@@ -1,0 +1,26 @@
+{
+  "name": "social-media-agent",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:reddit": "npm run dev -w brandpilot-ai",
+    "dev:web": "npm run dev -w web",
+    "build:web": "npm run build -w web",
+    "lint": "npm run lint -w web",
+    "test": "npm run test -w web",
+    "test:e2e": "npm run test:e2e -w web",
+    "db:migrate": "npm run db:migrate -w web",
+    "db:deploy": "npm run db:deploy -w web",
+    "db:seed": "npm run db:seed -w web",
+    "typecheck": "npm run typecheck -w web"
+  },
+  "devDependencies": {
+    "rea-agents": "^6.7.0"
+  },
+  "dependencies": {
+    "@neon/config": "^1.9.3",
+    "@neon/env": "^1.6.4"
+  }
+}

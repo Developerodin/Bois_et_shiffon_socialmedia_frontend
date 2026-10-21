@@ -1,0 +1,67 @@
+"use client";
+
+import { ChevronsUpDown } from "lucide-react";
+import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export type WorkspaceOption = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type Props = {
+  workspaces: WorkspaceOption[];
+  activeWorkspaceId: string | null;
+};
+
+export function WorkspaceSwitcher({ workspaces, activeWorkspaceId }: Props) {
+  const active =
+    workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
+
+  if (!workspaces.length) {
+    return (
+      <p className="text-xs text-muted-foreground">No workspace access</p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs text-muted-foreground">Workspace</span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            className="min-w-[12rem] justify-between"
+            aria-label="Select workspace"
+          >
+            <span className="truncate">{active?.name ?? "Select workspace"}</span>
+            <ChevronsUpDown className="opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[12rem]">
+          <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {workspaces.map((ws) => (
+            <DropdownMenuItem
+              key={ws.id}
+              onSelect={() => {
+                void setActiveWorkspace(ws.id);
+              }}
+            >
+              {ws.name}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}

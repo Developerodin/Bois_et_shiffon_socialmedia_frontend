@@ -1,0 +1,21 @@
+{
+  "workspace": {
+    "name": "Bois & Chiffons Team",
+    "slug": "bois-chiffons-team"
+  },
+  "brand": {
+    "slug": "bois-chiffons",
+    "displayName": "Bois & Chiffons"
+  },
+  "profile": {
+    "websiteUrl": "https://example.com",
+    "voiceSummary": "Warm, editorial French lifestyle — craftsmanship and natural materials.",
+    "pillars": ["craftsmanship", "natural materials", "editorial lifestyle"],
+    "locales": ["fr-FR", "fr-CA"]
+  },
+  "seedUser": {
+    "email": "owner@example.com",
+    "name": "Workspace Owner",
+    "passwordEnv": "SEED_OWNER_PASSWORD"
+  }
+}

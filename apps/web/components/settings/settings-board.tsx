@@ -1,0 +1,135 @@
+"use client";
+
+import { useCallback, useRef, useState } from "react";
+import { ShieldOff } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { settingsApi } from "@/components/settings/api";
+import { InvitationsTab } from "@/components/settings/invitations-tab";
+import { MembersTab } from "@/components/settings/members-tab";
+import { RolesTab } from "@/components/settings/roles-tab";
+import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
+import { cn } from "@/lib/utils";
+
+type TabKey = "members" | "roles" | "invitations";
+
+const TABS: { key: TabKey; label: string; needs: string }[] = [
+  { key: "members", label: "Members", needs: "members.read" },
+  { key: "roles", label: "Roles", needs: "roles.read" },
+  { key: "invitations", label: "Invitations", needs: "invitations.manage" },
+];
+
+export function SettingsBoard({ workspaceId }: { workspaceId: string }) {
+  const permsFetcher = useCallback(
+    () => settingsApi.myPermissions(workspaceId).then((d) => new Set(d.permissions ?? [])),
+    [workspaceId],
+  );
+  const perms = useLoad(permsFetcher);
+  const can = perms.state.kind === "ready" ? perms.state.data : null;
+
+  // Roles feed the role selects in Members and Invitations too, so load them once here.
+  const rolesFetcher = useCallback(
+    () => settingsApi.roles(workspaceId).then((d) => d.roles ?? []),
+    [workspaceId],
+  );
+  const roles = useLoad(can?.has("roles.read") ? rolesFetcher : null);
+  const roleList = roles.state.kind === "ready" ? roles.state.data : [];
+
+  const visible = can ? TABS.filter((t) => can.has(t.needs)) : [];
+  const [active, setActive] = useState<TabKey | null>(null);
+  const current = visible.find((t) => t.key === active) ?? visible[0];
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  function onTabKey(e: React.KeyboardEvent, index: number) {
+    const delta = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    let next = index + delta;
+    if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = visible.length - 1;
+    else if (!delta) return;
+    e.preventDefault();
+    const tab = visible[(next + visible.length) % visible.length];
+    setActive(tab.key);
+    tabRefs.current[tab.key]?.focus();
+  }
+
+  const forbidden = (
+    <EmptyState
+      icon={ShieldOff}
+      title="You don't have access to workspace settings"
+      description="Ask a workspace owner or admin to grant you a role with member, role or invitation permissions."
+    />
+  );
+
+  let body: React.ReactNode;
+  if (perms.state.kind === "loading") body = <ListSkeleton label="Loading settings" />;
+  else if (perms.state.kind === "forbidden") body = forbidden;
+  else if (perms.state.kind === "error")
+    body = <LoadError message={perms.state.message} onRetry={perms.reload} />;
+  else if (!current) body = forbidden;
+  else {
+    body = (
+      <>
+        <div
+          role="tablist"
+          aria-label="Workspace settings"
+          className="flex gap-1 self-start rounded-full border border-border bg-card p-1"
+        >
+          {visible.map((t, i) => {
+            const selected = t.key === current.key;
+            return (
+              <button
+                key={t.key}
+                ref={(el) => {
+                  tabRefs.current[t.key] = el;
+                }}
+                role="tab"
+                id={`settings-tab-${t.key}`}
+                aria-selected={selected}
+                aria-controls={`settings-panel-${t.key}`}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => setActive(t.key)}
+                onKeyDown={(e) => onTabKey(e, i)}
+                className={cn(
+                  "rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  selected
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+        <div
+          role="tabpanel"
+          id={`settings-panel-${current.key}`}
+          aria-labelledby={`settings-tab-${current.key}`}
+          tabIndex={0}
+          className="focus-visible:outline-none"
+        >
+          {current.key === "members" ? (
+            <MembersTab workspaceId={workspaceId} can={can!} roles={roleList} onRolesChanged={roles.reload} />
+          ) : current.key === "roles" ? (
+            <RolesTab workspaceId={workspaceId} can={can!} roles={roles} />
+          ) : (
+            <InvitationsTab workspaceId={workspaceId} roles={roleList} />
+          )}
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex max-w-5xl flex-col gap-8">
+      <div>
+        <h2 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
+          Workspace settings
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Who can work here, what each role is allowed to do, and who is waiting to join.
+        </p>
+      </div>
+      {body}
+    </div>
+  );
+}
