@@ -268,3 +268,10 @@ Settings → **Connections** (per brand): Facebook Pages, Instagram, Threads, Go
 - **UGC video:** idea only, on hold.
 - **Reddit:** on hold pending Reddit commercial approval; assisted mode (web search + manual post) possible meanwhile.
 - **Pinterest:** wanted (furniture fit); needs Pinterest Trial → Standard access + public privacy policy.
+
+### 8f. SEO + GEO agents (2026-10-21)
+
+- `seo` and `geo` agents (registry), reports in `AuditReport` (latest per kind on **Performance**). Scores and findings are deterministic (`server/seo/checks.ts`); AI only orders and explains them. GEO adds a live visibility test: 5 shopper questions answered by OpenAI with web search, checking for the brand and competitors.
+- First real run on boisetchiffons.fr: SEO 78/100 (mobile LCP ~9.5 s, 95 images without alt, missing meta descriptions); GEO 50/100 — mentioned in 1/5 AI answers (only when named); AI recommends Tikamoon, IKEA, Maisons du Monde, La Redoute, Ethnicraft instead.
+- Dev tool: `npm run audit -w web -- seo|geo <url>`.
+- **Ceiling — run time:** SEO ~70 s, GEO ~120 s (parallel AI calls), Research similar. The Vercel job route has `maxDuration = 60` and the job lease is 5 min. Works with the local worker (`worker:dev`); on Vercel these runs need Pro `maxDuration` 300 s or splitting each agent into checkpointed steps (one job per step). Not scheduled yet (manual runs only) to control OpenAI web-search cost.
