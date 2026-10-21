@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Check, ExternalLink, TriangleAlert, X } from "lucide-react";
-import { request } from "@/components/settings/api";
+import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
+import { errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
+import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/lib/website";
@@ -36,36 +37,72 @@ export type ContentItem = {
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
+    byPerson: boolean;
     check: { overall: "PASS" | "WARN" | "BLOCKER"; results: Check[] } | null;
+    review: { verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null } | null;
   } | null;
 };
 
 const POLL_MS = 6000;
 
-// Last response per URL, shared by every panel on the page: a post opened from the calendar shows at once.
+// Last response per URL, shared by every panel on the page: a post opened from the calendar shows at once,
+// and a fresh response (e.g. after an edit) updates every panel showing that URL, not just the one that asked.
 const lastResponse = new Map<string, unknown>();
+const listeners = new Map<string, Set<(d: unknown) => void>>();
+const fetchedAt = new Map<string, number>();
 
 /** Poll a brand API path; `reload` refetches now. Starts from the last response any panel got. */
 export function useBrandData<T>(base: string, path: string, pick: (d: never) => T) {
   const url = `${base}/${path}`;
   const [data, setData] = useState<T | null>(() => (lastResponse.has(url) ? pick(lastResponse.get(url) as never) : null));
+  const [failed, setFailed] = useState(false);
   const load = useCallback(
     () =>
       request<never>(url).then(
         (d) => {
+          fetchedAt.set(url, Date.now());
           lastResponse.set(url, d);
-          setData(pick(d));
+          listeners.get(url)?.forEach((fn) => fn(d));
         },
-        () => undefined,
+        () => setFailed(true),
       ),
-    [url, pick],
+    [url],
   );
   useEffect(() => {
+    const fn = (d: unknown) => {
+      setData(pick(d as never));
+      setFailed(false);
+    };
+    const set = listeners.get(url) ?? new Set();
+    listeners.set(url, set.add(fn));
+    return () => void set.delete(fn);
+  }, [url, pick]);
+  useEffect(() => {
     void load();
-    const t = setInterval(() => void load(), POLL_MS);
-    return () => clearInterval(t);
-  }, [load]);
-  return { data, reload: load };
+    // Pause while the tab is hidden; catch up as soon as it's visible again.
+    // Several panels watch the same URL; one fetch per interval feeds them all.
+    const t = setInterval(() => {
+      if (document.visibilityState === "visible" && Date.now() - (fetchedAt.get(url) ?? 0) > POLL_MS / 2) void load();
+    }, POLL_MS);
+    const onShow = () => document.visibilityState === "visible" && void load();
+    document.addEventListener("visibilitychange", onShow);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onShow);
+    };
+  }, [load, url]);
+  return { data, failed, reload: load };
+}
+
+function LoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
+  return (
+    <div role="alert" className="flex flex-wrap items-center gap-2 p-4 text-sm text-muted-foreground">
+      Couldn&rsquo;t load {what}. Check your connection.
+      <Button size="sm" variant="outline" onClick={onRetry}>
+        Try again
+      </Button>
+    </div>
+  );
 }
 
 export const CHANNEL_LABEL: Record<string, string> = {
@@ -107,7 +144,7 @@ const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekd
 
 export function IdeasPanel({ base, onRunScout }: { base: string; onRunScout: () => void }) {
   const pick = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities, []);
-  const { data, reload } = useBrandData(base, "opportunities", pick as (d: never) => Opportunity[]);
+  const { data, failed, reload } = useBrandData(base, "opportunities", pick as (d: never) => Opportunity[]);
   const [filter, setFilter] = useState<"open" | "all">("open");
   const [error, setError] = useState<string | null>(null);
 
@@ -121,7 +158,7 @@ export function IdeasPanel({ base, onRunScout }: { base: string; onRunScout: () 
     }
   }
 
-  if (!data) return <p className="p-4 text-sm text-muted-foreground">Loading ideas…</p>;
+  if (!data) return failed ? <LoadFailed what="ideas" onRetry={reload} /> : <p className="p-4 text-sm text-muted-foreground">Loading ideas…</p>;
   const shown = data.filter((o) => (filter === "all" ? true : o.status === "NEW" || o.status === "SHORTLISTED"));
   const shortlisted = data.filter((o) => o.status === "SHORTLISTED").length;
 
@@ -208,8 +245,8 @@ export function IdeasPanel({ base, onRunScout }: { base: string; onRunScout: () 
 
 export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onOpen: (id: string) => void; onRunPlanner: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
-  const { data } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
-  if (!data) return <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
+  const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
+  if (!data) return failed ? <LoadFailed what="the calendar" onRetry={reload} /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
   if (!data.length) {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
@@ -253,10 +290,91 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
 
 /* ───────────── Centre: one post ───────────── */
 
+/** What moves this post forward, and which agent does it. Approval and publishing live in the release panel. */
+function nextStep(i: ContentItem): { text: string; agent?: { key: string; label: string }; edit?: string } | null {
+  const l = i.latest;
+  if (i.status === "PLANNED") return { text: "Next: the Brief writer turns this plan into a production brief.", agent: { key: "brief", label: "Write the brief" }, edit: "Skip it and write the draft" };
+  if (i.status === "BRIEF_READY") return { text: "Next: write the draft from the brief.", agent: { key: "creator", label: "Write it with the Creator" }, edit: "Write it yourself" };
+  if (i.status === "DRAFT_REVIEW" && l?.review?.verdict === "CHANGES_REQUESTED")
+    return { text: `The approver asked for changes${l.review.note ? `: \u201c${l.review.note}\u201d` : "."}`, agent: { key: "creator", label: "Rewrite with the Creator" }, edit: "Edit it yourself" };
+  if (i.status === "DRAFT_REVIEW" && l?.check?.overall === "BLOCKER")
+    return { text: "The quality check found problems to fix (listed below).", agent: { key: "creator", label: "Fix with the Creator" }, edit: "Fix it yourself" };
+  if (i.status === "DRAFT_REVIEW" && l && !l.check) return { text: `Next: the quality check reviews v${l.version} before it goes to the approver.`, agent: { key: "quality", label: "Run the quality check" } };
+  if (i.status === "REJECTED") return { text: "The approver rejected this post. Edit the draft to send it back through review.", edit: "Edit the draft" };
+  if (i.status === "BLOCKED") return { text: "This post is blocked. Edit the draft to send it back through review.", edit: "Edit the draft" };
+  return null;
+}
+
+function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentItem; perms: string[] | null; onEdit: () => void }) {
+  const step = nextStep(item);
+  // The agent we started, until the post moves on (status, version or check changes).
+  const at = `${item.status}:${item.latest?.version ?? 0}:${item.latest?.check ? 1 : 0}`;
+  const [started, setStarted] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    setStarted(null);
+    setError(null);
+  }, [at]);
+  if (!step) return null;
+  const canRun = perms?.includes("agents.run");
+  const canEdit = perms?.includes("content.create");
+
+  async function run(key: string) {
+    setPending(true);
+    setError(null);
+    try {
+      await request(`${base}/agents/${encodeURIComponent(key)}/runs`, { method: "POST", body: "{}" });
+      setStarted(key);
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't start the agent. Try again."));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <section aria-label="Next step" className="flex flex-col gap-3 rounded-xl border border-primary/40 bg-primary/5 p-4">
+      <p className="text-sm">{step.text}</p>
+      {started ? (
+        <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+          <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" />
+          Working on it. This post updates by itself; follow along in the Agents feed.
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {step.agent && canRun && (
+            <Button size="sm" onClick={() => run(step.agent!.key)} disabled={pending}>
+              <Sparkles aria-hidden /> {pending ? "Starting…" : step.agent.label}
+            </Button>
+          )}
+          {step.edit && canEdit && (
+            <Button size="sm" variant={step.agent && canRun ? "outline" : "default"} onClick={onEdit}>
+              <Pencil aria-hidden /> {step.edit}
+            </Button>
+          )}
+          {perms && !(step.agent && canRun) && !(step.edit && canEdit) && (
+            <p className="text-sm text-muted-foreground">Your role can&rsquo;t do this step. Someone who runs agents or edits content will pick it up.</p>
+          )}
+        </div>
+      )}
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    </section>
+  );
+}
+
 export function ContentView({ base, id, onBack }: { base: string; id: string; onBack: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
-  const { data } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
+  const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const item = data?.find((i) => i.id === id);
+  const [editing, setEditing] = useState(false);
+  const [perms, setPerms] = useState<string[] | null>(null);
+  useEffect(() => {
+    request<{ permissions: string[] }>(`${base.split("/brands/")[0]}/my-permissions`).then((p) => setPerms(p.permissions), () => setPerms([]));
+  }, [base]);
+  useEffect(() => setEditing(false), [id]);
+  const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";
+  const canEdit = perms?.includes("content.create") && !locked;
   const brief = (item?.brief ?? {}) as { goal?: string; audience?: string; keyMessage?: string; products?: string[]; cta?: string; visual?: string; questions?: string[]; angle?: string };
   const b = item?.latest?.body;
 
@@ -269,7 +387,13 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
         <span className="truncate text-sm text-muted-foreground">/ {item?.title ?? "Post"}</span>
       </div>
       {!item ? (
-        <p className="p-6 text-sm text-muted-foreground">{data ? "This post no longer exists." : "Loading…"}</p>
+        data ? (
+          <p className="p-6 text-sm text-muted-foreground">This post no longer exists.</p>
+        ) : failed ? (
+          <LoadFailed what="this post" onRetry={reload} />
+        ) : (
+          <p className="p-6 text-sm text-muted-foreground">Loading…</p>
+        )
       ) : (
         <div className="flex flex-col gap-6 px-6 py-6">
           <div>
@@ -314,13 +438,36 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
             )}
           </section>
 
+          {!editing && <NextStep base={base} item={item} perms={perms} onEdit={() => setEditing(true)} />}
+
           <section aria-labelledby="draft-h" className="rounded-xl border border-border p-4">
-            <h2 id="draft-h" className="text-sm font-semibold">Draft {item.latest ? `v${item.latest.version}` : ""}</h2>
-            {!b ? (
-              <p className="mt-2 text-sm text-muted-foreground">No draft yet. The Creator writes it once the brief is ready.</p>
+            <div className="flex items-center justify-between gap-2">
+              <h2 id="draft-h" className="text-sm font-semibold">
+                {editing ? "Edit draft" : `Draft ${item.latest ? `v${item.latest.version}` : ""}`}
+                {!editing && item.latest?.byPerson && <span className="ml-2 font-normal text-muted-foreground">edited by a person</span>}
+              </h2>
+              {!editing && b && canEdit && (
+                <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
+                  <Pencil aria-hidden /> Edit
+                </Button>
+              )}
+            </div>
+            {editing ? (
+              <DraftEditor
+                url={`${base}/content/${encodeURIComponent(item.id)}`}
+                item={item}
+                onCancel={() => setEditing(false)}
+                onSaved={() => {
+                  setEditing(false);
+                  void reload();
+                }}
+              />
+            ) : !b ? (
+              <p className="mt-2 text-sm text-muted-foreground">No draft yet.</p>
             ) : (
               <div className="mt-3 flex flex-col gap-3 text-sm">
                 {b.pinTitle && <p className="font-medium">{b.pinTitle}</p>}
+                {b.hook && item.channel !== "PINTEREST_PIN" && !b.caption.startsWith(b.hook) && <p className="font-medium">{b.hook}</p>}
                 <p className="whitespace-pre-wrap">{b.caption}</p>
                 {b.hashtags.length > 0 && <p className="text-muted-foreground">{b.hashtags.join(" ")}</p>}
                 {b.slides.length > 0 && (
@@ -364,7 +511,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
             </section>
           )}
 
-          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} />
+          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} />
         </div>
       )}
     </div>

@@ -31,25 +31,13 @@ export type AgentEvent = {
   entityId: string | null;
 };
 
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
-}
+// One fetch helper for the app: it surfaces the server's own explanation (problem detail).
+import { request } from "@/components/settings/api";
+
+export { ApiError } from "@/components/settings/api";
 
 function base(workspaceId: string, brandId: string) {
   return `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
-}
-
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, { cache: "no-store", ...init });
-  if (!res.ok) {
-    throw new ApiError(res.status, `Request failed (${res.status})`);
-  }
-  return (await res.json()) as T;
 }
 
 export function fetchAgents(workspaceId: string, brandId: string, signal?: AbortSignal) {

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Play } from "lucide-react";
 import { startRun, type AgentSummary, type RunStatus } from "@/components/agents/api";
+import { errorMessage } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -55,8 +56,7 @@ export function AgentTile({ agent, workspaceId, brandId, onRunStarted }: Props) 
       await startRun(workspaceId, brandId, agent.key);
       onRunStarted();
     } catch (err) {
-      console.error("[agents] failed to start run", err);
-      setError("Could not start a run. Try again.");
+      setError(errorMessage(err, "Could not start a run. Try again."));
     } finally {
       setPending(false);
     }

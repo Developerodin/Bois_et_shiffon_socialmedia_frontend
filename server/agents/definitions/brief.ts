@@ -51,8 +51,9 @@ export const briefAgent: AgentDefinition = {
           questions: ["Quels produits mettre en avant ?"],
         },
       });
-      await prisma.contentItem.update({ where: { id: item.id }, data: { brief: { ...prior, ...out }, status: "BRIEF_READY" } });
-      await ctx.log("SUCCESS", `Brief ready: ${item.title}`, { type: "ContentItem", id: item.id });
+      // Only if it's still waiting for a brief: someone may have written the draft meanwhile.
+      const { count } = await prisma.contentItem.updateMany({ where: { id: item.id, status: "PLANNED" }, data: { brief: { ...prior, ...out }, status: "BRIEF_READY" } });
+      await ctx.log(count ? "SUCCESS" : "WARN", count ? `Brief ready: ${item.title}` : `Skipped (it moved on while I was writing): ${item.title}`, { type: "ContentItem", id: item.id });
     }
     return { briefed: items.length };
   },

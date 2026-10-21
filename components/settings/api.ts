@@ -1,8 +1,13 @@
 // Client-side contract for the RBAC API
 // (docs/superpowers/specs/2026-10-21-rbac-api-contract.md). Keep in sync with the route handlers.
-import { ApiError } from "@/components/agents/api";
-
-export { ApiError };
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
 
 export type Permission = { key: string; category: string; description: string };
 

@@ -37,18 +37,28 @@ const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "nu
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Try again.");
 
 /** Approve the exact draft shown above, then publish or schedule it, with a full history. */
-export function ReleasePanel({ base, id, status, version, qualityBlocked }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean }) {
+export function ReleasePanel({ base, id, status, version, qualityBlocked, perms }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: string[] | null }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
   const [data, setData] = useState<Release | null>(null);
-  const [perms, setPerms] = useState<string[]>([]);
-  const load = useCallback(() => request<Release>(url).then(setData, () => undefined), [url]);
+  const [loadError, setLoadError] = useState(false);
+  const load = useCallback(
+    () =>
+      request<Release>(url).then(
+        (d) => {
+          setData(d);
+          setLoadError(false);
+        },
+        () => setLoadError(true),
+      ),
+    [url],
+  );
 
-  useEffect(() => {
-    void load();
-    request<{ permissions: string[] }>(`${base.split("/brands/")[0]}/my-permissions`).then((p) => setPerms(p.permissions), () => undefined);
-  }, [load, base]);
-  // Follow a post that is going out right now; the content list refreshes the status too.
-  const busy = data?.attempts.some((a) => a.status === "PUBLISHING" || (a.status === "SCHEDULED" && new Date(a.runAt).getTime() < Date.now() + 60_000));
+  useEffect(() => void load(), [load]);
+  // Follow a post that is going out right now (due within a minute, or up to 10 minutes overdue).
+  const busy = data?.attempts.some((a) => {
+    const due = new Date(a.runAt).getTime() - Date.now();
+    return a.status === "PUBLISHING" || (a.status === "SCHEDULED" && due < 60_000 && due > -10 * 60_000);
+  });
   useEffect(() => {
     if (!busy) return;
     const t = setInterval(() => void load(), 3000);
@@ -62,7 +72,20 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked }: { ba
     void load();
   }
 
-  if (!data) return <section className="rounded-xl border border-border p-4 text-sm text-muted-foreground">Loading approval…</section>;
+  if (!data || !perms) {
+    return (
+      <section className="flex flex-wrap items-center gap-2 rounded-xl border border-border p-4 text-sm text-muted-foreground">
+        {loadError ? (
+          <>
+            Couldn&rsquo;t load approval and publishing.
+            <Button size="sm" variant="outline" onClick={() => void load()}>Try again</Button>
+          </>
+        ) : (
+          "Loading approval…"
+        )}
+      </section>
+    );
+  }
   const canApprove = perms.includes("content.approve");
   const canPublish = perms.includes("publish.execute");
 
@@ -81,10 +104,14 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked }: { ba
         ) : (
           <p className="text-sm text-muted-foreground">Approved. Someone who can publish will post it.</p>
         )
+      ) : status === "APPROVED" ? (
+        <p className="text-sm text-muted-foreground">The approved draft has changed since. The latest version needs a fresh approval.</p>
       ) : status === "DRAFT_REVIEW" || status === "PLANNED" || status === "BRIEF_READY" ? (
         <p className="text-sm text-muted-foreground">
-          {qualityBlocked ? "The quality check found blockers. A new draft goes back to the approver once they're fixed." : "Approval opens once a draft passes the quality check."}
+          {qualityBlocked ? "A new draft goes back to the approver once the quality problems are fixed." : "Approval opens once a draft passes the quality check."}
         </p>
+      ) : status === "REJECTED" ? (
+        <p className="text-sm text-muted-foreground">Rejected. Editing the draft sends it back through review.</p>
       ) : null}
       <History data={data} canPublish={canPublish} onSettle={(attemptId, action) => act({ action, attemptId })} />
     </section>
@@ -95,6 +122,7 @@ function ApproveForm({ version, blocked, onDecide }: { version: number; blocked:
   const [note, setNote] = useState("");
   const [pending, setPending] = useState<Decision["verdict"] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmReject, setConfirmReject] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
   async function run(verdict: Decision["verdict"]) {
@@ -103,6 +131,9 @@ function ApproveForm({ version, blocked, onDecide }: { version: number; blocked:
       noteRef.current?.focus();
       return;
     }
+    // Rejecting stops the post; ask once more.
+    if (verdict === "REJECTED" && !confirmReject) return setConfirmReject(true);
+    setConfirmReject(false);
     setPending(verdict);
     setError(null);
     try {
@@ -120,7 +151,7 @@ function ApproveForm({ version, blocked, onDecide }: { version: number; blocked:
       <p className="flex items-start gap-2 text-sm">
         <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
         <span>
-          You&rsquo;re signing off <span className="font-medium">draft v{version} exactly as shown above</span>. Any later edit needs a new approval before it can go out.
+          You&rsquo;re signing off <span className="font-medium">draft v{version} exactly as shown above</span>. If anyone edits it later, the new version needs its own approval.
         </span>
       </p>
       <div className="flex flex-col gap-1.5">
@@ -138,8 +169,13 @@ function ApproveForm({ version, blocked, onDecide }: { version: number; blocked:
           <Undo2 aria-hidden /> {pending === "CHANGES_REQUESTED" ? "Sending…" : "Request changes"}
         </Button>
         <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => run("REJECTED")} disabled={pending !== null}>
-          <X aria-hidden /> {pending === "REJECTED" ? "Rejecting…" : "Reject"}
+          <X aria-hidden /> {pending === "REJECTED" ? "Rejecting…" : confirmReject ? "Confirm: reject this post" : "Reject"}
         </Button>
+        {confirmReject && pending === null && (
+          <Button variant="ghost" onClick={() => setConfirmReject(false)}>
+            Keep it
+          </Button>
+        )}
       </div>
     </div>
   );

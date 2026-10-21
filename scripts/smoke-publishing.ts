@@ -2,12 +2,17 @@
  * Approval → publishing on Neon with Pinterest's API faked (nothing reaches a real account):
  * creator ≠ approver, approval bound to the latest version, one live attempt per account even
  * under concurrent clicks, success, refusal (retry allowed), unknown outcome (no blind retry),
- * draft changed after scheduling, cancel. Throwaway workspace. Run: npm run smoke:publishing -w web
+ * draft changed after scheduling, cancel; a person's edit (new version, voids approval, stale edits
+ * refused); "request changes" reaching the Creator with the approver's note; agents never overwrite
+ * a newer draft. Throwaway workspace. Run: npm run smoke:publishing -w web
  */
 import assert from "node:assert/strict";
 import { encryptCredentials } from "@/server/crypto/credentials";
 import { prisma } from "@/server/db/prisma";
-import { decide, executePublication, PublishingError, releaseState, schedulePublication, settlePublication } from "@/server/services/publishing";
+import { creatorAgent } from "@/server/agents/definitions/creator";
+import { qualityAgent } from "@/server/agents/definitions/quality";
+import type { AgentContext } from "@/server/agents/types";
+import { decide, executePublication, PublishingError, releaseState, saveDraft, schedulePublication, settlePublication } from "@/server/services/publishing";
 
 let platform: { status: number; body: unknown } = { status: 200, body: { id: "pin-1" } };
 const calls: string[] = [];
@@ -110,6 +115,48 @@ async function main() {
     assert.equal((await attempt(b.id)).status, "CANCELLED");
     assert.equal(await status(b.id), "APPROVED");
     console.log("7 a scheduled post can be cancelled ✓");
+
+    // 8. A person edits: stale or empty edits refused; scheduled posts locked; a saved edit voids the
+    //    approval, goes back to the quality check, and its author can't approve it.
+    const draft = { hook: "Oak", caption: "Edited caption", hashtags: ["bois", "#bois", "#chêne"], slides: [], script: [], pinTitle: "Oak table", altText: "An oak table" };
+    await refused(saveDraft({ ...scope, itemId: b.id, version: 1, body: draft }), /newer draft/);
+    await refused(saveDraft({ ...scope, itemId: b.id, version: 2, body: { ...draft, caption: "  " } }), /can't be empty/);
+    await schedulePublication({ ...scope, itemId: b.id, version: 2, ...pin, runAt: new Date(Date.now() + 86_400_000) });
+    await refused(saveDraft({ ...scope, itemId: b.id, version: 2, body: draft }), /Cancel it first/);
+    await settlePublication({ ...scope, attemptId: (await attempt(b.id)).id, action: "cancel" });
+    const v3 = await saveDraft({ ...scope, itemId: b.id, version: 2, body: draft });
+    assert.equal(v3.version, 3);
+    assert.deepEqual((v3.body as { hashtags: string[] }).hashtags, ["#bois", "#chêne"]);
+    assert.equal(await status(b.id), "DRAFT_REVIEW");
+    assert.equal((await releaseState(scope, b.id)).approvalValid, false);
+    await refused(saveDraft({ ...scope, itemId: b.id, version: 3, body: draft }), /Nothing changed/);
+    await prisma.qualityCheck.create({ data: { contentVersionId: v3.id, overall: "PASS", results: [] } });
+    await prisma.contentItem.update({ where: { id: b.id }, data: { status: "AWAITING_APPROVAL" } });
+    await refused(decide({ ...scope, itemId: b.id, version: 3, verdict: "APPROVED" }), /someone else/);
+    console.log("8 a person's edit is a new version that voids approval; stale, empty, no-op and scheduled edits refused ✓");
+
+    // 9. "Request changes" reaches the Creator with the note; agents skip posts that changed under them.
+    const prompts: string[] = [];
+    const ctx: AgentContext = {
+      runId: "smoke",
+      brand: { workspaceId: ws.id, brandId: brand.id, displayName: "Smoke", websiteUrl: null, voiceSummary: null, pillars: null, locales: null },
+      log: async () => {},
+      ai: { generateObject: async (i) => { prompts.push(i.prompt); return i.mock!; } },
+    };
+    await decide({ ...scope, itemId: b.id, version: 3, verdict: "CHANGES_REQUESTED", note: "Mention the oil finish" });
+    await creatorAgent.run(ctx, {});
+    assert.match(prompts.at(-1)!, /Mention the oil finish/);
+    assert.equal((await prisma.contentVersion.count({ where: { contentItemId: b.id } })), 4);
+    await qualityAgent.run(ctx, {});
+    assert.equal(await status(b.id), "AWAITING_APPROVAL");
+    // A Creator that started before a person's edit must not write over it.
+    const c = await newItem("C");
+    await prisma.contentItem.update({ where: { id: c.id }, data: { status: "BRIEF_READY" } });
+    const slow: AgentContext = { ...ctx, ai: { generateObject: async (i) => { await saveDraft({ ...scope, itemId: c.id, version: 1, body: draft }); return i.mock!; } } };
+    await creatorAgent.run(slow, {});
+    const latestC = await prisma.contentVersion.findFirstOrThrow({ where: { contentItemId: c.id }, orderBy: { version: "desc" } });
+    assert.equal(latestC.createdBy, user.id);
+    console.log("9 'request changes' sends the note to the Creator; an agent never overwrites a newer draft ✓");
   } finally {
     await prisma.job.deleteMany({ where: { workspaceId: ws.id } });
     await prisma.workspace.delete({ where: { id: ws.id } });

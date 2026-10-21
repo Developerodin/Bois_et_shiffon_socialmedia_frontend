@@ -5,6 +5,7 @@ import type { AgentDefinition } from "@/server/agents/types";
 import { brandKnowledge } from "@/server/content/knowledge";
 import { checkDraft, overallOf, type CheckResult, type DraftBody } from "@/server/content/rules";
 import { prisma } from "@/server/db/prisma";
+import { lock, TX } from "@/server/services/publishing";
 
 const Review = z.object({
   results: z.array(z.object({ check: z.string(), status: z.enum(["pass", "warn", "blocker"]), note: z.string() })),
@@ -52,6 +53,7 @@ export const qualityAgent: AgentDefinition = {
     const todo = items.filter((i) => i.versions[0] && i.versions[0].checks.length === 0).slice(0, PER_RUN);
     if (!todo.length) throw new Error("No new drafts to check: run the Creator first");
     const knowledge = await brandKnowledge(brand.workspaceId, brand.brandId, 4000);
+    let checked = 0;
 
     for (const item of todo) {
       const v = item.versions[0];
@@ -76,10 +78,20 @@ export const qualityAgent: AgentDefinition = {
       });
       const results = [...rules, ...(lt ? [lt] : []), ...ai.results];
       const overall = overallOf(results);
-      await prisma.$transaction([
-        prisma.qualityCheck.create({ data: { contentVersionId: v.id, overall, results: results as Prisma.InputJsonValue, agentRunId: ctx.runId } }),
-        prisma.contentItem.update({ where: { id: item.id }, data: { status: overall === "BLOCKER" ? "DRAFT_REVIEW" : "AWAITING_APPROVAL" } }),
-      ]);
+      // The check takes a while: a newer draft (or any status change) since we started wins.
+      const saved = await prisma.$transaction(async (tx) => {
+        await lock(tx, item.id);
+        const now = await tx.contentItem.findUnique({ where: { id: item.id }, select: { status: true, versions: { orderBy: { version: "desc" }, take: 1, select: { id: true } } } });
+        if (now?.status !== "DRAFT_REVIEW" || now.versions[0]?.id !== v.id) return false;
+        await tx.qualityCheck.create({ data: { contentVersionId: v.id, overall, results: results as Prisma.InputJsonValue, agentRunId: ctx.runId } });
+        await tx.contentItem.update({ where: { id: item.id }, data: { status: overall === "BLOCKER" ? "DRAFT_REVIEW" : "AWAITING_APPROVAL" } });
+        return true;
+      }, TX);
+      if (!saved) {
+        await ctx.log("WARN", `Skipped (the draft changed while I was checking it): ${item.title}`, { type: "ContentItem", id: item.id });
+        continue;
+      }
+      checked++;
       const problems = results.filter((r) => r.status !== "pass").length;
       await ctx.log(
         overall === "BLOCKER" ? "WARN" : "SUCCESS",
@@ -87,6 +99,6 @@ export const qualityAgent: AgentDefinition = {
         { type: "ContentItem", id: item.id },
       );
     }
-    return { checked: todo.length };
+    return { checked };
   },
 };

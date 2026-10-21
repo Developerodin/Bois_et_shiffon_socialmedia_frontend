@@ -32,7 +32,7 @@ import { AgentLog } from "@/components/agents/agent-log";
 import { fetchAgents, startRun, type AgentSummary } from "@/components/agents/api";
 import { DocPane } from "@/components/context/doc-pane";
 import { fetchContextDocs, type ContextDocEntry, type ContextDocKind, type ContextDocsResponse } from "@/components/context/api";
-import { request, settingsApi, type Connection } from "@/components/settings/api";
+import { ApiError, errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { AccountMenu } from "@/components/workspace/account-menu";
@@ -42,6 +42,7 @@ import { ContentPanel, ContentView, IdeasPanel, useBrandData, type ContentItem, 
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { cn } from "@/lib/utils";
+import { readable } from "@/lib/agent-message";
 import { safeHttpUrl } from "@/lib/website";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
@@ -664,7 +665,8 @@ function DocView(p: {
     <div>
       <BackBar onBack={p.onBack} title={p.entry.title} />
       <div className="px-6 py-6">
-        <DocPane entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} />
+        {/* Keyed by document: switching documents must never carry one document's edit into another. */}
+        <DocPane key={p.entry.kind} entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} />
       </div>
     </div>
   );
@@ -702,7 +704,7 @@ function AgentView({
       await startRun(workspaceId, brandId, agentKey);
       onRan();
     } catch (e) {
-      setError(e instanceof Error && /403/.test(e.message) ? "Your role can't run agents. Ask an owner or admin." : "Couldn't start the agent. Try again.");
+      setError(e instanceof ApiError && e.status === 403 ? "Your role can't run agents. Ask an owner or admin." : errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
       setPending(false);
     }
@@ -717,6 +719,9 @@ function AgentView({
             <h1 className="font-display text-2xl font-medium tracking-tight">{agent?.name ?? agentKey}</h1>
             <p className="mt-1 max-w-[60ch] text-sm text-muted-foreground">{agent?.description}</p>
             <p className="mt-2 text-xs text-muted-foreground">{agentStatus(agent ?? undefined)}</p>
+            {agent?.lastRun?.status === "FAILED" && agent.lastRun.error && (
+              <p className="mt-1 max-w-[60ch] text-sm text-destructive">{readable(agent.lastRun.error)}</p>
+            )}
           </div>
           <Button onClick={run} disabled={pending || running}>
             {pending || running ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
@@ -853,7 +858,7 @@ function AnalyticsPanel({ reports, onOpenAgent }: { reports: { seo: Report; geo:
 function feedLine(key: string, a: AgentSummary | undefined, reports: { seo: Report; geo: Report } | null, docs: ContextDocsResponse | null) {
   if (a?.lastRun?.status === "QUEUED" && a.lastRun.startedAt) return "Hit a problem, retrying soon: open Logs for the reason";
   if (a?.lastRun?.status === "RUNNING" || a?.lastRun?.status === "QUEUED") return "Working…";
-  if (a?.lastRun?.status === "FAILED") return "Last run failed: open Logs for details";
+  if (a?.lastRun?.status === "FAILED") return a.lastRun.error ? `Last run: ${readable(a.lastRun.error)}` : "Last run failed: open Logs for details";
   if (key === "seo" && reports?.seo) return `${reports.seo.score}/100 · ${reports.seo.findings.length} fixes ready`;
   if (key === "geo" && reports?.geo) {
     const m = reports.geo.metrics as { visibility?: number; competitors?: unknown[] };
@@ -885,20 +890,27 @@ function AgentsFeed({
   onOpen: (v: View) => void;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const built = (agents ?? []).filter((a) => a.key !== "systems-check");
   async function run(key: string) {
     setBusy(key);
+    setError(null);
     try {
       await startRun(workspaceId, brandId, key);
       onRan();
-    } catch {
-      // Permission or network: the agent view explains; keep the feed quiet.
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
       setBusy(null);
     }
   }
   return (
     <ul className="divide-y divide-border">
+      {error && (
+        <li role="alert" className="px-4 py-2 text-sm text-destructive">
+          {error}
+        </li>
+      )}
       {built.map((a) => {
         const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
         const Icon = meta.icon;

@@ -74,7 +74,7 @@ export async function startCompetitorAudit(input: { workspaceId: string; brandId
     throw e;
   }
   try {
-    await startAgentRun({
+    const run = await startAgentRun({
       workspaceId: input.workspaceId,
       brandId: input.brandId,
       agentKey: "site-audit",
@@ -82,6 +82,11 @@ export async function startCompetitorAudit(input: { workspaceId: string; brandId
       userId: input.userId,
       input: { domain: competitor.domain, chargeId },
     });
+    // A second click while the first is queued joins that run; give this charge back.
+    if ((run.input as { chargeId?: string } | null)?.chargeId !== chargeId) {
+      await refundCharge(input.workspaceId, chargeId);
+      return { status: "already-running" };
+    }
   } catch (e) {
     await refundCharge(input.workspaceId, chargeId);
     throw e;

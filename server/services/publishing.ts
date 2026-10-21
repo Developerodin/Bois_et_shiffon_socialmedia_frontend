@@ -66,8 +66,50 @@ async function currentApproval(itemId: string, latest: { id: string; body: unkno
 }
 
 // Callers queue on the per-post lock; allow for a slow database link before giving up.
-const TX = { maxWait: 10_000, timeout: 20_000 };
-const lock = (tx: Prisma.TransactionClient, itemId: string) => tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`content:${itemId}`}))`;
+export const TX = { maxWait: 10_000, timeout: 20_000 };
+/** Per-post lock shared by people (edit, approve, publish) and agents (Creator, Quality). */
+export const lock = (tx: Prisma.TransactionClient, itemId: string) => tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`content:${itemId}`}))`;
+
+export type DraftInput = { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
+// A person can edit until the post is handed to a platform; a scheduled post must be cancelled first.
+const EDITABLE = ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"];
+
+/**
+ * A person saves a draft: always a new immutable version (any approval of the old one stops
+ * holding), back to draft review for the Quality check. The editor can't approve it themselves.
+ * `version` is the one they edited (0 when writing the first draft); a newer one means they'd overwrite it.
+ */
+export async function saveDraft(input: { workspaceId: string; brandId: string; userId: string; itemId: string; version: number; body: DraftInput }) {
+  const body: DraftInput = {
+    hook: input.body.hook.trim(),
+    caption: input.body.caption.trim(),
+    hashtags: [...new Set(input.body.hashtags.map((h) => h.trim().replace(/^#*/, "")).filter(Boolean).map((h) => `#${h}`))],
+    slides: input.body.slides.map((s) => s.trim()).filter(Boolean),
+    script: input.body.script.map((s) => s.trim()).filter(Boolean),
+    pinTitle: input.body.pinTitle.trim(),
+    altText: input.body.altText.trim(),
+  };
+  if (!body.caption) throw new PublishingError("The caption can't be empty", 400);
+  return prisma.$transaction(async (tx) => {
+    await lock(tx, input.itemId);
+    const { item, latest } = await loadItem(input, input.itemId, tx);
+    if ((latest?.version ?? 0) !== input.version) throw new PublishingError("Someone saved a newer draft while you were editing. Copy your changes, reload and try again.");
+    if (item.status === "SCHEDULED") throw new PublishingError("This post is scheduled. Cancel it first, then edit.");
+    if (!EDITABLE.includes(item.status)) throw new PublishingError("A published post can't be edited");
+    if (latest && JSON.stringify({ ...(latest.body as object), ...body }) === JSON.stringify(latest.body)) throw new PublishingError("Nothing changed", 400);
+    const version = await tx.contentVersion.create({
+      data: { contentItemId: item.id, version: (latest?.version ?? 0) + 1, body, createdBy: input.userId },
+    });
+    await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW" } });
+    await tx.auditEvent.create({
+      data: {
+        workspaceId: input.workspaceId, brandId: input.brandId, actorUserId: input.userId,
+        action: "content.edit", entityType: "ContentItem", entityId: item.id, metadata: { version: version.version, from: item.status },
+      },
+    });
+    return version;
+  }, TX);
+}
 
 export async function decide(input: {
   workspaceId: string;
