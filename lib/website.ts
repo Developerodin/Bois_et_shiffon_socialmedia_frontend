@@ -34,3 +34,10 @@ export function safeHttpUrl(raw: string | null | undefined): URL | null {
     return null;
   }
 }
+
+/** "https://www.Tikamoon.com/fr" → "tikamoon.com". Null when it isn't a public http(s) site. */
+export function domainOf(raw: string | null | undefined): string | null {
+  const u = safeHttpUrl(raw && !/^https?:\/\//i.test(raw) ? `https://${raw.trim()}` : raw);
+  if (!u || !u.hostname.includes(".")) return null;
+  return u.hostname.toLowerCase().replace(/^www\./, "");
+}

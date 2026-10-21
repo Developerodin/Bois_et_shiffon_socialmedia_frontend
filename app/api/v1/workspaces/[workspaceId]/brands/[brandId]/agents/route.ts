@@ -19,7 +19,7 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
       }),
     ]);
 
-    const agents = AGENTS.map((a) => {
+    const agents = AGENTS.filter((a) => !a.internal).map((a) => {
       const run = lastRuns.find((r) => r.agentKey === a.key);
       return {
         key: a.key,

@@ -31,5 +31,7 @@ export type AgentDefinition<I extends z.ZodType = z.ZodType> = {
   inputSchema: I;
   /** Cron-like hint for the daily sweep; only "daily" is supported today. */
   schedule?: "daily";
+  /** Started only by its own feature (e.g. a paid competitor audit), never from the agents list or Run button. */
+  internal?: boolean;
   run: (ctx: AgentContext, input: z.infer<I>) => Promise<Prisma.InputJsonValue | void>;
 };

@@ -1,5 +1,6 @@
 import { analystAgent } from "@/server/agents/definitions/analyst";
 import { briefAgent } from "@/server/agents/definitions/brief";
+import { competitorsAgent } from "@/server/agents/definitions/competitors";
 import { creatorAgent } from "@/server/agents/definitions/creator";
 import { geoAgent } from "@/server/agents/definitions/geo";
 import { plannerAgent } from "@/server/agents/definitions/planner";
@@ -7,6 +8,7 @@ import { qualityAgent } from "@/server/agents/definitions/quality";
 import { researchAgent } from "@/server/agents/definitions/research";
 import { scoutAgent } from "@/server/agents/definitions/scout";
 import { seoAgent } from "@/server/agents/definitions/seo";
+import { siteAuditAgent } from "@/server/agents/definitions/site-audit";
 import { systemsCheckAgent } from "@/server/agents/definitions/systems-check";
 import type { AgentDefinition } from "@/server/agents/types";
 
@@ -21,6 +23,8 @@ export const AGENTS: readonly AgentDefinition[] = [
   analystAgent,
   seoAgent,
   geoAgent,
+  competitorsAgent,
+  siteAuditAgent,
   systemsCheckAgent,
 ];
 

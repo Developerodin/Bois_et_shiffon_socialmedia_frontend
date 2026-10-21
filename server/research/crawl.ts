@@ -170,6 +170,35 @@ export function tagAttrs(html: string, tag: string): Record<string, string>[] {
   });
 }
 
+const SOCIAL_HOSTS: [string, RegExp][] = [
+  ["instagram", /(^|\.)instagram\.com$/],
+  ["facebook", /(^|\.)facebook\.com$/],
+  ["pinterest", /(^|\.)pinterest\.[a-z.]+$/],
+  ["tiktok", /(^|\.)tiktok\.com$/],
+  ["youtube", /(^|\.)youtube\.com$/],
+  ["linkedin", /(^|\.)linkedin\.com$/],
+  ["x", /(^|\.)(x|twitter)\.com$/],
+  ["threads", /(^|\.)threads\.(net|com)$/],
+];
+
+/** Brand profile links found on a page (first per platform; share/intent links skipped). */
+export function socialLinks(hrefs: string[]) {
+  const found = new Map<string, string>();
+  for (const href of hrefs) {
+    let u: URL;
+    try {
+      u = new URL(href);
+    } catch {
+      continue;
+    }
+    if (u.protocol !== "https:" && u.protocol !== "http:") continue;
+    if (/\/(sharer|share|intent|pin\/create|dialog)\b/i.test(u.pathname) || u.pathname.length < 2) continue;
+    const platform = SOCIAL_HOSTS.find(([, re]) => re.test(u.hostname))?.[0];
+    if (platform && !found.has(platform)) found.set(platform, `${u.origin}${u.pathname}`.replace(/\/$/, ""));
+  }
+  return [...found].map(([platform, url]) => ({ platform, url }));
+}
+
 /** On-page SEO signals from the raw (server-rendered) HTML — what crawlers without JS see. */
 export function seoSignals(html: string) {
   const metas = tagAttrs(html, "meta");
@@ -201,6 +230,7 @@ export function seoSignals(html: string) {
     // alt="" is the correct markup for decorative images, so only a missing attribute counts.
     imagesMissingAlt: images.filter((i) => !("alt" in i)).length,
     wordCount: bodyText.split(/\s+/).filter(Boolean).length,
+    socials: socialLinks(tagAttrs(html, "a").map((a) => a.href ?? "")),
   };
 }
 export type PageSeo = ReturnType<typeof seoSignals>;
