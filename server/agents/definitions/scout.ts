@@ -3,6 +3,7 @@ import { CONTENT_PROMPT_VERSION, SCOUT_SYSTEM } from "@/server/agents/prompts/co
 import type { AgentDefinition } from "@/server/agents/types";
 import { brandKnowledge } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
+import { safeHttpUrl } from "@/lib/website";
 
 const CHANNELS = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "FACEBOOK_POST", "PINTEREST_PIN", "THREADS_POST"] as const;
 
@@ -74,7 +75,7 @@ export const scoutAgent: AgentDefinition = {
         reason: o.reason,
         score: Math.max(0, Math.min(100, Math.round(o.score))),
         timing: o.timing || null,
-        sources: o.sources.slice(0, 6),
+        sources: o.sources.filter((s) => safeHttpUrl(s.url)).slice(0, 6), // model/web output is untrusted
         agentRunId: ctx.runId,
       };
       const existing = await prisma.opportunity.findUnique({ where: { brandId_dedupeKey: { brandId: brand.brandId, dedupeKey: key } } });

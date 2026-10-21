@@ -5,6 +5,7 @@ import { ArrowLeft, Check, ExternalLink, TriangleAlert, X } from "lucide-react";
 import { request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { safeHttpUrl } from "@/lib/website";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -162,10 +163,10 @@ export function IdeasPanel({ base, onRunScout }: { base: string; onRunScout: () 
               <p className="text-xs text-muted-foreground">{o.channels.map((c) => CHANNEL_LABEL[c] ?? c).join(" · ")}</p>
               {o.sources.length > 0 && (
                 <ul className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                  {o.sources.slice(0, 3).map((s) => (
-                    <li key={s.url}>
-                      <a href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 py-0.5 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
-                        {s.title || new URL(s.url).hostname} <ExternalLink className="size-3" aria-hidden="true" />
+                  {o.sources.flatMap((s) => { const u = safeHttpUrl(s.url); return u ? [{ ...s, u }] : []; }).slice(0, 3).map((s) => (
+                    <li key={s.u.href}>
+                      <a href={s.u.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 py-0.5 text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+                        {s.title || s.u.hostname} <ExternalLink className="size-3" aria-hidden="true" />
                       </a>
                     </li>
                   ))}

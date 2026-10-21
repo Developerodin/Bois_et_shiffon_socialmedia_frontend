@@ -41,6 +41,7 @@ import { ContentPanel, ContentView, IdeasPanel, useBrandData, type ContentItem, 
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { cn } from "@/lib/utils";
+import { safeHttpUrl } from "@/lib/website";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
@@ -235,12 +236,8 @@ const PRESETS: Preset<PanelId>[] = [
 
 /** Stored website, only if it is a valid http(s) URL: never link other schemes (e.g. javascript:). */
 function safeSite(website: string | null) {
-  try {
-    const u = new URL(website ?? "");
-    return u.protocol === "https:" || u.protocol === "http:" ? { href: u.href, host: u.hostname.replace(/^www\./, "") } : null;
-  } catch {
-    return null;
-  }
+  const u = safeHttpUrl(website);
+  return u ? { href: u.href, host: u.hostname.replace(/^www\./, "") } : null;
 }
 
 function plainSummary(markdown: string | undefined) {
