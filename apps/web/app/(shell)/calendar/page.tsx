@@ -1,12 +1,6 @@
-import { CalendarDays } from "lucide-react";
-import { ComingSoon } from "@/components/shell/coming-soon";
+import { redirect } from "next/navigation";
 
+/** The content calendar lives in the workspace as a panel; old links land there. */
 export default function Page() {
-  return (
-    <ComingSoon
-      icon={CalendarDays}
-      title="Your next thirty days, at a glance."
-      description="A calendar and list of every planned post, with readiness, owner and missing-asset flags. Drag to reschedule."
-    />
-  );
+  redirect("/?panel=content");
 }

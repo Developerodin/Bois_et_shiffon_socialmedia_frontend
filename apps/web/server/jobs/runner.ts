@@ -90,6 +90,7 @@ export async function kickIfDue() {
  */
 async function dailySweep() {
   await refreshExpiringTokens();
+  await pruneOldRows();
   const scheduled = AGENTS.filter((a) => a.schedule === "daily");
   if (scheduled.length === 0) return;
   const startOfDay = new Date(new Date().toISOString().slice(0, 10));
@@ -116,6 +117,16 @@ async function dailySweep() {
       }).catch(() => {}); // disabled for brand → skip
     }
   }
+}
+
+/** Housekeeping: rows that only matter for a while. Audit events, decisions and AI usage are kept. */
+async function pruneOldRows() {
+  const ago = (days: number) => new Date(Date.now() - days * 86_400_000);
+  await prisma.rateLimitBucket.deleteMany({ where: { windowStart: { lt: ago(2) } } });
+  await prisma.oAuthStateTransaction.deleteMany({ where: { expiresAt: { lt: ago(2) } } });
+  await prisma.job.deleteMany({ where: { status: "COMPLETED", updatedAt: { lt: ago(30) } } });
+  await prisma.emailOutbox.deleteMany({ where: { status: { in: ["SENT", "NOT_CONFIGURED"] }, createdAt: { lt: ago(30) } } });
+  await prisma.agentEvent.deleteMany({ where: { createdAt: { lt: ago(90) } } });
 }
 
 export async function enqueueDailySweep() {

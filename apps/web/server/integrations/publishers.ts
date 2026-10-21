@@ -39,7 +39,10 @@ const post = (url: string, params: Record<string, string>) =>
 /** Containers (Instagram, Threads) process asynchronously; publish only once they are FINISHED. */
 async function waitForContainer(url: string, field: "status_code" | "status") {
   for (let i = 0; i < 10; i++) {
-    const s = await call<Record<string, string>>(url.replace("FIELD", field));
+    // Nothing is live until media_publish/threads_publish, so even a 5xx here is a safe "not posted".
+    const s = await call<Record<string, string>>(url.replace("FIELD", field)).catch((e) => {
+      throw e instanceof PublishRefused ? e : new PublishRefused(`The platform didn't confirm the upload (${e instanceof Error ? e.message : "error"}). Nothing was posted. Try again.`);
+    });
     if (s[field] === "FINISHED") return;
     if (s[field] === "ERROR" || s[field] === "EXPIRED") throw new PublishRefused(`The platform couldn't process this post (${s[field]})`);
     await new Promise((r) => setTimeout(r, 3000));

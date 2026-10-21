@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
@@ -20,7 +21,6 @@ import {
   MessageSquareQuote,
   MessagesSquare,
   PenLine,
-  Pin,
   RotateCw,
   ScanSearch,
   ShieldCheck,
@@ -64,7 +64,6 @@ const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
 };
 const PLANNED: { key: string; name: string; icon: LucideIcon; does: string }[] = [
   { key: "reddit", name: "Reddit", icon: MessagesSquare, does: "Finds threads and drafts helpful replies" },
-  { key: "pinterest", name: "Pinterest", icon: Pin, does: "Publishes Pins and reads saves" },
   { key: "influencer", name: "Influencer", icon: Users, does: "Finds creators who fit your brand" },
   { key: "ugc", name: "UGC video", icon: Clapperboard, does: "Short product videos" },
 ];
@@ -79,6 +78,27 @@ type Props = {
   user: { name?: string | null; email?: string | null; image?: string | null };
 };
 
+/** The open item lives in the URL (?post=, ?doc=, ?agent=, ?competitor=) so Refresh, Back and shared links work. */
+function viewFromUrl(): View {
+  const q = new URLSearchParams(window.location.search);
+  const post = q.get("post"), doc = q.get("doc"), agent = q.get("agent"), competitor = q.get("competitor");
+  if (post) return { kind: "content", id: post };
+  if (doc) return { kind: "doc", doc: doc as ContextDocKind };
+  if (agent) return { kind: "agent", key: agent };
+  if (competitor) return { kind: "competitor", id: competitor };
+  return { kind: "home" };
+}
+function viewSearch(v: View) {
+  const q = new URLSearchParams(window.location.search);
+  for (const k of ["post", "doc", "agent", "competitor"]) q.delete(k);
+  if (v.kind === "content") q.set("post", v.id);
+  if (v.kind === "doc") q.set("doc", v.doc);
+  if (v.kind === "agent") q.set("agent", v.key);
+  if (v.kind === "competitor") q.set("competitor", v.id);
+  const s = q.toString();
+  return s ? `?${s}` : window.location.pathname;
+}
+
 export function Workspace({ workspaceId, brandId, brandName, website, user }: Props) {
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
@@ -86,6 +106,35 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   const [connections, setConnections] = useState<Connection[] | null>(null);
   const [view, setView] = useState<View>({ kind: "home" });
   const [focus, setFocus] = useState<{ id: PanelId; n: number } | undefined>();
+  const [urlRead, setUrlRead] = useState(false);
+
+  // Open what the URL names (deep link, refresh); Back/Forward move between views.
+  useEffect(() => {
+    const sync = () => {
+      const v = viewFromUrl();
+      setView(v);
+      if (v.kind !== "home") setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
+      // ?panel= is a one-time "show this panel" (e.g. Menu → Content calendar): use it, then drop it.
+      const q = new URLSearchParams(window.location.search);
+      const panel = q.get("panel");
+      if (panel) {
+        if ((PANEL_IDS as readonly string[]).includes(panel)) setFocus((f) => ({ id: panel as PanelId, n: (f?.n ?? 0) + 1 }));
+        q.delete("panel");
+        window.history.replaceState(null, "", q.size ? `?${q}` : window.location.pathname);
+      }
+    };
+    sync();
+    setUrlRead(true);
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
+  }, []);
+  useEffect(() => {
+    // Until the URL has been read, writing it would erase a deep link.
+    if (!urlRead) return;
+    const next = viewSearch(view);
+    const now = window.location.search || window.location.pathname;
+    if (next !== now) window.history.pushState(null, "", next);
+  }, [view, urlRead]);
 
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
   const loadReports = useCallback(() => request<{ seo: Report; geo: Report }>(`${base}/audit-reports`).then(setReports).catch(() => setReports({ seo: null, geo: null })), [base]);
@@ -132,14 +181,26 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
       id: "context",
       title: "Context",
       icon: <FileText />,
-      render: () => <ContextPane brandName={brandName} website={website} docs={docs} geo={reports?.geo ?? null} connections={connections} user={user} onOpenDoc={(doc) => open({ kind: "doc", doc })} />,
+      render: () => (
+        <ContextPane
+          base={base}
+          brandName={brandName}
+          website={website}
+          docs={docs}
+          geo={reports?.geo ?? null}
+          connections={connections}
+          user={user}
+          onOpenDoc={(doc) => open({ kind: "doc", doc })}
+          onOpenResearch={() => open({ kind: "agent", key: "research" })}
+        />
+      ),
     },
     {
       id: "home",
       title: "Today & agents",
       icon: <ScanSearch />,
       render: () =>
-        view.kind === "doc" && docs ? (
+        view.kind === "doc" && docs && docs.docs.some((d) => d.kind === view.doc) ? (
           <DocView
             entry={docs.docs.find((d) => d.kind === view.doc)!}
             workspaceId={workspaceId}
@@ -208,7 +269,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
     <div className="flex h-full min-h-0 flex-col">
       {outOfCredits && (
         <p role="status" className="shrink-0 border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm">
-          <span className="font-medium">Agents are done for now:</span> the AI credits are used up. Add credits to the OpenAI account, then run the agents again.
+          <span className="font-medium">Agents are paused:</span> the AI service is out of credits. You can still write and edit drafts, approve and publish. Once credits are added, press Run on the agent again.
         </p>
       )}
       <div className="min-h-0 flex-1">
@@ -218,7 +279,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   );
 }
 
-type PanelId = "context" | "home" | "ideas" | "content" | "competitors" | "analytics" | "feed" | "chat" | "log";
+const PANEL_IDS = ["context", "home", "ideas", "content", "competitors", "analytics", "feed", "chat", "log"] as const;
+type PanelId = (typeof PANEL_IDS)[number];
 
 const PRESETS: Preset<PanelId>[] = [
   {
@@ -276,7 +338,52 @@ function docBadge(entry: ContextDocEntry, researching: boolean) {
   return <Lock className="size-3.5 text-muted-foreground" aria-label="Not drafted yet" />;
 }
 
+/** Fix the brand's name or website in place (e.g. a placeholder site from setup). */
+function BrandEditor({ base, brandName, website, onDone }: { base: string; brandName: string; website: string | null; onDone: (siteChanged: boolean) => void }) {
+  const router = useRouter();
+  const [name, setName] = useState(brandName);
+  const [site, setSite] = useState(website ?? "");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    const url = /^https?:\/\//i.test(site.trim()) ? site.trim() : `https://${site.trim()}`;
+    const siteChanged = url !== website;
+    setPending(true);
+    setError(null);
+    try {
+      await request(base, { method: "PATCH", body: JSON.stringify({ displayName: name.trim(), ...(siteChanged ? { websiteUrl: url } : {}) }) });
+      router.refresh();
+      onDone(siteChanged);
+    } catch (err) {
+      setError(errorMessage(err, "Couldn't save. Try again."));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <form onSubmit={save} className="flex flex-col gap-3" aria-label="Edit brand">
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">Brand name</span>
+        <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} className="h-10 rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+      </label>
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">Website</span>
+        <input value={site} onChange={(e) => setSite(e.target.value)} required inputMode="url" placeholder="yourbrand.com" className="h-10 rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+      </label>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      <div className="flex gap-2">
+        <Button type="submit" size="sm" disabled={pending || !name.trim() || !site.trim()}>{pending ? "Saving…" : "Save"}</Button>
+        <Button type="button" size="sm" variant="ghost" onClick={() => onDone(false)} disabled={pending}>Cancel</Button>
+      </div>
+    </form>
+  );
+}
+
 function ContextPane({
+  base,
   brandName,
   website,
   docs,
@@ -284,7 +391,10 @@ function ContextPane({
   connections,
   user,
   onOpenDoc,
+  onOpenResearch,
 }: {
+  base: string;
+  onOpenResearch: () => void;
   brandName: string;
   website: string | null;
   docs: ContextDocsResponse | null;
@@ -298,17 +408,29 @@ function ContextPane({
   const researching = docs?.research?.status === "QUEUED" || docs?.research?.status === "RUNNING";
   const competitors = ((geo?.metrics.competitors ?? []) as { name: string; mentions: number }[]).slice(0, 8);
   const site = safeSite(website);
+  const [editing, setEditing] = useState(false);
+  const [siteSaved, setSiteSaved] = useState(false);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto">
         <section className="border-b border-border px-5 py-5">
+          {editing ? (
+            <BrandEditor base={base} brandName={brandName} website={website} onDone={(changed) => { setEditing(false); setSiteSaved(changed); }} />
+          ) : (
+          <>
           <div className="flex items-baseline justify-between gap-2">
             <h2 className="font-display text-lg font-medium">{brandName}</h2>
-            <Link href="/context" className="inline-block py-1 text-xs text-muted-foreground hover:text-foreground">
+            <button type="button" onClick={() => setEditing(true)} className="inline-block py-1 text-xs text-muted-foreground hover:text-foreground">
               Edit
-            </Link>
+            </button>
           </div>
+          {siteSaved && (
+            <p role="status" className="mt-2 text-xs">
+              Website saved. Agents use it from their next run.{" "}
+              <button type="button" onClick={onOpenResearch} className="font-medium underline underline-offset-2">Re-read it now</button> to redraft the documents.
+            </p>
+          )}
           {site && (
             <a href={site.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 py-1 text-xs text-muted-foreground hover:text-foreground">
               {site.host} <ExternalLink className="size-3" aria-hidden="true" />
@@ -323,6 +445,8 @@ function ContextPane({
             </>
           ) : (
             <p className="mt-3 text-sm text-muted-foreground">{researching && !product?.latest ? "Reading your website…" : "Your brand summary appears once Research has drafted the product document."}</p>
+          )}
+          </>
           )}
         </section>
 
@@ -405,8 +529,12 @@ function timeAgo(iso: string | null | undefined) {
   return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`;
 }
 
+/** "No new drafts to check" and friends: the agent ran fine and found no work. Not a failure. */
+const nothingToDo = (a: AgentSummary | undefined) => a?.lastRun?.status === "FAILED" && /^(No |Nothing )/.test(a.lastRun.error ?? "");
+
 function agentStatus(a: AgentSummary | undefined) {
   const s = a?.lastRun?.status;
+  if (nothingToDo(a)) return "Nothing to do right now";
   if (s === "RUNNING") return "Running…";
   if (s === "QUEUED") return a?.lastRun?.startedAt ? "Retrying soon" : "Queued";
   if (s === "FAILED") return "Failed";
@@ -563,7 +691,7 @@ function Home({
                   tint={meta.tint}
                   name={a.name}
                   status={agentStatus(a)}
-                  state={running ? "running" : a.lastRun?.status === "FAILED" ? "failed" : "ready"}
+                  state={running ? "running" : a.lastRun?.status === "FAILED" && !nothingToDo(a) ? "failed" : "ready"}
                   onClick={() => onOpen({ kind: "agent", key: a.key })}
                 />
               </li>
@@ -720,7 +848,7 @@ function AgentView({
             <p className="mt-1 max-w-[60ch] text-sm text-muted-foreground">{agent?.description}</p>
             <p className="mt-2 text-xs text-muted-foreground">{agentStatus(agent ?? undefined)}</p>
             {agent?.lastRun?.status === "FAILED" && agent.lastRun.error && (
-              <p className="mt-1 max-w-[60ch] text-sm text-destructive">{readable(agent.lastRun.error)}</p>
+              <p className={cn("mt-1 max-w-[60ch] text-sm", nothingToDo(agent) ? "text-muted-foreground" : "text-destructive")}>{readable(agent.lastRun.error)}</p>
             )}
           </div>
           <Button onClick={run} disabled={pending || running}>
