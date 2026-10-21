@@ -132,7 +132,7 @@ const decode = (s: string) =>
 
 export function extractPage(html: string, base: URL) {
   const title = decode(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1]?.trim() ?? "") || null;
-  const description = decode(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)/i.exec(html)?.[1] ?? "") || null;
+  const description = tagAttrs(html, "meta").find((m) => m.name?.toLowerCase() === "description")?.content || null;
   const text = decode(
     html
       .replace(/<(script|style|noscript|svg|template)[\s\S]*?<\/\1>/gi, " ")
@@ -159,10 +159,25 @@ export function extractPage(html: string, base: URL) {
   return { title, description, text, links: [...links], seo: seoSignals(html) };
 }
 
+/** Attributes of every `<tag …>` in any order, quoted or not (keys lower-cased, values decoded). */
+export function tagAttrs(html: string, tag: string): Record<string, string>[] {
+  return [...html.matchAll(new RegExp(`<${tag}\\b([^>]*)>`, "gi"))].map((m) => {
+    const attrs: Record<string, string> = {};
+    for (const a of m[1].matchAll(/([^\s=/>"']+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>"']+)))?/g)) {
+      attrs[a[1].toLowerCase()] = decode((a[2] ?? a[3] ?? a[4] ?? "").trim());
+    }
+    return attrs;
+  });
+}
+
 /** On-page SEO signals from the raw (server-rendered) HTML — what crawlers without JS see. */
 export function seoSignals(html: string) {
-  const attr = (re: RegExp) => decode(re.exec(html)?.[1]?.trim() ?? "") || null;
-  const images = [...html.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]);
+  const metas = tagAttrs(html, "meta");
+  const links = tagAttrs(html, "link");
+  const meta = (key: "name" | "property", value: string) =>
+    metas.find((m) => m[key]?.toLowerCase() === value)?.content || null;
+  const rel = (l: Record<string, string>, value: string) => (l.rel ?? "").toLowerCase().split(/\s+/).includes(value);
+  const images = tagAttrs(html, "img");
   const jsonLdTypes = new Set<string>();
   for (const m of html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
     for (const t of m[1].matchAll(/"@type"\s*:\s*(?:"([^"]+)"|\[([^\]]+)\])/g)) {
@@ -173,17 +188,18 @@ export function seoSignals(html: string) {
     .replace(/<(script|style|noscript|svg|template)[\s\S]*?<\/\1>/gi, " ")
     .replace(/<[^>]+>/g, " ");
   return {
-    lang: attr(/<html[^>]+lang=["']([^"']+)/i),
-    canonical: attr(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i),
-    robots: attr(/<meta[^>]+name=["']robots["'][^>]+content=["']([^"']+)/i),
-    viewport: /<meta[^>]+name=["']viewport["']/i.test(html),
-    ogImage: /<meta[^>]+property=["']og:image["']/i.test(html),
+    lang: tagAttrs(html, "html")[0]?.lang || null,
+    canonical: links.find((l) => rel(l, "canonical"))?.href || null,
+    robots: meta("name", "robots"),
+    viewport: meta("name", "viewport") !== null,
+    ogImage: meta("property", "og:image") !== null,
     h1Count: (html.match(/<h1\b/gi) ?? []).length,
     h2Count: (html.match(/<h2\b/gi) ?? []).length,
-    hreflang: [...html.matchAll(/<link[^>]+hreflang=["']([^"']+)/gi)].map((m) => m[1]),
+    hreflang: links.filter((l) => l.hreflang).map((l) => l.hreflang),
     jsonLdTypes: [...jsonLdTypes],
     imageCount: images.length,
-    imagesMissingAlt: images.filter((i) => !/\balt=["'][^"']+["']/i.test(i)).length,
+    // alt="" is the correct markup for decorative images, so only a missing attribute counts.
+    imagesMissingAlt: images.filter((i) => !("alt" in i)).length,
     wordCount: bodyText.split(/\s+/).filter(Boolean).length,
   };
 }
@@ -203,6 +219,7 @@ export async function crawlSite(startUrl: string, onPage?: (p: CrawledPage) => P
 
   const queue = [start.toString()];
   const seen = new Set(queue);
+  const discovered = new Set<string>(); // every same-origin link seen, for callers that need more than MAX_PAGES
   const pages: CrawledPage[] = [];
   const failures: Array<{ url: string; error: string }> = [];
 
@@ -222,6 +239,7 @@ export async function crawlSite(startUrl: string, onPage?: (p: CrawledPage) => P
       const crawled = { url: res.url.toString(), title: page.title, description: page.description, text: page.text, seo: page.seo };
       pages.push(crawled);
       await onPage?.(crawled);
+      page.links.forEach((l) => discovered.add(l));
       const fresh = page.links.filter((l) => !seen.has(l));
       fresh.sort((a, b) => Number(PRIORITY.test(b)) - Number(PRIORITY.test(a)) || a.length - b.length);
       for (const l of fresh.slice(0, 30)) {
@@ -232,5 +250,5 @@ export async function crawlSite(startUrl: string, onPage?: (p: CrawledPage) => P
       failures.push({ url: next, error: String(error instanceof Error ? error.message : error) });
     }
   }
-  return { pages, failures, robotsTxt };
+  return { pages, failures, robotsTxt, links: [...discovered] };
 }

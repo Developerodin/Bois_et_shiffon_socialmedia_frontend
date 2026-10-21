@@ -71,7 +71,7 @@ export function seoChecks({ startUrl, pages, robotsTxt, hasSitemap }: SiteFacts)
 
   const noTitle = pagesWhere(pages, (p) => !p.title);
   if (noTitle.length) add({ id: "title-missing", category: "On-page", severity: "high", title: "Pages without a title", detail: "The title is the clickable headline in search results.", urls: noTitle, fix: "Give each page a unique, descriptive <title> (about 50–60 characters)." });
-  const badTitle = pagesWhere(pages, (p) => !!p.title && (p.title.length > 65 || p.title.length < 15));
+  const badTitle = pagesWhere(pages, (p) => !!p.title && (p.title.length > 60 || p.title.length < 15));
   if (badTitle.length) add({ id: "title-length", category: "On-page", severity: "low", title: "Titles too long or too short", detail: "Titles over ~60 characters get cut off; very short ones waste the space.", urls: badTitle, fix: "Aim for 15–60 characters, main keyword first, brand last." });
 
   const titles = new Map<string, string[]>();
