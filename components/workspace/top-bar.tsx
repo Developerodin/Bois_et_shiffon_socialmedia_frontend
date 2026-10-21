@@ -42,7 +42,7 @@ const AREAS = [
   { href: "/", label: "Workspace" },
   { href: "/performance", label: "Performance" },
   { href: "/context", label: "Strategy documents" },
-  { href: "/calendar", label: "Calendar", soon: true },
+  { href: "/?panel=content", label: "Content calendar" },
   { href: "/studio", label: "Studio", soon: true },
   { href: "/settings", label: "Settings" },
 ];

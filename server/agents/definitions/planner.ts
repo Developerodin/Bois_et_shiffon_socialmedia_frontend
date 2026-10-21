@@ -65,7 +65,10 @@ export const plannerAgent: AgentDefinition = {
     });
     const taken = new Set(existing.map((e) => takenKey(e.channel, e.scheduledFor!)));
     const from = new Date(Date.now() + 86_400_000);
-    const valid = new Set(opps.map((o) => o.id));
+    // A retried run (cut off after creating some posts) must not plan the same idea twice.
+    const done = await prisma.contentItem.findMany({ where: { brandId: brand.brandId, opportunityId: { in: opps.map((o) => o.id) } }, select: { opportunityId: true } });
+    const already = new Set(done.map((d) => d.opportunityId));
+    const valid = new Set(opps.map((o) => o.id).filter((id) => !already.has(id)));
     let planned = 0;
     let unscheduled = 0;
     for (const p of out.posts) {
@@ -87,7 +90,7 @@ export const plannerAgent: AgentDefinition = {
       planned++;
       await ctx.log("SUCCESS", `Planned ${p.channel.replace(/_/g, " ").toLowerCase()}${when ? ` for ${when.toISOString().slice(0, 10)}` : " (no free slot in 30 days)"}: ${p.title}`, { type: "ContentItem", id: item.id });
     }
-    await prisma.opportunity.updateMany({ where: { id: { in: [...valid] } }, data: { status: "PLANNED" } });
+    await prisma.opportunity.updateMany({ where: { id: { in: opps.map((o) => o.id) } }, data: { status: "PLANNED" } });
     if (unscheduled) await ctx.log("WARN", `${unscheduled} post(s) had no free slot in the next 30 days`);
     return { planned, unscheduled };
   },
