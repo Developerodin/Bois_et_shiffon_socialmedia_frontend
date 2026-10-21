@@ -26,6 +26,7 @@ const PURPOSE: Record<Provider, string> = {
   THREADS: "Publish to Threads and read post insights.",
   GOOGLE: "Read website traffic (Analytics) and search queries (Search Console).",
   REDDIT: "Find relevant conversations and post approved replies.",
+  PINTEREST: "Publish approved Pins to your boards and read saves and clicks.",
 };
 
 type Props = {

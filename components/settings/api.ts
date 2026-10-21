@@ -115,7 +115,7 @@ export const settingsApi = {
 
 const brand = (w: string, b: string) => `${ws(w)}/brands/${encodeURIComponent(b)}`;
 
-export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "REDDIT";
+export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "REDDIT" | "PINTEREST";
 export type ProviderInfo = { provider: Provider; label: string; configured: boolean };
 export type Connection = {
   id: string;
