@@ -275,3 +275,10 @@ Settings → **Connections** (per brand): Facebook Pages, Instagram, Threads, Go
 - First real run on boisetchiffons.fr: SEO 78/100 (mobile LCP ~9.5 s, 95 images without alt, missing meta descriptions); GEO 50/100 — mentioned in 1/5 AI answers (only when named); AI recommends Tikamoon, IKEA, Maisons du Monde, La Redoute, Ethnicraft instead.
 - Dev tool: `npm run audit -w web -- seo|geo <url>`.
 - **Ceiling — run time:** SEO ~70 s, GEO ~120 s (parallel AI calls), Research similar. The Vercel job route has `maxDuration = 60` and the job lease is 5 min. Works with the local worker (`worker:dev`); on Vercel these runs need Pro `maxDuration` 300 s or splitting each agent into checkpointed steps (one job per step). Not scheduled yet (manual runs only) to control OpenAI web-search cost.
+
+### 8g. First-run page + Google sign-in (2026-10-21)
+
+- `/welcome`: signed-in person with no brand (Today redirects there) enters their website → brand + Research run → live "reading room" (Agent Log lines + five docs drafting) → Context to confirm. Resumable via `?brand&run&site`.
+- **Continue with Google** on `/login` (Auth.js Google provider, same OAuth client as the Analytics connection). Requires Google `email_verified`; links to an existing account with the same email; refuses disabled/deleted accounts. A new Google account accepts its pending invitations, otherwise gets its own workspace as Owner (`server/services/google-signup.ts`; check `npm run smoke:google -w web`).
+- Google Cloud client needs the extra redirect URI `http://localhost:3100/api/auth/callback/google` (and the production domain's).
+- **Ceiling:** open Google sign-up lets anyone create a workspace and run agents (OpenAI cost). Before a public launch add an allow-list/waitlist or per-workspace run quota.
