@@ -4,21 +4,30 @@ import { useCallback, useRef, useState } from "react";
 import { ShieldOff } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { settingsApi } from "@/components/settings/api";
+import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { InvitationsTab } from "@/components/settings/invitations-tab";
 import { MembersTab } from "@/components/settings/members-tab";
 import { RolesTab } from "@/components/settings/roles-tab";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
 
-type TabKey = "members" | "roles" | "invitations";
+type TabKey = "members" | "roles" | "invitations" | "connections";
 
 const TABS: { key: TabKey; label: string; needs: string }[] = [
   { key: "members", label: "Members", needs: "members.read" },
   { key: "roles", label: "Roles", needs: "roles.read" },
   { key: "invitations", label: "Invitations", needs: "invitations.manage" },
+  { key: "connections", label: "Connections", needs: "brand.read" },
 ];
 
-export function SettingsBoard({ workspaceId }: { workspaceId: string }) {
+type Props = {
+  workspaceId: string;
+  brandId: string | null;
+  initialTab?: TabKey;
+  notice: { kind: "ok" | "error"; text: string } | null;
+};
+
+export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Props) {
   const permsFetcher = useCallback(
     () => settingsApi.myPermissions(workspaceId).then((d) => new Set(d.permissions ?? [])),
     [workspaceId],
@@ -34,8 +43,9 @@ export function SettingsBoard({ workspaceId }: { workspaceId: string }) {
   const roles = useLoad(can?.has("roles.read") ? rolesFetcher : null);
   const roleList = roles.state.kind === "ready" ? roles.state.data : [];
 
-  const visible = can ? TABS.filter((t) => can.has(t.needs)) : [];
-  const [active, setActive] = useState<TabKey | null>(null);
+  // Connections are per brand, so the tab only shows with a brand selected.
+  const visible = can ? TABS.filter((t) => can.has(t.needs) && (t.key !== "connections" || brandId)) : [];
+  const [active, setActive] = useState<TabKey | null>(initialTab ?? null);
   const current = visible.find((t) => t.key === active) ?? visible[0];
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -111,8 +121,15 @@ export function SettingsBoard({ workspaceId }: { workspaceId: string }) {
             <MembersTab workspaceId={workspaceId} can={can!} roles={roleList} onRolesChanged={roles.reload} />
           ) : current.key === "roles" ? (
             <RolesTab workspaceId={workspaceId} can={can!} roles={roles} />
-          ) : (
+          ) : current.key === "invitations" ? (
             <InvitationsTab workspaceId={workspaceId} roles={roleList} />
+          ) : (
+            <ConnectionsTab
+              workspaceId={workspaceId}
+              brandId={brandId!}
+              canManage={can!.has("integrations.manage")}
+              notice={notice}
+            />
           )}
         </div>
       </>
@@ -126,7 +143,7 @@ export function SettingsBoard({ workspaceId }: { workspaceId: string }) {
           Workspace settings
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Who can work here, what each role is allowed to do, and who is waiting to join.
+          Who can work here, what each role can do, who is waiting to join, and which accounts this brand has connected.
         </p>
       </div>
       {body}

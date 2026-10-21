@@ -252,3 +252,11 @@ Not porting: impersonation, platform policy evaluator, delegation (enterprise fe
 ## 9. Left to the builder
 
 Exact tokens and component styling within §3.2; table/column names beyond `DATA_MODEL.md`; OpenAI model choices per workflow (configurable); crawler implementation details; whether RLS lands in Slice 0 or later; test fixture strategy; polling intervals.
+
+### 8d. Connect-account buttons (2026-10-21, pulled forward from Slice 6)
+
+Settings → **Connections** (per brand): Facebook Pages, Instagram, Threads, Google (Analytics + Search Console), Reddit.
+- `IntegrationConnection` (composite brand FK, AES-256-GCM token envelope per DEC-002/018, `server/crypto/credentials.ts`) and `OAuthStateTransaction` (hashed single-use state bound to user + brand + provider, 10-min TTL, consumed atomically before the code exchange; access re-checked at callback — DEC-017).
+- Adapters: `server/integrations/providers.ts` (Meta stores one row per granted Page with its non-expiring Page token; IG/Threads long-lived 60-day tokens; Google/Reddit refresh tokens). Callback: `/api/v1/integrations/{meta,instagram,threads,google,reddit}/callback`; redirect URI = `*_REDIRECT_URI` env or derived from `AUTH_URL`.
+- Check: `npm run smoke:connections -w web`.
+- **Not yet:** token refresh job (IG/Threads expire after 60 days, Google/Reddit access tokens hourly — refresh before use), provider-side revoke on disconnect, uninstall/data-deletion callbacks (Meta App Review requirement), https tunnel for IG/Threads redirect URIs in dev.
