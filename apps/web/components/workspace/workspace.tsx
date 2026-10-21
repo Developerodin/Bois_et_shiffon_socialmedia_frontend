@@ -192,6 +192,16 @@ const PRESETS: Preset<PanelId>[] = [
 
 /* ───────────── Context pane (left) ───────────── */
 
+/** Stored website, only if it is a valid http(s) URL: never link other schemes (e.g. javascript:). */
+function safeSite(website: string | null) {
+  try {
+    const u = new URL(website ?? "");
+    return u.protocol === "https:" || u.protocol === "http:" ? { href: u.href, host: u.hostname.replace(/^www\./, "") } : null;
+  } catch {
+    return null;
+  }
+}
+
 function plainSummary(markdown: string | undefined) {
   if (!markdown) return null;
   const para = markdown
@@ -229,7 +239,7 @@ function ContextPane({
   const summary = plainSummary(product?.latest?.markdown);
   const researching = docs?.research?.status === "QUEUED" || docs?.research?.status === "RUNNING";
   const competitors = ((geo?.metrics.competitors ?? []) as { name: string; mentions: number }[]).slice(0, 8);
-  const host = website ? new URL(website).hostname.replace(/^www\./, "") : null;
+  const site = safeSite(website);
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -241,9 +251,9 @@ function ContextPane({
               Edit
             </Link>
           </div>
-          {host && (
-            <a href={website!} target="_blank" rel="noreferrer" className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-              {host} <ExternalLink className="size-3" aria-hidden="true" />
+          {site && (
+            <a href={site.href} target="_blank" rel="noreferrer" className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+              {site.host} <ExternalLink className="size-3" aria-hidden="true" />
             </a>
           )}
           {summary ? (
@@ -665,7 +675,7 @@ function AgentView({
 /* ───────────── Chat pane (right) ───────────── */
 
 function ChatPane({ website }: { website: string | null }) {
-  const host = website ? new URL(website).hostname.replace(/^www\./, "") : "your site";
+  const host = safeSite(website)?.host ?? "your site";
   const starters = ["Plan the next 30 days", "Who is my customer?", "Compare me with competitors"];
   return (
     <div className="flex h-full min-h-0 flex-col">
