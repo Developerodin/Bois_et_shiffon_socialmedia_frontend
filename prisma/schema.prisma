@@ -1,0 +1,448 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Neon: pooled for app traffic, direct for migrations (pooler breaks Prisma Migrate)
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  EDITOR
+  REVIEWER
+  VIEWER
+}
+
+enum BrandStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model User {
+  id             String     @id @default(cuid())
+  email          String     @unique
+  emailVerified  DateTime?
+  name           String?
+  image          String?
+  passwordHash   String?
+  /// Only ACTIVE accounts can sign in (ported from Cad account-eligibility)
+  status         UserStatus @default(ACTIVE)
+  deletedAt      DateTime?
+  /// Bump to revoke every existing session (password change, disable)
+  sessionVersion Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  memberships    WorkspaceMember[]
+  passwordResets PasswordResetToken[]
+  brandMembers   BrandMember[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     WorkspaceMember[]
+  brands      Brand[]
+  roles       Role[]
+  invitations Invitation[]
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  /// Legacy tier; superseded by roleId (fallback when roleId is null)
+  role        WorkspaceRole @default(VIEWER)
+  roleId      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleRef   Role?     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@unique([workspaceId, userId])
+  @@index([roleId])
+  @@index([userId])
+}
+
+model Brand {
+  id          String      @id @default(cuid())
+  workspaceId String
+  slug        String
+  displayName String
+  status      BrandStatus @default(ACTIVE)
+  archivedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  workspace    Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  profile      BrandProfile?
+  members      BrandMember[]
+  agentRuns    AgentRun[]
+  agentEvents  AgentEvent[]
+  agentConfigs BrandAgentConfig[]
+  aiRuns       AiWorkflowRun[]
+  contextDocs  BrandContextDoc[]
+
+  // target for composite tenant FKs (AT-021): children reference (id, workspaceId)
+  @@unique([id, workspaceId])
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, status])
+}
+
+model BrandProfile {
+  id           String   @id @default(cuid())
+  workspaceId  String
+  brandId      String   @unique
+  websiteUrl   String?
+  voiceSummary String?
+  pillars      Json?
+  locales      Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@unique([brandId, workspaceId])
+  @@index([workspaceId, brandId])
+}
+
+model BrandMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  brandId     String
+  userId      String
+  role        String?
+  /// Extra roles granted on this brand only (on top of the workspace role)
+  roleIds     String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([brandId, userId])
+  @@index([workspaceId, brandId])
+  @@index([userId])
+}
+
+// --- Slice 0: duties, jobs, agents, audit, AI run log (foundation design §4–5, §8b) ---
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  DEAD_LETTER
+}
+
+/// Durable job queue (DEC-006/015). Claimed with FOR UPDATE SKIP LOCKED + lease.
+model Job {
+  id             String    @id @default(cuid())
+  /// null for system jobs (e.g. account emails)
+  workspaceId    String?
+  brandId        String?
+  type           String
+  payload        Json
+  status         JobStatus @default(PENDING)
+  runAt          DateTime  @default(now())
+  attempts       Int       @default(0)
+  maxAttempts    Int       @default(5)
+  leasedBy       String?
+  leasedUntil    DateTime?
+  lastError      String?
+  idempotencyKey String?   @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, runAt])
+  @@index([status, leasedUntil])
+}
+
+enum AgentRunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+model AgentRun {
+  id                String         @id @default(cuid())
+  workspaceId       String
+  brandId           String
+  agentKey          String
+  trigger           String
+  status            AgentRunStatus @default(QUEUED)
+  input             Json?
+  output            Json?
+  error             String?
+  triggeredByUserId String?
+  startedAt         DateTime?
+  finishedAt        DateTime?
+  createdAt         DateTime       @default(now())
+
+  brand  Brand        @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  events AgentEvent[]
+
+  @@index([brandId, agentKey, createdAt])
+}
+
+enum AgentEventLevel {
+  INFO
+  SUCCESS
+  WARN
+  ERROR
+}
+
+/// Append-only Agent Log. Int id gives a monotonic cursor for polling.
+// ponytail: Int id caps at ~2.1B events; switch to BigInt when the log gets there
+model AgentEvent {
+  id          Int             @id @default(autoincrement())
+  workspaceId String
+  brandId     String
+  runId       String
+  agentKey    String
+  level       AgentEventLevel @default(INFO)
+  message     String
+  data        Json?
+  entityType  String?
+  entityId    String?
+  createdAt   DateTime        @default(now())
+
+  brand Brand    @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  run   AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([brandId, id])
+  @@index([runId, id])
+}
+
+model BrandAgentConfig {
+  id          String   @id @default(cuid())
+  workspaceId String
+  brandId     String
+  agentKey    String
+  enabled     Boolean  @default(true)
+  settings    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@unique([brandId, agentKey])
+}
+
+/// Append-only audit trail (actor, timestamp, entity) for state transitions.
+model AuditEvent {
+  id          String   @id @default(cuid())
+  workspaceId String?
+  brandId     String?
+  actorUserId String?
+  action      String
+  entityType  String
+  entityId    String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId, brandId, createdAt])
+  @@index([entityType, entityId])
+  @@index([actorUserId, createdAt])
+}
+
+/// One row per AI provider call: model, prompt version, tokens, latency (DEC-003).
+model AiWorkflowRun {
+  id            String   @id @default(cuid())
+  workspaceId   String
+  brandId       String
+  agentRunId    String?
+  workflowId    String
+  promptVersion String
+  provider      String
+  model         String
+  status        String
+  inputTokens   Int?
+  outputTokens  Int?
+  latencyMs     Int?
+  error         String?
+  createdAt     DateTime @default(now())
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@index([brandId, createdAt])
+  @@index([agentRunId])
+}
+
+// --- Slice 1: brand context documents (design §4.1, §8b-3) ---
+
+enum ContextDocStatus {
+  DRAFT
+  CONFIRMED
+  SUPERSEDED
+}
+
+/// Versioned strategy docs per brand (Okara's five docs). Agents read the latest CONFIRMED version.
+model BrandContextDoc {
+  id                String           @id @default(cuid())
+  workspaceId       String
+  brandId           String
+  kind              String
+  version           Int
+  status            ContextDocStatus @default(DRAFT)
+  markdown          String
+  sources           Json             @default("[]")
+  agentRunId        String?
+  createdByUserId   String?
+  confirmedByUserId String?
+  confirmedAt       DateTime?
+  createdAt         DateTime         @default(now())
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@unique([brandId, kind, version])
+  @@index([brandId, kind, status])
+  @@index([brandId, agentRunId])
+}
+
+// --- Login hardening (ported from Cad auth) ---
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  DISABLED
+}
+
+/// Fixed-window rate-limit counters in Postgres (shared across instances, no Redis).
+model RateLimitBucket {
+  key         String   @id
+  count       Int
+  windowStart DateTime
+
+  @@index([windowStart])
+}
+
+// --- RBAC + account flows (ported from Cad IAM, minus impersonation) ---
+
+/// Workspace role = named set of permission keys from server/auth/permissions.catalog.ts.
+/// ponytail: permissions as a text[] instead of Cad's RolePermission join table; add the
+/// join table when per-permission scope/conditions are needed.
+model Role {
+  id          String   @id @default(cuid())
+  workspaceId String
+  slug        String
+  name        String
+  description String?
+  isSystem    Boolean  @default(false)
+  permissions String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  members     WorkspaceMember[]
+  invitations Invitation[]
+
+  @@unique([workspaceId, slug])
+}
+
+/// Single-use invite; only the SHA-256 of the token is stored.
+model Invitation {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  email           String
+  roleId          String
+  tokenHash       String    @unique
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  revokedAt       DateTime?
+  invitedByUserId String?
+  createdAt       DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  role      Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId, createdAt])
+  @@index([email])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+  NOT_CONFIGURED
+}
+
+/// Outbox: emails are written in the same transaction as the action, sent by a job (Cad pattern).
+model EmailOutbox {
+  id        String      @id @default(cuid())
+  to        String
+  subject   String
+  text      String
+  status    EmailStatus @default(PENDING)
+  attempts  Int         @default(0)
+  error     String?
+  sentAt    DateTime?
+  createdAt DateTime    @default(now())
+
+  @@index([status, createdAt])
+}
