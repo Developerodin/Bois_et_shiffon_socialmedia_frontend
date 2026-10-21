@@ -29,7 +29,8 @@
     "probe:meta": "tsx --env-file=.env scripts/probe-meta-data.ts",
     "audit:ui": "tsx --env-file=.env scripts/audit-ui.ts",
     "worker:dev": "tsx --env-file=.env scripts/worker-dev.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "smoke:publishing": "tsx --env-file=.env scripts/smoke-publishing.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

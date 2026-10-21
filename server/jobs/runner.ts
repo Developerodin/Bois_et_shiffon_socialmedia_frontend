@@ -11,6 +11,7 @@ import { AiProviderError } from "@/server/ai/provider";
 import { prisma } from "@/server/db/prisma";
 import { EMAIL_SEND_JOB, sendOutboxEmail } from "@/server/email/outbox";
 import { claimNextJob, completeJob, enqueueJob, failJob } from "@/server/jobs/queue";
+import { executePublication, PUBLISH_JOB } from "@/server/services/publishing";
 
 type Handler = {
   run: (payload: unknown) => Promise<void>;
@@ -23,6 +24,7 @@ const HANDLERS: Record<string, Handler> = {
   [AGENT_RUN_JOB]: { run: executeAgentRun, onFailure: onAgentRunFailure },
   [DAILY_SWEEP_JOB]: { run: dailySweep },
   [EMAIL_SEND_JOB]: { run: sendOutboxEmail },
+  [PUBLISH_JOB]: { run: executePublication },
 };
 
 /**

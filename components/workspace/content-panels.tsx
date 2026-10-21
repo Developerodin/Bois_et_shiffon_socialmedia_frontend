@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Check, ExternalLink, TriangleAlert, X } from "lucide-react";
 import { request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
+import { ReleasePanel } from "@/components/workspace/release-panel";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/lib/website";
 
@@ -93,6 +94,7 @@ const STATUS_TONE: Record<string, string> = {
   PUBLISHED: "bg-success/15 text-success",
   BLOCKED: "bg-destructive/15 text-destructive",
   REJECTED: "bg-destructive/15 text-destructive",
+  SCHEDULED: "bg-primary/15 text-primary",
 };
 const DECISION: Record<Opportunity["decision"], { label: string; tone: string }> = {
   RECOMMEND: { label: "Recommend", tone: "bg-success/15 text-success" },
@@ -359,11 +361,10 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
                   </li>
                 ))}
               </ul>
-              {item.status === "AWAITING_APPROVAL" && (
-                <p className="mt-3 text-xs text-muted-foreground">Approval and publishing come next: an approver will sign off this exact version.</p>
-              )}
             </section>
           )}
+
+          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} />
         </div>
       )}
     </div>
