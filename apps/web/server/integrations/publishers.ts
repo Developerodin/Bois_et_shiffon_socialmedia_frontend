@@ -11,7 +11,9 @@ export type PostPayload = {
   title: string; // Pinterest title
   altText: string;
   link: string | null; // brand website for Pins
-  imageUrl: string | null;
+  imageUrl: string | null; // the first image
+  imageUrls: string[]; // all images (carousels)
+  videoUrl: string | null; // Reels
   boardId: string | null;
 };
 export type Published = { externalId: string; externalUrl: string | null };
@@ -37,8 +39,8 @@ const post = (url: string, params: Record<string, string>) =>
   call<{ id: string }>(url, { method: "POST", body: new URLSearchParams(params) });
 
 /** Containers (Instagram, Threads) process asynchronously; publish only once they are FINISHED. */
-async function waitForContainer(url: string, field: "status_code" | "status") {
-  for (let i = 0; i < 10; i++) {
+async function waitForContainer(url: string, field: "status_code" | "status", tries = 10) {
+  for (let i = 0; i < tries; i++) {
     // Nothing is live until media_publish/threads_publish, so even a 5xx here is a safe "not posted".
     const s = await call<Record<string, string>>(url.replace("FIELD", field)).catch((e) => {
       throw e instanceof PublishRefused ? e : new PublishRefused(`The platform didn't confirm the upload (${e instanceof Error ? e.message : "error"}). Nothing was posted. Try again.`);
@@ -62,8 +64,25 @@ export const PUBLISHERS: Partial<
   },
 
   async INSTAGRAM(p, { id, token }) {
-    const c = await post(`${IG}/${id}/media`, { image_url: p.imageUrl!, caption: p.text, alt_text: p.altText, access_token: token });
-    await waitForContainer(`${IG}/${c.id}?fields=FIELD&access_token=${encodeURIComponent(token)}`, "status_code");
+    const ready = (cid: string, tries?: number) => waitForContainer(`${IG}/${cid}?fields=FIELD&access_token=${encodeURIComponent(token)}`, "status_code", tries);
+    let c: { id: string };
+    if (p.videoUrl) {
+      // Reels: video processing takes longer (up to ~2.5 min, still within the job's time).
+      c = await post(`${IG}/${id}/media`, { media_type: "REELS", video_url: p.videoUrl, caption: p.text, share_to_feed: "true", access_token: token });
+      await ready(c.id, 50);
+    } else if (p.imageUrls.length > 1) {
+      const children: string[] = [];
+      for (const url of p.imageUrls) {
+        const child = await post(`${IG}/${id}/media`, { image_url: url, is_carousel_item: "true", alt_text: p.altText, access_token: token });
+        await ready(child.id);
+        children.push(child.id);
+      }
+      c = await post(`${IG}/${id}/media`, { media_type: "CAROUSEL", children: children.join(","), caption: p.text, access_token: token });
+      await ready(c.id);
+    } else {
+      c = await post(`${IG}/${id}/media`, { image_url: p.imageUrl!, caption: p.text, alt_text: p.altText, access_token: token });
+      await ready(c.id);
+    }
     const res = await post(`${IG}/${id}/media_publish`, { creation_id: c.id, access_token: token });
     const link = await call<{ permalink?: string }>(`${IG}/${res.id}?fields=permalink&access_token=${encodeURIComponent(token)}`).catch(() => ({ permalink: undefined }));
     return { externalId: res.id, externalUrl: link.permalink ?? null };

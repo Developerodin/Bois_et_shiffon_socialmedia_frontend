@@ -25,7 +25,7 @@ type Decision = { id: string; verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJEC
 type Release = {
   latestVersion: number | null;
   approvalValid: boolean;
-  requirements: { provider: string | null; needsImage: boolean; needsBoard: boolean };
+  requirements: { provider: string | null; needsImage: boolean; minImages: number; maxImages: number; needsVideo: boolean; needsBoard: boolean };
   accounts: { id: string; displayName: string }[];
   boards?: Record<string, { id: string; name: string }[] | null>;
   decisions: Decision[];
@@ -187,6 +187,10 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
   const boards = data.boards?.[accountId];
   const [boardId, setBoardId] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  // Carousels take several links, one per line.
+  const imageLinks = imageUrl.split("\n").map((l) => l.trim()).filter(Boolean);
+  const many = req.maxImages > 1;
   const [later, setLater] = useState(false);
   const [runAt, setRunAt] = useState("");
   const [confirming, setConfirming] = useState(false);
@@ -194,14 +198,16 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
   const [error, setError] = useState<string | null>(null);
   const name = PROVIDER_NAME[req.provider ?? ""] ?? "this channel";
   const account = accounts.find((a) => a.id === accountId);
-  const image = safeHttpUrl(imageUrl.trim());
+  const image = safeHttpUrl(imageLinks[0] ?? "");
+  const allHttps = imageLinks.every((l) => safeHttpUrl(l)?.protocol === "https:");
+  const video = safeHttpUrl(videoUrl.trim());
 
   useEffect(() => {
     if (boards?.length && !boards.some((b) => b.id === boardId)) setBoardId(boards[0].id);
   }, [boards, boardId]);
 
   if (!req.provider) {
-    return <p className="text-sm text-muted-foreground">Reels and carousels can&rsquo;t be published from here yet. Post this one in the app using the approved text above.</p>;
+    return <p className="text-sm text-muted-foreground">This format can&rsquo;t be published from here yet. Post it in the app using the approved text above.</p>;
   }
   if (!accounts.length) {
     return (
@@ -214,8 +220,10 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
 
   const missing =
     (req.needsBoard && !boardId && "Choose a board") ||
-    (req.needsImage && !image && "Add an image link") ||
-    (imageUrl.trim() && image?.protocol !== "https:" && "The image link must start with https://") ||
+    (imageLinks.length < req.minImages && (req.minImages > 1 ? `Add at least ${req.minImages} image links` : "Add an image link")) ||
+    (imageLinks.length > req.maxImages && (req.maxImages ? `At most ${req.maxImages} images` : "Reels take a video link, not images")) ||
+    (!allHttps && "Image links must start with https://") ||
+    (req.needsVideo && video?.protocol !== "https:" && "Add a public https video link") ||
     (later && !runAt && "Pick a date and time") ||
     null;
 
@@ -227,7 +235,8 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
       await onPublish({
         connectionId: accountId,
         ...(req.needsBoard ? { boardId } : {}),
-        ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
+        ...(imageLinks.length ? { imageLinks } : {}),
+        ...(req.needsVideo ? { videoUrl: videoUrl.trim() } : {}),
         ...(later ? { runAt: new Date(runAt).toISOString() } : {}),
       });
     } catch (e) {
@@ -272,19 +281,32 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
         </div>
       )}
 
+      {req.needsVideo && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="pub-video" className="text-sm font-medium">Video link</label>
+          <Input id="pub-video" type="url" inputMode="url" placeholder="https://…/reel.mp4" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="h-11" aria-describedby="pub-video-help" />
+          <p id="pub-video-help" className="text-xs text-muted-foreground">A public https link to an MP4 (vertical, 3 to 90 seconds). Instagram downloads it from there.</p>
+        </div>
+      )}
+      {req.maxImages > 0 && (
       <div className="flex flex-col gap-1.5">
         <label htmlFor="pub-image" className="text-sm font-medium">
-          Image link {!req.needsImage && <span className="font-normal text-muted-foreground">(optional)</span>}
+          {many ? `Image links (${req.minImages} to ${req.maxImages}, one per line)` : "Image link"} {!req.needsImage && <span className="font-normal text-muted-foreground">(optional)</span>}
         </label>
         <div className="flex items-center gap-3">
+          {many ? (
+            <Textarea id="pub-image" rows={4} placeholder={"https://…/slide-1.jpg\nhttps://…/slide-2.jpg"} value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} aria-describedby="pub-image-help" />
+          ) : (
           <Input id="pub-image" type="url" inputMode="url" placeholder="https://…/photo.jpg" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="h-11" aria-describedby="pub-image-help" />
+          )}
           {image?.protocol === "https:" && (
             // eslint-disable-next-line @next/next/no-img-element -- user-supplied preview from any host
             <img src={image.href} alt="" className="size-11 shrink-0 rounded-md border border-border object-cover" />
           )}
         </div>
-        <p id="pub-image-help" className="text-xs text-muted-foreground">A public https link to a JPG or PNG. {name} downloads the image from there.</p>
+        <p id="pub-image-help" className="text-xs text-muted-foreground">Public https link{many ? "s" : ""} to {req.provider === "INSTAGRAM" ? "JPG" : "JPG or PNG"} images. {name} downloads them from there.</p>
       </div>
+      )}
 
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1.5 text-sm font-medium">When</legend>

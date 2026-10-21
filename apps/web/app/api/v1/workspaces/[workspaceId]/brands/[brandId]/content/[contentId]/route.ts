@@ -28,6 +28,8 @@ const Action = z.discriminatedUnion("action", [
     connectionId: z.string().min(1),
     boardId: z.string().max(100).optional(),
     imageUrl: z.string().max(2000).optional(),
+    imageLinks: z.array(z.string().max(2000)).max(10).optional(),
+    videoUrl: z.string().max(2000).optional(),
     runAt: z.string().datetime({ offset: true }).optional(),
   }),
   z.object({ action: z.enum(["cancel", "posted", "not-posted"]), attemptId: z.string().min(1), url: z.string().max(2000).optional() }),
@@ -69,7 +71,7 @@ export async function POST(request: Request, context: Params) {
     } else if (body.action === "decide") {
       await decide({ ...scope, itemId, version: body.version, verdict: body.verdict, note: body.note });
     } else if (body.action === "publish") {
-      const a = await schedulePublication({ ...scope, itemId, version: body.version, connectionId: body.connectionId, boardId: body.boardId, imageUrl: body.imageUrl, runAt: body.runAt ? new Date(body.runAt) : undefined });
+      const a = await schedulePublication({ ...scope, itemId, version: body.version, connectionId: body.connectionId, boardId: body.boardId, imageUrl: body.imageUrl, imageLinks: body.imageLinks, videoUrl: body.videoUrl, runAt: body.runAt ? new Date(body.runAt) : undefined });
       if (a.runAt.getTime() <= Date.now() + 5_000) kickRunner();
     } else {
       await settlePublication({ ...scope, attemptId: body.attemptId, action: body.action, url: body.url });
