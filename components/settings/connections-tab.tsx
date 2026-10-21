@@ -44,6 +44,8 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Connection | null>(null);
   const [shown, setShown] = useState(notice);
+  // Hide a disconnected account at once; the list refetch from the database can take seconds.
+  const [gone, setGone] = useState<Set<string>>(new Set());
   const fresh = new Set(shown?.kind === "ok" ? shown.names : []);
 
   // The OAuth result arrives as one-time URL params; drop them so a refresh or a shared link
@@ -77,7 +79,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
     body = (
       <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
         {state.data.providers.map((p) => {
-          const accounts = state.data.connections.filter((c) => c.provider === p.provider);
+          const accounts = state.data.connections.filter((c) => c.provider === p.provider && !gone.has(c.id));
           return (
             <li key={p.provider} className="flex flex-col gap-3 px-6 py-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -152,7 +154,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
           )}
           <p className="flex-1">
             {error ?? shown?.text}
-            {shown?.kind === "ok" && !error && " Agents can now use this account for this brand."}
+            {shown?.kind === "ok" && !error && shown.names && " Agents can now use this account for this brand."}
           </p>
           <button
             type="button"
@@ -175,7 +177,11 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
         description="Agents will stop publishing to and reading from this account. You can reconnect any time."
         confirmLabel="Disconnect"
         onConfirm={async () => {
-          await settingsApi.disconnect(workspaceId, brandId, removing!.id);
+          const c = removing!;
+          await settingsApi.disconnect(workspaceId, brandId, c.id);
+          setGone((g) => new Set(g).add(c.id));
+          setError(null);
+          setShown({ kind: "ok", text: `Disconnected ${c.displayName}. Agents will no longer use it.` });
           reload();
         }}
       />
