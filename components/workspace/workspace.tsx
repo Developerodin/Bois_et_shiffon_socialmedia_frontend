@@ -167,7 +167,19 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
     { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> },
   ];
 
-  return <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} />;
+  const outOfCredits = agents?.some((a) => a.lastRun?.error?.includes("AI credits used up"));
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      {outOfCredits && (
+        <p role="status" className="shrink-0 border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm">
+          <span className="font-medium">Agents are done for now:</span> the AI credits are used up. Add credits to the OpenAI account, then run the agents again.
+        </p>
+      )}
+      <div className="min-h-0 flex-1">
+        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} />
+      </div>
+    </div>
+  );
 }
 
 type PanelId = "context" | "home" | "analytics" | "feed" | "chat" | "log";

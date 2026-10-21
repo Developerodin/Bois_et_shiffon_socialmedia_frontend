@@ -3,7 +3,7 @@ import { z } from "zod";
 import { loadBrandContext } from "@/server/agents/brand-context";
 import { getAgent } from "@/server/agents/registry";
 import type { AgentContext } from "@/server/agents/types";
-import { generateObject } from "@/server/ai/provider";
+import { generateObject, OUT_OF_CREDITS } from "@/server/ai/provider";
 import { prisma } from "@/server/db/prisma";
 import { validateAiWorkflowPayload } from "@/server/jobs/claim";
 import { enqueueJob } from "@/server/jobs/queue";
@@ -171,7 +171,9 @@ export async function onAgentRunFailure(rawPayload: unknown, error: unknown, exh
       agentKey: run.agentKey,
       level: exhausted ? "ERROR" : "WARN",
       message: exhausted
-        ? `Failed: ${String(error).slice(0, 300)}`
+        ? error instanceof Error && error.message === OUT_OF_CREDITS
+          ? `Stopped. ${OUT_OF_CREDITS}.`
+          : `Failed: ${String(error).slice(0, 300)}`
         : `Attempt failed, will retry: ${String(error).slice(0, 300)}`,
     },
   });
