@@ -1,5 +1,6 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { authConfig } from "@/auth.config";
@@ -11,6 +12,7 @@ import {
   LOGIN_LIMITS,
   resetRateLimit,
 } from "@/server/auth/rate-limit";
+import { provisionGoogleUser } from "@/server/services/google-signup";
 
 /**
  * bcrypt hash of a non-secret dummy password, compared when the account is
@@ -29,6 +31,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   callbacks: {
     ...authConfig.callbacks,
+    /** Google: only verified emails, and never a disabled or deleted account. */
+    async signIn({ account, profile }) {
+      if (account?.provider !== "google") return true;
+      const email = typeof profile?.email === "string" ? profile.email.toLowerCase() : null;
+      if (!email || profile?.email_verified !== true) return "/login?error=google_unverified";
+      const existing = await prisma.user.findUnique({ where: { email }, select: { status: true, deletedAt: true } });
+      if (existing && (existing.status !== "ACTIVE" || existing.deletedAt)) return "/login?error=disabled";
+      return true;
+    },
     async jwt({ token, user }) {
       if (user?.id) {
         token.sub = user.id;
@@ -60,7 +71,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
+  events: {
+    // New account from Google → join invited workspaces, or get their own (google-signup.ts).
+    async createUser({ user }) {
+      if (user.id && user.email) await provisionGoogleUser({ id: user.id, email: user.email, name: user.name });
+    },
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && user.id) {
+        await prisma.auditEvent.create({
+          data: { actorUserId: user.id, action: "auth.login", entityType: "User", entityId: user.id, metadata: { provider: "google" } },
+        });
+      }
+    },
+  },
   providers: [
+    // Same Google OAuth client as the Analytics connection; sign-in only asks for openid, email, profile.
+    // Linking by email is safe here because signIn() above requires Google's email_verified.
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [Google({ clientId: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET, allowDangerousEmailAccountLinking: true })]
+      : []),
     Credentials({
       name: "Email and password",
       credentials: {
