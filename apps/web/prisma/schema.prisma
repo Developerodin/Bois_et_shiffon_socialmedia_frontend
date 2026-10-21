@@ -632,7 +632,9 @@ model ContentItem {
 
   brand       Brand            @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
   opportunity Opportunity?     @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
-  versions    ContentVersion[]
+  versions     ContentVersion[]
+  decisions    ApprovalDecision[]
+  publications PublicationAttempt[]
 
   @@index([workspaceId, brandId, status])
   @@index([brandId, scheduledFor])
@@ -742,4 +744,63 @@ model CreditEntry {
 
   @@unique([workspaceId, reason, refId])
   @@index([workspaceId, createdAt])
+}
+
+enum ApprovalVerdict {
+  APPROVED
+  CHANGES_REQUESTED
+  REJECTED
+}
+
+/** Append-only. An approval counts only while its version is still the latest and its hash matches. */
+model ApprovalDecision {
+  id               String          @id @default(cuid())
+  workspaceId      String
+  brandId          String
+  contentItemId    String
+  contentVersionId String
+  packageHash      String // sha256 of the exact channel + version body approved
+  verdict          ApprovalVerdict
+  note             String?
+  userId           String
+  createdAt        DateTime        @default(now())
+
+  item ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([contentItemId, createdAt])
+}
+
+enum PublicationStatus {
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED // the platform refused; safe to try again
+  PENDING_VERIFY // outcome unknown (timeout, 5xx); a person checks before any retry
+  CANCELLED
+}
+
+model PublicationAttempt {
+  id               String              @id @default(cuid())
+  workspaceId      String
+  brandId          String
+  contentItemId    String
+  contentVersionId String
+  packageHash      String
+  connectionId     String
+  provider         IntegrationProvider
+  target           Json // { boardId?, imageUrl? }
+  status           PublicationStatus   @default(SCHEDULED)
+  runAt            DateTime
+  externalId       String?
+  externalUrl      String?
+  error            String?
+  createdByUserId  String
+  publishedAt      DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  item ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([contentItemId, createdAt])
+  @@index([status, runAt])
 }

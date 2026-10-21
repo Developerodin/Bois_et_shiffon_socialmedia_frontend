@@ -317,3 +317,12 @@ Pipeline (agents only draft; people shortlist, approve and publish):
 - AI visibility per competitor = mentions in the brand's own GEO questions (free).
 - UI: **Competitors** panel (credits, last checked, mini scores, Fresh audit with price confirm, add/find/stop tracking), competitor view, **Market** layout preset.
 - Check: `npm run smoke:competitors -w web`. Not yet: plans/monthly allowances, Stripe top-ups, competitor Instagram metrics (needs Facebook Login Business Discovery), per-competitor GEO question runs.
+
+### 8l. Approval and publishing (2026-10-21)
+
+- `ApprovalDecision` (append-only): verdict APPROVED / CHANGES_REQUESTED / REJECTED, bound to one `ContentVersion` and the sha256 of item + channel + version + body. An approval counts only while that version is still the latest and the hash matches; a newer draft voids it. Creator ≠ approver; a note is required to request changes or reject; approval needs a passing (or warn) quality check. Capability `content.approve`.
+- `PublicationAttempt`: one live attempt per (version, account), serialised by a per-post advisory lock. Publish now or schedule (`content.publish` job, `maxAttempts: 1`). At posting time the seal is re-checked; a draft changed after scheduling is not posted. Capability `publish.execute`.
+- Outcomes: platform refusal (4xx) → FAILED with the reason, retry allowed. Timeout / 5xx / crash mid-post → PENDING_VERIFY, never retried automatically; a person marks "It's live" or "It didn't post" (DEC-015). Duplicate job delivery is a no-op.
+- Publishers: Facebook Page (text, or photo with an image link), Instagram post (image link), Threads (text or image), Pinterest Pin (board + image link, links to the brand site). Not yet: carousels and Reels (need media in drafts), image upload/hosting (people paste a public https image link), stock/offer re-check before publish.
+- Scheduled posts go out when the job runner runs (`/api/v1/jobs/run` cron).
+- UI: post view "Approval and publishing" (approve / request changes / reject, then account, board, image, now or schedule, two-click confirm) and a history with cancel and verify actions. Check: `npm run smoke:publishing -w web`.
