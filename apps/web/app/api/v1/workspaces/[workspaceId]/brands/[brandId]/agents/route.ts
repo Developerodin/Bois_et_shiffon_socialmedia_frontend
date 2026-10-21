@@ -15,7 +15,7 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
         where: { workspaceId, brandId },
         orderBy: { createdAt: "desc" },
         distinct: ["agentKey"],
-        select: { id: true, agentKey: true, status: true, startedAt: true, finishedAt: true },
+        select: { id: true, agentKey: true, status: true, startedAt: true, finishedAt: true, error: true },
       }),
     ]);
 
@@ -32,6 +32,7 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
               status: run.status,
               startedAt: run.startedAt?.toISOString() ?? null,
               finishedAt: run.finishedAt?.toISOString() ?? null,
+              error: run.status === "FAILED" ? (run.error?.slice(0, 300) ?? null) : null,
             }
           : null,
       };

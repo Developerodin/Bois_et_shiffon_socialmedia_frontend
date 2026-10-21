@@ -26,6 +26,9 @@ export type GenerateObjectInput<T extends z.ZodType> = {
   mock?: z.infer<T>;
 };
 
+/** Shown to people as-is (Agent Log, workspace banner); `readable()` also recognises it. */
+export const OUT_OF_CREDITS = "AI credits used up: agents are paused until credits are added";
+
 export class AiProviderError extends Error {
   constructor(
     message: string,
@@ -100,8 +103,11 @@ async function callOpenAi<T extends z.ZodType>(
     }),
   });
   if (!res.ok) {
+    const body = (await res.text()).slice(0, 500);
+    // An empty credit balance is also a 429, but waiting won't fix it: stop now, don't retry for hours.
+    if (/insufficient_quota|credit_balance/i.test(body)) throw new AiProviderError(OUT_OF_CREDITS, false);
     const retryable = res.status === 429 || res.status >= 500;
-    throw new AiProviderError(`OpenAI ${res.status}: ${(await res.text()).slice(0, 500)}`, retryable);
+    throw new AiProviderError(`OpenAI ${res.status}: ${body}`, retryable);
   }
   const body = (await res.json()) as {
     output?: Array<{ type: string; content?: Array<{ type: string; text?: string }> }>;

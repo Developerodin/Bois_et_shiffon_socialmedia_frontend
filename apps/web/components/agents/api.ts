@@ -13,6 +13,8 @@ export type AgentSummary = {
     status: RunStatus;
     startedAt: string | null;
     finishedAt: string | null;
+    /** Last failure reason, only for FAILED runs. */
+    error?: string | null;
   } | null;
 };
 
