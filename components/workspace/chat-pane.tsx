@@ -1,0 +1,210 @@
+"use client";
+
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { ArrowUp, Check, Globe, Loader2, Plus, Square, TriangleAlert, Wrench } from "lucide-react";
+import { Markdown } from "@/components/context/markdown";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const STARTERS = ["Plan the next 30 days of posts", "Who is my customer?", "Compare me with my competitors", "What should I fix first on my website?"];
+
+const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) => string> = {
+  listDocuments: () => "Checked your strategy documents",
+  readDocument: (i) => `Read ${String(i?.kind ?? "a document").replace(/-/g, " ")}`,
+  getSiteReports: () => "Read the SEO and AI-visibility reports",
+  listAgents: () => "Checked the agents",
+  startAgent: (i) => `Started the ${String(i?.agentKey ?? "")} agent`,
+  webSearch: () => "Searched the web",
+};
+
+type Props = { workspaceId: string; brandId: string; website: string | null };
+
+/** Loads the person's latest conversation for this brand, then hands over to the live session. */
+export function ChatPane(props: Props) {
+  const [initial, setInitial] = useState<{ id: string; messages: UIMessage[] } | null>(null);
+  const base = `/api/v1/workspaces/${encodeURIComponent(props.workspaceId)}/brands/${encodeURIComponent(props.brandId)}/chat`;
+  useEffect(() => {
+    let cancelled = false;
+    fetch(base, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : { thread: null }))
+      .then((d: { thread: { id: string; messages: UIMessage[] } | null }) => !cancelled && setInitial(d.thread ?? { id: crypto.randomUUID(), messages: [] }))
+      .catch(() => !cancelled && setInitial({ id: crypto.randomUUID(), messages: [] }));
+    return () => {
+      cancelled = true;
+    };
+  }, [base]);
+
+  if (!initial) return <p className="p-4 text-sm text-muted-foreground">Loading chat…</p>;
+  return <ChatSession key={initial.id} {...props} api={base} initial={initial} onNew={() => setInitial({ id: crypto.randomUUID(), messages: [] })} />;
+}
+
+function ChatSession({
+  api,
+  website,
+  initial,
+  onNew,
+}: Props & { api: string; initial: { id: string; messages: UIMessage[] }; onNew: () => void }) {
+  const [input, setInput] = useState("");
+  const endRef = useRef<HTMLDivElement>(null);
+  const { messages, sendMessage, status, error, stop, regenerate, clearError } = useChat({
+    id: initial.id,
+    messages: initial.messages,
+    transport: new DefaultChatTransport({
+      api,
+      // The server keeps the history; send only the newest message.
+      prepareSendMessagesRequest: ({ messages: all, id }) => ({ body: { id, message: all[all.length - 1] } }),
+    }),
+  });
+  const busy = status === "submitted" || status === "streaming";
+  const host = (() => {
+    try {
+      return website ? new URL(website).hostname.replace(/^www\./, "") : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [messages]);
+
+  function send(text: string) {
+    const t = text.trim();
+    if (!t || busy) return;
+    clearError();
+    void sendMessage({ text: t });
+    setInput("");
+  }
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    send(input);
+  };
+  const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      send(input);
+    }
+  };
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-1.5">
+        <span className="text-xs text-muted-foreground">Your CMO reads your documents and reports, and can start agents. It never publishes.</span>
+        <Button variant="ghost" size="sm" onClick={onNew} disabled={busy || messages.length === 0} aria-label="New chat">
+          <Plus aria-hidden="true" /> New
+        </Button>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4" aria-live="polite">
+        {messages.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+            <span className="grid size-12 place-items-center rounded-2xl bg-muted font-display text-lg" aria-hidden="true">
+              P+
+            </span>
+            <p className="max-w-[30ch] text-sm text-muted-foreground">
+              Ask your CMO anything about {host ?? "your brand"}: plans, customers, competitors, what to fix.
+            </p>
+            <ul className="flex flex-wrap justify-center gap-2">
+              {STARTERS.map((s) => (
+                <li key={s}>
+                  <button
+                    type="button"
+                    onClick={() => send(s)}
+                    className="rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {s}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <ol className="flex flex-col gap-5">
+            {messages.map((m) => (
+              <li key={m.id} className={cn("flex flex-col gap-2", m.role === "user" && "items-end")}>
+                {m.parts.map((part, i) => {
+                  if (part.type === "text") {
+                    return m.role === "user" ? (
+                      <p key={i} className="max-w-[85%] whitespace-pre-wrap rounded-2xl bg-muted px-3.5 py-2 text-sm">
+                        {part.text}
+                      </p>
+                    ) : (
+                      <div key={i} className="text-sm [&_h3]:text-lg [&_h4]:text-base">
+                        <Markdown source={part.text} />
+                      </div>
+                    );
+                  }
+                  if (part.type.startsWith("tool-")) {
+                    const name = part.type.slice(5);
+                    const p = part as { state: string; input?: Record<string, unknown> };
+                    const label = (TOOL_LABEL[name] ?? (() => name))(p.input);
+                    const done = p.state === "output-available";
+                    const failed = p.state === "output-error";
+                    return (
+                      <p key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        {failed ? (
+                          <TriangleAlert className="size-3.5 text-destructive" aria-hidden="true" />
+                        ) : done ? (
+                          <Check className="size-3.5 text-success" aria-hidden="true" />
+                        ) : name === "webSearch" ? (
+                          <Globe className="size-3.5 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+                        ) : (
+                          <Wrench className="size-3.5 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+                        )}
+                        {label}
+                        {failed ? " (failed)" : done ? "" : "…"}
+                      </p>
+                    );
+                  }
+                  return null;
+                })}
+              </li>
+            ))}
+            {status === "submitted" && (
+              <li className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Thinking…
+              </li>
+            )}
+          </ol>
+        )}
+        {error && (
+          <div role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
+            <span className="min-w-0 flex-1">{error.message || "Something went wrong."}</span>
+            <Button size="sm" variant="outline" onClick={() => void regenerate()}>
+              Try again
+            </Button>
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
+
+      <form onSubmit={onSubmit} className="shrink-0 border-t border-border p-3">
+        <div className="flex items-end gap-2 rounded-xl border border-input bg-card p-2 focus-within:ring-2 focus-within:ring-ring">
+          <label htmlFor="chat-input" className="sr-only">
+            Message your CMO
+          </label>
+          <textarea
+            id="chat-input"
+            rows={2}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKey}
+            placeholder="Ask your CMO… (Enter to send, Shift+Enter for a new line)"
+            className="min-h-10 flex-1 resize-none bg-transparent px-1.5 py-1 text-sm outline-none placeholder:text-muted-foreground"
+          />
+          {busy ? (
+            <Button type="button" size="icon" variant="secondary" onClick={() => void stop()} aria-label="Stop">
+              <Square aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button type="submit" size="icon" disabled={!input.trim()} aria-label="Send">
+              <ArrowUp aria-hidden="true" />
+            </Button>
+          )}
+        </div>
+      </form>
+    </div>
+  );
+}

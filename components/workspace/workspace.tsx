@@ -36,6 +36,7 @@ import { request, settingsApi, type Connection } from "@/components/settings/api
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { AccountMenu } from "@/components/workspace/account-menu";
+import { ChatPane } from "@/components/workspace/chat-pane";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { cn } from "@/lib/utils";
 
@@ -163,7 +164,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
       icon: <ListChecks />,
       render: () => <AgentsFeed agents={agents} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} onRan={refreshAgents} onOpen={open} />,
     },
-    { id: "chat", title: "Chat", icon: <MessageCircle />, render: () => <ChatPane website={website} /> },
+    { id: "chat", title: "Chat", icon: <MessageCircle />, render: () => <ChatPane workspaceId={workspaceId} brandId={brandId} website={website} /> },
     { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> },
   ];
 
@@ -187,8 +188,8 @@ type PanelId = "context" | "home" | "analytics" | "feed" | "chat" | "log";
 const PRESETS: Preset<PanelId>[] = [
   {
     name: "Focus",
-    description: "Context, today and agents, agents feed",
-    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 2.2, panels: ["home"] }, { id: "c", size: 1.3, panels: ["feed", "chat"] }], collapsed: ["chat"] },
+    description: "Context, today and agents, chat",
+    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 2.2, panels: ["home"] }, { id: "c", size: 1.3, panels: ["chat", "feed"] }], collapsed: ["feed"] },
   },
   {
     name: "Classic",
@@ -692,44 +693,6 @@ function AgentView({
             ))}
           </ul>
         )}
-      </div>
-    </div>
-  );
-}
-
-/* ───────────── Chat pane (right) ───────────── */
-
-function ChatPane({ website }: { website: string | null }) {
-  const host = safeSite(website)?.host ?? "your site";
-  const starters = ["Plan the next 30 days", "Who is my customer?", "Compare me with competitors"];
-  return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
-        <span className="grid size-12 place-items-center rounded-2xl bg-muted font-display text-lg" aria-hidden="true">
-          P+
-        </span>
-        <p className="max-w-[28ch] text-sm text-muted-foreground">
-          Soon you&rsquo;ll be able to ask your CMO about {host}: plans, customers, competitors.
-        </p>
-        <ul className="flex flex-wrap justify-center gap-2">
-          {starters.map((s) => (
-            <li key={s}>
-              <span className="inline-block rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground">{s}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="border-t border-border p-3">
-        <label className="sr-only" htmlFor="chat-input">
-          Message your CMO
-        </label>
-        <textarea
-          id="chat-input"
-          disabled
-          rows={2}
-          placeholder="Chat is coming soon"
-          className="w-full resize-none rounded-lg border border-input bg-card px-3 py-2 text-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-70"
-        />
       </div>
     </div>
   );
