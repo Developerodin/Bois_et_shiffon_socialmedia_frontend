@@ -39,5 +39,10 @@ export function safeHttpUrl(raw: string | null | undefined): URL | null {
 export function domainOf(raw: string | null | undefined): string | null {
   const u = safeHttpUrl(raw && !/^https?:\/\//i.test(raw) ? `https://${raw.trim()}` : raw);
   if (!u || !u.hostname.includes(".")) return null;
-  return u.hostname.toLowerCase().replace(/^www\./, "");
+  const host = u.hostname.toLowerCase();
+  // Defence in depth (the crawler's SSRF guard also checks every resolved address): only public
+  // DNS names, never IP literals or internal-only suffixes.
+  if (/^\d+(\.\d+){3}$/.test(host) || host.includes(":") || host.startsWith("[")) return null;
+  if (/\.(local|localhost|internal|lan|home|corp|intranet|test|invalid|example)$/.test(host)) return null;
+  return host.replace(/^www\./, "");
 }

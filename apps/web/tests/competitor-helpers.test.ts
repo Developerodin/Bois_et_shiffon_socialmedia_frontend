@@ -6,7 +6,7 @@ describe("competitor helpers", () => {
   it("normalises domains and rejects non-sites", () => {
     expect(domainOf("https://www.Tikamoon.com/fr/tables")).toBe("tikamoon.com");
     expect(domainOf("maisonsdumonde.com")).toBe("maisonsdumonde.com");
-    for (const bad of ["javascript:alert(1)", "localhost", "", null]) expect(domainOf(bad), String(bad)).toBeNull();
+    for (const bad of ["javascript:alert(1)", "localhost", "", null, "10.0.0.5", "http://169.254.169.254/latest", "[::1]", "nas.local", "metadata.internal"]) expect(domainOf(bad), String(bad)).toBeNull();
   });
 
   it("finds one profile per platform and skips share links", () => {
