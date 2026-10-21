@@ -108,7 +108,7 @@ export function TopBar(p: Props) {
 
         <div className="ml-auto flex items-center gap-1.5">
           {p.activeBrandId && (
-            <Button variant={logsOpen ? "secondary" : "ghost"} size="sm" onClick={toggleLogs} aria-expanded={logsOpen} aria-controls="agent-log-drawer">
+            <Button variant={logsOpen ? "secondary" : "ghost"} size="sm" className="h-10 sm:h-8" onClick={toggleLogs} aria-label="Logs" aria-expanded={logsOpen} aria-controls="agent-log-drawer">
               <SquareTerminal aria-hidden="true" />
               <span className="hidden sm:inline">Logs</span>
               {logsOpen ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}
@@ -116,7 +116,7 @@ export function TopBar(p: Props) {
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" aria-label="Open menu">
+              <Button variant="ghost" size="sm" className="h-10 sm:h-8" aria-label="Open menu">
                 <Menu aria-hidden="true" />
                 <span className="hidden sm:inline">Menu</span>
               </Button>
@@ -135,7 +135,7 @@ export function TopBar(p: Props) {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" className="size-10 sm:size-9" asChild>
             <Link href="/settings" aria-label="Settings">
               <Settings aria-hidden="true" />
             </Link>

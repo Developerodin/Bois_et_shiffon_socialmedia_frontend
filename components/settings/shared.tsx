@@ -60,9 +60,9 @@ export function SectionHeader({
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h3 id={id} className="font-display text-xl font-medium tracking-tight">
+        <h2 id={id} className="font-display text-xl font-medium tracking-tight">
           {title}
-        </h3>
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       </div>
       {action}

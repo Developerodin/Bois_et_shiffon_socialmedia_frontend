@@ -5,7 +5,6 @@ export default function Page() {
   return (
     <ComingSoon
       icon={MessageSquare}
-      slice={8}
       title="Talk to your CMO."
       description="Ask about the active brand. It will explain, search and start agents on your behalf."
     />

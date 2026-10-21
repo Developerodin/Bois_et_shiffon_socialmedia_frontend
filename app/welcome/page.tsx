@@ -32,11 +32,11 @@ export default async function WelcomePage({
       <header className="flex items-center justify-between px-6 py-5 sm:px-10">
         <span className="font-display text-lg font-medium tracking-tight">Prow PLUS</span>
         {shell.brands.length > 0 || resume ? (
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+          <Link href="/" className="inline-block py-2 text-sm text-muted-foreground hover:text-foreground">
             Go to the app
           </Link>
         ) : canCreate ? (
-          <Link href="/settings" className="text-sm text-muted-foreground hover:text-foreground">
+          <Link href="/settings" className="inline-block py-2 text-sm text-muted-foreground hover:text-foreground">
             Invite your team first
           </Link>
         ) : null}

@@ -115,7 +115,7 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
           id={`settings-panel-${current.key}`}
           aria-labelledby={`settings-tab-${current.key}`}
           tabIndex={0}
-          className="focus-visible:outline-none"
+          className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
         >
           {current.key === "members" ? (
             <MembersTab workspaceId={workspaceId} can={can!} roles={roleList} onRolesChanged={roles.reload} />
@@ -139,9 +139,9 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
       <div>
-        <h2 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
+        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
           Workspace settings
-        </h2>
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Who can work here, what each role can do, who is waiting to join, and which accounts this brand has connected.
         </p>

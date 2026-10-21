@@ -8,6 +8,8 @@ type Props = {
   eyebrow?: string;
   size?: "default" | "hero";
   className?: string;
+  /** h1 when the empty state is the whole page. */
+  headingLevel?: "h1" | "h2";
 };
 
 export function EmptyState({
@@ -17,6 +19,7 @@ export function EmptyState({
   eyebrow,
   size = "default",
   className,
+  headingLevel: Heading = "h2",
 }: Props) {
   const hero = size === "hero";
   return (
@@ -41,14 +44,14 @@ export function EmptyState({
           {eyebrow}
         </p>
       ) : null}
-      <h2
+      <Heading
         className={cn(
           "font-display font-medium tracking-tight text-foreground text-balance",
           hero ? "max-w-2xl text-4xl sm:text-5xl" : "text-xl",
         )}
       >
         {title}
-      </h2>
+      </Heading>
       <p
         className={cn(
           "max-w-xl text-muted-foreground text-pretty",

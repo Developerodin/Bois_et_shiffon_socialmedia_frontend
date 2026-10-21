@@ -31,7 +31,7 @@ export default async function LoginPage({
       ? "Invitation accepted. Sign in to continue."
       : null;
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+    <main className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
         <h1 className="font-display text-2xl font-semibold text-foreground">
           Sign in to Prow PLUS
@@ -121,14 +121,14 @@ export default async function LoginPage({
           <div className="text-center">
             <Link
               href="/forgot-password"
-              className="rounded-sm text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="inline-block rounded-sm py-1 text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Forgot password?
             </Link>
           </div>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
 
