@@ -24,3 +24,13 @@ export function brandNameFromWebsite(website: string): string {
     .map((w, i) => (i > 0 && SMALL_WORDS.has(w) ? w : w[0].toUpperCase() + w.slice(1)))
     .join(" ");
 }
+
+/** The URL if it is a well-formed http(s) address, else null. Use before rendering any untrusted link. */
+export function safeHttpUrl(raw: string | null | undefined): URL | null {
+  try {
+    const u = new URL(raw ?? "");
+    return u.protocol === "https:" || u.protocol === "http:" ? u : null;
+  } catch {
+    return null;
+  }
+}

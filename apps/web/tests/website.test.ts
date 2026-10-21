@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { brandNameFromWebsite, normalizeWebsite } from "@/lib/website";
+import { brandNameFromWebsite, normalizeWebsite, safeHttpUrl } from "@/lib/website";
 
 describe("website input", () => {
   it("adds https and trims what people paste", () => {
     expect(normalizeWebsite(" boisetchiffons.fr/ ")).toBe("https://boisetchiffons.fr");
     expect(normalizeWebsite("http://www.shop.test/fr#top")).toBe("http://www.shop.test/fr");
     expect(normalizeWebsite("HTTPS://Shop.Test")).toBe("https://shop.test");
+  });
+
+  it("only lets http(s) links through (untrusted sources)", () => {
+    for (const bad of ["javascript:alert(1)", "data:text/html,x", "vbscript:x", "", "not a url", null]) expect(safeHttpUrl(bad), String(bad)).toBeNull();
+    expect(safeHttpUrl("https://www.ikea.com/fr/")?.hostname).toBe("www.ikea.com");
   });
 
   it("rejects things that aren't a public website", () => {
