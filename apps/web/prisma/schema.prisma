@@ -95,6 +95,7 @@ model Workspace {
   brands      Brand[]
   roles       Role[]
   invitations Invitation[]
+  credits     CreditEntry[]
 }
 
 model WorkspaceMember {
@@ -140,6 +141,7 @@ model Brand {
   opportunities Opportunity[]
   contentItems  ContentItem[]
   learningNotes LearningNote[]
+  competitors   Competitor[]
 
   // target for composite tenant FKs (AT-021): children reference (id, workspaceId)
   @@unique([id, workspaceId])
@@ -684,4 +686,59 @@ model LearningNote {
   brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
 
   @@index([workspaceId, brandId, createdAt])
+}
+
+/** A competitor this brand tracks. Private to the brand; its audits live in the shared SiteAudit library. */
+model Competitor {
+  id          String   @id @default(cuid())
+  workspaceId String
+  brandId     String
+  name        String
+  domain      String // normalized host, no www
+  source      String // geo | document | search | manual
+  createdAt   DateTime @default(now())
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@unique([brandId, domain])
+  @@index([workspaceId, brandId])
+}
+
+/**
+ * Shared library of public-website audits, keyed by domain (not tenant-scoped on purpose).
+ * Holds only data measured from public pages and web search. requestedByWorkspaceId is kept for
+ * the audit trail and is never returned to other workspaces.
+ */
+model SiteAudit {
+  id                     String   @id @default(cuid())
+  domain                 String
+  url                    String
+  scores                 Json // { performance, accessibility, bestPractices, seo, siteChecks }
+  findings               Json // top SEO findings [{ id, severity, title, fix }]
+  aiCrawlers             Json // [{ ua, allowed }]
+  approach               Json // { positioning, audience, products, priceSignals, contentThemes, strengths, weaknesses }
+  socials                Json // [{ platform, url }]
+  sources                Json @default("[]")
+  pagesRead              Int
+  requestedByWorkspaceId String?
+  agentRunId             String?
+  createdAt              DateTime @default(now())
+
+  @@index([domain, createdAt])
+}
+
+/** Credit ledger: grants are positive, spends negative. Balance = sum of delta. */
+model CreditEntry {
+  id          String   @id @default(cuid())
+  workspaceId String
+  delta       Int
+  reason      String // initial-grant | site-audit | refund | top-up
+  refId       String? // AgentRun id for spends/refunds
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, reason, refId])
+  @@index([workspaceId, createdAt])
 }

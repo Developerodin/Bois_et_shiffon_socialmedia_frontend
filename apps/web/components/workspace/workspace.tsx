@@ -37,6 +37,7 @@ import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { AccountMenu } from "@/components/workspace/account-menu";
 import { ChatPane } from "@/components/workspace/chat-pane";
+import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
 import { ContentPanel, ContentView, IdeasPanel, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
@@ -45,7 +46,7 @@ import { safeHttpUrl } from "@/lib/website";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
-type View = { kind: "home" } | { kind: "doc"; doc: ContextDocKind } | { kind: "agent"; key: string } | { kind: "content"; id: string };
+type View = { kind: "home" } | { kind: "doc"; doc: ContextDocKind } | { kind: "agent"; key: string } | { kind: "content"; id: string } | { kind: "competitor"; id: string };
 
 /** Agents shown as tiles. Built ones come from the API; planned ones are locked (Okara shows locked tiles too). */
 const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
@@ -58,6 +59,7 @@ const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
   analyst: { icon: LineChart, tint: "text-accent" },
   seo: { icon: Gauge, tint: "text-success" },
   geo: { icon: MessageSquareQuote, tint: "text-accent" },
+  competitors: { icon: Users, tint: "text-accent" },
 };
 const PLANNED: { key: string; name: string; icon: LucideIcon; does: string }[] = [
   { key: "reddit", name: "Reddit", icon: MessagesSquare, does: "Finds threads and drafts helpful replies" },
@@ -146,6 +148,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             onChanged={(entry) => setDocs((d) => d && { ...d, docs: d.docs.map((x) => (x.kind === entry.kind ? entry : x)) })}
             onStale={() => fetchContextDocs(workspaceId, brandId).then(setDocs)}
           />
+        ) : view.kind === "competitor" ? (
+          <CompetitorView base={base} id={view.id} onBack={() => setView({ kind: "home" })} />
         ) : view.kind === "content" ? (
           <ContentView base={base} id={view.id} onBack={() => setView({ kind: "home" })} />
         ) : view.kind === "agent" ? (
@@ -188,6 +192,12 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
       icon: <CalendarDays />,
       render: () => <ContentPanel base={base} onOpen={(id) => open({ kind: "content", id })} onRunPlanner={() => open({ kind: "agent", key: "planner" })} />,
     },
+    {
+      id: "competitors",
+      title: "Competitors",
+      icon: <Users />,
+      render: () => <CompetitorsPanel base={base} onOpen={(id) => open({ kind: "competitor", id })} onFind={() => open({ kind: "agent", key: "competitors" })} />,
+    },
     { id: "chat", title: "Chat", icon: <MessageCircle />, render: () => <ChatPane workspaceId={workspaceId} brandId={brandId} website={website} /> },
     { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> },
   ];
@@ -207,7 +217,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   );
 }
 
-type PanelId = "context" | "home" | "ideas" | "content" | "analytics" | "feed" | "chat" | "log";
+type PanelId = "context" | "home" | "ideas" | "content" | "competitors" | "analytics" | "feed" | "chat" | "log";
 
 const PRESETS: Preset<PanelId>[] = [
   {
@@ -219,6 +229,11 @@ const PRESETS: Preset<PanelId>[] = [
     name: "Content team",
     description: "Ideas, today and agents, content calendar, chat",
     layout: { columns: [{ id: "a", size: 1.1, panels: ["ideas"] }, { id: "b", size: 1.8, panels: ["home"] }, { id: "c", size: 1.1, panels: ["content"] }, { id: "d", size: 1.1, panels: ["chat"] }], collapsed: [] },
+  },
+  {
+    name: "Market",
+    description: "Your scores next to your competitors'",
+    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.3, panels: ["analytics"] }, { id: "c", size: 1.3, panels: ["competitors"] }, { id: "d", size: 1.1, panels: ["chat"] }], collapsed: [] },
   },
   {
     name: "Classic",
@@ -340,7 +355,7 @@ function ContextPane({
           </h2>
           {competitors.length ? (
             <>
-              <p className="mt-1 text-xs text-muted-foreground">Brands AI assistants recommend instead of you</p>
+              <p className="mt-1 text-xs text-muted-foreground">Brands AI assistants recommend instead of you. Audit them in the Competitors panel.</p>
               <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
                 {competitors.map((c) => (
                   <li key={c.name} className="flex min-w-0 items-center gap-2 text-sm">

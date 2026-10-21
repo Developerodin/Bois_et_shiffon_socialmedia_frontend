@@ -308,3 +308,12 @@ Pipeline (agents only draft; people shortlist, approve and publish):
 - UI: **Ideas** panel (shortlist / dismiss), **Content calendar** panel, post view (brief, draft, quality), learning notes on the Analyst page, Today tasks for ideas to decide and drafts awaiting approval, "Content team" layout preset.
 - Checks: `npm run smoke:pipeline -w web` (mock AI, throwaway brand), `tests/content-rules.test.ts`.
 - Not yet: approval/publishing (next slice), image generation, product catalogue facts (stock/price) for accuracy checks, per-brand cadence settings, Reddit/Pinterest/Influencer/UGC agents (locked tiles).
+
+### 8k. Competitor audits, shared library, credits (2026-10-21)
+
+- **Competitors** agent: brand's competitor list (private) from GEO answers + competitor doc + web search, resolved to verified domains; never the brand's own domain. Manual add/remove too.
+- **Site audit** (internal agent, never on the Run button): PageSpeed (performance, accessibility, best practices, SEO), our site checks, AI crawler access, social profiles linked from the site, and the marketing approach (positioning, audience, products, price signals only if shown, content themes, strengths, gaps). Saved to the **shared `SiteAudit` library keyed by domain**: only public data; `requestedByWorkspaceId` is never returned. Only competitor audits go there; a customer's own SEO/GEO stays private (`AuditReport`). Decision 2026-10-21 (user).
+- Any customer tracking that domain sees the latest audit free, tagged "Last checked <date>", flagged stale after 30 days. **Fresh audit = 10 credits** (decision: credits, not Stripe yet). `CreditEntry` ledger (grant/spend/refund; balance = sum), starter grant 100, spend under a per-workspace advisory lock, refund once if the run finally fails, no charge when the same domain is already being audited by anyone.
+- AI visibility per competitor = mentions in the brand's own GEO questions (free).
+- UI: **Competitors** panel (credits, last checked, mini scores, Fresh audit with price confirm, add/find/stop tracking), competitor view, **Market** layout preset.
+- Check: `npm run smoke:competitors -w web`. Not yet: plans/monthly allowances, Stripe top-ups, competitor Instagram metrics (needs Facebook Login Business Discovery), per-competitor GEO question runs.

@@ -11,7 +11,7 @@ import { CONTEXT_DOC_KINDS, listContextDocs } from "@/server/services/context-do
 export type ChatScope = { workspaceId: string; brandId: string; userId: string };
 
 const KINDS = CONTEXT_DOC_KINDS.map((k) => k.kind) as [string, ...string[]];
-const RUNNABLE = AGENTS.filter((a) => a.key !== "systems-check").map((a) => a.key) as [string, ...string[]];
+const RUNNABLE = AGENTS.filter((a) => a.key !== "systems-check" && !a.internal).map((a) => a.key) as [string, ...string[]];
 
 /**
  * What the CMO chat may do. Read-only access to this brand's documents, reports and agents, and
@@ -80,7 +80,7 @@ export function chatTools(scope: ChatScope) {
           distinct: ["agentKey"],
           select: { agentKey: true, status: true, finishedAt: true, error: true },
         });
-        return AGENTS.filter((a) => a.key !== "systems-check").map((a) => {
+        return AGENTS.filter((a) => a.key !== "systems-check" && !a.internal).map((a) => {
           const r = runs.find((x) => x.agentKey === a.key);
           return { key: a.key, name: a.name, does: a.description, lastRun: r ? { status: r.status, finishedAt: r.finishedAt?.toISOString() ?? null, error: r.error?.slice(0, 200) ?? null } : null };
         });

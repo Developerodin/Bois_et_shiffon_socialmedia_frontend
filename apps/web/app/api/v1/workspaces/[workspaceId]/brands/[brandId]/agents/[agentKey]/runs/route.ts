@@ -1,6 +1,7 @@
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
 import { AgentStartError, startAgentRun } from "@/server/agents/engine";
+import { getAgent } from "@/server/agents/registry";
 import { kickRunner } from "@/server/jobs/runner";
 
 type Params = BrandRouteParams & { agentKey: string };
@@ -10,6 +11,9 @@ export async function POST(request: Request, context: { params: Promise<Params> 
     const scope = await authorizeBrandRoute(request, context.params, "agents.run");
     if (scope instanceof Response) return scope;
     const { agentKey } = await context.params;
+    if (getAgent(agentKey)?.internal) {
+      return problemResponse({ type: "https://api.brandpilot/errors/agent-start", title: "Agent could not start", status: 403, detail: "This agent is started from its own feature." });
+    }
     const body = await request.json().catch(() => ({}));
 
     const run = await startAgentRun({

@@ -5,6 +5,7 @@ import { getAgent } from "@/server/agents/registry";
 import type { AgentContext } from "@/server/agents/types";
 import { generateObject, OUT_OF_CREDITS } from "@/server/ai/provider";
 import { prisma } from "@/server/db/prisma";
+import { refundCharge } from "@/server/services/credits";
 import { validateAiWorkflowPayload } from "@/server/jobs/claim";
 import { enqueueJob } from "@/server/jobs/queue";
 
@@ -163,6 +164,9 @@ export async function onAgentRunFailure(rawPayload: unknown, error: unknown, exh
       ? { status: "FAILED", finishedAt: new Date(), error: String(error).slice(0, 2000) }
       : { status: "QUEUED", error: String(error).slice(0, 2000) },
   });
+  // Paid runs (e.g. competitor site audits) get their credits back when they finally fail.
+  const chargeId = (run.input as { chargeId?: string } | null)?.chargeId;
+  if (exhausted && chargeId) await refundCharge(run.workspaceId, chargeId);
   await prisma.agentEvent.create({
     data: {
       workspaceId: run.workspaceId,
