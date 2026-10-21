@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import type { ApprovalVerdict, ContentChannel, IntegrationProvider, Prisma } from "@prisma/client";
-import { decryptCredentials } from "@/server/crypto/credentials";
 import { prisma } from "@/server/db/prisma";
 import { PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
 import { enqueueJob } from "@/server/jobs/queue";
+import { accessToken, markReconnect, ReconnectNeeded } from "@/server/services/connections";
 import { safeHttpUrl } from "@/lib/website";
 
 /**
@@ -233,24 +233,50 @@ export async function executePublication(payload: unknown) {
   const conn = await prisma.integrationConnection.findFirst({ where: { id: a.connectionId, status: "ACTIVE" } });
   const publisher = PUBLISHERS[a.provider];
   if (!conn?.encryptedCredentials || !publisher) {
-    await finish("FAILED", { error: "The account was disconnected. Reconnect it and publish again." }, "APPROVED");
+    await finish("FAILED", { error: "The account was disconnected or needs reconnecting. Reconnect it in Settings → Connections, then publish again." }, "APPROVED");
+    return;
+  }
+  // Refresh an expiring token before posting. Nothing has been sent yet, so any failure here is safe to retry.
+  let token: string;
+  try {
+    token = await accessToken(conn);
+  } catch (e) {
+    const error = e instanceof ReconnectNeeded
+      ? `${conn.displayName}'s access expired. Reconnect it in Settings → Connections, then publish again.`
+      : "Couldn't reach the platform to refresh the account's access. Nothing was posted. Try again.";
+    await finish("FAILED", { error }, "APPROVED");
     return;
   }
   const body = latest.body as Body;
   const target = a.target as { boardId: string | null; imageUrl: string | null };
   const profile = await prisma.brandProfile.findFirst({ where: { brandId: a.brandId }, select: { websiteUrl: true } });
   try {
-    const { accessToken } = decryptCredentials<{ accessToken: string }>(conn.encryptedCredentials);
     const res = await publisher(
       { text: postText(body), title: body.pinTitle || body.hook || item.title, altText: body.altText ?? "", link: safeHttpUrl(profile?.websiteUrl)?.href ?? null, imageUrl: target.imageUrl, boardId: target.boardId },
-      { id: conn.externalAccountId, token: accessToken },
+      { id: conn.externalAccountId, token },
     );
     await finish("PUBLISHED", { externalId: res.externalId, externalUrl: safeHttpUrl(res.externalUrl)?.href ?? null, publishedAt: new Date(), error: null }, "PUBLISHED");
   } catch (e) {
     const msg = e instanceof Error ? e.message.slice(0, 300) : "Unknown error";
-    if (e instanceof PublishRefused) await finish("FAILED", { error: msg }, "APPROVED");
+    if (e instanceof PublishRefused) {
+      // The platform no longer accepts this token: say so on the account, not just on this post.
+      if (/^401 |access token|OAuthException/i.test(msg)) await markReconnect(conn.id, `The platform rejected the access (${msg.slice(0, 120)}). Reconnect ${conn.displayName}.`);
+      await finish("FAILED", { error: msg }, "APPROVED");
+    }
     else await finish("PENDING_VERIFY", { error: `We couldn't confirm whether it posted (${msg}). Check the account before trying again.` }, "SCHEDULED");
   }
+}
+
+/**
+ * The publish job died mid-run (timeout, crash) and won't be retried: whatever is still PUBLISHING
+ * may or may not have posted, so a person checks the account.
+ */
+export async function onPublishJobLost(payload: unknown) {
+  const { attemptId } = payload as { attemptId: string };
+  await prisma.publicationAttempt.updateMany({
+    where: { id: attemptId, status: "PUBLISHING" },
+    data: { status: "PENDING_VERIFY", error: "Publishing stopped midway. Check the account before trying again." },
+  });
 }
 
 /** Cancel a scheduled post, or settle a PENDING_VERIFY one after someone looked at the account. */

@@ -85,6 +85,23 @@ Open [http://localhost:3100/login](http://localhost:3100/login) — seeded email
 
 Reddit Devvit app (unchanged): `npm run dev:reddit`
 
+### Background jobs (scheduled posts, agent retries, emails)
+
+Jobs wait in Postgres until something runs the queue. Three things do:
+
+1. **Any action that queues work** (Run agent, Publish now, invite) starts it straight away.
+2. **The open app**: while anyone has the workspace open, overdue jobs run within about 30 s.
+3. **Cron** calls `/api/v1/jobs/run` with `Authorization: Bearer $CRON_SECRET`. `vercel.json` runs it **once a day** (all the Vercel Hobby plan allows). That also refreshes expiring Pinterest/Instagram/Threads tokens and starts daily agents.
+
+So a post scheduled for 18:00 when nobody has the app open goes out at the next daily run. For on-time posts, call the endpoint every 5 minutes, either:
+
+- **Vercel Pro:** change the schedule in `apps/web/vercel.json` to `*/5 * * * *` (the daily work still runs once a day), or
+- **Any cron service** (e.g. cron-job.org): `POST https://<your-domain>/api/v1/jobs/run` every 5 minutes with header `Authorization: Bearer <CRON_SECRET>`.
+
+Locally, `npm run worker:dev -w web` keeps the queue running.
+
+Without `OPENAI_API_KEY`, agents use canned test output locally but **refuse to run in production** (set `AI_ALLOW_MOCK=1` only for a demo deployment).
+
 ---
 
 ## 6. Quality commands

@@ -10,10 +10,9 @@ export async function DELETE(
     const scope = await authorizeBrandRoute(request, context.params, "integrations.manage");
     if (scope instanceof Response) return scope;
     const { connectionId } = await context.params;
-    if (!(await disconnect({ ...scope, connectionId }))) {
-      return problemResponse({ type: "https://api.brandpilot/errors/not-found", title: "Not found", status: 404 });
-    }
-    return new Response(null, { status: 204 });
+    const result = await disconnect({ ...scope, connectionId });
+    if (!result) return problemResponse({ type: "https://api.brandpilot/errors/not-found", title: "Not found", status: 404 });
+    return Response.json(result);
   } catch (error) {
     return fromAccessError(error);
   }

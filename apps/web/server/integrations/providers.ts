@@ -20,6 +20,8 @@ type Adapter = {
   scopes: string[];
   authorizeUrl: (p: { clientId: string; redirectUri: string; state: string; scope: string }) => string;
   exchange: (p: { code: string; clientId: string; secret: string; redirectUri: string }) => Promise<ConnectedAccount[]>;
+  /** Swap a token that is about to expire for a fresh one. Absent = the token doesn't expire (Facebook Pages). */
+  refresh?: (p: { credentials: ConnectedAccount["credentials"]; clientId: string; secret: string }) => Promise<Pick<ConnectedAccount, "credentials" | "tokenExpiresAt">>;
 };
 
 export class ProviderError extends Error {}
@@ -83,6 +85,18 @@ const pinterest: Adapter = {
       scopes: tok.scope ? tok.scope.split(/[ ,]+/) : PINTEREST_SCOPES,
     }];
   },
+  async refresh({ credentials, clientId, secret }) {
+    if (!credentials.refreshToken) throw new ProviderError("400 No refresh token stored; reconnect the account");
+    const tok = await call<{ access_token: string; refresh_token?: string; expires_in: number }>("https://api.pinterest.com/v5/oauth/token", {
+      method: "POST",
+      headers: {
+        authorization: `Basic ${Buffer.from(`${clientId}:${secret}`).toString("base64")}`,
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: qs({ grant_type: "refresh_token", refresh_token: credentials.refreshToken }),
+    });
+    return { credentials: { accessToken: tok.access_token, refreshToken: tok.refresh_token ?? credentials.refreshToken }, tokenExpiresAt: expiry(tok.expires_in) };
+  },
 };
 
 export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
@@ -142,6 +156,13 @@ export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
         scopes: PROVIDERS.INSTAGRAM.scopes,
       }];
     },
+    // Long-lived tokens (60 days) refresh themselves once they're at least a day old.
+    async refresh({ credentials }) {
+      const t = await call<{ access_token: string; expires_in: number }>(
+        `https://graph.instagram.com/refresh_access_token?${qs({ grant_type: "ig_refresh_token", access_token: credentials.accessToken })}`,
+      );
+      return { credentials: { accessToken: t.access_token }, tokenExpiresAt: expiry(t.expires_in) };
+    },
   },
   THREADS: {
     label: "Threads",
@@ -168,6 +189,12 @@ export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
         tokenExpiresAt: expiry(long.expires_in),
         scopes: PROVIDERS.THREADS.scopes,
       }];
+    },
+    async refresh({ credentials }) {
+      const t = await call<{ access_token: string; expires_in: number }>(
+        `https://graph.threads.net/refresh_access_token?${qs({ grant_type: "th_refresh_token", access_token: credentials.accessToken })}`,
+      );
+      return { credentials: { accessToken: t.access_token }, tokenExpiresAt: expiry(t.expires_in) };
     },
   },
   GOOGLE: {

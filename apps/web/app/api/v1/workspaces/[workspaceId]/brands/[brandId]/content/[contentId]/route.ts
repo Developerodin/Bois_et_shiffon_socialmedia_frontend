@@ -1,11 +1,14 @@
 import { z } from "zod";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
-import { decryptCredentials } from "@/server/crypto/credentials";
 import { prisma } from "@/server/db/prisma";
 import { pinterestBoards } from "@/server/integrations/publishers";
 import { kickRunner } from "@/server/jobs/runner";
+import { accessToken } from "@/server/services/connections";
 import { decide, PublishingError, releaseState, saveDraft, schedulePublication, settlePublication } from "@/server/services/publishing";
+
+// Queued work runs after the response (kickRunner); give it room to finish.
+export const maxDuration = 300;
 
 type Params = { params: Promise<BrandRouteParams & { contentId: string }> };
 
@@ -42,10 +45,9 @@ export async function GET(request: Request, context: Params) {
     const boards: Record<string, { id: string; name: string }[] | null> = {};
     if (state.requirements.needsBoard) {
       for (const a of state.accounts) {
-        const c = await prisma.integrationConnection.findUnique({ where: { id: a.id }, select: { encryptedCredentials: true } });
-        boards[a.id] = c?.encryptedCredentials
-          ? await pinterestBoards(decryptCredentials<{ accessToken: string }>(c.encryptedCredentials).accessToken).catch(() => null)
-          : null;
+        // Any failure (expired access, bad key, Pinterest down) shows as "couldn't load boards", not a broken page.
+        const c = await prisma.integrationConnection.findUnique({ where: { id: a.id } });
+        boards[a.id] = c ? await accessToken(c).then(pinterestBoards).catch(() => null) : null;
       }
     }
     return Response.json({ ...state, boards });

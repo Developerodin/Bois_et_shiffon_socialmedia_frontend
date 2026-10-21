@@ -53,6 +53,11 @@ export async function generateObject<T extends z.ZodType>(
   input: GenerateObjectInput<T>,
 ): Promise<z.infer<T>> {
   const provider = aiProviderName();
+  // Canned fixtures are for tests and local runs. In production a missing key must stop the agent,
+  // never quietly hand people made-up drafts. AI_ALLOW_MOCK=1 opts a demo deployment in.
+  if (provider === "mock" && process.env.NODE_ENV === "production" && process.env.AI_ALLOW_MOCK !== "1") {
+    throw new AiProviderError("AI isn't set up on this server (OPENAI_API_KEY is missing). An admin needs to add it.", false);
+  }
   const model = provider === "mock" ? "mock" : (input.model ?? DEFAULT_MODEL);
   const started = Date.now();
   let usage: { input_tokens?: number; output_tokens?: number } | undefined;
@@ -84,7 +89,9 @@ async function callOpenAi<T extends z.ZodType>(
   input: GenerateObjectInput<T>,
   model: string,
 ) {
+  // ponytail: one call can include web search; 2.5 min covers slow ones without holding the runner forever.
   const res = await fetch("https://api.openai.com/v1/responses", {
+    signal: AbortSignal.timeout(150_000),
     method: "POST",
     headers: {
       authorization: `Bearer ${process.env.OPENAI_API_KEY}`,

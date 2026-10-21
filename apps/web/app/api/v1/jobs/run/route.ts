@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { problemResponse } from "@/server/api/http-error";
 import { enqueueDailySweep, runDueJobs } from "@/server/jobs/runner";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function authorized(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -15,15 +15,15 @@ function authorized(request: Request) {
 const unauthorized = () =>
   problemResponse({ type: "https://api.brandpilot/errors/unauthorized", title: "Unauthorized", status: 401 });
 
-/** Vercel Cron (daily): enqueue the daily sweep, then drain the queue. */
+/** Cron: enqueue the daily sweep (once per day, idempotent), then drain the queue. Safe to call every few minutes. */
 export async function GET(request: Request) {
   if (!authorized(request)) return unauthorized();
   await enqueueDailySweep();
-  return Response.json(await runDueJobs({ budgetMs: 50_000 }));
+  return Response.json(await runDueJobs({ budgetMs: 120_000 }));
 }
 
 /** Manual / dev kick: drain due jobs only. */
 export async function POST(request: Request) {
   if (!authorized(request)) return unauthorized();
-  return Response.json(await runDueJobs({ budgetMs: 50_000 }));
+  return Response.json(await runDueJobs({ budgetMs: 120_000 }));
 }

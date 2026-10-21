@@ -115,7 +115,7 @@ export const settingsApi = {
   startConnect: (w: string, b: string, provider: Provider) =>
     request<{ url: string }>(`${brand(w, b)}/connections/start`, json("POST", { provider })),
   disconnect: (w: string, b: string, id: string) =>
-    request<void>(`${brand(w, b)}/connections/${encodeURIComponent(id)}`, { method: "DELETE" }),
+    request<{ cancelled: number }>(`${brand(w, b)}/connections/${encodeURIComponent(id)}`, { method: "DELETE" }),
 };
 
 const brand = (w: string, b: string) => `${ws(w)}/brands/${encodeURIComponent(b)}`;

@@ -19,7 +19,7 @@ import { chatTools } from "@/server/chat/tools";
 import { prisma } from "@/server/db/prisma";
 
 // Streaming replies with a few tool steps can take a while.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const Body = z.object({ id: z.string().min(8).max(100), message: z.unknown() });
 const CHAT_LIMIT = { limit: 30, windowMs: 10 * 60_000 }; // per person: each message costs OpenAI tokens
