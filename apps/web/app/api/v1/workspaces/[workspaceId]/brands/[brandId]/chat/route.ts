@@ -1,0 +1,125 @@
+import { createOpenAI } from "@ai-sdk/openai";
+import type { Prisma } from "@prisma/client";
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  isStepCount,
+  streamText,
+  toUIMessageStream,
+  validateUIMessages,
+  type UIMessage,
+} from "ai";
+import { z } from "zod";
+import { fromAccessError, problemResponse } from "@/server/api/http-error";
+import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
+import { isOutOfCreditsText, OUT_OF_CREDITS } from "@/server/ai/provider";
+import { hitRateLimit, limitKey } from "@/server/auth/rate-limit";
+import { chatSystemPrompt, CHAT_PROMPT_VERSION } from "@/server/chat/prompt";
+import { chatTools } from "@/server/chat/tools";
+import { prisma } from "@/server/db/prisma";
+
+// Streaming replies with a few tool steps can take a while.
+export const maxDuration = 60;
+
+const Body = z.object({ id: z.string().min(8).max(100), message: z.unknown() });
+const CHAT_LIMIT = { limit: 30, windowMs: 10 * 60_000 }; // per person: each message costs OpenAI tokens
+
+/** Latest conversation for this person and brand, so the panel restores it. */
+export async function GET(request: Request, context: { params: Promise<BrandRouteParams> }) {
+  try {
+    const scope = await authorizeBrandRoute(request, context.params, "brand.read");
+    if (scope instanceof Response) return scope;
+    const thread = await prisma.chatThread.findFirst({
+      where: { workspaceId: scope.workspaceId, brandId: scope.brandId, userId: scope.userId },
+      orderBy: { updatedAt: "desc" },
+      select: { id: true, messages: true },
+    });
+    return Response.json({ thread });
+  } catch (error) {
+    return fromAccessError(error);
+  }
+}
+
+/** One turn: the client sends only its newest message; history comes from the database. */
+export async function POST(request: Request, context: { params: Promise<BrandRouteParams> }) {
+  try {
+    const scope = await authorizeBrandRoute(request, context.params, "brand.read");
+    if (scope instanceof Response) return scope;
+    const body = Body.safeParse(await request.json().catch(() => null));
+    if (!body.success) {
+      return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid request", status: 422 });
+    }
+    const rate = await hitRateLimit(limitKey("chat:user", scope.userId), CHAT_LIMIT.limit, CHAT_LIMIT.windowMs);
+    if (!rate.allowed) {
+      return problemResponse({ type: "https://api.brandpilot/errors/rate-limited", title: "Slow down", status: 429, detail: "Too many messages. Wait a few minutes." });
+    }
+
+    const existing = await prisma.chatThread.findUnique({ where: { id: body.data.id } });
+    // Another person's (or brand's) conversation id: behave as if it doesn't exist.
+    if (existing && (existing.userId !== scope.userId || existing.brandId !== scope.brandId)) {
+      return problemResponse({ type: "https://api.brandpilot/errors/not-found", title: "Not found", status: 404 });
+    }
+
+    const brand = await prisma.brand.findFirstOrThrow({
+      where: { id: scope.brandId, workspaceId: scope.workspaceId },
+      select: { displayName: true, profile: { select: { websiteUrl: true } } },
+    });
+    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const tools = { ...chatTools(scope), webSearch: openai.tools.webSearch() };
+    const previous = (existing?.messages ?? []) as unknown as UIMessage[];
+    const messages = await validateUIMessages({ messages: [...previous, body.data.message], tools });
+
+    const model = process.env.OPENAI_MODEL_DEFAULT ?? "gpt-5-mini";
+    const started = Date.now();
+    const result = streamText({
+      model: openai(model),
+      system: chatSystemPrompt({ name: brand.displayName, website: brand.profile?.websiteUrl ?? null }),
+      messages: await convertToModelMessages(messages),
+      tools,
+      stopWhen: isStepCount(6),
+      onFinish: async ({ totalUsage }) => {
+        await prisma.aiWorkflowRun.create({
+          data: {
+            workspaceId: scope.workspaceId,
+            brandId: scope.brandId,
+            workflowId: "chat.turn",
+            promptVersion: CHAT_PROMPT_VERSION,
+            provider: "openai",
+            model,
+            status: "SUCCEEDED",
+            inputTokens: totalUsage.inputTokens,
+            outputTokens: totalUsage.outputTokens,
+            latencyMs: Date.now() - started,
+          },
+        });
+      },
+    });
+    result.consumeStream(); // finish and save even if the browser disconnects
+
+    const firstText = messages.find((m) => m.role === "user")?.parts.find((p) => p.type === "text");
+    const title = (firstText && "text" in firstText ? firstText.text : "New chat").slice(0, 80);
+
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream({
+        stream: result.stream,
+        originalMessages: messages,
+        onEnd: async ({ messages: all }) => {
+          const data = { messages: all as unknown as Prisma.InputJsonValue, title };
+          await prisma.chatThread.upsert({
+            where: { id: body.data.id },
+            create: { id: body.data.id, workspaceId: scope.workspaceId, brandId: scope.brandId, userId: scope.userId, ...data },
+            update: data,
+          });
+        },
+        onError: (error) => {
+          const text = error instanceof Error ? error.message : String(error);
+          if (isOutOfCreditsText(text)) return `${OUT_OF_CREDITS}.`;
+          console.error("[chat] turn failed", text.slice(0, 500));
+          return "Something went wrong answering that. Try again.";
+        },
+      }),
+    });
+  } catch (error) {
+    return fromAccessError(error);
+  }
+}

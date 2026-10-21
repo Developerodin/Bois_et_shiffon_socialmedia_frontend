@@ -29,6 +29,9 @@ export type GenerateObjectInput<T extends z.ZodType> = {
 /** Shown to people as-is (Agent Log, workspace banner); `readable()` also recognises it. */
 export const OUT_OF_CREDITS = "AI credits used up: agents are paused until credits are added";
 
+/** OpenAI says "insufficient_quota" in the error code and "no credits remaining" in the message. */
+export const isOutOfCreditsText = (text: string) => /insufficient_quota|credit_balance|credits remaining/i.test(text);
+
 export class AiProviderError extends Error {
   constructor(
     message: string,
@@ -105,7 +108,7 @@ async function callOpenAi<T extends z.ZodType>(
   if (!res.ok) {
     const body = (await res.text()).slice(0, 500);
     // An empty credit balance is also a 429, but waiting won't fix it: stop now, don't retry for hours.
-    if (/insufficient_quota|credit_balance/i.test(body)) throw new AiProviderError(OUT_OF_CREDITS, false);
+    if (isOutOfCreditsText(body)) throw new AiProviderError(OUT_OF_CREDITS, false);
     const retryable = res.status === 429 || res.status >= 500;
     throw new AiProviderError(`OpenAI ${res.status}: ${body}`, retryable);
   }
