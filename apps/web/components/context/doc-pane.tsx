@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, ExternalLink, FileText, Loader2, Pencil } from "lucide-react";
 import {
   confirmContextDoc,
@@ -77,6 +77,15 @@ export function DocPane({
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState<"save" | "confirm" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const dirty = editing && draft !== (latest?.markdown ?? "");
+
+  // Closing or reloading the tab with unsaved text asks first.
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
 
   function startEdit() {
     setDraft(latest?.markdown ?? "");

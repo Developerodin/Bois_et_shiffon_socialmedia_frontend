@@ -14,12 +14,23 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
       include: {
         opportunity: { select: { title: true } },
         versions: { orderBy: { version: "desc" }, take: 1, include: { checks: { orderBy: { createdAt: "desc" }, take: 1 } } },
+        decisions: { orderBy: { createdAt: "desc" }, take: 1, select: { verdict: true, note: true, contentVersionId: true } },
       },
     });
     return Response.json({
-      items: rows.map(({ versions, ...i }) => ({
+      items: rows.map(({ versions, decisions, ...i }) => ({
         ...i,
-        latest: versions[0] ? { version: versions[0].version, body: versions[0].body, createdAt: versions[0].createdAt, check: versions[0].checks[0] ?? null } : null,
+        latest: versions[0]
+          ? {
+              version: versions[0].version,
+              body: versions[0].body,
+              createdAt: versions[0].createdAt,
+              byPerson: versions[0].createdBy !== "agent",
+              check: versions[0].checks[0] ?? null,
+              // The approver's last word on this exact draft (e.g. the changes they asked for).
+              review: decisions[0]?.contentVersionId === versions[0].id ? { verdict: decisions[0].verdict, note: decisions[0].note } : null,
+            }
+          : null,
       })),
     });
   } catch (error) {

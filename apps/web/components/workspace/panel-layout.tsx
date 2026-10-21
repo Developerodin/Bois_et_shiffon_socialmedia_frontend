@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,15 @@ export type Layout<Id extends string> = { columns: Column<Id>[]; collapsed: Id[]
 export type Preset<Id extends string> = { name: string; description: string; layout: Layout<Id> };
 
 const MIN_PX = 240;
+// Matches Tailwind's lg breakpoint. Only the layout on screen renders panels: rendering both (one hidden
+// by CSS) would mount every panel twice, double the polling, duplicate element ids and split edit state.
+const WIDE = "(min-width: 1024px)";
+const subscribeWide = (cb: () => void) => {
+  const m = window.matchMedia(WIDE);
+  m.addEventListener("change", cb);
+  return () => m.removeEventListener("change", cb);
+};
+const useWide = () => useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE).matches, () => true);
 let seq = 0;
 const colId = () => `c${Date.now().toString(36)}${seq++}`;
 
@@ -54,6 +63,7 @@ export function PanelLayout<Id extends string>({
 }) {
   const ids = panels.map((p) => p.id);
   const [layout, setLayout] = useState<Layout<Id>>(presets[0].layout);
+  const wide = useWide();
   const [mobilePanel, setMobilePanel] = useState<Id | null>(null);
   const [dropHint, setDropHint] = useState<string | null>(null);
   const [hintSeen, setHintSeen] = useState(true);
@@ -245,7 +255,7 @@ export function PanelLayout<Id extends string>({
 
       {/* Phones and small tablets: one panel at a time with tabs (Okara pattern). */}
       <div className="flex min-h-0 flex-1 flex-col lg:hidden">
-        <div className="min-h-0 flex-1 overflow-y-auto">{activeMobile && def(activeMobile).render()}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto">{!wide && activeMobile && def(activeMobile).render()}</div>
         <nav aria-label="Panels" className="flex shrink-0 overflow-x-auto border-t border-border">
           {visible.map((id) => (
             <button
@@ -335,7 +345,7 @@ export function PanelLayout<Id extends string>({
                         </DropdownMenu>
                       </div>
                     </header>
-                    {!collapsed && <div className="min-h-0 flex-1 overflow-y-auto">{p.render()}</div>}
+                    {!collapsed && wide && <div className="min-h-0 flex-1 overflow-y-auto">{p.render()}</div>}
                   </section>
                 );
               })}

@@ -5,11 +5,19 @@ import { decryptCredentials } from "@/server/crypto/credentials";
 import { prisma } from "@/server/db/prisma";
 import { pinterestBoards } from "@/server/integrations/publishers";
 import { kickRunner } from "@/server/jobs/runner";
-import { decide, PublishingError, releaseState, schedulePublication, settlePublication } from "@/server/services/publishing";
+import { decide, PublishingError, releaseState, saveDraft, schedulePublication, settlePublication } from "@/server/services/publishing";
 
 type Params = { params: Promise<BrandRouteParams & { contentId: string }> };
 
+const text = (max: number) => z.string().max(max).default("");
+const list = (items: number, max: number) => z.array(z.string().max(max)).max(items).default([]);
+
 const Action = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("edit"),
+    version: z.number().int().min(0),
+    body: z.object({ hook: text(500), caption: z.string().min(1).max(5000), hashtags: list(30, 100), slides: list(20, 1000), script: list(30, 1000), pinTitle: text(200), altText: text(1000) }),
+  }),
   z.object({ action: z.literal("decide"), version: z.number().int(), verdict: z.enum(["APPROVED", "CHANGES_REQUESTED", "REJECTED"]), note: z.string().max(2000).optional() }),
   z.object({
     action: z.literal("publish"),
@@ -22,7 +30,7 @@ const Action = z.discriminatedUnion("action", [
   z.object({ action: z.enum(["cancel", "posted", "not-posted"]), attemptId: z.string().min(1), url: z.string().max(2000).optional() }),
 ]);
 
-const PERMISSION = { decide: "content.approve", publish: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
+const PERMISSION = { edit: "content.create", decide: "content.approve", publish: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
 
 /** Approval history, publishing history, and where this post can go (with Pinterest boards). */
 export async function GET(request: Request, context: Params) {
@@ -54,7 +62,9 @@ export async function POST(request: Request, context: Params) {
     const scope = await authorizeBrandRoute(request, context.params, PERMISSION[body.action]);
     if (scope instanceof Response) return scope;
     const { contentId: itemId } = await context.params;
-    if (body.action === "decide") {
+    if (body.action === "edit") {
+      await saveDraft({ ...scope, itemId, version: body.version, body: body.body });
+    } else if (body.action === "decide") {
       await decide({ ...scope, itemId, version: body.version, verdict: body.verdict, note: body.note });
     } else if (body.action === "publish") {
       const a = await schedulePublication({ ...scope, itemId, version: body.version, connectionId: body.connectionId, boardId: body.boardId, imageUrl: body.imageUrl, runAt: body.runAt ? new Date(body.runAt) : undefined });

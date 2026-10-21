@@ -48,6 +48,18 @@ export async function startAgentRun(input: {
   if (!parsed.success) throw new AgentStartError(parsed.error.message, 422);
 
   return prisma.$transaction(async (tx) => {
+    // Double clicks and two people pressing Run share one run instead of paying twice.
+    // ponytail: a run stuck past 30 min no longer blocks a fresh one; the lease reclaim handles the old job.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`agent-start:${input.brandId}:${agent.key}`}))`;
+    const inFlight = await tx.agentRun.findMany({
+      where: { brandId: input.brandId, agentKey: agent.key, status: { in: ["QUEUED", "RUNNING"] }, createdAt: { gte: new Date(Date.now() - 30 * 60_000) } },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+    // Same job = same input, ignoring who paid for it (a paid caller refunds when it gets someone else's run).
+    const key = (v: unknown) => JSON.stringify({ ...(v as object), chargeId: undefined });
+    const same = inFlight.find((r) => key(r.input) === key(parsed.data));
+    if (same) return same;
     const run = await tx.agentRun.create({
       data: {
         workspaceId: input.workspaceId,
