@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchEvents, type AgentEvent, type AgentEventLevel } from "@/components/agents/api";
 import { ServiceUnavailable } from "@/components/agents/service-unavailable";
+import { readable } from "@/lib/agent-message";
 import { cn } from "@/lib/utils";
 
 const POLL_MS = 3000;
@@ -24,9 +25,11 @@ function formatTime(iso: string): string {
 type Props = {
   workspaceId: string;
   brandId: string;
+  /** Drawer variant: no heading or window chrome, shorter. */
+  compact?: boolean;
 };
 
-export function AgentLog({ workspaceId, brandId }: Props) {
+export function AgentLog({ workspaceId, brandId, compact = false }: Props) {
   const [events, setEvents] = useState<AgentEvent[]>([]);
   const [status, setStatus] = useState<"connecting" | "live" | "error">("connecting");
   const cursorRef = useRef<string | null>(null);
@@ -81,8 +84,8 @@ export function AgentLog({ workspaceId, brandId }: Props) {
   }
 
   return (
-    <section aria-labelledby="agent-log-heading" className="flex flex-col gap-4">
-      <div className="flex items-end justify-between gap-3">
+    <section aria-labelledby="agent-log-heading" className={cn("flex flex-col", compact ? "gap-0" : "gap-4")}>
+      <div className={cn("flex items-end justify-between gap-3", compact && "sr-only")}>
         <h2
           id="agent-log-heading"
           className="font-display text-2xl font-medium tracking-tight"
@@ -105,8 +108,8 @@ export function AgentLog({ workspaceId, brandId }: Props) {
 
       {status === "error" ? <ServiceUnavailable /> : null}
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-[hsl(30_10%_4%)] text-[hsl(40_22%_90%)]">
-        <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5" aria-hidden="true">
+      <div className={cn("overflow-hidden bg-[hsl(30_10%_4%)] text-[hsl(40_22%_90%)]", compact ? "rounded-lg" : "rounded-2xl border border-border")}>
+        <div className={cn("flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5", compact && "hidden")} aria-hidden="true">
           <span className="size-2.5 rounded-full bg-white/15" />
           <span className="size-2.5 rounded-full bg-white/15" />
           <span className="size-2.5 rounded-full bg-white/15" />
@@ -120,7 +123,10 @@ export function AgentLog({ workspaceId, brandId }: Props) {
           aria-relevant="additions"
           aria-label="Agent activity log"
           tabIndex={0}
-          className="h-[22rem] overflow-y-auto px-4 py-3 font-mono text-[13px] leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+          className={cn(
+            compact ? "h-[min(30vh,16rem)]" : "h-[22rem]",
+            "overflow-y-auto px-4 py-3 font-mono text-[13px] leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+          )}
         >
           {events.length === 0 ? (
             <p className="text-white/60">
@@ -140,8 +146,8 @@ export function AgentLog({ workspaceId, brandId }: Props) {
                   </span>
                   <span className="min-w-0 break-words">
                     <span className="text-white/50">[{e.agentKey}]</span>{" "}
-                    <span className={e.level === "INFO" ? undefined : LOG_LEVEL_ON_DARK[e.level]}>
-                      {e.message}
+                    <span className={e.level === "INFO" ? undefined : LOG_LEVEL_ON_DARK[e.level]} title={e.message}>
+                      {readable(e.message)}
                     </span>
                     {e.entityType ? (
                       <span className="ml-2 text-white/50">→ {e.entityType}</span>

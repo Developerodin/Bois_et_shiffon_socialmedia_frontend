@@ -282,3 +282,10 @@ Settings → **Connections** (per brand): Facebook Pages, Instagram, Threads, Go
 - **Continue with Google** on `/login` (Auth.js Google provider, same OAuth client as the Analytics connection). Requires Google `email_verified`; links to an existing account with the same email; refuses disabled/deleted accounts. A new Google account accepts its pending invitations, otherwise gets its own workspace as Owner (`server/services/google-signup.ts`; check `npm run smoke:google -w web`).
 - Google Cloud client needs the extra redirect URI `http://localhost:3100/api/auth/callback/google` (and the production domain's).
 - **Ceiling:** open Google sign-up lets anyone create a workspace and run agents (OpenAI cost). Before a public launch add an allow-list/waitlist or per-workspace run quota.
+
+### 8h. One-screen workspace with a free panel layout (2026-10-21) — supersedes the 8-item sidebar in §3.1
+
+- `/` is the workspace: panels **Context**, **Today & agents** (docs and agents open here), **Analytics** (SEO / GEO), **Agents feed**, **Chat** (placeholder until chat is built), **Agent Log**.
+- Free layout like VS Code / Cursor (`components/workspace/panel-layout.tsx`): drag a panel header to another column, onto a panel, or to the right edge (new column); drag dividers to resize; each panel menu has keyboard equivalents (move left/right, own column, collapse, hide). Presets: **Focus** (Okara main), **Classic** (Okara analytics layout), **Operator** (agents + live log). Saved per browser (`ws.layout.v1`); phones get one panel at a time with a bottom tab bar.
+- One top bar for every page: brand switcher, Connect Google, PageSpeed + AI-visibility score rings (→ Performance), Logs drawer, Menu (other areas), Settings; account menu at the foot of Context (Okara), avatar elsewhere. Sidebar removed.
+- Ceiling: stacked panels split a column's height equally (no vertical splitters yet).

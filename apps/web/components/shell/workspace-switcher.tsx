@@ -35,7 +35,7 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId }: Props) {
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-muted-foreground">Workspace</span>
+      <span className="sr-only">Workspace</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
