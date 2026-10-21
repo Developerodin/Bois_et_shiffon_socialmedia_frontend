@@ -50,7 +50,43 @@ const form = (o: Record<string, string>): RequestInit => ({
   body: qs(o),
 });
 
+const PINTEREST_SCOPES = ["user_accounts:read", "boards:read", "boards:write", "pins:read", "pins:write"];
+
+const pinterest: Adapter = {
+  label: "Pinterest",
+  envId: "PINTEREST_APP_ID",
+  envSecret: "PINTEREST_APP_SECRET",
+  scopes: PINTEREST_SCOPES,
+  authorizeUrl: ({ clientId, redirectUri, state, scope }) =>
+    `https://www.pinterest.com/oauth/?${qs({ client_id: clientId, redirect_uri: redirectUri, state, scope, response_type: "code" })}`,
+  async exchange({ code, clientId, secret, redirectUri }) {
+    // Pinterest v5: Basic auth with the app id/secret; access ~30 days, refresh token ~1 year.
+    const tok = await call<{ access_token: string; refresh_token?: string; expires_in: number; scope?: string }>(
+      "https://api.pinterest.com/v5/oauth/token",
+      {
+        method: "POST",
+        headers: {
+          authorization: `Basic ${Buffer.from(`${clientId}:${secret}`).toString("base64")}`,
+          "content-type": "application/x-www-form-urlencoded",
+        },
+        body: qs({ grant_type: "authorization_code", code, redirect_uri: redirectUri }),
+      },
+    );
+    const me = await call<{ id?: string; username: string }>("https://api.pinterest.com/v5/user_account", {
+      headers: { authorization: `Bearer ${tok.access_token}` },
+    });
+    return [{
+      externalAccountId: me.id ?? me.username,
+      displayName: `@${me.username}`,
+      credentials: { accessToken: tok.access_token, refreshToken: tok.refresh_token },
+      tokenExpiresAt: expiry(tok.expires_in),
+      scopes: tok.scope ? tok.scope.split(/[ ,]+/) : PINTEREST_SCOPES,
+    }];
+  },
+};
+
 export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
+  PINTEREST: pinterest,
   META: {
     label: "Facebook Pages",
     envId: "META_APP_ID",
@@ -210,6 +246,7 @@ export const PROVIDER_SLUGS: Record<string, IntegrationProvider> = {
   threads: "THREADS",
   google: "GOOGLE",
   reddit: "REDDIT",
+  pinterest: "PINTEREST",
 };
 export const providerSlug = (p: IntegrationProvider) => p.toLowerCase();
 

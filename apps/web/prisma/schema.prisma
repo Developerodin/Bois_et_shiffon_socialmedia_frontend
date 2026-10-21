@@ -461,6 +461,7 @@ enum IntegrationProvider {
   THREADS
   GOOGLE // Analytics + Search Console
   REDDIT
+  PINTEREST
 }
 
 enum ConnectionStatus {

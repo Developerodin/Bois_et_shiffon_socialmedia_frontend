@@ -3,7 +3,7 @@ import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
 import { ConnectionError, startConnect } from "@/server/services/connections";
 
-const Body = z.object({ provider: z.enum(["META", "INSTAGRAM", "THREADS", "GOOGLE", "REDDIT"]) });
+const Body = z.object({ provider: z.enum(["META", "INSTAGRAM", "THREADS", "GOOGLE", "REDDIT", "PINTEREST"]) });
 
 /** Returns the provider consent URL; the browser navigates there. */
 export async function POST(request: Request, context: { params: Promise<BrandRouteParams> }) {
