@@ -12,13 +12,13 @@ export function AuthCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+    <main className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
         <h1 className="font-display text-2xl font-semibold text-foreground">{title}</h1>
         {description ? <p className="mt-2 text-sm text-muted-foreground">{description}</p> : null}
         <div className="mt-6">{children}</div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -26,7 +26,7 @@ export function AuthLink({ href, children }: { href: string; children: React.Rea
   return (
     <Link
       href={href}
-      className="rounded-sm text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="inline-block rounded-sm py-1 text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {children}
     </Link>

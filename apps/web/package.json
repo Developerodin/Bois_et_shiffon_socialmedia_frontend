@@ -24,6 +24,7 @@
     "smoke:google": "tsx --env-file=.env scripts/smoke-google-signup.ts",
     "audit": "tsx --env-file=.env scripts/run-audit.ts",
     "probe:meta": "tsx --env-file=.env scripts/probe-meta-data.ts",
+    "audit:ui": "tsx --env-file=.env scripts/audit-ui.ts",
     "worker:dev": "tsx --env-file=.env scripts/worker-dev.ts",
     "postinstall": "prisma generate"
   },

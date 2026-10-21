@@ -175,8 +175,8 @@ type PanelId = "context" | "home" | "analytics" | "feed" | "chat" | "log";
 const PRESETS: Preset<PanelId>[] = [
   {
     name: "Focus",
-    description: "Context, today and agents, chat",
-    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 2.2, panels: ["home"] }, { id: "c", size: 1.2, panels: ["chat"] }], collapsed: [] },
+    description: "Context, today and agents, agents feed",
+    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 2.2, panels: ["home"] }, { id: "c", size: 1.3, panels: ["feed", "chat"] }], collapsed: ["chat"] },
   },
   {
     name: "Classic",
@@ -208,7 +208,11 @@ function plainSummary(markdown: string | undefined) {
     .split(/\n{2,}/)
     .map((p) => p.trim())
     .find((p) => p && !p.startsWith("#") && !p.startsWith("-") && !p.startsWith("_") && p.length > 60);
-  return para?.replace(/\*\*|__|`|\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s+/g, " ") ?? null;
+  const fallback = markdown
+    .split("\n")
+    .map((l) => l.replace(/^[-*\d.\s]+/, "").trim())
+    .find((l) => l.length > 60 && !l.startsWith("#"));
+  return (para ?? fallback)?.replace(/\*\*|__|`|\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s+/g, " ") ?? null;
 }
 
 function docBadge(entry: ContextDocEntry, researching: boolean) {
@@ -247,24 +251,24 @@ function ContextPane({
         <section className="border-b border-border px-5 py-5">
           <div className="flex items-baseline justify-between gap-2">
             <h2 className="font-display text-lg font-medium">{brandName}</h2>
-            <Link href="/context" className="text-xs text-muted-foreground hover:text-foreground">
+            <Link href="/context" className="inline-block py-1 text-xs text-muted-foreground hover:text-foreground">
               Edit
             </Link>
           </div>
           {site && (
-            <a href={site.href} target="_blank" rel="noreferrer" className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+            <a href={site.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 py-1 text-xs text-muted-foreground hover:text-foreground">
               {site.host} <ExternalLink className="size-3" aria-hidden="true" />
             </a>
           )}
           {summary ? (
             <>
               <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-muted-foreground">{summary}</p>
-              <button type="button" onClick={() => onOpenDoc("product-information")} className="mt-1 text-xs font-medium hover:underline">
+              <button type="button" onClick={() => onOpenDoc("product-information")} className="mt-1 py-1 text-xs font-medium hover:underline">
                 View more
               </button>
             </>
           ) : (
-            <p className="mt-3 text-sm text-muted-foreground">{researching ? "Reading your website…" : "Your brand summary appears once Research has read the site."}</p>
+            <p className="mt-3 text-sm text-muted-foreground">{researching && !product?.latest ? "Reading your website…" : "Your brand summary appears once Research has drafted the product document."}</p>
           )}
         </section>
 
@@ -350,7 +354,7 @@ function timeAgo(iso: string | null | undefined) {
 function agentStatus(a: AgentSummary | undefined) {
   const s = a?.lastRun?.status;
   if (s === "RUNNING") return "Running…";
-  if (s === "QUEUED") return "Queued";
+  if (s === "QUEUED") return a?.lastRun?.startedAt ? "Retrying soon" : "Queued";
   if (s === "FAILED") return "Failed";
   if (s === "SUCCEEDED") return `Done ${timeAgo(a?.lastRun?.finishedAt)}`;
   return "Ready";
@@ -374,16 +378,17 @@ function Home({
   const first = user.name?.trim().split(/\s+/)[0];
   const tasks = useMemo(() => {
     const list: { id: string; done: boolean; label: string; detail?: string; action: React.ReactNode }[] = [];
-    for (const d of docs?.docs ?? []) {
-      if (!d.latest) continue;
+    const drafted = (docs?.docs ?? []).filter((d) => d.latest);
+    const toReview = drafted.filter((d) => d.latest!.status !== "CONFIRMED");
+    if (drafted.length) {
       list.push({
-        id: d.kind,
-        done: d.latest.status === "CONFIRMED",
-        label: d.title,
-        detail: "Ready to read",
+        id: "docs",
+        done: toReview.length === 0,
+        label: "Review your strategy documents",
+        detail: `${toReview.length} of ${drafted.length} to confirm`,
         action: (
-          <Button size="sm" variant="secondary" onClick={() => onOpen({ kind: "doc", doc: d.kind })}>
-            Read it
+          <Button size="sm" variant="secondary" onClick={() => toReview[0] && onOpen({ kind: "doc", doc: toReview[0].kind })}>
+            Review
           </Button>
         ),
       });
@@ -480,13 +485,21 @@ function Home({
               </li>
             );
           })}
-          {PLANNED.map((p) => (
-            <li key={p.key}>
-              <AgentFolder icon={p.icon} tint="text-muted-foreground" name={p.name} status="Coming soon" state="locked" title={p.does} />
-            </li>
-          ))}
           {!agents && <li className="col-span-full text-sm text-muted-foreground">Loading agents…</li>}
         </ul>
+        <details className="group mt-6">
+          <summary className="flex cursor-pointer list-none items-center gap-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">
+            <ChevronRight className="size-3.5 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true" />
+            Coming soon · {PLANNED.length} agents
+          </summary>
+          <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-x-3 gap-y-5">
+            {PLANNED.map((p) => (
+              <li key={p.key}>
+                <AgentFolder icon={p.icon} tint="text-muted-foreground" name={p.name} status={p.does} state="locked" title={p.does} />
+              </li>
+            ))}
+          </ul>
+        </details>
       </section>
     </div>
   );
@@ -791,6 +804,7 @@ function AnalyticsPanel({ reports, onOpenAgent }: { reports: { seo: Report; geo:
 /* ───────────── Agents feed panel (Okara "Agents Feed") ───────────── */
 
 function feedLine(key: string, a: AgentSummary | undefined, reports: { seo: Report; geo: Report } | null, docs: ContextDocsResponse | null) {
+  if (a?.lastRun?.status === "QUEUED" && a.lastRun.startedAt) return "Hit a problem, retrying soon: open Logs for the reason";
   if (a?.lastRun?.status === "RUNNING" || a?.lastRun?.status === "QUEUED") return "Working…";
   if (a?.lastRun?.status === "FAILED") return "Last run failed: open Logs for details";
   if (key === "seo" && reports?.seo) return `${reports.seo.score}/100 · ${reports.seo.findings.length} fixes ready`;
@@ -858,7 +872,7 @@ function AgentsFeed({
         );
       })}
       {PLANNED.map((p) => (
-        <li key={p.key} className="flex items-center gap-3 px-4 py-3.5 opacity-70">
+        <li key={p.key} className="flex items-center gap-3 px-4 py-3.5">
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted">
             <p.icon className="size-4 text-muted-foreground" aria-hidden="true" />
           </span>

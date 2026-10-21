@@ -51,7 +51,7 @@ export function BrandSwitcher({ workspaceId, brands, activeBrandId }: Props) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="h-8 min-w-[9rem] justify-between sm:min-w-[12rem]"
+              className="h-10 min-w-[9rem] justify-between sm:h-8 sm:min-w-[12rem]"
               aria-label="Select brand"
             >
               <span className="flex items-center gap-2 truncate">
@@ -86,7 +86,7 @@ export function BrandSwitcher({ workspaceId, brands, activeBrandId }: Props) {
         <NewBrandDialog
           workspaceId={workspaceId}
           trigger={
-            <Button variant="outline" size="icon" className="size-8" aria-label="New brand" title="New brand">
+            <Button variant="outline" size="icon" className="size-10 sm:size-8" aria-label="New brand" title="New brand">
               <Plus />
             </Button>
           }

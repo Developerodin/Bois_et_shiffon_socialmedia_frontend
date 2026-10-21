@@ -146,12 +146,12 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
           Strategy documents
         </p>
-        <h2
+        <h1
           id="context-heading"
           className="font-display text-3xl font-medium tracking-tight sm:text-4xl"
         >
           Brand context
-        </h2>
+        </h1>
         <p className="max-w-2xl text-sm text-muted-foreground text-pretty sm:text-base">
           Agents work from the documents you confirm. Read each draft, fix
           anything the Research agent got wrong, then confirm it. Until you do,

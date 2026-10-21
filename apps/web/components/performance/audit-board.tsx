@@ -76,7 +76,7 @@ function Panel({ title, report, agent, children }: { title: string; report: Repo
     <section aria-label={title} className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h3 className="font-display text-xl font-medium tracking-tight">{title}</h3>
+          <h2 className="font-display text-xl font-medium tracking-tight">{title}</h2>
           {report && <p className="mt-1 text-xs text-muted-foreground">Last run {formatDate(report.createdAt)}</p>}
         </div>
         {report && <Score label="out of 100" value={report.score} big />}
@@ -158,7 +158,7 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8">
       <div>
-        <h2 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Performance</h2>
+        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Performance</h1>
         <p className="mt-1 text-sm text-muted-foreground">How findable the brand is — in search engines and in AI assistants — and what to fix first.</p>
       </div>
       {body}

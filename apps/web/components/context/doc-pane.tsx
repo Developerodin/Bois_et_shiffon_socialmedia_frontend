@@ -131,12 +131,12 @@ export function DocPane({
     >
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <h3
+          <h2
             id="doc-title"
             className="font-display text-2xl font-medium tracking-tight"
           >
             {entry.title}
-          </h3>
+          </h2>
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <DocStateBadge entry={entry} />
             {latest ? (

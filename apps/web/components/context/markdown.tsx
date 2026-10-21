@@ -72,21 +72,21 @@ export function Markdown({ source }: { source: string }) {
           }
           if (block.level === 2) {
             return (
-              <h4
+              <h3
                 key={i}
                 className="mt-2 font-display text-xl font-medium tracking-tight text-foreground"
               >
                 {inline(block.text)}
-              </h4>
+              </h3>
             );
           }
           return (
-            <h5
+            <h4
               key={i}
               className="mt-1 font-mono text-xs uppercase tracking-[0.16em] text-primary"
             >
               {inline(block.text)}
-            </h5>
+            </h4>
           );
         }
         if (block.type === "p") {

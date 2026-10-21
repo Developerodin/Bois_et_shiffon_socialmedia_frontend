@@ -95,9 +95,9 @@ function AddressStep({
 
   return (
     <form onSubmit={onSubmit} noValidate className="mx-auto flex w-full max-w-3xl flex-col">
-      <label htmlFor="website" className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
-        What&rsquo;s your website?
-      </label>
+      <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
+        <label htmlFor="website">What&rsquo;s your website?</label>
+      </h1>
       <p id="website-help" className="mt-3 max-w-[60ch] text-muted-foreground">
         We read it and draft five strategy documents for you to check: product, marketing strategy, competitors,
         brand voice and content. It takes about two minutes.

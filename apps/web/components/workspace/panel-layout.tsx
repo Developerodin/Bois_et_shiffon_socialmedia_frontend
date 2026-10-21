@@ -56,12 +56,14 @@ export function PanelLayout<Id extends string>({
   const [layout, setLayout] = useState<Layout<Id>>(presets[0].layout);
   const [mobilePanel, setMobilePanel] = useState<Id | null>(null);
   const [dropHint, setDropHint] = useState<string | null>(null);
+  const [hintSeen, setHintSeen] = useState(true);
   const dragging = useRef<Id | null>(null);
   const rowRef = useRef<HTMLDivElement>(null);
 
   // Load the saved arrangement once (after mount, so server and client render the same first).
   useEffect(() => {
     try {
+      setHintSeen(localStorage.getItem(`${storageKey}.hint`) === "1");
       const saved = localStorage.getItem(storageKey);
       if (saved) setLayout(sanitize(JSON.parse(saved), ids, presets[0].layout));
     } catch {
@@ -219,7 +221,25 @@ export function PanelLayout<Id extends string>({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex h-9 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
-        <p className="hidden text-xs text-muted-foreground lg:block">Drag a panel by its header to move it. Drag the dividers to resize.</p>
+        {!hintSeen && (
+          <p className="hidden items-center gap-2 text-xs text-muted-foreground lg:flex">
+            Drag a panel by its header to move it. Drag the dividers to resize.
+            <button
+              type="button"
+              className="rounded px-1.5 py-1 font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => {
+                setHintSeen(true);
+                try {
+                  localStorage.setItem(`${storageKey}.hint`, "1");
+                } catch {
+                  // ignore
+                }
+              }}
+            >
+              Got it
+            </button>
+          </p>
+        )}
         <div className="ml-auto">{layoutMenu}</div>
       </div>
 
@@ -290,7 +310,7 @@ export function PanelLayout<Id extends string>({
                         type="button"
                         onClick={() => toggleCollapse(id)}
                         aria-expanded={!collapsed}
-                        className="flex min-w-0 items-center gap-1.5 rounded text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="flex min-w-0 items-center gap-1.5 rounded py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         {collapsed ? <ChevronRight className="size-3.5" aria-hidden="true" /> : <ChevronDown className="size-3.5" aria-hidden="true" />}
                         <span className="text-muted-foreground [&_svg]:size-4">{p.icon}</span>
@@ -325,6 +345,9 @@ export function PanelLayout<Id extends string>({
                 role="separator"
                 aria-orientation="vertical"
                 aria-label="Resize columns"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round((col.size / (col.size + layout.columns[ci + 1].size)) * 100)}
                 tabIndex={0}
                 onPointerDown={(e) => startResize(ci, e)}
                 onKeyDown={(e) => nudge(ci, e)}
