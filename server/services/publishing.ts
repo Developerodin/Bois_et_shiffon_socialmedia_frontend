@@ -5,6 +5,7 @@ import { PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
 import { enqueueJob } from "@/server/jobs/queue";
 import { accessToken, markReconnect, ReconnectNeeded } from "@/server/services/connections";
 import { safeHttpUrl } from "@/lib/website";
+import { signedMediaUrl } from "@/server/storage/media";
 
 /**
  * Approval → publishing (design §6 "sealed package", DEC-015/016). Rules:
@@ -29,16 +30,28 @@ const CHANNEL_PROVIDER: Record<ContentChannel, IntegrationProvider | null> = {
   INSTAGRAM_POST: "INSTAGRAM",
   THREADS_POST: "THREADS",
   PINTEREST_PIN: "PINTEREST",
-  INSTAGRAM_CAROUSEL: null, // ponytail: needs several images; post these from Instagram until drafts carry media
-  INSTAGRAM_REEL: null, // needs a rendered video
+  INSTAGRAM_CAROUSEL: "INSTAGRAM",
+  INSTAGRAM_REEL: "INSTAGRAM",
 };
-const NEEDS_IMAGE: ContentChannel[] = ["INSTAGRAM_POST", "PINTEREST_PIN"];
-const TEXT_LIMIT: Partial<Record<ContentChannel, number>> = { THREADS_POST: 500, INSTAGRAM_POST: 2200 };
+// How many images each channel takes [min, max]; Reels take a video instead.
+const IMAGES: Record<ContentChannel, [number, number]> = {
+  INSTAGRAM_POST: [1, 1],
+  PINTEREST_PIN: [1, 1],
+  INSTAGRAM_CAROUSEL: [2, 10],
+  FACEBOOK_POST: [0, 1],
+  THREADS_POST: [0, 1],
+  INSTAGRAM_REEL: [0, 0],
+};
+const TEXT_LIMIT: Partial<Record<ContentChannel, number>> = { THREADS_POST: 500, INSTAGRAM_POST: 2200, INSTAGRAM_CAROUSEL: 2200, INSTAGRAM_REEL: 2200 };
 const LIVE: Prisma.EnumPublicationStatusFilter = { in: ["SCHEDULED", "PUBLISHING", "PUBLISHED", "PENDING_VERIFY"] };
 
 export function publishRequirements(channel: ContentChannel) {
-  return { provider: CHANNEL_PROVIDER[channel], needsImage: NEEDS_IMAGE.includes(channel), needsBoard: channel === "PINTEREST_PIN" };
+  const [minImages, maxImages] = IMAGES[channel];
+  return { provider: CHANNEL_PROVIDER[channel], needsImage: minImages > 0, minImages, maxImages, needsVideo: channel === "INSTAGRAM_REEL", needsBoard: channel === "PINTEREST_PIN" };
 }
+
+/** Where the post's media lives: our private uploads (signed at posting time) and/or public links. */
+type Target = { boardId: string | null; imageUrl?: string | null; media?: string[]; links?: string[]; videoUrl?: string | null };
 
 export function postText(body: Body) {
   return [body.caption?.trim(), body.hashtags?.length ? body.hashtags.join(" ") : ""].filter(Boolean).join("\n\n");
@@ -164,7 +177,10 @@ export async function schedulePublication(input: {
   version: number;
   connectionId: string;
   boardId?: string;
-  imageUrl?: string;
+  imageUrl?: string; // a public link (one-image channels)
+  imageLinks?: string[];
+  mediaKeys?: string[]; // files uploaded to this brand's media storage
+  videoUrl?: string;
   runAt?: Date; // omitted = now
 }) {
   const runAt = input.runAt ?? new Date();
@@ -184,9 +200,24 @@ export async function schedulePublication(input: {
       where: { id: input.connectionId, brandId: input.brandId, provider: req.provider, status: "ACTIVE" },
     });
     if (!conn) throw new PublishingError("Choose a connected account for this channel", 400);
-    const imageUrl = input.imageUrl?.trim() ? safeHttpUrl(input.imageUrl.trim())?.href ?? null : null;
-    if (input.imageUrl?.trim() && (!imageUrl || !imageUrl.startsWith("https://"))) throw new PublishingError("The image link must be a public https:// address", 400);
-    if (req.needsImage && !imageUrl) throw new PublishingError("This channel needs an image", 400);
+    const https = (u: string) => {
+      const h = safeHttpUrl(u.trim())?.href;
+      return h?.startsWith("https://") ? h : null;
+    };
+    const rawLinks = [...(input.imageLinks ?? []), ...(input.imageUrl?.trim() ? [input.imageUrl] : [])].filter((u) => u.trim());
+    const links = rawLinks.map(https);
+    if (links.some((l) => !l)) throw new PublishingError("Image links must be public https:// addresses", 400);
+    const media = input.mediaKeys ?? [];
+    // Uploaded files must be this brand's own (keys are workspace/brand/file).
+    if (media.some((k) => !k.startsWith(`${input.workspaceId}/${input.brandId}/`) || k.includes(".."))) throw new PublishingError("Unknown image", 400);
+    const count = media.length + links.length;
+    if (count < req.minImages) throw new PublishingError(req.minImages === 1 ? "This channel needs an image" : `A carousel needs at least ${req.minImages} images`, 400);
+    if (count > req.maxImages) throw new PublishingError(req.maxImages === 0 ? "Reels take a video, not images" : `This channel takes at most ${req.maxImages} image${req.maxImages === 1 ? "" : "s"}`, 400);
+    if (req.provider === "INSTAGRAM" && media.some((k) => !/\.jpe?g$/i.test(k))) throw new PublishingError("Instagram only accepts JPEG photos. Upload a .jpg instead.", 400);
+    const videoUrl = input.videoUrl?.trim() ? https(input.videoUrl) : null;
+    if (input.videoUrl?.trim() && !videoUrl) throw new PublishingError("The video link must be a public https:// address", 400);
+    if (req.needsVideo && !videoUrl) throw new PublishingError("A Reel needs a video link", 400);
+    const imageUrl = links[0] ?? null;
     if (req.needsBoard && !input.boardId) throw new PublishingError("Choose a board", 400);
     const limit = TEXT_LIMIT[item.channel];
     if (limit && postText(latest.body as Body).length > limit) throw new PublishingError(`The text is over this channel's ${limit}-character limit`, 400);
@@ -198,7 +229,7 @@ export async function schedulePublication(input: {
       data: {
         workspaceId: input.workspaceId, brandId: input.brandId, contentItemId: item.id, contentVersionId: latest.id,
         packageHash: approval.packageHash, connectionId: conn.id, provider: conn.provider,
-        target: { boardId: input.boardId ?? null, imageUrl }, runAt, createdByUserId: input.userId,
+        target: { boardId: input.boardId ?? null, imageUrl, media, links: links as string[], videoUrl } satisfies Target, runAt, createdByUserId: input.userId,
       },
     });
     await tx.contentItem.update({ where: { id: item.id }, data: { status: "SCHEDULED", scheduledFor: runAt } });
@@ -248,11 +279,13 @@ export async function executePublication(payload: unknown) {
     return;
   }
   const body = latest.body as Body;
-  const target = a.target as { boardId: string | null; imageUrl: string | null };
+  const target = a.target as Target;
   const profile = await prisma.brandProfile.findFirst({ where: { brandId: a.brandId }, select: { websiteUrl: true } });
   try {
+    // Uploads are private: the platform gets a link valid for an hour, made at the moment of posting.
+    const images = [...(await Promise.all((target.media ?? []).map((k) => signedMediaUrl(k, 3600)))), ...(target.links ?? (target.imageUrl ? [target.imageUrl] : []))];
     const res = await publisher(
-      { text: postText(body), title: body.pinTitle || body.hook || item.title, altText: body.altText ?? "", link: safeHttpUrl(profile?.websiteUrl)?.href ?? null, imageUrl: target.imageUrl, boardId: target.boardId },
+      { text: postText(body), title: body.pinTitle || body.hook || item.title, altText: body.altText ?? "", link: safeHttpUrl(profile?.websiteUrl)?.href ?? null, imageUrl: images[0] ?? null, imageUrls: images, videoUrl: target.videoUrl ?? null, boardId: target.boardId },
       { id: conn.externalAccountId, token },
     );
     await finish("PUBLISHED", { externalId: res.externalId, externalUrl: safeHttpUrl(res.externalUrl)?.href ?? null, publishedAt: new Date(), error: null }, "PUBLISHED");
