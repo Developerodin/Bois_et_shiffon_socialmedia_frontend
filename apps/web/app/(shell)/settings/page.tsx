@@ -33,7 +33,7 @@ export default async function SettingsPage({
   // OAuth callback lands here with ?tab=connections&connected=…|connectError=…
   const q = await searchParams;
   const notice = q.connected
-    ? { kind: "ok" as const, text: `Connected ${q.connected}.` }
+    ? { kind: "ok" as const, text: `Connected ${q.connected}.`, names: q.connected.split(", ") }
     : q.connectError
       ? { kind: "error" as const, text: q.connectError }
       : null;

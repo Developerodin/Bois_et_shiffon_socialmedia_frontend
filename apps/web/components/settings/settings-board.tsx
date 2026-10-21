@@ -24,7 +24,7 @@ type Props = {
   workspaceId: string;
   brandId: string | null;
   initialTab?: TabKey;
-  notice: { kind: "ok" | "error"; text: string } | null;
+  notice: { kind: "ok" | "error"; text: string; names?: string[] } | null;
 };
 
 export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Props) {

@@ -34,7 +34,6 @@ async function main() {
   await assert.rejects(completeConnect({ provider, state, code: "fake-code", userId: owner.userId }), ConnectionError);
   console.log("2-4 wrong user rejected, state single-use, replay refused ✓");
 
-  // 5. disconnect wipes the encrypted tokens
   const conn = await prisma.integrationConnection.create({
     data: {
       workspaceId: scope.workspaceId, brandId: scope.brandId, connectedByUserId: owner.userId, provider,
@@ -43,6 +42,13 @@ async function main() {
     },
   });
   assert.deepEqual(decryptCredentials(conn.encryptedCredentials!), { accessToken: "t" });
+  // 4b. a repeat of a callback that did connect reports the same success (browser double-hit)
+  const again = await completeConnect({ provider, state, code: "fake-code", userId: owner.userId });
+  assert.deepEqual(again.connections.map((c) => c.id), [conn.id]);
+  await assert.rejects(completeConnect({ provider, state, code: "x", userId: "someone-else" }), ConnectionError);
+  console.log("4b repeated callback after a real connect → same success, other users still refused ✓");
+
+  // 5. disconnect wipes the encrypted tokens
   assert.equal(await disconnect({ ...scope, connectionId: conn.id }), true);
   const after = await prisma.integrationConnection.findUniqueOrThrow({ where: { id: conn.id } });
   assert.equal(after.status, "REVOKED");

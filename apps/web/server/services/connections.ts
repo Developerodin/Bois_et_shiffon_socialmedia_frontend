@@ -77,8 +77,12 @@ export async function completeConnect(input: {
     },
     data: { consumedAt: new Date() },
   });
-  if (consumed.count !== 1) throw new ConnectionError("This connect link expired or was already used. Try again.");
-  const st = await prisma.oAuthStateTransaction.findUniqueOrThrow({ where: { stateHash } });
+  if (consumed.count !== 1) {
+    const replay = await replayedConnect(stateHash, input);
+    if (replay) return replay;
+    throw new ConnectionError("This connect link expired or was already used. Try again.");
+  }
+  const st =await prisma.oAuthStateTransaction.findUniqueOrThrow({ where: { stateHash } });
 
   await requireBrandAccess(st.workspaceId, st.brandId, input.userId);
   await requirePermission(st.workspaceId, input.userId, "integrations.manage", st.brandId);
@@ -129,6 +133,27 @@ export async function completeConnect(input: {
     return rows;
   });
   return { workspaceId: st.workspaceId, brandId: st.brandId, connections: saved };
+}
+
+/**
+ * Browsers and providers sometimes hit the callback twice (back button, prefetch, a double
+ * redirect). The first request consumed the state and connected; the repeat should report the
+ * same success, not "already used". Only the same user, the same state, within 2 minutes, and it
+ * never issues or touches tokens. Waits briefly in case the first request is still exchanging.
+ */
+async function replayedConnect(stateHash: string, input: { provider: IntegrationProvider; userId: string }) {
+  const st = await prisma.oAuthStateTransaction.findUnique({ where: { stateHash } });
+  if (!st?.consumedAt || st.userId !== input.userId || st.provider !== input.provider) return null;
+  if (Date.now() - st.consumedAt.getTime() > 2 * 60_000) return null;
+  await requireBrandAccess(st.workspaceId, st.brandId, input.userId);
+  for (let i = 0; i < 15; i++) {
+    const connections = await prisma.integrationConnection.findMany({
+      where: { brandId: st.brandId, provider: input.provider, status: "ACTIVE", updatedAt: { gte: st.consumedAt } },
+    });
+    if (connections.length) return { workspaceId: st.workspaceId, brandId: st.brandId, connections };
+    await new Promise((r) => setTimeout(r, 1000)); // ponytail: polls ~15s; the first request's exchange is usually <5s
+  }
+  return null;
 }
 
 /** Disconnect = forget the tokens. ponytail: no provider-side revoke call; the user can also remove the app in the platform's settings. */

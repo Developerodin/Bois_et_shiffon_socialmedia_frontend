@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { Plug } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { CircleAlert, CircleCheck, Plug, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -34,7 +34,7 @@ type Props = {
   brandId: string;
   canManage: boolean;
   /** Result of the OAuth round-trip, read from the URL by the parent. */
-  notice: { kind: "ok" | "error"; text: string } | null;
+  notice: { kind: "ok" | "error"; text: string; names?: string[] } | null;
 };
 
 export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Props) {
@@ -43,6 +43,18 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
   const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Connection | null>(null);
+  const [shown, setShown] = useState(notice);
+  const fresh = new Set(shown?.kind === "ok" ? shown.names : []);
+
+  // The OAuth result arrives as one-time URL params; drop them so a refresh or a shared link
+  // doesn't replay the message.
+  useEffect(() => {
+    if (!notice) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("connected");
+    url.searchParams.delete("connectError");
+    window.history.replaceState(window.history.state, "", url);
+  }, [notice]);
 
   async function connect(provider: Provider) {
     setBusy(provider);
@@ -87,13 +99,22 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                 ) : null}
               </div>
               {accounts.map((c) => (
-                <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-muted/40 px-4 py-2.5">
+                <div
+                  key={c.id}
+                  className={
+                    fresh.has(c.displayName) && c.status === "ACTIVE"
+                      ? "flex flex-wrap items-center justify-between gap-3 rounded-xl border border-success/50 bg-success/10 px-4 py-2.5"
+                      : "flex flex-wrap items-center justify-between gap-3 rounded-xl border border-transparent bg-muted/40 px-4 py-2.5"
+                  }
+                >
                   <div className="flex min-w-0 items-center gap-3">
                     <StatusPill tone={c.status === "ACTIVE" ? "good" : "bad"}>
                       {c.status === "ACTIVE" ? "Connected" : "Needs reconnect"}
                     </StatusPill>
                     <span className="truncate text-sm">{c.displayName}</span>
-                    <span className="text-xs text-muted-foreground">since {formatDate(c.connectedAt)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {fresh.has(c.displayName) && c.status === "ACTIVE" ? "just now" : `since ${formatDate(c.connectedAt)}`}
+                    </span>
                   </div>
                   {canManage && (
                     <Button size="sm" variant="ghost" onClick={() => setRemoving(c)}>
@@ -115,17 +136,36 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
         title="Connected accounts"
         description="This brand's own channel accounts. Tokens are stored encrypted and never shown."
       />
-      {(notice || error) && (
-        <p
-          role="status"
+      {(shown || error) && (
+        <div
+          role={error || shown?.kind === "error" ? "alert" : "status"}
           className={
-            notice?.kind === "ok" && !error
-              ? "rounded-xl border border-success/40 bg-success/10 px-4 py-3 text-sm"
-              : "rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm"
+            shown?.kind === "ok" && !error
+              ? "flex items-start gap-3 rounded-xl border border-success/40 bg-success/10 px-4 py-3 text-sm"
+              : "flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm"
           }
         >
-          {error ?? notice?.text}
-        </p>
+          {shown?.kind === "ok" && !error ? (
+            <CircleCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-success" />
+          ) : (
+            <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" />
+          )}
+          <p className="flex-1">
+            {error ?? shown?.text}
+            {shown?.kind === "ok" && !error && " Agents can now use this account for this brand."}
+          </p>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={() => {
+              setShown(null);
+              setError(null);
+            }}
+            className="-m-2 grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X aria-hidden className="size-4" />
+          </button>
+        </div>
       )}
       {body}
       <ConfirmDialog
