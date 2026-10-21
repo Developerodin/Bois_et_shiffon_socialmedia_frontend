@@ -23,6 +23,7 @@
     "smoke:connections": "tsx --env-file=.env scripts/smoke-connections.ts",
     "smoke:google": "tsx --env-file=.env scripts/smoke-google-signup.ts",
     "smoke:chat": "tsx --env-file=.env scripts/smoke-chat.ts",
+    "smoke:pipeline": "tsx --env-file=.env scripts/smoke-pipeline.ts",
     "audit": "tsx --env-file=.env scripts/run-audit.ts",
     "probe:meta": "tsx --env-file=.env scripts/probe-meta-data.ts",
     "audit:ui": "tsx --env-file=.env scripts/audit-ui.ts",

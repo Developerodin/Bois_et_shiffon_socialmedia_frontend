@@ -295,3 +295,16 @@ Settings → **Connections** (per brand): Facebook Pages, Instagram, Threads, Go
 - Chat built on the **Vercel AI SDK** (`ai` v7, `@ai-sdk/openai`, `@ai-sdk/react`): streaming, multi-step tool calls (`isStepCount(6)`), conversations saved per person+brand in `ChatThread` (client sends only the newest message). Tools: listDocuments, readDocument, getSiteReports, listAgents, startAgent (same `agents.run` check as the Run button), OpenAI webSearch. **No publish/approve/spend tool.** 30 messages / 10 min per person. Usage logged to `AiWorkflowRun` (`chat.turn`). Check: `npm run smoke:chat -w web`.
 - Out of AI credits: provider marks it non-retryable (`isOutOfCreditsText`), agents stop with one plain message, workspace banner, chat shows the same sentence.
 - Reuse plan for the next agents (repo research 2026-10-21): prompts adapted (MIT, attributed in NOTICE.md) from **coreyhaines31/marketingskills** (social, content-strategy, copywriting, copy-editing, marketing-ideas, analytics, influencer-marketing) and **instagram-agent-skill** (hooks, caption, carousel, plan, audit, slop/humanizer → French equivalents). Quality checker: LLM rubric + **LanguageTool** over HTTP for French. Orchestration/handoffs later: `@openai/agents` if agents need to call each other. Do not copy **Postiz** (AGPL). React bumped to 19.1.10 (security patch line; required by `@ai-sdk/react`).
+
+### 8j. Content agents (2026-10-21)
+
+Pipeline (agents only draft; people shortlist, approve and publish):
+`Opportunities (scout, daily) → people shortlist → Planner → Brief writer → Creator → Quality check → [approval, later] → … → Analyst`.
+
+- Models: `Opportunity` (Recommend/Hold/Reject + reason + sources, deduped per brand), `ContentItem` (channel, date, status lifecycle, brief), `ContentVersion` (immutable drafts; approval will bind to one), `QualityCheck` (per-check pass/warn/blocker), `LearningNote`.
+- Planner dates come from a fixed cadence per channel (`server/content/calendar.ts`); the AI only proposes posts. Falls back to top Recommend ideas when nothing is shortlisted, and says so.
+- Quality = deterministic rules (`server/content/rules.ts`: caption limits, 125-char first line, ≤5 hashtags, one ask, FR/EN AI-filler list, Pin title, Threads 500, carousel/Reel structure, alt text) + optional **LanguageTool** (`LANGUAGETOOL_URL`) + AI review (voice, product accuracy vs. brand docs, French, CTA). Blocker → stays in draft review; Creator's next run rewrites it from the report (new version).
+- Analyst writes honest notes (no published posts yet → says so; uses reports, pipeline, quality patterns).
+- UI: **Ideas** panel (shortlist / dismiss), **Content calendar** panel, post view (brief, draft, quality), learning notes on the Analyst page, Today tasks for ideas to decide and drafts awaiting approval, "Content team" layout preset.
+- Checks: `npm run smoke:pipeline -w web` (mock AI, throwaway brand), `tests/content-rules.test.ts`.
+- Not yet: approval/publishing (next slice), image generation, product catalogue facts (stock/price) for accuracy checks, per-brand cadence settings, Reddit/Pinterest/Influencer/UGC agents (locked tiles).

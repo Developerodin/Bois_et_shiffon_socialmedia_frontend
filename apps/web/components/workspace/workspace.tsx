@@ -37,25 +37,28 @@ import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { AccountMenu } from "@/components/workspace/account-menu";
 import { ChatPane } from "@/components/workspace/chat-pane";
+import { ContentPanel, ContentView, IdeasPanel, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
+import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { cn } from "@/lib/utils";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
-type View = { kind: "home" } | { kind: "doc"; doc: ContextDocKind } | { kind: "agent"; key: string };
+type View = { kind: "home" } | { kind: "doc"; doc: ContextDocKind } | { kind: "agent"; key: string } | { kind: "content"; id: string };
 
 /** Agents shown as tiles. Built ones come from the API; planned ones are locked (Okara shows locked tiles too). */
 const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
   research: { icon: ScanSearch, tint: "text-primary" },
+  scout: { icon: Compass, tint: "text-primary" },
+  planner: { icon: CalendarDays, tint: "text-primary" },
+  brief: { icon: FileText, tint: "text-primary" },
+  creator: { icon: PenLine, tint: "text-primary" },
+  quality: { icon: ShieldCheck, tint: "text-success" },
+  analyst: { icon: LineChart, tint: "text-accent" },
   seo: { icon: Gauge, tint: "text-success" },
   geo: { icon: MessageSquareQuote, tint: "text-accent" },
 };
 const PLANNED: { key: string; name: string; icon: LucideIcon; does: string }[] = [
-  { key: "scout", name: "Opportunities", icon: Compass, does: "Finds what to post about and ranks it" },
-  { key: "planner", name: "Planner", icon: CalendarDays, does: "Fills your 30-day calendar" },
-  { key: "creator", name: "Creator", icon: PenLine, does: "Drafts captions, scripts and visuals" },
-  { key: "quality", name: "Quality check", icon: ShieldCheck, does: "Checks voice, accuracy and stock before approval" },
-  { key: "analyst", name: "Analyst", icon: LineChart, does: "Reads results and writes learning notes" },
   { key: "reddit", name: "Reddit", icon: MessagesSquare, does: "Finds threads and drafts helpful replies" },
   { key: "pinterest", name: "Pinterest", icon: Pin, does: "Publishes Pins and reads saves" },
   { key: "influencer", name: "Influencer", icon: Users, does: "Finds creators who fit your brand" },
@@ -108,6 +111,12 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
     if (reportRuns) void loadReports();
   }, [reportRuns, loadReports]);
 
+  const pickOpps = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "NEW" && o.decision === "RECOMMEND").length, []);
+  const pickItems = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "AWAITING_APPROVAL").length, []);
+  const ideasToDecide = useBrandData(base, "opportunities", pickOpps as (d: never) => number).data;
+  const awaiting = useBrandData(base, "content", pickItems as (d: never) => number).data;
+  const pipeline = ideasToDecide == null || awaiting == null ? null : { ideasToDecide, awaiting };
+
   // Docs and agents open in the "Today & agents" panel (it's re-shown by the layout if hidden).
   const open = (v: View) => {
     setView(v);
@@ -136,6 +145,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             onChanged={(entry) => setDocs((d) => d && { ...d, docs: d.docs.map((x) => (x.kind === entry.kind ? entry : x)) })}
             onStale={() => fetchContextDocs(workspaceId, brandId).then(setDocs)}
           />
+        ) : view.kind === "content" ? (
+          <ContentView base={base} id={view.id} onBack={() => setView({ kind: "home" })} />
         ) : view.kind === "agent" ? (
           <AgentView
             agentKey={view.key}
@@ -149,7 +160,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             onRan={refreshAgents}
           />
         ) : (
-          <Home user={user} docs={docs} agents={agents} reports={reports} connections={connections} onOpen={open} />
+          <Home user={user} docs={docs} agents={agents} reports={reports} connections={connections} pipeline={pipeline} onOpen={open} onShowPanel={(id) => setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }))} />
         ),
     },
     {
@@ -163,6 +174,18 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
       title: "Agents feed",
       icon: <ListChecks />,
       render: () => <AgentsFeed agents={agents} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} onRan={refreshAgents} onOpen={open} />,
+    },
+    {
+      id: "ideas",
+      title: "Ideas",
+      icon: <Compass />,
+      render: () => <IdeasPanel base={base} onRunScout={() => open({ kind: "agent", key: "scout" })} />,
+    },
+    {
+      id: "content",
+      title: "Content calendar",
+      icon: <CalendarDays />,
+      render: () => <ContentPanel base={base} onOpen={(id) => open({ kind: "content", id })} onRunPlanner={() => open({ kind: "agent", key: "planner" })} />,
     },
     { id: "chat", title: "Chat", icon: <MessageCircle />, render: () => <ChatPane workspaceId={workspaceId} brandId={brandId} website={website} /> },
     { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> },
@@ -183,13 +206,18 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   );
 }
 
-type PanelId = "context" | "home" | "analytics" | "feed" | "chat" | "log";
+type PanelId = "context" | "home" | "ideas" | "content" | "analytics" | "feed" | "chat" | "log";
 
 const PRESETS: Preset<PanelId>[] = [
   {
     name: "Focus",
     description: "Context, today and agents, chat",
     layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 2.2, panels: ["home"] }, { id: "c", size: 1.3, panels: ["chat", "feed"] }], collapsed: ["feed"] },
+  },
+  {
+    name: "Content team",
+    description: "Ideas, today and agents, content calendar, chat",
+    layout: { columns: [{ id: "a", size: 1.1, panels: ["ideas"] }, { id: "b", size: 1.8, panels: ["home"] }, { id: "c", size: 1.1, panels: ["content"] }, { id: "d", size: 1.1, panels: ["chat"] }], collapsed: [] },
   },
   {
     name: "Classic",
@@ -379,14 +407,18 @@ function Home({
   agents,
   reports,
   connections,
+  pipeline,
   onOpen,
+  onShowPanel,
 }: {
   user: Props["user"];
   docs: ContextDocsResponse | null;
   agents: AgentSummary[] | null;
   reports: { seo: Report; geo: Report } | null;
   connections: Connection[] | null;
+  pipeline: { ideasToDecide: number; awaiting: number } | null;
   onOpen: (v: View) => void;
+  onShowPanel: (id: PanelId) => void;
 }) {
   const first = user.name?.trim().split(/\s+/)[0];
   const tasks = useMemo(() => {
@@ -412,6 +444,32 @@ function Home({
       run("seo", "Check your website's SEO health", !!reports.seo);
       run("geo", "See if AI assistants recommend you", !!reports.geo);
     }
+    if (pipeline?.ideasToDecide) {
+      list.push({
+        id: "ideas",
+        done: false,
+        label: "Decide on new post ideas",
+        detail: `${pipeline.ideasToDecide} recommended`,
+        action: (
+          <Button size="sm" variant="secondary" onClick={() => onShowPanel("ideas")}>
+            See ideas
+          </Button>
+        ),
+      });
+    }
+    if (pipeline?.awaiting) {
+      list.push({
+        id: "approve",
+        done: false,
+        label: "Review drafts ready for approval",
+        detail: `${pipeline.awaiting} waiting`,
+        action: (
+          <Button size="sm" variant="secondary" onClick={() => onShowPanel("content")}>
+            Open calendar
+          </Button>
+        ),
+      });
+    }
     if (connections) {
       list.push({
         id: "connect",
@@ -426,7 +484,7 @@ function Home({
       });
     }
     return list;
-  }, [docs, reports, connections, onOpen]);
+  }, [docs, reports, connections, pipeline, onOpen, onShowPanel]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done);
@@ -681,6 +739,8 @@ function AgentView({
           </section>
         )}
 
+        {agentKey === "analyst" && <LearningNotes workspaceId={workspaceId} brandId={brandId} />}
+
         {agentKey === "research" && docs && (
           <ul className="divide-y divide-border rounded-xl border border-border">
             {docs.docs.map((d) => (
@@ -862,5 +922,30 @@ function AgentsFeed({
       ))}
       {!agents && <li className="px-4 py-3 text-sm text-muted-foreground">Loading agents…</li>}
     </ul>
+  );
+}
+
+/* ───────────── Analyst notes ───────────── */
+
+function LearningNotes({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
+  const [notes, setNotes] = useState<{ id: string; title: string; body: string; createdAt: string }[] | null>(null);
+  useEffect(() => {
+    request<{ notes: { id: string; title: string; body: string; createdAt: string }[] }>(
+      `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}/learning-notes`,
+    ).then((d) => setNotes(d.notes), () => setNotes([]));
+  }, [workspaceId, brandId]);
+  if (!notes) return <p className="text-sm text-muted-foreground">Loading notes…</p>;
+  if (!notes.length) return <p className="text-sm text-muted-foreground">No learning notes yet. Run the Analyst to write the first one.</p>;
+  return (
+    <section aria-labelledby="notes-h" className="flex flex-col gap-4">
+      <h2 id="notes-h" className="text-base font-semibold">Learning notes</h2>
+      {notes.map((n) => (
+        <article key={n.id} className="rounded-xl border border-border p-4">
+          <p className="text-xs text-muted-foreground">{timeAgo(n.createdAt)}</p>
+          <h3 className="mt-1 font-medium">{n.title}</h3>
+          <div className="mt-2 text-sm"><Markdown source={n.body} /></div>
+        </article>
+      ))}
+    </section>
   );
 }
