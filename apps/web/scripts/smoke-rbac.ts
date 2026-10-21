@@ -52,7 +52,11 @@ async function main() {
     console.log("3 custom role assigned → permissions change immediately ✓");
 
     // 4. ownership guards
-    await assert.rejects(changeMemberRole(ws.id, user.id, member.id, ws.roles.find((r) => r.slug === "owner")!.id), AccountFlowError);
+    const ownerRole = ws.roles.find((r) => r.slug === "owner")!;
+    await assert.rejects(changeMemberRole(ws.id, user.id, member.id, ownerRole.id), AccountFlowError);
+    // A non-owner can't reach ownership by invitation, or remove an owner.
+    await assert.rejects(createInvitation({ workspaceId: ws.id, email: `takeover-${Date.now()}@example.com`, roleId: ownerRole.id, invitedByUserId: user.id }), /Only owners/);
+    await assert.rejects(removeMember(ws.id, user.id, owner.id), /Only owners/);
     const owners = (await listMembers(ws.id)).filter((m) => m.role?.slug === "owner");
     if (owners.length === 1) {
       await assert.rejects(removeMember(ws.id, owner.userId, owners[0].id), AccountFlowError);

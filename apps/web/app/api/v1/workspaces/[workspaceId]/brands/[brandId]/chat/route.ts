@@ -21,7 +21,14 @@ import { prisma } from "@/server/db/prisma";
 // Streaming replies with a few tool steps can take a while.
 export const maxDuration = 300;
 
-const Body = z.object({ id: z.string().min(8).max(100), message: z.unknown() });
+// The client sends only the person's newest message; assistant and tool turns come from our database.
+const Body = z.object({
+  id: z.string().min(8).max(100),
+  message: z.object({ role: z.literal("user") }).passthrough().refine((m) => JSON.stringify(m).length <= 20_000, "Message too long"),
+});
+// ponytail: the model sees the last 40 messages and the thread keeps the last 200; summarise older turns if people want longer memory.
+const MODEL_HISTORY = 40;
+const STORED_HISTORY = 200;
 const CHAT_LIMIT = { limit: 30, windowMs: 10 * 60_000 }; // per person: each message costs OpenAI tokens
 
 /** Latest conversation for this person and brand, so the panel restores it. */
@@ -47,7 +54,7 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     if (scope instanceof Response) return scope;
     const body = Body.safeParse(await request.json().catch(() => null));
     if (!body.success) {
-      return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid request", status: 422 });
+      return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid request", status: 422, detail: "That message is too long or malformed. Shorten it and try again." });
     }
     const rate = await hitRateLimit(limitKey("chat:user", scope.userId), CHAT_LIMIT.limit, CHAT_LIMIT.windowMs);
     if (!rate.allowed) {
@@ -74,7 +81,7 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     const result = streamText({
       model: openai(model),
       system: chatSystemPrompt({ name: brand.displayName, website: brand.profile?.websiteUrl ?? null }),
-      messages: await convertToModelMessages(messages),
+      messages: await convertToModelMessages(messages.slice(-MODEL_HISTORY)),
       tools,
       stopWhen: isStepCount(6),
       onFinish: async ({ totalUsage }) => {
@@ -104,7 +111,7 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
         stream: result.stream,
         originalMessages: messages,
         onEnd: async ({ messages: all }) => {
-          const data = { messages: all as unknown as Prisma.InputJsonValue, title };
+          const data = { messages: all.slice(-STORED_HISTORY) as unknown as Prisma.InputJsonValue, title };
           await prisma.chatThread.upsert({
             where: { id: body.data.id },
             create: { id: body.data.id, workspaceId: scope.workspaceId, brandId: scope.brandId, userId: scope.userId, ...data },

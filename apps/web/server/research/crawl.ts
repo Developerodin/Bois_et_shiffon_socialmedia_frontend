@@ -35,9 +35,19 @@ export function isPrivateAddress(ip: string): boolean {
     );
   }
   const v6 = ip.toLowerCase();
-  if (v6.startsWith("::ffff:")) return isPrivateAddress(v6.slice(7));
+  if (v6.startsWith("::ffff:")) {
+    // IPv4-mapped: "::ffff:127.0.0.1", or the hex form URL parsing produces ("::ffff:7f00:1").
+    const rest = v6.slice(7);
+    if (isIP(rest) === 4) return isPrivateAddress(rest);
+    const hex = rest.match(/^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
+    if (!hex) return true;
+    const [hi, lo] = [parseInt(hex[1], 16), parseInt(hex[2], 16)];
+    return isPrivateAddress(`${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`);
+  }
   return (
-    v6 === "::" || v6 === "::1" ||
+    // Everything in ::/8 is reserved (incl. IPv4-compatible "::7f00:1"); 64:ff9b:: (NAT64) and
+    // 2002:: (6to4) embed an IPv4 address we can't vouch for.
+    v6.startsWith("::") || v6.startsWith("64:ff9b:") || v6.startsWith("2002:") ||
     v6.startsWith("fc") || v6.startsWith("fd") ||
     v6.startsWith("fe8") || v6.startsWith("fe9") || v6.startsWith("fea") || v6.startsWith("feb") ||
     v6.startsWith("ff")

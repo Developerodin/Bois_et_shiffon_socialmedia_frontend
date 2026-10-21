@@ -1,7 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { startAgentRun } from "@/server/agents/engine";
+import { AgentStartError, startAgentRun } from "@/server/agents/engine";
 import { requirePermission } from "@/server/auth/permissions";
+import { hitRateLimit } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
 
 export const CreateBrandInput = z.object({
@@ -23,6 +24,9 @@ export async function createBrandWithResearch(
   input: z.infer<typeof CreateBrandInput>,
 ) {
   await requirePermission(workspaceId, userId, "brand.create");
+  // Each new brand starts a paid Research run.
+  const { allowed } = await hitRateLimit(`brands:${userId}`, 10, 86_400_000);
+  if (!allowed) throw new AgentStartError("You've added 10 brands today, the daily limit. Try again tomorrow.", 429);
 
   const base = slugify(input.displayName);
   let brand;

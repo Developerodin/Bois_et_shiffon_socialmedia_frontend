@@ -33,7 +33,16 @@ export async function listRoles(workspaceId: string) {
   }));
 }
 
+/** Ownership-level powers stay with owners: a role editor can't hand them out (or keep them in a role). */
+async function assertCanGrant(workspaceId: string, actorUserId: string, permissions: string[] | undefined) {
+  if (!permissions?.includes("workspace.manage")) return;
+  if ((await memberRole(workspaceId, actorUserId))?.role?.slug !== "owner") {
+    throw new AccountFlowError("Only owners can give a role workspace ownership powers", 409);
+  }
+}
+
 export async function createRole(workspaceId: string, actorUserId: string, input: z.infer<typeof RoleInput>) {
+  await assertCanGrant(workspaceId, actorUserId, input.permissions);
   const base = slugify(input.name);
   const taken = await prisma.role.count({ where: { workspaceId, slug: { startsWith: base } } });
   const role = await prisma.role.create({
@@ -58,6 +67,7 @@ export async function updateRole(
   const role = await prisma.role.findFirst({ where: { id: roleId, workspaceId } });
   if (!role) throw new AccountFlowError("Role not found", 404);
   if (role.isSystem) throw new AccountFlowError("System roles can't be edited", 409);
+  await assertCanGrant(workspaceId, actorUserId, input.permissions);
   const updated = await prisma.role.update({
     where: { id: role.id },
     data: { name: input.name, description: input.description, permissions: input.permissions },
@@ -134,8 +144,9 @@ export async function removeMember(workspaceId: string, actorUserId: string, mem
   const member = await prisma.workspaceMember.findFirst({ where: { id: memberId, workspaceId } });
   if (!member) throw new AccountFlowError("Member not found", 404);
   const current = await memberRole(workspaceId, member.userId);
-  if (current?.role?.slug === "owner" && (await ownerCount(workspaceId)) <= 1) {
-    throw new AccountFlowError("A workspace needs at least one owner", 409);
+  if (current?.role?.slug === "owner") {
+    if ((await memberRole(workspaceId, actorUserId))?.role?.slug !== "owner") throw new AccountFlowError("Only owners can remove an owner", 409);
+    if ((await ownerCount(workspaceId)) <= 1) throw new AccountFlowError("A workspace needs at least one owner", 409);
   }
   await prisma.$transaction([
     prisma.brandMember.deleteMany({ where: { workspaceId, userId: member.userId } }),

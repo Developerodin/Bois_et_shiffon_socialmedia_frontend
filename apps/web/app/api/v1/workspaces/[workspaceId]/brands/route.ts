@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { AgentStartError } from "@/server/agents/engine";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { assertWorkspaceHeaderMatchesPath } from "@/server/api/workspace-headers";
 import { requireWorkspaceMember } from "@/server/auth/access";
@@ -68,6 +69,9 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof AgentStartError) {
+      return problemResponse({ type: "https://api.brandpilot/errors/limit", title: error.message, status: error.status, detail: error.message });
+    }
     return fromAccessError(error);
   }
 }

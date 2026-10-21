@@ -19,11 +19,16 @@ const RUNNABLE = AGENTS.filter((a) => a.key !== "systems-check" && !a.internal).
  * publishes, posts, replies, spends or approves: drafts only, people decide (design §4.4).
  */
 export function chatTools(scope: ChatScope) {
+  // Chat sees exactly what the person's role can see on screen: same permissions as the matching pages.
+  let perms: Promise<Set<string>> | undefined;
+  const can = async (p: string) => (await (perms ??= effectivePermissions(scope.workspaceId, scope.userId, scope.brandId))).has(p);
+  const denied = (what: string) => ({ error: `Your role can't see ${what}.` });
   return {
     listDocuments: tool({
       description: "List the brand's five strategy documents with their status (draft or confirmed by the team).",
       inputSchema: z.object({}),
       execute: async () => {
+        if (!(await can("agents.read"))) return denied("the strategy documents");
         const docs = await listContextDocs(scope.workspaceId, scope.brandId);
         return docs.map((d) => ({
           kind: d.kind,
@@ -38,6 +43,7 @@ export function chatTools(scope: ChatScope) {
         "Read one strategy document. Prefer it over guessing: product information, marketing strategy, competitor analysis, brand voice, content strategy.",
       inputSchema: z.object({ kind: z.enum(KINDS) }),
       execute: async ({ kind }) => {
+        if (!(await can("agents.read"))) return denied("the strategy documents");
         const doc = (await listContextDocs(scope.workspaceId, scope.brandId)).find((d) => d.kind === kind);
         const use = doc?.confirmed ?? doc?.latest;
         if (!doc || !use) return { kind, status: "not written yet" };
@@ -54,6 +60,7 @@ export function chatTools(scope: ChatScope) {
       description: "Latest SEO audit and AI-visibility (GEO) report: scores, summaries, top fixes, competitors AI recommends.",
       inputSchema: z.object({}),
       execute: async () => {
+        if (!(await can("analytics.read"))) return denied("the site reports");
         const { seo, geo } = await latestAuditReports(scope.workspaceId, scope.brandId);
         const brief = (r: typeof seo) =>
           r && {
@@ -74,6 +81,7 @@ export function chatTools(scope: ChatScope) {
       description: "List the agents for this brand and the status of their latest run.",
       inputSchema: z.object({}),
       execute: async () => {
+        if (!(await can("agents.read"))) return denied("the agents");
         const runs = await prisma.agentRun.findMany({
           where: { workspaceId: scope.workspaceId, brandId: scope.brandId },
           orderBy: { createdAt: "desc" },
@@ -92,8 +100,7 @@ export function chatTools(scope: ChatScope) {
         "Start an agent run for this brand (research = re-read the website and redraft the documents; seo = website audit; geo = AI-visibility check). Only when the person asks for it.",
       inputSchema: z.object({ agentKey: z.enum(RUNNABLE) }),
       execute: async ({ agentKey }) => {
-        const perms = await effectivePermissions(scope.workspaceId, scope.userId, scope.brandId);
-        if (!perms.has("agents.run")) return { started: false, reason: "Your role can't run agents. Ask an owner or admin." };
+        if (!(await can("agents.run"))) return { started: false, reason: "Your role can't run agents. Ask an owner or admin." };
         try {
           const run = await startAgentRun({ ...scope, agentKey, trigger: "manual" });
           kickRunner();

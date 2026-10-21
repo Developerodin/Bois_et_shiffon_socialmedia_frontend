@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
+import { AgentStartError } from "@/server/agents/engine";
 import { kickRunner } from "@/server/jobs/runner";
 import { startCompetitorAudit } from "@/server/services/competitor-audits";
 
@@ -20,6 +21,10 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     if (result.status === "started") kickRunner();
     return Response.json(result, { status: result.status === "started" ? 202 : 200 });
   } catch (error) {
+    // The charge was already refunded; say why it didn't start (daily limit, bad domain…).
+    if (error instanceof AgentStartError) {
+      return problemResponse({ type: "https://api.brandpilot/errors/agent-start", title: "Audit could not start", status: error.status, detail: error.message });
+    }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
       return problemResponse({ type: "https://api.brandpilot/errors/not-found", title: "Not found", status: 404 });
     }
