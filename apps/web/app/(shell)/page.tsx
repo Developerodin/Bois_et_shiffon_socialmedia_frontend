@@ -1,4 +1,7 @@
+import { redirect } from "next/navigation";
 import { AlertTriangle, CheckCircle2, Compass, type LucideIcon } from "lucide-react";
+import { auth } from "@/auth";
+import { loadShellContext } from "@/server/shell/load-shell-context";
 
 const SECTIONS: Array<{
   id: string;
@@ -26,7 +29,14 @@ const SECTIONS: Array<{
   },
 ];
 
-export default function TodayPage() {
+export default async function TodayPage() {
+  // First run: no brand yet → the website step. Other pages stay reachable (e.g. Settings to invite people).
+  const session = await auth();
+  if (session?.user?.id) {
+    const shell = await loadShellContext(session.user.id);
+    if (shell.activeWorkspaceId && shell.brands.length === 0) redirect("/welcome");
+  }
+
   return (
     <div className="mx-auto max-w-5xl space-y-12">
       <section
