@@ -98,18 +98,32 @@ export async function safeFetch(raw: string, accept = "text/html"): Promise<{ ur
   throw new CrawlError("Too many redirects");
 }
 
-/** Disallow rules for `User-agent: *` (simple prefix match; ponytail: no wildcards/Allow precedence). */
-export function parseRobots(txt: string): string[] {
-  const rules: string[] = [];
-  let applies = false;
+/** Disallow rules per user-agent (lower-cased). Consecutive User-agent lines share one group. */
+export function robotsGroups(txt: string): Map<string, string[]> {
+  const groups = new Map<string, string[]>();
+  let agents: string[] = [];
+  let inRules = false;
   for (const line of txt.split(/\r?\n/)) {
     const [k, ...rest] = line.split("#")[0].split(":");
     const key = k?.trim().toLowerCase();
     const value = rest.join(":").trim();
-    if (key === "user-agent") applies = value === "*";
-    else if (applies && key === "disallow" && value) rules.push(value);
+    if (key === "user-agent") {
+      if (inRules) agents = [];
+      inRules = false;
+      const ua = value.toLowerCase();
+      agents.push(ua);
+      if (!groups.has(ua)) groups.set(ua, []);
+    } else if (key === "disallow" || key === "allow") {
+      inRules = true;
+      if (key === "disallow" && value) for (const a of agents) groups.get(a)!.push(value);
+    }
   }
-  return rules;
+  return groups;
+}
+
+/** Disallow rules for `User-agent: *` (simple prefix match; ponytail: no wildcards/Allow precedence). */
+export function parseRobots(txt: string): string[] {
+  return robotsGroups(txt).get("*") ?? [];
 }
 
 const decode = (s: string) =>
@@ -142,18 +156,49 @@ export function extractPage(html: string, base: URL) {
       // ignore malformed hrefs
     }
   }
-  return { title, description, text, links: [...links] };
+  return { title, description, text, links: [...links], seo: seoSignals(html) };
 }
+
+/** On-page SEO signals from the raw (server-rendered) HTML — what crawlers without JS see. */
+export function seoSignals(html: string) {
+  const attr = (re: RegExp) => decode(re.exec(html)?.[1]?.trim() ?? "") || null;
+  const images = [...html.matchAll(/<img\b[^>]*>/gi)].map((m) => m[0]);
+  const jsonLdTypes = new Set<string>();
+  for (const m of html.matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+    for (const t of m[1].matchAll(/"@type"\s*:\s*(?:"([^"]+)"|\[([^\]]+)\])/g)) {
+      (t[1] ?? t[2]).split(",").forEach((x) => jsonLdTypes.add(x.replace(/"/g, "").trim()));
+    }
+  }
+  const bodyText = html
+    .replace(/<(script|style|noscript|svg|template)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<[^>]+>/g, " ");
+  return {
+    lang: attr(/<html[^>]+lang=["']([^"']+)/i),
+    canonical: attr(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)/i),
+    robots: attr(/<meta[^>]+name=["']robots["'][^>]+content=["']([^"']+)/i),
+    viewport: /<meta[^>]+name=["']viewport["']/i.test(html),
+    ogImage: /<meta[^>]+property=["']og:image["']/i.test(html),
+    h1Count: (html.match(/<h1\b/gi) ?? []).length,
+    h2Count: (html.match(/<h2\b/gi) ?? []).length,
+    hreflang: [...html.matchAll(/<link[^>]+hreflang=["']([^"']+)/gi)].map((m) => m[1]),
+    jsonLdTypes: [...jsonLdTypes],
+    imageCount: images.length,
+    imagesMissingAlt: images.filter((i) => !/\balt=["'][^"']+["']/i.test(i)).length,
+    wordCount: bodyText.split(/\s+/).filter(Boolean).length,
+  };
+}
+export type PageSeo = ReturnType<typeof seoSignals>;
 
 const PRIORITY = /about|a-propos|histoire|story|qui-sommes|collection|produit|product|shop|boutique|catalog|materi|savoir/i;
 
-export type CrawledPage = { url: string; title: string | null; description: string | null; text: string };
+export type CrawledPage = { url: string; title: string | null; description: string | null; text: string; seo?: PageSeo };
 
 export async function crawlSite(startUrl: string, onPage?: (p: CrawledPage) => Promise<void>) {
   const start = await assertPublicUrl(startUrl);
-  const disallow = await safeFetch(new URL("/robots.txt", start).toString(), "text/plain")
-    .then((r) => (r.status === 200 ? parseRobots(r.body) : []))
-    .catch(() => []);
+  const robotsTxt = await safeFetch(new URL("/robots.txt", start).toString(), "text/plain")
+    .then((r) => (r.status === 200 ? r.body : null))
+    .catch(() => null);
+  const disallow = robotsTxt ? parseRobots(robotsTxt) : [];
   const allowed = (u: string) => !disallow.some((rule) => new URL(u).pathname.startsWith(rule));
 
   const queue = [start.toString()];
@@ -174,7 +219,7 @@ export async function crawlSite(startUrl: string, onPage?: (p: CrawledPage) => P
         continue;
       }
       const page = extractPage(res.body, res.url);
-      const crawled = { url: res.url.toString(), title: page.title, description: page.description, text: page.text };
+      const crawled = { url: res.url.toString(), title: page.title, description: page.description, text: page.text, seo: page.seo };
       pages.push(crawled);
       await onPage?.(crawled);
       const fresh = page.links.filter((l) => !seen.has(l));
@@ -187,5 +232,5 @@ export async function crawlSite(startUrl: string, onPage?: (p: CrawledPage) => P
       failures.push({ url: next, error: String(error instanceof Error ? error.message : error) });
     }
   }
-  return { pages, failures };
+  return { pages, failures, robotsTxt };
 }

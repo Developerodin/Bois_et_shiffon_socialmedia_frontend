@@ -135,6 +135,7 @@ model Brand {
   aiRuns       AiWorkflowRun[]
   contextDocs  BrandContextDoc[]
   connections  IntegrationConnection[]
+  auditReports AuditReport[]
 
   // target for composite tenant FKs (AT-021): children reference (id, workspaceId)
   @@unique([id, workspaceId])
@@ -500,4 +501,28 @@ model OAuthStateTransaction {
   createdAt   DateTime            @default(now())
 
   @@index([expiresAt])
+}
+
+enum AuditKind {
+  SEO
+  GEO
+}
+
+/** One SEO or GEO audit produced by an agent run. Append-only; the UI shows the latest per kind. */
+model AuditReport {
+  id          String    @id @default(cuid())
+  workspaceId String
+  brandId     String
+  kind        AuditKind
+  score       Int // 0-100
+  summary     String
+  findings    Json // [{ id, category, severity, title, detail, url?, fix }]
+  metrics     Json // kind-specific numbers (PageSpeed, crawler access, visibility…)
+  agentRunId  String?
+  createdAt   DateTime  @default(now())
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@index([brandId, kind, createdAt])
+  @@index([workspaceId, brandId])
 }

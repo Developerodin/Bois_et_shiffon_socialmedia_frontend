@@ -21,6 +21,7 @@
     "smoke:auth": "tsx --env-file=.env scripts/smoke-auth.ts",
     "smoke:rbac": "tsx --env-file=.env scripts/smoke-rbac.ts",
     "smoke:connections": "tsx --env-file=.env scripts/smoke-connections.ts",
+    "audit": "tsx --env-file=.env scripts/run-audit.ts",
     "worker:dev": "tsx --env-file=.env scripts/worker-dev.ts",
     "postinstall": "prisma generate"
   },
