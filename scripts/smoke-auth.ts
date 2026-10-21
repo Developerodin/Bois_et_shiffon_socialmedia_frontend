@@ -69,7 +69,9 @@ async function main() {
     assert.ok(last.location.includes("rate_limited") || last.location.includes("code=rate_limited"), `got ${last.location}`);
     const blockedEvenIfRight = await login(email, password, ip);
     assert.ok(!blockedEvenIfRight.ok, "correct password must also be blocked while limited");
-    console.log("4 per-email rate limit blocks after 5 failures ✓");
+    // Someone hammering from one place can't lock the real person out from theirs.
+    assert.ok((await login(email, password, `${ip}8`)).ok, "the owner signs in from another IP");
+    console.log("4 rate limit blocks after 5 failures from one IP, without locking the account out elsewhere ✓");
 
     // 5. disabled account cannot sign in
     await resetRateLimit(limitKey("login:email", email));
@@ -78,6 +80,7 @@ async function main() {
     console.log("5 disabled account rejected ✓");
   } finally {
     await resetRateLimit(limitKey("login:email", email));
+    for (const i of [ip, `${ip}8`, `${ip}9`]) await resetRateLimit(limitKey("login:email-ip", `${email}|${i}`));
     await prisma.user.delete({ where: { id: user.id } });
   }
 }

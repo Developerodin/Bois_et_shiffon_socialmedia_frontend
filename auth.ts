@@ -103,16 +103,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const emailKey = limitKey("login:email", email);
-        const [byEmail, byIp] = await Promise.all([
+        // Tight limit per (email, IP): guessing from one place stops fast, but a stranger elsewhere
+        // can't lock the real person out. A looser per-email limit still caps guessing spread over many IPs.
+        const ip = clientIp(request);
+        const emailKey = limitKey("login:email-ip", `${email}|${ip}`);
+        const [byEmailIp, byEmail, byIp] = await Promise.all([
           hitRateLimit(emailKey, LOGIN_LIMITS.perEmail.limit, LOGIN_LIMITS.perEmail.windowMs),
-          hitRateLimit(
-            limitKey("login:ip", clientIp(request)),
-            LOGIN_LIMITS.perIp.limit,
-            LOGIN_LIMITS.perIp.windowMs,
-          ),
+          hitRateLimit(limitKey("login:email", email), LOGIN_LIMITS.perEmailAnyIp.limit, LOGIN_LIMITS.perEmailAnyIp.windowMs),
+          hitRateLimit(limitKey("login:ip", ip), LOGIN_LIMITS.perIp.limit, LOGIN_LIMITS.perIp.windowMs),
         ]);
-        if (!byEmail.allowed || !byIp.allowed) {
+        if (!byEmailIp.allowed || !byEmail.allowed || !byIp.allowed) {
           throw new TooManyAttempts();
         }
 

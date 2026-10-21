@@ -35,6 +35,7 @@ export function clientIp(request: Request | undefined) {
 }
 
 export const LOGIN_LIMITS = {
-  perEmail: { limit: 5, windowMs: 15 * 60_000 },
+  perEmail: { limit: 5, windowMs: 15 * 60_000 }, // per email from one IP
+  perEmailAnyIp: { limit: 50, windowMs: 15 * 60_000 },
   perIp: { limit: 30, windowMs: 15 * 60_000 },
 };

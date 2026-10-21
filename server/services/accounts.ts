@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { memberRole } from "@/server/auth/permissions";
 import { hitRateLimit, limitKey, resetRateLimit } from "@/server/auth/rate-limit";
 import { appUrl, hashToken, MIN_PASSWORD_LENGTH, newToken } from "@/server/auth/tokens";
 import { prisma } from "@/server/db/prisma";
@@ -32,6 +33,11 @@ export async function createInvitation(input: {
   const email = normEmail(input.email);
   const role = await prisma.role.findFirst({ where: { id: input.roleId, workspaceId: input.workspaceId } });
   if (!role) throw new AccountFlowError("Role not found in this workspace", 404);
+  // Same rule as changing roles: only an owner can make someone an owner (else an admin could invite
+  // their own second address as owner and take over the workspace).
+  if (role.slug === "owner" && (await memberRole(input.workspaceId, input.invitedByUserId))?.role?.slug !== "owner") {
+    throw new AccountFlowError("Only owners can invite another owner", 409);
+  }
   const already = await prisma.workspaceMember.findFirst({
     where: { workspaceId: input.workspaceId, user: { email } },
   });

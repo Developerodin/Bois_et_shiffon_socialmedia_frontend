@@ -28,6 +28,13 @@ export async function queueEmail(
 
 export const emailConfigured = () => Boolean(process.env.SMTP_HOST && process.env.EMAIL_FROM);
 
+/**
+ * Invite and reset emails carry a live single-use link; the database keeps only token hashes,
+ * so once the email is out of our hands the outbox copy loses its link too.
+ * ponytail: a send that keeps failing keeps its link until the token expires (reset 1 h, invite 7 days).
+ */
+export const scrubLinks = (text: string) => text.replace(/https?:\/\/\S*(?:\/invite\/|reset-password)\S*/g, "[link removed after sending]");
+
 let transport: nodemailer.Transporter | undefined;
 function smtp() {
   const port = Number(process.env.SMTP_PORT ?? 587);
@@ -46,10 +53,11 @@ function smtp() {
 
 export async function sendOutboxEmail(rawPayload: unknown) {
   const { outboxId } = z.object({ outboxId: z.string() }).parse(rawPayload);
-  const row = await prisma.emailOutbox.findUniqueOrThrow({ where: { id: outboxId } });
-  if (row.status === "SENT") return;
+  const row = await prisma.emailOutbox.findUnique({ where: { id: outboxId } });
+  if (!row || row.status === "SENT") return; // deleted (e.g. the invite was cleaned up) or already sent
   if (!emailConfigured()) {
-    await prisma.emailOutbox.update({ where: { id: row.id }, data: { status: "NOT_CONFIGURED" } });
+    // The inviter was shown a copy-able link instead; nothing will send this later.
+    await prisma.emailOutbox.update({ where: { id: row.id }, data: { status: "NOT_CONFIGURED", text: scrubLinks(row.text) } });
     console.warn(`[email] not configured; "${row.subject}" to ${row.to} not sent`);
     return;
   }
@@ -67,6 +75,6 @@ export async function sendOutboxEmail(rawPayload: unknown) {
   }
   await prisma.emailOutbox.update({
     where: { id: row.id },
-    data: { status: "SENT", sentAt: new Date(), attempts: { increment: 1 }, error: null },
+    data: { status: "SENT", sentAt: new Date(), attempts: { increment: 1 }, error: null, text: scrubLinks(row.text) },
   });
 }

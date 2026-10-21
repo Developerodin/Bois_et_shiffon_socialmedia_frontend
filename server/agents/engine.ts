@@ -4,6 +4,7 @@ import { loadBrandContext } from "@/server/agents/brand-context";
 import { getAgent } from "@/server/agents/registry";
 import type { AgentContext } from "@/server/agents/types";
 import { generateObject, OUT_OF_CREDITS } from "@/server/ai/provider";
+import { hitRateLimit } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
 import { refundCharge } from "@/server/services/credits";
 import { validateAiWorkflowPayload } from "@/server/jobs/claim";
@@ -11,10 +12,12 @@ import { enqueueJob } from "@/server/jobs/queue";
 
 export const AGENT_RUN_JOB = "agent.run";
 
+export const MANUAL_RUNS_PER_DAY = 100;
+
 export class AgentStartError extends Error {
   constructor(
     message: string,
-    readonly status: 404 | 409 | 422,
+    readonly status: 404 | 409 | 422 | 429,
   ) {
     super(message);
     this.name = "AgentStartError";
@@ -46,6 +49,12 @@ export async function startAgentRun(input: {
   }
   const parsed = agent.inputSchema.safeParse(input.input ?? {});
   if (!parsed.success) throw new AgentStartError(parsed.error.message, 422);
+  // Every run spends AI credits: cap what people (and scripts) can start per workspace per day.
+  // ponytail: one flat cap; per-plan allowances come with billing.
+  if (input.trigger === "manual") {
+    const { allowed } = await hitRateLimit(`agent-runs:${input.workspaceId}`, MANUAL_RUNS_PER_DAY, 86_400_000);
+    if (!allowed) throw new AgentStartError(`This workspace has started ${MANUAL_RUNS_PER_DAY} agent runs today, the daily limit. Try again tomorrow.`, 429);
+  }
 
   return prisma.$transaction(async (tx) => {
     // Double clicks and two people pressing Run share one run instead of paying twice.
