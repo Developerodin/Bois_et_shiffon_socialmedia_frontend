@@ -25,7 +25,7 @@ type Question = { question: string; mentioned: boolean; branded?: boolean; brand
 const TONE: Record<Severity, "bad" | "warn" | "muted"> = { critical: "bad", high: "bad", medium: "warn", low: "muted" };
 const scoreTone = (n: number) => (n >= 80 ? "text-success" : n >= 50 ? "text-warning" : "text-destructive");
 
-function Score({ label, value, big }: { label: string; value: number | null | undefined; big?: boolean }) {
+export function Score({ label, value, big }: { label: string; value: number | null | undefined; big?: boolean }) {
   return (
     <div className="flex flex-col">
       <span className={cn("font-display font-medium tabular-nums", big ? "text-5xl" : "text-2xl", value == null ? "text-muted-foreground" : scoreTone(value))}>
@@ -36,7 +36,7 @@ function Score({ label, value, big }: { label: string; value: number | null | un
   );
 }
 
-function Findings({ findings }: { findings: Finding[] }) {
+export function Findings({ findings }: { findings: Finding[] }) {
   if (!findings.length) return <p className="text-sm text-muted-foreground">No issues found.</p>;
   return (
     <ol className="flex flex-col divide-y divide-border">
