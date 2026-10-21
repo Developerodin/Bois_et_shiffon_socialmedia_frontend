@@ -99,6 +99,15 @@ Each `IntegrationConnection` stores `capabilities: ConnectorCapability[]` actual
 - OAuth app for research connectors (subreddit monitoring)
 - Store subreddit + post ids with retention policy
 
+**Access (Responsible Builder Policy, checked 2026-10-21):** self-serve app creation is blocked until Reddit approves the account; **commercial use needs explicit written approval** (Devvit is the path only for non-commercial apps). Commercial request form ("enterprise partner/commercial developer", asks for company details and a **data budget** — expect paid access): https://support.reddithelp.com/hc/en-us/requests/new?ticket_form_id=14868593862164&tf_42139884615700=api_request_type_enterprise_clone. Reddit also says unregistered Data API apps lose access from 2027-01-12 and remaining public API access ends March 2027 (https://developers.reddit.com/app-registration). Design rules the Reddit agent must follow:
+
+- Human approves every post/comment; never identical or near-identical text across subreddits (spam rule).
+- No vote/karma manipulation; respect blocks and bans.
+- Read only the subreddits a brand watches; request only the scopes used.
+- No inferring sensitive traits about Reddit users, no matching them to off-platform identities, no ads targeting.
+- Reddit content may be sent to the LLM to draft a reply (inference) but never used for training; keep only post ids + short excerpts, and drop items Reddit has deleted.
+- Use the brand's own connected account for its replies; don't mix app automation into a personal account.
+
 **Mock:** `MockRedditConnector` with fixture JSON — **required** until DEC-004 cleared; Devvit does not replace mock in the main app today.
 
 **Risks (DEC-004)**

@@ -260,3 +260,11 @@ Settings → **Connections** (per brand): Facebook Pages, Instagram, Threads, Go
 - Adapters: `server/integrations/providers.ts` (Meta stores one row per granted Page with its non-expiring Page token; IG/Threads long-lived 60-day tokens; Google/Reddit refresh tokens). Callback: `/api/v1/integrations/{meta,instagram,threads,google,reddit}/callback`; redirect URI = `*_REDIRECT_URI` env or derived from `AUTH_URL`.
 - Check: `npm run smoke:connections -w web`.
 - **Not yet:** token refresh job (IG/Threads expire after 60 days, Google/Reddit access tokens hourly — refresh before use), provider-side revoke on disconnect, uninstall/data-deletion callbacks (Meta App Review requirement), https tunnel for IG/Threads redirect URIs in dev.
+
+### 8e. Channel/agent decisions (2026-10-21)
+
+- **SEO + GEO agents:** instructions adapted from **claude-seo** (agricidaniel, MIT, v1.8.x — installed locally at `~/.claude/plugins/marketplaces/agricidaniel-seo`): `seo-technical`, `seo-content` (E-E-A-T), `seo-schema`, `seo-images`, `seo-hreflang` (FR/EU sites), `seo-ecommerce` (product schema; DataForSEO parts optional/skipped), `seo-drift` (baselines → regressions), `seo-geo` (AI-crawler access, llms.txt, passage citability, brand mentions). Copy as versioned prompt files with MIT attribution in `NOTICE.md`. `bencium-aeo` used as reference only (no explicit licence for its guide text) — write our own AEO wording. Data: our crawler + PageSpeed key + Search Console OAuth + OpenAI web search (GEO "does ChatGPT mention the brand" checks). No new keys; Perplexity/Gemini/DataForSEO optional later.
+- **X:** needed — requires X developer account + paid API; check current pricing before building the connector.
+- **UGC video:** idea only, on hold.
+- **Reddit:** on hold pending Reddit commercial approval; assisted mode (web search + manual post) possible meanwhile.
+- **Pinterest:** wanted (furniture fit); needs Pinterest Trial → Standard access + public privacy policy.
