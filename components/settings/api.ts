@@ -104,6 +104,27 @@ export const settingsApi = {
     ),
   revokeInvitation: (w: string, id: string) =>
     request<void>(`${ws(w)}/invitations/${encodeURIComponent(id)}`, { method: "DELETE" }),
+
+  connections: (w: string, b: string) =>
+    request<{ providers: ProviderInfo[]; connections: Connection[] }>(`${brand(w, b)}/connections`),
+  startConnect: (w: string, b: string, provider: Provider) =>
+    request<{ url: string }>(`${brand(w, b)}/connections/start`, json("POST", { provider })),
+  disconnect: (w: string, b: string, id: string) =>
+    request<void>(`${brand(w, b)}/connections/${encodeURIComponent(id)}`, { method: "DELETE" }),
+};
+
+const brand = (w: string, b: string) => `${ws(w)}/brands/${encodeURIComponent(b)}`;
+
+export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "REDDIT";
+export type ProviderInfo = { provider: Provider; label: string; configured: boolean };
+export type Connection = {
+  id: string;
+  provider: Provider;
+  displayName: string;
+  status: "ACTIVE" | "ERROR" | "REVOKED";
+  lastError: string | null;
+  tokenExpiresAt: string | null;
+  connectedAt: string;
 };
 
 export const authApi = {

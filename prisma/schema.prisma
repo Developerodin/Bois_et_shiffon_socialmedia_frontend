@@ -134,6 +134,7 @@ model Brand {
   agentConfigs BrandAgentConfig[]
   aiRuns       AiWorkflowRun[]
   contextDocs  BrandContextDoc[]
+  connections  IntegrationConnection[]
 
   // target for composite tenant FKs (AT-021): children reference (id, workspaceId)
   @@unique([id, workspaceId])
@@ -445,4 +446,58 @@ model EmailOutbox {
   createdAt DateTime    @default(now())
 
   @@index([status, createdAt])
+}
+
+enum IntegrationProvider {
+  META // Facebook Pages
+  INSTAGRAM
+  THREADS
+  GOOGLE // Analytics + Search Console
+  REDDIT
+}
+
+enum ConnectionStatus {
+  ACTIVE
+  ERROR // token refresh/decrypt failed — needs reconnect
+  REVOKED
+}
+
+/** A brand's connected channel account. Tokens only ever live encrypted (DEC-002/018). */
+model IntegrationConnection {
+  id                   String              @id @default(cuid())
+  workspaceId          String
+  brandId              String
+  provider             IntegrationProvider
+  externalAccountId    String
+  displayName          String
+  scopes               String[]
+  encryptedCredentials String?             // null once revoked
+  credentialKeyVersion Int
+  tokenExpiresAt       DateTime?
+  status               ConnectionStatus    @default(ACTIVE)
+  lastError            String?
+  connectedByUserId    String
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@unique([brandId, provider, externalAccountId])
+  @@index([workspaceId, brandId])
+  @@index([status, tokenExpiresAt])
+}
+
+/** Single-use OAuth state (DEC-017): only the hash is stored; consumed atomically on callback. */
+model OAuthStateTransaction {
+  id          String              @id @default(cuid())
+  stateHash   String              @unique
+  workspaceId String
+  brandId     String
+  userId      String
+  provider    IntegrationProvider
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@index([expiresAt])
 }

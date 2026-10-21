@@ -5,7 +5,11 @@ import { SettingsBoard } from "@/components/settings/settings-board";
 import { EmptyState } from "@/components/ui/empty-state";
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/login");
@@ -26,5 +30,21 @@ export default async function SettingsPage() {
     );
   }
 
-  return <SettingsBoard key={shell.activeWorkspaceId} workspaceId={shell.activeWorkspaceId} />;
+  // OAuth callback lands here with ?tab=connections&connected=…|connectError=…
+  const q = await searchParams;
+  const notice = q.connected
+    ? { kind: "ok" as const, text: `Connected ${q.connected}.` }
+    : q.connectError
+      ? { kind: "error" as const, text: q.connectError }
+      : null;
+
+  return (
+    <SettingsBoard
+      key={shell.activeWorkspaceId}
+      workspaceId={shell.activeWorkspaceId}
+      brandId={shell.activeBrandId ?? null}
+      initialTab={q.tab === "connections" ? "connections" : undefined}
+      notice={notice}
+    />
+  );
 }
