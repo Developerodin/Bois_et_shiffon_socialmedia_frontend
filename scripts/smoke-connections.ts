@@ -49,7 +49,7 @@ async function main() {
   console.log("4b repeated callback after a real connect → same success, other users still refused ✓");
 
   // 5. disconnect wipes the encrypted tokens
-  assert.equal(await disconnect({ ...scope, connectionId: conn.id }), true);
+  assert.deepEqual(await disconnect({ ...scope, connectionId: conn.id }), { cancelled: 0 });
   const after = await prisma.integrationConnection.findUniqueOrThrow({ where: { id: conn.id } });
   assert.equal(after.status, "REVOKED");
   assert.equal(after.encryptedCredentials, null);

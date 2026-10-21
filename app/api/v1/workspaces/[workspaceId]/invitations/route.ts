@@ -4,6 +4,9 @@ import { kickRunner } from "@/server/jobs/runner";
 import { createInvitation } from "@/server/services/accounts";
 import { listInvitations } from "@/server/services/workspace-admin";
 
+// Queued work runs after the response (kickRunner); give it room to finish.
+export const maxDuration = 300;
+
 export const GET = workspaceHandler("invitations.manage", async (_req, { workspaceId }) =>
   Response.json({ invitations: await listInvitations(workspaceId) }),
 );

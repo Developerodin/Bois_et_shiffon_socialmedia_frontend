@@ -118,6 +118,11 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                       {fresh.has(c.displayName) && c.status === "ACTIVE" ? "just now" : `since ${formatDate(c.connectedAt)}`}
                     </span>
                   </div>
+                  {c.status !== "ACTIVE" && (
+                    <p className="basis-full text-xs text-muted-foreground">
+                      {c.lastError ?? "This account's access stopped working."} Posts to it fail until you press Reconnect.
+                    </p>
+                  )}
                   {canManage && (
                     <Button size="sm" variant="ghost" onClick={() => setRemoving(c)}>
                       Disconnect
@@ -174,14 +179,17 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
         open={removing !== null}
         onOpenChange={(open) => !open && setRemoving(null)}
         title={`Disconnect ${removing?.displayName ?? ""}?`}
-        description="Agents will stop publishing to and reading from this account. You can reconnect any time."
+        description="Agents will stop publishing to and reading from this account, and posts scheduled to it are cancelled (they stay approved, ready to schedule again). You can reconnect any time."
         confirmLabel="Disconnect"
         onConfirm={async () => {
           const c = removing!;
-          await settingsApi.disconnect(workspaceId, brandId, c.id);
+          const { cancelled } = await settingsApi.disconnect(workspaceId, brandId, c.id);
           setGone((g) => new Set(g).add(c.id));
           setError(null);
-          setShown({ kind: "ok", text: `Disconnected ${c.displayName}. Agents will no longer use it.` });
+          setShown({
+            kind: "ok",
+            text: `Disconnected ${c.displayName}. Agents will no longer use it.${cancelled ? ` ${cancelled} scheduled post${cancelled === 1 ? " was" : "s were"} cancelled; schedule ${cancelled === 1 ? "it" : "them"} again from the calendar.` : ""}`,
+          });
           reload();
         }}
       />

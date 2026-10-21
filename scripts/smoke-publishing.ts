@@ -4,7 +4,8 @@
  * under concurrent clicks, success, refusal (retry allowed), unknown outcome (no blind retry),
  * draft changed after scheduling, cancel; a person's edit (new version, voids approval, stale edits
  * refused); "request changes" reaching the Creator with the approver's note; agents never overwrite
- * a newer draft. Throwaway workspace. Run: npm run smoke:publishing -w web
+ * a newer draft; expiring tokens refreshed before posting, refused ones flagged for reconnect;
+ * disconnecting cancels scheduled posts. Throwaway workspace. Run: npm run smoke:publishing -w web
  */
 import assert from "node:assert/strict";
 import { encryptCredentials } from "@/server/crypto/credentials";
@@ -12,12 +13,17 @@ import { prisma } from "@/server/db/prisma";
 import { creatorAgent } from "@/server/agents/definitions/creator";
 import { qualityAgent } from "@/server/agents/definitions/quality";
 import type { AgentContext } from "@/server/agents/types";
+import { disconnect } from "@/server/services/connections";
 import { decide, executePublication, PublishingError, releaseState, saveDraft, schedulePublication, settlePublication } from "@/server/services/publishing";
 
 let platform: { status: number; body: unknown } = { status: 200, body: { id: "pin-1" } };
+let tokenEndpoint: { status: number; body: unknown } = { status: 200, body: { access_token: "fresh", expires_in: 2_592_000 } };
 const calls: string[] = [];
-globalThis.fetch = (async (url: string) => {
+const auth: string[] = [];
+globalThis.fetch = (async (url: string, init?: RequestInit) => {
+  if (String(url).includes("/oauth/token")) return new Response(JSON.stringify(tokenEndpoint.body), { status: tokenEndpoint.status });
   calls.push(String(url));
+  auth.push(String((init?.headers as Record<string, string> | undefined)?.authorization ?? ""));
   return new Response(JSON.stringify(platform.body), { status: platform.status });
 }) as typeof fetch;
 
@@ -157,6 +163,53 @@ async function main() {
     const latestC = await prisma.contentVersion.findFirstOrThrow({ where: { contentItemId: c.id }, orderBy: { version: "desc" } });
     assert.equal(latestC.createdBy, user.id);
     console.log("9 'request changes' sends the note to the Creator; an agent never overwrites a newer draft ✓");
+
+    // 10. Tokens: refreshed before posting when about to expire; a refused refresh or a 401 flags the account.
+    const expiring = await prisma.integrationConnection.create({
+      data: {
+        workspaceId: ws.id, brandId: brand.id, connectedByUserId: user.id, provider: "PINTEREST", externalAccountId: "acct2", displayName: "@expiring", scopes: [],
+        encryptedCredentials: encryptCredentials({ accessToken: "old", refreshToken: "r" }), credentialKeyVersion: 1, tokenExpiresAt: new Date(Date.now() + 86_400_000),
+      },
+    });
+    const approvedPin = async (title: string) => {
+      const it = await newItem(title);
+      await decide({ ...scope, itemId: it.id, version: 1, verdict: "APPROVED" });
+      return it;
+    };
+    platform = { status: 200, body: { id: "pin-3" } };
+    const d = await approvedPin("D");
+    await schedulePublication({ ...scope, itemId: d.id, version: 1, ...pin, connectionId: expiring.id });
+    await executePublication({ attemptId: (await attempt(d.id)).id });
+    assert.equal((await attempt(d.id)).status, "PUBLISHED");
+    assert.equal(auth.at(-1), "Bearer fresh");
+    const refreshed = await prisma.integrationConnection.findUniqueOrThrow({ where: { id: expiring.id } });
+    assert.ok(refreshed.tokenExpiresAt!.getTime() > Date.now() + 20 * 86_400_000);
+    // Expired and the refresh is refused → nothing posted, account flagged.
+    await prisma.integrationConnection.update({ where: { id: expiring.id }, data: { tokenExpiresAt: new Date(Date.now() - 1000) } });
+    tokenEndpoint = { status: 400, body: { message: "invalid_grant" } };
+    const e = await approvedPin("E");
+    await schedulePublication({ ...scope, itemId: e.id, version: 1, ...pin, connectionId: expiring.id });
+    const before10 = calls.length;
+    await executePublication({ attemptId: (await attempt(e.id)).id });
+    assert.equal(calls.length, before10, "nothing sent to Pinterest");
+    assert.match((await attempt(e.id)).error!, /Reconnect/);
+    assert.equal((await prisma.integrationConnection.findUniqueOrThrow({ where: { id: expiring.id } })).status, "ERROR");
+    // A 401 at publish time flags the account too.
+    platform = { status: 401, body: { message: "Authentication failed" } };
+    await schedulePublication({ ...scope, itemId: e.id, version: 1, ...pin });
+    await executePublication({ attemptId: (await attempt(e.id)).id });
+    assert.equal((await attempt(e.id)).status, "FAILED");
+    assert.equal((await prisma.integrationConnection.findUniqueOrThrow({ where: { id: conn.id } })).status, "ERROR");
+    console.log("10 expiring tokens refresh before posting; a refused refresh or a 401 marks the account 'needs reconnect' ✓");
+
+    // 11. Disconnecting cancels posts scheduled to that account; they stay approved.
+    await prisma.integrationConnection.update({ where: { id: conn.id }, data: { status: "ACTIVE", lastError: null } });
+    platform = { status: 200, body: { id: "pin-4" } };
+    await schedulePublication({ ...scope, itemId: e.id, version: 1, ...pin, runAt: new Date(Date.now() + 86_400_000) });
+    assert.deepEqual(await disconnect({ ...scope, connectionId: conn.id }), { cancelled: 1 });
+    assert.equal((await attempt(e.id)).status, "CANCELLED");
+    assert.equal(await status(e.id), "APPROVED");
+    console.log("11 disconnecting cancels its scheduled posts openly; they stay approved ✓");
   } finally {
     await prisma.job.deleteMany({ where: { workspaceId: ws.id } });
     await prisma.workspace.delete({ where: { id: ws.id } });

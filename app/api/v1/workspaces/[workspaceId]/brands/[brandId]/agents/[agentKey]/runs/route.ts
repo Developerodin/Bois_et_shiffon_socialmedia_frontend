@@ -4,6 +4,9 @@ import { AgentStartError, startAgentRun } from "@/server/agents/engine";
 import { getAgent } from "@/server/agents/registry";
 import { kickRunner } from "@/server/jobs/runner";
 
+// Queued work runs after the response (kickRunner); give it room to finish.
+export const maxDuration = 300;
+
 type Params = BrandRouteParams & { agentKey: string };
 
 export async function POST(request: Request, context: { params: Promise<Params> }) {

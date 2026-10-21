@@ -6,6 +6,9 @@ import { kickRunner } from "@/server/jobs/runner";
 import { listAccessibleBrands } from "@/server/services/brands";
 import { CreateBrandInput, createBrandWithResearch } from "@/server/services/create-brand";
 
+// Queued work runs after the response (kickRunner); give it room to finish.
+export const maxDuration = 300;
+
 type RouteContext = { params: Promise<{ workspaceId: string }> };
 
 export async function GET(request: Request, context: RouteContext) {
