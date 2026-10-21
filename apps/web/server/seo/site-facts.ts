@@ -3,19 +3,13 @@ import type { Finding, SiteFacts } from "@/server/seo/checks";
 
 /** Crawl + robots/sitemap/llms.txt probes shared by the SEO and GEO agents. */
 export async function collectSiteFacts(startUrl: string, onPage?: (url: string, title: string | null) => Promise<void>) {
-  const { pages, failures, robotsTxt } = await crawlSite(startUrl, (p) => onPage?.(p.url, p.title) ?? Promise.resolve());
+  const { pages, failures, robotsTxt, links } = await crawlSite(startUrl, (p) => onPage?.(p.url, p.title) ?? Promise.resolve());
 
   // Product pages carry the Product schema and photos that matter most for SEO; the crawl favours
   // shorter collection URLs, so add up to 2 product pages linked from what was read.
   const isProduct = (u: string) => /\/(products?|produits?)\//i.test(new URL(u).pathname);
   if (!pages.some((p) => isProduct(p.url))) {
-    const productLinks = new Set<string>();
-    for (const p of pages.slice(0, 4)) {
-      const res = await safeFetch(p.url).catch(() => null);
-      if (res?.status === 200) extractPage(res.body, res.url).links.filter(isProduct).forEach((l) => productLinks.add(l));
-      if (productLinks.size >= 2) break;
-    }
-    for (const url of [...productLinks].slice(0, 2)) {
+    for (const url of links.filter(isProduct).slice(0, 2)) {
       const res = await safeFetch(url).catch(() => null);
       if (res?.status !== 200) continue;
       const page = extractPage(res.body, res.url);

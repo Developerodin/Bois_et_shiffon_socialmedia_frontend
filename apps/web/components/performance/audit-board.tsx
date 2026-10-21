@@ -20,7 +20,7 @@ type Report = {
   createdAt: string;
 };
 type PageSpeed = { performance: number; seo: number; accessibility: number; bestPractices: number; lcpMs: number | null };
-type Question = { question: string; mentioned: boolean; brands: string[] };
+type Question = { question: string; mentioned: boolean; branded?: boolean; brands: string[] };
 
 const TONE: Record<Severity, "bad" | "warn" | "muted"> = { critical: "bad", high: "bad", medium: "warn", low: "muted" };
 const scoreTone = (n: number) => (n >= 80 ? "text-success" : n >= 50 ? "text-warning" : "text-destructive");
@@ -128,14 +128,16 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
           {geo && (
             <div className="flex flex-col gap-4 rounded-xl bg-muted/40 px-5 py-4">
               <div className="flex flex-wrap gap-8">
-                <Score label="Mentioned by AI" value={geo.metrics.visibility as number} />
+                <Score label="Recommended unprompted" value={geo.metrics.visibility as number} />
                 <Score label="Citability" value={geo.metrics.citability as number} />
                 <Score label="AI crawler access" value={geo.metrics.technical as number} />
               </div>
               <ul className="flex flex-col gap-2 text-sm">
                 {questions.map((q) => (
                   <li key={q.question} className="flex items-start gap-2">
-                    <StatusPill tone={q.mentioned ? "good" : "muted"}>{q.mentioned ? "Mentioned" : "Not yet"}</StatusPill>
+                    <StatusPill tone={q.branded ? "muted" : q.mentioned ? "good" : "warn"}>
+                      {q.branded ? "Names brand" : q.mentioned ? "Mentioned" : "Not yet"}
+                    </StatusPill>
                     <span>{q.question}</span>
                   </li>
                 ))}

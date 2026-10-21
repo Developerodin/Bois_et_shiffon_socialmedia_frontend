@@ -8,6 +8,7 @@ import {
   PROMPT_VERSION,
 } from "@/server/agents/prompts/seo-geo";
 import type { AgentDefinition } from "@/server/agents/types";
+import { aiProviderName } from "@/server/ai/provider";
 import { aiCrawlerAccess, applyPriorities, geoTechnicalChecks, scoreFindings, type Finding } from "@/server/seo/checks";
 import { collectSiteFacts } from "@/server/seo/site-facts";
 import { saveAuditReport } from "@/server/services/audit-reports";
@@ -35,18 +36,41 @@ const Answer = z.object({ answer: z.string(), brandsMentioned: z.array(z.string(
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 
-/** Brand counts as mentioned when an answer names it or cites its domain. */
+/** "Bois & Chiffons" / "Bois et Chiffons" / "bois-and-chiffons" → "bois chiffons" (accents, &/et/and, punctuation dropped). */
+const words = (s: string) =>
+  ` ${s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/&|\b(et|and|und|y)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim()} `;
+const compact = (s: string) => words(s).replace(/\s+/g, "");
+const domainLabel = (domain: string) => domain.split(".")[0];
+
+/** Whole-phrase match of the brand name, or its domain name written as one word ("boisetchiffons"). */
+function namesBrand(text: string, brandName: string, domain: string) {
+  const w = words(text);
+  return w.includes(words(brandName)) || w.includes(` ${domainLabel(domain)} `) || compact(text) === compact(brandName);
+}
+
+/**
+ * Brand counts as mentioned when an answer names it (exact brand, not a substring of another
+ * brand) or cites a page on its domain.
+ * ponytail: a one-word generic brand name ("Monde") can still match prose; fine for distinctive names.
+ */
 export function mentionsBrand(a: z.infer<typeof Answer>, brandName: string, domain: string) {
-  const name = brandName.toLowerCase();
+  const host = (u: string) => {
+    try {
+      return new URL(u).hostname.toLowerCase();
+    } catch {
+      return "";
+    }
+  };
   return (
-    a.brandsMentioned.some((b) => {
-      const n = b.trim().toLowerCase();
-      return n.length > 2 && (n.includes(name) || name.includes(n));
-    }) ||
-    a.sources.some((s) => s.toLowerCase().includes(domain)) ||
-    a.answer.toLowerCase().includes(name)
+    a.brandsMentioned.some((b) => compact(b) === compact(brandName) || compact(b) === domainLabel(domain)) ||
+    a.sources.some((s) => host(s) === domain || host(s).endsWith(`.${domain}`)) ||
+    namesBrand(a.answer, brandName, domain)
   );
 }
+
+/** A question that already names the brand can't show whether AI would recommend it unprompted. */
+export const isBrandedQuestion = (q: string, brandName: string, domain = "") =>
+  namesBrand(q, brandName, domain || "-");
 
 /**
  * GEO agent (Okara "GEO"): would AI assistants recommend this brand?
@@ -110,7 +134,7 @@ export const geoAgent: AgentDefinition = {
         });
         const mentioned = mentionsBrand(a, brand.displayName, domain);
         await ctx.log(mentioned ? "SUCCESS" : "WARN", `"${question}" — ${mentioned ? "brand mentioned" : `not mentioned; named: ${a.brandsMentioned.slice(0, 5).join(", ") || "no brands"}`}`);
-        return { question, mentioned, brands: a.brandsMentioned, sources: a.sources.slice(0, 8) };
+        return { question, branded: isBrandedQuestion(question, brand.displayName, domain), mentioned, brands: a.brandsMentioned, sources: a.sources.slice(0, 8) };
       }),
     );
     const cit = await citP;
@@ -123,13 +147,16 @@ export const geoAgent: AgentDefinition = {
           competitorCounts.set(b, (competitorCounts.get(b) ?? 0) + 1);
     const competitors = [...competitorCounts].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, mentions]) => ({ name, mentions }));
 
-    const visibility = results.length ? (100 * results.filter((r) => r.mentioned).length) / results.length : 0;
+    // Visibility = share of *unbranded* questions where AI named the brand on its own.
+    const unbranded = results.filter((r) => !r.branded);
+    const visibility = unbranded.length ? (100 * unbranded.filter((r) => r.mentioned).length) / unbranded.length : 0;
     const citability = avg(cit.pages.map((p) => (p.citability + p.structure + p.authority) / 3));
     const technicalScore = scoreFindings(technical);
     const score = clamp(0.4 * visibility + 0.3 * citability + 0.3 * technicalScore);
     const findings = [...technical, ...contentFindings];
-    if (visibility === 0) {
-      findings.unshift({ id: "not-recommended", category: "Visibility", severity: "high", title: "AI assistants don't mention the brand yet", detail: `None of the ${results.length} shopper questions returned ${brand.displayName}. Brands named instead: ${competitors.slice(0, 5).map((c) => c.name).join(", ") || "none"}.`, fix: "Build brand mentions where AI assistants look: press and blog features, Reddit and YouTube discussions, comparison and 'best of' lists, and a Wikipedia/Wikidata entry if notable." });
+    // Skip in mock mode: no real AI answered, so "not recommended" would be a false alarm.
+    if (visibility === 0 && unbranded.length && aiProviderName() === "openai") {
+      findings.unshift({ id: "not-recommended", category: "Visibility", severity: "high", title: "AI assistants don't mention the brand yet", detail: `None of the ${unbranded.length} unbranded shopper questions returned ${brand.displayName}. Brands named instead: ${competitors.slice(0, 5).map((c) => c.name).join(", ") || "none"}.`, fix: "Build brand mentions where AI assistants look: press and blog features, Reddit and YouTube discussions, comparison and 'best of' lists, and a Wikipedia/Wikidata entry if notable." });
     }
 
     const ai = await ctx.ai.generateObject({
@@ -161,7 +188,7 @@ export const geoAgent: AgentDefinition = {
       },
       agentRunId: ctx.runId,
     });
-    await ctx.log("SUCCESS", `GEO report ready — ${score}/100, mentioned in ${results.filter((r) => r.mentioned).length}/${results.length} AI answers`, { type: "AuditReport", id: report.id });
+    await ctx.log("SUCCESS", `GEO report ready — ${score}/100, mentioned unprompted in ${unbranded.filter((r) => r.mentioned).length}/${unbranded.length} AI answers`, { type: "AuditReport", id: report.id });
     return { score, visibility: clamp(visibility) };
   },
 };
