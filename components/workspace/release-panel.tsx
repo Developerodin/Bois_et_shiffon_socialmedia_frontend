@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, Check, CircleAlert, ExternalLink, Send, ShieldCheck, Undo2, X } from "lucide-react";
+import { CalendarClock, Check, CircleAlert, ExternalLink, ImageUp, Send, ShieldCheck, Undo2, X } from "lucide-react";
 import { ApiError, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,7 +100,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms 
         )
       ) : status === "APPROVED" && data.approvalValid ? (
         canPublish ? (
-          <PublishForm data={data} version={version!} onPublish={(b) => act({ action: "publish", version, ...b })} />
+          <PublishForm base={base} data={data} version={version!} onPublish={(b) => act({ action: "publish", version, ...b })} />
         ) : (
           <p className="text-sm text-muted-foreground">Approved. Someone who can publish will post it.</p>
         )
@@ -181,7 +181,7 @@ function ApproveForm({ version, blocked, onDecide }: { version: number; blocked:
   );
 }
 
-function PublishForm({ data, version, onPublish }: { data: Release; version: number; onPublish: (b: Record<string, unknown>) => Promise<void> }) {
+function PublishForm({ base, data, version, onPublish }: { base: string; data: Release; version: number; onPublish: (b: Record<string, unknown>) => Promise<void> }) {
   const { requirements: req, accounts } = data;
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const boards = data.boards?.[accountId];
@@ -190,6 +190,11 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
   const [videoUrl, setVideoUrl] = useState("");
   // Carousels take several links, one per line.
   const imageLinks = imageUrl.split("\n").map((l) => l.trim()).filter(Boolean);
+  // Files uploaded to the brand's private storage; they go out before any links.
+  const [uploads, setUploads] = useState<{ key: string; previewUrl: string }[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const imageCount = uploads.length + imageLinks.length;
   const many = req.maxImages > 1;
   const [later, setLater] = useState(false);
   const [runAt, setRunAt] = useState("");
@@ -220,12 +225,32 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
 
   const missing =
     (req.needsBoard && !boardId && "Choose a board") ||
-    (imageLinks.length < req.minImages && (req.minImages > 1 ? `Add at least ${req.minImages} image links` : "Add an image link")) ||
-    (imageLinks.length > req.maxImages && (req.maxImages ? `At most ${req.maxImages} images` : "Reels take a video link, not images")) ||
+    (uploading && "Uploading…") ||
+    (imageCount < req.minImages && (req.minImages > 1 ? `Add at least ${req.minImages} images` : "Add an image")) ||
+    (imageCount > req.maxImages && (req.maxImages ? `At most ${req.maxImages} images` : "Reels take a video link, not images")) ||
     (!allHttps && "Image links must start with https://") ||
     (req.needsVideo && video?.protocol !== "https:" && "Add a public https video link") ||
     (later && !runAt && "Pick a date and time") ||
     null;
+
+  async function upload(files: FileList | null) {
+    if (!files?.length) return;
+    setUploading(true);
+    setError(null);
+    try {
+      for (const file of Array.from(files)) {
+        const body = new FormData();
+        body.append("file", file);
+        const u = await request<{ key: string; previewUrl: string }>(`${base}/media`, { method: "POST", body, headers: {} });
+        setUploads((prev) => [...prev, u]);
+      }
+    } catch (e) {
+      setError(errText(e));
+    } finally {
+      setUploading(false);
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  }
 
   async function go() {
     if (!confirming) return setConfirming(true);
@@ -236,6 +261,7 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
         connectionId: accountId,
         ...(req.needsBoard ? { boardId } : {}),
         ...(imageLinks.length ? { imageLinks } : {}),
+        ...(uploads.length ? { mediaKeys: uploads.map((u) => u.key) } : {}),
         ...(req.needsVideo ? { videoUrl: videoUrl.trim() } : {}),
         ...(later ? { runAt: new Date(runAt).toISOString() } : {}),
       });
@@ -291,7 +317,7 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
       {req.maxImages > 0 && (
       <div className="flex flex-col gap-1.5">
         <label htmlFor="pub-image" className="text-sm font-medium">
-          {many ? `Image links (${req.minImages} to ${req.maxImages}, one per line)` : "Image link"} {!req.needsImage && <span className="font-normal text-muted-foreground">(optional)</span>}
+          {many ? `Images (${req.minImages} to ${req.maxImages}; links one per line)` : "Image"} {!req.needsImage && <span className="font-normal text-muted-foreground">(optional)</span>}
         </label>
         <div className="flex items-center gap-3">
           {many ? (
@@ -304,7 +330,24 @@ function PublishForm({ data, version, onPublish }: { data: Release; version: num
             <img src={image.href} alt="" className="size-11 shrink-0 rounded-md border border-border object-cover" />
           )}
         </div>
-        <p id="pub-image-help" className="text-xs text-muted-foreground">Public https link{many ? "s" : ""} to {req.provider === "INSTAGRAM" ? "JPG" : "JPG or PNG"} images. {name} downloads them from there.</p>
+        <p id="pub-image-help" className="text-xs text-muted-foreground">Upload {req.provider === "INSTAGRAM" ? "JPG" : "JPG or PNG"} images (up to 4 MB each), or paste public https link{many ? "s" : ""}. {name} downloads them from there.</p>
+        {uploads.length > 0 && (
+          <ul className="flex flex-wrap gap-2" aria-label="Uploaded images">
+            {uploads.map((u, i) => (
+              <li key={u.key} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed link */}
+                <img src={u.previewUrl} alt={`Uploaded image ${i + 1}`} className="size-16 rounded-md border border-border object-cover" />
+                <button type="button" onClick={() => setUploads((prev) => prev.filter((x) => x.key !== u.key))} aria-label={`Remove image ${i + 1}`} className="absolute -right-2 -top-2 grid size-6 place-items-center rounded-full border border-border bg-background text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <X aria-hidden className="size-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <input ref={fileInput} type="file" accept={req.provider === "INSTAGRAM" ? "image/jpeg" : "image/jpeg,image/png"} multiple={many} className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => void upload(e.target.files)} />
+        <Button type="button" variant="outline" className="w-fit" disabled={uploading || imageCount >= req.maxImages} onClick={() => fileInput.current?.click()}>
+          <ImageUp aria-hidden /> {uploading ? "Uploading…" : many ? "Upload images" : "Upload an image"}
+        </Button>
       </div>
       )}
 
