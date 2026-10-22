@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 
 const DOCS = ["Product information", "Marketing strategy", "Competitor analysis", "Brand voice", "Content strategy"];
 const POLL_MS = 2000;
+/** Past this, offer a way out; the agent keeps reading in the background. */
+const SLOW_AFTER_S = 5 * 60;
 
 type Props = {
   workspaceId: string;
@@ -52,6 +54,8 @@ function AddressStep({
   const [nameTouched, setNameTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // Brand created by an earlier attempt: a retry after a later step failed must not create a second one.
+  const created = useRef<{ brandId: string; runId: string; website: string } | null>(null);
 
   const website = normalizeWebsite(address);
   const suggestedName = website ? brandNameFromWebsite(website) : "";
@@ -65,10 +69,14 @@ function AddressStep({
     setPending(true);
     setError(null);
     try {
-      const { brand, researchRunId } = await createBrand(workspaceId, { displayName: brandName.trim(), websiteUrl: website });
-      await setActiveBrand(workspaceId, brand.id);
-      router.replace(`/welcome?${new URLSearchParams({ brand: brand.id, run: researchRunId, site: website })}`);
-      onStarted({ brandId: brand.id, runId: researchRunId, website });
+      if (!created.current) {
+        const { brand, researchRunId } = await createBrand(workspaceId, { displayName: brandName.trim(), websiteUrl: website });
+        created.current = { brandId: brand.id, runId: researchRunId, website };
+      }
+      const started = created.current;
+      await setActiveBrand(workspaceId, started.brandId);
+      router.replace(`/welcome?${new URLSearchParams({ brand: started.brandId, run: started.runId, site: started.website })}`);
+      onStarted(started);
     } catch (err) {
       setError(
         err instanceof ProblemError && err.status === 422
@@ -318,6 +326,17 @@ function ReadingRoom({
             <Link href="/context">
               Review documents <ArrowRight aria-hidden="true" />
             </Link>
+          </Button>
+        </div>
+      )}
+      {!finished && elapsed >= SLOW_AFTER_S && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-[60ch]">
+            This is taking longer than usual. You don&rsquo;t need to wait here: reading carries on, and the drafts appear
+            in Context as they&rsquo;re ready.
+          </p>
+          <Button variant="outline" asChild>
+            <Link href="/context">Go to Context</Link>
           </Button>
         </div>
       )}

@@ -10,7 +10,8 @@ Prow PLUS AI CMO (`apps/web`, Next.js 15 + Prisma on Neon). This pass took an au
 | `edbdbb6` | Publishing | Pinterest / Instagram / Threads tokens refresh before expiry; refused ones mark the account "Needs reconnect". Overdue jobs run while the app is open. Poison jobs stop. No OpenAI key in production stops agents instead of faking drafts. Disconnecting cancels that account's scheduled posts. |
 | `f6042fd` | Security | Owner-only: inviting/removing owners, ownership powers in custom roles. IPv4-mapped IPv6 SSRF bypass closed. Live links scrubbed from sent emails. Daily caps: 100 manual agent runs per workspace, 10 brands per person. Chat respects role permissions and sends the last 40 messages. Login lockout is per email + IP. |
 | `3a5852d` | Usability | Edit brand name/website in place (Context panel, "Edit"). Deep links: `?post=`, `?doc=`, `?agent=`, `?competitor=`, `?panel=`. Menu "Content calendar" opens the panel. "Nothing to do" runs aren't red. Planner retries don't duplicate. Daily pruning of short-lived rows. |
-| latest | Media | Instagram carousels (2 to 10 image links) and Reels (public video link) publish. Publishing can also take uploaded files from the brand's private storage, signed at posting time (no upload button yet). |
+| `260968e` | Media | Instagram carousels (2 to 10 image links) and Reels (public video link) publish. Publishing can also take uploaded files from the brand's private storage, signed at posting time. |
+| 2026-10-22 | Follow-ups | Upload button for images in the publish form (JPG/PNG up to 4 MB, type checked from the file bytes, stored per brand). Phones get a tab for every panel. Welcome: a retry after a failed step reuses the brand already created; after 5 minutes it offers a way out while reading carries on. Index on `AgentRun(agentKey, status)`; running-audit lookup limited to the brand's own competitor domains. |
 
 Checks: `npm run typecheck`, `npm run lint`, `npm test` (55), `npm run smoke:publishing` (11 scenarios), `smoke:connections`, `smoke:rbac`, `smoke:auth`.
 
@@ -24,13 +25,11 @@ Checks: `npm run typecheck`, `npm run lint`, `npm test` (55), `npm run smoke:pub
 ## Still open (in priority order)
 
 1. **Product catalogue + stock checks** (brief REQ-BRIEF-011/012/047/058/106). Needs a design first: data model (SKU, materials, dimensions, price, stock, freshness), import (CSV or Shopify/WooCommerce), checks at approval and again before publishing, "hold" when stock can't be confirmed.
-2. **Upload button for images.** Storage (`server/storage/media.ts`) and publishing already accept brand-scoped keys (`mediaKeys` on the publish action). Missing: an upload route (multipart, ≤ 4 MB on Vercel, JPEG for Instagram) and the button in `components/workspace/release-panel.tsx`. Videos stay as links (Vercel body limit).
-3. **Mobile tab defaults:** Ideas and Content calendar aren't in the phone tab bar by default (`PRESETS` in `components/workspace/workspace.tsx`).
-4. **Welcome flow:** no time limit on "Reading your website", and a failed "make active" after creating the brand can create a duplicate on retry (`components/welcome/welcome-flow.tsx`).
-5. **Index** on `AgentRun(agentKey, status)` and tenant scoping of the running-audit lookup in `server/services/competitor-audits.ts` (needs a migration).
-6. Competitor gaps vs Okara/peers: drag-to-reschedule calendar view, real performance metrics into the Analyst, LinkedIn/X/CMS publishing, morning email digest.
+2. Competitor gaps vs Okara/peers: drag-to-reschedule calendar view, real performance metrics into the Analyst, LinkedIn/X/CMS publishing, morning email digest.
 
 ## Things to know
+
+- **Uploaded images nobody publishes stay in the `media` bucket.** Add a bucket lifecycle rule if storage grows.
 
 - **Opening the workspace runs overdue jobs** (`kickIfDue` from the agents poll). On a dev box with real data, check the queue first (`Job` rows with status `PENDING`).
 - **Smoke tests vs a running server:** stop the dev/prod server before `smoke:publishing`; an open app tab can pick up the test's jobs mid-run (they use fake tokens, so nothing posts, but the test result becomes flaky).

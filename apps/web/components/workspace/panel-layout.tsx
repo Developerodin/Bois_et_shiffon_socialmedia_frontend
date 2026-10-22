@@ -196,7 +196,8 @@ export function PanelLayout<Id extends string>({
   }, [focus]);
 
   const def = (id: Id) => panels.find((p) => p.id === id)!;
-  const activeMobile = mobilePanel && visible.includes(mobilePanel) ? mobilePanel : (visible.find((v) => v !== "context" as Id) ?? visible[0]);
+  // Phones show one panel at a time, so every panel gets a tab; the layout only arranges desktop.
+  const activeMobile = mobilePanel ?? (visible.find((v) => v !== "context" as Id) ?? ids[0]);
 
   const layoutMenu = (
     <DropdownMenu>
@@ -230,7 +231,7 @@ export function PanelLayout<Id extends string>({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex h-9 shrink-0 items-center justify-between gap-2 border-b border-border px-3">
+      <div className="hidden h-9 shrink-0 items-center justify-between gap-2 border-b border-border px-3 lg:flex">
         {!hintSeen && (
           <p className="hidden items-center gap-2 text-xs text-muted-foreground lg:flex">
             Drag a panel by its header to move it. Drag the dividers to resize.
@@ -257,7 +258,7 @@ export function PanelLayout<Id extends string>({
       <div className="flex min-h-0 flex-1 flex-col lg:hidden">
         <div className="min-h-0 flex-1 overflow-y-auto">{!wide && activeMobile && def(activeMobile).render()}</div>
         <nav aria-label="Panels" className="flex shrink-0 overflow-x-auto border-t border-border">
-          {visible.map((id) => (
+          {ids.map((id) => (
             <button
               key={id}
               type="button"

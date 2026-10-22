@@ -243,6 +243,7 @@ model AgentRun {
   events AgentEvent[]
 
   @@index([brandId, agentKey, createdAt])
+  @@index([agentKey, status])
 }
 
 enum AgentEventLevel {

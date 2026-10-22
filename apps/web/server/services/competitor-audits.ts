@@ -23,7 +23,13 @@ export async function listCompetitors(workspaceId: string, brandId: string) {
   const domains = competitors.map((c) => c.domain);
   const [audits, running, geo, balance] = await Promise.all([
     prisma.siteAudit.findMany({ where: { domain: { in: domains } }, orderBy: { createdAt: "desc" }, distinct: ["domain"], select: PUBLIC_AUDIT }),
-    prisma.agentRun.findMany({ where: { agentKey: "site-audit", status: { in: ["QUEUED", "RUNNING"] } }, select: { input: true } }),
+    // Any workspace's running audit counts (shared library), but only for this brand's domains.
+    domains.length
+      ? prisma.agentRun.findMany({
+          where: { agentKey: "site-audit", status: { in: ["QUEUED", "RUNNING"] }, OR: domains.map((d) => ({ input: { path: ["domain"], equals: d } })) },
+          select: { input: true },
+        })
+      : [],
     prisma.auditReport.findFirst({ where: { workspaceId, brandId, kind: "GEO" }, orderBy: { createdAt: "desc" }, select: { metrics: true } }),
     creditBalance(workspaceId),
   ]);
