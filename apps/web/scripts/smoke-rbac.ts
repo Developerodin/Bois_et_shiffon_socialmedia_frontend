@@ -1,12 +1,16 @@
 /**
  * Live RBAC + account-flow check on Neon (services, no server needed):
- * invite → preview → accept (single use) → member gets role permissions →
- * custom role → role change → last-owner guard → password reset (single use,
- * revokes sessions). Cleans up. Run: npm run smoke:rbac -w web
+ * project invite → accept (single use) → Member sees only that project with the project role →
+ * project admin adds a colleague, can't reach another project → custom role → role change →
+ * last-owner guard → password reset (single use, revokes sessions). Cleans up.
+ * Run: npm run smoke:rbac -w web
  */
 import assert from "node:assert/strict";
 import { prisma } from "@/server/db/prisma";
+import { requireBrandAccess } from "@/server/auth/access";
 import { effectivePermissions } from "@/server/auth/permissions";
+import { listAccessibleBrands } from "@/server/services/brands";
+import { addToProject } from "@/server/services/project-members";
 import { hashToken } from "@/server/auth/tokens";
 import {
   acceptInvitation,
@@ -21,37 +25,65 @@ import { changeMemberRole, createRole, deleteRole, listMembers, removeMember } f
 async function main() {
   const ws = await prisma.workspace.findFirstOrThrow({ include: { roles: true } });
   const owner = (await listMembers(ws.id)).find((m) => m.role?.slug === "owner")!;
-  const editorRole = ws.roles.find((r) => r.slug === "editor")!;
-  const email = `smoke-rbac-${Date.now()}@example.com`;
+  const role = (slug: string) => ws.roles.find((r) => r.slug === slug)!;
+  const stamp = Date.now();
+  const email = `smoke-rbac-${stamp}@example.com`;
+  const colleague = `smoke-rbac-colleague-${stamp}@example.com`;
   let customRoleId: string | null = null;
+  const brandA = await prisma.brand.findFirstOrThrow({ where: { workspaceId: ws.id } });
+  const brandB = await prisma.brand.create({ data: { workspaceId: ws.id, slug: `smoke-rbac-${stamp}`, displayName: "Smoke other project" } });
 
   try {
-    // 1. invite + accept
-    const { inviteUrl, emailDelivery } = await createInvitation({ workspaceId: ws.id, email, roleId: editorRole.id, invitedByUserId: owner.userId });
+    // 1. project invite + accept
+    await assert.rejects(createInvitation({ workspaceId: ws.id, brandId: brandA.id, email, roleId: role("admin").id, invitedByUserId: owner.userId }), /project role/);
+    const { inviteUrl, emailDelivery } = await createInvitation({ workspaceId: ws.id, brandId: brandA.id, email, roleId: role("project-admin").id, invitedByUserId: owner.userId });
     const token = inviteUrl.split("/invite/")[1];
     const preview = await previewInvitation(token);
-    assert.equal(preview.roleName, editorRole.name);
+    assert.equal(preview.roleName, "Project admin");
+    assert.equal(preview.projectName, brandA.displayName);
     await assert.rejects(acceptInvitation({ token, name: "Smoke", password: "short" }), AccountFlowError);
     await acceptInvitation({ token, name: "Smoke", password: "a-long-enough-password" });
     await assert.rejects(acceptInvitation({ token, password: "a-long-enough-password" }), AccountFlowError);
     const user = await prisma.user.findUniqueOrThrow({ where: { email } });
-    console.log(`1 invite → accept (single use, weak password rejected), email: ${emailDelivery} ✓`);
+    console.log(`1 project invite → accept (single use, weak password rejected, workspace role refused), email: ${emailDelivery} ✓`);
 
-    // 2. permissions follow the role
-    let perms = await effectivePermissions(ws.id, user.id);
-    assert.ok(perms.has("content.create") && !perms.has("agents.run") && !perms.has("members.manage"));
-    console.log("2 editor gets content.create, not agents.run / members.manage ✓");
+    // 2. only the invited project, with the project role; their own workspace exists
+    let perms = await effectivePermissions(ws.id, user.id, brandA.id);
+    assert.ok(perms.has("project.members.manage") && perms.has("publish.execute") && !perms.has("members.manage"));
+    assert.deepEqual((await listAccessibleBrands(ws.id, user.id)).map((b) => b.id), [brandA.id]);
+    await assert.rejects(requireBrandAccess(ws.id, brandB.id, user.id), /access/);
+    assert.ok(!(await effectivePermissions(ws.id, user.id, brandB.id)).has("brand.read"));
+    assert.ok(await prisma.workspaceMember.findFirst({ where: { userId: user.id, roleRef: { slug: "owner" } } }), "own workspace");
+    console.log("2 Member sees only the invited project as Project admin; other project refused; own workspace ✓");
 
-    // 3. custom role + role change takes effect immediately
-    const custom = await createRole(ws.id, owner.userId, { name: `Smoke runner ${Date.now()}`, permissions: ["brand.read", "agents.read", "agents.run"] });
+    // 3. the project admin brings in a colleague with a project role
+    const add = await addToProject({ workspaceId: ws.id, brandId: brandA.id, actorUserId: user.id, email: colleague, roleId: role("creator").id });
+    assert.equal(add.invited, true);
+    await assert.rejects(addToProject({ workspaceId: ws.id, brandId: brandA.id, actorUserId: user.id, email: colleague, roleId: role("owner").id }), /project role/);
+    await assert.rejects(addToProject({ workspaceId: ws.id, brandId: brandA.id, actorUserId: user.id, email: owner.email, roleId: role("viewer").id }), /every project/);
+    console.log("3 project admin invites a Creator; can't hand out workspace roles; owners already reach every project ✓");
+
+    // 4. custom project role + role change takes effect immediately
+    await assert.rejects(createRole(ws.id, owner.userId, { name: `Smoke bad ${stamp}`, scope: "PROJECT", permissions: ["brand.read", "members.manage"] }), /project permissions/);
+    const custom = await createRole(ws.id, owner.userId, { name: `Smoke runner ${stamp}`, scope: "PROJECT", permissions: ["brand.read", "agents.read", "agents.run"] });
     customRoleId = custom.id;
-    const member = (await listMembers(ws.id)).find((m) => m.userId === user.id)!;
-    await changeMemberRole(ws.id, owner.userId, member.id, custom.id);
-    perms = await effectivePermissions(ws.id, user.id);
+    const grant = await prisma.brandMember.findFirstOrThrow({ where: { brandId: brandA.id, userId: user.id } });
+    await prisma.brandMember.update({ where: { id: grant.id }, data: { roleId: custom.id } });
+    perms = await effectivePermissions(ws.id, user.id, brandA.id);
     assert.ok(perms.has("agents.run") && !perms.has("content.create"));
-    console.log("3 custom role assigned → permissions change immediately ✓");
+    await assert.rejects(deleteRole(ws.id, owner.userId, custom.id), AccountFlowError); // still assigned
+    await prisma.brandMember.delete({ where: { id: grant.id } });
+    console.log("4 custom project role: workspace permissions refused, change applies immediately, in-use role can't be deleted ✓");
 
-    // 4. ownership guards
+    // 5. workspace role change + ownership guards (custom workspace role)
+    const wsCustom = await createRole(ws.id, owner.userId, { name: `Smoke ws ${stamp}`, scope: "WORKSPACE", permissions: ["brand.read", "agents.read", "agents.run"] });
+    await prisma.role.delete({ where: { id: custom.id } });
+    customRoleId = wsCustom.id;
+    const member = (await listMembers(ws.id)).find((m) => m.userId === user.id)!;
+    await assert.rejects(changeMemberRole(ws.id, owner.userId, member.id, role("viewer").id), /workspace role/);
+    await changeMemberRole(ws.id, owner.userId, member.id, wsCustom.id);
+    assert.ok((await effectivePermissions(ws.id, user.id, brandB.id)).has("agents.run"), "workspace role reaches every project");
+
     const ownerRole = ws.roles.find((r) => r.slug === "owner")!;
     await assert.rejects(changeMemberRole(ws.id, user.id, member.id, ownerRole.id), AccountFlowError);
     // A non-owner can't reach ownership by invitation, or remove an owner.
@@ -61,10 +93,9 @@ async function main() {
     if (owners.length === 1) {
       await assert.rejects(removeMember(ws.id, owner.userId, owners[0].id), AccountFlowError);
     }
-    await assert.rejects(deleteRole(ws.id, owner.userId, custom.id), AccountFlowError); // still assigned
-    console.log("4 non-owner can't grant owner; last owner protected; assigned role can't be deleted ✓");
+    console.log("5 workspace role reaches every project; project role refused as workspace role; non-owner can't grant owner; last owner protected ✓");
 
-    // 5. password reset: single use + revokes sessions
+    // 6. password reset: single use + revokes sessions
     const before = user.sessionVersion;
     await requestPasswordReset(email, "203.0.113.7");
     await requestPasswordReset(`nobody-${Date.now()}@example.com`, "203.0.113.7"); // same silent success
@@ -76,14 +107,19 @@ async function main() {
     await assert.rejects(resetPassword(raw, "another-long-password"), AccountFlowError);
     const after = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
     assert.equal(after.sessionVersion, before + 1);
-    console.log("5 password reset single-use, unknown email silent, sessions revoked ✓");
+    console.log("6 password reset single-use, unknown email silent, sessions revoked ✓");
   } finally {
     const u = await prisma.user.findUnique({ where: { email } });
     if (u) {
+      const own = await prisma.workspaceMember.findMany({ where: { userId: u.id, roleRef: { slug: "owner" } } });
+      await prisma.workspace.deleteMany({ where: { id: { in: own.map((m) => m.workspaceId) } } });
+      await prisma.brandMember.deleteMany({ where: { userId: u.id } });
       await prisma.workspaceMember.deleteMany({ where: { userId: u.id } });
+      await prisma.auditEvent.deleteMany({ where: { actorUserId: u.id } });
       await prisma.user.delete({ where: { id: u.id } });
     }
-    await prisma.invitation.deleteMany({ where: { email } });
+    await prisma.invitation.deleteMany({ where: { email: { in: [email, colleague] } } });
+    await prisma.brand.delete({ where: { id: brandB.id } });
     await prisma.emailOutbox.deleteMany({ where: { to: { startsWith: "smoke-rbac-" } } });
     if (customRoleId) await prisma.role.delete({ where: { id: customRoleId } }).catch(() => {});
   }

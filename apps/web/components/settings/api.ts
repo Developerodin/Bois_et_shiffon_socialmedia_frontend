@@ -9,7 +9,7 @@ export class ApiError extends Error {
   }
 }
 
-export type Permission = { key: string; category: string; description: string };
+export type Permission = { key: string; category: string; description: string; scope: RoleScope };
 
 export type Role = {
   id: string;
@@ -17,9 +17,13 @@ export type Role = {
   name: string;
   description: string | null;
   isSystem: boolean;
+  scope: RoleScope;
   permissions: string[];
   memberCount: number;
 };
+
+/** WORKSPACE roles go on workspace members; PROJECT roles on one project (brand). */
+export type RoleScope = "WORKSPACE" | "PROJECT";
 
 export type MemberStatus = "ACTIVE" | "INVITED" | "DISABLED";
 
@@ -39,6 +43,7 @@ export type Invitation = {
   id: string;
   email: string;
   role: { id: string; name: string };
+  project: string | null;
   status: InvitationStatus;
   expiresAt: string;
   createdAt: string;
@@ -50,6 +55,7 @@ export type EmailDelivery = "sent" | "queued" | "not_configured";
 export type PublicInvitation = {
   email: string;
   workspaceName: string;
+  projectName: string | null;
   roleName: string;
   expiresAt: string;
   existingAccount: boolean;
@@ -81,11 +87,12 @@ const ws = (workspaceId: string) => `/api/v1/workspaces/${encodeURIComponent(wor
 const json = (method: string, body: unknown): RequestInit => ({ method, body: JSON.stringify(body) });
 
 export const settingsApi = {
-  myPermissions: (w: string) => request<{ permissions: string[] }>(`${ws(w)}/my-permissions`),
+  myPermissions: (w: string, b?: string | null) =>
+    request<{ permissions: string[] }>(`${ws(w)}/my-permissions${b ? `?brandId=${encodeURIComponent(b)}` : ""}`),
   permissions: () => request<{ permissions: Permission[] }>("/api/v1/permissions"),
 
   roles: (w: string) => request<{ roles: Role[] }>(`${ws(w)}/roles`),
-  createRole: (w: string, body: { name: string; description?: string; permissions: string[] }) =>
+  createRole: (w: string, body: { name: string; description?: string; scope: RoleScope; permissions: string[] }) =>
     request<{ role: Role }>(`${ws(w)}/roles`, json("POST", body)),
   updateRole: (
     w: string,
@@ -110,6 +117,16 @@ export const settingsApi = {
   revokeInvitation: (w: string, id: string) =>
     request<void>(`${ws(w)}/invitations/${encodeURIComponent(id)}`, { method: "DELETE" }),
 
+  projectPeople: (w: string, b: string) => request<ProjectPeople>(`${brand(w, b)}/members`),
+  addToProject: (w: string, b: string, body: { email: string; roleId: string }) =>
+    request<{ invited: boolean; inviteUrl?: string; emailDelivery?: EmailDelivery }>(`${brand(w, b)}/members`, json("POST", body)),
+  changeProjectRole: (w: string, b: string, grantId: string, roleId: string) =>
+    request<{ ok: true }>(`${brand(w, b)}/members/${encodeURIComponent(grantId)}`, json("PATCH", { roleId })),
+  removeFromProject: (w: string, b: string, grantId: string) =>
+    request<void>(`${brand(w, b)}/members/${encodeURIComponent(grantId)}`, { method: "DELETE" }),
+  revokeProjectInvitation: (w: string, b: string, id: string) =>
+    request<void>(`${brand(w, b)}/invitations/${encodeURIComponent(id)}`, { method: "DELETE" }),
+
   connections: (w: string, b: string) =>
     request<{ providers: ProviderInfo[]; connections: Connection[] }>(`${brand(w, b)}/connections`),
   startConnect: (w: string, b: string, provider: Provider) =>
@@ -119,6 +136,13 @@ export const settingsApi = {
 };
 
 const brand = (w: string, b: string) => `${ws(w)}/brands/${encodeURIComponent(b)}`;
+
+export type ProjectPeople = {
+  viaWorkspace: { userId: string; name: string | null; email: string; role: string }[];
+  people: { id: string; userId: string; name: string | null; email: string; role: { id: string; name: string } }[];
+  invitations: { id: string; email: string; role: { id: string; name: string }; expiresAt: string }[];
+  roles: { id: string; name: string; description: string | null }[];
+};
 
 export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "REDDIT" | "PINTEREST";
 export type ProviderInfo = { provider: Provider; label: string; configured: boolean };

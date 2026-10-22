@@ -15,6 +15,15 @@ Prow PLUS AI CMO (`apps/web`, Next.js 15 + Prisma on Neon). This pass took an au
 
 Checks: `npm run typecheck`, `npm run lint`, `npm test` (55), `npm run smoke:publishing` (11 scenarios), `smoke:connections`, `smoke:rbac`, `smoke:auth`.
 
+| 2026-10-22 | Project access | Every person owns a workspace (also when they join by invite). Projects (brands) are shared per person: workspace roles are Owner / Admin / Member; project roles are Project admin / Manager / Creator / Approver / Viewer, plus custom roles of either kind. Owner/Admin reach every project; a Member sees only projects they were added to. Settings → Project access adds a colleague by email (direct grant if already in the workspace, else a project invite). /welcome can switch workspace and sign out. |
+
+### Access model (2026-10-22)
+
+- `Role.scope` is `WORKSPACE` or `PROJECT`. Permissions are split in `server/auth/permissions.catalog.ts` (`permissionScope`); a project role can't hold workspace permissions.
+- Effective permissions on a project = workspace role ∪ the `BrandMember` grant's role (`server/auth/permissions.ts`). Project access needs `brand.read` from either.
+- `project.members.manage` lets a project admin invite and manage people on that project only.
+- New system roles are seeded by migration `20261022120000_project_roles` for existing workspaces, and with one `createMany` for new ones (`ensurePersonalWorkspace`).
+
 ## Decisions waiting on the owner
 
 1. **Job trigger for on-time scheduled posts.** Vercel Hobby cron runs once a day. Either upgrade to Pro and set `apps/web/vercel.json` to `*/5 * * * *`, or point a cron service at `POST /api/v1/jobs/run` with `Authorization: Bearer $CRON_SECRET` every 5 minutes. See `docs/ENV_SETUP.md` → Background jobs.

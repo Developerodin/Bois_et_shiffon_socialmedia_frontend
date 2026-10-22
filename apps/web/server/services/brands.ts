@@ -1,4 +1,5 @@
 import { BrandStatus } from "@prisma/client";
+import { memberRole } from "@/server/auth/permissions";
 import { prisma } from "@/server/db/prisma";
 
 export type BrandListItem = {
@@ -9,19 +10,18 @@ export type BrandListItem = {
 };
 
 /**
- * Brands the user may list under `brand.read` (DEC-021 BrandMember gate).
+ * Projects the user can open: all of them when the workspace role has brand.read
+ * (Owner/Admin), otherwise those with a project grant whose role has it.
  */
 export async function listAccessibleBrands(
   workspaceId: string,
   userId: string,
 ): Promise<BrandListItem[]> {
+  const all = (await memberRole(workspaceId, userId))?.role?.permissions.includes("brand.read") ?? false;
   const brands = await prisma.brand.findMany({
     where: {
       workspaceId,
-      OR: [
-        { members: { none: {} } },
-        { members: { some: { userId } } },
-      ],
+      ...(all ? {} : { members: { some: { userId, role: { permissions: { has: "brand.read" } } } } }),
     },
     orderBy: { displayName: "asc" },
     select: {

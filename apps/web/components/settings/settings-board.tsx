@@ -7,13 +7,15 @@ import { settingsApi } from "@/components/settings/api";
 import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { InvitationsTab } from "@/components/settings/invitations-tab";
 import { MembersTab } from "@/components/settings/members-tab";
+import { ProjectAccessTab } from "@/components/settings/project-access-tab";
 import { RolesTab } from "@/components/settings/roles-tab";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
 
-type TabKey = "members" | "roles" | "invitations" | "connections";
+type TabKey = "project" | "members" | "roles" | "invitations" | "connections";
 
 const TABS: { key: TabKey; label: string; needs: string }[] = [
+  { key: "project", label: "Project access", needs: "brand.read" },
   { key: "members", label: "Members", needs: "members.read" },
   { key: "roles", label: "Roles", needs: "roles.read" },
   { key: "invitations", label: "Invitations", needs: "invitations.manage" },
@@ -29,8 +31,9 @@ type Props = {
 
 export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Props) {
   const permsFetcher = useCallback(
-    () => settingsApi.myPermissions(workspaceId).then((d) => new Set(d.permissions ?? [])),
-    [workspaceId],
+    // With a project open: workspace role plus that project's role.
+    () => settingsApi.myPermissions(workspaceId, brandId).then((d) => new Set(d.permissions ?? [])),
+    [workspaceId, brandId],
   );
   const perms = useLoad(permsFetcher);
   const can = perms.state.kind === "ready" ? perms.state.data : null;
@@ -41,10 +44,13 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
     [workspaceId],
   );
   const roles = useLoad(can?.has("roles.read") ? rolesFetcher : null);
-  const roleList = roles.state.kind === "ready" ? roles.state.data : [];
+  // Members and workspace invitations take workspace roles; project roles are picked in Project access.
+  const roleList = roles.state.kind === "ready" ? roles.state.data.filter((r) => r.scope === "WORKSPACE") : [];
 
-  // Connections are per brand, so the tab only shows with a brand selected.
-  const visible = can ? TABS.filter((t) => can.has(t.needs) && (t.key !== "connections" || brandId)) : [];
+  // Project access and Connections are per brand, so they only show with a brand selected.
+  const visible = can
+    ? TABS.filter((t) => can.has(t.needs) && ((t.key !== "connections" && t.key !== "project") || brandId))
+    : [];
   const [active, setActive] = useState<TabKey | null>(initialTab ?? null);
   const current = visible.find((t) => t.key === active) ?? visible[0];
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -117,7 +123,9 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
           tabIndex={0}
           className="rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
         >
-          {current.key === "members" ? (
+          {current.key === "project" ? (
+            <ProjectAccessTab workspaceId={workspaceId} brandId={brandId!} canManage={can!.has("project.members.manage")} />
+          ) : current.key === "members" ? (
             <MembersTab workspaceId={workspaceId} can={can!} roles={roleList} onRolesChanged={roles.reload} />
           ) : current.key === "roles" ? (
             <RolesTab workspaceId={workspaceId} can={can!} roles={roles} />
@@ -140,10 +148,10 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
       <div>
         <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
-          Workspace settings
+          Settings
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Who can work here, what each role can do, who is waiting to join, and which accounts this brand has connected.
+          Who works on this project and the workspace, what each role can do, who is waiting to join, and which accounts this project has connected.
         </p>
       </div>
       {body}

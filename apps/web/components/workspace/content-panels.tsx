@@ -370,7 +370,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
   const [editing, setEditing] = useState(false);
   const [perms, setPerms] = useState<string[] | null>(null);
   useEffect(() => {
-    request<{ permissions: string[] }>(`${base.split("/brands/")[0]}/my-permissions`).then((p) => setPerms(p.permissions), () => setPerms([]));
+    request<{ permissions: string[] }>(`${base.split("/brands/")[0]}/my-permissions?brandId=${base.split("/brands/")[1]}`).then((p) => setPerms(p.permissions), () => setPerms([]));
   }, [base]);
   useEffect(() => setEditing(false), [id]);
   const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";

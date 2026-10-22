@@ -1,6 +1,7 @@
 import { BrandStatus } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { AccessDeniedError, BrandArchivedError } from "@/server/auth/errors";
+import { effectivePermissions } from "@/server/auth/permissions";
 
 export type BrandAccessOptions = {
   /** Allow read-style access when brand is archived (AT-024 history). */
@@ -26,7 +27,8 @@ export async function requireWorkspaceMember(
 }
 
 /**
- * Workspace member + brand in workspace + optional BrandMember gate (DEC-021).
+ * Workspace member + brand in workspace + brand.read on it: from the workspace role
+ * (Owner/Admin reach every project) or from a project grant (BrandMember).
  */
 export async function requireBrandAccess(
   workspaceId: string,
@@ -36,13 +38,7 @@ export async function requireBrandAccess(
 ) {
   await requireWorkspaceMember(workspaceId, userId);
 
-  const brand = await prisma.brand.findFirst({
-    where: { id: brandId, workspaceId },
-    include: {
-      members: { where: { userId }, take: 1 },
-    },
-  });
-
+  const brand = await prisma.brand.findFirst({ where: { id: brandId, workspaceId } });
   if (!brand) {
     throw new AccessDeniedError("Brand not found in workspace");
   }
@@ -51,12 +47,8 @@ export async function requireBrandAccess(
     throw new BrandArchivedError();
   }
 
-  const restrictedMemberCount = await prisma.brandMember.count({
-    where: { brandId },
-  });
-
-  if (restrictedMemberCount > 0 && brand.members.length === 0) {
-    throw new AccessDeniedError("No brand-level access grant");
+  if (!(await effectivePermissions(workspaceId, userId, brandId)).has("brand.read")) {
+    throw new AccessDeniedError("You don't have access to this project");
   }
 
   return brand;

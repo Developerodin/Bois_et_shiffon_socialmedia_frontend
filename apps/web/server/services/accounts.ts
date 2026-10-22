@@ -1,6 +1,9 @@
+import { randomBytes } from "node:crypto";
+import type { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { memberRole } from "@/server/auth/permissions";
+import { SYSTEM_ROLES } from "@/server/auth/permissions.catalog";
 import { hitRateLimit, limitKey, resetRateLimit } from "@/server/auth/rate-limit";
 import { appUrl, hashToken, MIN_PASSWORD_LENGTH, newToken } from "@/server/auth/tokens";
 import { prisma } from "@/server/db/prisma";
@@ -26,13 +29,21 @@ const normEmail = (e: string) => e.trim().toLowerCase();
 
 export async function createInvitation(input: {
   workspaceId: string;
+  /** Project invite: the role is a PROJECT role on this brand; the person joins the workspace as Member. */
+  brandId?: string;
   email: string;
   roleId: string;
   invitedByUserId: string;
 }) {
   const email = normEmail(input.email);
-  const role = await prisma.role.findFirst({ where: { id: input.roleId, workspaceId: input.workspaceId } });
-  if (!role) throw new AccountFlowError("Role not found in this workspace", 404);
+  const role = await prisma.role.findFirst({
+    where: { id: input.roleId, workspaceId: input.workspaceId, scope: input.brandId ? "PROJECT" : "WORKSPACE" },
+  });
+  if (!role) throw new AccountFlowError(input.brandId ? "Pick a project role" : "Pick a workspace role", 404);
+  const brand = input.brandId
+    ? await prisma.brand.findFirst({ where: { id: input.brandId, workspaceId: input.workspaceId } })
+    : null;
+  if (input.brandId && !brand) throw new AccountFlowError("Project not found in this workspace", 404);
   // Same rule as changing roles: only an owner can make someone an owner (else an admin could invite
   // their own second address as owner and take over the workspace).
   if (role.slug === "owner" && (await memberRole(input.workspaceId, input.invitedByUserId))?.role?.slug !== "owner") {
@@ -47,9 +58,9 @@ export async function createInvitation(input: {
   const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: input.workspaceId } });
   const inviteUrl = appUrl(`/invite/${token.raw}`);
   return prisma.$transaction(async (tx) => {
-    // A new invite replaces any pending one for the same email.
+    // A new invite replaces any pending one for the same email and project.
     await tx.invitation.updateMany({
-      where: { workspaceId: input.workspaceId, email, acceptedAt: null, revokedAt: null },
+      where: { workspaceId: input.workspaceId, brandId: input.brandId ?? null, email, acceptedAt: null, revokedAt: null },
       data: { revokedAt: new Date() },
     });
     const invitation = await tx.invitation.create({
@@ -57,16 +68,18 @@ export async function createInvitation(input: {
         workspaceId: input.workspaceId,
         email,
         roleId: role.id,
+        brandId: input.brandId,
         tokenHash: token.hash,
         expiresAt: new Date(Date.now() + INVITE_TTL_MS),
         invitedByUserId: input.invitedByUserId,
       },
       include: { role: true },
     });
+    const where = brand ? `${brand.displayName} (in ${workspace.name})` : workspace.name;
     const emailDelivery = await queueEmail(tx, {
       to: email,
-      subject: `You're invited to ${workspace.name}`,
-      text: `You've been invited to join ${workspace.name} as ${role.name}.\n\nAccept the invitation: ${inviteUrl}\n\nThis link expires in 7 days.`,
+      subject: `You're invited to ${brand?.displayName ?? workspace.name}`,
+      text: `You've been invited to work on ${where} as ${role.name}.\n\nAccept the invitation: ${inviteUrl}\n\nThis link expires in 7 days.`,
     });
     await tx.auditEvent.create({
       data: {
@@ -75,7 +88,7 @@ export async function createInvitation(input: {
         action: "invitation.created",
         entityType: "Invitation",
         entityId: invitation.id,
-        metadata: { email, roleId: role.id },
+        metadata: { email, roleId: role.id, brandId: input.brandId ?? null },
       },
     });
     return { invitation, inviteUrl, emailDelivery };
@@ -85,7 +98,7 @@ export async function createInvitation(input: {
 async function findOpenInvitation(rawToken: string) {
   const inv = await prisma.invitation.findUnique({
     where: { tokenHash: hashToken(rawToken) },
-    include: { workspace: true, role: true },
+    include: { workspace: true, role: true, brand: { select: { displayName: true } } },
   });
   if (!inv || inv.acceptedAt || inv.revokedAt || inv.expiresAt < new Date()) {
     throw new AccountFlowError("This invitation is invalid or has expired", 404);
@@ -99,6 +112,7 @@ export async function previewInvitation(rawToken: string) {
   return {
     email: inv.email,
     workspaceName: inv.workspace.name,
+    projectName: inv.brand?.displayName ?? null,
     roleName: inv.role.name,
     expiresAt: inv.expiresAt.toISOString(),
     existingAccount: Boolean(user?.passwordHash && user.status === "ACTIVE"),
@@ -130,11 +144,8 @@ export async function acceptInvitation(input: { token: string; name?: string; pa
         : {},
       create: { email: inv.email, name: input.name || null, passwordHash, status: "ACTIVE" },
     });
-    await tx.workspaceMember.upsert({
-      where: { workspaceId_userId: { workspaceId: inv.workspaceId, userId: user.id } },
-      update: { roleId: inv.roleId },
-      create: { workspaceId: inv.workspaceId, userId: user.id, roleId: inv.roleId },
-    });
+    await joinFromInvitation(tx, inv, user.id);
+    await ensurePersonalWorkspace(tx, user);
     await tx.auditEvent.create({
       data: {
         workspaceId: inv.workspaceId,
@@ -145,6 +156,50 @@ export async function acceptInvitation(input: { token: string; name?: string; pa
       },
     });
   });
+  return { workspaceId: inv.workspaceId, brandId: inv.brandId };
+}
+
+type Tx = Prisma.TransactionClient;
+
+/** Workspace invite: the invited workspace role. Project invite: Member (never a downgrade) + the project role. */
+export async function joinFromInvitation(tx: Tx, inv: { workspaceId: string; roleId: string; brandId: string | null }, userId: string) {
+  if (!inv.brandId) {
+    await tx.workspaceMember.upsert({
+      where: { workspaceId_userId: { workspaceId: inv.workspaceId, userId } },
+      update: { roleId: inv.roleId },
+      create: { workspaceId: inv.workspaceId, userId, roleId: inv.roleId },
+    });
+    return;
+  }
+  const member = await tx.role.findUniqueOrThrow({ where: { workspaceId_slug: { workspaceId: inv.workspaceId, slug: "member" } } });
+  await tx.workspaceMember.upsert({
+    where: { workspaceId_userId: { workspaceId: inv.workspaceId, userId } },
+    update: {},
+    create: { workspaceId: inv.workspaceId, userId, role: "VIEWER", roleId: member.id },
+  });
+  await tx.brandMember.upsert({
+    where: { brandId_userId: { brandId: inv.brandId, userId } },
+    update: { roleId: inv.roleId },
+    create: { workspaceId: inv.workspaceId, brandId: inv.brandId, userId, roleId: inv.roleId },
+  });
+}
+
+/** Everyone owns a workspace of their own to add projects to, invited or not. */
+export async function ensurePersonalWorkspace(tx: Tx, user: { id: string; email: string; name?: string | null }) {
+  const owns = await tx.workspaceMember.findFirst({ where: { userId: user.id, roleRef: { slug: "owner" } } });
+  if (owns) return null;
+  const first = (user.name ?? user.email.split("@")[0]).trim().split(/\s+/)[0] || "My";
+  const workspace = await tx.workspace.create({
+    data: { name: `${first}'s workspace`, slug: `ws-${randomBytes(5).toString("hex")}` },
+  });
+  // New workspace: one insert for its system roles (upserting each one overruns the transaction timeout on Neon).
+  await tx.role.createMany({ data: SYSTEM_ROLES.map((r) => ({ ...r, workspaceId: workspace.id, isSystem: true })) });
+  const owner = await tx.role.findUniqueOrThrow({ where: { workspaceId_slug: { workspaceId: workspace.id, slug: "owner" } } });
+  await tx.workspaceMember.create({ data: { workspaceId: workspace.id, userId: user.id, role: "OWNER", roleId: owner.id } });
+  await tx.auditEvent.create({
+    data: { workspaceId: workspace.id, actorUserId: user.id, action: "workspace.created", entityType: "Workspace", entityId: workspace.id },
+  });
+  return workspace;
 }
 
 // ---------- password reset ----------

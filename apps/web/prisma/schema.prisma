@@ -142,6 +142,7 @@ model Brand {
   contentItems  ContentItem[]
   learningNotes LearningNote[]
   competitors   Competitor[]
+  invitations   Invitation[]
 
   // target for composite tenant FKs (AT-021): children reference (id, workspaceId)
   @@unique([id, workspaceId])
@@ -171,14 +172,14 @@ model BrandMember {
   workspaceId String
   brandId     String
   userId      String
-  role        String?
-  /// Extra roles granted on this brand only (on top of the workspace role)
-  roleIds     String[]
+  /// Project role on this brand (adds to the workspace role)
+  roleId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role  Role  @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
   @@unique([brandId, userId])
   @@index([workspaceId, brandId])
@@ -363,6 +364,11 @@ model BrandContextDoc {
 
 // --- Login hardening (ported from Cad auth) ---
 
+enum RoleScope {
+  WORKSPACE
+  PROJECT
+}
+
 enum UserStatus {
   ACTIVE
   INVITED
@@ -390,13 +396,16 @@ model Role {
   name        String
   description String?
   isSystem    Boolean  @default(false)
+  /// WORKSPACE roles go on workspace members; PROJECT roles on a brand (BrandMember)
+  scope       RoleScope @default(WORKSPACE)
   permissions String[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  members     WorkspaceMember[]
-  invitations Invitation[]
+  members      WorkspaceMember[]
+  brandMembers BrandMember[]
+  invitations  Invitation[]
 
   @@unique([workspaceId, slug])
 }
@@ -407,6 +416,8 @@ model Invitation {
   workspaceId     String
   email           String
   roleId          String
+  /// Set for a project invite: roleId is then a PROJECT role on this brand
+  brandId         String?
   tokenHash       String    @unique
   expiresAt       DateTime
   acceptedAt      DateTime?
@@ -416,6 +427,7 @@ model Invitation {
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   role      Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  brand     Brand?    @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, createdAt])
   @@index([email])

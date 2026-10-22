@@ -67,6 +67,9 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
                   <p className="font-display text-lg font-medium leading-tight tracking-tight">
                     {r.name}
                   </p>
+                  <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                    {r.scope === "PROJECT" ? "Project role" : "Workspace role"}
+                  </span>
                   {r.isSystem ? <SystemLock /> : null}
                 </div>
                 {r.description ? (

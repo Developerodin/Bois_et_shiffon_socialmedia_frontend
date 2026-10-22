@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { errorMessage, settingsApi, type Permission, type Role } from "@/components/settings/api";
+import { errorMessage, settingsApi, type Permission, type Role, type RoleScope } from "@/components/settings/api";
 import { LoadError, type Load } from "@/components/settings/shared";
 
 type Props = {
@@ -28,6 +28,7 @@ export function RoleDialog({ workspaceId, role, catalog, onRetryCatalog, onClose
   const id = useId();
   const [name, setName] = useState(role?.name ?? "");
   const [description, setDescription] = useState(role?.description ?? "");
+  const [scope, setScope] = useState<RoleScope>(role?.scope ?? "PROJECT");
   const [selected, setSelected] = useState<Set<string>>(() => new Set(role?.permissions ?? []));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,10 +50,13 @@ export function RoleDialog({ workspaceId, role, catalog, onRetryCatalog, onClose
     }
     setBusy(true);
     setError(null);
+    // A project role can't hold workspace permissions (ones ticked before switching are dropped).
+    const allowed = new Set(catalog.kind === "ready" ? catalog.data.filter((p) => scope === "WORKSPACE" || p.scope === "PROJECT").map((p) => p.key) : []);
     const body = {
       name: name.trim(),
       description: description.trim() || undefined,
-      permissions: [...selected],
+      scope,
+      permissions: [...selected].filter((k) => allowed.has(k)),
     };
     try {
       if (role) await settingsApi.updateRole(workspaceId, role.id, body);
@@ -68,6 +72,7 @@ export function RoleDialog({ workspaceId, role, catalog, onRetryCatalog, onClose
   const groups = new Map<string, Permission[]>();
   if (catalog.kind === "ready") {
     for (const p of catalog.data) {
+      if (scope === "PROJECT" && p.scope !== "PROJECT") continue;
       groups.set(p.category, [...(groups.get(p.category) ?? []), p]);
     }
   }
@@ -100,6 +105,32 @@ export function RoleDialog({ workspaceId, role, catalog, onRetryCatalog, onClose
               maxLength={500}
             />
           </label>
+
+          {role ? null : (
+            <fieldset className="flex flex-col gap-2 text-sm">
+              <legend className="mb-1.5 text-muted-foreground">Used for</legend>
+              {(
+                [
+                  ["PROJECT", "One project", "Given to someone on a project they're invited to"],
+                  ["WORKSPACE", "The whole workspace", "Applies to every project, plus any workspace permissions"],
+                ] as const
+              ).map(([value, label, hint]) => (
+                <label key={value} className="flex cursor-pointer items-start gap-2.5">
+                  <input
+                    type="radio"
+                    name={`${id}-scope`}
+                    checked={scope === value}
+                    onChange={() => setScope(value)}
+                    className="mt-0.5 size-4 shrink-0 accent-primary"
+                  />
+                  <span>
+                    <span className="block text-foreground">{label}</span>
+                    <span className="block text-xs text-muted-foreground">{hint}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          )}
 
           <fieldset className="flex flex-col gap-4">
             <legend className="mb-2 text-sm text-muted-foreground">

@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { isPermissionKey, LEGACY_ROLE_SLUG } from "@/server/auth/permissions.catalog";
+import { isPermissionKey, LEGACY_ROLE_SLUG, permissionScope } from "@/server/auth/permissions.catalog";
 import { memberRole } from "@/server/auth/permissions";
 import { prisma } from "@/server/db/prisma";
 import { AccountFlowError } from "@/server/services/accounts";
@@ -13,13 +13,21 @@ const slugify = (s: string) =>
 export const RoleInput = z.object({
   name: z.string().trim().min(1).max(60),
   description: z.string().trim().max(240).optional(),
+  /** WORKSPACE roles may hold any permission (project ones then apply to every project); PROJECT roles only project ones. */
+  scope: z.enum(["WORKSPACE", "PROJECT"]).default("WORKSPACE"),
   permissions: z.array(z.string()).refine((ps) => ps.every(isPermissionKey), "Unknown permission"),
 });
+
+function assertFitsScope(scope: "WORKSPACE" | "PROJECT", permissions: string[] | undefined) {
+  if (scope === "PROJECT" && permissions?.some((p) => isPermissionKey(p) && permissionScope(p) === "WORKSPACE")) {
+    throw new AccountFlowError("A project role can only hold project permissions", 409);
+  }
+}
 
 export async function listRoles(workspaceId: string) {
   const roles = await prisma.role.findMany({
     where: { workspaceId },
-    include: { _count: { select: { members: true } } },
+    include: { _count: { select: { members: true, brandMembers: true } } },
     orderBy: [{ isSystem: "desc" }, { createdAt: "asc" }],
   });
   return roles.map((r) => ({
@@ -28,8 +36,9 @@ export async function listRoles(workspaceId: string) {
     name: r.name,
     description: r.description,
     isSystem: r.isSystem,
+    scope: r.scope,
     permissions: r.permissions.filter(isPermissionKey),
-    memberCount: r._count.members,
+    memberCount: r._count.members + r._count.brandMembers,
   }));
 }
 
@@ -43,6 +52,7 @@ async function assertCanGrant(workspaceId: string, actorUserId: string, permissi
 
 export async function createRole(workspaceId: string, actorUserId: string, input: z.infer<typeof RoleInput>) {
   await assertCanGrant(workspaceId, actorUserId, input.permissions);
+  assertFitsScope(input.scope, input.permissions);
   const base = slugify(input.name);
   const taken = await prisma.role.count({ where: { workspaceId, slug: { startsWith: base } } });
   const role = await prisma.role.create({
@@ -51,6 +61,7 @@ export async function createRole(workspaceId: string, actorUserId: string, input
       slug: taken ? `${base}-${taken + 1}` : base,
       name: input.name,
       description: input.description,
+      scope: input.scope,
       permissions: input.permissions,
     },
   });
@@ -68,6 +79,7 @@ export async function updateRole(
   if (!role) throw new AccountFlowError("Role not found", 404);
   if (role.isSystem) throw new AccountFlowError("System roles can't be edited", 409);
   await assertCanGrant(workspaceId, actorUserId, input.permissions);
+  assertFitsScope(role.scope, input.permissions);
   const updated = await prisma.role.update({
     where: { id: role.id },
     data: { name: input.name, description: input.description, permissions: input.permissions },
@@ -79,11 +91,11 @@ export async function updateRole(
 export async function deleteRole(workspaceId: string, actorUserId: string, roleId: string) {
   const role = await prisma.role.findFirst({
     where: { id: roleId, workspaceId },
-    include: { _count: { select: { members: true, invitations: true } } },
+    include: { _count: { select: { members: true, brandMembers: true, invitations: true } } },
   });
   if (!role) throw new AccountFlowError("Role not found", 404);
   if (role.isSystem) throw new AccountFlowError("System roles can't be deleted", 409);
-  if (role._count.members || role._count.invitations) {
+  if (role._count.members || role._count.brandMembers || role._count.invitations) {
     throw new AccountFlowError("Move members and invitations off this role first", 409);
   }
   await prisma.role.delete({ where: { id: role.id } });
@@ -119,8 +131,8 @@ async function ownerCount(workspaceId: string) {
 export async function changeMemberRole(workspaceId: string, actorUserId: string, memberId: string, roleId: string) {
   const member = await prisma.workspaceMember.findFirst({ where: { id: memberId, workspaceId } });
   if (!member) throw new AccountFlowError("Member not found", 404);
-  const role = await prisma.role.findFirst({ where: { id: roleId, workspaceId } });
-  if (!role) throw new AccountFlowError("Role not found", 404);
+  const role = await prisma.role.findFirst({ where: { id: roleId, workspaceId, scope: "WORKSPACE" } });
+  if (!role) throw new AccountFlowError("Pick a workspace role", 404);
   const current = await memberRole(workspaceId, member.userId);
   // Only owners can create or remove owners.
   if (role.slug === "owner" || current?.role?.slug === "owner") {
@@ -158,7 +170,7 @@ export async function removeMember(workspaceId: string, actorUserId: string, mem
 export async function listInvitations(workspaceId: string) {
   const rows = await prisma.invitation.findMany({
     where: { workspaceId },
-    include: { role: true },
+    include: { role: true, brand: { select: { displayName: true } } },
     orderBy: { createdAt: "desc" },
     take: 200,
   });
@@ -169,6 +181,7 @@ export async function listInvitations(workspaceId: string) {
     id: r.id,
     email: r.email,
     role: { id: r.role.id, name: r.role.name },
+    project: r.brand?.displayName ?? null,
     status: r.acceptedAt ? "ACCEPTED" : r.revokedAt ? "REVOKED" : r.expiresAt < now ? "EXPIRED" : "PENDING",
     expiresAt: r.expiresAt.toISOString(),
     createdAt: r.createdAt.toISOString(),
