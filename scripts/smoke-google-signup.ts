@@ -1,6 +1,7 @@
 /**
- * Google sign-up provisioning on Neon: an invited email joins the inviting workspace with the
- * invited role (and the invite is used up); a new email gets its own workspace as Owner.
+ * Google sign-up provisioning on Neon: an email invited to a project joins that workspace as
+ * Member with the project role (invite used up) and still gets a workspace of its own;
+ * a new email gets its own workspace as Owner.
  * Run: npm run smoke:google -w web
  */
 import assert from "node:assert/strict";
@@ -14,23 +15,27 @@ async function main() {
   const invitedEmail = `smoke-g-invited-${stamp}@example.com`;
   const newEmail = `smoke-g-new-${stamp}@example.com`;
   const ws = await prisma.workspace.findFirstOrThrow({ include: { roles: true } });
-  const editor = ws.roles.find((r) => r.slug === "editor")!;
+  const creator = ws.roles.find((r) => r.slug === "creator")!;
+  const brand = await prisma.brand.findFirstOrThrow({ where: { workspaceId: ws.id } });
   const userIds: string[] = [];
+  const ownWss: string[] = [];
   let ownWs: string | null = null;
   try {
     await prisma.invitation.create({
-      data: { workspaceId: ws.id, email: invitedEmail, roleId: editor.id, tokenHash: hashToken(`t-${stamp}`), expiresAt: new Date(Date.now() + 86_400_000) },
+      data: { workspaceId: ws.id, brandId: brand.id, email: invitedEmail, roleId: creator.id, tokenHash: hashToken(`t-${stamp}`), expiresAt: new Date(Date.now() + 86_400_000) },
     });
     const invited = await prisma.user.create({ data: { email: invitedEmail, name: "Invited Person" } });
     userIds.push(invited.id);
     const r1 = await provisionGoogleUser(invited);
     assert.equal(r1.joined, 1);
-    const perms = await effectivePermissions(ws.id, invited.id);
+    if (r1.workspaceId) ownWss.push(r1.workspaceId);
+    const perms = await effectivePermissions(ws.id, invited.id, brand.id);
     assert.ok(perms.has("content.create") && !perms.has("members.manage"));
-    assert.equal(await prisma.workspaceMember.count({ where: { userId: invited.id } }), 1, "no personal workspace when invited");
+    assert.ok(!(await effectivePermissions(ws.id, invited.id)).has("brand.read"), "no workspace-wide project access");
+    assert.ok(r1.workspaceId, "invited people get their own workspace too");
     const inv = await prisma.invitation.findFirstOrThrow({ where: { email: invitedEmail } });
     assert.ok(inv.acceptedAt, "invitation used up");
-    console.log("1 invited email → joins the inviting workspace as Designer / editor, invite used ✓");
+    console.log("1 project invite → Creator on that project only, invite used, own workspace too ✓");
 
     const fresh = await prisma.user.create({ data: { email: newEmail, name: "Ana Martin" } });
     userIds.push(fresh.id);
@@ -44,7 +49,8 @@ async function main() {
     console.log("2 new email → own workspace \"Ana's workspace\" as Owner (can add a brand) ✓");
   } finally {
     await prisma.invitation.deleteMany({ where: { email: invitedEmail } });
-    if (ownWs) await prisma.workspace.delete({ where: { id: ownWs } });
+    for (const id of [...ownWss, ownWs].filter(Boolean) as string[]) await prisma.workspace.delete({ where: { id } });
+    await prisma.brandMember.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.workspaceMember.deleteMany({ where: { userId: { in: userIds } } });
     await prisma.auditEvent.deleteMany({ where: { actorUserId: { in: userIds } } });
     await prisma.user.deleteMany({ where: { id: { in: userIds } } });

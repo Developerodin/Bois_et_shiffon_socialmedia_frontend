@@ -3,16 +3,20 @@
  * Cad `permissions.catalog.ts`). Keys are `resource.action`. Roles store keys.
  */
 export const PERMISSIONS = [
+  // Workspace scope: held through the workspace role.
   ["workspace.manage", "workspace", "Rename the workspace, manage billing and ownership"],
   ["members.read", "members", "See workspace members and their roles"],
   ["members.manage", "members", "Change member roles and remove members"],
-  ["invitations.manage", "members", "Invite people and revoke invitations"],
+  ["invitations.manage", "members", "Invite people to the workspace and revoke invitations"],
   ["roles.read", "roles", "See roles and their permissions"],
   ["roles.manage", "roles", "Create, edit and delete custom roles"],
   ["audit.read", "audit", "Read the audit log"],
-  ["brand.create", "brands", "Create brands"],
-  ["brand.read", "brands", "Open a brand and its workspace areas"],
-  ["brand.archive", "brands", "Archive and restore brands"],
+  ["brand.create", "brands", "Create projects (brands)"],
+  ["brand.archive", "brands", "Archive and restore projects"],
+  // Project scope: a workspace role holding these gets them on every project;
+  // a project role gets them on its one project.
+  ["brand.read", "project", "Open the project and its workspace areas"],
+  ["project.members.manage", "project", "Invite people to this project and change their project roles"],
   ["agents.read", "agents", "See agents and the Agent Log"],
   ["agents.run", "agents", "Run agents and change their schedules"],
   ["context.edit", "context", "Edit brand strategy documents"],
@@ -33,39 +37,53 @@ export function isPermissionKey(key: string): key is PermissionKey {
 }
 
 const ALL = PERMISSION_KEYS;
+const WORKSPACE_ONLY: PermissionKey[] = [
+  "workspace.manage", "members.read", "members.manage", "invitations.manage",
+  "roles.read", "roles.manage", "audit.read", "brand.create", "brand.archive",
+];
+export const PROJECT_KEYS = ALL.filter((k) => !WORKSPACE_ONLY.includes(k));
+export const permissionScope = (k: PermissionKey) => (WORKSPACE_ONLY.includes(k) ? "WORKSPACE" : "PROJECT");
 const READ: PermissionKey[] = ["brand.read", "agents.read", "analytics.read"];
 
-/** Seeded per workspace; read-only in the UI. Mirrors the brief's duties. */
+/**
+ * Seeded per workspace; read-only in the UI. Workspace roles decide who runs the workspace;
+ * project roles decide what someone does on one project (brand).
+ */
 export const SYSTEM_ROLES: ReadonlyArray<{
   slug: string;
   name: string;
   description: string;
+  scope: "WORKSPACE" | "PROJECT";
   permissions: PermissionKey[];
 }> = [
-  { slug: "owner", name: "Owner", description: "Full control, including ownership and billing", permissions: ALL },
-  { slug: "admin", name: "Admin", description: "Everything except workspace ownership", permissions: ALL.filter((p) => p !== "workspace.manage") },
+  { slug: "owner", name: "Owner", scope: "WORKSPACE", description: "Full control of the workspace and every project, including ownership and billing", permissions: ALL },
+  { slug: "admin", name: "Admin", scope: "WORKSPACE", description: "Manages people, roles and every project; not ownership", permissions: ALL.filter((p) => p !== "workspace.manage") },
+  { slug: "member", name: "Member", scope: "WORKSPACE", description: "Sees only the projects they are invited to", permissions: [] },
+
+  { slug: "project-admin", name: "Project admin", scope: "PROJECT", description: "Everything on this project, including who works on it", permissions: PROJECT_KEYS },
   {
-    slug: "social-manager",
-    name: "Social media manager",
-    description: "Runs opportunities, agents and the calendar",
-    permissions: [...READ, "members.read", "roles.read", "agents.run", "context.edit", "context.confirm", "content.create", "publish.execute"],
+    slug: "manager",
+    name: "Manager",
+    scope: "PROJECT",
+    description: "Runs agents, strategy, the calendar and publishing",
+    permissions: [...READ, "agents.run", "context.edit", "context.confirm", "content.create", "publish.execute", "integrations.manage"],
   },
-  { slug: "editor", name: "Designer / editor", description: "Receives briefs and produces drafts", permissions: [...READ, "content.create"] },
+  { slug: "creator", name: "Creator", scope: "PROJECT", description: "Writes and edits drafts", permissions: [...READ, "content.create"] },
   {
     slug: "approver",
-    name: "Brand approver",
-    description: "Reviews final content and brand rules",
+    name: "Approver",
+    scope: "PROJECT",
+    description: "Reviews posts, brand rules and strategy",
     permissions: [...READ, "context.edit", "context.confirm", "rules.approve", "content.approve"],
   },
-  { slug: "commercial-owner", name: "Commercial owner", description: "Sets product priorities, campaigns and offer rules", permissions: [...READ, "rules.approve"] },
-  { slug: "viewer", name: "Viewer", description: "Read-only access", permissions: READ },
+  { slug: "viewer", name: "Viewer", scope: "PROJECT", description: "Read-only access to this project", permissions: READ },
 ];
 
 /** Legacy WorkspaceRole enum → system role slug (fallback while roleId is null). */
 export const LEGACY_ROLE_SLUG = {
   OWNER: "owner",
   ADMIN: "admin",
-  EDITOR: "social-manager",
-  REVIEWER: "approver",
-  VIEWER: "viewer",
+  EDITOR: "member",
+  REVIEWER: "member",
+  VIEWER: "member",
 } as const;

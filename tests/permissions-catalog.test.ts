@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isPermissionKey, PERMISSION_KEYS, SYSTEM_ROLES } from "@/server/auth/permissions.catalog";
+import { isPermissionKey, PERMISSION_KEYS, permissionScope, SYSTEM_ROLES } from "@/server/auth/permissions.catalog";
 import { backoffMs } from "@/server/jobs/queue";
 
 describe("permission catalog + system roles", () => {
@@ -17,11 +17,20 @@ describe("permission catalog + system roles", () => {
   });
 
   it("brief duties stay separated", () => {
-    expect(role("social-manager").has("agents.run")).toBe(true);
-    expect(role("social-manager").has("content.approve")).toBe(false);
+    expect(role("manager").has("agents.run")).toBe(true);
+    expect(role("manager").has("content.approve")).toBe(false);
     expect(role("approver").has("content.approve")).toBe(true);
-    expect(role("editor").has("context.confirm")).toBe(false);
+    expect(role("creator").has("context.confirm")).toBe(false);
     expect(role("viewer").has("content.create")).toBe(false);
+  });
+
+  it("project roles hold only project permissions; Member reaches no project by itself", () => {
+    for (const r of SYSTEM_ROLES.filter((r) => r.scope === "PROJECT")) {
+      for (const p of r.permissions) expect(permissionScope(p)).toBe("PROJECT");
+      expect(r.permissions).toContain("brand.read");
+    }
+    expect(role("member").size).toBe(0);
+    expect(role("project-admin").has("project.members.manage")).toBe(true);
   });
 });
 

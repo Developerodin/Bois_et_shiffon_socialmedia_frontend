@@ -20,16 +20,25 @@ export async function loadShellContext(userId: string): Promise<ShellContext> {
   const cookieWorkspaceId = cookieStore.get(SHELL_COOKIE_WORKSPACE)?.value;
   const cookieBrandId = cookieStore.get(SHELL_COOKIE_BRAND)?.value;
 
-  const activeWorkspaceId =
-    workspaces.find((w) => w.id === cookieWorkspaceId)?.id ??
-    workspaces[0]?.id ??
-    null;
-
+  let activeWorkspaceId = workspaces.find((w) => w.id === cookieWorkspaceId)?.id ?? null;
   let brands: Awaited<ReturnType<typeof listAccessibleBrands>> = [];
   let activeBrandId: string | null = null;
 
+  // No choice yet: open the first workspace with a project this person can see (an invitee's
+  // shared project rather than their own empty workspace), else the first one.
+  if (!activeWorkspaceId) {
+    for (const w of workspaces) {
+      brands = await listAccessibleBrands(w.id, userId);
+      if (brands.length) {
+        activeWorkspaceId = w.id;
+        break;
+      }
+    }
+    activeWorkspaceId ??= workspaces[0]?.id ?? null;
+  }
+
   if (activeWorkspaceId) {
-    brands = await listAccessibleBrands(activeWorkspaceId, userId);
+    if (!brands.length) brands = await listAccessibleBrands(activeWorkspaceId, userId);
     const candidateBrandId =
       brands.find((b) => b.id === cookieBrandId)?.id ?? brands[0]?.id ?? null;
 

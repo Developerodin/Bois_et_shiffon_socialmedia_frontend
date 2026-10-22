@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { problemResponse } from "@/server/api/http-error";
-import { PERMISSIONS } from "@/server/auth/permissions.catalog";
+import { PERMISSIONS, permissionScope } from "@/server/auth/permissions.catalog";
 
 export async function GET() {
   const session = await auth();
@@ -8,6 +8,6 @@ export async function GET() {
     return problemResponse({ type: "https://api.brandpilot/errors/unauthorized", title: "Unauthorized", status: 401 });
   }
   return Response.json({
-    permissions: PERMISSIONS.map(([key, category, description]) => ({ key, category, description })),
+    permissions: PERMISSIONS.map(([key, category, description]) => ({ key, category, description, scope: permissionScope(key) })),
   });
 }

@@ -87,6 +87,7 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
               <p className="truncate font-medium text-foreground">{inv.email}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 {inv.role.name}
+                {inv.project ? ` on ${inv.project}` : ""}
                 {inv.invitedBy ? ` · invited by ${inv.invitedBy}` : ""} · expires{" "}
                 {formatDate(inv.expiresAt)}
               </p>
@@ -109,7 +110,7 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
       <SectionHeader
         id="invitations-heading"
         title="Invitations"
-        description="People you've asked to join. Pending links can be revoked at any time."
+        description="People you've asked to join the workspace or one of its projects. Pending links can be revoked at any time. To invite someone to one project only, use Project access."
         action={
           <Button onClick={() => setInviting(true)}>
             <UserPlus /> Invite
@@ -156,7 +157,7 @@ function InviteDialog({
 }) {
   const [email, setEmail] = useState("");
   const [roleId, setRoleId] = useState(
-    () => (roles.find((r) => r.slug === "viewer") ?? roles[0])?.id ?? "",
+    () => (roles.find((r) => r.slug === "member") ?? roles[0])?.id ?? "",
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

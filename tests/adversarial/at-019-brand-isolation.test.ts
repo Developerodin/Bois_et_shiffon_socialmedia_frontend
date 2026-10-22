@@ -13,24 +13,26 @@ import {
 const mocks = vi.hoisted(() => ({
   findUnique: vi.fn(),
   findFirst: vi.fn(),
-  count: vi.fn(),
+  grant: vi.fn(),
 }));
 
 vi.mock("@/server/db/prisma", () => ({
   prisma: {
     workspaceMember: { findUnique: mocks.findUnique },
     brand: { findFirst: mocks.findFirst },
-    brandMember: { count: mocks.count },
+    brandMember: { findFirst: mocks.grant },
   },
 }));
+
+const member = (permissions: string[]) => ({ id: "mem", role: "VIEWER", roleRef: { slug: "x", permissions } });
 
 describe("AT-019 brand isolation", () => {
   beforeEach(() => {
     mocks.findUnique.mockReset();
     mocks.findFirst.mockReset();
-    mocks.count.mockReset();
-    mocks.findUnique.mockResolvedValue({ id: "mem", role: "EDITOR" });
-    mocks.count.mockResolvedValue(0);
+    mocks.grant.mockReset();
+    mocks.findUnique.mockResolvedValue(member(["brand.read"]));
+    mocks.grant.mockResolvedValue(null);
   });
 
   it("denies when brand is not in workspace", async () => {
@@ -61,6 +63,22 @@ describe("AT-019 brand isolation", () => {
       status: BrandStatus.ACTIVE,
       members: [],
     });
+
+    const brand = await requireBrandAccess("ws-1", "brand-a", "user-1");
+    expect(brand.id).toBe("brand-a");
+  });
+
+  it("denies a workspace Member with no grant on this project", async () => {
+    mocks.findUnique.mockResolvedValue(member([]));
+    mocks.findFirst.mockResolvedValue({ id: "brand-a", workspaceId: "ws-1", status: BrandStatus.ACTIVE });
+
+    await expect(requireBrandAccess("ws-1", "brand-a", "user-1")).rejects.toBeInstanceOf(AccessDeniedError);
+  });
+
+  it("allows a workspace Member through a project grant", async () => {
+    mocks.findUnique.mockResolvedValue(member([]));
+    mocks.findFirst.mockResolvedValue({ id: "brand-a", workspaceId: "ws-1", status: BrandStatus.ACTIVE });
+    mocks.grant.mockResolvedValue({ role: { permissions: ["brand.read", "content.create"] } });
 
     const brand = await requireBrandAccess("ws-1", "brand-a", "user-1");
     expect(brand.id).toBe("brand-a");

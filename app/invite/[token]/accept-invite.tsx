@@ -113,10 +113,11 @@ export function AcceptInvite({ token }: { token: string }) {
 
   return (
     <AuthCard
-      title={`Join ${invite.workspaceName}`}
+      title={`Join ${invite.projectName ?? invite.workspaceName}`}
       description={
         <>
           You&apos;ve been invited as <span className="text-foreground">{invite.roleName}</span>{" "}
+          {invite.projectName ? <>on {invite.projectName} in {invite.workspaceName} </> : null}
           using <span className="text-foreground">{invite.email}</span>.
         </>
       }
