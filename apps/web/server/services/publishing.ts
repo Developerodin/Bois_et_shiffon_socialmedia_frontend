@@ -208,8 +208,9 @@ export async function schedulePublication(input: {
     const links = rawLinks.map(https);
     if (links.some((l) => !l)) throw new PublishingError("Image links must be public https:// addresses", 400);
     const media = input.mediaKeys ?? [];
-    // Uploaded files must be this brand's own (keys are workspace/brand/file).
-    if (media.some((k) => !k.startsWith(`${input.workspaceId}/${input.brandId}/`) || k.includes(".."))) throw new PublishingError("Unknown image", 400);
+    // Uploaded files must be this brand's own, named exactly as the upload route names them (uuid.jpg|png).
+    const prefix = `${input.workspaceId}/${input.brandId}/`;
+    if (media.some((k) => !k.startsWith(prefix) || !/^[0-9a-f-]{36}\.(jpg|png)$/.test(k.slice(prefix.length)))) throw new PublishingError("Unknown image", 400);
     const count = media.length + links.length;
     if (count < req.minImages) throw new PublishingError(req.minImages === 1 ? "This channel needs an image" : `A carousel needs at least ${req.minImages} images`, 400);
     if (count > req.maxImages) throw new PublishingError(req.maxImages === 0 ? "Reels take a video, not images" : `This channel takes at most ${req.maxImages} image${req.maxImages === 1 ? "" : "s"}`, 400);
