@@ -42,6 +42,7 @@ model User {
   memberships    WorkspaceMember[]
   passwordResets PasswordResetToken[]
   brandMembers   BrandMember[]
+  ownedWorkspaces Workspace[] @relation("WorkspacePrimaryOwner")
 }
 
 model Account {
@@ -88,8 +89,12 @@ model Workspace {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
+  /// Primary owner (the creator): can't be demoted or removed; only they can hand it over
+  ownerUserId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  owner       User?             @relation("WorkspacePrimaryOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
 
   members     WorkspaceMember[]
   brands      Brand[]
@@ -459,6 +464,7 @@ model EmailOutbox {
   to        String
   subject   String
   text      String
+  html      String? // optional rich version; cleared after sending like text's links
   status    EmailStatus @default(PENDING)
   attempts  Int         @default(0)
   error     String?

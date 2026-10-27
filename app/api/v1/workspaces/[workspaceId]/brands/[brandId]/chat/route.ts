@@ -73,7 +73,10 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     });
     const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const tools = { ...chatTools(scope), webSearch: openai.tools.webSearch() };
-    const previous = (existing?.messages ?? []) as unknown as UIMessage[];
+    const stored = (existing?.messages ?? []) as unknown as UIMessage[];
+    // Regenerate resends a message we already have: answer it again from that point, don't append a copy.
+    const resent = stored.findIndex((m) => m.id === (body.data.message as { id?: unknown }).id);
+    const previous = resent === -1 ? stored : stored.slice(0, resent);
     const messages = await validateUIMessages({ messages: [...previous, body.data.message], tools });
 
     const model = process.env.OPENAI_MODEL_DEFAULT ?? "gpt-5-mini";

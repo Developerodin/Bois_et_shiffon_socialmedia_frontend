@@ -21,6 +21,16 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
 
 type Props = { workspaceId: string; brandId: string; website: string | null };
 
+/** The AI SDK uses a failed response's body as the error message: show the problem+json detail, not the JSON. */
+function chatError(error: Error) {
+  try {
+    const p = JSON.parse(error.message) as { detail?: string; title?: string; status?: number };
+    return { text: p.detail || p.title || "Something went wrong.", retry: !(p.status && p.status >= 400 && p.status < 500) };
+  } catch {
+    return { text: error.message || "Something went wrong.", retry: true };
+  }
+}
+
 /** Loads the person's latest conversation for this brand, then hands over to the live session. */
 export function ChatPane(props: Props) {
   const [initial, setInitial] = useState<{ id: string; messages: UIMessage[] } | null>(null);
@@ -58,6 +68,7 @@ function ChatSession({
     }),
   });
   const busy = status === "submitted" || status === "streaming";
+  const failure = error ? chatError(error) : null;
   const host = (() => {
     try {
       return website ? new URL(website).hostname.replace(/^www\./, "") : null;
@@ -97,7 +108,11 @@ function ChatSession({
         </Button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4" aria-live="polite">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        {/* Announce the finished reply once, not every streamed token. */}
+        <p role="status" className="sr-only">
+          {status === "ready" && messages.at(-1)?.role === "assistant" ? "Reply finished" : ""}
+        </p>
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
             <span className="grid size-12 place-items-center rounded-2xl bg-muted font-display text-lg" aria-hidden="true">
@@ -169,12 +184,14 @@ function ChatSession({
             )}
           </ol>
         )}
-        {error && (
+        {failure && (
           <div role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
-            <span className="min-w-0 flex-1">{error.message || "Something went wrong."}</span>
-            <Button size="sm" variant="outline" onClick={() => void regenerate()}>
-              Try again
-            </Button>
+            <span className="min-w-0 flex-1">{failure.text}</span>
+            {failure.retry && (
+              <Button size="sm" variant="outline" onClick={() => void regenerate()}>
+                Try again
+              </Button>
+            )}
           </div>
         )}
         <div ref={endRef} />

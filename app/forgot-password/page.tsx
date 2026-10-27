@@ -9,7 +9,7 @@ import { ApiError, authApi } from "@/components/settings/api";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [sent, setSent] = useState<"sent" | "no_email" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
@@ -17,8 +17,8 @@ export default function ForgotPasswordPage() {
     setBusy(true);
     setError(null);
     try {
-      await authApi.forgot(email.trim());
-      setSent(true);
+      const res = await authApi.forgot(email.trim());
+      setSent(res.emailConfigured === false ? "no_email" : "sent");
     } catch (err) {
       setError(
         err instanceof ApiError && err.status === 429
@@ -38,7 +38,9 @@ export default function ForgotPasswordPage() {
       {sent ? (
         <div className="space-y-4">
           <p role="status" className="text-sm text-foreground">
-            If an account exists, we&apos;ve sent a reset link.
+            {sent === "no_email"
+              ? "Password emails aren't set up on this server yet. Ask your workspace owner to reset it for you."
+              : "If an account exists, we've sent a reset link."}
           </p>
           <AuthLink href="/login">Back to sign in</AuthLink>
         </div>

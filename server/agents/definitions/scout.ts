@@ -39,7 +39,6 @@ export const scoutAgent: AgentDefinition = {
   async run(ctx) {
     const { brand } = ctx;
     const knowledge = await brandKnowledge(brand.workspaceId, brand.brandId);
-    if (knowledge.unconfirmed.length) await ctx.log("WARN", `Using unconfirmed documents: ${knowledge.unconfirmed.join(", ")}`);
     const recent = await prisma.opportunity.findMany({ where: { brandId: brand.brandId }, select: { title: true, status: true }, orderBy: { createdAt: "desc" }, take: 40 });
     const today = new Date().toISOString().slice(0, 10);
 

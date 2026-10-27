@@ -15,11 +15,15 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
         opportunity: { select: { title: true } },
         versions: { orderBy: { version: "desc" }, take: 1, include: { checks: { orderBy: { createdAt: "desc" }, take: 1 } } },
         decisions: { orderBy: { createdAt: "desc" }, take: 1, select: { verdict: true, note: true, contentVersionId: true } },
+        publications: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, error: true } },
       },
     });
     return Response.json({
-      items: rows.map(({ versions, decisions, ...i }) => ({
+      items: rows.map(({ versions, decisions, publications, ...i }) => ({
         ...i,
+        // The last publish went wrong: "FAILED" (back to Approved, reason in publishError) or "CHECK" (may have posted).
+        publishIssue: publications[0]?.status === "PENDING_VERIFY" ? "CHECK" : publications[0]?.status === "FAILED" && i.status === "APPROVED" ? "FAILED" : null,
+        publishError: publications[0]?.status === "FAILED" || publications[0]?.status === "PENDING_VERIFY" ? publications[0].error : null,
         latest: versions[0]
           ? {
               version: versions[0].version,

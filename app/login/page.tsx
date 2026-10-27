@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 
 const ERRORS: Record<string, string> = {
   invalid: "Email or password is incorrect.",
+  unavailable: "We couldn't check your sign-in just now. Try again in a moment.",
   rate_limited: "Too many sign-in attempts. Wait 15 minutes and try again.",
   google_unverified: "Google didn't confirm this email address. Use a verified Google account or sign in with email.",
   disabled: "This account is disabled. Ask a workspace owner to restore it.",
@@ -18,12 +19,31 @@ const ERRORS: Record<string, string> = {
 
 const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
+/** Where to go after sign-in: a same-site path only ("/x", never "//host" or "https://…"). */
+function safeNext(next?: string, callbackUrl?: string): string {
+  const path = next ?? (callbackUrl ? pathOf(callbackUrl) : "/");
+  const ok = path.startsWith("/") && !path.startsWith("//") && !path.startsWith("/\\") && !path.startsWith("/login");
+  return ok ? path : "/";
+}
+
+// The sign-in middleware sends ?callbackUrl=<absolute URL>; keep only its path, so it can't leave this site.
+function pathOf(url: string) {
+  try {
+    const u = new URL(url, "http://local");
+    return u.pathname + u.search;
+  } catch {
+    return "/";
+  }
+}
+
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; reset?: string; invited?: string }>;
+  searchParams: Promise<{ error?: string; reset?: string; invited?: string; next?: string; callbackUrl?: string }>;
 }) {
-  const { error, reset, invited } = await searchParams;
+  const { error, reset, invited, next: nextParam, callbackUrl } = await searchParams;
+  const next = safeNext(nextParam, callbackUrl);
+  const keepNext = next === "/" ? "" : `&next=${encodeURIComponent(next)}`;
   const message = error ? (ERRORS[error] ?? ERRORS.invalid) : null;
   const notice = reset
     ? "Password updated. Sign in with your new password."
@@ -52,7 +72,7 @@ export default async function LoginPage({
               className="mt-6"
               action={async () => {
                 "use server";
-                await signIn("google", { redirectTo: "/" });
+                await signIn("google", { redirectTo: next });
               }}
             >
               <Button type="submit" variant="outline" className="w-full">
@@ -75,15 +95,18 @@ export default async function LoginPage({
               await signIn("credentials", {
                 email: formData.get("email"),
                 password: formData.get("password"),
-                redirectTo: "/",
+                redirectTo: next,
               });
             } catch (error) {
               if (error instanceof AuthError) {
-                const code =
-                  error instanceof CredentialsSignin && error.code === "rate_limited"
+                // Only CredentialsSignin means "wrong email/password"; anything else (e.g. the DB is
+                // unreachable) must not tell people their password is wrong.
+                const code = !(error instanceof CredentialsSignin)
+                  ? "unavailable"
+                  : error.code === "rate_limited"
                     ? "rate_limited"
                     : "invalid";
-                redirect(`/login?error=${code}`);
+                redirect(`/login?error=${code}${keepNext}`);
               }
               throw error;
             }

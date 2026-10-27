@@ -94,11 +94,12 @@ export function RoleDialog({ workspaceId, role, catalog, onRetryCatalog, onClose
         <form onSubmit={submit} className="flex flex-col gap-5">
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-muted-foreground">Name</span>
-            <Input value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} />
+            <Input value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} disabled={role?.isSystem} />
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-muted-foreground">Description (optional)</span>
             <Textarea
+              disabled={role?.isSystem}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="min-h-16"

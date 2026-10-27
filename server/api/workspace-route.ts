@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { requestUserId } from "@/server/auth/request-user";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { assertWorkspaceHeaderMatchesPath } from "@/server/api/workspace-headers";
 import { requirePermission } from "@/server/auth/permissions";
@@ -16,15 +16,15 @@ export function workspaceHandler<P extends { workspaceId: string }>(
   handler: (request: Request, scope: Scope, params: P) => Promise<Response>,
 ) {
   return async (request: Request, context: { params: Promise<P> }) => {
-    const session = await auth();
-    if (!session?.user?.id) {
+    const userId = await requestUserId(request);
+    if (!userId) {
       return problemResponse({ type: "https://api.brandpilot/errors/unauthorized", title: "Unauthorized", status: 401 });
     }
     const params = await context.params;
     try {
       assertWorkspaceHeaderMatchesPath(params.workspaceId, request.headers.get("X-Workspace-Id"));
-      await requirePermission(params.workspaceId, session.user.id, permission);
-      return await handler(request, { userId: session.user.id, workspaceId: params.workspaceId }, params);
+      await requirePermission(params.workspaceId, userId, permission);
+      return await handler(request, { userId: userId, workspaceId: params.workspaceId }, params);
     } catch (error) {
       return accountErrorResponse(error) ?? fromAccessError(error);
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -47,7 +47,7 @@ import { safeHttpUrl } from "@/lib/website";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
-type View = { kind: "home" } | { kind: "doc"; doc: ContextDocKind } | { kind: "agent"; key: string } | { kind: "content"; id: string } | { kind: "competitor"; id: string };
+type View = { kind: "home" } | { kind: "doc"; doc: ContextDocKind } | { kind: "agent"; key: string; run?: boolean } | { kind: "content"; id: string } | { kind: "competitor"; id: string };
 
 /** Agents shown as tiles. Built ones come from the API; planned ones are locked (Okara shows locked tiles too). */
 const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
@@ -166,15 +166,19 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
 
   const pickOpps = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "NEW" && o.decision === "RECOMMEND").length, []);
   const pickItems = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "AWAITING_APPROVAL").length, []);
+  const pickToWrite = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "PLANNED" || i.status === "BRIEF_READY" || i.status === "DRAFT_REVIEW").length, []);
   const ideasToDecide = useBrandData(base, "opportunities", pickOpps as (d: never) => number).data;
   const awaiting = useBrandData(base, "content", pickItems as (d: never) => number).data;
-  const pipeline = ideasToDecide == null || awaiting == null ? null : { ideasToDecide, awaiting };
+  const toWrite = useBrandData(base, "content", pickToWrite as (d: never) => number).data;
+  const pipeline = ideasToDecide == null || awaiting == null || toWrite == null ? null : { ideasToDecide, awaiting, toWrite };
 
   // Docs and agents open in the "Today & agents" panel (it's re-shown by the layout if hidden).
   const open = (v: View) => {
     setView(v);
     setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
   };
+  // Brings a panel into view, adding it to the layout if it's hidden.
+  const showPanel = (id: PanelId) => setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }));
 
   const panels: PanelDef<PanelId>[] = [
     {
@@ -217,6 +221,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
         ) : view.kind === "agent" ? (
           <AgentView
             agentKey={view.key}
+            autoRun={view.run}
             agent={agents?.find((a) => a.key === view.key) ?? null}
             report={view.key === "seo" ? reports?.seo ?? null : view.key === "geo" ? reports?.geo ?? null : null}
             docs={docs}
@@ -225,9 +230,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             onBack={() => setView({ kind: "home" })}
             onOpenDoc={(doc) => open({ kind: "doc", doc })}
             onRan={refreshAgents}
+            onOpenPosts={() => showPanel("content")}
           />
         ) : (
-          <Home user={user} docs={docs} agents={agents} reports={reports} connections={connections} pipeline={pipeline} onOpen={open} onShowPanel={(id) => setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }))} />
+          <Home user={user} agents={agents} reports={reports} connections={connections} pipeline={pipeline} onOpen={open} onShowPanel={showPanel} />
         ),
     },
     {
@@ -246,7 +252,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
       id: "ideas",
       title: "Ideas",
       icon: <Compass />,
-      render: () => <IdeasPanel base={base} onRunScout={() => open({ kind: "agent", key: "scout" })} />,
+      render: () => <IdeasPanel base={base} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => showPanel("content")} />,
     },
     {
       id: "content",
@@ -320,15 +326,23 @@ function safeSite(website: string | null) {
 
 function plainSummary(markdown: string | undefined) {
   if (!markdown) return null;
-  const para = markdown
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .find((p) => p && !p.startsWith("#") && !p.startsWith("-") && !p.startsWith("_") && p.length > 60);
-  const fallback = markdown
-    .split("\n")
-    .map((l) => l.replace(/^[-*\d.\s]+/, "").trim())
-    .find((l) => l.length > 60 && !l.startsWith("#"));
-  return (para ?? fallback)?.replace(/\*\*|__|`|\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s+/g, " ") ?? null;
+  // First real sentence of the doc: skip headings and source lists, drop "(Sources: …)" and bare URLs.
+  const clean = (l: string) =>
+    l
+      .replace(/^[-*\d.\s]+/, "")
+      .replace(/\((?:sources?)\b[^)]*\)/gi, "")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/\*\*|__|`/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  return (
+    markdown
+      .split("\n")
+      .filter((l) => !l.trim().startsWith("#"))
+      .map(clean)
+      .find((l) => l.length > 60 && !/^sources?\b/i.test(l)) ?? null
+  );
 }
 
 function docBadge(entry: ContextDocEntry, researching: boolean) {
@@ -544,7 +558,6 @@ function agentStatus(a: AgentSummary | undefined) {
 
 function Home({
   user,
-  docs,
   agents,
   reports,
   connections,
@@ -553,37 +566,34 @@ function Home({
   onShowPanel,
 }: {
   user: Props["user"];
-  docs: ContextDocsResponse | null;
   agents: AgentSummary[] | null;
   reports: { seo: Report; geo: Report } | null;
   connections: Connection[] | null;
-  pipeline: { ideasToDecide: number; awaiting: number } | null;
+  pipeline: { ideasToDecide: number; awaiting: number; toWrite: number } | null;
   onOpen: (v: View) => void;
   onShowPanel: (id: PanelId) => void;
 }) {
   const first = user.name?.trim().split(/\s+/)[0];
   const tasks = useMemo(() => {
     const list: { id: string; done: boolean; label: string; detail?: string; action: React.ReactNode }[] = [];
-    const drafted = (docs?.docs ?? []).filter((d) => d.latest);
-    const toReview = drafted.filter((d) => d.latest!.status !== "CONFIRMED");
-    if (drafted.length) {
-      list.push({
-        id: "docs",
-        done: toReview.length === 0,
-        label: "Review your strategy documents",
-        detail: `${toReview.length} of ${drafted.length} to confirm`,
-        action: (
-          <Button size="sm" variant="secondary" onClick={() => toReview[0] && onOpen({ kind: "doc", doc: toReview[0].kind })}>
-            Review
-          </Button>
-        ),
-      });
-    }
     const run = (key: string, label: string, done: boolean) =>
       list.push({ id: key, done, label, detail: done ? undefined : "Not run yet", action: <Button size="sm" variant="secondary" onClick={() => onOpen({ kind: "agent", key })}>Open</Button> });
     if (reports) {
       run("seo", "Check your website's SEO health", !!reports.seo);
       run("geo", "See if AI assistants recommend you", !!reports.geo);
+    }
+    if (pipeline && !pipeline.ideasToDecide && !pipeline.awaiting && !pipeline.toWrite) {
+      list.push({
+        id: "scout",
+        done: false,
+        label: "Get post ideas for your brand",
+        detail: "Scout reads your documents and the season",
+        action: (
+          <Button size="sm" onClick={() => onOpen({ kind: "agent", key: "scout", run: true })}>
+            Get ideas
+          </Button>
+        ),
+      });
     }
     if (pipeline?.ideasToDecide) {
       list.push({
@@ -594,6 +604,19 @@ function Home({
         action: (
           <Button size="sm" variant="secondary" onClick={() => onShowPanel("ideas")}>
             See ideas
+          </Button>
+        ),
+      });
+    }
+    if (pipeline?.toWrite) {
+      list.push({
+        id: "write",
+        done: false,
+        label: "Write your planned posts",
+        detail: `${pipeline.toWrite} to brief and draft`,
+        action: (
+          <Button size="sm" variant="secondary" onClick={() => onShowPanel("content")}>
+            Open posts
           </Button>
         ),
       });
@@ -625,7 +648,7 @@ function Home({
       });
     }
     return list;
-  }, [docs, reports, connections, pipeline, onOpen, onShowPanel]);
+  }, [reports, connections, pipeline, onOpen, onShowPanel]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done);
@@ -659,8 +682,8 @@ function Home({
               <li key={t.id} className="flex items-center gap-3 px-4 py-3">
                 <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <p className="min-w-0 flex-1 truncate text-sm">
-                  {t.detail && <span className="text-muted-foreground">{t.detail} · </span>}
                   <span className="font-medium">{t.label}</span>
+                  {t.detail && <span className="text-muted-foreground"> · {t.detail}</span>}
                 </p>
                 {t.action}
               </li>
@@ -810,8 +833,13 @@ function AgentView({
   onBack,
   onOpenDoc,
   onRan,
+  autoRun,
+  onOpenPosts,
 }: {
   agentKey: string;
+  /** Start a run on open (one-click "Get ideas" from Today). */
+  autoRun?: boolean;
+  onOpenPosts: () => void;
   agent: AgentSummary | null;
   report: Report;
   docs: ContextDocsResponse | null;
@@ -837,6 +865,15 @@ function AgentView({
       setPending(false);
     }
   }
+
+  // Once per mount; the ref stops React's dev double-effect from starting two paid runs.
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (!autoRun || autoStarted.current || !agent || running) return;
+    autoStarted.current = true;
+    void run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when the agent has loaded
+  }, [autoRun, agent]);
 
   return (
     <div>
@@ -885,6 +922,17 @@ function AgentView({
         )}
 
         {agentKey === "analyst" && <LearningNotes workspaceId={workspaceId} brandId={brandId} />}
+        {/* Scout's output is the idea list: show it here, reloaded when a run finishes. */}
+        {agentKey === "scout" && !running && (
+          <div className="-mx-6 border-t border-border">
+            <IdeasPanel
+              key={agent?.lastRun?.finishedAt ?? "none"}
+              base={`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`}
+              onRunScout={() => void run()}
+              onOpenPosts={onOpenPosts}
+            />
+          </div>
+        )}
 
         {agentKey === "research" && docs && (
           <ul className="divide-y divide-border rounded-xl border border-border">
@@ -892,7 +940,7 @@ function AgentView({
               <li key={d.kind}>
                 <button type="button" disabled={!d.latest} onClick={() => onOpenDoc(d.kind)} className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-muted disabled:hover:bg-transparent">
                   <span className={cn(!d.latest && "text-muted-foreground")}>{d.title}</span>
-                  <span className="text-xs text-muted-foreground">{d.latest ? (d.latest.status === "CONFIRMED" ? "Confirmed" : "Draft to read") : "Not drafted"}</span>
+                  <span className="text-xs text-muted-foreground">{d.latest ? (d.latest.status === "CONFIRMED" ? "Reviewed" : "Ready") : "Not drafted"}</span>
                 </button>
               </li>
             ))}
@@ -994,8 +1042,7 @@ function feedLine(key: string, a: AgentSummary | undefined, reports: { seo: Repo
   }
   if (key === "research" && docs) {
     const drafted = docs.docs.filter((d) => d.latest).length;
-    const confirmed = docs.docs.filter((d) => d.latest?.status === "CONFIRMED").length;
-    return `${drafted} of 5 documents drafted · ${confirmed} confirmed`;
+    return `${drafted} of 5 documents drafted`;
   }
   return a?.lastRun ? "Done" : "Not run yet";
 }

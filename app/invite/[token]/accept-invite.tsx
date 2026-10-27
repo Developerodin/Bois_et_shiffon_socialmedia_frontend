@@ -125,7 +125,8 @@ export function AcceptInvite({ token }: { token: string }) {
       <form onSubmit={submit} className="space-y-4">
         {invite.existingAccount ? (
           <p className="text-sm text-muted-foreground">
-            You already have an account. Accept to add this workspace to it.
+            You already have an account. Accept to add this workspace to it, then sign in with Google or your
+            password as usual.
           </p>
         ) : (
           <>

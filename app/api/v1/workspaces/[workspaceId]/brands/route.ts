@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { requestUserId } from "@/server/auth/request-user";
 import { AgentStartError } from "@/server/agents/engine";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { assertWorkspaceHeaderMatchesPath } from "@/server/api/workspace-headers";
@@ -13,8 +13,8 @@ export const maxDuration = 300;
 type RouteContext = { params: Promise<{ workspaceId: string }> };
 
 export async function GET(request: Request, context: RouteContext) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await requestUserId(request);
+  if (!userId) {
     return problemResponse({
       type: "https://api.brandpilot/errors/unauthorized",
       title: "Unauthorized",
@@ -27,8 +27,8 @@ export async function GET(request: Request, context: RouteContext) {
 
   try {
     assertWorkspaceHeaderMatchesPath(workspaceId, headerWorkspaceId);
-    await requireWorkspaceMember(workspaceId, session.user.id);
-    const brands = await listAccessibleBrands(workspaceId, session.user.id);
+    await requireWorkspaceMember(workspaceId, userId);
+    const brands = await listAccessibleBrands(workspaceId, userId);
     return Response.json({ brands });
   } catch (error) {
     return fromAccessError(error);
@@ -36,8 +36,8 @@ export async function GET(request: Request, context: RouteContext) {
 }
 
 export async function POST(request: Request, context: RouteContext) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await requestUserId(request);
+  if (!userId) {
     return problemResponse({
       type: "https://api.brandpilot/errors/unauthorized",
       title: "Unauthorized",
@@ -60,7 +60,7 @@ export async function POST(request: Request, context: RouteContext) {
     assertWorkspaceHeaderMatchesPath(workspaceId, request.headers.get("X-Workspace-Id"));
     const { brand, researchRunId } = await createBrandWithResearch(
       workspaceId,
-      session.user.id,
+      userId,
       parsed.data,
     );
     kickRunner();

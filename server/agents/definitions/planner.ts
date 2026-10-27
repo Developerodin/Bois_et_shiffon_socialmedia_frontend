@@ -1,5 +1,6 @@
 import type { ContentChannel } from "@prisma/client";
 import { z } from "zod";
+import { NothingToDoError } from "@/server/agents/engine";
 import { CONTENT_PROMPT_VERSION, PLANNER_SYSTEM } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
 import { nextSlot, takenKey } from "@/server/content/calendar";
@@ -35,7 +36,7 @@ export const plannerAgent: AgentDefinition = {
         orderBy: { score: "desc" },
         take: 3,
       });
-      if (!opps.length) throw new Error("No ideas to plan: run Opportunities, then shortlist the ideas you like");
+      if (!opps.length) throw new NothingToDoError("No ideas to plan: run Opportunities, then shortlist the ideas you like");
       await ctx.log("WARN", "Nothing shortlisted yet: planning the top recommended ideas. Shortlist ideas to choose yourself.");
     }
 

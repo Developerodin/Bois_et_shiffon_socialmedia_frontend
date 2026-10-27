@@ -25,9 +25,11 @@ type Props = {
   workspaceId: string | null;
   brands: BrandOption[];
   activeBrandId: string | null;
+  /** brand.create in this workspace; without it "New brand" would only end in a 403. */
+  canCreate: boolean;
 };
 
-export function BrandSwitcher({ workspaceId, brands, activeBrandId }: Props) {
+export function BrandSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Props) {
   const active = brands.find((b) => b.id === activeBrandId) ?? brands[0];
 
   if (!workspaceId) {
@@ -38,7 +40,7 @@ export function BrandSwitcher({ workspaceId, brands, activeBrandId }: Props) {
     return (
       <div className="flex flex-col gap-1">
         <span className="text-xs text-muted-foreground">No brands in workspace</span>
-        <NewBrandDialog workspaceId={workspaceId} />
+        {canCreate ? <NewBrandDialog workspaceId={workspaceId} /> : null}
       </div>
     );
   }
@@ -83,14 +85,16 @@ export function BrandSwitcher({ workspaceId, brands, activeBrandId }: Props) {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <NewBrandDialog
-          workspaceId={workspaceId}
-          trigger={
-            <Button variant="outline" size="icon" className="size-10 sm:size-8" aria-label="New brand" title="New brand">
-              <Plus />
-            </Button>
-          }
-        />
+        {canCreate ? (
+          <NewBrandDialog
+            workspaceId={workspaceId}
+            trigger={
+              <Button variant="outline" size="icon" className="size-10 sm:size-8" aria-label="New brand" title="New brand">
+                <Plus />
+              </Button>
+            }
+          />
+        ) : null}
       </div>
     </div>
   );

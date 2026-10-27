@@ -58,6 +58,12 @@ export async function confirmedContext(workspaceId: string, brandId: string) {
   return Object.fromEntries(docs.map((d) => [d.kind, d.markdown])) as Partial<Record<ContextDocKind, string>>;
 }
 
+/** Latest markdown per kind, draft or confirmed — what agents read. */
+export async function latestContext(workspaceId: string, brandId: string) {
+  const docs = await listContextDocs(workspaceId, brandId);
+  return Object.fromEntries(docs.flatMap((d) => (d.latest ? [[d.kind, d.latest.markdown]] : []))) as Partial<Record<ContextDocKind, string>>;
+}
+
 /**
  * New DRAFT version. `baseVersion` (user edits) must equal the current latest,
  * so two people editing at once can't silently overwrite each other.

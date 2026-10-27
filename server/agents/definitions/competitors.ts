@@ -40,7 +40,7 @@ export const competitorsAgent: AgentDefinition = {
       schemaName: "competitors",
       system: SYSTEM,
       webSearch: true,
-      prompt: `Brand: ${brand.displayName}\nWebsite: ${brand.websiteUrl ?? "unknown"}\nLocales: ${JSON.stringify(brand.locales ?? [])}\nNamed by AI assistants in our market questions: ${fromGeo.join(", ") || "none yet"}\n\nCompetitor document:\n${(doc?.confirmed ?? doc?.latest)?.markdown.slice(0, 5000) ?? "(not written yet)"}`,
+      prompt: `Brand: ${brand.displayName}\nWebsite: ${brand.websiteUrl ?? "unknown"}\nLocales: ${JSON.stringify(brand.locales ?? [])}\nNamed by AI assistants in our market questions: ${fromGeo.join(", ") || "none yet"}\n\nCompetitor document:\n${doc?.latest?.markdown.slice(0, 5000) ?? "(not written yet)"}`,
       mock: {
         competitors: [
           { name: "Tikamoon", website: "https://www.tikamoon.com", why: "Solid-wood furniture sold online in France." },

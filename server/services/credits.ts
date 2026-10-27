@@ -6,8 +6,14 @@ import { prisma } from "@/server/db/prisma";
  * ponytail: one starter grant per workspace; plans, monthly allowances and Stripe top-ups come later
  * as more "grant"/"top-up" rows, no schema change needed.
  */
-export const CREDIT_COSTS = { siteAudit: 10 } as const;
-export const STARTER_CREDITS = 100;
+export const CREDIT_COSTS = { siteAudit: 10, manualRun: 5 } as const;
+export const STARTER_CREDITS = 20;
+/** The quality check is the required gate before approval: never charge for it on top of the draft it checks. */
+export const FREE_MANUAL_AGENTS: ReadonlySet<string> = new Set(["quality"]);
+
+/** ponytail: testing override via env (comma-separated workspace ids); becomes a plan flag on Workspace with billing. */
+const hasUnlimitedCredits = (workspaceId: string) =>
+  (process.env.UNLIMITED_CREDIT_WORKSPACES ?? "").split(",").map((s) => s.trim()).includes(workspaceId);
 export const AUDIT_FRESH_DAYS = 30;
 
 export class InsufficientCreditsError extends Error {
@@ -33,9 +39,14 @@ export async function creditBalance(workspaceId: string) {
  * Spend credits atomically. A transaction-scoped advisory lock per workspace serialises spends,
  * so two clicks at once can't both pass the balance check. Returns the charge id to refund later.
  */
-export async function spendCredits(input: { workspaceId: string; amount: number; reason: string; userId: string }) {
+export async function spendCredits(input: { workspaceId: string; amount: number; reason: string; userId?: string }) {
   await ensureStarterGrant(input.workspaceId);
   const chargeId = randomUUID();
+  if (hasUnlimitedCredits(input.workspaceId)) {
+    // Zero-delta row keeps the usage trail; refundCharge finds no negative row, so nothing to give back.
+    await prisma.creditEntry.create({ data: { workspaceId: input.workspaceId, delta: 0, reason: input.reason, refId: chargeId, userId: input.userId } });
+    return chargeId;
+  }
   await prisma.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`credits:${input.workspaceId}`}))`;
     const { _sum } = await tx.creditEntry.aggregate({ where: { workspaceId: input.workspaceId }, _sum: { delta: true } });

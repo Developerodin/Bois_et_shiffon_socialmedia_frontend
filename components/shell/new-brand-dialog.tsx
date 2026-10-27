@@ -24,7 +24,7 @@ type Props = {
   trigger?: ReactNode;
 };
 
-type FormError = { field: "url" | "form"; message: string };
+type FormError = { field: "name" | "url" | "form"; message: string };
 
 export function NewBrandDialog({ workspaceId, trigger }: Props) {
   const router = useRouter();
@@ -53,8 +53,10 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
       router.refresh();
     } catch (err) {
       if (err instanceof ProblemError && err.status === 422) {
+        // ponytail: the 422 detail has no field path; URL messages mention "url"/"website", the rest are about the name.
+        // Upgrade path: return zod issue paths from the brands route.
         setError({
-          field: "url",
+          field: /url|website/i.test(err.message) ? "url" : "name",
           message: err.message || "That website URL is not valid.",
         });
       } else if (err instanceof ProblemError && err.status === 403) {
@@ -113,9 +115,21 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Acme Outdoors"
-              maxLength={120}
+              maxLength={80}
               disabled={pending}
+              aria-invalid={error?.field === "name" || undefined}
+              aria-describedby={
+                error?.field === "name" ? "new-brand-name-error" : undefined
+              }
             />
+            {error?.field === "name" ? (
+              <span
+                id="new-brand-name-error"
+                className="text-xs text-destructive"
+              >
+                {error.message}
+              </span>
+            ) : null}
           </label>
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="font-medium">Website URL</span>

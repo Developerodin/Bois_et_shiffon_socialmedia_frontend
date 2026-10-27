@@ -10,6 +10,8 @@ export type ContextDocKind =
   | "brand-voice"
   | "content-strategy";
 
+export const DOC_KINDS: ContextDocKind[] = ["product-information", "marketing-strategy", "competitor-analysis", "brand-voice", "content-strategy"];
+
 export type ContextDoc = {
   id: string;
   version: number;
@@ -30,7 +32,7 @@ export type ContextDocEntry = {
 
 export type ContextDocsResponse = {
   docs: ContextDocEntry[];
-  research: { runId: string; status: RunStatus } | null;
+  research: { runId: string; status: RunStatus; error?: string | null } | null;
 };
 
 /** Error carrying the problem+json `detail` (or `title`) when the server sent one. */

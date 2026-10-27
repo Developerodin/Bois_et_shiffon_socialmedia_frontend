@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Trash2, Users } from "lucide-react";
+import { Crown, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -37,13 +37,16 @@ type Props = {
 
 export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
   const fetcher = useCallback(
-    () => settingsApi.members(workspaceId).then((d) => d.members ?? []),
+    () => settingsApi.members(workspaceId).then((d) => ({ members: d.members ?? [], me: d.me })),
     [workspaceId],
   );
   const { state, reload } = useLoad(fetcher);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Member | null>(null);
+  const [handingOver, setHandingOver] = useState<Member | null>(null);
+  const me = state.kind === "ready" ? state.data.me : null;
+  const iAmPrimary = state.kind === "ready" && state.data.members.some((m) => m.isPrimaryOwner && m.userId === me);
   const manage = can.has("members.manage") && roles.length > 0;
 
   async function changeRole(member: Member, roleId: string) {
@@ -64,6 +67,12 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
   }
 
   function roleControl(m: Member) {
+    if (m.isPrimaryOwner)
+      return (
+        <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
+          <Crown aria-hidden className="size-3.5 text-primary" /> Owner · primary
+        </span>
+      );
     if (!manage) return <span className="text-sm text-foreground">{m.role.name}</span>;
     return (
       <select
@@ -83,8 +92,15 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
   }
 
   function removeControl(m: Member) {
-    if (!can.has("members.manage")) return null;
+    const handOver = iAmPrimary && !m.isPrimaryOwner && m.status === "ACTIVE" ? (
+      <Button variant="ghost" size="icon" aria-label={`Make ${m.name ?? m.email} the primary owner`} title="Make primary owner" onClick={() => setHandingOver(m)} className="text-muted-foreground hover:text-foreground">
+        <Crown />
+      </Button>
+    ) : null;
+    if (!can.has("members.manage") || m.isPrimaryOwner) return handOver;
     return (
+      <>
+      {handOver}
       <Button
         variant="ghost"
         size="icon"
@@ -94,6 +110,7 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
       >
         <Trash2 />
       </Button>
+      </>
     );
   }
 
@@ -102,10 +119,10 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
   else if (state.kind === "forbidden")
     body = <EmptyState icon={Users} title="You can't view members" description="Your role doesn't include members.read." />;
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
-  else if (state.data.length === 0)
+  else if (state.data.members.length === 0)
     body = <EmptyState icon={Users} title="No members yet" description="Invite someone from the Invitations tab." />;
   else {
-    const members = state.data;
+    const members = state.data.members;
     body = (
       <>
         {/* Desktop: table */}
@@ -167,7 +184,7 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
       <SectionHeader
         id="members-heading"
         title="Members"
-        description="Everyone with access to this workspace and the role they hold."
+        description="Everyone in this workspace and their workspace role. The primary owner created the workspace; only they can hand that over."
       />
       <p
         aria-live="polite"
@@ -176,6 +193,24 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
         {status?.text}
       </p>
       {body}
+      <ConfirmDialog
+        open={handingOver !== null}
+        onOpenChange={(open) => !open && setHandingOver(null)}
+        title="Hand over primary ownership?"
+        description={
+          handingOver
+            ? `${handingOver.name ?? handingOver.email} becomes the primary owner and an Owner. You stay an Owner, but they can then change your role or remove you.`
+            : ""
+        }
+        confirmLabel="Hand over"
+        onConfirm={async () => {
+          if (!handingOver) return;
+          await settingsApi.transferPrimaryOwner(workspaceId, handingOver.id);
+          setStatus({ ok: true, text: `${handingOver.name ?? handingOver.email} is now the primary owner.` });
+          reload();
+          onRolesChanged();
+        }}
+      />
       <ConfirmDialog
         open={removing !== null}
         onOpenChange={(open) => !open && setRemoving(null)}

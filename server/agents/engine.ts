@@ -6,7 +6,7 @@ import type { AgentContext } from "@/server/agents/types";
 import { generateObject, OUT_OF_CREDITS } from "@/server/ai/provider";
 import { hitRateLimit } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
-import { refundCharge } from "@/server/services/credits";
+import { CREDIT_COSTS, FREE_MANUAL_AGENTS, InsufficientCreditsError, refundCharge, spendCredits } from "@/server/services/credits";
 import { validateAiWorkflowPayload } from "@/server/jobs/claim";
 import { enqueueJob } from "@/server/jobs/queue";
 
@@ -17,11 +17,16 @@ export const MANUAL_RUNS_PER_DAY = 100;
 export class AgentStartError extends Error {
   constructor(
     message: string,
-    readonly status: 404 | 409 | 422 | 429,
+    readonly status: 402 | 404 | 409 | 422 | 429,
   ) {
     super(message);
     this.name = "AgentStartError";
   }
+}
+
+/** The agent ran fine and found no work (e.g. no new drafts). Not retried; the UI shows it as "nothing to do". */
+export class NothingToDoError extends Error {
+  name = "NothingToDoError";
 }
 
 export const AgentRunJobPayload = z.object({
@@ -38,6 +43,8 @@ export async function startAgentRun(input: {
   trigger: "manual" | "schedule" | "event";
   userId?: string;
   input?: unknown;
+  /** Server-side only: a caller that already charged (competitor audits). Never from request input. */
+  prepaidChargeId?: string;
 }) {
   const agent = getAgent(input.agentKey);
   if (!agent) throw new AgentStartError(`Unknown agent ${input.agentKey}`, 404);
@@ -56,7 +63,23 @@ export async function startAgentRun(input: {
     if (!allowed) throw new AgentStartError(`This workspace has started ${MANUAL_RUNS_PER_DAY} agent runs today, the daily limit. Try again tomorrow.`, 429);
   }
 
-  return prisma.$transaction(async (tx) => {
+  // Manual runs cost credits, refunded if the run finally fails. Callers that already charged
+  // (competitor audits) pass prepaidChargeId; schedule/event runs are free. Billing never reads agent input.
+  const agentInput: Record<string, unknown> = { ...(parsed.data as object) };
+  delete agentInput.chargeId;
+  let chargeId = input.prepaidChargeId;
+  const chargedHere = input.trigger === "manual" && !chargeId && !FREE_MANUAL_AGENTS.has(agent.key);
+  if (chargedHere) {
+    try {
+      chargeId = await spendCredits({ workspaceId: input.workspaceId, amount: CREDIT_COSTS.manualRun, reason: `agent-run:${agent.key}`, userId: input.userId });
+    } catch (e) {
+      if (e instanceof InsufficientCreditsError) throw new AgentStartError(`This run needs ${e.needed} credits; you have ${e.balance}.`, 402);
+      throw e;
+    }
+  }
+  const runInput = chargeId ? { ...agentInput, chargeId } : agentInput;
+
+  const run = await prisma.$transaction(async (tx) => {
     // Double clicks and two people pressing Run share one run instead of paying twice.
     // ponytail: a run stuck past 30 min no longer blocks a fresh one; the lease reclaim handles the old job.
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`agent-start:${input.brandId}:${agent.key}`}))`;
@@ -76,7 +99,7 @@ export async function startAgentRun(input: {
         agentKey: agent.key,
         trigger: input.trigger,
         triggeredByUserId: input.userId,
-        input: parsed.data as Prisma.InputJsonValue,
+        input: runInput as Prisma.InputJsonValue,
       },
     });
     await tx.agentEvent.create({
@@ -110,7 +133,13 @@ export async function startAgentRun(input: {
       },
     });
     return run;
+  }).catch(async (e) => {
+    if (chargedHere && chargeId) await refundCharge(input.workspaceId, chargeId);
+    throw e;
   });
+  // Joined someone else's in-flight run: they paid, give this charge back. (Prepaid callers refund their own.)
+  if (chargedHere && chargeId && (run.input as { chargeId?: string } | null)?.chargeId !== chargeId) await refundCharge(input.workspaceId, chargeId);
+  return run;
 }
 
 /** Job handler. Throws on failure so the queue applies retry/backoff. */
@@ -166,7 +195,10 @@ export async function executeAgentRun(rawPayload: unknown) {
     },
   };
 
-  const output = await agent.run(ctx, agent.inputSchema.parse(run.input ?? {}));
+  // chargeId is billing bookkeeping, not agent input (most input schemas are strict).
+  const agentInput: Record<string, unknown> = { ...((run.input ?? {}) as object) };
+  delete agentInput.chargeId;
+  const output = await agent.run(ctx, agent.inputSchema.parse(agentInput));
   await prisma.agentRun.update({
     where: { id: run.id },
     data: { status: "SUCCEEDED", finishedAt: new Date(), output: output ?? undefined },
@@ -179,11 +211,13 @@ export async function onAgentRunFailure(rawPayload: unknown, error: unknown, exh
   const parsed = AgentRunJobPayload.safeParse(rawPayload);
   if (!parsed.success) return;
   const { runId } = parsed.data;
+  // The message alone: the UI reads it (e.g. "No new drafts…" means nothing to do), so no "Error: " prefix.
+  const text = error instanceof Error ? error.message : String(error);
   const run = await prisma.agentRun.update({
     where: { id: runId },
     data: exhausted
-      ? { status: "FAILED", finishedAt: new Date(), error: String(error).slice(0, 2000) }
-      : { status: "QUEUED", error: String(error).slice(0, 2000) },
+      ? { status: "FAILED", finishedAt: new Date(), error: text.slice(0, 2000) }
+      : { status: "QUEUED", error: text.slice(0, 2000) },
   });
   // Paid runs (e.g. competitor site audits) get their credits back when they finally fail.
   const chargeId = (run.input as { chargeId?: string } | null)?.chargeId;
@@ -194,12 +228,14 @@ export async function onAgentRunFailure(rawPayload: unknown, error: unknown, exh
       brandId: run.brandId,
       runId,
       agentKey: run.agentKey,
-      level: exhausted ? "ERROR" : "WARN",
-      message: exhausted
+      level: error instanceof NothingToDoError ? "INFO" : exhausted ? "ERROR" : "WARN",
+      message: error instanceof NothingToDoError
+        ? text.slice(0, 300)
+        : exhausted
         ? error instanceof Error && error.message === OUT_OF_CREDITS
           ? `Stopped. ${OUT_OF_CREDITS}.`
-          : `Failed: ${String(error).slice(0, 300)}`
-        : `Attempt failed, will retry: ${String(error).slice(0, 300)}`,
+          : `Failed: ${text.slice(0, 300)}`
+        : `Attempt failed, will retry: ${text.slice(0, 300)}`,
     },
   });
 }

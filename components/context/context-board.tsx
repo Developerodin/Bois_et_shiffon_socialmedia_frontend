@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Loader2, RefreshCw } from "lucide-react";
 import { ServiceUnavailable } from "@/components/agents/service-unavailable";
 import {
   fetchContextDocs,
@@ -153,9 +154,9 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
           Brand context
         </h1>
         <p className="max-w-2xl text-sm text-muted-foreground text-pretty sm:text-base">
-          Agents work from the documents you confirm. Read each draft, fix
-          anything the Research agent got wrong, then confirm it. Until you do,
-          outputs are marked as using unconfirmed brand context.
+          Agents use the latest version of each document as soon as Research
+          writes it. Fix anything it got wrong and agents pick up your edit on
+          their next run.
         </p>
       </section>
 
@@ -196,7 +197,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
               </span>
               <span className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
                 <span className="text-foreground">{confirmedCount}</span> of{" "}
-                {docs.length || 5} confirmed
+                {docs.length || 5} reviewed
               </span>
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -220,6 +221,22 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
               ) : null}
             </div>
           </div>
+
+          {researchStatus === "SUCCEEDED" ? (
+            <div className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm">
+                <span className="font-medium">Next: get post ideas.</span>{" "}
+                <span className="text-muted-foreground">
+                  Your workspace has the ideas, calendar and drafts. Agents already use these documents.
+                </span>
+              </p>
+              <Button asChild size="sm" className="self-start sm:self-auto">
+                <Link href="/">
+                  Go to workspace <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+          ) : null}
 
           <div className="grid gap-6 md:grid-cols-[16rem_1fr]">
             {/* Mobile: compact select */}

@@ -5,6 +5,7 @@
  * last-owner guard → password reset (single use, revokes sessions). Cleans up.
  * Run: npm run smoke:rbac -w web
  */
+import type { PermissionKey } from "@/server/auth/permissions.catalog";
 import assert from "node:assert/strict";
 import { prisma } from "@/server/db/prisma";
 import { requireBrandAccess } from "@/server/auth/access";
@@ -20,7 +21,7 @@ import {
   requestPasswordReset,
   resetPassword,
 } from "@/server/services/accounts";
-import { changeMemberRole, createRole, deleteRole, listMembers, removeMember } from "@/server/services/workspace-admin";
+import { changeMemberRole, createRole, deleteRole, listMembers, removeMember, transferPrimaryOwnership, updateRole } from "@/server/services/workspace-admin";
 
 async function main() {
   const ws = await prisma.workspace.findFirstOrThrow({ include: { roles: true } });
@@ -88,12 +89,36 @@ async function main() {
     await assert.rejects(changeMemberRole(ws.id, user.id, member.id, ownerRole.id), AccountFlowError);
     // A non-owner can't reach ownership by invitation, or remove an owner.
     await assert.rejects(createInvitation({ workspaceId: ws.id, email: `takeover-${Date.now()}@example.com`, roleId: ownerRole.id, invitedByUserId: user.id }), /Only owners/);
-    await assert.rejects(removeMember(ws.id, user.id, owner.id), /Only owners/);
+    // The seeded owner is also the primary owner, so either guard may refuse first.
+    await assert.rejects(removeMember(ws.id, user.id, owner.id), /Only owners|primary owner/);
     const owners = (await listMembers(ws.id)).filter((m) => m.role?.slug === "owner");
     if (owners.length === 1) {
       await assert.rejects(removeMember(ws.id, owner.userId, owners[0].id), AccountFlowError);
     }
     console.log("5 workspace role reaches every project; project role refused as workspace role; non-owner can't grant owner; last owner protected ✓");
+
+    // 5b. primary owner: fixed until they hand it over; owners can edit built-in roles (not Owner)
+    const primary = (await listMembers(ws.id)).find((m) => m.isPrimaryOwner)!;
+    assert.ok(primary, "workspace has a primary owner");
+    await assert.rejects(changeMemberRole(ws.id, primary.userId, primary.id, role("admin").id), /primary owner/);
+    await assert.rejects(removeMember(ws.id, primary.userId, primary.id), /primary owner/);
+    await assert.rejects(transferPrimaryOwnership(ws.id, user.id, primary.id), /Only the primary owner/);
+    try {
+      await transferPrimaryOwnership(ws.id, primary.userId, member.id);
+      const after = await listMembers(ws.id);
+      assert.ok(after.find((m) => m.userId === user.id)!.isPrimaryOwner && after.find((m) => m.userId === user.id)!.role!.slug === "owner");
+      assert.ok(after.find((m) => m.userId === primary.userId)!.role!.slug === "owner", "previous primary stays Owner");
+      await transferPrimaryOwnership(ws.id, user.id, primary.id);
+    } finally {
+      await prisma.workspace.update({ where: { id: ws.id }, data: { ownerUserId: primary.userId } });
+    }
+    const viewer = role("viewer");
+    const vp = viewer.permissions as PermissionKey[];
+    await assert.rejects(updateRole(ws.id, owner.userId, role("owner").id, { permissions: ["brand.read"] }), /Owner role/);
+    await assert.rejects(updateRole(ws.id, user.id, viewer.id, { permissions: [...vp, "content.create"] }), /Only owners/);
+    await updateRole(ws.id, owner.userId, viewer.id, { permissions: [...vp, "content.create"] });
+    await updateRole(ws.id, owner.userId, viewer.id, { permissions: vp });
+    console.log("5b primary owner can't be changed or removed; only they hand it over (both ways); owners edit built-in roles, not Owner ✓");
 
     // 6. password reset: single use + revokes sessions
     const before = user.sessionVersion;
@@ -111,8 +136,8 @@ async function main() {
   } finally {
     const u = await prisma.user.findUnique({ where: { email } });
     if (u) {
-      const own = await prisma.workspaceMember.findMany({ where: { userId: u.id, roleRef: { slug: "owner" } } });
-      await prisma.workspace.deleteMany({ where: { id: { in: own.map((m) => m.workspaceId) } } });
+      // Only the test user's personal workspace: 5b makes them an Owner of the real workspace too.
+      await prisma.workspace.deleteMany({ where: { ownerUserId: u.id, id: { not: ws.id } } });
       await prisma.brandMember.deleteMany({ where: { userId: u.id } });
       await prisma.workspaceMember.deleteMany({ where: { userId: u.id } });
       await prisma.auditEvent.deleteMany({ where: { actorUserId: u.id } });

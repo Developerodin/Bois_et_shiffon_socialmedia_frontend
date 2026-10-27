@@ -20,7 +20,8 @@ export async function ensureSystemRoles(workspaceId: string, db: Db = prisma) {
   for (const r of SYSTEM_ROLES) {
     await db.role.upsert({
       where: { workspaceId_slug: { workspaceId, slug: r.slug } },
-      update: { name: r.name, description: r.description, scope: r.scope, permissions: r.permissions, isSystem: true },
+      // Owners may have edited a built-in role's permissions: keep them (Owner always tracks the catalog).
+      update: { name: r.name, description: r.description, scope: r.scope, isSystem: true, ...(r.slug === "owner" ? { permissions: r.permissions } : {}) },
       create: { workspaceId, slug: r.slug, name: r.name, description: r.description, scope: r.scope, permissions: r.permissions, isSystem: true },
     });
   }

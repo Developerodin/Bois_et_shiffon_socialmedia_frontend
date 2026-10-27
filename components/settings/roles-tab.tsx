@@ -24,6 +24,8 @@ type Props = {
 
 export function RolesTab({ workspaceId, can, roles }: Props) {
   const manage = can.has("roles.manage");
+  // Owners can change a built-in role's permissions too; the Owner role itself always keeps everything.
+  const editBuiltIn = manage && can.has("workspace.manage");
   const catalogFetcher = useCallback(
     () => settingsApi.permissions().then((d) => d.permissions ?? []),
     [],
@@ -80,6 +82,11 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
                 <span className="mr-2 text-xs text-muted-foreground">
                   {r.memberCount} {r.memberCount === 1 ? "member" : "members"}
                 </span>
+                {editBuiltIn && r.isSystem && r.slug !== "owner" ? (
+                  <Button variant="ghost" size="icon" aria-label={`Edit ${r.name} permissions`} onClick={() => setEditing(r)}>
+                    <Pencil />
+                  </Button>
+                ) : null}
                 {manage && !r.isSystem ? (
                   <>
                     <Button
@@ -128,7 +135,7 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
       <SectionHeader
         id="roles-heading"
         title="Roles"
-        description="System roles are fixed. Custom roles let you pick exactly which permissions apply."
+        description="Owners can change what any built-in role may do (except Owner, which keeps everything). Custom roles let you build your own."
         action={
           manage ? (
             <Button onClick={() => setEditing("new")}>

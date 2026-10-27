@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { Prisma } from "@prisma/client";
+import type { EmailStatus, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { memberRole } from "@/server/auth/permissions";
@@ -95,6 +95,28 @@ export async function createInvitation(input: {
   });
 }
 
+/**
+ * Latest invite email per invitation. Outbox rows don't reference invitations, so match by
+ * recipient + invite subject + sent no earlier than the invitation.
+ * ponytail: two pending invites to one address (workspace + a project) can show each other's status;
+ * add EmailOutbox.invitationId if that matters.
+ */
+export async function inviteEmailStatuses(invitations: { id: string; email: string; createdAt: string }[]) {
+  if (!invitations.length) return new Map<string, EmailStatus>();
+  const since = new Date(Math.min(...invitations.map((i) => Date.parse(i.createdAt))));
+  const rows = await prisma.emailOutbox.findMany({
+    where: { to: { in: [...new Set(invitations.map((i) => i.email))] }, subject: { startsWith: "You're invited" }, createdAt: { gte: since } },
+    orderBy: { createdAt: "desc" },
+    select: { to: true, status: true, createdAt: true },
+  });
+  return new Map(
+    invitations.flatMap((i) => {
+      const row = rows.find((r) => r.to === i.email && r.createdAt.getTime() >= Date.parse(i.createdAt) - 1000);
+      return row ? [[i.id, row.status] as const] : [];
+    }),
+  );
+}
+
 async function findOpenInvitation(rawToken: string) {
   const inv = await prisma.invitation.findUnique({
     where: { tokenHash: hashToken(rawToken) },
@@ -115,14 +137,15 @@ export async function previewInvitation(rawToken: string) {
     projectName: inv.brand?.displayName ?? null,
     roleName: inv.role.name,
     expiresAt: inv.expiresAt.toISOString(),
-    existingAccount: Boolean(user?.passwordHash && user.status === "ACTIVE"),
+    // Any active account counts, password or Google-only: they accept, then sign in the way they already do.
+    existingAccount: user?.status === "ACTIVE",
   };
 }
 
 export async function acceptInvitation(input: { token: string; name?: string; password?: string }) {
   const inv = await findOpenInvitation(input.token);
   const existing = await prisma.user.findUnique({ where: { email: inv.email } });
-  const needsPassword = !(existing?.passwordHash && existing.status === "ACTIVE");
+  const needsPassword = existing?.status !== "ACTIVE";
   if (needsPassword) {
     const parsed = Password.safeParse(input.password ?? "");
     if (!parsed.success) throw new AccountFlowError(parsed.error.issues[0].message, 400);
@@ -190,7 +213,7 @@ export async function ensurePersonalWorkspace(tx: Tx, user: { id: string; email:
   if (owns) return null;
   const first = (user.name ?? user.email.split("@")[0]).trim().split(/\s+/)[0] || "My";
   const workspace = await tx.workspace.create({
-    data: { name: `${first}'s workspace`, slug: `ws-${randomBytes(5).toString("hex")}` },
+    data: { name: `${first}'s workspace`, slug: `ws-${randomBytes(5).toString("hex")}`, ownerUserId: user.id },
   });
   // New workspace: one insert for its system roles (upserting each one overruns the transaction timeout on Neon).
   await tx.role.createMany({ data: SYSTEM_ROLES.map((r) => ({ ...r, workspaceId: workspace.id, isSystem: true })) });

@@ -138,6 +138,7 @@ async function main() {
       create: { workspaceId: workspace.id, userId: admin.id, role: WorkspaceRole.OWNER, roleId: ownerRole.id },
     });
     adminId = admin.id;
+    await prisma.workspace.updateMany({ where: { id: workspace.id, ownerUserId: null }, data: { ownerUserId: admin.id } });
   } else {
     console.warn("SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD not set — admin user skipped");
   }
