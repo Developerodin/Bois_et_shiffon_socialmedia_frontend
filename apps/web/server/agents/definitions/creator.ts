@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { NothingToDoError } from "@/server/agents/engine";
 import { CONTENT_PROMPT_VERSION, CREATOR_SYSTEM } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
 import { brandKnowledge } from "@/server/content/knowledge";
@@ -45,7 +46,7 @@ export const creatorAgent: AgentDefinition = {
     const todo = items
       .filter((i) => i.status === "BRIEF_READY" || i.versions[0]?.checks[0]?.overall === "BLOCKER" || sentBack(i))
       .slice(0, PER_RUN);
-    if (!todo.length) throw new Error("Nothing to write: run the Brief writer first (or there are no blocked drafts to fix)");
+    if (!todo.length) throw new NothingToDoError("Nothing to write: run the Brief writer first (or there are no blocked drafts to fix)");
     const knowledge = await brandKnowledge(brand.workspaceId, brand.brandId, 3500);
     let drafted = 0;
 

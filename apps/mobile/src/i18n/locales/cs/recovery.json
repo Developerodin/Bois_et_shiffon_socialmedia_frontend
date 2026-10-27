@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} kredit",
+  "credits_other": "{{n}} kredity",
+  "tableAlt": "{{product}} jídelní stůl",
+  "sheet": {
+    "dismiss": "Zavřít"
+  },
+  "videoFailed": {
+    "title": "Vaše video není připraveno",
+    "body": "Vykreslování bylo přerušeno během skládání scény. Vaše rezervované kredity byly uvolněny.",
+    "failed": "Selhalo",
+    "facts_one": "{{seconds}}s · 9:16 Vertikální · {{count}} scéna",
+    "facts_other": "{{seconds}}s · 9:16 Vertikální · {{count}} scény",
+    "released_one": "{{n}} rezervovaný kredit uvolněn",
+    "released_other": "{{n}} rezervované kredity uvolněny",
+    "impact": "Dopad na zůstatek kreditů",
+    "used_one": "{{n}} kredit použit",
+    "used_other": "{{n}} kredity použity",
+    "viewDetails": "Zobrazit detaily",
+    "details": {
+      "failedAt": "Selhalo v",
+      "reserved": "Rezervováno",
+      "released": "Uvolněno",
+      "stages": {
+        "sceneComposition": "Skládání scény"
+      }
+    },
+    "tryAgain_one": "Zkusit znovu ({{n}} kredit)",
+    "tryAgain_other": "Zkusit znovu ({{n}} kredity)",
+    "editStoryboard": "Upravit storyboard"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "Délka {{seconds}}s · 9:16 vertikální",
+    "sheetLabel": "Nedostatek kreditů",
+    "title_one": "Potřebujete {{n}} kredit",
+    "title_other": "Potřebujete {{n}} kredity",
+    "body_one": "Momentálně máte <b>{{n}} kredit k dispozici</b> ve vašem Profesionálním workspace. Váš návrh storyboardu je bezpečně uložen.",
+    "body_other": "Momentálně máte <b>{{n}} kredity k dispozici</b> ve vašem Profesionálním workspace. Váš návrh storyboardu je bezpečně uložen.",
+    "planName": "Profesionální plán",
+    "active": "Aktivní",
+    "renews": "Obnovuje se měsíčně",
+    "remaining": "{{available}} / {{monthly}} zbývá",
+    "remainingA11y": "Zbývající měsíční kredity",
+    "manage": "Spravovat kredity",
+    "keepEditing": "Pokračovat v úpravách storyboardu"
+  },
+  "reconnect": {
+    "backdropTitle": "Plán",
+    "backdropMeta": "Naplánováno na {{date}}",
+    "title": "Znovu připojit {{network}}",
+    "body": "Platnost autorizace vašeho účtu vypršela. Znovu připojte svůj účet, abyste mohli pokračovat v plánování.",
+    "draftSaved": "Stávající návrh bezpečně uložen",
+    "noPosting": "Žádné zveřejnění nezačne, dokud to výslovně nepotvrdíte.",
+    "saveForLater": "Uložit návrh na později"
+  },
+  "importFailed": {
+    "title": "Nelze načíst tuto webovou stránku",
+    "body": "Nepodařilo se nám dosáhnout nebo extrahovat katalogové fotografie z této adresy. Zkontrolujte svou URL nebo pokračujte popisem svého obchodu.",
+    "urlLabel": "URL webu obchodu",
+    "changeUrlA11y": "Změnit URL webu",
+    "changeUrl": "Změnit URL",
+    "reasons": {
+      "timeout": "Webová stránka reagovala příliš dlouho. Žádné změny nebyly provedeny."
+    },
+    "quickOptions": "Rychlé možnosti pokračování:",
+    "options": {
+      "retry": "Zkuste znovu skenovat, pokud byl server vašeho obchodu dočasně zaneprázdněn.",
+      "manual": "Přidejte název firmy a produkty ručně bez čekání."
+    },
+    "tryAgain": "Zkusit znovu",
+    "addManually": "Přidat firmu ručně"
+  }
+}

@@ -33,7 +33,7 @@ export function chatTools(scope: ChatScope) {
         return docs.map((d) => ({
           kind: d.kind,
           title: d.title,
-          status: d.latest ? (d.latest.status === "CONFIRMED" ? "confirmed" : "draft, not yet confirmed") : "not written yet",
+          status: d.latest ? (d.latest.status === "CONFIRMED" ? "reviewed by the team" : "current") : "not written yet",
         }));
       },
     }),
@@ -45,12 +45,12 @@ export function chatTools(scope: ChatScope) {
       execute: async ({ kind }) => {
         if (!(await can("agents.read"))) return denied("the strategy documents");
         const doc = (await listContextDocs(scope.workspaceId, scope.brandId)).find((d) => d.kind === kind);
-        const use = doc?.confirmed ?? doc?.latest;
+        const use = doc?.latest;
         if (!doc || !use) return { kind, status: "not written yet" };
         return {
           kind,
           title: doc.title,
-          status: use.status === "CONFIRMED" ? "confirmed" : "draft, not yet confirmed by the team",
+          status: use.status === "CONFIRMED" ? "reviewed by the team" : "current",
           markdown: use.markdown.slice(0, 12_000),
         };
       },

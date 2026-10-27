@@ -1,0 +1,168 @@
+{
+  "viewPlans": "Vezi planurile",
+  "credits_one": "{{n}} credit",
+  "credits_other": "{{n}} credite",
+  "tableAlt": "{{product}} masă de dining",
+  "plans": {
+    "professional": "Profesional",
+    "starter": "Start",
+    "recommended": "Recomandat",
+    "priceToBeConfirmed": "Preț de confirmat",
+    "features": {
+      "monthlyCredits_one": "{{n}} credit lunar studio",
+      "monthlyCredits_other": "{{n}} credite lunare studio",
+      "postsStories": "Postări, povești & programare",
+      "photoshoots": "Ședințe foto produs & modă",
+      "websiteStudio": "Website Studio & domeniu personalizat",
+      "replyAssistant": "Asistent AI răspuns clienți",
+      "googleSync": "Sincronizare profil Google Growth",
+      "contentExports": "Creare și export de conținut",
+      "reelsStaging": "Reels video studio & pregătire"
+    }
+  },
+  "header": {
+    "openMenu": "Deschide meniul",
+    "plans": "Planuri",
+    "billingSettings": "Setări facturare",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Postări",
+      "photoshoot": "Ședință foto",
+      "marketing": "Marketing"
+    }
+  },
+  "choose": {
+    "title": "Alege planul tău",
+    "pricingUnavailable": "Prețul nu este disponibil încă.",
+    "continue": "Continuă",
+    "restorePurchases": "Restabilește achizițiile",
+    "terms": "Termeni de serviciu",
+    "privacy": "Politica de confidențialitate",
+    "lead": "Dezvoltă-ți studioul de retail cu video reels automate, ședințe foto pregătite și publicare socială.",
+    "planA11y": "Plan {{name}}, {{price}}"
+  },
+  "activated": {
+    "continueReel_one": "Continuă realizarea reel-ului ({{n}} credit)",
+    "continueReel_other": "Continuă realizarea reel-ului ({{n}} credite)",
+    "backToWorkspace": "Înapoi la spațiul de lucru",
+    "title": "Plan activat",
+    "lead_one": "Spațiul tău de lucru {{plan}} este acum activ cu {{n}} credit lunar. Bine ai venit la Espanda Studio.",
+    "lead_other": "Spațiul tău de lucru {{plan}} este acum activ cu {{n}} credite lunare. Bine ai venit la Espanda Studio.",
+    "planName": "Plan {{plan}}",
+    "active": "Activ",
+    "renews": "Se reînnoiește lunar · Caracteristici {{plan}}",
+    "available": "Disponibil",
+    "resumeProject": "Reia proiectul în așteptare",
+    "inProgress": "În desfășurare",
+    "reelTitle": "Reel {{title}}",
+    "scenesReady_one": "{{n}} scenă gata de creare",
+    "scenesReady_other": "{{n}} scene gata de creare",
+    "noDeduction": "Nu s-au dedus credite încă. Generarea începe doar când confirmi."
+  },
+  "billing": {
+    "title": "Setări",
+    "tabs": {
+      "business": "Afacerea mea",
+      "billing": "Facturare",
+      "postsPlanner": "Planificator postări"
+    },
+    "status": "Nicio abonament activ",
+    "plan": "Spațiu de lucru gratuit",
+    "balance": "Sold",
+    "note": "Schițele, sincronizarea catalogului magazinului și setările afacerii rămân disponibile.",
+    "recentUsage": "Utilizare recentă a creditelor",
+    "creditActivity": "Activitate credite",
+    "empty": "Nu s-au folosit credite încă. Alege un plan pentru a începe redarea reels și pregătirea automată.",
+    "restore": "Restabilește achizițiile de abonamente",
+    "appLanguage": "Limba interfeței aplicației",
+    "languages": {
+      "englishUS": "Engleză US",
+      "frenchFR": "Franceză FR"
+    },
+    "push": "Notificări push",
+    "pushHint": "Alerte de redare și finalizări în lot",
+    "terms": "Termeni de serviciu",
+    "privacy": "Politica de confidențialitate"
+  },
+  "gate": {
+    "sheetLabel": "Abonament necesar",
+    "subscriberGeneration": "Generare abonat",
+    "title": "Ești gata să faci acest reel?",
+    "body": "Un plan activ este necesar pentru a reda video reels cu voiceover și audio în franceză. Storyboard-ul tău este salvat și așteaptă.",
+    "saved": "Salvat",
+    "reelFacts_one": "{{seconds}}s · 9:16 vertical · {{count}} scenă · Voiceover franceză",
+    "reelFacts_other": "{{seconds}}s · 9:16 vertical · {{count}} scene · Voiceover franceză",
+    "creditsPerReel_one": "{{n}} credit per reel",
+    "creditsPerReel_other": "{{n}} credite per reel",
+    "keepEditing": "Continuă editarea storyboard-ului",
+    "afterActivation": "După activare, revino la storyboard-ul tău pentru a confirma generarea."
+  },
+  "marketing": {
+    "paidAdsA11y": "Reclame plătite, în curând",
+    "paidAds": "Reclame plătite · În curând",
+    "title": "Marketing",
+    "subtitle": "Gestionează vizibilitatea magazinului tău, conversațiile și profilul de brand",
+    "toolLockedA11y": "{{title}}, {{subtitle}}. Blocată, plan Profesional. Vezi planurile",
+    "toolAvailableA11y": "{{title}}, {{subtitle}}. Disponibil. Configurează",
+    "locked": "Blocat",
+    "available": "Disponibil",
+    "professional": "Profesional",
+    "configure": "Configurează",
+    "tools": {
+      "customers": {
+        "title": "Clienți",
+        "subtitle": "Inbox & răspunsuri AI"
+      },
+      "google": {
+        "title": "Google Growth",
+        "subtitle": "Hărți locale & recenzii"
+      },
+      "website": {
+        "title": "Website Studio",
+        "subtitle": "Pagini de destinație & schiță"
+      },
+      "business": {
+        "title": "Afacerea mea",
+        "subtitle": "Detalii de brand & răspunsuri"
+      },
+      "connections": {
+        "title": "Conexiuni",
+        "subtitle": "Sincronizare socială & website"
+      },
+      "automations": {
+        "title": "Automatizări",
+        "subtitle": "Preferințe de publicare"
+      }
+    }
+  },
+  "posts": {
+    "title": "Postările tale, în mișcare",
+    "subtitle": "Revizuiește evidențele de produs generate & postările programate",
+    "subscriptionFeature": "Caracteristică de abonament",
+    "inactive": "Inactiv",
+    "monthlyPlan": "Planul tău lunar",
+    "unlock": "Deblochează postările și poveștile lunare, subtitrările ajustate pentru brand și publicarea programată pe mai multe canale.",
+    "calendarA11y": "Previzualizare program schiță, {{month}}",
+    "draftSchedule": "Program schiță",
+    "day": "{{weekday}} {{day}}",
+    "postMeta": "{{time}} · Schiță · nepublicat",
+    "keepDrafting": "Continuă să schițezi manual"
+  },
+  "reels": {
+    "home": "Acasă Reels",
+    "title": "Fă următorul tău reel",
+    "subtitle": "Creează reels video studio din catalogul magazinului tău",
+    "notice_one": "Ideile tale sunt încă aici. Explorează {{n}} idee și revizuiește storyboard-urile oricând. Planul activ deblochează redarea video.",
+    "notice_other": "Ideile tale sunt încă aici. Explorează {{n}} idei și revizuiește storyboard-urile oricând. Planul activ deblochează redarea video.",
+    "heroAlt": "{{product}} colecție de dining, pregătită",
+    "creativePrompt": "Sugestie creativă",
+    "yourAssistant": "Asistentul tău",
+    "question": "Ce ai dori să arăți?",
+    "planTogether": "Planifică un reel împreună",
+    "start": "Începe",
+    "startA11y": "Începe să planifici un reel",
+    "ideasReady_one": "{{n}} idee gata",
+    "ideasReady_other": "{{n}} idei gata",
+    "viewIdeas": "Vezi ideile →"
+  }
+}

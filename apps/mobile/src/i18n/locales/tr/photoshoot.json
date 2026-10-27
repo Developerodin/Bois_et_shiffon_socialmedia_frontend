@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Menüyü aç",
+    "creditsAvailable_one": "{{count}} kredi mevcut",
+    "creditsAvailable_other": "{{count}} kredi mevcut",
+    "settings": "Ayarlar",
+    "appModules": "Uygulama modülleri",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Gönderiler",
+      "photoshoot": "Fotoğraf çekimi",
+      "marketing": "Pazarlama"
+    },
+    "moduleNavigation": "Modül gezintisi",
+    "create": "Oluştur",
+    "results": "Sonuçlar",
+    "goBack": "Geri dön",
+    "switchBusiness": "İşletme değiştir, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} öğe",
+    "optionWithCount_other": "{{label}} {{count}} öğe"
+  },
+  "create": {
+    "title": "Fotoğraf çekimi oluştur",
+    "subtitle": "Ürün fotoğrafları oluştur ve kıyafetleri modeller üzerinde stilize et.",
+    "product": {
+      "imageLabel": "{{name}} yemek masası",
+      "pill": "Katalog öğesi",
+      "title": "Ürün fotoğraf çekimi",
+      "body": "Katalog öğelerini doğal ışıkla mimari iç mekan ve stüdyo ortamlarına yerleştirin.",
+      "cta": "Yeni ürün çekimi"
+    },
+    "fashion": {
+      "imageLabel": "İllüstrasyonlu kıyafet fotoğraf stüdyosu",
+      "title": "Moda fotoğraf çekimi",
+      "body": "Kampanya hazır sahnelerde kıyafetleri modeller üzerinde stilize edin.",
+      "cta": "Yeni moda çekimi"
+    }
+  },
+  "product": {
+    "title": "Ürün fotoğraf çekimi",
+    "estimate_one": "Tahmin: {{count}} kredi",
+    "estimate_other": "Tahmin: {{count}} kredi",
+    "available": "{{count}} mevcut",
+    "generate": "Fotoğraf çekimi oluştur",
+    "selectedAsset": "Seçilen katalog varlığı",
+    "changeAsset": "Varlığı değiştir",
+    "aspectRatio": "En-boy oranı",
+    "sceneStyle": "Sahne stili",
+    "scenes": {
+      "studio": "Stüdyo",
+      "interior": "İç mekan",
+      "custom": "Özel"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Yaratıcı özet",
+    "briefHint": "Aydınlatma, ambiyans veya belirli dekor ipuçlarını iyileştirin",
+    "sourcePreview": "Kaynak önizleme",
+    "fullPreview": "{{product}}, tam önizleme",
+    "sourceImage": "Kaynak görüntü"
+  },
+  "fashion": {
+    "title": "Moda fotoğraf çekimi",
+    "generate": "Fotoğraf çekimi oluştur",
+    "uploadToEnable": "Oluşturmayı etkinleştirmek için bir kıyafet fotoğrafı yükleyin",
+    "heading": "Moda çekiminizi oluşturun",
+    "subtitle": "Düz yatay veya askıdaki kıyafetleri gerçekçi sahnelenmiş modellere dönüştürün.",
+    "garmentPhoto": "Kıyafet fotoğrafı",
+    "required": "Gerekli",
+    "garmentSelected": "Kıyafet fotoğrafı: {{label}}. Fotoğrafı değiştir",
+    "addGarment": "Kıyafet fotoğrafı ekle",
+    "changeGarment": "Kıyafet fotoğrafını değiştir",
+    "garmentHint": "Nötr arka planda PNG veya JPG, düz yatay veya hayalet manken",
+    "modelStyling": "Model & stil",
+    "modelSelected": "Model & stil: {{model}}",
+    "models": {
+      "choose": "Bir model seçin",
+      "natural": "{{name}} · doğal stil",
+      "editorial": "{{name}} · editoryal stil",
+      "casual": "{{name}} · günlük stil"
+    },
+    "pose": "Poz",
+    "poses": {
+      "fullBody": "Tam vücut",
+      "threeQuarter": "Üç çeyrek",
+      "closeUp": "Yakın detay"
+    },
+    "outputFormat": "Çıktı formatı",
+    "formats": {
+      "feedPortrait": "Akış portresi",
+      "storyReel": "Hikaye / Reel"
+    },
+    "background": "Arka plan ayarı",
+    "backgrounds": {
+      "studioMinimal": "Stüdyo minimal",
+      "urbanStreet": "Kentsel sokak",
+      "naturalInterior": "Doğal iç mekan"
+    },
+    "requirementsTitle": "Yükleme gereksinimleri",
+    "requirements": {
+      "contrast": "Arka plana karşı yüksek kontrast",
+      "wrinkles": "Ağır kırışıklık yok",
+      "frontFacing": "Önden bakış açısı"
+    }
+  },
+  "source": {
+    "title": "Kaynak varlığı seçin",
+    "uploadNewLabel": "Yeni fotoğraf yükle",
+    "uploadNew": "Yeni yükle",
+    "noPhotoSelected": "Fotoğraf seçilmedi",
+    "photosSelected_one": "{{count}} fotoğraf seçildi",
+    "photosSelected_other": "{{count}} fotoğraf seçildi",
+    "selectPhoto": "Bir fotoğraf seçin",
+    "usePhoto": "Fotoğrafı kullan",
+    "source": "Kaynak",
+    "tabs": {
+      "website": "Web sitesi",
+      "uploads": "Yüklemeler"
+    },
+    "businessWebsite": "{{name}} · Web sitesi",
+    "fromWebsite": "Web sitesinden",
+    "filterCatalog": "Katalogu filtrele",
+    "filters": {
+      "all": "Tüm öğeler",
+      "tables": "Masalar",
+      "storage": "Depolama"
+    },
+    "addPhoto": "Fotoğraf ekle",
+    "tip": "Temiz ürün kesitleri, optimal fotoğraf çekimi sonuçları verir. Espanda Studio orijinal akasya ahşap dokusunu koruyacaktır."
+  },
+  "generating": {
+    "backToWorkspace": "Çalışma alanına geri dön",
+    "returnToWorkspace": "Çalışma alanına dön",
+    "title": "Fotoğraflarınız hazırlanıyor",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Oluşturma işleminiz arka planda güvenle çalışır. Tamamlanan varlıkları Sonuçlar'da bulacaksınız.",
+    "status": {
+      "done": "Tamamlandı",
+      "active": "Devam ediyor",
+      "queued": "Sırada"
+    },
+    "progress": "Oluşturuluyor",
+    "sample": {
+      "title": "{{name}} yemek fotoğraf çekimi",
+      "description": "{{product}} mimari gün ışığı iç mekanında sahneleniyor.",
+      "variations_one": "{{count}} varyasyon",
+      "variations_other": "{{count}} varyasyon"
+    },
+    "steps": {
+      "catalog": "Katalog varlığı işleniyor",
+      "compose": "Sahne ve aydınlatma oluşturuluyor",
+      "finish": "Tamamlama ve renk kalibrasyonu"
+    }
+  },
+  "results": {
+    "title": "Fotoğraf çekimleri",
+    "subtitle": "Ürün ve moda fotoğraflarınız",
+    "newPhotoshoot": "Yeni fotoğraf çekimi",
+    "filterLabel": "Fotoğraf çekimlerini filtrele",
+    "filters": {
+      "all": "Tümü ({{count}})",
+      "product": "Ürün ({{count}})",
+      "fashion": "Moda ({{count}})"
+    },
+    "empty": "Henüz fotoğraf çekimi yok.",
+    "processingLabel": "{{title}}. İşleniyor, {{percent}}%",
+    "processingBadge_one": "İşleniyor · {{count}} kredi",
+    "processingBadge_other": "İşleniyor · {{count}} kredi",
+    "preview": "Önizleme",
+    "reviewPhotoLabel": "Fotoğrafı incele, {{title}}",
+    "reviewPhoto": "Fotoğrafı incele",
+    "sample": {
+      "studioStaging": "{{product}} · Stüdyo sahneleme",
+      "rendering": "Render aşaması · {{percent}}%",
+      "interiorReady_one": "İç mekan · {{ratio}} · {{count}} fotoğraf hazır",
+      "interiorReady_other": "İç mekan · {{ratio}} · {{count}} fotoğraf hazır",
+      "studioDaylight": "Stüdyo gün ışığı · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Daha fazla seçenek",
+    "downloadPhoto": "Fotoğraf indir",
+    "variation": "Varyasyon",
+    "share": "Fotoğraf çekimini paylaş",
+    "samplePreview": "Örnek önizleme",
+    "compareOriginal": "Orijinali karşılaştır",
+    "expandView": "Genişlet",
+    "stagingSummary": "Sahneleme özeti",
+    "format": "Format",
+    "creationCost": "Oluşturma maliyeti",
+    "credits_one": "{{count}} kredi",
+    "credits_other": "{{count}} kredi",
+    "sample": {
+      "headerTitle": "{{name}} fotoğraf çekimi",
+      "vertical": "{{ratio}} Dikey",
+      "architecturalInterior": "Mimari İç Mekan",
+      "studioDaylight": "Stüdyo gün ışığı",
+      "formatBadge": "{{ratio}} format",
+      "naturalStudio": "Doğal stüdyo",
+      "portraitPhoto": "Portre fotoğrafı"
+    }
+  }
+}

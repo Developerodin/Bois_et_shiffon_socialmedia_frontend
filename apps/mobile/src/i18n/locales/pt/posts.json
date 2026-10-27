@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Planeado",
+    "briefReady": "Brief pronto",
+    "needsReview": "Precisa de revisão",
+    "draftReady": "Rascunho pronto",
+    "approved": "Aprovado",
+    "scheduled": "Agendado",
+    "published": "Publicado",
+    "draft": "Rascunho"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Hoje",
+    "tomorrow": "Amanhã"
+  },
+  "chrome": {
+    "openMenu": "Abrir menu",
+    "logo": "Espanda",
+    "credits_one": "{{count}} crédito disponível",
+    "credits_other": "{{count}} créditos disponíveis",
+    "settings": "Definições",
+    "modulesLabel": "Módulos da app",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Publicações",
+      "photoshoot": "Sessão fotográfica",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Navegação do módulo",
+    "nav": {
+      "today": "Hoje",
+      "posts": "Publicações",
+      "create": "Criar",
+      "stories": "Stories",
+      "settings": "Definições"
+    },
+    "back": "Voltar",
+    "switchBusiness": "Mudar de negócio, {{name}}",
+    "business": "Negócio: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "As tuas publicações, em movimento",
+    "subtitle": "Revê destaques de produtos gerados & publicações agendadas",
+    "needsApproval": "Precisa de aprovação",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Rever publicação",
+    "agenda": "Agenda futura",
+    "thisWeek": "Esta semana",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Ver calendário"
+  },
+  "calendar": {
+    "title": "Calendário de publicações",
+    "subtitle": "Planeia e automatiza os teus lançamentos",
+    "viewLabel": "Vista do calendário",
+    "views": {
+      "month": "Mês",
+      "list": "Lista"
+    },
+    "plan": "Plano: {{n}} publicações / mês",
+    "managePlan": "Gerir plano",
+    "postCount_one": "{{count}} publicação",
+    "postCount_other": "{{count}} publicações",
+    "empty": "Nada planeado para este dia.",
+    "scheduled_one": "{{count}} agendada",
+    "scheduled_other": "{{count}} agendadas",
+    "previousMonth": "Mês anterior",
+    "nextMonth": "Próximo mês",
+    "gridLabel": "Calendário de {{month}}",
+    "dayWithPosts_one": "{{day}} · {{count}} publicação",
+    "dayWithPosts_other": "{{day}} · {{count}} publicações"
+  },
+  "detail": {
+    "title": "Detalhes da publicação",
+    "moreOptions": "Mais opções",
+    "feedPhoto": "Foto de feed 4:5",
+    "fullscreen": "Ecrã inteiro",
+    "captionFrench": "Legenda (Francês)",
+    "editText": "Editar texto",
+    "channels": "Canais de publicação",
+    "instagramFeed": "Feed do Instagram",
+    "instagramDetail": "Conectar uma conta para publicar",
+    "facebookPage": "Página do Facebook",
+    "facebookDetail": "Auto-publicar na página oficial",
+    "notConnected": "Não conectado",
+    "channelNotConnected": "{{name}}, não conectado",
+    "editPost": "Editar publicação",
+    "schedule": "Agendar"
+  },
+  "edit": {
+    "title": "Editar publicação",
+    "cancel": "Cancelar",
+    "save": "Guardar alterações",
+    "previewLabel": "{{title}}, proporção original 4:5",
+    "ratio": "Proporção original · 4:5",
+    "sectionLabel": "Editar secção",
+    "tabs": {
+      "image": "Imagem",
+      "caption": "Legenda",
+      "brand": "Marca"
+    },
+    "description": "Descrição da publicação",
+    "language": "Idioma: Francês (FR)",
+    "suggestedHashtags": "Hashtags sugeridas",
+    "addHashtag": "Adicionar hashtag",
+    "add": "+ Adicionar",
+    "regenerate": "Re-gerar legenda com IA",
+    "imageHint": "Proporção original · 4:5. Arrasta a pré-visualização para reenquadrar o corte.",
+    "brandHint": "Logotipo, cores e tom seguem o teu kit de marca {{brand}}."
+  },
+  "schedule": {
+    "title": "Agendar",
+    "storyFormat": "Story · imagem 9:16",
+    "feedFormat": "Publicação de feed · imagem 4:5",
+    "destination": "Destino",
+    "actionRequired": "Ação necessária",
+    "notLinked": "Conta do Instagram não ligada",
+    "notLinkedBody": "Conecta as tuas contas sociais para desbloquear a publicação agendada direta.",
+    "connect": "Conectar conta social",
+    "locked": "Agendamento bloqueado até conexão",
+    "timing": "Tempo & Agendamento",
+    "date": "Data",
+    "dateLabel": "Data, {{date}}",
+    "time": "Hora",
+    "timeLabel": "Hora, {{time}}",
+    "timezone": "Fuso horário",
+    "schedulePost": "Agendar publicação",
+    "scheduleLocked": "Agendar publicação (Conectar canal primeiro)",
+    "saveDraft": "Guardar rascunho"
+  },
+  "brief": {
+    "title": "Criar uma publicação",
+    "subtitle": "Escolhe um produto e direção criativa",
+    "format": "Formato de conteúdo",
+    "formatLabel": "Formato da publicação",
+    "singlePhoto": "Foto única",
+    "singlePhotoDetail": "Foco de feed 4:5",
+    "carousel": "Carrossel",
+    "carouselDetail": "Múltiplas fotos",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Objetivo principal",
+    "goals": {
+      "newArrival": "Nova chegada",
+      "productFeature": "Destaque do produto",
+      "specialOffer": "Oferta especial"
+    },
+    "product": "Produto do catálogo alvo",
+    "changeProduct": "Alterar produto",
+    "change": "Alterar",
+    "direction": "Direção criativa (opcional)",
+    "directionLanguage": "Francês (FR)",
+    "directionPlaceholder": "ex.: Focar na marcenaria artesanal e no aconchego",
+    "cost": "Custo de criação:",
+    "costPending": "Estimativa pendente",
+    "draftPost": "Rascunho de publicação"
+  },
+  "stories": {
+    "title": "Stories",
+    "subtitle": "Momentos sociais verticais 9:16",
+    "newStory": "Nova story",
+    "statusLabel": "Status da story",
+    "drafts_one": "Rascunhos ({{count}})",
+    "drafts_other": "Rascunhos ({{count}})",
+    "scheduled_one": "Agendadas ({{count}})",
+    "scheduled_other": "Agendadas ({{count}})",
+    "samplePreview": "Pré-visualização de exemplo",
+    "moreOptions": "Mais opções para {{title}}",
+    "editStory": "Editar story"
+  },
+  "editStory": {
+    "back": "Voltar",
+    "undo": "Desfazer",
+    "tools": {
+      "text": "Texto",
+      "image": "Imagem",
+      "brand": "Marca",
+      "cta": "CTA"
+    },
+    "toolLabel": "Ferramenta {{tool}}",
+    "captionTitle": "Legenda da story / Sticker de link",
+    "languageCode": "FR",
+    "saveDraft": "Guardar rascunho",
+    "scheduleStory": "Agendar story"
+  },
+  "planner": {
+    "title": "Planeador de publicações",
+    "sectionsLabel": "Secções de definições",
+    "sections": {
+      "business": "O Meu Negócio",
+      "billing": "Faturação",
+      "planner": "Planeador de publicações"
+    },
+    "cycle": "Ciclo de planeamento",
+    "cadence": "Cadência de publicação",
+    "monthlyTarget": "Meta mensal",
+    "feedPosts": "Publicações no feed",
+    "stories": "Stories",
+    "perMonth": "{{n}} / mês",
+    "feedNote": "~1 publicação diária",
+    "storiesNote": "Distribuídas ao longo do mês",
+    "cadenceHint": "Metas de conteúdo sugeridas. Ajuste antes de gerar o seu calendário.",
+    "pillars": "Pilares de conteúdo",
+    "pillar": {
+      "catalog": "Produtos do catálogo (foco em Bunting)",
+      "craft": "Detalhes de materiais & artesanato (madeira Acacia)",
+      "story": "História da marca & herança francesa"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Revisão manual antes da publicação: </b>As publicações geradas são colocadas no seu calendário como rascunhos para a sua confirmação final. Nenhum conteúdo é publicado sem aprovação.",
+    "generate": "Gerar calendário"
+  }
+}

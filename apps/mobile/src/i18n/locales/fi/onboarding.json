@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Tervetuloa Espandaan",
+    "subtitle": "Luo sisältöä yrityksellesi.",
+    "mobileNumber": "Puhelinnumero",
+    "countryCode": "Maatunnus {{code}}",
+    "sendCode": "Lähetä koodi",
+    "useEmail": "Käytä sähköpostia",
+    "sendFailed": "Koodin lähetys epäonnistui. Yritä uudelleen tai käytä sähköpostia.",
+    "chooseCountry": "Valitse maa",
+    "searchCountry": "Hae maata tai koodia"
+  },
+  "email": {
+    "title": "Kirjaudu sisään sähköpostilla",
+    "subtitle": "Lähetämme sinulle sähköpostitse salasanattoman vahvistuskoodin.",
+    "tagline": "Älykästä markkinointia modernille vähittäiskaupalle",
+    "label": "Sähköpostiosoite",
+    "placeholder": "nimi@yrityksesi.com",
+    "notConfigured": "Sähköpostikirjautumista ei ole vielä asetettu tälle palvelimelle.",
+    "sendFailed": "Koodia ei voitu lähettää. Yritä uudelleen.",
+    "useMobile": "Käytä puhelinnumeroa",
+    "linkTitle": "Lisää sähköposti",
+    "linkSubtitle": "Numerosi on vahvistettu. Lisää sähköposti kuittien ja tiimikutsujen saamiseksi. Lähetämme siihen koodin."
+  },
+  "verify": {
+    "title": "Syötä koodisi",
+    "sent": "Lähetimme vahvistuskoodin osoitteeseen {{destination}}",
+    "codeLabel": "Kuusimerkkinen vahvistuskoodi",
+    "submit": "Vahvista koodi",
+    "checkFailed": "Koodia ei voitu tarkistaa. Yritä uudelleen.",
+    "resendFailed": "Koodia ei voitu lähettää uudelleen.",
+    "resendIn": "Lähetä koodi uudelleen {{time}}",
+    "resend": "Lähetä koodi uudelleen",
+    "changeEmail": "Vaihda sähköpostia",
+    "changeMobile": "Vaihda puhelinnumeroa"
+  },
+  "welcome": {
+    "getStarted": "Aloita",
+    "footnote": "Yrityksesi, luova suuntasi.",
+    "photosLabel": "Esimerkkejä {{brand}}-luettelosta",
+    "title": "Markkinointia, joka tuntuu yritykseltäsi",
+    "body": "Luo brändin mukaisia studio-videoita, valokuvauksia ja tuotejulkaisuja luettelostasi.",
+    "steps": {
+      "goal": {
+        "title": "Valitse tavoitteesi",
+        "body": "Valitse ensimmäinen luova formaatti, jonka haluat tuottaa."
+      },
+      "business": {
+        "title": "Jaa yrityksesi",
+        "body": "Jaa verkkosivustosi tai lisää yrityksesi tiedot."
+      },
+      "review": {
+        "title": "Tarkista valmis sisältö",
+        "body": "Tarkista tuotteidesi ympärille luodut ideat."
+      }
+    }
+  },
+  "goal": {
+    "title": "Mitä luot ensin?",
+    "subtitle": "Mukautamme alkuperäisen työtilasi ja mallisi ensisijaisen painopisteesi mukaan.",
+    "note": "Kaikki työkalut ja studioformaatit ovat käytettävissä myöhemmin.",
+    "options": {
+      "socialPlan": {
+        "title": "Sosiaalisen median suunnitelma",
+        "description": "Kuukauden julkaisut ja kuvatekstit"
+      },
+      "marketingVideos": {
+        "title": "Markkinointivideot",
+        "description": "Studio-videoita luettelostasi"
+      },
+      "fashionPhotoshoot": {
+        "title": "Muotikuvaus",
+        "description": "Stailaa vaatteita malleille"
+      },
+      "productPhotoshoot": {
+        "title": "Tuotekuvaus",
+        "description": "Tuotekuvia luetteloosi"
+      }
+    }
+  },
+  "source": {
+    "title": "Missä yrityksesi on verkossa?",
+    "subtitle": "Espanda skannaa verkkokauppasi tai listauksesi luodakseen automaattisesti brändin mukaisia medioita.",
+    "options": {
+      "website": {
+        "title": "Verkkosivusto",
+        "description": "Shopify, WooCommerce, oma verkkotunnus"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Paikallinen myymälä, putiikki tai näyttelytila"
+      },
+      "marketplace": {
+        "title": "Markkinapaikka",
+        "description": "Amazon, Etsy, eBay tai Instagram-kauppa"
+      },
+      "wholesale": {
+        "title": "Tukkumyynti / B2B",
+        "description": "Faire, Ankorstore, yksityinen luettelo"
+      },
+      "none": {
+        "title": "Ei verkkoläsnäoloa",
+        "description": "Kuvaile tuotteesi manuaalisesti"
+      },
+      "other": {
+        "title": "Jotain muuta",
+        "description": "Sosiaalinen tili, PDF-lookbook tai tiedosto"
+      }
+    }
+  },
+  "website": {
+    "title": "Mikä on verkkosivustosi?",
+    "subtitle": "Haemme automaattisesti luettelosi kuvat, värit ja äänensävyn.",
+    "label": "Kaupan verkkosivuston url",
+    "placeholder": "www.kauppasi.com",
+    "valid": "Kelvollinen osoite",
+    "willRead": "Luemme tämän sivuston",
+    "facts": {
+      "catalog": {
+        "key": "Luettelotuotteet",
+        "value": "Tuotekuvat"
+      },
+      "identity": {
+        "key": "Brändi-identiteetti",
+        "value": "Värit & typografia"
+      },
+      "tone": {
+        "key": "Sävy & tyyli",
+        "value": "Ääni sivuiltasi"
+      }
+    },
+    "safeNote": "Luettelon tuonti ei muuta mitään live-kaupassasi."
+  },
+  "manual": {
+    "title": "Lisää yrityksen tiedot",
+    "subtitle": "Jaa listauslinkki tai kuvaile luettelosi manuaalisesti.",
+    "modeLabel": "Kuinka lisätä yrityksesi",
+    "modeListing": "Listaus-URL",
+    "modeDescribe": "Kuvaile yritystä",
+    "listingLabel": "Listauslinkki *",
+    "listingPlaceholder": "Etsy, Amazon, Google Maps tai kauppalinkki",
+    "nameLabel": "Yrityksen nimi *",
+    "namePlaceholder": "esim. Atelier Bois & Chiffons",
+    "sellsLabel": "Mitä myyt? *",
+    "sellsPlaceholder": "esim. Käsintehtyjä puupöytiä, TV-tasoja ja modernia sisustusta...",
+    "locationLabel": "Sijainti (valinnainen)",
+    "locationPlaceholder": "Kaupunki, maa tai näyttelytilan osoite",
+    "websiteLabel": "Verkkosivusto (valinnainen)"
+  },
+  "learning": {
+    "working": "Työstetään",
+    "tryAgain": "Yritä uudelleen",
+    "inProgressButton": "Oppiminen käynnissä...",
+    "saved": "Tallennamme edistymisesi.",
+    "title": "Tutustumme yritykseesi",
+    "bodyWebsite": "Analysoimme verkkosivustoasi brändi-identiteetin, luetteloiden ja visuaalisen sävyn löytämiseksi.",
+    "bodyManual": "Muutamme kuvauksesi brändi-identiteetiksi, luetteloiksi ja visuaaliseksi sävyksi.",
+    "fallbackName": "Yrityksesi",
+    "sourceWebsite": "Ensisijainen verkkosivustolähde",
+    "sourceManual": "Yrityksen tiedot",
+    "foundWebsite": "Verkkosivusto löytyi",
+    "foundManual": "Tiedot lisätty",
+    "stages": {
+      "open": "Avataan verkkosivusto",
+      "identity": "Luetaan brändi-identiteettiä & sävyä",
+      "photos": "Kerätään tuotekuvia"
+    },
+    "status": {
+      "done": "Valmis",
+      "running": "Käynnissä",
+      "queued": "Jonossa"
+    },
+    "errors": {
+      "stopped": "Verkkosivustosi lukeminen keskeytettiin.",
+      "noWorkspace": "Tililläsi ei ole vielä työtilaa.",
+      "startFailed": "Verkkosivustosi lukemista ei voitu aloittaa.",
+      "restartFailed": "Uudelleenkäynnistystä ei voitu suorittaa. Yritä uudelleen."
+    }
+  },
+  "review": {
+    "title": "Tarkista yrityksen tiedot",
+    "subtitle": "Löysimme nämä tiedot verkkosivustoltasi. Voit muokata niitä milloin tahansa.",
+    "edit": "Muokkaa",
+    "tagline": "Iskulause",
+    "editTagline": "Muokkaa iskulause",
+    "categoryLocation": "Kategoria & sijainti",
+    "audience": "Kohdeyleisö",
+    "editAudience": "Muokkaa kohdeyleisöä",
+    "products_one": "Havaitut tuotteet ({{count}})",
+    "products_other": "Havaitut tuotteet ({{count}})",
+    "found": "Löydetty",
+    "strengths": "Brändin vahvuudet",
+    "tags": {
+      "homeLiving": "Koti & asuminen",
+      "france": "Ranska",
+      "productCatalog": "Tuotekatalogi",
+      "showroomEshop": "Fyysinen showroom & verkkokauppa"
+    }
+  },
+  "brand": {
+    "title": "Brändi & luova tyyli",
+    "subtitle": "Säädä, miten Espanda luo kuvauksesi ja somepostauksesi.",
+    "identity": "{{name}} identiteetti",
+    "paletteMeta": "Verkkosivuston paletti · Muokattavissa",
+    "swatches": "Tuodut verkkosivuston värimallit",
+    "tone": "Luova sävy",
+    "selected_one": "{{count}} valittu",
+    "selected_other": "{{count}} valittu",
+    "tones": {
+      "modern": "Moderni",
+      "luxurious": "Ylellinen",
+      "elegant": "Elegantti",
+      "premium": "Premium",
+      "natural": "Luonnollinen",
+      "minimalist": "Minimalistinen"
+    },
+    "contentLanguage": "Sisällön kieli",
+    "contentLanguageA11y": "Sisällön kieli, {{language}}. Vaihda",
+    "languages": {
+      "fr": "Ranska (FR)",
+      "en": "Englanti (US)"
+    },
+    "audienceProfile": "Kohdeyleisön profiili",
+    "audienceHome": "Koti & huonekalut",
+    "featured": "Esillä olevat katalogituotteet",
+    "readyForBatch_one": "{{count}} valmis erään",
+    "readyForBatch_other": "{{count}} valmiina erään",
+    "sampleProducts": {
+      "table": "Bunting pöytä",
+      "tableDetail": "Acacia 240cm",
+      "tv": "TV-yksikkö",
+      "tvDetail": "Acacia 2 ovea"
+    },
+    "channelsNote": "Instagram ja Facebook voidaan yhdistää seuraavassa vaiheessa. (Ei kanavia yhdistetty vielä)"
+  },
+  "preparing": {
+    "ready": "Studio valmis",
+    "preparing": "Valmistellaan studiota",
+    "loadingButton": "Valmistellaan ideoitasi…",
+    "catalogSafe": "Katalogisi pysyy koskemattomana kaupassasi.",
+    "title": "Valmistellaan ensimmäisiä ideoitasi",
+    "body": "Luodaan räätälöityjä somevideoita ja lavastuksia {{name}}-kokoelmastasi.",
+    "photosTitle": "Kerätään kuvia",
+    "photosDetail": "{{product}} ruokailuryhmä",
+    "storyboardTitle": "Rakennetaan käsikirjoitusta",
+    "storyboardDetail_one": "Koostetaan {{count}} videokohtaus",
+    "storyboardDetail_other": "Koostetaan {{count}} videokohtausta",
+    "nextTitle": "Seuraavaksi: Arvioi ideasi",
+    "nextDetail": "Valitse koukut ja äänipresetit"
+  },
+  "connect": {
+    "readyToConnect": "• Valmis yhdistettäväksi",
+    "title": "Julkaise, kun olet valmis",
+    "subtitle": "Yhdistä sosiaalisen median tilisi, jotta Espanda voi julkaista tai luonnostella valmiita julkaisuja ja tuote-esittelyjä suoraan.",
+    "toolsTitle": "Julkaisutyökalut",
+    "featureReels": "Julkaise Instagram Feediin & Reelseihin",
+    "featureCaptions": "Käytä omia kuvatekstejäsi ja hashtagejasi",
+    "featureReview": "Arvioit aina ennen kuin mitään julkaistaan",
+    "assurance": "Ei sisältöä julkaista ilman vahvistustasi",
+    "connectInstagram": "Yhdistä Instagram",
+    "connectFacebook": "Yhdistä Facebook",
+    "skip": "Ohita toistaiseksi",
+    "laterTitle": "Yhdistä myöhemmin?",
+    "laterBody": "Voit silti luoda, muokata ja ladata korkearesoluutioisia videoita ja kuvauksia kamerarullallesi. Voit yhdistää Instagramisi milloin tahansa Asetuksissa.",
+    "laterDownload": "Lataa luomuksesi",
+    "laterSettings": "Yhdistä kanavat Asetuksissa",
+    "continueWithout": "Jatka yhdistämättä"
+  }
+}

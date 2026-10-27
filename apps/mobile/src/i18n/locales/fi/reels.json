@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} sekunti",
+  "seconds_other": "{{count}} sekuntia",
+  "noPresenter": "Ei esittäjää",
+  "aiActor": "AI-näyttelijä",
+  "assistant": "Videon assistenttisi",
+  "sourceWebsite": "Lähdesivusto",
+  "preview": "Esikatselu",
+  "schedule": "Aikataulu",
+  "goBack": "Takaisin",
+  "inProgress": "Käynnissä",
+  "timezone": "Aikavyöhyke",
+  "status": {
+    "draft": "Luonnos",
+    "ready": "Valmis"
+  },
+  "scene": {
+    "label": "Kohtaus {{n}} · {{seconds}}s",
+    "count_one": "{{count}} kohtaus",
+    "count_other": "{{count}} kohtausta"
+  },
+  "shot": {
+    "wide": "Laaja kuva",
+    "material": "Materiaalin yksityiskohta",
+    "closeCta": "Tuote lähikuva & CTA"
+  },
+  "create": {
+    "switchBusiness": "Vaihda yritystä, {{name}}",
+    "title": "Tee seuraava reelsisi",
+    "subtitle": "Luo studiovideoita myymäläsi katalogista",
+    "heroImage": "Täysi sisäkuva {{product}} ruokailukokoelmasta",
+    "question": "Mitä haluaisit näyttää?",
+    "planTogether": "Suunnitellaan reels yhdessä",
+    "start": "Aloita",
+    "startA11y": "Aloita reelsin suunnittelu",
+    "ideasReady_one": "{{count}} idea valmis",
+    "ideasReady_other": "{{count}} ideaa valmiina",
+    "viewIdeas": "Näytä ideat →",
+    "actorSubtitle": "Esittäjän reels",
+    "templates": "Mallit",
+    "templatesSubtitle": "Nopeat katalogileikkaukset",
+    "jumpBackIn": "Palaa takaisin",
+    "seeAll": "Näytä kaikki",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Videoideat",
+    "subtitle": "Kuratoidut kulmat valmiina liikkeeseen",
+    "filter": {
+      "all": "Kaikki ({{n}})",
+      "productSpotlight": "Tuotteen esittely ({{n}})",
+      "collection": "Kokoelma ({{n}})"
+    },
+    "angle": "Kulma {{n}}",
+    "body": {
+      "angle01": "Korostetaan luonnollista syykuviota, geometrisia ristijalkarakenteita ja ruokailuasetelmia.",
+      "angle02": "Keskitytään käsin veistettyihin säleoviin, johdonhallintaan ja lämpimään elinympäristöön."
+    },
+    "readyToReview": "Valmis tarkastettavaksi",
+    "viewStoryboard": "Näytä kuvakäsikirjoitus"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} krediitti",
+    "creditsA11y_other": "{{count}} krediittiä",
+    "addAssets": "Lisää aineistoja",
+    "composerPlaceholder": "Tarkenna sävyä, ääniä tai lisää ohjeita...",
+    "composerA11y": "Tarkenna sävyä, ääniä tai lisää ohjeita",
+    "send": "Lähetä tarkennus",
+    "day": "Tänään · Reels Studio",
+    "userMessage": "Näytä Bunting-kokoelma rauhallisessa, korkealaatuisessa reelsissä.",
+    "reply": "Olen räätälöinyt konseptin <b>{{brand}}</b> {{product}} pöydällesi. Tässä ovat suositellut parametrit:",
+    "format": "Muoto",
+    "formatVertical": "9:16 Pysty (Story/Reel)",
+    "duration": "Kesto",
+    "presenter": "Esittäjä",
+    "openingHook": "Avauskoukku",
+    "reviewStoryboard_one": "Tarkista kuvakäsikirjoitus ({{count}} kohtaus)",
+    "reviewStoryboard_other": "Tarkista kuvakäsikirjoitus ({{count}} kohtausta)",
+    "readyStatus": "Valmis luotavaksi tai tarkennettavaksi"
+  },
+  "storyboard": {
+    "title": "Kuvakäsikirjoitus",
+    "durationFact": "{{seconds}}s kesto",
+    "verticalFact": "9:16 pysty",
+    "readyToRender": "Valmis renderöitäväksi <muted>· Luonnos tallennettu tarkistettavaksi</muted>",
+    "sceneDirection": "Kohtauksen ohjaus",
+    "voiceoverFr": "Ääniraita (FR)",
+    "direction": {
+      "scene1": "Hidas liukuva paljastus modernin ruokailuympäristön yli",
+      "scene2": "Pehmeä makrosweep rikkaan luonnonpuun syyn ja viistetyn reunan yli",
+      "scene3": "Lavastettu näkökulma Bois & Chiffons -embleemillä vesileimattuna"
+    },
+    "editInChat": "Muokkaa chatissa",
+    "makeVideo": "Tee video",
+    "makeVideoA11y_one": "Tee video, {{count}} krediitti",
+    "makeVideoA11y_other": "Tee video, {{count}} krediittiä",
+    "cost_one": "{{count}} krediitti",
+    "cost_other": "{{count}} krediittiä",
+    "balance_one": "Nykyinen saldo: {{balance}} krediittiä · {{count}} krediitti varataan · Luonnos tallennetaan automaattisesti",
+    "balance_other": "Nykyinen saldo: {{balance}} krediittiä · {{count}} krediittiä varataan · Luonnos tallennetaan automaattisesti"
+  },
+  "generating": {
+    "backToWorkspace": "Takaisin työtilaan",
+    "renderingA11y": "Renderöinti käynnissä",
+    "title": "Luodaan reelsisi",
+    "body": "Koostetaan visuaaleja, ranskankielistä ääniraitaa ja liikkeen rytmitystä {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Aito ranskalainen katalogiaineisto",
+    "preparingScenes_one": "Valmistellaan {{count}} kohtausta",
+    "preparingScenes_other": "Valmistellaan {{count}} kohtausta",
+    "done": "Valmis",
+    "renderingFrames": "Renderöidään videokehyksiä",
+    "addingAudio": "Lisätään ääni",
+    "queued": "Jonossa",
+    "creditsReserved_one": "{{count}} krediitti varattu",
+    "creditsReserved_other": "{{count}} krediittiä varattu",
+    "remaining_one": "Jäljellä: {{count}} krediitti",
+    "remaining_other": "Jäljellä: {{count}} krediittiä",
+    "safeToLeave": "Voit turvallisesti poistua tältä näytöltä. Luonnoksesi tallennetaan automaattisesti Tulokset-välilehdelle.",
+    "keepWorking": "Jatka työskentelyä taustalla"
+  },
+  "results": {
+    "title": "Videoreelsit",
+    "newReel": "Uusi reels",
+    "filter": {
+      "all": "Kaikki ({{n}})",
+      "ready": "Valmis ({{n}})",
+      "processing": "Käsittelyssä ({{n}})"
+    },
+    "processing_one": "Käsittelyssä · {{count}} krediitti varattu",
+    "processing_other": "Käsittelyssä · {{count}} krediittiä varattu",
+    "renderingA11y": "{{title}}, renderöinti {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 pysty · Renderöidään visuaaleja...",
+    "renderingStage": "Renderöintivaihe",
+    "previewA11y": "Näyte-esikatselu, {{title}}",
+    "moreOptions": "Lisää vaihtoehtoja",
+    "reviewVideo": "Tarkista video",
+    "meta": {
+      "tv": "20s · Ranskalainen ääniraita · Valmis aikataulutettavaksi",
+      "atelier": "15s · Ambient-akustinen · Valmis aikataulutettavaksi"
+    }
+  },
+  "review": {
+    "subtitle": "Reels-luonnos · Valmis tarkistettavaksi",
+    "options": "Valikko",
+    "downloadVideo": "Lataa video",
+    "connectFirst": "Valitse yhdistetty tili ennen julkaisua.",
+    "samplePreview": "Näyte-esikatselu",
+    "play": "Toista videoesikatselu",
+    "position": "Videon sijainti",
+    "sound": "Vaihda videon ääni",
+    "fullscreen": "Avaa video koko näytölle",
+    "vertical": "9:16 Pysty",
+    "portrait": "Pystysuuntainen muoto",
+    "captionFrench": "Tekstitys (ranska)",
+    "defaultSource": "· Oletuslähde",
+    "editable": "Muokattavissa",
+    "captionA11y": "Videon tekstitys ranskaksi",
+    "addTag": "Lisää tunniste",
+    "specifications": "Tiedot",
+    "audioTrack": "Ääniraita",
+    "audioValue": "Ranskalainen kertoja (Studio Natural) + Ympäristöääni",
+    "resolution": "Resoluutio",
+    "resolutionValue": "Pystysuuntainen video · 9:16"
+  },
+  "publish": {
+    "title": "Julkaise rulla",
+    "confirmSchedule": "Vahvista aikataulu",
+    "publishNow": "Julkaise nyt",
+    "saveDraft": "Tallenna luonnos",
+    "readyToSchedule": "Valmis aikataulutettavaksi",
+    "format": "{{product}} · 9:16 Pystyrulla",
+    "playPreview": "Esikatsele",
+    "channel": "Julkaisukanava",
+    "connected": "Yhdistetty",
+    "notConnected": "Ei yhdistetty",
+    "connect": "Yhdistä",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Automaattinen julkaisu syötteeseen & rulliin",
+    "orDownload": "Tai lataa suoraan video",
+    "download": "Lataa",
+    "timing": "Ajoitus",
+    "date": "Päivämäärä",
+    "time": "Aika",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Aikavyöhyke, {{value}}",
+    "notice": "Yhdistä Instagram-yritystili automatisoidun aikataulutetun julkaisun avaamiseksi. Voit silti tallentaa tämän rullan luonnoksena."
+  },
+  "scheduled": {
+    "close": "Sulje",
+    "viewReel": "Näytä aikataulutettu rulla",
+    "backToResults": "Takaisin tuloksiin",
+    "title": "Rulla aikataulutettu",
+    "body": "Videosi julkaistaan valitulle tilille aikataulun mukaisesti.",
+    "meta": "{{seconds}}s · Ranskalainen kertoja",
+    "publishDate": "Julkaisupäivämäärä",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Brändin työtila",
+    "channel": "Kanava",
+    "instagramConnected": "Instagram (Yhdistetty)",
+    "editInCalendar": "Muokkaa tai peru tämä julkaisu kalenteristasi."
+  },
+  "actor": {
+    "title": "Valitse esittelijä",
+    "intro": "Valitse esittelijätyyli tai vain tuoterulla.",
+    "noPresenterA11y": "Ei esittelijää, suositeltu",
+    "recommended": "Suositeltu",
+    "noPresenterBody": "Keskity vain huonekalujen visuaaleihin, tekstuureihin ja studioääneen.",
+    "styles": "Esittelijätyylit",
+    "style": {
+      "calm": {
+        "title": "Rauhallinen kertoja",
+        "subtitle": "Ranska · Rauhallinen studio"
+      },
+      "expressive": {
+        "title": "Ilmeikäs esittelijä",
+        "subtitle": "Englanti / FR · Dynaaminen"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Ääninäyte, {{title}}",
+    "sampleVoice": "Ääninäyte",
+    "voiceLed": "Äänivetoinen tyyli",
+    "notice": "Valitse äänivetoinen tyyli tai keskity tuotteeseesi."
+  },
+  "script": {
+    "title": "Käsikirjoitus & ääni",
+    "continue": "Jatka kuvakäsikirjoitukseen",
+    "costNote": "Tarkista luottokustannukset ennen rullan luomista.",
+    "targetProduct": "Kohdetuote",
+    "productMeta": "Kiinteä akaasia · Lähdesivusto",
+    "voiceoverScript": "Kertojaäänen käsikirjoitus",
+    "frenchFr": "Ranska (FR)",
+    "wordCount_one": "{{count}} sana · ~{{seconds}} sek",
+    "wordCount_other": "{{count}} sanaa · ~{{seconds}} sek",
+    "scriptA11y": "Kertojaäänen käsikirjoitus ranskaksi",
+    "targetDuration_one": "Tavoitekesto: {{count}} sekunti",
+    "targetDuration_other": "Tavoitekesto: {{count}} sekuntia",
+    "rewriteOpening": "Kirjoita aloitus uudelleen",
+    "narratorAudio": "Kertojaääni",
+    "calmVoice": "Rauhallinen ranskalainen ääni",
+    "calmVoiceMeta": "Luonnollinen ranska, lämmin akustinen tempo",
+    "recordOwn": "Tallenna oma äänesi",
+    "recordOwnMeta": "Valinnainen mukautettu brändikerronta",
+    "record": "Tallenna"
+  },
+  "templates": {
+    "title": "Rullapohjat",
+    "useTemplate": "Käytä pohjaa",
+    "searchPlaceholder": "Etsi studiomuotoja...",
+    "searchA11y": "Etsi studiomuotoja",
+    "tune": "Säädä",
+    "filter": {
+      "all": "Kaikki muodot",
+      "catalog": "Katalogin kohokohta",
+      "shortCuts": "15-20s leikkaukset"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Tuotekohokohta",
+        "subtitle": "3 makroleikkausta + koukku"
+      },
+      "collection": {
+        "title": "Kokoelman paljastus",
+        "subtitle": "Nopea monituotenäyttö"
+      },
+      "material": {
+        "title": "Materiaalin yksityiskohdat",
+        "subtitle": "Puun syyt & käsityön lähikuvat"
+      },
+      "arrival": {
+        "title": "Uusi saapuminen",
+        "subtitle": "Ilmoitus & showroom CTA"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Valitse aineistot",
+    "createStoryboard_one": "Luo kuvakäsikirjoitus ({{count}} kohtaus)",
+    "createStoryboard_other": "Luo kuvakäsikirjoitus ({{count}} kohtausta)",
+    "upload": "Lataa kuvia",
+    "websiteAssets": "Verkkosivuston aineistot",
+    "selected_one": "{{count}} valittu",
+    "selected_other": "{{count}} valittu",
+    "otherCategory": "Eri tuotekategoria",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Kuvakäsikirjoituksen järjestys",
+    "dragToReorder": "Vedä järjestääksesi uudelleen",
+    "reorderA11y": "Kohtaus {{n}}: {{label}}. Järjestä kohtaus uudelleen",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Huone",
+      "macro": "Yksityiskohta",
+      "staged": "Stailattu",
+      "tv": "TV-yksikkö"
+    }
+  }
+}

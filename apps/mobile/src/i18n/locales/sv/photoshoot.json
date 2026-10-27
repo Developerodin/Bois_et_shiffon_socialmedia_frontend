@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Öppna meny",
+    "creditsAvailable_one": "{{count}} kredit tillgänglig",
+    "creditsAvailable_other": "{{count}} krediter tillgängliga",
+    "settings": "Inställningar",
+    "appModules": "Appmoduler",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Inlägg",
+      "photoshoot": "Fotosession",
+      "marketing": "Marknadsföring"
+    },
+    "moduleNavigation": "Modulnavigering",
+    "create": "Skapa",
+    "results": "Resultat",
+    "goBack": "Gå tillbaka",
+    "switchBusiness": "Byt företag, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} objekt",
+    "optionWithCount_other": "{{label}} {{count}} objekt"
+  },
+  "create": {
+    "title": "Skapa fotosession",
+    "subtitle": "Skapa produktfoton och styla kläder på modeller.",
+    "product": {
+      "imageLabel": "{{name}} matbord",
+      "pill": "Katalogobjekt",
+      "title": "Produktfotosession",
+      "body": "Placera katalogobjekt i arkitektoniska interiörer och studiouppsättningar med naturligt ljus.",
+      "cta": "Ny produktfotografering"
+    },
+    "fashion": {
+      "imageLabel": "Illustrerat klädfotostudio",
+      "title": "Modefotosession",
+      "body": "Styla kläder på modeller i kampanjklara scener.",
+      "cta": "Ny modefotografering"
+    }
+  },
+  "product": {
+    "title": "Produktfotosession",
+    "estimate_one": "Uppskattning: {{count}} kredit",
+    "estimate_other": "Uppskattning: {{count}} krediter",
+    "available": "{{count}} tillgängliga",
+    "generate": "Generera fotosession",
+    "selectedAsset": "Valt katalogobjekt",
+    "changeAsset": "Byt objekt",
+    "aspectRatio": "Bildförhållande",
+    "sceneStyle": "Scenstil",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Interiör",
+      "custom": "Anpassad"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Kreativ brief",
+    "briefHint": "Förfina belysning, atmosfär eller specifika dekorativa inslag",
+    "sourcePreview": "Förhandsvisning av källa",
+    "fullPreview": "{{product}}, full förhandsvisning",
+    "sourceImage": "Källbild"
+  },
+  "fashion": {
+    "title": "Modefotosession",
+    "generate": "Generera fotosession",
+    "uploadToEnable": "Ladda upp ett plaggfoto för att aktivera generering",
+    "heading": "Bygg din modefotografering",
+    "subtitle": "Förvandla plagg på galge eller platt liggande till realistiska iscensatta modeller.",
+    "garmentPhoto": "Plaggfoto",
+    "required": "Obligatoriskt",
+    "garmentSelected": "Plaggfoto: {{label}}. Byt foto",
+    "addGarment": "Lägg till plaggfoto",
+    "changeGarment": "Byt plaggfoto",
+    "garmentHint": "PNG eller JPG på neutral bakgrund, platt liggande eller osynlig docka",
+    "modelStyling": "Modell & styling",
+    "modelSelected": "Modell & styling: {{model}}",
+    "models": {
+      "choose": "Välj en modell",
+      "natural": "{{name}} · naturlig styling",
+      "editorial": "{{name}} · redaktionell styling",
+      "casual": "{{name}} · avslappnad styling"
+    },
+    "pose": "Pose",
+    "poses": {
+      "fullBody": "Helskropp",
+      "threeQuarter": "Tre fjärdedelar",
+      "closeUp": "Närbildsdetalj"
+    },
+    "outputFormat": "Utdataformat",
+    "formats": {
+      "feedPortrait": "Flödesporträtt",
+      "storyReel": "Story / Reel"
+    },
+    "background": "Bakgrundsmiljö",
+    "backgrounds": {
+      "studioMinimal": "Studio minimal",
+      "urbanStreet": "Urban gata",
+      "naturalInterior": "Naturlig interiör"
+    },
+    "requirementsTitle": "Uppladdningskrav",
+    "requirements": {
+      "contrast": "Hög kontrast mot bakgrund",
+      "wrinkles": "Inga kraftiga veck",
+      "frontFacing": "Framåtvänd vinkel"
+    }
+  },
+  "source": {
+    "title": "Välj källobjekt",
+    "uploadNewLabel": "Ladda upp nytt foto",
+    "uploadNew": "Ladda upp nytt",
+    "noPhotoSelected": "Inget foto valt",
+    "photosSelected_one": "{{count}} foto valt",
+    "photosSelected_other": "{{count}} foton valda",
+    "selectPhoto": "Välj ett foto",
+    "usePhoto": "Använd foto",
+    "source": "Källa",
+    "tabs": {
+      "website": "Webbplats",
+      "uploads": "Uppladdningar"
+    },
+    "businessWebsite": "{{name}} · Webbplats",
+    "fromWebsite": "Från webbplats",
+    "filterCatalog": "Filtrera katalog",
+    "filters": {
+      "all": "Alla objekt",
+      "tables": "Bord",
+      "storage": "Förvaring"
+    },
+    "addPhoto": "Lägg till foto",
+    "tip": "Rena produktutskärningar ger optimala fotosessionsresultat. Espanda Studio bevarar originalets akaciaträstruktur."
+  },
+  "generating": {
+    "backToWorkspace": "Tillbaka till arbetsyta",
+    "returnToWorkspace": "Återgå till arbetsyta",
+    "title": "Förbereder dina foton",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Din generering körs säkert i bakgrunden. Du hittar färdiga objekt i Resultat.",
+    "status": {
+      "done": "Klar",
+      "active": "Pågår",
+      "queued": "I kö"
+    },
+    "progress": "Genererar",
+    "sample": {
+      "title": "{{name}} matfotosession",
+      "description": "Scenerar {{product}} i arkitektonisk dagsljusinteriör.",
+      "variations_one": "{{count}} variation",
+      "variations_other": "{{count}} variationer"
+    },
+    "steps": {
+      "catalog": "Bearbetar katalogobjekt",
+      "compose": "Komponerar scen & belysning",
+      "finish": "Avslutar & färgkalibrering"
+    }
+  },
+  "results": {
+    "title": "Fotosessioner",
+    "subtitle": "Dina produkt- och modefoton",
+    "newPhotoshoot": "Ny fotosession",
+    "filterLabel": "Filtrera fotosessioner",
+    "filters": {
+      "all": "Alla ({{count}})",
+      "product": "Produkt ({{count}})",
+      "fashion": "Mode ({{count}})"
+    },
+    "empty": "Inga fotosessioner ännu.",
+    "processingLabel": "{{title}}. Bearbetar, {{percent}}%",
+    "processingBadge_one": "Bearbetar · {{count}} kredit",
+    "processingBadge_other": "Bearbetar · {{count}} krediter",
+    "preview": "Förhandsvisning",
+    "reviewPhotoLabel": "Granska foto, {{title}}",
+    "reviewPhoto": "Granska foto",
+    "sample": {
+      "studioStaging": "{{product}} · Studiouppsättning",
+      "rendering": "Renderingsstadium · {{percent}}%",
+      "interiorReady_one": "Interiör · {{ratio}} · {{count}} foto klart",
+      "interiorReady_other": "Interiör · {{ratio}} · {{count}} foton klara",
+      "studioDaylight": "Studioljus · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Fler alternativ",
+    "downloadPhoto": "Ladda ner foto",
+    "variation": "Variation",
+    "share": "Dela fotosession",
+    "samplePreview": "Exempelförhandsvisning",
+    "compareOriginal": "Jämför original",
+    "expandView": "Expandera vy",
+    "stagingSummary": "Sammanfattning av uppsättning",
+    "format": "Format",
+    "creationCost": "Skapandekostnad",
+    "credits_one": "{{count}} kredit",
+    "credits_other": "{{count}} krediter",
+    "sample": {
+      "headerTitle": "{{name}} fotosession",
+      "vertical": "{{ratio}} Vertikal",
+      "architecturalInterior": "Arkitektonisk interiör",
+      "studioDaylight": "Studioljus",
+      "formatBadge": "{{ratio}} format",
+      "naturalStudio": "Naturlig studio",
+      "portraitPhoto": "Porträttfoto"
+    }
+  }
+}

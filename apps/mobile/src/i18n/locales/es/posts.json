@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Planificado",
+    "briefReady": "Brief listo",
+    "needsReview": "Necesita revisión",
+    "draftReady": "Borrador listo",
+    "approved": "Aprobado",
+    "scheduled": "Programado",
+    "published": "Publicado",
+    "draft": "Borrador"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} de {{month}} de {{year}}",
+    "short": "{{day}} de {{month}} de {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Hoy",
+    "tomorrow": "Mañana"
+  },
+  "chrome": {
+    "openMenu": "Abrir menú",
+    "logo": "Espanda",
+    "credits_one": "{{count}} crédito disponible",
+    "credits_other": "{{count}} créditos disponibles",
+    "settings": "Configuración",
+    "modulesLabel": "Módulos de la app",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Publicaciones",
+      "photoshoot": "Sesión de fotos",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Navegación del módulo",
+    "nav": {
+      "today": "Hoy",
+      "posts": "Publicaciones",
+      "create": "Crear",
+      "stories": "Historias",
+      "settings": "Configuración"
+    },
+    "back": "Atrás",
+    "switchBusiness": "Cambiar negocio, {{name}}",
+    "business": "Negocio: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Tus publicaciones, en movimiento",
+    "subtitle": "Revisa los destacados de productos generados y las publicaciones programadas",
+    "needsApproval": "Necesita aprobación",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Revisar publicación",
+    "agenda": "Agenda próxima",
+    "thisWeek": "Esta semana",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Ver calendario"
+  },
+  "calendar": {
+    "title": "Calendario de publicaciones",
+    "subtitle": "Planifica y automatiza tus lanzamientos",
+    "viewLabel": "Vista de calendario",
+    "views": {
+      "month": "Mes",
+      "list": "Lista"
+    },
+    "plan": "Plan: {{n}} publicaciones / mes",
+    "managePlan": "Gestionar plan",
+    "postCount_one": "{{count}} publicación",
+    "postCount_other": "{{count}} publicaciones",
+    "empty": "Nada planificado para este día.",
+    "scheduled_one": "{{count}} programada",
+    "scheduled_other": "{{count}} programadas",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "gridLabel": "Calendario de {{month}}",
+    "dayWithPosts_one": "{{day}} · {{count}} publicación",
+    "dayWithPosts_other": "{{day}} · {{count}} publicaciones"
+  },
+  "detail": {
+    "title": "Detalles de la publicación",
+    "moreOptions": "Más opciones",
+    "feedPhoto": "Foto de feed 4:5",
+    "fullscreen": "Pantalla completa",
+    "captionFrench": "Subtítulo (Francés)",
+    "editText": "Editar texto",
+    "channels": "Canales de publicación",
+    "instagramFeed": "Feed de Instagram",
+    "instagramDetail": "Conecta una cuenta para publicar",
+    "facebookPage": "Página de Facebook",
+    "facebookDetail": "Auto-publicar en la página oficial",
+    "notConnected": "No conectado",
+    "channelNotConnected": "{{name}}, no conectado",
+    "editPost": "Editar publicación",
+    "schedule": "Programar"
+  },
+  "edit": {
+    "title": "Editar publicación",
+    "cancel": "Cancelar",
+    "save": "Guardar cambios",
+    "previewLabel": "{{title}}, proporción original 4:5",
+    "ratio": "Proporción original · 4:5",
+    "sectionLabel": "Editar sección",
+    "tabs": {
+      "image": "Imagen",
+      "caption": "Subtítulo",
+      "brand": "Marca"
+    },
+    "description": "Descripción de la publicación",
+    "language": "Idioma: Francés (FR)",
+    "suggestedHashtags": "Hashtags sugeridos",
+    "addHashtag": "Añadir hashtag",
+    "add": "+ Añadir",
+    "regenerate": "Re-generar subtítulo con IA",
+    "imageHint": "Proporción original · 4:5. Arrastra la vista previa para reencuadrar el recorte.",
+    "brandHint": "Logo, colores y tono siguen tu kit de marca {{brand}}."
+  },
+  "schedule": {
+    "title": "Programar",
+    "storyFormat": "Historia · Imagen 9:16",
+    "feedFormat": "Publicación de feed · Imagen 4:5",
+    "destination": "Destino",
+    "actionRequired": "Acción requerida",
+    "notLinked": "Cuenta de Instagram no vinculada",
+    "notLinkedBody": "Conecta tus cuentas sociales para desbloquear la publicación programada directa.",
+    "connect": "Conectar cuenta social",
+    "locked": "Programación bloqueada hasta conexión",
+    "timing": "Horario y programación",
+    "date": "Fecha",
+    "dateLabel": "Fecha, {{date}}",
+    "time": "Hora",
+    "timeLabel": "Hora, {{time}}",
+    "timezone": "Zona horaria",
+    "schedulePost": "Programar publicación",
+    "scheduleLocked": "Programar publicación (Conectar canal primero)",
+    "saveDraft": "Guardar borrador"
+  },
+  "brief": {
+    "title": "Crear una publicación",
+    "subtitle": "Elige un producto y dirección creativa",
+    "format": "Formato de contenido",
+    "formatLabel": "Formato de publicación",
+    "singlePhoto": "Foto única",
+    "singlePhotoDetail": "Foco de feed 4:5",
+    "carousel": "Carrusel",
+    "carouselDetail": "Múltiples fotos",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Objetivo principal",
+    "goals": {
+      "newArrival": "Nueva llegada",
+      "productFeature": "Destacar producto",
+      "specialOffer": "Oferta especial"
+    },
+    "product": "Producto del catálogo objetivo",
+    "changeProduct": "Cambiar producto",
+    "change": "Cambiar",
+    "direction": "Dirección creativa (opcional)",
+    "directionLanguage": "Francés (FR)",
+    "directionPlaceholder": "p.ej. Enfocar en la carpintería artesanal y calidez",
+    "cost": "Costo de creación:",
+    "costPending": "Estimación pendiente",
+    "draftPost": "Borrador de publicación"
+  },
+  "stories": {
+    "title": "Historias",
+    "subtitle": "Momentos sociales verticales 9:16",
+    "newStory": "Nueva historia",
+    "statusLabel": "Estado de la historia",
+    "drafts_one": "Borradores ({{count}})",
+    "drafts_other": "Borradores ({{count}})",
+    "scheduled_one": "Programadas ({{count}})",
+    "scheduled_other": "Programadas ({{count}})",
+    "samplePreview": "Vista previa de muestra",
+    "moreOptions": "Más opciones para {{title}}",
+    "editStory": "Editar historia"
+  },
+  "editStory": {
+    "back": "Atrás",
+    "undo": "Deshacer",
+    "tools": {
+      "text": "Texto",
+      "image": "Imagen",
+      "brand": "Marca",
+      "cta": "CTA"
+    },
+    "toolLabel": "Herramienta {{tool}}",
+    "captionTitle": "Subtítulo de la historia / Sticker de enlace",
+    "languageCode": "FR",
+    "saveDraft": "Guardar borrador",
+    "scheduleStory": "Programar historia"
+  },
+  "planner": {
+    "title": "Planificador de publicaciones",
+    "sectionsLabel": "Secciones de configuración",
+    "sections": {
+      "business": "Mi negocio",
+      "billing": "Facturación",
+      "planner": "Planificador de publicaciones"
+    },
+    "cycle": "Ciclo de planificación",
+    "cadence": "Cadencia de publicación",
+    "monthlyTarget": "Objetivo mensual",
+    "feedPosts": "Publicaciones en el feed",
+    "stories": "Historias",
+    "perMonth": "{{n}} / mes",
+    "feedNote": "~1 publicación diaria",
+    "storiesNote": "Distribuidas a lo largo del mes",
+    "cadenceHint": "Objetivos de contenido sugeridos. Ajusta antes de generar tu calendario.",
+    "pillars": "Pilares de contenido",
+    "pillar": {
+      "catalog": "Productos del catálogo (enfoque Bunting)",
+      "craft": "Detalles de materiales y artesanía (madera de Acacia)",
+      "story": "Historia de la marca y herencia francesa"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Revisión manual antes de publicar: </b>Las publicaciones generadas se colocan en tu calendario como borradores para tu confirmación final. No se publica contenido sin aprobación.",
+    "generate": "Generar calendario"
+  }
+}

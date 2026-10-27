@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} secondo",
+  "seconds_other": "{{count}} secondi",
+  "noPresenter": "Nessun presentatore",
+  "aiActor": "Attore AI",
+  "assistant": "Il tuo assistente video",
+  "sourceWebsite": "Sito web di origine",
+  "preview": "Anteprima",
+  "schedule": "Programma",
+  "goBack": "Torna indietro",
+  "inProgress": "In corso",
+  "timezone": "Fuso orario",
+  "status": {
+    "draft": "Bozza",
+    "ready": "Pronto"
+  },
+  "scene": {
+    "label": "Scena {{n}} · {{seconds}}s",
+    "count_one": "{{count}} scena",
+    "count_other": "{{count}} scene"
+  },
+  "shot": {
+    "wide": "Ripresa ampia",
+    "material": "Dettaglio materiale",
+    "closeCta": "Primo piano prodotto & CTA"
+  },
+  "create": {
+    "switchBusiness": "Cambia attività, {{name}}",
+    "title": "Crea il tuo prossimo reel",
+    "subtitle": "Crea video reel da studio dal catalogo del tuo negozio",
+    "heroImage": "Vista completa dell'interno della collezione da pranzo {{product}}",
+    "question": "Cosa vuoi mostrare?",
+    "planTogether": "Pianifica un reel insieme",
+    "start": "Inizia",
+    "startA11y": "Inizia a pianificare un reel",
+    "ideasReady_one": "{{count}} idea pronta",
+    "ideasReady_other": "{{count}} idee pronte",
+    "viewIdeas": "Vedi idee →",
+    "actorSubtitle": "Reel del presentatore",
+    "templates": "Modelli",
+    "templatesSubtitle": "Tagli rapidi del catalogo",
+    "jumpBackIn": "Rientra",
+    "seeAll": "Vedi tutto",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Idee video",
+    "subtitle": "Angolazioni curate pronte per diventare motion reel",
+    "filter": {
+      "all": "Tutti ({{n}})",
+      "productSpotlight": "Focus prodotto ({{n}})",
+      "collection": "Collezione ({{n}})"
+    },
+    "angle": "Angolazione {{n}}",
+    "body": {
+      "angle01": "Evidenziando la venatura naturale, l'architettura a gambe incrociate geometriche e l'allestimento da pranzo.",
+      "angle02": "Concentrandosi su porte intagliate a mano, gestione dei cavi e atmosfera calda del soggiorno."
+    },
+    "readyToReview": "Pronto per la revisione",
+    "viewStoryboard": "Vedi storyboard"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} credito",
+    "creditsA11y_other": "{{count}} crediti",
+    "addAssets": "Aggiungi risorse",
+    "composerPlaceholder": "Raffina tono, voce fuori campo o aggiungi indicazioni...",
+    "composerA11y": "Raffina tono, voce fuori campo o aggiungi indicazioni",
+    "send": "Invia rifinitura",
+    "day": "Oggi · Reels Studio",
+    "userMessage": "Mostra la collezione Bunting in un reel calmo e premium.",
+    "reply": "Ho personalizzato un concetto per il tuo <b>{{brand}}</b> {{product}} tavolo. Ecco i parametri consigliati:",
+    "format": "Formato",
+    "formatVertical": "9:16 Verticale (Storia/Reel)",
+    "duration": "Durata",
+    "presenter": "Presentatore",
+    "openingHook": "Apertura accattivante",
+    "reviewStoryboard_one": "Rivedi storyboard ({{count}} scena)",
+    "reviewStoryboard_other": "Rivedi storyboard ({{count}} scene)",
+    "readyStatus": "Pronto per generare o rifinire"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "Durata {{seconds}}s",
+    "verticalFact": "9:16 verticale",
+    "readyToRender": "Pronto per il rendering <muted>· Bozza salvata per la revisione</muted>",
+    "sceneDirection": "Direzione scena",
+    "voiceoverFr": "Voce fuori campo (FR)",
+    "direction": {
+      "scene1": "Rivelazione lenta e scorrevole su un moderno ambiente da pranzo",
+      "scene2": "Sweep macro fluido su ricca venatura del legno naturale e bordo smussato",
+      "scene3": "Prospettiva allestita con filigrana emblema Bois & Chiffons"
+    },
+    "editInChat": "Modifica in chat",
+    "makeVideo": "Crea video",
+    "makeVideoA11y_one": "Crea video, {{count}} credito",
+    "makeVideoA11y_other": "Crea video, {{count}} crediti",
+    "cost_one": "{{count}} credito",
+    "cost_other": "{{count}} crediti",
+    "balance_one": "Saldo attuale: {{balance}} crediti · {{count}} credito sarà riservato · Bozza salvata automaticamente",
+    "balance_other": "Saldo attuale: {{balance}} crediti · {{count}} crediti saranno riservati · Bozza salvata automaticamente"
+  },
+  "generating": {
+    "backToWorkspace": "Torna al workspace",
+    "renderingA11y": "Rendering in corso",
+    "title": "Creazione del tuo reel",
+    "body": "Composizione di immagini, voce fuori campo in francese e ritmo del movimento per {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Risorsa autentica del catalogo francese",
+    "preparingScenes_one": "Preparazione {{count}} scena",
+    "preparingScenes_other": "Preparazione {{count}} scene",
+    "done": "Fatto",
+    "renderingFrames": "Rendering dei fotogrammi video",
+    "addingAudio": "Aggiunta audio",
+    "queued": "In coda",
+    "creditsReserved_one": "{{count}} credito riservato",
+    "creditsReserved_other": "{{count}} crediti riservati",
+    "remaining_one": "Rimanente: {{count}} credito",
+    "remaining_other": "Rimanenti: {{count}} crediti",
+    "safeToLeave": "Puoi lasciare tranquillamente questa schermata. La tua bozza è salvata automaticamente nella scheda Risultati.",
+    "keepWorking": "Continua a lavorare in background"
+  },
+  "results": {
+    "title": "Video reel",
+    "newReel": "Nuovo reel",
+    "filter": {
+      "all": "Tutti ({{n}})",
+      "ready": "Pronti ({{n}})",
+      "processing": "In elaborazione ({{n}})"
+    },
+    "processing_one": "Elaborazione · {{count}} credito riservato",
+    "processing_other": "Elaborazione · {{count}} crediti riservati",
+    "renderingA11y": "{{title}}, rendering {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 verticale · Rendering delle immagini...",
+    "renderingStage": "Fase di rendering",
+    "previewA11y": "Anteprima campione, {{title}}",
+    "moreOptions": "Altre opzioni",
+    "reviewVideo": "Rivedi video",
+    "meta": {
+      "tv": "20s · Voce fuori campo in francese · Pronto per la programmazione",
+      "atelier": "15s · Acustica ambientale · Pronto per la programmazione"
+    }
+  },
+  "review": {
+    "subtitle": "Bozza del reel · Pronto per la revisione",
+    "options": "Menu opzioni",
+    "downloadVideo": "Scarica video",
+    "connectFirst": "Scegli un account connesso prima di pubblicare.",
+    "samplePreview": "Anteprima campione",
+    "play": "Riproduci anteprima video",
+    "position": "Posizione video",
+    "sound": "Attiva/disattiva audio video",
+    "fullscreen": "Apri video a schermo intero",
+    "vertical": "9:16 Verticale",
+    "portrait": "Formato verticale",
+    "captionFrench": "Didascalia (Francese)",
+    "defaultSource": "· Fonte predefinita",
+    "editable": "Modificabile",
+    "captionA11y": "Didascalia video in francese",
+    "addTag": "Aggiungi tag",
+    "specifications": "Specifiche",
+    "audioTrack": "Traccia audio",
+    "audioValue": "Voce fuori campo francese (Studio Natural) + Acustica ambientale",
+    "resolution": "Risoluzione",
+    "resolutionValue": "Video verticale · 9:16"
+  },
+  "publish": {
+    "title": "Pubblica reel",
+    "confirmSchedule": "Conferma programmazione",
+    "publishNow": "Pubblica ora",
+    "saveDraft": "Salva bozza",
+    "readyToSchedule": "Pronto per programmare",
+    "format": "{{product}} · Reel verticale 9:16",
+    "playPreview": "Riproduci anteprima",
+    "channel": "Canale di pubblicazione",
+    "connected": "Connesso",
+    "notConnected": "Non connesso",
+    "connect": "Connetti",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Pubblica automaticamente su feed e reel",
+    "orDownload": "Oppure scarica video diretto",
+    "download": "Scarica",
+    "timing": "Tempistica",
+    "date": "Data",
+    "time": "Ora",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Fuso orario, {{value}}",
+    "notice": "Connetti il tuo account business Instagram per sbloccare la pubblicazione programmata automatica. Puoi comunque salvare questo reel come bozza."
+  },
+  "scheduled": {
+    "close": "Chiudi",
+    "viewReel": "Visualizza reel programmato",
+    "backToResults": "Torna ai risultati",
+    "title": "Reel programmato",
+    "body": "Il tuo video sarà pubblicato sull'account selezionato all'orario programmato.",
+    "meta": "{{seconds}}s · Voce fuori campo francese",
+    "publishDate": "Data di pubblicazione",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Spazio di lavoro del brand",
+    "channel": "Canale",
+    "instagramConnected": "Instagram (Connesso)",
+    "editInCalendar": "Modifica o annulla questo post dal tuo calendario."
+  },
+  "actor": {
+    "title": "Scegli un presentatore",
+    "intro": "Scegli uno stile di presentatore o un reel solo prodotto.",
+    "noPresenterA11y": "Nessun presentatore, consigliato",
+    "recommended": "Consigliato",
+    "noPresenterBody": "Concentrati solo sui visual degli arredi, texture e audio dello studio.",
+    "styles": "Stili di presentatore",
+    "style": {
+      "calm": {
+        "title": "Narratore calmo",
+        "subtitle": "Francese · Studio Calmo"
+      },
+      "expressive": {
+        "title": "Presentatore espressivo",
+        "subtitle": "Inglese / FR · Dinamico"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Voce campione, {{title}}",
+    "sampleVoice": "Voce campione",
+    "voiceLed": "Stile guidato dalla voce",
+    "notice": "Scegli uno stile guidato dalla voce, o mantieni il focus sul tuo prodotto."
+  },
+  "script": {
+    "title": "Script & voce",
+    "continue": "Continua allo storyboard",
+    "costNote": "Rivedi il costo dei crediti prima di creare il tuo reel.",
+    "targetProduct": "Prodotto target",
+    "productMeta": "Acacia massiccia · Sito web di origine",
+    "voiceoverScript": "Script voce fuori campo",
+    "frenchFr": "Francese (FR)",
+    "wordCount_one": "{{count}} parola · ~{{seconds}} sec",
+    "wordCount_other": "{{count}} parole · ~{{seconds}} sec",
+    "scriptA11y": "Script voce fuori campo in francese",
+    "targetDuration_one": "Durata target: {{count}} secondo",
+    "targetDuration_other": "Durata target: {{count}} secondi",
+    "rewriteOpening": "Riscrivi apertura",
+    "narratorAudio": "Audio narratore",
+    "calmVoice": "Voce francese calma",
+    "calmVoiceMeta": "Francese naturale, ritmo acustico caldo",
+    "recordOwn": "Registra la tua voce",
+    "recordOwnMeta": "Narrazione personalizzata opzionale del brand",
+    "record": "Registra"
+  },
+  "templates": {
+    "title": "Template reel",
+    "useTemplate": "Usa template",
+    "searchPlaceholder": "Cerca formati studio...",
+    "searchA11y": "Cerca formati studio",
+    "tune": "Regola",
+    "filter": {
+      "all": "Tutti i formati",
+      "catalog": "Catalogo in evidenza",
+      "shortCuts": "Tagli da 15-20s"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Prodotto in evidenza",
+        "subtitle": "3 tagli macro + gancio"
+      },
+      "collection": {
+        "title": "Rivelazione collezione",
+        "subtitle": "Vetrina rapida multi-articolo"
+      },
+      "material": {
+        "title": "Dettaglio materiale",
+        "subtitle": "Grana del legno e dettagli artigianali"
+      },
+      "arrival": {
+        "title": "Nuovo arrivo",
+        "subtitle": "Annuncio & CTA showroom"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Seleziona risorse",
+    "createStoryboard_one": "Crea storyboard ({{count}} scena)",
+    "createStoryboard_other": "Crea storyboard ({{count}} scene)",
+    "upload": "Carica foto",
+    "websiteAssets": "Risorse del sito web",
+    "selected_one": "{{count}} selezionato",
+    "selected_other": "{{count}} selezionati",
+    "otherCategory": "Categoria prodotto diversa",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Sequenza storyboard",
+    "dragToReorder": "Trascina per riordinare",
+    "reorderA11y": "Scena {{n}}: {{label}}. Riordina scena",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Stanza",
+      "macro": "Dettaglio",
+      "staged": "Stilizzato",
+      "tv": "Unità TV"
+    }
+  }
+}

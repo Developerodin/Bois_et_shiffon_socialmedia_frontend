@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Työtila {{name}}",
+    "logoLabel": "{{name}} logo",
+    "settingsTitle": "Asetukset",
+    "edit": "Muokkaa",
+    "manage": "Hallitse",
+    "tabs": {
+      "myBusiness": "Yritykseni",
+      "billing": "Laskutus",
+      "postsPlanner": "Julkaisusuunnitelma"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Yrityksen ominaisuudet",
+    "attributes": {
+      "location": "Sijainti",
+      "audience": "Kohderyhmä",
+      "category": "Kategoria",
+      "subcategory": "Alakategoria",
+      "storeType": "Myymälätyyppi",
+      "website": "Verkkosivusto"
+    },
+    "brandPreferences": "Brändin mieltymykset",
+    "brandPreferencesHint": "Värit, sävy, kieli",
+    "photoAssets": "Kuvavarastot",
+    "photoAssetsHint": "Bunting-pöytä ja TV-yksikkökuvat",
+    "connections": "Yhteydet",
+    "connectionsHint": "Sosiaalikanavat & Google-profiili"
+  },
+  "brand": {
+    "title": "Brändin asetukset",
+    "save": "Tallenna muutokset",
+    "paletteTitle": "Brändin väripaletti",
+    "editHex": "Muokkaa hex",
+    "watermarkTitle": "Outro-vesileimalogo",
+    "watermarkBody": "Lisätään videon loppuihin ja kuvien reunoihin",
+    "change": "Vaihda",
+    "toneTitle": "Luova sävy",
+    "tones": {
+      "modern": "Moderni",
+      "luxurious": "Ylellinen",
+      "elegant": "Elegantti",
+      "premium": "Premium",
+      "natural": "Luonnollinen",
+      "minimalist": "Minimalistinen"
+    },
+    "cuesTitle": "Brändin tunnusmerkit",
+    "addCue": "Lisää merkki"
+  },
+  "photos": {
+    "title": "Kuvavarastot",
+    "refresh": "Päivitä",
+    "sourceTitle": "Lähde verkkosivusto",
+    "sourceBody": "Jaetut kuvat käytetään rullien, syötejulkaisujen ja kuvausjärjestelyjen luomiseen. Kuvat eivät julkaista ilman nimenomaista hyväksyntääsi.",
+    "sources": {
+      "website": "Verkkosivusto ({{n}})",
+      "uploads": "Lataukset ({{n}})"
+    },
+    "addPhotos": "Lisää kuvia",
+    "photosTitle": "Kuvat",
+    "photoCount_one": "{{n}} kuva",
+    "photoCount_other": "{{n}} kuvaa",
+    "emptyTitle": "Ei vielä latauksia",
+    "emptyBody": "Studiokuvat, jotka lataat, näkyvät täällä.",
+    "upload": "Lataa omia studiokuvia"
+  },
+  "connections": {
+    "title": "Yhteydet",
+    "sourceTitle": "Lähde verkkosivusto",
+    "linked": "Linkitetty",
+    "sourceBody": "Tuotekuvat ja yritystiedot",
+    "channelsTitle": "Julkaisukanavat",
+    "accounts": "Tilit",
+    "connected": "Yhdistetty",
+    "notConnected": "Ei yhdistetty",
+    "connect": "Yhdistä",
+    "disconnect": "Katkaise yhteys",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook-sivu",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Business -profiili",
+      "shopify": "Shopify Direct Sync"
+    }
+  },
+  "automations": {
+    "title": "Automatisoinnit",
+    "heading": "Julkaisumieltymyksesi",
+    "intro": "Hallitse, miten Espanda esitäyttää aikataulutetut julkaisut ja luonnostelee sisältöä luettelokohteillesi.",
+    "reviewTitle": "Tarkista ennen julkaisua",
+    "reviewBody": "Tarkista sisältö ennen sen julkaisua.",
+    "required": "Vaaditaan",
+    "reviewLabel": "Tarkista ennen julkaisua. Tarkista sisältö ennen sen julkaisua. Vaaditaan.",
+    "queueTitle": "Jonota toiminnot",
+    "manageConnections": "Hallitse yhteyksiä",
+    "items": {
+      "monthly": {
+        "title": "Luo kuukausisuunnitelmat",
+        "body": "Valmistele kuukausikalenterisi luonnosjulkaisuista.",
+        "active": "Aktiivinen · luonnokset tallennettu kalenteriin"
+      },
+      "autopublish": {
+        "title": "Automaattinen hyväksyttyjen julkaisujen julkaisu",
+        "body": "Julkaise aikataulutetut rullat automaattisesti, kun napautat \"Hyväksy\".",
+        "requires": "Vaatii Instagram-yhteyden",
+        "active": "Aktiivinen · julkaisee hyväksynnän jälkeen"
+      },
+      "replies": {
+        "title": "Luonnostele showroom-kyselyvastaukset",
+        "body": "Esitäytä hienostuneet ranskalaiset käsityöläisvastaukset postilaatikkojonoosi.",
+        "requires": "Vaatii viestintäkanavan",
+        "active": "Aktiivinen · luonnokset lisätty postilaatikkoosi"
+      }
+    },
+    "adsTitle": "Maksetut sosiaalimainokset",
+    "comingSoon": "Tulossa pian",
+    "adsBody": "Automaattinen Meta-mainosten luovuustestaus ja budjetin hallinta."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} krediitti käytettävissä",
+    "creditsAvailable_other": "{{n}} krediittiä käytettävissä",
+    "planName": "{{tier}} suunnitelma",
+    "statusActive": "Aktiivinen",
+    "planBlurb": "Luomis- ja yritystyökalusi",
+    "cycleTitle": "Laskutusjakso",
+    "renewsMonthly": "Uusiutuu kuukausittain",
+    "balanceTitle": "Kredittisaldo",
+    "monthlyAllowance": "{{amount}} kuukausittainen sallittu määrä",
+    "balanceLabel_one": "{{balance}} / {{n}} krediitti käytettävissä",
+    "balanceLabel_other": "{{balance}} / {{n}} krediittiä käytettävissä",
+    "balanceOf_one": " / {{n}} krediitti käytettävissä",
+    "balanceOf_other": " / {{n}} krediittiä käytettävissä",
+    "note_one": "{{n}} krediitti käytetty · {{reserved}} varattu kohteelle {{item}}. Sallittu määrä uusiutuu kuukausittain.",
+    "note_other": "{{n}} krediittiä käytetty · {{reserved}} varattu kohteelle {{item}}. Sallittu määrä uusiutuu kuukausittain.",
+    "usageTitle": "Viimeaikainen kreditin käyttö",
+    "usageAside": "Työtilan toiminta",
+    "today": "Tänään",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} rulla",
+        "detail": "Varattu luomiseen"
+      },
+      "plan": {
+        "title": "Kuukausittainen sisältösuunnitelma",
+        "detail_one": "{{n}} luonnosjulkaisu",
+        "detail_other": "{{n}} luonnosjulkaisua"
+      },
+      "renewal": {
+        "title": "Kuukausittaisen suunnitelman uusiminen",
+        "detail": "Jakson kreditin nollaus"
+      }
+    },
+    "spent_one": "-{{n}} krediitti",
+    "spent_other": "-{{n}} krediittiä",
+    "added_one": "+{{n}} krediitti",
+    "added_other": "+{{n}} krediittiä",
+    "included": "Sisältyy",
+    "help": {
+      "missingCredits": "Puuttuvat krediitit tai epäonnistunut renderointi",
+      "restore": "Palauta tilausostot",
+      "history": "Laskutushistoria ja laskut"
+    }
+  },
+  "account": {
+    "title": "Tiliasetukset",
+    "workspaceTitle": "Työtila",
+    "workspaceName": "Työtilan nimi",
+    "teamTitle": "Tiimiyhteistyö",
+    "teamMembers": "Työtilan jäsenet",
+    "preferencesTitle": "Asetukset",
+    "languageTitle": "Sovelluksen käyttöliittymän kieli",
+    "languageBody": "Kehotteet ja viennit pysyvät ranskaksi",
+    "languageLabel": "Sovelluksen kieli, {{language}}",
+    "languageHint": "Avaa kielilista",
+    "pushTitle": "Push-ilmoitukset",
+    "pushBody": "Luonti- ja julkaisupäivitykset",
+    "supportTitle": "Tuki ja oikeudelliset asiat",
+    "help": "Tarvitsetko apua & ota yhteyttä tukeen",
+    "terms": "Käyttöehdot",
+    "privacy": "Tietosuojakäytäntö",
+    "restore": "Palauta ostot",
+    "signOut": "Kirjaudu ulos Espandasta",
+    "signOutNote": "Aktiivinen tilauksesi ja luonnostellut katalogiresurssit säilyvät turvallisesti tallennettuina."
+  },
+  "drawer": {
+    "closeMenu": "Sulje valikko",
+    "switchLabel": "Työtila {{name}}. Vaihda yritystä",
+    "balanceLabel_one": "Nykyinen saldo {{credits}} krediitti jäljellä, {{plan}} suunnitelma",
+    "balanceLabel_other": "Nykyinen saldo {{credits}} krediittiä jäljellä, {{plan}} suunnitelma",
+    "balanceTitle": "Nykyinen saldo",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> krediitti jäljellä</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> krediittiä jäljellä</rest>",
+    "sections": {
+      "create": "Luo",
+      "grow": "Kasvata",
+      "manage": "Hallitse"
+    },
+    "items": {
+      "chat": "Keskustele tehdäksesi videon",
+      "generations": "Omat sukupolvet",
+      "photos": "Valokuvaresurssit",
+      "inbox": "Asiakkaat & Saapuneet",
+      "google": "Google Kasvu",
+      "website": "Verkkosivustostudio",
+      "connections": "Yhteydet",
+      "automations": "Automaatio",
+      "billing": "Suunnitelmat & Laskutus",
+      "account": "Tiliasetukset"
+    },
+    "signOut": "Kirjaudu ulos"
+  }
+}

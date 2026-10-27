@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Gepland",
+    "briefReady": "Brief klaar",
+    "needsReview": "Moet worden beoordeeld",
+    "draftReady": "Concept klaar",
+    "approved": "Goedgekeurd",
+    "scheduled": "Gepland",
+    "published": "Gepubliceerd",
+    "draft": "Concept"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Vandaag",
+    "tomorrow": "Morgen"
+  },
+  "chrome": {
+    "openMenu": "Menu openen",
+    "logo": "Espanda",
+    "credits_one": "{{count}} tegoed beschikbaar",
+    "credits_other": "{{count}} tegoeden beschikbaar",
+    "settings": "Instellingen",
+    "modulesLabel": "App-modules",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Berichten",
+      "photoshoot": "Fotoshoot",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Module navigatie",
+    "nav": {
+      "today": "Vandaag",
+      "posts": "Berichten",
+      "create": "Creëer",
+      "stories": "Verhalen",
+      "settings": "Instellingen"
+    },
+    "back": "Terug",
+    "switchBusiness": "Wissel bedrijf, {{name}}",
+    "business": "Bedrijf: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Je berichten, in beweging",
+    "subtitle": "Bekijk gegenereerde producthoogtepunten & geplande berichten",
+    "needsApproval": "Moet worden goedgekeurd",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Bericht beoordelen",
+    "agenda": "Aankomende agenda",
+    "thisWeek": "Deze week",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Bekijk kalender"
+  },
+  "calendar": {
+    "title": "Berichtenkalender",
+    "subtitle": "Plan en automatiseer je releases",
+    "viewLabel": "Kalenderweergave",
+    "views": {
+      "month": "Maand",
+      "list": "Lijst"
+    },
+    "plan": "Plan: {{n}} berichten / maand",
+    "managePlan": "Beheer plan",
+    "postCount_one": "{{count}} bericht",
+    "postCount_other": "{{count}} berichten",
+    "empty": "Niets gepland voor deze dag.",
+    "scheduled_one": "{{count}} gepland",
+    "scheduled_other": "{{count}} gepland",
+    "previousMonth": "Vorige maand",
+    "nextMonth": "Volgende maand",
+    "gridLabel": "{{month}} kalender",
+    "dayWithPosts_one": "{{day}} · {{count}} bericht",
+    "dayWithPosts_other": "{{day}} · {{count}} berichten"
+  },
+  "detail": {
+    "title": "Berichtdetails",
+    "moreOptions": "Meer opties",
+    "feedPhoto": "4:5 Feed foto",
+    "fullscreen": "Volledig scherm",
+    "captionFrench": "Onderschrift (Frans)",
+    "editText": "Tekst bewerken",
+    "channels": "Publicatiekanalen",
+    "instagramFeed": "Instagram Feed",
+    "instagramDetail": "Verbind een account om te publiceren",
+    "facebookPage": "Facebook-pagina",
+    "facebookDetail": "Automatisch posten op officiële pagina",
+    "notConnected": "Niet verbonden",
+    "channelNotConnected": "{{name}}, niet verbonden",
+    "editPost": "Bericht bewerken",
+    "schedule": "Inplannen"
+  },
+  "edit": {
+    "title": "Bericht bewerken",
+    "cancel": "Annuleren",
+    "save": "Wijzigingen opslaan",
+    "previewLabel": "{{title}}, origineel formaat 4:5",
+    "ratio": "Origineel formaat · 4:5",
+    "sectionLabel": "Sectie bewerken",
+    "tabs": {
+      "image": "Afbeelding",
+      "caption": "Onderschrift",
+      "brand": "Merk"
+    },
+    "description": "Berichtbeschrijving",
+    "language": "Taal: Frans (FR)",
+    "suggestedHashtags": "Voorgestelde hashtags",
+    "addHashtag": "Hashtag toevoegen",
+    "add": "+ Toevoegen",
+    "regenerate": "Onderschrift opnieuw genereren met AI",
+    "imageHint": "Origineel formaat · 4:5. Sleep de preview om de uitsnede aan te passen.",
+    "brandHint": "Logo, kleuren en toon volgen je {{brand}} merkset."
+  },
+  "schedule": {
+    "title": "Inplannen",
+    "storyFormat": "Verhaal · 9:16 afbeelding",
+    "feedFormat": "Feed bericht · 4:5 afbeelding",
+    "destination": "Bestemming",
+    "actionRequired": "Actie vereist",
+    "notLinked": "Instagram-account niet gekoppeld",
+    "notLinkedBody": "Verbind je sociale accounts om directe geplande publicatie te ontgrendelen.",
+    "connect": "Verbind sociaal account",
+    "locked": "Planning vergrendeld tot verbinding",
+    "timing": "Timing & Planning",
+    "date": "Datum",
+    "dateLabel": "Datum, {{date}}",
+    "time": "Tijd",
+    "timeLabel": "Tijd, {{time}}",
+    "timezone": "Tijdzone",
+    "schedulePost": "Bericht inplannen",
+    "scheduleLocked": "Bericht inplannen (Verbind eerst kanaal)",
+    "saveDraft": "Concept opslaan"
+  },
+  "brief": {
+    "title": "Maak een bericht",
+    "subtitle": "Kies een product en creatieve richting",
+    "format": "Inhoudsformaat",
+    "formatLabel": "Berichtformaat",
+    "singlePhoto": "Enkele foto",
+    "singlePhotoDetail": "4:5 Feed focus",
+    "carousel": "Carrousel",
+    "carouselDetail": "Meerdere foto's",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Primaire doel",
+    "goals": {
+      "newArrival": "Nieuw binnen",
+      "productFeature": "Productkenmerk",
+      "specialOffer": "Speciale aanbieding"
+    },
+    "product": "Doelcatalogusproduct",
+    "changeProduct": "Product wijzigen",
+    "change": "Wijzig",
+    "direction": "Creatieve richting (optioneel)",
+    "directionLanguage": "Frans (FR)",
+    "directionPlaceholder": "bijv. Focus op handgemaakte houtverbindingen en warmte",
+    "cost": "Creatiekosten:",
+    "costPending": "Schatting in afwachting",
+    "draftPost": "Conceptbericht"
+  },
+  "stories": {
+    "title": "Verhalen",
+    "subtitle": "9:16 verticale sociale momenten",
+    "newStory": "Nieuw verhaal",
+    "statusLabel": "Verhaalstatus",
+    "drafts_one": "Concepten ({{count}})",
+    "drafts_other": "Concepten ({{count}})",
+    "scheduled_one": "Gepland ({{count}})",
+    "scheduled_other": "Gepland ({{count}})",
+    "samplePreview": "Voorbeeldweergave",
+    "moreOptions": "Meer opties voor {{title}}",
+    "editStory": "Verhaal bewerken"
+  },
+  "editStory": {
+    "back": "Terug",
+    "undo": "Ongedaan maken",
+    "tools": {
+      "text": "Tekst",
+      "image": "Afbeelding",
+      "brand": "Merk",
+      "cta": "CTA"
+    },
+    "toolLabel": "{{tool}} tool",
+    "captionTitle": "Verhaalbijschrift / Linksticker",
+    "languageCode": "FR",
+    "saveDraft": "Concept opslaan",
+    "scheduleStory": "Verhaal plannen"
+  },
+  "planner": {
+    "title": "Berichtenplanner",
+    "sectionsLabel": "Instellingen secties",
+    "sections": {
+      "business": "Mijn Bedrijf",
+      "billing": "Facturering",
+      "planner": "Berichtenplanner"
+    },
+    "cycle": "Planningscyclus",
+    "cadence": "Publicatieritme",
+    "monthlyTarget": "Maanddoel",
+    "feedPosts": "Feedberichten",
+    "stories": "Verhalen",
+    "perMonth": "{{n}} / maand",
+    "feedNote": "~1 bericht dagelijks",
+    "storiesNote": "Verspreid over je maand",
+    "cadenceHint": "Voorgestelde contentdoelen. Pas aan voordat je je kalender genereert.",
+    "pillars": "Contentpijlers",
+    "pillar": {
+      "catalog": "Catalogusproducten (Bunting focus)",
+      "craft": "Materiaal details & vakmanschap (Acacia hout)",
+      "story": "Merkverhaal & Franse erfgoed"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Handmatige controle voor publicatie: </b>Gegenereerde drops worden als concepten in je kalender geplaatst voor je definitieve bevestiging. Geen content wordt gepubliceerd zonder goedkeuring.",
+    "generate": "Kalender genereren"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "back": "Назад",
+  "close": "Закрити",
+  "continue": "Продовжити",
+  "step": "Крок {{step}} з {{total}}",
+  "auth": {
+    "orContinueWith": "або продовжити з",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "Продовжуючи, ви погоджуєтеся з нашими <terms>Умовами надання послуг</terms> та <privacy>Політикою конфіденційності</privacy>.",
+    "allScreensDev": "Усі екрани (розробка)",
+    "googleFailed": "Вхід через Google не вдався. Спробуйте ще раз або використайте email.",
+    "googleNeedsBuild": "Вхід через Google працює в встановленому додатку Espanda, а не в Expo Go. Використовуйте email поки що."
+  },
+  "language": {
+    "title": "Мова додатку",
+    "search": "Пошук мов",
+    "explainer": "Змінює кнопки та меню додатку. Ваші пости зберігають мову контенту, встановлену для кожного бренду.",
+    "noMatch": "Жодна мова не відповідає «{{query}}»."
+  },
+  "module": {
+    "openMenu": "Відкрити меню",
+    "settings": "Налаштування",
+    "credits_one": "Доступний {{count}} кредит",
+    "credits_other": "Доступно {{count}} кредитів",
+    "workspace": "Робочий простір {{name}}"
+  },
+  "nav": {
+    "reels": "Ролики",
+    "posts": "Пости",
+    "photoshoot": "Фотосесія",
+    "marketing": "Маркетинг",
+    "create": "Створити",
+    "ideas": "Ідеї",
+    "results": "Результати"
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Tervezett",
+    "briefReady": "Vázlat kész",
+    "needsReview": "Felülvizsgálatra vár",
+    "draftReady": "Vázlat kész",
+    "approved": "Jóváhagyva",
+    "scheduled": "Ütemezett",
+    "published": "Közzétéve",
+    "draft": "Vázlat"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Ma",
+    "tomorrow": "Holnap"
+  },
+  "chrome": {
+    "openMenu": "Menü megnyitása",
+    "logo": "Espanda",
+    "credits_one": "{{count}} kredit elérhető",
+    "credits_other": "{{count}} kredit elérhető",
+    "settings": "Beállítások",
+    "modulesLabel": "App modulok",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Bejegyzések",
+      "photoshoot": "Fotózás",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Modul navigáció",
+    "nav": {
+      "today": "Ma",
+      "posts": "Bejegyzések",
+      "create": "Létrehozás",
+      "stories": "Történetek",
+      "settings": "Beállítások"
+    },
+    "back": "Vissza",
+    "switchBusiness": "Váltás vállalkozásra, {{name}}",
+    "business": "Vállalkozás: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Bejegyzéseid mozgásban",
+    "subtitle": "Ellenőrizd a generált termékkiemeléseket és az ütemezett bejegyzéseket",
+    "needsApproval": "Jóváhagyásra vár",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Bejegyzés ellenőrzése",
+    "agenda": "Közelgő napirend",
+    "thisWeek": "Ezen a héten",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Naptár megtekintése"
+  },
+  "calendar": {
+    "title": "Bejegyzések naptára",
+    "subtitle": "Tervezd meg és automatizáld a megjelenéseket",
+    "viewLabel": "Naptár nézet",
+    "views": {
+      "month": "Hónap",
+      "list": "Lista"
+    },
+    "plan": "Terv: {{n}} bejegyzés / hónap",
+    "managePlan": "Terv kezelése",
+    "postCount_one": "{{count}} bejegyzés",
+    "postCount_other": "{{count}} bejegyzés",
+    "empty": "Erre a napra nincs semmi tervezve.",
+    "scheduled_one": "{{count}} ütemezett",
+    "scheduled_other": "{{count}} ütemezett",
+    "previousMonth": "Előző hónap",
+    "nextMonth": "Következő hónap",
+    "gridLabel": "{{month}} naptár",
+    "dayWithPosts_one": "{{day}} · {{count}} bejegyzés",
+    "dayWithPosts_other": "{{day}} · {{count}} bejegyzés"
+  },
+  "detail": {
+    "title": "Bejegyzés részletei",
+    "moreOptions": "További lehetőségek",
+    "feedPhoto": "4:5 Feed fotó",
+    "fullscreen": "Teljes képernyő",
+    "captionFrench": "Felirat (francia)",
+    "editText": "Szöveg szerkesztése",
+    "channels": "Közzétételi csatornák",
+    "instagramFeed": "Instagram Feed",
+    "instagramDetail": "Csatlakoztass egy fiókot a közzétételhez",
+    "facebookPage": "Facebook oldal",
+    "facebookDetail": "Automatikus közzététel a hivatalos oldalon",
+    "notConnected": "Nincs csatlakoztatva",
+    "channelNotConnected": "{{name}}, nincs csatlakoztatva",
+    "editPost": "Bejegyzés szerkesztése",
+    "schedule": "Ütemezés"
+  },
+  "edit": {
+    "title": "Bejegyzés szerkesztése",
+    "cancel": "Mégse",
+    "save": "Változások mentése",
+    "previewLabel": "{{title}}, eredeti arány 4:5",
+    "ratio": "Eredeti arány · 4:5",
+    "sectionLabel": "Szakasz szerkesztése",
+    "tabs": {
+      "image": "Kép",
+      "caption": "Felirat",
+      "brand": "Márka"
+    },
+    "description": "Bejegyzés leírása",
+    "language": "Nyelv: francia (FR)",
+    "suggestedHashtags": "Javasolt hashtagek",
+    "addHashtag": "Hashtag hozzáadása",
+    "add": "+ Hozzáadás",
+    "regenerate": "Felirat újragenerálása AI-val",
+    "imageHint": "Eredeti arány · 4:5. Húzd a nézetet az újravágáshoz.",
+    "brandHint": "Logó, színek és hangnem a(z) {{brand}} márkakészlet szerint."
+  },
+  "schedule": {
+    "title": "Ütemezés",
+    "storyFormat": "Történet · 9:16 kép",
+    "feedFormat": "Feed bejegyzés · 4:5 kép",
+    "destination": "Cél",
+    "actionRequired": "Művelet szükséges",
+    "notLinked": "Instagram fiók nincs csatlakoztatva",
+    "notLinkedBody": "Csatlakoztasd a közösségi fiókjaidat a közvetlen ütemezett közzététel feloldásához.",
+    "connect": "Közösségi fiók csatlakoztatása",
+    "locked": "Ütemezés zárolva, amíg nincs csatlakoztatva",
+    "timing": "Időzítés és ütemezés",
+    "date": "Dátum",
+    "dateLabel": "Dátum, {{date}}",
+    "time": "Idő",
+    "timeLabel": "Idő, {{time}}",
+    "timezone": "Időzóna",
+    "schedulePost": "Bejegyzés ütemezése",
+    "scheduleLocked": "Bejegyzés ütemezése (Először csatlakoztasd a csatornát)",
+    "saveDraft": "Vázlat mentése"
+  },
+  "brief": {
+    "title": "Bejegyzés létrehozása",
+    "subtitle": "Válassz egy terméket és kreatív irányt",
+    "format": "Tartalom formátuma",
+    "formatLabel": "Bejegyzés formátuma",
+    "singlePhoto": "Egyetlen fotó",
+    "singlePhotoDetail": "4:5 Feed fókusz",
+    "carousel": "Karusszel",
+    "carouselDetail": "Több fotó",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Elsődleges cél",
+    "goals": {
+      "newArrival": "Új érkezés",
+      "productFeature": "Termékjellemző",
+      "specialOffer": "Különleges ajánlat"
+    },
+    "product": "Célzott katalógustermék",
+    "changeProduct": "Termék módosítása",
+    "change": "Módosítás",
+    "direction": "Kreatív irány (opcionális)",
+    "directionLanguage": "Francia (FR)",
+    "directionPlaceholder": "pl. Kézműves asztalosmunka és melegség kiemelése",
+    "cost": "Létrehozási költség:",
+    "costPending": "Becslés folyamatban",
+    "draftPost": "Vázlat poszt"
+  },
+  "stories": {
+    "title": "Történetek",
+    "subtitle": "9:16 függőleges közösségi pillanatok",
+    "newStory": "Új történet",
+    "statusLabel": "Történet állapota",
+    "drafts_one": "Vázlatok ({{count}})",
+    "drafts_other": "Vázlatok ({{count}})",
+    "scheduled_one": "Ütemezett ({{count}})",
+    "scheduled_other": "Ütemezett ({{count}})",
+    "samplePreview": "Minta előnézet",
+    "moreOptions": "További lehetőségek: {{title}}",
+    "editStory": "Történet szerkesztése"
+  },
+  "editStory": {
+    "back": "Vissza",
+    "undo": "Visszavonás",
+    "tools": {
+      "text": "Szöveg",
+      "image": "Kép",
+      "brand": "Márka",
+      "cta": "CTA"
+    },
+    "toolLabel": "{{tool}} eszköz",
+    "captionTitle": "Történet felirat / Link matrica",
+    "languageCode": "FR",
+    "saveDraft": "Vázlat mentése",
+    "scheduleStory": "Történet ütemezése"
+  },
+  "planner": {
+    "title": "Posztok tervezője",
+    "sectionsLabel": "Beállítások szekciók",
+    "sections": {
+      "business": "Saját vállalkozásom",
+      "billing": "Számlázás",
+      "planner": "Posztok tervezője"
+    },
+    "cycle": "Tervezési ciklus",
+    "cadence": "Közzétételi ütem",
+    "monthlyTarget": "Havi cél",
+    "feedPosts": "Hírfolyam posztok",
+    "stories": "Történetek",
+    "perMonth": "{{n}} / hónap",
+    "feedNote": "~1 poszt naponta",
+    "storiesNote": "Szétosztva a hónap során",
+    "cadenceHint": "Javasolt tartalmi célok. Állítsd be, mielőtt létrehozod a naptáradat.",
+    "pillars": "Tartalmi pillérek",
+    "pillar": {
+      "catalog": "Katalógustermékek (Bunting fókusz)",
+      "craft": "Anyag részletek és kézművesség (Acacia fa)",
+      "story": "Márkatörténet és francia örökség"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Kézi átnézés közzététel előtt: </b>Az előállított tartalmak vázlatként kerülnek a naptáradba, végső megerősítésedre. Tartalom nem kerül közzétételre jóváhagyás nélkül.",
+    "generate": "Naptár generálása"
+  }
+}

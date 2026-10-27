@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Planned",
+    "briefReady": "Brief ready",
+    "needsReview": "Needs review",
+    "draftReady": "Draft ready",
+    "approved": "Approved",
+    "scheduled": "Scheduled",
+    "published": "Published",
+    "draft": "Draft"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Today",
+    "tomorrow": "Tomorrow"
+  },
+  "chrome": {
+    "openMenu": "Open menu",
+    "logo": "Espanda",
+    "credits_one": "{{count}} credit available",
+    "credits_other": "{{count}} credits available",
+    "settings": "Settings",
+    "modulesLabel": "App modules",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Posts",
+      "photoshoot": "Photoshoot",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Module navigation",
+    "nav": {
+      "today": "Today",
+      "posts": "Posts",
+      "create": "Create",
+      "stories": "Stories",
+      "settings": "Settings"
+    },
+    "back": "Back",
+    "switchBusiness": "Switch business, {{name}}",
+    "business": "Business: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Your posts, in motion",
+    "subtitle": "Review generated product highlights & scheduled posts",
+    "needsApproval": "Needs approval",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Review post",
+    "agenda": "Upcoming agenda",
+    "thisWeek": "This week",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "View calendar"
+  },
+  "calendar": {
+    "title": "Posts calendar",
+    "subtitle": "Plan and automate your releases",
+    "viewLabel": "Calendar view",
+    "views": {
+      "month": "Month",
+      "list": "List"
+    },
+    "plan": "Plan: {{n}} posts / month",
+    "managePlan": "Manage plan",
+    "postCount_one": "{{count}} post",
+    "postCount_other": "{{count}} posts",
+    "empty": "Nothing planned for this day.",
+    "scheduled_one": "{{count}} scheduled",
+    "scheduled_other": "{{count}} scheduled",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "gridLabel": "{{month}} calendar",
+    "dayWithPosts_one": "{{day}} · {{count}} post",
+    "dayWithPosts_other": "{{day}} · {{count}} posts"
+  },
+  "detail": {
+    "title": "Post details",
+    "moreOptions": "More options",
+    "feedPhoto": "4:5 Feed photo",
+    "fullscreen": "Fullscreen",
+    "captionFrench": "Caption (French)",
+    "editText": "Edit text",
+    "channels": "Publishing channels",
+    "instagramFeed": "Instagram Feed",
+    "instagramDetail": "Connect an account to publish",
+    "facebookPage": "Facebook Page",
+    "facebookDetail": "Auto-post to official page",
+    "notConnected": "Not connected",
+    "channelNotConnected": "{{name}}, not connected",
+    "editPost": "Edit post",
+    "schedule": "Schedule"
+  },
+  "edit": {
+    "title": "Edit post",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "previewLabel": "{{title}}, original ratio 4:5",
+    "ratio": "Original ratio · 4:5",
+    "sectionLabel": "Edit section",
+    "tabs": {
+      "image": "Image",
+      "caption": "Caption",
+      "brand": "Brand"
+    },
+    "description": "Post description",
+    "language": "Language: French (FR)",
+    "suggestedHashtags": "Suggested hashtags",
+    "addHashtag": "Add hashtag",
+    "add": "+ Add",
+    "regenerate": "Re-generate caption with AI",
+    "imageHint": "Original ratio · 4:5. Drag the preview to reframe the crop.",
+    "brandHint": "Logo, colours and tone follow your {{brand}} brand kit."
+  },
+  "schedule": {
+    "title": "Schedule",
+    "storyFormat": "Story · 9:16 image",
+    "feedFormat": "Feed post · 4:5 image",
+    "destination": "Destination",
+    "actionRequired": "Action required",
+    "notLinked": "Instagram account not linked",
+    "notLinkedBody": "Connect your social accounts to unlock direct scheduled publishing.",
+    "connect": "Connect social account",
+    "locked": "Schedule locked until connection",
+    "timing": "Timing & Schedule",
+    "date": "Date",
+    "dateLabel": "Date, {{date}}",
+    "time": "Time",
+    "timeLabel": "Time, {{time}}",
+    "timezone": "Timezone",
+    "schedulePost": "Schedule post",
+    "scheduleLocked": "Schedule post (Connect channel first)",
+    "saveDraft": "Save draft"
+  },
+  "brief": {
+    "title": "Create a post",
+    "subtitle": "Choose a product and creative direction",
+    "format": "Content format",
+    "formatLabel": "Post format",
+    "singlePhoto": "Single photo",
+    "singlePhotoDetail": "4:5 Feed focal",
+    "carousel": "Carousel",
+    "carouselDetail": "Multiple photos",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Primary goal",
+    "goals": {
+      "newArrival": "New arrival",
+      "productFeature": "Product feature",
+      "specialOffer": "Special offer"
+    },
+    "product": "Target catalog product",
+    "changeProduct": "Change product",
+    "change": "Change",
+    "direction": "Creative direction (optional)",
+    "directionLanguage": "French (FR)",
+    "directionPlaceholder": "e.g. Focus on hand-crafted joinery and warmth",
+    "cost": "Creation cost:",
+    "costPending": "Estimate pending",
+    "draftPost": "Draft post"
+  },
+  "stories": {
+    "title": "Stories",
+    "subtitle": "9:16 vertical social moments",
+    "newStory": "New story",
+    "statusLabel": "Story status",
+    "drafts_one": "Drafts ({{count}})",
+    "drafts_other": "Drafts ({{count}})",
+    "scheduled_one": "Scheduled ({{count}})",
+    "scheduled_other": "Scheduled ({{count}})",
+    "samplePreview": "Sample preview",
+    "moreOptions": "More options for {{title}}",
+    "editStory": "Edit story"
+  },
+  "editStory": {
+    "back": "Back",
+    "undo": "Undo",
+    "tools": {
+      "text": "Text",
+      "image": "Image",
+      "brand": "Brand",
+      "cta": "CTA"
+    },
+    "toolLabel": "{{tool}} tool",
+    "captionTitle": "Story caption / Link sticker",
+    "languageCode": "FR",
+    "saveDraft": "Save draft",
+    "scheduleStory": "Schedule story"
+  },
+  "planner": {
+    "title": "Posts planner",
+    "sectionsLabel": "Settings sections",
+    "sections": {
+      "business": "My Business",
+      "billing": "Billing",
+      "planner": "Posts planner"
+    },
+    "cycle": "Planning cycle",
+    "cadence": "Publishing cadence",
+    "monthlyTarget": "Monthly target",
+    "feedPosts": "Feed Posts",
+    "stories": "Stories",
+    "perMonth": "{{n}} / month",
+    "feedNote": "~1 post daily",
+    "storiesNote": "Spread across your month",
+    "cadenceHint": "Suggested content targets. Adjust before generating your calendar.",
+    "pillars": "Content pillars",
+    "pillar": {
+      "catalog": "Catalog products (Bunting focus)",
+      "craft": "Material details & craft (Acacia wood)",
+      "story": "Brand story & French heritage"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Manual review before publishing: </b>Generated drops are placed in your calendar as drafts for your final confirmation. No content is published without approval.",
+    "generate": "Generate calendar"
+  }
+}

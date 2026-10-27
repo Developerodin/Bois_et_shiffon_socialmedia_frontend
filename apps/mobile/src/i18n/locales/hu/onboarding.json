@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Üdvözlünk az Espandában",
+    "subtitle": "Készíts tartalmat az üzletedhez.",
+    "mobileNumber": "Mobilszám",
+    "countryCode": "Országkód {{code}}",
+    "sendCode": "Kód küldése",
+    "useEmail": "Használj e-mailt",
+    "sendFailed": "Nem sikerült elküldeni a kódot. Próbáld újra vagy használd az emailt.",
+    "chooseCountry": "Válaszd ki az országot",
+    "searchCountry": "Ország vagy kód keresése"
+  },
+  "email": {
+    "title": "Bejelentkezés e-maillel",
+    "subtitle": "Egy jelszó nélküli ellenőrző kódot küldünk e-mailben.",
+    "tagline": "Intelligens marketing a modern kiskereskedelemhez",
+    "label": "E-mail cím",
+    "placeholder": "nev@uzleted.com",
+    "notConfigured": "Az e-mailes bejelentkezés még nincs beállítva ezen a szerveren.",
+    "sendFailed": "Nem sikerült elküldeni a kódot. Próbáld újra.",
+    "useMobile": "Használj mobilszámot",
+    "linkTitle": "Add meg az emailed",
+    "linkSubtitle": "A számod ellenőrizve. Adj meg egy emailt a nyugtákhoz és csapatmeghívókhoz. Küldünk rá egy kódot."
+  },
+  "verify": {
+    "title": "Add meg a kódot",
+    "sent": "Egy ellenőrző kódot küldtünk a következő címre: {{destination}}",
+    "codeLabel": "Hatjegyű ellenőrző kód",
+    "submit": "Kód ellenőrzése",
+    "checkFailed": "Nem sikerült ellenőrizni a kódot. Próbáld újra.",
+    "resendFailed": "Nem sikerült újraküldeni a kódot.",
+    "resendIn": "Újraküldés {{time}} múlva",
+    "resend": "Kód újraküldése",
+    "changeEmail": "E-mail cím módosítása",
+    "changeMobile": "Mobilszám módosítása"
+  },
+  "welcome": {
+    "getStarted": "Kezdjük el",
+    "footnote": "Az üzleted, a te kreatív irányod.",
+    "photosLabel": "Példák a(z) {{brand}} katalógusból",
+    "title": "Marketing, ami olyan, mint az üzleted",
+    "body": "Készíts márkahű stúdió videókat, fotózásokat és termékposztokat a katalógusodból.",
+    "steps": {
+      "goal": {
+        "title": "Válaszd ki a célodat",
+        "body": "Válaszd ki az első kreatív formátumot, amit létre szeretnél hozni."
+      },
+      "business": {
+        "title": "Oszd meg az üzleted",
+        "body": "Oszd meg a weboldalad vagy add meg az üzleted adatait."
+      },
+      "review": {
+        "title": "Kész tartalom áttekintése",
+        "body": "Tekintsd át a termékeid köré készített ötleteket."
+      }
+    }
+  },
+  "goal": {
+    "title": "Mit fogsz először létrehozni?",
+    "subtitle": "Az elsődleges fókuszod alapján alakítjuk ki a kezdeti munkaterületet és sablonokat.",
+    "note": "Minden eszköz és stúdió formátum később is elérhető marad.",
+    "options": {
+      "socialPlan": {
+        "title": "Közösségi média terv",
+        "description": "Egy hónapnyi poszt és felirat"
+      },
+      "marketingVideos": {
+        "title": "Marketing videók",
+        "description": "Stúdió videók a katalógusodból"
+      },
+      "fashionPhotoshoot": {
+        "title": "Divatfotózás",
+        "description": "Ruházat stílusolása modelleken"
+      },
+      "productPhotoshoot": {
+        "title": "Termékfotózás",
+        "description": "Termékfotók a katalógusodhoz"
+      }
+    }
+  },
+  "source": {
+    "title": "Hol található az üzleted online?",
+    "subtitle": "Az Espanda átvizsgálja az online boltodat vagy listádat, hogy automatikusan márkahű médiát generáljon.",
+    "options": {
+      "website": {
+        "title": "Weboldal",
+        "description": "Shopify, WooCommerce, egyedi domain"
+      },
+      "googleMaps": {
+        "title": "Google Térkép",
+        "description": "Helyi üzlet, butik vagy bemutatóterem"
+      },
+      "marketplace": {
+        "title": "Piactér",
+        "description": "Amazon, Etsy, eBay vagy Instagram bolt"
+      },
+      "wholesale": {
+        "title": "Nagykereskedelem / B2B",
+        "description": "Faire, Ankorstore, privát katalógus"
+      },
+      "none": {
+        "title": "Nincs online jelenlét",
+        "description": "Írd le a termékeidet manuálisan"
+      },
+      "other": {
+        "title": "Valami más",
+        "description": "Közösségi profil, PDF lookbook vagy fájl"
+      }
+    }
+  },
+  "website": {
+    "title": "Mi a weboldalad?",
+    "subtitle": "Automatikusan áthúzzuk a katalógusfotóidat, színeidet és hangnemedet.",
+    "label": "Bolt weboldalának URL-je",
+    "placeholder": "www.uzleted.com",
+    "valid": "Érvényes cím",
+    "willRead": "Ezt az oldalt fogjuk olvasni",
+    "facts": {
+      "catalog": {
+        "key": "Katalógus termékek",
+        "value": "Termékfotók"
+      },
+      "identity": {
+        "key": "Márkaidentitás",
+        "value": "Színek és tipográfia"
+      },
+      "tone": {
+        "key": "Hangnem és stílus",
+        "value": "Hang a lapjaidról"
+      }
+    },
+    "safeNote": "A katalógus importálása nem változtat semmit az élő boltodon."
+  },
+  "manual": {
+    "title": "Üzleti adatok hozzáadása",
+    "subtitle": "Oszd meg egy lista linkjét vagy írd le a katalógusodat manuálisan.",
+    "modeLabel": "Hogyan adod hozzá az üzleted",
+    "modeListing": "Lista URL",
+    "modeDescribe": "Üzlet leírása",
+    "listingLabel": "Lista link *",
+    "listingPlaceholder": "Etsy, Amazon, Google Térkép vagy bolt link",
+    "nameLabel": "Üzlet neve *",
+    "namePlaceholder": "pl. Atelier Bois & Chiffons",
+    "sellsLabel": "Mit árulsz? *",
+    "sellsPlaceholder": "pl. Kézzel készített fa asztalok, TV állványok és modern lakásdekoráció...",
+    "locationLabel": "Helyszín (opcionális)",
+    "locationPlaceholder": "Város, ország vagy bemutatóterem címe",
+    "websiteLabel": "Weboldal (opcionális)"
+  },
+  "learning": {
+    "working": "Dolgozunk rajta",
+    "tryAgain": "Próbáld újra",
+    "inProgressButton": "Tanulás folyamatban...",
+    "saved": "A haladásodat mentjük.",
+    "title": "Az üzleted megismerése",
+    "bodyWebsite": "A weboldalad elemzése a márkaidentitás, katalógusok és vizuális hangnem kinyeréséhez.",
+    "bodyManual": "A leírásod átalakítása márkaidentitássá, katalógusokká és vizuális hangnemmé.",
+    "fallbackName": "Az üzleted",
+    "sourceWebsite": "Elsődleges weboldal forrás",
+    "sourceManual": "Üzleti adatok",
+    "foundWebsite": "Weboldal megtalálva",
+    "foundManual": "Adatok hozzáadva",
+    "stages": {
+      "open": "Weboldal megnyitása",
+      "identity": "Márkaidentitás és hangnem olvasása",
+      "photos": "Termékfotók gyűjtése"
+    },
+    "status": {
+      "done": "Kész",
+      "running": "Folyamatban",
+      "queued": "Sorban áll"
+    },
+    "errors": {
+      "stopped": "A weboldalad olvasása leállt.",
+      "noWorkspace": "A fiókodnak még nincs munkaterülete.",
+      "startFailed": "Nem sikerült elindítani a weboldalad olvasását.",
+      "restartFailed": "Nem sikerült újraindítani. Próbáld újra."
+    }
+  },
+  "review": {
+    "title": "Üzleti adatok áttekintése",
+    "subtitle": "Ezeket az adatokat találtuk a weboldaladon. Bármikor szerkesztheted őket.",
+    "edit": "Szerkesztés",
+    "tagline": "Szlogen",
+    "editTagline": "Szlogen szerkesztése",
+    "categoryLocation": "Kategória és helyszín",
+    "audience": "Célközönség",
+    "editAudience": "Célközönség szerkesztése",
+    "products_one": "Észlelt termékek ({{count}})",
+    "products_other": "Észlelt termékek ({{count}})",
+    "found": "Talált",
+    "strengths": "Márka erősségei",
+    "tags": {
+      "homeLiving": "Otthon & Élet",
+      "france": "Franciaország",
+      "productCatalog": "Termékkatalógus",
+      "showroomEshop": "Fizikai bemutatóterem és e-shop"
+    }
+  },
+  "brand": {
+    "title": "Márka & kreatív stílus",
+    "subtitle": "Hangold be, hogyan készíti az Espanda a fotózásaidat és közösségi posztjaidat.",
+    "identity": "{{name}} identitás",
+    "paletteMeta": "Weboldal paletta · Szerkeszthető",
+    "swatches": "Importált weboldal színminták",
+    "tone": "Kreatív hangvétel",
+    "selected_one": "{{count}} kiválasztva",
+    "selected_other": "{{count}} kiválasztva",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxus",
+      "elegant": "Elegáns",
+      "premium": "Prémium",
+      "natural": "Természetes",
+      "minimalist": "Minimalista"
+    },
+    "contentLanguage": "Tartalom nyelve",
+    "contentLanguageA11y": "Tartalom nyelve, {{language}}. Módosítás",
+    "languages": {
+      "fr": "Francia (FR)",
+      "en": "Angol (US)"
+    },
+    "audienceProfile": "Célközönség profil",
+    "audienceHome": "Otthon & bútor",
+    "featured": "Kiemelt katalógus termékek",
+    "readyForBatch_one": "{{count}} kész a csomaghoz",
+    "readyForBatch_other": "{{count}} kész a csomaghoz",
+    "sampleProducts": {
+      "table": "Bunting asztal",
+      "tableDetail": "Akácia 240cm",
+      "tv": "TV állvány",
+      "tvDetail": "Akácia 2 ajtós"
+    },
+    "channelsNote": "Instagram és Facebook a következő lépésben csatlakoztatható. (Még nincsenek csatornák csatlakoztatva)"
+  },
+  "preparing": {
+    "ready": "Stúdió kész",
+    "preparing": "Stúdió előkészítése",
+    "loadingButton": "Ötleteid előkészítése…",
+    "catalogSafe": "A katalógusod érintetlen marad az áruházadban.",
+    "title": "Első ötleteid előkészítése",
+    "body": "Személyre szabott közösségi videók és színpadkészletek generálása a(z) {{name}} kollekciódból.",
+    "photosTitle": "Fotók összegyűjtése",
+    "photosDetail": "{{product}} étkezőgarnitúra",
+    "storyboardTitle": "Storyboard építése",
+    "storyboardDetail_one": "{{count}} videójelenet összeállítása",
+    "storyboardDetail_other": "{{count}} videójelenet összeállítása",
+    "nextTitle": "Következő: Nézd át az ötleteidet",
+    "nextDetail": "Válassz horgokat és hangbeállításokat"
+  },
+  "connect": {
+    "readyToConnect": "• Készen áll a csatlakozásra",
+    "title": "Publikálj, amikor készen állsz",
+    "subtitle": "Csatlakoztasd a közösségi fiókjaidat, hogy az Espanda közvetlenül publikálhassa vagy vázlatként menthesse a posztolásra kész videókat és termékbemutatókat.",
+    "toolsTitle": "Publikálási eszközök",
+    "featureReels": "Publikálás az Instagram Feed & Reels-re",
+    "featureCaptions": "Használd a felirataidat és hashtageidet",
+    "featureReview": "Mindig átnézed, mielőtt bármi élőbe kerül",
+    "assurance": "Nincs tartalom publikálva a megerősítésed nélkül",
+    "connectInstagram": "Csatlakozás Instagramhoz",
+    "connectFacebook": "Csatlakozás Facebookhoz",
+    "skip": "Kihagyás most",
+    "laterTitle": "Csatlakozás később?",
+    "laterBody": "Még mindig létrehozhatsz, szerkeszthetsz és letölthetsz nagy felbontású videókat és fotózásokat a kameratekercsedre. Az Instagramot bármikor összekapcsolhatod a Beállításokban.",
+    "laterDownload": "Kreációid letöltése",
+    "laterSettings": "Csatornák csatlakoztatása a Beállításokban",
+    "continueWithout": "Folytatás csatlakozás nélkül"
+  }
+}

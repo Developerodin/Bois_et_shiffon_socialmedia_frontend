@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Pianificato",
+    "briefReady": "Brief pronto",
+    "needsReview": "Da rivedere",
+    "draftReady": "Bozza pronta",
+    "approved": "Approvato",
+    "scheduled": "Programmato",
+    "published": "Pubblicato",
+    "draft": "Bozza"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Oggi",
+    "tomorrow": "Domani"
+  },
+  "chrome": {
+    "openMenu": "Apri menu",
+    "logo": "Espanda",
+    "credits_one": "{{count}} credito disponibile",
+    "credits_other": "{{count}} crediti disponibili",
+    "settings": "Impostazioni",
+    "modulesLabel": "Moduli app",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Post",
+      "photoshoot": "Servizio fotografico",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Navigazione moduli",
+    "nav": {
+      "today": "Oggi",
+      "posts": "Post",
+      "create": "Crea",
+      "stories": "Storie",
+      "settings": "Impostazioni"
+    },
+    "back": "Indietro",
+    "switchBusiness": "Cambia attività, {{name}}",
+    "business": "Attività: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "I tuoi post, in movimento",
+    "subtitle": "Rivedi i punti salienti dei prodotti generati e i post programmati",
+    "needsApproval": "Da approvare",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Rivedi post",
+    "agenda": "Agenda prossima",
+    "thisWeek": "Questa settimana",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Visualizza calendario"
+  },
+  "calendar": {
+    "title": "Calendario dei post",
+    "subtitle": "Pianifica e automatizza le tue pubblicazioni",
+    "viewLabel": "Vista calendario",
+    "views": {
+      "month": "Mese",
+      "list": "Lista"
+    },
+    "plan": "Piano: {{n}} post / mese",
+    "managePlan": "Gestisci piano",
+    "postCount_one": "{{count}} post",
+    "postCount_other": "{{count}} post",
+    "empty": "Niente in programma per questo giorno.",
+    "scheduled_one": "{{count}} programmato",
+    "scheduled_other": "{{count}} programmati",
+    "previousMonth": "Mese precedente",
+    "nextMonth": "Mese successivo",
+    "gridLabel": "Calendario di {{month}}",
+    "dayWithPosts_one": "{{day}} · {{count}} post",
+    "dayWithPosts_other": "{{day}} · {{count}} post"
+  },
+  "detail": {
+    "title": "Dettagli del post",
+    "moreOptions": "Altre opzioni",
+    "feedPhoto": "Foto feed 4:5",
+    "fullscreen": "Schermo intero",
+    "captionFrench": "Didascalia (Francese)",
+    "editText": "Modifica testo",
+    "channels": "Canali di pubblicazione",
+    "instagramFeed": "Feed di Instagram",
+    "instagramDetail": "Connetti un account per pubblicare",
+    "facebookPage": "Pagina Facebook",
+    "facebookDetail": "Auto-pubblica sulla pagina ufficiale",
+    "notConnected": "Non connesso",
+    "channelNotConnected": "{{name}}, non connesso",
+    "editPost": "Modifica post",
+    "schedule": "Programma"
+  },
+  "edit": {
+    "title": "Modifica post",
+    "cancel": "Annulla",
+    "save": "Salva modifiche",
+    "previewLabel": "{{title}}, rapporto originale 4:5",
+    "ratio": "Rapporto originale · 4:5",
+    "sectionLabel": "Modifica sezione",
+    "tabs": {
+      "image": "Immagine",
+      "caption": "Didascalia",
+      "brand": "Brand"
+    },
+    "description": "Descrizione del post",
+    "language": "Lingua: Francese (FR)",
+    "suggestedHashtags": "Hashtag suggeriti",
+    "addHashtag": "Aggiungi hashtag",
+    "add": "+ Aggiungi",
+    "regenerate": "Rigenera didascalia con AI",
+    "imageHint": "Rapporto originale · 4:5. Trascina l'anteprima per ritagliare.",
+    "brandHint": "Logo, colori e tono seguono il tuo kit brand {{brand}}."
+  },
+  "schedule": {
+    "title": "Programma",
+    "storyFormat": "Storia · Immagine 9:16",
+    "feedFormat": "Post feed · Immagine 4:5",
+    "destination": "Destinazione",
+    "actionRequired": "Azione richiesta",
+    "notLinked": "Account Instagram non collegato",
+    "notLinkedBody": "Connetti i tuoi account social per sbloccare la pubblicazione programmata diretta.",
+    "connect": "Connetti account social",
+    "locked": "Programmazione bloccata fino alla connessione",
+    "timing": "Tempistica e Programmazione",
+    "date": "Data",
+    "dateLabel": "Data, {{date}}",
+    "time": "Ora",
+    "timeLabel": "Ora, {{time}}",
+    "timezone": "Fuso orario",
+    "schedulePost": "Programma post",
+    "scheduleLocked": "Programma post (Connetti prima il canale)",
+    "saveDraft": "Salva bozza"
+  },
+  "brief": {
+    "title": "Crea un post",
+    "subtitle": "Scegli un prodotto e una direzione creativa",
+    "format": "Formato contenuto",
+    "formatLabel": "Formato post",
+    "singlePhoto": "Foto singola",
+    "singlePhotoDetail": "Focale feed 4:5",
+    "carousel": "Carosello",
+    "carouselDetail": "Foto multiple",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Obiettivo principale",
+    "goals": {
+      "newArrival": "Nuovo arrivo",
+      "productFeature": "Caratteristica prodotto",
+      "specialOffer": "Offerta speciale"
+    },
+    "product": "Prodotto del catalogo target",
+    "changeProduct": "Cambia prodotto",
+    "change": "Cambia",
+    "direction": "Direzione creativa (opzionale)",
+    "directionLanguage": "Francese (FR)",
+    "directionPlaceholder": "es. Focus su giunzioni artigianali e calore",
+    "cost": "Costo creazione:",
+    "costPending": "Stima in sospeso",
+    "draftPost": "Bozza post"
+  },
+  "stories": {
+    "title": "Storie",
+    "subtitle": "Momenti sociali verticali 9:16",
+    "newStory": "Nuova storia",
+    "statusLabel": "Stato storia",
+    "drafts_one": "Bozze ({{count}})",
+    "drafts_other": "Bozze ({{count}})",
+    "scheduled_one": "Programmate ({{count}})",
+    "scheduled_other": "Programmate ({{count}})",
+    "samplePreview": "Anteprima campione",
+    "moreOptions": "Altre opzioni per {{title}}",
+    "editStory": "Modifica storia"
+  },
+  "editStory": {
+    "back": "Indietro",
+    "undo": "Annulla",
+    "tools": {
+      "text": "Testo",
+      "image": "Immagine",
+      "brand": "Brand",
+      "cta": "CTA"
+    },
+    "toolLabel": "Strumento {{tool}}",
+    "captionTitle": "Didascalia storia / Sticker link",
+    "languageCode": "FR",
+    "saveDraft": "Salva bozza",
+    "scheduleStory": "Programma storia"
+  },
+  "planner": {
+    "title": "Pianificatore post",
+    "sectionsLabel": "Sezioni impostazioni",
+    "sections": {
+      "business": "La mia attività",
+      "billing": "Fatturazione",
+      "planner": "Pianificatore post"
+    },
+    "cycle": "Ciclo di pianificazione",
+    "cadence": "Cadenza di pubblicazione",
+    "monthlyTarget": "Obiettivo mensile",
+    "feedPosts": "Post nel feed",
+    "stories": "Storie",
+    "perMonth": "{{n}} / mese",
+    "feedNote": "~1 post al giorno",
+    "storiesNote": "Distribuite nel mese",
+    "cadenceHint": "Obiettivi di contenuto suggeriti. Regola prima di generare il tuo calendario.",
+    "pillars": "Pilastri di contenuto",
+    "pillar": {
+      "catalog": "Prodotti del catalogo (focus su Bunting)",
+      "craft": "Dettagli materiali & artigianato (legno di Acacia)",
+      "story": "Storia del brand & eredità francese"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Revisione manuale prima della pubblicazione: </b>Le bozze generate sono inserite nel tuo calendario per la conferma finale. Nessun contenuto viene pubblicato senza approvazione.",
+    "generate": "Genera calendario"
+  }
+}

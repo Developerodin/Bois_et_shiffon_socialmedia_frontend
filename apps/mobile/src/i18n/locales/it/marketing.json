@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Workspace {{name}}",
+    "customers": "Clienti",
+    "customerTabs": {
+      "inbox": "Posta in arrivo",
+      "reviews": "Recensioni",
+      "people": "Persone"
+    },
+    "status": {
+      "notConnected": "Non connesso"
+    },
+    "draft": "Bozza",
+    "googleGrowth": "Crescita su Google",
+    "websiteStudio": "Studio del sito web",
+    "editContent": "Modifica contenuto",
+    "diningTableImage": "Tavolo da pranzo Acacia Bunting",
+    "pages": {
+      "home": "Home",
+      "product": "Prodotto",
+      "contact": "Contatto"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Cambia attività, {{name}}",
+    "title": "Marketing",
+    "subtitle": "Gestisci la visibilità del tuo negozio, le conversazioni e il profilo del marchio",
+    "cue": {
+      "imageLabel": "Mobile TV Acacia allestito in un soggiorno",
+      "dismiss": "Ignora il suggerimento di oggi",
+      "eyebrow": "Suggerimento di oggi",
+      "title": "Aggiungi nuove foto al catalogo",
+      "body": "Aggiungere nuove foto mantiene aggiornati i tuoi reel automatici e la bozza del sito web."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Clienti",
+        "body": "Posta in arrivo, recensioni e persone",
+        "cta": "Apri posta"
+      },
+      "google": {
+        "title": "Crescita su Google",
+        "body": "Profilo, post e recensioni",
+        "cta": "Configura"
+      },
+      "website": {
+        "title": "Studio del sito web",
+        "body": "Bozza, modifica e pubblica il tuo sito",
+        "cta": "Apri bozza"
+      },
+      "business": {
+        "title": "Attività",
+        "body": "Marchio, risorse e connessioni",
+        "cta": "Gestisci"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Nessun messaggio ancora",
+    "emptyBody": "Connetti i tuoi canali clienti per ricevere domande dirette sui prodotti e rivedere le bozze suggerite dall'AI in sicurezza prima di inviarle.",
+    "connectChannel": "Connetti il tuo canale",
+    "emptyFootnote": "I nuovi messaggi diventano disponibili automaticamente una volta connessi.",
+    "channelsTitle": "Canali di messaggistica supportati",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Connetti un account per ricevere messaggi."
+  },
+  "reply": {
+    "title": "Assistente di risposta",
+    "referencedProduct": "Prodotto di riferimento",
+    "suggestionTitle": "Suggerimento di risposta Espanda",
+    "draftLabel": "Bozza di risposta",
+    "tone": "Tono: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Raffinato & artigianale"
+    },
+    "done": "Fatto",
+    "editReply": "Modifica risposta",
+    "approvalTitle": "Approvazione manuale richiesta",
+    "approvalBody": "Nessun messaggio viene mai inviato senza il tuo esplicito clic.",
+    "exampleTitle": "Modalità conversazione di esempio",
+    "exampleBody": "Collegando il tuo account Instagram o Facebook, questo esempio viene sostituito con domande reali dei clienti."
+  },
+  "reviews": {
+    "emptyTitle": "Nessuna recensione ancora",
+    "emptyBody": "Connetti il tuo profilo Google Business per raccogliere e rispondere automaticamente ai feedback verificati dei clienti.",
+    "connectGoogle": "Connetti Google Business",
+    "automatedTitle": "Richieste di recensione automatizzate",
+    "connectFirst": "Connetti prima",
+    "automatedBody": "Richiede la connessione a Google Business per inviare inviti personalizzati alle recensioni."
+  },
+  "people": {
+    "emptyTitle": "Nessun record cliente ancora",
+    "emptyBody": "Le persone con cui comunichi tramite i canali clienti connessi appariranno qui.",
+    "connectChannel": "Connetti un canale",
+    "directoryTitle": "La tua rubrica clienti",
+    "directoryBody": "Apri il record di una persona per vedere le sue conversazioni e i dettagli di contatto in un unico posto.",
+    "connectedChannels": "Canali clienti connessi"
+  },
+  "google": {
+    "presenceTitle": "La tua presenza su Google",
+    "presenceBody": "Mantieni visibile automaticamente il tuo showroom locale francese su Google Maps e Ricerca.",
+    "profileTitle": "Profilo Google Business",
+    "profileBody": "Sincronizza il tuo indirizzo ufficiale del negozio, gli orari di apertura e le nuove foto del catalogo direttamente su Google Maps.",
+    "connectProfile": "Connetti il profilo Google Business",
+    "capabilitiesTitle": "Capacità di sincronizzazione automatica",
+    "capabilities": {
+      "catalog": {
+        "title": "Aggiornamenti profilo & catalogo",
+        "body": "Sincronizza le nuove foto allestite e i nuovi arrivi di mobili con gli aggiornamenti dei post locali su Google."
+      },
+      "reviews": {
+        "title": "Richieste di recensione",
+        "body": "Genera inviti cortesi alle recensioni in francese dopo le visite allo showroom o gli acquisti."
+      },
+      "replies": {
+        "title": "Bozze di risposta curate",
+        "body": "Espanda crea bozze di risposta ponderate a tutte le recensioni dei clienti in arrivo per la tua revisione."
+      }
+    },
+    "controlTitle": "Tu resti in controllo",
+    "controlBody": "Niente viene pubblicato o risposto su Google finché non lo approvi."
+  },
+  "googleWorkspace": {
+    "newPost": "Nuovo post su Google",
+    "subtitle": "Anteprima di come i nuovi arrivi e le recensioni dello showroom si sincronizzano direttamente su Google.",
+    "tabs": {
+      "profile": "Profilo",
+      "posts": "Post",
+      "reviews": "Recensioni"
+    },
+    "draftPostTitle": "Bozza di post su Google",
+    "actionButton": "Pulsante azione: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Scopri di più"
+    },
+    "reviewPost": "Rivedi post",
+    "reviewsTitle": "Recensioni dello showroom",
+    "reviewsBody": "Le recensioni e le bozze di risposta vengono raccolte con le conversazioni dei clienti.",
+    "openReviews": "Apri recensioni",
+    "checklistTitle": "Lista di controllo configurazione profilo",
+    "checklist": {
+      "profile": {
+        "label": "Profilo Google connesso",
+        "value": "Trovato"
+      },
+      "reviewLink": {
+        "label": "Link diretto per richiesta recensione",
+        "value": "Imposta"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Anteprima bozza",
+    "catalogConnected": "Catalogo del negozio sorgente connesso",
+    "connectDomain": "Connetti dominio",
+    "previewLabel": "Anteprima bozza del sito web",
+    "browserTitle": "Bozza del sito web",
+    "fullPreview": "Anteprima completa",
+    "reviewPublish": "Rivedi & pubblica bozza",
+    "footnote": "Rivedi il tuo contenuto e il dominio prima di pubblicare."
+  },
+  "websiteEdit": {
+    "saveChanges": "Salva modifiche alla bozza",
+    "reviewPublish": "Rivedi & pubblica",
+    "preview": "Anteprima",
+    "title": "Modifica contenuto del sito web",
+    "heroTitle": "Banner sezione principale",
+    "replaceImage": "Sostituisci immagine",
+    "heroImageLabel": "Immagine banner principale",
+    "headline": "Titolo (Francese)",
+    "description": "Descrizione",
+    "sectionsTitle": "Sezioni della pagina",
+    "sectionCount_one": "{{count}} sezione",
+    "sectionCount_other": "{{count}} sezioni",
+    "sections": {
+      "heroBanner": "Banner principale",
+      "featuredCollection": "Collezione in evidenza",
+      "showroomContact": "Showroom & contatto"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Verifica un dominio e controlla il contenuto per pubblicare.",
+    "publish": "Pubblica sito",
+    "keepDraft": "Mantieni bozza",
+    "title": "Rivedi il tuo sito",
+    "subtitle": "Controlla il contenuto e la destinazione prima di andare online.",
+    "heroImageLabel": "Immagine principale del sito",
+    "destinationTitle": "Destinazione di pubblicazione",
+    "destinationBody": "Collega e verifica un dominio per pubblicare questa bozza.",
+    "setUpDomain": "Configura un dominio"
+  }
+}

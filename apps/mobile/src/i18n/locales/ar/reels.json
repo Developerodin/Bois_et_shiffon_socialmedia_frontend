@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}ث",
+  "seconds_one": "{{count}} ثانية",
+  "seconds_other": "{{count}} ثواني",
+  "noPresenter": "لا يوجد مقدم",
+  "aiActor": "ممثل AI",
+  "assistant": "مساعد الفيديو الخاص بك",
+  "sourceWebsite": "الموقع المصدر",
+  "preview": "معاينة",
+  "schedule": "جدولة",
+  "goBack": "رجوع",
+  "inProgress": "قيد التقدم",
+  "timezone": "المنطقة الزمنية",
+  "status": {
+    "draft": "مسودة",
+    "ready": "جاهز"
+  },
+  "scene": {
+    "label": "المشهد {{n}} · {{seconds}}ث",
+    "count_one": "{{count}} مشهد",
+    "count_other": "{{count}} مشاهد"
+  },
+  "shot": {
+    "wide": "لقطة واسعة",
+    "material": "تفاصيل المادة",
+    "closeCta": "إغلاق المنتج وCTA"
+  },
+  "create": {
+    "switchBusiness": "تبديل العمل، {{name}}",
+    "title": "اصنع الريل التالي",
+    "subtitle": "أنشئ فيديوهات استوديو من كتالوج متجرك",
+    "heroImage": "عرض داخلي كامل لمجموعة طعام {{product}}",
+    "question": "ماذا تريد أن تعرض؟",
+    "planTogether": "خطط لريل معًا",
+    "start": "ابدأ",
+    "startA11y": "ابدأ في تخطيط ريل",
+    "ideasReady_one": "{{count}} فكرة جاهزة",
+    "ideasReady_other": "{{count}} أفكار جاهزة",
+    "viewIdeas": "عرض الأفكار →",
+    "actorSubtitle": "ريل المقدم",
+    "templates": "قوالب",
+    "templatesSubtitle": "قصات كتالوج سريعة",
+    "jumpBackIn": "العودة",
+    "seeAll": "عرض الكل",
+    "recentA11y": "{{title}}، {{status}}"
+  },
+  "ideas": {
+    "title": "أفكار الفيديو",
+    "subtitle": "زوايا مختارة جاهزة للتحويل إلى ريل متحرك",
+    "filter": {
+      "all": "الكل ({{n}})",
+      "productSpotlight": "تسليط الضوء على المنتج ({{n}})",
+      "collection": "مجموعة ({{n}})"
+    },
+    "angle": "زاوية {{n}}",
+    "body": {
+      "angle01": "تسليط الضوء على الحبوب الطبيعية، والهندسة المتقاطعة للأرجل، وتنسيق الطعام.",
+      "angle02": "التركيز على الأبواب المنحوتة يدويًا، وإدارة الأسلاك، والأجواء الدافئة للمعيشة."
+    },
+    "readyToReview": "جاهز للمراجعة",
+    "viewStoryboard": "عرض لوحة القصة"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} رصيد",
+    "creditsA11y_other": "{{count}} أرصدة",
+    "addAssets": "إضافة أصول",
+    "composerPlaceholder": "تحسين النغمة، التعليق الصوتي، أو إضافة توجيهات...",
+    "composerA11y": "تحسين النغمة، التعليق الصوتي، أو إضافة توجيهات",
+    "send": "إرسال التحسين",
+    "day": "اليوم · استوديو الريلز",
+    "userMessage": "عرض مجموعة Bunting في ريل هادئ وفاخر.",
+    "reply": "لقد قمت بتخصيص مفهوم لطاولة <b>{{brand}}</b> {{product}}. إليك المعايير الموصى بها:",
+    "format": "التنسيق",
+    "formatVertical": "9:16 عمودي (قصة/ريل)",
+    "duration": "المدة",
+    "presenter": "المقدم",
+    "openingHook": "مقدمة جذابة",
+    "reviewStoryboard_one": "مراجعة لوحة القصة ({{count}} مشهد)",
+    "reviewStoryboard_other": "مراجعة لوحة القصة ({{count}} مشاهد)",
+    "readyStatus": "جاهز للتوليد أو التحسين"
+  },
+  "storyboard": {
+    "title": "لوحة القصة",
+    "durationFact": "مدة {{seconds}}ث",
+    "verticalFact": "9:16 عمودي",
+    "readyToRender": "جاهز للتصيير <muted>· تم حفظ المسودة للمراجعة</muted>",
+    "sceneDirection": "توجيه المشهد",
+    "voiceoverFr": "التعليق الصوتي (FR)",
+    "direction": {
+      "scene1": "كشف بطيء عبر إعداد طعام حديث",
+      "scene2": "مسح ماكرو سلس على حبوب الخشب الطبيعي الغنية والحافة المشطوفة",
+      "scene3": "منظور منظم مع علامة Bois & Chiffons المائية"
+    },
+    "editInChat": "تحرير في الدردشة",
+    "makeVideo": "إنشاء فيديو",
+    "makeVideoA11y_one": "إنشاء فيديو، {{count}} رصيد",
+    "makeVideoA11y_other": "إنشاء فيديو، {{count}} أرصدة",
+    "cost_one": "{{count}} رصيد",
+    "cost_other": "{{count}} أرصدة",
+    "balance_one": "الرصيد الحالي: {{balance}} أرصدة · سيتم حجز {{count}} رصيد · تم حفظ المسودة تلقائيًا",
+    "balance_other": "الرصيد الحالي: {{balance}} أرصدة · سيتم حجز {{count}} أرصدة · تم حفظ المسودة تلقائيًا"
+  },
+  "generating": {
+    "backToWorkspace": "العودة إلى مساحة العمل",
+    "renderingA11y": "التصيير قيد التقدم",
+    "title": "إنشاء الريل الخاص بك",
+    "body": "تكوين المرئيات، التعليق الصوتي الفرنسي، وتوقيت الحركة لـ {{title}}.",
+    "summary": "{{title}} · {{seconds}}ث · 9:16",
+    "assetNote": "أصل كتالوج فرنسي أصلي",
+    "preparingScenes_one": "تحضير {{count}} مشهد",
+    "preparingScenes_other": "تحضير {{count}} مشاهد",
+    "done": "تم",
+    "renderingFrames": "تصيير إطارات الفيديو",
+    "addingAudio": "إضافة الصوت",
+    "queued": "في الانتظار",
+    "creditsReserved_one": "تم حجز {{count}} رصيد",
+    "creditsReserved_other": "تم حجز {{count}} أرصدة",
+    "remaining_one": "المتبقي: {{count}} رصيد",
+    "remaining_other": "المتبقي: {{count}} أرصدة",
+    "safeToLeave": "يمكنك مغادرة هذه الشاشة بأمان. يتم حفظ المسودة تلقائيًا في علامة التبويب النتائج الخاصة بك.",
+    "keepWorking": "استمر في العمل في الخلفية"
+  },
+  "results": {
+    "title": "ريل الفيديو",
+    "newReel": "ريل جديد",
+    "filter": {
+      "all": "الكل ({{n}})",
+      "ready": "جاهز ({{n}})",
+      "processing": "قيد المعالجة ({{n}})"
+    },
+    "processing_one": "قيد المعالجة · تم حجز {{count}} رصيد",
+    "processing_other": "قيد المعالجة · تم حجز {{count}} أرصدة",
+    "renderingA11y": "{{title}}، التصيير {{percent}}",
+    "renderingMeta": "{{seconds}}ث · 9:16 عمودي · تصيير المرئيات...",
+    "renderingStage": "مرحلة التصيير",
+    "previewA11y": "معاينة عينة، {{title}}",
+    "moreOptions": "خيارات أكثر",
+    "reviewVideo": "مراجعة الفيديو",
+    "meta": {
+      "tv": "20ث · تعليق صوتي فرنسي · جاهز للجدولة",
+      "atelier": "15ث · صوت محيطي · جاهز للجدولة"
+    }
+  },
+  "review": {
+    "subtitle": "مسودة الريل · جاهز للمراجعة",
+    "options": "قائمة الخيارات",
+    "downloadVideo": "تحميل الفيديو",
+    "connectFirst": "اختر حسابًا متصلًا قبل النشر.",
+    "samplePreview": "معاينة عينة",
+    "play": "تشغيل معاينة الفيديو",
+    "position": "موضع الفيديو",
+    "sound": "تبديل صوت الفيديو",
+    "fullscreen": "فتح الفيديو بملء الشاشة",
+    "vertical": "9:16 عمودي",
+    "portrait": "تنسيق عمودي",
+    "captionFrench": "التسمية التوضيحية (بالفرنسية)",
+    "defaultSource": "· المصدر الافتراضي",
+    "editable": "قابل للتعديل",
+    "captionA11y": "التسمية التوضيحية للفيديو بالفرنسية",
+    "addTag": "إضافة وسم",
+    "specifications": "المواصفات",
+    "audioTrack": "المسار الصوتي",
+    "audioValue": "تعليق صوتي فرنسي (استوديو ناتشورال) + صوت محيطي",
+    "resolution": "الدقة",
+    "resolutionValue": "فيديو عمودي · 9:16"
+  },
+  "publish": {
+    "title": "نشر الريل",
+    "confirmSchedule": "تأكيد الجدول",
+    "publishNow": "نشر الآن",
+    "saveDraft": "حفظ كمسودة",
+    "readyToSchedule": "جاهز للجدولة",
+    "format": "{{product}} · ريل عمودي 9:16",
+    "playPreview": "تشغيل المعاينة",
+    "channel": "قناة النشر",
+    "connected": "متصل",
+    "notConnected": "غير متصل",
+    "connect": "اتصال",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "نشر تلقائي مباشر على الخلاصة والريلز",
+    "orDownload": "أو تنزيل الفيديو مباشرة",
+    "download": "تنزيل",
+    "timing": "التوقيت",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}، {{value}}",
+    "timezoneA11y": "المنطقة الزمنية، {{value}}",
+    "notice": "قم بتوصيل حساب Instagram التجاري الخاص بك لفتح النشر المجدول التلقائي. لا يزال بإمكانك حفظ هذا الريل كمسودة."
+  },
+  "scheduled": {
+    "close": "إغلاق",
+    "viewReel": "عرض الريل المجدول",
+    "backToResults": "العودة إلى النتائج",
+    "title": "ريل مجدول",
+    "body": "سيتم نشر الفيديو الخاص بك على الحساب المحدد في الوقت المجدول.",
+    "meta": "{{seconds}} ثانية · تعليق صوتي فرنسي",
+    "publishDate": "تاريخ النشر",
+    "dateTime": "{{date}}، {{time}}",
+    "brandWorkspace": "مساحة عمل العلامة التجارية",
+    "channel": "القناة",
+    "instagramConnected": "Instagram (متصل)",
+    "editInCalendar": "تحرير أو إلغاء هذا المنشور من التقويم الخاص بك."
+  },
+  "actor": {
+    "title": "اختر مقدم العرض",
+    "intro": "اختر نمط مقدم العرض أو ريل للمنتج فقط.",
+    "noPresenterA11y": "بدون مقدم، موصى به",
+    "recommended": "موصى به",
+    "noPresenterBody": "التركيز فقط على مرئيات الأثاث، القوام والصوت الاستوديو.",
+    "styles": "أنماط المقدم",
+    "style": {
+      "calm": {
+        "title": "راوي هادئ",
+        "subtitle": "فرنسي · استوديو هادئ"
+      },
+      "expressive": {
+        "title": "مقدم معبر",
+        "subtitle": "إنجليزي / فرنسي · ديناميكي"
+      }
+    },
+    "styleA11y": "{{title}}، {{subtitle}}",
+    "sampleVoiceA11y": "عينة صوت، {{title}}",
+    "sampleVoice": "عينة صوت",
+    "voiceLed": "نمط بقيادة الصوت",
+    "notice": "اختر نمط بقيادة الصوت، أو حافظ على التركيز على منتجك."
+  },
+  "script": {
+    "title": "النص والصوت",
+    "continue": "الاستمرار إلى لوحة القصة",
+    "costNote": "راجع تكلفة الائتمان قبل إنشاء الريل الخاص بك.",
+    "targetProduct": "المنتج المستهدف",
+    "productMeta": "خشب أكاسيا صلب · موقع المصدر",
+    "voiceoverScript": "نص التعليق الصوتي",
+    "frenchFr": "فرنسي (FR)",
+    "wordCount_one": "{{count}} كلمة · ~{{seconds}} ثانية",
+    "wordCount_other": "{{count}} كلمات · ~{{seconds}} ثانية",
+    "scriptA11y": "نص التعليق الصوتي بالفرنسية",
+    "targetDuration_one": "المدة المستهدفة: {{count}} ثانية",
+    "targetDuration_other": "المدة المستهدفة: {{count}} ثواني",
+    "rewriteOpening": "إعادة كتابة الافتتاحية",
+    "narratorAudio": "صوت الراوي",
+    "calmVoice": "صوت فرنسي هادئ",
+    "calmVoiceMeta": "فرنسي طبيعي، إيقاع دافئ",
+    "recordOwn": "سجل صوتك الخاص",
+    "recordOwnMeta": "تعليق مخصص للعلامة التجارية اختياري",
+    "record": "تسجيل"
+  },
+  "templates": {
+    "title": "قوالب الريل",
+    "useTemplate": "استخدام القالب",
+    "searchPlaceholder": "البحث عن تنسيقات الاستوديو...",
+    "searchA11y": "البحث عن تنسيقات الاستوديو",
+    "tune": "تعديل",
+    "filter": {
+      "all": "جميع التنسيقات",
+      "catalog": "تسليط الضوء على الكتالوج",
+      "shortCuts": "مقاطع 15-20 ثانية"
+    },
+    "item": {
+      "spotlight": {
+        "title": "تسليط الضوء على المنتج",
+        "subtitle": "3 مقاطع ماكرو + خطاف"
+      },
+      "collection": {
+        "title": "عرض المجموعة",
+        "subtitle": "عرض سريع لعدة عناصر"
+      },
+      "material": {
+        "title": "تفاصيل المادة",
+        "subtitle": "تفاصيل حبيبات الخشب والحرفية"
+      },
+      "arrival": {
+        "title": "وصول جديد",
+        "subtitle": "إعلان ونداء إلى صالة العرض"
+      }
+    },
+    "itemA11y": "{{title}}، {{subtitle}}، {{duration}}"
+  },
+  "assets": {
+    "title": "اختر الأصول",
+    "createStoryboard_one": "إنشاء لوحة القصة ({{count}} مشهد)",
+    "createStoryboard_other": "إنشاء لوحة القصة ({{count}} مشاهد)",
+    "upload": "تحميل الصور",
+    "websiteAssets": "أصول الموقع الإلكتروني",
+    "selected_one": "{{count}} مختار",
+    "selected_other": "{{count}} مختار",
+    "otherCategory": "فئة منتج مختلفة",
+    "itemA11y": "{{title}}، {{scene}}",
+    "sequence": "تسلسل لوحة القصة",
+    "dragToReorder": "سحب لإعادة الترتيب",
+    "reorderA11y": "المشهد {{n}}: {{label}}. إعادة ترتيب المشهد",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "غرفة",
+      "macro": "تفاصيل",
+      "staged": "منسق",
+      "tv": "وحدة تلفزيون"
+    }
+  }
+}

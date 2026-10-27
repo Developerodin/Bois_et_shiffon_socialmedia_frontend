@@ -4,8 +4,9 @@ import { useCallback, useState, type FormEvent } from "react";
 import { ArrowLeft, Coins, ExternalLink, Loader2, Plus, RotateCw, Trash2 } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
-import { useBrandData } from "@/components/workspace/content-panels";
+import { LoadFailed, useBrandData, usePerms } from "@/components/workspace/content-panels";
 import { ScoreRing } from "@/components/workspace/score-ring";
+import { readable } from "@/lib/agent-message";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/lib/website";
 
@@ -23,7 +24,7 @@ type Audit = {
   createdAt: string;
   stale: boolean;
 };
-type Competitor = { id: string; name: string; domain: string; source: string; aiMentions: number | null; auditRunning: boolean; audit: Audit | null };
+type Competitor = { id: string; name: string; domain: string; source: string; aiMentions: number | null; auditRunning: boolean; auditError: string | null; audit: Audit | null };
 type Data = { credits: { balance: number; auditCost: number }; competitors: Competitor[] };
 
 const checked = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
@@ -80,12 +81,15 @@ function FreshAudit({ base, c, credits, onDone }: { base: string; c: Competitor;
   );
 }
 
+/** agents.run gates adding, auditing and removing: the routes refuse those without it. */
 export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpen: (id: string) => void; onFind: () => void }) {
-  const { data, reload } = useCompetitors(base);
+  const canRun = usePerms(base)?.includes("agents.run");
+  const { data, failed, reload } = useCompetitors(base);
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
   const [site, setSite] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState<{ id: string; message: string } | null>(null);
 
   async function add(e: FormEvent) {
     e.preventDefault();
@@ -100,12 +104,18 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
       setError(errorMessage(err));
     }
   }
-  async function remove(id: string) {
-    await request(`${base}/competitors/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => undefined);
-    await reload();
+  async function remove(c: Competitor) {
+    if (!window.confirm(`Stop tracking ${c.name}? Its audits stay in the shared library.`)) return;
+    setRemoveError(null);
+    try {
+      await request(`${base}/competitors/${encodeURIComponent(c.id)}`, { method: "DELETE" });
+      await reload();
+    } catch (err) {
+      setRemoveError({ id: c.id, message: errorMessage(err, "Couldn't stop tracking it. Try again.") });
+    }
   }
 
-  if (!data) return <p className="p-4 text-sm text-muted-foreground">Loading competitors…</p>;
+  if (!data) return failed ? <LoadFailed what="competitors" onRetry={() => void reload()} /> : <p className="p-4 text-sm text-muted-foreground">Loading competitors…</p>;
   return (
     <div className="flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 text-xs">
@@ -114,15 +124,17 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
           <span className="font-medium text-foreground tabular-nums">{data.credits.balance}</span> credits · audits shared by others are free
         </span>
         <span className="flex gap-1">
-          <Button size="sm" variant="ghost" onClick={() => setAdding((a) => !a)}>
-            <Plus aria-hidden="true" /> Add
-          </Button>
+          {canRun && (
+            <Button size="sm" variant="ghost" onClick={() => setAdding((a) => !a)}>
+              <Plus aria-hidden="true" /> Add
+            </Button>
+          )}
           <Button size="sm" variant="ghost" onClick={onFind}>
             Find
           </Button>
         </span>
       </div>
-      {adding && (
+      {adding && canRun && (
         <form onSubmit={add} className="flex flex-wrap items-end gap-2 border-b border-border px-4 py-3">
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-muted-foreground">Name</span>
@@ -150,7 +162,7 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
                   <span className="block text-sm font-medium">{c.name}</span>
                   <span className="block text-xs text-muted-foreground">{c.domain}</span>
                 </button>
-                <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} />
+                {canRun && <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} />}
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 {c.aiMentions != null && <span>Named by AI in {c.aiMentions} of your questions</span>}
@@ -162,6 +174,7 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
                 ) : (
                   <span>Not audited yet</span>
                 )}
+                {c.auditError && !c.auditRunning && <span className="text-destructive">Last audit failed: {readable(c.auditError)}</span>}
               </div>
               {c.audit && (
                 <button type="button" onClick={() => onOpen(c.id)} className="flex flex-wrap gap-3 rounded-lg py-1 text-left hover:bg-muted/50">
@@ -171,10 +184,13 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
                   <ScoreRing value={c.audit.scores.seo} label="SEO" />
                 </button>
               )}
-              <button type="button" onClick={() => remove(c.id)} className="self-start py-0.5 text-xs text-muted-foreground hover:text-destructive" aria-label={`Stop tracking ${c.name}`}>
-                <Trash2 className="mr-1 inline size-3" aria-hidden="true" />
-                Stop tracking
-              </button>
+              {canRun && (
+                <button type="button" onClick={() => remove(c)} className="self-start py-0.5 text-xs text-muted-foreground hover:text-destructive" aria-label={`Stop tracking ${c.name}`}>
+                  <Trash2 className="mr-1 inline size-3" aria-hidden="true" />
+                  Stop tracking
+                </button>
+              )}
+              {removeError?.id === c.id && <p role="alert" className="text-xs text-destructive">{removeError.message}</p>}
             </li>
           ))}
         </ul>
@@ -184,7 +200,8 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
 }
 
 export function CompetitorView({ base, id, onBack }: { base: string; id: string; onBack: () => void }) {
-  const { data, reload } = useCompetitors(base);
+  const canRun = usePerms(base)?.includes("agents.run");
+  const { data, failed, reload } = useCompetitors(base);
   const c = data?.competitors.find((x) => x.id === id);
   const a = c?.audit;
   return (
@@ -195,8 +212,16 @@ export function CompetitorView({ base, id, onBack }: { base: string; id: string;
         </Button>
         <span className="truncate text-sm text-muted-foreground">/ {c?.name ?? "Competitor"}</span>
       </div>
-      {!c || !a || !data ? (
-        <p className="p-6 text-sm text-muted-foreground">{data ? "No audit for this competitor yet." : "Loading…"}</p>
+      {!data ? (
+        failed ? <LoadFailed what="competitors" onRetry={() => void reload()} /> : <p className="p-6 text-sm text-muted-foreground">Loading…</p>
+      ) : !c ? (
+        <p className="p-6 text-sm text-muted-foreground">This competitor isn&rsquo;t tracked any more.</p>
+      ) : !a ? (
+        <div className="flex flex-col items-start gap-3 p-6">
+          <p className="text-sm text-muted-foreground">No audit for this competitor yet.</p>
+          {c.auditError && !c.auditRunning && <p className="text-sm text-destructive">Last audit failed: {readable(c.auditError)}</p>}
+          {canRun && <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} />}
+        </div>
       ) : (
         <div className="flex flex-col gap-6 px-6 py-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -217,8 +242,9 @@ export function CompetitorView({ base, id, onBack }: { base: string; id: string;
               </p>
               {a.stale && <p className="mt-1 text-xs text-warning">Over 30 days old: run a fresh audit for current numbers.</p>}
             </div>
-            <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} />
+            {canRun && <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} />}
           </div>
+          {c.auditError && !c.auditRunning && <p className="-mt-3 text-sm text-destructive">Last audit failed: {readable(c.auditError)}</p>}
 
           <div className="flex flex-wrap gap-5 rounded-xl border border-border p-4">
             <ScoreRing value={a.scores.performance} label="Performance" />

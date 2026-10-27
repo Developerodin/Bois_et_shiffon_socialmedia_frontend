@@ -1,0 +1,37 @@
+{
+  "back": "वापस",
+  "close": "बंद करें",
+  "continue": "जारी रखें",
+  "step": "{{total}} में से चरण {{step}}",
+  "auth": {
+    "orContinueWith": "या जारी रखें",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "जारी रखते हुए, आप हमारे <terms>सेवा की शर्तों</terms> और <privacy>गोपनीयता नीति</privacy> से सहमत हैं।",
+    "allScreensDev": "सभी स्क्रीन (डेव)",
+    "googleFailed": "Google साइन-इन नहीं हो पाया। फिर से प्रयास करें या ईमेल का उपयोग करें।",
+    "googleNeedsBuild": "Google साइन-इन इंस्टॉल किए गए Espanda ऐप में काम करता है, Expo Go में नहीं। फिलहाल ईमेल का उपयोग करें।"
+  },
+  "language": {
+    "title": "ऐप भाषा",
+    "search": "भाषाएँ खोजें",
+    "explainer": "ऐप के बटन और मेनू बदलता है। आपके पोस्ट प्रत्येक ब्रांड के लिए सेट की गई सामग्री भाषा रखते हैं।",
+    "noMatch": "कोई भाषा “{{query}}” से मेल नहीं खाती।"
+  },
+  "module": {
+    "openMenu": "मेनू खोलें",
+    "settings": "सेटिंग्स",
+    "credits_one": "{{count}} क्रेडिट उपलब्ध",
+    "credits_other": "{{count}} क्रेडिट्स उपलब्ध",
+    "workspace": "वर्कस्पेस {{name}}"
+  },
+  "nav": {
+    "reels": "रील्स",
+    "posts": "पोस्ट्स",
+    "photoshoot": "फोटोशूट",
+    "marketing": "मार्केटिंग",
+    "create": "क्रिएट करें",
+    "ideas": "आइडियाज",
+    "results": "रिजल्ट्स"
+  }
+}

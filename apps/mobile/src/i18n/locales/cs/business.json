@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Pracovní prostor {{name}}",
+    "logoLabel": "Logo {{name}}",
+    "settingsTitle": "Nastavení",
+    "edit": "Upravit",
+    "manage": "Spravovat",
+    "tabs": {
+      "myBusiness": "Moje firma",
+      "billing": "Fakturace",
+      "postsPlanner": "Plánovač příspěvků"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Atributy firmy",
+    "attributes": {
+      "location": "Místo",
+      "audience": "Publikum",
+      "category": "Kategorie",
+      "subcategory": "Podkategorie",
+      "storeType": "Typ obchodu",
+      "website": "Webová stránka"
+    },
+    "brandPreferences": "Preference značky",
+    "brandPreferencesHint": "Barvy, tón, jazyk",
+    "photoAssets": "Fotografie",
+    "photoAssetsHint": "Fotky Bunting stolu a TV jednotky",
+    "connections": "Připojení",
+    "connectionsHint": "Sociální kanály & Google profil"
+  },
+  "brand": {
+    "title": "Nastavení značky",
+    "save": "Uložit změny",
+    "paletteTitle": "Barevná paleta značky",
+    "editHex": "Upravit hex",
+    "watermarkTitle": "Logo vodoznaku na konci",
+    "watermarkBody": "Používá se na konci videí a okrajích fotek",
+    "change": "Změnit",
+    "toneTitle": "Kreativní tón",
+    "tones": {
+      "modern": "Moderní",
+      "luxurious": "Luxusní",
+      "elegant": "Elegantní",
+      "premium": "Prémiový",
+      "natural": "Přírodní",
+      "minimalist": "Minimalistický"
+    },
+    "cuesTitle": "Charakteristické prvky značky",
+    "addCue": "Přidat prvek"
+  },
+  "photos": {
+    "title": "Fotografie",
+    "refresh": "Obnovit",
+    "sourceTitle": "Zdrojová webová stránka",
+    "sourceBody": "Sdílené fotky použité k vytváření videí, příspěvků a inscenací focení. Žádné fotky nejsou zveřejněny bez vašeho výslovného souhlasu.",
+    "sources": {
+      "website": "Webová stránka ({{n}})",
+      "uploads": "Nahrávky ({{n}})"
+    },
+    "addPhotos": "Přidat fotky",
+    "photosTitle": "Fotky",
+    "photoCount_one": "{{n}} fotka",
+    "photoCount_other": "{{n}} fotek",
+    "emptyTitle": "Zatím žádné nahrávky",
+    "emptyBody": "Fotky ze studia, které nahrajete, se objeví zde.",
+    "upload": "Nahrát vlastní fotky ze studia"
+  },
+  "connections": {
+    "title": "Připojení",
+    "sourceTitle": "Zdrojová webová stránka",
+    "linked": "Propojeno",
+    "sourceBody": "Fotky produktů a detaily firmy",
+    "channelsTitle": "Publikační kanály",
+    "accounts": "Účty",
+    "connected": "Připojeno",
+    "notConnected": "Nepřipojeno",
+    "connect": "Připojit",
+    "disconnect": "Odpojit",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook stránka",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Business profil",
+      "shopify": "Shopify Direct Sync"
+    }
+  },
+  "automations": {
+    "title": "Automatizace",
+    "heading": "Vaše publikační preference",
+    "intro": "Ovládejte, jak Espanda předvyplňuje naplánované příspěvky a vytváří obsah pro vaše katalogové položky.",
+    "reviewTitle": "Kontrola před publikováním",
+    "reviewBody": "Zkontrolujte obsah před jeho zveřejněním.",
+    "required": "Požadováno",
+    "reviewLabel": "Kontrola před publikováním. Zkontrolujte obsah před jeho zveřejněním. Požadováno.",
+    "queueTitle": "Fronta akcí",
+    "manageConnections": "Spravovat připojení",
+    "items": {
+      "monthly": {
+        "title": "Generovat měsíční plány",
+        "body": "Připravte si měsíční kalendář návrhů příspěvků.",
+        "active": "Aktivní · návrhy uloženy do kalendáře"
+      },
+      "autopublish": {
+        "title": "Automatické publikování schválených příspěvků",
+        "body": "Automaticky zveřejňujte naplánovaná videa po kliknutí na \"Schválit\".",
+        "requires": "Vyžaduje připojení k Instagramu",
+        "active": "Aktivní · zveřejňuje po schválení"
+      },
+      "replies": {
+        "title": "Návrhy odpovědí na dotazy v showroomu",
+        "body": "Předvyplňte propracované odpovědi francouzských řemeslníků ve vaší frontě zpráv.",
+        "requires": "Vyžaduje komunikační kanál",
+        "active": "Aktivní · návrhy přidány do vaší schránky"
+      }
+    },
+    "adsTitle": "Placené sociální reklamy",
+    "comingSoon": "Již brzy",
+    "adsBody": "Automatizované testování kreativ Meta reklam a rozpočtování."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} kredit k dispozici",
+    "creditsAvailable_other": "{{n}} kreditů k dispozici",
+    "planName": "{{tier}} plán",
+    "statusActive": "Aktivní",
+    "planBlurb": "Vaše nástroje pro tvorbu a podnikání",
+    "cycleTitle": "Fakturační cyklus",
+    "renewsMonthly": "Obnovuje se měsíčně",
+    "balanceTitle": "Zůstatek kreditů",
+    "monthlyAllowance": "{{amount}} měsíční příspěvek",
+    "balanceLabel_one": "{{balance}} z {{n}} kreditu k dispozici",
+    "balanceLabel_other": "{{balance}} z {{n}} kreditů k dispozici",
+    "balanceOf_one": " / {{n}} kredit k dispozici",
+    "balanceOf_other": " / {{n}} kreditů k dispozici",
+    "note_one": "{{n}} kredit použit · {{reserved}} rezervováno pro {{item}}. Příspěvek se obnovuje měsíčně.",
+    "note_other": "{{n}} kreditů použito · {{reserved}} rezervováno pro {{item}}. Příspěvek se obnovuje měsíčně.",
+    "usageTitle": "Nedávné použití kreditů",
+    "usageAside": "Aktivita pracovního prostoru",
+    "today": "Dnes",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} video",
+        "detail": "Rezervováno pro generování"
+      },
+      "plan": {
+        "title": "Měsíční plán obsahu",
+        "detail_one": "{{n}} návrh příspěvku",
+        "detail_other": "{{n}} návrhů příspěvků"
+      },
+      "renewal": {
+        "title": "Obnovení měsíčního plánu",
+        "detail": "Reset kreditního cyklu"
+      }
+    },
+    "spent_one": "-{{n}} kredit",
+    "spent_other": "-{{n}} kreditů",
+    "added_one": "+{{n}} kredit",
+    "added_other": "+{{n}} kreditů",
+    "included": "Zahrnuto",
+    "help": {
+      "missingCredits": "Chybějící kredity nebo selhání vykreslení",
+      "restore": "Obnovit nákupy předplatného",
+      "history": "Historie fakturace a faktury"
+    }
+  },
+  "account": {
+    "title": "Nastavení účtu",
+    "workspaceTitle": "Pracovní prostor",
+    "workspaceName": "Název pracovního prostoru",
+    "teamTitle": "Týmová spolupráce",
+    "teamMembers": "Členové pracovního prostoru",
+    "preferencesTitle": "Předvolby",
+    "languageTitle": "Jazyk rozhraní aplikace",
+    "languageBody": "Výzvy a exporty zůstávají ve francouzštině",
+    "languageLabel": "Jazyk aplikace, {{language}}",
+    "languageHint": "Otevře seznam jazyků",
+    "pushTitle": "Push notifikace",
+    "pushBody": "Aktualizace tvorby a publikování",
+    "supportTitle": "Podpora a právní informace",
+    "help": "Potřebujete pomoc & kontaktujte podporu",
+    "terms": "Podmínky služby",
+    "privacy": "Zásady ochrany osobních údajů",
+    "restore": "Obnovit nákupy",
+    "signOut": "Odhlásit se z Espanda",
+    "signOutNote": "Vaše aktivní předplatné a rozpracované katalogové položky zůstávají bezpečně uloženy."
+  },
+  "drawer": {
+    "closeMenu": "Zavřít menu",
+    "switchLabel": "Pracovní prostor {{name}}. Přepnout podnikání",
+    "balanceLabel_one": "Aktuální zůstatek {{credits}} kredit, plán {{plan}}",
+    "balanceLabel_other": "Aktuální zůstatek {{credits}} kreditů, plán {{plan}}",
+    "balanceTitle": "Aktuální zůstatek",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredit zbývá</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> kreditů zbývá</rest>",
+    "sections": {
+      "create": "Vytvořit",
+      "grow": "Růst",
+      "manage": "Spravovat"
+    },
+    "items": {
+      "chat": "Chat pro tvorbu videa",
+      "generations": "Moje generace",
+      "photos": "Fotografické zdroje",
+      "inbox": "Zákazníci & Doručená pošta",
+      "google": "Růst na Google",
+      "website": "Studio webových stránek",
+      "connections": "Spojení",
+      "automations": "Automatizace",
+      "billing": "Plány & Fakturace",
+      "account": "Nastavení účtu"
+    },
+    "signOut": "Odhlásit se"
+  }
+}

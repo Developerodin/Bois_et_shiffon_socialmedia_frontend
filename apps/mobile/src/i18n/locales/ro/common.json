@@ -1,0 +1,37 @@
+{
+  "back": "Înapoi",
+  "close": "Închide",
+  "continue": "Continuă",
+  "step": "Pasul {{step}} din {{total}}",
+  "auth": {
+    "orContinueWith": "sau continuă cu",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "Continuând, ești de acord cu <terms>Termenii și condițiile</terms> și <privacy>Politica de confidențialitate</privacy>.",
+    "allScreensDev": "Toate ecranele (dev)",
+    "googleFailed": "Conectarea cu Google nu a reușit. Încearcă din nou sau folosește emailul.",
+    "googleNeedsBuild": "Conectarea cu Google funcționează în aplicația Espanda instalată, nu în Expo Go. Folosește emailul deocamdată."
+  },
+  "language": {
+    "title": "Limba aplicației",
+    "search": "Caută limbi",
+    "explainer": "Schimbă butoanele și meniurile aplicației. Postările tale păstrează limba de conținut setată pentru fiecare brand.",
+    "noMatch": "Nicio limbă nu corespunde cu „{{query}}”."
+  },
+  "module": {
+    "openMenu": "Deschide meniul",
+    "settings": "Setări",
+    "credits_one": "{{count}} credit disponibil",
+    "credits_other": "{{count}} credite disponibile",
+    "workspace": "Spațiu de lucru {{name}}"
+  },
+  "nav": {
+    "reels": "Reels",
+    "posts": "Postări",
+    "photoshoot": "Ședință foto",
+    "marketing": "Marketing",
+    "create": "Creează",
+    "ideas": "Idei",
+    "results": "Rezultate"
+  }
+}

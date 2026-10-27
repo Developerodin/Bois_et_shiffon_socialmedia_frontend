@@ -21,13 +21,23 @@ const PUBLIC_AUDIT = {
 export async function listCompetitors(workspaceId: string, brandId: string) {
   const competitors = await prisma.competitor.findMany({ where: { workspaceId, brandId }, orderBy: { createdAt: "asc" } });
   const domains = competitors.map((c) => c.domain);
-  const [audits, running, geo, balance] = await Promise.all([
+  const [audits, running, failed, geo, balance] = await Promise.all([
     prisma.siteAudit.findMany({ where: { domain: { in: domains } }, orderBy: { createdAt: "desc" }, distinct: ["domain"], select: PUBLIC_AUDIT }),
     // Any workspace's running audit counts (shared library), but only for this brand's domains.
     domains.length
       ? prisma.agentRun.findMany({
           where: { agentKey: "site-audit", status: { in: ["QUEUED", "RUNNING"] }, OR: domains.map((d) => ({ input: { path: ["domain"], equals: d } })) },
           select: { input: true },
+        })
+      : [],
+    // This workspace's own failed audits only: another customer's error text is theirs.
+    // ponytail: newest 50 failures cover a brand's competitor list; past that, query per domain.
+    domains.length
+      ? prisma.agentRun.findMany({
+          where: { workspaceId, agentKey: "site-audit", status: "FAILED", OR: domains.map((d) => ({ input: { path: ["domain"], equals: d } })) },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+          select: { input: true, error: true, createdAt: true, finishedAt: true },
         })
       : [],
     prisma.auditReport.findFirst({ where: { workspaceId, brandId, kind: "GEO" }, orderBy: { createdAt: "desc" }, select: { metrics: true } }),
@@ -40,6 +50,9 @@ export async function listCompetitors(workspaceId: string, brandId: string) {
     credits: { balance, auditCost: CREDIT_COSTS.siteAudit },
     competitors: competitors.map((c) => {
       const audit = audits.find((a) => a.domain === c.domain) ?? null;
+      // The latest failure, unless a successful audit landed after it.
+      const fail = failed.find((r) => (r.input as { domain?: string } | null)?.domain === c.domain);
+      const failedAt = fail && (fail.finishedAt ?? fail.createdAt);
       return {
         id: c.id,
         name: c.name,
@@ -47,6 +60,7 @@ export async function listCompetitors(workspaceId: string, brandId: string) {
         source: c.source,
         aiMentions: mentions.get(c.name.toLowerCase()) ?? null,
         auditRunning: runningDomains.has(c.domain),
+        auditError: failedAt && (!audit || failedAt > audit.createdAt) ? (fail?.error ?? "The audit failed.") : null,
         audit: audit && { ...audit, createdAt: audit.createdAt.toISOString(), stale: audit.createdAt.getTime() < staleBefore },
       };
     }),
@@ -86,7 +100,8 @@ export async function startCompetitorAudit(input: { workspaceId: string; brandId
       agentKey: "site-audit",
       trigger: "manual",
       userId: input.userId,
-      input: { domain: competitor.domain, chargeId },
+      input: { domain: competitor.domain },
+      prepaidChargeId: chargeId,
     });
     // A second click while the first is queued joins that run; give this charge back.
     if ((run.input as { chargeId?: string } | null)?.chargeId !== chargeId) {

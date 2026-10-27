@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Arbetsyta {{name}}",
+    "logoLabel": "{{name}} logotyp",
+    "settingsTitle": "Inställningar",
+    "edit": "Redigera",
+    "manage": "Hantera",
+    "tabs": {
+      "myBusiness": "Mitt företag",
+      "billing": "Fakturering",
+      "postsPlanner": "Inläggsplanerare"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Företagsattribut",
+    "attributes": {
+      "location": "Plats",
+      "audience": "Publik",
+      "category": "Kategori",
+      "subcategory": "Underkategori",
+      "storeType": "Butikstyp",
+      "website": "Webbplats"
+    },
+    "brandPreferences": "Varumärkespreferenser",
+    "brandPreferencesHint": "Färger, ton, språk",
+    "photoAssets": "Fotoresurser",
+    "photoAssetsHint": "Bunting bord och TV-enhet foton",
+    "connections": "Anslutningar",
+    "connectionsHint": "Sociala kanaler & Google-profil"
+  },
+  "brand": {
+    "title": "Varumärkesinställningar",
+    "save": "Spara ändringar",
+    "paletteTitle": "Varumärkets färgpalett",
+    "editHex": "Redigera hex",
+    "watermarkTitle": "Outro vattenstämpellogo",
+    "watermarkBody": "Tillämpas på videoreelavslut och fotogränser",
+    "change": "Ändra",
+    "toneTitle": "Kreativ ton",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Lyxig",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Naturlig",
+      "minimalist": "Minimalistisk"
+    },
+    "cuesTitle": "Varumärkets signaturdrag",
+    "addCue": "Lägg till drag"
+  },
+  "photos": {
+    "title": "Fotoresurser",
+    "refresh": "Uppdatera",
+    "sourceTitle": "Källwebbplats",
+    "sourceBody": "Delade foton används för att skapa reels, flödesinlägg och fotosessioner. Inga foton publiceras utåt utan ditt uttryckliga godkännande.",
+    "sources": {
+      "website": "Webbplats ({{n}})",
+      "uploads": "Uppladdningar ({{n}})"
+    },
+    "addPhotos": "Lägg till foton",
+    "photosTitle": "Foton",
+    "photoCount_one": "{{n}} foto",
+    "photoCount_other": "{{n}} foton",
+    "emptyTitle": "Inga uppladdningar ännu",
+    "emptyBody": "Studiobilder du laddar upp visas här.",
+    "upload": "Ladda upp egna studiobilder"
+  },
+  "connections": {
+    "title": "Anslutningar",
+    "sourceTitle": "Källwebbplats",
+    "linked": "Länkad",
+    "sourceBody": "Produktbilder och företagsdetaljer",
+    "channelsTitle": "Publiceringskanaler",
+    "accounts": "Konton",
+    "connected": "Ansluten",
+    "notConnected": "Inte ansluten",
+    "connect": "Anslut",
+    "disconnect": "Koppla från",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook-sida",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Business-profil",
+      "shopify": "Shopify direkt synk"
+    }
+  },
+  "automations": {
+    "title": "Automatiseringar",
+    "heading": "Dina publiceringspreferenser",
+    "intro": "Kontrollera hur Espanda förfyller schemalagda inlägg och skapar utkast för dina katalogartiklar.",
+    "reviewTitle": "Granska innan publicering",
+    "reviewBody": "Granska innehåll innan det publiceras.",
+    "required": "Krävs",
+    "reviewLabel": "Granska innan publicering. Granska innehåll innan det publiceras. Krävs.",
+    "queueTitle": "Köa åtgärder",
+    "manageConnections": "Hantera anslutningar",
+    "items": {
+      "monthly": {
+        "title": "Skapa månadsplaner",
+        "body": "Förbered din månadskalender med utkast till inlägg.",
+        "active": "Aktiv · utkast sparade i kalendern"
+      },
+      "autopublish": {
+        "title": "Automatpublicera godkända inlägg",
+        "body": "Skicka automatiskt schemalagda reels när du trycker på \"Godkänn\".",
+        "requires": "Kräver Instagram-anslutning",
+        "active": "Aktiv · publicerar efter godkännande"
+      },
+      "replies": {
+        "title": "Utkast till showroom-förfrågningar",
+        "body": "Förfyll raffinerade franska hantverkssvar i din inkorgskö.",
+        "requires": "Kräver meddelandekanal",
+        "active": "Aktiv · utkast tillagda i din inkorg"
+      }
+    },
+    "adsTitle": "Betalda sociala annonser",
+    "comingSoon": "Kommer snart",
+    "adsBody": "Automatiserad Meta-annonskreativ testning & budgethantering."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} kredit tillgänglig",
+    "creditsAvailable_other": "{{n}} krediter tillgängliga",
+    "planName": "{{tier}} plan",
+    "statusActive": "Aktiv",
+    "planBlurb": "Dina skapande- och affärsverktyg",
+    "cycleTitle": "Faktureringscykel",
+    "renewsMonthly": "Förnyas månadsvis",
+    "balanceTitle": "Kreditsaldo",
+    "monthlyAllowance": "{{amount}} månatlig tilldelning",
+    "balanceLabel_one": "{{balance}} av {{n}} kredit tillgänglig",
+    "balanceLabel_other": "{{balance}} av {{n}} krediter tillgängliga",
+    "balanceOf_one": " / {{n}} kredit tillgänglig",
+    "balanceOf_other": " / {{n}} krediter tillgängliga",
+    "note_one": "{{n}} kredit använd · {{reserved}} reserverad för {{item}}. Tilldelning förnyas månadsvis.",
+    "note_other": "{{n}} krediter använda · {{reserved}} reserverade för {{item}}. Tilldelning förnyas månadsvis.",
+    "usageTitle": "Senaste kreditanvändning",
+    "usageAside": "Arbetsyta aktivitet",
+    "today": "Idag",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} reel",
+        "detail": "Reserverad för generering"
+      },
+      "plan": {
+        "title": "Månadsinnehållsplan",
+        "detail_one": "{{n}} utkast till inlägg",
+        "detail_other": "{{n}} utkast till inlägg"
+      },
+      "renewal": {
+        "title": "Månadsplanförnyelse",
+        "detail": "Kreditcykel återställs"
+      }
+    },
+    "spent_one": "-{{n}} kredit",
+    "spent_other": "-{{n}} krediter",
+    "added_one": "+{{n}} kredit",
+    "added_other": "+{{n}} krediter",
+    "included": "Inkluderad",
+    "help": {
+      "missingCredits": "Saknade krediter eller misslyckad rendering",
+      "restore": "Återställ prenumerationsköp",
+      "history": "Fakturahistorik & fakturor"
+    }
+  },
+  "account": {
+    "title": "Kontoinställningar",
+    "workspaceTitle": "Arbetsyta",
+    "workspaceName": "Arbetsytans namn",
+    "teamTitle": "Samarbete i team",
+    "teamMembers": "Arbetsytans medlemmar",
+    "preferencesTitle": "Inställningar",
+    "languageTitle": "Appens gränssnittsspråk",
+    "languageBody": "Uppmaningar och exporter förblir på franska",
+    "languageLabel": "Appspråk, {{language}}",
+    "languageHint": "Öppnar listan över språk",
+    "pushTitle": "Push-notiser",
+    "pushBody": "Uppdateringar om skapande och publicering",
+    "supportTitle": "Support & juridik",
+    "help": "Behöver hjälp & kontakta support",
+    "terms": "Användarvillkor",
+    "privacy": "Integritetspolicy",
+    "restore": "Återställ köp",
+    "signOut": "Logga ut från Espanda",
+    "signOutNote": "Din aktiva prenumeration och utkastade katalogtillgångar är säkert sparade."
+  },
+  "drawer": {
+    "closeMenu": "Stäng menyn",
+    "switchLabel": "Arbetsyta {{name}}. Byt företag",
+    "balanceLabel_one": "Nuvarande saldo {{credits}} kredit kvar, {{plan}} plan",
+    "balanceLabel_other": "Nuvarande saldo {{credits}} krediter kvar, {{plan}} plan",
+    "balanceTitle": "Nuvarande saldo",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredit kvar</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> krediter kvar</rest>",
+    "sections": {
+      "create": "Skapa",
+      "grow": "Väx",
+      "manage": "Hantera"
+    },
+    "items": {
+      "chat": "Chatta för att göra video",
+      "generations": "Mina generationer",
+      "photos": "Fototillgångar",
+      "inbox": "Kunder & Inkorg",
+      "google": "Google Tillväxt",
+      "website": "Webbplatsstudio",
+      "connections": "Anslutningar",
+      "automations": "Automatiseringar",
+      "billing": "Planer & Fakturering",
+      "account": "Kontoinställningar"
+    },
+    "signOut": "Logga ut"
+  }
+}

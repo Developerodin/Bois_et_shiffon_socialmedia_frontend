@@ -1,0 +1,37 @@
+{
+  "back": "Indietro",
+  "close": "Chiudi",
+  "continue": "Continua",
+  "step": "Passo {{step}} di {{total}}",
+  "auth": {
+    "orContinueWith": "o continua con",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "Continuando, accetti i nostri <terms>Termini di servizio</terms> e la <privacy>Politica sulla privacy</privacy>.",
+    "allScreensDev": "Tutti gli schermi (dev)",
+    "googleFailed": "Accesso con Google non riuscito. Riprova o usa l'email.",
+    "googleNeedsBuild": "L'accesso con Google funziona nell'app Espanda installata, non in Expo Go. Usa l'email per ora."
+  },
+  "language": {
+    "title": "Lingua dell'app",
+    "search": "Cerca lingue",
+    "explainer": "Cambia i pulsanti e i menu dell'app. I tuoi post mantengono la lingua dei contenuti impostata per ogni brand.",
+    "noMatch": "Nessuna lingua corrisponde a “{{query}}”."
+  },
+  "module": {
+    "openMenu": "Apri menu",
+    "settings": "Impostazioni",
+    "credits_one": "{{count}} credito disponibile",
+    "credits_other": "{{count}} crediti disponibili",
+    "workspace": "Workspace {{name}}"
+  },
+  "nav": {
+    "reels": "Reels",
+    "posts": "Post",
+    "photoshoot": "Servizio fotografico",
+    "marketing": "Marketing",
+    "create": "Crea",
+    "ideas": "Idee",
+    "results": "Risultati"
+  }
+}

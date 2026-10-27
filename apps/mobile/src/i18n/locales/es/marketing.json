@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Espacio de trabajo {{name}}",
+    "customers": "Clientes",
+    "customerTabs": {
+      "inbox": "Bandeja de entrada",
+      "reviews": "Reseñas",
+      "people": "Personas"
+    },
+    "status": {
+      "notConnected": "No conectado"
+    },
+    "draft": "Borrador",
+    "googleGrowth": "Crecimiento en Google",
+    "websiteStudio": "Estudio de sitio web",
+    "editContent": "Editar contenido",
+    "diningTableImage": "Mesa de comedor Acacia Bunting",
+    "pages": {
+      "home": "Inicio",
+      "product": "Producto",
+      "contact": "Contacto"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Cambiar negocio, {{name}}",
+    "title": "Marketing",
+    "subtitle": "Gestiona la visibilidad de tu tienda, conversaciones y perfil de marca",
+    "cue": {
+      "imageLabel": "Unidad de TV Acacia en una sala de estar",
+      "dismiss": "Descartar sugerencia de hoy",
+      "eyebrow": "Sugerencia de hoy",
+      "title": "Añadir fotos nuevas al catálogo",
+      "body": "Añadir fotos nuevas mantiene tus reels automáticos y el borrador del sitio web actualizados."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Clientes",
+        "body": "Bandeja de entrada, reseñas y personas",
+        "cta": "Abrir bandeja"
+      },
+      "google": {
+        "title": "Crecimiento en Google",
+        "body": "Perfil, publicaciones y reseñas",
+        "cta": "Configurar"
+      },
+      "website": {
+        "title": "Estudio de sitio web",
+        "body": "Borrador, edita y publica tu sitio",
+        "cta": "Abrir borrador"
+      },
+      "business": {
+        "title": "Negocio",
+        "body": "Marca, activos y conexiones",
+        "cta": "Gestionar"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Aún no hay mensajes",
+    "emptyBody": "Conecta tus canales de clientes para recibir preguntas directas sobre productos y revisar borradores sugeridos por IA de manera segura antes de enviar.",
+    "connectChannel": "Conectar tu canal",
+    "emptyFootnote": "Los nuevos mensajes estarán disponibles automáticamente una vez conectados.",
+    "channelsTitle": "Canales de mensajería compatibles",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Conecta una cuenta para recibir mensajes."
+  },
+  "reply": {
+    "title": "Asistente de respuestas",
+    "referencedProduct": "Producto referenciado",
+    "suggestionTitle": "Sugerencia de respuesta de Espanda",
+    "draftLabel": "Borrador de respuesta",
+    "tone": "Tono: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Pulido y artesanal"
+    },
+    "done": "Hecho",
+    "editReply": "Editar respuesta",
+    "approvalTitle": "Aprobación manual requerida",
+    "approvalBody": "Ningún mensaje se envía sin tu clic explícito.",
+    "exampleTitle": "Modo de conversación de ejemplo",
+    "exampleBody": "Conectar tu cuenta de Instagram o Facebook reemplaza este ejemplo con preguntas reales de clientes."
+  },
+  "reviews": {
+    "emptyTitle": "Aún no hay reseñas",
+    "emptyBody": "Conecta tu perfil de Google Business para recopilar y responder automáticamente a los comentarios verificados de los clientes.",
+    "connectGoogle": "Conectar Google Business",
+    "automatedTitle": "Solicitudes de reseñas automatizadas",
+    "connectFirst": "Conectar primero",
+    "automatedBody": "Requiere conexión con Google Business para enviar invitaciones personalizadas de reseñas."
+  },
+  "people": {
+    "emptyTitle": "Aún no hay registros de clientes",
+    "emptyBody": "Las personas de las que recibas mensajes a través de los canales de clientes conectados aparecerán aquí.",
+    "connectChannel": "Conectar un canal",
+    "directoryTitle": "Tu directorio de clientes",
+    "directoryBody": "Abre el registro de una persona para ver sus conversaciones y detalles de contacto en un solo lugar.",
+    "connectedChannels": "Canales de clientes conectados"
+  },
+  "google": {
+    "presenceTitle": "Tu presencia en Google",
+    "presenceBody": "Mantén visible automáticamente tu showroom local en Francia en Google Maps y Search.",
+    "profileTitle": "Perfil de Google Business",
+    "profileBody": "Sincroniza la dirección oficial de tu tienda, horarios de apertura y nuevas fotos del catálogo directamente en Google Maps.",
+    "connectProfile": "Conectar perfil de Google Business",
+    "capabilitiesTitle": "Capacidades de sincronización automática",
+    "capabilities": {
+      "catalog": {
+        "title": "Actualizaciones de perfil y catálogo",
+        "body": "Sincroniza fotos recién tomadas y lanzamientos de muebles con tus actualizaciones locales de publicaciones de Google."
+      },
+      "reviews": {
+        "title": "Solicitudes de reseñas",
+        "body": "Genera invitaciones educadas en francés para reseñas después de visitas al showroom o compras."
+      },
+      "replies": {
+        "title": "Borradores de respuestas curadas",
+        "body": "Espanda elabora borradores de respuestas reflexivas para todas las reseñas de clientes entrantes para tu revisión."
+      }
+    },
+    "controlTitle": "Tú tienes el control",
+    "controlBody": "Nada se publica o responde en Google hasta que lo apruebes."
+  },
+  "googleWorkspace": {
+    "newPost": "Nueva publicación en Google",
+    "subtitle": "Previsualiza cómo los lanzamientos de productos y las reseñas del showroom se sincronizan directamente con Google.",
+    "tabs": {
+      "profile": "Perfil",
+      "posts": "Publicaciones",
+      "reviews": "Reseñas"
+    },
+    "draftPostTitle": "Borrador de publicación en Google",
+    "actionButton": "Botón de acción: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Saber más"
+    },
+    "reviewPost": "Revisar publicación",
+    "reviewsTitle": "Reseñas del showroom",
+    "reviewsBody": "Las reseñas y borradores de respuestas se recopilan con tus conversaciones de clientes.",
+    "openReviews": "Abrir reseñas",
+    "checklistTitle": "Lista de verificación de configuración de perfil",
+    "checklist": {
+      "profile": {
+        "label": "Perfil de Google conectado",
+        "value": "Encontrado"
+      },
+      "reviewLink": {
+        "label": "Enlace directo para solicitud de reseña",
+        "value": "Configurar"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Vista previa del borrador",
+    "catalogConnected": "Catálogo de tienda fuente conectado",
+    "connectDomain": "Conectar dominio",
+    "previewLabel": "Vista previa del borrador del sitio web",
+    "browserTitle": "Borrador del sitio web",
+    "fullPreview": "Vista previa completa",
+    "reviewPublish": "Revisar y publicar borrador",
+    "footnote": "Revisa tu contenido y dominio antes de publicar."
+  },
+  "websiteEdit": {
+    "saveChanges": "Guardar cambios del borrador",
+    "reviewPublish": "Revisar y publicar",
+    "preview": "Vista previa",
+    "title": "Editar contenido del sitio web",
+    "heroTitle": "Banner de la sección principal",
+    "replaceImage": "Reemplazar imagen",
+    "heroImageLabel": "Imagen del banner principal",
+    "headline": "Titular (francés)",
+    "description": "Descripción",
+    "sectionsTitle": "Secciones de la página",
+    "sectionCount_one": "{{count}} sección",
+    "sectionCount_other": "{{count}} secciones",
+    "sections": {
+      "heroBanner": "Banner principal",
+      "featuredCollection": "Colección destacada",
+      "showroomContact": "Showroom y contacto"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Verifica un dominio y revisa el contenido para publicar.",
+    "publish": "Publicar sitio web",
+    "keepDraft": "Guardar como borrador",
+    "title": "Revisa tu sitio web",
+    "subtitle": "Revisa tu contenido y destino antes de publicar.",
+    "heroImageLabel": "Imagen principal del sitio web",
+    "destinationTitle": "Destino de publicación",
+    "destinationBody": "Conecta y verifica un dominio para publicar este borrador.",
+    "setUpDomain": "Configurar un dominio"
+  }
+}

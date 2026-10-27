@@ -37,7 +37,7 @@ const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "nu
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Try again.");
 
 /** Approve the exact draft shown above, then publish or schedule it, with a full history. */
-export function ReleasePanel({ base, id, status, version, qualityBlocked, perms }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: string[] | null }) {
+export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: string[] | null; onChanged: () => void }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
   const [data, setData] = useState<Release | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -70,6 +70,8 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms 
     const next = await request<Release>(url, { method: "POST", body: JSON.stringify(body) });
     setData((d) => ({ ...next, boards: d?.boards }));
     void load();
+    // The post's status lives in the parent's list: refresh it now, not on its next poll.
+    onChanged();
   }
 
   if (!data || !perms) {
@@ -113,7 +115,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms 
       ) : status === "REJECTED" ? (
         <p className="text-sm text-muted-foreground">Rejected. Editing the draft sends it back through review.</p>
       ) : null}
-      <History data={data} canPublish={canPublish} onSettle={(attemptId, action) => act({ action, attemptId })} />
+      <History data={data} canPublish={canPublish} onSettle={(attemptId, action, link) => act({ action, attemptId, ...(link ? { url: link } : {}) })} />
     </section>
   );
 }
@@ -265,6 +267,7 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
         ...(req.needsVideo ? { videoUrl: videoUrl.trim() } : {}),
         ...(later ? { runAt: new Date(runAt).toISOString() } : {}),
       });
+      setConfirming(false);
     } catch (e) {
       setError(errText(e));
       setConfirming(false);
@@ -388,9 +391,10 @@ const ATTEMPT: Record<Attempt["status"], { label: string; tone: string }> = {
 };
 const VERDICT: Record<Decision["verdict"], string> = { APPROVED: "approved", CHANGES_REQUESTED: "asked for changes to", REJECTED: "rejected" };
 
-function History({ data, canPublish, onSettle }: { data: Release; canPublish: boolean; onSettle: (attemptId: string, action: "cancel" | "posted" | "not-posted") => Promise<void> }) {
+function History({ data, canPublish, onSettle }: { data: Release; canPublish: boolean; onSettle: (attemptId: string, action: "cancel" | "posted" | "not-posted", link?: string) => Promise<void> }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  const [link, setLink] = useState("");
   const rows = [
     ...data.decisions.map((d) => ({ at: d.at, key: d.id, d, a: null as Attempt | null })),
     ...data.attempts.map((a) => ({ at: a.publishedAt ?? a.runAt, key: a.id, d: null as Decision | null, a })),
@@ -398,10 +402,11 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
   if (!rows.length) return null;
 
   async function settle(id: string, action: "cancel" | "posted" | "not-posted") {
+    if (action === "posted" && link.trim() && !safeHttpUrl(link.trim())) return setError("That post link isn't a web address.");
     setPending(id + action);
     setError(null);
     try {
-      await onSettle(id, action);
+      await onSettle(id, action, action === "posted" ? link.trim() : undefined);
     } catch (e) {
       setError(errText(e));
     } finally {
@@ -414,8 +419,9 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
       <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">History</h3>
       {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
       <ol className="mt-2 flex flex-col divide-y divide-border">
-        {rows.map(({ key, d, a }) =>
-          d ? (
+        {rows.map(({ key, d, a }) => {
+          const overdue = a?.status === "SCHEDULED" && new Date(a.runAt).getTime() < Date.now();
+          return d ? (
             <li key={key} className="flex flex-col gap-0.5 py-2.5 text-sm">
               <span>
                 <span className="font-medium">{d.by}</span> {VERDICT[d.verdict]} {d.version ? `v${d.version}` : "an earlier draft"}
@@ -427,7 +433,7 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
           ) : a ? (
             <li key={key} className="flex flex-col gap-1.5 py-2.5 text-sm">
               <span className="flex flex-wrap items-center gap-2">
-                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", ATTEMPT[a.status].tone)}>{ATTEMPT[a.status].label}</span>
+                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", ATTEMPT[a.status].tone)}>{overdue ? "Overdue" : ATTEMPT[a.status].label}</span>
                 <span>
                   {PROVIDER_NAME[a.provider] ?? a.provider} · {a.account}
                   <span className="text-muted-foreground"> · {a.status === "PUBLISHED" && a.publishedAt ? when(a.publishedAt) : when(a.runAt)} · by {a.by}</span>
@@ -439,6 +445,8 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
                 )}
               </span>
               {a.error && a.status !== "PUBLISHED" && <span className="text-muted-foreground">{a.error}</span>}
+              {overdue && <span className="text-muted-foreground">Overdue — waiting for the job runner to post it.</span>}
+              {!canPublish && a.status === "PENDING_VERIFY" && <span className="text-muted-foreground">Waiting for someone who can publish to confirm whether it posted.</span>}
               {canPublish && a.status === "SCHEDULED" && (
                 <span>
                   <Button size="sm" variant="outline" disabled={pending !== null} onClick={() => settle(a.id, "cancel")}>
@@ -447,14 +455,15 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
                 </span>
               )}
               {canPublish && a.status === "PENDING_VERIFY" && (
-                <span className="flex flex-wrap gap-2">
+                <span className="flex flex-wrap items-center gap-2">
+                  <Input type="url" inputMode="url" aria-label="Post link (optional)" placeholder="Post link (optional)" value={link} onChange={(e) => setLink(e.target.value)} className="h-9 w-64 max-w-full" />
                   <Button size="sm" variant="outline" disabled={pending !== null} onClick={() => settle(a.id, "posted")}>It&rsquo;s live</Button>
                   <Button size="sm" variant="outline" disabled={pending !== null} onClick={() => settle(a.id, "not-posted")}>It didn&rsquo;t post</Button>
                 </span>
               )}
             </li>
-          ) : null,
-        )}
+          ) : null;
+        })}
       </ol>
     </div>
   );

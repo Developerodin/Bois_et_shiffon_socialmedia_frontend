@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} crédito",
+  "credits_other": "{{n}} créditos",
+  "tableAlt": "Mesa de comedor {{product}}",
+  "sheet": {
+    "dismiss": "Descartar"
+  },
+  "videoFailed": {
+    "title": "Tu reel no está listo",
+    "body": "La renderización se interrumpió durante la composición de la escena. Tus créditos reservados han sido liberados.",
+    "failed": "Fallido",
+    "facts_one": "{{seconds}}s · 9:16 Vertical · {{count}} escena",
+    "facts_other": "{{seconds}}s · 9:16 Vertical · {{count}} escenas",
+    "released_one": "{{n}} crédito reservado liberado",
+    "released_other": "{{n}} créditos reservados liberados",
+    "impact": "Impacto en el saldo de créditos",
+    "used_one": "{{n}} crédito usado",
+    "used_other": "{{n}} créditos usados",
+    "viewDetails": "Ver detalles",
+    "details": {
+      "failedAt": "Falló en",
+      "reserved": "Reservado",
+      "released": "Liberado",
+      "stages": {
+        "sceneComposition": "Composición de la escena"
+      }
+    },
+    "tryAgain_one": "Intenta de nuevo ({{n}} crédito)",
+    "tryAgain_other": "Intenta de nuevo ({{n}} créditos)",
+    "editStoryboard": "Editar storyboard"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "Duración de {{seconds}}s · 9:16 vertical",
+    "sheetLabel": "No hay suficientes créditos",
+    "title_one": "Necesitas {{n}} crédito",
+    "title_other": "Necesitas {{n}} créditos",
+    "body_one": "Actualmente tienes <b>{{n}} crédito disponible</b> en tu espacio de trabajo Profesional. Tu borrador de storyboard está guardado de forma segura.",
+    "body_other": "Actualmente tienes <b>{{n}} créditos disponibles</b> en tu espacio de trabajo Profesional. Tu borrador de storyboard está guardado de forma segura.",
+    "planName": "Plan Profesional",
+    "active": "Activo",
+    "renews": "Se renueva mensualmente",
+    "remaining": "{{available}} / {{monthly}} restantes",
+    "remainingA11y": "Créditos mensuales restantes",
+    "manage": "Gestionar créditos",
+    "keepEditing": "Seguir editando storyboard"
+  },
+  "reconnect": {
+    "backdropTitle": "Programar",
+    "backdropMeta": "Programado para {{date}}",
+    "title": "Reconectar {{network}}",
+    "body": "La autorización de tu cuenta ha expirado. Reconecta tu cuenta para reanudar la programación.",
+    "draftSaved": "Borrador existente guardado de forma segura",
+    "noPosting": "No se publicará nada hasta que lo confirmes explícitamente.",
+    "saveForLater": "Guardar borrador para más tarde"
+  },
+  "importFailed": {
+    "title": "No se pudo leer este sitio web",
+    "body": "No pudimos acceder o extraer fotos del catálogo de esta dirección. Verifica tu URL o continúa describiendo tu tienda.",
+    "urlLabel": "URL del sitio web de la tienda",
+    "changeUrlA11y": "Cambiar URL del sitio web",
+    "changeUrl": "Cambiar URL",
+    "reasons": {
+      "timeout": "El sitio web tardó demasiado en responder. No se realizaron cambios."
+    },
+    "quickOptions": "Opciones rápidas para continuar:",
+    "options": {
+      "retry": "Reintentar escanear si el servidor de tu tienda estuvo brevemente ocupado.",
+      "manual": "Añadir nombre del negocio y productos manualmente sin esperar."
+    },
+    "tryAgain": "Intenta de nuevo",
+    "addManually": "Añadir negocio manualmente"
+  }
+}

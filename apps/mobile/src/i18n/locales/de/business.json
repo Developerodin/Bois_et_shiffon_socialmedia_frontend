@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Arbeitsbereich {{name}}",
+    "logoLabel": "{{name}} Logo",
+    "settingsTitle": "Einstellungen",
+    "edit": "Bearbeiten",
+    "manage": "Verwalten",
+    "tabs": {
+      "myBusiness": "Mein Geschäft",
+      "billing": "Abrechnung",
+      "postsPlanner": "Beitragsplaner"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Geschäftsattribute",
+    "attributes": {
+      "location": "Standort",
+      "audience": "Zielgruppe",
+      "category": "Kategorie",
+      "subcategory": "Unterkategorie",
+      "storeType": "Geschäftstyp",
+      "website": "Webseite"
+    },
+    "brandPreferences": "Markenpräferenzen",
+    "brandPreferencesHint": "Farben, Ton, Sprache",
+    "photoAssets": "Fotoressourcen",
+    "photoAssetsHint": "Bunting Tisch- und TV-Einheit Fotos",
+    "connections": "Verbindungen",
+    "connectionsHint": "Soziale Kanäle & Google-Profil"
+  },
+  "brand": {
+    "title": "Markeneinstellungen",
+    "save": "Änderungen speichern",
+    "paletteTitle": "Markenfarbpalette",
+    "editHex": "Hex bearbeiten",
+    "watermarkTitle": "Outro-Wasserzeichen-Logo",
+    "watermarkBody": "Wird am Ende von Videoreels und Fotogrenzen angewendet",
+    "change": "Ändern",
+    "toneTitle": "Kreativer Ton",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxuriös",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Natürlich",
+      "minimalist": "Minimalistisch"
+    },
+    "cuesTitle": "Markensignaturhinweise",
+    "addCue": "Hinweis hinzufügen"
+  },
+  "photos": {
+    "title": "Fotoressourcen",
+    "refresh": "Aktualisieren",
+    "sourceTitle": "Quellwebseite",
+    "sourceBody": "Geteilte Fotos zur Erstellung von Reels, Feed-Posts und Fotoshootings. Keine Fotos werden ohne Ihre ausdrückliche Zustimmung veröffentlicht.",
+    "sources": {
+      "website": "Webseite ({{n}})",
+      "uploads": "Uploads ({{n}})"
+    },
+    "addPhotos": "Fotos hinzufügen",
+    "photosTitle": "Fotos",
+    "photoCount_one": "{{n}} Foto",
+    "photoCount_other": "{{n}} Fotos",
+    "emptyTitle": "Noch keine Uploads",
+    "emptyBody": "Studiofotos, die Sie hochladen, erscheinen hier.",
+    "upload": "Eigene Studiofotos hochladen"
+  },
+  "connections": {
+    "title": "Verbindungen",
+    "sourceTitle": "Quellwebseite",
+    "linked": "Verknüpft",
+    "sourceBody": "Produktfotos und Geschäftsdaten",
+    "channelsTitle": "Veröffentlichungskanäle",
+    "accounts": "Konten",
+    "connected": "Verbunden",
+    "notConnected": "Nicht verbunden",
+    "connect": "Verbinden",
+    "disconnect": "Trennen",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook-Seite",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Unternehmensprofil",
+      "shopify": "Shopify Direct Sync"
+    }
+  },
+  "automations": {
+    "title": "Automatisierungen",
+    "heading": "Ihre Veröffentlichungseinstellungen",
+    "intro": "Steuern Sie, wie Espanda geplante Beiträge vorab ausfüllt und Inhalte für Ihre Katalogartikel entwirft.",
+    "reviewTitle": "Vor Veröffentlichung prüfen",
+    "reviewBody": "Inhalte vor der Veröffentlichung prüfen.",
+    "required": "Erforderlich",
+    "reviewLabel": "Vor Veröffentlichung prüfen. Inhalte vor der Veröffentlichung prüfen. Erforderlich.",
+    "queueTitle": "Aktionen in Warteschlange",
+    "manageConnections": "Verbindungen verwalten",
+    "items": {
+      "monthly": {
+        "title": "Monatliche Pläne erstellen",
+        "body": "Bereiten Sie Ihren monatlichen Kalender mit Entwurfsbeiträgen vor.",
+        "active": "Aktiv · Entwürfe im Kalender gespeichert"
+      },
+      "autopublish": {
+        "title": "Genehmigte Beiträge automatisch veröffentlichen",
+        "body": "Geplante Reels automatisch veröffentlichen, sobald Sie \"Genehmigen\" tippen.",
+        "requires": "Erfordert Instagram-Verbindung",
+        "active": "Aktiv · veröffentlicht nach Genehmigung"
+      },
+      "replies": {
+        "title": "Anfragen im Showroom beantworten",
+        "body": "Verfeinerte französische Handwerksantworten in Ihrer Posteingangs-Warteschlange vorab ausfüllen.",
+        "requires": "Erfordert Nachrichtenkanal",
+        "active": "Aktiv · Entwürfe zu Ihrem Posteingang hinzugefügt"
+      }
+    },
+    "adsTitle": "Bezahlte Social Ads",
+    "comingSoon": "Demnächst",
+    "adsBody": "Automatisiertes Meta-Anzeigentest und Budgetsteuerung."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} Guthaben verfügbar",
+    "creditsAvailable_other": "{{n}} Guthaben verfügbar",
+    "planName": "{{tier}}-Plan",
+    "statusActive": "Aktiv",
+    "planBlurb": "Ihre Erstellungs- und Geschäftswerkzeuge",
+    "cycleTitle": "Abrechnungszyklus",
+    "renewsMonthly": "Erneuert sich monatlich",
+    "balanceTitle": "Guthabenstand",
+    "monthlyAllowance": "{{amount}} monatliches Guthaben",
+    "balanceLabel_one": "{{balance}} von {{n}} Guthaben verfügbar",
+    "balanceLabel_other": "{{balance}} von {{n}} Guthaben verfügbar",
+    "balanceOf_one": " / {{n}} Guthaben verfügbar",
+    "balanceOf_other": " / {{n}} Guthaben verfügbar",
+    "note_one": "{{n}} Guthaben verwendet · {{reserved}} für {{item}} reserviert. Guthaben erneuert sich monatlich.",
+    "note_other": "{{n}} Guthaben verwendet · {{reserved}} für {{item}} reserviert. Guthaben erneuert sich monatlich.",
+    "usageTitle": "Aktuelle Guthabennutzung",
+    "usageAside": "Arbeitsbereichsaktivität",
+    "today": "Heute",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} Reel",
+        "detail": "Für Erstellung reserviert"
+      },
+      "plan": {
+        "title": "Monatlicher Inhaltsplan",
+        "detail_one": "{{n}} Entwurfsbeitrag",
+        "detail_other": "{{n}} Entwurfsbeiträge"
+      },
+      "renewal": {
+        "title": "Monatliche Planerneuerung",
+        "detail": "Guthabenzyklus zurückgesetzt"
+      }
+    },
+    "spent_one": "-{{n}} Guthaben",
+    "spent_other": "-{{n}} Guthaben",
+    "added_one": "+{{n}} Guthaben",
+    "added_other": "+{{n}} Guthaben",
+    "included": "Inklusive",
+    "help": {
+      "missingCredits": "Fehlende Credits oder fehlgeschlagene Wiedergabe",
+      "restore": "Abonnementkäufe wiederherstellen",
+      "history": "Abrechnungsverlauf & Rechnungen"
+    }
+  },
+  "account": {
+    "title": "Kontoeinstellungen",
+    "workspaceTitle": "Arbeitsbereich",
+    "workspaceName": "Arbeitsbereichsname",
+    "teamTitle": "Teamzusammenarbeit",
+    "teamMembers": "Mitglieder des Arbeitsbereichs",
+    "preferencesTitle": "Einstellungen",
+    "languageTitle": "App-Oberflächensprache",
+    "languageBody": "Eingaben & Exporte bleiben auf Französisch",
+    "languageLabel": "App-Sprache, {{language}}",
+    "languageHint": "Öffnet die Liste der Sprachen",
+    "pushTitle": "Push-Benachrichtigungen",
+    "pushBody": "Erstellungs- und Veröffentlichungsupdates",
+    "supportTitle": "Support & Rechtliches",
+    "help": "Hilfe & Support kontaktieren",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzrichtlinie",
+    "restore": "Käufe wiederherstellen",
+    "signOut": "Von Espanda abmelden",
+    "signOutNote": "Ihr aktives Abonnement und entworfene Katalogressourcen bleiben sicher gespeichert."
+  },
+  "drawer": {
+    "closeMenu": "Menü schließen",
+    "switchLabel": "Arbeitsbereich {{name}}. Geschäft wechseln",
+    "balanceLabel_one": "Aktueller Kontostand {{credits}} Credit übrig, {{plan}}-Plan",
+    "balanceLabel_other": "Aktueller Kontostand {{credits}} Credits übrig, {{plan}}-Plan",
+    "balanceTitle": "Aktueller Kontostand",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> Credit übrig</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> Credits übrig</rest>",
+    "sections": {
+      "create": "Erstellen",
+      "grow": "Wachsen",
+      "manage": "Verwalten"
+    },
+    "items": {
+      "chat": "Chat für Videoerstellung",
+      "generations": "Meine Generationen",
+      "photos": "Fotoressourcen",
+      "inbox": "Kunden & Posteingang",
+      "google": "Google-Wachstum",
+      "website": "Website-Studio",
+      "connections": "Verbindungen",
+      "automations": "Automatisierungen",
+      "billing": "Pläne & Abrechnung",
+      "account": "Kontoeinstellungen"
+    },
+    "signOut": "Abmelden"
+  }
+}

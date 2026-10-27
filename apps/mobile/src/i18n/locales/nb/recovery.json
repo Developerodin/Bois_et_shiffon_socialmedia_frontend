@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} kreditt",
+  "credits_other": "{{n}} kreditter",
+  "tableAlt": "{{product}} spisebord",
+  "sheet": {
+    "dismiss": "Lukk"
+  },
+  "videoFailed": {
+    "title": "Videoen din er ikke klar",
+    "body": "Gjengivelsen ble avbrutt under scenekomposisjonen. Dine reserverte kreditter er frigitt.",
+    "failed": "Mislyktes",
+    "facts_one": "{{seconds}}s · 9:16 Vertikal · {{count}} scene",
+    "facts_other": "{{seconds}}s · 9:16 Vertikal · {{count}} scener",
+    "released_one": "{{n}} reservert kreditt frigitt",
+    "released_other": "{{n}} reserverte kreditter frigitt",
+    "impact": "Kredittbalanse påvirkning",
+    "used_one": "{{n}} kreditt brukt",
+    "used_other": "{{n}} kreditter brukt",
+    "viewDetails": "Se detaljer",
+    "details": {
+      "failedAt": "Mislyktes ved",
+      "reserved": "Reservert",
+      "released": "Frigitt",
+      "stages": {
+        "sceneComposition": "Scenekomposisjon"
+      }
+    },
+    "tryAgain_one": "Prøv igjen ({{n}} kreditt)",
+    "tryAgain_other": "Prøv igjen ({{n}} kreditter)",
+    "editStoryboard": "Rediger storyboard"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "{{seconds}}s varighet · 9:16 vertikal",
+    "sheetLabel": "Ikke nok kreditter",
+    "title_one": "Du trenger {{n}} kreditt",
+    "title_other": "Du trenger {{n}} kreditter",
+    "body_one": "Du har for øyeblikket <b>{{n}} kreditt tilgjengelig</b> i din Professional-arbeidsplass. Din storyboard-utkast er trygt lagret.",
+    "body_other": "Du har for øyeblikket <b>{{n}} kreditter tilgjengelig</b> i din Professional-arbeidsplass. Din storyboard-utkast er trygt lagret.",
+    "planName": "Professional-plan",
+    "active": "Aktiv",
+    "renews": "Fornyes månedlig",
+    "remaining": "{{available}} / {{monthly}} igjen",
+    "remainingA11y": "Månedlige kreditter igjen",
+    "manage": "Administrer kreditter",
+    "keepEditing": "Fortsett å redigere storyboard"
+  },
+  "reconnect": {
+    "backdropTitle": "Planlegg",
+    "backdropMeta": "Planlagt til {{date}}",
+    "title": "Koble til {{network}} igjen",
+    "body": "Din kontoautorisasjon har utløpt. Koble til kontoen din igjen for å fortsette planleggingen.",
+    "draftSaved": "Eksisterende utkast lagret trygt",
+    "noPosting": "Ingen innlegg vil starte før du eksplisitt bekrefter.",
+    "saveForLater": "Lagre utkast for senere"
+  },
+  "importFailed": {
+    "title": "Kunne ikke lese denne nettsiden",
+    "body": "Vi kunne ikke nå eller hente katalogbilder fra denne adressen. Sjekk URL-en din eller fortsett ved å beskrive butikken din.",
+    "urlLabel": "Butikkens nettadresse",
+    "changeUrlA11y": "Endre nettadresse",
+    "changeUrl": "Endre URL",
+    "reasons": {
+      "timeout": "Nettsiden tok for lang tid å svare. Ingen endringer ble gjort."
+    },
+    "quickOptions": "Raske alternativer for å fortsette:",
+    "options": {
+      "retry": "Prøv å skanne på nytt hvis butikkserveren din var midlertidig opptatt.",
+      "manual": "Legg til bedriftsnavn og produkter manuelt uten å vente."
+    },
+    "tryAgain": "Prøv igjen",
+    "addManually": "Legg til bedrift manuelt"
+  }
+}

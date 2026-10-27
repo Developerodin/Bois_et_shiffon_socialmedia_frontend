@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} kredit",
+  "credits_other": "{{n}} kreditter",
+  "tableAlt": "{{product}} spisebord",
+  "sheet": {
+    "dismiss": "Luk"
+  },
+  "videoFailed": {
+    "title": "Din video er ikke klar",
+    "body": "Rendering blev afbrudt under sceneopbygning. Dine reserverede kreditter er frigivet.",
+    "failed": "Fejl",
+    "facts_one": "{{seconds}}s · 9:16 Vertikal · {{count}} scene",
+    "facts_other": "{{seconds}}s · 9:16 Vertikal · {{count}} scener",
+    "released_one": "{{n}} reserveret kredit frigivet",
+    "released_other": "{{n}} reserverede kreditter frigivet",
+    "impact": "Kreditbalance påvirkning",
+    "used_one": "{{n}} kredit brugt",
+    "used_other": "{{n}} kreditter brugt",
+    "viewDetails": "Se detaljer",
+    "details": {
+      "failedAt": "Fejlede ved",
+      "reserved": "Reserveret",
+      "released": "Frigivet",
+      "stages": {
+        "sceneComposition": "Sceneopbygning"
+      }
+    },
+    "tryAgain_one": "Prøv igen ({{n}} kredit)",
+    "tryAgain_other": "Prøv igen ({{n}} kreditter)",
+    "editStoryboard": "Rediger storyboard"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "{{seconds}}s varighed · 9:16 vertikal",
+    "sheetLabel": "Ikke nok kreditter",
+    "title_one": "Du har brug for {{n}} kredit",
+    "title_other": "Du har brug for {{n}} kreditter",
+    "body_one": "Du har i øjeblikket <b>{{n}} kredit tilgængelig</b> i din Professional arbejdsområde. Dit storyboard-udkast er sikkert gemt.",
+    "body_other": "Du har i øjeblikket <b>{{n}} kreditter tilgængelige</b> i din Professional arbejdsområde. Dit storyboard-udkast er sikkert gemt.",
+    "planName": "Professional plan",
+    "active": "Aktiv",
+    "renews": "Fornyes månedligt",
+    "remaining": "{{available}} / {{monthly}} tilbage",
+    "remainingA11y": "Månedlige kreditter tilbage",
+    "manage": "Administrer kreditter",
+    "keepEditing": "Fortsæt med at redigere storyboard"
+  },
+  "reconnect": {
+    "backdropTitle": "Planlæg",
+    "backdropMeta": "Planlagt til {{date}}",
+    "title": "Genopret forbindelse til {{network}}",
+    "body": "Din kontoautorisation er udløbet. Genopret din konto for at genoptage planlægning.",
+    "draftSaved": "Eksisterende udkast gemt sikkert",
+    "noPosting": "Ingen opslag vil starte, før du eksplicit bekræfter.",
+    "saveForLater": "Gem udkast til senere"
+  },
+  "importFailed": {
+    "title": "Kunne ikke læse denne hjemmeside",
+    "body": "Vi kunne ikke nå eller udtrække katalogfotos fra denne adresse. Tjek din URL eller fortsæt ved at beskrive din butik.",
+    "urlLabel": "Butikswebadresse",
+    "changeUrlA11y": "Skift webadresse",
+    "changeUrl": "Skift URL",
+    "reasons": {
+      "timeout": "Hjemmesiden tog for lang tid at svare. Ingen ændringer blev foretaget."
+    },
+    "quickOptions": "Hurtige muligheder for at fortsætte:",
+    "options": {
+      "retry": "Prøv at scanne igen, hvis din butiksserver var kortvarigt optaget.",
+      "manual": "Tilføj virksomhedsnavn og produkter manuelt uden at vente."
+    },
+    "tryAgain": "Prøv igen",
+    "addManually": "Tilføj virksomhed manuelt"
+  }
+}

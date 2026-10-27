@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Bun venit la Espanda",
+    "subtitle": "Creează conținut pentru afacerea ta.",
+    "mobileNumber": "Număr de telefon",
+    "countryCode": "Prefix țară {{code}}",
+    "sendCode": "Trimite codul",
+    "useEmail": "Folosește emailul",
+    "sendFailed": "Nu am putut trimite codul. Încearcă din nou sau folosește emailul.",
+    "chooseCountry": "Alege țara",
+    "searchCountry": "Caută țara sau codul"
+  },
+  "email": {
+    "title": "Autentificare cu email",
+    "subtitle": "Îți vom trimite un cod de verificare fără parolă pe email.",
+    "tagline": "Marketing inteligent pentru retailul modern",
+    "label": "Adresă de email",
+    "placeholder": "nume@afacereata.com",
+    "notConfigured": "Autentificarea prin email nu este configurată încă pe acest server.",
+    "sendFailed": "Nu am putut trimite codul. Încearcă din nou.",
+    "useMobile": "Folosește numărul de telefon",
+    "linkTitle": "Adaugă emailul",
+    "linkSubtitle": "Numărul tău este verificat. Adaugă un email pentru chitanțe și invitații de echipă. Îți vom trimite un cod."
+  },
+  "verify": {
+    "title": "Introdu codul tău",
+    "sent": "Am trimis un cod de verificare la {{destination}}",
+    "codeLabel": "Cod de verificare din șase cifre",
+    "submit": "Verifică codul",
+    "checkFailed": "Nu am putut verifica codul. Încearcă din nou.",
+    "resendFailed": "Nu am putut retrimite codul.",
+    "resendIn": "Retrimite codul în {{time}}",
+    "resend": "Retrimite codul",
+    "changeEmail": "Schimbă emailul",
+    "changeMobile": "Schimbă numărul de telefon"
+  },
+  "welcome": {
+    "getStarted": "Începe acum",
+    "footnote": "Afacerea ta, direcția ta creativă.",
+    "photosLabel": "Exemple din catalogul {{brand}}",
+    "title": "Marketing care se simte ca afacerea ta",
+    "body": "Generează videoclipuri de studio, ședințe foto și postări de produs din catalogul tău.",
+    "steps": {
+      "goal": {
+        "title": "Alege-ți obiectivul",
+        "body": "Selectează primul format creativ pe care vrei să-l produci."
+      },
+      "business": {
+        "title": "Împărtășește afacerea ta",
+        "body": "Împărtășește site-ul tău sau adaugă detaliile afacerii tale."
+      },
+      "review": {
+        "title": "Revizuiește conținutul pregătit",
+        "body": "Revizuiește ideile create în jurul produselor tale."
+      }
+    }
+  },
+  "goal": {
+    "title": "Ce vei crea mai întâi?",
+    "subtitle": "Vom personaliza spațiul tău de lucru inițial și șabloanele în jurul focusului tău principal.",
+    "note": "Toate instrumentele și formatele de studio rămân disponibile ulterior.",
+    "options": {
+      "socialPlan": {
+        "title": "Plan social media",
+        "description": "O lună de postări și descrieri"
+      },
+      "marketingVideos": {
+        "title": "Videoclipuri de marketing",
+        "description": "Videoclipuri de studio din catalogul tău"
+      },
+      "fashionPhotoshoot": {
+        "title": "Ședință foto de modă",
+        "description": "Stilizare articole pe modele"
+      },
+      "productPhotoshoot": {
+        "title": "Ședință foto de produs",
+        "description": "Fotografii de produs pentru catalogul tău"
+      }
+    }
+  },
+  "source": {
+    "title": "Unde este afacerea ta online?",
+    "subtitle": "Espanda scanează magazinul tău online sau listarea pentru a genera automat media precisă pentru brand.",
+    "options": {
+      "website": {
+        "title": "Website",
+        "description": "Shopify, WooCommerce, domeniu personalizat"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Magazin local, boutique sau showroom"
+      },
+      "marketplace": {
+        "title": "Piață online",
+        "description": "Amazon, Etsy, eBay sau magazin Instagram"
+      },
+      "wholesale": {
+        "title": "En-gros / B2B",
+        "description": "Faire, Ankorstore, catalog privat"
+      },
+      "none": {
+        "title": "Fără prezență online",
+        "description": "Descrie articolele manual"
+      },
+      "other": {
+        "title": "Altceva",
+        "description": "Cont social, lookbook PDF sau fișier"
+      }
+    }
+  },
+  "website": {
+    "title": "Care este site-ul tău?",
+    "subtitle": "Vom extrage automat fotografiile din catalog, culorile și tonul vocii tale.",
+    "label": "URL-ul magazinului",
+    "placeholder": "www.magazinultau.com",
+    "valid": "Adresă validă",
+    "willRead": "Vom citi acest site",
+    "facts": {
+      "catalog": {
+        "key": "Produse din catalog",
+        "value": "Fotografii de produs"
+      },
+      "identity": {
+        "key": "Identitatea brandului",
+        "value": "Culori & Tipografie"
+      },
+      "tone": {
+        "key": "Ton & stil",
+        "value": "Voce din paginile tale"
+      }
+    },
+    "safeNote": "Importul catalogului nu schimbă nimic pe magazinul tău live."
+  },
+  "manual": {
+    "title": "Adaugă detalii despre afacere",
+    "subtitle": "Împărtășește un link de listare sau descrie catalogul tău manual.",
+    "modeLabel": "Cum să adaugi afacerea ta",
+    "modeListing": "URL de listare",
+    "modeDescribe": "Descrie afacerea",
+    "listingLabel": "Link de listare *",
+    "listingPlaceholder": "Link Etsy, Amazon, Google Maps sau magazin",
+    "nameLabel": "Numele afacerii *",
+    "namePlaceholder": "ex. Atelier Bois & Chiffons",
+    "sellsLabel": "Ce vinzi? *",
+    "sellsPlaceholder": "ex. Mese din lemn lucrate manual, suporturi TV și decor modern pentru casă...",
+    "locationLabel": "Locație (opțional)",
+    "locationPlaceholder": "Oraș, țară sau adresă showroom",
+    "websiteLabel": "Website (opțional)"
+  },
+  "learning": {
+    "working": "Se lucrează",
+    "tryAgain": "Încearcă din nou",
+    "inProgressButton": "Învățare în curs...",
+    "saved": "Vom păstra progresul tău salvat.",
+    "title": "Cunoaștem afacerea ta",
+    "bodyWebsite": "Analizăm site-ul tău pentru a extrage identitatea brandului, cataloagele și tonul vizual.",
+    "bodyManual": "Transformăm descrierea ta în identitatea brandului, cataloage și ton vizual.",
+    "fallbackName": "Afacerea ta",
+    "sourceWebsite": "Sursa principală a site-ului",
+    "sourceManual": "Detalii despre afacere",
+    "foundWebsite": "Site găsit",
+    "foundManual": "Detalii adăugate",
+    "stages": {
+      "open": "Deschidem site-ul",
+      "identity": "Citirea identității brandului & tonului",
+      "photos": "Colectăm fotografii de produs"
+    },
+    "status": {
+      "done": "Complet",
+      "running": "În curs",
+      "queued": "În așteptare"
+    },
+    "errors": {
+      "stopped": "Citirea site-ului tău a fost oprită.",
+      "noWorkspace": "Contul tău nu are încă un spațiu de lucru.",
+      "startFailed": "Nu am putut începe citirea site-ului tău.",
+      "restartFailed": "Nu am putut reporni. Încearcă din nou."
+    }
+  },
+  "review": {
+    "title": "Revizuiește detaliile afacerii",
+    "subtitle": "Am găsit aceste detalii pe site-ul tău. Le poți edita oricând.",
+    "edit": "Editează",
+    "tagline": "Slogan",
+    "editTagline": "Editează sloganul",
+    "categoryLocation": "Categorie & locație",
+    "audience": "Public țintă",
+    "editAudience": "Editează publicul țintă",
+    "products_one": "Produse detectate ({{count}})",
+    "products_other": "Produse detectate ({{count}})",
+    "found": "Găsit",
+    "strengths": "Puncte tari ale brandului",
+    "tags": {
+      "homeLiving": "Casă & Living",
+      "france": "Franța",
+      "productCatalog": "Catalog de produse",
+      "showroomEshop": "Showroom fizic & e-shop"
+    }
+  },
+  "brand": {
+    "title": "Brand & stil creativ",
+    "subtitle": "Ajustează cum Espanda îți creează ședințele foto și postările sociale.",
+    "identity": "Identitatea {{name}}",
+    "paletteMeta": "Paleta site-ului · Editabilă",
+    "swatches": "Mostre de culoare importate de pe site",
+    "tone": "Ton creativ",
+    "selected_one": "{{count}} selectat",
+    "selected_other": "{{count}} selectate",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxos",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Natural",
+      "minimalist": "Minimalist"
+    },
+    "contentLanguage": "Limba conținutului",
+    "contentLanguageA11y": "Limba conținutului, {{language}}. Schimbă",
+    "languages": {
+      "fr": "Franceză (FR)",
+      "en": "Engleză (US)"
+    },
+    "audienceProfile": "Profilul audienței",
+    "audienceHome": "Casă & mobilier",
+    "featured": "Produse de catalog recomandate",
+    "readyForBatch_one": "{{count}} gata pentru lot",
+    "readyForBatch_other": "{{count}} gata pentru lot",
+    "sampleProducts": {
+      "table": "Masă Bunting",
+      "tableDetail": "Acacia 240cm",
+      "tv": "Unitate TV",
+      "tvDetail": "Acacia 2 uși"
+    },
+    "channelsNote": "Instagram și Facebook pot fi conectate în pasul următor. (Niciun canal conectat încă)"
+  },
+  "preparing": {
+    "ready": "Studioul este gata",
+    "preparing": "Pregătirea studioului",
+    "loadingButton": "Pregătim ideile tale…",
+    "catalogSafe": "Catalogul tău rămâne neatins în magazinul tău.",
+    "title": "Pregătirea primelor tale idei",
+    "body": "Generăm role sociale personalizate și seturi de scenă din colecția ta {{name}}.",
+    "photosTitle": "Colectăm fotografii",
+    "photosDetail": "Set de dining {{product}}",
+    "storyboardTitle": "Construim storyboard-ul",
+    "storyboardDetail_one": "Compunem {{count}} scenă video",
+    "storyboardDetail_other": "Compunem {{count}} scene video",
+    "nextTitle": "Urmează: Revizuiește-ți ideile",
+    "nextDetail": "Selectează hook-uri și presetări audio"
+  },
+  "connect": {
+    "readyToConnect": "• Gata de conectare",
+    "title": "Publică când ești gata",
+    "subtitle": "Conectează-ți conturile sociale pentru ca Espanda să poată publica sau salva rolele și prezentările de produse gata de postat direct.",
+    "toolsTitle": "Instrumente de publicare",
+    "featureReels": "Publică pe Instagram Feed & Reels",
+    "featureCaptions": "Folosește-ți descrierile și hashtag-urile",
+    "featureReview": "Întotdeauna revizuiești înainte ca ceva să fie publicat",
+    "assurance": "Niciun conținut nu este publicat fără confirmarea ta",
+    "connectInstagram": "Conectează Instagram",
+    "connectFacebook": "Conectează Facebook",
+    "skip": "Sari peste acum",
+    "laterTitle": "Conectează mai târziu?",
+    "laterBody": "Poți încă să creezi, editezi și descarci role și ședințe foto de înaltă rezoluție în galeria ta. Poți să-ți conectezi Instagram-ul oricând în Setări.",
+    "laterDownload": "Descarcă-ți creațiile",
+    "laterSettings": "Conectează canalele în Setări",
+    "continueWithout": "Continuă fără conectare"
+  }
+}

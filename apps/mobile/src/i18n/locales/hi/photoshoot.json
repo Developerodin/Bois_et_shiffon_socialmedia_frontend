@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "मेन्यू खोलें",
+    "creditsAvailable_one": "{{count}} क्रेडिट उपलब्ध",
+    "creditsAvailable_other": "{{count}} क्रेडिट्स उपलब्ध",
+    "settings": "सेटिंग्स",
+    "appModules": "ऐप मॉड्यूल्स",
+    "modules": {
+      "reels": "रील्स",
+      "posts": "पोस्ट्स",
+      "photoshoot": "फोटोशूट",
+      "marketing": "मार्केटिंग"
+    },
+    "moduleNavigation": "मॉड्यूल नेविगेशन",
+    "create": "बनाएं",
+    "results": "परिणाम",
+    "goBack": "वापस जाएं",
+    "switchBusiness": "व्यवसाय बदलें, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} आइटम",
+    "optionWithCount_other": "{{label}} {{count}} आइटम्स"
+  },
+  "create": {
+    "title": "फोटोशूट बनाएं",
+    "subtitle": "प्रोडक्ट फोटो बनाएं और मॉडल्स पर परिधान स्टाइल करें।",
+    "product": {
+      "imageLabel": "{{name}} डाइनिंग टेबल",
+      "pill": "कैटलॉग आइटम",
+      "title": "प्रोडक्ट फोटोशूट",
+      "body": "कैटलॉग आइटम्स को आर्किटेक्चरल इंटीरियर और स्टूडियो सेटिंग्स में प्राकृतिक लाइटिंग के साथ रखें।",
+      "cta": "नया प्रोडक्ट शूट"
+    },
+    "fashion": {
+      "imageLabel": "इलस्ट्रेटेड परिधान फोटोग्राफी स्टूडियो",
+      "title": "फैशन फोटोशूट",
+      "body": "मॉडल्स पर परिधान को कैंपेन-रेडी सीन में स्टाइल करें।",
+      "cta": "नया फैशन शूट"
+    }
+  },
+  "product": {
+    "title": "प्रोडक्ट फोटोशूट",
+    "estimate_one": "अनुमान: {{count}} क्रेडिट",
+    "estimate_other": "अनुमान: {{count}} क्रेडिट्स",
+    "available": "{{count}} उपलब्ध",
+    "generate": "फोटोशूट जनरेट करें",
+    "selectedAsset": "चयनित कैटलॉग एसेट",
+    "changeAsset": "एसेट बदलें",
+    "aspectRatio": "आस्पेक्ट रेशियो",
+    "sceneStyle": "सीन स्टाइल",
+    "scenes": {
+      "studio": "स्टूडियो",
+      "interior": "इंटीरियर",
+      "custom": "कस्टम"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "क्रिएटिव ब्रीफ",
+    "briefHint": "लाइटिंग, माहौल या विशिष्ट डेकोर संकेतों को परिष्कृत करें",
+    "sourcePreview": "सोर्स प्रीव्यू",
+    "fullPreview": "{{product}}, फुल प्रीव्यू",
+    "sourceImage": "सोर्स इमेज"
+  },
+  "fashion": {
+    "title": "फैशन फोटोशूट",
+    "generate": "फोटोशूट जनरेट करें",
+    "uploadToEnable": "जनरेशन को सक्षम करने के लिए एक परिधान फोटो अपलोड करें",
+    "heading": "अपना फैशन शूट बनाएं",
+    "subtitle": "फ्लैट लेज़ या हैंगर परिधानों को यथार्थवादी स्टेज्ड मॉडल्स में बदलें।",
+    "garmentPhoto": "परिधान फोटो",
+    "required": "आवश्यक",
+    "garmentSelected": "परिधान फोटो: {{label}}. फोटो बदलें",
+    "addGarment": "परिधान फोटो जोड़ें",
+    "changeGarment": "परिधान फोटो बदलें",
+    "garmentHint": "न्यूट्रल बैकग्राउंड पर PNG या JPG, फ्लैट ले या घोस्ट मैनेक्विन",
+    "modelStyling": "मॉडल और स्टाइलिंग",
+    "modelSelected": "मॉडल और स्टाइलिंग: {{model}}",
+    "models": {
+      "choose": "एक मॉडल चुनें",
+      "natural": "{{name}} · नैचुरल स्टाइलिंग",
+      "editorial": "{{name}} · एडिटोरियल स्टाइलिंग",
+      "casual": "{{name}} · कैज़ुअल स्टाइलिंग"
+    },
+    "pose": "पोज़",
+    "poses": {
+      "fullBody": "फुल बॉडी",
+      "threeQuarter": "थ्री-क्वार्टर",
+      "closeUp": "क्लोज़-अप डिटेल"
+    },
+    "outputFormat": "आउटपुट फॉर्मेट",
+    "formats": {
+      "feedPortrait": "फीड पोर्ट्रेट",
+      "storyReel": "स्टोरी / रील"
+    },
+    "background": "बैकग्राउंड सेटिंग",
+    "backgrounds": {
+      "studioMinimal": "स्टूडियो मिनिमल",
+      "urbanStreet": "अर्बन स्ट्रीट",
+      "naturalInterior": "प्राकृतिक इंटीरियर"
+    },
+    "requirementsTitle": "अपलोड आवश्यकताएँ",
+    "requirements": {
+      "contrast": "बैकग्राउंड के खिलाफ उच्च कंट्रास्ट",
+      "wrinkles": "कोई भारी सिलवटें नहीं",
+      "frontFacing": "फ्रंट-फेसिंग एंगल"
+    }
+  },
+  "source": {
+    "title": "सोर्स एसेट चुनें",
+    "uploadNewLabel": "नई फोटो अपलोड करें",
+    "uploadNew": "नया अपलोड करें",
+    "noPhotoSelected": "कोई फोटो चयनित नहीं",
+    "photosSelected_one": "{{count}} फोटो चयनित",
+    "photosSelected_other": "{{count}} फोटो चयनित",
+    "selectPhoto": "एक फोटो चुनें",
+    "usePhoto": "फोटो का उपयोग करें",
+    "source": "सोर्स",
+    "tabs": {
+      "website": "वेबसाइट",
+      "uploads": "अपलोड्स"
+    },
+    "businessWebsite": "{{name}} · वेबसाइट",
+    "fromWebsite": "वेबसाइट से",
+    "filterCatalog": "कैटलॉग फ़िल्टर करें",
+    "filters": {
+      "all": "सभी आइटम्स",
+      "tables": "टेबल्स",
+      "storage": "स्टोरेज"
+    },
+    "addPhoto": "फोटो जोड़ें",
+    "tip": "स्वच्छ प्रोडक्ट कटआउट्स इष्टतम फोटोशूट परिणाम देते हैं। Espanda Studio मूल अकासिया लकड़ी की बनावट को संरक्षित करेगा।"
+  },
+  "generating": {
+    "backToWorkspace": "वर्कस्पेस पर वापस",
+    "returnToWorkspace": "वर्कस्पेस पर लौटें",
+    "title": "आपकी फोटो तैयार की जा रही है",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "आपकी जनरेशन सुरक्षित रूप से बैकग्राउंड में चल रही है। आपको पूर्ण एसेट्स परिणामों में मिलेंगे।",
+    "status": {
+      "done": "हो गया",
+      "active": "प्रगति पर",
+      "queued": "कतारबद्ध"
+    },
+    "progress": "जनरेट हो रहा है",
+    "sample": {
+      "title": "{{name}} डाइनिंग फोटोशूट",
+      "description": "आर्किटेक्चरल डे लाइट इंटीरियर में {{product}} का स्टेजिंग।",
+      "variations_one": "{{count}} वेरिएशन",
+      "variations_other": "{{count}} वेरिएशन्स"
+    },
+    "steps": {
+      "catalog": "कैटलॉग एसेट प्रोसेसिंग",
+      "compose": "सीन और लाइटिंग कंपोज़िंग",
+      "finish": "फिनिशिंग और कलर कैलिब्रेशन"
+    }
+  },
+  "results": {
+    "title": "फोटोशूट्स",
+    "subtitle": "आपकी प्रोडक्ट और फैशन फोटो",
+    "newPhotoshoot": "नया फोटोशूट",
+    "filterLabel": "फोटोशूट्स फ़िल्टर करें",
+    "filters": {
+      "all": "सभी ({{count}})",
+      "product": "प्रोडक्ट ({{count}})",
+      "fashion": "फैशन ({{count}})"
+    },
+    "empty": "अभी तक कोई फोटोशूट नहीं।",
+    "processingLabel": "{{title}}. प्रोसेसिंग, {{percent}}%",
+    "processingBadge_one": "प्रोसेसिंग · {{count}} क्रेडिट",
+    "processingBadge_other": "प्रोसेसिंग · {{count}} क्रेडिट्स",
+    "preview": "पूर्वावलोकन",
+    "reviewPhotoLabel": "फोटो की समीक्षा करें, {{title}}",
+    "reviewPhoto": "फोटो की समीक्षा करें",
+    "sample": {
+      "studioStaging": "{{product}} · स्टूडियो स्टेजिंग",
+      "rendering": "रेंडरिंग स्टेज · {{percent}}%",
+      "interiorReady_one": "इंटीरियर · {{ratio}} · {{count}} फोटो तैयार",
+      "interiorReady_other": "इंटीरियर · {{ratio}} · {{count}} फोटोज़ तैयार",
+      "studioDaylight": "स्टूडियो डे लाइट · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "अधिक विकल्प",
+    "downloadPhoto": "फोटो डाउनलोड करें",
+    "variation": "विविधता",
+    "share": "फोटोशूट साझा करें",
+    "samplePreview": "नमूना पूर्वावलोकन",
+    "compareOriginal": "मूल की तुलना करें",
+    "expandView": "व्यू विस्तृत करें",
+    "stagingSummary": "स्टेजिंग सारांश",
+    "format": "प्रारूप",
+    "creationCost": "निर्माण लागत",
+    "credits_one": "{{count}} क्रेडिट",
+    "credits_other": "{{count}} क्रेडिट्स",
+    "sample": {
+      "headerTitle": "{{name}} फोटोशूट",
+      "vertical": "{{ratio}} वर्टिकल",
+      "architecturalInterior": "आर्किटेक्चरल इंटीरियर",
+      "studioDaylight": "स्टूडियो डे लाइट",
+      "formatBadge": "{{ratio}} प्रारूप",
+      "naturalStudio": "प्राकृतिक स्टूडियो",
+      "portraitPhoto": "पोर्ट्रेट फोटो"
+    }
+  }
+}

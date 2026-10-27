@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} crédit",
+  "credits_other": "{{n}} crédits",
+  "tableAlt": "Table à manger {{product}}",
+  "sheet": {
+    "dismiss": "Fermer"
+  },
+  "videoFailed": {
+    "title": "Votre vidéo n'est pas prête",
+    "body": "Le rendu a été interrompu lors de la composition des scènes. Vos crédits réservés ont été libérés.",
+    "failed": "Échec",
+    "facts_one": "{{seconds}}s · 9:16 Vertical · {{count}} scène",
+    "facts_other": "{{seconds}}s · 9:16 Vertical · {{count}} scènes",
+    "released_one": "{{n}} crédit réservé libéré",
+    "released_other": "{{n}} crédits réservés libérés",
+    "impact": "Impact sur le solde de crédits",
+    "used_one": "{{n}} crédit utilisé",
+    "used_other": "{{n}} crédits utilisés",
+    "viewDetails": "Voir détails",
+    "details": {
+      "failedAt": "Échec à",
+      "reserved": "Réservé",
+      "released": "Libéré",
+      "stages": {
+        "sceneComposition": "Composition des scènes"
+      }
+    },
+    "tryAgain_one": "Réessayer ({{n}} crédit)",
+    "tryAgain_other": "Réessayer ({{n}} crédits)",
+    "editStoryboard": "Modifier le storyboard"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "Durée {{seconds}}s · 9:16 vertical",
+    "sheetLabel": "Pas assez de crédits",
+    "title_one": "Vous avez besoin de {{n}} crédit",
+    "title_other": "Vous avez besoin de {{n}} crédits",
+    "body_one": "Vous avez actuellement <b>{{n}} crédit disponible</b> dans votre espace de travail Professionnel. Votre brouillon de storyboard est sauvegardé en toute sécurité.",
+    "body_other": "Vous avez actuellement <b>{{n}} crédits disponibles</b> dans votre espace de travail Professionnel. Votre brouillon de storyboard est sauvegardé en toute sécurité.",
+    "planName": "Plan Professionnel",
+    "active": "Actif",
+    "renews": "Renouvellement mensuel",
+    "remaining": "{{available}} / {{monthly}} restants",
+    "remainingA11y": "Crédits mensuels restants",
+    "manage": "Gérer les crédits",
+    "keepEditing": "Continuer à modifier le storyboard"
+  },
+  "reconnect": {
+    "backdropTitle": "Planification",
+    "backdropMeta": "Prévu pour le {{date}}",
+    "title": "Reconnecter {{network}}",
+    "body": "L'autorisation de votre compte a expiré. Reconnectez votre compte pour reprendre la planification.",
+    "draftSaved": "Brouillon existant sauvegardé en toute sécurité",
+    "noPosting": "Aucune publication ne commencera tant que vous n'avez pas confirmé explicitement.",
+    "saveForLater": "Enregistrer le brouillon pour plus tard"
+  },
+  "importFailed": {
+    "title": "Impossible de lire ce site web",
+    "body": "Nous n'avons pas pu atteindre ou extraire les photos du catalogue de cette adresse. Vérifiez votre URL ou continuez en décrivant votre magasin.",
+    "urlLabel": "URL du site web du magasin",
+    "changeUrlA11y": "Changer l'URL du site web",
+    "changeUrl": "Changer l'URL",
+    "reasons": {
+      "timeout": "Le site web a mis trop de temps à répondre. Aucun changement n'a été effectué."
+    },
+    "quickOptions": "Options rapides pour continuer :",
+    "options": {
+      "retry": "Réessayez de scanner si le serveur de votre magasin était momentanément occupé.",
+      "manual": "Ajoutez le nom de l'entreprise et les produits manuellement sans attendre."
+    },
+    "tryAgain": "Réessayer",
+    "addManually": "Ajouter l'entreprise manuellement"
+  }
+}

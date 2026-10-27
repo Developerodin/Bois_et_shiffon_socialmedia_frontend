@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Çalışma Alanı {{name}}",
+    "logoLabel": "{{name}} logosu",
+    "settingsTitle": "Ayarlar",
+    "edit": "Düzenle",
+    "manage": "Yönet",
+    "tabs": {
+      "myBusiness": "İşletmem",
+      "billing": "Faturalama",
+      "postsPlanner": "Gönderi Planlayıcı"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "İşletme Özellikleri",
+    "attributes": {
+      "location": "Konum",
+      "audience": "Hedef Kitle",
+      "category": "Kategori",
+      "subcategory": "Alt Kategori",
+      "storeType": "Mağaza Türü",
+      "website": "Web Sitesi"
+    },
+    "brandPreferences": "Marka Tercihleri",
+    "brandPreferencesHint": "Renkler, ton, dil",
+    "photoAssets": "Fotoğraf Varlıkları",
+    "photoAssetsHint": "Bunting masa ve TV ünitesi fotoğrafları",
+    "connections": "Bağlantılar",
+    "connectionsHint": "Sosyal kanallar & Google profili"
+  },
+  "brand": {
+    "title": "Marka Ayarları",
+    "save": "Değişiklikleri Kaydet",
+    "paletteTitle": "Marka Renk Paleti",
+    "editHex": "Hex Düzenle",
+    "watermarkTitle": "Outro Filigran Logosu",
+    "watermarkBody": "Video sonlarına ve fotoğraf kenarlarına uygulanır",
+    "change": "Değiştir",
+    "toneTitle": "Yaratıcı Ton",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Lüks",
+      "elegant": "Zarif",
+      "premium": "Premium",
+      "natural": "Doğal",
+      "minimalist": "Minimalist"
+    },
+    "cuesTitle": "Marka İmza İpuçları",
+    "addCue": "İpucu Ekle"
+  },
+  "photos": {
+    "title": "Fotoğraf Varlıkları",
+    "refresh": "Yenile",
+    "sourceTitle": "Kaynak Web Sitesi",
+    "sourceBody": "Paylaşılan fotoğraflar, makara, gönderi ve çekim sahnelemesi oluşturmak için kullanılır. Onayınız olmadan dışa fotoğraf yayınlanmaz.",
+    "sources": {
+      "website": "Web Sitesi ({{n}})",
+      "uploads": "Yüklemeler ({{n}})"
+    },
+    "addPhotos": "Fotoğraf Ekle",
+    "photosTitle": "Fotoğraflar",
+    "photoCount_one": "{{n}} fotoğraf",
+    "photoCount_other": "{{n}} fotoğraf",
+    "emptyTitle": "Henüz yükleme yok",
+    "emptyBody": "Yüklediğiniz stüdyo fotoğrafları burada görünür.",
+    "upload": "Özel stüdyo fotoğrafları yükle"
+  },
+  "connections": {
+    "title": "Bağlantılar",
+    "sourceTitle": "Kaynak Web Sitesi",
+    "linked": "Bağlı",
+    "sourceBody": "Ürün fotoğrafları ve işletme detayları",
+    "channelsTitle": "Yayın Kanalları",
+    "accounts": "Hesaplar",
+    "connected": "Bağlı",
+    "notConnected": "Bağlı değil",
+    "connect": "Bağla",
+    "disconnect": "Bağlantıyı kes",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook Sayfası",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google İşletme Profili",
+      "shopify": "Shopify Direct Sync"
+    }
+  },
+  "automations": {
+    "title": "Otomasyonlar",
+    "heading": "Yayın Tercihleriniz",
+    "intro": "Espanda'nın planlanan gönderileri nasıl önceden doldurduğunu ve katalog öğeleriniz için içerik taslağı oluşturduğunu kontrol edin.",
+    "reviewTitle": "Yayınlamadan Önce İnceleyin",
+    "reviewBody": "İçeriği yayınlanmadan önce inceleyin.",
+    "required": "Gerekli",
+    "reviewLabel": "Yayınlamadan önce inceleyin. İçeriği yayınlanmadan önce inceleyin. Gerekli.",
+    "queueTitle": "Eylemleri Sıraya Al",
+    "manageConnections": "Bağlantıları Yönet",
+    "items": {
+      "monthly": {
+        "title": "Aylık Planlar Oluştur",
+        "body": "Taslak gönderilerinizin aylık takvimini hazırlayın.",
+        "active": "Aktif · taslaklar takvime kaydedildi"
+      },
+      "autopublish": {
+        "title": "Onaylanan Gönderileri Otomatik Yayınla",
+        "body": "\"Onayla\"ya dokunduğunuzda planlanan makaraları otomatik olarak yayınlayın.",
+        "requires": "Instagram bağlantısı gerektirir",
+        "active": "Aktif · onaydan sonra yayınlanır"
+      },
+      "replies": {
+        "title": "Showroom Sorgu Yanıtları Taslağı",
+        "body": "Gelen kutusu sıranıza rafine Fransız zanaatkar yanıtlarını önceden doldurun.",
+        "requires": "Mesajlaşma kanalı gerektirir",
+        "active": "Aktif · taslaklar gelen kutunuza eklendi"
+      }
+    },
+    "adsTitle": "Ücretli Sosyal Reklamlar",
+    "comingSoon": "Yakında",
+    "adsBody": "Otomatik Meta reklam yaratıcı testi ve bütçe ayarlaması."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} kredi mevcut",
+    "creditsAvailable_other": "{{n}} kredi mevcut",
+    "planName": "{{tier}} planı",
+    "statusActive": "Aktif",
+    "planBlurb": "Yaratım ve işletme araçlarınız",
+    "cycleTitle": "Fatura Döngüsü",
+    "renewsMonthly": "Aylık yenilenir",
+    "balanceTitle": "Kredi Bakiyesi",
+    "monthlyAllowance": "{{amount}} aylık ödenek",
+    "balanceLabel_one": "{{balance}} / {{n}} kredi mevcut",
+    "balanceLabel_other": "{{balance}} / {{n}} kredi mevcut",
+    "balanceOf_one": " / {{n}} kredi mevcut",
+    "balanceOf_other": " / {{n}} kredi mevcut",
+    "note_one": "{{n}} kredi kullanıldı · {{reserved}} {{item}} için ayrıldı. Ödenek aylık yenilenir.",
+    "note_other": "{{n}} kredi kullanıldı · {{reserved}} {{item}} için ayrıldı. Ödenek aylık yenilenir.",
+    "usageTitle": "Son Kredi Kullanımı",
+    "usageAside": "Çalışma Alanı Etkinliği",
+    "today": "Bugün",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} makarası",
+        "detail": "Oluşturma için ayrıldı"
+      },
+      "plan": {
+        "title": "Aylık İçerik Planı",
+        "detail_one": "{{n}} taslak gönderi",
+        "detail_other": "{{n}} taslak gönderi"
+      },
+      "renewal": {
+        "title": "Aylık Plan Yenileme",
+        "detail": "Döngü kredi sıfırlama"
+      }
+    },
+    "spent_one": "-{{n}} kredi",
+    "spent_other": "-{{n}} kredi",
+    "added_one": "+{{n}} kredi",
+    "added_other": "+{{n}} kredi",
+    "included": "Dahil",
+    "help": {
+      "missingCredits": "Eksik krediler veya başarısız oluşturma",
+      "restore": "Abonelik satın alımlarını geri yükle",
+      "history": "Fatura geçmişi ve faturalar"
+    }
+  },
+  "account": {
+    "title": "Hesap ayarları",
+    "workspaceTitle": "Çalışma alanı",
+    "workspaceName": "Çalışma Alanı Adı",
+    "teamTitle": "Takım işbirliği",
+    "teamMembers": "Çalışma alanı üyeleri",
+    "preferencesTitle": "Tercihler",
+    "languageTitle": "Uygulama arayüz dili",
+    "languageBody": "İstemler ve dışa aktarımlar Fransızca kalır",
+    "languageLabel": "Uygulama dili, {{language}}",
+    "languageHint": "Diller listesini açar",
+    "pushTitle": "Bildirimler",
+    "pushBody": "Oluşturma ve yayınlama güncellemeleri",
+    "supportTitle": "Destek ve yasal",
+    "help": "Yardım ve destek ile iletişim",
+    "terms": "Hizmet Şartları",
+    "privacy": "Gizlilik Politikası",
+    "restore": "Satın alımları geri yükle",
+    "signOut": "Espanda'dan çıkış yap",
+    "signOutNote": "Aktif aboneliğiniz ve taslak katalog varlıklarınız güvenli bir şekilde kaydedilir."
+  },
+  "drawer": {
+    "closeMenu": "Menüyü kapat",
+    "switchLabel": "Çalışma alanı {{name}}. İşletme değiştir",
+    "balanceLabel_one": "Mevcut bakiye {{credits}} kredi kaldı, {{plan}} planı",
+    "balanceLabel_other": "Mevcut bakiye {{credits}} kredi kaldı, {{plan}} planı",
+    "balanceTitle": "Mevcut bakiye",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredi kaldı</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> kredi kaldı</rest>",
+    "sections": {
+      "create": "Oluştur",
+      "grow": "Büyüt",
+      "manage": "Yönet"
+    },
+    "items": {
+      "chat": "Video yapmak için sohbet",
+      "generations": "Benim üretimlerim",
+      "photos": "Fotoğraf varlıkları",
+      "inbox": "Müşteriler ve Gelen Kutusu",
+      "google": "Google Büyümesi",
+      "website": "Web Sitesi Stüdyosu",
+      "connections": "Bağlantılar",
+      "automations": "Otomasyonlar",
+      "billing": "Planlar ve Faturalama",
+      "account": "Hesap ayarları"
+    },
+    "signOut": "Çıkış yap"
+  }
+}

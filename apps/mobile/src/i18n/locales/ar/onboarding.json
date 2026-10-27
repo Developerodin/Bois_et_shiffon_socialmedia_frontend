@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "مرحبًا بك في Espanda",
+    "subtitle": "أنشئ محتوى لأعمالك.",
+    "mobileNumber": "رقم الجوال",
+    "countryCode": "رمز البلد {{code}}",
+    "sendCode": "إرسال الرمز",
+    "useEmail": "استخدم البريد الإلكتروني بدلاً من ذلك",
+    "sendFailed": "تعذر إرسال الرمز. حاول مرة أخرى أو استخدم البريد الإلكتروني.",
+    "chooseCountry": "اختر بلدك",
+    "searchCountry": "ابحث عن البلد أو الرمز"
+  },
+  "email": {
+    "title": "تسجيل الدخول بالبريد الإلكتروني",
+    "subtitle": "سنرسل لك رمز تحقق بدون كلمة مرور عبر البريد الإلكتروني.",
+    "tagline": "تسويق ذكي لتجارة التجزئة الحديثة",
+    "label": "عنوان البريد الإلكتروني",
+    "placeholder": "name@yourbusiness.com",
+    "notConfigured": "تسجيل الدخول بالبريد الإلكتروني غير مُعد على هذا الخادم بعد.",
+    "sendFailed": "تعذر إرسال الرمز. حاول مرة أخرى.",
+    "useMobile": "استخدم رقم الجوال بدلاً من ذلك",
+    "linkTitle": "أضف بريدك الإلكتروني",
+    "linkSubtitle": "تم التحقق من رقمك. أضف بريدًا إلكترونيًا للإيصالات ودعوات الفريق. سنرسل لك رمزًا."
+  },
+  "verify": {
+    "title": "أدخل الرمز الخاص بك",
+    "sent": "أرسلنا رمز تحقق إلى {{destination}}",
+    "codeLabel": "رمز التحقق المكون من ستة أرقام",
+    "submit": "تحقق من الرمز",
+    "checkFailed": "تعذر التحقق من الرمز. حاول مرة أخرى.",
+    "resendFailed": "تعذر إعادة إرسال الرمز.",
+    "resendIn": "إعادة إرسال الرمز في {{time}}",
+    "resend": "إعادة إرسال الرمز",
+    "changeEmail": "تغيير البريد الإلكتروني",
+    "changeMobile": "تغيير رقم الجوال"
+  },
+  "welcome": {
+    "getStarted": "ابدأ الآن",
+    "footnote": "عملك، اتجاهك الإبداعي.",
+    "photosLabel": "أمثلة من كتالوج {{brand}}",
+    "title": "تسويق يشبه عملك",
+    "body": "أنشئ مقاطع فيديو، جلسات تصوير، ومنشورات منتجات تتماشى مع علامتك التجارية من الكتالوج الخاص بك.",
+    "steps": {
+      "goal": {
+        "title": "اختر هدفك",
+        "body": "حدد أول شكل إبداعي تريد إنتاجه."
+      },
+      "business": {
+        "title": "شارك تفاصيل عملك",
+        "body": "شارك موقعك الإلكتروني أو أضف تفاصيل عملك."
+      },
+      "review": {
+        "title": "راجع المحتوى الجاهز",
+        "body": "راجع الأفكار التي تم إنشاؤها حول منتجاتك."
+      }
+    }
+  },
+  "goal": {
+    "title": "ماذا ستنشئ أولاً؟",
+    "subtitle": "سنخصص مساحة العمل والقوالب الأولية الخاصة بك حول تركيزك الأساسي.",
+    "note": "تظل جميع الأدوات وأشكال الاستوديو متاحة لاحقًا.",
+    "options": {
+      "socialPlan": {
+        "title": "خطة وسائل التواصل الاجتماعي",
+        "description": "شهر من المنشورات والتعليقات"
+      },
+      "marketingVideos": {
+        "title": "فيديوهات تسويقية",
+        "description": "مقاطع فيديو استوديو من الكتالوج الخاص بك"
+      },
+      "fashionPhotoshoot": {
+        "title": "جلسة تصوير أزياء",
+        "description": "تنسيق الملابس على العارضين"
+      },
+      "productPhotoshoot": {
+        "title": "جلسة تصوير منتجات",
+        "description": "صور منتجات لكتالوجك"
+      }
+    }
+  },
+  "source": {
+    "title": "أين يوجد عملك على الإنترنت؟",
+    "subtitle": "يقوم Espanda بمسح متجرك أو قائمتك عبر الإنترنت لإنشاء وسائط دقيقة للعلامة التجارية تلقائيًا.",
+    "options": {
+      "website": {
+        "title": "موقع إلكتروني",
+        "description": "Shopify، WooCommerce، نطاق مخصص"
+      },
+      "googleMaps": {
+        "title": "خرائط Google",
+        "description": "واجهة متجر محلية، بوتيك أو صالة عرض"
+      },
+      "marketplace": {
+        "title": "سوق",
+        "description": "متجر Amazon، Etsy، eBay أو Instagram"
+      },
+      "wholesale": {
+        "title": "الجملة / B2B",
+        "description": "Faire، Ankorstore، كتالوج خاص"
+      },
+      "none": {
+        "title": "لا يوجد تواجد على الإنترنت",
+        "description": "وصف العناصر يدويًا"
+      },
+      "other": {
+        "title": "شيء آخر",
+        "description": "حساب اجتماعي، كتيب PDF، أو ملف"
+      }
+    }
+  },
+  "website": {
+    "title": "ما هو موقعك الإلكتروني؟",
+    "subtitle": "سنقوم بسحب صور الكتالوج والألوان ونبرة الصوت تلقائيًا.",
+    "label": "عنوان موقع المتجر",
+    "placeholder": "www.yourstore.com",
+    "valid": "عنوان صالح",
+    "willRead": "سنقرأ هذا الموقع",
+    "facts": {
+      "catalog": {
+        "key": "منتجات الكتالوج",
+        "value": "صور المنتجات"
+      },
+      "identity": {
+        "key": "هوية العلامة التجارية",
+        "value": "الألوان والطباعة"
+      },
+      "tone": {
+        "key": "النبرة والأسلوب",
+        "value": "الصوت من صفحاتك"
+      }
+    },
+    "safeNote": "لا يغير استيراد الكتالوج أي شيء في متجرك المباشر."
+  },
+  "manual": {
+    "title": "أضف تفاصيل العمل",
+    "subtitle": "شارك رابط القائمة أو وصف الكتالوج يدويًا.",
+    "modeLabel": "كيفية إضافة عملك",
+    "modeListing": "رابط القائمة",
+    "modeDescribe": "وصف العمل",
+    "listingLabel": "رابط القائمة *",
+    "listingPlaceholder": "رابط Etsy، Amazon، خرائط Google أو المتجر",
+    "nameLabel": "اسم العمل *",
+    "namePlaceholder": "مثال: Atelier Bois & Chiffons",
+    "sellsLabel": "ماذا تبيع؟ *",
+    "sellsPlaceholder": "مثال: طاولات خشبية مصنوعة يدويًا، حوامل تلفزيون، وديكور منزلي حديث...",
+    "locationLabel": "الموقع (اختياري)",
+    "locationPlaceholder": "المدينة، البلد أو عنوان صالة العرض",
+    "websiteLabel": "الموقع الإلكتروني (اختياري)"
+  },
+  "learning": {
+    "working": "جارٍ العمل",
+    "tryAgain": "حاول مرة أخرى",
+    "inProgressButton": "التعلم جارٍ...",
+    "saved": "سنحتفظ بتقدمك محفوظًا.",
+    "title": "التعرف على عملك",
+    "bodyWebsite": "تحليل موقعك لاستخراج هوية العلامة التجارية والكتالوجات والنبرة البصرية.",
+    "bodyManual": "تحويل وصفك إلى هوية العلامة التجارية والكتالوجات والنبرة البصرية.",
+    "fallbackName": "عملك",
+    "sourceWebsite": "مصدر الموقع الرئيسي",
+    "sourceManual": "تفاصيل العمل",
+    "foundWebsite": "تم العثور على الموقع",
+    "foundManual": "تمت إضافة التفاصيل",
+    "stages": {
+      "open": "فتح الموقع",
+      "identity": "قراءة هوية العلامة التجارية والنبرة",
+      "photos": "جمع صور المنتجات"
+    },
+    "status": {
+      "done": "اكتمل",
+      "running": "قيد التنفيذ",
+      "queued": "في الانتظار"
+    },
+    "errors": {
+      "stopped": "توقف قراءة موقعك.",
+      "noWorkspace": "حسابك ليس لديه مساحة عمل بعد.",
+      "startFailed": "تعذر بدء قراءة موقعك.",
+      "restartFailed": "تعذر إعادة التشغيل. حاول مرة أخرى."
+    }
+  },
+  "review": {
+    "title": "مراجعة تفاصيل العمل",
+    "subtitle": "وجدنا هذه التفاصيل على موقعك. يمكنك تعديلها في أي وقت.",
+    "edit": "تعديل",
+    "tagline": "الشعار",
+    "editTagline": "تعديل الشعار",
+    "categoryLocation": "الفئة والموقع",
+    "audience": "الجمهور المستهدف",
+    "editAudience": "تعديل الجمهور المستهدف",
+    "products_one": "المنتجات المكتشفة ({{count}})",
+    "products_other": "المنتجات المكتشفة ({{count}})",
+    "found": "تم العثور",
+    "strengths": "نقاط قوة العلامة التجارية",
+    "tags": {
+      "homeLiving": "المنزل والمعيشة",
+      "france": "فرنسا",
+      "productCatalog": "كتالوج المنتجات",
+      "showroomEshop": "معرض فعلي ومتجر إلكتروني"
+    }
+  },
+  "brand": {
+    "title": "العلامة التجارية والأسلوب الإبداعي",
+    "subtitle": "اضبط كيف تقوم Espanda بتصميم جلسات التصوير والمنشورات الاجتماعية.",
+    "identity": "هوية {{name}}",
+    "paletteMeta": "لوحة الموقع · قابلة للتعديل",
+    "swatches": "عينات ألوان الموقع المستوردة",
+    "tone": "النغمة الإبداعية",
+    "selected_one": "{{count}} مختار",
+    "selected_other": "{{count}} مختار",
+    "tones": {
+      "modern": "حديث",
+      "luxurious": "فاخر",
+      "elegant": "أنيق",
+      "premium": "متميز",
+      "natural": "طبيعي",
+      "minimalist": "بسيط"
+    },
+    "contentLanguage": "لغة المحتوى",
+    "contentLanguageA11y": "لغة المحتوى، {{language}}. تغيير",
+    "languages": {
+      "fr": "الفرنسية (FR)",
+      "en": "الإنجليزية (US)"
+    },
+    "audienceProfile": "ملف الجمهور",
+    "audienceHome": "المنزل والأثاث",
+    "featured": "منتجات الكتالوج المميزة",
+    "readyForBatch_one": "{{count}} جاهز للدفعة",
+    "readyForBatch_other": "{{count}} جاهز للدفعة",
+    "sampleProducts": {
+      "table": "طاولة Bunting",
+      "tableDetail": "أكاسيا 240 سم",
+      "tv": "وحدة تلفاز",
+      "tvDetail": "أكاسيا بابين"
+    },
+    "channelsNote": "يمكن ربط Instagram وFacebook في الخطوة التالية. (لم يتم ربط أي قنوات بعد)"
+  },
+  "preparing": {
+    "ready": "الاستوديو جاهز",
+    "preparing": "تحضير الاستوديو",
+    "loadingButton": "تحضير أفكارك…",
+    "catalogSafe": "يبقى كتالوجك دون تغيير في متجرك.",
+    "title": "تحضير أفكارك الأولى",
+    "body": "إنشاء مقاطع اجتماعية مخصصة ومجموعات عرض من مجموعة {{name}} الخاصة بك.",
+    "photosTitle": "جمع الصور",
+    "photosDetail": "مجموعة طعام {{product}}",
+    "storyboardTitle": "بناء لوحة القصة",
+    "storyboardDetail_one": "تأليف {{count}} مشهد فيديو",
+    "storyboardDetail_other": "تأليف {{count}} مشاهد فيديو",
+    "nextTitle": "التالي: مراجعة أفكارك",
+    "nextDetail": "اختر الخطافات والإعدادات الصوتية"
+  },
+  "connect": {
+    "readyToConnect": "• جاهز للاتصال",
+    "title": "انشر عندما تكون جاهزًا",
+    "subtitle": "اربط حساباتك الاجتماعية حتى تتمكن Espanda من نشر أو إعداد مقاطع جاهزة للنشر وتسليط الضوء على المنتجات مباشرة.",
+    "toolsTitle": "أدوات النشر",
+    "featureReels": "انشر على Instagram Feed & Reels",
+    "featureCaptions": "استخدم تسمياتك التوضيحية والهاشتاجات",
+    "featureReview": "تراجع دائمًا قبل أن يصبح أي شيء مباشرًا",
+    "assurance": "لن يتم نشر أي محتوى دون تأكيدك",
+    "connectInstagram": "ربط Instagram",
+    "connectFacebook": "ربط Facebook",
+    "skip": "تخطي الآن",
+    "laterTitle": "ربط لاحقًا؟",
+    "laterBody": "لا يزال بإمكانك إنشاء وتحرير وتنزيل مقاطع عالية الدقة وجلسات تصوير إلى ألبوم الكاميرا. يمكنك ربط Instagram في أي وقت من الإعدادات.",
+    "laterDownload": "تنزيل إبداعاتك",
+    "laterSettings": "ربط القنوات في الإعدادات",
+    "continueWithout": "الاستمرار دون ربط"
+  }
+}

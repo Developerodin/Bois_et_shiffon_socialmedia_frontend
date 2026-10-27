@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Planlandı",
+    "briefReady": "Özet hazır",
+    "needsReview": "İnceleme gerekiyor",
+    "draftReady": "Taslak hazır",
+    "approved": "Onaylandı",
+    "scheduled": "Zamanlandı",
+    "published": "Yayınlandı",
+    "draft": "Taslak"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Bugün",
+    "tomorrow": "Yarın"
+  },
+  "chrome": {
+    "openMenu": "Menüyü aç",
+    "logo": "Espanda",
+    "credits_one": "{{count}} kredi mevcut",
+    "credits_other": "{{count}} kredi mevcut",
+    "settings": "Ayarlar",
+    "modulesLabel": "Uygulama modülleri",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Gönderiler",
+      "photoshoot": "Fotoğraf çekimi",
+      "marketing": "Pazarlama"
+    },
+    "navLabel": "Modül gezintisi",
+    "nav": {
+      "today": "Bugün",
+      "posts": "Gönderiler",
+      "create": "Oluştur",
+      "stories": "Hikayeler",
+      "settings": "Ayarlar"
+    },
+    "back": "Geri",
+    "switchBusiness": "İşletme değiştir, {{name}}",
+    "business": "İşletme: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Gönderileriniz, hareket halinde",
+    "subtitle": "Oluşturulan ürün öne çıkanlarını ve planlanmış gönderileri inceleyin",
+    "needsApproval": "Onay gerekiyor",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Gönderiyi incele",
+    "agenda": "Yaklaşan gündem",
+    "thisWeek": "Bu hafta",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Takvimi görüntüle"
+  },
+  "calendar": {
+    "title": "Gönderi takvimi",
+    "subtitle": "Yayınlarınızı planlayın ve otomatikleştirin",
+    "viewLabel": "Takvim görünümü",
+    "views": {
+      "month": "Ay",
+      "list": "Liste"
+    },
+    "plan": "Plan: {{n}} gönderi / ay",
+    "managePlan": "Planı yönet",
+    "postCount_one": "{{count}} gönderi",
+    "postCount_other": "{{count}} gönderi",
+    "empty": "Bu gün için planlanmış bir şey yok.",
+    "scheduled_one": "{{count}} planlandı",
+    "scheduled_other": "{{count}} planlandı",
+    "previousMonth": "Önceki ay",
+    "nextMonth": "Sonraki ay",
+    "gridLabel": "{{month}} takvimi",
+    "dayWithPosts_one": "{{day}} · {{count}} gönderi",
+    "dayWithPosts_other": "{{day}} · {{count}} gönderi"
+  },
+  "detail": {
+    "title": "Gönderi detayları",
+    "moreOptions": "Daha fazla seçenek",
+    "feedPhoto": "4:5 Akış fotoğrafı",
+    "fullscreen": "Tam ekran",
+    "captionFrench": "Altyazı (Fransızca)",
+    "editText": "Metni düzenle",
+    "channels": "Yayın kanalları",
+    "instagramFeed": "Instagram Akışı",
+    "instagramDetail": "Yayınlamak için bir hesap bağlayın",
+    "facebookPage": "Facebook Sayfası",
+    "facebookDetail": "Resmi sayfaya otomatik gönder",
+    "notConnected": "Bağlı değil",
+    "channelNotConnected": "{{name}}, bağlı değil",
+    "editPost": "Gönderiyi düzenle",
+    "schedule": "Zamanla"
+  },
+  "edit": {
+    "title": "Gönderiyi düzenle",
+    "cancel": "İptal",
+    "save": "Değişiklikleri kaydet",
+    "previewLabel": "{{title}}, orijinal oran 4:5",
+    "ratio": "Orijinal oran · 4:5",
+    "sectionLabel": "Bölümü düzenle",
+    "tabs": {
+      "image": "Görsel",
+      "caption": "Altyazı",
+      "brand": "Marka"
+    },
+    "description": "Gönderi açıklaması",
+    "language": "Dil: Fransızca (FR)",
+    "suggestedHashtags": "Önerilen etiketler",
+    "addHashtag": "Etiket ekle",
+    "add": "+ Ekle",
+    "regenerate": "Altyazıyı AI ile yeniden oluştur",
+    "imageHint": "Orijinal oran · 4:5. Kırpma önizlemesini yeniden çerçevelemek için sürükleyin.",
+    "brandHint": "Logo, renkler ve ton {{brand}} marka kitinize göre ayarlanır."
+  },
+  "schedule": {
+    "title": "Zamanla",
+    "storyFormat": "Hikaye · 9:16 görsel",
+    "feedFormat": "Akış gönderisi · 4:5 görsel",
+    "destination": "Hedef",
+    "actionRequired": "Eylem gerekli",
+    "notLinked": "Instagram hesabı bağlı değil",
+    "notLinkedBody": "Doğrudan planlanmış yayınları açmak için sosyal hesaplarınızı bağlayın.",
+    "connect": "Sosyal hesabı bağla",
+    "locked": "Bağlantı sağlanana kadar zamanlama kilitli",
+    "timing": "Zamanlama ve Program",
+    "date": "Tarih",
+    "dateLabel": "Tarih, {{date}}",
+    "time": "Saat",
+    "timeLabel": "Saat, {{time}}",
+    "timezone": "Saat dilimi",
+    "schedulePost": "Gönderiyi zamanla",
+    "scheduleLocked": "Gönderiyi zamanla (Önce kanalı bağlayın)",
+    "saveDraft": "Taslağı kaydet"
+  },
+  "brief": {
+    "title": "Gönderi oluştur",
+    "subtitle": "Bir ürün ve yaratıcı yön seçin",
+    "format": "İçerik formatı",
+    "formatLabel": "Gönderi formatı",
+    "singlePhoto": "Tek fotoğraf",
+    "singlePhotoDetail": "4:5 Akış odaklı",
+    "carousel": "Karusel",
+    "carouselDetail": "Birden fazla fotoğraf",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Ana hedef",
+    "goals": {
+      "newArrival": "Yeni gelen",
+      "productFeature": "Ürün özelliği",
+      "specialOffer": "Özel teklif"
+    },
+    "product": "Hedef katalog ürünü",
+    "changeProduct": "Ürünü değiştir",
+    "change": "Değiştir",
+    "direction": "Yaratıcı yön (isteğe bağlı)",
+    "directionLanguage": "Fransızca (FR)",
+    "directionPlaceholder": "ör. El yapımı marangozluk ve sıcaklığa odaklan",
+    "cost": "Oluşturma maliyeti:",
+    "costPending": "Tahmin bekleniyor",
+    "draftPost": "Taslak gönderi"
+  },
+  "stories": {
+    "title": "Hikayeler",
+    "subtitle": "9:16 dikey sosyal anlar",
+    "newStory": "Yeni hikaye",
+    "statusLabel": "Hikaye durumu",
+    "drafts_one": "Taslaklar ({{count}})",
+    "drafts_other": "Taslaklar ({{count}})",
+    "scheduled_one": "Planlanmış ({{count}})",
+    "scheduled_other": "Planlanmış ({{count}})",
+    "samplePreview": "Örnek önizleme",
+    "moreOptions": "{{title}} için daha fazla seçenek",
+    "editStory": "Hikayeyi düzenle"
+  },
+  "editStory": {
+    "back": "Geri",
+    "undo": "Geri al",
+    "tools": {
+      "text": "Metin",
+      "image": "Görsel",
+      "brand": "Marka",
+      "cta": "CTA"
+    },
+    "toolLabel": "{{tool}} aracı",
+    "captionTitle": "Hikaye başlığı / Bağlantı etiketi",
+    "languageCode": "FR",
+    "saveDraft": "Taslağı kaydet",
+    "scheduleStory": "Hikayeyi planla"
+  },
+  "planner": {
+    "title": "Gönderi planlayıcı",
+    "sectionsLabel": "Ayarlar bölümleri",
+    "sections": {
+      "business": "İşletmem",
+      "billing": "Faturalandırma",
+      "planner": "Gönderi planlayıcı"
+    },
+    "cycle": "Planlama döngüsü",
+    "cadence": "Yayınlama sıklığı",
+    "monthlyTarget": "Aylık hedef",
+    "feedPosts": "Akış Gönderileri",
+    "stories": "Hikayeler",
+    "perMonth": "{{n}} / ay",
+    "feedNote": "~Günlük 1 gönderi",
+    "storiesNote": "Ay boyunca yayılmış",
+    "cadenceHint": "Önerilen içerik hedefleri. Takviminizi oluşturmadan önce ayarlayın.",
+    "pillars": "İçerik sütunları",
+    "pillar": {
+      "catalog": "Katalog ürünleri (Bunting odaklı)",
+      "craft": "Malzeme detayları & zanaat (Acacia ağacı)",
+      "story": "Marka hikayesi & Fransız mirası"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Yayınlamadan önce manuel inceleme: </b>Oluşturulan damlalar, son onayınız için takviminize taslak olarak yerleştirilir. Onay olmadan içerik yayınlanmaz.",
+    "generate": "Takvimi oluştur"
+  }
+}

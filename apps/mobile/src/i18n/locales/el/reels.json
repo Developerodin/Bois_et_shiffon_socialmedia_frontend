@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}δ",
+  "seconds_one": "{{count}} δευτερόλεπτο",
+  "seconds_other": "{{count}} δευτερόλεπτα",
+  "noPresenter": "Χωρίς παρουσιαστή",
+  "aiActor": "AI Ηθοποιός",
+  "assistant": "Ο βοηθός βίντεο σας",
+  "sourceWebsite": "Ιστότοπος πηγής",
+  "preview": "Προεπισκόπηση",
+  "schedule": "Πρόγραμμα",
+  "goBack": "Πίσω",
+  "inProgress": "Σε εξέλιξη",
+  "timezone": "Ζώνη ώρας",
+  "status": {
+    "draft": "Πρόχειρο",
+    "ready": "Έτοιμο"
+  },
+  "scene": {
+    "label": "Σκηνή {{n}} · {{seconds}}δ",
+    "count_one": "{{count}} σκηνή",
+    "count_other": "{{count}} σκηνές"
+  },
+  "shot": {
+    "wide": "Ευρεία λήψη",
+    "material": "Λεπτομέρεια υλικού",
+    "closeCta": "Κοντινό προϊόν & CTA"
+  },
+  "create": {
+    "switchBusiness": "Αλλαγή επιχείρησης, {{name}}",
+    "title": "Δημιουργήστε το επόμενο reel σας",
+    "subtitle": "Δημιουργήστε βίντεο reels στούντιο από τον κατάλογο του καταστήματός σας",
+    "heroImage": "Πλήρης εσωτερική άποψη της συλλογής τραπεζαρίας {{product}}",
+    "question": "Τι θα θέλατε να δείξετε;",
+    "planTogether": "Σχεδιάστε ένα reel μαζί",
+    "start": "Έναρξη",
+    "startA11y": "Ξεκινήστε τον σχεδιασμό ενός reel",
+    "ideasReady_one": "{{count}} ιδέα έτοιμη",
+    "ideasReady_other": "{{count}} ιδέες έτοιμες",
+    "viewIdeas": "Δείτε ιδέες →",
+    "actorSubtitle": "Reel παρουσιαστή",
+    "templates": "Πρότυπα",
+    "templatesSubtitle": "Γρήγορες περικοπές καταλόγου",
+    "jumpBackIn": "Επιστροφή",
+    "seeAll": "Δείτε όλα",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Ιδέες βίντεο",
+    "subtitle": "Επιλεγμένες γωνίες έτοιμες για μετατροπή σε motion reels",
+    "filter": {
+      "all": "Όλα ({{n}})",
+      "productSpotlight": "Προβολή προϊόντος ({{n}})",
+      "collection": "Συλλογή ({{n}})"
+    },
+    "angle": "Γωνία {{n}}",
+    "body": {
+      "angle01": "Ανάδειξη φυσικού κόκκου, γεωμετρικής αρχιτεκτονικής σταυροπόδιων και σκηνικού τραπεζαρίας.",
+      "angle02": "Εστίαση σε χειροποίητες πόρτες με πηχάκια, διαχείριση καλωδίων και ζεστή ατμόσφαιρα καθιστικού."
+    },
+    "readyToReview": "Έτοιμο για ανασκόπηση",
+    "viewStoryboard": "Δείτε το storyboard"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} πίστωση",
+    "creditsA11y_other": "{{count}} πιστώσεις",
+    "addAssets": "Προσθήκη στοιχείων",
+    "composerPlaceholder": "Βελτιώστε τον τόνο, την αφήγηση ή προσθέστε οδηγίες...",
+    "composerA11y": "Βελτιώστε τον τόνο, την αφήγηση ή προσθέστε οδηγίες",
+    "send": "Αποστολή βελτίωσης",
+    "day": "Σήμερα · Reels Studio",
+    "userMessage": "Δείξτε τη συλλογή Bunting σε ένα ήρεμο, premium reel.",
+    "reply": "Έχω προσαρμόσει μια ιδέα για το <b>{{brand}}</b> {{product}} τραπέζι σας. Εδώ είναι οι προτεινόμενες παράμετροι:",
+    "format": "Μορφή",
+    "formatVertical": "9:16 Κάθετο (Ιστορία/Reel)",
+    "duration": "Διάρκεια",
+    "presenter": "Παρουσιαστής",
+    "openingHook": "Αρχικό άγκιστρο",
+    "reviewStoryboard_one": "Ανασκόπηση storyboard ({{count}} σκηνή)",
+    "reviewStoryboard_other": "Ανασκόπηση storyboard ({{count}} σκηνές)",
+    "readyStatus": "Έτοιμο για δημιουργία ή βελτίωση"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "Διάρκεια {{seconds}}δ",
+    "verticalFact": "9:16 κάθετο",
+    "readyToRender": "Έτοιμο για απόδοση <muted>· Πρόχειρο αποθηκευμένο για ανασκόπηση</muted>",
+    "sceneDirection": "Κατεύθυνση σκηνής",
+    "voiceoverFr": "Αφήγηση (FR)",
+    "direction": {
+      "scene1": "Αργή αποκάλυψη σε μοντέρνο σκηνικό τραπεζαρίας",
+      "scene2": "Ομαλή μακρο λήψη πάνω από πλούσιο φυσικό ξύλο και λοξό άκρο",
+      "scene3": "Σκηνική προοπτική με υδατογράφημα εμβλήματος Bois & Chiffons"
+    },
+    "editInChat": "Επεξεργασία στη συνομιλία",
+    "makeVideo": "Δημιουργία βίντεο",
+    "makeVideoA11y_one": "Δημιουργία βίντεο, {{count}} πίστωση",
+    "makeVideoA11y_other": "Δημιουργία βίντεο, {{count}} πιστώσεις",
+    "cost_one": "{{count}} πίστωση",
+    "cost_other": "{{count}} πιστώσεις",
+    "balance_one": "Τρέχον υπόλοιπο: {{balance}} πιστώσεις · {{count}} πίστωση θα δεσμευτεί · Το πρόχειρο αποθηκεύεται αυτόματα",
+    "balance_other": "Τρέχον υπόλοιπο: {{balance}} πιστώσεις · {{count}} πιστώσεις θα δεσμευτούν · Το πρόχειρο αποθηκεύεται αυτόματα"
+  },
+  "generating": {
+    "backToWorkspace": "Επιστροφή στο χώρο εργασίας",
+    "renderingA11y": "Απόδοση σε εξέλιξη",
+    "title": "Δημιουργία του reel σας",
+    "body": "Σύνθεση οπτικών, γαλλικής αφήγησης και ρυθμού κίνησης για {{title}}.",
+    "summary": "{{title}} · {{seconds}}δ · 9:16",
+    "assetNote": "Γνήσιο στοιχείο γαλλικού καταλόγου",
+    "preparingScenes_one": "Προετοιμασία {{count}} σκηνής",
+    "preparingScenes_other": "Προετοιμασία {{count}} σκηνών",
+    "done": "Ολοκληρώθηκε",
+    "renderingFrames": "Απόδοση καρέ βίντεο",
+    "addingAudio": "Προσθήκη ήχου",
+    "queued": "Σε ουρά",
+    "creditsReserved_one": "{{count}} πίστωση δεσμευμένη",
+    "creditsReserved_other": "{{count}} πιστώσεις δεσμευμένες",
+    "remaining_one": "Υπόλοιπο: {{count}} πίστωση",
+    "remaining_other": "Υπόλοιπο: {{count}} πιστώσεις",
+    "safeToLeave": "Μπορείτε να αποχωρήσετε με ασφάλεια από αυτήν την οθόνη. Το πρόχειρο σας αποθηκεύεται αυτόματα στην καρτέλα Αποτελέσματα.",
+    "keepWorking": "Συνεχίστε να εργάζεστε στο παρασκήνιο"
+  },
+  "results": {
+    "title": "Βίντεο reels",
+    "newReel": "Νέο reel",
+    "filter": {
+      "all": "Όλα ({{n}})",
+      "ready": "Έτοιμο ({{n}})",
+      "processing": "Επεξεργασία ({{n}})"
+    },
+    "processing_one": "Επεξεργασία · {{count}} πίστωση δεσμευμένη",
+    "processing_other": "Επεξεργασία · {{count}} πιστώσεις δεσμευμένες",
+    "renderingA11y": "{{title}}, απόδοση {{percent}}",
+    "renderingMeta": "{{seconds}}δ · 9:16 κάθετο · Απόδοση οπτικών...",
+    "renderingStage": "Στάδιο απόδοσης",
+    "previewA11y": "Δείγμα προεπισκόπησης, {{title}}",
+    "moreOptions": "Περισσότερες επιλογές",
+    "reviewVideo": "Ανασκόπηση βίντεο",
+    "meta": {
+      "tv": "20δ · Γαλλική αφήγηση · Έτοιμο για προγραμματισμό",
+      "atelier": "15δ · Ακουστική ατμόσφαιρα · Έτοιμο για προγραμματισμό"
+    }
+  },
+  "review": {
+    "subtitle": "Πρόχειρο reel · Έτοιμο για ανασκόπηση",
+    "options": "Μενού επιλογών",
+    "downloadVideo": "Λήψη βίντεο",
+    "connectFirst": "Επιλέξτε έναν συνδεδεμένο λογαριασμό πριν από τη δημοσίευση.",
+    "samplePreview": "Δείγμα προεπισκόπησης",
+    "play": "Αναπαραγωγή προεπισκόπησης βίντεο",
+    "position": "Θέση βίντεο",
+    "sound": "Εναλλαγή ήχου βίντεο",
+    "fullscreen": "Άνοιγμα βίντεο σε πλήρη οθόνη",
+    "vertical": "9:16 Κάθετο",
+    "portrait": "Κάθετη μορφή",
+    "captionFrench": "Λεζάντα (Γαλλικά)",
+    "defaultSource": "· Προεπιλεγμένη πηγή",
+    "editable": "Επεξεργάσιμο",
+    "captionA11y": "Λεζάντα βίντεο στα Γαλλικά",
+    "addTag": "Προσθήκη ετικέτας",
+    "specifications": "Προδιαγραφές",
+    "audioTrack": "Ηχητικό κομμάτι",
+    "audioValue": "Γαλλική αφήγηση (Studio Natural) + Περιβάλλον ακουστική",
+    "resolution": "Ανάλυση",
+    "resolutionValue": "Κάθετο βίντεο · 9:16"
+  },
+  "publish": {
+    "title": "Δημοσίευση reel",
+    "confirmSchedule": "Επιβεβαίωση προγραμματισμού",
+    "publishNow": "Δημοσίευση τώρα",
+    "saveDraft": "Αποθήκευση πρόχειρου",
+    "readyToSchedule": "Έτοιμο για προγραμματισμό",
+    "format": "{{product}} · 9:16 Κάθετο Reel",
+    "playPreview": "Αναπαραγωγή προεπισκόπησης",
+    "channel": "Κανάλι δημοσίευσης",
+    "connected": "Συνδεδεμένο",
+    "notConnected": "Μη συνδεδεμένο",
+    "connect": "Σύνδεση",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Αυτόματη ανάρτηση απευθείας σε feed & reels",
+    "orDownload": "Ή κατεβάστε το βίντεο απευθείας",
+    "download": "Λήψη",
+    "timing": "Χρονισμός",
+    "date": "Ημερομηνία",
+    "time": "Ώρα",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Ζώνη ώρας, {{value}}",
+    "notice": "Συνδέστε τον επαγγελματικό λογαριασμό σας στο Instagram για να ξεκλειδώσετε την αυτόματη προγραμματισμένη δημοσίευση. Μπορείτε ακόμα να αποθηκεύσετε αυτό το reel ως πρόχειρο."
+  },
+  "scheduled": {
+    "close": "Κλείσιμο",
+    "viewReel": "Προβολή προγραμματισμένου reel",
+    "backToResults": "Επιστροφή στα Αποτελέσματα",
+    "title": "Reel προγραμματισμένο",
+    "body": "Το βίντεό σας θα δημοσιευτεί στον επιλεγμένο λογαριασμό την προγραμματισμένη ώρα.",
+    "meta": "{{seconds}}s · Γαλλική αφήγηση",
+    "publishDate": "Ημερομηνία δημοσίευσης",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Χώρος εργασίας μάρκας",
+    "channel": "Κανάλι",
+    "instagramConnected": "Instagram (Συνδεδεμένο)",
+    "editInCalendar": "Επεξεργαστείτε ή ακυρώστε αυτήν την ανάρτηση από το ημερολόγιό σας."
+  },
+  "actor": {
+    "title": "Επιλογή παρουσιαστή",
+    "intro": "Επιλέξτε στυλ παρουσιαστή ή μόνο προϊόν reel.",
+    "noPresenterA11y": "Χωρίς παρουσιαστή, προτεινόμενο",
+    "recommended": "Προτεινόμενο",
+    "noPresenterBody": "Επικεντρωθείτε αποκλειστικά σε οπτικά έπιπλα, υφές και στούντιο ήχο.",
+    "styles": "Στυλ παρουσιαστή",
+    "style": {
+      "calm": {
+        "title": "Ήρεμος αφηγητής",
+        "subtitle": "Γαλλικά · Ήρεμο Στούντιο"
+      },
+      "expressive": {
+        "title": "Εκφραστικός παρουσιαστής",
+        "subtitle": "Αγγλικά / FR · Δυναμικό"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Δείγμα φωνής, {{title}}",
+    "sampleVoice": "Δείγμα φωνής",
+    "voiceLed": "Στυλ με φωνή",
+    "notice": "Επιλέξτε στυλ με φωνή ή κρατήστε την εστίαση στο προϊόν σας."
+  },
+  "script": {
+    "title": "Σενάριο & φωνή",
+    "continue": "Συνέχεια στο storyboard",
+    "costNote": "Ελέγξτε το κόστος πίστωσης πριν δημιουργήσετε το reel σας.",
+    "targetProduct": "Στόχος προϊόντος",
+    "productMeta": "Στερεά ακακία · Πηγή ιστότοπου",
+    "voiceoverScript": "Σενάριο αφήγησης",
+    "frenchFr": "Γαλλικά (FR)",
+    "wordCount_one": "{{count}} λέξη · ~{{seconds}} δευτ",
+    "wordCount_other": "{{count}} λέξεις · ~{{seconds}} δευτ",
+    "scriptA11y": "Σενάριο αφήγησης στα Γαλλικά",
+    "targetDuration_one": "Στόχος διάρκειας: {{count}} δευτερόλεπτο",
+    "targetDuration_other": "Στόχος διάρκειας: {{count}} δευτερόλεπτα",
+    "rewriteOpening": "Ξαναγράψτε την αρχή",
+    "narratorAudio": "Ήχος αφηγητή",
+    "calmVoice": "Ήρεμη γαλλική φωνή",
+    "calmVoiceMeta": "Φυσικά γαλλικά, ζεστός ακουστικός ρυθμός",
+    "recordOwn": "Καταγράψτε τη δική σας φωνή",
+    "recordOwnMeta": "Προαιρετική προσαρμοσμένη αφήγηση μάρκας",
+    "record": "Καταγραφή"
+  },
+  "templates": {
+    "title": "Πρότυπα reel",
+    "useTemplate": "Χρήση προτύπου",
+    "searchPlaceholder": "Αναζήτηση μορφών στούντιο...",
+    "searchA11y": "Αναζήτηση μορφών στούντιο",
+    "tune": "Ρύθμιση",
+    "filter": {
+      "all": "Όλες οι μορφές",
+      "catalog": "Εστίαση καταλόγου",
+      "shortCuts": "15-20s κοψίματα"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Εστίαση προϊόντος",
+        "subtitle": "3 μακροκοψίματα + γάντζος"
+      },
+      "collection": {
+        "title": "Αποκάλυψη συλλογής",
+        "subtitle": "Γρήγορη παρουσίαση πολλών αντικειμένων"
+      },
+      "material": {
+        "title": "Λεπτομέρεια υλικού",
+        "subtitle": "Κοντινά πλάνα ξύλου & κατασκευής"
+      },
+      "arrival": {
+        "title": "Νέα άφιξη",
+        "subtitle": "Ανακοίνωση & CTA εκθεσιακού χώρου"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Επιλογή στοιχείων",
+    "createStoryboard_one": "Δημιουργία storyboard ({{count}} σκηνή)",
+    "createStoryboard_other": "Δημιουργία storyboard ({{count}} σκηνές)",
+    "upload": "Μεταφόρτωση φωτογραφιών",
+    "websiteAssets": "Στοιχεία ιστότοπου",
+    "selected_one": "{{count}} επιλεγμένο",
+    "selected_other": "{{count}} επιλεγμένα",
+    "otherCategory": "Διαφορετική κατηγορία προϊόντος",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Ακολουθία storyboard",
+    "dragToReorder": "Σύρετε για αναδιάταξη",
+    "reorderA11y": "Σκηνή {{n}}: {{label}}. Αναδιάταξη σκηνής",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Δωμάτιο",
+      "macro": "Λεπτομέρεια",
+      "staged": "Στυλιζαρισμένο",
+      "tv": "Μονάδα τηλεόρασης"
+    }
+  }
+}

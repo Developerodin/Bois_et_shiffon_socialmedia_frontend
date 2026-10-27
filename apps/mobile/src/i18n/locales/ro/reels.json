@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} secundă",
+  "seconds_other": "{{count}} secunde",
+  "noPresenter": "Fără prezentator",
+  "aiActor": "Actor AI",
+  "assistant": "Asistentul tău video",
+  "sourceWebsite": "Sursa site-ului",
+  "preview": "Previzualizare",
+  "schedule": "Programează",
+  "goBack": "Înapoi",
+  "inProgress": "În desfășurare",
+  "timezone": "Fus orar",
+  "status": {
+    "draft": "Ciornă",
+    "ready": "Gata"
+  },
+  "scene": {
+    "label": "Scena {{n}} · {{seconds}}s",
+    "count_one": "{{count}} scenă",
+    "count_other": "{{count}} scene"
+  },
+  "shot": {
+    "wide": "Cadru larg",
+    "material": "Detaliu material",
+    "closeCta": "Produs aproape & CTA"
+  },
+  "create": {
+    "switchBusiness": "Schimbă afacerea, {{name}}",
+    "title": "Creează următorul tău reel",
+    "subtitle": "Creează videoclipuri de studio din catalogul magazinului tău",
+    "heroImage": "Vedere interioară completă a colecției de dining {{product}}",
+    "question": "Ce ai dori să arăți?",
+    "planTogether": "Planifică un reel împreună",
+    "start": "Începe",
+    "startA11y": "Începe planificarea unui reel",
+    "ideasReady_one": "{{count}} idee gata",
+    "ideasReady_other": "{{count}} idei gata",
+    "viewIdeas": "Vezi ideile →",
+    "actorSubtitle": "Reel prezentator",
+    "templates": "Șabloane",
+    "templatesSubtitle": "Tăieturi rapide din catalog",
+    "jumpBackIn": "Reia",
+    "seeAll": "Vezi tot",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Idei video",
+    "subtitle": "Unghiuri selectate gata de transformat în motion reels",
+    "filter": {
+      "all": "Toate ({{n}})",
+      "productSpotlight": "Produs în prim-plan ({{n}})",
+      "collection": "Colecție ({{n}})"
+    },
+    "angle": "Unghi {{n}}",
+    "body": {
+      "angle01": "Evidențierea granulației naturale, arhitectura geometrică a picioarelor încrucișate și aranjamentul dining-ului.",
+      "angle02": "Concentrare pe ușile sculptate manual, gestionarea cablurilor și ambianța caldă a livingului."
+    },
+    "readyToReview": "Gata de revizuire",
+    "viewStoryboard": "Vezi storyboard-ul"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} credit",
+    "creditsA11y_other": "{{count}} credite",
+    "addAssets": "Adaugă resurse",
+    "composerPlaceholder": "Rafinează tonul, voiceover-ul sau adaugă indicații...",
+    "composerA11y": "Rafinează tonul, voiceover-ul sau adaugă indicații",
+    "send": "Trimite rafinamentul",
+    "day": "Astăzi · Reels Studio",
+    "userMessage": "Arată colecția Bunting într-un reel calm și premium.",
+    "reply": "Am creat un concept pentru masa <b>{{brand}}</b> {{product}}. Iată parametrii recomandați:",
+    "format": "Format",
+    "formatVertical": "9:16 Vertical (Story/Reel)",
+    "duration": "Durată",
+    "presenter": "Prezentator",
+    "openingHook": "Introducere captivantă",
+    "reviewStoryboard_one": "Revizuiește storyboard-ul ({{count}} scenă)",
+    "reviewStoryboard_other": "Revizuiește storyboard-ul ({{count}} scene)",
+    "readyStatus": "Gata de generare sau rafinare"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "Durată {{seconds}}s",
+    "verticalFact": "9:16 vertical",
+    "readyToRender": "Gata de redare <muted>· Ciornă salvată pentru revizuire</muted>",
+    "sceneDirection": "Direcția scenei",
+    "voiceoverFr": "Voiceover (FR)",
+    "direction": {
+      "scene1": "Dezvăluire lentă printr-un cadru modern de dining",
+      "scene2": "Trecere macro lină peste granulația bogată a lemnului natural și marginea teșită",
+      "scene3": "Perspectivă aranjată cu watermark-ul emblemei Bois & Chiffons"
+    },
+    "editInChat": "Editează în chat",
+    "makeVideo": "Creează video",
+    "makeVideoA11y_one": "Creează video, {{count}} credit",
+    "makeVideoA11y_other": "Creează video, {{count}} credite",
+    "cost_one": "{{count}} credit",
+    "cost_other": "{{count}} credite",
+    "balance_one": "Sold curent: {{balance}} credite · {{count}} credit va fi rezervat · Ciorna salvată automat",
+    "balance_other": "Sold curent: {{balance}} credite · {{count}} credite vor fi rezervate · Ciorna salvată automat"
+  },
+  "generating": {
+    "backToWorkspace": "Înapoi la spațiul de lucru",
+    "renderingA11y": "Redare în desfășurare",
+    "title": "Crearea reel-ului tău",
+    "body": "Compunerea vizualurilor, voiceover-ului în franceză și ritmului de mișcare pentru {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Resursă autentică din catalogul francez",
+    "preparingScenes_one": "Pregătirea {{count}} scene",
+    "preparingScenes_other": "Pregătirea {{count}} scenelor",
+    "done": "Gata",
+    "renderingFrames": "Redarea cadrelor video",
+    "addingAudio": "Adăugarea audio",
+    "queued": "În așteptare",
+    "creditsReserved_one": "{{count}} credit rezervat",
+    "creditsReserved_other": "{{count}} credite rezervate",
+    "remaining_one": "Rămase: {{count}} credit",
+    "remaining_other": "Rămase: {{count}} credite",
+    "safeToLeave": "Poți părăsi această pagină în siguranță. Ciorna ta este salvată automat în fila Rezultate.",
+    "keepWorking": "Continuă să lucrezi în fundal"
+  },
+  "results": {
+    "title": "Reel-uri video",
+    "newReel": "Reel nou",
+    "filter": {
+      "all": "Toate ({{n}})",
+      "ready": "Gata ({{n}})",
+      "processing": "În procesare ({{n}})"
+    },
+    "processing_one": "În procesare · {{count}} credit rezervat",
+    "processing_other": "În procesare · {{count}} credite rezervate",
+    "renderingA11y": "{{title}}, redare {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 vertical · Redare vizualuri...",
+    "renderingStage": "Etapa de redare",
+    "previewA11y": "Previzualizare eșantion, {{title}}",
+    "moreOptions": "Mai multe opțiuni",
+    "reviewVideo": "Revizuiește video",
+    "meta": {
+      "tv": "20s · Voiceover în franceză · Gata de programare",
+      "atelier": "15s · Acustică ambientală · Gata de programare"
+    }
+  },
+  "review": {
+    "subtitle": "Ciornă reel · Gata de revizuire",
+    "options": "Meniu opțiuni",
+    "downloadVideo": "Descarcă video",
+    "connectFirst": "Alege un cont conectat înainte de publicare.",
+    "samplePreview": "Previzualizare eșantion",
+    "play": "Redă previzualizarea video",
+    "position": "Poziția videoclipului",
+    "sound": "Activează sunetul video",
+    "fullscreen": "Deschide video pe tot ecranul",
+    "vertical": "9:16 Vertical",
+    "portrait": "Format portret",
+    "captionFrench": "Subtitrare (franceză)",
+    "defaultSource": "· Sursă implicită",
+    "editable": "Editabil",
+    "captionA11y": "Subtitrare video în franceză",
+    "addTag": "Adaugă etichetă",
+    "specifications": "Specificații",
+    "audioTrack": "Piesă audio",
+    "audioValue": "Voce franceză (Studio Natural) + Acustică ambientală",
+    "resolution": "Rezoluție",
+    "resolutionValue": "Video portret · 9:16"
+  },
+  "publish": {
+    "title": "Publică reel",
+    "confirmSchedule": "Confirmă programarea",
+    "publishNow": "Publică acum",
+    "saveDraft": "Salvează schița",
+    "readyToSchedule": "Gata de programare",
+    "format": "{{product}} · 9:16 Reel vertical",
+    "playPreview": "Redă previzualizare",
+    "channel": "Canal de publicare",
+    "connected": "Conectat",
+    "notConnected": "Neconectat",
+    "connect": "Conectează",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Postare automată direct pe feed & reels",
+    "orDownload": "Sau descarcă video direct",
+    "download": "Descarcă",
+    "timing": "Sincronizare",
+    "date": "Data",
+    "time": "Ora",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Fus orar, {{value}}",
+    "notice": "Conectează-ți contul de business Instagram pentru a activa publicarea programată automată. Poți salva în continuare acest reel ca schiță."
+  },
+  "scheduled": {
+    "close": "Închide",
+    "viewReel": "Vezi reel programat",
+    "backToResults": "Înapoi la rezultate",
+    "title": "Reel programat",
+    "body": "Videoclipul tău va fi publicat pe contul selectat la ora programată.",
+    "meta": "{{seconds}}s · Voce franceză",
+    "publishDate": "Data publicării",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Spațiu de lucru brand",
+    "channel": "Canal",
+    "instagramConnected": "Instagram (Conectat)",
+    "editInCalendar": "Editează sau anulează această postare din calendarul tău."
+  },
+  "actor": {
+    "title": "Alege un prezentator",
+    "intro": "Alege un stil de prezentator sau un reel doar cu produsul.",
+    "noPresenterA11y": "Fără prezentator, recomandat",
+    "recommended": "Recomandat",
+    "noPresenterBody": "Concentrează-te doar pe vizualurile mobilierului, texturi și audio de studio.",
+    "styles": "Stiluri de prezentator",
+    "style": {
+      "calm": {
+        "title": "Narator calm",
+        "subtitle": "Franceză · Studio Calm"
+      },
+      "expressive": {
+        "title": "Prezentator expresiv",
+        "subtitle": "Engleză / FR · Dinamic"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Voce de probă, {{title}}",
+    "sampleVoice": "Voce de probă",
+    "voiceLed": "Stil condus de voce",
+    "notice": "Alege un stil condus de voce sau concentrează-te pe produsul tău."
+  },
+  "script": {
+    "title": "Script & voce",
+    "continue": "Continuă la storyboard",
+    "costNote": "Revizuiește costul creditului înainte de a crea reel-ul tău.",
+    "targetProduct": "Produs țintă",
+    "productMeta": "Acacia solidă · Sursa site-ului",
+    "voiceoverScript": "Script voiceover",
+    "frenchFr": "Franceză (FR)",
+    "wordCount_one": "{{count}} cuvânt · ~{{seconds}} sec",
+    "wordCount_other": "{{count}} cuvinte · ~{{seconds}} sec",
+    "scriptA11y": "Script voiceover în franceză",
+    "targetDuration_one": "Durata țintă: {{count}} secundă",
+    "targetDuration_other": "Durata țintă: {{count}} secunde",
+    "rewriteOpening": "Rescrie deschiderea",
+    "narratorAudio": "Audio narator",
+    "calmVoice": "Voce franceză calmă",
+    "calmVoiceMeta": "Franceză naturală, ritm acustic cald",
+    "recordOwn": "Înregistrează-ți propria voce",
+    "recordOwnMeta": "Narațiune personalizată opțională pentru brand",
+    "record": "Înregistrează"
+  },
+  "templates": {
+    "title": "Șabloane de reel",
+    "useTemplate": "Folosește șablon",
+    "searchPlaceholder": "Caută formate de studio...",
+    "searchA11y": "Caută formate de studio",
+    "tune": "Ajustează",
+    "filter": {
+      "all": "Toate formatele",
+      "catalog": "Spotlight catalog",
+      "shortCuts": "Tăieturi de 15-20s"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Spotlight produs",
+        "subtitle": "3 tăieturi macro + hook"
+      },
+      "collection": {
+        "title": "Dezvăluire colecție",
+        "subtitle": "Prezentare rapidă multi-produs"
+      },
+      "material": {
+        "title": "Detaliu material",
+        "subtitle": "Textură lemn & detalii artizanale"
+      },
+      "arrival": {
+        "title": "Nouă sosire",
+        "subtitle": "Anunț & CTA showroom"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Selectează resurse",
+    "createStoryboard_one": "Creează storyboard ({{count}} scenă)",
+    "createStoryboard_other": "Creează storyboard ({{count}} scene)",
+    "upload": "Încarcă fotografii",
+    "websiteAssets": "Resurse site",
+    "selected_one": "{{count}} selectat",
+    "selected_other": "{{count}} selectate",
+    "otherCategory": "Categorie diferită de produs",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Secvență storyboard",
+    "dragToReorder": "Trage pentru a reordona",
+    "reorderA11y": "Scena {{n}}: {{label}}. Reordonează scena",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Cameră",
+      "macro": "Detaliu",
+      "staged": "Stilizat",
+      "tv": "Unitate TV"
+    }
+  }
+}

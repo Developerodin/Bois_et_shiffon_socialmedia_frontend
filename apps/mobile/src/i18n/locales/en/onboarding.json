@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Welcome to Espanda",
+    "subtitle": "Create content for your business.",
+    "mobileNumber": "Mobile number",
+    "countryCode": "Country code {{code}}",
+    "sendCode": "Send code",
+    "useEmail": "Use email instead",
+    "sendFailed": "Couldn’t send the code. Try again or use email.",
+    "chooseCountry": "Choose your country",
+    "searchCountry": "Search country or code"
+  },
+  "email": {
+    "title": "Sign in with email",
+    "subtitle": "We will email you a passwordless verification code.",
+    "tagline": "Intelligent marketing for modern retail",
+    "label": "Email address",
+    "placeholder": "name@yourbusiness.com",
+    "notConfigured": "Email sign-in isn't set up on this server yet.",
+    "sendFailed": "Couldn't send the code. Try again.",
+    "useMobile": "Use mobile number instead",
+    "linkTitle": "Add your email",
+    "linkSubtitle": "Your number is verified. Add an email for receipts and team invites. We’ll send it a code."
+  },
+  "verify": {
+    "title": "Enter your code",
+    "sent": "We sent a verification code to {{destination}}",
+    "codeLabel": "Six-digit verification code",
+    "submit": "Verify code",
+    "checkFailed": "Couldn't check the code. Try again.",
+    "resendFailed": "Couldn't resend the code.",
+    "resendIn": "Resend code in {{time}}",
+    "resend": "Resend code",
+    "changeEmail": "Change email",
+    "changeMobile": "Change mobile number"
+  },
+  "welcome": {
+    "getStarted": "Get started",
+    "footnote": "Your business, your creative direction.",
+    "photosLabel": "Examples from the {{brand}} catalog",
+    "title": "Marketing that feels like your business",
+    "body": "Generate on-brand studio reels, photoshoots, and product posts from your catalog.",
+    "steps": {
+      "goal": {
+        "title": "Choose your goal",
+        "body": "Select the first creative format you want to produce."
+      },
+      "business": {
+        "title": "Share your business",
+        "body": "Share your website or add your business details."
+      },
+      "review": {
+        "title": "Review ready content",
+        "body": "Review ideas made around your products."
+      }
+    }
+  },
+  "goal": {
+    "title": "What will you create first?",
+    "subtitle": "We’ll tailor your initial workspace and templates around your primary focus.",
+    "note": "All tools and studio formats remain available later.",
+    "options": {
+      "socialPlan": {
+        "title": "Social media plan",
+        "description": "A month of posts and captions"
+      },
+      "marketingVideos": {
+        "title": "Marketing videos",
+        "description": "Studio reels from your catalog"
+      },
+      "fashionPhotoshoot": {
+        "title": "Fashion photoshoot",
+        "description": "Style apparel on models"
+      },
+      "productPhotoshoot": {
+        "title": "Product photoshoot",
+        "description": "Product photos for your catalog"
+      }
+    }
+  },
+  "source": {
+    "title": "Where is your business online?",
+    "subtitle": "Espanda scans your online store or listing to automatically generate brand-accurate media.",
+    "options": {
+      "website": {
+        "title": "Website",
+        "description": "Shopify, WooCommerce, custom domain"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Local storefront, boutique or showroom"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "description": "Amazon, Etsy, eBay or Instagram shop"
+      },
+      "wholesale": {
+        "title": "Wholesale / B2B",
+        "description": "Faire, Ankorstore, private catalog"
+      },
+      "none": {
+        "title": "No online presence",
+        "description": "Describe your items manually"
+      },
+      "other": {
+        "title": "Something else",
+        "description": "Social handle, PDF lookbook, or file"
+      }
+    }
+  },
+  "website": {
+    "title": "What's your website?",
+    "subtitle": "We’ll automatically pull your catalog photos, colors, and tone of voice.",
+    "label": "Store website url",
+    "placeholder": "www.yourstore.com",
+    "valid": "Valid address",
+    "willRead": "We’ll read this site",
+    "facts": {
+      "catalog": {
+        "key": "Catalog products",
+        "value": "Product photos"
+      },
+      "identity": {
+        "key": "Brand identity",
+        "value": "Colors & Typography"
+      },
+      "tone": {
+        "key": "Tone & style",
+        "value": "Voice from your pages"
+      }
+    },
+    "safeNote": "Catalog import does not change anything on your live store."
+  },
+  "manual": {
+    "title": "Add business details",
+    "subtitle": "Share a listing link or describe your catalog manually.",
+    "modeLabel": "How to add your business",
+    "modeListing": "Listing URL",
+    "modeDescribe": "Describe business",
+    "listingLabel": "Listing link *",
+    "listingPlaceholder": "Etsy, Amazon, Google Maps or shop link",
+    "nameLabel": "Business name *",
+    "namePlaceholder": "e.g. Atelier Bois & Chiffons",
+    "sellsLabel": "What do you sell? *",
+    "sellsPlaceholder": "e.g. Handcrafted wooden tables, TV stands, and modern home decor...",
+    "locationLabel": "Location (optional)",
+    "locationPlaceholder": "City, country or showroom address",
+    "websiteLabel": "Website (optional)"
+  },
+  "learning": {
+    "working": "Working",
+    "tryAgain": "Try again",
+    "inProgressButton": "Learning in progress...",
+    "saved": "We’ll keep your progress saved.",
+    "title": "Getting to know your business",
+    "bodyWebsite": "Analyzing your website to extract brand identity, catalogs, and visual tone.",
+    "bodyManual": "Turning your description into brand identity, catalogs, and visual tone.",
+    "fallbackName": "Your business",
+    "sourceWebsite": "Primary website source",
+    "sourceManual": "Business details",
+    "foundWebsite": "Website found",
+    "foundManual": "Details added",
+    "stages": {
+      "open": "Opening website",
+      "identity": "Reading brand identity & tone",
+      "photos": "Gathering product photos"
+    },
+    "status": {
+      "done": "Complete",
+      "running": "In progress",
+      "queued": "Queued"
+    },
+    "errors": {
+      "stopped": "Reading your website stopped.",
+      "noWorkspace": "Your account has no workspace yet.",
+      "startFailed": "Couldn't start reading your website.",
+      "restartFailed": "Couldn't restart. Try again."
+    }
+  },
+  "review": {
+    "title": "Review business details",
+    "subtitle": "We found these details on your website. You can edit them anytime.",
+    "edit": "Edit",
+    "tagline": "Tagline",
+    "editTagline": "Edit tagline",
+    "categoryLocation": "Category & location",
+    "audience": "Target audience",
+    "editAudience": "Edit target audience",
+    "products_one": "Detected products ({{count}})",
+    "products_other": "Detected products ({{count}})",
+    "found": "Found",
+    "strengths": "Brand strengths",
+    "tags": {
+      "homeLiving": "Home & Living",
+      "france": "France",
+      "productCatalog": "Product catalog",
+      "showroomEshop": "Physical showroom & e-shop"
+    }
+  },
+  "brand": {
+    "title": "Brand & creative style",
+    "subtitle": "Tune how Espanda crafts your photoshoots and social posts.",
+    "identity": "{{name}} identity",
+    "paletteMeta": "Website palette · Editable",
+    "swatches": "Imported website color swatches",
+    "tone": "Creative tone",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxurious",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Natural",
+      "minimalist": "Minimalist"
+    },
+    "contentLanguage": "Content language",
+    "contentLanguageA11y": "Content language, {{language}}. Change",
+    "languages": {
+      "fr": "French (FR)",
+      "en": "English (US)"
+    },
+    "audienceProfile": "Audience profile",
+    "audienceHome": "Home & furniture",
+    "featured": "Featured catalog products",
+    "readyForBatch_one": "{{count}} ready for batch",
+    "readyForBatch_other": "{{count}} ready for batch",
+    "sampleProducts": {
+      "table": "Bunting table",
+      "tableDetail": "Acacia 240cm",
+      "tv": "TV unit",
+      "tvDetail": "Acacia 2 doors"
+    },
+    "channelsNote": "Instagram and Facebook can be connected in the next step. (No channels connected yet)"
+  },
+  "preparing": {
+    "ready": "Studio ready",
+    "preparing": "Preparing studio",
+    "loadingButton": "Preparing your ideas…",
+    "catalogSafe": "Your catalog remains untouched on your store.",
+    "title": "Preparing your first ideas",
+    "body": "Generating tailored social reels and staging sets from your {{name}} collection.",
+    "photosTitle": "Gathering photos",
+    "photosDetail": "{{product}} dining set",
+    "storyboardTitle": "Building storyboard",
+    "storyboardDetail_one": "Composing {{count}} video scene",
+    "storyboardDetail_other": "Composing {{count}} video scenes",
+    "nextTitle": "Next up: Review your ideas",
+    "nextDetail": "Select hooks and audio presets"
+  },
+  "connect": {
+    "readyToConnect": "• Ready to connect",
+    "title": "Publish when you're ready",
+    "subtitle": "Connect your social accounts so Espanda can publish or draft ready-to-post reels and product spotlights directly.",
+    "toolsTitle": "Publishing tools",
+    "featureReels": "Publish to Instagram Feed & Reels",
+    "featureCaptions": "Use your captions and hashtags",
+    "featureReview": "You always review before anything goes live",
+    "assurance": "No content published without your confirmation",
+    "connectInstagram": "Connect Instagram",
+    "connectFacebook": "Connect Facebook",
+    "skip": "Skip for now",
+    "laterTitle": "Connect later?",
+    "laterBody": "You can still create, edit, and download high-resolution reels and photoshoots to your camera roll. You can link your Instagram anytime in Settings.",
+    "laterDownload": "Download your creations",
+    "laterSettings": "Connect channels in Settings",
+    "continueWithout": "Continue without connecting"
+  }
+}

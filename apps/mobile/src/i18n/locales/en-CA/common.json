@@ -1,0 +1,37 @@
+{
+  "back": "Back",
+  "close": "Close",
+  "continue": "Continue",
+  "step": "Step {{step}} of {{total}}",
+  "auth": {
+    "orContinueWith": "or continue with",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "By continuing, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
+    "allScreensDev": "All screens (dev)",
+    "googleFailed": "Google sign-in didn’t go through. Try again or use e-mail.",
+    "googleNeedsBuild": "Google sign-in works in the installed Espanda app, not in Expo Go. Use e-mail for now."
+  },
+  "language": {
+    "title": "App language",
+    "search": "Search languages",
+    "explainer": "Changes the app's buttons and menus. Your posts keep the content language set for each brand.",
+    "noMatch": "No language matches “{{query}}”."
+  },
+  "module": {
+    "openMenu": "Open menu",
+    "settings": "Settings",
+    "credits_one": "{{count}} credit available",
+    "credits_other": "{{count}} credits available",
+    "workspace": "Workspace {{name}}"
+  },
+  "nav": {
+    "reels": "Reels",
+    "posts": "Posts",
+    "photoshoot": "Photoshoot",
+    "marketing": "Marketing",
+    "create": "Create",
+    "ideas": "Ideas",
+    "results": "Results"
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "viewPlans": "Zobrazit plány",
+  "credits_one": "{{n}} kredit",
+  "credits_other": "{{n}} kredity",
+  "tableAlt": "{{product}} jídelní stůl",
+  "plans": {
+    "professional": "Profesionální",
+    "starter": "Startovací",
+    "recommended": "Doporučeno",
+    "priceToBeConfirmed": "Cena bude upřesněna",
+    "features": {
+      "monthlyCredits_one": "{{n}} měsíční kredit do studia",
+      "monthlyCredits_other": "{{n}} měsíčních kreditů do studia",
+      "postsStories": "Příspěvky, příběhy a plánování",
+      "photoshoots": "Produktové a módní focení",
+      "websiteStudio": "Website Studio a návrh vlastní domény",
+      "replyAssistant": "AI asistent pro odpovědi zákazníkům",
+      "googleSync": "Synchronizace profilu Google Growth",
+      "contentExports": "Tvorba a export obsahu",
+      "reelsStaging": "Video kotouče a inscenace ve studiu"
+    }
+  },
+  "header": {
+    "openMenu": "Otevřít menu",
+    "plans": "Plány",
+    "billingSettings": "Nastavení fakturace",
+    "modules": {
+      "reels": "Kotouče",
+      "posts": "Příspěvky",
+      "photoshoot": "Focení",
+      "marketing": "Marketing"
+    }
+  },
+  "choose": {
+    "title": "Vyberte si plán",
+    "pricingUnavailable": "Ceny zatím nejsou k dispozici.",
+    "continue": "Pokračovat",
+    "restorePurchases": "Obnovit nákupy",
+    "terms": "Podmínky služby",
+    "privacy": "Zásady ochrany osobních údajů",
+    "lead": "Rozšiřte své maloobchodní studio s automatizovanými video kotouči, inscenovanými foceními a publikováním na sociálních sítích.",
+    "planA11y": "Plán {{name}}, {{price}}"
+  },
+  "activated": {
+    "continueReel_one": "Pokračovat ve vytváření kotouče ({{n}} kredit)",
+    "continueReel_other": "Pokračovat ve vytváření kotouče ({{n}} kredity)",
+    "backToWorkspace": "Zpět do pracovního prostoru",
+    "title": "Plán aktivován",
+    "lead_one": "Váš pracovní prostor {{plan}} je nyní aktivní s {{n}} měsíčním kreditem. Vítejte v Espanda Studio.",
+    "lead_other": "Váš pracovní prostor {{plan}} je nyní aktivní s {{n}} měsíčními kredity. Vítejte v Espanda Studio.",
+    "planName": "Plán {{plan}}",
+    "active": "Aktivní",
+    "renews": "Obnovuje se měsíčně · Funkce {{plan}}",
+    "available": "Dostupné",
+    "resumeProject": "Pokračovat v čekajícím projektu",
+    "inProgress": "Probíhá",
+    "reelTitle": "Kotouč {{title}}",
+    "scenesReady_one": "{{n}} scéna připravena k vytvoření",
+    "scenesReady_other": "{{n}} scén připraveno k vytvoření",
+    "noDeduction": "Žádné kredity zatím nebyly odečteny. Generování začne až po vašem potvrzení."
+  },
+  "billing": {
+    "title": "Nastavení",
+    "tabs": {
+      "business": "Moje firma",
+      "billing": "Fakturace",
+      "postsPlanner": "Plánovač příspěvků"
+    },
+    "status": "Žádné aktivní předplatné",
+    "plan": "Bezplatný pracovní prostor",
+    "balance": "Zůstatek",
+    "note": "Návrhy, synchronizace katalogu obchodu a nastavení firmy zůstávají dostupné.",
+    "recentUsage": "Nedávné využití kreditů",
+    "creditActivity": "Aktivita kreditů",
+    "empty": "Zatím nebyly použity žádné kredity. Vyberte si plán a začněte vytvářet kotouče a automatizované inscenace.",
+    "restore": "Obnovit nákupy předplatného",
+    "appLanguage": "Jazyk rozhraní aplikace",
+    "languages": {
+      "englishUS": "Angličtina US",
+      "frenchFR": "Francouzština FR"
+    },
+    "push": "Push notifikace",
+    "pushHint": "Upozornění na vykreslení a dokončení dávky",
+    "terms": "Podmínky služby",
+    "privacy": "Zásady ochrany osobních údajů"
+  },
+  "gate": {
+    "sheetLabel": "Vyžadováno předplatné",
+    "subscriberGeneration": "Generování pro předplatitele",
+    "title": "Připraveno k vytvoření tohoto kotouče?",
+    "body": "Pro vykreslení video kotoučů s francouzským voiceoverem a zvukem je vyžadován aktivní plán. Váš storyboard je uložen a čeká.",
+    "saved": "Uloženo",
+    "reelFacts_one": "{{seconds}}s · 9:16 vertikální · {{count}} scéna · Francouzský voiceover",
+    "reelFacts_other": "{{seconds}}s · 9:16 vertikální · {{count}} scén · Francouzský voiceover",
+    "creditsPerReel_one": "{{n}} kredit za kotouč",
+    "creditsPerReel_other": "{{n}} kredity za kotouč",
+    "keepEditing": "Pokračovat v úpravách storyboardu",
+    "afterActivation": "Po aktivaci se vraťte ke svému storyboardu a potvrďte generování."
+  },
+  "marketing": {
+    "paidAdsA11y": "Placené reklamy, již brzy",
+    "paidAds": "Placené reklamy · Již brzy",
+    "title": "Marketing",
+    "subtitle": "Spravujte viditelnost svého obchodu, konverzace a profil značky",
+    "toolLockedA11y": "{{title}}, {{subtitle}}. Uzamčeno, Profesionální plán. Zobrazit plány",
+    "toolAvailableA11y": "{{title}}, {{subtitle}}. Dostupné. Nastavit",
+    "locked": "Uzamčeno",
+    "available": "Dostupné",
+    "professional": "Profesionální",
+    "configure": "Nastavit",
+    "tools": {
+      "customers": {
+        "title": "Zákazníci",
+        "subtitle": "Doručená pošta a AI odpovědi"
+      },
+      "google": {
+        "title": "Google Growth",
+        "subtitle": "Místní mapy a recenze"
+      },
+      "website": {
+        "title": "Website Studio",
+        "subtitle": "Vstupní stránky a návrh"
+      },
+      "business": {
+        "title": "Moje firma",
+        "subtitle": "Detaily značky a odpovědi"
+      },
+      "connections": {
+        "title": "Připojení",
+        "subtitle": "Synchronizace sociálních sítí a webu"
+      },
+      "automations": {
+        "title": "Automatizace",
+        "subtitle": "Nastavení publikování"
+      }
+    }
+  },
+  "posts": {
+    "title": "Vaše příspěvky v pohybu",
+    "subtitle": "Zkontrolujte vygenerované produktové zvýraznění a naplánované příspěvky",
+    "subscriptionFeature": "Funkce předplatného",
+    "inactive": "Neaktivní",
+    "monthlyPlan": "Váš měsíční plán",
+    "unlock": "Odemkněte měsíční příspěvky a příběhy, popisky laděné na značku a naplánované publikování na více kanálech.",
+    "calendarA11y": "Náhled návrhu plánu, {{month}}",
+    "draftSchedule": "Návrh plánu",
+    "day": "{{weekday}} {{day}}",
+    "postMeta": "{{time}} · Návrh · nepublikováno",
+    "keepDrafting": "Pokračovat v ručním návrhu"
+  },
+  "reels": {
+    "home": "Domů kotouče",
+    "title": "Vytvořte svůj další kotouč",
+    "subtitle": "Vytvářejte video kotouče ve studiu z katalogu vašeho obchodu",
+    "notice_one": "Vaše nápady jsou stále zde. Prozkoumejte {{n}} nápad a kdykoli zkontrolujte storyboardy. Aktivní plán odemkne vykreslování videa.",
+    "notice_other": "Vaše nápady jsou stále zde. Prozkoumejte {{n}} nápady a kdykoli zkontrolujte storyboardy. Aktivní plán odemkne vykreslování videa.",
+    "heroAlt": "{{product}} jídelní kolekce, inscenováno",
+    "creativePrompt": "Kreativní podnět",
+    "yourAssistant": "Váš asistent",
+    "question": "Co byste chtěli ukázat?",
+    "planTogether": "Naplánujte kotouč společně",
+    "start": "Začít",
+    "startA11y": "Začněte plánovat kotouč",
+    "ideasReady_one": "{{n}} nápad připraven",
+    "ideasReady_other": "{{n}} nápadů připraveno",
+    "viewIdeas": "Zobrazit nápady →"
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "viewPlans": "Pläne anzeigen",
+  "credits_one": "{{n}} Guthaben",
+  "credits_other": "{{n}} Guthaben",
+  "tableAlt": "{{product}} Esstisch",
+  "plans": {
+    "professional": "Professional",
+    "starter": "Starter",
+    "recommended": "Empfohlen",
+    "priceToBeConfirmed": "Preis noch nicht bestätigt",
+    "features": {
+      "monthlyCredits_one": "{{n}} monatliches Studio-Guthaben",
+      "monthlyCredits_other": "{{n}} monatliche Studio-Guthaben",
+      "postsStories": "Beiträge, Stories & Planung",
+      "photoshoots": "Produkt- & Mode-Shootings",
+      "websiteStudio": "Website Studio & benutzerdefinierte Domain",
+      "replyAssistant": "KI-Kundenantwort-Assistent",
+      "googleSync": "Google Growth Profil-Synchronisation",
+      "contentExports": "Inhaltserstellung und Exporte",
+      "reelsStaging": "Kernstudio-Video-Reels & Inszenierung"
+    }
+  },
+  "header": {
+    "openMenu": "Menü öffnen",
+    "plans": "Pläne",
+    "billingSettings": "Abrechnungseinstellungen",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Beiträge",
+      "photoshoot": "Fotoshooting",
+      "marketing": "Marketing"
+    }
+  },
+  "choose": {
+    "title": "Wähle deinen Plan",
+    "pricingUnavailable": "Preise sind noch nicht verfügbar.",
+    "continue": "Weiter",
+    "restorePurchases": "Käufe wiederherstellen",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzrichtlinie",
+    "lead": "Skaliere dein Einzelhandelsstudio mit automatisierten Video-Reels, inszenierten Shootings und sozialem Publishing.",
+    "planA11y": "{{name}}-Plan, {{price}}"
+  },
+  "activated": {
+    "continueReel_one": "Reel fortsetzen ({{n}} Guthaben)",
+    "continueReel_other": "Reel fortsetzen ({{n}} Guthaben)",
+    "backToWorkspace": "Zurück zum Arbeitsbereich",
+    "title": "Plan aktiviert",
+    "lead_one": "Dein {{plan}}-Arbeitsbereich ist jetzt aktiv mit {{n}} monatlichem Guthaben. Willkommen bei Espanda Studio.",
+    "lead_other": "Dein {{plan}}-Arbeitsbereich ist jetzt aktiv mit {{n}} monatlichen Guthaben. Willkommen bei Espanda Studio.",
+    "planName": "{{plan}}-Plan",
+    "active": "Aktiv",
+    "renews": "Erneuert sich monatlich · {{plan}}-Funktionen",
+    "available": "Verfügbar",
+    "resumeProject": "Ausstehendes Projekt fortsetzen",
+    "inProgress": "In Bearbeitung",
+    "reelTitle": "{{title}}-Reel",
+    "scenesReady_one": "{{n}} Szene bereit zur Erstellung",
+    "scenesReady_other": "{{n}} Szenen bereit zur Erstellung",
+    "noDeduction": "Noch keine Guthaben abgezogen. Die Erstellung beginnt erst nach deiner Bestätigung."
+  },
+  "billing": {
+    "title": "Einstellungen",
+    "tabs": {
+      "business": "Mein Geschäft",
+      "billing": "Abrechnung",
+      "postsPlanner": "Beitragsplaner"
+    },
+    "status": "Kein aktives Abonnement",
+    "plan": "Kostenloser Arbeitsbereich",
+    "balance": "Guthaben",
+    "note": "Entwürfe, Katalog-Synchronisation und Geschäftseinstellungen bleiben verfügbar.",
+    "recentUsage": "Letzte Guthabenverwendung",
+    "creditActivity": "Guthabenaktivität",
+    "empty": "Noch keine Guthaben verwendet. Wähle einen Plan, um mit der Erstellung von Reels und automatisierter Inszenierung zu beginnen.",
+    "restore": "Abonnementkäufe wiederherstellen",
+    "appLanguage": "App-Sprache",
+    "languages": {
+      "englishUS": "Englisch US",
+      "frenchFR": "Französisch FR"
+    },
+    "push": "Push-Benachrichtigungen",
+    "pushHint": "Render-Benachrichtigungen und Batch-Abschlüsse",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzrichtlinie"
+  },
+  "gate": {
+    "sheetLabel": "Abonnement erforderlich",
+    "subscriberGeneration": "Abonnentenerstellung",
+    "title": "Bereit, dieses Reel zu erstellen?",
+    "body": "Ein aktiver Plan ist erforderlich, um Video-Reels mit französischem Voiceover und Audio zu rendern. Dein Storyboard ist gespeichert und wartet.",
+    "saved": "Gespeichert",
+    "reelFacts_one": "{{seconds}}s · 9:16 vertikal · {{count}} Szene · Französisches Voiceover",
+    "reelFacts_other": "{{seconds}}s · 9:16 vertikal · {{count}} Szenen · Französisches Voiceover",
+    "creditsPerReel_one": "{{n}} Guthaben pro Reel",
+    "creditsPerReel_other": "{{n}} Guthaben pro Reel",
+    "keepEditing": "Storyboard weiter bearbeiten",
+    "afterActivation": "Nach der Aktivierung kehre zu deinem Storyboard zurück, um die Erstellung zu bestätigen."
+  },
+  "marketing": {
+    "paidAdsA11y": "Bezahlte Anzeigen, demnächst verfügbar",
+    "paidAds": "Bezahlte Anzeigen · Demnächst verfügbar",
+    "title": "Marketing",
+    "subtitle": "Verwalte die Sichtbarkeit deines Shops, Gespräche und das Markenprofil",
+    "toolLockedA11y": "{{title}}, {{subtitle}}. Gesperrt, Professional-Plan. Pläne anzeigen",
+    "toolAvailableA11y": "{{title}}, {{subtitle}}. Verfügbar. Konfigurieren",
+    "locked": "Gesperrt",
+    "available": "Verfügbar",
+    "professional": "Professional",
+    "configure": "Konfigurieren",
+    "tools": {
+      "customers": {
+        "title": "Kunden",
+        "subtitle": "Posteingang & KI-Antworten"
+      },
+      "google": {
+        "title": "Google Growth",
+        "subtitle": "Lokale Karten & Bewertungen"
+      },
+      "website": {
+        "title": "Website Studio",
+        "subtitle": "Landingpages & Entwurf"
+      },
+      "business": {
+        "title": "Mein Geschäft",
+        "subtitle": "Markendetails & Antworten"
+      },
+      "connections": {
+        "title": "Verbindungen",
+        "subtitle": "Soziale & Website-Synchronisation"
+      },
+      "automations": {
+        "title": "Automatisierungen",
+        "subtitle": "Veröffentlichungseinstellungen"
+      }
+    }
+  },
+  "posts": {
+    "title": "Deine Beiträge, in Bewegung",
+    "subtitle": "Überprüfe generierte Produkt-Highlights & geplante Beiträge",
+    "subscriptionFeature": "Abonnementfunktion",
+    "inactive": "Inaktiv",
+    "monthlyPlan": "Dein monatlicher Plan",
+    "unlock": "Schalte monatliche Beiträge und Stories, markenabgestimmte Bildunterschriften und geplante Multi-Channel-Veröffentlichungen frei.",
+    "calendarA11y": "Vorschau des Entwurfsplans, {{month}}",
+    "draftSchedule": "Entwurfsplan",
+    "day": "{{weekday}} {{day}}",
+    "postMeta": "{{time}} · Entwurf · nicht veröffentlicht",
+    "keepDrafting": "Weiter manuell entwerfen"
+  },
+  "reels": {
+    "home": "Reels-Startseite",
+    "title": "Erstelle dein nächstes Reel",
+    "subtitle": "Erstelle Studio-Video-Reels aus deinem Katalog",
+    "notice_one": "Deine Ideen sind noch hier. Erkunde {{n}} Idee und überprüfe Storyboards jederzeit. Aktiver Plan schaltet Video-Rendering frei.",
+    "notice_other": "Deine Ideen sind noch hier. Erkunde {{n}} Ideen und überprüfe Storyboards jederzeit. Aktiver Plan schaltet Video-Rendering frei.",
+    "heroAlt": "{{product}} Esskollektion, inszeniert",
+    "creativePrompt": "Kreativer Impuls",
+    "yourAssistant": "Dein Assistent",
+    "question": "Was möchtest du zeigen?",
+    "planTogether": "Plane ein Reel zusammen",
+    "start": "Start",
+    "startA11y": "Beginne mit der Planung eines Reels",
+    "ideasReady_one": "{{n}} Idee bereit",
+    "ideasReady_other": "{{n}} Ideen bereit",
+    "viewIdeas": "Ideen ansehen →"
+  }
+}

@@ -1,21 +1,19 @@
 import type { ContextDocEntry } from "@/components/context/api";
 import { cn } from "@/lib/utils";
 
-type State = { key: "none" | "draft" | "pending" | "confirmed"; label: string };
+type State = { key: "none" | "draft" | "confirmed"; label: string };
 
 export function docState(entry: ContextDocEntry): State {
   if (!entry.latest) return { key: "none", label: "Not generated" };
   if (entry.latest.status === "CONFIRMED")
-    return { key: "confirmed", label: "Confirmed" };
-  if (entry.confirmed)
-    return { key: "pending", label: "Draft changes pending" };
-  return { key: "draft", label: "Draft" };
+    return { key: "confirmed", label: "Reviewed" };
+  // Agents read the latest version either way; reviewing is optional.
+  return { key: "draft", label: "In use" };
 }
 
 const TONE: Record<State["key"], string> = {
   none: "border-border text-muted-foreground",
   draft: "border-primary/40 bg-primary/10 text-primary",
-  pending: "border-primary/40 bg-primary/10 text-primary",
   confirmed: "border-success/40 bg-success/10 text-success",
 };
 

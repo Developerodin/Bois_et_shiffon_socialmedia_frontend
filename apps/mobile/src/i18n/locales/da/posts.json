@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Planlagt",
+    "briefReady": "Brief klar",
+    "needsReview": "Kræver gennemgang",
+    "draftReady": "Kladde klar",
+    "approved": "Godkendt",
+    "scheduled": "Planlagt",
+    "published": "Udgivet",
+    "draft": "Kladde"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "I dag",
+    "tomorrow": "I morgen"
+  },
+  "chrome": {
+    "openMenu": "Åbn menu",
+    "logo": "Espanda",
+    "credits_one": "{{count}} kredit tilgængelig",
+    "credits_other": "{{count}} kreditter tilgængelige",
+    "settings": "Indstillinger",
+    "modulesLabel": "App-moduler",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Indlæg",
+      "photoshoot": "Fotoshoot",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Modulnavigation",
+    "nav": {
+      "today": "I dag",
+      "posts": "Indlæg",
+      "create": "Opret",
+      "stories": "Stories",
+      "settings": "Indstillinger"
+    },
+    "back": "Tilbage",
+    "switchBusiness": "Skift virksomhed, {{name}}",
+    "business": "Virksomhed: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Dine indlæg i bevægelse",
+    "subtitle": "Gennemgå genererede produktfremhævninger & planlagte indlæg",
+    "needsApproval": "Kræver godkendelse",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Gennemgå indlæg",
+    "agenda": "Kommende agenda",
+    "thisWeek": "Denne uge",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Se kalender"
+  },
+  "calendar": {
+    "title": "Indlægskalender",
+    "subtitle": "Planlæg og automatiser dine udgivelser",
+    "viewLabel": "Kalendervisning",
+    "views": {
+      "month": "Måned",
+      "list": "Liste"
+    },
+    "plan": "Plan: {{n}} indlæg / måned",
+    "managePlan": "Administrer plan",
+    "postCount_one": "{{count}} indlæg",
+    "postCount_other": "{{count}} indlæg",
+    "empty": "Intet planlagt for denne dag.",
+    "scheduled_one": "{{count}} planlagt",
+    "scheduled_other": "{{count}} planlagt",
+    "previousMonth": "Forrige måned",
+    "nextMonth": "Næste måned",
+    "gridLabel": "{{month}} kalender",
+    "dayWithPosts_one": "{{day}} · {{count}} indlæg",
+    "dayWithPosts_other": "{{day}} · {{count}} indlæg"
+  },
+  "detail": {
+    "title": "Indlægsdetaljer",
+    "moreOptions": "Flere muligheder",
+    "feedPhoto": "4:5 Feed foto",
+    "fullscreen": "Fuld skærm",
+    "captionFrench": "Billedtekst (fransk)",
+    "editText": "Rediger tekst",
+    "channels": "Udgivelseskanaler",
+    "instagramFeed": "Instagram Feed",
+    "instagramDetail": "Forbind en konto for at udgive",
+    "facebookPage": "Facebook-side",
+    "facebookDetail": "Auto-post til officiel side",
+    "notConnected": "Ikke forbundet",
+    "channelNotConnected": "{{name}}, ikke forbundet",
+    "editPost": "Rediger indlæg",
+    "schedule": "Planlæg"
+  },
+  "edit": {
+    "title": "Rediger indlæg",
+    "cancel": "Annuller",
+    "save": "Gem ændringer",
+    "previewLabel": "{{title}}, originalt format 4:5",
+    "ratio": "Originalt format · 4:5",
+    "sectionLabel": "Rediger sektion",
+    "tabs": {
+      "image": "Billede",
+      "caption": "Billedtekst",
+      "brand": "Brand"
+    },
+    "description": "Indlægsbeskrivelse",
+    "language": "Sprog: Fransk (FR)",
+    "suggestedHashtags": "Foreslåede hashtags",
+    "addHashtag": "Tilføj hashtag",
+    "add": "+ Tilføj",
+    "regenerate": "Genskab billedtekst med AI",
+    "imageHint": "Originalt format · 4:5. Træk forhåndsvisningen for at omramme beskæringen.",
+    "brandHint": "Logo, farver og tone følger din {{brand}} brandpakke."
+  },
+  "schedule": {
+    "title": "Planlæg",
+    "storyFormat": "Story · 9:16 billede",
+    "feedFormat": "Feed indlæg · 4:5 billede",
+    "destination": "Destination",
+    "actionRequired": "Handling påkrævet",
+    "notLinked": "Instagram-konto ikke forbundet",
+    "notLinkedBody": "Forbind dine sociale konti for at låse op for direkte planlagt udgivelse.",
+    "connect": "Forbind social konto",
+    "locked": "Planlægning låst indtil forbindelse",
+    "timing": "Timing & Planlægning",
+    "date": "Dato",
+    "dateLabel": "Dato, {{date}}",
+    "time": "Tid",
+    "timeLabel": "Tid, {{time}}",
+    "timezone": "Tidszone",
+    "schedulePost": "Planlæg indlæg",
+    "scheduleLocked": "Planlæg indlæg (Forbind kanal først)",
+    "saveDraft": "Gem kladde"
+  },
+  "brief": {
+    "title": "Opret et indlæg",
+    "subtitle": "Vælg et produkt og kreativ retning",
+    "format": "Indholdsformat",
+    "formatLabel": "Indlægsformat",
+    "singlePhoto": "Enkelt foto",
+    "singlePhotoDetail": "4:5 Feed fokus",
+    "carousel": "Karrusel",
+    "carouselDetail": "Flere fotos",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Primært mål",
+    "goals": {
+      "newArrival": "Ny ankomst",
+      "productFeature": "Produktfunktion",
+      "specialOffer": "Særtilbud"
+    },
+    "product": "Målrettet katalogprodukt",
+    "changeProduct": "Skift produkt",
+    "change": "Skift",
+    "direction": "Kreativ retning (valgfri)",
+    "directionLanguage": "Fransk (FR)",
+    "directionPlaceholder": "f.eks. Fokus på håndlavet snedkerarbejde og varme",
+    "cost": "Oprettelsesomkostning:",
+    "costPending": "Vurdering afventer",
+    "draftPost": "Kladdeopslag"
+  },
+  "stories": {
+    "title": "Stories",
+    "subtitle": "9:16 lodrette sociale øjeblikke",
+    "newStory": "Ny story",
+    "statusLabel": "Story-status",
+    "drafts_one": "Kladder ({{count}})",
+    "drafts_other": "Kladder ({{count}})",
+    "scheduled_one": "Planlagt ({{count}})",
+    "scheduled_other": "Planlagt ({{count}})",
+    "samplePreview": "Eksempelvisning",
+    "moreOptions": "Flere muligheder for {{title}}",
+    "editStory": "Rediger story"
+  },
+  "editStory": {
+    "back": "Tilbage",
+    "undo": "Fortryd",
+    "tools": {
+      "text": "Tekst",
+      "image": "Billede",
+      "brand": "Brand",
+      "cta": "CTA"
+    },
+    "toolLabel": "{{tool}} værktøj",
+    "captionTitle": "Story-tekst / Link-sticker",
+    "languageCode": "FR",
+    "saveDraft": "Gem kladde",
+    "scheduleStory": "Planlæg story"
+  },
+  "planner": {
+    "title": "Opslagsplanlægger",
+    "sectionsLabel": "Indstillingssektioner",
+    "sections": {
+      "business": "Min virksomhed",
+      "billing": "Fakturering",
+      "planner": "Opslagsplanlægger"
+    },
+    "cycle": "Planlægningscyklus",
+    "cadence": "Udgivelsesfrekvens",
+    "monthlyTarget": "Månedligt mål",
+    "feedPosts": "Feed-opslag",
+    "stories": "Stories",
+    "perMonth": "{{n}} / måned",
+    "feedNote": "~1 opslag dagligt",
+    "storiesNote": "Fordelt over din måned",
+    "cadenceHint": "Foreslåede indholdsmål. Juster før du genererer din kalender.",
+    "pillars": "Indholdssøjler",
+    "pillar": {
+      "catalog": "Katalogprodukter (Bunting fokus)",
+      "craft": "Materialedetaljer & håndværk (Acacia træ)",
+      "story": "Brandhistorie & fransk arv"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Manuel gennemgang før udgivelse: </b>Genererede opslag placeres i din kalender som kladder til din endelige bekræftelse. Intet indhold udgives uden godkendelse.",
+    "generate": "Generer kalender"
+  }
+}

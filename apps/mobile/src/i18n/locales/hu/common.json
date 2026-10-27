@@ -1,0 +1,37 @@
+{
+  "back": "Vissza",
+  "close": "Bezárás",
+  "continue": "Folytatás",
+  "step": "{{step}} / {{total}} lépés",
+  "auth": {
+    "orContinueWith": "vagy folytatás ezzel",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "A folytatással elfogadod a <terms>Szolgáltatási feltételeinket</terms> és az <privacy>Adatvédelmi irányelveinket</privacy>.",
+    "allScreensDev": "Összes képernyő (fejlesztői)",
+    "googleFailed": "A Google bejelentkezés nem sikerült. Próbáld újra, vagy használj e-mailt.",
+    "googleNeedsBuild": "A Google bejelentkezés az Espanda telepített alkalmazásban működik, nem az Expo Go-ban. Használj e-mailt egyelőre."
+  },
+  "language": {
+    "title": "Alkalmazás nyelve",
+    "search": "Nyelvek keresése",
+    "explainer": "Megváltoztatja az app gombjait és menüit. A posztjaid megtartják az egyes márkákhoz beállított tartalomnyelvet.",
+    "noMatch": "Nincs találat a(z) „{{query}}” kifejezésre."
+  },
+  "module": {
+    "openMenu": "Menü megnyitása",
+    "settings": "Beállítások",
+    "credits_one": "{{count}} kredit elérhető",
+    "credits_other": "{{count}} kredit elérhető",
+    "workspace": "Munkaterület {{name}}"
+  },
+  "nav": {
+    "reels": "Reels",
+    "posts": "Posztok",
+    "photoshoot": "Fotózás",
+    "marketing": "Marketing",
+    "create": "Létrehozás",
+    "ideas": "Ötletek",
+    "results": "Eredmények"
+  }
+}

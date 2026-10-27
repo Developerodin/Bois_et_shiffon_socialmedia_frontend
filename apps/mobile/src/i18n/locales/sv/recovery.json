@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} kredit",
+  "credits_other": "{{n}} krediter",
+  "tableAlt": "{{product}} matbord",
+  "sheet": {
+    "dismiss": "Avfärda"
+  },
+  "videoFailed": {
+    "title": "Din reel är inte klar",
+    "body": "Rendering avbröts under scenkompositionen. Dina reserverade krediter har släppts.",
+    "failed": "Misslyckades",
+    "facts_one": "{{seconds}}s · 9:16 Vertikal · {{count}} scen",
+    "facts_other": "{{seconds}}s · 9:16 Vertikal · {{count}} scener",
+    "released_one": "{{n}} reserverad kredit släppt",
+    "released_other": "{{n}} reserverade krediter släppta",
+    "impact": "Kreditbalanspåverkan",
+    "used_one": "{{n}} kredit använd",
+    "used_other": "{{n}} krediter använda",
+    "viewDetails": "Visa detaljer",
+    "details": {
+      "failedAt": "Misslyckades vid",
+      "reserved": "Reserverad",
+      "released": "Släppt",
+      "stages": {
+        "sceneComposition": "Scenkomposition"
+      }
+    },
+    "tryAgain_one": "Försök igen ({{n}} kredit)",
+    "tryAgain_other": "Försök igen ({{n}} krediter)",
+    "editStoryboard": "Redigera storyboard"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "{{seconds}}s varaktighet · 9:16 vertikal",
+    "sheetLabel": "Inte tillräckligt med krediter",
+    "title_one": "Du behöver {{n}} kredit",
+    "title_other": "Du behöver {{n}} krediter",
+    "body_one": "Du har för närvarande <b>{{n}} kredit tillgänglig</b> i ditt Professional-arbetsutrymme. Din storyboard-utkast är säkert sparad.",
+    "body_other": "Du har för närvarande <b>{{n}} krediter tillgängliga</b> i ditt Professional-arbetsutrymme. Din storyboard-utkast är säkert sparad.",
+    "planName": "Professional-plan",
+    "active": "Aktiv",
+    "renews": "Förnyas månadsvis",
+    "remaining": "{{available}} / {{monthly}} kvar",
+    "remainingA11y": "Månadsvis krediter kvar",
+    "manage": "Hantera krediter",
+    "keepEditing": "Fortsätt redigera storyboard"
+  },
+  "reconnect": {
+    "backdropTitle": "Schema",
+    "backdropMeta": "Schemalagd till {{date}}",
+    "title": "Återanslut {{network}}",
+    "body": "Din kontobehörighet har gått ut. Återanslut ditt konto för att fortsätta schemaläggningen.",
+    "draftSaved": "Befintligt utkast sparat säkert",
+    "noPosting": "Ingen publicering kommer att starta förrän du uttryckligen bekräftar.",
+    "saveForLater": "Spara utkast för senare"
+  },
+  "importFailed": {
+    "title": "Kunde inte läsa denna webbplats",
+    "body": "Vi kunde inte nå eller extrahera katalogfoton från denna adress. Kontrollera din URL eller fortsätt genom att beskriva din butik.",
+    "urlLabel": "Butikens webbplats-URL",
+    "changeUrlA11y": "Ändra webbplats-URL",
+    "changeUrl": "Ändra URL",
+    "reasons": {
+      "timeout": "Webbplatsen tog för lång tid att svara. Inga ändringar gjordes."
+    },
+    "quickOptions": "Snabbalternativ för att fortsätta:",
+    "options": {
+      "retry": "Försök skanna igen om din butiksserver var tillfälligt upptagen.",
+      "manual": "Lägg till företagsnamn och produkter manuellt utan att vänta."
+    },
+    "tryAgain": "Försök igen",
+    "addManually": "Lägg till företag manuellt"
+  }
+}

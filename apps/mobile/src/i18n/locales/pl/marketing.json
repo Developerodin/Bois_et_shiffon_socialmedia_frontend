@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Przestrzeń robocza {{name}}",
+    "customers": "Klienci",
+    "customerTabs": {
+      "inbox": "Skrzynka odbiorcza",
+      "reviews": "Opinie",
+      "people": "Osoby"
+    },
+    "status": {
+      "notConnected": "Nie połączono"
+    },
+    "draft": "Szkic",
+    "googleGrowth": "Wzrost Google",
+    "websiteStudio": "Studio strony",
+    "editContent": "Edytuj treść",
+    "diningTableImage": "Stół jadalny Acacia Bunting",
+    "pages": {
+      "home": "Strona główna",
+      "product": "Produkt",
+      "contact": "Kontakt"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Zmień firmę, {{name}}",
+    "title": "Marketing",
+    "subtitle": "Zarządzaj widocznością sklepu, rozmowami i profilem marki",
+    "cue": {
+      "imageLabel": "Szafka TV Acacia w salonie",
+      "dismiss": "Odrzuć dzisiejszą wskazówkę",
+      "eyebrow": "Dzisiejsza wskazówka",
+      "title": "Dodaj nowe zdjęcia katalogowe",
+      "body": "Dodawanie nowych zdjęć utrzymuje automatyczne rolki i szkic strony na bieżąco."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Klienci",
+        "body": "Skrzynka odbiorcza, opinie i osoby",
+        "cta": "Otwórz skrzynkę"
+      },
+      "google": {
+        "title": "Wzrost Google",
+        "body": "Profil, posty i opinie",
+        "cta": "Skonfiguruj"
+      },
+      "website": {
+        "title": "Studio strony",
+        "body": "Szkic, edytuj i publikuj swoją stronę",
+        "cta": "Otwórz szkic"
+      },
+      "business": {
+        "title": "Biznes",
+        "body": "Marka, zasoby i połączenia",
+        "cta": "Zarządzaj"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Brak wiadomości",
+    "emptyBody": "Połącz swoje kanały klienta, aby otrzymywać bezpośrednie pytania o produkt i bezpiecznie przeglądać sugerowane szkice AI przed wysłaniem.",
+    "connectChannel": "Połącz swój kanał",
+    "emptyFootnote": "Nowe wiadomości będą dostępne automatycznie po połączeniu.",
+    "channelsTitle": "Obsługiwane kanały wiadomości",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Połącz konto, aby otrzymywać wiadomości."
+  },
+  "reply": {
+    "title": "Asystent odpowiedzi",
+    "referencedProduct": "Wspomniany produkt",
+    "suggestionTitle": "Sugestia odpowiedzi Espanda",
+    "draftLabel": "Szkic odpowiedzi",
+    "tone": "Ton: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Dopracowany i rzemieślniczy"
+    },
+    "done": "Gotowe",
+    "editReply": "Edytuj odpowiedź",
+    "approvalTitle": "Wymagana ręczna akceptacja",
+    "approvalBody": "Żadna wiadomość nie jest wysyłana bez Twojego wyraźnego kliknięcia.",
+    "exampleTitle": "Tryb przykładowej rozmowy",
+    "exampleBody": "Połączenie konta Instagram lub Facebook zastępuje ten przykład prawdziwymi pytaniami klientów."
+  },
+  "reviews": {
+    "emptyTitle": "Brak opinii",
+    "emptyBody": "Połącz swój profil Google Business, aby automatycznie zbierać i odpowiadać na zweryfikowane opinie klientów.",
+    "connectGoogle": "Połącz Google Business",
+    "automatedTitle": "Automatyczne prośby o opinie",
+    "connectFirst": "Najpierw połącz",
+    "automatedBody": "Wymaga połączenia z Google Business, aby wysyłać spersonalizowane zaproszenia do opinii."
+  },
+  "people": {
+    "emptyTitle": "Brak zapisów klientów",
+    "emptyBody": "Osoby, z którymi się kontaktujesz przez połączone kanały klienta, pojawią się tutaj.",
+    "connectChannel": "Połącz kanał",
+    "directoryTitle": "Twoja książka klientów",
+    "directoryBody": "Otwórz zapis osoby, aby zobaczyć jej rozmowy i dane kontaktowe w jednym miejscu.",
+    "connectedChannels": "Połączone kanały klienta"
+  },
+  "google": {
+    "presenceTitle": "Twoja obecność w Google",
+    "presenceBody": "Utrzymuj widoczność swojego lokalnego francuskiego showroomu na Google Maps i w wyszukiwarce automatycznie.",
+    "profileTitle": "Profil Google Business",
+    "profileBody": "Synchronizuj oficjalny adres sklepu, godziny otwarcia i nowe zdjęcia katalogowe bezpośrednio z Google Maps.",
+    "connectProfile": "Połącz profil Google Business",
+    "capabilitiesTitle": "Możliwości automatycznej synchronizacji",
+    "capabilities": {
+      "catalog": {
+        "title": "Aktualizacje profilu i katalogu",
+        "body": "Synchronizuj nowo zaaranżowane zdjęcia i dostawy mebli z lokalnymi aktualizacjami postów Google."
+      },
+      "reviews": {
+        "title": "Prośby o opinie",
+        "body": "Generuj uprzejme francuskie zaproszenia do opinii po wizytach w showroomie lub zakupach."
+      },
+      "replies": {
+        "title": "Kuratorowane szkice odpowiedzi",
+        "body": "Espanda tworzy przemyślane szkice odpowiedzi na wszystkie przychodzące opinie klientów do Twojej recenzji."
+      }
+    },
+    "controlTitle": "Ty masz kontrolę",
+    "controlBody": "Nic nie jest publikowane ani odpowiadane w Google, dopóki tego nie zatwierdzisz."
+  },
+  "googleWorkspace": {
+    "newPost": "Nowy post Google",
+    "subtitle": "Podgląd, jak dostawy produktów i opinie showroomu synchronizują się bezpośrednio z Google.",
+    "tabs": {
+      "profile": "Profil",
+      "posts": "Posty",
+      "reviews": "Opinie"
+    },
+    "draftPostTitle": "Szkic posta Google",
+    "actionButton": "Przycisk akcji: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Dowiedz się więcej"
+    },
+    "reviewPost": "Przegląd posta",
+    "reviewsTitle": "Opinie showroomu",
+    "reviewsBody": "Opinie i szkice odpowiedzi są zbierane z rozmowami klientów.",
+    "openReviews": "Otwórz opinie",
+    "checklistTitle": "Lista kontrolna konfiguracji profilu",
+    "checklist": {
+      "profile": {
+        "label": "Profil Google połączony",
+        "value": "Znaleziono"
+      },
+      "reviewLink": {
+        "label": "Bezpośredni link do prośby o opinię",
+        "value": "Ustaw"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Podgląd szkicu",
+    "catalogConnected": "Połączony katalog sklepu",
+    "connectDomain": "Połącz domenę",
+    "previewLabel": "Podgląd szkicu strony",
+    "browserTitle": "Szkic strony",
+    "fullPreview": "Pełny podgląd",
+    "reviewPublish": "Przegląd i publikacja szkicu",
+    "footnote": "Przejrzyj swoją treść i domenę przed publikacją."
+  },
+  "websiteEdit": {
+    "saveChanges": "Zapisz zmiany szkicu",
+    "reviewPublish": "Przegląd i publikacja",
+    "preview": "Podgląd",
+    "title": "Edytuj treść strony",
+    "heroTitle": "Baner sekcji głównej",
+    "replaceImage": "Zamień obraz",
+    "heroImageLabel": "Obraz banera głównego",
+    "headline": "Nagłówek (francuski)",
+    "description": "Opis",
+    "sectionsTitle": "Sekcje strony",
+    "sectionCount_one": "{{count}} sekcja",
+    "sectionCount_other": "{{count}} sekcje",
+    "sections": {
+      "heroBanner": "Baner główny",
+      "featuredCollection": "Polecana kolekcja",
+      "showroomContact": "Showroom i kontakt"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Zweryfikuj domenę i sprawdź treść przed publikacją.",
+    "publish": "Opublikuj stronę",
+    "keepDraft": "Zachowaj jako szkic",
+    "title": "Przejrzyj swoją stronę",
+    "subtitle": "Sprawdź treść i miejsce docelowe przed publikacją.",
+    "heroImageLabel": "Główne zdjęcie strony",
+    "destinationTitle": "Miejsce publikacji",
+    "destinationBody": "Połącz i zweryfikuj domenę, aby opublikować ten szkic.",
+    "setUpDomain": "Skonfiguruj domenę"
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} Sekunde",
+  "seconds_other": "{{count}} Sekunden",
+  "noPresenter": "Kein Moderator",
+  "aiActor": "KI-Darsteller",
+  "assistant": "Dein Video-Assistent",
+  "sourceWebsite": "Quell-Website",
+  "preview": "Vorschau",
+  "schedule": "Planen",
+  "goBack": "Zurück",
+  "inProgress": "In Bearbeitung",
+  "timezone": "Zeitzone",
+  "status": {
+    "draft": "Entwurf",
+    "ready": "Bereit"
+  },
+  "scene": {
+    "label": "Szene {{n}} · {{seconds}}s",
+    "count_one": "{{count}} Szene",
+    "count_other": "{{count}} Szenen"
+  },
+  "shot": {
+    "wide": "Weitwinkelaufnahme",
+    "material": "Materialdetail",
+    "closeCta": "Produktnah & CTA"
+  },
+  "create": {
+    "switchBusiness": "Geschäft wechseln, {{name}}",
+    "title": "Erstelle dein nächstes Reel",
+    "subtitle": "Erstelle Studio-Video-Reels aus deinem Store-Katalog",
+    "heroImage": "Gesamtansicht der {{product}}-Esskollektion",
+    "question": "Was möchtest du zeigen?",
+    "planTogether": "Plane ein Reel zusammen",
+    "start": "Start",
+    "startA11y": "Plane ein Reel starten",
+    "ideasReady_one": "{{count}} Idee bereit",
+    "ideasReady_other": "{{count}} Ideen bereit",
+    "viewIdeas": "Ideen ansehen →",
+    "actorSubtitle": "Präsentator-Reel",
+    "templates": "Vorlagen",
+    "templatesSubtitle": "Schnelle Katalogschnitte",
+    "jumpBackIn": "Wieder einsteigen",
+    "seeAll": "Alle ansehen",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Videoideen",
+    "subtitle": "Kurierte Winkel bereit, in Bewegungs-Reels verwandelt zu werden",
+    "filter": {
+      "all": "Alle ({{n}})",
+      "productSpotlight": "Produkt-Spotlight ({{n}})",
+      "collection": "Kollektion ({{n}})"
+    },
+    "angle": "Winkel {{n}}",
+    "body": {
+      "angle01": "Betonung auf natürlicher Maserung, geometrischer Kreuzbein-Architektur und Essensinszenierung.",
+      "angle02": "Fokus auf handgeschnitzte Lamellentüren, Kabelmanagement und warme Wohnatmosphäre."
+    },
+    "readyToReview": "Bereit zur Überprüfung",
+    "viewStoryboard": "Storyboard ansehen"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} Guthaben",
+    "creditsA11y_other": "{{count}} Guthaben",
+    "addAssets": "Assets hinzufügen",
+    "composerPlaceholder": "Ton verfeinern, Voiceover hinzufügen oder Anweisungen geben...",
+    "composerA11y": "Ton verfeinern, Voiceover hinzufügen oder Anweisungen geben",
+    "send": "Verfeinerung senden",
+    "day": "Heute · Reels Studio",
+    "userMessage": "Zeige die Bunting-Kollektion in einem ruhigen, hochwertigen Reel.",
+    "reply": "Ich habe ein Konzept für deinen <b>{{brand}}</b> {{product}} Tisch maßgeschneidert. Hier sind die empfohlenen Parameter:",
+    "format": "Format",
+    "formatVertical": "9:16 Vertikal (Story/Reel)",
+    "duration": "Dauer",
+    "presenter": "Präsentator",
+    "openingHook": "Einstiegshaken",
+    "reviewStoryboard_one": "Storyboard überprüfen ({{count}} Szene)",
+    "reviewStoryboard_other": "Storyboard überprüfen ({{count}} Szenen)",
+    "readyStatus": "Bereit zur Erstellung oder Verfeinerung"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "{{seconds}}s Dauer",
+    "verticalFact": "9:16 vertikal",
+    "readyToRender": "Bereit zum Rendern <muted>· Entwurf zur Überprüfung gespeichert</muted>",
+    "sceneDirection": "Szenenrichtung",
+    "voiceoverFr": "Voiceover (FR)",
+    "direction": {
+      "scene1": "Langsame Gleitenthüllung über modernes Essenssetting",
+      "scene2": "Sanfter Makroschwenk über reichhaltige natürliche Holzmaserung und abgeschrägte Kante",
+      "scene3": "Inszenierte Perspektive mit Bois & Chiffons Emblem-Wasserzeichen"
+    },
+    "editInChat": "Im Chat bearbeiten",
+    "makeVideo": "Video erstellen",
+    "makeVideoA11y_one": "Video erstellen, {{count}} Guthaben",
+    "makeVideoA11y_other": "Video erstellen, {{count}} Guthaben",
+    "cost_one": "{{count}} Guthaben",
+    "cost_other": "{{count}} Guthaben",
+    "balance_one": "Aktuelles Guthaben: {{balance}} Guthaben · {{count}} Guthaben wird reserviert · Entwurf wird automatisch gespeichert",
+    "balance_other": "Aktuelles Guthaben: {{balance}} Guthaben · {{count}} Guthaben werden reserviert · Entwurf wird automatisch gespeichert"
+  },
+  "generating": {
+    "backToWorkspace": "Zurück zum Arbeitsbereich",
+    "renderingA11y": "Rendering läuft",
+    "title": "Erstelle dein Reel",
+    "body": "Komponiere visuelle Elemente, französisches Voiceover und Bewegungsrhythmus für {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Authentisches französisches Katalog-Asset",
+    "preparingScenes_one": "{{count}} Szene wird vorbereitet",
+    "preparingScenes_other": "{{count}} Szenen werden vorbereitet",
+    "done": "Fertig",
+    "renderingFrames": "Video-Frames rendern",
+    "addingAudio": "Audio hinzufügen",
+    "queued": "In Warteschlange",
+    "creditsReserved_one": "{{count}} Guthaben reserviert",
+    "creditsReserved_other": "{{count}} Guthaben reserviert",
+    "remaining_one": "Verbleibend: {{count}} Guthaben",
+    "remaining_other": "Verbleibend: {{count}} Guthaben",
+    "safeToLeave": "Du kannst diesen Bildschirm sicher verlassen. Dein Entwurf wird automatisch im Ergebnistab gespeichert.",
+    "keepWorking": "Im Hintergrund weiterarbeiten"
+  },
+  "results": {
+    "title": "Video-Reels",
+    "newReel": "Neues Reel",
+    "filter": {
+      "all": "Alle ({{n}})",
+      "ready": "Bereit ({{n}})",
+      "processing": "In Bearbeitung ({{n}})"
+    },
+    "processing_one": "In Bearbeitung · {{count}} Guthaben reserviert",
+    "processing_other": "In Bearbeitung · {{count}} Guthaben reserviert",
+    "renderingA11y": "{{title}}, wird gerendert {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 vertikal · Visuelle Elemente werden gerendert...",
+    "renderingStage": "Rendering-Phase",
+    "previewA11y": "Beispielvorschau, {{title}}",
+    "moreOptions": "Mehr Optionen",
+    "reviewVideo": "Video überprüfen",
+    "meta": {
+      "tv": "20s · Französisches Voiceover · Bereit zur Planung",
+      "atelier": "15s · Ambient Akustik · Bereit zur Planung"
+    }
+  },
+  "review": {
+    "subtitle": "Reel-Entwurf · Bereit zur Überprüfung",
+    "options": "Optionsmenü",
+    "downloadVideo": "Video herunterladen",
+    "connectFirst": "Wähle ein verbundenes Konto, bevor du veröffentlichst.",
+    "samplePreview": "Beispielvorschau",
+    "play": "Video-Vorschau abspielen",
+    "position": "Videoposition",
+    "sound": "Video-Sound umschalten",
+    "fullscreen": "Video im Vollbild öffnen",
+    "vertical": "9:16 Vertikal",
+    "portrait": "Hochformat",
+    "captionFrench": "Untertitel (Französisch)",
+    "defaultSource": "· Standardquelle",
+    "editable": "Bearbeitbar",
+    "captionA11y": "Video-Untertitel auf Französisch",
+    "addTag": "Tag hinzufügen",
+    "specifications": "Spezifikationen",
+    "audioTrack": "Audiotrack",
+    "audioValue": "Französische Stimme (Studio Natural) + Umgebungsakustik",
+    "resolution": "Auflösung",
+    "resolutionValue": "Hochformat-Video · 9:16"
+  },
+  "publish": {
+    "title": "Reel veröffentlichen",
+    "confirmSchedule": "Zeitplan bestätigen",
+    "publishNow": "Jetzt veröffentlichen",
+    "saveDraft": "Entwurf speichern",
+    "readyToSchedule": "Bereit zum Planen",
+    "format": "{{product}} · 9:16 Vertikales Reel",
+    "playPreview": "Vorschau abspielen",
+    "channel": "Veröffentlichungskanal",
+    "connected": "Verbunden",
+    "notConnected": "Nicht verbunden",
+    "connect": "Verbinden",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Automatisch direkt in Feed & Reels posten",
+    "orDownload": "Oder Video direkt herunterladen",
+    "download": "Herunterladen",
+    "timing": "Zeitplanung",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Zeitzone, {{value}}",
+    "notice": "Verbinde dein Instagram-Geschäftskonto, um automatisierte geplante Veröffentlichungen freizuschalten. Du kannst dieses Reel trotzdem als Entwurf speichern."
+  },
+  "scheduled": {
+    "close": "Schließen",
+    "viewReel": "Geplantes Reel ansehen",
+    "backToResults": "Zurück zu den Ergebnissen",
+    "title": "Reel geplant",
+    "body": "Dein Video wird zum geplanten Zeitpunkt auf dem ausgewählten Konto veröffentlicht.",
+    "meta": "{{seconds}}s · Französische Stimme",
+    "publishDate": "Veröffentlichungsdatum",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Markenarbeitsbereich",
+    "channel": "Kanal",
+    "instagramConnected": "Instagram (Verbunden)",
+    "editInCalendar": "Diesen Beitrag im Kalender bearbeiten oder stornieren."
+  },
+  "actor": {
+    "title": "Präsentator wählen",
+    "intro": "Wähle einen Präsentationsstil oder ein reines Produkt-Reel.",
+    "noPresenterA11y": "Kein Präsentator, empfohlen",
+    "recommended": "Empfohlen",
+    "noPresenterBody": "Konzentriere dich ausschließlich auf Möbelvisuals, Texturen und Studioaudio.",
+    "styles": "Präsentationsstile",
+    "style": {
+      "calm": {
+        "title": "Ruhiger Erzähler",
+        "subtitle": "Französisch · Ruhiges Studio"
+      },
+      "expressive": {
+        "title": "Ausdrucksstarker Präsentator",
+        "subtitle": "Englisch / FR · Dynamisch"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Beispielstimme, {{title}}",
+    "sampleVoice": "Beispielstimme",
+    "voiceLed": "Stimmgeführter Stil",
+    "notice": "Wähle einen stimmgeführten Stil oder konzentriere dich auf dein Produkt."
+  },
+  "script": {
+    "title": "Skript & Stimme",
+    "continue": "Weiter zum Storyboard",
+    "costNote": "Überprüfe die Kreditkosten, bevor du dein Reel erstellst.",
+    "targetProduct": "Zielprodukt",
+    "productMeta": "Massive Akazie · Quellwebsite",
+    "voiceoverScript": "Voiceover-Skript",
+    "frenchFr": "Französisch (FR)",
+    "wordCount_one": "{{count}} Wort · ~{{seconds}} Sek.",
+    "wordCount_other": "{{count}} Wörter · ~{{seconds}} Sek.",
+    "scriptA11y": "Voiceover-Skript auf Französisch",
+    "targetDuration_one": "Zieldauer: {{count}} Sekunde",
+    "targetDuration_other": "Zieldauer: {{count}} Sekunden",
+    "rewriteOpening": "Eröffnung umschreiben",
+    "narratorAudio": "Erzähler-Audio",
+    "calmVoice": "Ruhige französische Stimme",
+    "calmVoiceMeta": "Natürliche französische Stimme, warmes akustisches Tempo",
+    "recordOwn": "Eigene Stimme aufnehmen",
+    "recordOwnMeta": "Optionale benutzerdefinierte Marken-Narration",
+    "record": "Aufnehmen"
+  },
+  "templates": {
+    "title": "Reel-Vorlagen",
+    "useTemplate": "Vorlage verwenden",
+    "searchPlaceholder": "Studioformate suchen...",
+    "searchA11y": "Studioformate suchen",
+    "tune": "Anpassen",
+    "filter": {
+      "all": "Alle Formate",
+      "catalog": "Katalog-Spotlight",
+      "shortCuts": "15-20s Schnitte"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Produkt-Spotlight",
+        "subtitle": "3 Makroschnitte + Hook"
+      },
+      "collection": {
+        "title": "Kollektion enthüllen",
+        "subtitle": "Schnelle Mehrfachartikel-Präsentation"
+      },
+      "material": {
+        "title": "Materialdetails",
+        "subtitle": "Holzmaserung & Handwerks-Nahaufnahmen"
+      },
+      "arrival": {
+        "title": "Neuankömmling",
+        "subtitle": "Ankündigung & Showroom-CTA"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Assets auswählen",
+    "createStoryboard_one": "Storyboard erstellen ({{count}} Szene)",
+    "createStoryboard_other": "Storyboard erstellen ({{count}} Szenen)",
+    "upload": "Fotos hochladen",
+    "websiteAssets": "Website-Assets",
+    "selected_one": "{{count}} ausgewählt",
+    "selected_other": "{{count}} ausgewählt",
+    "otherCategory": "Andere Produktkategorie",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Storyboard-Sequenz",
+    "dragToReorder": "Zum Neuanordnen ziehen",
+    "reorderA11y": "Szene {{n}}: {{label}}. Szene neu anordnen",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Raum",
+      "macro": "Detail",
+      "staged": "Gestylt",
+      "tv": "TV-Einheit"
+    }
+  }
+}

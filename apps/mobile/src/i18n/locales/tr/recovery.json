@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} kredi",
+  "credits_other": "{{n}} kredi",
+  "tableAlt": "{{product}} yemek masası",
+  "sheet": {
+    "dismiss": "Kapat"
+  },
+  "videoFailed": {
+    "title": "Reel'in hazır değil",
+    "body": "Sahne bileşimi sırasında işleme kesildi. Ayrılan kredilerin serbest bırakıldı.",
+    "failed": "Başarısız",
+    "facts_one": "{{seconds}}s · 9:16 Dikey · {{count}} sahne",
+    "facts_other": "{{seconds}}s · 9:16 Dikey · {{count}} sahne",
+    "released_one": "{{n}} ayrılan kredi serbest bırakıldı",
+    "released_other": "{{n}} ayrılan kredi serbest bırakıldı",
+    "impact": "Kredi bakiyesi etkisi",
+    "used_one": "{{n}} kredi kullanıldı",
+    "used_other": "{{n}} kredi kullanıldı",
+    "viewDetails": "Detayları gör",
+    "details": {
+      "failedAt": "Başarısız olduğu zaman",
+      "reserved": "Ayrıldı",
+      "released": "Serbest bırakıldı",
+      "stages": {
+        "sceneComposition": "Sahne bileşimi"
+      }
+    },
+    "tryAgain_one": "Tekrar dene ({{n}} kredi)",
+    "tryAgain_other": "Tekrar dene ({{n}} kredi)",
+    "editStoryboard": "Storyboard'u düzenle"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "{{seconds}}s süre · 9:16 dikey",
+    "sheetLabel": "Yeterli kredi yok",
+    "title_one": "{{n}} krediye ihtiyacın var",
+    "title_other": "{{n}} krediye ihtiyacın var",
+    "body_one": "Şu anda Profesyonel çalışma alanında <b>{{n}} kredi mevcut</b>. Storyboard taslağın güvenle kaydedildi.",
+    "body_other": "Şu anda Profesyonel çalışma alanında <b>{{n}} kredi mevcut</b>. Storyboard taslağın güvenle kaydedildi.",
+    "planName": "Profesyonel plan",
+    "active": "Aktif",
+    "renews": "Aylık yenilenir",
+    "remaining": "{{available}} / {{monthly}} kaldı",
+    "remainingA11y": "Aylık kalan krediler",
+    "manage": "Kredileri yönet",
+    "keepEditing": "Storyboard'u düzenlemeye devam et"
+  },
+  "reconnect": {
+    "backdropTitle": "Takvim",
+    "backdropMeta": "{{date}} için planlandı",
+    "title": "{{network}}'i yeniden bağla",
+    "body": "Hesap yetkilendirmen süresi doldu. Planlamaya devam etmek için hesabını yeniden bağla.",
+    "draftSaved": "Mevcut taslak güvenle kaydedildi",
+    "noPosting": "Açıkça onaylayana kadar gönderim başlamayacak.",
+    "saveForLater": "Taslağı sonra için kaydet"
+  },
+  "importFailed": {
+    "title": "Bu web sitesini okuyamadık",
+    "body": "Bu adresten katalog fotoğraflarına ulaşamadık veya çıkaramadık. URL'ni kontrol et veya mağazanı tanımlayarak devam et.",
+    "urlLabel": "Mağaza web sitesi url'si",
+    "changeUrlA11y": "Web sitesi URL'sini değiştir",
+    "changeUrl": "URL'yi değiştir",
+    "reasons": {
+      "timeout": "Web sitesi yanıt vermesi çok uzun sürdü. Herhangi bir değişiklik yapılmadı."
+    },
+    "quickOptions": "Devam etmek için hızlı seçenekler:",
+    "options": {
+      "retry": "Mağaza sunucunuz kısa süreliğine meşgulse taramayı tekrar deneyin.",
+      "manual": "İşletme adını ve ürünleri beklemeden manuel olarak ekleyin."
+    },
+    "tryAgain": "Tekrar dene",
+    "addManually": "İşletmeyi manuel ekle"
+  }
+}

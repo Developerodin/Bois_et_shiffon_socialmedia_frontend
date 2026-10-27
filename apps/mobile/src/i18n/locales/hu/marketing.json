@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Munkaterület {{name}}",
+    "customers": "Ügyfelek",
+    "customerTabs": {
+      "inbox": "Bejövő",
+      "reviews": "Értékelések",
+      "people": "Emberek"
+    },
+    "status": {
+      "notConnected": "Nincs csatlakoztatva"
+    },
+    "draft": "Piszkozat",
+    "googleGrowth": "Google növekedés",
+    "websiteStudio": "Weboldal stúdió",
+    "editContent": "Tartalom szerkesztése",
+    "diningTableImage": "Acacia Bunting étkezőasztal",
+    "pages": {
+      "home": "Kezdőlap",
+      "product": "Termék",
+      "contact": "Kapcsolat"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Váltás üzletre, {{name}}",
+    "title": "Marketing",
+    "subtitle": "Kezeld boltod láthatóságát, beszélgetéseit és márkaprofilját",
+    "cue": {
+      "imageLabel": "Acacia TV egység nappaliban elhelyezve",
+      "dismiss": "Mai tipp elvetése",
+      "eyebrow": "Mai tipp",
+      "title": "Adj hozzá friss katalógusfotókat",
+      "body": "Új fotók hozzáadása segít az automatikus tekercsek és a weboldal piszkozatának finomhangolásában."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Ügyfelek",
+        "body": "Bejövő, értékelések és emberek",
+        "cta": "Bejövő megnyitása"
+      },
+      "google": {
+        "title": "Google növekedés",
+        "body": "Profil, bejegyzések és értékelések",
+        "cta": "Beállítás"
+      },
+      "website": {
+        "title": "Weboldal stúdió",
+        "body": "Piszkozat, szerkesztés és közzététel",
+        "cta": "Piszkozat megnyitása"
+      },
+      "business": {
+        "title": "Üzlet",
+        "body": "Márka, eszközök és kapcsolatok",
+        "cta": "Kezelés"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Még nincsenek üzenetek",
+    "emptyBody": "Csatlakoztasd az ügyfélcsatornáidat, hogy közvetlen termékkérdéseket kapj, és biztonságosan ellenőrizd az AI által javasolt piszkozatokat küldés előtt.",
+    "connectChannel": "Csatorna csatlakoztatása",
+    "emptyFootnote": "Az új üzenetek automatikusan elérhetővé válnak csatlakoztatás után.",
+    "channelsTitle": "Támogatott üzenetküldő csatornák",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Csatlakoztass egy fiókot az üzenetek fogadásához."
+  },
+  "reply": {
+    "title": "Válasz asszisztens",
+    "referencedProduct": "Hivatkozott termék",
+    "suggestionTitle": "Espanda válaszjavaslat",
+    "draftLabel": "Válasz piszkozat",
+    "tone": "Hangnem: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Finomított & kézműves"
+    },
+    "done": "Kész",
+    "editReply": "Válasz szerkesztése",
+    "approvalTitle": "Kézi jóváhagyás szükséges",
+    "approvalBody": "Egyetlen üzenet sem kerül elküldésre a kifejezett kattintásod nélkül.",
+    "exampleTitle": "Példa beszélgetési mód",
+    "exampleBody": "Instagram vagy Facebook fiókod csatlakoztatása helyettesíti ezt a példát valódi ügyfélkérdésekkel."
+  },
+  "reviews": {
+    "emptyTitle": "Még nincsenek értékelések",
+    "emptyBody": "Csatlakoztasd a Google Business profilodat, hogy automatikusan gyűjtsd és válaszolj a hitelesített ügyfélvisszajelzésekre.",
+    "connectGoogle": "Google Business csatlakoztatása",
+    "automatedTitle": "Automatizált értékelés kérések",
+    "connectFirst": "Először csatlakoztass",
+    "automatedBody": "Személyre szabott értékelés meghívók küldéséhez Google Business kapcsolat szükséges."
+  },
+  "people": {
+    "emptyTitle": "Még nincsenek ügyfélrekordok",
+    "emptyBody": "Azok az emberek, akiktől a csatlakoztatott ügyfélcsatornákon keresztül hallasz, itt jelennek meg.",
+    "connectChannel": "Csatorna csatlakoztatása",
+    "directoryTitle": "Ügyfélnyilvántartásod",
+    "directoryBody": "Nyisd meg egy személy rekordját, hogy egy helyen lásd a beszélgetéseit és elérhetőségeit.",
+    "connectedChannels": "Csatlakoztatott ügyfélcsatornák"
+  },
+  "google": {
+    "presenceTitle": "Google jelenléted",
+    "presenceBody": "Tartsd láthatóan a helyi francia bemutatótermedet a Google Térképen és Keresésben automatikusan.",
+    "profileTitle": "Google Business profil",
+    "profileBody": "Szinkronizáld hivatalos boltod címét, nyitvatartási idejét és új katalógusfotóit közvetlenül a Google Térképre.",
+    "connectProfile": "Google Business profil csatlakoztatása",
+    "capabilitiesTitle": "Automatikus szinkronizálási képességek",
+    "capabilities": {
+      "catalog": {
+        "title": "Profil & katalógus frissítések",
+        "body": "Szinkronizáld az újonnan elhelyezett fotókat és bútorokat a helyi Google bejegyzés frissítéseihez."
+      },
+      "reviews": {
+        "title": "Értékelés kérések",
+        "body": "Udvarias francia értékelés meghívók generálása bemutatóterem látogatások vagy vásárlások után."
+      },
+      "replies": {
+        "title": "Gondosan megírt válasz piszkozatok",
+        "body": "Az Espanda átgondolt válasz piszkozatokat készít minden beérkező ügyfélértékeléshez a te átnézésedre."
+      }
+    },
+    "controlTitle": "Te maradsz az irányításban",
+    "controlBody": "Semmi sem kerül közzétételre vagy válaszra a Google-on, amíg nem hagyod jóvá."
+  },
+  "googleWorkspace": {
+    "newPost": "Új Google bejegyzés",
+    "subtitle": "Tekintsd meg, hogyan szinkronizálódnak a termékmegjelenések és bemutatóterem értékelések közvetlenül a Google-ra.",
+    "tabs": {
+      "profile": "Profil",
+      "posts": "Bejegyzések",
+      "reviews": "Értékelések"
+    },
+    "draftPostTitle": "Google bejegyzés piszkozat",
+    "actionButton": "Művelet gomb: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Tudj meg többet"
+    },
+    "reviewPost": "Bejegyzés átnézése",
+    "reviewsTitle": "Bemutatóterem értékelések",
+    "reviewsBody": "Az értékelések és válasz piszkozatok az ügyfélbeszélgetéseiddel együtt gyűlnek össze.",
+    "openReviews": "Értékelések megnyitása",
+    "checklistTitle": "Profil beállítás ellenőrzőlista",
+    "checklist": {
+      "profile": {
+        "label": "Google profil csatlakoztatva",
+        "value": "Megtalálva"
+      },
+      "reviewLink": {
+        "label": "Közvetlen értékelés kérés link",
+        "value": "Beállítva"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Piszkozat előnézet",
+    "catalogConnected": "Forrásbolt katalógus csatlakoztatva",
+    "connectDomain": "Domain csatlakoztatása",
+    "previewLabel": "Weboldal piszkozat előnézet",
+    "browserTitle": "Weboldal piszkozat",
+    "fullPreview": "Teljes előnézet",
+    "reviewPublish": "Piszkozat átnézése és közzététele",
+    "footnote": "Nézd át a tartalmadat és a domaint közzététel előtt."
+  },
+  "websiteEdit": {
+    "saveChanges": "Piszkozat módosítások mentése",
+    "reviewPublish": "Átnézés és közzététel",
+    "preview": "Előnézet",
+    "title": "Weboldal tartalom szerkesztése",
+    "heroTitle": "Hős szekció banner",
+    "replaceImage": "Kép cseréje",
+    "heroImageLabel": "Hős banner kép",
+    "headline": "Főcím (francia)",
+    "description": "Leírás",
+    "sectionsTitle": "Oldalszekciók",
+    "sectionCount_one": "{{count}} szekció",
+    "sectionCount_other": "{{count}} szekciók",
+    "sections": {
+      "heroBanner": "Hős banner",
+      "featuredCollection": "Kiemelt kollekció",
+      "showroomContact": "Bemutatóterem & kapcsolat"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Ellenőrizd a domaint és a tartalmat a közzétételhez.",
+    "publish": "Weboldal közzététele",
+    "keepDraft": "Mentés piszkozatként",
+    "title": "Weboldalad áttekintése",
+    "subtitle": "Ellenőrizd a tartalmat és a célhelyet, mielőtt élesíted.",
+    "heroImageLabel": "Weboldal főképe",
+    "destinationTitle": "Közzétételi célhely",
+    "destinationBody": "Csatlakoztass és ellenőrizz egy domaint a piszkozat közzétételéhez.",
+    "setUpDomain": "Domain beállítása"
+  }
+}

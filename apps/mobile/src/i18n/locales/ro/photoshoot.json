@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Deschide meniul",
+    "creditsAvailable_one": "{{count}} credit disponibil",
+    "creditsAvailable_other": "{{count}} credite disponibile",
+    "settings": "Setări",
+    "appModules": "Module aplicație",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Postări",
+      "photoshoot": "Ședință foto",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Navigare module",
+    "create": "Creează",
+    "results": "Rezultate",
+    "goBack": "Înapoi",
+    "switchBusiness": "Schimbă afacerea, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} articol",
+    "optionWithCount_other": "{{label}} {{count}} articole"
+  },
+  "create": {
+    "title": "Creează ședință foto",
+    "subtitle": "Creează fotografii de produs și stilizează îmbrăcămintea pe modele.",
+    "product": {
+      "imageLabel": "{{name}} masă de dining",
+      "pill": "Articol din catalog",
+      "title": "Ședință foto produs",
+      "body": "Plasează articolele din catalog în interioare arhitecturale și setări de studio cu iluminare naturală.",
+      "cta": "Nouă ședință foto produs"
+    },
+    "fashion": {
+      "imageLabel": "Studiou de fotografie de îmbrăcăminte ilustrată",
+      "title": "Ședință foto modă",
+      "body": "Stilizează îmbrăcămintea pe modele în scene pregătite pentru campanie.",
+      "cta": "Nouă ședință foto modă"
+    }
+  },
+  "product": {
+    "title": "Ședință foto produs",
+    "estimate_one": "Estimare: {{count}} credit",
+    "estimate_other": "Estimare: {{count}} credite",
+    "available": "{{count}} disponibile",
+    "generate": "Generează ședință foto",
+    "selectedAsset": "Resursă din catalog selectată",
+    "changeAsset": "Schimbă resursa",
+    "aspectRatio": "Raport de aspect",
+    "sceneStyle": "Stil scenă",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Interior",
+      "custom": "Personalizat"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Brief creativ",
+    "briefHint": "Rafinează iluminarea, ambianța sau indicii specifice de decor",
+    "sourcePreview": "Previzualizare sursă",
+    "fullPreview": "{{product}}, previzualizare completă",
+    "sourceImage": "Imagine sursă"
+  },
+  "fashion": {
+    "title": "Ședință foto modă",
+    "generate": "Generează ședință foto",
+    "uploadToEnable": "Încarcă o fotografie cu un articol vestimentar pentru a activa generarea",
+    "heading": "Construiește-ți ședința foto de modă",
+    "subtitle": "Transformă articolele vestimentare așezate plat sau pe umeraș în modele realiste puse în scenă.",
+    "garmentPhoto": "Fotografie articol vestimentar",
+    "required": "Necesar",
+    "garmentSelected": "Fotografie articol vestimentar: {{label}}. Schimbă fotografia",
+    "addGarment": "Adaugă fotografie articol vestimentar",
+    "changeGarment": "Schimbă fotografia articolului vestimentar",
+    "garmentHint": "PNG sau JPG pe fundal neutru, așezat plat sau manechin fantomă",
+    "modelStyling": "Model & stilizare",
+    "modelSelected": "Model & stilizare: {{model}}",
+    "models": {
+      "choose": "Alege un model",
+      "natural": "{{name}} · stilizare naturală",
+      "editorial": "{{name}} · stilizare editorială",
+      "casual": "{{name}} · stilizare casual"
+    },
+    "pose": "Poză",
+    "poses": {
+      "fullBody": "Corp întreg",
+      "threeQuarter": "Trei sferturi",
+      "closeUp": "Detaliu prim-plan"
+    },
+    "outputFormat": "Format de ieșire",
+    "formats": {
+      "feedPortrait": "Portret feed",
+      "storyReel": "Story / Reel"
+    },
+    "background": "Setare fundal",
+    "backgrounds": {
+      "studioMinimal": "Studio minimal",
+      "urbanStreet": "Stradă urbană",
+      "naturalInterior": "Interior natural"
+    },
+    "requirementsTitle": "Cerințe de încărcare",
+    "requirements": {
+      "contrast": "Contrast ridicat față de fundal",
+      "wrinkles": "Fără cute pronunțate",
+      "frontFacing": "Unghi frontal"
+    }
+  },
+  "source": {
+    "title": "Alege resursa sursă",
+    "uploadNewLabel": "Încarcă fotografie nouă",
+    "uploadNew": "Încarcă nou",
+    "noPhotoSelected": "Nicio fotografie selectată",
+    "photosSelected_one": "{{count}} fotografie selectată",
+    "photosSelected_other": "{{count}} fotografii selectate",
+    "selectPhoto": "Selectează o fotografie",
+    "usePhoto": "Folosește fotografia",
+    "source": "Sursă",
+    "tabs": {
+      "website": "Website",
+      "uploads": "Încărcări"
+    },
+    "businessWebsite": "{{name}} · Website",
+    "fromWebsite": "De pe website",
+    "filterCatalog": "Filtrează catalogul",
+    "filters": {
+      "all": "Toate articolele",
+      "tables": "Mese",
+      "storage": "Depozitare"
+    },
+    "addPhoto": "Adaugă fotografie",
+    "tip": "Decupajele curate ale produselor oferă rezultate optime pentru ședințele foto. Espanda Studio va păstra textura originală a lemnului de acacia."
+  },
+  "generating": {
+    "backToWorkspace": "Înapoi la spațiul de lucru",
+    "returnToWorkspace": "Revenire la spațiul de lucru",
+    "title": "Pregătim fotografiile tale",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Generarea se desfășoară în siguranță în fundal. Vei găsi resursele finalizate în Rezultate.",
+    "status": {
+      "done": "Gata",
+      "active": "În desfășurare",
+      "queued": "În așteptare"
+    },
+    "progress": "Generare",
+    "sample": {
+      "title": "{{name}} ședință foto dining",
+      "description": "Punerea în scenă a {{product}} în interior arhitectural cu lumină naturală.",
+      "variations_one": "{{count}} variație",
+      "variations_other": "{{count}} variații"
+    },
+    "steps": {
+      "catalog": "Procesare resursă catalog",
+      "compose": "Compoziție scenă & iluminare",
+      "finish": "Finalizare & calibrare culoare"
+    }
+  },
+  "results": {
+    "title": "Ședințe foto",
+    "subtitle": "Fotografiile tale de produs și modă",
+    "newPhotoshoot": "Nouă ședință foto",
+    "filterLabel": "Filtrează ședințele foto",
+    "filters": {
+      "all": "Toate ({{count}})",
+      "product": "Produs ({{count}})",
+      "fashion": "Modă ({{count}})"
+    },
+    "empty": "Nicio ședință foto încă.",
+    "processingLabel": "{{title}}. Procesare, {{percent}}%",
+    "processingBadge_one": "Procesare · {{count}} credit",
+    "processingBadge_other": "Procesare · {{count}} credite",
+    "preview": "Previzualizare",
+    "reviewPhotoLabel": "Revizuiește fotografia, {{title}}",
+    "reviewPhoto": "Revizuiește fotografia",
+    "sample": {
+      "studioStaging": "{{product}} · Studio înscenare",
+      "rendering": "Etapă de randare · {{percent}}%",
+      "interiorReady_one": "Interior · {{ratio}} · {{count}} fotografie gata",
+      "interiorReady_other": "Interior · {{ratio}} · {{count}} fotografii gata",
+      "studioDaylight": "Studio lumină naturală · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Mai multe opțiuni",
+    "downloadPhoto": "Descarcă fotografia",
+    "variation": "Variație",
+    "share": "Distribuie ședința foto",
+    "samplePreview": "Previzualizare eșantion",
+    "compareOriginal": "Compară originalul",
+    "expandView": "Extinde vizualizarea",
+    "stagingSummary": "Rezumat înscenare",
+    "format": "Format",
+    "creationCost": "Cost de creare",
+    "credits_one": "{{count}} credit",
+    "credits_other": "{{count}} credite",
+    "sample": {
+      "headerTitle": "Ședința foto {{name}}",
+      "vertical": "{{ratio}} Vertical",
+      "architecturalInterior": "Interior arhitectural",
+      "studioDaylight": "Studio lumină naturală",
+      "formatBadge": "Format {{ratio}}",
+      "naturalStudio": "Studio natural",
+      "portraitPhoto": "Fotografie portret"
+    }
+  }
+}

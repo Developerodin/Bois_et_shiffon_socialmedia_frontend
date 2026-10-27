@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { requestUserId } from "@/server/auth/request-user";
 import { problemResponse } from "@/server/api/http-error";
 import { assertWorkspaceHeaderMatchesPath } from "@/server/api/workspace-headers";
 import { requireBrandAccess } from "@/server/auth/access";
@@ -17,8 +17,8 @@ export async function authorizeBrandRoute(
   params: Promise<BrandRouteParams>,
   permission: PermissionKey,
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
+  const userId = await requestUserId(request);
+  if (!userId) {
     return problemResponse({
       type: "https://api.brandpilot/errors/unauthorized",
       title: "Unauthorized",
@@ -27,7 +27,7 @@ export async function authorizeBrandRoute(
   }
   const { workspaceId, brandId } = await params;
   assertWorkspaceHeaderMatchesPath(workspaceId, request.headers.get("X-Workspace-Id"));
-  await requireBrandAccess(workspaceId, brandId, session.user.id);
-  await requirePermission(workspaceId, session.user.id, permission, brandId);
-  return { userId: session.user.id, workspaceId, brandId };
+  await requireBrandAccess(workspaceId, brandId, userId);
+  await requirePermission(workspaceId, userId, permission, brandId);
+  return { userId: userId, workspaceId, brandId };
 }

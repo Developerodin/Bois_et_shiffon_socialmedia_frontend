@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} seconde",
+  "seconds_other": "{{count}} secondes",
+  "noPresenter": "Pas de présentateur",
+  "aiActor": "Acteur IA",
+  "assistant": "Votre assistant vidéo",
+  "sourceWebsite": "Site source",
+  "preview": "Aperçu",
+  "schedule": "Programmer",
+  "goBack": "Retour",
+  "inProgress": "En cours",
+  "timezone": "Fuseau horaire",
+  "status": {
+    "draft": "Brouillon",
+    "ready": "Prêt"
+  },
+  "scene": {
+    "label": "Scène {{n}} · {{seconds}}s",
+    "count_one": "{{count}} scène",
+    "count_other": "{{count}} scènes"
+  },
+  "shot": {
+    "wide": "Plan large",
+    "material": "Détail du matériau",
+    "closeCta": "Produit en gros plan & CTA"
+  },
+  "create": {
+    "switchBusiness": "Changer d'entreprise, {{name}}",
+    "title": "Créez votre prochain reel",
+    "subtitle": "Créez des vidéos studio à partir de votre catalogue",
+    "heroImage": "Vue intérieure complète de la collection de salle à manger {{product}}",
+    "question": "Que souhaitez-vous montrer ?",
+    "planTogether": "Planifiez un reel ensemble",
+    "start": "Commencer",
+    "startA11y": "Commencer à planifier un reel",
+    "ideasReady_one": "{{count}} idée prête",
+    "ideasReady_other": "{{count}} idées prêtes",
+    "viewIdeas": "Voir les idées →",
+    "actorSubtitle": "Reel du présentateur",
+    "templates": "Modèles",
+    "templatesSubtitle": "Coupes rapides du catalogue",
+    "jumpBackIn": "Reprendre",
+    "seeAll": "Voir tout",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Idées de vidéos",
+    "subtitle": "Angles sélectionnés prêts à être transformés en reels animés",
+    "filter": {
+      "all": "Tous ({{n}})",
+      "productSpotlight": "Mise en avant produit ({{n}})",
+      "collection": "Collection ({{n}})"
+    },
+    "angle": "Angle {{n}}",
+    "body": {
+      "angle01": "Mise en valeur du grain naturel, de l'architecture géométrique des pieds croisés et de la mise en scène de la salle à manger.",
+      "angle02": "Focus sur les portes à lattes sculptées à la main, la gestion des câbles et l'ambiance chaleureuse du salon."
+    },
+    "readyToReview": "Prêt à examiner",
+    "viewStoryboard": "Voir le storyboard"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} crédit",
+    "creditsA11y_other": "{{count}} crédits",
+    "addAssets": "Ajouter des ressources",
+    "composerPlaceholder": "Affiner le ton, la voix off ou ajouter des instructions...",
+    "composerA11y": "Affiner le ton, la voix off ou ajouter des instructions",
+    "send": "Envoyer l'affinement",
+    "day": "Aujourd'hui · Studio Reels",
+    "userMessage": "Montrez la collection Bunting dans un reel calme et premium.",
+    "reply": "J'ai conçu un concept pour votre <b>{{brand}}</b> {{product}} table. Voici les paramètres recommandés :",
+    "format": "Format",
+    "formatVertical": "9:16 Vertical (Story/Reel)",
+    "duration": "Durée",
+    "presenter": "Présentateur",
+    "openingHook": "Accroche d'ouverture",
+    "reviewStoryboard_one": "Examiner le storyboard ({{count}} scène)",
+    "reviewStoryboard_other": "Examiner le storyboard ({{count}} scènes)",
+    "readyStatus": "Prêt à générer ou affiner"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "Durée de {{seconds}}s",
+    "verticalFact": "9:16 vertical",
+    "readyToRender": "Prêt à rendre <muted>· Brouillon enregistré pour examen</muted>",
+    "sceneDirection": "Direction de la scène",
+    "voiceoverFr": "Voix off (FR)",
+    "direction": {
+      "scene1": "Révélation lente en glissant sur un cadre de salle à manger moderne",
+      "scene2": "Balayage macro fluide sur le riche grain de bois naturel et le bord biseauté",
+      "scene3": "Perspective mise en scène avec l'emblème Bois & Chiffons en filigrane"
+    },
+    "editInChat": "Modifier dans le chat",
+    "makeVideo": "Créer la vidéo",
+    "makeVideoA11y_one": "Créer la vidéo, {{count}} crédit",
+    "makeVideoA11y_other": "Créer la vidéo, {{count}} crédits",
+    "cost_one": "{{count}} crédit",
+    "cost_other": "{{count}} crédits",
+    "balance_one": "Solde actuel : {{balance}} crédits · {{count}} crédit sera réservé · Brouillon enregistré automatiquement",
+    "balance_other": "Solde actuel : {{balance}} crédits · {{count}} crédits seront réservés · Brouillon enregistré automatiquement"
+  },
+  "generating": {
+    "backToWorkspace": "Retour à l'espace de travail",
+    "renderingA11y": "Rendu en cours",
+    "title": "Création de votre reel",
+    "body": "Composition des visuels, voix off française et rythme de mouvement pour {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Ressource authentique du catalogue français",
+    "preparingScenes_one": "Préparation de {{count}} scène",
+    "preparingScenes_other": "Préparation de {{count}} scènes",
+    "done": "Terminé",
+    "renderingFrames": "Rendu des images vidéo",
+    "addingAudio": "Ajout de l'audio",
+    "queued": "En file d'attente",
+    "creditsReserved_one": "{{count}} crédit réservé",
+    "creditsReserved_other": "{{count}} crédits réservés",
+    "remaining_one": "Restant : {{count}} crédit",
+    "remaining_other": "Restant : {{count}} crédits",
+    "safeToLeave": "Vous pouvez quitter cet écran en toute sécurité. Votre brouillon est automatiquement enregistré dans votre onglet Résultats.",
+    "keepWorking": "Continuer à travailler en arrière-plan"
+  },
+  "results": {
+    "title": "Reels vidéo",
+    "newReel": "Nouveau reel",
+    "filter": {
+      "all": "Tous ({{n}})",
+      "ready": "Prêt ({{n}})",
+      "processing": "En traitement ({{n}})"
+    },
+    "processing_one": "En traitement · {{count}} crédit réservé",
+    "processing_other": "En traitement · {{count}} crédits réservés",
+    "renderingA11y": "{{title}}, rendu {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 vertical · Rendu des visuels...",
+    "renderingStage": "Étape de rendu",
+    "previewA11y": "Aperçu d'échantillon, {{title}}",
+    "moreOptions": "Plus d'options",
+    "reviewVideo": "Examiner la vidéo",
+    "meta": {
+      "tv": "20s · Voix off française · Prêt à programmer",
+      "atelier": "15s · Acoustique ambiante · Prêt à programmer"
+    }
+  },
+  "review": {
+    "subtitle": "Brouillon de reel · Prêt à examiner",
+    "options": "Menu des options",
+    "downloadVideo": "Télécharger la vidéo",
+    "connectFirst": "Choisissez un compte connecté avant de publier.",
+    "samplePreview": "Aperçu d'échantillon",
+    "play": "Lire l'aperçu vidéo",
+    "position": "Position de la vidéo",
+    "sound": "Activer/désactiver le son",
+    "fullscreen": "Ouvrir en plein écran",
+    "vertical": "9:16 Vertical",
+    "portrait": "Format portrait",
+    "captionFrench": "Légende (français)",
+    "defaultSource": "· Source par défaut",
+    "editable": "Modifiable",
+    "captionA11y": "Légende vidéo en français",
+    "addTag": "Ajouter un tag",
+    "specifications": "Spécifications",
+    "audioTrack": "Piste audio",
+    "audioValue": "Voix off française (Studio Natural) + Acoustique ambiante",
+    "resolution": "Résolution",
+    "resolutionValue": "Vidéo portrait · 9:16"
+  },
+  "publish": {
+    "title": "Publier le reel",
+    "confirmSchedule": "Confirmer la programmation",
+    "publishNow": "Publier maintenant",
+    "saveDraft": "Enregistrer le brouillon",
+    "readyToSchedule": "Prêt à programmer",
+    "format": "{{product}} · Reel vertical 9:16",
+    "playPreview": "Lire l'aperçu",
+    "channel": "Canal de publication",
+    "connected": "Connecté",
+    "notConnected": "Non connecté",
+    "connect": "Connecter",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Publication automatique sur le fil & reels",
+    "orDownload": "Ou télécharger la vidéo",
+    "download": "Télécharger",
+    "timing": "Timing",
+    "date": "Date",
+    "time": "Heure",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Fuseau horaire, {{value}}",
+    "notice": "Connectez votre compte professionnel Instagram pour activer la publication programmée automatique. Vous pouvez toujours enregistrer ce reel en tant que brouillon."
+  },
+  "scheduled": {
+    "close": "Fermer",
+    "viewReel": "Voir le reel programmé",
+    "backToResults": "Retour aux résultats",
+    "title": "Reel programmé",
+    "body": "Votre vidéo sera publiée sur le compte sélectionné à l'heure programmée.",
+    "meta": "{{seconds}}s · Voix off française",
+    "publishDate": "Date de publication",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Espace de travail de la marque",
+    "channel": "Canal",
+    "instagramConnected": "Instagram (Connecté)",
+    "editInCalendar": "Modifier ou annuler ce post depuis votre calendrier."
+  },
+  "actor": {
+    "title": "Choisir un présentateur",
+    "intro": "Choisissez un style de présentateur ou un reel sans présentateur.",
+    "noPresenterA11y": "Pas de présentateur, recommandé",
+    "recommended": "Recommandé",
+    "noPresenterBody": "Concentrez-vous uniquement sur les visuels des meubles, les textures et l'audio studio.",
+    "styles": "Styles de présentateur",
+    "style": {
+      "calm": {
+        "title": "Narrateur calme",
+        "subtitle": "Français · Studio Calme"
+      },
+      "expressive": {
+        "title": "Présentateur expressif",
+        "subtitle": "Anglais / FR · Dynamique"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Exemple de voix, {{title}}",
+    "sampleVoice": "Exemple de voix",
+    "voiceLed": "Style dirigé par la voix",
+    "notice": "Choisissez un style dirigé par la voix, ou concentrez-vous sur votre produit."
+  },
+  "script": {
+    "title": "Script & voix",
+    "continue": "Continuer vers le storyboard",
+    "costNote": "Vérifiez le coût en crédits avant de créer votre reel.",
+    "targetProduct": "Produit cible",
+    "productMeta": "Acacia massif · Site source",
+    "voiceoverScript": "Script de voix off",
+    "frenchFr": "Français (FR)",
+    "wordCount_one": "{{count}} mot · ~{{seconds}} sec",
+    "wordCount_other": "{{count}} mots · ~{{seconds}} sec",
+    "scriptA11y": "Script de voix off en français",
+    "targetDuration_one": "Durée cible : {{count}} seconde",
+    "targetDuration_other": "Durée cible : {{count}} secondes",
+    "rewriteOpening": "Réécrire l'ouverture",
+    "narratorAudio": "Audio du narrateur",
+    "calmVoice": "Voix française calme",
+    "calmVoiceMeta": "Français naturel, rythme acoustique chaleureux",
+    "recordOwn": "Enregistrez votre propre voix",
+    "recordOwnMeta": "Narration de marque personnalisée optionnelle",
+    "record": "Enregistrer"
+  },
+  "templates": {
+    "title": "Modèles de reel",
+    "useTemplate": "Utiliser le modèle",
+    "searchPlaceholder": "Rechercher des formats studio...",
+    "searchA11y": "Rechercher des formats studio",
+    "tune": "Ajuster",
+    "filter": {
+      "all": "Tous les formats",
+      "catalog": "Mise en avant du catalogue",
+      "shortCuts": "Coupes de 15-20s"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Mise en avant du produit",
+        "subtitle": "3 coupes macro + accroche"
+      },
+      "collection": {
+        "title": "Révélation de collection",
+        "subtitle": "Présentation rapide de plusieurs articles"
+      },
+      "material": {
+        "title": "Détail du matériau",
+        "subtitle": "Gros plans sur le grain du bois & l'artisanat"
+      },
+      "arrival": {
+        "title": "Nouvelle arrivée",
+        "subtitle": "Annonce & CTA showroom"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Sélectionner les ressources",
+    "createStoryboard_one": "Créer un storyboard ({{count}} scène)",
+    "createStoryboard_other": "Créer un storyboard ({{count}} scènes)",
+    "upload": "Télécharger des photos",
+    "websiteAssets": "Ressources du site web",
+    "selected_one": "{{count}} sélectionné",
+    "selected_other": "{{count}} sélectionnés",
+    "otherCategory": "Catégorie de produit différente",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Séquence du storyboard",
+    "dragToReorder": "Glisser pour réorganiser",
+    "reorderA11y": "Scène {{n}} : {{label}}. Réorganiser la scène",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Pièce",
+      "macro": "Détail",
+      "staged": "Stylisé",
+      "tv": "Meuble TV"
+    }
+  }
+}

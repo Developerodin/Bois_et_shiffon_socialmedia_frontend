@@ -36,6 +36,8 @@ type Props = {
   activeBrandId: string | null;
   scores: TopBarScores;
   googleConnected: boolean;
+  /** brand.create in the active workspace: shows "New brand". */
+  canCreateBrand: boolean;
 };
 
 const AREAS = [
@@ -79,7 +81,7 @@ export function TopBar(p: Props) {
           {p.workspaces.length > 1 && (
             <WorkspaceSwitcher workspaces={p.workspaces} activeWorkspaceId={p.activeWorkspaceId} />
           )}
-          <BrandSwitcher workspaceId={p.activeWorkspaceId} brands={p.brands} activeBrandId={p.activeBrandId} />
+          <BrandSwitcher workspaceId={p.activeWorkspaceId} brands={p.brands} activeBrandId={p.activeBrandId} canCreate={p.canCreateBrand} />
         </div>
 
         {p.activeBrandId && (

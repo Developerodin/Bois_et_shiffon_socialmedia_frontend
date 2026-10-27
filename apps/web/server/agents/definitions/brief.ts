@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NothingToDoError } from "@/server/agents/engine";
 import { BRIEF_SYSTEM, CONTENT_PROMPT_VERSION } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
 import { brandKnowledge } from "@/server/content/knowledge";
@@ -29,7 +30,7 @@ export const briefAgent: AgentDefinition = {
       take: PER_RUN,
       include: { opportunity: { select: { title: true, summary: true, angle: true, reason: true } } },
     });
-    if (!items.length) throw new Error("No planned posts waiting for a brief: run the Planner first");
+    if (!items.length) throw new NothingToDoError("No planned posts waiting for a brief: run the Planner first");
     const knowledge = await brandKnowledge(brand.workspaceId, brand.brandId, 3000);
 
     for (const item of items) {

@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Arbejdsområde {{name}}",
+    "customers": "Kunder",
+    "customerTabs": {
+      "inbox": "Indbakke",
+      "reviews": "Anmeldelser",
+      "people": "Personer"
+    },
+    "status": {
+      "notConnected": "Ikke forbundet"
+    },
+    "draft": "Kladde",
+    "googleGrowth": "Google Vækst",
+    "websiteStudio": "Website Studio",
+    "editContent": "Rediger indhold",
+    "diningTableImage": "Acacia Bunting spisebord",
+    "pages": {
+      "home": "Hjem",
+      "product": "Produkt",
+      "contact": "Kontakt"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Skift virksomhed, {{name}}",
+    "title": "Marketing",
+    "subtitle": "Administrer din butiks synlighed, samtaler og brandprofil",
+    "cue": {
+      "imageLabel": "Acacia TV-enhed iscenesat i en stue",
+      "dismiss": "Afvis dagens forslag",
+      "eyebrow": "Dagens forslag",
+      "title": "Tilføj nye katalogbilleder",
+      "body": "Tilføjelse af nye billeder holder dine automatiske reels og website kladde opdateret."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Kunder",
+        "body": "Indbakke, anmeldelser og personer",
+        "cta": "Åbn indbakke"
+      },
+      "google": {
+        "title": "Google Vækst",
+        "body": "Profil, opslag og anmeldelser",
+        "cta": "Konfigurer"
+      },
+      "website": {
+        "title": "Website Studio",
+        "body": "Kladde, rediger og udgiv dit site",
+        "cta": "Åbn kladde"
+      },
+      "business": {
+        "title": "Forretning",
+        "body": "Brand, aktiver og forbindelser",
+        "cta": "Administrer"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Ingen beskeder endnu",
+    "emptyBody": "Forbind dine kundekanaler for at modtage direkte produktspørgsmål og gennemgå AI-foreslåede kladder sikkert, før de sendes.",
+    "connectChannel": "Forbind din kanal",
+    "emptyFootnote": "Nye beskeder bliver tilgængelige automatisk, når de er forbundet.",
+    "channelsTitle": "Understøttede beskedkanaler",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Forbind en konto for at modtage beskeder."
+  },
+  "reply": {
+    "title": "Svarassistent",
+    "referencedProduct": "Refereret produkt",
+    "suggestionTitle": "Espanda svarforslag",
+    "draftLabel": "Svarkladde",
+    "tone": "Tone: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Poleret & håndværk"
+    },
+    "done": "Færdig",
+    "editReply": "Rediger svar",
+    "approvalTitle": "Manuel godkendelse krævet",
+    "approvalBody": "Ingen besked sendes uden din eksplicitte klik.",
+    "exampleTitle": "Eksempel på samtaletilstand",
+    "exampleBody": "Forbindelse af din Instagram- eller Facebook-konto erstatter dette eksempel med rigtige kundespørgsmål."
+  },
+  "reviews": {
+    "emptyTitle": "Ingen anmeldelser endnu",
+    "emptyBody": "Forbind din Google Business-profil for automatisk at indsamle og besvare verificeret kundefeedback.",
+    "connectGoogle": "Forbind Google Business",
+    "automatedTitle": "Automatiserede anmeldelsesanmodninger",
+    "connectFirst": "Forbind først",
+    "automatedBody": "Kræver Google Business-forbindelse for at sende personlige anmeldelsesanmodninger."
+  },
+  "people": {
+    "emptyTitle": "Ingen kunderegistreringer endnu",
+    "emptyBody": "Personer, du hører fra gennem forbundne kundekanaler, vil dukke op her.",
+    "connectChannel": "Forbind en kanal",
+    "directoryTitle": "Dit kundekartotek",
+    "directoryBody": "Åbn en persons registrering for at se deres samtaler og kontaktoplysninger ét sted.",
+    "connectedChannels": "Forbundne kundekanaler"
+  },
+  "google": {
+    "presenceTitle": "Din Google-tilstedeværelse",
+    "presenceBody": "Hold dit lokale franske showroom synligt på Google Maps og Søg automatisk.",
+    "profileTitle": "Google Business-profil",
+    "profileBody": "Synkroniser din officielle butiksadresse, åbningstider og nye katalogbilleder direkte til Google Maps.",
+    "connectProfile": "Forbind Google Business-profil",
+    "capabilitiesTitle": "Automatiske synkroniseringsmuligheder",
+    "capabilities": {
+      "catalog": {
+        "title": "Profil- og katalogopdateringer",
+        "body": "Synkroniser nyiscenesatte billeder og møbeldrop til dine lokale Google-opdateringer."
+      },
+      "reviews": {
+        "title": "Anmeldelsesanmodninger",
+        "body": "Generer høflige franske anmeldelsesanmodninger efter showroom-besøg eller køb."
+      },
+      "replies": {
+        "title": "Kurerede svarkladder",
+        "body": "Espanda udarbejder omhyggelige kladder til alle indkommende kundeanmeldelser til din gennemgang."
+      }
+    },
+    "controlTitle": "Du har kontrollen",
+    "controlBody": "Intet postes eller besvares på Google, før du godkender det."
+  },
+  "googleWorkspace": {
+    "newPost": "Nyt Google-opslag",
+    "subtitle": "Forhåndsvis hvordan produktdrops og showroom-anmeldelser synkroniseres direkte til Google.",
+    "tabs": {
+      "profile": "Profil",
+      "posts": "Opslag",
+      "reviews": "Anmeldelser"
+    },
+    "draftPostTitle": "Kladde til Google-opslag",
+    "actionButton": "Handlingsknap: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Lær mere"
+    },
+    "reviewPost": "Gennemgå opslag",
+    "reviewsTitle": "Showroom-anmeldelser",
+    "reviewsBody": "Anmeldelser og svarkladder indsamles med dine kundesamtaler.",
+    "openReviews": "Åbn anmeldelser",
+    "checklistTitle": "Profilopsætningscheckliste",
+    "checklist": {
+      "profile": {
+        "label": "Google-profil forbundet",
+        "value": "Fundet"
+      },
+      "reviewLink": {
+        "label": "Direkte anmeldelsesanmodningslink",
+        "value": "Opsæt"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Kladdeforhåndsvisning",
+    "catalogConnected": "Kildebutikskatalog forbundet",
+    "connectDomain": "Forbind domæne",
+    "previewLabel": "Forhåndsvisning af website kladde",
+    "browserTitle": "Website kladde",
+    "fullPreview": "Fuld forhåndsvisning",
+    "reviewPublish": "Gennemgå & udgiv kladde",
+    "footnote": "Gennemgå dit indhold og domæne, før du udgiver."
+  },
+  "websiteEdit": {
+    "saveChanges": "Gem kladdeændringer",
+    "reviewPublish": "Gennemgå & udgiv",
+    "preview": "Forhåndsvisning",
+    "title": "Rediger websiteindhold",
+    "heroTitle": "Hero-sektion banner",
+    "replaceImage": "Erstat billede",
+    "heroImageLabel": "Hero-banner billede",
+    "headline": "Overskrift (fransk)",
+    "description": "Beskrivelse",
+    "sectionsTitle": "Sidens sektioner",
+    "sectionCount_one": "{{count}} sektion",
+    "sectionCount_other": "{{count}} sektioner",
+    "sections": {
+      "heroBanner": "Hero-banner",
+      "featuredCollection": "Fremhævet kollektion",
+      "showroomContact": "Showroom & kontakt"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Bekræft et domæne og gennemgå indholdet for at udgive.",
+    "publish": "Udgiv hjemmeside",
+    "keepDraft": "Gem som kladde",
+    "title": "Gennemgå din hjemmeside",
+    "subtitle": "Tjek dit indhold og din destination, før du går live.",
+    "heroImageLabel": "Hjemmesidens hero-billede",
+    "destinationTitle": "Udgivelsesdestination",
+    "destinationBody": "Forbind og bekræft et domæne for at udgive denne kladde.",
+    "setUpDomain": "Opsæt et domæne"
+  }
+}

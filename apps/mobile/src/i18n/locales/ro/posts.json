@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Planificat",
+    "briefReady": "Brief pregătit",
+    "needsReview": "Necesită revizuire",
+    "draftReady": "Schiță pregătită",
+    "approved": "Aprobat",
+    "scheduled": "Programat",
+    "published": "Publicat",
+    "draft": "Schiță"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Astăzi",
+    "tomorrow": "Mâine"
+  },
+  "chrome": {
+    "openMenu": "Deschide meniul",
+    "logo": "Espanda",
+    "credits_one": "{{count}} credit disponibil",
+    "credits_other": "{{count}} credite disponibile",
+    "settings": "Setări",
+    "modulesLabel": "Module aplicație",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Postări",
+      "photoshoot": "Ședință foto",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Navigare module",
+    "nav": {
+      "today": "Astăzi",
+      "posts": "Postări",
+      "create": "Creează",
+      "stories": "Povești",
+      "settings": "Setări"
+    },
+    "back": "Înapoi",
+    "switchBusiness": "Schimbă afacerea, {{name}}",
+    "business": "Afacere: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Postările tale, în mișcare",
+    "subtitle": "Revizuiește evidențele de produse generate & postările programate",
+    "needsApproval": "Necesită aprobare",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Revizuiește postarea",
+    "agenda": "Agenda viitoare",
+    "thisWeek": "Săptămâna aceasta",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Vezi calendarul"
+  },
+  "calendar": {
+    "title": "Calendar postări",
+    "subtitle": "Planifică și automatizează lansările",
+    "viewLabel": "Vizualizare calendar",
+    "views": {
+      "month": "Lună",
+      "list": "Listă"
+    },
+    "plan": "Plan: {{n}} postări / lună",
+    "managePlan": "Gestionează planul",
+    "postCount_one": "{{count}} postare",
+    "postCount_other": "{{count}} postări",
+    "empty": "Nimic planificat pentru această zi.",
+    "scheduled_one": "{{count}} programată",
+    "scheduled_other": "{{count}} programate",
+    "previousMonth": "Luna precedentă",
+    "nextMonth": "Luna următoare",
+    "gridLabel": "Calendar {{month}}",
+    "dayWithPosts_one": "{{day}} · {{count}} postare",
+    "dayWithPosts_other": "{{day}} · {{count}} postări"
+  },
+  "detail": {
+    "title": "Detalii postare",
+    "moreOptions": "Mai multe opțiuni",
+    "feedPhoto": "Foto feed 4:5",
+    "fullscreen": "Ecran complet",
+    "captionFrench": "Caption (French)",
+    "editText": "Editează textul",
+    "channels": "Canale de publicare",
+    "instagramFeed": "Feed Instagram",
+    "instagramDetail": "Conectează un cont pentru a publica",
+    "facebookPage": "Pagina Facebook",
+    "facebookDetail": "Postare automată pe pagina oficială",
+    "notConnected": "Neconectat",
+    "channelNotConnected": "{{name}}, neconectat",
+    "editPost": "Editează postarea",
+    "schedule": "Programează"
+  },
+  "edit": {
+    "title": "Editează postarea",
+    "cancel": "Anulează",
+    "save": "Salvează modificările",
+    "previewLabel": "{{title}}, raport original 4:5",
+    "ratio": "Raport original · 4:5",
+    "sectionLabel": "Editează secțiunea",
+    "tabs": {
+      "image": "Imagine",
+      "caption": "Caption",
+      "brand": "Brand"
+    },
+    "description": "Descriere postare",
+    "language": "Limbă: French (FR)",
+    "suggestedHashtags": "Hashtag-uri sugerate",
+    "addHashtag": "Adaugă hashtag",
+    "add": "+ Adaugă",
+    "regenerate": "Regenerează caption cu AI",
+    "imageHint": "Raport original · 4:5. Trage previzualizarea pentru a reîncadra decupajul.",
+    "brandHint": "Logo, culori și ton urmează kitul de brand {{brand}}."
+  },
+  "schedule": {
+    "title": "Programează",
+    "storyFormat": "Poveste · imagine 9:16",
+    "feedFormat": "Postare feed · imagine 4:5",
+    "destination": "Destinație",
+    "actionRequired": "Acțiune necesară",
+    "notLinked": "Cont Instagram neconectat",
+    "notLinkedBody": "Conectează-ți conturile sociale pentru a debloca publicarea programată directă.",
+    "connect": "Conectează cont social",
+    "locked": "Programare blocată până la conectare",
+    "timing": "Timp și programare",
+    "date": "Data",
+    "dateLabel": "Data, {{date}}",
+    "time": "Ora",
+    "timeLabel": "Ora, {{time}}",
+    "timezone": "Fus orar",
+    "schedulePost": "Programează postarea",
+    "scheduleLocked": "Programează postarea (Conectează mai întâi canalul)",
+    "saveDraft": "Salvează schița"
+  },
+  "brief": {
+    "title": "Creează o postare",
+    "subtitle": "Alege un produs și o direcție creativă",
+    "format": "Format conținut",
+    "formatLabel": "Format postare",
+    "singlePhoto": "Fotografie unică",
+    "singlePhotoDetail": "Focalizare feed 4:5",
+    "carousel": "Carusel",
+    "carouselDetail": "Mai multe fotografii",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Obiectiv principal",
+    "goals": {
+      "newArrival": "Nouă sosire",
+      "productFeature": "Caracteristică produs",
+      "specialOffer": "Ofertă specială"
+    },
+    "product": "Produs țintă din catalog",
+    "changeProduct": "Schimbă produsul",
+    "change": "Schimbă",
+    "direction": "Direcție creativă (opțional)",
+    "directionLanguage": "Franceză (FR)",
+    "directionPlaceholder": "ex. Concentrează-te pe tâmplăria lucrată manual și căldură",
+    "cost": "Cost de creare:",
+    "costPending": "Estimare în așteptare",
+    "draftPost": "Postare schiță"
+  },
+  "stories": {
+    "title": "Povești",
+    "subtitle": "Momente sociale verticale 9:16",
+    "newStory": "Poveste nouă",
+    "statusLabel": "Stare poveste",
+    "drafts_one": "Schițe ({{count}})",
+    "drafts_other": "Schițe ({{count}})",
+    "scheduled_one": "Programate ({{count}})",
+    "scheduled_other": "Programate ({{count}})",
+    "samplePreview": "Previzualizare exemplu",
+    "moreOptions": "Mai multe opțiuni pentru {{title}}",
+    "editStory": "Editează povestea"
+  },
+  "editStory": {
+    "back": "Înapoi",
+    "undo": "Anulează",
+    "tools": {
+      "text": "Text",
+      "image": "Imagine",
+      "brand": "Brand",
+      "cta": "CTA"
+    },
+    "toolLabel": "Instrument {{tool}}",
+    "captionTitle": "Legendă poveste / Sticker link",
+    "languageCode": "FR",
+    "saveDraft": "Salvează schița",
+    "scheduleStory": "Programează povestea"
+  },
+  "planner": {
+    "title": "Planificator postări",
+    "sectionsLabel": "Secțiuni setări",
+    "sections": {
+      "business": "Afacerea mea",
+      "billing": "Facturare",
+      "planner": "Planificator postări"
+    },
+    "cycle": "Ciclu de planificare",
+    "cadence": "Ritmul publicării",
+    "monthlyTarget": "Țintă lunară",
+    "feedPosts": "Postări în feed",
+    "stories": "Povești",
+    "perMonth": "{{n}} / lună",
+    "feedNote": "~1 postare zilnic",
+    "storiesNote": "Distribuite pe parcursul lunii",
+    "cadenceHint": "Ținte de conținut sugerate. Ajustează înainte de a genera calendarul.",
+    "pillars": "Pilonii conținutului",
+    "pillar": {
+      "catalog": "Produse din catalog (focalizare Bunting)",
+      "craft": "Detalii materiale & meșteșug (lemn de Acacia)",
+      "story": "Povestea brandului & patrimoniul francez"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Revizuire manuală înainte de publicare: </b>Postările generate sunt plasate în calendar ca schițe pentru confirmarea ta finală. Niciun conținut nu este publicat fără aprobare.",
+    "generate": "Generează calendar"
+  }
+}

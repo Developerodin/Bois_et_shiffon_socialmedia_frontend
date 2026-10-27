@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} sekunda",
+  "seconds_other": "{{count}} sekund",
+  "noPresenter": "Brak prezentera",
+  "aiActor": "Aktor AI",
+  "assistant": "Twój asystent wideo",
+  "sourceWebsite": "Strona źródłowa",
+  "preview": "Podgląd",
+  "schedule": "Zaplanuj",
+  "goBack": "Wróć",
+  "inProgress": "W toku",
+  "timezone": "Strefa czasowa",
+  "status": {
+    "draft": "Szkic",
+    "ready": "Gotowe"
+  },
+  "scene": {
+    "label": "Scena {{n}} · {{seconds}}s",
+    "count_one": "{{count}} scena",
+    "count_other": "{{count}} scen"
+  },
+  "shot": {
+    "wide": "Szeroki kadr",
+    "material": "Szczegóły materiału",
+    "closeCta": "Zbliżenie produktu i CTA"
+  },
+  "create": {
+    "switchBusiness": "Zmień firmę, {{name}}",
+    "title": "Stwórz swój kolejny reel",
+    "subtitle": "Twórz studyjne wideo z katalogu sklepu",
+    "heroImage": "Pełny widok wnętrza kolekcji jadalnianej {{product}}",
+    "question": "Co chcesz pokazać?",
+    "planTogether": "Zaplanujmy reel razem",
+    "start": "Start",
+    "startA11y": "Rozpocznij planowanie reel",
+    "ideasReady_one": "{{count}} pomysł gotowy",
+    "ideasReady_other": "{{count}} pomysłów gotowych",
+    "viewIdeas": "Zobacz pomysły →",
+    "actorSubtitle": "Reel prezentera",
+    "templates": "Szablony",
+    "templatesSubtitle": "Szybkie cięcia katalogowe",
+    "jumpBackIn": "Wróć do pracy",
+    "seeAll": "Zobacz wszystko",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Pomysły na wideo",
+    "subtitle": "Wyselekcjonowane kąty gotowe do przekształcenia w ruchome reele",
+    "filter": {
+      "all": "Wszystkie ({{n}})",
+      "productSpotlight": "Wyróżnienie produktu ({{n}})",
+      "collection": "Kolekcja ({{n}})"
+    },
+    "angle": "Kąt {{n}}",
+    "body": {
+      "angle01": "Podkreślenie naturalnego ziarna, geometrycznej architektury nóg i aranżacji jadalni.",
+      "angle02": "Skupienie na ręcznie rzeźbionych drzwiach, zarządzaniu kablami i ciepłej atmosferze salonu."
+    },
+    "readyToReview": "Gotowe do przeglądu",
+    "viewStoryboard": "Zobacz storyboard"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} kredyt",
+    "creditsA11y_other": "{{count}} kredytów",
+    "addAssets": "Dodaj zasoby",
+    "composerPlaceholder": "Doprecyzuj ton, lektora lub dodaj wskazówki...",
+    "composerA11y": "Doprecyzuj ton, lektora lub dodaj wskazówki",
+    "send": "Wyślij poprawki",
+    "day": "Dziś · Reels Studio",
+    "userMessage": "Pokaż kolekcję Bunting w spokojnym, premium reel.",
+    "reply": "Dostosowałem koncepcję dla twojego <b>{{brand}}</b> {{product}} stołu. Oto zalecane parametry:",
+    "format": "Format",
+    "formatVertical": "9:16 Pionowy (Story/Reel)",
+    "duration": "Czas trwania",
+    "presenter": "Prezenter",
+    "openingHook": "Zaczep otwierający",
+    "reviewStoryboard_one": "Przegląd storyboardu ({{count}} scena)",
+    "reviewStoryboard_other": "Przegląd storyboardu ({{count}} scen)",
+    "readyStatus": "Gotowe do generowania lub dopracowania"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "Czas trwania {{seconds}}s",
+    "verticalFact": "9:16 pionowy",
+    "readyToRender": "Gotowe do renderowania <muted>· Szkic zapisany do przeglądu</muted>",
+    "sceneDirection": "Kierunek sceny",
+    "voiceoverFr": "Lektor (FR)",
+    "direction": {
+      "scene1": "Powolne ujawnienie nowoczesnej aranżacji jadalni",
+      "scene2": "Płynne makro ujęcie bogatego naturalnego ziarna drewna i fazowanej krawędzi",
+      "scene3": "Perspektywa z emblematem Bois & Chiffons jako znak wodny"
+    },
+    "editInChat": "Edytuj w czacie",
+    "makeVideo": "Stwórz wideo",
+    "makeVideoA11y_one": "Stwórz wideo, {{count}} kredyt",
+    "makeVideoA11y_other": "Stwórz wideo, {{count}} kredytów",
+    "cost_one": "{{count}} kredyt",
+    "cost_other": "{{count}} kredytów",
+    "balance_one": "Bieżące saldo: {{balance}} kredytów · {{count}} kredyt zostanie zarezerwowany · Szkic zapisany automatycznie",
+    "balance_other": "Bieżące saldo: {{balance}} kredytów · {{count}} kredytów zostanie zarezerwowanych · Szkic zapisany automatycznie"
+  },
+  "generating": {
+    "backToWorkspace": "Powrót do przestrzeni roboczej",
+    "renderingA11y": "Renderowanie w toku",
+    "title": "Tworzenie twojego reel",
+    "body": "Komponowanie wizualizacji, francuskiego lektora i tempa ruchu dla {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Autentyczny francuski zasób katalogowy",
+    "preparingScenes_one": "Przygotowywanie {{count}} sceny",
+    "preparingScenes_other": "Przygotowywanie {{count}} scen",
+    "done": "Gotowe",
+    "renderingFrames": "Renderowanie klatek wideo",
+    "addingAudio": "Dodawanie dźwięku",
+    "queued": "W kolejce",
+    "creditsReserved_one": "{{count}} kredyt zarezerwowany",
+    "creditsReserved_other": "{{count}} kredytów zarezerwowanych",
+    "remaining_one": "Pozostało: {{count}} kredyt",
+    "remaining_other": "Pozostało: {{count}} kredytów",
+    "safeToLeave": "Możesz bezpiecznie opuścić ten ekran. Twój szkic jest automatycznie zapisywany w zakładce Wyniki.",
+    "keepWorking": "Pracuj dalej w tle"
+  },
+  "results": {
+    "title": "Reele wideo",
+    "newReel": "Nowy reel",
+    "filter": {
+      "all": "Wszystkie ({{n}})",
+      "ready": "Gotowe ({{n}})",
+      "processing": "Przetwarzanie ({{n}})"
+    },
+    "processing_one": "Przetwarzanie · {{count}} kredyt zarezerwowany",
+    "processing_other": "Przetwarzanie · {{count}} kredytów zarezerwowanych",
+    "renderingA11y": "{{title}}, renderowanie {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 pionowy · Renderowanie wizualizacji...",
+    "renderingStage": "Etap renderowania",
+    "previewA11y": "Przykładowy podgląd, {{title}}",
+    "moreOptions": "Więcej opcji",
+    "reviewVideo": "Przegląd wideo",
+    "meta": {
+      "tv": "20s · Francuski lektor · Gotowe do zaplanowania",
+      "atelier": "15s · Akustyka ambientowa · Gotowe do zaplanowania"
+    }
+  },
+  "review": {
+    "subtitle": "Szkic reel · Gotowe do przeglądu",
+    "options": "Menu opcji",
+    "downloadVideo": "Pobierz wideo",
+    "connectFirst": "Wybierz połączone konto przed publikacją.",
+    "samplePreview": "Przykładowy podgląd",
+    "play": "Odtwórz podgląd wideo",
+    "position": "Pozycja wideo",
+    "sound": "Przełącz dźwięk wideo",
+    "fullscreen": "Otwórz wideo na pełnym ekranie",
+    "vertical": "9:16 Pionowe",
+    "portrait": "Format portretowy",
+    "captionFrench": "Napisy (francuski)",
+    "defaultSource": "· Źródło domyślne",
+    "editable": "Edytowalne",
+    "captionA11y": "Napisy wideo po francusku",
+    "addTag": "Dodaj tag",
+    "specifications": "Specyfikacje",
+    "audioTrack": "Ścieżka dźwiękowa",
+    "audioValue": "Francuski lektor (Studio Natural) + Akustyka otoczenia",
+    "resolution": "Rozdzielczość",
+    "resolutionValue": "Wideo portretowe · 9:16"
+  },
+  "publish": {
+    "title": "Opublikuj rolkę",
+    "confirmSchedule": "Potwierdź harmonogram",
+    "publishNow": "Opublikuj teraz",
+    "saveDraft": "Zapisz szkic",
+    "readyToSchedule": "Gotowe do zaplanowania",
+    "format": "{{product}} · 9:16 Pionowa rolka",
+    "playPreview": "Odtwórz podgląd",
+    "channel": "Kanał publikacji",
+    "connected": "Połączono",
+    "notConnected": "Nie połączono",
+    "connect": "Połącz",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Automatyczne publikowanie na feed i rolki",
+    "orDownload": "Lub pobierz wideo bezpośrednio",
+    "download": "Pobierz",
+    "timing": "Czas",
+    "date": "Data",
+    "time": "Godzina",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Strefa czasowa, {{value}}",
+    "notice": "Połącz swoje konto firmowe na Instagramie, aby odblokować automatyczne planowane publikowanie. Nadal możesz zapisać tę rolkę jako szkic."
+  },
+  "scheduled": {
+    "close": "Zamknij",
+    "viewReel": "Zobacz zaplanowaną rolkę",
+    "backToResults": "Powrót do wyników",
+    "title": "Rolka zaplanowana",
+    "body": "Twoje wideo zostanie opublikowane na wybranym koncie o zaplanowanej godzinie.",
+    "meta": "{{seconds}}s · Francuski lektor",
+    "publishDate": "Data publikacji",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Przestrzeń robocza marki",
+    "channel": "Kanał",
+    "instagramConnected": "Instagram (Połączono)",
+    "editInCalendar": "Edytuj lub anuluj ten post z kalendarza."
+  },
+  "actor": {
+    "title": "Wybierz prezentera",
+    "intro": "Wybierz styl prezentera lub rolkę tylko z produktem.",
+    "noPresenterA11y": "Bez prezentera, zalecane",
+    "recommended": "Zalecane",
+    "noPresenterBody": "Skup się wyłącznie na wizualizacjach mebli, teksturach i dźwięku studyjnym.",
+    "styles": "Style prezentera",
+    "style": {
+      "calm": {
+        "title": "Spokojny narrator",
+        "subtitle": "Francuski · Spokojne Studio"
+      },
+      "expressive": {
+        "title": "Ekspresyjny prezenter",
+        "subtitle": "Angielski / FR · Dynamiczny"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Próbka głosu, {{title}}",
+    "sampleVoice": "Próbka głosu",
+    "voiceLed": "Styl prowadzony głosem",
+    "notice": "Wybierz styl prowadzony głosem lub skup się na swoim produkcie."
+  },
+  "script": {
+    "title": "Scenariusz i głos",
+    "continue": "Kontynuuj do storyboardu",
+    "costNote": "Sprawdź koszt kredytu przed stworzeniem rolki.",
+    "targetProduct": "Docelowy produkt",
+    "productMeta": "Solidna akacja · Strona źródłowa",
+    "voiceoverScript": "Scenariusz lektora",
+    "frenchFr": "Francuski (FR)",
+    "wordCount_one": "{{count}} słowo · ~{{seconds}} sek",
+    "wordCount_other": "{{count}} słów · ~{{seconds}} sek",
+    "scriptA11y": "Scenariusz lektora po francusku",
+    "targetDuration_one": "Docelowy czas trwania: {{count}} sekunda",
+    "targetDuration_other": "Docelowy czas trwania: {{count}} sekund",
+    "rewriteOpening": "Przepisz wstęp",
+    "narratorAudio": "Dźwięk narratora",
+    "calmVoice": "Spokojny francuski głos",
+    "calmVoiceMeta": "Naturalny francuski, ciepłe tempo akustyczne",
+    "recordOwn": "Nagraj swój głos",
+    "recordOwnMeta": "Opcjonalna narracja marki",
+    "record": "Nagraj"
+  },
+  "templates": {
+    "title": "Szablony rolek",
+    "useTemplate": "Użyj szablonu",
+    "searchPlaceholder": "Szukaj formatów studyjnych...",
+    "searchA11y": "Szukaj formatów studyjnych",
+    "tune": "Dopasuj",
+    "filter": {
+      "all": "Wszystkie formaty",
+      "catalog": "Katalog spotlight",
+      "shortCuts": "15-20s cięcia"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Produkt spotlight",
+        "subtitle": "3 makro cięcia + haczyk"
+      },
+      "collection": {
+        "title": "Odkrycie kolekcji",
+        "subtitle": "Szybki pokaz wielu przedmiotów"
+      },
+      "material": {
+        "title": "Szczegóły materiału",
+        "subtitle": "Słoje drewna i zbliżenia rzemieślnicze"
+      },
+      "arrival": {
+        "title": "Nowość",
+        "subtitle": "Ogłoszenie i CTA showroom"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Wybierz zasoby",
+    "createStoryboard_one": "Stwórz storyboard ({{count}} scena)",
+    "createStoryboard_other": "Stwórz storyboard ({{count}} sceny)",
+    "upload": "Prześlij zdjęcia",
+    "websiteAssets": "Zasoby strony internetowej",
+    "selected_one": "{{count}} wybrany",
+    "selected_other": "{{count}} wybrane",
+    "otherCategory": "Inna kategoria produktu",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Sekwencja storyboardu",
+    "dragToReorder": "Przeciągnij, aby zmienić kolejność",
+    "reorderA11y": "Scena {{n}}: {{label}}. Zmień kolejność sceny",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Pokój",
+      "macro": "Szczegół",
+      "staged": "Stylizowane",
+      "tv": "Jednostka TV"
+    }
+  }
+}

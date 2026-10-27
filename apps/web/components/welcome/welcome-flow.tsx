@@ -83,7 +83,9 @@ function AddressStep({
           ? err.message || "That website address doesn't look right."
           : err instanceof ProblemError && err.status === 403
             ? "Your role can't add brands. Ask a workspace owner or admin."
-            : "Couldn't start reading your website. Check your connection and try again.",
+            : err instanceof ProblemError
+              ? err.message // e.g. 429 "You've added 10 brands today…"
+              : "Couldn't start reading your website. Check your connection and try again.",
       );
       setPending(false);
     }
@@ -107,8 +109,8 @@ function AddressStep({
         <label htmlFor="website">What&rsquo;s your website?</label>
       </h1>
       <p id="website-help" className="mt-3 max-w-[60ch] text-muted-foreground">
-        We read it and draft five strategy documents for you to check: product, marketing strategy, competitors,
-        brand voice and content. It takes about two minutes.
+        We read it and write five strategy documents your agents work from: product, marketing strategy, competitors,
+        brand voice and content. We also score it for SEO and AI search. It takes a few minutes.
       </p>
 
       <div className="group mt-12">
@@ -195,11 +197,14 @@ function ReadingRoom({
   const [startedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
   const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
+  const [checks, setChecks] = useState<Record<string, CheckState>>({ seo: "waiting", geo: "waiting" });
   const cursor = useRef<string | null>(null);
   const logEnd = useRef<HTMLLIElement>(null);
 
   const status = docs?.research?.runId === runId ? docs.research.status : "QUEUED";
   const finished = status === "SUCCEEDED" || status === "FAILED";
+  const checksDone = CHECKS.every((c) => checks[c.key] === "done" || checks[c.key] === "failed");
 
   useEffect(() => {
     cursor.current = null;
@@ -207,7 +212,7 @@ function ReadingRoom({
   }, [runId]);
 
   useEffect(() => {
-    if (finished) return;
+    if (finished && checksDone) return;
     const ctrl = new AbortController();
     const tick = async () => {
       try {
@@ -217,7 +222,16 @@ function ReadingRoom({
         ]);
         if (ev.events.length) cursor.current = ev.events[ev.events.length - 1].id;
         const mine = ev.events.filter((e) => e.runId === runId);
-        if (mine.length) setEvents((prev) => [...prev, ...mine]);
+        // Overlapping ticks (slow fetch, dev double-effect) can return the same events twice.
+        if (mine.length) setEvents((prev) => [...prev, ...mine.filter((e) => !prev.some((p) => p.id === e.id))]);
+        const site = ev.events.filter((e) => e.agentKey in CHECK_KEYS);
+        if (site.length) {
+          setChecks((prev) => {
+            const next = { ...prev };
+            for (const e of site) next[e.agentKey] = e.level === "SUCCESS" ? "done" : e.level === "ERROR" ? "failed" : "running";
+            return next;
+          });
+        }
         setDocs(d);
       } catch {
         // Transient network error: the next tick tries again.
@@ -232,7 +246,7 @@ function ReadingRoom({
       clearInterval(timer);
       ctrl.abort();
     };
-  }, [workspaceId, brandId, runId, finished]);
+  }, [workspaceId, brandId, runId, finished, checksDone]);
 
   useEffect(() => {
     logEnd.current?.scrollIntoView({ block: "nearest" });
@@ -255,9 +269,12 @@ function ReadingRoom({
 
   async function retry() {
     setRetrying(true);
+    setRetryError(null);
     try {
       const { run } = await startResearch(workspaceId, brandId);
       onRetry(run.id);
+    } catch (err) {
+      setRetryError(err instanceof ProblemError ? err.message : "Couldn't restart. Check your connection and try again.");
     } finally {
       setRetrying(false);
     }
@@ -314,19 +331,36 @@ function ReadingRoom({
               </li>
             ))}
           </ul>
+
+          <h2 id="checks-heading" className="mt-8 text-sm font-medium text-muted-foreground">
+            Site scores
+          </h2>
+          <ul aria-labelledby="checks-heading" className="mt-4 divide-y divide-border border-y border-border">
+            {CHECKS.map((c) => (
+              <li key={c.key} className="flex items-center justify-between gap-4 py-3.5">
+                <span className={cn("text-base", checks[c.key] === "waiting" && "text-muted-foreground")}>{c.title}</span>
+                <CheckStatus state={checks[c.key]} />
+              </li>
+            ))}
+          </ul>
         </section>
       </div>
 
       {status === "SUCCEEDED" && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-[60ch]">
-            Your five drafts are ready. Check each one and confirm it; agents only use confirmed documents.
+            Your five documents are ready and agents are already using them. Fix anything that&rsquo;s off; edits apply on the next run.
           </p>
-          <Button asChild size="lg">
-            <Link href="/context">
-              Review documents <ArrowRight aria-hidden="true" />
-            </Link>
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" asChild>
+              <Link href="/context">See documents</Link>
+            </Button>
+            <Button asChild size="lg">
+              <Link href="/">
+                Go to workspace <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
         </div>
       )}
       {!finished && elapsed >= SLOW_AFTER_S && (
@@ -343,7 +377,7 @@ function ReadingRoom({
       {status === "FAILED" && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p role="alert" className="max-w-[60ch]">
-            Reading stopped{failure ? `: ${readable(failure.message)}` : "."} Documents already drafted are kept.
+            {retryError ?? <>Reading stopped{failure ? `: ${readable(failure.message)}` : "."} Documents already drafted are kept.</>}
           </p>
           <div className="flex gap-3">
             <Button variant="outline" asChild>
@@ -374,5 +408,32 @@ function DocStatus({ state }: { state: DocState }) {
       </span>
     );
   }
+  return <span className="text-sm text-muted-foreground">Waiting</span>;
+}
+
+/** SEO and GEO start with Research when a brand is created (server/services/create-brand.ts). */
+const CHECKS = [
+  { key: "seo", title: "SEO audit" },
+  { key: "geo", title: "AI search visibility (GEO)" },
+];
+const CHECK_KEYS = Object.fromEntries(CHECKS.map((c) => [c.key, true]));
+type CheckState = "waiting" | "running" | "done" | "failed";
+
+function CheckStatus({ state }: { state: CheckState }) {
+  if (state === "done") {
+    return (
+      <span className="flex items-center gap-1.5 text-sm text-success">
+        <Check className="size-4" aria-hidden="true" /> Done
+      </span>
+    );
+  }
+  if (state === "running") {
+    return (
+      <span className="flex items-center gap-1.5 text-sm text-primary">
+        <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Checking
+      </span>
+    );
+  }
+  if (state === "failed") return <span className="text-sm text-destructive">Stopped</span>;
   return <span className="text-sm text-muted-foreground">Waiting</span>;
 }

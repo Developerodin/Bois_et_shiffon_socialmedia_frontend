@@ -72,7 +72,7 @@ export function DocPane({
   onChanged,
   onStale,
 }: Props) {
-  const { latest, confirmed } = entry;
+  const { latest } = entry;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState<"save" | "confirm" | null>(null);
@@ -172,6 +172,7 @@ export function DocPane({
             </Button>
             {canConfirm ? (
               <Button
+                variant="outline"
                 size="sm"
                 onClick={() => void onConfirm()}
                 disabled={busy !== null}
@@ -181,18 +182,12 @@ export function DocPane({
                 ) : (
                   <Check />
                 )}
-                Confirm v{latest.version}
+                Mark reviewed
               </Button>
             ) : null}
           </div>
         ) : null}
       </header>
-
-      {latest?.status === "DRAFT" && confirmed ? (
-        <p className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-foreground/90">
-          Agents keep using v{confirmed.version} until you confirm this draft.
-        </p>
-      ) : null}
 
       {error ? (
         <p

@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Vítejte v Espanda",
+    "subtitle": "Vytvářejte obsah pro svůj podnik.",
+    "mobileNumber": "Telefonní číslo",
+    "countryCode": "Kód země {{code}}",
+    "sendCode": "Odeslat kód",
+    "useEmail": "Použít e-mail místo toho",
+    "sendFailed": "Nepodařilo se odeslat kód. Zkuste to znovu nebo použijte e-mail.",
+    "chooseCountry": "Vyberte svou zemi",
+    "searchCountry": "Hledejte zemi nebo kód"
+  },
+  "email": {
+    "title": "Přihlásit se e-mailem",
+    "subtitle": "Zašleme vám ověřovací kód bez hesla.",
+    "tagline": "Inteligentní marketing pro moderní maloobchod",
+    "label": "E-mailová adresa",
+    "placeholder": "jmeno@vaspodnik.com",
+    "notConfigured": "Přihlášení e-mailem na tomto serveru zatím není nastaveno.",
+    "sendFailed": "Nepodařilo se odeslat kód. Zkuste to znovu.",
+    "useMobile": "Použít telefonní číslo místo toho",
+    "linkTitle": "Přidejte svůj e-mail",
+    "linkSubtitle": "Vaše číslo je ověřeno. Přidejte e-mail pro účtenky a pozvánky pro tým. Pošleme vám kód."
+  },
+  "verify": {
+    "title": "Zadejte svůj kód",
+    "sent": "Odeslali jsme ověřovací kód na {{destination}}",
+    "codeLabel": "Šestimístný ověřovací kód",
+    "submit": "Ověřit kód",
+    "checkFailed": "Nepodařilo se ověřit kód. Zkuste to znovu.",
+    "resendFailed": "Nepodařilo se znovu odeslat kód.",
+    "resendIn": "Znovu odeslat kód za {{time}}",
+    "resend": "Znovu odeslat kód",
+    "changeEmail": "Změnit e-mail",
+    "changeMobile": "Změnit telefonní číslo"
+  },
+  "welcome": {
+    "getStarted": "Začít",
+    "footnote": "Váš podnik, váš kreativní směr.",
+    "photosLabel": "Příklady z katalogu {{brand}}",
+    "title": "Marketing, který odpovídá vašemu podnikání",
+    "body": "Generujte studiové role, focení a produktové příspěvky z vašeho katalogu.",
+    "steps": {
+      "goal": {
+        "title": "Vyberte svůj cíl",
+        "body": "Vyberte první kreativní formát, který chcete vytvořit."
+      },
+      "business": {
+        "title": "Sdílejte svůj podnik",
+        "body": "Sdílejte svůj web nebo přidejte podrobnosti o svém podniku."
+      },
+      "review": {
+        "title": "Zkontrolujte připravený obsah",
+        "body": "Zkontrolujte nápady vytvořené kolem vašich produktů."
+      }
+    }
+  },
+  "goal": {
+    "title": "Co vytvoříte jako první?",
+    "subtitle": "Přizpůsobíme vaše počáteční pracovní prostředí a šablony vašemu hlavnímu zaměření.",
+    "note": "Všechny nástroje a formáty studia zůstanou dostupné později.",
+    "options": {
+      "socialPlan": {
+        "title": "Plán sociálních médií",
+        "description": "Měsíc příspěvků a popisků"
+      },
+      "marketingVideos": {
+        "title": "Marketingová videa",
+        "description": "Studiové role z vašeho katalogu"
+      },
+      "fashionPhotoshoot": {
+        "title": "Módní focení",
+        "description": "Styling oblečení na modelech"
+      },
+      "productPhotoshoot": {
+        "title": "Produktové focení",
+        "description": "Produktové fotografie pro váš katalog"
+      }
+    }
+  },
+  "source": {
+    "title": "Kde je váš podnik online?",
+    "subtitle": "Espanda prohledá váš online obchod nebo výpis a automaticky vygeneruje mediální obsah odpovídající značce.",
+    "options": {
+      "website": {
+        "title": "Webová stránka",
+        "description": "Shopify, WooCommerce, vlastní doména"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Místní prodejna, butik nebo showroom"
+      },
+      "marketplace": {
+        "title": "Tržiště",
+        "description": "Amazon, Etsy, eBay nebo Instagram obchod"
+      },
+      "wholesale": {
+        "title": "Velkoobchod / B2B",
+        "description": "Faire, Ankorstore, soukromý katalog"
+      },
+      "none": {
+        "title": "Žádná online přítomnost",
+        "description": "Popište své položky ručně"
+      },
+      "other": {
+        "title": "Něco jiného",
+        "description": "Sociální profil, PDF lookbook nebo soubor"
+      }
+    }
+  },
+  "website": {
+    "title": "Jaká je vaše webová stránka?",
+    "subtitle": "Automaticky stáhneme fotografie z vašeho katalogu, barvy a tón hlasu.",
+    "label": "URL webové stránky obchodu",
+    "placeholder": "www.vasobchod.com",
+    "valid": "Platná adresa",
+    "willRead": "Prohlédneme si tento web",
+    "facts": {
+      "catalog": {
+        "key": "Produkty v katalogu",
+        "value": "Produktové fotografie"
+      },
+      "identity": {
+        "key": "Identita značky",
+        "value": "Barvy a typografie"
+      },
+      "tone": {
+        "key": "Tón a styl",
+        "value": "Hlas z vašich stránek"
+      }
+    },
+    "safeNote": "Import katalogu nic nezmění na vašem živém obchodě."
+  },
+  "manual": {
+    "title": "Přidat podrobnosti o podniku",
+    "subtitle": "Sdílejte odkaz na výpis nebo popište svůj katalog ručně.",
+    "modeLabel": "Jak přidat svůj podnik",
+    "modeListing": "URL výpisu",
+    "modeDescribe": "Popište podnik",
+    "listingLabel": "Odkaz na výpis *",
+    "listingPlaceholder": "Etsy, Amazon, Google Maps nebo odkaz na obchod",
+    "nameLabel": "Název podniku *",
+    "namePlaceholder": "např. Atelier Bois & Chiffons",
+    "sellsLabel": "Co prodáváte? *",
+    "sellsPlaceholder": "např. Ručně vyráběné dřevěné stoly, TV stolky a moderní domácí dekorace...",
+    "locationLabel": "Umístění (volitelné)",
+    "locationPlaceholder": "Město, země nebo adresa showroomu",
+    "websiteLabel": "Webová stránka (volitelné)"
+  },
+  "learning": {
+    "working": "Pracujeme",
+    "tryAgain": "Zkusit znovu",
+    "inProgressButton": "Učení probíhá...",
+    "saved": "Uložíme váš pokrok.",
+    "title": "Poznáváme váš podnik",
+    "bodyWebsite": "Analyzujeme vaši webovou stránku, abychom získali identitu značky, katalogy a vizuální tón.",
+    "bodyManual": "Převádíme váš popis na identitu značky, katalogy a vizuální tón.",
+    "fallbackName": "Váš podnik",
+    "sourceWebsite": "Primární zdroj webové stránky",
+    "sourceManual": "Podrobnosti o podniku",
+    "foundWebsite": "Webová stránka nalezena",
+    "foundManual": "Podrobnosti přidány",
+    "stages": {
+      "open": "Otevírání webové stránky",
+      "identity": "Čtení identity značky a tónu",
+      "photos": "Shromažďování produktových fotografií"
+    },
+    "status": {
+      "done": "Dokončeno",
+      "running": "Probíhá",
+      "queued": "Ve frontě"
+    },
+    "errors": {
+      "stopped": "Čtení vaší webové stránky bylo zastaveno.",
+      "noWorkspace": "Váš účet zatím nemá pracovní prostor.",
+      "startFailed": "Nepodařilo se začít číst vaši webovou stránku.",
+      "restartFailed": "Nepodařilo se restartovat. Zkuste to znovu."
+    }
+  },
+  "review": {
+    "title": "Zkontrolujte podrobnosti o podniku",
+    "subtitle": "Na vaší webové stránce jsme našli tyto podrobnosti. Můžete je kdykoli upravit.",
+    "edit": "Upravit",
+    "tagline": "Slogan",
+    "editTagline": "Upravit slogan",
+    "categoryLocation": "Kategorie a umístění",
+    "audience": "Cílová skupina",
+    "editAudience": "Upravit cílovou skupinu",
+    "products_one": "Zjištěné produkty ({{count}})",
+    "products_other": "Zjištěné produkty ({{count}})",
+    "found": "Nalezeno",
+    "strengths": "Silné stránky značky",
+    "tags": {
+      "homeLiving": "Domov & Bydlení",
+      "france": "Francie",
+      "productCatalog": "Katalog produktů",
+      "showroomEshop": "Fyzický showroom & e-shop"
+    }
+  },
+  "brand": {
+    "title": "Značka & kreativní styl",
+    "subtitle": "Vylaďte, jak Espanda vytváří vaše focení a příspěvky na sociálních sítích.",
+    "identity": "Identita {{name}}",
+    "paletteMeta": "Paleta webu · Upravitelná",
+    "swatches": "Importované barevné vzorky webu",
+    "tone": "Kreativní tón",
+    "selected_one": "{{count}} vybráno",
+    "selected_other": "{{count}} vybráno",
+    "tones": {
+      "modern": "Moderní",
+      "luxurious": "Luxusní",
+      "elegant": "Elegantní",
+      "premium": "Prémiový",
+      "natural": "Přírodní",
+      "minimalist": "Minimalistický"
+    },
+    "contentLanguage": "Jazyk obsahu",
+    "contentLanguageA11y": "Jazyk obsahu, {{language}}. Změnit",
+    "languages": {
+      "fr": "Francouzština (FR)",
+      "en": "Angličtina (US)"
+    },
+    "audienceProfile": "Profil publika",
+    "audienceHome": "Domov & nábytek",
+    "featured": "Doporučené produkty katalogu",
+    "readyForBatch_one": "{{count}} připraveno k dávce",
+    "readyForBatch_other": "{{count}} připraveno k dávce",
+    "sampleProducts": {
+      "table": "Stůl Bunting",
+      "tableDetail": "Akácie 240cm",
+      "tv": "TV jednotka",
+      "tvDetail": "Akácie 2 dveře"
+    },
+    "channelsNote": "Instagram a Facebook lze připojit v dalším kroku. (Žádné kanály zatím nejsou připojeny)"
+  },
+  "preparing": {
+    "ready": "Studio připraveno",
+    "preparing": "Příprava studia",
+    "loadingButton": "Připravuji vaše nápady…",
+    "catalogSafe": "Váš katalog zůstává nedotčen ve vašem obchodě.",
+    "title": "Příprava vašich prvních nápadů",
+    "body": "Generování přizpůsobených sociálních videí a scén z vaší kolekce {{name}}.",
+    "photosTitle": "Shromažďování fotek",
+    "photosDetail": "{{product}} jídelní set",
+    "storyboardTitle": "Tvorba storyboardu",
+    "storyboardDetail_one": "Skládání {{count}} video scény",
+    "storyboardDetail_other": "Skládání {{count}} video scén",
+    "nextTitle": "Dále: Zkontrolujte své nápady",
+    "nextDetail": "Vyberte háčky a zvukové předvolby"
+  },
+  "connect": {
+    "readyToConnect": "• Připraveno k připojení",
+    "title": "Publikujte, až budete připraveni",
+    "subtitle": "Připojte své sociální účty, aby Espanda mohla přímo publikovat nebo připravit k odeslání videa a produktové spoty.",
+    "toolsTitle": "Nástroje pro publikování",
+    "featureReels": "Publikovat na Instagram Feed & Reels",
+    "featureCaptions": "Použijte své popisky a hashtagy",
+    "featureReview": "Vždy zkontrolujete, než něco půjde živě",
+    "assurance": "Žádný obsah nebude publikován bez vašeho potvrzení",
+    "connectInstagram": "Připojit Instagram",
+    "connectFacebook": "Připojit Facebook",
+    "skip": "Přeskočit prozatím",
+    "laterTitle": "Připojit později?",
+    "laterBody": "Stále můžete vytvářet, upravovat a stahovat videa a focení ve vysokém rozlišení do svého fotoaparátu. Instagram můžete kdykoli propojit v Nastavení.",
+    "laterDownload": "Stáhnout vaše výtvory",
+    "laterSettings": "Připojit kanály v Nastavení",
+    "continueWithout": "Pokračovat bez připojení"
+  }
+}

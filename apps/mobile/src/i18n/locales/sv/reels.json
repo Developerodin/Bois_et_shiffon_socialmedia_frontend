@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} sekund",
+  "seconds_other": "{{count}} sekunder",
+  "noPresenter": "Ingen presentatör",
+  "aiActor": "AI-skådespelare",
+  "assistant": "Din videoassistent",
+  "sourceWebsite": "Källwebbplats",
+  "preview": "Förhandsvisning",
+  "schedule": "Schemalägg",
+  "goBack": "Gå tillbaka",
+  "inProgress": "Pågår",
+  "timezone": "Tidszon",
+  "status": {
+    "draft": "Utkast",
+    "ready": "Klar"
+  },
+  "scene": {
+    "label": "Scen {{n}} · {{seconds}}s",
+    "count_one": "{{count}} scen",
+    "count_other": "{{count}} scener"
+  },
+  "shot": {
+    "wide": "Vidvinkel",
+    "material": "Materialdetalj",
+    "closeCta": "Produkt närbild & CTA"
+  },
+  "create": {
+    "switchBusiness": "Byt företag, {{name}}",
+    "title": "Skapa din nästa reel",
+    "subtitle": "Skapa studiovideoreels från din butikskatalog",
+    "heroImage": "Full interiörvy av {{product}} matkollektion",
+    "question": "Vad vill du visa?",
+    "planTogether": "Planera en reel tillsammans",
+    "start": "Starta",
+    "startA11y": "Börja planera en reel",
+    "ideasReady_one": "{{count}} idé klar",
+    "ideasReady_other": "{{count}} idéer klara",
+    "viewIdeas": "Visa idéer →",
+    "actorSubtitle": "Presentatörsreel",
+    "templates": "Mallar",
+    "templatesSubtitle": "Snabba katalogklipp",
+    "jumpBackIn": "Hoppa tillbaka in",
+    "seeAll": "Se alla",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Videoidéer",
+    "subtitle": "Kuraterade vinklar redo att bli rörelse-reels",
+    "filter": {
+      "all": "Alla ({{n}})",
+      "productSpotlight": "Produktfokus ({{n}})",
+      "collection": "Kollektion ({{n}})"
+    },
+    "angle": "Vinkel {{n}}",
+    "body": {
+      "angle01": "Framhäver naturlig ådring, geometrisk korsbensarkitektur och matstaging.",
+      "angle02": "Fokuserar på handkarvade spaltdörrar, kabelhantering och varm levande atmosfär."
+    },
+    "readyToReview": "Redo att granska",
+    "viewStoryboard": "Visa storyboard"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} kredit",
+    "creditsA11y_other": "{{count}} krediter",
+    "addAssets": "Lägg till tillgångar",
+    "composerPlaceholder": "Förfina ton, röstöver eller lägg till instruktioner...",
+    "composerA11y": "Förfina ton, röstöver eller lägg till instruktioner",
+    "send": "Skicka förfining",
+    "day": "Idag · Reels Studio",
+    "userMessage": "Visa Bunting-kollektionen i en lugn, premium reel.",
+    "reply": "Jag har skräddarsytt ett koncept för ditt <b>{{brand}}</b> {{product}} bord. Här är de rekommenderade parametrarna:",
+    "format": "Format",
+    "formatVertical": "9:16 Vertikal (Story/Reel)",
+    "duration": "Varaktighet",
+    "presenter": "Presentatör",
+    "openingHook": "Inledande krok",
+    "reviewStoryboard_one": "Granska storyboard ({{count}} scen)",
+    "reviewStoryboard_other": "Granska storyboard ({{count}} scener)",
+    "readyStatus": "Redo att generera eller förfina"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "{{seconds}}s varaktighet",
+    "verticalFact": "9:16 vertikal",
+    "readyToRender": "Redo att rendera <muted>· Utkast sparat för granskning</muted>",
+    "sceneDirection": "Scenriktning",
+    "voiceoverFr": "Röstöver (FR)",
+    "direction": {
+      "scene1": "Långsam glidande avslöjande över modern matmiljö",
+      "scene2": "Jämn makrosvep över rik naturlig träådring och fasad kant",
+      "scene3": "Staged perspektiv med Bois & Chiffons emblem vattenstämpel"
+    },
+    "editInChat": "Redigera i chatten",
+    "makeVideo": "Skapa video",
+    "makeVideoA11y_one": "Skapa video, {{count}} kredit",
+    "makeVideoA11y_other": "Skapa video, {{count}} krediter",
+    "cost_one": "{{count}} kredit",
+    "cost_other": "{{count}} krediter",
+    "balance_one": "Aktuellt saldo: {{balance}} krediter · {{count}} kredit kommer att reserveras · Utkast sparas automatiskt",
+    "balance_other": "Aktuellt saldo: {{balance}} krediter · {{count}} krediter kommer att reserveras · Utkast sparas automatiskt"
+  },
+  "generating": {
+    "backToWorkspace": "Tillbaka till arbetsytan",
+    "renderingA11y": "Rendering pågår",
+    "title": "Skapar din reel",
+    "body": "Komponerar visuellt, fransk röstöver och rörelsetakt för {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Autentisk fransk katalogtillgång",
+    "preparingScenes_one": "Förbereder {{count}} scen",
+    "preparingScenes_other": "Förbereder {{count}} scener",
+    "done": "Klar",
+    "renderingFrames": "Renderar videoramar",
+    "addingAudio": "Lägger till ljud",
+    "queued": "Köad",
+    "creditsReserved_one": "{{count}} kredit reserverad",
+    "creditsReserved_other": "{{count}} krediter reserverade",
+    "remaining_one": "Återstående: {{count}} kredit",
+    "remaining_other": "Återstående: {{count}} krediter",
+    "safeToLeave": "Du kan säkert lämna denna skärm. Ditt utkast sparas automatiskt i din Resultat-flik.",
+    "keepWorking": "Fortsätt arbeta i bakgrunden"
+  },
+  "results": {
+    "title": "Videoreels",
+    "newReel": "Ny reel",
+    "filter": {
+      "all": "Alla ({{n}})",
+      "ready": "Klar ({{n}})",
+      "processing": "Bearbetar ({{n}})"
+    },
+    "processing_one": "Bearbetar · {{count}} kredit reserverad",
+    "processing_other": "Bearbetar · {{count}} krediter reserverade",
+    "renderingA11y": "{{title}}, renderar {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 vertikal · Renderar visuellt...",
+    "renderingStage": "Renderingsstadium",
+    "previewA11y": "Exempelförhandsvisning, {{title}}",
+    "moreOptions": "Fler alternativ",
+    "reviewVideo": "Granska video",
+    "meta": {
+      "tv": "20s · Fransk röstöver · Klar att schemalägga",
+      "atelier": "15s · Ambient akustik · Klar att schemalägga"
+    }
+  },
+  "review": {
+    "subtitle": "Reelutkast · Redo att granska",
+    "options": "Alternativmeny",
+    "downloadVideo": "Ladda ner video",
+    "connectFirst": "Välj ett anslutet konto innan publicering.",
+    "samplePreview": "Exempelförhandsvisning",
+    "play": "Spela videoförhandsvisning",
+    "position": "Videoposition",
+    "sound": "Växla ljud",
+    "fullscreen": "Öppna video i helskärm",
+    "vertical": "9:16 Vertikal",
+    "portrait": "Porträttformat",
+    "captionFrench": "Bildtext (Franska)",
+    "defaultSource": "· Standardskälla",
+    "editable": "Redigerbar",
+    "captionA11y": "Videobildtext på franska",
+    "addTag": "Lägg till tagg",
+    "specifications": "Specifikationer",
+    "audioTrack": "Ljudspår",
+    "audioValue": "Fransk voiceover (Studio Natural) + Miljöljud",
+    "resolution": "Upplösning",
+    "resolutionValue": "Porträttvideo · 9:16"
+  },
+  "publish": {
+    "title": "Publicera reel",
+    "confirmSchedule": "Bekräfta schema",
+    "publishNow": "Publicera nu",
+    "saveDraft": "Spara utkast",
+    "readyToSchedule": "Klar att schemalägga",
+    "format": "{{product}} · 9:16 Vertikal Reel",
+    "playPreview": "Spela förhandsvisning",
+    "channel": "Publiceringskanal",
+    "connected": "Ansluten",
+    "notConnected": "Inte ansluten",
+    "connect": "Anslut",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Autopublicera direkt till flöde & reels",
+    "orDownload": "Eller ladda ner direkt video",
+    "download": "Ladda ner",
+    "timing": "Timing",
+    "date": "Datum",
+    "time": "Tid",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Tidszon, {{value}}",
+    "notice": "Anslut ditt Instagram-företagskonto för att låsa upp automatiserad schemalagd publicering. Du kan fortfarande spara denna reel som ett utkast."
+  },
+  "scheduled": {
+    "close": "Stäng",
+    "viewReel": "Visa schemalagd reel",
+    "backToResults": "Tillbaka till resultat",
+    "title": "Reel schemalagd",
+    "body": "Din video kommer att publiceras på det valda kontot vid den schemalagda tiden.",
+    "meta": "{{seconds}}s · Fransk voiceover",
+    "publishDate": "Publiceringsdatum",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Varumärkesarbetsyta",
+    "channel": "Kanal",
+    "instagramConnected": "Instagram (Ansluten)",
+    "editInCalendar": "Redigera eller avbryt detta inlägg från din kalender."
+  },
+  "actor": {
+    "title": "Välj en presentatör",
+    "intro": "Välj en presentatörsstil eller en produktfokuserad reel.",
+    "noPresenterA11y": "Ingen presentatör, rekommenderas",
+    "recommended": "Rekommenderas",
+    "noPresenterBody": "Fokusera enbart på möbelbilder, texturer och studioljud.",
+    "styles": "Presentatörsstilar",
+    "style": {
+      "calm": {
+        "title": "Lugn berättare",
+        "subtitle": "Franska · Calm Studio"
+      },
+      "expressive": {
+        "title": "Uttrycksfull presentatör",
+        "subtitle": "Engelska / FR · Dynamisk"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Exempelröst, {{title}}",
+    "sampleVoice": "Exempelröst",
+    "voiceLed": "Röstledd stil",
+    "notice": "Välj en röstledd stil, eller håll fokus på din produkt."
+  },
+  "script": {
+    "title": "Manus & röst",
+    "continue": "Fortsätt till storyboard",
+    "costNote": "Granska kreditkostnaden innan du skapar din reel.",
+    "targetProduct": "Målprodukt",
+    "productMeta": "Solid akacia · Källwebbplats",
+    "voiceoverScript": "Voiceover-manus",
+    "frenchFr": "Franska (FR)",
+    "wordCount_one": "{{count}} ord · ~{{seconds}} sek",
+    "wordCount_other": "{{count}} ord · ~{{seconds}} sek",
+    "scriptA11y": "Voiceover-manus på franska",
+    "targetDuration_one": "Målduration: {{count}} sekund",
+    "targetDuration_other": "Målduration: {{count}} sekunder",
+    "rewriteOpening": "Skriv om inledning",
+    "narratorAudio": "Berättarröst",
+    "calmVoice": "Lugn fransk röst",
+    "calmVoiceMeta": "Naturlig franska, varm akustisk takt",
+    "recordOwn": "Spela in din egen röst",
+    "recordOwnMeta": "Valfri anpassad varumärkesberättelse",
+    "record": "Spela in"
+  },
+  "templates": {
+    "title": "Reel-mallar",
+    "useTemplate": "Använd mall",
+    "searchPlaceholder": "Sök studiomallar...",
+    "searchA11y": "Sök studiomallar",
+    "tune": "Justera",
+    "filter": {
+      "all": "Alla format",
+      "catalog": "Katalogfokus",
+      "shortCuts": "15-20s klipp"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Produktfokus",
+        "subtitle": "3 makroklipp + krok"
+      },
+      "collection": {
+        "title": "Kollektion avslöjande",
+        "subtitle": "Snabb multi-produktvisning"
+      },
+      "material": {
+        "title": "Materialdetalj",
+        "subtitle": "Träådring & hantverksnärbilder"
+      },
+      "arrival": {
+        "title": "Ny ankomst",
+        "subtitle": "Tillkännagivande & showroom CTA"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Välj tillgångar",
+    "createStoryboard_one": "Skapa storyboard ({{count}} scen)",
+    "createStoryboard_other": "Skapa storyboard ({{count}} scener)",
+    "upload": "Ladda upp bilder",
+    "websiteAssets": "Webbplatstillgångar",
+    "selected_one": "{{count}} vald",
+    "selected_other": "{{count}} valda",
+    "otherCategory": "Annan produktkategori",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Storyboard-sekvens",
+    "dragToReorder": "Dra för att ändra ordning",
+    "reorderA11y": "Scen {{n}}: {{label}}. Ändra ordning på scen",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Rum",
+      "macro": "Detalj",
+      "staged": "Stiliserad",
+      "tv": "TV-enhet"
+    }
+  }
+}

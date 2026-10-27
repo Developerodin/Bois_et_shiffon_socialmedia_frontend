@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Welkom bij Espanda",
+    "subtitle": "Creëer content voor je bedrijf.",
+    "mobileNumber": "Mobiel nummer",
+    "countryCode": "Landcode {{code}}",
+    "sendCode": "Stuur code",
+    "useEmail": "Gebruik e-mail in plaats daarvan",
+    "sendFailed": "Kon de code niet verzenden. Probeer opnieuw of gebruik e-mail.",
+    "chooseCountry": "Kies je land",
+    "searchCountry": "Zoek land of code"
+  },
+  "email": {
+    "title": "Inloggen met e-mail",
+    "subtitle": "We sturen je een verificatiecode zonder wachtwoord.",
+    "tagline": "Intelligente marketing voor moderne retail",
+    "label": "E-mailadres",
+    "placeholder": "naam@jouwbedrijf.com",
+    "notConfigured": "E-mailinloggen is nog niet ingesteld op deze server.",
+    "sendFailed": "Kon de code niet verzenden. Probeer opnieuw.",
+    "useMobile": "Gebruik mobiel nummer in plaats daarvan",
+    "linkTitle": "Voeg je e-mail toe",
+    "linkSubtitle": "Je nummer is geverifieerd. Voeg een e-mail toe voor bonnetjes en teamuitnodigingen. We sturen je een code."
+  },
+  "verify": {
+    "title": "Voer je code in",
+    "sent": "We hebben een verificatiecode gestuurd naar {{destination}}",
+    "codeLabel": "Zes-cijferige verificatiecode",
+    "submit": "Verifieer code",
+    "checkFailed": "Kon de code niet controleren. Probeer opnieuw.",
+    "resendFailed": "Kon de code niet opnieuw verzenden.",
+    "resendIn": "Code opnieuw verzenden over {{time}}",
+    "resend": "Code opnieuw verzenden",
+    "changeEmail": "Wijzig e-mail",
+    "changeMobile": "Wijzig mobiel nummer"
+  },
+  "welcome": {
+    "getStarted": "Aan de slag",
+    "footnote": "Jouw bedrijf, jouw creatieve richting.",
+    "photosLabel": "Voorbeelden uit de {{brand}} catalogus",
+    "title": "Marketing die voelt als jouw bedrijf",
+    "body": "Genereer studio reels, fotoshoots en productposts die passen bij je merk uit je catalogus.",
+    "steps": {
+      "goal": {
+        "title": "Kies je doel",
+        "body": "Selecteer het eerste creatieve formaat dat je wilt maken."
+      },
+      "business": {
+        "title": "Deel je bedrijf",
+        "body": "Deel je website of voeg je bedrijfsgegevens toe."
+      },
+      "review": {
+        "title": "Bekijk kant-en-klare content",
+        "body": "Bekijk ideeën die rondom je producten zijn gemaakt."
+      }
+    }
+  },
+  "goal": {
+    "title": "Wat ga je als eerste maken?",
+    "subtitle": "We passen je eerste werkruimte en sjablonen aan op je primaire focus.",
+    "note": "Alle tools en studioformaten blijven later beschikbaar.",
+    "options": {
+      "socialPlan": {
+        "title": "Social media plan",
+        "description": "Een maand aan posts en bijschriften"
+      },
+      "marketingVideos": {
+        "title": "Marketingvideo's",
+        "description": "Studio reels uit je catalogus"
+      },
+      "fashionPhotoshoot": {
+        "title": "Modefotoshoot",
+        "description": "Stijl kleding op modellen"
+      },
+      "productPhotoshoot": {
+        "title": "Productfotoshoot",
+        "description": "Productfoto's voor je catalogus"
+      }
+    }
+  },
+  "source": {
+    "title": "Waar is je bedrijf online?",
+    "subtitle": "Espanda scant je online winkel of vermelding om automatisch merkaccurate media te genereren.",
+    "options": {
+      "website": {
+        "title": "Website",
+        "description": "Shopify, WooCommerce, eigen domein"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Lokale winkel, boetiek of showroom"
+      },
+      "marketplace": {
+        "title": "Marktplaats",
+        "description": "Amazon, Etsy, eBay of Instagram winkel"
+      },
+      "wholesale": {
+        "title": "Groothandel / B2B",
+        "description": "Faire, Ankorstore, privécatalogus"
+      },
+      "none": {
+        "title": "Geen online aanwezigheid",
+        "description": "Beschrijf je items handmatig"
+      },
+      "other": {
+        "title": "Iets anders",
+        "description": "Sociale handle, PDF-lookbook of bestand"
+      }
+    }
+  },
+  "website": {
+    "title": "Wat is je website?",
+    "subtitle": "We halen automatisch je catalogusfoto's, kleuren en toon van de site.",
+    "label": "Winkel website url",
+    "placeholder": "www.jouwwinkel.com",
+    "valid": "Geldig adres",
+    "willRead": "We lezen deze site",
+    "facts": {
+      "catalog": {
+        "key": "Catalogusproducten",
+        "value": "Productfoto's"
+      },
+      "identity": {
+        "key": "Merkidentiteit",
+        "value": "Kleuren & Typografie"
+      },
+      "tone": {
+        "key": "Toon & stijl",
+        "value": "Stem van je pagina's"
+      }
+    },
+    "safeNote": "Catalogusimport verandert niets aan je live winkel."
+  },
+  "manual": {
+    "title": "Voeg bedrijfsgegevens toe",
+    "subtitle": "Deel een vermeldinglink of beschrijf je catalogus handmatig.",
+    "modeLabel": "Hoe je je bedrijf toevoegt",
+    "modeListing": "Vermelding URL",
+    "modeDescribe": "Beschrijf bedrijf",
+    "listingLabel": "Vermelding link *",
+    "listingPlaceholder": "Etsy, Amazon, Google Maps of winkel link",
+    "nameLabel": "Bedrijfsnaam *",
+    "namePlaceholder": "bijv. Atelier Bois & Chiffons",
+    "sellsLabel": "Wat verkoop je? *",
+    "sellsPlaceholder": "bijv. Handgemaakte houten tafels, tv-meubels en moderne woondecoratie...",
+    "locationLabel": "Locatie (optioneel)",
+    "locationPlaceholder": "Stad, land of showroomadres",
+    "websiteLabel": "Website (optioneel)"
+  },
+  "learning": {
+    "working": "Bezig",
+    "tryAgain": "Probeer opnieuw",
+    "inProgressButton": "Leren bezig...",
+    "saved": "We bewaren je voortgang.",
+    "title": "Je bedrijf leren kennen",
+    "bodyWebsite": "Analyseren van je website om merkidentiteit, catalogi en visuele toon te extraheren.",
+    "bodyManual": "Je beschrijving omzetten in merkidentiteit, catalogi en visuele toon.",
+    "fallbackName": "Je bedrijf",
+    "sourceWebsite": "Primaire websitebron",
+    "sourceManual": "Bedrijfsgegevens",
+    "foundWebsite": "Website gevonden",
+    "foundManual": "Details toegevoegd",
+    "stages": {
+      "open": "Website openen",
+      "identity": "Merkidentiteit & toon lezen",
+      "photos": "Productfoto's verzamelen"
+    },
+    "status": {
+      "done": "Voltooid",
+      "running": "Bezig",
+      "queued": "In wachtrij"
+    },
+    "errors": {
+      "stopped": "Lezen van je website gestopt.",
+      "noWorkspace": "Je account heeft nog geen werkruimte.",
+      "startFailed": "Kon het lezen van je website niet starten.",
+      "restartFailed": "Kon niet opnieuw starten. Probeer opnieuw."
+    }
+  },
+  "review": {
+    "title": "Bekijk bedrijfsgegevens",
+    "subtitle": "We hebben deze gegevens op je website gevonden. Je kunt ze altijd bewerken.",
+    "edit": "Bewerk",
+    "tagline": "Slogan",
+    "editTagline": "Bewerk slogan",
+    "categoryLocation": "Categorie & locatie",
+    "audience": "Doelgroep",
+    "editAudience": "Bewerk doelgroep",
+    "products_one": "Gedetecteerde producten ({{count}})",
+    "products_other": "Gedetecteerde producten ({{count}})",
+    "found": "Gevonden",
+    "strengths": "Merksterkten",
+    "tags": {
+      "homeLiving": "Wonen & Leven",
+      "france": "Frankrijk",
+      "productCatalog": "Productcatalogus",
+      "showroomEshop": "Fysieke showroom & e-shop"
+    }
+  },
+  "brand": {
+    "title": "Merk & creatieve stijl",
+    "subtitle": "Stem af hoe Espanda je fotoshoots en social posts vormgeeft.",
+    "identity": "{{name}} identiteit",
+    "paletteMeta": "Websitepalet · Aanpasbaar",
+    "swatches": "Geïmporteerde websitekleuren",
+    "tone": "Creatieve toon",
+    "selected_one": "{{count}} geselecteerd",
+    "selected_other": "{{count}} geselecteerd",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxueus",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Natuurlijk",
+      "minimalist": "Minimalistisch"
+    },
+    "contentLanguage": "Inhoudstaal",
+    "contentLanguageA11y": "Inhoudstaal, {{language}}. Wijzig",
+    "languages": {
+      "fr": "Frans (FR)",
+      "en": "Engels (US)"
+    },
+    "audienceProfile": "Doelgroep profiel",
+    "audienceHome": "Wonen & meubels",
+    "featured": "Uitgelichte catalogusproducten",
+    "readyForBatch_one": "{{count}} klaar voor batch",
+    "readyForBatch_other": "{{count}} klaar voor batch",
+    "sampleProducts": {
+      "table": "Bunting tafel",
+      "tableDetail": "Acacia 240cm",
+      "tv": "TV-meubel",
+      "tvDetail": "Acacia 2 deuren"
+    },
+    "channelsNote": "Instagram en Facebook kunnen in de volgende stap worden verbonden. (Nog geen kanalen verbonden)"
+  },
+  "preparing": {
+    "ready": "Studio klaar",
+    "preparing": "Studio voorbereiden",
+    "loadingButton": "Je ideeën voorbereiden…",
+    "catalogSafe": "Je catalogus blijft onaangetast in je winkel.",
+    "title": "Je eerste ideeën voorbereiden",
+    "body": "Op maat gemaakte social reels en staging sets genereren uit je {{name}} collectie.",
+    "photosTitle": "Foto's verzamelen",
+    "photosDetail": "{{product}} eetset",
+    "storyboardTitle": "Storyboard maken",
+    "storyboardDetail_one": "{{count}} videoscène samenstellen",
+    "storyboardDetail_other": "{{count}} videoscènes samenstellen",
+    "nextTitle": "Volgende: Beoordeel je ideeën",
+    "nextDetail": "Selecteer hooks en audiopresets"
+  },
+  "connect": {
+    "readyToConnect": "• Klaar om te verbinden",
+    "title": "Publiceer wanneer je klaar bent",
+    "subtitle": "Verbind je sociale accounts zodat Espanda direct kant-en-klare reels en productspotlights kan publiceren of als concept kan opslaan.",
+    "toolsTitle": "Publicatietools",
+    "featureReels": "Publiceer op Instagram Feed & Reels",
+    "featureCaptions": "Gebruik je bijschriften en hashtags",
+    "featureReview": "Je beoordeelt altijd voordat iets live gaat",
+    "assurance": "Geen inhoud wordt gepubliceerd zonder jouw bevestiging",
+    "connectInstagram": "Verbind Instagram",
+    "connectFacebook": "Verbind Facebook",
+    "skip": "Sla voorlopig over",
+    "laterTitle": "Later verbinden?",
+    "laterBody": "Je kunt nog steeds high-resolution reels en fotoshoots maken, bewerken en downloaden naar je camerarol. Je kunt je Instagram op elk moment in Instellingen koppelen.",
+    "laterDownload": "Download je creaties",
+    "laterSettings": "Verbind kanalen in Instellingen",
+    "continueWithout": "Doorgaan zonder te verbinden"
+  }
+}

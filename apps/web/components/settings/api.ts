@@ -34,6 +34,8 @@ export type Member = {
   email: string;
   status: MemberStatus;
   role: { id: string; name: string; slug: string };
+  /** The workspace's creator (or whoever it was handed to): can't be changed or removed. */
+  isPrimaryOwner: boolean;
   joinedAt: string;
 };
 
@@ -65,6 +67,7 @@ export type PublicInvitation = {
 export async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const headers = init?.body ? { "Content-Type": "application/json" } : undefined;
   const res = await fetch(url, { cache: "no-store", headers, ...init });
+  if (res.status === 401 && url.startsWith("/api/")) redirectToLogin();
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     try {
@@ -77,6 +80,18 @@ export async function request<T>(url: string, init?: RequestInit): Promise<T> {
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
+}
+
+const PUBLIC_PAGES = ["/login", "/invite/", "/forgot-password", "/reset-password"];
+let redirecting = false;
+
+/** Session expired: go sign in, then come back here. Once per page; never from the public account pages. */
+export function redirectToLogin() {
+  if (typeof window === "undefined" || redirecting) return;
+  const { pathname, search } = window.location;
+  if (PUBLIC_PAGES.some((p) => pathname.startsWith(p))) return;
+  redirecting = true;
+  window.location.assign(`/login?next=${encodeURIComponent(pathname + search)}`);
 }
 
 export function errorMessage(err: unknown, fallback = "Something went wrong. Try again.") {
@@ -102,7 +117,9 @@ export const settingsApi = {
   deleteRole: (w: string, id: string) =>
     request<void>(`${ws(w)}/roles/${encodeURIComponent(id)}`, { method: "DELETE" }),
 
-  members: (w: string) => request<{ members: Member[] }>(`${ws(w)}/members`),
+  members: (w: string) => request<{ members: Member[]; me: string }>(`${ws(w)}/members`),
+  transferPrimaryOwner: (w: string, id: string) =>
+    request<{ ok: true }>(`${ws(w)}/members/${encodeURIComponent(id)}/primary-owner`, { method: "POST" }),
   updateMember: (w: string, id: string, roleId: string) =>
     request<{ member: Member }>(`${ws(w)}/members/${encodeURIComponent(id)}`, json("PATCH", { roleId })),
   removeMember: (w: string, id: string) =>
@@ -161,7 +178,7 @@ export const authApi = {
     request<PublicInvitation>(`/api/v1/auth/invitations/${encodeURIComponent(token)}`),
   accept: (body: { token: string; name?: string; password?: string }) =>
     request<{ ok: true }>("/api/v1/auth/invitations/accept", json("POST", body)),
-  forgot: (email: string) => request<{ ok: true }>("/api/v1/auth/password/forgot", json("POST", { email })),
+  forgot: (email: string) => request<{ ok: true; emailConfigured?: false }>("/api/v1/auth/password/forgot", json("POST", { email })),
   reset: (token: string, password: string) =>
     request<{ ok: true }>("/api/v1/auth/password/reset", json("POST", { token, password })),
 };

@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Werkruimte {{name}}",
+    "logoLabel": "{{name}} logo",
+    "settingsTitle": "Instellingen",
+    "edit": "Bewerken",
+    "manage": "Beheren",
+    "tabs": {
+      "myBusiness": "Mijn Bedrijf",
+      "billing": "Facturatie",
+      "postsPlanner": "Postplanner"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Bedrijfskenmerken",
+    "attributes": {
+      "location": "Locatie",
+      "audience": "Doelgroep",
+      "category": "Categorie",
+      "subcategory": "Subcategorie",
+      "storeType": "Winkeltype",
+      "website": "Website"
+    },
+    "brandPreferences": "Merkvoorkeuren",
+    "brandPreferencesHint": "Kleuren, toon, taal",
+    "photoAssets": "Foto-assets",
+    "photoAssetsHint": "Bunting tafel en tv-meubel foto's",
+    "connections": "Verbindingen",
+    "connectionsHint": "Sociale kanalen & Google-profiel"
+  },
+  "brand": {
+    "title": "Merkinstellingen",
+    "save": "Wijzigingen opslaan",
+    "paletteTitle": "Merk kleurenpalet",
+    "editHex": "Hex bewerken",
+    "watermarkTitle": "Outro watermerk logo",
+    "watermarkBody": "Toegepast op video-eindes en fotokaders",
+    "change": "Wijzigen",
+    "toneTitle": "Creatieve toon",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxueus",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Natuurlijk",
+      "minimalist": "Minimalistisch"
+    },
+    "cuesTitle": "Merkhandtekening cues",
+    "addCue": "Cue toevoegen"
+  },
+  "photos": {
+    "title": "Foto-assets",
+    "refresh": "Vernieuwen",
+    "sourceTitle": "Bronwebsite",
+    "sourceBody": "Gedeelde foto's gebruikt voor reels, feedposts en fotoshootopstellingen. Geen foto's worden gepubliceerd zonder jouw expliciete goedkeuring.",
+    "sources": {
+      "website": "Website ({{n}})",
+      "uploads": "Uploads ({{n}})"
+    },
+    "addPhotos": "Foto's toevoegen",
+    "photosTitle": "Foto's",
+    "photoCount_one": "{{n}} foto",
+    "photoCount_other": "{{n}} foto's",
+    "emptyTitle": "Nog geen uploads",
+    "emptyBody": "Studiofoto's die je uploadt verschijnen hier.",
+    "upload": "Aangepaste studiofoto's uploaden"
+  },
+  "connections": {
+    "title": "Verbindingen",
+    "sourceTitle": "Bronwebsite",
+    "linked": "Gekoppeld",
+    "sourceBody": "Productfoto's en bedrijfsgegevens",
+    "channelsTitle": "Publicatiekanalen",
+    "accounts": "Accounts",
+    "connected": "Verbonden",
+    "notConnected": "Niet verbonden",
+    "connect": "Verbinden",
+    "disconnect": "Verbreken",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook Pagina",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Bedrijfsprofiel",
+      "shopify": "Shopify Direct Sync"
+    }
+  },
+  "automations": {
+    "title": "Automatiseringen",
+    "heading": "Jouw publicatievoorkeuren",
+    "intro": "Bepaal hoe Espanda geplande posts vooraf invult en inhoud voor je catalogusitems opstelt.",
+    "reviewTitle": "Controleren voor publicatie",
+    "reviewBody": "Controleer inhoud voordat het wordt gepubliceerd.",
+    "required": "Vereist",
+    "reviewLabel": "Controleren voor publicatie. Controleer inhoud voordat het wordt gepubliceerd. Vereist.",
+    "queueTitle": "Acties in de wachtrij",
+    "manageConnections": "Verbindingen beheren",
+    "items": {
+      "monthly": {
+        "title": "Maandelijkse plannen genereren",
+        "body": "Bereid je maandelijkse kalender met conceptposts voor.",
+        "active": "Actief · concepten opgeslagen in kalender"
+      },
+      "autopublish": {
+        "title": "Automatisch goedgekeurde posts publiceren",
+        "body": "Automatisch geplande reels publiceren zodra je op \"Goedkeuren\" tikt.",
+        "requires": "Vereist Instagram-verbinding",
+        "active": "Actief · publiceert na goedkeuring"
+      },
+      "replies": {
+        "title": "Conceptantwoorden op showroomvragen",
+        "body": "Vooraf ingevulde verfijnde Franse ambachtsantwoorden in je inboxwachtrij.",
+        "requires": "Vereist berichtenkanaal",
+        "active": "Actief · concepten toegevoegd aan je inbox"
+      }
+    },
+    "adsTitle": "Betaalde Sociale Advertenties",
+    "comingSoon": "Binnenkort beschikbaar",
+    "adsBody": "Geautomatiseerde Meta-advertentiecreatieve tests & budgetbeheer."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} tegoed beschikbaar",
+    "creditsAvailable_other": "{{n}} tegoeden beschikbaar",
+    "planName": "{{tier}} plan",
+    "statusActive": "Actief",
+    "planBlurb": "Jouw creatie- en bedrijfstools",
+    "cycleTitle": "Factureringscyclus",
+    "renewsMonthly": "Maandelijks verlengen",
+    "balanceTitle": "Tegoedsaldo",
+    "monthlyAllowance": "{{amount}} maandelijkse toelage",
+    "balanceLabel_one": "{{balance}} van {{n}} tegoed beschikbaar",
+    "balanceLabel_other": "{{balance}} van {{n}} tegoeden beschikbaar",
+    "balanceOf_one": " / {{n}} tegoed beschikbaar",
+    "balanceOf_other": " / {{n}} tegoeden beschikbaar",
+    "note_one": "{{n}} tegoed gebruikt · {{reserved}} gereserveerd voor {{item}}. Toelage vernieuwt maandelijks.",
+    "note_other": "{{n}} tegoeden gebruikt · {{reserved}} gereserveerd voor {{item}}. Toelage vernieuwt maandelijks.",
+    "usageTitle": "Recent tegoedgebruik",
+    "usageAside": "Werkruimte-activiteit",
+    "today": "Vandaag",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} reel",
+        "detail": "Gereserveerd voor generatie"
+      },
+      "plan": {
+        "title": "Maandelijks inhoudsplan",
+        "detail_one": "{{n}} conceptpost",
+        "detail_other": "{{n}} conceptposts"
+      },
+      "renewal": {
+        "title": "Maandelijkse planvernieuwing",
+        "detail": "Tegoedcyclus reset"
+      }
+    },
+    "spent_one": "-{{n}} tegoed",
+    "spent_other": "-{{n}} tegoeden",
+    "added_one": "+{{n}} tegoed",
+    "added_other": "+{{n}} tegoeden",
+    "included": "Inbegrepen",
+    "help": {
+      "missingCredits": "Ontbrekende credits of mislukte weergave",
+      "restore": "Aankopen herstellen",
+      "history": "Factuurgeschiedenis & facturen"
+    }
+  },
+  "account": {
+    "title": "Accountinstellingen",
+    "workspaceTitle": "Werkruimte",
+    "workspaceName": "Naam werkruimte",
+    "teamTitle": "Team samenwerking",
+    "teamMembers": "Leden van werkruimte",
+    "preferencesTitle": "Voorkeuren",
+    "languageTitle": "App-interface taal",
+    "languageBody": "Prompts & exports blijven Frans",
+    "languageLabel": "App-taal, {{language}}",
+    "languageHint": "Opent de lijst met talen",
+    "pushTitle": "Pushmeldingen",
+    "pushBody": "Updates over creatie en publicatie",
+    "supportTitle": "Ondersteuning & juridisch",
+    "help": "Hulp nodig & contact opnemen met ondersteuning",
+    "terms": "Servicevoorwaarden",
+    "privacy": "Privacybeleid",
+    "restore": "Aankopen herstellen",
+    "signOut": "Uitloggen bij Espanda",
+    "signOutNote": "Je actieve abonnement en conceptcatalogus blijven veilig opgeslagen."
+  },
+  "drawer": {
+    "closeMenu": "Menu sluiten",
+    "switchLabel": "Werkruimte {{name}}. Wissel van bedrijf",
+    "balanceLabel_one": "Huidig saldo {{credits}} credit over, {{plan}} plan",
+    "balanceLabel_other": "Huidig saldo {{credits}} credits over, {{plan}} plan",
+    "balanceTitle": "Huidig saldo",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> credit over</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> credits over</rest>",
+    "sections": {
+      "create": "Creëren",
+      "grow": "Groeien",
+      "manage": "Beheren"
+    },
+    "items": {
+      "chat": "Chat om video te maken",
+      "generations": "Mijn generaties",
+      "photos": "Foto-assets",
+      "inbox": "Klanten & Inbox",
+      "google": "Google Groei",
+      "website": "Website Studio",
+      "connections": "Verbindingen",
+      "automations": "Automatiseringen",
+      "billing": "Plannen & Facturering",
+      "account": "Accountinstellingen"
+    },
+    "signOut": "Uitloggen"
+  }
+}

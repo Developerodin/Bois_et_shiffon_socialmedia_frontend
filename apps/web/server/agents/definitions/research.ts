@@ -6,7 +6,7 @@ import { CONTEXT_DOC_KINDS, saveDraft, type ContextDocKind } from "@/server/serv
 
 /**
  * Okara-style onboarding (design §4.1, Slice 1): read the brand's website,
- * draft the five strategy docs with sources. Drafts only — humans confirm.
+ * write the five strategy docs with sources. Agents use them straight away; people edit when needed.
  */
 const DocOutput = z.object({
   markdown: z.string().min(1),
@@ -60,7 +60,7 @@ function mockDoc(kind: ContextDocKind, brand: string, pages: CrawledPage[]) {
 export const researchAgent: AgentDefinition = {
   key: "research",
   name: "Research",
-  description: "Reads the brand's website and drafts the five strategy documents for you to confirm.",
+  description: "Reads the brand's website and writes the five strategy documents the other agents work from.",
   inputSchema: z.object({}).strict(),
   async run(ctx) {
     const { brand } = ctx;
@@ -104,7 +104,7 @@ export const researchAgent: AgentDefinition = {
         sources: [...new Set(out.sourceUrls)].map((url) => ({ url, title: known.get(url) ?? null })),
         agentRunId: ctx.runId,
       });
-      await ctx.log("SUCCESS", `${title} drafted (v${doc.version}) — waiting for confirmation`, {
+      await ctx.log("SUCCESS", `${title} written (v${doc.version})`, {
         type: "BrandContextDoc",
         id: doc.id,
       });

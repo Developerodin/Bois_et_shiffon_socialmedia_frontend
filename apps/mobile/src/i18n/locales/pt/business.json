@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Espaço de trabalho {{name}}",
+    "logoLabel": "Logotipo {{name}}",
+    "settingsTitle": "Configurações",
+    "edit": "Editar",
+    "manage": "Gerir",
+    "tabs": {
+      "myBusiness": "O Meu Negócio",
+      "billing": "Faturação",
+      "postsPlanner": "Planeador de Publicações"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Atributos do Negócio",
+    "attributes": {
+      "location": "Localização",
+      "audience": "Público",
+      "category": "Categoria",
+      "subcategory": "Subcategoria",
+      "storeType": "Tipo de Loja",
+      "website": "Website"
+    },
+    "brandPreferences": "Preferências de Marca",
+    "brandPreferencesHint": "Cores, tom, idioma",
+    "photoAssets": "Recursos Fotográficos",
+    "photoAssetsHint": "Fotos de mesa e unidade de TV Bunting",
+    "connections": "Conexões",
+    "connectionsHint": "Canais sociais e perfil Google"
+  },
+  "brand": {
+    "title": "Configurações da Marca",
+    "save": "Guardar alterações",
+    "paletteTitle": "Paleta de Cores da Marca",
+    "editHex": "Editar hex",
+    "watermarkTitle": "Outro logotipo de marca d'água",
+    "watermarkBody": "Aplicado aos finais de vídeos e bordas de fotos",
+    "change": "Alterar",
+    "toneTitle": "Tom Criativo",
+    "tones": {
+      "modern": "Moderno",
+      "luxurious": "Luxuoso",
+      "elegant": "Elegante",
+      "premium": "Premium",
+      "natural": "Natural",
+      "minimalist": "Minimalista"
+    },
+    "cuesTitle": "Sinais de Assinatura da Marca",
+    "addCue": "Adicionar sinal"
+  },
+  "photos": {
+    "title": "Recursos Fotográficos",
+    "refresh": "Atualizar",
+    "sourceTitle": "Website de Origem",
+    "sourceBody": "Fotos partilhadas usadas para gerar reels, publicações de feed e encenações de sessões fotográficas. Nenhuma foto é publicada sem a sua aprovação explícita.",
+    "sources": {
+      "website": "Website ({{n}})",
+      "uploads": "Uploads ({{n}})"
+    },
+    "addPhotos": "Adicionar fotos",
+    "photosTitle": "Fotos",
+    "photoCount_one": "{{n}} foto",
+    "photoCount_other": "{{n}} fotos",
+    "emptyTitle": "Ainda sem uploads",
+    "emptyBody": "As fotos de estúdio que carregar aparecerão aqui.",
+    "upload": "Carregar fotos de estúdio personalizadas"
+  },
+  "connections": {
+    "title": "Conexões",
+    "sourceTitle": "Website de Origem",
+    "linked": "Ligado",
+    "sourceBody": "Fotos de produtos e detalhes do negócio",
+    "channelsTitle": "Canais de Publicação",
+    "accounts": "Contas",
+    "connected": "Conectado",
+    "notConnected": "Não conectado",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Página do Facebook",
+      "whatsapp": "WhatsApp Business",
+      "google": "Perfil de Negócio Google",
+      "shopify": "Sincronização Direta Shopify"
+    }
+  },
+  "automations": {
+    "title": "Automatizações",
+    "heading": "As suas preferências de publicação",
+    "intro": "Controle como a Espanda pré-preenche publicações agendadas e redige conteúdo para os seus itens de catálogo.",
+    "reviewTitle": "Rever antes de publicar",
+    "reviewBody": "Revise o conteúdo antes de ser publicado.",
+    "required": "Obrigatório",
+    "reviewLabel": "Rever antes de publicar. Revise o conteúdo antes de ser publicado. Obrigatório.",
+    "queueTitle": "Ações em fila",
+    "manageConnections": "Gerir conexões",
+    "items": {
+      "monthly": {
+        "title": "Gerar planos mensais",
+        "body": "Prepare o seu calendário mensal de publicações rascunho.",
+        "active": "Ativo · rascunhos guardados no calendário"
+      },
+      "autopublish": {
+        "title": "Publicar automaticamente publicações aprovadas",
+        "body": "Empurre automaticamente os reels agendados assim que tocar em \"Aprovar\".",
+        "requires": "Requer conexão Instagram",
+        "active": "Ativo · publica após aprovação"
+      },
+      "replies": {
+        "title": "Redigir respostas a consultas de showroom",
+        "body": "Pré-preencher respostas refinadas de artesãos franceses na sua fila de entrada.",
+        "requires": "Requer canal de mensagens",
+        "active": "Ativo · rascunhos adicionados à sua caixa de entrada"
+      }
+    },
+    "adsTitle": "Anúncios Sociais Pagos",
+    "comingSoon": "Em breve",
+    "adsBody": "Teste criativo automatizado de anúncios Meta e gestão de orçamento."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} crédito disponível",
+    "creditsAvailable_other": "{{n}} créditos disponíveis",
+    "planName": "Plano {{tier}}",
+    "statusActive": "Ativo",
+    "planBlurb": "As suas ferramentas de criação e negócios",
+    "cycleTitle": "Ciclo de Faturação",
+    "renewsMonthly": "Renova mensalmente",
+    "balanceTitle": "Saldo de Créditos",
+    "monthlyAllowance": "{{amount}} de subsídio mensal",
+    "balanceLabel_one": "{{balance}} de {{n}} crédito disponível",
+    "balanceLabel_other": "{{balance}} de {{n}} créditos disponíveis",
+    "balanceOf_one": " / {{n}} crédito disponível",
+    "balanceOf_other": " / {{n}} créditos disponíveis",
+    "note_one": "{{n}} crédito usado · {{reserved}} reservado para {{item}}. Subsídio renova mensalmente.",
+    "note_other": "{{n}} créditos usados · {{reserved}} reservado para {{item}}. Subsídio renova mensalmente.",
+    "usageTitle": "Uso recente de créditos",
+    "usageAside": "Atividade do espaço de trabalho",
+    "today": "Hoje",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "Reel {{name}}",
+        "detail": "Reservado para geração"
+      },
+      "plan": {
+        "title": "Plano de conteúdo mensal",
+        "detail_one": "{{n}} publicação rascunho",
+        "detail_other": "{{n}} publicações rascunho"
+      },
+      "renewal": {
+        "title": "Renovação do plano mensal",
+        "detail": "Reinício do crédito do ciclo"
+      }
+    },
+    "spent_one": "-{{n}} crédito",
+    "spent_other": "-{{n}} créditos",
+    "added_one": "+{{n}} crédito",
+    "added_other": "+{{n}} créditos",
+    "included": "Incluído",
+    "help": {
+      "missingCredits": "Créditos em falta ou renderização falhada",
+      "restore": "Restaurar compras de subscrição",
+      "history": "Histórico de faturação e faturas"
+    }
+  },
+  "account": {
+    "title": "Configurações da conta",
+    "workspaceTitle": "Espaço de trabalho",
+    "workspaceName": "Nome do espaço de trabalho",
+    "teamTitle": "Colaboração em equipa",
+    "teamMembers": "Membros do espaço de trabalho",
+    "preferencesTitle": "Preferências",
+    "languageTitle": "Idioma da interface da app",
+    "languageBody": "Os prompts e exportações permanecem em francês",
+    "languageLabel": "Idioma da app, {{language}}",
+    "languageHint": "Abre a lista de idiomas",
+    "pushTitle": "Notificações push",
+    "pushBody": "Atualizações de criação e publicação",
+    "supportTitle": "Suporte e legal",
+    "help": "Precisa de ajuda & contactar suporte",
+    "terms": "Termos de Serviço",
+    "privacy": "Política de Privacidade",
+    "restore": "Restaurar compras",
+    "signOut": "Terminar sessão no Espanda",
+    "signOutNote": "A sua subscrição ativa e os ativos de catálogo em rascunho permanecem guardados com segurança."
+  },
+  "drawer": {
+    "closeMenu": "Fechar menu",
+    "switchLabel": "Espaço de trabalho {{name}}. Mudar de negócio",
+    "balanceLabel_one": "Saldo atual {{credits}} crédito restante, plano {{plan}}",
+    "balanceLabel_other": "Saldo atual {{credits}} créditos restantes, plano {{plan}}",
+    "balanceTitle": "Saldo atual",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> crédito restante</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> créditos restantes</rest>",
+    "sections": {
+      "create": "Criar",
+      "grow": "Crescer",
+      "manage": "Gerir"
+    },
+    "items": {
+      "chat": "Chat para fazer vídeo",
+      "generations": "As minhas gerações",
+      "photos": "Ativos de fotos",
+      "inbox": "Clientes & Caixa de Entrada",
+      "google": "Crescimento no Google",
+      "website": "Estúdio de Websites",
+      "connections": "Conexões",
+      "automations": "Automatizações",
+      "billing": "Planos & Faturação",
+      "account": "Configurações da conta"
+    },
+    "signOut": "Terminar sessão"
+  }
+}

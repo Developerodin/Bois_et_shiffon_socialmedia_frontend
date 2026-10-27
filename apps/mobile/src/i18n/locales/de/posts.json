@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Geplant",
+    "briefReady": "Brief bereit",
+    "needsReview": "Benötigt Überprüfung",
+    "draftReady": "Entwurf bereit",
+    "approved": "Genehmigt",
+    "scheduled": "Geplant",
+    "published": "Veröffentlicht",
+    "draft": "Entwurf"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Heute",
+    "tomorrow": "Morgen"
+  },
+  "chrome": {
+    "openMenu": "Menü öffnen",
+    "logo": "Espanda",
+    "credits_one": "{{count}} Guthaben verfügbar",
+    "credits_other": "{{count}} Guthaben verfügbar",
+    "settings": "Einstellungen",
+    "modulesLabel": "App-Module",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Beiträge",
+      "photoshoot": "Fotoshooting",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Modulnavigation",
+    "nav": {
+      "today": "Heute",
+      "posts": "Beiträge",
+      "create": "Erstellen",
+      "stories": "Stories",
+      "settings": "Einstellungen"
+    },
+    "back": "Zurück",
+    "switchBusiness": "Geschäft wechseln, {{name}}",
+    "business": "Geschäft: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} MEZ",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Deine Beiträge, in Bewegung",
+    "subtitle": "Überprüfe generierte Produkt-Highlights & geplante Beiträge",
+    "needsApproval": "Benötigt Genehmigung",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Beitrag überprüfen",
+    "agenda": "Bevorstehende Agenda",
+    "thisWeek": "Diese Woche",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Kalender ansehen"
+  },
+  "calendar": {
+    "title": "Beitragskalender",
+    "subtitle": "Plane und automatisiere deine Veröffentlichungen",
+    "viewLabel": "Kalenderansicht",
+    "views": {
+      "month": "Monat",
+      "list": "Liste"
+    },
+    "plan": "Plan: {{n}} Beiträge / Monat",
+    "managePlan": "Plan verwalten",
+    "postCount_one": "{{count}} Beitrag",
+    "postCount_other": "{{count}} Beiträge",
+    "empty": "Nichts für diesen Tag geplant.",
+    "scheduled_one": "{{count}} geplant",
+    "scheduled_other": "{{count}} geplant",
+    "previousMonth": "Vorheriger Monat",
+    "nextMonth": "Nächster Monat",
+    "gridLabel": "{{month}} Kalender",
+    "dayWithPosts_one": "{{day}} · {{count}} Beitrag",
+    "dayWithPosts_other": "{{day}} · {{count}} Beiträge"
+  },
+  "detail": {
+    "title": "Beitragsdetails",
+    "moreOptions": "Mehr Optionen",
+    "feedPhoto": "4:5 Feed-Foto",
+    "fullscreen": "Vollbild",
+    "captionFrench": "Bildunterschrift (Französisch)",
+    "editText": "Text bearbeiten",
+    "channels": "Veröffentlichungskanäle",
+    "instagramFeed": "Instagram-Feed",
+    "instagramDetail": "Konto verbinden, um zu veröffentlichen",
+    "facebookPage": "Facebook-Seite",
+    "facebookDetail": "Automatisch auf offizieller Seite posten",
+    "notConnected": "Nicht verbunden",
+    "channelNotConnected": "{{name}}, nicht verbunden",
+    "editPost": "Beitrag bearbeiten",
+    "schedule": "Planen"
+  },
+  "edit": {
+    "title": "Beitrag bearbeiten",
+    "cancel": "Abbrechen",
+    "save": "Änderungen speichern",
+    "previewLabel": "{{title}}, Originalverhältnis 4:5",
+    "ratio": "Originalverhältnis · 4:5",
+    "sectionLabel": "Abschnitt bearbeiten",
+    "tabs": {
+      "image": "Bild",
+      "caption": "Bildunterschrift",
+      "brand": "Marke"
+    },
+    "description": "Beitragsbeschreibung",
+    "language": "Sprache: Französisch (FR)",
+    "suggestedHashtags": "Vorgeschlagene Hashtags",
+    "addHashtag": "Hashtag hinzufügen",
+    "add": "+ Hinzufügen",
+    "regenerate": "Bildunterschrift mit KI neu generieren",
+    "imageHint": "Originalverhältnis · 4:5. Ziehe die Vorschau, um den Zuschnitt neu zu rahmen.",
+    "brandHint": "Logo, Farben und Ton folgen deinem {{brand}} Markenkit."
+  },
+  "schedule": {
+    "title": "Planen",
+    "storyFormat": "Story · 9:16 Bild",
+    "feedFormat": "Feed-Beitrag · 4:5 Bild",
+    "destination": "Ziel",
+    "actionRequired": "Aktion erforderlich",
+    "notLinked": "Instagram-Konto nicht verknüpft",
+    "notLinkedBody": "Verbinde deine sozialen Konten, um direkt geplante Veröffentlichungen freizuschalten.",
+    "connect": "Soziales Konto verbinden",
+    "locked": "Planung gesperrt bis zur Verbindung",
+    "timing": "Zeit & Planung",
+    "date": "Datum",
+    "dateLabel": "Datum, {{date}}",
+    "time": "Uhrzeit",
+    "timeLabel": "Uhrzeit, {{time}}",
+    "timezone": "Zeitzone",
+    "schedulePost": "Beitrag planen",
+    "scheduleLocked": "Beitrag planen (Kanal zuerst verbinden)",
+    "saveDraft": "Entwurf speichern"
+  },
+  "brief": {
+    "title": "Beitrag erstellen",
+    "subtitle": "Wähle ein Produkt und eine kreative Richtung",
+    "format": "Inhaltsformat",
+    "formatLabel": "Beitragsformat",
+    "singlePhoto": "Einzelnes Foto",
+    "singlePhotoDetail": "4:5 Feed-Fokus",
+    "carousel": "Karussell",
+    "carouselDetail": "Mehrere Fotos",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Hauptziel",
+    "goals": {
+      "newArrival": "Neu eingetroffen",
+      "productFeature": "Produkt-Highlight",
+      "specialOffer": "Sonderangebot"
+    },
+    "product": "Zielkatalogprodukt",
+    "changeProduct": "Produkt ändern",
+    "change": "Ändern",
+    "direction": "Kreative Richtung (optional)",
+    "directionLanguage": "Französisch (FR)",
+    "directionPlaceholder": "z.B. Fokus auf handgefertigte Tischlerei und Wärme",
+    "cost": "Erstellungskosten:",
+    "costPending": "Schätzung ausstehend",
+    "draftPost": "Entwurfspost"
+  },
+  "stories": {
+    "title": "Stories",
+    "subtitle": "9:16 vertikale soziale Momente",
+    "newStory": "Neue Story",
+    "statusLabel": "Story-Status",
+    "drafts_one": "Entwürfe ({{count}})",
+    "drafts_other": "Entwürfe ({{count}})",
+    "scheduled_one": "Geplant ({{count}})",
+    "scheduled_other": "Geplant ({{count}})",
+    "samplePreview": "Beispielvorschau",
+    "moreOptions": "Weitere Optionen für {{title}}",
+    "editStory": "Story bearbeiten"
+  },
+  "editStory": {
+    "back": "Zurück",
+    "undo": "Rückgängig",
+    "tools": {
+      "text": "Text",
+      "image": "Bild",
+      "brand": "Marke",
+      "cta": "CTA"
+    },
+    "toolLabel": "{{tool}}-Werkzeug",
+    "captionTitle": "Story-Beschriftung / Link-Sticker",
+    "languageCode": "FR",
+    "saveDraft": "Entwurf speichern",
+    "scheduleStory": "Story planen"
+  },
+  "planner": {
+    "title": "Post-Planer",
+    "sectionsLabel": "Einstellungsabschnitte",
+    "sections": {
+      "business": "Mein Geschäft",
+      "billing": "Abrechnung",
+      "planner": "Post-Planer"
+    },
+    "cycle": "Planungszyklus",
+    "cadence": "Veröffentlichungsfrequenz",
+    "monthlyTarget": "Monatsziel",
+    "feedPosts": "Feed-Posts",
+    "stories": "Stories",
+    "perMonth": "{{n}} / Monat",
+    "feedNote": "~1 Post täglich",
+    "storiesNote": "Über den Monat verteilt",
+    "cadenceHint": "Vorgeschlagene Inhaltsziele. Vor der Kalendererstellung anpassen.",
+    "pillars": "Inhaltssäulen",
+    "pillar": {
+      "catalog": "Katalogprodukte (Bunting-Fokus)",
+      "craft": "Materialdetails & Handwerk (Acacia-Holz)",
+      "story": "Markengeschichte & französisches Erbe"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Manuelle Überprüfung vor der Veröffentlichung: </b>Generierte Beiträge werden als Entwürfe in Ihren Kalender eingefügt, um Ihre endgültige Bestätigung zu erhalten. Kein Inhalt wird ohne Genehmigung veröffentlicht.",
+    "generate": "Kalender generieren"
+  }
+}

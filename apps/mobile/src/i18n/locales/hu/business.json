@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Munkaterület {{name}}",
+    "logoLabel": "{{name}} logó",
+    "settingsTitle": "Beállítások",
+    "edit": "Szerkesztés",
+    "manage": "Kezelés",
+    "tabs": {
+      "myBusiness": "Üzletem",
+      "billing": "Számlázás",
+      "postsPlanner": "Bejegyzés tervező"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Üzleti jellemzők",
+    "attributes": {
+      "location": "Helyszín",
+      "audience": "Közönség",
+      "category": "Kategória",
+      "subcategory": "Alkategória",
+      "storeType": "Üzlettípus",
+      "website": "Weboldal"
+    },
+    "brandPreferences": "Márka preferenciák",
+    "brandPreferencesHint": "Színek, hangnem, nyelv",
+    "photoAssets": "Fotó eszközök",
+    "photoAssetsHint": "Bunting asztal és TV egység fotók",
+    "connections": "Kapcsolatok",
+    "connectionsHint": "Közösségi csatornák és Google profil"
+  },
+  "brand": {
+    "title": "Márka beállítások",
+    "save": "Változások mentése",
+    "paletteTitle": "Márka színpaletta",
+    "editHex": "Hex szerkesztése",
+    "watermarkTitle": "Outro vízjel logó",
+    "watermarkBody": "Videó tekercsek végére és fotókeretekre alkalmazva",
+    "change": "Változtatás",
+    "toneTitle": "Kreatív hangnem",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxus",
+      "elegant": "Elegáns",
+      "premium": "Prémium",
+      "natural": "Természetes",
+      "minimalist": "Minimalista"
+    },
+    "cuesTitle": "Márka jellegzetes elemei",
+    "addCue": "Elem hozzáadása"
+  },
+  "photos": {
+    "title": "Fotó eszközök",
+    "refresh": "Frissítés",
+    "sourceTitle": "Forrás weboldal",
+    "sourceBody": "Megosztott fotók tekercsek, hírfolyam bejegyzések és fotózás előkészítéséhez. Nincs fotó közzétéve a jóváhagyásod nélkül.",
+    "sources": {
+      "website": "Weboldal ({{n}})",
+      "uploads": "Feltöltések ({{n}})"
+    },
+    "addPhotos": "Fotók hozzáadása",
+    "photosTitle": "Fotók",
+    "photoCount_one": "{{n}} fotó",
+    "photoCount_other": "{{n}} fotó",
+    "emptyTitle": "Még nincs feltöltés",
+    "emptyBody": "A feltöltött stúdiófotók itt jelennek meg.",
+    "upload": "Egyedi stúdiófotók feltöltése"
+  },
+  "connections": {
+    "title": "Kapcsolatok",
+    "sourceTitle": "Forrás weboldal",
+    "linked": "Összekapcsolva",
+    "sourceBody": "Termékfotók és üzleti adatok",
+    "channelsTitle": "Közzétételi csatornák",
+    "accounts": "Fiókok",
+    "connected": "Csatlakoztatva",
+    "notConnected": "Nincs csatlakoztatva",
+    "connect": "Csatlakozás",
+    "disconnect": "Leválasztás",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook oldal",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Üzleti Profil",
+      "shopify": "Shopify közvetlen szinkronizálás"
+    }
+  },
+  "automations": {
+    "title": "Automatizálások",
+    "heading": "Közzétételi preferenciáid",
+    "intro": "Szabályozd, hogyan tölti előre az Espanda az ütemezett bejegyzéseket és készít tartalmat a katalógus elemeihez.",
+    "reviewTitle": "Áttekintés közzététel előtt",
+    "reviewBody": "Tekintsd át a tartalmat, mielőtt közzéteszed.",
+    "required": "Kötelező",
+    "reviewLabel": "Áttekintés közzététel előtt. Tekintsd át a tartalmat, mielőtt közzéteszed. Kötelező.",
+    "queueTitle": "Sorba állítási műveletek",
+    "manageConnections": "Kapcsolatok kezelése",
+    "items": {
+      "monthly": {
+        "title": "Havi tervek generálása",
+        "body": "Készítsd el a havi vázlatbejegyzések naptárát.",
+        "active": "Aktív · vázlatok mentve a naptárba"
+      },
+      "autopublish": {
+        "title": "Jóváhagyott bejegyzések automatikus közzététele",
+        "body": "Automatikusan közzéteszi az ütemezett tekercseket, miután megnyomod az \"Jóváhagyás\" gombot.",
+        "requires": "Instagram kapcsolat szükséges",
+        "active": "Aktív · közzététel jóváhagyás után"
+      },
+      "replies": {
+        "title": "Bemutatótermi érdeklődések válaszainak vázlatolása",
+        "body": "Előre kitöltött, finomított francia kézműves válaszok az üzenetküldő sorban.",
+        "requires": "Üzenetküldő csatorna szükséges",
+        "active": "Aktív · vázlatok hozzáadva az üzenetküldő sorhoz"
+      }
+    },
+    "adsTitle": "Fizetett közösségi hirdetések",
+    "comingSoon": "Hamarosan",
+    "adsBody": "Automatizált Meta hirdetés kreatív tesztelés és költségvetés ütemezés."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} elérhető kredit",
+    "creditsAvailable_other": "{{n}} elérhető kredit",
+    "planName": "{{tier}} csomag",
+    "statusActive": "Aktív",
+    "planBlurb": "Kreatív és üzleti eszközeid",
+    "cycleTitle": "Számlázási ciklus",
+    "renewsMonthly": "Havi megújulás",
+    "balanceTitle": "Kredit egyenleg",
+    "monthlyAllowance": "{{amount}} havi keret",
+    "balanceLabel_one": "{{balance}} a(z) {{n}} kreditből elérhető",
+    "balanceLabel_other": "{{balance}} a(z) {{n}} kreditből elérhető",
+    "balanceOf_one": " / {{n}} elérhető kredit",
+    "balanceOf_other": " / {{n}} elérhető kredit",
+    "note_one": "{{n}} kredit felhasználva · {{reserved}} fenntartva a(z) {{item}} számára. A keret havonta megújul.",
+    "note_other": "{{n}} kredit felhasználva · {{reserved}} fenntartva a(z) {{item}} számára. A keret havonta megújul.",
+    "usageTitle": "Legutóbbi kredit felhasználás",
+    "usageAside": "Munkaterület tevékenység",
+    "today": "Ma",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} tekercs",
+        "detail": "Fenntartva generálásra"
+      },
+      "plan": {
+        "title": "Havi tartalomterv",
+        "detail_one": "{{n}} vázlatolt bejegyzés",
+        "detail_other": "{{n}} vázlatolt bejegyzés"
+      },
+      "renewal": {
+        "title": "Havi terv megújítása",
+        "detail": "Ciklus kredit visszaállítása"
+      }
+    },
+    "spent_one": "-{{n}} kredit",
+    "spent_other": "-{{n}} kredit",
+    "added_one": "+{{n}} kredit",
+    "added_other": "+{{n}} kredit",
+    "included": "Tartalmazva",
+    "help": {
+      "missingCredits": "Hiányzó kreditek vagy sikertelen renderelés",
+      "restore": "Előfizetések visszaállítása",
+      "history": "Számlázási előzmények és számlák"
+    }
+  },
+  "account": {
+    "title": "Fiókbeállítások",
+    "workspaceTitle": "Munkaterület",
+    "workspaceName": "Munkaterület neve",
+    "teamTitle": "Csapat együttműködés",
+    "teamMembers": "Munkaterület tagjai",
+    "preferencesTitle": "Beállítások",
+    "languageTitle": "Alkalmazás felület nyelve",
+    "languageBody": "A promptok és exportok franciák maradnak",
+    "languageLabel": "Alkalmazás nyelve, {{language}}",
+    "languageHint": "Megnyitja a nyelvek listáját",
+    "pushTitle": "Push értesítések",
+    "pushBody": "Létrehozási és közzétételi frissítések",
+    "supportTitle": "Támogatás és jogi",
+    "help": "Segítségre van szüksége & kapcsolatfelvétel támogatás",
+    "terms": "Szolgáltatási feltételek",
+    "privacy": "Adatvédelmi irányelvek",
+    "restore": "Vásárlások visszaállítása",
+    "signOut": "Kijelentkezés az Espandából",
+    "signOutNote": "Az aktív előfizetésed és a tervezett katalógus elemek biztonságosan mentve maradnak."
+  },
+  "drawer": {
+    "closeMenu": "Menü bezárása",
+    "switchLabel": "Munkaterület {{name}}. Váltás vállalkozásra",
+    "balanceLabel_one": "Jelenlegi egyenleg {{credits}} kredit maradt, {{plan}} terv",
+    "balanceLabel_other": "Jelenlegi egyenleg {{credits}} kredit maradt, {{plan}} terv",
+    "balanceTitle": "Jelenlegi egyenleg",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredit maradt</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> kredit maradt</rest>",
+    "sections": {
+      "create": "Létrehozás",
+      "grow": "Növekedés",
+      "manage": "Kezelés"
+    },
+    "items": {
+      "chat": "Csevegés videó készítéséhez",
+      "generations": "Saját generációk",
+      "photos": "Fotó eszközök",
+      "inbox": "Ügyfelek és Bejövő üzenetek",
+      "google": "Google Növekedés",
+      "website": "Weboldal Stúdió",
+      "connections": "Kapcsolatok",
+      "automations": "Automatizálások",
+      "billing": "Tervek és Számlázás",
+      "account": "Fiókbeállítások"
+    },
+    "signOut": "Kijelentkezés"
+  }
+}

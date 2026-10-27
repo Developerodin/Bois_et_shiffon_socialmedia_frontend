@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Planerad",
+    "briefReady": "Brief klar",
+    "needsReview": "Behöver granskas",
+    "draftReady": "Utkast klart",
+    "approved": "Godkänd",
+    "scheduled": "Schemalagd",
+    "published": "Publicerad",
+    "draft": "Utkast"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Idag",
+    "tomorrow": "Imorgon"
+  },
+  "chrome": {
+    "openMenu": "Öppna menyn",
+    "logo": "Espanda",
+    "credits_one": "{{count}} kredit tillgänglig",
+    "credits_other": "{{count}} krediter tillgängliga",
+    "settings": "Inställningar",
+    "modulesLabel": "Appmoduler",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Inlägg",
+      "photoshoot": "Fotosession",
+      "marketing": "Marknadsföring"
+    },
+    "navLabel": "Modulnavigering",
+    "nav": {
+      "today": "Idag",
+      "posts": "Inlägg",
+      "create": "Skapa",
+      "stories": "Stories",
+      "settings": "Inställningar"
+    },
+    "back": "Tillbaka",
+    "switchBusiness": "Byt företag, {{name}}",
+    "business": "Företag: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Dina inlägg, i rörelse",
+    "subtitle": "Granska genererade produkthöjdpunkter & schemalagda inlägg",
+    "needsApproval": "Behöver godkännande",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Granska inlägg",
+    "agenda": "Kommande agenda",
+    "thisWeek": "Denna vecka",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Visa kalender"
+  },
+  "calendar": {
+    "title": "Inläggskalender",
+    "subtitle": "Planera och automatisera dina utgåvor",
+    "viewLabel": "Kalendervy",
+    "views": {
+      "month": "Månad",
+      "list": "Lista"
+    },
+    "plan": "Plan: {{n}} inlägg / månad",
+    "managePlan": "Hantera plan",
+    "postCount_one": "{{count}} inlägg",
+    "postCount_other": "{{count}} inlägg",
+    "empty": "Inget planerat för denna dag.",
+    "scheduled_one": "{{count}} schemalagd",
+    "scheduled_other": "{{count}} schemalagda",
+    "previousMonth": "Föregående månad",
+    "nextMonth": "Nästa månad",
+    "gridLabel": "{{month}} kalender",
+    "dayWithPosts_one": "{{day}} · {{count}} inlägg",
+    "dayWithPosts_other": "{{day}} · {{count}} inlägg"
+  },
+  "detail": {
+    "title": "Inläggsdetaljer",
+    "moreOptions": "Fler alternativ",
+    "feedPhoto": "4:5 Flödesfoto",
+    "fullscreen": "Helskärm",
+    "captionFrench": "Bildtext (Franska)",
+    "editText": "Redigera text",
+    "channels": "Publiceringskanaler",
+    "instagramFeed": "Instagram-flöde",
+    "instagramDetail": "Anslut ett konto för att publicera",
+    "facebookPage": "Facebook-sida",
+    "facebookDetail": "Autoposta till officiell sida",
+    "notConnected": "Inte ansluten",
+    "channelNotConnected": "{{name}}, inte ansluten",
+    "editPost": "Redigera inlägg",
+    "schedule": "Schemalägg"
+  },
+  "edit": {
+    "title": "Redigera inlägg",
+    "cancel": "Avbryt",
+    "save": "Spara ändringar",
+    "previewLabel": "{{title}}, originalförhållande 4:5",
+    "ratio": "Originalförhållande · 4:5",
+    "sectionLabel": "Redigera sektion",
+    "tabs": {
+      "image": "Bild",
+      "caption": "Bildtext",
+      "brand": "Varumärke"
+    },
+    "description": "Inläggsbeskrivning",
+    "language": "Språk: Franska (FR)",
+    "suggestedHashtags": "Föreslagna hashtags",
+    "addHashtag": "Lägg till hashtag",
+    "add": "+ Lägg till",
+    "regenerate": "Återskapa bildtext med AI",
+    "imageHint": "Originalförhållande · 4:5. Dra förhandsvisningen för att omrama beskärningen.",
+    "brandHint": "Logotyp, färger och ton följer ditt {{brand}} varumärkespaket."
+  },
+  "schedule": {
+    "title": "Schemalägg",
+    "storyFormat": "Story · 9:16 bild",
+    "feedFormat": "Flödesinlägg · 4:5 bild",
+    "destination": "Destination",
+    "actionRequired": "Åtgärd krävs",
+    "notLinked": "Instagram-konto inte länkat",
+    "notLinkedBody": "Anslut dina sociala konton för att låsa upp direkt schemalagd publicering.",
+    "connect": "Anslut socialt konto",
+    "locked": "Schema låst tills anslutning",
+    "timing": "Tid & Schema",
+    "date": "Datum",
+    "dateLabel": "Datum, {{date}}",
+    "time": "Tid",
+    "timeLabel": "Tid, {{time}}",
+    "timezone": "Tidszon",
+    "schedulePost": "Schemalägg inlägg",
+    "scheduleLocked": "Schemalägg inlägg (Anslut kanal först)",
+    "saveDraft": "Spara utkast"
+  },
+  "brief": {
+    "title": "Skapa ett inlägg",
+    "subtitle": "Välj en produkt och kreativ riktning",
+    "format": "Innehållsformat",
+    "formatLabel": "Inläggsformat",
+    "singlePhoto": "Enstaka foto",
+    "singlePhotoDetail": "4:5 Flödesfokus",
+    "carousel": "Karusell",
+    "carouselDetail": "Flera foton",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Primärt mål",
+    "goals": {
+      "newArrival": "Ny ankomst",
+      "productFeature": "Produktfunktion",
+      "specialOffer": "Specialerbjudande"
+    },
+    "product": "Målprodukt i katalog",
+    "changeProduct": "Byt produkt",
+    "change": "Ändra",
+    "direction": "Kreativ riktning (valfritt)",
+    "directionLanguage": "Franska (FR)",
+    "directionPlaceholder": "t.ex. Fokusera på handgjorda snickerier och värme",
+    "cost": "Skapandekostnad:",
+    "costPending": "Uppskattning pågår",
+    "draftPost": "Utkast till inlägg"
+  },
+  "stories": {
+    "title": "Stories",
+    "subtitle": "9:16 vertikala sociala ögonblick",
+    "newStory": "Ny story",
+    "statusLabel": "Storystatus",
+    "drafts_one": "Utkast ({{count}})",
+    "drafts_other": "Utkast ({{count}})",
+    "scheduled_one": "Schemalagt ({{count}})",
+    "scheduled_other": "Schemalagt ({{count}})",
+    "samplePreview": "Exempelförhandsvisning",
+    "moreOptions": "Fler alternativ för {{title}}",
+    "editStory": "Redigera story"
+  },
+  "editStory": {
+    "back": "Tillbaka",
+    "undo": "Ångra",
+    "tools": {
+      "text": "Text",
+      "image": "Bild",
+      "brand": "Varumärke",
+      "cta": "CTA"
+    },
+    "toolLabel": "{{tool}}-verktyg",
+    "captionTitle": "Storytext / Länkklistermärke",
+    "languageCode": "FR",
+    "saveDraft": "Spara utkast",
+    "scheduleStory": "Schemalägg story"
+  },
+  "planner": {
+    "title": "Inläggsplanerare",
+    "sectionsLabel": "Inställningssektioner",
+    "sections": {
+      "business": "Mitt företag",
+      "billing": "Fakturering",
+      "planner": "Inläggsplanerare"
+    },
+    "cycle": "Planeringscykel",
+    "cadence": "Publiceringsfrekvens",
+    "monthlyTarget": "Månatligt mål",
+    "feedPosts": "Flödesinlägg",
+    "stories": "Stories",
+    "perMonth": "{{n}} / månad",
+    "feedNote": "~1 inlägg dagligen",
+    "storiesNote": "Sprid över månaden",
+    "cadenceHint": "Föreslagna innehållsmål. Justera innan du genererar din kalender.",
+    "pillars": "Innehållspelare",
+    "pillar": {
+      "catalog": "Katalogprodukter (Bunting-fokus)",
+      "craft": "Materialdetaljer & hantverk (Acacia-trä)",
+      "story": "Varumärkesberättelse & franskt arv"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Manuell granskning innan publicering: </b>Genererade droppar placeras i din kalender som utkast för ditt slutgiltiga godkännande. Inget innehåll publiceras utan godkännande.",
+    "generate": "Generera kalender"
+  }
+}

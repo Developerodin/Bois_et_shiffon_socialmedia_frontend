@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Άνοιγμα μενού",
+    "creditsAvailable_one": "{{count}} διαθέσιμη πίστωση",
+    "creditsAvailable_other": "{{count}} διαθέσιμες πιστώσεις",
+    "settings": "Ρυθμίσεις",
+    "appModules": "Ενότητες εφαρμογής",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Αναρτήσεις",
+      "photoshoot": "Φωτογράφιση",
+      "marketing": "Μάρκετινγκ"
+    },
+    "moduleNavigation": "Πλοήγηση ενότητας",
+    "create": "Δημιουργία",
+    "results": "Αποτελέσματα",
+    "goBack": "Πίσω",
+    "switchBusiness": "Αλλαγή επιχείρησης, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} αντικείμενο",
+    "optionWithCount_other": "{{label}} {{count}} αντικείμενα"
+  },
+  "create": {
+    "title": "Δημιουργία φωτογράφησης",
+    "subtitle": "Δημιουργήστε φωτογραφίες προϊόντων και στυλιζάρετε ρούχα σε μοντέλα.",
+    "product": {
+      "imageLabel": "{{name}} τραπέζι τραπεζαρίας",
+      "pill": "Αντικείμενο καταλόγου",
+      "title": "Φωτογράφιση προϊόντος",
+      "body": "Τοποθετήστε αντικείμενα καταλόγου σε αρχιτεκτονικούς εσωτερικούς και στούντιο χώρους με φυσικό φωτισμό.",
+      "cta": "Νέα φωτογράφιση προϊόντος"
+    },
+    "fashion": {
+      "imageLabel": "Εικονογραφημένο στούντιο φωτογραφίας ρούχων",
+      "title": "Φωτογράφιση μόδας",
+      "body": "Στυλιζάρετε ρούχα σε μοντέλα σε σκηνές έτοιμες για καμπάνια.",
+      "cta": "Νέα φωτογράφιση μόδας"
+    }
+  },
+  "product": {
+    "title": "Φωτογράφιση προϊόντος",
+    "estimate_one": "Εκτίμηση: {{count}} πίστωση",
+    "estimate_other": "Εκτίμηση: {{count}} πιστώσεις",
+    "available": "{{count}} διαθέσιμες",
+    "generate": "Δημιουργία φωτογράφησης",
+    "selectedAsset": "Επιλεγμένο αντικείμενο καταλόγου",
+    "changeAsset": "Αλλαγή αντικειμένου",
+    "aspectRatio": "Αναλογία διαστάσεων",
+    "sceneStyle": "Στυλ σκηνής",
+    "scenes": {
+      "studio": "Στούντιο",
+      "interior": "Εσωτερικό",
+      "custom": "Προσαρμοσμένο"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Δημιουργική περιγραφή",
+    "briefHint": "Βελτιώστε φωτισμό, ατμόσφαιρα ή συγκεκριμένα διακοσμητικά στοιχεία",
+    "sourcePreview": "Προεπισκόπηση πηγής",
+    "fullPreview": "{{product}}, πλήρης προεπισκόπηση",
+    "sourceImage": "Εικόνα πηγής"
+  },
+  "fashion": {
+    "title": "Φωτογράφιση μόδας",
+    "generate": "Δημιουργία φωτογράφησης",
+    "uploadToEnable": "Ανεβάστε φωτογραφία ρούχου για ενεργοποίηση δημιουργίας",
+    "heading": "Δημιουργήστε τη φωτογράφιση μόδας σας",
+    "subtitle": "Μετατρέψτε επίπεδες ή κρεμαστές ενδυμασίες σε ρεαλιστικά μοντέλα.",
+    "garmentPhoto": "Φωτογραφία ρούχου",
+    "required": "Απαιτείται",
+    "garmentSelected": "Φωτογραφία ρούχου: {{label}}. Αλλαγή φωτογραφίας",
+    "addGarment": "Προσθήκη φωτογραφίας ρούχου",
+    "changeGarment": "Αλλαγή φωτογραφίας ρούχου",
+    "garmentHint": "PNG ή JPG σε ουδέτερο φόντο, επίπεδη ή με αόρατο μανεκέν",
+    "modelStyling": "Μοντέλο & στυλ",
+    "modelSelected": "Μοντέλο & στυλ: {{model}}",
+    "models": {
+      "choose": "Επιλέξτε μοντέλο",
+      "natural": "{{name}} · φυσικό στυλ",
+      "editorial": "{{name}} · εκδοτικό στυλ",
+      "casual": "{{name}} · καθημερινό στυλ"
+    },
+    "pose": "Πόζα",
+    "poses": {
+      "fullBody": "Ολόσωμη",
+      "threeQuarter": "Τρία τέταρτα",
+      "closeUp": "Κοντινή λεπτομέρεια"
+    },
+    "outputFormat": "Μορφή εξόδου",
+    "formats": {
+      "feedPortrait": "Πορτραίτο ροής",
+      "storyReel": "Ιστορία / Reel"
+    },
+    "background": "Ρύθμιση φόντου",
+    "backgrounds": {
+      "studioMinimal": "Μινιμαλιστικό στούντιο",
+      "urbanStreet": "Αστικός δρόμος",
+      "naturalInterior": "Φυσικό εσωτερικό"
+    },
+    "requirementsTitle": "Απαιτήσεις ανεβάσματος",
+    "requirements": {
+      "contrast": "Υψηλή αντίθεση με το φόντο",
+      "wrinkles": "Χωρίς έντονες ζάρες",
+      "frontFacing": "Μπροστινή γωνία"
+    }
+  },
+  "source": {
+    "title": "Επιλέξτε πηγή",
+    "uploadNewLabel": "Ανεβάστε νέα φωτογραφία",
+    "uploadNew": "Ανέβασμα νέας",
+    "noPhotoSelected": "Δεν έχει επιλεγεί φωτογραφία",
+    "photosSelected_one": "{{count}} επιλεγμένη φωτογραφία",
+    "photosSelected_other": "{{count}} επιλεγμένες φωτογραφίες",
+    "selectPhoto": "Επιλέξτε φωτογραφία",
+    "usePhoto": "Χρήση φωτογραφίας",
+    "source": "Πηγή",
+    "tabs": {
+      "website": "Ιστοσελίδα",
+      "uploads": "Ανεβάσματα"
+    },
+    "businessWebsite": "{{name}} · Ιστοσελίδα",
+    "fromWebsite": "Από ιστοσελίδα",
+    "filterCatalog": "Φιλτράρισμα καταλόγου",
+    "filters": {
+      "all": "Όλα τα αντικείμενα",
+      "tables": "Τραπέζια",
+      "storage": "Αποθήκευση"
+    },
+    "addPhoto": "Προσθήκη φωτογραφίας",
+    "tip": "Καθαρά αποκόμματα προϊόντων αποδίδουν βέλτιστα αποτελέσματα φωτογράφησης. Το Espanda Studio θα διατηρήσει την αρχική υφή ξύλου ακακίας."
+  },
+  "generating": {
+    "backToWorkspace": "Επιστροφή στο χώρο εργασίας",
+    "returnToWorkspace": "Επιστροφή στο χώρο εργασίας",
+    "title": "Προετοιμασία των φωτογραφιών σας",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Η δημιουργία σας εκτελείται με ασφάλεια στο παρασκήνιο. Θα βρείτε τα ολοκληρωμένα αντικείμενα στα Αποτελέσματα.",
+    "status": {
+      "done": "Ολοκληρώθηκε",
+      "active": "Σε εξέλιξη",
+      "queued": "Σε ουρά"
+    },
+    "progress": "Δημιουργία",
+    "sample": {
+      "title": "{{name}} φωτογράφιση τραπεζαρίας",
+      "description": "Σκηνικό {{product}} σε αρχιτεκτονικό εσωτερικό με φυσικό φως ημέρας.",
+      "variations_one": "{{count}} παραλλαγή",
+      "variations_other": "{{count}} παραλλαγές"
+    },
+    "steps": {
+      "catalog": "Επεξεργασία αντικειμένου καταλόγου",
+      "compose": "Σύνθεση σκηνής & φωτισμού",
+      "finish": "Ολοκλήρωση & βαθμονόμηση χρώματος"
+    }
+  },
+  "results": {
+    "title": "Φωτογραφήσεις",
+    "subtitle": "Οι φωτογραφίες προϊόντων και μόδας σας",
+    "newPhotoshoot": "Νέα φωτογράφιση",
+    "filterLabel": "Φιλτράρισμα φωτογραφήσεων",
+    "filters": {
+      "all": "Όλα ({{count}})",
+      "product": "Προϊόν ({{count}})",
+      "fashion": "Μόδα ({{count}})"
+    },
+    "empty": "Δεν υπάρχουν ακόμα φωτογραφήσεις.",
+    "processingLabel": "{{title}}. Επεξεργασία, {{percent}}%",
+    "processingBadge_one": "Επεξεργασία · {{count}} πίστωση",
+    "processingBadge_other": "Επεξεργασία · {{count}} πιστώσεις",
+    "preview": "Προεπισκόπηση",
+    "reviewPhotoLabel": "Ανασκόπηση φωτογραφίας, {{title}}",
+    "reviewPhoto": "Ανασκόπηση φωτογραφίας",
+    "sample": {
+      "studioStaging": "{{product}} · Σκηνικό στούντιο",
+      "rendering": "Στάδιο απόδοσης · {{percent}}%",
+      "interiorReady_one": "Εσωτερικό · {{ratio}} · {{count}} φωτογραφία έτοιμη",
+      "interiorReady_other": "Εσωτερικό · {{ratio}} · {{count}} φωτογραφίες έτοιμες",
+      "studioDaylight": "Φωτισμός στούντιο · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Περισσότερες επιλογές",
+    "downloadPhoto": "Λήψη φωτογραφίας",
+    "variation": "Παραλλαγή",
+    "share": "Κοινή χρήση φωτογράφισης",
+    "samplePreview": "Προεπισκόπηση δείγματος",
+    "compareOriginal": "Σύγκριση με το πρωτότυπο",
+    "expandView": "Επέκταση προβολής",
+    "stagingSummary": "Περίληψη σκηνικού",
+    "format": "Μορφή",
+    "creationCost": "Κόστος δημιουργίας",
+    "credits_one": "{{count}} πίστωση",
+    "credits_other": "{{count}} πιστώσεις",
+    "sample": {
+      "headerTitle": "Φωτογράφιση {{name}}",
+      "vertical": "{{ratio}} Κάθετο",
+      "architecturalInterior": "Αρχιτεκτονικό Εσωτερικό",
+      "studioDaylight": "Φωτισμός στούντιο",
+      "formatBadge": "Μορφή {{ratio}}",
+      "naturalStudio": "Φυσικό στούντιο",
+      "portraitPhoto": "Πορτραίτο φωτογραφία"
+    }
+  }
+}

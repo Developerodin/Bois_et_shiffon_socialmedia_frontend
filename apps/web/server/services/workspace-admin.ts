@@ -77,12 +77,20 @@ export async function updateRole(
 ) {
   const role = await prisma.role.findFirst({ where: { id: roleId, workspaceId } });
   if (!role) throw new AccountFlowError("Role not found", 404);
-  if (role.isSystem) throw new AccountFlowError("System roles can't be edited", 409);
+  // Built-in roles: owners may change their permissions (not their name); the Owner role always keeps everything.
+  if (role.isSystem) {
+    if (role.slug === "owner") throw new AccountFlowError("The Owner role always has every permission", 409);
+    if (!(await memberRole(workspaceId, actorUserId))?.role?.permissions.includes("workspace.manage")) {
+      throw new AccountFlowError("Only owners can change a built-in role", 409);
+    }
+  }
   await assertCanGrant(workspaceId, actorUserId, input.permissions);
   assertFitsScope(role.scope, input.permissions);
   const updated = await prisma.role.update({
     where: { id: role.id },
-    data: { name: input.name, description: input.description, permissions: input.permissions },
+    data: role.isSystem
+      ? { permissions: input.permissions }
+      : { name: input.name, description: input.description, permissions: input.permissions },
   });
   await audit(workspaceId, actorUserId, "role.updated", role.id, { before: role.permissions, after: updated.permissions });
   return updated;
@@ -103,11 +111,14 @@ export async function deleteRole(workspaceId: string, actorUserId: string, roleI
 }
 
 export async function listMembers(workspaceId: string) {
-  const members = await prisma.workspaceMember.findMany({
-    where: { workspaceId },
-    include: { user: true, roleRef: true },
-    orderBy: { createdAt: "asc" },
-  });
+  const [members, workspace] = await Promise.all([
+    prisma.workspaceMember.findMany({
+      where: { workspaceId },
+      include: { user: true, roleRef: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.workspace.findUniqueOrThrow({ where: { id: workspaceId }, select: { ownerUserId: true } }),
+  ]);
   const legacy = await prisma.role.findMany({ where: { workspaceId, isSystem: true } });
   return members.map((m) => {
     const role = m.roleRef ?? legacy.find((r) => r.slug === LEGACY_ROLE_SLUG[m.role]);
@@ -118,6 +129,7 @@ export async function listMembers(workspaceId: string) {
       email: m.user.email,
       status: m.user.status,
       role: role ? { id: role.id, name: role.name, slug: role.slug } : null,
+      isPrimaryOwner: m.userId === workspace.ownerUserId,
       joinedAt: m.createdAt.toISOString(),
     };
   });
@@ -128,9 +140,17 @@ async function ownerCount(workspaceId: string) {
   return members.filter((m) => m.role?.slug === "owner").length;
 }
 
+async function assertNotPrimaryOwner(workspaceId: string, userId: string) {
+  const ws = await prisma.workspace.findUnique({ where: { id: workspaceId }, select: { ownerUserId: true } });
+  if (ws?.ownerUserId === userId) {
+    throw new AccountFlowError("The primary owner can't be changed or removed. They can hand primary ownership to another member first.", 409);
+  }
+}
+
 export async function changeMemberRole(workspaceId: string, actorUserId: string, memberId: string, roleId: string) {
   const member = await prisma.workspaceMember.findFirst({ where: { id: memberId, workspaceId } });
   if (!member) throw new AccountFlowError("Member not found", 404);
+  await assertNotPrimaryOwner(workspaceId, member.userId);
   const role = await prisma.role.findFirst({ where: { id: roleId, workspaceId, scope: "WORKSPACE" } });
   if (!role) throw new AccountFlowError("Pick a workspace role", 404);
   const current = await memberRole(workspaceId, member.userId);
@@ -155,6 +175,7 @@ export async function changeMemberRole(workspaceId: string, actorUserId: string,
 export async function removeMember(workspaceId: string, actorUserId: string, memberId: string) {
   const member = await prisma.workspaceMember.findFirst({ where: { id: memberId, workspaceId } });
   if (!member) throw new AccountFlowError("Member not found", 404);
+  await assertNotPrimaryOwner(workspaceId, member.userId);
   const current = await memberRole(workspaceId, member.userId);
   if (current?.role?.slug === "owner") {
     if ((await memberRole(workspaceId, actorUserId))?.role?.slug !== "owner") throw new AccountFlowError("Only owners can remove an owner", 409);
@@ -165,6 +186,24 @@ export async function removeMember(workspaceId: string, actorUserId: string, mem
     prisma.workspaceMember.delete({ where: { id: member.id } }),
   ]);
   await audit(workspaceId, actorUserId, "member.removed", member.id, { userId: member.userId });
+}
+
+/** Only the primary owner can hand primary ownership over; the new primary owner becomes an Owner. The old one stays Owner. */
+export async function transferPrimaryOwnership(workspaceId: string, actorUserId: string, memberId: string) {
+  return prisma.$transaction(async (tx) => {
+    // Row lock: two hand-overs at once can't both pass the check.
+    const [ws] = await tx.$queryRaw<{ ownerUserId: string | null }[]>`SELECT "ownerUserId" FROM "Workspace" WHERE "id" = ${workspaceId} FOR UPDATE`;
+    if (ws?.ownerUserId !== actorUserId) throw new AccountFlowError("Only the primary owner can hand primary ownership over", 409);
+    const member = await tx.workspaceMember.findFirst({ where: { id: memberId, workspaceId } });
+    if (!member) throw new AccountFlowError("Member not found", 404);
+    if (member.userId === actorUserId) throw new AccountFlowError("You're already the primary owner", 409);
+    const owner = await tx.role.findUniqueOrThrow({ where: { workspaceId_slug: { workspaceId, slug: "owner" } } });
+    await tx.workspaceMember.update({ where: { id: member.id }, data: { role: "OWNER", roleId: owner.id } });
+    await tx.workspace.update({ where: { id: workspaceId }, data: { ownerUserId: member.userId } });
+    await tx.auditEvent.create({
+      data: { workspaceId, actorUserId, action: "workspace.primary_owner_transferred", entityType: "Workspace", entityId: workspaceId, metadata: { from: actorUserId, to: member.userId } },
+    });
+  });
 }
 
 export async function listInvitations(workspaceId: string) {

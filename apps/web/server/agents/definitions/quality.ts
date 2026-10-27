@@ -1,5 +1,6 @@
 import type { ContentChannel, Prisma } from "@prisma/client";
 import { z } from "zod";
+import { NothingToDoError } from "@/server/agents/engine";
 import { CONTENT_PROMPT_VERSION, QUALITY_SYSTEM } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
 import { brandKnowledge } from "@/server/content/knowledge";
@@ -51,7 +52,7 @@ export const qualityAgent: AgentDefinition = {
       take: 50,
     });
     const todo = items.filter((i) => i.versions[0] && i.versions[0].checks.length === 0).slice(0, PER_RUN);
-    if (!todo.length) throw new Error("No new drafts to check: run the Creator first");
+    if (!todo.length) throw new NothingToDoError("No new drafts to check: run the Creator first");
     const knowledge = await brandKnowledge(brand.workspaceId, brand.brandId, 4000);
     let checked = 0;
 

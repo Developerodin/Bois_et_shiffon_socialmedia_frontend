@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Відкрити меню",
+    "creditsAvailable_one": "Доступний {{count}} кредит",
+    "creditsAvailable_other": "Доступно {{count}} кредитів",
+    "settings": "Налаштування",
+    "appModules": "Модулі додатку",
+    "modules": {
+      "reels": "Ролики",
+      "posts": "Пости",
+      "photoshoot": "Фотосесія",
+      "marketing": "Маркетинг"
+    },
+    "moduleNavigation": "Навігація по модулях",
+    "create": "Створити",
+    "results": "Результати",
+    "goBack": "Назад",
+    "switchBusiness": "Змінити бізнес, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} елемент",
+    "optionWithCount_other": "{{label}} {{count}} елементів"
+  },
+  "create": {
+    "title": "Створити фотосесію",
+    "subtitle": "Створюйте фото продуктів і стилізуйте одяг на моделях.",
+    "product": {
+      "imageLabel": "{{name}} обідній стіл",
+      "pill": "Елемент каталогу",
+      "title": "Фотосесія продукту",
+      "body": "Розміщуйте елементи каталогу в архітектурних інтер'єрах та студійних умовах з природним освітленням.",
+      "cta": "Нова фотосесія продукту"
+    },
+    "fashion": {
+      "imageLabel": "Ілюстрована студія фотографії одягу",
+      "title": "Фотосесія моди",
+      "body": "Стилізуйте одяг на моделях у сценах, готових до кампанії.",
+      "cta": "Нова фотосесія моди"
+    }
+  },
+  "product": {
+    "title": "Фотосесія продукту",
+    "estimate_one": "Оцінка: {{count}} кредит",
+    "estimate_other": "Оцінка: {{count}} кредитів",
+    "available": "Доступно: {{count}}",
+    "generate": "Створити фотосесію",
+    "selectedAsset": "Вибраний елемент каталогу",
+    "changeAsset": "Змінити елемент",
+    "aspectRatio": "Співвідношення сторін",
+    "sceneStyle": "Стиль сцени",
+    "scenes": {
+      "studio": "Студія",
+      "interior": "Інтер'єр",
+      "custom": "Користувацький"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Креативний бриф",
+    "briefHint": "Уточніть освітлення, атмосферу або конкретні декоративні елементи",
+    "sourcePreview": "Попередній перегляд джерела",
+    "fullPreview": "{{product}}, повний перегляд",
+    "sourceImage": "Зображення джерела"
+  },
+  "fashion": {
+    "title": "Фотосесія моди",
+    "generate": "Створити фотосесію",
+    "uploadToEnable": "Завантажте фото одягу, щоб увімкнути генерацію",
+    "heading": "Створіть свою модну фотосесію",
+    "subtitle": "Перетворюйте плоскі викладки або одяг на вішалках у реалістичні сценічні моделі.",
+    "garmentPhoto": "Фото одягу",
+    "required": "Обов'язково",
+    "garmentSelected": "Фото одягу: {{label}}. Змінити фото",
+    "addGarment": "Додати фото одягу",
+    "changeGarment": "Змінити фото одягу",
+    "garmentHint": "PNG або JPG на нейтральному фоні, плоска викладка або невидимий манекен",
+    "modelStyling": "Модель та стиль",
+    "modelSelected": "Модель та стиль: {{model}}",
+    "models": {
+      "choose": "Вибрати модель",
+      "natural": "{{name}} · природний стиль",
+      "editorial": "{{name}} · редакційний стиль",
+      "casual": "{{name}} · повсякденний стиль"
+    },
+    "pose": "Поза",
+    "poses": {
+      "fullBody": "Повний зріст",
+      "threeQuarter": "Три чверті",
+      "closeUp": "Крупний план"
+    },
+    "outputFormat": "Формат виводу",
+    "formats": {
+      "feedPortrait": "Портрет для стрічки",
+      "storyReel": "Історія / Ролик"
+    },
+    "background": "Фонова обстановка",
+    "backgrounds": {
+      "studioMinimal": "Мінімалістична студія",
+      "urbanStreet": "Міська вулиця",
+      "naturalInterior": "Природний інтер'єр"
+    },
+    "requirementsTitle": "Вимоги до завантаження",
+    "requirements": {
+      "contrast": "Високий контраст з фоном",
+      "wrinkles": "Без сильних зморшок",
+      "frontFacing": "Фронтальний кут"
+    }
+  },
+  "source": {
+    "title": "Виберіть джерело",
+    "uploadNewLabel": "Завантажити нове фото",
+    "uploadNew": "Завантажити нове",
+    "noPhotoSelected": "Фото не вибрано",
+    "photosSelected_one": "Вибрано {{count}} фото",
+    "photosSelected_other": "Вибрано {{count}} фото",
+    "selectPhoto": "Вибрати фото",
+    "usePhoto": "Використати фото",
+    "source": "Джерело",
+    "tabs": {
+      "website": "Вебсайт",
+      "uploads": "Завантаження"
+    },
+    "businessWebsite": "{{name}} · Вебсайт",
+    "fromWebsite": "З вебсайту",
+    "filterCatalog": "Фільтрувати каталог",
+    "filters": {
+      "all": "Усі елементи",
+      "tables": "Стіли",
+      "storage": "Зберігання"
+    },
+    "addPhoto": "Додати фото",
+    "tip": "Чисті вирізки продуктів дають оптимальні результати фотосесії. Espanda Studio зберігає оригінальну текстуру акації."
+  },
+  "generating": {
+    "backToWorkspace": "Назад до робочого простору",
+    "returnToWorkspace": "Повернутися до робочого простору",
+    "title": "Підготовка ваших фото",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Ваша генерація безпечно виконується у фоновому режимі. Завершені активи ви знайдете в Результатах.",
+    "status": {
+      "done": "Готово",
+      "active": "В процесі",
+      "queued": "В черзі"
+    },
+    "progress": "Генерація",
+    "sample": {
+      "title": "{{name}} фотосесія обіду",
+      "description": "Сценарій {{product}} в архітектурному денному інтер'єрі.",
+      "variations_one": "{{count}} варіація",
+      "variations_other": "{{count}} варіацій"
+    },
+    "steps": {
+      "catalog": "Обробка елемента каталогу",
+      "compose": "Композиція сцени та освітлення",
+      "finish": "Завершення та калібрування кольору"
+    }
+  },
+  "results": {
+    "title": "Фотосесії",
+    "subtitle": "Ваші фото продуктів та моди",
+    "newPhotoshoot": "Нова фотосесія",
+    "filterLabel": "Фільтрувати фотосесії",
+    "filters": {
+      "all": "Усі ({{count}})",
+      "product": "Продукт ({{count}})",
+      "fashion": "Мода ({{count}})"
+    },
+    "empty": "Фотосесій ще немає.",
+    "processingLabel": "{{title}}. Обробка, {{percent}}%",
+    "processingBadge_one": "Обробка · {{count}} кредит",
+    "processingBadge_other": "Обробка · {{count}} кредитів",
+    "preview": "Попередній перегляд",
+    "reviewPhotoLabel": "Перегляд фото, {{title}}",
+    "reviewPhoto": "Перегляд фото",
+    "sample": {
+      "studioStaging": "{{product}} · Студійна постановка",
+      "rendering": "Етап рендерингу · {{percent}}%",
+      "interiorReady_one": "Інтер'єр · {{ratio}} · {{count}} фото готове",
+      "interiorReady_other": "Інтер'єр · {{ratio}} · {{count}} фото готові",
+      "studioDaylight": "Студійне денне світло · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Більше опцій",
+    "downloadPhoto": "Завантажити фото",
+    "variation": "Варіація",
+    "share": "Поділитися фотосесією",
+    "samplePreview": "Попередній перегляд зразка",
+    "compareOriginal": "Порівняти з оригіналом",
+    "expandView": "Розгорнути перегляд",
+    "stagingSummary": "Підсумок постановки",
+    "format": "Формат",
+    "creationCost": "Вартість створення",
+    "credits_one": "{{count}} кредит",
+    "credits_other": "{{count}} кредитів",
+    "sample": {
+      "headerTitle": "Фотосесія {{name}}",
+      "vertical": "{{ratio}} Вертикально",
+      "architecturalInterior": "Архітектурний інтер'єр",
+      "studioDaylight": "Студійне денне світло",
+      "formatBadge": "Формат {{ratio}}",
+      "naturalStudio": "Природна студія",
+      "portraitPhoto": "Портретне фото"
+    }
+  }
+}

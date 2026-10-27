@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Arbejdsområde {{name}}",
+    "logoLabel": "{{name}} logo",
+    "settingsTitle": "Indstillinger",
+    "edit": "Rediger",
+    "manage": "Administrer",
+    "tabs": {
+      "myBusiness": "Min virksomhed",
+      "billing": "Fakturering",
+      "postsPlanner": "Indlægsplanlægger"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Virksomhedsattributter",
+    "attributes": {
+      "location": "Placering",
+      "audience": "Publikum",
+      "category": "Kategori",
+      "subcategory": "Underkategori",
+      "storeType": "Butikstype",
+      "website": "Websted"
+    },
+    "brandPreferences": "Brandpræferencer",
+    "brandPreferencesHint": "Farver, tone, sprog",
+    "photoAssets": "Fotoaktiver",
+    "photoAssetsHint": "Bunting bord og TV-enhed fotos",
+    "connections": "Forbindelser",
+    "connectionsHint": "Sociale kanaler & Google-profil"
+  },
+  "brand": {
+    "title": "Brandindstillinger",
+    "save": "Gem ændringer",
+    "paletteTitle": "Brandfarvepalet",
+    "editHex": "Rediger hex",
+    "watermarkTitle": "Outro vandmærkelogo",
+    "watermarkBody": "Anvendes på videoafslutninger og fotokanter",
+    "change": "Skift",
+    "toneTitle": "Kreativ tone",
+    "tones": {
+      "modern": "Moderne",
+      "luxurious": "Luksuriøs",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Naturlig",
+      "minimalist": "Minimalistisk"
+    },
+    "cuesTitle": "Brand signaturtræk",
+    "addCue": "Tilføj træk"
+  },
+  "photos": {
+    "title": "Fotoaktiver",
+    "refresh": "Opdater",
+    "sourceTitle": "Kildewebsted",
+    "sourceBody": "Delte fotos bruges til at generere reels, feed-indlæg og fotoshoot-opsætning. Ingen fotos offentliggøres uden din eksplicitte godkendelse.",
+    "sources": {
+      "website": "Websted ({{n}})",
+      "uploads": "Uploads ({{n}})"
+    },
+    "addPhotos": "Tilføj fotos",
+    "photosTitle": "Fotos",
+    "photoCount_one": "{{n}} foto",
+    "photoCount_other": "{{n}} fotos",
+    "emptyTitle": "Ingen uploads endnu",
+    "emptyBody": "Studiobilleder, du uploader, vises her.",
+    "upload": "Upload tilpassede studiobilleder"
+  },
+  "connections": {
+    "title": "Forbindelser",
+    "sourceTitle": "Kildewebsted",
+    "linked": "Forbundet",
+    "sourceBody": "Produktfotos og virksomhedsdetaljer",
+    "channelsTitle": "Udgivelseskanaler",
+    "accounts": "Konti",
+    "connected": "Forbundet",
+    "notConnected": "Ikke forbundet",
+    "connect": "Forbind",
+    "disconnect": "Afbryd",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook-side",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Business-profil",
+      "shopify": "Shopify Direct Sync"
+    }
+  },
+  "automations": {
+    "title": "Automatiseringer",
+    "heading": "Dine udgivelsespræferencer",
+    "intro": "Kontroller, hvordan Espanda forudfylder planlagte indlæg og kladder indhold til dine katalogvarer.",
+    "reviewTitle": "Gennemse før udgivelse",
+    "reviewBody": "Gennemse indhold, før det udgives.",
+    "required": "Påkrævet",
+    "reviewLabel": "Gennemse før udgivelse. Gennemse indhold, før det udgives. Påkrævet.",
+    "queueTitle": "Køhandlinger",
+    "manageConnections": "Administrer forbindelser",
+    "items": {
+      "monthly": {
+        "title": "Generer månedlige planer",
+        "body": "Forbered din månedlige kalender med kladdeindlæg.",
+        "active": "Aktiv · kladder gemt i kalender"
+      },
+      "autopublish": {
+        "title": "Auto-udgiv godkendte indlæg",
+        "body": "Skub automatisk planlagte reels, når du trykker på \"Godkend\".",
+        "requires": "Kræver Instagram-forbindelse",
+        "active": "Aktiv · udgiver efter godkendelse"
+      },
+      "replies": {
+        "title": "Kladde showroom forespørgselsbesvarelser",
+        "body": "Forudfyld raffinerede franske håndværkerbesvarelser i din indbakke-kø.",
+        "requires": "Kræver beskedkanal",
+        "active": "Aktiv · kladder tilføjet til din indbakke"
+      }
+    },
+    "adsTitle": "Betalte sociale annoncer",
+    "comingSoon": "Kommer snart",
+    "adsBody": "Automatiseret Meta-annoncekreativ test & budgetstyring."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} kredit tilgængelig",
+    "creditsAvailable_other": "{{n}} kreditter tilgængelige",
+    "planName": "{{tier}} plan",
+    "statusActive": "Aktiv",
+    "planBlurb": "Dine skabelses- og virksomhedsværktøjer",
+    "cycleTitle": "Faktureringscyklus",
+    "renewsMonthly": "Fornyes månedligt",
+    "balanceTitle": "Kreditsaldo",
+    "monthlyAllowance": "{{amount}} månedlig tillæg",
+    "balanceLabel_one": "{{balance}} af {{n}} kredit tilgængelig",
+    "balanceLabel_other": "{{balance}} af {{n}} kreditter tilgængelige",
+    "balanceOf_one": " / {{n}} kredit tilgængelig",
+    "balanceOf_other": " / {{n}} kreditter tilgængelige",
+    "note_one": "{{n}} kredit brugt · {{reserved}} reserveret til {{item}}. Tillæg fornyes månedligt.",
+    "note_other": "{{n}} kreditter brugt · {{reserved}} reserveret til {{item}}. Tillæg fornyes månedligt.",
+    "usageTitle": "Seneste kreditforbrug",
+    "usageAside": "Arbejdsområdeaktivitet",
+    "today": "I dag",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} reel",
+        "detail": "Reserveret til generering"
+      },
+      "plan": {
+        "title": "Månedlig indholdsplan",
+        "detail_one": "{{n}} kladdeindlæg",
+        "detail_other": "{{n}} kladdeindlæg"
+      },
+      "renewal": {
+        "title": "Månedlig planfornyelse",
+        "detail": "Cyklus kredit nulstillet"
+      }
+    },
+    "spent_one": "-{{n}} kredit",
+    "spent_other": "-{{n}} kreditter",
+    "added_one": "+{{n}} kredit",
+    "added_other": "+{{n}} kreditter",
+    "included": "Inkluderet",
+    "help": {
+      "missingCredits": "Manglende kreditter eller mislykket gengivelse",
+      "restore": "Gendan abonnementskøb",
+      "history": "Fakturahistorik & fakturaer"
+    }
+  },
+  "account": {
+    "title": "Kontoinstillinger",
+    "workspaceTitle": "Arbejdsområde",
+    "workspaceName": "Arbejdsområdenavn",
+    "teamTitle": "Samarbejde i team",
+    "teamMembers": "Arbejdsområdemedlemmer",
+    "preferencesTitle": "Præferencer",
+    "languageTitle": "Appens sprog",
+    "languageBody": "Prompter & eksporter forbliver på fransk",
+    "languageLabel": "Appens sprog, {{language}}",
+    "languageHint": "Åbner listen over sprog",
+    "pushTitle": "Push-notifikationer",
+    "pushBody": "Opdateringer om oprettelse og udgivelse",
+    "supportTitle": "Support & juridisk",
+    "help": "Brug for hjælp & kontakt support",
+    "terms": "Servicevilkår",
+    "privacy": "Privatlivspolitik",
+    "restore": "Gendan køb",
+    "signOut": "Log ud af Espanda",
+    "signOutNote": "Dit aktive abonnement og kladde-katalogaktiver forbliver sikkert gemt."
+  },
+  "drawer": {
+    "closeMenu": "Luk menu",
+    "switchLabel": "Arbejdsområde {{name}}. Skift virksomhed",
+    "balanceLabel_one": "Nuværende saldo {{credits}} kredit tilbage, {{plan}} plan",
+    "balanceLabel_other": "Nuværende saldo {{credits}} kreditter tilbage, {{plan}} plan",
+    "balanceTitle": "Nuværende saldo",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredit tilbage</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> kreditter tilbage</rest>",
+    "sections": {
+      "create": "Opret",
+      "grow": "Vækst",
+      "manage": "Administrer"
+    },
+    "items": {
+      "chat": "Chat for at lave video",
+      "generations": "Mine generationer",
+      "photos": "Fotoaktiver",
+      "inbox": "Kunder & Indbakke",
+      "google": "Google Vækst",
+      "website": "Website Studio",
+      "connections": "Forbindelser",
+      "automations": "Automatiseringer",
+      "billing": "Planer & Fakturering",
+      "account": "Kontoinstillinger"
+    },
+    "signOut": "Log ud"
+  }
+}

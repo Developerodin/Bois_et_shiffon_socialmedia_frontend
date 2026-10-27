@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Abrir menú",
+    "creditsAvailable_one": "{{count}} crédito disponible",
+    "creditsAvailable_other": "{{count}} créditos disponibles",
+    "settings": "Configuración",
+    "appModules": "Módulos de la app",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Publicaciones",
+      "photoshoot": "Sesión de fotos",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Navegación de módulos",
+    "create": "Crear",
+    "results": "Resultados",
+    "goBack": "Volver",
+    "switchBusiness": "Cambiar negocio, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} artículo",
+    "optionWithCount_other": "{{label}} {{count}} artículos"
+  },
+  "create": {
+    "title": "Crear sesión de fotos",
+    "subtitle": "Crea fotos de productos y estiliza ropa en modelos.",
+    "product": {
+      "imageLabel": "{{name}} mesa de comedor",
+      "pill": "Artículo del catálogo",
+      "title": "Sesión de fotos de producto",
+      "body": "Coloca artículos del catálogo en interiores arquitectónicos y estudios con luz natural.",
+      "cta": "Nueva sesión de producto"
+    },
+    "fashion": {
+      "imageLabel": "Estudio de fotografía de ropa ilustrada",
+      "title": "Sesión de fotos de moda",
+      "body": "Estiliza ropa en modelos en escenas listas para campaña.",
+      "cta": "Nueva sesión de moda"
+    }
+  },
+  "product": {
+    "title": "Sesión de fotos de producto",
+    "estimate_one": "Estimación: {{count}} crédito",
+    "estimate_other": "Estimación: {{count}} créditos",
+    "available": "{{count}} disponibles",
+    "generate": "Generar sesión de fotos",
+    "selectedAsset": "Recurso del catálogo seleccionado",
+    "changeAsset": "Cambiar recurso",
+    "aspectRatio": "Relación de aspecto",
+    "sceneStyle": "Estilo de escena",
+    "scenes": {
+      "studio": "Estudio",
+      "interior": "Interior",
+      "custom": "Personalizado"
+    },
+    "frenchPrompt": "Prompt en francés",
+    "creativeBrief": "Brief creativo",
+    "briefHint": "Refina la iluminación, el ambiente o detalles específicos de decoración",
+    "sourcePreview": "Vista previa de origen",
+    "fullPreview": "{{product}}, vista previa completa",
+    "sourceImage": "Imagen de origen"
+  },
+  "fashion": {
+    "title": "Sesión de fotos de moda",
+    "generate": "Generar sesión de fotos",
+    "uploadToEnable": "Sube una foto de la prenda para habilitar la generación",
+    "heading": "Crea tu sesión de moda",
+    "subtitle": "Transforma prendas planas o en perchas en modelos escenificados realistas.",
+    "garmentPhoto": "Foto de la prenda",
+    "required": "Requerido",
+    "garmentSelected": "Foto de la prenda: {{label}}. Cambiar foto",
+    "addGarment": "Agregar foto de prenda",
+    "changeGarment": "Cambiar foto de prenda",
+    "garmentHint": "PNG o JPG en fondo neutro, plano o con maniquí invisible",
+    "modelStyling": "Modelo y estilo",
+    "modelSelected": "Modelo y estilo: {{model}}",
+    "models": {
+      "choose": "Elige un modelo",
+      "natural": "{{name}} · estilo natural",
+      "editorial": "{{name}} · estilo editorial",
+      "casual": "{{name}} · estilo casual"
+    },
+    "pose": "Pose",
+    "poses": {
+      "fullBody": "Cuerpo completo",
+      "threeQuarter": "Tres cuartos",
+      "closeUp": "Detalle de primer plano"
+    },
+    "outputFormat": "Formato de salida",
+    "formats": {
+      "feedPortrait": "Retrato para feed",
+      "storyReel": "Historia / Reel"
+    },
+    "background": "Configuración de fondo",
+    "backgrounds": {
+      "studioMinimal": "Estudio minimalista",
+      "urbanStreet": "Calle urbana",
+      "naturalInterior": "Interior natural"
+    },
+    "requirementsTitle": "Requisitos de carga",
+    "requirements": {
+      "contrast": "Alto contraste con el fondo",
+      "wrinkles": "Sin arrugas marcadas",
+      "frontFacing": "Ángulo frontal"
+    }
+  },
+  "source": {
+    "title": "Elegir recurso de origen",
+    "uploadNewLabel": "Subir nueva foto",
+    "uploadNew": "Subir nueva",
+    "noPhotoSelected": "No se seleccionó foto",
+    "photosSelected_one": "{{count}} foto seleccionada",
+    "photosSelected_other": "{{count}} fotos seleccionadas",
+    "selectPhoto": "Seleccionar una foto",
+    "usePhoto": "Usar foto",
+    "source": "Fuente",
+    "tabs": {
+      "website": "Sitio web",
+      "uploads": "Subidas"
+    },
+    "businessWebsite": "{{name}} · Sitio web",
+    "fromWebsite": "Desde el sitio web",
+    "filterCatalog": "Filtrar catálogo",
+    "filters": {
+      "all": "Todos los artículos",
+      "tables": "Mesas",
+      "storage": "Almacenamiento"
+    },
+    "addPhoto": "Agregar foto",
+    "tip": "Recortes de producto limpios producen resultados óptimos en la sesión de fotos. Espanda Studio preservará la textura original de la madera de acacia."
+  },
+  "generating": {
+    "backToWorkspace": "Volver al espacio de trabajo",
+    "returnToWorkspace": "Regresar al espacio de trabajo",
+    "title": "Preparando tus fotos",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Tu generación se ejecuta de forma segura en segundo plano. Encontrarás los recursos completados en Resultados.",
+    "status": {
+      "done": "Hecho",
+      "active": "En progreso",
+      "queued": "En cola"
+    },
+    "progress": "Generando",
+    "sample": {
+      "title": "{{name}} sesión de fotos de comedor",
+      "description": "Escenificando {{product}} en interior arquitectónico con luz diurna.",
+      "variations_one": "{{count}} variación",
+      "variations_other": "{{count}} variaciones"
+    },
+    "steps": {
+      "catalog": "Procesando recurso del catálogo",
+      "compose": "Componiendo escena e iluminación",
+      "finish": "Finalizando y calibrando color"
+    }
+  },
+  "results": {
+    "title": "Sesiones de fotos",
+    "subtitle": "Tus fotos de producto y moda",
+    "newPhotoshoot": "Nueva sesión de fotos",
+    "filterLabel": "Filtrar sesiones de fotos",
+    "filters": {
+      "all": "Todos ({{count}})",
+      "product": "Producto ({{count}})",
+      "fashion": "Moda ({{count}})"
+    },
+    "empty": "Aún no hay sesiones de fotos.",
+    "processingLabel": "{{title}}. Procesando, {{percent}}%",
+    "processingBadge_one": "Procesando · {{count}} crédito",
+    "processingBadge_other": "Procesando · {{count}} créditos",
+    "preview": "Vista previa",
+    "reviewPhotoLabel": "Revisar foto, {{title}}",
+    "reviewPhoto": "Revisar foto",
+    "sample": {
+      "studioStaging": "{{product}} · Escenografía de estudio",
+      "rendering": "Etapa de renderizado · {{percent}}%",
+      "interiorReady_one": "Interior · {{ratio}} · {{count}} foto lista",
+      "interiorReady_other": "Interior · {{ratio}} · {{count}} fotos listas",
+      "studioDaylight": "Luz de día en estudio · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Más opciones",
+    "downloadPhoto": "Descargar foto",
+    "variation": "Variación",
+    "share": "Compartir sesión",
+    "samplePreview": "Vista previa de muestra",
+    "compareOriginal": "Comparar original",
+    "expandView": "Expandir vista",
+    "stagingSummary": "Resumen de escenografía",
+    "format": "Formato",
+    "creationCost": "Costo de creación",
+    "credits_one": "{{count}} crédito",
+    "credits_other": "{{count}} créditos",
+    "sample": {
+      "headerTitle": "Sesión de {{name}}",
+      "vertical": "{{ratio}} Vertical",
+      "architecturalInterior": "Interior arquitectónico",
+      "studioDaylight": "Luz de día en estudio",
+      "formatBadge": "Formato {{ratio}}",
+      "naturalStudio": "Estudio natural",
+      "portraitPhoto": "Foto de retrato"
+    }
+  }
+}

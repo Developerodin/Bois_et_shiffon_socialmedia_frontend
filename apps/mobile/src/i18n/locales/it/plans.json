@@ -1,0 +1,168 @@
+{
+  "viewPlans": "Vedi piani",
+  "credits_one": "{{n}} credito",
+  "credits_other": "{{n}} crediti",
+  "tableAlt": "{{product}} tavolo da pranzo",
+  "plans": {
+    "professional": "Professionale",
+    "starter": "Iniziale",
+    "recommended": "Consigliato",
+    "priceToBeConfirmed": "Prezzo da confermare",
+    "features": {
+      "monthlyCredits_one": "{{n}} credito mensile per studio",
+      "monthlyCredits_other": "{{n}} crediti mensili per studio",
+      "postsStories": "Post, storie e programmazione",
+      "photoshoots": "Servizi fotografici di prodotto e moda",
+      "websiteStudio": "Website Studio e bozza di dominio personalizzato",
+      "replyAssistant": "Assistente risposte AI",
+      "googleSync": "Sincronizzazione profilo Google Growth",
+      "contentExports": "Creazione ed esportazione contenuti",
+      "reelsStaging": "Video reel e staging core studio"
+    }
+  },
+  "header": {
+    "openMenu": "Apri menu",
+    "plans": "Piani",
+    "billingSettings": "Impostazioni di fatturazione",
+    "modules": {
+      "reels": "Reel",
+      "posts": "Post",
+      "photoshoot": "Servizio fotografico",
+      "marketing": "Marketing"
+    }
+  },
+  "choose": {
+    "title": "Scegli il tuo piano",
+    "pricingUnavailable": "Prezzi non ancora disponibili.",
+    "continue": "Continua",
+    "restorePurchases": "Ripristina acquisti",
+    "terms": "Termini di servizio",
+    "privacy": "Informativa sulla privacy",
+    "lead": "Scala il tuo studio retail con video reel automatizzati, servizi fotografici e pubblicazione sui social.",
+    "planA11y": "Piano {{name}}, {{price}}"
+  },
+  "activated": {
+    "continueReel_one": "Continua a creare il reel ({{n}} credito)",
+    "continueReel_other": "Continua a creare il reel ({{n}} crediti)",
+    "backToWorkspace": "Torna allo spazio di lavoro",
+    "title": "Piano attivato",
+    "lead_one": "Il tuo spazio di lavoro {{plan}} è ora attivo con {{n}} credito mensile. Benvenuto in Espanda Studio.",
+    "lead_other": "Il tuo spazio di lavoro {{plan}} è ora attivo con {{n}} crediti mensili. Benvenuto in Espanda Studio.",
+    "planName": "Piano {{plan}}",
+    "active": "Attivo",
+    "renews": "Rinnova mensilmente · Caratteristiche del piano {{plan}}",
+    "available": "Disponibile",
+    "resumeProject": "Riprendi progetto in sospeso",
+    "inProgress": "In corso",
+    "reelTitle": "Reel {{title}}",
+    "scenesReady_one": "{{n}} scena pronta per la creazione",
+    "scenesReady_other": "{{n}} scene pronte per la creazione",
+    "noDeduction": "Nessun credito è stato ancora detratto. La generazione inizia solo quando confermi."
+  },
+  "billing": {
+    "title": "Impostazioni",
+    "tabs": {
+      "business": "La mia attività",
+      "billing": "Fatturazione",
+      "postsPlanner": "Pianificatore di post"
+    },
+    "status": "Nessun abbonamento attivo",
+    "plan": "Spazio di lavoro gratuito",
+    "balance": "Saldo",
+    "note": "Bozze, sincronizzazione catalogo negozio e impostazioni aziendali rimangono disponibili.",
+    "recentUsage": "Uso recente dei crediti",
+    "creditActivity": "Attività dei crediti",
+    "empty": "Nessun credito usato ancora. Scegli un piano per iniziare a creare reel e staging automatizzati.",
+    "restore": "Ripristina acquisti di abbonamento",
+    "appLanguage": "Lingua dell'interfaccia app",
+    "languages": {
+      "englishUS": "Inglese US",
+      "frenchFR": "Francese FR"
+    },
+    "push": "Notifiche push",
+    "pushHint": "Avvisi di rendering e completamenti batch",
+    "terms": "Termini di servizio",
+    "privacy": "Informativa sulla privacy"
+  },
+  "gate": {
+    "sheetLabel": "Abbonamento richiesto",
+    "subscriberGeneration": "Generazione abbonato",
+    "title": "Pronto a creare questo reel?",
+    "body": "È richiesto un piano attivo per creare video reel con voiceover e audio in francese. La tua storyboard è salvata e in attesa.",
+    "saved": "Salvato",
+    "reelFacts_one": "{{seconds}}s · 9:16 verticale · {{count}} scena · Voiceover in francese",
+    "reelFacts_other": "{{seconds}}s · 9:16 verticale · {{count}} scene · Voiceover in francese",
+    "creditsPerReel_one": "{{n}} credito per reel",
+    "creditsPerReel_other": "{{n}} crediti per reel",
+    "keepEditing": "Continua a modificare la storyboard",
+    "afterActivation": "Dopo l'attivazione, torna alla tua storyboard per confermare la generazione."
+  },
+  "marketing": {
+    "paidAdsA11y": "Annunci a pagamento, in arrivo",
+    "paidAds": "Annunci a pagamento · In arrivo",
+    "title": "Marketing",
+    "subtitle": "Gestisci la visibilità del tuo negozio, le conversazioni e il profilo del marchio",
+    "toolLockedA11y": "{{title}}, {{subtitle}}. Bloccato, piano Professionale. Vedi piani",
+    "toolAvailableA11y": "{{title}}, {{subtitle}}. Disponibile. Configura",
+    "locked": "Bloccato",
+    "available": "Disponibile",
+    "professional": "Professionale",
+    "configure": "Configura",
+    "tools": {
+      "customers": {
+        "title": "Clienti",
+        "subtitle": "Posta in arrivo e risposte AI"
+      },
+      "google": {
+        "title": "Google Growth",
+        "subtitle": "Mappe locali e recensioni"
+      },
+      "website": {
+        "title": "Website Studio",
+        "subtitle": "Pagine di destinazione e bozza"
+      },
+      "business": {
+        "title": "La mia attività",
+        "subtitle": "Dettagli del marchio e risposte"
+      },
+      "connections": {
+        "title": "Connessioni",
+        "subtitle": "Sincronizzazione social e sito web"
+      },
+      "automations": {
+        "title": "Automazioni",
+        "subtitle": "Preferenze di pubblicazione"
+      }
+    }
+  },
+  "posts": {
+    "title": "I tuoi post, in movimento",
+    "subtitle": "Rivedi i punti salienti dei prodotti generati e i post programmati",
+    "subscriptionFeature": "Funzionalità di abbonamento",
+    "inactive": "Inattivo",
+    "monthlyPlan": "Il tuo piano mensile",
+    "unlock": "Sblocca post e storie mensili, didascalie ottimizzate per il marchio e pubblicazione multi-canale programmata.",
+    "calendarA11y": "Anteprima del programma bozza, {{month}}",
+    "draftSchedule": "Programma bozza",
+    "day": "{{weekday}} {{day}}",
+    "postMeta": "{{time}} · Bozza · non pubblicato",
+    "keepDrafting": "Continua a creare bozze manualmente"
+  },
+  "reels": {
+    "home": "Home reel",
+    "title": "Crea il tuo prossimo reel",
+    "subtitle": "Crea video reel studio dal catalogo del tuo negozio",
+    "notice_one": "Le tue idee sono ancora qui. Esplora {{n}} idea e rivedi le storyboard in qualsiasi momento. Il piano attivo sblocca il rendering video.",
+    "notice_other": "Le tue idee sono ancora qui. Esplora {{n}} idee e rivedi le storyboard in qualsiasi momento. Il piano attivo sblocca il rendering video.",
+    "heroAlt": "{{product}} collezione da pranzo, allestita",
+    "creativePrompt": "Spunto creativo",
+    "yourAssistant": "Il tuo assistente",
+    "question": "Cosa vorresti mostrare?",
+    "planTogether": "Pianifica un reel insieme",
+    "start": "Inizia",
+    "startA11y": "Inizia a pianificare un reel",
+    "ideasReady_one": "{{n}} idea pronta",
+    "ideasReady_other": "{{n}} idee pronte",
+    "viewIdeas": "Vedi idee →"
+  }
+}

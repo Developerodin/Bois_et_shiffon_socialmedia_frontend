@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} credit",
+  "credits_other": "{{n}} credits",
+  "tableAlt": "{{product}} dining table",
+  "sheet": {
+    "dismiss": "Dismiss"
+  },
+  "videoFailed": {
+    "title": "Your reel isn't ready",
+    "body": "Rendering was interrupted during scene composition. Your reserved credits have been released.",
+    "failed": "Failed",
+    "facts_one": "{{seconds}}s · 9:16 Vertical · {{count}} scene",
+    "facts_other": "{{seconds}}s · 9:16 Vertical · {{count}} scenes",
+    "released_one": "{{n}} reserved credit released",
+    "released_other": "{{n}} reserved credits released",
+    "impact": "Credit balance impact",
+    "used_one": "{{n}} credit used",
+    "used_other": "{{n}} credits used",
+    "viewDetails": "View details",
+    "details": {
+      "failedAt": "Failed at",
+      "reserved": "Reserved",
+      "released": "Released",
+      "stages": {
+        "sceneComposition": "Scene composition"
+      }
+    },
+    "tryAgain_one": "Try again ({{n}} credit)",
+    "tryAgain_other": "Try again ({{n}} credits)",
+    "editStoryboard": "Edit storyboard"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "{{seconds}}s duration · 9:16 vertical",
+    "sheetLabel": "Not enough credits",
+    "title_one": "You need {{n}} credit",
+    "title_other": "You need {{n}} credits",
+    "body_one": "You currently have <b>{{n}} credit available</b> in your Professional workspace. Your storyboard draft is safely saved.",
+    "body_other": "You currently have <b>{{n}} credits available</b> in your Professional workspace. Your storyboard draft is safely saved.",
+    "planName": "Professional plan",
+    "active": "Active",
+    "renews": "Renews monthly",
+    "remaining": "{{available}} / {{monthly}} remaining",
+    "remainingA11y": "Monthly credits remaining",
+    "manage": "Manage credits",
+    "keepEditing": "Keep editing storyboard"
+  },
+  "reconnect": {
+    "backdropTitle": "Schedule",
+    "backdropMeta": "Scheduled for {{date}}",
+    "title": "Reconnect {{network}}",
+    "body": "Your account authorization has expired. Reconnect your account to resume scheduling.",
+    "draftSaved": "Existing draft saved safely",
+    "noPosting": "No posting will start until you explicitly confirm.",
+    "saveForLater": "Save draft for later"
+  },
+  "importFailed": {
+    "title": "Couldn't read this website",
+    "body": "We couldn't reach or extract catalog photos from this address. Check your URL or continue by describing your store.",
+    "urlLabel": "Store website url",
+    "changeUrlA11y": "Change website URL",
+    "changeUrl": "Change URL",
+    "reasons": {
+      "timeout": "The website took too long to respond. No changes were made."
+    },
+    "quickOptions": "Quick options to continue:",
+    "options": {
+      "retry": "Retry scanning if your store server was briefly busy.",
+      "manual": "Add business name and products manually without waiting."
+    },
+    "tryAgain": "Try again",
+    "addManually": "Add business manually"
+  }
+}

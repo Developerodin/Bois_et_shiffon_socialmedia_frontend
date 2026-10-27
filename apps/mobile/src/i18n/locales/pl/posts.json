@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Zaplanowane",
+    "briefReady": "Brief gotowy",
+    "needsReview": "Wymaga przeglądu",
+    "draftReady": "Szkic gotowy",
+    "approved": "Zatwierdzone",
+    "scheduled": "Zaplanowane",
+    "published": "Opublikowane",
+    "draft": "Szkic"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Dziś",
+    "tomorrow": "Jutro"
+  },
+  "chrome": {
+    "openMenu": "Otwórz menu",
+    "logo": "Espanda",
+    "credits_one": "{{count}} kredyt dostępny",
+    "credits_other": "{{count}} kredytów dostępnych",
+    "settings": "Ustawienia",
+    "modulesLabel": "Moduły aplikacji",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Posty",
+      "photoshoot": "Sesja zdjęciowa",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Nawigacja modułu",
+    "nav": {
+      "today": "Dziś",
+      "posts": "Posty",
+      "create": "Utwórz",
+      "stories": "Relacje",
+      "settings": "Ustawienia"
+    },
+    "back": "Wstecz",
+    "switchBusiness": "Zmień firmę, {{name}}",
+    "business": "Firma: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Twoje posty w ruchu",
+    "subtitle": "Przeglądaj wygenerowane wyróżnienia produktów i zaplanowane posty",
+    "needsApproval": "Wymaga zatwierdzenia",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Przejrzyj post",
+    "agenda": "Nadchodząca agenda",
+    "thisWeek": "W tym tygodniu",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Zobacz kalendarz"
+  },
+  "calendar": {
+    "title": "Kalendarz postów",
+    "subtitle": "Planuj i automatyzuj swoje publikacje",
+    "viewLabel": "Widok kalendarza",
+    "views": {
+      "month": "Miesiąc",
+      "list": "Lista"
+    },
+    "plan": "Plan: {{n}} postów / miesiąc",
+    "managePlan": "Zarządzaj planem",
+    "postCount_one": "{{count}} post",
+    "postCount_other": "{{count}} postów",
+    "empty": "Nic nie zaplanowano na ten dzień.",
+    "scheduled_one": "{{count}} zaplanowany",
+    "scheduled_other": "{{count}} zaplanowane",
+    "previousMonth": "Poprzedni miesiąc",
+    "nextMonth": "Następny miesiąc",
+    "gridLabel": "Kalendarz {{month}}",
+    "dayWithPosts_one": "{{day}} · {{count}} post",
+    "dayWithPosts_other": "{{day}} · {{count}} postów"
+  },
+  "detail": {
+    "title": "Szczegóły posta",
+    "moreOptions": "Więcej opcji",
+    "feedPhoto": "Zdjęcie w feedzie 4:5",
+    "fullscreen": "Pełny ekran",
+    "captionFrench": "Podpis (francuski)",
+    "editText": "Edytuj tekst",
+    "channels": "Kanały publikacji",
+    "instagramFeed": "Instagram Feed",
+    "instagramDetail": "Połącz konto, aby publikować",
+    "facebookPage": "Strona na Facebooku",
+    "facebookDetail": "Automatyczne publikowanie na oficjalnej stronie",
+    "notConnected": "Nie połączono",
+    "channelNotConnected": "{{name}}, nie połączono",
+    "editPost": "Edytuj post",
+    "schedule": "Zaplanuj"
+  },
+  "edit": {
+    "title": "Edytuj post",
+    "cancel": "Anuluj",
+    "save": "Zapisz zmiany",
+    "previewLabel": "{{title}}, oryginalny format 4:5",
+    "ratio": "Oryginalny format · 4:5",
+    "sectionLabel": "Edytuj sekcję",
+    "tabs": {
+      "image": "Obraz",
+      "caption": "Podpis",
+      "brand": "Marka"
+    },
+    "description": "Opis posta",
+    "language": "Język: francuski (FR)",
+    "suggestedHashtags": "Sugerowane hashtagi",
+    "addHashtag": "Dodaj hashtag",
+    "add": "+ Dodaj",
+    "regenerate": "Wygeneruj podpis ponownie za pomocą AI",
+    "imageHint": "Oryginalny format · 4:5. Przeciągnij podgląd, aby zmienić kadr.",
+    "brandHint": "Logo, kolory i tonacja zgodne z zestawem marki {{brand}}."
+  },
+  "schedule": {
+    "title": "Zaplanuj",
+    "storyFormat": "Relacja · obraz 9:16",
+    "feedFormat": "Post w feedzie · obraz 4:5",
+    "destination": "Cel",
+    "actionRequired": "Wymagana akcja",
+    "notLinked": "Konto Instagram nie połączone",
+    "notLinkedBody": "Połącz swoje konta społecznościowe, aby odblokować bezpośrednie planowanie publikacji.",
+    "connect": "Połącz konto społecznościowe",
+    "locked": "Planowanie zablokowane do momentu połączenia",
+    "timing": "Czas i harmonogram",
+    "date": "Data",
+    "dateLabel": "Data, {{date}}",
+    "time": "Czas",
+    "timeLabel": "Czas, {{time}}",
+    "timezone": "Strefa czasowa",
+    "schedulePost": "Zaplanuj post",
+    "scheduleLocked": "Zaplanuj post (Najpierw połącz kanał)",
+    "saveDraft": "Zapisz szkic"
+  },
+  "brief": {
+    "title": "Utwórz post",
+    "subtitle": "Wybierz produkt i kierunek kreatywny",
+    "format": "Format treści",
+    "formatLabel": "Format posta",
+    "singlePhoto": "Pojedyncze zdjęcie",
+    "singlePhotoDetail": "Fokus feedu 4:5",
+    "carousel": "Karuzela",
+    "carouselDetail": "Wiele zdjęć",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Główny cel",
+    "goals": {
+      "newArrival": "Nowość",
+      "productFeature": "Cechy produktu",
+      "specialOffer": "Oferta specjalna"
+    },
+    "product": "Docelowy produkt z katalogu",
+    "changeProduct": "Zmień produkt",
+    "change": "Zmień",
+    "direction": "Kierunek kreatywny (opcjonalnie)",
+    "directionLanguage": "Francuski (FR)",
+    "directionPlaceholder": "np. Skup się na ręcznie wykonanych elementach i ciepłocie",
+    "cost": "Koszt utworzenia:",
+    "costPending": "Szacowanie w toku",
+    "draftPost": "Szkic posta"
+  },
+  "stories": {
+    "title": "Relacje",
+    "subtitle": "Pionowe chwile społeczne 9:16",
+    "newStory": "Nowa relacja",
+    "statusLabel": "Status relacji",
+    "drafts_one": "Szkice ({{count}})",
+    "drafts_other": "Szkice ({{count}})",
+    "scheduled_one": "Zaplanowane ({{count}})",
+    "scheduled_other": "Zaplanowane ({{count}})",
+    "samplePreview": "Podgląd próbki",
+    "moreOptions": "Więcej opcji dla {{title}}",
+    "editStory": "Edytuj relację"
+  },
+  "editStory": {
+    "back": "Wstecz",
+    "undo": "Cofnij",
+    "tools": {
+      "text": "Tekst",
+      "image": "Obraz",
+      "brand": "Marka",
+      "cta": "CTA"
+    },
+    "toolLabel": "Narzędzie {{tool}}",
+    "captionTitle": "Podpis relacji / Naklejka z linkiem",
+    "languageCode": "FR",
+    "saveDraft": "Zapisz szkic",
+    "scheduleStory": "Zaplanuj relację"
+  },
+  "planner": {
+    "title": "Planer postów",
+    "sectionsLabel": "Sekcje ustawień",
+    "sections": {
+      "business": "Moja firma",
+      "billing": "Rozliczenia",
+      "planner": "Planer postów"
+    },
+    "cycle": "Cykl planowania",
+    "cadence": "Częstotliwość publikacji",
+    "monthlyTarget": "Miesięczny cel",
+    "feedPosts": "Posty w feedzie",
+    "stories": "Relacje",
+    "perMonth": "{{n}} / miesiąc",
+    "feedNote": "~1 post dziennie",
+    "storiesNote": "Rozłożone w ciągu miesiąca",
+    "cadenceHint": "Sugerowane cele dotyczące treści. Dostosuj przed wygenerowaniem kalendarza.",
+    "pillars": "Filary treści",
+    "pillar": {
+      "catalog": "Produkty katalogowe (skupienie na Bunting)",
+      "craft": "Szczegóły materiałów i rzemiosło (drewno Acacia)",
+      "story": "Historia marki i francuskie dziedzictwo"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Ręczna weryfikacja przed publikacją: </b>Wygenerowane treści są umieszczane w kalendarzu jako szkice do ostatecznego potwierdzenia. Żadne treści nie są publikowane bez zgody.",
+    "generate": "Generuj kalendarz"
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "مساحة العمل {{name}}",
+    "logoLabel": "شعار {{name}}",
+    "settingsTitle": "الإعدادات",
+    "edit": "تعديل",
+    "manage": "إدارة",
+    "tabs": {
+      "myBusiness": "عملي",
+      "billing": "الفواتير",
+      "postsPlanner": "مخطط المنشورات"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "خصائص العمل",
+    "attributes": {
+      "location": "الموقع",
+      "audience": "الجمهور",
+      "category": "الفئة",
+      "subcategory": "الفئة الفرعية",
+      "storeType": "نوع المتجر",
+      "website": "الموقع الإلكتروني"
+    },
+    "brandPreferences": "تفضيلات العلامة التجارية",
+    "brandPreferencesHint": "الألوان، النغمة، اللغة",
+    "photoAssets": "أصول الصور",
+    "photoAssetsHint": "صور طاولة Bunting ووحدة التلفاز",
+    "connections": "الاتصالات",
+    "connectionsHint": "القنوات الاجتماعية وملف Google الشخصي"
+  },
+  "brand": {
+    "title": "إعدادات العلامة التجارية",
+    "save": "حفظ التغييرات",
+    "paletteTitle": "لوحة ألوان العلامة التجارية",
+    "editHex": "تعديل الكود السداسي",
+    "watermarkTitle": "شعار العلامة المائية الختامي",
+    "watermarkBody": "يُطبق على نهايات الفيديوهات وإطارات الصور",
+    "change": "تغيير",
+    "toneTitle": "نغمة الإبداع",
+    "tones": {
+      "modern": "حديث",
+      "luxurious": "فاخر",
+      "elegant": "أنيق",
+      "premium": "متميز",
+      "natural": "طبيعي",
+      "minimalist": "بسيط"
+    },
+    "cuesTitle": "إشارات توقيع العلامة التجارية",
+    "addCue": "إضافة إشارة"
+  },
+  "photos": {
+    "title": "أصول الصور",
+    "refresh": "تحديث",
+    "sourceTitle": "الموقع المصدر",
+    "sourceBody": "الصور المشتركة المستخدمة لإنشاء الفيديوهات، منشورات الخلاصة، وتنسيق جلسات التصوير. لا تُنشر أي صور خارجية دون موافقتك الصريحة.",
+    "sources": {
+      "website": "الموقع الإلكتروني ({{n}})",
+      "uploads": "التحميلات ({{n}})"
+    },
+    "addPhotos": "إضافة صور",
+    "photosTitle": "الصور",
+    "photoCount_one": "{{n}} صورة",
+    "photoCount_other": "{{n}} صور",
+    "emptyTitle": "لا توجد تحميلات بعد",
+    "emptyBody": "ستظهر هنا الصور الاستوديو التي تقوم بتحميلها.",
+    "upload": "تحميل صور استوديو مخصصة"
+  },
+  "connections": {
+    "title": "الاتصالات",
+    "sourceTitle": "الموقع المصدر",
+    "linked": "مرتبط",
+    "sourceBody": "صور المنتجات وتفاصيل العمل",
+    "channelsTitle": "قنوات النشر",
+    "accounts": "الحسابات",
+    "connected": "متصل",
+    "notConnected": "غير متصل",
+    "connect": "اتصال",
+    "disconnect": "قطع الاتصال",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "صفحة Facebook",
+      "whatsapp": "WhatsApp Business",
+      "google": "ملف Google للأعمال",
+      "shopify": "مزامنة Shopify المباشرة"
+    }
+  },
+  "automations": {
+    "title": "الأتمتة",
+    "heading": "تفضيلات النشر الخاصة بك",
+    "intro": "تحكم في كيفية ملء Espanda مسبقًا للمنشورات المجدولة وصياغة المحتوى لعناصر الكتالوج الخاصة بك.",
+    "reviewTitle": "مراجعة قبل النشر",
+    "reviewBody": "مراجعة المحتوى قبل نشره.",
+    "required": "مطلوب",
+    "reviewLabel": "مراجعة قبل النشر. مراجعة المحتوى قبل نشره. مطلوب.",
+    "queueTitle": "إجراءات قائمة الانتظار",
+    "manageConnections": "إدارة الاتصالات",
+    "items": {
+      "monthly": {
+        "title": "إنشاء خطط شهرية",
+        "body": "تحضير تقويمك الشهري للمنشورات المسودة.",
+        "active": "نشط · المسودات محفوظة في التقويم"
+      },
+      "autopublish": {
+        "title": "نشر المنشورات المعتمدة تلقائيًا",
+        "body": "دفع الفيديوهات المجدولة تلقائيًا بمجرد النقر على \"موافقة\".",
+        "requires": "يتطلب اتصال Instagram",
+        "active": "نشط · ينشر بعد الموافقة"
+      },
+      "replies": {
+        "title": "صياغة ردود استفسارات صالة العرض",
+        "body": "ملء مسبق لردود الحرفيين الفرنسيين المكررة في قائمة الانتظار الخاصة بك.",
+        "requires": "يتطلب قناة مراسلة",
+        "active": "نشط · المسودات مضافة إلى صندوق الوارد الخاص بك"
+      }
+    },
+    "adsTitle": "إعلانات وسائل التواصل المدفوعة",
+    "comingSoon": "قريبًا",
+    "adsBody": "اختبار إبداعي تلقائي لإعلانات Meta وتحديد الميزانية."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} رصيد متاح",
+    "creditsAvailable_other": "{{n}} أرصدة متاحة",
+    "planName": "خطة {{tier}}",
+    "statusActive": "نشط",
+    "planBlurb": "أدوات الإنشاء والعمل الخاصة بك",
+    "cycleTitle": "دورة الفوترة",
+    "renewsMonthly": "تجدد شهريًا",
+    "balanceTitle": "رصيد الائتمان",
+    "monthlyAllowance": "{{amount}} مخصص شهري",
+    "balanceLabel_one": "{{balance}} من {{n}} رصيد متاح",
+    "balanceLabel_other": "{{balance}} من {{n}} أرصدة متاحة",
+    "balanceOf_one": " / {{n}} رصيد متاح",
+    "balanceOf_other": " / {{n}} أرصدة متاحة",
+    "note_one": "{{n}} رصيد مستخدم · {{reserved}} محجوز لـ {{item}}. يتجدد المخصص شهريًا.",
+    "note_other": "{{n}} أرصدة مستخدمة · {{reserved}} محجوزة لـ {{item}}. يتجدد المخصص شهريًا.",
+    "usageTitle": "استخدام الرصيد الأخير",
+    "usageAside": "نشاط مساحة العمل",
+    "today": "اليوم",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} فيديو",
+        "detail": "محجوز للتوليد"
+      },
+      "plan": {
+        "title": "خطة المحتوى الشهرية",
+        "detail_one": "{{n}} منشور مسودة",
+        "detail_other": "{{n}} منشورات مسودة"
+      },
+      "renewal": {
+        "title": "تجديد الخطة الشهرية",
+        "detail": "إعادة تعيين رصيد الدورة"
+      }
+    },
+    "spent_one": "-{{n}} رصيد",
+    "spent_other": "-{{n}} أرصدة",
+    "added_one": "+{{n}} رصيد",
+    "added_other": "+{{n}} أرصدة",
+    "included": "مشمول",
+    "help": {
+      "missingCredits": "الأرصدة المفقودة أو الفشل في العرض",
+      "restore": "استعادة عمليات الشراء للاشتراك",
+      "history": "تاريخ الفواتير والفواتير"
+    }
+  },
+  "account": {
+    "title": "إعدادات الحساب",
+    "workspaceTitle": "مساحة العمل",
+    "workspaceName": "اسم مساحة العمل",
+    "teamTitle": "التعاون في الفريق",
+    "teamMembers": "أعضاء مساحة العمل",
+    "preferencesTitle": "التفضيلات",
+    "languageTitle": "لغة واجهة التطبيق",
+    "languageBody": "تظل المطالبات والصادرات بالفرنسية",
+    "languageLabel": "لغة التطبيق، {{language}}",
+    "languageHint": "يفتح قائمة اللغات",
+    "pushTitle": "إشعارات الدفع",
+    "pushBody": "تحديثات الإنشاء والنشر",
+    "supportTitle": "الدعم والقانوني",
+    "help": "تحتاج إلى مساعدة واتصل بالدعم",
+    "terms": "شروط الخدمة",
+    "privacy": "سياسة الخصوصية",
+    "restore": "استعادة المشتريات",
+    "signOut": "تسجيل الخروج من Espanda",
+    "signOutNote": "يظل اشتراكك النشط وأصول الكتالوج المسودة محفوظة بأمان."
+  },
+  "drawer": {
+    "closeMenu": "إغلاق القائمة",
+    "switchLabel": "مساحة العمل {{name}}. تبديل العمل",
+    "balanceLabel_one": "الرصيد الحالي {{credits}} رصيد متبقي، خطة {{plan}}",
+    "balanceLabel_other": "الرصيد الحالي {{credits}} أرصدة متبقية، خطة {{plan}}",
+    "balanceTitle": "الرصيد الحالي",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> رصيد متبقي</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> أرصدة متبقية</rest>",
+    "sections": {
+      "create": "إنشاء",
+      "grow": "نمو",
+      "manage": "إدارة"
+    },
+    "items": {
+      "chat": "الدردشة لإنشاء فيديو",
+      "generations": "أجيالي",
+      "photos": "أصول الصور",
+      "inbox": "العملاء وصندوق الوارد",
+      "google": "نمو Google",
+      "website": "استوديو الموقع",
+      "connections": "الاتصالات",
+      "automations": "الأتمتة",
+      "billing": "الخطط والفواتير",
+      "account": "إعدادات الحساب"
+    },
+    "signOut": "تسجيل الخروج"
+  }
+}

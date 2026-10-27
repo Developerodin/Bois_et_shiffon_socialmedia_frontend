@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Åbn menu",
+    "creditsAvailable_one": "{{count}} kredit tilgængelig",
+    "creditsAvailable_other": "{{count}} kreditter tilgængelige",
+    "settings": "Indstillinger",
+    "appModules": "App-moduler",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Opslag",
+      "photoshoot": "Fotoshoot",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Modulnavigation",
+    "create": "Opret",
+    "results": "Resultater",
+    "goBack": "Gå tilbage",
+    "switchBusiness": "Skift virksomhed, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} vare",
+    "optionWithCount_other": "{{label}} {{count}} varer"
+  },
+  "create": {
+    "title": "Opret fotoshoot",
+    "subtitle": "Opret produktfotos og style tøj på modeller.",
+    "product": {
+      "imageLabel": "{{name}} spisebord",
+      "pill": "Katalogvare",
+      "title": "Produktfotoshoot",
+      "body": "Placer katalogvarer i arkitektoniske interiører og studieindstillinger med naturligt lys.",
+      "cta": "Nyt produktshoot"
+    },
+    "fashion": {
+      "imageLabel": "Illustreret tøjfotografistudie",
+      "title": "Modefotoshoot",
+      "body": "Style tøj på modeller i kampagneklare scener.",
+      "cta": "Nyt modeshot"
+    }
+  },
+  "product": {
+    "title": "Produktfotoshoot",
+    "estimate_one": "Estimat: {{count}} kredit",
+    "estimate_other": "Estimat: {{count}} kreditter",
+    "available": "{{count}} tilgængelig",
+    "generate": "Generer fotoshoot",
+    "selectedAsset": "Valgt katalogvare",
+    "changeAsset": "Skift vare",
+    "aspectRatio": "Billedformat",
+    "sceneStyle": "Scenestil",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Interiør",
+      "custom": "Brugerdefineret"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Kreativ brief",
+    "briefHint": "Forfin belysning, stemning eller specifikke dekorelementer",
+    "sourcePreview": "Kildevisning",
+    "fullPreview": "{{product}}, fuld visning",
+    "sourceImage": "Kildebillede"
+  },
+  "fashion": {
+    "title": "Modefotoshoot",
+    "generate": "Generer fotoshoot",
+    "uploadToEnable": "Upload et tøjbillede for at aktivere generering",
+    "heading": "Byg dit modeshot",
+    "subtitle": "Transformér flade eller hængende tøj til realistiske opstillede modeller.",
+    "garmentPhoto": "Tøjbillede",
+    "required": "Påkrævet",
+    "garmentSelected": "Tøjbillede: {{label}}. Skift billede",
+    "addGarment": "Tilføj tøjbillede",
+    "changeGarment": "Skift tøjbillede",
+    "garmentHint": "PNG eller JPG på neutral baggrund, fladt eller ghost mannequin",
+    "modelStyling": "Model & styling",
+    "modelSelected": "Model & styling: {{model}}",
+    "models": {
+      "choose": "Vælg en model",
+      "natural": "{{name}} · naturlig styling",
+      "editorial": "{{name}} · redaktionel styling",
+      "casual": "{{name}} · afslappet styling"
+    },
+    "pose": "Positur",
+    "poses": {
+      "fullBody": "Fuld krop",
+      "threeQuarter": "Tre-kvart",
+      "closeUp": "Nærbillede"
+    },
+    "outputFormat": "Outputformat",
+    "formats": {
+      "feedPortrait": "Feed-portræt",
+      "storyReel": "Story / Reel"
+    },
+    "background": "Baggrundsindstilling",
+    "backgrounds": {
+      "studioMinimal": "Studio minimal",
+      "urbanStreet": "Urban gade",
+      "naturalInterior": "Naturligt interiør"
+    },
+    "requirementsTitle": "Uploadkrav",
+    "requirements": {
+      "contrast": "Høj kontrast mod baggrund",
+      "wrinkles": "Ingen kraftige folder",
+      "frontFacing": "Frontvendt vinkel"
+    }
+  },
+  "source": {
+    "title": "Vælg kildevare",
+    "uploadNewLabel": "Upload nyt billede",
+    "uploadNew": "Upload ny",
+    "noPhotoSelected": "Intet billede valgt",
+    "photosSelected_one": "{{count}} billede valgt",
+    "photosSelected_other": "{{count}} billeder valgt",
+    "selectPhoto": "Vælg et billede",
+    "usePhoto": "Brug billede",
+    "source": "Kilde",
+    "tabs": {
+      "website": "Websted",
+      "uploads": "Uploads"
+    },
+    "businessWebsite": "{{name}} · Websted",
+    "fromWebsite": "Fra websted",
+    "filterCatalog": "Filtrer katalog",
+    "filters": {
+      "all": "Alle varer",
+      "tables": "Borde",
+      "storage": "Opbevaring"
+    },
+    "addPhoto": "Tilføj billede",
+    "tip": "Rene produktudskæringer giver optimale fotoshoot-resultater. Espanda Studio vil bevare den originale akacietræstruktur."
+  },
+  "generating": {
+    "backToWorkspace": "Tilbage til arbejdsområde",
+    "returnToWorkspace": "Tilbage til arbejdsområde",
+    "title": "Forbereder dine fotos",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Din generering kører sikkert i baggrunden. Du finder færdige varer i Resultater.",
+    "status": {
+      "done": "Færdig",
+      "active": "I gang",
+      "queued": "I kø"
+    },
+    "progress": "Genererer",
+    "sample": {
+      "title": "{{name}} spisebordsfotoshoot",
+      "description": "Opsætning af {{product}} i arkitektonisk dagslysinteriør.",
+      "variations_one": "{{count}} variation",
+      "variations_other": "{{count}} variationer"
+    },
+    "steps": {
+      "catalog": "Behandler katalogvare",
+      "compose": "Komponerer scene & belysning",
+      "finish": "Afslutter & farvekalibrering"
+    }
+  },
+  "results": {
+    "title": "Fotoshoots",
+    "subtitle": "Dine produkt- og modefotos",
+    "newPhotoshoot": "Nyt fotoshoot",
+    "filterLabel": "Filtrer fotoshoots",
+    "filters": {
+      "all": "Alle ({{count}})",
+      "product": "Produkt ({{count}})",
+      "fashion": "Mode ({{count}})"
+    },
+    "empty": "Ingen fotoshoots endnu.",
+    "processingLabel": "{{title}}. Behandler, {{percent}}%",
+    "processingBadge_one": "Behandler · {{count}} kredit",
+    "processingBadge_other": "Behandler · {{count}} kreditter",
+    "preview": "Forhåndsvisning",
+    "reviewPhotoLabel": "Gennemgå foto, {{title}}",
+    "reviewPhoto": "Gennemgå foto",
+    "sample": {
+      "studioStaging": "{{product}} · Studiostaging",
+      "rendering": "Rendering trin · {{percent}}%",
+      "interiorReady_one": "Interiør · {{ratio}} · {{count}} foto klar",
+      "interiorReady_other": "Interiør · {{ratio}} · {{count}} fotos klar",
+      "studioDaylight": "Studiobelysning · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Flere muligheder",
+    "downloadPhoto": "Download foto",
+    "variation": "Variation",
+    "share": "Del fotoshoot",
+    "samplePreview": "Eksempel forhåndsvisning",
+    "compareOriginal": "Sammenlign original",
+    "expandView": "Udvid visning",
+    "stagingSummary": "Staging oversigt",
+    "format": "Format",
+    "creationCost": "Oprettelsesomkostning",
+    "credits_one": "{{count}} kredit",
+    "credits_other": "{{count}} kreditter",
+    "sample": {
+      "headerTitle": "{{name}} fotoshoot",
+      "vertical": "{{ratio}} Vertikal",
+      "architecturalInterior": "Arkitektonisk interiør",
+      "studioDaylight": "Studiobelysning",
+      "formatBadge": "{{ratio}} format",
+      "naturalStudio": "Naturligt studie",
+      "portraitPhoto": "Portrætfoto"
+    }
+  }
+}

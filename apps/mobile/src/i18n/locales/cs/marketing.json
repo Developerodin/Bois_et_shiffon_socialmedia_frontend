@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Pracovní prostor {{name}}",
+    "customers": "Zákazníci",
+    "customerTabs": {
+      "inbox": "Doručená pošta",
+      "reviews": "Recenze",
+      "people": "Lidé"
+    },
+    "status": {
+      "notConnected": "Nepřipojeno"
+    },
+    "draft": "Koncept",
+    "googleGrowth": "Růst na Google",
+    "websiteStudio": "Studio webu",
+    "editContent": "Upravit obsah",
+    "diningTableImage": "Jídelní stůl Acacia Bunting",
+    "pages": {
+      "home": "Domů",
+      "product": "Produkt",
+      "contact": "Kontakt"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Přepnout podnik, {{name}}",
+    "title": "Marketing",
+    "subtitle": "Spravujte viditelnost obchodu, konverzace a profil značky",
+    "cue": {
+      "imageLabel": "Televizní jednotka Acacia v obývacím pokoji",
+      "dismiss": "Zrušit dnešní tip",
+      "eyebrow": "Dnešní tip",
+      "title": "Přidejte nové fotky do katalogu",
+      "body": "Přidávání nových fotek udržuje vaše automatické rolety a koncept webu aktuální."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Zákazníci",
+        "body": "Doručená pošta, recenze a lidé",
+        "cta": "Otevřít poštu"
+      },
+      "google": {
+        "title": "Růst na Google",
+        "body": "Profil, příspěvky a recenze",
+        "cta": "Nastavit"
+      },
+      "website": {
+        "title": "Studio webu",
+        "body": "Koncept, úpravy a publikace vašeho webu",
+        "cta": "Otevřít koncept"
+      },
+      "business": {
+        "title": "Podnikání",
+        "body": "Značka, aktiva a připojení",
+        "cta": "Spravovat"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Zatím žádné zprávy",
+    "emptyBody": "Připojte své zákaznické kanály pro přijímání přímých dotazů na produkty a bezpečně si prohlédněte návrhy konceptů AI před odesláním.",
+    "connectChannel": "Připojit kanál",
+    "emptyFootnote": "Nové zprávy se automaticky objeví po připojení.",
+    "channelsTitle": "Podporované kanály zpráv",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Připojte účet pro přijímání zpráv."
+  },
+  "reply": {
+    "title": "Asistent odpovědí",
+    "referencedProduct": "Odkazovaný produkt",
+    "suggestionTitle": "Návrh odpovědi Espanda",
+    "draftLabel": "Koncept odpovědi",
+    "tone": "Tón: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Vyleštěný & řemeslný"
+    },
+    "done": "Hotovo",
+    "editReply": "Upravit odpověď",
+    "approvalTitle": "Vyžadováno ruční schválení",
+    "approvalBody": "Žádná zpráva není odeslána bez vašeho výslovného kliknutí.",
+    "exampleTitle": "Ukázkový režim konverzace",
+    "exampleBody": "Připojení vašeho účtu Instagram nebo Facebook nahradí tento příklad skutečnými dotazy zákazníků."
+  },
+  "reviews": {
+    "emptyTitle": "Zatím žádné recenze",
+    "emptyBody": "Připojte svůj profil Google Business pro automatické sbírání a odpovídání na ověřenou zpětnou vazbu od zákazníků.",
+    "connectGoogle": "Připojit Google Business",
+    "automatedTitle": "Automatické žádosti o recenze",
+    "connectFirst": "Nejprve připojte",
+    "automatedBody": "Vyžaduje připojení Google Business pro odesílání personalizovaných pozvánek k recenzím."
+  },
+  "people": {
+    "emptyTitle": "Zatím žádné záznamy zákazníků",
+    "emptyBody": "Lidé, od kterých slyšíte prostřednictvím připojených zákaznických kanálů, se zde objeví.",
+    "connectChannel": "Připojit kanál",
+    "directoryTitle": "Váš adresář zákazníků",
+    "directoryBody": "Otevřete záznam osoby a zobrazte si její konverzace a kontaktní údaje na jednom místě.",
+    "connectedChannels": "Připojené zákaznické kanály"
+  },
+  "google": {
+    "presenceTitle": "Vaše přítomnost na Google",
+    "presenceBody": "Udržujte svou místní francouzskou prodejnu viditelnou na Google Maps a ve Vyhledávání automaticky.",
+    "profileTitle": "Profil Google Business",
+    "profileBody": "Synchronizujte svou oficiální adresu obchodu, otevírací dobu a nové fotky katalogu přímo na Google Maps.",
+    "connectProfile": "Připojit profil Google Business",
+    "capabilitiesTitle": "Automatické synchronizační schopnosti",
+    "capabilities": {
+      "catalog": {
+        "title": "Aktualizace profilu a katalogu",
+        "body": "Synchronizujte nově inscenované fotky a nábytkové novinky do místních aktualizací příspěvků na Google."
+      },
+      "reviews": {
+        "title": "Žádosti o recenze",
+        "body": "Generujte zdvořilé francouzské pozvánky k recenzím po návštěvách showroomu nebo nákupech."
+      },
+      "replies": {
+        "title": "Pečlivě připravené koncepty odpovědí",
+        "body": "Espanda vytváří promyšlené koncepty odpovědí na všechny příchozí recenze zákazníků pro vaši kontrolu."
+      }
+    },
+    "controlTitle": "Vy máte kontrolu",
+    "controlBody": "Nic není zveřejněno ani odpovězeno na Google, dokud to neschválíte."
+  },
+  "googleWorkspace": {
+    "newPost": "Nový příspěvek na Google",
+    "subtitle": "Náhled, jak se produktové novinky a recenze showroomu synchronizují přímo na Google.",
+    "tabs": {
+      "profile": "Profil",
+      "posts": "Příspěvky",
+      "reviews": "Recenze"
+    },
+    "draftPostTitle": "Koncept příspěvku na Google",
+    "actionButton": "Akční tlačítko: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Zjistit více"
+    },
+    "reviewPost": "Zkontrolovat příspěvek",
+    "reviewsTitle": "Recenze showroomu",
+    "reviewsBody": "Recenze a koncepty odpovědí jsou shromažďovány s vašimi zákaznickými konverzacemi.",
+    "openReviews": "Otevřít recenze",
+    "checklistTitle": "Kontrolní seznam nastavení profilu",
+    "checklist": {
+      "profile": {
+        "label": "Profil Google připojen",
+        "value": "Nalezeno"
+      },
+      "reviewLink": {
+        "label": "Přímý odkaz na žádost o recenzi",
+        "value": "Nastavit"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Náhled konceptu",
+    "catalogConnected": "Zdrojový katalog obchodu připojen",
+    "connectDomain": "Připojit doménu",
+    "previewLabel": "Náhled konceptu webu",
+    "browserTitle": "Koncept webu",
+    "fullPreview": "Úplný náhled",
+    "reviewPublish": "Zkontrolovat a publikovat koncept",
+    "footnote": "Před publikováním zkontrolujte svůj obsah a doménu."
+  },
+  "websiteEdit": {
+    "saveChanges": "Uložit změny konceptu",
+    "reviewPublish": "Zkontrolovat a publikovat",
+    "preview": "Náhled",
+    "title": "Upravit obsah webu",
+    "heroTitle": "Banner hlavní sekce",
+    "replaceImage": "Nahradit obrázek",
+    "heroImageLabel": "Obrázek banneru hlavní sekce",
+    "headline": "Nadpis (francouzsky)",
+    "description": "Popis",
+    "sectionsTitle": "Sekce stránky",
+    "sectionCount_one": "{{count}} sekce",
+    "sectionCount_other": "{{count}} sekcí",
+    "sections": {
+      "heroBanner": "Banner hlavní sekce",
+      "featuredCollection": "Doporučená kolekce",
+      "showroomContact": "Showroom & kontakt"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Ověřte doménu a zkontrolujte obsah před publikováním.",
+    "publish": "Publikovat web",
+    "keepDraft": "Ponechat jako koncept",
+    "title": "Zkontrolujte svůj web",
+    "subtitle": "Zkontrolujte obsah a cíl před spuštěním.",
+    "heroImageLabel": "Hlavní obrázek webu",
+    "destinationTitle": "Cíl publikování",
+    "destinationBody": "Pro publikování tohoto konceptu připojte a ověřte doménu.",
+    "setUpDomain": "Nastavit doménu"
+  }
+}

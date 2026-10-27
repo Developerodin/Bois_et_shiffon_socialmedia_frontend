@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Ouvrir le menu",
+    "creditsAvailable_one": "{{count}} crédit disponible",
+    "creditsAvailable_other": "{{count}} crédits disponibles",
+    "settings": "Paramètres",
+    "appModules": "Modules de l'appli",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Publications",
+      "photoshoot": "Shooting photo",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Navigation des modules",
+    "create": "Créer",
+    "results": "Résultats",
+    "goBack": "Retour",
+    "switchBusiness": "Changer d'entreprise, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} élément",
+    "optionWithCount_other": "{{label}} {{count}} éléments"
+  },
+  "create": {
+    "title": "Créer un shooting photo",
+    "subtitle": "Créez des photos de produits et stylisez des vêtements sur des modèles.",
+    "product": {
+      "imageLabel": "Table à manger {{name}}",
+      "pill": "Article du catalogue",
+      "title": "Shooting photo produit",
+      "body": "Placez des articles du catalogue dans des décors intérieurs architecturaux et des studios avec un éclairage naturel.",
+      "cta": "Nouveau shooting produit"
+    },
+    "fashion": {
+      "imageLabel": "Studio de photographie de vêtements illustrés",
+      "title": "Shooting photo mode",
+      "body": "Stylisez des vêtements sur des modèles dans des scènes prêtes pour les campagnes.",
+      "cta": "Nouveau shooting mode"
+    }
+  },
+  "product": {
+    "title": "Shooting photo produit",
+    "estimate_one": "Estimation : {{count}} crédit",
+    "estimate_other": "Estimation : {{count}} crédits",
+    "available": "{{count}} disponibles",
+    "generate": "Générer le shooting photo",
+    "selectedAsset": "Élément du catalogue sélectionné",
+    "changeAsset": "Changer d'élément",
+    "aspectRatio": "Format d'image",
+    "sceneStyle": "Style de scène",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Intérieur",
+      "custom": "Personnalisé"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Brief créatif",
+    "briefHint": "Affinez l'éclairage, l'ambiance ou des indices de décor spécifiques",
+    "sourcePreview": "Aperçu source",
+    "fullPreview": "{{product}}, aperçu complet",
+    "sourceImage": "Image source"
+  },
+  "fashion": {
+    "title": "Shooting photo mode",
+    "generate": "Générer le shooting photo",
+    "uploadToEnable": "Téléchargez une photo de vêtement pour activer la génération",
+    "heading": "Construisez votre shooting mode",
+    "subtitle": "Transformez des vêtements à plat ou sur cintre en modèles réalistes mis en scène.",
+    "garmentPhoto": "Photo de vêtement",
+    "required": "Requis",
+    "garmentSelected": "Photo de vêtement : {{label}}. Changer de photo",
+    "addGarment": "Ajouter une photo de vêtement",
+    "changeGarment": "Changer de photo de vêtement",
+    "garmentHint": "PNG ou JPG sur fond neutre, à plat ou mannequin invisible",
+    "modelStyling": "Modèle & stylisme",
+    "modelSelected": "Modèle & stylisme : {{model}}",
+    "models": {
+      "choose": "Choisir un modèle",
+      "natural": "{{name}} · style naturel",
+      "editorial": "{{name}} · style éditorial",
+      "casual": "{{name}} · style décontracté"
+    },
+    "pose": "Pose",
+    "poses": {
+      "fullBody": "Corps entier",
+      "threeQuarter": "Trois-quarts",
+      "closeUp": "Gros plan"
+    },
+    "outputFormat": "Format de sortie",
+    "formats": {
+      "feedPortrait": "Portrait de fil",
+      "storyReel": "Story / Reel"
+    },
+    "background": "Décor de fond",
+    "backgrounds": {
+      "studioMinimal": "Studio minimal",
+      "urbanStreet": "Rue urbaine",
+      "naturalInterior": "Intérieur naturel"
+    },
+    "requirementsTitle": "Exigences de téléchargement",
+    "requirements": {
+      "contrast": "Contraste élevé avec le fond",
+      "wrinkles": "Pas de plis marqués",
+      "frontFacing": "Angle de face"
+    }
+  },
+  "source": {
+    "title": "Choisir un élément source",
+    "uploadNewLabel": "Télécharger une nouvelle photo",
+    "uploadNew": "Télécharger nouveau",
+    "noPhotoSelected": "Aucune photo sélectionnée",
+    "photosSelected_one": "{{count}} photo sélectionnée",
+    "photosSelected_other": "{{count}} photos sélectionnées",
+    "selectPhoto": "Sélectionner une photo",
+    "usePhoto": "Utiliser la photo",
+    "source": "Source",
+    "tabs": {
+      "website": "Site web",
+      "uploads": "Téléchargements"
+    },
+    "businessWebsite": "{{name}} · Site web",
+    "fromWebsite": "Depuis le site web",
+    "filterCatalog": "Filtrer le catalogue",
+    "filters": {
+      "all": "Tous les articles",
+      "tables": "Tables",
+      "storage": "Rangement"
+    },
+    "addPhoto": "Ajouter une photo",
+    "tip": "Les découpes de produits propres donnent des résultats optimaux pour le shooting photo. Espanda Studio préservera la texture originale du bois d'acacia."
+  },
+  "generating": {
+    "backToWorkspace": "Retour à l'espace de travail",
+    "returnToWorkspace": "Retour à l'espace de travail",
+    "title": "Préparation de vos photos",
+    "stepStatus": "{{step}} : {{status}}",
+    "note": "Votre génération s'exécute en toute sécurité en arrière-plan. Vous trouverez les éléments terminés dans Résultats.",
+    "status": {
+      "done": "Terminé",
+      "active": "En cours",
+      "queued": "En file d'attente"
+    },
+    "progress": "Génération",
+    "sample": {
+      "title": "Shooting photo {{name}}",
+      "description": "Mise en scène de {{product}} dans un intérieur architectural en lumière du jour.",
+      "variations_one": "{{count}} variation",
+      "variations_other": "{{count}} variations"
+    },
+    "steps": {
+      "catalog": "Traitement de l'élément du catalogue",
+      "compose": "Composition de la scène & éclairage",
+      "finish": "Finition & calibration des couleurs"
+    }
+  },
+  "results": {
+    "title": "Shooting photos",
+    "subtitle": "Vos photos de produits et de mode",
+    "newPhotoshoot": "Nouveau shooting photo",
+    "filterLabel": "Filtrer les shootings photo",
+    "filters": {
+      "all": "Tous ({{count}})",
+      "product": "Produit ({{count}})",
+      "fashion": "Mode ({{count}})"
+    },
+    "empty": "Aucun shooting photo pour le moment.",
+    "processingLabel": "{{title}}. Traitement, {{percent}}%",
+    "processingBadge_one": "Traitement · {{count}} crédit",
+    "processingBadge_other": "Traitement · {{count}} crédits",
+    "preview": "Aperçu",
+    "reviewPhotoLabel": "Vérifier la photo, {{title}}",
+    "reviewPhoto": "Vérifier la photo",
+    "sample": {
+      "studioStaging": "{{product}} · Mise en scène studio",
+      "rendering": "Étape de rendu · {{percent}}%",
+      "interiorReady_one": "Intérieur · {{ratio}} · {{count}} photo prête",
+      "interiorReady_other": "Intérieur · {{ratio}} · {{count}} photos prêtes",
+      "studioDaylight": "Lumière du jour studio · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Plus d'options",
+    "downloadPhoto": "Télécharger la photo",
+    "variation": "Variation",
+    "share": "Partager la séance photo",
+    "samplePreview": "Aperçu de l'échantillon",
+    "compareOriginal": "Comparer à l'original",
+    "expandView": "Agrandir la vue",
+    "stagingSummary": "Résumé de la mise en scène",
+    "format": "Format",
+    "creationCost": "Coût de création",
+    "credits_one": "{{count}} crédit",
+    "credits_other": "{{count}} crédits",
+    "sample": {
+      "headerTitle": "Séance photo {{name}}",
+      "vertical": "{{ratio}} Vertical",
+      "architecturalInterior": "Intérieur architectural",
+      "studioDaylight": "Lumière du jour studio",
+      "formatBadge": "Format {{ratio}}",
+      "naturalStudio": "Studio naturel",
+      "portraitPhoto": "Photo portrait"
+    }
+  }
+}

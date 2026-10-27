@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} credit",
+  "credits_other": "{{n}} credits",
+  "tableAlt": "{{product}} eettafel",
+  "sheet": {
+    "dismiss": "Sluiten"
+  },
+  "videoFailed": {
+    "title": "Je reel is niet klaar",
+    "body": "Rendering werd onderbroken tijdens de scènecompositie. Je gereserveerde credits zijn vrijgegeven.",
+    "failed": "Mislukt",
+    "facts_one": "{{seconds}}s · 9:16 Verticaal · {{count}} scène",
+    "facts_other": "{{seconds}}s · 9:16 Verticaal · {{count}} scènes",
+    "released_one": "{{n}} gereserveerde credit vrijgegeven",
+    "released_other": "{{n}} gereserveerde credits vrijgegeven",
+    "impact": "Impact op creditbalans",
+    "used_one": "{{n}} credit gebruikt",
+    "used_other": "{{n}} credits gebruikt",
+    "viewDetails": "Bekijk details",
+    "details": {
+      "failedAt": "Mislukt om",
+      "reserved": "Gereserveerd",
+      "released": "Vrijgegeven",
+      "stages": {
+        "sceneComposition": "Scènecompositie"
+      }
+    },
+    "tryAgain_one": "Probeer opnieuw ({{n}} credit)",
+    "tryAgain_other": "Probeer opnieuw ({{n}} credits)",
+    "editStoryboard": "Storyboard bewerken"
+  },
+  "lowCredits": {
+    "backdropTitle": "Storyboard",
+    "backdropMeta": "{{seconds}}s duur · 9:16 verticaal",
+    "sheetLabel": "Niet genoeg credits",
+    "title_one": "Je hebt {{n}} credit nodig",
+    "title_other": "Je hebt {{n}} credits nodig",
+    "body_one": "Je hebt momenteel <b>{{n}} credit beschikbaar</b> in je Professional-werkruimte. Je storyboardconcept is veilig opgeslagen.",
+    "body_other": "Je hebt momenteel <b>{{n}} credits beschikbaar</b> in je Professional-werkruimte. Je storyboardconcept is veilig opgeslagen.",
+    "planName": "Professional-abonnement",
+    "active": "Actief",
+    "renews": "Maandelijks verlengen",
+    "remaining": "{{available}} / {{monthly}} resterend",
+    "remainingA11y": "Maandelijkse credits resterend",
+    "manage": "Beheer credits",
+    "keepEditing": "Blijf storyboard bewerken"
+  },
+  "reconnect": {
+    "backdropTitle": "Schema",
+    "backdropMeta": "Gepland voor {{date}}",
+    "title": "Verbind opnieuw met {{network}}",
+    "body": "Je accountautorisatie is verlopen. Verbind je account opnieuw om het plannen te hervatten.",
+    "draftSaved": "Bestaand concept veilig opgeslagen",
+    "noPosting": "Er wordt niets geplaatst totdat je expliciet bevestigt.",
+    "saveForLater": "Concept opslaan voor later"
+  },
+  "importFailed": {
+    "title": "Kon deze website niet lezen",
+    "body": "We konden de catalogusfoto's van dit adres niet bereiken of extraheren. Controleer je URL of ga verder door je winkel te beschrijven.",
+    "urlLabel": "Winkelwebsite-URL",
+    "changeUrlA11y": "Website-URL wijzigen",
+    "changeUrl": "URL wijzigen",
+    "reasons": {
+      "timeout": "De website deed er te lang over om te reageren. Er zijn geen wijzigingen aangebracht."
+    },
+    "quickOptions": "Snelle opties om verder te gaan:",
+    "options": {
+      "retry": "Probeer opnieuw te scannen als je winkelserver kort bezet was.",
+      "manual": "Voeg bedrijfsnaam en producten handmatig toe zonder te wachten."
+    },
+    "tryAgain": "Probeer opnieuw",
+    "addManually": "Bedrijf handmatig toevoegen"
+  }
+}

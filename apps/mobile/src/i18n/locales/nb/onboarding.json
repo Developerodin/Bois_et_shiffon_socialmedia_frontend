@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Velkommen til Espanda",
+    "subtitle": "Lag innhold for din bedrift.",
+    "mobileNumber": "Mobilnummer",
+    "countryCode": "Landskode {{code}}",
+    "sendCode": "Send kode",
+    "useEmail": "Bruk e-post i stedet",
+    "sendFailed": "Kunne ikke sende koden. Prøv igjen eller bruk e-post.",
+    "chooseCountry": "Velg landet ditt",
+    "searchCountry": "Søk land eller kode"
+  },
+  "email": {
+    "title": "Logg inn med e-post",
+    "subtitle": "Vi sender deg en kode for verifisering uten passord.",
+    "tagline": "Intelligent markedsføring for moderne detaljhandel",
+    "label": "E-postadresse",
+    "placeholder": "navn@dinbedrift.com",
+    "notConfigured": "E-postinnlogging er ikke satt opp på denne serveren ennå.",
+    "sendFailed": "Kunne ikke sende koden. Prøv igjen.",
+    "useMobile": "Bruk mobilnummer i stedet",
+    "linkTitle": "Legg til e-post",
+    "linkSubtitle": "Nummeret ditt er bekreftet. Legg til en e-post for kvitteringer og invitasjoner. Vi sender deg en kode."
+  },
+  "verify": {
+    "title": "Skriv inn koden din",
+    "sent": "Vi sendte en verifikasjonskode til {{destination}}",
+    "codeLabel": "Sekssifret verifikasjonskode",
+    "submit": "Verifiser kode",
+    "checkFailed": "Kunne ikke sjekke koden. Prøv igjen.",
+    "resendFailed": "Kunne ikke sende koden på nytt.",
+    "resendIn": "Send koden på nytt om {{time}}",
+    "resend": "Send kode på nytt",
+    "changeEmail": "Endre e-post",
+    "changeMobile": "Endre mobilnummer"
+  },
+  "welcome": {
+    "getStarted": "Kom i gang",
+    "footnote": "Din bedrift, din kreative retning.",
+    "photosLabel": "Eksempler fra {{brand}}-katalogen",
+    "title": "Markedsføring som føles som din bedrift",
+    "body": "Generer merkevaretilpassede studiofilmer, fotoshoots og produktinnlegg fra katalogen din.",
+    "steps": {
+      "goal": {
+        "title": "Velg ditt mål",
+        "body": "Velg det første kreative formatet du vil produsere."
+      },
+      "business": {
+        "title": "Del din bedrift",
+        "body": "Del nettstedet ditt eller legg til bedriftsdetaljer."
+      },
+      "review": {
+        "title": "Gjennomgå klart innhold",
+        "body": "Gjennomgå ideer laget rundt produktene dine."
+      }
+    }
+  },
+  "goal": {
+    "title": "Hva vil du lage først?",
+    "subtitle": "Vi tilpasser ditt første arbeidsområde og maler rundt ditt primære fokus.",
+    "note": "Alle verktøy og studioformater er tilgjengelige senere.",
+    "options": {
+      "socialPlan": {
+        "title": "Sosiale medier-plan",
+        "description": "En måned med innlegg og bildetekster"
+      },
+      "marketingVideos": {
+        "title": "Markedsføringsvideoer",
+        "description": "Studiofilmer fra katalogen din"
+      },
+      "fashionPhotoshoot": {
+        "title": "Mote-fotoshoot",
+        "description": "Style klær på modeller"
+      },
+      "productPhotoshoot": {
+        "title": "Produkt-fotoshoot",
+        "description": "Produktbilder for katalogen din"
+      }
+    }
+  },
+  "source": {
+    "title": "Hvor er din bedrift online?",
+    "subtitle": "Espanda skanner nettbutikken din eller oppføringen for automatisk å generere merkevarekorrekt media.",
+    "options": {
+      "website": {
+        "title": "Nettsted",
+        "description": "Shopify, WooCommerce, eget domene"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Lokal butikk, boutique eller showroom"
+      },
+      "marketplace": {
+        "title": "Markedsplass",
+        "description": "Amazon, Etsy, eBay eller Instagram-butikk"
+      },
+      "wholesale": {
+        "title": "Engros / B2B",
+        "description": "Faire, Ankorstore, privat katalog"
+      },
+      "none": {
+        "title": "Ingen online tilstedeværelse",
+        "description": "Beskriv varene dine manuelt"
+      },
+      "other": {
+        "title": "Noe annet",
+        "description": "Sosiale medier, PDF-lookbook eller fil"
+      }
+    }
+  },
+  "website": {
+    "title": "Hva er nettstedet ditt?",
+    "subtitle": "Vi henter automatisk katalogbilder, farger og tone of voice.",
+    "label": "Nettadresse til butikk",
+    "placeholder": "www.dinbutikk.com",
+    "valid": "Gyldig adresse",
+    "willRead": "Vi leser dette nettstedet",
+    "facts": {
+      "catalog": {
+        "key": "Katalogprodukter",
+        "value": "Produktbilder"
+      },
+      "identity": {
+        "key": "Merkevareidentitet",
+        "value": "Farger & typografi"
+      },
+      "tone": {
+        "key": "Tone & stil",
+        "value": "Stemme fra sidene dine"
+      }
+    },
+    "safeNote": "Katalogimport endrer ingenting på din live-butikk."
+  },
+  "manual": {
+    "title": "Legg til bedriftsdetaljer",
+    "subtitle": "Del en oppføringslenke eller beskriv katalogen din manuelt.",
+    "modeLabel": "Hvordan legge til din bedrift",
+    "modeListing": "Oppførings-URL",
+    "modeDescribe": "Beskriv bedriften",
+    "listingLabel": "Oppføringslenke *",
+    "listingPlaceholder": "Etsy, Amazon, Google Maps eller butikklenke",
+    "nameLabel": "Bedriftsnavn *",
+    "namePlaceholder": "f.eks. Atelier Bois & Chiffons",
+    "sellsLabel": "Hva selger du? *",
+    "sellsPlaceholder": "f.eks. Håndlagde trebord, TV-stativ og moderne hjemmedekor...",
+    "locationLabel": "Sted (valgfritt)",
+    "locationPlaceholder": "By, land eller showroom-adresse",
+    "websiteLabel": "Nettsted (valgfritt)"
+  },
+  "learning": {
+    "working": "Jobber",
+    "tryAgain": "Prøv igjen",
+    "inProgressButton": "Læring pågår...",
+    "saved": "Vi lagrer fremgangen din.",
+    "title": "Bli kjent med din bedrift",
+    "bodyWebsite": "Analyserer nettstedet ditt for å hente ut merkevareidentitet, kataloger og visuell tone.",
+    "bodyManual": "Gjør beskrivelsen din om til merkevareidentitet, kataloger og visuell tone.",
+    "fallbackName": "Din bedrift",
+    "sourceWebsite": "Primær nettsidekilde",
+    "sourceManual": "Bedriftsdetaljer",
+    "foundWebsite": "Nettsted funnet",
+    "foundManual": "Detaljer lagt til",
+    "stages": {
+      "open": "Åpner nettsted",
+      "identity": "Leser merkevareidentitet & tone",
+      "photos": "Samler produktbilder"
+    },
+    "status": {
+      "done": "Fullført",
+      "running": "Pågår",
+      "queued": "I kø"
+    },
+    "errors": {
+      "stopped": "Lesing av nettstedet ditt stoppet.",
+      "noWorkspace": "Kontoen din har ikke noe arbeidsområde ennå.",
+      "startFailed": "Kunne ikke starte lesing av nettstedet ditt.",
+      "restartFailed": "Kunne ikke starte på nytt. Prøv igjen."
+    }
+  },
+  "review": {
+    "title": "Gjennomgå bedriftsdetaljer",
+    "subtitle": "Vi fant disse detaljene på nettstedet ditt. Du kan redigere dem når som helst.",
+    "edit": "Rediger",
+    "tagline": "Slagord",
+    "editTagline": "Rediger slagord",
+    "categoryLocation": "Kategori & sted",
+    "audience": "Målgruppe",
+    "editAudience": "Rediger målgruppe",
+    "products_one": "Oppdaget produkter ({{count}})",
+    "products_other": "Oppdaget produkter ({{count}})",
+    "found": "Funnet",
+    "strengths": "Merkevarestyrker",
+    "tags": {
+      "homeLiving": "Hjem & Livsstil",
+      "france": "Frankrike",
+      "productCatalog": "Produktkatalog",
+      "showroomEshop": "Fysisk showroom & nettbutikk"
+    }
+  },
+  "brand": {
+    "title": "Merkevare & kreativ stil",
+    "subtitle": "Tilpass hvordan Espanda lager dine fotoshoots og innlegg på sosiale medier.",
+    "identity": "{{name}} identitet",
+    "paletteMeta": "Nettstedspalett · Redigerbar",
+    "swatches": "Importerte fargeprøver fra nettstedet",
+    "tone": "Kreativ tone",
+    "selected_one": "{{count}} valgt",
+    "selected_other": "{{count}} valgt",
+    "tones": {
+      "modern": "Moderne",
+      "luxurious": "Luksuriøs",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Naturlig",
+      "minimalist": "Minimalistisk"
+    },
+    "contentLanguage": "Innholdsspråk",
+    "contentLanguageA11y": "Innholdsspråk, {{language}}. Endre",
+    "languages": {
+      "fr": "Fransk (FR)",
+      "en": "Engelsk (US)"
+    },
+    "audienceProfile": "Målgruppeprofil",
+    "audienceHome": "Hjem & møbler",
+    "featured": "Utvalgte katalogprodukter",
+    "readyForBatch_one": "{{count}} klar for batch",
+    "readyForBatch_other": "{{count}} klar for batch",
+    "sampleProducts": {
+      "table": "Bunting bord",
+      "tableDetail": "Acacia 240cm",
+      "tv": "TV-enhet",
+      "tvDetail": "Acacia 2 dører"
+    },
+    "channelsNote": "Instagram og Facebook kan kobles til i neste steg. (Ingen kanaler koblet ennå)"
+  },
+  "preparing": {
+    "ready": "Studio klart",
+    "preparing": "Forbereder studio",
+    "loadingButton": "Forbereder dine ideer…",
+    "catalogSafe": "Din katalog forblir urørt i butikken din.",
+    "title": "Forbereder dine første ideer",
+    "body": "Genererer skreddersydde sosiale reels og oppsett fra din {{name}}-kolleksjon.",
+    "photosTitle": "Samler bilder",
+    "photosDetail": "{{product}} spisesett",
+    "storyboardTitle": "Bygger storyboard",
+    "storyboardDetail_one": "Setter sammen {{count}} videoscene",
+    "storyboardDetail_other": "Setter sammen {{count}} videoscener",
+    "nextTitle": "Neste: Gjennomgå dine ideer",
+    "nextDetail": "Velg hooks og lydinnstillinger"
+  },
+  "connect": {
+    "readyToConnect": "• Klar til å koble til",
+    "title": "Publiser når du er klar",
+    "subtitle": "Koble til dine sosiale kontoer slik at Espanda kan publisere eller klargjøre innlegg og produktfokus direkte.",
+    "toolsTitle": "Publiseringsverktøy",
+    "featureReels": "Publiser til Instagram Feed & Reels",
+    "featureCaptions": "Bruk dine bildetekster og hashtags",
+    "featureReview": "Du gjennomgår alltid før noe går live",
+    "assurance": "Ingen innhold publiseres uten din bekreftelse",
+    "connectInstagram": "Koble til Instagram",
+    "connectFacebook": "Koble til Facebook",
+    "skip": "Hopp over for nå",
+    "laterTitle": "Koble til senere?",
+    "laterBody": "Du kan fortsatt lage, redigere og laste ned høyoppløselige reels og fotoshoots til kamerarullen din. Du kan koble til Instagram når som helst i Innstillinger.",
+    "laterDownload": "Last ned dine kreasjoner",
+    "laterSettings": "Koble til kanaler i Innstillinger",
+    "continueWithout": "Fortsett uten å koble til"
+  }
+}

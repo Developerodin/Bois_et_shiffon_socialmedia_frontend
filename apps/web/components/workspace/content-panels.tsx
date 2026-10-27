@@ -34,6 +34,9 @@ export type ContentItem = {
   pillar: string | null;
   brief: Record<string, unknown> | null;
   opportunity: { title: string } | null;
+  /** The last publish went wrong: FAILED = not posted (reason in publishError), CHECK = may have posted. */
+  publishIssue: "FAILED" | "CHECK" | null;
+  publishError: string | null;
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
@@ -94,7 +97,16 @@ export function useBrandData<T>(base: string, path: string, pick: (d: never) => 
   return { data, failed, reload: load };
 }
 
-function LoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
+/** The signed-in person's permissions on this brand; [] if they couldn't be loaded. */
+export function usePerms(base: string) {
+  const [perms, setPerms] = useState<string[] | null>(null);
+  useEffect(() => {
+    request<{ permissions: string[] }>(`${base.split("/brands/")[0]}/my-permissions?brandId=${base.split("/brands/")[1]}`).then((p) => setPerms(p.permissions), () => setPerms([]));
+  }, [base]);
+  return perms;
+}
+
+export function LoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
   return (
     <div role="alert" className="flex flex-wrap items-center gap-2 p-4 text-sm text-muted-foreground">
       Couldn&rsquo;t load {what}. Check your connection.
@@ -133,6 +145,10 @@ const STATUS_TONE: Record<string, string> = {
   REJECTED: "bg-destructive/15 text-destructive",
   SCHEDULED: "bg-primary/15 text-primary",
 };
+const PUBLISH_ISSUE = {
+  FAILED: { label: "Not posted", tone: "bg-destructive/15 text-destructive" },
+  CHECK: { label: "Check needed", tone: "bg-warning/15 text-warning" },
+};
 const DECISION: Record<Opportunity["decision"], { label: string; tone: string }> = {
   RECOMMEND: { label: "Recommend", tone: "bg-success/15 text-success" },
   HOLD: { label: "Hold", tone: "bg-warning/15 text-warning" },
@@ -142,11 +158,35 @@ const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekd
 
 /* ───────────── Ideas panel ───────────── */
 
-export function IdeasPanel({ base, onRunScout }: { base: string; onRunScout: () => void }) {
+export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; onRunScout: () => void; onOpenPosts?: () => void }) {
   const pick = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities, []);
   const { data, failed, reload } = useBrandData(base, "opportunities", pick as (d: never) => Opportunity[]);
   const [filter, setFilter] = useState<"open" | "all">("open");
   const [error, setError] = useState<string | null>(null);
+  const perms = usePerms(base);
+  const canDecide = perms?.includes("content.create");
+  const [planning, setPlanning] = useState<string | null>(null);
+  const [planned, setPlanned] = useState(false);
+  const planFailed = useCallback((why: string) => {
+    setPlanning(null);
+    setError(why);
+  }, []);
+  const planDone = useCallback(() => {
+    setPlanning(null);
+    setPlanned(true);
+    void reload();
+  }, [reload]);
+
+  async function plan() {
+    setError(null);
+    setPlanned(false);
+    try {
+      const { run } = await request<{ run: { id: string } }>(`${base}/agents/planner/runs`, { method: "POST", body: "{}" });
+      setPlanning(run.id);
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't start the Planner. Try again."));
+    }
+  }
 
   async function set(id: string, status: Opportunity["status"]) {
     setError(null);
@@ -165,8 +205,17 @@ export function IdeasPanel({ base, onRunScout }: { base: string; onRunScout: () 
   return (
     <div className="flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 text-xs">
-        <span className="text-muted-foreground">
-          {shortlisted} shortlisted · the Planner turns shortlisted ideas into posts
+        <span className="flex flex-wrap items-center gap-2 text-muted-foreground">
+          {shortlisted} shortlisted
+          {shortlisted > 0 && perms?.includes("agents.run") ? (
+            <Button size="sm" onClick={() => void plan()} disabled={!!planning}>
+              {planning ? <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> : null}
+              {planning ? "Planning posts…" : `Plan posts from ${shortlisted === 1 ? "this idea" : `these ${shortlisted} ideas`}`}
+            </Button>
+          ) : (
+            <span>· shortlist the ideas you like, then plan them into posts</span>
+          )}
+          {planning && <RunWatch base={base} runId={planning} onFailed={planFailed} onDone={planDone} />}
         </span>
         <div role="tablist" aria-label="Filter ideas" className="flex rounded-md bg-muted p-0.5">
           {(["open", "all"] as const).map((f) => (
@@ -177,6 +226,16 @@ export function IdeasPanel({ base, onRunScout }: { base: string; onRunScout: () 
         </div>
       </div>
       {error && <p role="alert" className="px-4 pt-3 text-sm text-destructive">{error}</p>}
+      {planned && (
+        <div role="status" className="flex flex-wrap items-center justify-between gap-3 px-4 pt-3 text-sm">
+          <span>Posts planned. Open one to write its brief and draft.</span>
+          {onOpenPosts && (
+            <Button size="sm" onClick={onOpenPosts}>
+              Open posts
+            </Button>
+          )}
+        </div>
+      )}
       {shown.length === 0 ? (
         <div className="flex flex-col items-start gap-3 p-4">
           <p className="text-sm text-muted-foreground">{data.length ? "No open ideas. Switch to All to see past ones." : "No ideas yet. The Opportunities agent finds what to post about."}</p>
@@ -211,7 +270,7 @@ export function IdeasPanel({ base, onRunScout }: { base: string; onRunScout: () 
                   ))}
                 </ul>
               )}
-              {o.status !== "PLANNED" && (
+              {o.status !== "PLANNED" && canDecide && (
                 <div className="flex gap-2 pt-1">
                   {o.status === "SHORTLISTED" ? (
                     <Button size="sm" variant="secondary" onClick={() => set(o.id, "NEW")}>
@@ -259,23 +318,28 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
   }
   const groups = new Map<string, ContentItem[]>();
   for (const i of data) {
-    const k = i.scheduledFor ? i.scheduledFor.slice(0, 10) : "unscheduled";
+    // Group by the viewer's local date ("en-CA" is YYYY-MM-DD), not the UTC one.
+    const k = i.scheduledFor ? new Date(i.scheduledFor).toLocaleDateString("en-CA") : "unscheduled";
     groups.set(k, [...(groups.get(k) ?? []), i]);
   }
   return (
     <ol className="flex flex-col">
       {[...groups].map(([k, list]) => (
         <li key={k}>
-          <p className="sticky top-0 z-[1] bg-background/95 px-4 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">{k === "unscheduled" ? "No date" : day(k)}</p>
+          <p className="sticky top-0 z-[1] bg-background/95 px-4 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">{k === "unscheduled" ? "No date" : day(list[0].scheduledFor!)}</p>
           <ul className="divide-y divide-border">
             {list.map((i) => (
               <li key={i.id}>
                 <button type="button" onClick={() => onOpen(i.id)} className="flex w-full flex-col gap-1 px-4 py-2.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
                   <span className="flex items-center justify-between gap-2 text-[11px]">
                     <span className="text-muted-foreground">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
-                    <span className={cn("rounded-full px-2 py-0.5 font-medium", STATUS_TONE[i.status] ?? "bg-muted text-muted-foreground")}>
-                      {i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status)}
-                    </span>
+                    {i.publishIssue ? (
+                      <span className={cn("rounded-full px-2 py-0.5 font-medium", PUBLISH_ISSUE[i.publishIssue].tone)}>{PUBLISH_ISSUE[i.publishIssue].label}</span>
+                    ) : (
+                      <span className={cn("rounded-full px-2 py-0.5 font-medium", STATUS_TONE[i.status] ?? "bg-muted text-muted-foreground")}>
+                        {i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status)}
+                      </span>
+                    )}
                   </span>
                   <span className="text-sm">{i.title}</span>
                 </button>
@@ -309,13 +373,17 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
   const step = nextStep(item);
   // The agent we started, until the post moves on (status, version or check changes).
   const at = `${item.status}:${item.latest?.version ?? 0}:${item.latest?.check ? 1 : 0}`;
-  const [started, setStarted] = useState<string | null>(null);
+  const [started, setStarted] = useState<{ key: string; runId: string } | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     setStarted(null);
     setError(null);
   }, [at]);
+  const stopped = useCallback((why: string) => {
+    setStarted(null);
+    setError(why);
+  }, []);
   if (!step) return null;
   const canRun = perms?.includes("agents.run");
   const canEdit = perms?.includes("content.create");
@@ -324,8 +392,8 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
     setPending(true);
     setError(null);
     try {
-      await request(`${base}/agents/${encodeURIComponent(key)}/runs`, { method: "POST", body: "{}" });
-      setStarted(key);
+      const { run } = await request<{ run: { id: string } }>(`${base}/agents/${encodeURIComponent(key)}/runs`, { method: "POST", body: "{}" });
+      setStarted({ key, runId: run.id });
     } catch (e) {
       setError(errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
@@ -340,6 +408,7 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
         <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" />
           Working on it. This post updates by itself; follow along in the Agents feed.
+          <RunWatch base={base} runId={started.runId} onFailed={stopped} />
         </p>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -363,15 +432,25 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
   );
 }
 
+/** Polls the agents list while a run we started is going; reports it if that run ends FAILED. */
+// ponytail: reads each agent's latest run only; if another run of the same agent starts, ours drops out and the spinner waits for the post to change.
+function RunWatch({ base, runId, onFailed, onDone }: { base: string; runId: string; onFailed: (why: string) => void; onDone?: () => void }) {
+  type Run = { id: string; status: string; error: string | null };
+  const pick = useCallback((d: { agents: { lastRun: Run | null }[] }) => d.agents.find((a) => a.lastRun?.id === runId)?.lastRun ?? null, [runId]);
+  const run = useBrandData(base, "agents", pick as (d: never) => Run | null).data;
+  useEffect(() => {
+    if (run?.status === "FAILED") onFailed(run.error || "The agent stopped before finishing. Try again.");
+    if (run?.status === "SUCCEEDED") onDone?.();
+  }, [run, onFailed, onDone]);
+  return null;
+}
+
 export function ContentView({ base, id, onBack }: { base: string; id: string; onBack: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const item = data?.find((i) => i.id === id);
   const [editing, setEditing] = useState(false);
-  const [perms, setPerms] = useState<string[] | null>(null);
-  useEffect(() => {
-    request<{ permissions: string[] }>(`${base.split("/brands/")[0]}/my-permissions?brandId=${base.split("/brands/")[1]}`).then((p) => setPerms(p.permissions), () => setPerms([]));
-  }, [base]);
+  const perms = usePerms(base);
   useEffect(() => setEditing(false), [id]);
   const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";
   const canEdit = perms?.includes("content.create") && !locked;
@@ -403,6 +482,14 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
             </p>
             <h1 className="mt-1 font-display text-2xl font-medium tracking-tight">{item.title}</h1>
             {item.opportunity && <p className="mt-1 text-sm text-muted-foreground">From the idea: {item.opportunity.title}</p>}
+            {item.publishIssue && (
+              <p role="status" className={cn("mt-2 flex items-start gap-2 rounded-lg px-3 py-2 text-sm", PUBLISH_ISSUE[item.publishIssue].tone)}>
+                <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+                <span>
+                  <span className="font-medium">{item.publishIssue === "FAILED" ? "Not posted." : "Check needed: it may or may not have posted."}</span> {item.publishError}
+                </span>
+              </p>
+            )}
           </div>
 
           <section aria-labelledby="brief-h" className="rounded-xl border border-border p-4">
@@ -511,7 +598,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
             </section>
           )}
 
-          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} />
+          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} />
         </div>
       )}
     </div>

@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Menü megnyitása",
+    "creditsAvailable_one": "{{count}} kredit elérhető",
+    "creditsAvailable_other": "{{count}} kredit elérhető",
+    "settings": "Beállítások",
+    "appModules": "Alkalmazás modulok",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Bejegyzések",
+      "photoshoot": "Fotózás",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Modul navigáció",
+    "create": "Létrehozás",
+    "results": "Eredmények",
+    "goBack": "Vissza",
+    "switchBusiness": "Váltás vállalkozásra, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} elem",
+    "optionWithCount_other": "{{label}} {{count}} elem"
+  },
+  "create": {
+    "title": "Fotózás létrehozása",
+    "subtitle": "Készíts termékfotókat és stílusosíts ruházatot modelleken.",
+    "product": {
+      "imageLabel": "{{name}} étkezőasztal",
+      "pill": "Katalógus elem",
+      "title": "Termékfotózás",
+      "body": "Helyezd el a katalógus elemeket építészeti belső és stúdió környezetben természetes fényben.",
+      "cta": "Új termékfotózás"
+    },
+    "fashion": {
+      "imageLabel": "Illusztrált ruházati fotóstúdió",
+      "title": "Divatfotózás",
+      "body": "Stílusosíts ruházatot modelleken kampánykész jelenetekben.",
+      "cta": "Új divatfotózás"
+    }
+  },
+  "product": {
+    "title": "Termékfotózás",
+    "estimate_one": "Becsült költség: {{count}} kredit",
+    "estimate_other": "Becsült költség: {{count}} kredit",
+    "available": "{{count}} elérhető",
+    "generate": "Fotózás generálása",
+    "selectedAsset": "Kiválasztott katalógus elem",
+    "changeAsset": "Elem módosítása",
+    "aspectRatio": "Képarány",
+    "sceneStyle": "Jelenet stílusa",
+    "scenes": {
+      "studio": "Stúdió",
+      "interior": "Belső tér",
+      "custom": "Egyedi"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Kreatív brief",
+    "briefHint": "Finomítsd a világítást, hangulatot vagy konkrét dekorációs elemeket",
+    "sourcePreview": "Forrás előnézet",
+    "fullPreview": "{{product}}, teljes előnézet",
+    "sourceImage": "Forrás kép"
+  },
+  "fashion": {
+    "title": "Divatfotózás",
+    "generate": "Fotózás generálása",
+    "uploadToEnable": "Tölts fel egy ruhadarab fotót a generálás engedélyezéséhez",
+    "heading": "Építsd fel a divatfotózásodat",
+    "subtitle": "Alakítsd át a lapos elrendezéseket vagy vállfás ruhadarabokat valósághűen beállított modellekké.",
+    "garmentPhoto": "Ruhadarab fotó",
+    "required": "Kötelező",
+    "garmentSelected": "Ruhadarab fotó: {{label}}. Fotó módosítása",
+    "addGarment": "Ruhadarab fotó hozzáadása",
+    "changeGarment": "Ruhadarab fotó módosítása",
+    "garmentHint": "PNG vagy JPG semleges háttérrel, lapos elrendezés vagy szellemmanöken",
+    "modelStyling": "Modell és stílus",
+    "modelSelected": "Modell és stílus: {{model}}",
+    "models": {
+      "choose": "Válassz modellt",
+      "natural": "{{name}} · természetes stílus",
+      "editorial": "{{name}} · szerkesztői stílus",
+      "casual": "{{name}} · hétköznapi stílus"
+    },
+    "pose": "Póz",
+    "poses": {
+      "fullBody": "Teljes test",
+      "threeQuarter": "Háromnegyedes",
+      "closeUp": "Közeli részlet"
+    },
+    "outputFormat": "Kimeneti formátum",
+    "formats": {
+      "feedPortrait": "Portré a hírfolyamba",
+      "storyReel": "Történet / Reel"
+    },
+    "background": "Háttér beállítás",
+    "backgrounds": {
+      "studioMinimal": "Stúdió minimalista",
+      "urbanStreet": "Városi utca",
+      "naturalInterior": "Természetes belső tér"
+    },
+    "requirementsTitle": "Feltöltési követelmények",
+    "requirements": {
+      "contrast": "Magas kontraszt a háttérrel szemben",
+      "wrinkles": "Nincs erős gyűrődés",
+      "frontFacing": "Előrenéző szög"
+    }
+  },
+  "source": {
+    "title": "Válassz forrás elemet",
+    "uploadNewLabel": "Új fotó feltöltése",
+    "uploadNew": "Új feltöltése",
+    "noPhotoSelected": "Nincs kiválasztott fotó",
+    "photosSelected_one": "{{count}} fotó kiválasztva",
+    "photosSelected_other": "{{count}} fotó kiválasztva",
+    "selectPhoto": "Válassz egy fotót",
+    "usePhoto": "Fotó használata",
+    "source": "Forrás",
+    "tabs": {
+      "website": "Weboldal",
+      "uploads": "Feltöltések"
+    },
+    "businessWebsite": "{{name}} · Weboldal",
+    "fromWebsite": "Weboldalról",
+    "filterCatalog": "Katalógus szűrése",
+    "filters": {
+      "all": "Összes elem",
+      "tables": "Asztalok",
+      "storage": "Tárolás"
+    },
+    "addPhoto": "Fotó hozzáadása",
+    "tip": "Tiszta termékkivágások optimális fotózási eredményeket hoznak. Az Espanda Studio megőrzi az eredeti akácfa textúrát."
+  },
+  "generating": {
+    "backToWorkspace": "Vissza a munkaterületre",
+    "returnToWorkspace": "Vissza a munkaterületre",
+    "title": "Fotóid előkészítése",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "A generálás biztonságosan fut a háttérben. A kész elemeket az Eredmények között találod.",
+    "status": {
+      "done": "Kész",
+      "active": "Folyamatban",
+      "queued": "Sorban áll"
+    },
+    "progress": "Generálás",
+    "sample": {
+      "title": "{{name}} étkező fotózás",
+      "description": "{{product}} elhelyezése építészeti nappali belső térben.",
+      "variations_one": "{{count}} variáció",
+      "variations_other": "{{count}} variáció"
+    },
+    "steps": {
+      "catalog": "Katalógus elem feldolgozása",
+      "compose": "Jelenet és világítás összeállítása",
+      "finish": "Befejezés és színkalibráció"
+    }
+  },
+  "results": {
+    "title": "Fotózások",
+    "subtitle": "Termék- és divatfotóid",
+    "newPhotoshoot": "Új fotózás",
+    "filterLabel": "Fotózások szűrése",
+    "filters": {
+      "all": "Összes ({{count}})",
+      "product": "Termék ({{count}})",
+      "fashion": "Divat ({{count}})"
+    },
+    "empty": "Még nincsenek fotózások.",
+    "processingLabel": "{{title}}. Feldolgozás, {{percent}}%",
+    "processingBadge_one": "Feldolgozás · {{count}} kredit",
+    "processingBadge_other": "Feldolgozás · {{count}} kredit",
+    "preview": "Előnézet",
+    "reviewPhotoLabel": "Fotó ellenőrzése, {{title}}",
+    "reviewPhoto": "Fotó ellenőrzése",
+    "sample": {
+      "studioStaging": "{{product}} · Stúdió beállítás",
+      "rendering": "Renderelési szakasz · {{percent}}%",
+      "interiorReady_one": "Belső tér · {{ratio}} · {{count}} fotó kész",
+      "interiorReady_other": "Belső tér · {{ratio}} · {{count}} fotó kész",
+      "studioDaylight": "Stúdió nappali fény · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "További lehetőségek",
+    "downloadPhoto": "Fotó letöltése",
+    "variation": "Variáció",
+    "share": "Fotózás megosztása",
+    "samplePreview": "Minta előnézet",
+    "compareOriginal": "Eredeti összehasonlítása",
+    "expandView": "Nézet kibővítése",
+    "stagingSummary": "Beállítás összegzése",
+    "format": "Formátum",
+    "creationCost": "Létrehozási költség",
+    "credits_one": "{{count}} kredit",
+    "credits_other": "{{count}} kredit",
+    "sample": {
+      "headerTitle": "{{name}} fotózás",
+      "vertical": "{{ratio}} Függőleges",
+      "architecturalInterior": "Építészeti belső tér",
+      "studioDaylight": "Stúdió nappali fény",
+      "formatBadge": "{{ratio}} formátum",
+      "naturalStudio": "Természetes stúdió",
+      "portraitPhoto": "Portré fotó"
+    }
+  }
+}

@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Prévu",
+    "briefReady": "Brief prêt",
+    "needsReview": "À revoir",
+    "draftReady": "Brouillon prêt",
+    "approved": "Approuvé",
+    "scheduled": "Planifié",
+    "published": "Publié",
+    "draft": "Brouillon"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain"
+  },
+  "chrome": {
+    "openMenu": "Ouvrir le menu",
+    "logo": "Espanda",
+    "credits_one": "{{count}} crédit disponible",
+    "credits_other": "{{count}} crédits disponibles",
+    "settings": "Paramètres",
+    "modulesLabel": "Modules de l'app",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Publications",
+      "photoshoot": "Shooting photo",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Navigation du module",
+    "nav": {
+      "today": "Aujourd'hui",
+      "posts": "Publications",
+      "create": "Créer",
+      "stories": "Stories",
+      "settings": "Paramètres"
+    },
+    "back": "Retour",
+    "switchBusiness": "Changer d'entreprise, {{name}}",
+    "business": "Entreprise : {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Vos publications, en mouvement",
+    "subtitle": "Revoir les points forts des produits générés et les publications planifiées",
+    "needsApproval": "À approuver",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Revoir la publication",
+    "agenda": "Agenda à venir",
+    "thisWeek": "Cette semaine",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Voir le calendrier"
+  },
+  "calendar": {
+    "title": "Calendrier des publications",
+    "subtitle": "Planifiez et automatisez vos publications",
+    "viewLabel": "Vue du calendrier",
+    "views": {
+      "month": "Mois",
+      "list": "Liste"
+    },
+    "plan": "Plan : {{n}} publications / mois",
+    "managePlan": "Gérer le plan",
+    "postCount_one": "{{count}} publication",
+    "postCount_other": "{{count}} publications",
+    "empty": "Rien de prévu pour ce jour.",
+    "scheduled_one": "{{count}} planifiée",
+    "scheduled_other": "{{count}} planifiées",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "gridLabel": "Calendrier de {{month}}",
+    "dayWithPosts_one": "{{day}} · {{count}} publication",
+    "dayWithPosts_other": "{{day}} · {{count}} publications"
+  },
+  "detail": {
+    "title": "Détails de la publication",
+    "moreOptions": "Plus d'options",
+    "feedPhoto": "Photo 4:5 du fil",
+    "fullscreen": "Plein écran",
+    "captionFrench": "Légende (Français)",
+    "editText": "Modifier le texte",
+    "channels": "Canaux de publication",
+    "instagramFeed": "Fil Instagram",
+    "instagramDetail": "Connectez un compte pour publier",
+    "facebookPage": "Page Facebook",
+    "facebookDetail": "Publication automatique sur la page officielle",
+    "notConnected": "Non connecté",
+    "channelNotConnected": "{{name}}, non connecté",
+    "editPost": "Modifier la publication",
+    "schedule": "Planifier"
+  },
+  "edit": {
+    "title": "Modifier la publication",
+    "cancel": "Annuler",
+    "save": "Enregistrer les modifications",
+    "previewLabel": "{{title}}, ratio original 4:5",
+    "ratio": "Ratio original · 4:5",
+    "sectionLabel": "Modifier la section",
+    "tabs": {
+      "image": "Image",
+      "caption": "Légende",
+      "brand": "Marque"
+    },
+    "description": "Description de la publication",
+    "language": "Langue : Français (FR)",
+    "suggestedHashtags": "Hashtags suggérés",
+    "addHashtag": "Ajouter un hashtag",
+    "add": "+ Ajouter",
+    "regenerate": "Régénérer la légende avec l'IA",
+    "imageHint": "Ratio original · 4:5. Faites glisser l'aperçu pour recadrer.",
+    "brandHint": "Logo, couleurs et ton suivent votre kit de marque {{brand}}."
+  },
+  "schedule": {
+    "title": "Planifier",
+    "storyFormat": "Story · image 9:16",
+    "feedFormat": "Publication du fil · image 4:5",
+    "destination": "Destination",
+    "actionRequired": "Action requise",
+    "notLinked": "Compte Instagram non lié",
+    "notLinkedBody": "Connectez vos comptes sociaux pour débloquer la publication planifiée directe.",
+    "connect": "Connecter le compte social",
+    "locked": "Planification verrouillée jusqu'à la connexion",
+    "timing": "Horaire & Planification",
+    "date": "Date",
+    "dateLabel": "Date, {{date}}",
+    "time": "Heure",
+    "timeLabel": "Heure, {{time}}",
+    "timezone": "Fuseau horaire",
+    "schedulePost": "Planifier la publication",
+    "scheduleLocked": "Planifier la publication (Connecter le canal d'abord)",
+    "saveDraft": "Enregistrer le brouillon"
+  },
+  "brief": {
+    "title": "Créer une publication",
+    "subtitle": "Choisissez un produit et une direction créative",
+    "format": "Format de contenu",
+    "formatLabel": "Format de la publication",
+    "singlePhoto": "Photo unique",
+    "singlePhotoDetail": "Focal du fil 4:5",
+    "carousel": "Carrousel",
+    "carouselDetail": "Photos multiples",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Objectif principal",
+    "goals": {
+      "newArrival": "Nouvelle arrivée",
+      "productFeature": "Mise en avant produit",
+      "specialOffer": "Offre spéciale"
+    },
+    "product": "Produit du catalogue ciblé",
+    "changeProduct": "Changer de produit",
+    "change": "Changer",
+    "direction": "Direction créative (facultatif)",
+    "directionLanguage": "Français (FR)",
+    "directionPlaceholder": "ex. Mettre l'accent sur la menuiserie artisanale et la chaleur",
+    "cost": "Coût de création :",
+    "costPending": "Estimation en attente",
+    "draftPost": "Brouillon de publication"
+  },
+  "stories": {
+    "title": "Stories",
+    "subtitle": "Moments sociaux verticaux 9:16",
+    "newStory": "Nouvelle story",
+    "statusLabel": "Statut de la story",
+    "drafts_one": "Brouillons ({{count}})",
+    "drafts_other": "Brouillons ({{count}})",
+    "scheduled_one": "Planifiées ({{count}})",
+    "scheduled_other": "Planifiées ({{count}})",
+    "samplePreview": "Aperçu d'exemple",
+    "moreOptions": "Plus d'options pour {{title}}",
+    "editStory": "Modifier la story"
+  },
+  "editStory": {
+    "back": "Retour",
+    "undo": "Annuler",
+    "tools": {
+      "text": "Texte",
+      "image": "Image",
+      "brand": "Marque",
+      "cta": "CTA"
+    },
+    "toolLabel": "Outil {{tool}}",
+    "captionTitle": "Légende de la story / Autocollant de lien",
+    "languageCode": "FR",
+    "saveDraft": "Enregistrer le brouillon",
+    "scheduleStory": "Planifier la story"
+  },
+  "planner": {
+    "title": "Planificateur de publications",
+    "sectionsLabel": "Sections des paramètres",
+    "sections": {
+      "business": "Mon Entreprise",
+      "billing": "Facturation",
+      "planner": "Planificateur de publications"
+    },
+    "cycle": "Cycle de planification",
+    "cadence": "Cadence de publication",
+    "monthlyTarget": "Objectif mensuel",
+    "feedPosts": "Publications du fil",
+    "stories": "Stories",
+    "perMonth": "{{n}} / mois",
+    "feedNote": "~1 publication par jour",
+    "storiesNote": "Réparties sur votre mois",
+    "cadenceHint": "Objectifs de contenu suggérés. Ajustez avant de générer votre calendrier.",
+    "pillars": "Piliers de contenu",
+    "pillar": {
+      "catalog": "Produits du catalogue (focus Bunting)",
+      "craft": "Détails des matériaux & artisanat (bois d'Acacia)",
+      "story": "Histoire de la marque & héritage français"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Revue manuelle avant publication : </b>Les publications générées sont placées dans votre calendrier en tant que brouillons pour votre confirmation finale. Aucun contenu n'est publié sans approbation.",
+    "generate": "Générer le calendrier"
+  }
+}

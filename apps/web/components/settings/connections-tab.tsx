@@ -124,9 +124,16 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                     </p>
                   )}
                   {canManage && (
-                    <Button size="sm" variant="ghost" onClick={() => setRemoving(c)}>
-                      Disconnect
-                    </Button>
+                    <div className="flex gap-2">
+                      {c.status === "ERROR" && p.configured && (
+                        <Button size="sm" onClick={() => connect(c.provider)} disabled={busy !== null}>
+                          {busy === c.provider ? "Opening…" : "Reconnect"}
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" onClick={() => setRemoving(c)}>
+                        Disconnect
+                      </Button>
+                    </div>
                   )}
                 </div>
               ))}

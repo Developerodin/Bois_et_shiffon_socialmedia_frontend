@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Willkommen bei Espanda",
+    "subtitle": "Erstelle Inhalte für dein Geschäft.",
+    "mobileNumber": "Handynummer",
+    "countryCode": "Ländercode {{code}}",
+    "sendCode": "Code senden",
+    "useEmail": "E-Mail stattdessen verwenden",
+    "sendFailed": "Code konnte nicht gesendet werden. Versuche es erneut oder nutze die E-Mail.",
+    "chooseCountry": "Wähle dein Land",
+    "searchCountry": "Land oder Code suchen"
+  },
+  "email": {
+    "title": "Mit E-Mail anmelden",
+    "subtitle": "Wir senden dir einen passwortlosen Bestätigungscode per E-Mail.",
+    "tagline": "Intelligentes Marketing für den modernen Einzelhandel",
+    "label": "E-Mail-Adresse",
+    "placeholder": "name@deingeschäft.com",
+    "notConfigured": "E-Mail-Anmeldung ist auf diesem Server noch nicht eingerichtet.",
+    "sendFailed": "Code konnte nicht gesendet werden. Versuche es erneut.",
+    "useMobile": "Handynummer stattdessen verwenden",
+    "linkTitle": "E-Mail hinzufügen",
+    "linkSubtitle": "Deine Nummer ist verifiziert. Füge eine E-Mail für Belege und Team-Einladungen hinzu. Wir senden dir einen Code."
+  },
+  "verify": {
+    "title": "Gib deinen Code ein",
+    "sent": "Wir haben einen Bestätigungscode an {{destination}} gesendet",
+    "codeLabel": "Sechsstelliger Bestätigungscode",
+    "submit": "Code bestätigen",
+    "checkFailed": "Code konnte nicht überprüft werden. Versuche es erneut.",
+    "resendFailed": "Code konnte nicht erneut gesendet werden.",
+    "resendIn": "Code erneut senden in {{time}}",
+    "resend": "Code erneut senden",
+    "changeEmail": "E-Mail ändern",
+    "changeMobile": "Handynummer ändern"
+  },
+  "welcome": {
+    "getStarted": "Loslegen",
+    "footnote": "Dein Geschäft, deine kreative Richtung.",
+    "photosLabel": "Beispiele aus dem {{brand}}-Katalog",
+    "title": "Marketing, das sich wie dein Geschäft anfühlt",
+    "body": "Erstelle markengerechte Studio-Reels, Fotoshootings und Produktbeiträge aus deinem Katalog.",
+    "steps": {
+      "goal": {
+        "title": "Wähle dein Ziel",
+        "body": "Wähle das erste kreative Format, das du erstellen möchtest."
+      },
+      "business": {
+        "title": "Teile dein Geschäft",
+        "body": "Teile deine Website oder füge deine Geschäftsdaten hinzu."
+      },
+      "review": {
+        "title": "Fertige Inhalte überprüfen",
+        "body": "Überprüfe Ideen, die rund um deine Produkte erstellt wurden."
+      }
+    }
+  },
+  "goal": {
+    "title": "Was wirst du zuerst erstellen?",
+    "subtitle": "Wir passen deinen ersten Arbeitsbereich und Vorlagen an deinen Hauptfokus an.",
+    "note": "Alle Tools und Studioformate bleiben später verfügbar.",
+    "options": {
+      "socialPlan": {
+        "title": "Social-Media-Plan",
+        "description": "Ein Monat Beiträge und Bildunterschriften"
+      },
+      "marketingVideos": {
+        "title": "Marketing-Videos",
+        "description": "Studio-Reels aus deinem Katalog"
+      },
+      "fashionPhotoshoot": {
+        "title": "Mode-Fotoshooting",
+        "description": "Kleidung auf Modellen stylen"
+      },
+      "productPhotoshoot": {
+        "title": "Produkt-Fotoshooting",
+        "description": "Produktfotos für deinen Katalog"
+      }
+    }
+  },
+  "source": {
+    "title": "Wo ist dein Geschäft online?",
+    "subtitle": "Espanda scannt deinen Online-Shop oder Eintrag, um markengerechte Medien automatisch zu erstellen.",
+    "options": {
+      "website": {
+        "title": "Website",
+        "description": "Shopify, WooCommerce, eigene Domain"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Lokales Ladengeschäft, Boutique oder Showroom"
+      },
+      "marketplace": {
+        "title": "Marktplatz",
+        "description": "Amazon, Etsy, eBay oder Instagram-Shop"
+      },
+      "wholesale": {
+        "title": "Großhandel / B2B",
+        "description": "Faire, Ankorstore, privater Katalog"
+      },
+      "none": {
+        "title": "Keine Online-Präsenz",
+        "description": "Beschreibe deine Artikel manuell"
+      },
+      "other": {
+        "title": "Etwas anderes",
+        "description": "Social-Handle, PDF-Lookbook oder Datei"
+      }
+    }
+  },
+  "website": {
+    "title": "Was ist deine Website?",
+    "subtitle": "Wir ziehen automatisch deine Katalogfotos, Farben und den Tonfall.",
+    "label": "URL des Shop-Websites",
+    "placeholder": "www.deinshop.com",
+    "valid": "Gültige Adresse",
+    "willRead": "Wir lesen diese Seite",
+    "facts": {
+      "catalog": {
+        "key": "Katalogprodukte",
+        "value": "Produktfotos"
+      },
+      "identity": {
+        "key": "Markenidentität",
+        "value": "Farben & Typografie"
+      },
+      "tone": {
+        "key": "Ton & Stil",
+        "value": "Stimme von deinen Seiten"
+      }
+    },
+    "safeNote": "Der Katalogimport ändert nichts an deinem Live-Shop."
+  },
+  "manual": {
+    "title": "Geschäftsdaten hinzufügen",
+    "subtitle": "Teile einen Listungslink oder beschreibe deinen Katalog manuell.",
+    "modeLabel": "Wie du dein Geschäft hinzufügen kannst",
+    "modeListing": "Listungs-URL",
+    "modeDescribe": "Geschäft beschreiben",
+    "listingLabel": "Listungslink *",
+    "listingPlaceholder": "Etsy, Amazon, Google Maps oder Shop-Link",
+    "nameLabel": "Geschäftsname *",
+    "namePlaceholder": "z.B. Atelier Bois & Chiffons",
+    "sellsLabel": "Was verkaufst du? *",
+    "sellsPlaceholder": "z.B. Handgefertigte Holztische, TV-Ständer und moderne Wohnkultur...",
+    "locationLabel": "Standort (optional)",
+    "locationPlaceholder": "Stadt, Land oder Showroom-Adresse",
+    "websiteLabel": "Website (optional)"
+  },
+  "learning": {
+    "working": "Wird bearbeitet",
+    "tryAgain": "Erneut versuchen",
+    "inProgressButton": "Lernen läuft...",
+    "saved": "Wir speichern deinen Fortschritt.",
+    "title": "Dein Geschäft kennenlernen",
+    "bodyWebsite": "Analysiere deine Website, um Markenidentität, Kataloge und visuellen Ton zu extrahieren.",
+    "bodyManual": "Verwandle deine Beschreibung in Markenidentität, Kataloge und visuellen Ton.",
+    "fallbackName": "Dein Geschäft",
+    "sourceWebsite": "Primäre Website-Quelle",
+    "sourceManual": "Geschäftsdaten",
+    "foundWebsite": "Website gefunden",
+    "foundManual": "Details hinzugefügt",
+    "stages": {
+      "open": "Website öffnen",
+      "identity": "Markenidentität & Ton lesen",
+      "photos": "Produktfotos sammeln"
+    },
+    "status": {
+      "done": "Abgeschlossen",
+      "running": "In Bearbeitung",
+      "queued": "In Warteschlange"
+    },
+    "errors": {
+      "stopped": "Das Lesen deiner Website wurde gestoppt.",
+      "noWorkspace": "Dein Konto hat noch keinen Arbeitsbereich.",
+      "startFailed": "Konnte das Lesen deiner Website nicht starten.",
+      "restartFailed": "Konnte nicht neu starten. Versuche es erneut."
+    }
+  },
+  "review": {
+    "title": "Geschäftsdaten überprüfen",
+    "subtitle": "Wir haben diese Details auf deiner Website gefunden. Du kannst sie jederzeit bearbeiten.",
+    "edit": "Bearbeiten",
+    "tagline": "Slogan",
+    "editTagline": "Slogan bearbeiten",
+    "categoryLocation": "Kategorie & Standort",
+    "audience": "Zielgruppe",
+    "editAudience": "Zielgruppe bearbeiten",
+    "products_one": "Erkannte Produkte ({{count}})",
+    "products_other": "Erkannte Produkte ({{count}})",
+    "found": "Gefunden",
+    "strengths": "Markenstärken",
+    "tags": {
+      "homeLiving": "Wohnen & Leben",
+      "france": "Frankreich",
+      "productCatalog": "Produktkatalog",
+      "showroomEshop": "Physischer Showroom & E-Shop"
+    }
+  },
+  "brand": {
+    "title": "Marke & kreativer Stil",
+    "subtitle": "Passe an, wie Espanda deine Fotoshootings und Social-Posts gestaltet.",
+    "identity": "{{name}}-Identität",
+    "paletteMeta": "Website-Palette · Bearbeitbar",
+    "swatches": "Importierte Website-Farbpaletten",
+    "tone": "Kreativer Ton",
+    "selected_one": "{{count}} ausgewählt",
+    "selected_other": "{{count}} ausgewählt",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxuriös",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Natürlich",
+      "minimalist": "Minimalistisch"
+    },
+    "contentLanguage": "Inhaltssprache",
+    "contentLanguageA11y": "Inhaltssprache, {{language}}. Ändern",
+    "languages": {
+      "fr": "Französisch (FR)",
+      "en": "Englisch (US)"
+    },
+    "audienceProfile": "Zielgruppenprofil",
+    "audienceHome": "Wohnen & Möbel",
+    "featured": "Ausgewählte Katalogprodukte",
+    "readyForBatch_one": "{{count}} bereit für Batch",
+    "readyForBatch_other": "{{count}} bereit für Batch",
+    "sampleProducts": {
+      "table": "Bunting Tisch",
+      "tableDetail": "Akazie 240cm",
+      "tv": "TV-Einheit",
+      "tvDetail": "Akazie 2 Türen"
+    },
+    "channelsNote": "Instagram und Facebook können im nächsten Schritt verbunden werden. (Noch keine Kanäle verbunden)"
+  },
+  "preparing": {
+    "ready": "Studio bereit",
+    "preparing": "Studio wird vorbereitet",
+    "loadingButton": "Bereite deine Ideen vor…",
+    "catalogSafe": "Dein Katalog bleibt in deinem Shop unberührt.",
+    "title": "Bereite deine ersten Ideen vor",
+    "body": "Erstelle maßgeschneiderte Social Reels und Bühnenbilder aus deiner {{name}}-Kollektion.",
+    "photosTitle": "Fotos sammeln",
+    "photosDetail": "{{product}} Essgruppe",
+    "storyboardTitle": "Storyboard erstellen",
+    "storyboardDetail_one": "{{count}} Videoszene komponieren",
+    "storyboardDetail_other": "{{count}} Videoszenen komponieren",
+    "nextTitle": "Als Nächstes: Überprüfe deine Ideen",
+    "nextDetail": "Wähle Hooks und Audio-Presets"
+  },
+  "connect": {
+    "readyToConnect": "• Bereit zum Verbinden",
+    "title": "Veröffentliche, wenn du bereit bist",
+    "subtitle": "Verbinde deine Social-Media-Konten, damit Espanda direkt veröffentlichen oder bereit-zu-posten Reels und Produkt-Highlights als Entwurf speichern kann.",
+    "toolsTitle": "Veröffentlichungstools",
+    "featureReels": "Veröffentliche auf Instagram Feed & Reels",
+    "featureCaptions": "Verwende deine Bildunterschriften und Hashtags",
+    "featureReview": "Du überprüfst immer, bevor etwas live geht",
+    "assurance": "Kein Inhalt wird ohne deine Bestätigung veröffentlicht",
+    "connectInstagram": "Instagram verbinden",
+    "connectFacebook": "Facebook verbinden",
+    "skip": "Für jetzt überspringen",
+    "laterTitle": "Später verbinden?",
+    "laterBody": "Du kannst weiterhin hochauflösende Reels und Fotoshootings erstellen, bearbeiten und auf deine Kamerarolle herunterladen. Du kannst dein Instagram jederzeit in den Einstellungen verknüpfen.",
+    "laterDownload": "Lade deine Kreationen herunter",
+    "laterSettings": "Kanäle in den Einstellungen verbinden",
+    "continueWithout": "Ohne Verbindung fortfahren"
+  }
+}

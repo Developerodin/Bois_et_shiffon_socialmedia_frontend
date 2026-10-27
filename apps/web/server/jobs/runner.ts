@@ -3,6 +3,7 @@ import { after } from "next/server";
 import {
   AGENT_RUN_JOB,
   executeAgentRun,
+  NothingToDoError,
   onAgentRunFailure,
   startAgentRun,
 } from "@/server/agents/engine";
@@ -54,7 +55,7 @@ export async function runDueJobs({ budgetMs = 45_000 } = {}) {
       await handler.run(job.payload);
       await completeJob(job);
     } catch (error) {
-      const retryable = !(error instanceof AiProviderError) || error.retryable;
+      const retryable = error instanceof AiProviderError ? error.retryable : !(error instanceof NothingToDoError);
       const exhausted = await failJob(job, error, retryable && Boolean(handler));
       await handler?.onFailure?.(job.payload, error, exhausted).catch(() => {});
     }

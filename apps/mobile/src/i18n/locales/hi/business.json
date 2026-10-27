@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "वर्कस्पेस {{name}}",
+    "logoLabel": "{{name}} लोगो",
+    "settingsTitle": "सेटिंग्स",
+    "edit": "संपादित करें",
+    "manage": "प्रबंधित करें",
+    "tabs": {
+      "myBusiness": "मेरा व्यवसाय",
+      "billing": "बिलिंग",
+      "postsPlanner": "पोस्ट प्लानर"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "व्यवसाय विशेषताएँ",
+    "attributes": {
+      "location": "स्थान",
+      "audience": "दर्शक",
+      "category": "श्रेणी",
+      "subcategory": "उपश्रेणी",
+      "storeType": "स्टोर प्रकार",
+      "website": "वेबसाइट"
+    },
+    "brandPreferences": "ब्रांड प्राथमिकताएँ",
+    "brandPreferencesHint": "रंग, टोन, भाषा",
+    "photoAssets": "फोटो संसाधन",
+    "photoAssetsHint": "Bunting टेबल और टीवी यूनिट फोटो",
+    "connections": "कनेक्शन",
+    "connectionsHint": "सोशल चैनल और Google प्रोफाइल"
+  },
+  "brand": {
+    "title": "ब्रांड सेटिंग्स",
+    "save": "परिवर्तन सहेजें",
+    "paletteTitle": "ब्रांड रंग पैलेट",
+    "editHex": "हेक्स संपादित करें",
+    "watermarkTitle": "आउट्रो वॉटरमार्क लोगो",
+    "watermarkBody": "वीडियो रील अंत और फोटो बॉर्डर पर लागू",
+    "change": "बदलें",
+    "toneTitle": "क्रिएटिव टोन",
+    "tones": {
+      "modern": "आधुनिक",
+      "luxurious": "शानदार",
+      "elegant": "शालीन",
+      "premium": "प्रीमियम",
+      "natural": "प्राकृतिक",
+      "minimalist": "मिनिमलिस्ट"
+    },
+    "cuesTitle": "ब्रांड सिग्नेचर संकेत",
+    "addCue": "संकेत जोड़ें"
+  },
+  "photos": {
+    "title": "फोटो संसाधन",
+    "refresh": "रिफ्रेश",
+    "sourceTitle": "स्रोत वेबसाइट",
+    "sourceBody": "रील्स, फीड पोस्ट और फोटोशूट स्टेजिंग के लिए साझा फोटो। आपकी स्पष्ट स्वीकृति के बिना कोई फोटो प्रकाशित नहीं होता।",
+    "sources": {
+      "website": "वेबसाइट ({{n}})",
+      "uploads": "अपलोड्स ({{n}})"
+    },
+    "addPhotos": "फोटो जोड़ें",
+    "photosTitle": "फोटो",
+    "photoCount_one": "{{n}} फोटो",
+    "photoCount_other": "{{n}} फोटो",
+    "emptyTitle": "अभी तक कोई अपलोड नहीं",
+    "emptyBody": "स्टूडियो फोटो जो आप अपलोड करते हैं, यहाँ दिखाई देंगे।",
+    "upload": "कस्टम स्टूडियो फोटो अपलोड करें"
+  },
+  "connections": {
+    "title": "कनेक्शन",
+    "sourceTitle": "स्रोत वेबसाइट",
+    "linked": "लिंक्ड",
+    "sourceBody": "उत्पाद फोटो और व्यवसाय विवरण",
+    "channelsTitle": "प्रकाशन चैनल",
+    "accounts": "अकाउंट्स",
+    "connected": "कनेक्टेड",
+    "notConnected": "कनेक्टेड नहीं",
+    "connect": "कनेक्ट करें",
+    "disconnect": "डिस्कनेक्ट करें",
+    "channels": {
+      "instagram": "Instagram डायरेक्ट और रील्स",
+      "facebook": "Facebook पेज",
+      "whatsapp": "WhatsApp बिजनेस",
+      "google": "Google बिजनेस प्रोफाइल",
+      "shopify": "Shopify डायरेक्ट सिंक"
+    }
+  },
+  "automations": {
+    "title": "ऑटोमेशन",
+    "heading": "आपकी प्रकाशन प्राथमिकताएँ",
+    "intro": "Espanda कैसे निर्धारित पोस्ट को प्री-फिल करता है और आपके कैटलॉग आइटम के लिए सामग्री का मसौदा तैयार करता है, इसे नियंत्रित करें।",
+    "reviewTitle": "प्रकाशन से पहले समीक्षा",
+    "reviewBody": "सामग्री को प्रकाशित होने से पहले समीक्षा करें।",
+    "required": "आवश्यक",
+    "reviewLabel": "प्रकाशन से पहले समीक्षा। सामग्री को प्रकाशित होने से पहले समीक्षा करें। आवश्यक।",
+    "queueTitle": "क्रियाएँ कतारबद्ध करें",
+    "manageConnections": "कनेक्शन प्रबंधित करें",
+    "items": {
+      "monthly": {
+        "title": "मासिक योजनाएँ बनाएं",
+        "body": "अपने मासिक ड्राफ्ट पोस्ट कैलेंडर को तैयार करें।",
+        "active": "सक्रिय · ड्राफ्ट कैलेंडर में सहेजे गए"
+      },
+      "autopublish": {
+        "title": "स्वीकृत पोस्ट को स्वचालित रूप से प्रकाशित करें",
+        "body": "जैसे ही आप \"स्वीकृत\" टैप करते हैं, निर्धारित रील्स को स्वचालित रूप से पुश करें।",
+        "requires": "Instagram कनेक्शन आवश्यक",
+        "active": "सक्रिय · स्वीकृति के बाद प्रकाशित"
+      },
+      "replies": {
+        "title": "शोरूम पूछताछ के उत्तर का मसौदा तैयार करें",
+        "body": "आपके इनबॉक्स कतार में परिष्कृत फ्रेंच कारीगर उत्तरों को पूर्व-जनसंख्या करें।",
+        "requires": "मैसेजिंग चैनल आवश्यक",
+        "active": "सक्रिय · ड्राफ्ट आपके इनबॉक्स में जोड़े गए"
+      }
+    },
+    "adsTitle": "पेड सोशल विज्ञापन",
+    "comingSoon": "जल्द आ रहा है",
+    "adsBody": "स्वचालित मेटा विज्ञापन क्रिएटिव परीक्षण और बजट पेसिंग।"
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} क्रेडिट उपलब्ध",
+    "creditsAvailable_other": "{{n}} क्रेडिट उपलब्ध",
+    "planName": "{{tier}} योजना",
+    "statusActive": "सक्रिय",
+    "planBlurb": "आपके निर्माण और व्यवसाय उपकरण",
+    "cycleTitle": "बिलिंग चक्र",
+    "renewsMonthly": "मासिक नवीनीकरण",
+    "balanceTitle": "क्रेडिट बैलेंस",
+    "monthlyAllowance": "{{amount}} मासिक भत्ता",
+    "balanceLabel_one": "{{balance}} में से {{n}} क्रेडिट उपलब्ध",
+    "balanceLabel_other": "{{balance}} में से {{n}} क्रेडिट उपलब्ध",
+    "balanceOf_one": " / {{n}} क्रेडिट उपलब्ध",
+    "balanceOf_other": " / {{n}} क्रेडिट उपलब्ध",
+    "note_one": "{{n}} क्रेडिट उपयोग किया गया · {{item}} के लिए {{reserved}} आरक्षित। भत्ता मासिक नवीनीकरण होता है।",
+    "note_other": "{{n}} क्रेडिट उपयोग किए गए · {{item}} के लिए {{reserved}} आरक्षित। भत्ता मासिक नवीनीकरण होता है।",
+    "usageTitle": "हाल की क्रेडिट उपयोग",
+    "usageAside": "वर्कस्पेस गतिविधि",
+    "today": "आज",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} रील",
+        "detail": "उत्पादन के लिए आरक्षित"
+      },
+      "plan": {
+        "title": "मासिक सामग्री योजना",
+        "detail_one": "{{n}} ड्राफ्ट पोस्ट",
+        "detail_other": "{{n}} ड्राफ्ट पोस्ट"
+      },
+      "renewal": {
+        "title": "मासिक योजना नवीनीकरण",
+        "detail": "चक्र क्रेडिट रीसेट"
+      }
+    },
+    "spent_one": "-{{n}} क्रेडिट",
+    "spent_other": "-{{n}} क्रेडिट",
+    "added_one": "+{{n}} क्रेडिट",
+    "added_other": "+{{n}} क्रेडिट",
+    "included": "शामिल",
+    "help": {
+      "missingCredits": "क्रेडिट गायब या रेंडर विफल",
+      "restore": "सदस्यता खरीदारी पुनर्स्थापित करें",
+      "history": "बिलिंग इतिहास और चालान"
+    }
+  },
+  "account": {
+    "title": "खाता सेटिंग्स",
+    "workspaceTitle": "वर्कस्पेस",
+    "workspaceName": "वर्कस्पेस का नाम",
+    "teamTitle": "टीम सहयोग",
+    "teamMembers": "वर्कस्पेस सदस्य",
+    "preferencesTitle": "प्राथमिकताएँ",
+    "languageTitle": "ऐप इंटरफ़ेस भाषा",
+    "languageBody": "प्रॉम्प्ट्स और निर्यात फ्रेंच में रहेंगे",
+    "languageLabel": "ऐप भाषा, {{language}}",
+    "languageHint": "भाषाओं की सूची खोलता है",
+    "pushTitle": "पुश सूचनाएँ",
+    "pushBody": "निर्माण और प्रकाशन अपडेट",
+    "supportTitle": "सहायता और कानूनी",
+    "help": "सहायता चाहिए और समर्थन से संपर्क करें",
+    "terms": "सेवा की शर्तें",
+    "privacy": "गोपनीयता नीति",
+    "restore": "खरीदारी पुनर्स्थापित करें",
+    "signOut": "Espanda से साइन आउट करें",
+    "signOutNote": "आपकी सक्रिय सदस्यता और ड्राफ्ट की गई कैटलॉग संपत्तियाँ सुरक्षित रूप से सहेजी जाती हैं।"
+  },
+  "drawer": {
+    "closeMenu": "मेनू बंद करें",
+    "switchLabel": "वर्कस्पेस {{name}}. व्यवसाय बदलें",
+    "balanceLabel_one": "वर्तमान शेष {{credits}} क्रेडिट बचे हैं, {{plan}} योजना",
+    "balanceLabel_other": "वर्तमान शेष {{credits}} क्रेडिट्स बचे हैं, {{plan}} योजना",
+    "balanceTitle": "वर्तमान शेष",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> क्रेडिट बचे हैं</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> क्रेडिट्स बचे हैं</rest>",
+    "sections": {
+      "create": "बनाएँ",
+      "grow": "विकसित करें",
+      "manage": "प्रबंधित करें"
+    },
+    "items": {
+      "chat": "वीडियो बनाने के लिए चैट",
+      "generations": "मेरी पीढ़ियाँ",
+      "photos": "फोटो संपत्तियाँ",
+      "inbox": "ग्राहक और इनबॉक्स",
+      "google": "Google वृद्धि",
+      "website": "वेबसाइट स्टूडियो",
+      "connections": "कनेक्शन्स",
+      "automations": "स्वचालन",
+      "billing": "योजनाएँ और बिलिंग",
+      "account": "खाता सेटिंग्स"
+    },
+    "signOut": "साइन आउट करें"
+  }
+}

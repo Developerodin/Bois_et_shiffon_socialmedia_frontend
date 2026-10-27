@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Työtila {{name}}",
+    "customers": "Asiakkaat",
+    "customerTabs": {
+      "inbox": "Saapuneet",
+      "reviews": "Arvostelut",
+      "people": "Ihmiset"
+    },
+    "status": {
+      "notConnected": "Ei yhdistetty"
+    },
+    "draft": "Luonnos",
+    "googleGrowth": "Google Kasvu",
+    "websiteStudio": "Verkkosivustostudio",
+    "editContent": "Muokkaa sisältöä",
+    "diningTableImage": "Acacia Bunting ruokapöytä",
+    "pages": {
+      "home": "Koti",
+      "product": "Tuote",
+      "contact": "Yhteystiedot"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Vaihda yritystä, {{name}}",
+    "title": "Markkinointi",
+    "subtitle": "Hallitse kauppasi näkyvyyttä, keskusteluja ja brändiprofiilia",
+    "cue": {
+      "imageLabel": "Acacia TV-yksikkö olohuoneessa",
+      "dismiss": "Ohita päivän vihje",
+      "eyebrow": "Päivän vihje",
+      "title": "Lisää uusia katalogikuvia",
+      "body": "Uusien kuvien lisääminen pitää automaattiset kelat ja verkkosivustoluonnoksen ajan tasalla."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Asiakkaat",
+        "body": "Saapuneet, arvostelut ja ihmiset",
+        "cta": "Avaa saapuneet"
+      },
+      "google": {
+        "title": "Google Kasvu",
+        "body": "Profiili, julkaisut ja arvostelut",
+        "cta": "Määritä"
+      },
+      "website": {
+        "title": "Verkkosivustostudio",
+        "body": "Luonnos, muokkaa ja julkaise sivustosi",
+        "cta": "Avaa luonnos"
+      },
+      "business": {
+        "title": "Liiketoiminta",
+        "body": "Brändi, resurssit ja yhteydet",
+        "cta": "Hallitse"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Ei viestejä vielä",
+    "emptyBody": "Yhdistä asiakasviestintäkanavasi saadaksesi suoria tuotekysymyksiä ja tarkista AI-ehdotetut luonnokset turvallisesti ennen lähettämistä.",
+    "connectChannel": "Yhdistä kanava",
+    "emptyFootnote": "Uudet viestit tulevat automaattisesti saataville, kun yhteys on muodostettu.",
+    "channelsTitle": "Tuetut viestintäkanavat",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Yhdistä tili vastaanottaaksesi viestejä."
+  },
+  "reply": {
+    "title": "Vastausavustaja",
+    "referencedProduct": "Viitattu tuote",
+    "suggestionTitle": "Espanda vastaussuositus",
+    "draftLabel": "Vastausluonnos",
+    "tone": "Sävy: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Viimeistelty & käsityöläinen"
+    },
+    "done": "Valmis",
+    "editReply": "Muokkaa vastausta",
+    "approvalTitle": "Manuaalinen hyväksyntä vaaditaan",
+    "approvalBody": "Yhtään viestiä ei lähetetä ilman nimenomaista klikkaustasi.",
+    "exampleTitle": "Esimerkkikeskustelutila",
+    "exampleBody": "Yhdistämällä Instagram- tai Facebook-tilisi tämä esimerkki korvataan oikeilla asiakaskysymyksillä."
+  },
+  "reviews": {
+    "emptyTitle": "Ei arvosteluja vielä",
+    "emptyBody": "Yhdistä Google Business -profiilisi kerätäksesi ja vastataksesi automaattisesti vahvistettuihin asiakaspalautteisiin.",
+    "connectGoogle": "Yhdistä Google Business",
+    "automatedTitle": "Automaattiset arvostelupyynnöt",
+    "connectFirst": "Yhdistä ensin",
+    "automatedBody": "Vaatii Google Business -yhteyden lähettääkseen henkilökohtaisia arvostelukutsuja."
+  },
+  "people": {
+    "emptyTitle": "Ei asiakastietoja vielä",
+    "emptyBody": "Ihmiset, joista kuulet yhdistettyjen asiakasviestintäkanavien kautta, näkyvät täällä.",
+    "connectChannel": "Yhdistä kanava",
+    "directoryTitle": "Asiakasluettelosi",
+    "directoryBody": "Avaa henkilön tiedot nähdäksesi hänen keskustelunsa ja yhteystietonsa yhdessä paikassa.",
+    "connectedChannels": "Yhdistetyt asiakasviestintäkanavat"
+  },
+  "google": {
+    "presenceTitle": "Google-näkyvyytesi",
+    "presenceBody": "Pidä paikallinen ranskalainen näyttelytilasi näkyvissä Google Mapsissa ja Haussa automaattisesti.",
+    "profileTitle": "Google Business -profiili",
+    "profileBody": "Synkronoi virallinen myymäläosoitteesi, aukioloaikasi ja uudet katalogikuvasi suoraan Google Mapsiin.",
+    "connectProfile": "Yhdistä Google Business -profiili",
+    "capabilitiesTitle": "Automaattiset synkronointiominaisuudet",
+    "capabilities": {
+      "catalog": {
+        "title": "Profiili- ja katalogipäivitykset",
+        "body": "Synkronoi uudet lavastetut kuvat ja huonekalut paikallisiin Google-julkaisupäivityksiin."
+      },
+      "reviews": {
+        "title": "Arvostelupyynnöt",
+        "body": "Luo kohteliaita ranskalaisia arvostelukutsuja näyttelytilavierailujen tai ostosten jälkeen."
+      },
+      "replies": {
+        "title": "Kuratoidut vastausluonnokset",
+        "body": "Espanda luo huolellisesti harkittuja vastausluonnoksia kaikille saapuville asiakasarvosteluille tarkistettavaksesi."
+      }
+    },
+    "controlTitle": "Sinä pysyt hallinnassa",
+    "controlBody": "Mitään ei julkaista tai vastata Googlessa ennen kuin hyväksyt sen."
+  },
+  "googleWorkspace": {
+    "newPost": "Uusi Google-julkaisu",
+    "subtitle": "Esikatsele, miten tuotelanseeraukset ja näyttelytilan arvostelut synkronoituvat suoraan Googleen.",
+    "tabs": {
+      "profile": "Profiili",
+      "posts": "Julkaisut",
+      "reviews": "Arvostelut"
+    },
+    "draftPostTitle": "Luonnos Google-julkaisu",
+    "actionButton": "Toimintopainike: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Lue lisää"
+    },
+    "reviewPost": "Tarkista julkaisu",
+    "reviewsTitle": "Näyttelytilan arvostelut",
+    "reviewsBody": "Arvostelut ja vastausluonnokset kerätään asiakaskeskustelujesi kanssa.",
+    "openReviews": "Avaa arvostelut",
+    "checklistTitle": "Profiilin asennuslista",
+    "checklist": {
+      "profile": {
+        "label": "Google-profiili yhdistetty",
+        "value": "Löydetty"
+      },
+      "reviewLink": {
+        "label": "Suora arvostelupyyntölomake",
+        "value": "Aseta"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Luonnoksen esikatselu",
+    "catalogConnected": "Lähdekaupan katalogi yhdistetty",
+    "connectDomain": "Yhdistä verkkotunnus",
+    "previewLabel": "Verkkosivustoluonnoksen esikatselu",
+    "browserTitle": "Verkkosivustoluonnos",
+    "fullPreview": "Täysi esikatselu",
+    "reviewPublish": "Tarkista & julkaise luonnos",
+    "footnote": "Tarkista sisältösi ja verkkotunnuksesi ennen julkaisua."
+  },
+  "websiteEdit": {
+    "saveChanges": "Tallenna luonnosmuutokset",
+    "reviewPublish": "Tarkista & julkaise",
+    "preview": "Esikatselu",
+    "title": "Muokkaa verkkosivuston sisältöä",
+    "heroTitle": "Hero-osion banneri",
+    "replaceImage": "Vaihda kuva",
+    "heroImageLabel": "Hero-bannerikuva",
+    "headline": "Otsikko (ranskaksi)",
+    "description": "Kuvaus",
+    "sectionsTitle": "Sivun osiot",
+    "sectionCount_one": "{{count}} osio",
+    "sectionCount_other": "{{count}} osiota",
+    "sections": {
+      "heroBanner": "Hero-banneri",
+      "featuredCollection": "Esittelykokoelma",
+      "showroomContact": "Näyttelytila & yhteystiedot"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Vahvista verkkotunnus ja tarkista sisältö ennen julkaisua.",
+    "publish": "Julkaise sivusto",
+    "keepDraft": "Pidä luonnoksena",
+    "title": "Tarkista sivustosi",
+    "subtitle": "Tarkista sisältö ja kohde ennen julkaisua.",
+    "heroImageLabel": "Sivuston pääkuva",
+    "destinationTitle": "Julkaisukohde",
+    "destinationBody": "Yhdistä ja vahvista verkkotunnus julkaistaksesi tämän luonnoksen.",
+    "setUpDomain": "Määritä verkkotunnus"
+  }
+}

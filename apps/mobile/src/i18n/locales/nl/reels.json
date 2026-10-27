@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} seconde",
+  "seconds_other": "{{count}} seconden",
+  "noPresenter": "Geen presentator",
+  "aiActor": "AI Acteur",
+  "assistant": "Je video-assistent",
+  "sourceWebsite": "Bronwebsite",
+  "preview": "Voorbeeld",
+  "schedule": "Inplannen",
+  "goBack": "Terug",
+  "inProgress": "Bezig",
+  "timezone": "Tijdzone",
+  "status": {
+    "draft": "Concept",
+    "ready": "Klaar"
+  },
+  "scene": {
+    "label": "Scene {{n}} · {{seconds}}s",
+    "count_one": "{{count}} scene",
+    "count_other": "{{count}} scenes"
+  },
+  "shot": {
+    "wide": "Groothoek",
+    "material": "Materiaal detail",
+    "closeCta": "Product close-up & CTA"
+  },
+  "create": {
+    "switchBusiness": "Wissel bedrijf, {{name}}",
+    "title": "Maak je volgende reel",
+    "subtitle": "Maak studiovideo-reels van je winkelcatalogus",
+    "heroImage": "Volledig interieurbeeld van de {{product}} eetkamercollectie",
+    "question": "Wat wil je laten zien?",
+    "planTogether": "Plan samen een reel",
+    "start": "Start",
+    "startA11y": "Begin met het plannen van een reel",
+    "ideasReady_one": "{{count}} idee klaar",
+    "ideasReady_other": "{{count}} ideeën klaar",
+    "viewIdeas": "Bekijk ideeën →",
+    "actorSubtitle": "Presentator reel",
+    "templates": "Sjablonen",
+    "templatesSubtitle": "Snelle catalogus cuts",
+    "jumpBackIn": "Ga verder",
+    "seeAll": "Bekijk alles",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Video-ideeën",
+    "subtitle": "Geselecteerde hoeken klaar om om te zetten in bewegende reels",
+    "filter": {
+      "all": "Alle ({{n}})",
+      "productSpotlight": "Product spotlight ({{n}})",
+      "collection": "Collectie ({{n}})"
+    },
+    "angle": "Hoek {{n}}",
+    "body": {
+      "angle01": "Natuurlijke nerf, geometrische kruisbeenarchitectuur en eetkameropstelling benadrukken.",
+      "angle02": "Focussen op handgesneden latdeuren, kabelbeheer en warme woonambiance."
+    },
+    "readyToReview": "Klaar om te beoordelen",
+    "viewStoryboard": "Bekijk storyboard"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} tegoed",
+    "creditsA11y_other": "{{count}} tegoeden",
+    "addAssets": "Voeg middelen toe",
+    "composerPlaceholder": "Verfijn toon, voice-over, of voeg aanwijzingen toe...",
+    "composerA11y": "Verfijn toon, voice-over, of voeg aanwijzingen toe",
+    "send": "Verstuur verfijning",
+    "day": "Vandaag · Reels Studio",
+    "userMessage": "Toon de Bunting-collectie in een rustige, premium reel.",
+    "reply": "Ik heb een concept op maat gemaakt voor je <b>{{brand}}</b> {{product}} tafel. Hier zijn de aanbevolen parameters:",
+    "format": "Formaat",
+    "formatVertical": "9:16 Verticaal (Story/Reel)",
+    "duration": "Duur",
+    "presenter": "Presentator",
+    "openingHook": "Opening hook",
+    "reviewStoryboard_one": "Beoordeel storyboard ({{count}} scene)",
+    "reviewStoryboard_other": "Beoordeel storyboard ({{count}} scenes)",
+    "readyStatus": "Klaar om te genereren of verfijnen"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "{{seconds}}s duur",
+    "verticalFact": "9:16 verticaal",
+    "readyToRender": "Klaar om te renderen <muted>· Concept opgeslagen voor beoordeling</muted>",
+    "sceneDirection": "Scenerichting",
+    "voiceoverFr": "Voice-over (FR)",
+    "direction": {
+      "scene1": "Langzame glijdende onthulling over moderne eetkameropstelling",
+      "scene2": "Vloeiende macroveeg over rijke natuurlijke houtnerf en afgeschuinde rand",
+      "scene3": "Gestileerd perspectief met Bois & Chiffons embleem watermerk"
+    },
+    "editInChat": "Bewerk in chat",
+    "makeVideo": "Maak video",
+    "makeVideoA11y_one": "Maak video, {{count}} tegoed",
+    "makeVideoA11y_other": "Maak video, {{count}} tegoeden",
+    "cost_one": "{{count}} tegoed",
+    "cost_other": "{{count}} tegoeden",
+    "balance_one": "Huidig saldo: {{balance}} tegoeden · {{count}} tegoed wordt gereserveerd · Concept automatisch opgeslagen",
+    "balance_other": "Huidig saldo: {{balance}} tegoeden · {{count}} tegoeden worden gereserveerd · Concept automatisch opgeslagen"
+  },
+  "generating": {
+    "backToWorkspace": "Terug naar werkruimte",
+    "renderingA11y": "Renderen bezig",
+    "title": "Je reel wordt gemaakt",
+    "body": "Beelden samenstellen, Franse voice-over en bewegingsritme voor {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Authentiek Frans catalogusmiddel",
+    "preparingScenes_one": "Voorbereiden {{count}} scene",
+    "preparingScenes_other": "Voorbereiden {{count}} scenes",
+    "done": "Klaar",
+    "renderingFrames": "Videoframes renderen",
+    "addingAudio": "Audio toevoegen",
+    "queued": "In wachtrij",
+    "creditsReserved_one": "{{count}} tegoed gereserveerd",
+    "creditsReserved_other": "{{count}} tegoeden gereserveerd",
+    "remaining_one": "Resterend: {{count}} tegoed",
+    "remaining_other": "Resterend: {{count}} tegoeden",
+    "safeToLeave": "Je kunt dit scherm veilig verlaten. Je concept wordt automatisch opgeslagen in je Resultaten-tabblad.",
+    "keepWorking": "Blijf werken op de achtergrond"
+  },
+  "results": {
+    "title": "Videoreels",
+    "newReel": "Nieuwe reel",
+    "filter": {
+      "all": "Alle ({{n}})",
+      "ready": "Klaar ({{n}})",
+      "processing": "Verwerken ({{n}})"
+    },
+    "processing_one": "Verwerken · {{count}} tegoed gereserveerd",
+    "processing_other": "Verwerken · {{count}} tegoeden gereserveerd",
+    "renderingA11y": "{{title}}, renderen {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 verticaal · Beelden renderen...",
+    "renderingStage": "Renderfase",
+    "previewA11y": "Voorbeeldweergave, {{title}}",
+    "moreOptions": "Meer opties",
+    "reviewVideo": "Beoordeel video",
+    "meta": {
+      "tv": "20s · Franse voice-over · Klaar om in te plannen",
+      "atelier": "15s · Omgevingsakoestiek · Klaar om in te plannen"
+    }
+  },
+  "review": {
+    "subtitle": "Reel concept · Klaar om te beoordelen",
+    "options": "Optiemenu",
+    "downloadVideo": "Download video",
+    "connectFirst": "Kies eerst een verbonden account voordat je publiceert.",
+    "samplePreview": "Voorbeeldweergave",
+    "play": "Speel video af",
+    "position": "Videopositie",
+    "sound": "Video geluid aan/uit",
+    "fullscreen": "Open video fullscreen",
+    "vertical": "9:16 Verticaal",
+    "portrait": "Portretformaat",
+    "captionFrench": "Ondertitel (Frans)",
+    "defaultSource": "· Standaardbron",
+    "editable": "Bewerkbaar",
+    "captionA11y": "Video-onderschrift in het Frans",
+    "addTag": "Tag toevoegen",
+    "specifications": "Specificaties",
+    "audioTrack": "Audiotrack",
+    "audioValue": "Franse voice-over (Studio Natural) + Omgevingsgeluid",
+    "resolution": "Resolutie",
+    "resolutionValue": "Portretvideo · 9:16"
+  },
+  "publish": {
+    "title": "Publiceer reel",
+    "confirmSchedule": "Bevestig schema",
+    "publishNow": "Nu publiceren",
+    "saveDraft": "Concept opslaan",
+    "readyToSchedule": "Klaar om te plannen",
+    "format": "{{product}} · 9:16 Verticale Reel",
+    "playPreview": "Voorbeeld afspelen",
+    "channel": "Publicatiekanaal",
+    "connected": "Verbonden",
+    "notConnected": "Niet verbonden",
+    "connect": "Verbinden",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Automatisch posten naar feed & reels",
+    "orDownload": "Of download directe video",
+    "download": "Download",
+    "timing": "Timing",
+    "date": "Datum",
+    "time": "Tijd",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Tijdzone, {{value}}",
+    "notice": "Verbind je Instagram bedrijfsaccount om geautomatiseerd geplande publicaties te ontgrendelen. Je kunt deze reel nog steeds als concept opslaan."
+  },
+  "scheduled": {
+    "close": "Sluiten",
+    "viewReel": "Bekijk geplande reel",
+    "backToResults": "Terug naar resultaten",
+    "title": "Reel gepland",
+    "body": "Je video wordt gepubliceerd op het geselecteerde account op de geplande tijd.",
+    "meta": "{{seconds}}s · Franse voice-over",
+    "publishDate": "Publicatiedatum",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Merkwerkruimte",
+    "channel": "Kanaal",
+    "instagramConnected": "Instagram (Verbonden)",
+    "editInCalendar": "Bewerk of annuleer deze post vanuit je kalender."
+  },
+  "actor": {
+    "title": "Kies een presentator",
+    "intro": "Kies een presentatorstijl of een reel zonder presentator.",
+    "noPresenterA11y": "Geen presentator, aanbevolen",
+    "recommended": "Aanbevolen",
+    "noPresenterBody": "Focus alleen op meubelvisuals, texturen en studio-audio.",
+    "styles": "Presentatorstijlen",
+    "style": {
+      "calm": {
+        "title": "Rustige verteller",
+        "subtitle": "Frans · Rustige Studio"
+      },
+      "expressive": {
+        "title": "Expressieve presentator",
+        "subtitle": "Engels / FR · Dynamisch"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Voorbeeldstem, {{title}}",
+    "sampleVoice": "Voorbeeldstem",
+    "voiceLed": "Stem-geleide stijl",
+    "notice": "Kies een stem-geleide stijl, of houd de focus op je product."
+  },
+  "script": {
+    "title": "Script & stem",
+    "continue": "Ga verder naar storyboard",
+    "costNote": "Bekijk de kredietkosten voordat je je reel maakt.",
+    "targetProduct": "Doelproduct",
+    "productMeta": "Massief acacia · Bronwebsite",
+    "voiceoverScript": "Voice-over script",
+    "frenchFr": "Frans (FR)",
+    "wordCount_one": "{{count}} woord · ~{{seconds}} sec",
+    "wordCount_other": "{{count}} woorden · ~{{seconds}} sec",
+    "scriptA11y": "Voice-over script in het Frans",
+    "targetDuration_one": "Doelduur: {{count}} seconde",
+    "targetDuration_other": "Doelduur: {{count}} seconden",
+    "rewriteOpening": "Herschrijf opening",
+    "narratorAudio": "Verteller audio",
+    "calmVoice": "Rustige Franse stem",
+    "calmVoiceMeta": "Natuurlijk Frans, warme akoestische snelheid",
+    "recordOwn": "Neem je eigen stem op",
+    "recordOwnMeta": "Optionele aangepaste merkvertelling",
+    "record": "Opnemen"
+  },
+  "templates": {
+    "title": "Reel sjablonen",
+    "useTemplate": "Gebruik sjabloon",
+    "searchPlaceholder": "Zoek studioformaten...",
+    "searchA11y": "Zoek studioformaten",
+    "tune": "Afstemmen",
+    "filter": {
+      "all": "Alle formaten",
+      "catalog": "Catalogus spotlight",
+      "shortCuts": "15-20s cuts"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Product spotlight",
+        "subtitle": "3 macro cuts + hook"
+      },
+      "collection": {
+        "title": "Collectie onthulling",
+        "subtitle": "Snelle multi-item showcase"
+      },
+      "material": {
+        "title": "Materiaal detail",
+        "subtitle": "Houtnerf & ambacht close-ups"
+      },
+      "arrival": {
+        "title": "Nieuwe aankomst",
+        "subtitle": "Aankondiging & showroom CTA"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Selecteer assets",
+    "createStoryboard_one": "Maak storyboard ({{count}} scène)",
+    "createStoryboard_other": "Maak storyboard ({{count}} scènes)",
+    "upload": "Foto's uploaden",
+    "websiteAssets": "Website assets",
+    "selected_one": "{{count}} geselecteerd",
+    "selected_other": "{{count}} geselecteerd",
+    "otherCategory": "Andere productcategorie",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Storyboard volgorde",
+    "dragToReorder": "Sleep om te herschikken",
+    "reorderA11y": "Scène {{n}}: {{label}}. Scène herschikken",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Kamer",
+      "macro": "Detail",
+      "staged": "Gestyled",
+      "tv": "TV-meubel"
+    }
+  }
+}

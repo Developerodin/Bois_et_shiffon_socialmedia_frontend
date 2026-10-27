@@ -13,7 +13,7 @@ export const maxDuration = 300;
 type Params = { params: Promise<BrandRouteParams & { contentId: string }> };
 
 const text = (max: number) => z.string().max(max).default("");
-const list = (items: number, max: number) => z.array(z.string().max(max)).max(items).default([]);
+const list = (items: number, max: number) => z.array(z.string().max(max, `${max} characters at most`)).max(items, `${items} at most`).default([]);
 
 const Action = z.discriminatedUnion("action", [
   z.object({
@@ -62,7 +62,11 @@ export async function GET(request: Request, context: Params) {
 export async function POST(request: Request, context: Params) {
   try {
     const parsed = Action.safeParse(await request.json().catch(() => null));
-    if (!parsed.success) return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid request", status: 400 });
+    if (!parsed.success) {
+      // e.g. "body.slides: 20 at most", so people know which limit they hit.
+      const detail = parsed.error.issues.slice(0, 3).map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
+      return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid request", status: 400, detail });
+    }
     const body = parsed.data;
     const scope = await authorizeBrandRoute(request, context.params, PERMISSION[body.action]);
     if (scope instanceof Response) return scope;

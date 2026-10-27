@@ -1,10 +1,9 @@
-import { auth } from "@/auth";
+import { requestUserId } from "@/server/auth/request-user";
 import { problemResponse } from "@/server/api/http-error";
 import { PERMISSIONS, permissionScope } from "@/server/auth/permissions.catalog";
 
-export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+export async function GET(request: Request) {
+  if (!(await requestUserId(request))) {
     return problemResponse({ type: "https://api.brandpilot/errors/unauthorized", title: "Unauthorized", status: 401 });
   }
   return Response.json({

@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Spațiu de lucru {{name}}",
+    "logoLabel": "Logo {{name}}",
+    "settingsTitle": "Setări",
+    "edit": "Editează",
+    "manage": "Gestionează",
+    "tabs": {
+      "myBusiness": "Afacerea mea",
+      "billing": "Facturare",
+      "postsPlanner": "Planificator postări"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Atribute afacere",
+    "attributes": {
+      "location": "Locație",
+      "audience": "Public",
+      "category": "Categorie",
+      "subcategory": "Subcategorie",
+      "storeType": "Tip magazin",
+      "website": "Website"
+    },
+    "brandPreferences": "Preferințe brand",
+    "brandPreferencesHint": "Culori, ton, limbaj",
+    "photoAssets": "Resurse foto",
+    "photoAssetsHint": "Fotografii Bunting masă și unitate TV",
+    "connections": "Conexiuni",
+    "connectionsHint": "Canale sociale & profil Google"
+  },
+  "brand": {
+    "title": "Setări brand",
+    "save": "Salvează modificările",
+    "paletteTitle": "Paletă culori brand",
+    "editHex": "Editează hex",
+    "watermarkTitle": "Logo filigran final",
+    "watermarkBody": "Aplicat la finalul videoclipurilor și pe marginea fotografiilor",
+    "change": "Schimbă",
+    "toneTitle": "Ton creativ",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxos",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Natural",
+      "minimalist": "Minimalist"
+    },
+    "cuesTitle": "Indicii semnătură brand",
+    "addCue": "Adaugă indiciu"
+  },
+  "photos": {
+    "title": "Resurse foto",
+    "refresh": "Reîmprospătează",
+    "sourceTitle": "Website sursă",
+    "sourceBody": "Fotografii partajate folosite pentru a genera role, postări de feed și scenarii de ședințe foto. Nicio fotografie nu este publicată fără aprobarea ta explicită.",
+    "sources": {
+      "website": "Website ({{n}})",
+      "uploads": "Încărcări ({{n}})"
+    },
+    "addPhotos": "Adaugă fotografii",
+    "photosTitle": "Fotografii",
+    "photoCount_one": "{{n}} fotografie",
+    "photoCount_other": "{{n}} fotografii",
+    "emptyTitle": "Nicio încărcare încă",
+    "emptyBody": "Fotografiile de studio încărcate de tine apar aici.",
+    "upload": "Încarcă fotografii de studio personalizate"
+  },
+  "connections": {
+    "title": "Conexiuni",
+    "sourceTitle": "Website sursă",
+    "linked": "Conectat",
+    "sourceBody": "Fotografii de produs și detalii afacere",
+    "channelsTitle": "Canale de publicare",
+    "accounts": "Conturi",
+    "connected": "Conectat",
+    "notConnected": "Neconectat",
+    "connect": "Conectează",
+    "disconnect": "Deconectează",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Pagina Facebook",
+      "whatsapp": "WhatsApp Business",
+      "google": "Profil Google Business",
+      "shopify": "Sincronizare directă Shopify"
+    }
+  },
+  "automations": {
+    "title": "Automatizări",
+    "heading": "Preferințele tale de publicare",
+    "intro": "Controlează cum Espanda completează automat postările programate și redactează conținut pentru articolele din catalogul tău.",
+    "reviewTitle": "Revizuire înainte de publicare",
+    "reviewBody": "Revizuiește conținutul înainte de a fi publicat.",
+    "required": "Necesar",
+    "reviewLabel": "Revizuire înainte de publicare. Revizuiește conținutul înainte de a fi publicat. Necesar.",
+    "queueTitle": "Acțiuni în coadă",
+    "manageConnections": "Gestionează conexiunile",
+    "items": {
+      "monthly": {
+        "title": "Generează planuri lunare",
+        "body": "Pregătește-ți calendarul lunar cu postări de schiță.",
+        "active": "Activ · schițe salvate în calendar"
+      },
+      "autopublish": {
+        "title": "Publicare automată a postărilor aprobate",
+        "body": "Publică automat rolele programate odată ce apeși \"Aprobă\".",
+        "requires": "Necesită conexiune Instagram",
+        "active": "Activ · publică după aprobare"
+      },
+      "replies": {
+        "title": "Redactează răspunsuri la întrebările showroom-ului",
+        "body": "Completează automat răspunsuri rafinate de artizan francez în coada ta de mesaje.",
+        "requires": "Necesită canal de mesagerie",
+        "active": "Activ · schițe adăugate în inboxul tău"
+      }
+    },
+    "adsTitle": "Reclame sociale plătite",
+    "comingSoon": "În curând",
+    "adsBody": "Testare automată a creativității reclamelor Meta & gestionarea bugetului."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} credit disponibil",
+    "creditsAvailable_other": "{{n}} credite disponibile",
+    "planName": "Plan {{tier}}",
+    "statusActive": "Activ",
+    "planBlurb": "Instrumentele tale de creație și afacere",
+    "cycleTitle": "Ciclul de facturare",
+    "renewsMonthly": "Se reînnoiește lunar",
+    "balanceTitle": "Sold credite",
+    "monthlyAllowance": "{{amount}} alocație lunară",
+    "balanceLabel_one": "{{balance}} din {{n}} credit disponibil",
+    "balanceLabel_other": "{{balance}} din {{n}} credite disponibile",
+    "balanceOf_one": " / {{n}} credit disponibil",
+    "balanceOf_other": " / {{n}} credite disponibile",
+    "note_one": "{{n}} credit utilizat · {{reserved}} rezervat pentru {{item}}. Alocația se reînnoiește lunar.",
+    "note_other": "{{n}} credite utilizate · {{reserved}} rezervat pentru {{item}}. Alocația se reînnoiește lunar.",
+    "usageTitle": "Utilizare recentă a creditelor",
+    "usageAside": "Activitate spațiu de lucru",
+    "today": "Astăzi",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "Rolă {{name}}",
+        "detail": "Rezervat pentru generare"
+      },
+      "plan": {
+        "title": "Plan de conținut lunar",
+        "detail_one": "{{n}} postare de schiță",
+        "detail_other": "{{n}} postări de schiță"
+      },
+      "renewal": {
+        "title": "Reînnoire plan lunar",
+        "detail": "Resetare credit ciclu"
+      }
+    },
+    "spent_one": "-{{n}} credit",
+    "spent_other": "-{{n}} credite",
+    "added_one": "+{{n}} credit",
+    "added_other": "+{{n}} credite",
+    "included": "Inclus",
+    "help": {
+      "missingCredits": "Credite lipsă sau redare eșuată",
+      "restore": "Restaurează achizițiile abonamentului",
+      "history": "Istoric facturare & facturi"
+    }
+  },
+  "account": {
+    "title": "Setări cont",
+    "workspaceTitle": "Spațiu de lucru",
+    "workspaceName": "Nume spațiu de lucru",
+    "teamTitle": "Colaborare în echipă",
+    "teamMembers": "Membri spațiu de lucru",
+    "preferencesTitle": "Preferințe",
+    "languageTitle": "Limba interfeței aplicației",
+    "languageBody": "Prompturile și exporturile rămân în franceză",
+    "languageLabel": "Limba aplicației, {{language}}",
+    "languageHint": "Deschide lista de limbi",
+    "pushTitle": "Notificări push",
+    "pushBody": "Actualizări de creare și publicare",
+    "supportTitle": "Suport & legal",
+    "help": "Ai nevoie de ajutor & contactează suportul",
+    "terms": "Termeni de serviciu",
+    "privacy": "Politica de confidențialitate",
+    "restore": "Restaurează achizițiile",
+    "signOut": "Deconectează-te de la Espanda",
+    "signOutNote": "Abonamentul tău activ și resursele de catalog salvate rămân în siguranță."
+  },
+  "drawer": {
+    "closeMenu": "Închide meniul",
+    "switchLabel": "Spațiu de lucru {{name}}. Schimbă afacerea",
+    "balanceLabel_one": "Sold curent {{credits}} credit rămas, plan {{plan}}",
+    "balanceLabel_other": "Sold curent {{credits}} credite rămase, plan {{plan}}",
+    "balanceTitle": "Sold curent",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> credit rămas</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> credite rămase</rest>",
+    "sections": {
+      "create": "Creează",
+      "grow": "Crește",
+      "manage": "Gestionează"
+    },
+    "items": {
+      "chat": "Chat pentru a face video",
+      "generations": "Generațiile mele",
+      "photos": "Resurse foto",
+      "inbox": "Clienți & Inbox",
+      "google": "Creștere Google",
+      "website": "Studio Website",
+      "connections": "Conexiuni",
+      "automations": "Automatizări",
+      "billing": "Planuri & Facturare",
+      "account": "Setări cont"
+    },
+    "signOut": "Deconectează-te"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "back": "Takaisin",
+  "close": "Sulje",
+  "continue": "Jatka",
+  "step": "Vaihe {{step}}/{{total}}",
+  "auth": {
+    "orContinueWith": "tai jatka käyttäen",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "Jatkamalla hyväksyt <terms>käyttöehdot</terms> ja <privacy>tietosuojakäytännön</privacy>.",
+    "allScreensDev": "Kaikki näytöt (kehitys)",
+    "googleFailed": "Google-kirjautuminen ei onnistunut. Yritä uudelleen tai käytä sähköpostia.",
+    "googleNeedsBuild": "Google-kirjautuminen toimii asennetussa Espanda-sovelluksessa, ei Expo Go:ssa. Käytä toistaiseksi sähköpostia."
+  },
+  "language": {
+    "title": "Sovelluksen kieli",
+    "search": "Etsi kieliä",
+    "explainer": "Muuttaa sovelluksen painikkeet ja valikot. Julkaisusi säilyttävät kunkin brändin sisältökielen.",
+    "noMatch": "Kieliä ei löytynyt haulla “{{query}}”."
+  },
+  "module": {
+    "openMenu": "Avaa valikko",
+    "settings": "Asetukset",
+    "credits_one": "{{count}} krediitti käytettävissä",
+    "credits_other": "{{count}} krediittiä käytettävissä",
+    "workspace": "Työtila {{name}}"
+  },
+  "nav": {
+    "reels": "Rullat",
+    "posts": "Julkaisut",
+    "photoshoot": "Kuvaukset",
+    "marketing": "Markkinointi",
+    "create": "Luo",
+    "ideas": "Ideat",
+    "results": "Tulokset"
+  }
+}

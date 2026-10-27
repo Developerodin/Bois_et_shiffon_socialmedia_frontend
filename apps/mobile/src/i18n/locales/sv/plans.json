@@ -1,0 +1,168 @@
+{
+  "viewPlans": "Visa planer",
+  "credits_one": "{{n}} kredit",
+  "credits_other": "{{n}} krediter",
+  "tableAlt": "{{product}} matbord",
+  "plans": {
+    "professional": "Professionell",
+    "starter": "Start",
+    "recommended": "Rekommenderad",
+    "priceToBeConfirmed": "Pris att bekräfta",
+    "features": {
+      "monthlyCredits_one": "{{n}} månatlig studiokredit",
+      "monthlyCredits_other": "{{n}} månatliga studiokrediter",
+      "postsStories": "Inlägg, berättelser & schemaläggning",
+      "photoshoots": "Produkt- & modefotograferingar",
+      "websiteStudio": "Webbplatsstudio & anpassad domänutkast",
+      "replyAssistant": "AI-kundsvareassistent",
+      "googleSync": "Google Growth-profil synk",
+      "contentExports": "Innehållsskapande och export",
+      "reelsStaging": "Kärnstudio videorullar & iscensättning"
+    }
+  },
+  "header": {
+    "openMenu": "Öppna meny",
+    "plans": "Planer",
+    "billingSettings": "Fakturainställningar",
+    "modules": {
+      "reels": "Rullar",
+      "posts": "Inlägg",
+      "photoshoot": "Fotosession",
+      "marketing": "Marknadsföring"
+    }
+  },
+  "choose": {
+    "title": "Välj din plan",
+    "pricingUnavailable": "Prissättning är ännu inte tillgänglig.",
+    "continue": "Fortsätt",
+    "restorePurchases": "Återställ köp",
+    "terms": "Användarvillkor",
+    "privacy": "Integritetspolicy",
+    "lead": "Skala din detaljhandelsstudio med automatiserade videorullar, iscensatta fotograferingar och social publicering.",
+    "planA11y": "{{name}} plan, {{price}}"
+  },
+  "activated": {
+    "continueReel_one": "Fortsätt göra rulle ({{n}} kredit)",
+    "continueReel_other": "Fortsätt göra rulle ({{n}} krediter)",
+    "backToWorkspace": "Tillbaka till arbetsyta",
+    "title": "Plan aktiverad",
+    "lead_one": "Din {{plan}} arbetsyta är nu aktiv med {{n}} månatlig kredit. Välkommen till Espanda Studio.",
+    "lead_other": "Din {{plan}} arbetsyta är nu aktiv med {{n}} månatliga krediter. Välkommen till Espanda Studio.",
+    "planName": "{{plan}} plan",
+    "active": "Aktiv",
+    "renews": "Förnyas månadsvis · {{plan}} funktioner",
+    "available": "Tillgänglig",
+    "resumeProject": "Återuppta väntande projekt",
+    "inProgress": "Pågår",
+    "reelTitle": "{{title}} rulle",
+    "scenesReady_one": "{{n}} scen redo för skapande",
+    "scenesReady_other": "{{n}} scener redo för skapande",
+    "noDeduction": "Inga krediter har dragits än. Generering börjar först när du bekräftar."
+  },
+  "billing": {
+    "title": "Inställningar",
+    "tabs": {
+      "business": "Mitt företag",
+      "billing": "Fakturering",
+      "postsPlanner": "Inläggsplanerare"
+    },
+    "status": "Ingen aktiv prenumeration",
+    "plan": "Gratis arbetsyta",
+    "balance": "Saldo",
+    "note": "Utkast, butikskatalogsynk och affärsinställningar förblir tillgängliga.",
+    "recentUsage": "Senaste kreditanvändning",
+    "creditActivity": "Kreditaktivitet",
+    "empty": "Inga krediter har använts än. Välj en plan för att börja rendera rullar och automatiserad iscensättning.",
+    "restore": "Återställ prenumerationsköp",
+    "appLanguage": "Appens gränssnittsspråk",
+    "languages": {
+      "englishUS": "Engelska US",
+      "frenchFR": "Franska FR"
+    },
+    "push": "Push-notiser",
+    "pushHint": "Renderingsvarningar och batchslutföranden",
+    "terms": "Användarvillkor",
+    "privacy": "Integritetspolicy"
+  },
+  "gate": {
+    "sheetLabel": "Prenumeration krävs",
+    "subscriberGeneration": "Prenumerantgenerering",
+    "title": "Redo att göra denna rulle?",
+    "body": "En aktiv plan krävs för att rendera videorullar med franskt röstspår och ljud. Din storyboard är sparad och väntar.",
+    "saved": "Sparad",
+    "reelFacts_one": "{{seconds}}s · 9:16 vertikal · {{count}} scen · Franskt röstspår",
+    "reelFacts_other": "{{seconds}}s · 9:16 vertikal · {{count}} scener · Franskt röstspår",
+    "creditsPerReel_one": "{{n}} kredit per rulle",
+    "creditsPerReel_other": "{{n}} krediter per rulle",
+    "keepEditing": "Fortsätt redigera storyboard",
+    "afterActivation": "Efter aktivering, återvänd till din storyboard för att bekräfta generering."
+  },
+  "marketing": {
+    "paidAdsA11y": "Betalda annonser, kommer snart",
+    "paidAds": "Betalda annonser · Kommer snart",
+    "title": "Marknadsföring",
+    "subtitle": "Hantera din butiks synlighet, konversationer och varumärkesprofil",
+    "toolLockedA11y": "{{title}}, {{subtitle}}. Låst, Professionell plan. Visa planer",
+    "toolAvailableA11y": "{{title}}, {{subtitle}}. Tillgänglig. Konfigurera",
+    "locked": "Låst",
+    "available": "Tillgänglig",
+    "professional": "Professionell",
+    "configure": "Konfigurera",
+    "tools": {
+      "customers": {
+        "title": "Kunder",
+        "subtitle": "Inkorg & AI-svar"
+      },
+      "google": {
+        "title": "Google Growth",
+        "subtitle": "Lokala kartor & recensioner"
+      },
+      "website": {
+        "title": "Webbplatsstudio",
+        "subtitle": "Landningssidor & utkast"
+      },
+      "business": {
+        "title": "Mitt företag",
+        "subtitle": "Varumärkesdetaljer & svar"
+      },
+      "connections": {
+        "title": "Anslutningar",
+        "subtitle": "Social & webbplats synk"
+      },
+      "automations": {
+        "title": "Automatiseringar",
+        "subtitle": "Publiceringspreferenser"
+      }
+    }
+  },
+  "posts": {
+    "title": "Dina inlägg, i rörelse",
+    "subtitle": "Granska genererade produkthöjdpunkter & schemalagda inlägg",
+    "subscriptionFeature": "Prenumerationsfunktion",
+    "inactive": "Inaktiv",
+    "monthlyPlan": "Din månadsplan",
+    "unlock": "Lås upp månatliga inlägg och berättelser, varumärkesanpassade bildtexter och schemalagd publicering på flera kanaler.",
+    "calendarA11y": "Förhandsgranskning av utkastschema, {{month}}",
+    "draftSchedule": "Utkastsschema",
+    "day": "{{weekday}} {{day}}",
+    "postMeta": "{{time}} · Utkast · ej publicerad",
+    "keepDrafting": "Fortsätt utforma manuellt"
+  },
+  "reels": {
+    "home": "Rullar hem",
+    "title": "Gör din nästa rulle",
+    "subtitle": "Skapa studiovideorullar från din butikskatalog",
+    "notice_one": "Dina idéer är fortfarande här. Utforska {{n}} idé och granska storyboards när som helst. Aktiv plan låser upp videorendering.",
+    "notice_other": "Dina idéer är fortfarande här. Utforska {{n}} idéer och granska storyboards när som helst. Aktiv plan låser upp videorendering.",
+    "heroAlt": "{{product}} matkollektion, iscensatt",
+    "creativePrompt": "Kreativ prompt",
+    "yourAssistant": "Din assistent",
+    "question": "Vad vill du visa?",
+    "planTogether": "Planera en reel tillsammans",
+    "start": "Starta",
+    "startA11y": "Börja planera en reel",
+    "ideasReady_one": "{{n}} idé klar",
+    "ideasReady_other": "{{n}} idéer klara",
+    "viewIdeas": "Visa idéer →"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "back": "Tilbake",
+  "close": "Lukk",
+  "continue": "Fortsett",
+  "step": "Steg {{step}} av {{total}}",
+  "auth": {
+    "orContinueWith": "eller fortsett med",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "Ved å fortsette, godtar du våre <terms>Vilkår for bruk</terms> og <privacy>Personvernregler</privacy>.",
+    "allScreensDev": "Alle skjermer (dev)",
+    "googleFailed": "Google-innlogging mislyktes. Prøv igjen eller bruk e-post.",
+    "googleNeedsBuild": "Google-innlogging fungerer i den installerte Espanda-appen, ikke i Expo Go. Bruk e-post foreløpig."
+  },
+  "language": {
+    "title": "Appspråk",
+    "search": "Søk språk",
+    "explainer": "Endrer appens knapper og menyer. Innleggene dine beholder innholdsspråket satt for hver merkevare.",
+    "noMatch": "Ingen språk matcher «{{query}}»."
+  },
+  "module": {
+    "openMenu": "Åpne meny",
+    "settings": "Innstillinger",
+    "credits_one": "{{count}} kreditt tilgjengelig",
+    "credits_other": "{{count}} kreditter tilgjengelig",
+    "workspace": "Arbeidsområde {{name}}"
+  },
+  "nav": {
+    "reels": "Reels",
+    "posts": "Innlegg",
+    "photoshoot": "Fotoshoot",
+    "marketing": "Markedsføring",
+    "create": "Opprett",
+    "ideas": "Ideer",
+    "results": "Resultater"
+  }
+}

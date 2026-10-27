@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Otevřít menu",
+    "creditsAvailable_one": "{{count}} kredit k dispozici",
+    "creditsAvailable_other": "{{count}} kreditů k dispozici",
+    "settings": "Nastavení",
+    "appModules": "Moduly aplikace",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Příspěvky",
+      "photoshoot": "Focení",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Navigace moduly",
+    "create": "Vytvořit",
+    "results": "Výsledky",
+    "goBack": "Zpět",
+    "switchBusiness": "Přepnout podnik, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} položka",
+    "optionWithCount_other": "{{label}} {{count}} položek"
+  },
+  "create": {
+    "title": "Vytvořit focení",
+    "subtitle": "Vytvořte produktové fotky a stylizujte oblečení na modelech.",
+    "product": {
+      "imageLabel": "{{name}} jídelní stůl",
+      "pill": "Katalogová položka",
+      "title": "Produktové focení",
+      "body": "Umístěte katalogové položky do architektonických interiérů a studiových prostředí s přirozeným osvětlením.",
+      "cta": "Nové produktové focení"
+    },
+    "fashion": {
+      "imageLabel": "Ilustrované fotografické studio pro oblečení",
+      "title": "Módní focení",
+      "body": "Stylizujte oblečení na modelech v kampaních připravených scénách.",
+      "cta": "Nové módní focení"
+    }
+  },
+  "product": {
+    "title": "Produktové focení",
+    "estimate_one": "Odhad: {{count}} kredit",
+    "estimate_other": "Odhad: {{count}} kreditů",
+    "available": "{{count}} k dispozici",
+    "generate": "Generovat focení",
+    "selectedAsset": "Vybraný katalogový prvek",
+    "changeAsset": "Změnit prvek",
+    "aspectRatio": "Poměr stran",
+    "sceneStyle": "Styl scény",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Interiér",
+      "custom": "Vlastní"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Kreativní zadání",
+    "briefHint": "Upřesněte osvětlení, atmosféru nebo konkrétní dekorativní prvky",
+    "sourcePreview": "Náhled zdroje",
+    "fullPreview": "{{product}}, úplný náhled",
+    "sourceImage": "Zdrojový obrázek"
+  },
+  "fashion": {
+    "title": "Módní focení",
+    "generate": "Generovat focení",
+    "uploadToEnable": "Nahrajte fotku oděvu pro povolení generování",
+    "heading": "Vytvořte své módní focení",
+    "subtitle": "Přeměňte ploché nebo zavěšené oděvy na realistické modely.",
+    "garmentPhoto": "Fotka oděvu",
+    "required": "Povinné",
+    "garmentSelected": "Fotka oděvu: {{label}}. Změnit fotku",
+    "addGarment": "Přidat fotku oděvu",
+    "changeGarment": "Změnit fotku oděvu",
+    "garmentHint": "PNG nebo JPG na neutrálním pozadí, plochý nebo ghost mannequin",
+    "modelStyling": "Model & styling",
+    "modelSelected": "Model & styling: {{model}}",
+    "models": {
+      "choose": "Vyberte model",
+      "natural": "{{name}} · přirozený styling",
+      "editorial": "{{name}} · editorial styling",
+      "casual": "{{name}} · ležérní styling"
+    },
+    "pose": "Póza",
+    "poses": {
+      "fullBody": "Celá postava",
+      "threeQuarter": "Tři čtvrtiny",
+      "closeUp": "Detailní záběr"
+    },
+    "outputFormat": "Výstupní formát",
+    "formats": {
+      "feedPortrait": "Portrét pro feed",
+      "storyReel": "Příběh / Reel"
+    },
+    "background": "Nastavení pozadí",
+    "backgrounds": {
+      "studioMinimal": "Studio minimalistické",
+      "urbanStreet": "Městská ulice",
+      "naturalInterior": "Přirozený interiér"
+    },
+    "requirementsTitle": "Požadavky na nahrávání",
+    "requirements": {
+      "contrast": "Vysoký kontrast vůči pozadí",
+      "wrinkles": "Žádné výrazné záhyby",
+      "frontFacing": "Čelní úhel"
+    }
+  },
+  "source": {
+    "title": "Vyberte zdrojový prvek",
+    "uploadNewLabel": "Nahrát novou fotku",
+    "uploadNew": "Nahrát novou",
+    "noPhotoSelected": "Žádná fotka vybrána",
+    "photosSelected_one": "{{count}} fotka vybrána",
+    "photosSelected_other": "{{count}} fotek vybráno",
+    "selectPhoto": "Vyberte fotku",
+    "usePhoto": "Použít fotku",
+    "source": "Zdroj",
+    "tabs": {
+      "website": "Webová stránka",
+      "uploads": "Nahrávky"
+    },
+    "businessWebsite": "{{name}} · Webová stránka",
+    "fromWebsite": "Z webové stránky",
+    "filterCatalog": "Filtrovat katalog",
+    "filters": {
+      "all": "Všechny položky",
+      "tables": "Stoly",
+      "storage": "Úložné prostory"
+    },
+    "addPhoto": "Přidat fotku",
+    "tip": "Čisté výřezy produktů přinášejí optimální výsledky focení. Espanda Studio zachová původní texturu akáciového dřeva."
+  },
+  "generating": {
+    "backToWorkspace": "Zpět do pracovního prostoru",
+    "returnToWorkspace": "Vrátit se do pracovního prostoru",
+    "title": "Příprava vašich fotek",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Vaše generování probíhá bezpečně na pozadí. Dokončené prvky najdete ve Výsledcích.",
+    "status": {
+      "done": "Hotovo",
+      "active": "Probíhá",
+      "queued": "Ve frontě"
+    },
+    "progress": "Generování",
+    "sample": {
+      "title": "{{name}} focení jídel",
+      "description": "Staging {{product}} v architektonickém denním světle interiéru.",
+      "variations_one": "{{count}} varianta",
+      "variations_other": "{{count}} varianty"
+    },
+    "steps": {
+      "catalog": "Zpracování katalogového prvku",
+      "compose": "Kompozice scény a osvětlení",
+      "finish": "Dokončení a kalibrace barev"
+    }
+  },
+  "results": {
+    "title": "Focení",
+    "subtitle": "Vaše produktové a módní fotky",
+    "newPhotoshoot": "Nové focení",
+    "filterLabel": "Filtrovat focení",
+    "filters": {
+      "all": "Vše ({{count}})",
+      "product": "Produkt ({{count}})",
+      "fashion": "Móda ({{count}})"
+    },
+    "empty": "Zatím žádné focení.",
+    "processingLabel": "{{title}}. Zpracovává se, {{percent}}%",
+    "processingBadge_one": "Zpracovává se · {{count}} kredit",
+    "processingBadge_other": "Zpracovává se · {{count}} kreditů",
+    "preview": "Náhled",
+    "reviewPhotoLabel": "Zkontrolovat fotku, {{title}}",
+    "reviewPhoto": "Zkontrolovat fotku",
+    "sample": {
+      "studioStaging": "{{product}} · Studiové aranžmá",
+      "rendering": "Fáze renderování · {{percent}}%",
+      "interiorReady_one": "Interiér · {{ratio}} · {{count}} fotka připravena",
+      "interiorReady_other": "Interiér · {{ratio}} · {{count}} fotek připraveno",
+      "studioDaylight": "Studiové denní světlo · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Další možnosti",
+    "downloadPhoto": "Stáhnout fotku",
+    "variation": "Varianta",
+    "share": "Sdílet focení",
+    "samplePreview": "Ukázkový náhled",
+    "compareOriginal": "Porovnat s originálem",
+    "expandView": "Rozšířit zobrazení",
+    "stagingSummary": "Souhrn aranžmá",
+    "format": "Formát",
+    "creationCost": "Náklady na vytvoření",
+    "credits_one": "{{count}} kredit",
+    "credits_other": "{{count}} kreditů",
+    "sample": {
+      "headerTitle": "Focení {{name}}",
+      "vertical": "{{ratio}} Vertikální",
+      "architecturalInterior": "Architektonický interiér",
+      "studioDaylight": "Studiové denní světlo",
+      "formatBadge": "Formát {{ratio}}",
+      "naturalStudio": "Přirozené studio",
+      "portraitPhoto": "Portrétní fotka"
+    }
+  }
+}

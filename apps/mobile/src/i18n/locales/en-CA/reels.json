@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} second",
+  "seconds_other": "{{count}} seconds",
+  "noPresenter": "No presenter",
+  "aiActor": "AI Actor",
+  "assistant": "Your video assistant",
+  "sourceWebsite": "Source website",
+  "preview": "Preview",
+  "schedule": "Schedule",
+  "goBack": "Go back",
+  "inProgress": "In progress",
+  "timezone": "Time zone",
+  "status": {
+    "draft": "Draft",
+    "ready": "Ready"
+  },
+  "scene": {
+    "label": "Scene {{n}} · {{seconds}}s",
+    "count_one": "{{count}} scene",
+    "count_other": "{{count}} scenes"
+  },
+  "shot": {
+    "wide": "Wide shot",
+    "material": "Material detail",
+    "closeCta": "Product close & CTA"
+  },
+  "create": {
+    "switchBusiness": "Switch business, {{name}}",
+    "title": "Make your next reel",
+    "subtitle": "Create studio video reels from your store catalogue",
+    "heroImage": "Full interior view of the {{product}} dining collection",
+    "question": "What would you like to show?",
+    "planTogether": "Plan a reel together",
+    "start": "Start",
+    "startA11y": "Start planning a reel",
+    "ideasReady_one": "{{count}} idea ready",
+    "ideasReady_other": "{{count}} ideas ready",
+    "viewIdeas": "View ideas →",
+    "actorSubtitle": "Presenter reel",
+    "templates": "Templates",
+    "templatesSubtitle": "Fast catalogue cuts",
+    "jumpBackIn": "Jump back in",
+    "seeAll": "See all",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Video ideas",
+    "subtitle": "Curated angles ready to turn into motion reels",
+    "filter": {
+      "all": "All ({{n}})",
+      "productSpotlight": "Product spotlight ({{n}})",
+      "collection": "Collection ({{n}})"
+    },
+    "angle": "Angle {{n}}",
+    "body": {
+      "angle01": "Highlighting natural grain, geometric cross-leg architecture, and dining staging.",
+      "angle02": "Focusing on hand-carved slat doors, wire management, and warm living ambience."
+    },
+    "readyToReview": "Ready to review",
+    "viewStoryboard": "View storyboard"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} credit",
+    "creditsA11y_other": "{{count}} credits",
+    "addAssets": "Add assets",
+    "composerPlaceholder": "Refine tone, voiceover, or add directions...",
+    "composerA11y": "Refine tone, voiceover, or add directions",
+    "send": "Send refinement",
+    "day": "Today · Reels Studio",
+    "userMessage": "Show the Bunting collection in a calm, premium reel.",
+    "reply": "I've tailored a concept for your <b>{{brand}}</b> {{product}} table. Here are the recommended parameters:",
+    "format": "Format",
+    "formatVertical": "9:16 Vertical (Story/Reel)",
+    "duration": "Duration",
+    "presenter": "Presenter",
+    "openingHook": "Opening hook",
+    "reviewStoryboard_one": "Review storyboard ({{count}} scene)",
+    "reviewStoryboard_other": "Review storyboard ({{count}} scenes)",
+    "readyStatus": "Ready to generate or refine"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "{{seconds}}s duration",
+    "verticalFact": "9:16 vertical",
+    "readyToRender": "Ready to render <muted>· Draft saved for review</muted>",
+    "sceneDirection": "Scene direction",
+    "voiceoverFr": "Voiceover (FR)",
+    "direction": {
+      "scene1": "Slow gliding reveal across modern dining setting",
+      "scene2": "Smooth macro sweep over rich natural wood grain and bevelled edge",
+      "scene3": "Staged perspective with Bois & Chiffons emblem watermark"
+    },
+    "editInChat": "Edit in chat",
+    "makeVideo": "Make video",
+    "makeVideoA11y_one": "Make video, {{count}} credit",
+    "makeVideoA11y_other": "Make video, {{count}} credits",
+    "cost_one": "{{count}} credit",
+    "cost_other": "{{count}} credits",
+    "balance_one": "Current balance: {{balance}} credits · {{count}} credit will be reserved · Draft saved automatically",
+    "balance_other": "Current balance: {{balance}} credits · {{count}} credits will be reserved · Draft saved automatically"
+  },
+  "generating": {
+    "backToWorkspace": "Back to workspace",
+    "renderingA11y": "Rendering in progress",
+    "title": "Creating your reel",
+    "body": "Composing visuals, French voiceover, and motion pacing for {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Authentic French catalogue asset",
+    "preparingScenes_one": "Preparing {{count}} scene",
+    "preparingScenes_other": "Preparing {{count}} scenes",
+    "done": "Done",
+    "renderingFrames": "Rendering video frames",
+    "addingAudio": "Adding audio",
+    "queued": "Queued",
+    "creditsReserved_one": "{{count}} credit reserved",
+    "creditsReserved_other": "{{count}} credits reserved",
+    "remaining_one": "Remaining: {{count}} credit",
+    "remaining_other": "Remaining: {{count}} credits",
+    "safeToLeave": "You can safely leave this screen. Your draft is automatically saved in your Results tab.",
+    "keepWorking": "Keep working in background"
+  },
+  "results": {
+    "title": "Video reels",
+    "newReel": "New reel",
+    "filter": {
+      "all": "All ({{n}})",
+      "ready": "Ready ({{n}})",
+      "processing": "Processing ({{n}})"
+    },
+    "processing_one": "Processing · {{count}} credit reserved",
+    "processing_other": "Processing · {{count}} credits reserved",
+    "renderingA11y": "{{title}}, rendering {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 vertical · Rendering visuals...",
+    "renderingStage": "Rendering stage",
+    "previewA11y": "Sample preview, {{title}}",
+    "moreOptions": "More options",
+    "reviewVideo": "Review video",
+    "meta": {
+      "tv": "20s · French voiceover · Ready to schedule",
+      "atelier": "15s · Ambient acoustic · Ready to schedule"
+    }
+  },
+  "review": {
+    "subtitle": "Reel draft · Ready to review",
+    "options": "Options menu",
+    "downloadVideo": "Download video",
+    "connectFirst": "Choose a connected account before publishing.",
+    "samplePreview": "Sample preview",
+    "play": "Play video preview",
+    "position": "Video position",
+    "sound": "Toggle video sound",
+    "fullscreen": "Open video fullscreen",
+    "vertical": "9:16 Vertical",
+    "portrait": "Portrait format",
+    "captionFrench": "Caption (French)",
+    "defaultSource": "· Default source",
+    "editable": "Editable",
+    "captionA11y": "Video caption in French",
+    "addTag": "Add tag",
+    "specifications": "Specifications",
+    "audioTrack": "Audio track",
+    "audioValue": "French voiceover (Studio Natural) + Ambient acoustic",
+    "resolution": "Resolution",
+    "resolutionValue": "Portrait video · 9:16"
+  },
+  "publish": {
+    "title": "Publish reel",
+    "confirmSchedule": "Confirm schedule",
+    "publishNow": "Publish now",
+    "saveDraft": "Save draft",
+    "readyToSchedule": "Ready to schedule",
+    "format": "{{product}} · 9:16 Vertical Reel",
+    "playPreview": "Play preview",
+    "channel": "Publishing channel",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "connect": "Connect",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Auto-post direct to feed & reels",
+    "orDownload": "Or download direct video",
+    "download": "Download",
+    "timing": "Timing",
+    "date": "Date",
+    "time": "Time",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Timezone, {{value}}",
+    "notice": "Connect your Instagram business account to unlock automated scheduled publishing. You can still save this reel as a draft."
+  },
+  "scheduled": {
+    "close": "Close",
+    "viewReel": "View scheduled reel",
+    "backToResults": "Back to Results",
+    "title": "Reel scheduled",
+    "body": "Your video will publish to the selected account at the scheduled time.",
+    "meta": "{{seconds}}s · French voiceover",
+    "publishDate": "Publish date",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Brand workspace",
+    "channel": "Channel",
+    "instagramConnected": "Instagram (Connected)",
+    "editInCalendar": "Edit or cancel this post from your calendar."
+  },
+  "actor": {
+    "title": "Choose a presenter",
+    "intro": "Choose a presenter style or a product-only reel.",
+    "noPresenterA11y": "No presenter, recommended",
+    "recommended": "Recommended",
+    "noPresenterBody": "Focus solely on furniture visuals, textures and studio audio.",
+    "styles": "Presenter styles",
+    "style": {
+      "calm": {
+        "title": "Calm narrator",
+        "subtitle": "French · Calm Studio"
+      },
+      "expressive": {
+        "title": "Expressive presenter",
+        "subtitle": "English / FR · Dynamic"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Sample voice, {{title}}",
+    "sampleVoice": "Sample voice",
+    "voiceLed": "Voice-led style",
+    "notice": "Choose a voice-led style, or keep the focus on your product."
+  },
+  "script": {
+    "title": "Script & voice",
+    "continue": "Continue to storyboard",
+    "costNote": "Review the credit cost before creating your reel.",
+    "targetProduct": "Target product",
+    "productMeta": "Solid acacia · Source website",
+    "voiceoverScript": "Voiceover script",
+    "frenchFr": "French (FR)",
+    "wordCount_one": "{{count}} word · ~{{seconds}} sec",
+    "wordCount_other": "{{count}} words · ~{{seconds}} sec",
+    "scriptA11y": "Voiceover script in French",
+    "targetDuration_one": "Target duration: {{count}} second",
+    "targetDuration_other": "Target duration: {{count}} seconds",
+    "rewriteOpening": "Rewrite opening",
+    "narratorAudio": "Narrator audio",
+    "calmVoice": "Calm French voice",
+    "calmVoiceMeta": "Natural French, warm acoustic pace",
+    "recordOwn": "Record your own voice",
+    "recordOwnMeta": "Optional custom brand narration",
+    "record": "Record"
+  },
+  "templates": {
+    "title": "Reel templates",
+    "useTemplate": "Use template",
+    "searchPlaceholder": "Search studio formats...",
+    "searchA11y": "Search studio formats",
+    "tune": "Tune",
+    "filter": {
+      "all": "All formats",
+      "catalog": "Catalogue spotlight",
+      "shortCuts": "15-20s cuts"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Product spotlight",
+        "subtitle": "3 macro cuts + hook"
+      },
+      "collection": {
+        "title": "Collection reveal",
+        "subtitle": "Fast multi-item showcase"
+      },
+      "material": {
+        "title": "Material detail",
+        "subtitle": "Wood grain & craft closeups"
+      },
+      "arrival": {
+        "title": "New arrival",
+        "subtitle": "Announcement & showroom CTA"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Select assets",
+    "createStoryboard_one": "Create storyboard ({{count}} scene)",
+    "createStoryboard_other": "Create storyboard ({{count}} scenes)",
+    "upload": "Upload photos",
+    "websiteAssets": "Website assets",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "otherCategory": "Different product category",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Storyboard sequence",
+    "dragToReorder": "Drag to reorder",
+    "reorderA11y": "Scene {{n}}: {{label}}. Reorder scene",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Room",
+      "macro": "Detail",
+      "staged": "Styled",
+      "tv": "TV unit"
+    }
+  }
+}

@@ -1,0 +1,187 @@
+import { createHash, randomInt } from "node:crypto";
+import { createRemoteJWKSet, jwtVerify, SignJWT } from "jose";
+import { z } from "zod";
+import { issueMobileToken } from "@/server/auth/request-user";
+import { clientIp, hitRateLimit, limitKey } from "@/server/auth/rate-limit";
+import { prisma } from "@/server/db/prisma";
+import { queueEmail } from "@/server/email/outbox";
+import { signInCodeHtml } from "@/server/email/sign-in-code";
+import { AccountFlowError } from "@/server/services/accounts";
+import { provisionGoogleUser } from "@/server/services/google-signup";
+
+/**
+ * Passwordless email sign-in for the mobile app (Figma A14 → A02): a 6-digit code by email,
+ * exchanged for a mobile token. Codes live in Auth.js's VerificationToken table (hashed, 10 min,
+ * one live code per email). New emails get an account + workspace, the same way Google sign-up does.
+ */
+const CODE_TTL_MS = 10 * 60_000;
+const identifier = (email: string) => `mobile-code:${email}`;
+const hash = (email: string, code: string) => createHash("sha256").update(`${email}:${code}:${process.env.AUTH_SECRET}`).digest("hex");
+
+export const EmailInput = z.object({ email: z.string().trim().toLowerCase().email().max(254) });
+const Code = z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code");
+/** phoneTicket: present when this email finishes a phone sign-up (see verifyPhoneCode). */
+export const CodeInput = EmailInput.extend({ code: Code, phoneTicket: z.string().max(1024).optional() });
+
+export async function sendEmailCode(input: z.infer<typeof EmailInput>, request: Request) {
+  const { email } = input;
+  const [byEmail, byIp] = await Promise.all([
+    hitRateLimit(limitKey("mobile-code:email", email), 5, 15 * 60_000),
+    hitRateLimit(limitKey("mobile-code:ip", clientIp(request)), 30, 15 * 60_000),
+  ]);
+  if (!byEmail.allowed || !byIp.allowed) throw new AccountFlowError("Too many codes requested. Wait 15 minutes and try again.", 429);
+
+  // Disabled accounts get no code, but the response is identical so emails can't be probed.
+  const existing = await prisma.user.findUnique({ where: { email }, select: { status: true, deletedAt: true } });
+  if (existing && (existing.status !== "ACTIVE" || existing.deletedAt)) return;
+
+  const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
+  await prisma.$transaction(async (tx) => {
+    await tx.verificationToken.deleteMany({ where: { identifier: identifier(email) } });
+    await tx.verificationToken.create({ data: { identifier: identifier(email), token: hash(email, code), expires: new Date(Date.now() + CODE_TTL_MS) } });
+    await queueEmail(tx, {
+      to: email,
+      subject: `${code} is your Espanda sign-in code`,
+      text: `Your Espanda sign-in code is ${code}.\n\nIt expires in 10 minutes. If you didn't ask for it, ignore this email.`,
+      html: signInCodeHtml(code),
+    });
+  });
+}
+
+export async function verifyEmailCode(input: z.infer<typeof CodeInput>, request: Request) {
+  const { email, code } = input;
+  // Checked before the code is used up, so a stale ticket doesn't cost the person their code.
+  const phone = input.phoneTicket ? await readPhoneTicket(input.phoneTicket) : null;
+  const attempts = await hitRateLimit(limitKey("mobile-verify:email", email), 8, 15 * 60_000);
+  if (!attempts.allowed) throw new AccountFlowError("Too many attempts. Request a new code in 15 minutes.", 429);
+
+  // Single use: the delete is the check, so two parallel submits can't both succeed.
+  const used = await prisma.verificationToken.deleteMany({ where: { identifier: identifier(email), token: hash(email, code), expires: { gt: new Date() } } });
+  if (used.count !== 1) throw new AccountFlowError("That code is wrong or has expired.", 400);
+  const result = await signInVerifiedEmail({ email, name: null }, "mobile-email-code", request);
+  // The code is already spent: a failed link must not also fail the sign-in. They can add the number again.
+  if (phone) await linkPhone(result.user.id, phone).catch((e: unknown) => console.error("[mobile-auth] phone link failed", e));
+  return result;
+}
+
+export const GoogleInput = z.object({ idToken: z.string().min(20).max(4096) });
+
+// Google rotates these keys; jose caches them and refetches on an unknown key id.
+const googleKeys = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
+
+/**
+ * "Continue with Google" on the phone: the app's native Google sign-in returns an ID token issued
+ * for our web client ID (the app passes it as webClientId), so the same GOOGLE_CLIENT_ID is the audience.
+ */
+export async function verifyGoogleSignIn(input: z.infer<typeof GoogleInput>, request: Request) {
+  const audience = process.env.GOOGLE_CLIENT_ID;
+  if (!audience) throw new AccountFlowError("Google sign-in isn't set up on this server.", 400);
+  const { payload } = await jwtVerify(input.idToken, googleKeys, { issuer: ["https://accounts.google.com", "accounts.google.com"], audience }).catch(() => {
+    throw new AccountFlowError("Google sign-in didn't go through. Try again.", 400);
+  });
+  // Same rule as the web Google login (auth.ts): only addresses Google has verified.
+  if (payload.email_verified !== true || typeof payload.email !== "string") throw new AccountFlowError("Your Google account's email isn't verified.", 400);
+  const name = typeof payload.name === "string" ? payload.name : null;
+  return signInVerifiedEmail({ email: payload.email.toLowerCase(), name }, "mobile-google", request);
+}
+
+/** Finds or creates the account for an email the caller has proven, and issues the mobile token. */
+async function signInVerifiedEmail({ email, name }: { email: string; name: string | null }, provider: string, request: Request) {
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (user && (user.status !== "ACTIVE" || user.deletedAt)) throw new AccountFlowError("This account is disabled. Ask a workspace owner to restore it.", 400);
+  if (!user) {
+    user = await prisma.user.create({ data: { email, name, emailVerified: new Date() } });
+    await provisionGoogleUser({ id: user.id, email, name });
+  } else if (!user.emailVerified) {
+    user = await prisma.user.update({ where: { id: user.id }, data: { emailVerified: new Date() } });
+  }
+  await prisma.auditEvent.create({
+    data: { actorUserId: user.id, action: "auth.login", entityType: "User", entityId: user.id, metadata: { provider, ip: clientIp(request) } },
+  });
+  return { token: await issueMobileToken(user), user: { id: user.id, email: user.email, name: user.name } };
+}
+
+/**
+ * Phone sign-in (Figma A01 → A02) through Twilio Verify, which generates, sends and checks the codes.
+ * Accounts still need an email: a known number signs straight in; a new number gets a short-lived
+ * phoneTicket, the app asks for an email, and verifying that email links the number to the account.
+ * The link is an Account row (provider "phone"), so no schema change.
+ */
+export const PhoneInput = z.object({ phone: z.string().trim().regex(/^\+[1-9]\d{7,14}$/, "Enter a valid mobile number") });
+export const PhoneCodeInput = PhoneInput.extend({ code: Code });
+
+const TICKET_TTL = "20m";
+const ticketKey = () => createHash("sha256").update(`phone-ticket:${process.env.AUTH_SECRET}`).digest();
+
+export async function sendPhoneCode({ phone }: z.infer<typeof PhoneInput>, request: Request) {
+  // Every text costs money, and X-Forwarded-For can be faked off Vercel, so there's also a cap for everyone together.
+  // ponytail: 300/hour total; raise it with real traffic, and limit Twilio's SMS countries (Geo Permissions) to launch markets.
+  const [byPhone, byIp, all] = await Promise.all([
+    hitRateLimit(limitKey("mobile-sms:phone", phone), 5, 15 * 60_000),
+    hitRateLimit(limitKey("mobile-sms:ip", clientIp(request)), 20, 15 * 60_000),
+    hitRateLimit("mobile-sms:all", 300, 60 * 60_000),
+  ]);
+  if (!all.allowed) throw new AccountFlowError("Text-message codes are busy right now. Use email instead.", 429);
+  if (!byPhone.allowed || !byIp.allowed) throw new AccountFlowError("Too many codes requested. Wait 15 minutes and try again.", 429);
+  await twilioVerify("Verifications", { To: phone, Channel: "sms" });
+}
+
+export async function verifyPhoneCode({ phone, code }: z.infer<typeof PhoneCodeInput>, request: Request) {
+  const attempts = await hitRateLimit(limitKey("mobile-sms-verify:phone", phone), 8, 15 * 60_000);
+  if (!attempts.allowed) throw new AccountFlowError("Too many attempts. Request a new code in 15 minutes.", 429);
+  const check = await twilioVerify("VerificationCheck", { To: phone, Code: code });
+  if (check?.status !== "approved") throw new AccountFlowError("That code is wrong or has expired.", 400);
+
+  const linked = await prisma.account.findUnique({ where: { provider_providerAccountId: { provider: "phone", providerAccountId: phone } }, include: { user: true } });
+  if (!linked) {
+    const phoneTicket = await new SignJWT({ phone }).setProtectedHeader({ alg: "HS256" }).setAudience("phone-link").setExpirationTime(TICKET_TTL).sign(ticketKey());
+    return { needsEmail: true as const, phoneTicket };
+  }
+  const user = linked.user;
+  if (user.status !== "ACTIVE" || user.deletedAt) throw new AccountFlowError("This account is disabled. Ask a workspace owner to restore it.", 400);
+  await prisma.auditEvent.create({
+    data: { actorUserId: user.id, action: "auth.login", entityType: "User", entityId: user.id, metadata: { provider: "mobile-phone-code", ip: clientIp(request) } },
+  });
+  return { token: await issueMobileToken(user), user: { id: user.id, email: user.email, name: user.name } };
+}
+
+async function readPhoneTicket(ticket: string) {
+  const { payload } = await jwtVerify(ticket, ticketKey(), { audience: "phone-link" }).catch(() => {
+    throw new AccountFlowError("Your mobile number check expired. Start again with your number.", 400);
+  });
+  return String(payload.phone);
+}
+
+/** First link wins: a number already on another account stays there (skipDuplicates). */
+async function linkPhone(userId: string, phone: string) {
+  await prisma.account.createMany({ data: [{ userId, type: "phone", provider: "phone", providerAccountId: phone }], skipDuplicates: true });
+}
+
+// Twilio error codes people can act on; anything else is a server problem.
+const TWILIO_ERRORS: Record<number, [string, 400 | 429]> = {
+  60200: ["Enter a valid mobile number.", 400],
+  21211: ["Enter a valid mobile number.", 400],
+  21608: ["This number can't receive codes yet. Use email instead.", 400], // trial account: number not verified in Twilio
+  60203: ["Too many codes requested. Wait 10 minutes and try again.", 429],
+  60202: ["Too many attempts. Request a new code.", 429],
+  60410: ["Codes can't be sent to this number. Use email instead.", 400], // Twilio fraud guard
+};
+
+async function twilioVerify(path: "Verifications" | "VerificationCheck", form: Record<string, string>): Promise<{ status?: string } | null> {
+  const { TWILIO_ACCOUNT_SID: sid, TWILIO_AUTH_TOKEN: token, TWILIO_VERIFY_SERVICE_SID: service } = process.env;
+  if (!sid || !token || !service) throw new AccountFlowError("Text-message sign-in isn't set up on this server yet.", 400);
+  const res = await fetch(`https://verify.twilio.com/v2/Services/${service}/${path}`, {
+    method: "POST",
+    headers: { Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`, "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(form),
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (res.ok) return res.json();
+  // Checking a code that expired or was already used comes back as 404.
+  if (path === "VerificationCheck" && res.status === 404) return null;
+  const err = (await res.json().catch(() => ({}))) as { code?: number; message?: string };
+  const known = err.code ? TWILIO_ERRORS[err.code] : undefined;
+  if (known) throw new AccountFlowError(...known);
+  console.error("[mobile-auth] Twilio", path, res.status, err);
+  throw new Error(`Twilio ${path} ${res.status} ${err.code ?? ""} ${err.message ?? ""}`);
+}

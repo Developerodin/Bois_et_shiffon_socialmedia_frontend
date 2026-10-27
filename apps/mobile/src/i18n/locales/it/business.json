@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Workspace {{name}}",
+    "logoLabel": "Logo {{name}}",
+    "settingsTitle": "Impostazioni",
+    "edit": "Modifica",
+    "manage": "Gestisci",
+    "tabs": {
+      "myBusiness": "La mia attività",
+      "billing": "Fatturazione",
+      "postsPlanner": "Pianificatore post"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Attributi attività",
+    "attributes": {
+      "location": "Posizione",
+      "audience": "Pubblico",
+      "category": "Categoria",
+      "subcategory": "Sottocategoria",
+      "storeType": "Tipo di negozio",
+      "website": "Sito web"
+    },
+    "brandPreferences": "Preferenze del brand",
+    "brandPreferencesHint": "Colori, tono, lingua",
+    "photoAssets": "Risorse fotografiche",
+    "photoAssetsHint": "Foto di tavolo e unità TV Bunting",
+    "connections": "Connessioni",
+    "connectionsHint": "Canali social & profilo Google"
+  },
+  "brand": {
+    "title": "Impostazioni del brand",
+    "save": "Salva modifiche",
+    "paletteTitle": "Palette colori del brand",
+    "editHex": "Modifica hex",
+    "watermarkTitle": "Logo filigrana finale",
+    "watermarkBody": "Applicato a fine video e bordi foto",
+    "change": "Cambia",
+    "toneTitle": "Tono creativo",
+    "tones": {
+      "modern": "Moderno",
+      "luxurious": "Lussuoso",
+      "elegant": "Elegante",
+      "premium": "Premium",
+      "natural": "Naturale",
+      "minimalist": "Minimalista"
+    },
+    "cuesTitle": "Segni distintivi del brand",
+    "addCue": "Aggiungi segno"
+  },
+  "photos": {
+    "title": "Risorse fotografiche",
+    "refresh": "Aggiorna",
+    "sourceTitle": "Sito web sorgente",
+    "sourceBody": "Foto condivise usate per generare reel, post e allestimenti. Nessuna foto viene pubblicata senza la tua approvazione esplicita.",
+    "sources": {
+      "website": "Sito web ({{n}})",
+      "uploads": "Caricamenti ({{n}})"
+    },
+    "addPhotos": "Aggiungi foto",
+    "photosTitle": "Foto",
+    "photoCount_one": "{{n}} foto",
+    "photoCount_other": "{{n}} foto",
+    "emptyTitle": "Nessun caricamento",
+    "emptyBody": "Le foto dello studio che carichi appariranno qui.",
+    "upload": "Carica foto personalizzate dello studio"
+  },
+  "connections": {
+    "title": "Connessioni",
+    "sourceTitle": "Sito web sorgente",
+    "linked": "Collegato",
+    "sourceBody": "Foto dei prodotti e dettagli dell'attività",
+    "channelsTitle": "Canali di pubblicazione",
+    "accounts": "Account",
+    "connected": "Connesso",
+    "notConnected": "Non connesso",
+    "connect": "Connetti",
+    "disconnect": "Disconnetti",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Pagina Facebook",
+      "whatsapp": "WhatsApp Business",
+      "google": "Profilo Google Business",
+      "shopify": "Sincronizzazione diretta Shopify"
+    }
+  },
+  "automations": {
+    "title": "Automazioni",
+    "heading": "Le tue preferenze di pubblicazione",
+    "intro": "Controlla come Espanda pre-compila i post programmati e redige contenuti per i tuoi articoli del catalogo.",
+    "reviewTitle": "Revisione prima della pubblicazione",
+    "reviewBody": "Rivedi i contenuti prima che vengano pubblicati.",
+    "required": "Richiesto",
+    "reviewLabel": "Revisione prima della pubblicazione. Rivedi i contenuti prima che vengano pubblicati. Richiesto.",
+    "queueTitle": "Azioni in coda",
+    "manageConnections": "Gestisci connessioni",
+    "items": {
+      "monthly": {
+        "title": "Genera piani mensili",
+        "body": "Prepara il tuo calendario mensile di post in bozza.",
+        "active": "Attivo · bozze salvate nel calendario"
+      },
+      "autopublish": {
+        "title": "Pubblica automaticamente i post approvati",
+        "body": "Pubblica automaticamente i reel programmati una volta che tocchi \"Approva\".",
+        "requires": "Richiede connessione Instagram",
+        "active": "Attivo · pubblica dopo l'approvazione"
+      },
+      "replies": {
+        "title": "Bozza di risposte alle richieste in showroom",
+        "body": "Pre-compila risposte raffinate di artigiani francesi nella tua coda di posta.",
+        "requires": "Richiede canale di messaggistica",
+        "active": "Attivo · bozze aggiunte alla tua posta in arrivo"
+      }
+    },
+    "adsTitle": "Annunci social a pagamento",
+    "comingSoon": "Prossimamente",
+    "adsBody": "Test creativi automatizzati per annunci Meta e gestione del budget."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} credito disponibile",
+    "creditsAvailable_other": "{{n}} crediti disponibili",
+    "planName": "Piano {{tier}}",
+    "statusActive": "Attivo",
+    "planBlurb": "I tuoi strumenti di creazione e business",
+    "cycleTitle": "Ciclo di fatturazione",
+    "renewsMonthly": "Rinnova mensilmente",
+    "balanceTitle": "Saldo crediti",
+    "monthlyAllowance": "{{amount}} mensile disponibile",
+    "balanceLabel_one": "{{balance}} di {{n}} credito disponibile",
+    "balanceLabel_other": "{{balance}} di {{n}} crediti disponibili",
+    "balanceOf_one": " / {{n}} credito disponibile",
+    "balanceOf_other": " / {{n}} crediti disponibili",
+    "note_one": "{{n}} credito usato · {{reserved}} riservato per {{item}}. Disponibilità rinnova mensilmente.",
+    "note_other": "{{n}} crediti usati · {{reserved}} riservati per {{item}}. Disponibilità rinnova mensilmente.",
+    "usageTitle": "Uso recente dei crediti",
+    "usageAside": "Attività del workspace",
+    "today": "Oggi",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "Reel {{name}}",
+        "detail": "Riservato per generazione"
+      },
+      "plan": {
+        "title": "Piano contenuti mensile",
+        "detail_one": "{{n}} post in bozza",
+        "detail_other": "{{n}} post in bozza"
+      },
+      "renewal": {
+        "title": "Rinnovo piano mensile",
+        "detail": "Reset crediti ciclo"
+      }
+    },
+    "spent_one": "-{{n}} credito",
+    "spent_other": "-{{n}} crediti",
+    "added_one": "+{{n}} credito",
+    "added_other": "+{{n}} crediti",
+    "included": "Incluso",
+    "help": {
+      "missingCredits": "Crediti mancanti o rendering fallito",
+      "restore": "Ripristina acquisti abbonamento",
+      "history": "Storico fatturazione e fatture"
+    }
+  },
+  "account": {
+    "title": "Impostazioni account",
+    "workspaceTitle": "Spazio di lavoro",
+    "workspaceName": "Nome spazio di lavoro",
+    "teamTitle": "Collaborazione del team",
+    "teamMembers": "Membri dello spazio di lavoro",
+    "preferencesTitle": "Preferenze",
+    "languageTitle": "Lingua dell'interfaccia app",
+    "languageBody": "I prompt e le esportazioni rimangono in francese",
+    "languageLabel": "Lingua app, {{language}}",
+    "languageHint": "Apre l'elenco delle lingue",
+    "pushTitle": "Notifiche push",
+    "pushBody": "Aggiornamenti di creazione e pubblicazione",
+    "supportTitle": "Supporto e legale",
+    "help": "Hai bisogno di aiuto & contatta il supporto",
+    "terms": "Termini di servizio",
+    "privacy": "Informativa sulla privacy",
+    "restore": "Ripristina acquisti",
+    "signOut": "Esci da Espanda",
+    "signOutNote": "Il tuo abbonamento attivo e le risorse del catalogo salvate rimangono al sicuro."
+  },
+  "drawer": {
+    "closeMenu": "Chiudi menu",
+    "switchLabel": "Spazio di lavoro {{name}}. Cambia attività",
+    "balanceLabel_one": "Saldo attuale {{credits}} credito rimasto, piano {{plan}}",
+    "balanceLabel_other": "Saldo attuale {{credits}} crediti rimasti, piano {{plan}}",
+    "balanceTitle": "Saldo attuale",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> credito rimasto</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> crediti rimasti</rest>",
+    "sections": {
+      "create": "Crea",
+      "grow": "Crescita",
+      "manage": "Gestisci"
+    },
+    "items": {
+      "chat": "Chat per creare video",
+      "generations": "Le mie generazioni",
+      "photos": "Risorse fotografiche",
+      "inbox": "Clienti & Posta in arrivo",
+      "google": "Crescita su Google",
+      "website": "Studio del sito web",
+      "connections": "Connessioni",
+      "automations": "Automazioni",
+      "billing": "Piani & Fatturazione",
+      "account": "Impostazioni account"
+    },
+    "signOut": "Esci"
+  }
+}

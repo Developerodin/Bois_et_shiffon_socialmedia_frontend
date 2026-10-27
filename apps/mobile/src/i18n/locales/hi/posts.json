@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "योजना बनाई गई",
+    "briefReady": "संक्षेप तैयार",
+    "needsReview": "समीक्षा की आवश्यकता",
+    "draftReady": "मसौदा तैयार",
+    "approved": "स्वीकृत",
+    "scheduled": "निर्धारित",
+    "published": "प्रकाशित",
+    "draft": "मसौदा"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "आज",
+    "tomorrow": "कल"
+  },
+  "chrome": {
+    "openMenu": "मेनू खोलें",
+    "logo": "Espanda",
+    "credits_one": "{{count}} क्रेडिट उपलब्ध",
+    "credits_other": "{{count}} क्रेडिट उपलब्ध",
+    "settings": "सेटिंग्स",
+    "modulesLabel": "ऐप मॉड्यूल",
+    "modules": {
+      "reels": "रील्स",
+      "posts": "पोस्ट्स",
+      "photoshoot": "फोटोशूट",
+      "marketing": "मार्केटिंग"
+    },
+    "navLabel": "मॉड्यूल नेविगेशन",
+    "nav": {
+      "today": "आज",
+      "posts": "पोस्ट्स",
+      "create": "बनाएं",
+      "stories": "कहानियाँ",
+      "settings": "सेटिंग्स"
+    },
+    "back": "वापस",
+    "switchBusiness": "व्यवसाय बदलें, {{name}}",
+    "business": "व्यवसाय: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "आपकी पोस्ट्स, गति में",
+    "subtitle": "उत्पाद हाइलाइट्स और निर्धारित पोस्ट्स की समीक्षा करें",
+    "needsApproval": "अनुमोदन की आवश्यकता",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "पोस्ट की समीक्षा करें",
+    "agenda": "आगामी एजेंडा",
+    "thisWeek": "इस सप्ताह",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "कैलेंडर देखें"
+  },
+  "calendar": {
+    "title": "पोस्ट्स कैलेंडर",
+    "subtitle": "अपनी रिलीज़ की योजना बनाएं और स्वचालित करें",
+    "viewLabel": "कैलेंडर दृश्य",
+    "views": {
+      "month": "महीना",
+      "list": "सूची"
+    },
+    "plan": "योजना: {{n}} पोस्ट्स / माह",
+    "managePlan": "योजना प्रबंधित करें",
+    "postCount_one": "{{count}} पोस्ट",
+    "postCount_other": "{{count}} पोस्ट्स",
+    "empty": "इस दिन के लिए कुछ भी योजना नहीं बनाई गई है।",
+    "scheduled_one": "{{count}} निर्धारित",
+    "scheduled_other": "{{count}} निर्धारित",
+    "previousMonth": "पिछला महीना",
+    "nextMonth": "अगला महीना",
+    "gridLabel": "{{month}} कैलेंडर",
+    "dayWithPosts_one": "{{day}} · {{count}} पोस्ट",
+    "dayWithPosts_other": "{{day}} · {{count}} पोस्ट्स"
+  },
+  "detail": {
+    "title": "पोस्ट विवरण",
+    "moreOptions": "अधिक विकल्प",
+    "feedPhoto": "4:5 फीड फोटो",
+    "fullscreen": "फुलस्क्रीन",
+    "captionFrench": "कैप्शन (फ्रेंच)",
+    "editText": "पाठ संपादित करें",
+    "channels": "प्रकाशन चैनल",
+    "instagramFeed": "Instagram फीड",
+    "instagramDetail": "प्रकाशित करने के लिए खाता कनेक्ट करें",
+    "facebookPage": "Facebook पेज",
+    "facebookDetail": "आधिकारिक पेज पर ऑटो-पोस्ट",
+    "notConnected": "कनेक्ट नहीं है",
+    "channelNotConnected": "{{name}}, कनेक्ट नहीं है",
+    "editPost": "पोस्ट संपादित करें",
+    "schedule": "निर्धारित करें"
+  },
+  "edit": {
+    "title": "पोस्ट संपादित करें",
+    "cancel": "रद्द करें",
+    "save": "परिवर्तन सहेजें",
+    "previewLabel": "{{title}}, मूल अनुपात 4:5",
+    "ratio": "मूल अनुपात · 4:5",
+    "sectionLabel": "खंड संपादित करें",
+    "tabs": {
+      "image": "छवि",
+      "caption": "कैप्शन",
+      "brand": "ब्रांड"
+    },
+    "description": "पोस्ट विवरण",
+    "language": "भाषा: फ्रेंच (FR)",
+    "suggestedHashtags": "सुझाए गए हैशटैग्स",
+    "addHashtag": "हैशटैग जोड़ें",
+    "add": "+ जोड़ें",
+    "regenerate": "AI के साथ कैप्शन पुनः उत्पन्न करें",
+    "imageHint": "मूल अनुपात · 4:5। पूर्वावलोकन को खींचकर फसल को पुनः फ्रेम करें।",
+    "brandHint": "लोगो, रंग और टोन आपके {{brand}} ब्रांड किट का अनुसरण करते हैं।"
+  },
+  "schedule": {
+    "title": "निर्धारित करें",
+    "storyFormat": "कहानी · 9:16 छवि",
+    "feedFormat": "फीड पोस्ट · 4:5 छवि",
+    "destination": "गंतव्य",
+    "actionRequired": "कार्रवाई की आवश्यकता",
+    "notLinked": "Instagram खाता लिंक नहीं है",
+    "notLinkedBody": "प्रत्यक्ष निर्धारित प्रकाशन को अनलॉक करने के लिए अपने सोशल खातों को कनेक्ट करें।",
+    "connect": "सोशल खाता कनेक्ट करें",
+    "locked": "कनेक्शन तक अनुसूची लॉक है",
+    "timing": "समय और अनुसूची",
+    "date": "तारीख",
+    "dateLabel": "तारीख, {{date}}",
+    "time": "समय",
+    "timeLabel": "समय, {{time}}",
+    "timezone": "समय क्षेत्र",
+    "schedulePost": "पोस्ट निर्धारित करें",
+    "scheduleLocked": "पोस्ट निर्धारित करें (पहले चैनल कनेक्ट करें)",
+    "saveDraft": "मसौदा सहेजें"
+  },
+  "brief": {
+    "title": "पोस्ट बनाएं",
+    "subtitle": "एक उत्पाद और रचनात्मक दिशा चुनें",
+    "format": "सामग्री प्रारूप",
+    "formatLabel": "पोस्ट प्रारूप",
+    "singlePhoto": "एकल फोटो",
+    "singlePhotoDetail": "4:5 फीड फोकल",
+    "carousel": "कैरोसेल",
+    "carouselDetail": "कई फोटो",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "प्राथमिक लक्ष्य",
+    "goals": {
+      "newArrival": "नया आगमन",
+      "productFeature": "उत्पाद विशेषता",
+      "specialOffer": "विशेष ऑफर"
+    },
+    "product": "लक्ष्य कैटलॉग उत्पाद",
+    "changeProduct": "उत्पाद बदलें",
+    "change": "बदलें",
+    "direction": "रचनात्मक दिशा (वैकल्पिक)",
+    "directionLanguage": "फ्रेंच (FR)",
+    "directionPlaceholder": "उदा. हस्तनिर्मित जोड़ और गर्मी पर ध्यान केंद्रित करें",
+    "cost": "निर्माण लागत:",
+    "costPending": "अनुमान लंबित",
+    "draftPost": "ड्राफ्ट पोस्ट"
+  },
+  "stories": {
+    "title": "कहानियाँ",
+    "subtitle": "9:16 वर्टिकल सोशल मोमेंट्स",
+    "newStory": "नई कहानी",
+    "statusLabel": "कहानी की स्थिति",
+    "drafts_one": "ड्राफ्ट ({{count}})",
+    "drafts_other": "ड्राफ्ट ({{count}})",
+    "scheduled_one": "निर्धारित ({{count}})",
+    "scheduled_other": "निर्धारित ({{count}})",
+    "samplePreview": "नमूना पूर्वावलोकन",
+    "moreOptions": "{{title}} के लिए अधिक विकल्प",
+    "editStory": "कहानी संपादित करें"
+  },
+  "editStory": {
+    "back": "वापस",
+    "undo": "पूर्ववत करें",
+    "tools": {
+      "text": "पाठ",
+      "image": "छवि",
+      "brand": "ब्रांड",
+      "cta": "CTA"
+    },
+    "toolLabel": "{{tool}} उपकरण",
+    "captionTitle": "कहानी कैप्शन / लिंक स्टिकर",
+    "languageCode": "FR",
+    "saveDraft": "ड्राफ्ट सहेजें",
+    "scheduleStory": "कहानी निर्धारित करें"
+  },
+  "planner": {
+    "title": "पोस्ट्स प्लानर",
+    "sectionsLabel": "सेटिंग्स अनुभाग",
+    "sections": {
+      "business": "मेरा व्यवसाय",
+      "billing": "बिलिंग",
+      "planner": "पोस्ट्स प्लानर"
+    },
+    "cycle": "योजना चक्र",
+    "cadence": "प्रकाशन ताल",
+    "monthlyTarget": "मासिक लक्ष्य",
+    "feedPosts": "फीड पोस्ट्स",
+    "stories": "कहानियाँ",
+    "perMonth": "{{n}} / माह",
+    "feedNote": "~1 पोस्ट दैनिक",
+    "storiesNote": "अपने महीने में फैलाएँ",
+    "cadenceHint": "सुझाए गए सामग्री लक्ष्य। अपना कैलेंडर जनरेट करने से पहले समायोजित करें।",
+    "pillars": "सामग्री के स्तंभ",
+    "pillar": {
+      "catalog": "कैटलॉग उत्पाद (Bunting फोकस)",
+      "craft": "सामग्री विवरण और शिल्प (Acacia लकड़ी)",
+      "story": "ब्रांड कहानी और फ्रेंच विरासत"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>प्रकाशन से पहले मैनुअल समीक्षा: </b>जनरेट की गई ड्रॉप्स आपके कैलेंडर में ड्राफ्ट के रूप में रखी जाती हैं आपकी अंतिम पुष्टि के लिए। बिना स्वीकृति के कोई सामग्री प्रकाशित नहीं होती।",
+    "generate": "कैलेंडर जनरेट करें"
+  }
+}

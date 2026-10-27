@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}s",
+  "seconds_one": "{{count}} sekund",
+  "seconds_other": "{{count}} sekunder",
+  "noPresenter": "Ingen presentatør",
+  "aiActor": "AI-skuespiller",
+  "assistant": "Din videoassistent",
+  "sourceWebsite": "Kilde nettsted",
+  "preview": "Forhåndsvisning",
+  "schedule": "Planlegg",
+  "goBack": "Gå tilbake",
+  "inProgress": "Pågår",
+  "timezone": "Tidssone",
+  "status": {
+    "draft": "Utkast",
+    "ready": "Klar"
+  },
+  "scene": {
+    "label": "Scene {{n}} · {{seconds}}s",
+    "count_one": "{{count}} scene",
+    "count_other": "{{count}} scener"
+  },
+  "shot": {
+    "wide": "Bredt bilde",
+    "material": "Materialdetalj",
+    "closeCta": "Produkt nær & CTA"
+  },
+  "create": {
+    "switchBusiness": "Bytt bedrift, {{name}}",
+    "title": "Lag din neste reel",
+    "subtitle": "Lag studiovideoer fra butikkatalogen din",
+    "heroImage": "Full interiørvisning av {{product}} spisesamling",
+    "question": "Hva vil du vise?",
+    "planTogether": "Planlegg en reel sammen",
+    "start": "Start",
+    "startA11y": "Start planlegging av en reel",
+    "ideasReady_one": "{{count}} idé klar",
+    "ideasReady_other": "{{count}} ideer klare",
+    "viewIdeas": "Se ideer →",
+    "actorSubtitle": "Presentatør reel",
+    "templates": "Maler",
+    "templatesSubtitle": "Raske katalogklipp",
+    "jumpBackIn": "Fortsett",
+    "seeAll": "Se alle",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Videoforslag",
+    "subtitle": "Kuraterte vinkler klare til å bli bevegelige reels",
+    "filter": {
+      "all": "Alle ({{n}})",
+      "productSpotlight": "Produktfokus ({{n}})",
+      "collection": "Samling ({{n}})"
+    },
+    "angle": "Vinkel {{n}}",
+    "body": {
+      "angle01": "Fremhever naturlig åremønster, geometrisk kryssbensarkitektur og spiseoppsett.",
+      "angle02": "Fokuserer på håndskårne spalte-dører, kabelhåndtering og varm stueatmosfære."
+    },
+    "readyToReview": "Klar til gjennomgang",
+    "viewStoryboard": "Se storyboard"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} kreditt",
+    "creditsA11y_other": "{{count}} kreditter",
+    "addAssets": "Legg til ressurser",
+    "composerPlaceholder": "Forbedre tone, voiceover, eller legg til instruksjoner...",
+    "composerA11y": "Forbedre tone, voiceover, eller legg til instruksjoner",
+    "send": "Send forbedring",
+    "day": "I dag · Reels Studio",
+    "userMessage": "Vis Bunting-samlingen i en rolig, premium reel.",
+    "reply": "Jeg har skreddersydd et konsept for ditt <b>{{brand}}</b> {{product}} bord. Her er de anbefalte parameterne:",
+    "format": "Format",
+    "formatVertical": "9:16 Vertikal (Story/Reel)",
+    "duration": "Varighet",
+    "presenter": "Presentatør",
+    "openingHook": "Åpningskrok",
+    "reviewStoryboard_one": "Gjennomgå storyboard ({{count}} scene)",
+    "reviewStoryboard_other": "Gjennomgå storyboard ({{count}} scener)",
+    "readyStatus": "Klar til å generere eller forbedre"
+  },
+  "storyboard": {
+    "title": "Storyboard",
+    "durationFact": "{{seconds}}s varighet",
+    "verticalFact": "9:16 vertikal",
+    "readyToRender": "Klar til å rendere <muted>· Utkast lagret for gjennomgang</muted>",
+    "sceneDirection": "Sceneretning",
+    "voiceoverFr": "Voiceover (FR)",
+    "direction": {
+      "scene1": "Langsom glidende avsløring over moderne spiseoppsett",
+      "scene2": "Jevn makrosveip over rik naturlig åremønster og faset kant",
+      "scene3": "Iscenesatt perspektiv med Bois & Chiffons emblem vannmerke"
+    },
+    "editInChat": "Rediger i chat",
+    "makeVideo": "Lag video",
+    "makeVideoA11y_one": "Lag video, {{count}} kreditt",
+    "makeVideoA11y_other": "Lag video, {{count}} kreditter",
+    "cost_one": "{{count}} kreditt",
+    "cost_other": "{{count}} kreditter",
+    "balance_one": "Nåværende saldo: {{balance}} kreditter · {{count}} kreditt vil bli reservert · Utkast lagres automatisk",
+    "balance_other": "Nåværende saldo: {{balance}} kreditter · {{count}} kreditter vil bli reservert · Utkast lagres automatisk"
+  },
+  "generating": {
+    "backToWorkspace": "Tilbake til arbeidsområde",
+    "renderingA11y": "Rendering pågår",
+    "title": "Lager din reel",
+    "body": "Komponerer visuelle elementer, fransk voiceover og bevegelsestempo for {{title}}.",
+    "summary": "{{title}} · {{seconds}}s · 9:16",
+    "assetNote": "Autentisk fransk katalogressurs",
+    "preparingScenes_one": "Forbereder {{count}} scene",
+    "preparingScenes_other": "Forbereder {{count}} scener",
+    "done": "Ferdig",
+    "renderingFrames": "Rendrer videorammer",
+    "addingAudio": "Legger til lyd",
+    "queued": "I kø",
+    "creditsReserved_one": "{{count}} kreditt reservert",
+    "creditsReserved_other": "{{count}} kreditter reservert",
+    "remaining_one": "Gjenstående: {{count}} kreditt",
+    "remaining_other": "Gjenstående: {{count}} kreditter",
+    "safeToLeave": "Du kan trygt forlate denne skjermen. Utkastet ditt lagres automatisk i Resultater-fanen.",
+    "keepWorking": "Fortsett å jobbe i bakgrunnen"
+  },
+  "results": {
+    "title": "Videoreels",
+    "newReel": "Ny reel",
+    "filter": {
+      "all": "Alle ({{n}})",
+      "ready": "Klar ({{n}})",
+      "processing": "Behandler ({{n}})"
+    },
+    "processing_one": "Behandler · {{count}} kreditt reservert",
+    "processing_other": "Behandler · {{count}} kreditter reservert",
+    "renderingA11y": "{{title}}, rendering {{percent}}",
+    "renderingMeta": "{{seconds}}s · 9:16 vertikal · Rendrer visuelle elementer...",
+    "renderingStage": "Renderingstadium",
+    "previewA11y": "Eksempel forhåndsvisning, {{title}}",
+    "moreOptions": "Flere alternativer",
+    "reviewVideo": "Gjennomgå video",
+    "meta": {
+      "tv": "20s · Fransk voiceover · Klar til å planlegge",
+      "atelier": "15s · Akustisk atmosfære · Klar til å planlegge"
+    }
+  },
+  "review": {
+    "subtitle": "Reel utkast · Klar til gjennomgang",
+    "options": "Alternativmeny",
+    "downloadVideo": "Last ned video",
+    "connectFirst": "Velg en tilkoblet konto før publisering.",
+    "samplePreview": "Eksempel forhåndsvisning",
+    "play": "Spill av video forhåndsvisning",
+    "position": "Videoposisjon",
+    "sound": "Slå av/på lyd",
+    "fullscreen": "Åpne video i fullskjerm",
+    "vertical": "9:16 Vertikal",
+    "portrait": "Portrettformat",
+    "captionFrench": "Tekst (fransk)",
+    "defaultSource": "· Standardkilde",
+    "editable": "Redigerbar",
+    "captionA11y": "Videotekst på fransk",
+    "addTag": "Legg til tag",
+    "specifications": "Spesifikasjoner",
+    "audioTrack": "Lydspor",
+    "audioValue": "Fransk voiceover (Studio Natural) + Miljølyd",
+    "resolution": "Oppløsning",
+    "resolutionValue": "Portrettvideo · 9:16"
+  },
+  "publish": {
+    "title": "Publiser reel",
+    "confirmSchedule": "Bekreft tidsplan",
+    "publishNow": "Publiser nå",
+    "saveDraft": "Lagre utkast",
+    "readyToSchedule": "Klar til å planlegge",
+    "format": "{{product}} · 9:16 Vertikal Reel",
+    "playPreview": "Spill av forhåndsvisning",
+    "channel": "Publiseringskanal",
+    "connected": "Tilkoblet",
+    "notConnected": "Ikke tilkoblet",
+    "connect": "Koble til",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Auto-post direkte til feed & reels",
+    "orDownload": "Eller last ned direkte video",
+    "download": "Last ned",
+    "timing": "Tidspunkt",
+    "date": "Dato",
+    "time": "Tid",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Tidssone, {{value}}",
+    "notice": "Koble til din Instagram bedriftskonto for å låse opp automatisk planlagt publisering. Du kan fortsatt lagre denne reelen som et utkast."
+  },
+  "scheduled": {
+    "close": "Lukk",
+    "viewReel": "Se planlagt reel",
+    "backToResults": "Tilbake til resultater",
+    "title": "Reel planlagt",
+    "body": "Videoen din vil bli publisert til den valgte kontoen på det planlagte tidspunktet.",
+    "meta": "{{seconds}}s · Fransk voiceover",
+    "publishDate": "Publiseringsdato",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Merkevare arbeidsområde",
+    "channel": "Kanal",
+    "instagramConnected": "Instagram (Tilkoblet)",
+    "editInCalendar": "Rediger eller avbryt dette innlegget fra kalenderen din."
+  },
+  "actor": {
+    "title": "Velg en presentatør",
+    "intro": "Velg en presentatørstil eller en reel kun med produkt.",
+    "noPresenterA11y": "Ingen presentatør, anbefalt",
+    "recommended": "Anbefalt",
+    "noPresenterBody": "Fokuser kun på møbelvisualer, teksturer og studio-lyd.",
+    "styles": "Presentatørstiler",
+    "style": {
+      "calm": {
+        "title": "Rolig forteller",
+        "subtitle": "Fransk · Calm Studio"
+      },
+      "expressive": {
+        "title": "Uttrykksfull presentatør",
+        "subtitle": "Engelsk / FR · Dynamisk"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Eksempelstemme, {{title}}",
+    "sampleVoice": "Eksempelstemme",
+    "voiceLed": "Stemmeledet stil",
+    "notice": "Velg en stemmeledet stil, eller hold fokus på produktet ditt."
+  },
+  "script": {
+    "title": "Manus & stemme",
+    "continue": "Fortsett til storyboard",
+    "costNote": "Gjennomgå kredittkostnaden før du lager reelen din.",
+    "targetProduct": "Målprodukt",
+    "productMeta": "Solid akasie · Kilde nettsted",
+    "voiceoverScript": "Voiceover manus",
+    "frenchFr": "Fransk (FR)",
+    "wordCount_one": "{{count}} ord · ~{{seconds}} sek",
+    "wordCount_other": "{{count}} ord · ~{{seconds}} sek",
+    "scriptA11y": "Voiceover manus på fransk",
+    "targetDuration_one": "Målt varighet: {{count}} sekund",
+    "targetDuration_other": "Målt varighet: {{count}} sekunder",
+    "rewriteOpening": "Omskriv åpning",
+    "narratorAudio": "Fortellerlyd",
+    "calmVoice": "Rolig fransk stemme",
+    "calmVoiceMeta": "Naturlig fransk, varm akustisk tempo",
+    "recordOwn": "Ta opp din egen stemme",
+    "recordOwnMeta": "Valgfri tilpasset merkevarefortelling",
+    "record": "Ta opp"
+  },
+  "templates": {
+    "title": "Reel-maler",
+    "useTemplate": "Bruk mal",
+    "searchPlaceholder": "Søk i studioformater...",
+    "searchA11y": "Søk i studioformater",
+    "tune": "Tilpass",
+    "filter": {
+      "all": "Alle formater",
+      "catalog": "Katalogfokus",
+      "shortCuts": "15-20s klipp"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Produktfokus",
+        "subtitle": "3 makroklipp + hook"
+      },
+      "collection": {
+        "title": "Kolleksjonsavsløring",
+        "subtitle": "Rask flerproduktvisning"
+      },
+      "material": {
+        "title": "Materialdetalj",
+        "subtitle": "Trekorn & håndverk nærbilder"
+      },
+      "arrival": {
+        "title": "Ny ankomst",
+        "subtitle": "Kunngjøring & showroom CTA"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Velg ressurser",
+    "createStoryboard_one": "Lag storyboard ({{count}} scene)",
+    "createStoryboard_other": "Lag storyboard ({{count}} scener)",
+    "upload": "Last opp bilder",
+    "websiteAssets": "Nettstedsressurser",
+    "selected_one": "{{count}} valgt",
+    "selected_other": "{{count}} valgt",
+    "otherCategory": "Annen produktkategori",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Storyboard-sekvens",
+    "dragToReorder": "Dra for å omorganisere",
+    "reorderA11y": "Scene {{n}}: {{label}}. Omorganiser scene",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Rom",
+      "macro": "Detalj",
+      "staged": "Stylet",
+      "tv": "TV-enhet"
+    }
+  }
+}

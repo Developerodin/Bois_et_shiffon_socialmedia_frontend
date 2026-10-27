@@ -12,7 +12,8 @@ import type { ContentItem } from "@/components/workspace/content-panels";
 type Body = NonNullable<ContentItem["latest"]>["body"];
 const EMPTY: Body = { hook: "", caption: "", hashtags: [], slides: [], script: [], pinTitle: "", altText: "" };
 // Mirrors server/content/rules.ts and the publish limits.
-const CAPTION_MAX: Record<string, number> = { THREADS_POST: 500 };
+const CAPTION_MAX: Record<string, number> = { THREADS_POST: 500, PINTEREST_PIN: 500 };
+const HASHTAGS_MAX = 5;
 const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
 
 /**
@@ -21,6 +22,9 @@ const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
  */
 export function DraftEditor({ url, item, onSaved, onCancel }: { url: string; item: ContentItem; onSaved: () => void; onCancel: () => void }) {
   const start = item.latest?.body ?? EMPTY;
+  // The version this edit is based on, fixed when the editor opens: the item prop refreshes every few
+  // seconds, and sending the fresh version would silently overwrite someone else's newer save.
+  const [baseVersion] = useState(item.latest?.version ?? 0);
   const [hook, setHook] = useState(start.hook ?? "");
   const [caption, setCaption] = useState(start.caption ?? "");
   const [hashtags, setHashtags] = useState((start.hashtags ?? []).join(" "));
@@ -44,6 +48,9 @@ export function DraftEditor({ url, item, onSaved, onCancel }: { url: string; ite
     pinTitle,
     altText,
   };
+  // Hashtags are added under the caption when it posts (server/services/publishing.ts postText), so they count too.
+  const tagText = body.hashtags.map((h) => `#${h.replace(/^#*/, "")}`).join(" ");
+  const postLength = caption.trim().length + (tagText ? tagText.length + 2 : 0);
   const dirty = JSON.stringify(body) !== JSON.stringify({ ...EMPTY, ...start, hashtags: start.hashtags ?? [], slides: start.slides ?? [], script: start.script ?? [] });
 
   // Leaving the page with unsaved text asks first.
@@ -61,10 +68,14 @@ export function DraftEditor({ url, item, onSaved, onCancel }: { url: string; ite
       captionRef.current?.focus();
       return;
     }
+    if (body.hashtags.length > HASHTAGS_MAX) {
+      setError(`Use ${HASHTAGS_MAX} hashtags at most.`);
+      return;
+    }
     setPending(true);
     setError(null);
     try {
-      await request(url, { method: "POST", body: JSON.stringify({ action: "edit", version: item.latest?.version ?? 0, body }) });
+      await request(url, { method: "POST", body: JSON.stringify({ action: "edit", version: baseVersion, body }) });
       onSaved();
     } catch (err) {
       setError(errorMessage(err));
@@ -86,7 +97,7 @@ export function DraftEditor({ url, item, onSaved, onCancel }: { url: string; ite
       {(item.status === "AWAITING_APPROVAL" || item.status === "APPROVED") && (
         <p className="flex items-start gap-2 rounded-lg bg-warning/10 px-3 py-2 text-sm">
           <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-warning" />
-          Saving makes v{(item.latest?.version ?? 0) + 1}. It goes back to the quality check and needs a fresh approval.
+          Saving makes v{baseVersion + 1}. It goes back to the quality check and needs a fresh approval.
         </p>
       )}
       {ch === "PINTEREST_PIN" && (
@@ -102,11 +113,11 @@ export function DraftEditor({ url, item, onSaved, onCancel }: { url: string; ite
         </div>
       )}
       <div className={field}>
-        <span className="flex justify-between"><label htmlFor="ed-caption" className={label}>{ch === "PINTEREST_PIN" ? "Description" : "Caption"}</label>{count(caption.length, ch === "PINTEREST_PIN" ? 500 : captionMax)}</span>
+        <span className="flex justify-between"><label htmlFor="ed-caption" className={label}>{ch === "PINTEREST_PIN" ? "Description" : "Caption"}</label>{count(postLength, captionMax)}</span>
         <Textarea id="ed-caption" ref={captionRef} value={caption} onChange={(e) => setCaption(e.target.value)} rows={8} aria-invalid={!caption.trim() && Boolean(error)} />
       </div>
       <div className={field}>
-        <label htmlFor="ed-tags" className={label}>Hashtags <span className="font-normal text-muted-foreground">(separate with spaces, 5 at most)</span></label>
+        <span className="flex justify-between"><label htmlFor="ed-tags" className={label}>Hashtags <span className="font-normal text-muted-foreground">(separate with spaces, {HASHTAGS_MAX} at most)</span></label>{count(body.hashtags.length, HASHTAGS_MAX)}</span>
         <Input id="ed-tags" value={hashtags} onChange={(e) => setHashtags(e.target.value)} className="h-11" placeholder="#boismassif #artdevivre" />
       </div>
       {ch === "INSTAGRAM_CAROUSEL" && (
@@ -134,7 +145,7 @@ export function DraftEditor({ url, item, onSaved, onCancel }: { url: string; ite
         </p>
       )}
       <div className="flex flex-wrap items-center gap-2">
-        <Button type="submit" disabled={pending || !dirty}>{pending ? "Saving…" : `Save as v${(item.latest?.version ?? 0) + 1}`}</Button>
+        <Button type="submit" disabled={pending || !dirty}>{pending ? "Saving…" : `Save as v${baseVersion + 1}`}</Button>
         <Button
           type="button"
           variant="ghost"

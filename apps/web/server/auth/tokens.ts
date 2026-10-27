@@ -8,7 +8,13 @@ export function newToken() {
 
 export const hashToken = (raw: string) => createHash("sha256").update(raw).digest("hex");
 
-export const appUrl = (path: string) =>
-  new URL(path, process.env.AUTH_URL ?? "http://localhost:3100").toString();
+export function appUrl(path: string) {
+  const base = process.env.AUTH_URL;
+  // Links in emails and OAuth redirects must never point at localhost in production.
+  if (!base && process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build") {
+    throw new Error("AUTH_URL is not set. Set it to this app's public URL, e.g. https://app.example.com");
+  }
+  return new URL(path, base ?? "http://localhost:3100").toString();
+}
 
 export const MIN_PASSWORD_LENGTH = 12;

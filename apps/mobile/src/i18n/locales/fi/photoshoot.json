@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Avaa valikko",
+    "creditsAvailable_one": "{{count}} krediitti käytettävissä",
+    "creditsAvailable_other": "{{count}} krediittiä käytettävissä",
+    "settings": "Asetukset",
+    "appModules": "Sovellusmoduulit",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Julkaisut",
+      "photoshoot": "Kuvaukset",
+      "marketing": "Markkinointi"
+    },
+    "moduleNavigation": "Moduulinavigointi",
+    "create": "Luo",
+    "results": "Tulokset",
+    "goBack": "Palaa takaisin",
+    "switchBusiness": "Vaihda yritystä, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} kohde",
+    "optionWithCount_other": "{{label}} {{count}} kohdetta"
+  },
+  "create": {
+    "title": "Luo kuvaus",
+    "subtitle": "Luo tuotekuvia ja stailaa vaatteita malleille.",
+    "product": {
+      "imageLabel": "{{name}} ruokapöytä",
+      "pill": "Luettelokohde",
+      "title": "Tuotekuvaus",
+      "body": "Aseta luettelokohteet arkkitehtonisiin sisä- ja studiokuvauksiin luonnonvalossa.",
+      "cta": "Uusi tuotekuvaus"
+    },
+    "fashion": {
+      "imageLabel": "Kuvitettu vaatekuvausstudio",
+      "title": "Muotikuvaus",
+      "body": "Stailaa vaatteita malleille kampanjavalmiissa kohtauksissa.",
+      "cta": "Uusi muotikuvaus"
+    }
+  },
+  "product": {
+    "title": "Tuotekuvaus",
+    "estimate_one": "Arvio: {{count}} krediitti",
+    "estimate_other": "Arvio: {{count}} krediittiä",
+    "available": "{{count}} käytettävissä",
+    "generate": "Luo kuvaus",
+    "selectedAsset": "Valittu luettelokohde",
+    "changeAsset": "Vaihda kohdetta",
+    "aspectRatio": "Kuvasuhde",
+    "sceneStyle": "Kohtauksen tyyli",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Sisätila",
+      "custom": "Mukautettu"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Luova briiffi",
+    "briefHint": "Tarkenna valaistusta, tunnelmaa tai tiettyjä sisustusvihjeitä",
+    "sourcePreview": "Lähde-esikatselu",
+    "fullPreview": "{{product}}, koko esikatselu",
+    "sourceImage": "Lähdekuva"
+  },
+  "fashion": {
+    "title": "Muotikuvaus",
+    "generate": "Luo kuvaus",
+    "uploadToEnable": "Lataa vaatteen kuva aktivoidaksesi luomisen",
+    "heading": "Rakenna muotikuvaus",
+    "subtitle": "Muuta tasolaskut tai ripustetut vaatteet realistisesti lavastetuiksi malleiksi.",
+    "garmentPhoto": "Vaatteen kuva",
+    "required": "Pakollinen",
+    "garmentSelected": "Vaatteen kuva: {{label}}. Vaihda kuva",
+    "addGarment": "Lisää vaatteen kuva",
+    "changeGarment": "Vaihda vaatteen kuva",
+    "garmentHint": "PNG tai JPG neutraalilla taustalla, tasolasku tai haamumannekiini",
+    "modelStyling": "Malli & stailaus",
+    "modelSelected": "Malli & stailaus: {{model}}",
+    "models": {
+      "choose": "Valitse malli",
+      "natural": "{{name}} · luonnollinen stailaus",
+      "editorial": "{{name}} · editoriaalinen stailaus",
+      "casual": "{{name}} · rento stailaus"
+    },
+    "pose": "Poseeraus",
+    "poses": {
+      "fullBody": "Koko vartalo",
+      "threeQuarter": "Kolmen neljänneksen",
+      "closeUp": "Lähikuva"
+    },
+    "outputFormat": "Tulostusmuoto",
+    "formats": {
+      "feedPortrait": "Feed-muotokuva",
+      "storyReel": "Tarina / Reel"
+    },
+    "background": "Taustaympäristö",
+    "backgrounds": {
+      "studioMinimal": "Studio minimalistinen",
+      "urbanStreet": "Kaupunkikatu",
+      "naturalInterior": "Luonnollinen sisätila"
+    },
+    "requirementsTitle": "Latausvaatimukset",
+    "requirements": {
+      "contrast": "Korkea kontrasti taustaa vasten",
+      "wrinkles": "Ei voimakkaita ryppyjä",
+      "frontFacing": "Etuviistosta kuvattu"
+    }
+  },
+  "source": {
+    "title": "Valitse lähdeaineisto",
+    "uploadNewLabel": "Lataa uusi kuva",
+    "uploadNew": "Lataa uusi",
+    "noPhotoSelected": "Ei valittua kuvaa",
+    "photosSelected_one": "{{count}} kuva valittu",
+    "photosSelected_other": "{{count}} kuvaa valittu",
+    "selectPhoto": "Valitse kuva",
+    "usePhoto": "Käytä kuvaa",
+    "source": "Lähde",
+    "tabs": {
+      "website": "Verkkosivusto",
+      "uploads": "Lataukset"
+    },
+    "businessWebsite": "{{name}} · Verkkosivusto",
+    "fromWebsite": "Verkkosivustolta",
+    "filterCatalog": "Suodata luettelo",
+    "filters": {
+      "all": "Kaikki kohteet",
+      "tables": "Pöydät",
+      "storage": "Säilytys"
+    },
+    "addPhoto": "Lisää kuva",
+    "tip": "Puhdasta tuotteen leikkausta käytettäessä saadaan parhaat kuvaustulokset. Espanda Studio säilyttää alkuperäisen akaasiapuun tekstuurin."
+  },
+  "generating": {
+    "backToWorkspace": "Takaisin työtilaan",
+    "returnToWorkspace": "Palaa työtilaan",
+    "title": "Valmistellaan kuviasi",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Luominen tapahtuu turvallisesti taustalla. Löydät valmiit aineistot Tuloksista.",
+    "status": {
+      "done": "Valmis",
+      "active": "Käynnissä",
+      "queued": "Jonossa"
+    },
+    "progress": "Luodaan",
+    "sample": {
+      "title": "{{name}} ruokakuvaus",
+      "description": "Lavastus {{product}} arkkitehtonisessa päivänvalossa sisätilassa.",
+      "variations_one": "{{count}} variaatio",
+      "variations_other": "{{count}} variaatiota"
+    },
+    "steps": {
+      "catalog": "Luettelokohteen käsittely",
+      "compose": "Kohtauksen ja valaistuksen sommittelu",
+      "finish": "Viimeistely ja värikalibrointi"
+    }
+  },
+  "results": {
+    "title": "Kuvaukset",
+    "subtitle": "Tuote- ja muotikuvasi",
+    "newPhotoshoot": "Uusi kuvaus",
+    "filterLabel": "Suodata kuvauksia",
+    "filters": {
+      "all": "Kaikki ({{count}})",
+      "product": "Tuote ({{count}})",
+      "fashion": "Muoti ({{count}})"
+    },
+    "empty": "Ei vielä kuvauksia.",
+    "processingLabel": "{{title}}. Käsitellään, {{percent}}%",
+    "processingBadge_one": "Käsitellään · {{count}} krediitti",
+    "processingBadge_other": "Käsitellään · {{count}} krediittiä",
+    "preview": "Esikatselu",
+    "reviewPhotoLabel": "Tarkista kuva, {{title}}",
+    "reviewPhoto": "Tarkista kuva",
+    "sample": {
+      "studioStaging": "{{product}} · Studiolavastus",
+      "rendering": "Renderöinti · {{percent}}%",
+      "interiorReady_one": "Sisustus · {{ratio}} · {{count}} kuva valmis",
+      "interiorReady_other": "Sisustus · {{ratio}} · {{count}} kuvaa valmiina",
+      "studioDaylight": "Studiovalo · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Lisää vaihtoehtoja",
+    "downloadPhoto": "Lataa kuva",
+    "variation": "Muunnelma",
+    "share": "Jaa kuvaukset",
+    "samplePreview": "Näyte-esikatselu",
+    "compareOriginal": "Vertaa alkuperäiseen",
+    "expandView": "Laajenna näkymä",
+    "stagingSummary": "Lavastuksen yhteenveto",
+    "format": "Muoto",
+    "creationCost": "Luontikustannus",
+    "credits_one": "{{count}} krediitti",
+    "credits_other": "{{count}} krediittiä",
+    "sample": {
+      "headerTitle": "{{name}} kuvaukset",
+      "vertical": "{{ratio}} Pysty",
+      "architecturalInterior": "Arkkitehtoninen sisustus",
+      "studioDaylight": "Studiovalo",
+      "formatBadge": "{{ratio}} muoto",
+      "naturalStudio": "Luonnollinen studio",
+      "portraitPhoto": "Muotokuva"
+    }
+  }
+}

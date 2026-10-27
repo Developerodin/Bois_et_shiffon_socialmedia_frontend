@@ -1,0 +1,37 @@
+{
+  "back": "رجوع",
+  "close": "إغلاق",
+  "continue": "متابعة",
+  "step": "الخطوة {{step}} من {{total}}",
+  "auth": {
+    "orContinueWith": "أو تابع باستخدام",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "بالمتابعة، أنت توافق على <terms>شروط الخدمة</terms> و<privacy>سياسة الخصوصية</privacy> الخاصة بنا.",
+    "allScreensDev": "جميع الشاشات (تطوير)",
+    "googleFailed": "فشل تسجيل الدخول عبر Google. حاول مرة أخرى أو استخدم البريد الإلكتروني.",
+    "googleNeedsBuild": "تسجيل الدخول عبر Google يعمل في تطبيق Espanda المثبت، وليس في Expo Go. استخدم البريد الإلكتروني الآن."
+  },
+  "language": {
+    "title": "لغة التطبيق",
+    "search": "ابحث عن اللغات",
+    "explainer": "يغير أزرار وقوائم التطبيق. تبقى منشوراتك باللغة المحددة لكل علامة تجارية.",
+    "noMatch": "لا توجد لغة تطابق “{{query}}”."
+  },
+  "module": {
+    "openMenu": "افتح القائمة",
+    "settings": "الإعدادات",
+    "credits_one": "{{count}} رصيد متاح",
+    "credits_other": "{{count}} أرصدة متاحة",
+    "workspace": "مساحة العمل {{name}}"
+  },
+  "nav": {
+    "reels": "Reels",
+    "posts": "المنشورات",
+    "photoshoot": "جلسة تصوير",
+    "marketing": "التسويق",
+    "create": "إنشاء",
+    "ideas": "أفكار",
+    "results": "النتائج"
+  }
+}

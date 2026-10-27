@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Menü öffnen",
+    "creditsAvailable_one": "{{count}} Guthaben verfügbar",
+    "creditsAvailable_other": "{{count}} Guthaben verfügbar",
+    "settings": "Einstellungen",
+    "appModules": "App-Module",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Beiträge",
+      "photoshoot": "Fotoshooting",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Modul-Navigation",
+    "create": "Erstellen",
+    "results": "Ergebnisse",
+    "goBack": "Zurück",
+    "switchBusiness": "Geschäft wechseln, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} Element",
+    "optionWithCount_other": "{{label}} {{count}} Elemente"
+  },
+  "create": {
+    "title": "Fotoshooting erstellen",
+    "subtitle": "Erstelle Produktfotos und style Kleidung an Modellen.",
+    "product": {
+      "imageLabel": "{{name}} Esstisch",
+      "pill": "Katalogelement",
+      "title": "Produktfotoshooting",
+      "body": "Platziere Katalogelemente in architektonischen Innenräumen und Studioeinstellungen mit natürlichem Licht.",
+      "cta": "Neues Produktshooting"
+    },
+    "fashion": {
+      "imageLabel": "Illustriertes Modefotostudio",
+      "title": "Modefotoshooting",
+      "body": "Style Kleidung an Modellen in kampagnenbereiten Szenen.",
+      "cta": "Neues Modeshooting"
+    }
+  },
+  "product": {
+    "title": "Produktfotoshooting",
+    "estimate_one": "Schätzung: {{count}} Guthaben",
+    "estimate_other": "Schätzung: {{count}} Guthaben",
+    "available": "{{count}} verfügbar",
+    "generate": "Fotoshooting generieren",
+    "selectedAsset": "Ausgewähltes Katalogelement",
+    "changeAsset": "Element ändern",
+    "aspectRatio": "Seitenverhältnis",
+    "sceneStyle": "Szenenstil",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Innenraum",
+      "custom": "Benutzerdefiniert"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Kreativbrief",
+    "briefHint": "Beleuchtung, Ambiente oder spezifische Dekorhinweise verfeinern",
+    "sourcePreview": "Quellvorschau",
+    "fullPreview": "{{product}}, vollständige Vorschau",
+    "sourceImage": "Quellbild"
+  },
+  "fashion": {
+    "title": "Modefotoshooting",
+    "generate": "Fotoshooting generieren",
+    "uploadToEnable": "Lade ein Kleidungsfoto hoch, um die Generierung zu aktivieren",
+    "heading": "Erstelle dein Modeshooting",
+    "subtitle": "Verwandle flach gelegte oder aufgehängte Kleidungsstücke in realistisch inszenierte Modelle.",
+    "garmentPhoto": "Kleidungsfoto",
+    "required": "Erforderlich",
+    "garmentSelected": "Kleidungsfoto: {{label}}. Foto ändern",
+    "addGarment": "Kleidungsfoto hinzufügen",
+    "changeGarment": "Kleidungsfoto ändern",
+    "garmentHint": "PNG oder JPG auf neutralem Hintergrund, flach gelegt oder Geisterpuppe",
+    "modelStyling": "Model & Styling",
+    "modelSelected": "Model & Styling: {{model}}",
+    "models": {
+      "choose": "Wähle ein Model",
+      "natural": "{{name}} · natürliches Styling",
+      "editorial": "{{name}} · Editorial-Styling",
+      "casual": "{{name}} · lässiges Styling"
+    },
+    "pose": "Pose",
+    "poses": {
+      "fullBody": "Ganzkörper",
+      "threeQuarter": "Dreiviertel",
+      "closeUp": "Nahaufnahme"
+    },
+    "outputFormat": "Ausgabeformat",
+    "formats": {
+      "feedPortrait": "Feed-Porträt",
+      "storyReel": "Story / Reel"
+    },
+    "background": "Hintergrund",
+    "backgrounds": {
+      "studioMinimal": "Studio minimal",
+      "urbanStreet": "Städtische Straße",
+      "naturalInterior": "Natürlicher Innenraum"
+    },
+    "requirementsTitle": "Upload-Anforderungen",
+    "requirements": {
+      "contrast": "Hoher Kontrast zum Hintergrund",
+      "wrinkles": "Keine starken Falten",
+      "frontFacing": "Frontalansicht"
+    }
+  },
+  "source": {
+    "title": "Quell-Element wählen",
+    "uploadNewLabel": "Neues Foto hochladen",
+    "uploadNew": "Neu hochladen",
+    "noPhotoSelected": "Kein Foto ausgewählt",
+    "photosSelected_one": "{{count}} Foto ausgewählt",
+    "photosSelected_other": "{{count}} Fotos ausgewählt",
+    "selectPhoto": "Foto auswählen",
+    "usePhoto": "Foto verwenden",
+    "source": "Quelle",
+    "tabs": {
+      "website": "Website",
+      "uploads": "Uploads"
+    },
+    "businessWebsite": "{{name}} · Website",
+    "fromWebsite": "Von Website",
+    "filterCatalog": "Katalog filtern",
+    "filters": {
+      "all": "Alle Elemente",
+      "tables": "Tische",
+      "storage": "Lagerung"
+    },
+    "addPhoto": "Foto hinzufügen",
+    "tip": "Saubere Produktfreisteller liefern optimale Fotoshooting-Ergebnisse. Espanda Studio bewahrt die ursprüngliche Akazienholzstruktur."
+  },
+  "generating": {
+    "backToWorkspace": "Zurück zum Arbeitsbereich",
+    "returnToWorkspace": "Zum Arbeitsbereich zurückkehren",
+    "title": "Fotos werden vorbereitet",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Deine Generierung läuft sicher im Hintergrund. Du findest abgeschlossene Elemente in den Ergebnissen.",
+    "status": {
+      "done": "Fertig",
+      "active": "In Bearbeitung",
+      "queued": "Warteschlange"
+    },
+    "progress": "Generierung",
+    "sample": {
+      "title": "{{name}} Essensfotoshooting",
+      "description": "Inszenierung von {{product}} im architektonischen Tageslicht-Innenraum.",
+      "variations_one": "{{count}} Variante",
+      "variations_other": "{{count}} Varianten"
+    },
+    "steps": {
+      "catalog": "Katalogelement verarbeiten",
+      "compose": "Szene & Beleuchtung komponieren",
+      "finish": "Abschluss & Farbkalibrierung"
+    }
+  },
+  "results": {
+    "title": "Fotoshootings",
+    "subtitle": "Deine Produkt- und Modefotos",
+    "newPhotoshoot": "Neues Fotoshooting",
+    "filterLabel": "Fotoshootings filtern",
+    "filters": {
+      "all": "Alle ({{count}})",
+      "product": "Produkt ({{count}})",
+      "fashion": "Mode ({{count}})"
+    },
+    "empty": "Noch keine Fotoshootings.",
+    "processingLabel": "{{title}}. Verarbeitung, {{percent}}%",
+    "processingBadge_one": "Verarbeitung · {{count}} Guthaben",
+    "processingBadge_other": "Verarbeitung · {{count}} Guthaben",
+    "preview": "Vorschau",
+    "reviewPhotoLabel": "Foto überprüfen, {{title}}",
+    "reviewPhoto": "Foto überprüfen",
+    "sample": {
+      "studioStaging": "{{product}} · Studio-Inszenierung",
+      "rendering": "Rendering-Stufe · {{percent}}%",
+      "interiorReady_one": "Innenraum · {{ratio}} · {{count}} Foto bereit",
+      "interiorReady_other": "Innenraum · {{ratio}} · {{count}} Fotos bereit",
+      "studioDaylight": "Studio-Tageslicht · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Mehr Optionen",
+    "downloadPhoto": "Foto herunterladen",
+    "variation": "Variation",
+    "share": "Fotoshooting teilen",
+    "samplePreview": "Beispielvorschau",
+    "compareOriginal": "Original vergleichen",
+    "expandView": "Ansicht vergrößern",
+    "stagingSummary": "Inszenierungsübersicht",
+    "format": "Format",
+    "creationCost": "Erstellungskosten",
+    "credits_one": "{{count}} Guthaben",
+    "credits_other": "{{count}} Guthaben",
+    "sample": {
+      "headerTitle": "{{name}} Fotoshooting",
+      "vertical": "{{ratio}} Vertikal",
+      "architecturalInterior": "Architektonischer Innenraum",
+      "studioDaylight": "Studio-Tageslicht",
+      "formatBadge": "{{ratio}} Format",
+      "naturalStudio": "Natürliches Studio",
+      "portraitPhoto": "Porträtfoto"
+    }
+  }
+}

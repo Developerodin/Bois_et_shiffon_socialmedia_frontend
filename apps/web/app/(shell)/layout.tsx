@@ -27,6 +27,9 @@ export default async function ShellLayout({ children }: { children: React.ReactN
   if (!session?.user?.id) redirect("/login");
 
   const shell = await loadShellContext(session.user.id);
+  const canCreateBrand = shell.activeWorkspaceId
+    ? (await effectivePermissions(shell.activeWorkspaceId, session.user.id)).has("brand.create")
+    : false;
   const [scores, googleConnected] =
     shell.activeWorkspaceId && shell.activeBrandId
       ? await Promise.all([
@@ -49,6 +52,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
         activeBrandId={shell.activeBrandId}
         scores={scores}
         googleConnected={googleConnected}
+        canCreateBrand={canCreateBrand}
       />
       <MainArea>{children}</MainArea>
     </div>

@@ -1,0 +1,37 @@
+{
+  "back": "Terug",
+  "close": "Sluiten",
+  "continue": "Doorgaan",
+  "step": "Stap {{step}} van {{total}}",
+  "auth": {
+    "orContinueWith": "of ga verder met",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "Door door te gaan, ga je akkoord met onze <terms>Servicevoorwaarden</terms> en <privacy>Privacybeleid</privacy>.",
+    "allScreensDev": "Alle schermen (dev)",
+    "googleFailed": "Google-aanmelding is mislukt. Probeer het opnieuw of gebruik e-mail.",
+    "googleNeedsBuild": "Google-aanmelding werkt in de geïnstalleerde Espanda-app, niet in Expo Go. Gebruik voorlopig e-mail."
+  },
+  "language": {
+    "title": "App-taal",
+    "search": "Talen zoeken",
+    "explainer": "Wijzigt de knoppen en menu's van de app. Je berichten behouden de inhoudstaal die voor elk merk is ingesteld.",
+    "noMatch": "Geen taal komt overeen met “{{query}}”."
+  },
+  "module": {
+    "openMenu": "Menu openen",
+    "settings": "Instellingen",
+    "credits_one": "{{count}} tegoed beschikbaar",
+    "credits_other": "{{count}} tegoeden beschikbaar",
+    "workspace": "Werkruimte {{name}}"
+  },
+  "nav": {
+    "reels": "Reels",
+    "posts": "Berichten",
+    "photoshoot": "Fotoshoot",
+    "marketing": "Marketing",
+    "create": "Maken",
+    "ideas": "Ideeën",
+    "results": "Resultaten"
+  }
+}

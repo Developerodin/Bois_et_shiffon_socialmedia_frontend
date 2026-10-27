@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Workspace {{name}}",
+    "logoLabel": "{{name}} logo",
+    "settingsTitle": "Settings",
+    "edit": "Edit",
+    "manage": "Manage",
+    "tabs": {
+      "myBusiness": "My Business",
+      "billing": "Billing",
+      "postsPlanner": "Posts planner"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Business attributes",
+    "attributes": {
+      "location": "Location",
+      "audience": "Audience",
+      "category": "Category",
+      "subcategory": "Subcategory",
+      "storeType": "Store Type",
+      "website": "Website"
+    },
+    "brandPreferences": "Brand preferences",
+    "brandPreferencesHint": "Colours, tone, language",
+    "photoAssets": "Photo assets",
+    "photoAssetsHint": "Bunting table and TV unit photos",
+    "connections": "Connections",
+    "connectionsHint": "Social channels & Google profile"
+  },
+  "brand": {
+    "title": "Brand settings",
+    "save": "Save changes",
+    "paletteTitle": "Brand colour palette",
+    "editHex": "Edit hex",
+    "watermarkTitle": "Outro watermark logo",
+    "watermarkBody": "Applied to video reel endings and photo borders",
+    "change": "Change",
+    "toneTitle": "Creative tone",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Luxurious",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Natural",
+      "minimalist": "Minimalist"
+    },
+    "cuesTitle": "Brand signature cues",
+    "addCue": "Add cue"
+  },
+  "photos": {
+    "title": "Photo assets",
+    "refresh": "Refresh",
+    "sourceTitle": "Source website",
+    "sourceBody": "Shared photos used to generate reels, feed posts, and photoshoot staging. No photos are published outbound without your explicit approval.",
+    "sources": {
+      "website": "Website ({{n}})",
+      "uploads": "Uploads ({{n}})"
+    },
+    "addPhotos": "Add photos",
+    "photosTitle": "Photos",
+    "photoCount_one": "{{n}} photo",
+    "photoCount_other": "{{n}} photos",
+    "emptyTitle": "No uploads yet",
+    "emptyBody": "Studio photos you upload appear here.",
+    "upload": "Upload custom studio photos"
+  },
+  "connections": {
+    "title": "Connections",
+    "sourceTitle": "Source website",
+    "linked": "Linked",
+    "sourceBody": "Product photos and business details",
+    "channelsTitle": "Publishing channels",
+    "accounts": "Accounts",
+    "connected": "Connected",
+    "notConnected": "Not connected",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook Page",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Business Profile",
+      "shopify": "Shopify Direct Sync"
+    }
+  },
+  "automations": {
+    "title": "Automations",
+    "heading": "Your publishing preferences",
+    "intro": "Control how Espanda pre-fills scheduled posts and drafts content for your catalogue items.",
+    "reviewTitle": "Review before publishing",
+    "reviewBody": "Review content before it is published.",
+    "required": "Required",
+    "reviewLabel": "Review before publishing. Review content before it is published. Required.",
+    "queueTitle": "Queue actions",
+    "manageConnections": "Manage connections",
+    "items": {
+      "monthly": {
+        "title": "Generate monthly plans",
+        "body": "Prepare your monthly calendar of draft posts.",
+        "active": "Active · drafts saved to calendar"
+      },
+      "autopublish": {
+        "title": "Auto-publish approved posts",
+        "body": "Automatically push scheduled reels once you tap \"Approve\".",
+        "requires": "Requires Instagram connection",
+        "active": "Active · publishes after approval"
+      },
+      "replies": {
+        "title": "Draft showroom enquiry replies",
+        "body": "Pre-populate refined French artisan replies in your inbox queue.",
+        "requires": "Requires messaging channel",
+        "active": "Active · drafts added to your inbox"
+      }
+    },
+    "adsTitle": "Paid Social Ads",
+    "comingSoon": "Coming soon",
+    "adsBody": "Automated Meta ad creative testing & budget pacing."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} credit available",
+    "creditsAvailable_other": "{{n}} credits available",
+    "planName": "{{tier}} plan",
+    "statusActive": "Active",
+    "planBlurb": "Your creation and business tools",
+    "cycleTitle": "Billing cycle",
+    "renewsMonthly": "Renews monthly",
+    "balanceTitle": "Credit balance",
+    "monthlyAllowance": "{{amount}} monthly allowance",
+    "balanceLabel_one": "{{balance}} of {{n}} credit available",
+    "balanceLabel_other": "{{balance}} of {{n}} credits available",
+    "balanceOf_one": " / {{n}} credit available",
+    "balanceOf_other": " / {{n}} credits available",
+    "note_one": "{{n}} credit used · {{reserved}} reserved for {{item}}. Allowance renews monthly.",
+    "note_other": "{{n}} credits used · {{reserved}} reserved for {{item}}. Allowance renews monthly.",
+    "usageTitle": "Recent credit usage",
+    "usageAside": "Workspace activity",
+    "today": "Today",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} reel",
+        "detail": "Reserved for generation"
+      },
+      "plan": {
+        "title": "Monthly content plan",
+        "detail_one": "{{n}} drafted post",
+        "detail_other": "{{n}} drafted posts"
+      },
+      "renewal": {
+        "title": "Monthly plan renewal",
+        "detail": "Cycle credit reset"
+      }
+    },
+    "spent_one": "-{{n}} credit",
+    "spent_other": "-{{n}} credits",
+    "added_one": "+{{n}} credit",
+    "added_other": "+{{n}} credits",
+    "included": "Included",
+    "help": {
+      "missingCredits": "Missing credits or failed render",
+      "restore": "Restore subscription purchases",
+      "history": "Billing history & invoices"
+    }
+  },
+  "account": {
+    "title": "Account settings",
+    "workspaceTitle": "Workspace",
+    "workspaceName": "Workspace Name",
+    "teamTitle": "Team collaboration",
+    "teamMembers": "Workspace members",
+    "preferencesTitle": "Preferences",
+    "languageTitle": "App interface language",
+    "languageBody": "Prompts & exports remain French",
+    "languageLabel": "App language, {{language}}",
+    "languageHint": "Opens the list of languages",
+    "pushTitle": "Push notifications",
+    "pushBody": "Creation and publishing updates",
+    "supportTitle": "Support & legal",
+    "help": "Need help & contact support",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "restore": "Restore purchases",
+    "signOut": "Sign out of Espanda",
+    "signOutNote": "Your active subscription and drafted catalogue assets remain securely saved."
+  },
+  "drawer": {
+    "closeMenu": "Close menu",
+    "switchLabel": "Workspace {{name}}. Switch business",
+    "balanceLabel_one": "Current balance {{credits}} credit left, {{plan}} plan",
+    "balanceLabel_other": "Current balance {{credits}} credits left, {{plan}} plan",
+    "balanceTitle": "Current balance",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> credit left</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> credits left</rest>",
+    "sections": {
+      "create": "Create",
+      "grow": "Grow",
+      "manage": "Manage"
+    },
+    "items": {
+      "chat": "Chat to make video",
+      "generations": "My generations",
+      "photos": "Photo assets",
+      "inbox": "Customers & Inbox",
+      "google": "Google Growth",
+      "website": "Website Studio",
+      "connections": "Connections",
+      "automations": "Automations",
+      "billing": "Plans & Billing",
+      "account": "Account settings"
+    },
+    "signOut": "Sign out"
+  }
+}

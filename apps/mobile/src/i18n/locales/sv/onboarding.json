@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Välkommen till Espanda",
+    "subtitle": "Skapa innehåll för ditt företag.",
+    "mobileNumber": "Mobilnummer",
+    "countryCode": "Landskod {{code}}",
+    "sendCode": "Skicka kod",
+    "useEmail": "Använd e-post istället",
+    "sendFailed": "Kunde inte skicka koden. Försök igen eller använd e-post.",
+    "chooseCountry": "Välj ditt land",
+    "searchCountry": "Sök land eller kod"
+  },
+  "email": {
+    "title": "Logga in med e-post",
+    "subtitle": "Vi skickar en verifieringskod utan lösenord till din e-post.",
+    "tagline": "Intelligent marknadsföring för modern detaljhandel",
+    "label": "E-postadress",
+    "placeholder": "namn@dittföretag.com",
+    "notConfigured": "E-postinloggning är inte konfigurerad på den här servern än.",
+    "sendFailed": "Kunde inte skicka koden. Försök igen.",
+    "useMobile": "Använd mobilnummer istället",
+    "linkTitle": "Lägg till din e-post",
+    "linkSubtitle": "Ditt nummer är verifierat. Lägg till en e-post för kvitton och teaminbjudningar. Vi skickar en kod."
+  },
+  "verify": {
+    "title": "Ange din kod",
+    "sent": "Vi skickade en verifieringskod till {{destination}}",
+    "codeLabel": "Sexsiffrig verifieringskod",
+    "submit": "Verifiera kod",
+    "checkFailed": "Kunde inte kontrollera koden. Försök igen.",
+    "resendFailed": "Kunde inte skicka om koden.",
+    "resendIn": "Skicka om kod om {{time}}",
+    "resend": "Skicka om kod",
+    "changeEmail": "Ändra e-post",
+    "changeMobile": "Ändra mobilnummer"
+  },
+  "welcome": {
+    "getStarted": "Kom igång",
+    "footnote": "Ditt företag, din kreativa riktning.",
+    "photosLabel": "Exempel från {{brand}}-katalogen",
+    "title": "Marknadsföring som känns som ditt företag",
+    "body": "Skapa varumärkesanpassade studiofilmer, fotosessioner och produktinlägg från din katalog.",
+    "steps": {
+      "goal": {
+        "title": "Välj ditt mål",
+        "body": "Välj det första kreativa formatet du vill producera."
+      },
+      "business": {
+        "title": "Dela ditt företag",
+        "body": "Dela din webbplats eller lägg till dina företagsuppgifter."
+      },
+      "review": {
+        "title": "Granska färdigt innehåll",
+        "body": "Granska idéer skapade kring dina produkter."
+      }
+    }
+  },
+  "goal": {
+    "title": "Vad vill du skapa först?",
+    "subtitle": "Vi anpassar din initiala arbetsyta och mallar efter ditt huvudfokus.",
+    "note": "Alla verktyg och studioformat är tillgängliga senare.",
+    "options": {
+      "socialPlan": {
+        "title": "Sociala medieplan",
+        "description": "En månad av inlägg och bildtexter"
+      },
+      "marketingVideos": {
+        "title": "Marknadsföringsvideor",
+        "description": "Studiofilmer från din katalog"
+      },
+      "fashionPhotoshoot": {
+        "title": "Modefotosession",
+        "description": "Styla kläder på modeller"
+      },
+      "productPhotoshoot": {
+        "title": "Produktfotosession",
+        "description": "Produktfoton för din katalog"
+      }
+    }
+  },
+  "source": {
+    "title": "Var finns ditt företag online?",
+    "subtitle": "Espanda skannar din onlinebutik eller annons för att automatiskt generera varumärkesanpassade medier.",
+    "options": {
+      "website": {
+        "title": "Webbplats",
+        "description": "Shopify, WooCommerce, egen domän"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Lokal butik, boutique eller showroom"
+      },
+      "marketplace": {
+        "title": "Marknadsplats",
+        "description": "Amazon, Etsy, eBay eller Instagram-butik"
+      },
+      "wholesale": {
+        "title": "Grossist / B2B",
+        "description": "Faire, Ankorstore, privat katalog"
+      },
+      "none": {
+        "title": "Ingen online-närvaro",
+        "description": "Beskriv dina artiklar manuellt"
+      },
+      "other": {
+        "title": "Något annat",
+        "description": "Socialt konto, PDF-lookbook eller fil"
+      }
+    }
+  },
+  "website": {
+    "title": "Vad är din webbplats?",
+    "subtitle": "Vi hämtar automatiskt dina katalogfoton, färger och ton.",
+    "label": "Butikswebbplatsens URL",
+    "placeholder": "www.dinbutik.com",
+    "valid": "Giltig adress",
+    "willRead": "Vi kommer att läsa denna webbplats",
+    "facts": {
+      "catalog": {
+        "key": "Katalogprodukter",
+        "value": "Produktfoton"
+      },
+      "identity": {
+        "key": "Varumärkesidentitet",
+        "value": "Färger & typografi"
+      },
+      "tone": {
+        "key": "Ton & stil",
+        "value": "Röst från dina sidor"
+      }
+    },
+    "safeNote": "Katalogimport ändrar inget på din livebutik."
+  },
+  "manual": {
+    "title": "Lägg till företagsuppgifter",
+    "subtitle": "Dela en annonslänk eller beskriv din katalog manuellt.",
+    "modeLabel": "Hur man lägger till ditt företag",
+    "modeListing": "Annons-URL",
+    "modeDescribe": "Beskriv företag",
+    "listingLabel": "Annonslänk *",
+    "listingPlaceholder": "Etsy, Amazon, Google Maps eller butiks länk",
+    "nameLabel": "Företagsnamn *",
+    "namePlaceholder": "t.ex. Atelier Bois & Chiffons",
+    "sellsLabel": "Vad säljer du? *",
+    "sellsPlaceholder": "t.ex. Handgjorda träbord, TV-stativ och modern heminredning...",
+    "locationLabel": "Plats (valfritt)",
+    "locationPlaceholder": "Stad, land eller showroom-adress",
+    "websiteLabel": "Webbplats (valfritt)"
+  },
+  "learning": {
+    "working": "Arbetar",
+    "tryAgain": "Försök igen",
+    "inProgressButton": "Inlärning pågår...",
+    "saved": "Vi sparar dina framsteg.",
+    "title": "Lär känna ditt företag",
+    "bodyWebsite": "Analyserar din webbplats för att extrahera varumärkesidentitet, kataloger och visuell ton.",
+    "bodyManual": "Omvandlar din beskrivning till varumärkesidentitet, kataloger och visuell ton.",
+    "fallbackName": "Ditt företag",
+    "sourceWebsite": "Primär webbplatskälla",
+    "sourceManual": "Företagsdetaljer",
+    "foundWebsite": "Webbplats hittad",
+    "foundManual": "Detaljer tillagda",
+    "stages": {
+      "open": "Öppnar webbplats",
+      "identity": "Läser varumärkesidentitet & ton",
+      "photos": "Samlar produktfoton"
+    },
+    "status": {
+      "done": "Komplett",
+      "running": "Pågår",
+      "queued": "I kö"
+    },
+    "errors": {
+      "stopped": "Läsning av din webbplats stoppad.",
+      "noWorkspace": "Ditt konto har ingen arbetsyta än.",
+      "startFailed": "Kunde inte börja läsa din webbplats.",
+      "restartFailed": "Kunde inte starta om. Försök igen."
+    }
+  },
+  "review": {
+    "title": "Granska företagsdetaljer",
+    "subtitle": "Vi hittade dessa detaljer på din webbplats. Du kan redigera dem när som helst.",
+    "edit": "Redigera",
+    "tagline": "Tagline",
+    "editTagline": "Redigera tagline",
+    "categoryLocation": "Kategori & plats",
+    "audience": "Målgrupp",
+    "editAudience": "Redigera målgrupp",
+    "products_one": "Upptäckta produkter ({{count}})",
+    "products_other": "Upptäckta produkter ({{count}})",
+    "found": "Hittad",
+    "strengths": "Varumärkesstyrkor",
+    "tags": {
+      "homeLiving": "Hem & Livsstil",
+      "france": "Frankrike",
+      "productCatalog": "Produktkatalog",
+      "showroomEshop": "Fysisk showroom & e-shop"
+    }
+  },
+  "brand": {
+    "title": "Varumärke & kreativ stil",
+    "subtitle": "Justera hur Espanda skapar dina fotosessioner och inlägg på sociala medier.",
+    "identity": "{{name}} identitet",
+    "paletteMeta": "Webbplatsens palett · Redigerbar",
+    "swatches": "Importerade webbplatsens färgprover",
+    "tone": "Kreativ ton",
+    "selected_one": "{{count}} vald",
+    "selected_other": "{{count}} valda",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Lyxig",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Naturlig",
+      "minimalist": "Minimalistisk"
+    },
+    "contentLanguage": "Innehållsspråk",
+    "contentLanguageA11y": "Innehållsspråk, {{language}}. Ändra",
+    "languages": {
+      "fr": "Franska (FR)",
+      "en": "Engelska (US)"
+    },
+    "audienceProfile": "Målgruppsprofil",
+    "audienceHome": "Hem & möbler",
+    "featured": "Utvalda katalogprodukter",
+    "readyForBatch_one": "{{count}} redo för batch",
+    "readyForBatch_other": "{{count}} redo för batch",
+    "sampleProducts": {
+      "table": "Bunting bord",
+      "tableDetail": "Acacia 240cm",
+      "tv": "TV-enhet",
+      "tvDetail": "Acacia 2 dörrar"
+    },
+    "channelsNote": "Instagram och Facebook kan kopplas i nästa steg. (Inga kanaler kopplade än)"
+  },
+  "preparing": {
+    "ready": "Studio redo",
+    "preparing": "Förbereder studio",
+    "loadingButton": "Förbereder dina idéer…",
+    "catalogSafe": "Din katalog förblir orörd i din butik.",
+    "title": "Förbereder dina första idéer",
+    "body": "Skapar skräddarsydda sociala reels och scenarier från din {{name}} kollektion.",
+    "photosTitle": "Samlar foton",
+    "photosDetail": "{{product}} matsalsset",
+    "storyboardTitle": "Bygger storyboard",
+    "storyboardDetail_one": "Komponerar {{count}} videoscen",
+    "storyboardDetail_other": "Komponerar {{count}} videoscener",
+    "nextTitle": "Nästa: Granska dina idéer",
+    "nextDetail": "Välj hooks och ljudinställningar"
+  },
+  "connect": {
+    "readyToConnect": "• Redo att ansluta",
+    "title": "Publicera när du är redo",
+    "subtitle": "Anslut dina sociala konton så att Espanda kan publicera eller utkast redo-att-posta reels och produktfokus direkt.",
+    "toolsTitle": "Publiceringsverktyg",
+    "featureReels": "Publicera till Instagram Feed & Reels",
+    "featureCaptions": "Använd dina bildtexter och hashtags",
+    "featureReview": "Du granskar alltid innan något går live",
+    "assurance": "Inget innehåll publiceras utan din bekräftelse",
+    "connectInstagram": "Anslut Instagram",
+    "connectFacebook": "Anslut Facebook",
+    "skip": "Hoppa över för nu",
+    "laterTitle": "Anslut senare?",
+    "laterBody": "Du kan fortfarande skapa, redigera och ladda ner högupplösta reels och fotosessioner till din kamerarulle. Du kan länka ditt Instagram när som helst i Inställningar.",
+    "laterDownload": "Ladda ner dina skapelser",
+    "laterSettings": "Anslut kanaler i Inställningar",
+    "continueWithout": "Fortsätt utan att ansluta"
+  }
+}

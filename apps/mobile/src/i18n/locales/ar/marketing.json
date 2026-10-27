@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "مساحة العمل {{name}}",
+    "customers": "العملاء",
+    "customerTabs": {
+      "inbox": "البريد الوارد",
+      "reviews": "التقييمات",
+      "people": "الأشخاص"
+    },
+    "status": {
+      "notConnected": "غير متصل"
+    },
+    "draft": "مسودة",
+    "googleGrowth": "نمو Google",
+    "websiteStudio": "استوديو الموقع",
+    "editContent": "تعديل المحتوى",
+    "diningTableImage": "طاولة طعام Acacia Bunting",
+    "pages": {
+      "home": "الرئيسية",
+      "product": "المنتج",
+      "contact": "الاتصال"
+    }
+  },
+  "tools": {
+    "switchBusiness": "تبديل العمل، {{name}}",
+    "title": "التسويق",
+    "subtitle": "إدارة ظهور متجرك، المحادثات، وملف العلامة التجارية",
+    "cue": {
+      "imageLabel": "وحدة تلفاز Acacia في غرفة معيشة",
+      "dismiss": "تجاهل تلميح اليوم",
+      "eyebrow": "تلميح اليوم",
+      "title": "أضف صور كتالوج جديدة",
+      "body": "إضافة صور جديدة تبقي مسودات الموقع والبكرات التلقائية محدثة."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "العملاء",
+        "body": "البريد الوارد، التقييمات والأشخاص",
+        "cta": "افتح البريد الوارد"
+      },
+      "google": {
+        "title": "نمو Google",
+        "body": "الملف الشخصي، المنشورات والتقييمات",
+        "cta": "إعداد"
+      },
+      "website": {
+        "title": "استوديو الموقع",
+        "body": "مسودة، تعديل ونشر موقعك",
+        "cta": "افتح المسودة"
+      },
+      "business": {
+        "title": "الأعمال",
+        "body": "العلامة التجارية، الأصول والاتصالات",
+        "cta": "إدارة"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "لا توجد رسائل بعد",
+    "emptyBody": "قم بتوصيل قنوات العملاء لتلقي أسئلة المنتجات المباشرة ومراجعة المسودات المقترحة من الذكاء الاصطناعي بأمان قبل الإرسال.",
+    "connectChannel": "توصيل قناتك",
+    "emptyFootnote": "تصبح الرسائل الجديدة متاحة تلقائيًا بمجرد الاتصال.",
+    "channelsTitle": "قنوات المراسلة المدعومة",
+    "channelLabel": "{{name}}، {{status}}",
+    "lockNote": "قم بتوصيل حساب لتلقي الرسائل."
+  },
+  "reply": {
+    "title": "مساعد الرد",
+    "referencedProduct": "المنتج المشار إليه",
+    "suggestionTitle": "اقتراح رد Espanda",
+    "draftLabel": "مسودة الرد",
+    "tone": "النغمة: {{tone}}",
+    "tones": {
+      "polishedArtisan": "مصقول وحرفي"
+    },
+    "done": "تم",
+    "editReply": "تعديل الرد",
+    "approvalTitle": "يتطلب الموافقة اليدوية",
+    "approvalBody": "لا يتم إرسال أي رسالة دون نقرك الصريح.",
+    "exampleTitle": "وضع محادثة مثال",
+    "exampleBody": "توصيل حسابك على Instagram أو Facebook يستبدل هذا المثال بأسئلة العملاء الحقيقية."
+  },
+  "reviews": {
+    "emptyTitle": "لا توجد تقييمات بعد",
+    "emptyBody": "قم بتوصيل ملفك الشخصي على Google Business لجمع والرد تلقائيًا على تعليقات العملاء الموثقة.",
+    "connectGoogle": "توصيل Google Business",
+    "automatedTitle": "طلبات التقييم التلقائية",
+    "connectFirst": "توصيل أولاً",
+    "automatedBody": "يتطلب اتصال Google Business لإرسال دعوات تقييم مخصصة."
+  },
+  "people": {
+    "emptyTitle": "لا توجد سجلات عملاء بعد",
+    "emptyBody": "الأشخاص الذين تتواصل معهم عبر قنوات العملاء المتصلة سيظهرون هنا.",
+    "connectChannel": "توصيل قناة",
+    "directoryTitle": "دليل عملائك",
+    "directoryBody": "افتح سجل شخص لرؤية محادثاتهم وتفاصيل الاتصال في مكان واحد.",
+    "connectedChannels": "قنوات العملاء المتصلة"
+  },
+  "google": {
+    "presenceTitle": "وجودك على Google",
+    "presenceBody": "حافظ على ظهور معرضك الفرنسي المحلي على خرائط Google والبحث تلقائيًا.",
+    "profileTitle": "ملف Google Business",
+    "profileBody": "مزامنة عنوان متجرك الرسمي، ساعات العمل، وصور الكتالوج الجديدة مباشرة إلى خرائط Google.",
+    "connectProfile": "توصيل ملف Google Business",
+    "capabilitiesTitle": "قدرات المزامنة التلقائية",
+    "capabilities": {
+      "catalog": {
+        "title": "تحديثات الملف والكتالوج",
+        "body": "مزامنة الصور الجديدة والأثاث إلى تحديثات منشورات Google المحلية."
+      },
+      "reviews": {
+        "title": "طلبات التقييم",
+        "body": "توليد دعوات تقييم فرنسية مهذبة بعد زيارات المعرض أو المشتريات."
+      },
+      "replies": {
+        "title": "مسودات الرد المنسقة",
+        "body": "Espanda تصيغ مسودات ردود مدروسة لجميع تقييمات العملاء الواردة لمراجعتك."
+      }
+    },
+    "controlTitle": "أنت تبقى في التحكم",
+    "controlBody": "لا يتم نشر أو الرد على أي شيء على Google حتى توافق عليه."
+  },
+  "googleWorkspace": {
+    "newPost": "منشور Google جديد",
+    "subtitle": "معاينة كيفية مزامنة إسقاطات المنتجات وتقييمات المعرض مباشرة إلى Google.",
+    "tabs": {
+      "profile": "الملف الشخصي",
+      "posts": "المنشورات",
+      "reviews": "التقييمات"
+    },
+    "draftPostTitle": "مسودة منشور Google",
+    "actionButton": "زر الإجراء: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "تعرف على المزيد"
+    },
+    "reviewPost": "مراجعة المنشور",
+    "reviewsTitle": "تقييمات المعرض",
+    "reviewsBody": "يتم جمع التقييمات ومسودات الردود مع محادثات العملاء الخاصة بك.",
+    "openReviews": "افتح التقييمات",
+    "checklistTitle": "قائمة إعداد الملف الشخصي",
+    "checklist": {
+      "profile": {
+        "label": "ملف Google متصل",
+        "value": "تم العثور"
+      },
+      "reviewLink": {
+        "label": "رابط طلب التقييم المباشر",
+        "value": "إعداد"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "معاينة المسودة",
+    "catalogConnected": "كتالوج المتجر المصدر متصل",
+    "connectDomain": "توصيل النطاق",
+    "previewLabel": "معاينة مسودة الموقع",
+    "browserTitle": "مسودة الموقع",
+    "fullPreview": "معاينة كاملة",
+    "reviewPublish": "مراجعة ونشر المسودة",
+    "footnote": "راجع المحتوى والنطاق قبل النشر."
+  },
+  "websiteEdit": {
+    "saveChanges": "حفظ تغييرات المسودة",
+    "reviewPublish": "مراجعة ونشر",
+    "preview": "معاينة",
+    "title": "تعديل محتوى الموقع",
+    "heroTitle": "لافتة قسم البطل",
+    "replaceImage": "استبدال الصورة",
+    "heroImageLabel": "صورة لافتة البطل",
+    "headline": "العنوان الرئيسي (بالفرنسية)",
+    "description": "الوصف",
+    "sectionsTitle": "أقسام الصفحة",
+    "sectionCount_one": "{{count}} قسم",
+    "sectionCount_other": "{{count}} أقسام",
+    "sections": {
+      "heroBanner": "لافتة البطل",
+      "featuredCollection": "مجموعة مميزة",
+      "showroomContact": "المعرض والاتصال"
+    }
+  },
+  "websitePublish": {
+    "footnote": "تحقق من النطاق وراجع المحتوى للنشر.",
+    "publish": "انشر الموقع",
+    "keepDraft": "احتفظ كمسودة",
+    "title": "راجع موقعك",
+    "subtitle": "تحقق من المحتوى والوجهة قبل النشر.",
+    "heroImageLabel": "صورة البطل للموقع",
+    "destinationTitle": "وجهة النشر",
+    "destinationBody": "قم بتوصيل وتحقق من النطاق لنشر هذه المسودة.",
+    "setUpDomain": "إعداد نطاق"
+  }
+}

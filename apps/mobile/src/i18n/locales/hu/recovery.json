@@ -1,0 +1,74 @@
+{
+  "credits_one": "{{n}} kredit",
+  "credits_other": "{{n}} kredit",
+  "tableAlt": "{{product}} étkezőasztal",
+  "sheet": {
+    "dismiss": "Bezárás"
+  },
+  "videoFailed": {
+    "title": "A filmed nem készült el",
+    "body": "A renderelés megszakadt a jelenet összeállítása közben. A lefoglalt kreditek felszabadultak.",
+    "failed": "Sikertelen",
+    "facts_one": "{{seconds}}s · 9:16 Függőleges · {{count}} jelenet",
+    "facts_other": "{{seconds}}s · 9:16 Függőleges · {{count}} jelenetek",
+    "released_one": "{{n}} felszabadított kredit",
+    "released_other": "{{n}} felszabadított kredit",
+    "impact": "Kreditegyenleg hatása",
+    "used_one": "{{n}} felhasznált kredit",
+    "used_other": "{{n}} felhasznált kredit",
+    "viewDetails": "Részletek megtekintése",
+    "details": {
+      "failedAt": "Sikertelen itt:",
+      "reserved": "Lefoglalt",
+      "released": "Felszabadított",
+      "stages": {
+        "sceneComposition": "Jelenet összeállítása"
+      }
+    },
+    "tryAgain_one": "Próbáld újra ({{n}} kredit)",
+    "tryAgain_other": "Próbáld újra ({{n}} kredit)",
+    "editStoryboard": "Forgatókönyv szerkesztése"
+  },
+  "lowCredits": {
+    "backdropTitle": "Forgatókönyv",
+    "backdropMeta": "{{seconds}}s időtartam · 9:16 függőleges",
+    "sheetLabel": "Nincs elég kredit",
+    "title_one": "Szükséged van {{n}} kreditre",
+    "title_other": "Szükséged van {{n}} kreditre",
+    "body_one": "Jelenleg <b>{{n}} kredit áll rendelkezésre</b> a Professional munkaterületen. A forgatókönyv vázlata biztonságosan elmentve.",
+    "body_other": "Jelenleg <b>{{n}} kredit áll rendelkezésre</b> a Professional munkaterületen. A forgatókönyv vázlata biztonságosan elmentve.",
+    "planName": "Professional csomag",
+    "active": "Aktív",
+    "renews": "Havi megújulás",
+    "remaining": "{{available}} / {{monthly}} maradt",
+    "remainingA11y": "Havi kreditek maradtak",
+    "manage": "Kreditek kezelése",
+    "keepEditing": "Forgatókönyv szerkesztésének folytatása"
+  },
+  "reconnect": {
+    "backdropTitle": "Ütemezés",
+    "backdropMeta": "Ütemezve: {{date}}",
+    "title": "Újra csatlakozás {{network}}",
+    "body": "A fiók jogosultsága lejárt. Csatlakoztasd újra a fiókodat az ütemezés folytatásához.",
+    "draftSaved": "Meglévő vázlat biztonságosan elmentve",
+    "noPosting": "Nem indul el a közzététel, amíg nem erősíted meg kifejezetten.",
+    "saveForLater": "Vázlat mentése későbbre"
+  },
+  "importFailed": {
+    "title": "Nem sikerült olvasni ezt a weboldalt",
+    "body": "Nem tudtuk elérni vagy kinyerni a katalógus fotókat erről a címről. Ellenőrizd az URL-t, vagy folytasd az üzleted leírásával.",
+    "urlLabel": "Üzlet weboldalának URL-je",
+    "changeUrlA11y": "Weboldal URL módosítása",
+    "changeUrl": "URL módosítása",
+    "reasons": {
+      "timeout": "A weboldal túl sokáig válaszolt. Nem történt változás."
+    },
+    "quickOptions": "Gyors opciók a folytatáshoz:",
+    "options": {
+      "retry": "Próbáld újra a beolvasást, ha az üzlet szervere rövid ideig foglalt volt.",
+      "manual": "Add meg az üzlet nevét és termékeit kézzel, várakozás nélkül."
+    },
+    "tryAgain": "Próbáld újra",
+    "addManually": "Üzlet hozzáadása kézzel"
+  }
+}

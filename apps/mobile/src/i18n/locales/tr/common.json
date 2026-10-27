@@ -1,0 +1,37 @@
+{
+  "back": "Geri",
+  "close": "Kapat",
+  "continue": "Devam et",
+  "step": "Adım {{step}} / {{total}}",
+  "auth": {
+    "orContinueWith": "veya devam et",
+    "google": "Google",
+    "apple": "Apple",
+    "legal": "Devam ederek, <terms>Hizmet Şartları</terms> ve <privacy>Gizlilik Politikası</privacy>'nı kabul etmiş olursunuz.",
+    "allScreensDev": "Tüm ekranlar (geliştirici)",
+    "googleFailed": "Google ile giriş yapılamadı. Tekrar deneyin veya e-posta kullanın.",
+    "googleNeedsBuild": "Google ile giriş, yüklü Espanda uygulamasında çalışır, Expo Go'da değil. Şimdilik e-posta kullanın."
+  },
+  "language": {
+    "title": "Uygulama dili",
+    "search": "Dilleri ara",
+    "explainer": "Uygulamanın düğmelerini ve menülerini değiştirir. Gönderileriniz, her marka için ayarlanan içerik dilini korur.",
+    "noMatch": "“{{query}}” ile eşleşen dil yok."
+  },
+  "module": {
+    "openMenu": "Menüyü aç",
+    "settings": "Ayarlar",
+    "credits_one": "{{count}} kredi mevcut",
+    "credits_other": "{{count}} kredi mevcut",
+    "workspace": "Çalışma alanı {{name}}"
+  },
+  "nav": {
+    "reels": "Reels",
+    "posts": "Gönderiler",
+    "photoshoot": "Fotoğraf Çekimi",
+    "marketing": "Pazarlama",
+    "create": "Oluştur",
+    "ideas": "Fikirler",
+    "results": "Sonuçlar"
+  }
+}

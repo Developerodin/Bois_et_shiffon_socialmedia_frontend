@@ -1,10 +1,12 @@
-import { auth } from "@/auth";
 import { problemResponse } from "@/server/api/http-error";
+import { requestUserId } from "@/server/auth/request-user";
+import { prisma } from "@/server/db/prisma";
 import { listUserWorkspaces } from "@/server/services/brands";
 
-export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
+export async function GET(request: Request) {
+  const userId = await requestUserId(request);
+  const user = userId ? await prisma.user.findUnique({ where: { id: userId }, select: { id: true, email: true, name: true, image: true } }) : null;
+  if (!user) {
     return problemResponse({
       type: "https://api.brandpilot/errors/unauthorized",
       title: "Unauthorized",
@@ -13,15 +15,7 @@ export async function GET() {
     });
   }
 
-  const workspaces = await listUserWorkspaces(session.user.id);
+  const workspaces = await listUserWorkspaces(user.id);
 
-  return Response.json({
-    user: {
-      id: session.user.id,
-      email: session.user.email,
-      name: session.user.name,
-      image: session.user.image,
-    },
-    workspaces,
-  });
+  return Response.json({ user, workspaces });
 }

@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Arbetsyta {{name}}",
+    "customers": "Kunder",
+    "customerTabs": {
+      "inbox": "Inkorg",
+      "reviews": "Recensioner",
+      "people": "Personer"
+    },
+    "status": {
+      "notConnected": "Inte ansluten"
+    },
+    "draft": "Utkast",
+    "googleGrowth": "Google-tillväxt",
+    "websiteStudio": "Webbplatsstudio",
+    "editContent": "Redigera innehåll",
+    "diningTableImage": "Acacia Bunting matbord",
+    "pages": {
+      "home": "Hem",
+      "product": "Produkt",
+      "contact": "Kontakt"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Byt företag, {{name}}",
+    "title": "Marknadsföring",
+    "subtitle": "Hantera din butiks synlighet, konversationer och varumärkesprofil",
+    "cue": {
+      "imageLabel": "Acacia TV-enhet iscensatt i ett vardagsrum",
+      "dismiss": "Avfärda dagens tips",
+      "eyebrow": "Dagens tips",
+      "title": "Lägg till nya katalogbilder",
+      "body": "Genom att lägga till nya bilder hålls dina automatiska rullar och webbplatsutkast uppdaterade."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Kunder",
+        "body": "Inkorg, recensioner och personer",
+        "cta": "Öppna inkorg"
+      },
+      "google": {
+        "title": "Google-tillväxt",
+        "body": "Profil, inlägg och recensioner",
+        "cta": "Konfigurera"
+      },
+      "website": {
+        "title": "Webbplatsstudio",
+        "body": "Utkast, redigera och publicera din webbplats",
+        "cta": "Öppna utkast"
+      },
+      "business": {
+        "title": "Företag",
+        "body": "Varumärke, tillgångar och anslutningar",
+        "cta": "Hantera"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Inga meddelanden än",
+    "emptyBody": "Anslut dina kundkanaler för att ta emot direkta produktfrågor och granska AI-förslag på utkast säkert innan du skickar.",
+    "connectChannel": "Anslut din kanal",
+    "emptyFootnote": "Nya meddelanden blir tillgängliga automatiskt när de är anslutna.",
+    "channelsTitle": "Stödda meddelandekanaler",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Anslut ett konto för att ta emot meddelanden."
+  },
+  "reply": {
+    "title": "Svarshjälp",
+    "referencedProduct": "Refererad produkt",
+    "suggestionTitle": "Espanda svarsförslag",
+    "draftLabel": "Svarsutkast",
+    "tone": "Ton: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Polerad & hantverk"
+    },
+    "done": "Klar",
+    "editReply": "Redigera svar",
+    "approvalTitle": "Manuell godkännande krävs",
+    "approvalBody": "Inget meddelande skickas utan ditt uttryckliga klick.",
+    "exampleTitle": "Exempel på konversationsläge",
+    "exampleBody": "Genom att ansluta ditt Instagram- eller Facebook-konto ersätts detta exempel med riktiga kundfrågor."
+  },
+  "reviews": {
+    "emptyTitle": "Inga recensioner än",
+    "emptyBody": "Anslut din Google Business-profil för att automatiskt samla in och svara på verifierad kundfeedback.",
+    "connectGoogle": "Anslut Google Business",
+    "automatedTitle": "Automatiska recensionsförfrågningar",
+    "connectFirst": "Anslut först",
+    "automatedBody": "Kräver Google Business-anslutning för att skicka personliga recensionsinbjudningar."
+  },
+  "people": {
+    "emptyTitle": "Inga kundregister än",
+    "emptyBody": "Personer du hör från genom anslutna kundkanaler kommer att visas här.",
+    "connectChannel": "Anslut en kanal",
+    "directoryTitle": "Ditt kundregister",
+    "directoryBody": "Öppna en persons register för att se deras konversationer och kontaktuppgifter på ett ställe.",
+    "connectedChannels": "Anslutna kundkanaler"
+  },
+  "google": {
+    "presenceTitle": "Din Google-närvaro",
+    "presenceBody": "Håll ditt lokala franska showroom synligt på Google Maps och Sök automatiskt.",
+    "profileTitle": "Google Business-profil",
+    "profileBody": "Synkronisera din officiella butiksadress, öppettider och nya katalogbilder direkt till Google Maps.",
+    "connectProfile": "Anslut Google Business-profil",
+    "capabilitiesTitle": "Automatiska synkroniseringsmöjligheter",
+    "capabilities": {
+      "catalog": {
+        "title": "Profil- och kataloguppdateringar",
+        "body": "Synkronisera nyiscensatta bilder och möbeldroppar till dina lokala Google-inläggsuppdateringar."
+      },
+      "reviews": {
+        "title": "Recensionsförfrågningar",
+        "body": "Generera artiga franska recensionsinbjudningar efter showroom-besök eller köp."
+      },
+      "replies": {
+        "title": "Kuraterade svarsutkast",
+        "body": "Espanda skapar genomtänkta utkast till svar på alla inkommande kundrecensioner för din granskning."
+      }
+    },
+    "controlTitle": "Du har kontrollen",
+    "controlBody": "Inget publiceras eller besvaras på Google förrän du godkänner det."
+  },
+  "googleWorkspace": {
+    "newPost": "Nytt Google-inlägg",
+    "subtitle": "Förhandsgranska hur produktlanseringar och showroom-recensioner synkroniseras direkt till Google.",
+    "tabs": {
+      "profile": "Profil",
+      "posts": "Inlägg",
+      "reviews": "Recensioner"
+    },
+    "draftPostTitle": "Utkast till Google-inlägg",
+    "actionButton": "Åtgärdsknapp: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Läs mer"
+    },
+    "reviewPost": "Granska inlägg",
+    "reviewsTitle": "Showroom-recensioner",
+    "reviewsBody": "Recensioner och svarsutkast samlas med dina kundkonversationer.",
+    "openReviews": "Öppna recensioner",
+    "checklistTitle": "Checklista för profilsättning",
+    "checklist": {
+      "profile": {
+        "label": "Google-profil ansluten",
+        "value": "Hittad"
+      },
+      "reviewLink": {
+        "label": "Direktlänk för recensionsförfrågan",
+        "value": "Konfigurerad"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Utkastförhandsvisning",
+    "catalogConnected": "Källbutikskatalog ansluten",
+    "connectDomain": "Anslut domän",
+    "previewLabel": "Förhandsvisning av webbplatsutkast",
+    "browserTitle": "Webbplatsutkast",
+    "fullPreview": "Full förhandsvisning",
+    "reviewPublish": "Granska & publicera utkast",
+    "footnote": "Granska ditt innehåll och din domän innan publicering."
+  },
+  "websiteEdit": {
+    "saveChanges": "Spara utkaständringar",
+    "reviewPublish": "Granska & publicera",
+    "preview": "Förhandsvisning",
+    "title": "Redigera webbplatsinnehåll",
+    "heroTitle": "Hjältedelsbanner",
+    "replaceImage": "Byt bild",
+    "heroImageLabel": "Hjältebannerbild",
+    "headline": "Rubrik (Franska)",
+    "description": "Beskrivning",
+    "sectionsTitle": "Sidsektioner",
+    "sectionCount_one": "{{count}} sektion",
+    "sectionCount_other": "{{count}} sektioner",
+    "sections": {
+      "heroBanner": "Hjältebanner",
+      "featuredCollection": "Utvald kollektion",
+      "showroomContact": "Showroom & kontakt"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Verifiera en domän och granska innehållet för att publicera.",
+    "publish": "Publicera webbplats",
+    "keepDraft": "Behåll som utkast",
+    "title": "Granska din webbplats",
+    "subtitle": "Kontrollera ditt innehåll och mål innan du går live.",
+    "heroImageLabel": "Webbplatsens hero-bild",
+    "destinationTitle": "Publiceringsmål",
+    "destinationBody": "Anslut och verifiera en domän för att publicera detta utkast.",
+    "setUpDomain": "Ställ in en domän"
+  }
+}

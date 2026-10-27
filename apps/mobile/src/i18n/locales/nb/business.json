@@ -1,0 +1,215 @@
+{
+  "kit": {
+    "workspaceLabel": "Arbeidsområde {{name}}",
+    "logoLabel": "{{name}} logo",
+    "settingsTitle": "Innstillinger",
+    "edit": "Rediger",
+    "manage": "Administrer",
+    "tabs": {
+      "myBusiness": "Min bedrift",
+      "billing": "Fakturering",
+      "postsPlanner": "Innholdsplanlegger"
+    }
+  },
+  "myBusiness": {
+    "attributesTitle": "Bedriftsattributter",
+    "attributes": {
+      "location": "Sted",
+      "audience": "Publikum",
+      "category": "Kategori",
+      "subcategory": "Underkategori",
+      "storeType": "Butikktype",
+      "website": "Nettside"
+    },
+    "brandPreferences": "Merkevarepreferanser",
+    "brandPreferencesHint": "Farger, tone, språk",
+    "photoAssets": "Bildeaktiva",
+    "photoAssetsHint": "Bunting bord og TV-enhet bilder",
+    "connections": "Tilkoblinger",
+    "connectionsHint": "Sosiale kanaler & Google-profil"
+  },
+  "brand": {
+    "title": "Merkevareinnstillinger",
+    "save": "Lagre endringer",
+    "paletteTitle": "Merkevarefargepalett",
+    "editHex": "Rediger hex",
+    "watermarkTitle": "Outro vannmerkelogo",
+    "watermarkBody": "Brukes på slutten av videoreels og fotokanter",
+    "change": "Endre",
+    "toneTitle": "Kreativ tone",
+    "tones": {
+      "modern": "Moderne",
+      "luxurious": "Luksuriøs",
+      "elegant": "Elegant",
+      "premium": "Premium",
+      "natural": "Naturlig",
+      "minimalist": "Minimalistisk"
+    },
+    "cuesTitle": "Merkevaresignaturer",
+    "addCue": "Legg til signatur"
+  },
+  "photos": {
+    "title": "Bildeaktiva",
+    "refresh": "Oppdater",
+    "sourceTitle": "Kildenettsted",
+    "sourceBody": "Delte bilder brukt til å lage reels, innlegg og fotoshoot-oppsett. Ingen bilder publiseres uten din eksplisitte godkjenning.",
+    "sources": {
+      "website": "Nettside ({{n}})",
+      "uploads": "Opplastinger ({{n}})"
+    },
+    "addPhotos": "Legg til bilder",
+    "photosTitle": "Bilder",
+    "photoCount_one": "{{n}} bilde",
+    "photoCount_other": "{{n}} bilder",
+    "emptyTitle": "Ingen opplastinger ennå",
+    "emptyBody": "Studio bilder du laster opp vises her.",
+    "upload": "Last opp tilpassede studiobilder"
+  },
+  "connections": {
+    "title": "Tilkoblinger",
+    "sourceTitle": "Kildenettsted",
+    "linked": "Koblet",
+    "sourceBody": "Produktbilder og bedriftsdetaljer",
+    "channelsTitle": "Publiseringskanaler",
+    "accounts": "Kontoer",
+    "connected": "Tilkoblet",
+    "notConnected": "Ikke tilkoblet",
+    "connect": "Koble til",
+    "disconnect": "Koble fra",
+    "channels": {
+      "instagram": "Instagram Direct & Reels",
+      "facebook": "Facebook-side",
+      "whatsapp": "WhatsApp Business",
+      "google": "Google Business-profil",
+      "shopify": "Shopify Direct Sync"
+    }
+  },
+  "automations": {
+    "title": "Automatiseringer",
+    "heading": "Dine publiseringspreferanser",
+    "intro": "Kontroller hvordan Espanda forhåndsutfyller planlagte innlegg og utarbeider innhold for dine katalogvarer.",
+    "reviewTitle": "Gjennomgå før publisering",
+    "reviewBody": "Gjennomgå innhold før det publiseres.",
+    "required": "Påkrevd",
+    "reviewLabel": "Gjennomgå før publisering. Gjennomgå innhold før det publiseres. Påkrevd.",
+    "queueTitle": "Køhandlinger",
+    "manageConnections": "Administrer tilkoblinger",
+    "items": {
+      "monthly": {
+        "title": "Generer månedlige planer",
+        "body": "Forbered din månedlige kalender med utkast til innlegg.",
+        "active": "Aktiv · utkast lagret i kalender"
+      },
+      "autopublish": {
+        "title": "Automatisk publisering av godkjente innlegg",
+        "body": "Automatisk publisering av planlagte reels når du trykker \"Godkjenn\".",
+        "requires": "Krever Instagram-tilkobling",
+        "active": "Aktiv · publiserer etter godkjenning"
+      },
+      "replies": {
+        "title": "Utkast til showroom-forespørsler",
+        "body": "Forhåndsutfyll raffinerte franske håndverkersvar i innbokskøen din.",
+        "requires": "Krever meldingskanal",
+        "active": "Aktiv · utkast lagt til i innboksen din"
+      }
+    },
+    "adsTitle": "Betalte sosiale annonser",
+    "comingSoon": "Kommer snart",
+    "adsBody": "Automatisert Meta-annonsekreativ testing & budsjettstyring."
+  },
+  "billing": {
+    "creditsAvailable_one": "{{n}} kreditt tilgjengelig",
+    "creditsAvailable_other": "{{n}} kreditter tilgjengelig",
+    "planName": "{{tier}} plan",
+    "statusActive": "Aktiv",
+    "planBlurb": "Dine skapelses- og forretningsverktøy",
+    "cycleTitle": "Faktureringssyklus",
+    "renewsMonthly": "Fornyes månedlig",
+    "balanceTitle": "Kredittsaldo",
+    "monthlyAllowance": "{{amount}} månedlig kvote",
+    "balanceLabel_one": "{{balance}} av {{n}} kreditt tilgjengelig",
+    "balanceLabel_other": "{{balance}} av {{n}} kreditter tilgjengelig",
+    "balanceOf_one": " / {{n}} kreditt tilgjengelig",
+    "balanceOf_other": " / {{n}} kreditter tilgjengelig",
+    "note_one": "{{n}} kreditt brukt · {{reserved}} reservert for {{item}}. Kvote fornyes månedlig.",
+    "note_other": "{{n}} kreditter brukt · {{reserved}} reservert for {{item}}. Kvote fornyes månedlig.",
+    "usageTitle": "Nylig kredittbruk",
+    "usageAside": "Arbeidsområdeaktivitet",
+    "today": "I dag",
+    "shortDate": "{{day}} {{month}}",
+    "usageMeta": "{{when}} · {{detail}}",
+    "usage": {
+      "reel": {
+        "title": "{{name}} reel",
+        "detail": "Reservert for generering"
+      },
+      "plan": {
+        "title": "Månedlig innholdsplan",
+        "detail_one": "{{n}} utkast til innlegg",
+        "detail_other": "{{n}} utkast til innlegg"
+      },
+      "renewal": {
+        "title": "Månedlig planfornyelse",
+        "detail": "Kredittsyklus tilbakestilt"
+      }
+    },
+    "spent_one": "-{{n}} kreditt",
+    "spent_other": "-{{n}} kreditter",
+    "added_one": "+{{n}} kreditt",
+    "added_other": "+{{n}} kreditter",
+    "included": "Inkludert",
+    "help": {
+      "missingCredits": "Manglende kreditter eller mislykket gjengivelse",
+      "restore": "Gjenopprett abonnementskjøp",
+      "history": "Fakturahistorikk og fakturaer"
+    }
+  },
+  "account": {
+    "title": "Kontoinnstillinger",
+    "workspaceTitle": "Arbeidsområde",
+    "workspaceName": "Navn på arbeidsområde",
+    "teamTitle": "Samarbeid i team",
+    "teamMembers": "Medlemmer i arbeidsområdet",
+    "preferencesTitle": "Preferanser",
+    "languageTitle": "Språk for appgrensesnitt",
+    "languageBody": "Spørsmål og eksport forblir på fransk",
+    "languageLabel": "Appspråk, {{language}}",
+    "languageHint": "Åpner listen over språk",
+    "pushTitle": "Push-varsler",
+    "pushBody": "Oppdateringer om opprettelse og publisering",
+    "supportTitle": "Støtte og juridisk",
+    "help": "Trenger du hjelp & kontakt støtte",
+    "terms": "Vilkår for bruk",
+    "privacy": "Personvernerklæring",
+    "restore": "Gjenopprett kjøp",
+    "signOut": "Logg ut av Espanda",
+    "signOutNote": "Ditt aktive abonnement og utkast til katalogressurser forblir trygt lagret."
+  },
+  "drawer": {
+    "closeMenu": "Lukk meny",
+    "switchLabel": "Arbeidsområde {{name}}. Bytt bedrift",
+    "balanceLabel_one": "Nåværende saldo {{credits}} kreditt igjen, {{plan}} plan",
+    "balanceLabel_other": "Nåværende saldo {{credits}} kreditter igjen, {{plan}} plan",
+    "balanceTitle": "Nåværende saldo",
+    "creditsLeft_one": "<amount>{{credits}}</amount><rest> kreditt igjen</rest>",
+    "creditsLeft_other": "<amount>{{credits}}</amount><rest> kreditter igjen</rest>",
+    "sections": {
+      "create": "Opprett",
+      "grow": "Vokse",
+      "manage": "Administrer"
+    },
+    "items": {
+      "chat": "Chat for å lage video",
+      "generations": "Mine generasjoner",
+      "photos": "Fotoressurser",
+      "inbox": "Kunder & Innboks",
+      "google": "Google Vekst",
+      "website": "Nettstudiostudio",
+      "connections": "Tilkoblinger",
+      "automations": "Automatiseringer",
+      "billing": "Planer & Fakturering",
+      "account": "Kontoinnstillinger"
+    },
+    "signOut": "Logg ut"
+  }
+}

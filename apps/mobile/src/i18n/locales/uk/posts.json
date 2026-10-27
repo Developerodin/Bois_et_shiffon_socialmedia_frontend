@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Заплановано",
+    "briefReady": "Бриф готовий",
+    "needsReview": "Потребує перевірки",
+    "draftReady": "Чернетка готова",
+    "approved": "Схвалено",
+    "scheduled": "Заплановано",
+    "published": "Опубліковано",
+    "draft": "Чернетка"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Сьогодні",
+    "tomorrow": "Завтра"
+  },
+  "chrome": {
+    "openMenu": "Відкрити меню",
+    "logo": "Espanda",
+    "credits_one": "Доступний {{count}} кредит",
+    "credits_other": "Доступно {{count}} кредитів",
+    "settings": "Налаштування",
+    "modulesLabel": "Модулі додатку",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Пости",
+      "photoshoot": "Фотосесія",
+      "marketing": "Маркетинг"
+    },
+    "navLabel": "Навігація по модулях",
+    "nav": {
+      "today": "Сьогодні",
+      "posts": "Пости",
+      "create": "Створити",
+      "stories": "Історії",
+      "settings": "Налаштування"
+    },
+    "back": "Назад",
+    "switchBusiness": "Змінити бізнес, {{name}}",
+    "business": "Бізнес: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Ваші пости в русі",
+    "subtitle": "Перегляньте створені акценти продуктів та заплановані пости",
+    "needsApproval": "Потребує схвалення",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Переглянути пост",
+    "agenda": "Майбутній порядок денний",
+    "thisWeek": "Цього тижня",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Переглянути календар"
+  },
+  "calendar": {
+    "title": "Календар постів",
+    "subtitle": "Плануйте та автоматизуйте свої випуски",
+    "viewLabel": "Перегляд календаря",
+    "views": {
+      "month": "Місяць",
+      "list": "Список"
+    },
+    "plan": "План: {{n}} постів / місяць",
+    "managePlan": "Керувати планом",
+    "postCount_one": "{{count}} пост",
+    "postCount_other": "{{count}} постів",
+    "empty": "Нічого не заплановано на цей день.",
+    "scheduled_one": "Заплановано {{count}}",
+    "scheduled_other": "Заплановано {{count}}",
+    "previousMonth": "Попередній місяць",
+    "nextMonth": "Наступний місяць",
+    "gridLabel": "Календар {{month}}",
+    "dayWithPosts_one": "{{day}} · {{count}} пост",
+    "dayWithPosts_other": "{{day}} · {{count}} постів"
+  },
+  "detail": {
+    "title": "Деталі поста",
+    "moreOptions": "Більше опцій",
+    "feedPhoto": "Фото для стрічки 4:5",
+    "fullscreen": "На весь екран",
+    "captionFrench": "Підпис (французька)",
+    "editText": "Редагувати текст",
+    "channels": "Канали публікації",
+    "instagramFeed": "Стрічка Instagram",
+    "instagramDetail": "Підключіть акаунт для публікації",
+    "facebookPage": "Сторінка Facebook",
+    "facebookDetail": "Авто-публікація на офіційну сторінку",
+    "notConnected": "Не підключено",
+    "channelNotConnected": "{{name}}, не підключено",
+    "editPost": "Редагувати пост",
+    "schedule": "Запланувати"
+  },
+  "edit": {
+    "title": "Редагувати пост",
+    "cancel": "Скасувати",
+    "save": "Зберегти зміни",
+    "previewLabel": "{{title}}, оригінальне співвідношення 4:5",
+    "ratio": "Оригінальне співвідношення · 4:5",
+    "sectionLabel": "Редагувати секцію",
+    "tabs": {
+      "image": "Зображення",
+      "caption": "Підпис",
+      "brand": "Бренд"
+    },
+    "description": "Опис поста",
+    "language": "Мова: французька (FR)",
+    "suggestedHashtags": "Рекомендовані хештеги",
+    "addHashtag": "Додати хештег",
+    "add": "+ Додати",
+    "regenerate": "Перегенерувати підпис за допомогою AI",
+    "imageHint": "Оригінальне співвідношення · 4:5. Перетягніть попередній перегляд, щоб змінити обрізку.",
+    "brandHint": "Логотип, кольори та стиль відповідають вашому брендовому набору {{brand}}."
+  },
+  "schedule": {
+    "title": "Запланувати",
+    "storyFormat": "Історія · зображення 9:16",
+    "feedFormat": "Пост у стрічці · зображення 4:5",
+    "destination": "Призначення",
+    "actionRequired": "Потрібна дія",
+    "notLinked": "Акаунт Instagram не підключено",
+    "notLinkedBody": "Підключіть свої соціальні акаунти, щоб розблокувати пряме заплановане публікування.",
+    "connect": "Підключити соціальний акаунт",
+    "locked": "Розклад заблоковано до підключення",
+    "timing": "Час та розклад",
+    "date": "Дата",
+    "dateLabel": "Дата, {{date}}",
+    "time": "Час",
+    "timeLabel": "Час, {{time}}",
+    "timezone": "Часовий пояс",
+    "schedulePost": "Запланувати пост",
+    "scheduleLocked": "Запланувати пост (Спочатку підключіть канал)",
+    "saveDraft": "Зберегти чернетку"
+  },
+  "brief": {
+    "title": "Створити пост",
+    "subtitle": "Виберіть продукт та креативний напрямок",
+    "format": "Формат контенту",
+    "formatLabel": "Формат поста",
+    "singlePhoto": "Одне фото",
+    "singlePhotoDetail": "Фокус стрічки 4:5",
+    "carousel": "Карусель",
+    "carouselDetail": "Кілька фото",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Основна мета",
+    "goals": {
+      "newArrival": "Новинка",
+      "productFeature": "Особливість продукту",
+      "specialOffer": "Спеціальна пропозиція"
+    },
+    "product": "Цільовий продукт каталогу",
+    "changeProduct": "Змінити продукт",
+    "change": "Змінити",
+    "direction": "Креативний напрямок (необов'язково)",
+    "directionLanguage": "Французька (FR)",
+    "directionPlaceholder": "наприклад, Зосередьтеся на ручній роботі та теплоті",
+    "cost": "Вартість створення:",
+    "costPending": "Оцінка очікується",
+    "draftPost": "Чернетка посту"
+  },
+  "stories": {
+    "title": "Історії",
+    "subtitle": "Вертикальні соціальні моменти 9:16",
+    "newStory": "Нова історія",
+    "statusLabel": "Статус історії",
+    "drafts_one": "Чернетки ({{count}})",
+    "drafts_other": "Чернетки ({{count}})",
+    "scheduled_one": "Заплановано ({{count}})",
+    "scheduled_other": "Заплановано ({{count}})",
+    "samplePreview": "Зразок попереднього перегляду",
+    "moreOptions": "Більше опцій для {{title}}",
+    "editStory": "Редагувати історію"
+  },
+  "editStory": {
+    "back": "Назад",
+    "undo": "Скасувати",
+    "tools": {
+      "text": "Текст",
+      "image": "Зображення",
+      "brand": "Бренд",
+      "cta": "Заклик до дії"
+    },
+    "toolLabel": "Інструмент {{tool}}",
+    "captionTitle": "Підпис історії / Наліпка з посиланням",
+    "languageCode": "FR",
+    "saveDraft": "Зберегти чернетку",
+    "scheduleStory": "Запланувати історію"
+  },
+  "planner": {
+    "title": "Планувальник постів",
+    "sectionsLabel": "Розділи налаштувань",
+    "sections": {
+      "business": "Мій бізнес",
+      "billing": "Оплата",
+      "planner": "Планувальник постів"
+    },
+    "cycle": "Цикл планування",
+    "cadence": "Частота публікацій",
+    "monthlyTarget": "Місячна ціль",
+    "feedPosts": "Пости у стрічці",
+    "stories": "Історії",
+    "perMonth": "{{n}} / місяць",
+    "feedNote": "~1 пост щодня",
+    "storiesNote": "Розподіліть протягом місяця",
+    "cadenceHint": "Рекомендовані цілі контенту. Відкоригуйте перед створенням календаря.",
+    "pillars": "Контентні стовпи",
+    "pillar": {
+      "catalog": "Продукти каталогу (Bunting focus)",
+      "craft": "Деталі матеріалу та ремесло (Acacia wood)",
+      "story": "Історія бренду та французька спадщина"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Ручний перегляд перед публікацією: </b>Згенеровані дропи розміщуються у вашому календарі як чернетки для остаточного підтвердження. Жоден контент не публікується без схвалення.",
+    "generate": "Створити календар"
+  }
+}

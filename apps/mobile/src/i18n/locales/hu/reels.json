@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}} mp",
+  "seconds_one": "{{count}} másodperc",
+  "seconds_other": "{{count}} másodperc",
+  "noPresenter": "Nincs előadó",
+  "aiActor": "AI Szereplő",
+  "assistant": "A videó asszisztensed",
+  "sourceWebsite": "Forrás weboldal",
+  "preview": "Előnézet",
+  "schedule": "Ütemezés",
+  "goBack": "Vissza",
+  "inProgress": "Folyamatban",
+  "timezone": "Időzóna",
+  "status": {
+    "draft": "Piszkozat",
+    "ready": "Kész"
+  },
+  "scene": {
+    "label": "Jelenet {{n}} · {{seconds}} mp",
+    "count_one": "{{count}} jelenet",
+    "count_other": "{{count}} jelenet"
+  },
+  "shot": {
+    "wide": "Széles felvétel",
+    "material": "Anyag részlet",
+    "closeCta": "Termék közel & CTA"
+  },
+  "create": {
+    "switchBusiness": "Váltás vállalkozásra, {{name}}",
+    "title": "Készítsd el a következő videódat",
+    "subtitle": "Készíts stúdió videókat az üzleted katalógusából",
+    "heroImage": "Teljes belső nézet a {{product}} étkező kollekcióról",
+    "question": "Mit szeretnél megmutatni?",
+    "planTogether": "Tervezd meg a videót együtt",
+    "start": "Kezdés",
+    "startA11y": "Videó tervezésének kezdése",
+    "ideasReady_one": "{{count}} ötlet kész",
+    "ideasReady_other": "{{count}} ötlet kész",
+    "viewIdeas": "Ötletek megtekintése →",
+    "actorSubtitle": "Előadó videó",
+    "templates": "Sablonok",
+    "templatesSubtitle": "Gyors katalógus vágások",
+    "jumpBackIn": "Folytatás",
+    "seeAll": "Összes megtekintése",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "Videó ötletek",
+    "subtitle": "Kiválasztott szögek készen állnak mozgó videóvá alakításra",
+    "filter": {
+      "all": "Összes ({{n}})",
+      "productSpotlight": "Termék kiemelés ({{n}})",
+      "collection": "Kollekció ({{n}})"
+    },
+    "angle": "Szög {{n}}",
+    "body": {
+      "angle01": "Természetes erezet, geometrikus keresztláb architektúra és étkező elrendezés kiemelése.",
+      "angle02": "Kézzel faragott lamellás ajtók, kábelkezelés és meleg lakókörnyezet fókuszban."
+    },
+    "readyToReview": "Készen áll az átnézésre",
+    "viewStoryboard": "Forgatókönyv megtekintése"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} kredit",
+    "creditsA11y_other": "{{count}} kredit",
+    "addAssets": "Eszközök hozzáadása",
+    "composerPlaceholder": "Finomítsd a hangnemet, narrációt, vagy adj hozzá utasításokat...",
+    "composerA11y": "Finomítsd a hangnemet, narrációt, vagy adj hozzá utasításokat",
+    "send": "Finomítás küldése",
+    "day": "Ma · Reels Stúdió",
+    "userMessage": "Mutasd be a Bunting kollekciót egy nyugodt, prémium videóban.",
+    "reply": "Testreszabtam egy koncepciót a <b>{{brand}}</b> {{product}} asztalodhoz. Íme az ajánlott paraméterek:",
+    "format": "Formátum",
+    "formatVertical": "9:16 Függőleges (Story/Videó)",
+    "duration": "Időtartam",
+    "presenter": "Előadó",
+    "openingHook": "Nyitó fogás",
+    "reviewStoryboard_one": "Forgatókönyv átnézése ({{count}} jelenet)",
+    "reviewStoryboard_other": "Forgatókönyv átnézése ({{count}} jelenet)",
+    "readyStatus": "Készen áll a generálásra vagy finomításra"
+  },
+  "storyboard": {
+    "title": "Forgatókönyv",
+    "durationFact": "{{seconds}} mp időtartam",
+    "verticalFact": "9:16 függőleges",
+    "readyToRender": "Készen áll a renderelésre <muted>· Piszkozat mentve átnézésre</muted>",
+    "sceneDirection": "Jelenet irányítása",
+    "voiceoverFr": "Narráció (FR)",
+    "direction": {
+      "scene1": "Lassú sikló felfedés a modern étkező beállításon keresztül",
+      "scene2": "Simított makró söprés a gazdag természetes fa erezeten és a ferde élen",
+      "scene3": "Beállított perspektíva a Bois & Chiffons embléma vízjellel"
+    },
+    "editInChat": "Szerkesztés a csevegésben",
+    "makeVideo": "Videó készítése",
+    "makeVideoA11y_one": "Videó készítése, {{count}} kredit",
+    "makeVideoA11y_other": "Videó készítése, {{count}} kredit",
+    "cost_one": "{{count}} kredit",
+    "cost_other": "{{count}} kredit",
+    "balance_one": "Jelenlegi egyenleg: {{balance}} kredit · {{count}} kredit lesz lefoglalva · Piszkozat automatikusan mentve",
+    "balance_other": "Jelenlegi egyenleg: {{balance}} kredit · {{count}} kredit lesz lefoglalva · Piszkozat automatikusan mentve"
+  },
+  "generating": {
+    "backToWorkspace": "Vissza a munkaterületre",
+    "renderingA11y": "Renderelés folyamatban",
+    "title": "Videód készítése",
+    "body": "Vizuális elemek, francia narráció és mozgás tempó összeállítása a(z) {{title}} számára.",
+    "summary": "{{title}} · {{seconds}} mp · 9:16",
+    "assetNote": "Hiteles francia katalógus eszköz",
+    "preparingScenes_one": "{{count}} jelenet előkészítése",
+    "preparingScenes_other": "{{count}} jelenet előkészítése",
+    "done": "Kész",
+    "renderingFrames": "Videó képkockák renderelése",
+    "addingAudio": "Hang hozzáadása",
+    "queued": "Sorban áll",
+    "creditsReserved_one": "{{count}} kredit lefoglalva",
+    "creditsReserved_other": "{{count}} kredit lefoglalva",
+    "remaining_one": "Hátralévő: {{count}} kredit",
+    "remaining_other": "Hátralévő: {{count}} kredit",
+    "safeToLeave": "Biztonságosan elhagyhatod ezt a képernyőt. A piszkozatod automatikusan mentésre kerül az Eredmények fülön.",
+    "keepWorking": "Folytasd a munkát a háttérben"
+  },
+  "results": {
+    "title": "Videó videók",
+    "newReel": "Új videó",
+    "filter": {
+      "all": "Összes ({{n}})",
+      "ready": "Kész ({{n}})",
+      "processing": "Feldolgozás alatt ({{n}})"
+    },
+    "processing_one": "Feldolgozás · {{count}} kredit lefoglalva",
+    "processing_other": "Feldolgozás · {{count}} kredit lefoglalva",
+    "renderingA11y": "{{title}}, renderelés {{percent}}",
+    "renderingMeta": "{{seconds}} mp · 9:16 függőleges · Vizuális elemek renderelése...",
+    "renderingStage": "Renderelési szakasz",
+    "previewA11y": "Minta előnézet, {{title}}",
+    "moreOptions": "További lehetőségek",
+    "reviewVideo": "Videó átnézése",
+    "meta": {
+      "tv": "20 mp · Francia narráció · Készen áll az ütemezésre",
+      "atelier": "15 mp · Környezeti akusztika · Készen áll az ütemezésre"
+    }
+  },
+  "review": {
+    "subtitle": "Videó piszkozat · Készen áll az átnézésre",
+    "options": "Opciók menü",
+    "downloadVideo": "Videó letöltése",
+    "connectFirst": "Válassz egy csatlakoztatott fiókot a közzététel előtt.",
+    "samplePreview": "Minta előnézet",
+    "play": "Videó előnézet lejátszása",
+    "position": "Videó pozíció",
+    "sound": "Videó hang ki/be",
+    "fullscreen": "Videó teljes képernyőn",
+    "vertical": "9:16 Függőleges",
+    "portrait": "Portré formátum",
+    "captionFrench": "Felirat (francia)",
+    "defaultSource": "· Alapértelmezett forrás",
+    "editable": "Szerkeszthető",
+    "captionA11y": "Videó felirat franciául",
+    "addTag": "Címke hozzáadása",
+    "specifications": "Specifikációk",
+    "audioTrack": "Hang sáv",
+    "audioValue": "Francia narráció (Studio Natural) + Környezeti akusztika",
+    "resolution": "Felbontás",
+    "resolutionValue": "Portré videó · 9:16"
+  },
+  "publish": {
+    "title": "Reel közzététele",
+    "confirmSchedule": "Ütemezés megerősítése",
+    "publishNow": "Közzététel most",
+    "saveDraft": "Vázlat mentése",
+    "readyToSchedule": "Kész az ütemezésre",
+    "format": "{{product}} · 9:16 Függőleges Reel",
+    "playPreview": "Előnézet lejátszása",
+    "channel": "Közzétételi csatorna",
+    "connected": "Csatlakoztatva",
+    "notConnected": "Nincs csatlakoztatva",
+    "connect": "Csatlakozás",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "Automatikus posztolás közvetlenül a feedbe és a reelekbe",
+    "orDownload": "Vagy letöltés közvetlen videóként",
+    "download": "Letöltés",
+    "timing": "Időzítés",
+    "date": "Dátum",
+    "time": "Idő",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "Időzóna, {{value}}",
+    "notice": "Csatlakoztasd Instagram üzleti fiókodat az automatikus ütemezett közzététel feloldásához. Még mindig elmentheted ezt a reelt vázlatként."
+  },
+  "scheduled": {
+    "close": "Bezárás",
+    "viewReel": "Ütemezett reel megtekintése",
+    "backToResults": "Vissza az eredményekhez",
+    "title": "Reel ütemezve",
+    "body": "A videód a kiválasztott fiókhoz lesz közzétéve az ütemezett időpontban.",
+    "meta": "{{seconds}}s · Francia narráció",
+    "publishDate": "Közzététel dátuma",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "Márka munkaterület",
+    "channel": "Csatorna",
+    "instagramConnected": "Instagram (Csatlakoztatva)",
+    "editInCalendar": "Szerkeszd vagy töröld ezt a posztot a naptáradból."
+  },
+  "actor": {
+    "title": "Válassz előadót",
+    "intro": "Válassz előadói stílust vagy csak termékes reelt.",
+    "noPresenterA11y": "Nincs előadó, ajánlott",
+    "recommended": "Ajánlott",
+    "noPresenterBody": "Csak a bútor vizuálokra, textúrákra és stúdió hangra fókuszálj.",
+    "styles": "Előadói stílusok",
+    "style": {
+      "calm": {
+        "title": "Nyugodt narrátor",
+        "subtitle": "Francia · Nyugodt Stúdió"
+      },
+      "expressive": {
+        "title": "Kifejező előadó",
+        "subtitle": "Angol / FR · Dinamikus"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "Minta hang, {{title}}",
+    "sampleVoice": "Minta hang",
+    "voiceLed": "Hangvezérelt stílus",
+    "notice": "Válassz hangvezérelt stílust, vagy tartsd a fókuszt a termékeden."
+  },
+  "script": {
+    "title": "Forgatókönyv és hang",
+    "continue": "Folytatás a storyboardhoz",
+    "costNote": "Nézd át a kredit költséget a reel létrehozása előtt.",
+    "targetProduct": "Céltermék",
+    "productMeta": "Tömör akác · Forrás weboldal",
+    "voiceoverScript": "Narrációs szöveg",
+    "frenchFr": "Francia (FR)",
+    "wordCount_one": "{{count}} szó · ~{{seconds}} mp",
+    "wordCount_other": "{{count}} szó · ~{{seconds}} mp",
+    "scriptA11y": "Narrációs szöveg franciául",
+    "targetDuration_one": "Cél időtartam: {{count}} másodperc",
+    "targetDuration_other": "Cél időtartam: {{count}} másodperc",
+    "rewriteOpening": "Nyitás újraírása",
+    "narratorAudio": "Narrátor hang",
+    "calmVoice": "Nyugodt francia hang",
+    "calmVoiceMeta": "Természetes francia, meleg akusztikus tempó",
+    "recordOwn": "Vedd fel saját hangodat",
+    "recordOwnMeta": "Opcionális egyedi márka narráció",
+    "record": "Felvétel"
+  },
+  "templates": {
+    "title": "Reel sablonok",
+    "useTemplate": "Sablon használata",
+    "searchPlaceholder": "Stúdió formátumok keresése...",
+    "searchA11y": "Stúdió formátumok keresése",
+    "tune": "Finomhangolás",
+    "filter": {
+      "all": "Minden formátum",
+      "catalog": "Katalógus kiemelés",
+      "shortCuts": "15-20s vágások"
+    },
+    "item": {
+      "spotlight": {
+        "title": "Termék kiemelés",
+        "subtitle": "3 makro vágás + hook"
+      },
+      "collection": {
+        "title": "Kollekció bemutató",
+        "subtitle": "Gyors több termék bemutató"
+      },
+      "material": {
+        "title": "Anyag részlet",
+        "subtitle": "Fa erezet & kézműves közeli"
+      },
+      "arrival": {
+        "title": "Új érkezés",
+        "subtitle": "Bejelentés & bemutatóterem CTA"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "Válassz eszközöket",
+    "createStoryboard_one": "Storyboard létrehozása ({{count}} jelenet)",
+    "createStoryboard_other": "Storyboard létrehozása ({{count}} jelenet)",
+    "upload": "Fotók feltöltése",
+    "websiteAssets": "Weboldal eszközök",
+    "selected_one": "{{count}} kiválasztva",
+    "selected_other": "{{count}} kiválasztva",
+    "otherCategory": "Más termékkategória",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "Storyboard sorrend",
+    "dragToReorder": "Húzd a sorrend átrendezéséhez",
+    "reorderA11y": "Jelenet {{n}}: {{label}}. Jelenet átrendezése",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "Szoba",
+      "macro": "Részlet",
+      "staged": "Stílusos",
+      "tv": "TV egység"
+    }
+  }
+}

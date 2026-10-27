@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Apri menu",
+    "creditsAvailable_one": "{{count}} credito disponibile",
+    "creditsAvailable_other": "{{count}} crediti disponibili",
+    "settings": "Impostazioni",
+    "appModules": "Moduli app",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Post",
+      "photoshoot": "Servizio fotografico",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Navigazione moduli",
+    "create": "Crea",
+    "results": "Risultati",
+    "goBack": "Indietro",
+    "switchBusiness": "Cambia attività, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} elemento",
+    "optionWithCount_other": "{{label}} {{count}} elementi"
+  },
+  "create": {
+    "title": "Crea servizio fotografico",
+    "subtitle": "Crea foto di prodotti e stila abbigliamento su modelli.",
+    "product": {
+      "imageLabel": "{{name}} tavolo da pranzo",
+      "pill": "Elemento catalogo",
+      "title": "Servizio fotografico prodotto",
+      "body": "Posiziona gli articoli del catalogo in ambienti interni architettonici e studi con illuminazione naturale.",
+      "cta": "Nuovo servizio prodotto"
+    },
+    "fashion": {
+      "imageLabel": "Studio fotografico abbigliamento illustrato",
+      "title": "Servizio fotografico moda",
+      "body": "Stila abbigliamento su modelli in scene pronte per la campagna.",
+      "cta": "Nuovo servizio moda"
+    }
+  },
+  "product": {
+    "title": "Servizio fotografico prodotto",
+    "estimate_one": "Stima: {{count}} credito",
+    "estimate_other": "Stima: {{count}} crediti",
+    "available": "{{count}} disponibili",
+    "generate": "Genera servizio fotografico",
+    "selectedAsset": "Risorsa catalogo selezionata",
+    "changeAsset": "Cambia risorsa",
+    "aspectRatio": "Rapporto d'aspetto",
+    "sceneStyle": "Stile scena",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Interno",
+      "custom": "Personalizzato"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Brief creativo",
+    "briefHint": "Raffina illuminazione, atmosfera o dettagli decorativi specifici",
+    "sourcePreview": "Anteprima sorgente",
+    "fullPreview": "{{product}}, anteprima completa",
+    "sourceImage": "Immagine sorgente"
+  },
+  "fashion": {
+    "title": "Servizio fotografico moda",
+    "generate": "Genera servizio fotografico",
+    "uploadToEnable": "Carica una foto del capo per abilitare la generazione",
+    "heading": "Crea il tuo servizio moda",
+    "subtitle": "Trasforma flat lay o capi su appendiabiti in modelli realistici messi in scena.",
+    "garmentPhoto": "Foto del capo",
+    "required": "Richiesto",
+    "garmentSelected": "Foto del capo: {{label}}. Cambia foto",
+    "addGarment": "Aggiungi foto capo",
+    "changeGarment": "Cambia foto capo",
+    "garmentHint": "PNG o JPG su sfondo neutro, flat lay o manichino invisibile",
+    "modelStyling": "Modello & styling",
+    "modelSelected": "Modello & styling: {{model}}",
+    "models": {
+      "choose": "Scegli un modello",
+      "natural": "{{name}} · styling naturale",
+      "editorial": "{{name}} · styling editoriale",
+      "casual": "{{name}} · styling casual"
+    },
+    "pose": "Posa",
+    "poses": {
+      "fullBody": "Corpo intero",
+      "threeQuarter": "Tre quarti",
+      "closeUp": "Dettaglio ravvicinato"
+    },
+    "outputFormat": "Formato output",
+    "formats": {
+      "feedPortrait": "Ritratto feed",
+      "storyReel": "Storia / Reel"
+    },
+    "background": "Impostazione sfondo",
+    "backgrounds": {
+      "studioMinimal": "Studio minimal",
+      "urbanStreet": "Strada urbana",
+      "naturalInterior": "Interno naturale"
+    },
+    "requirementsTitle": "Requisiti di caricamento",
+    "requirements": {
+      "contrast": "Alto contrasto con lo sfondo",
+      "wrinkles": "Nessuna piega pesante",
+      "frontFacing": "Angolo frontale"
+    }
+  },
+  "source": {
+    "title": "Scegli risorsa sorgente",
+    "uploadNewLabel": "Carica nuova foto",
+    "uploadNew": "Carica nuova",
+    "noPhotoSelected": "Nessuna foto selezionata",
+    "photosSelected_one": "{{count}} foto selezionata",
+    "photosSelected_other": "{{count}} foto selezionate",
+    "selectPhoto": "Seleziona una foto",
+    "usePhoto": "Usa foto",
+    "source": "Sorgente",
+    "tabs": {
+      "website": "Sito web",
+      "uploads": "Caricamenti"
+    },
+    "businessWebsite": "{{name}} · Sito web",
+    "fromWebsite": "Dal sito web",
+    "filterCatalog": "Filtra catalogo",
+    "filters": {
+      "all": "Tutti gli articoli",
+      "tables": "Tavoli",
+      "storage": "Stoccaggio"
+    },
+    "addPhoto": "Aggiungi foto",
+    "tip": "Ritagli puliti del prodotto offrono risultati ottimali per il servizio fotografico. Espanda Studio preserverà la texture originale del legno di acacia."
+  },
+  "generating": {
+    "backToWorkspace": "Torna allo spazio di lavoro",
+    "returnToWorkspace": "Ritorna allo spazio di lavoro",
+    "title": "Preparando le tue foto",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "La tua generazione avviene in sicurezza in background. Troverai le risorse completate nei Risultati.",
+    "status": {
+      "done": "Fatto",
+      "active": "In corso",
+      "queued": "In coda"
+    },
+    "progress": "Generazione",
+    "sample": {
+      "title": "{{name}} servizio fotografico pranzo",
+      "description": "Messa in scena di {{product}} in un interno architettonico con luce diurna.",
+      "variations_one": "{{count}} variazione",
+      "variations_other": "{{count}} variazioni"
+    },
+    "steps": {
+      "catalog": "Elaborazione risorsa catalogo",
+      "compose": "Composizione scena e illuminazione",
+      "finish": "Finitura e calibrazione colore"
+    }
+  },
+  "results": {
+    "title": "Servizi fotografici",
+    "subtitle": "Le tue foto di prodotto e moda",
+    "newPhotoshoot": "Nuovo servizio fotografico",
+    "filterLabel": "Filtra servizi fotografici",
+    "filters": {
+      "all": "Tutti ({{count}})",
+      "product": "Prodotto ({{count}})",
+      "fashion": "Moda ({{count}})"
+    },
+    "empty": "Nessun servizio fotografico ancora.",
+    "processingLabel": "{{title}}. Elaborazione, {{percent}}%",
+    "processingBadge_one": "Elaborazione · {{count}} credito",
+    "processingBadge_other": "Elaborazione · {{count}} crediti",
+    "preview": "Anteprima",
+    "reviewPhotoLabel": "Rivedi foto, {{title}}",
+    "reviewPhoto": "Rivedi foto",
+    "sample": {
+      "studioStaging": "{{product}} · Allestimento studio",
+      "rendering": "Fase di rendering · {{percent}}%",
+      "interiorReady_one": "Interno · {{ratio}} · {{count}} foto pronta",
+      "interiorReady_other": "Interno · {{ratio}} · {{count}} foto pronte",
+      "studioDaylight": "Luce diurna studio · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Altre opzioni",
+    "downloadPhoto": "Scarica foto",
+    "variation": "Variante",
+    "share": "Condividi servizio fotografico",
+    "samplePreview": "Anteprima campione",
+    "compareOriginal": "Confronta originale",
+    "expandView": "Espandi vista",
+    "stagingSummary": "Riepilogo allestimento",
+    "format": "Formato",
+    "creationCost": "Costo di creazione",
+    "credits_one": "{{count}} credito",
+    "credits_other": "{{count}} crediti",
+    "sample": {
+      "headerTitle": "Servizio fotografico {{name}}",
+      "vertical": "{{ratio}} Verticale",
+      "architecturalInterior": "Interno architettonico",
+      "studioDaylight": "Luce diurna studio",
+      "formatBadge": "Formato {{ratio}}",
+      "naturalStudio": "Studio naturale",
+      "portraitPhoto": "Foto ritratto"
+    }
+  }
+}

@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Witamy w Espanda",
+    "subtitle": "Twórz treści dla swojego biznesu.",
+    "mobileNumber": "Numer telefonu",
+    "countryCode": "Kod kraju {{code}}",
+    "sendCode": "Wyślij kod",
+    "useEmail": "Użyj e-maila",
+    "sendFailed": "Nie udało się wysłać kodu. Spróbuj ponownie lub użyj e-maila.",
+    "chooseCountry": "Wybierz swój kraj",
+    "searchCountry": "Szukaj kraju lub kodu"
+  },
+  "email": {
+    "title": "Zaloguj się za pomocą e-maila",
+    "subtitle": "Wyślemy Ci kod weryfikacyjny bez hasła.",
+    "tagline": "Inteligentny marketing dla nowoczesnego handlu",
+    "label": "Adres e-mail",
+    "placeholder": "name@yourbusiness.com",
+    "notConfigured": "Logowanie przez e-mail nie jest jeszcze skonfigurowane na tym serwerze.",
+    "sendFailed": "Nie udało się wysłać kodu. Spróbuj ponownie.",
+    "useMobile": "Użyj numeru telefonu",
+    "linkTitle": "Dodaj swój e-mail",
+    "linkSubtitle": "Twój numer jest zweryfikowany. Dodaj e-mail do paragonów i zaproszeń dla zespołu. Wyślemy na niego kod."
+  },
+  "verify": {
+    "title": "Wprowadź swój kod",
+    "sent": "Wysłaliśmy kod weryfikacyjny na {{destination}}",
+    "codeLabel": "Sześciocyfrowy kod weryfikacyjny",
+    "submit": "Zweryfikuj kod",
+    "checkFailed": "Nie udało się sprawdzić kodu. Spróbuj ponownie.",
+    "resendFailed": "Nie udało się ponownie wysłać kodu.",
+    "resendIn": "Wyślij kod ponownie za {{time}}",
+    "resend": "Wyślij kod ponownie",
+    "changeEmail": "Zmień e-mail",
+    "changeMobile": "Zmień numer telefonu"
+  },
+  "welcome": {
+    "getStarted": "Zaczynamy",
+    "footnote": "Twój biznes, Twoja kreatywna wizja.",
+    "photosLabel": "Przykłady z katalogu {{brand}}",
+    "title": "Marketing, który odzwierciedla Twój biznes",
+    "body": "Generuj zgodne z marką studio reels, sesje zdjęciowe i posty produktowe z Twojego katalogu.",
+    "steps": {
+      "goal": {
+        "title": "Wybierz swój cel",
+        "body": "Wybierz pierwszy format kreatywny, który chcesz stworzyć."
+      },
+      "business": {
+        "title": "Podziel się swoim biznesem",
+        "body": "Podaj swoją stronę internetową lub dodaj szczegóły dotyczące biznesu."
+      },
+      "review": {
+        "title": "Przegląd gotowych treści",
+        "body": "Przeglądaj pomysły stworzone wokół Twoich produktów."
+      }
+    }
+  },
+  "goal": {
+    "title": "Co stworzysz najpierw?",
+    "subtitle": "Dostosujemy Twoje początkowe środowisko pracy i szablony do Twojego głównego celu.",
+    "note": "Wszystkie narzędzia i formaty studio pozostają dostępne później.",
+    "options": {
+      "socialPlan": {
+        "title": "Plan mediów społecznościowych",
+        "description": "Miesiąc postów i opisów"
+      },
+      "marketingVideos": {
+        "title": "Filmy marketingowe",
+        "description": "Studio reels z Twojego katalogu"
+      },
+      "fashionPhotoshoot": {
+        "title": "Sesja zdjęciowa mody",
+        "description": "Stylizacja odzieży na modelach"
+      },
+      "productPhotoshoot": {
+        "title": "Sesja zdjęciowa produktu",
+        "description": "Zdjęcia produktów do Twojego katalogu"
+      }
+    }
+  },
+  "source": {
+    "title": "Gdzie jest Twój biznes online?",
+    "subtitle": "Espanda skanuje Twój sklep online lub ofertę, aby automatycznie generować media zgodne z marką.",
+    "options": {
+      "website": {
+        "title": "Strona internetowa",
+        "description": "Shopify, WooCommerce, własna domena"
+      },
+      "googleMaps": {
+        "title": "Google Maps",
+        "description": "Lokalny sklep, butik lub showroom"
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "description": "Amazon, Etsy, eBay lub sklep Instagram"
+      },
+      "wholesale": {
+        "title": "Hurt / B2B",
+        "description": "Faire, Ankorstore, prywatny katalog"
+      },
+      "none": {
+        "title": "Brak obecności online",
+        "description": "Opisz swoje produkty ręcznie"
+      },
+      "other": {
+        "title": "Coś innego",
+        "description": "Profil społecznościowy, PDF lookbook lub plik"
+      }
+    }
+  },
+  "website": {
+    "title": "Jaka jest Twoja strona internetowa?",
+    "subtitle": "Automatycznie pobierzemy zdjęcia katalogowe, kolory i ton głosu.",
+    "label": "Adres URL sklepu",
+    "placeholder": "www.yourstore.com",
+    "valid": "Prawidłowy adres",
+    "willRead": "Przeczytamy tę stronę",
+    "facts": {
+      "catalog": {
+        "key": "Produkty katalogowe",
+        "value": "Zdjęcia produktów"
+      },
+      "identity": {
+        "key": "Tożsamość marki",
+        "value": "Kolory i typografia"
+      },
+      "tone": {
+        "key": "Ton i styl",
+        "value": "Głos z Twoich stron"
+      }
+    },
+    "safeNote": "Import katalogu nie zmienia niczego w Twoim aktywnym sklepie."
+  },
+  "manual": {
+    "title": "Dodaj szczegóły biznesu",
+    "subtitle": "Podaj link do oferty lub opisz swój katalog ręcznie.",
+    "modeLabel": "Jak dodać swój biznes",
+    "modeListing": "URL oferty",
+    "modeDescribe": "Opisz biznes",
+    "listingLabel": "Link do oferty *",
+    "listingPlaceholder": "Etsy, Amazon, Google Maps lub link do sklepu",
+    "nameLabel": "Nazwa biznesu *",
+    "namePlaceholder": "np. Atelier Bois & Chiffons",
+    "sellsLabel": "Co sprzedajesz? *",
+    "sellsPlaceholder": "np. Ręcznie robione drewniane stoły, szafki RTV i nowoczesne dekoracje do domu...",
+    "locationLabel": "Lokalizacja (opcjonalnie)",
+    "locationPlaceholder": "Miasto, kraj lub adres showroomu",
+    "websiteLabel": "Strona internetowa (opcjonalnie)"
+  },
+  "learning": {
+    "working": "Pracuję",
+    "tryAgain": "Spróbuj ponownie",
+    "inProgressButton": "Nauka w toku...",
+    "saved": "Zachowamy Twój postęp.",
+    "title": "Poznajemy Twój biznes",
+    "bodyWebsite": "Analizujemy Twoją stronę, aby wyodrębnić tożsamość marki, katalogi i wizualny ton.",
+    "bodyManual": "Przekształcamy Twój opis w tożsamość marki, katalogi i wizualny ton.",
+    "fallbackName": "Twój biznes",
+    "sourceWebsite": "Główne źródło strony internetowej",
+    "sourceManual": "Szczegóły biznesu",
+    "foundWebsite": "Znaleziono stronę internetową",
+    "foundManual": "Dodano szczegóły",
+    "stages": {
+      "open": "Otwieranie strony internetowej",
+      "identity": "Odczytywanie tożsamości marki i tonu",
+      "photos": "Zbieranie zdjęć produktów"
+    },
+    "status": {
+      "done": "Zakończone",
+      "running": "W toku",
+      "queued": "W kolejce"
+    },
+    "errors": {
+      "stopped": "Odczytywanie Twojej strony zostało zatrzymane.",
+      "noWorkspace": "Twoje konto nie ma jeszcze przestrzeni roboczej.",
+      "startFailed": "Nie udało się rozpocząć odczytywania Twojej strony.",
+      "restartFailed": "Nie udało się ponownie uruchomić. Spróbuj ponownie."
+    }
+  },
+  "review": {
+    "title": "Przegląd szczegółów biznesu",
+    "subtitle": "Znaleźliśmy te szczegóły na Twojej stronie. Możesz je edytować w dowolnym momencie.",
+    "edit": "Edytuj",
+    "tagline": "Slogan",
+    "editTagline": "Edytuj slogan",
+    "categoryLocation": "Kategoria i lokalizacja",
+    "audience": "Docelowa grupa odbiorców",
+    "editAudience": "Edytuj docelową grupę odbiorców",
+    "products_one": "Wykryte produkty ({{count}})",
+    "products_other": "Wykryte produkty ({{count}})",
+    "found": "Znaleziono",
+    "strengths": "Mocne strony marki",
+    "tags": {
+      "homeLiving": "Dom i życie",
+      "france": "Francja",
+      "productCatalog": "Katalog produktów",
+      "showroomEshop": "Showroom i e-sklep"
+    }
+  },
+  "brand": {
+    "title": "Marka i styl kreatywny",
+    "subtitle": "Dostosuj, jak Espanda tworzy Twoje sesje zdjęciowe i posty w mediach społecznościowych.",
+    "identity": "Tożsamość {{name}}",
+    "paletteMeta": "Paleta strony · Edytowalna",
+    "swatches": "Zaimportowane próbki kolorów strony",
+    "tone": "Ton kreatywny",
+    "selected_one": "Wybrano {{count}}",
+    "selected_other": "Wybrano {{count}}",
+    "tones": {
+      "modern": "Nowoczesny",
+      "luxurious": "Luksusowy",
+      "elegant": "Elegancki",
+      "premium": "Premium",
+      "natural": "Naturalny",
+      "minimalist": "Minimalistyczny"
+    },
+    "contentLanguage": "Język treści",
+    "contentLanguageA11y": "Język treści, {{language}}. Zmień",
+    "languages": {
+      "fr": "Francuski (FR)",
+      "en": "Angielski (US)"
+    },
+    "audienceProfile": "Profil odbiorców",
+    "audienceHome": "Dom i meble",
+    "featured": "Polecane produkty z katalogu",
+    "readyForBatch_one": "{{count}} gotowy do partii",
+    "readyForBatch_other": "{{count}} gotowe do partii",
+    "sampleProducts": {
+      "table": "Stół Bunting",
+      "tableDetail": "Akacja 240cm",
+      "tv": "Szafka RTV",
+      "tvDetail": "Akacja 2 drzwi"
+    },
+    "channelsNote": "Instagram i Facebook można połączyć w następnym kroku. (Brak połączonych kanałów)"
+  },
+  "preparing": {
+    "ready": "Studio gotowe",
+    "preparing": "Przygotowywanie studia",
+    "loadingButton": "Przygotowywanie Twoich pomysłów…",
+    "catalogSafe": "Twój katalog pozostaje nienaruszony w sklepie.",
+    "title": "Przygotowywanie pierwszych pomysłów",
+    "body": "Generowanie dopasowanych rolek społecznościowych i zestawów scenicznych z kolekcji {{name}}.",
+    "photosTitle": "Zbieranie zdjęć",
+    "photosDetail": "{{product}} zestaw jadalniany",
+    "storyboardTitle": "Tworzenie scenariusza",
+    "storyboardDetail_one": "Komponowanie {{count}} sceny wideo",
+    "storyboardDetail_other": "Komponowanie {{count}} scen wideo",
+    "nextTitle": "Następne: Przejrzyj swoje pomysły",
+    "nextDetail": "Wybierz haki i ustawienia dźwięku"
+  },
+  "connect": {
+    "readyToConnect": "• Gotowe do połączenia",
+    "title": "Publikuj, gdy będziesz gotowy",
+    "subtitle": "Połącz swoje konta społecznościowe, aby Espanda mogła publikować lub tworzyć gotowe do publikacji rolki i prezentacje produktów bezpośrednio.",
+    "toolsTitle": "Narzędzia publikacji",
+    "featureReels": "Publikuj na Instagram Feed & Reels",
+    "featureCaptions": "Użyj swoich podpisów i hashtagów",
+    "featureReview": "Zawsze przeglądasz przed publikacją",
+    "assurance": "Żadna treść nie zostanie opublikowana bez Twojej zgody",
+    "connectInstagram": "Połącz Instagram",
+    "connectFacebook": "Połącz Facebook",
+    "skip": "Pomiń na razie",
+    "laterTitle": "Połączyć później?",
+    "laterBody": "Możesz nadal tworzyć, edytować i pobierać rolki i sesje zdjęciowe w wysokiej rozdzielczości na rolkę aparatu. Możesz połączyć swój Instagram w dowolnym momencie w Ustawieniach.",
+    "laterDownload": "Pobierz swoje kreacje",
+    "laterSettings": "Połącz kanały w Ustawieniach",
+    "continueWithout": "Kontynuuj bez łączenia"
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "secondsShort": "{{seconds}}से",
+  "seconds_one": "{{count}} सेकंड",
+  "seconds_other": "{{count}} सेकंड्स",
+  "noPresenter": "कोई प्रस्तुतकर्ता नहीं",
+  "aiActor": "AI अभिनेता",
+  "assistant": "आपका वीडियो सहायक",
+  "sourceWebsite": "स्रोत वेबसाइट",
+  "preview": "पूर्वावलोकन",
+  "schedule": "शेड्यूल",
+  "goBack": "वापस जाएं",
+  "inProgress": "प्रगति में",
+  "timezone": "समय क्षेत्र",
+  "status": {
+    "draft": "ड्राफ्ट",
+    "ready": "तैयार"
+  },
+  "scene": {
+    "label": "दृश्य {{n}} · {{seconds}}से",
+    "count_one": "{{count}} दृश्य",
+    "count_other": "{{count}} दृश्य"
+  },
+  "shot": {
+    "wide": "वाइड शॉट",
+    "material": "सामग्री विवरण",
+    "closeCta": "उत्पाद क्लोज़ & CTA"
+  },
+  "create": {
+    "switchBusiness": "व्यवसाय बदलें, {{name}}",
+    "title": "अपना अगला रील बनाएं",
+    "subtitle": "अपने स्टोर कैटलॉग से स्टूडियो वीडियो रील्स बनाएं",
+    "heroImage": "{{product}} डाइनिंग कलेक्शन का पूरा इंटीरियर दृश्य",
+    "question": "आप क्या दिखाना चाहेंगे?",
+    "planTogether": "एक रील साथ में प्लान करें",
+    "start": "शुरू करें",
+    "startA11y": "रील प्लानिंग शुरू करें",
+    "ideasReady_one": "{{count}} आइडिया तैयार",
+    "ideasReady_other": "{{count}} आइडियाज तैयार",
+    "viewIdeas": "आइडियाज देखें →",
+    "actorSubtitle": "प्रस्तुतकर्ता रील",
+    "templates": "टेम्पलेट्स",
+    "templatesSubtitle": "तेज़ कैटलॉग कट्स",
+    "jumpBackIn": "फिर से शुरू करें",
+    "seeAll": "सभी देखें",
+    "recentA11y": "{{title}}, {{status}}"
+  },
+  "ideas": {
+    "title": "वीडियो आइडियाज",
+    "subtitle": "क्यूरेटेड एंगल्स जो मोशन रील्स में बदलने के लिए तैयार हैं",
+    "filter": {
+      "all": "सभी ({{n}})",
+      "productSpotlight": "उत्पाद स्पॉटलाइट ({{n}})",
+      "collection": "कलेक्शन ({{n}})"
+    },
+    "angle": "एंगल {{n}}",
+    "body": {
+      "angle01": "प्राकृतिक अनाज, ज्यामितीय क्रॉस-लेग आर्किटेक्चर, और डाइनिंग स्टेजिंग को हाइलाइट करना।",
+      "angle02": "हाथ से नक्काशीदार स्लैट दरवाजे, वायर प्रबंधन, और गर्म रहने का माहौल पर ध्यान केंद्रित करना।"
+    },
+    "readyToReview": "समीक्षा के लिए तैयार",
+    "viewStoryboard": "स्टोरीबोर्ड देखें"
+  },
+  "chat": {
+    "creditsA11y_one": "{{count}} क्रेडिट",
+    "creditsA11y_other": "{{count}} क्रेडिट्स",
+    "addAssets": "एसेट्स जोड़ें",
+    "composerPlaceholder": "स्वर, वॉयसओवर को परिष्कृत करें, या निर्देश जोड़ें...",
+    "composerA11y": "स्वर, वॉयसओवर को परिष्कृत करें, या निर्देश जोड़ें",
+    "send": "परिष्करण भेजें",
+    "day": "आज · रील्स स्टूडियो",
+    "userMessage": "Bunting कलेक्शन को एक शांत, प्रीमियम रील में दिखाएं।",
+    "reply": "मैंने आपके <b>{{brand}}</b> {{product}} टेबल के लिए एक अवधारणा तैयार की है। यहाँ अनुशंसित पैरामीटर हैं:",
+    "format": "फॉर्मेट",
+    "formatVertical": "9:16 वर्टिकल (स्टोरी/रील)",
+    "duration": "अवधि",
+    "presenter": "प्रस्तुतकर्ता",
+    "openingHook": "प्रारंभिक हुक",
+    "reviewStoryboard_one": "स्टोरीबोर्ड की समीक्षा करें ({{count}} दृश्य)",
+    "reviewStoryboard_other": "स्टोरीबोर्ड की समीक्षा करें ({{count}} दृश्य)",
+    "readyStatus": "उत्पन्न करने या परिष्कृत करने के लिए तैयार"
+  },
+  "storyboard": {
+    "title": "स्टोरीबोर्ड",
+    "durationFact": "{{seconds}}से अवधि",
+    "verticalFact": "9:16 वर्टिकल",
+    "readyToRender": "रेंडर करने के लिए तैयार <muted>· समीक्षा के लिए ड्राफ्ट सहेजा गया</muted>",
+    "sceneDirection": "दृश्य दिशा",
+    "voiceoverFr": "वॉयसओवर (FR)",
+    "direction": {
+      "scene1": "आधुनिक डाइनिंग सेटिंग में धीमी ग्लाइडिंग रिवील",
+      "scene2": "समृद्ध प्राकृतिक लकड़ी के अनाज और बेवेल्ड एज पर स्मूथ मैक्रो स्वीप",
+      "scene3": "Bois & Chiffons प्रतीक वॉटरमार्क के साथ मंचित परिप्रेक्ष्य"
+    },
+    "editInChat": "चैट में संपादित करें",
+    "makeVideo": "वीडियो बनाएं",
+    "makeVideoA11y_one": "वीडियो बनाएं, {{count}} क्रेडिट",
+    "makeVideoA11y_other": "वीडियो बनाएं, {{count}} क्रेडिट्स",
+    "cost_one": "{{count}} क्रेडिट",
+    "cost_other": "{{count}} क्रेडिट्स",
+    "balance_one": "वर्तमान बैलेंस: {{balance}} क्रेडिट्स · {{count}} क्रेडिट आरक्षित किया जाएगा · ड्राफ्ट स्वचालित रूप से सहेजा गया",
+    "balance_other": "वर्तमान बैलेंस: {{balance}} क्रेडिट्स · {{count}} क्रेडिट्स आरक्षित किए जाएंगे · ड्राफ्ट स्वचालित रूप से सहेजा गया"
+  },
+  "generating": {
+    "backToWorkspace": "वर्कस्पेस पर वापस जाएं",
+    "renderingA11y": "रेंडरिंग प्रगति में",
+    "title": "आपकी रील बना रहे हैं",
+    "body": "{{title}} के लिए दृश्य, फ्रेंच वॉयसओवर, और मोशन पेसिंग तैयार कर रहे हैं।",
+    "summary": "{{title}} · {{seconds}}से · 9:16",
+    "assetNote": "प्रामाणिक फ्रेंच कैटलॉग एसेट",
+    "preparingScenes_one": "{{count}} दृश्य तैयार कर रहे हैं",
+    "preparingScenes_other": "{{count}} दृश्य तैयार कर रहे हैं",
+    "done": "हो गया",
+    "renderingFrames": "वीडियो फ्रेम्स रेंडर कर रहे हैं",
+    "addingAudio": "ऑडियो जोड़ रहे हैं",
+    "queued": "कतारबद्ध",
+    "creditsReserved_one": "{{count}} क्रेडिट आरक्षित",
+    "creditsReserved_other": "{{count}} क्रेडिट्स आरक्षित",
+    "remaining_one": "शेष: {{count}} क्रेडिट",
+    "remaining_other": "शेष: {{count}} क्रेडिट्स",
+    "safeToLeave": "आप इस स्क्रीन को सुरक्षित रूप से छोड़ सकते हैं। आपका ड्राफ्ट आपके परिणाम टैब में स्वचालित रूप से सहेजा गया है।",
+    "keepWorking": "पृष्ठभूमि में काम जारी रखें"
+  },
+  "results": {
+    "title": "वीडियो रील्स",
+    "newReel": "नई रील",
+    "filter": {
+      "all": "सभी ({{n}})",
+      "ready": "तैयार ({{n}})",
+      "processing": "प्रसंस्करण ({{n}})"
+    },
+    "processing_one": "प्रसंस्करण · {{count}} क्रेडिट आरक्षित",
+    "processing_other": "प्रसंस्करण · {{count}} क्रेडिट्स आरक्षित",
+    "renderingA11y": "{{title}}, रेंडरिंग {{percent}}",
+    "renderingMeta": "{{seconds}}से · 9:16 वर्टिकल · दृश्य रेंडर कर रहे हैं...",
+    "renderingStage": "रेंडरिंग चरण",
+    "previewA11y": "नमूना पूर्वावलोकन, {{title}}",
+    "moreOptions": "अधिक विकल्प",
+    "reviewVideo": "वीडियो की समीक्षा करें",
+    "meta": {
+      "tv": "20से · फ्रेंच वॉयसओवर · शेड्यूल करने के लिए तैयार",
+      "atelier": "15से · एम्बिएंट एकॉस्टिक · शेड्यूल करने के लिए तैयार"
+    }
+  },
+  "review": {
+    "subtitle": "रील ड्राफ्ट · समीक्षा के लिए तैयार",
+    "options": "विकल्प मेनू",
+    "downloadVideo": "वीडियो डाउनलोड करें",
+    "connectFirst": "प्रकाशित करने से पहले एक कनेक्टेड खाता चुनें।",
+    "samplePreview": "नमूना पूर्वावलोकन",
+    "play": "वीडियो पूर्वावलोकन चलाएं",
+    "position": "वीडियो स्थिति",
+    "sound": "वीडियो ध्वनि टॉगल करें",
+    "fullscreen": "वीडियो फुलस्क्रीन खोलें",
+    "vertical": "9:16 वर्टिकल",
+    "portrait": "पोर्ट्रेट फॉर्मेट",
+    "captionFrench": "कैप्शन (फ्रेंच)",
+    "defaultSource": "· डिफ़ॉल्ट स्रोत",
+    "editable": "संपादन योग्य",
+    "captionA11y": "फ्रेंच में वीडियो कैप्शन",
+    "addTag": "टैग जोड़ें",
+    "specifications": "विशेषताएँ",
+    "audioTrack": "ऑडियो ट्रैक",
+    "audioValue": "फ्रेंच वॉइसओवर (स्टूडियो नैचुरल) + परिवेश ध्वनि",
+    "resolution": "रिज़ॉल्यूशन",
+    "resolutionValue": "पोर्ट्रेट वीडियो · 9:16"
+  },
+  "publish": {
+    "title": "रील प्रकाशित करें",
+    "confirmSchedule": "अनुसूची की पुष्टि करें",
+    "publishNow": "अभी प्रकाशित करें",
+    "saveDraft": "ड्राफ्ट सहेजें",
+    "readyToSchedule": "अनुसूची के लिए तैयार",
+    "format": "{{product}} · 9:16 वर्टिकल रील",
+    "playPreview": "पूर्वावलोकन चलाएं",
+    "channel": "प्रकाशन चैनल",
+    "connected": "कनेक्टेड",
+    "notConnected": "कनेक्टेड नहीं",
+    "connect": "कनेक्ट करें",
+    "instagramFacebook": "Instagram & Facebook",
+    "autoPost": "फीड और रील्स पर सीधे ऑटो-पोस्ट करें",
+    "orDownload": "या सीधे वीडियो डाउनलोड करें",
+    "download": "डाउनलोड करें",
+    "timing": "समय",
+    "date": "तारीख",
+    "time": "समय",
+    "dateValue": "{{day}} {{month}} {{year}}",
+    "pickerA11y": "{{label}}, {{value}}",
+    "timezoneA11y": "समय क्षेत्र, {{value}}",
+    "notice": "स्वचालित अनुसूचित प्रकाशन को अनलॉक करने के लिए अपने Instagram व्यवसाय खाते को कनेक्ट करें। आप अभी भी इस रील को ड्राफ्ट के रूप में सहेज सकते हैं।"
+  },
+  "scheduled": {
+    "close": "बंद करें",
+    "viewReel": "अनुसूचित रील देखें",
+    "backToResults": "परिणामों पर वापस जाएं",
+    "title": "रील अनुसूचित",
+    "body": "आपका वीडियो चयनित खाते पर निर्धारित समय पर प्रकाशित होगा।",
+    "meta": "{{seconds}}s · फ्रेंच वॉइसओवर",
+    "publishDate": "प्रकाशन तिथि",
+    "dateTime": "{{date}}, {{time}}",
+    "brandWorkspace": "ब्रांड कार्यक्षेत्र",
+    "channel": "चैनल",
+    "instagramConnected": "Instagram (कनेक्टेड)",
+    "editInCalendar": "अपने कैलेंडर से इस पोस्ट को संपादित या रद्द करें।"
+  },
+  "actor": {
+    "title": "प्रस्तुतकर्ता चुनें",
+    "intro": "प्रस्तुतकर्ता शैली चुनें या केवल उत्पाद रील।",
+    "noPresenterA11y": "कोई प्रस्तुतकर्ता नहीं, अनुशंसित",
+    "recommended": "अनुशंसित",
+    "noPresenterBody": "केवल फर्नीचर दृश्य, बनावट और स्टूडियो ऑडियो पर ध्यान केंद्रित करें।",
+    "styles": "प्रस्तुतकर्ता शैलियाँ",
+    "style": {
+      "calm": {
+        "title": "शांत कथावाचक",
+        "subtitle": "फ्रेंच · शांत स्टूडियो"
+      },
+      "expressive": {
+        "title": "अभिव्यक्तिपूर्ण प्रस्तुतकर्ता",
+        "subtitle": "अंग्रेजी / FR · डायनामिक"
+      }
+    },
+    "styleA11y": "{{title}}, {{subtitle}}",
+    "sampleVoiceA11y": "उदाहरण आवाज़, {{title}}",
+    "sampleVoice": "उदाहरण आवाज़",
+    "voiceLed": "आवाज़-नेतृत्व शैली",
+    "notice": "आवाज़-नेतृत्व शैली चुनें, या अपने उत्पाद पर ध्यान केंद्रित रखें।"
+  },
+  "script": {
+    "title": "स्क्रिप्ट और आवाज़",
+    "continue": "स्टोरीबोर्ड पर जारी रखें",
+    "costNote": "अपनी रील बनाने से पहले क्रेडिट लागत की समीक्षा करें।",
+    "targetProduct": "लक्षित उत्पाद",
+    "productMeta": "ठोस अकासिया · स्रोत वेबसाइट",
+    "voiceoverScript": "वॉइसओवर स्क्रिप्ट",
+    "frenchFr": "फ्रेंच (FR)",
+    "wordCount_one": "{{count}} शब्द · ~{{seconds}} सेकंड",
+    "wordCount_other": "{{count}} शब्द · ~{{seconds}} सेकंड",
+    "scriptA11y": "फ्रेंच में वॉइसओवर स्क्रिप्ट",
+    "targetDuration_one": "लक्षित अवधि: {{count}} सेकंड",
+    "targetDuration_other": "लक्षित अवधि: {{count}} सेकंड",
+    "rewriteOpening": "प्रारंभिक भाग फिर से लिखें",
+    "narratorAudio": "कथावाचक ऑडियो",
+    "calmVoice": "शांत फ्रेंच आवाज़",
+    "calmVoiceMeta": "प्राकृतिक फ्रेंच, गर्म ध्वनिक गति",
+    "recordOwn": "अपनी आवाज़ रिकॉर्ड करें",
+    "recordOwnMeta": "वैकल्पिक कस्टम ब्रांड वर्णन",
+    "record": "रिकॉर्ड करें"
+  },
+  "templates": {
+    "title": "रील टेम्पलेट्स",
+    "useTemplate": "टेम्पलेट का उपयोग करें",
+    "searchPlaceholder": "स्टूडियो फॉर्मेट खोजें...",
+    "searchA11y": "स्टूडियो फॉर्मेट खोजें",
+    "tune": "ट्यून करें",
+    "filter": {
+      "all": "सभी फॉर्मेट",
+      "catalog": "कैटलॉग स्पॉटलाइट",
+      "shortCuts": "15-20s कट्स"
+    },
+    "item": {
+      "spotlight": {
+        "title": "उत्पाद स्पॉटलाइट",
+        "subtitle": "3 मैक्रो कट्स + हुक"
+      },
+      "collection": {
+        "title": "संग्रह का खुलासा",
+        "subtitle": "तेज़ मल्टी-आइटम शोकेस"
+      },
+      "material": {
+        "title": "सामग्री विवरण",
+        "subtitle": "लकड़ी के दाने और शिल्प क्लोज़अप"
+      },
+      "arrival": {
+        "title": "नई आगमन",
+        "subtitle": "घोषणा और शो रूम CTA"
+      }
+    },
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+  },
+  "assets": {
+    "title": "संपत्तियाँ चुनें",
+    "createStoryboard_one": "स्टोरीबोर्ड बनाएं ({{count}} दृश्य)",
+    "createStoryboard_other": "स्टोरीबोर्ड बनाएं ({{count}} दृश्य)",
+    "upload": "फोटो अपलोड करें",
+    "websiteAssets": "वेबसाइट संपत्तियाँ",
+    "selected_one": "{{count}} चयनित",
+    "selected_other": "{{count}} चयनित",
+    "otherCategory": "विभिन्न उत्पाद श्रेणी",
+    "itemA11y": "{{title}}, {{scene}}",
+    "sequence": "स्टोरीबोर्ड क्रम",
+    "dragToReorder": "पुनः क्रमबद्ध करने के लिए खींचें",
+    "reorderA11y": "दृश्य {{n}}: {{label}}। दृश्य पुनः क्रमबद्ध करें",
+    "sequenceItem": "{{n}} {{label}}",
+    "short": {
+      "wide": "कमरा",
+      "macro": "विवरण",
+      "staged": "स्टाइल्ड",
+      "tv": "टीवी यूनिट"
+    }
+  }
+}

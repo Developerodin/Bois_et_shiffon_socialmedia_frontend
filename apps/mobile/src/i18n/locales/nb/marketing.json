@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Arbeidsområde {{name}}",
+    "customers": "Kunder",
+    "customerTabs": {
+      "inbox": "Innboks",
+      "reviews": "Anmeldelser",
+      "people": "Personer"
+    },
+    "status": {
+      "notConnected": "Ikke tilkoblet"
+    },
+    "draft": "Utkast",
+    "googleGrowth": "Google-vekst",
+    "websiteStudio": "Nettstudiostudio",
+    "editContent": "Rediger innhold",
+    "diningTableImage": "Acacia Bunting spisebord",
+    "pages": {
+      "home": "Hjem",
+      "product": "Produkt",
+      "contact": "Kontakt"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Bytt bedrift, {{name}}",
+    "title": "Markedsføring",
+    "subtitle": "Administrer butikkens synlighet, samtaler og merkevareprofil",
+    "cue": {
+      "imageLabel": "Acacia TV-enhet i en stue",
+      "dismiss": "Avvis dagens tips",
+      "eyebrow": "Dagens tips",
+      "title": "Legg til nye katalogbilder",
+      "body": "Å legge til nye bilder holder de automatiske rullene og nettstudioutkastet oppdatert."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Kunder",
+        "body": "Innboks, anmeldelser og personer",
+        "cta": "Åpne innboks"
+      },
+      "google": {
+        "title": "Google-vekst",
+        "body": "Profil, innlegg og anmeldelser",
+        "cta": "Konfigurer"
+      },
+      "website": {
+        "title": "Nettstudiostudio",
+        "body": "Utkast, rediger og publiser nettstedet ditt",
+        "cta": "Åpne utkast"
+      },
+      "business": {
+        "title": "Bedrift",
+        "body": "Merkevare, eiendeler og tilkoblinger",
+        "cta": "Administrer"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Ingen meldinger ennå",
+    "emptyBody": "Koble til kundekanaler for å motta direkte produktspørsmål og trygt gjennomgå AI-forslag før sending.",
+    "connectChannel": "Koble til kanalen din",
+    "emptyFootnote": "Nye meldinger blir tilgjengelige automatisk når de er tilkoblet.",
+    "channelsTitle": "Støttede meldingskanaler",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Koble til en konto for å motta meldinger."
+  },
+  "reply": {
+    "title": "Svarassistent",
+    "referencedProduct": "Referert produkt",
+    "suggestionTitle": "Espanda svarforslag",
+    "draftLabel": "Svarutkast",
+    "tone": "Tone: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Polert & håndverker"
+    },
+    "done": "Ferdig",
+    "editReply": "Rediger svar",
+    "approvalTitle": "Manuell godkjenning kreves",
+    "approvalBody": "Ingen melding sendes uten ditt eksplisitte klikk.",
+    "exampleTitle": "Eksempel på samtalemodus",
+    "exampleBody": "Å koble til Instagram- eller Facebook-kontoen din erstatter dette eksempelet med ekte kundespørsmål."
+  },
+  "reviews": {
+    "emptyTitle": "Ingen anmeldelser ennå",
+    "emptyBody": "Koble til Google Business-profilen din for automatisk å samle inn og svare på verifisert kundefeedback.",
+    "connectGoogle": "Koble til Google Business",
+    "automatedTitle": "Automatiserte anmeldelsesforespørsler",
+    "connectFirst": "Koble til først",
+    "automatedBody": "Krever Google Business-tilkobling for å sende personlige anmeldelsesinvitasjoner."
+  },
+  "people": {
+    "emptyTitle": "Ingen kunderegistreringer ennå",
+    "emptyBody": "Personer du hører fra gjennom tilkoblede kundekanaler vil vises her.",
+    "connectChannel": "Koble til en kanal",
+    "directoryTitle": "Din kundekatalog",
+    "directoryBody": "Åpne en persons registrering for å se samtalene deres og kontaktinformasjon på ett sted.",
+    "connectedChannels": "Tilkoblede kundekanaler"
+  },
+  "google": {
+    "presenceTitle": "Din Google-tilstedeværelse",
+    "presenceBody": "Hold ditt lokale franske showroom synlig på Google Maps og Søk automatisk.",
+    "profileTitle": "Google Business-profil",
+    "profileBody": "Synkroniser din offisielle butikkadresse, åpningstider og nye katalogbilder direkte til Google Maps.",
+    "connectProfile": "Koble til Google Business-profil",
+    "capabilitiesTitle": "Automatiske synkroniseringsmuligheter",
+    "capabilities": {
+      "catalog": {
+        "title": "Profil- og katalogoppdateringer",
+        "body": "Synkroniser nylig iscenesatte bilder og møbeldropp til dine lokale Google-innlegg."
+      },
+      "reviews": {
+        "title": "Anmeldelsesforespørsler",
+        "body": "Generer høflige franske anmeldelsesinvitasjoner etter showroom-besøk eller kjøp."
+      },
+      "replies": {
+        "title": "Kuraterte svarutkast",
+        "body": "Espanda lager gjennomtenkte utkast til svar på alle innkommende kundevurderinger for din gjennomgang."
+      }
+    },
+    "controlTitle": "Du beholder kontrollen",
+    "controlBody": "Ingenting blir postet eller svart på Google før du godkjenner det."
+  },
+  "googleWorkspace": {
+    "newPost": "Nytt Google-innlegg",
+    "subtitle": "Forhåndsvis hvordan produktlanseringer og showroom-anmeldelser synkroniseres direkte til Google.",
+    "tabs": {
+      "profile": "Profil",
+      "posts": "Innlegg",
+      "reviews": "Anmeldelser"
+    },
+    "draftPostTitle": "Utkast til Google-innlegg",
+    "actionButton": "Handlingsknapp: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Lær mer"
+    },
+    "reviewPost": "Gjennomgå innlegg",
+    "reviewsTitle": "Showroom-anmeldelser",
+    "reviewsBody": "Anmeldelser og svarutkast samles med kundesamtalene dine.",
+    "openReviews": "Åpne anmeldelser",
+    "checklistTitle": "Sjekkliste for profiloppsett",
+    "checklist": {
+      "profile": {
+        "label": "Google-profil tilkoblet",
+        "value": "Funnet"
+      },
+      "reviewLink": {
+        "label": "Direkte anmeldelsesforespørselslenke",
+        "value": "Sett opp"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Utkast forhåndsvisning",
+    "catalogConnected": "Kildebutikkatalog tilkoblet",
+    "connectDomain": "Koble til domene",
+    "previewLabel": "Forhåndsvisning av nettstudioutkast",
+    "browserTitle": "Nettstudioutkast",
+    "fullPreview": "Full forhåndsvisning",
+    "reviewPublish": "Gjennomgå og publiser utkast",
+    "footnote": "Gjennomgå innholdet og domenet ditt før publisering."
+  },
+  "websiteEdit": {
+    "saveChanges": "Lagre utkastendringer",
+    "reviewPublish": "Gjennomgå og publiser",
+    "preview": "Forhåndsvisning",
+    "title": "Rediger nettstedsinnhold",
+    "heroTitle": "Heltseksjon banner",
+    "replaceImage": "Erstatt bilde",
+    "heroImageLabel": "Heltbannerbilde",
+    "headline": "Overskrift (fransk)",
+    "description": "Beskrivelse",
+    "sectionsTitle": "Seksjoner på siden",
+    "sectionCount_one": "{{count}} seksjon",
+    "sectionCount_other": "{{count}} seksjoner",
+    "sections": {
+      "heroBanner": "Heltbanner",
+      "featuredCollection": "Utvalgt samling",
+      "showroomContact": "Showroom & kontakt"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Bekreft et domene og gjennomgå innholdet for å publisere.",
+    "publish": "Publiser nettsted",
+    "keepDraft": "Behold som kladd",
+    "title": "Gjennomgå nettstedet ditt",
+    "subtitle": "Sjekk innholdet og destinasjonen før du går live.",
+    "heroImageLabel": "Nettstedets hovedbilde",
+    "destinationTitle": "Publiseringsdestinasjon",
+    "destinationBody": "Koble til og bekreft et domene for å publisere denne kladden.",
+    "setUpDomain": "Sett opp et domene"
+  }
+}

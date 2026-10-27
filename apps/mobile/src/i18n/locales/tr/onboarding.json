@@ -1,0 +1,269 @@
+{
+  "signIn": {
+    "title": "Espanda'ya Hoş Geldiniz",
+    "subtitle": "İşletmeniz için içerik oluşturun.",
+    "mobileNumber": "Cep telefonu numarası",
+    "countryCode": "Ülke kodu {{code}}",
+    "sendCode": "Kodu gönder",
+    "useEmail": "E-posta kullan",
+    "sendFailed": "Kod gönderilemedi. Tekrar deneyin veya e-posta kullanın.",
+    "chooseCountry": "Ülkenizi seçin",
+    "searchCountry": "Ülke veya kod arayın"
+  },
+  "email": {
+    "title": "E-posta ile giriş yap",
+    "subtitle": "Size şifresiz bir doğrulama kodu e-postayla göndereceğiz.",
+    "tagline": "Modern perakende için akıllı pazarlama",
+    "label": "E-posta adresi",
+    "placeholder": "name@yourbusiness.com",
+    "notConfigured": "E-posta ile giriş bu sunucuda henüz ayarlanmadı.",
+    "sendFailed": "Kodu gönderemedik. Tekrar deneyin.",
+    "useMobile": "Cep telefonu numarası kullan",
+    "linkTitle": "E-posta ekle",
+    "linkSubtitle": "Numaranız doğrulandı. Makbuzlar ve ekip davetleri için bir e-posta ekleyin. Size bir kod göndereceğiz."
+  },
+  "verify": {
+    "title": "Kodunuzu girin",
+    "sent": "{{destination}} adresine bir doğrulama kodu gönderdik",
+    "codeLabel": "Altı haneli doğrulama kodu",
+    "submit": "Kodu doğrula",
+    "checkFailed": "Kodu kontrol edemedik. Tekrar deneyin.",
+    "resendFailed": "Kodu yeniden gönderemedik.",
+    "resendIn": "Kodu {{time}} içinde yeniden gönder",
+    "resend": "Kodu yeniden gönder",
+    "changeEmail": "E-postayı değiştir",
+    "changeMobile": "Cep numarasını değiştir"
+  },
+  "welcome": {
+    "getStarted": "Başlayın",
+    "footnote": "İşletmeniz, sizin yaratıcı yönünüz.",
+    "photosLabel": "{{brand}} kataloğundan örnekler",
+    "title": "İşletmeniz gibi hissettiren pazarlama",
+    "body": "Kataloğunuzdan markaya uygun stüdyo videoları, fotoğraf çekimleri ve ürün gönderileri oluşturun.",
+    "steps": {
+      "goal": {
+        "title": "Hedefinizi seçin",
+        "body": "Üretmek istediğiniz ilk yaratıcı formatı seçin."
+      },
+      "business": {
+        "title": "İşletmenizi paylaşın",
+        "body": "Web sitenizi paylaşın veya işletme bilgilerinizi ekleyin."
+      },
+      "review": {
+        "title": "Hazır içeriği gözden geçirin",
+        "body": "Ürünleriniz etrafında oluşturulan fikirleri gözden geçirin."
+      }
+    }
+  },
+  "goal": {
+    "title": "Önce ne oluşturacaksınız?",
+    "subtitle": "İlk çalışma alanınızı ve şablonlarınızı ana odağınıza göre özelleştireceğiz.",
+    "note": "Tüm araçlar ve stüdyo formatları daha sonra da kullanılabilir.",
+    "options": {
+      "socialPlan": {
+        "title": "Sosyal medya planı",
+        "description": "Bir ay boyunca gönderiler ve başlıklar"
+      },
+      "marketingVideos": {
+        "title": "Pazarlama videoları",
+        "description": "Kataloğunuzdan stüdyo videoları"
+      },
+      "fashionPhotoshoot": {
+        "title": "Moda fotoğraf çekimi",
+        "description": "Modeller üzerinde stil kıyafetler"
+      },
+      "productPhotoshoot": {
+        "title": "Ürün fotoğraf çekimi",
+        "description": "Kataloğunuz için ürün fotoğrafları"
+      }
+    }
+  },
+  "source": {
+    "title": "İşletmeniz çevrimiçi nerede?",
+    "subtitle": "Espanda, markaya uygun medya oluşturmak için çevrimiçi mağazanızı veya listenizi otomatik olarak tarar.",
+    "options": {
+      "website": {
+        "title": "Web sitesi",
+        "description": "Shopify, WooCommerce, özel alan adı"
+      },
+      "googleMaps": {
+        "title": "Google Haritalar",
+        "description": "Yerel mağaza, butik veya showroom"
+      },
+      "marketplace": {
+        "title": "Pazar yeri",
+        "description": "Amazon, Etsy, eBay veya Instagram mağazası"
+      },
+      "wholesale": {
+        "title": "Toptan / B2B",
+        "description": "Faire, Ankorstore, özel katalog"
+      },
+      "none": {
+        "title": "Çevrimiçi varlık yok",
+        "description": "Ürünlerinizi manuel olarak tanımlayın"
+      },
+      "other": {
+        "title": "Başka bir şey",
+        "description": "Sosyal hesap, PDF lookbook veya dosya"
+      }
+    }
+  },
+  "website": {
+    "title": "Web siteniz nedir?",
+    "subtitle": "Katalog fotoğraflarınızı, renklerinizi ve ses tonunuzu otomatik olarak çekeceğiz.",
+    "label": "Mağaza web sitesi url'si",
+    "placeholder": "www.yourstore.com",
+    "valid": "Geçerli adres",
+    "willRead": "Bu siteyi okuyacağız",
+    "facts": {
+      "catalog": {
+        "key": "Katalog ürünleri",
+        "value": "Ürün fotoğrafları"
+      },
+      "identity": {
+        "key": "Marka kimliği",
+        "value": "Renkler ve Tipografi"
+      },
+      "tone": {
+        "key": "Ton ve stil",
+        "value": "Sayfalarınızdan ses"
+      }
+    },
+    "safeNote": "Katalog içe aktarma, canlı mağazanızda hiçbir şeyi değiştirmez."
+  },
+  "manual": {
+    "title": "İşletme bilgilerini ekleyin",
+    "subtitle": "Bir liste bağlantısı paylaşın veya kataloğunuzu manuel olarak tanımlayın.",
+    "modeLabel": "İşletmenizi nasıl ekleyeceksiniz",
+    "modeListing": "Liste URL'si",
+    "modeDescribe": "İşletmeyi tanımla",
+    "listingLabel": "Liste bağlantısı *",
+    "listingPlaceholder": "Etsy, Amazon, Google Haritalar veya mağaza bağlantısı",
+    "nameLabel": "İşletme adı *",
+    "namePlaceholder": "ör. Atelier Bois & Chiffons",
+    "sellsLabel": "Ne satıyorsunuz? *",
+    "sellsPlaceholder": "ör. El yapımı ahşap masalar, TV üniteleri ve modern ev dekorasyonu...",
+    "locationLabel": "Konum (isteğe bağlı)",
+    "locationPlaceholder": "Şehir, ülke veya showroom adresi",
+    "websiteLabel": "Web sitesi (isteğe bağlı)"
+  },
+  "learning": {
+    "working": "Çalışıyor",
+    "tryAgain": "Tekrar deneyin",
+    "inProgressButton": "Öğrenme devam ediyor...",
+    "saved": "İlerlemenizi kaydedeceğiz.",
+    "title": "İşletmenizi tanıyoruz",
+    "bodyWebsite": "Web sitenizi analiz ederek marka kimliği, kataloglar ve görsel ton çıkarıyoruz.",
+    "bodyManual": "Açıklamanızı marka kimliği, kataloglar ve görsel tona dönüştürüyoruz.",
+    "fallbackName": "İşletmeniz",
+    "sourceWebsite": "Birincil web sitesi kaynağı",
+    "sourceManual": "İşletme detayları",
+    "foundWebsite": "Web sitesi bulundu",
+    "foundManual": "Detaylar eklendi",
+    "stages": {
+      "open": "Web sitesi açılıyor",
+      "identity": "Marka kimliği ve tonu okunuyor",
+      "photos": "Ürün fotoğrafları toplanıyor"
+    },
+    "status": {
+      "done": "Tamamlandı",
+      "running": "Devam ediyor",
+      "queued": "Sırada"
+    },
+    "errors": {
+      "stopped": "Web sitenizi okuma durduruldu.",
+      "noWorkspace": "Hesabınızda henüz bir çalışma alanı yok.",
+      "startFailed": "Web sitenizi okumaya başlayamadık.",
+      "restartFailed": "Yeniden başlatılamadı. Tekrar deneyin."
+    }
+  },
+  "review": {
+    "title": "İşletme detaylarını gözden geçirin",
+    "subtitle": "Web sitenizde bu detayları bulduk. İstediğiniz zaman düzenleyebilirsiniz.",
+    "edit": "Düzenle",
+    "tagline": "Slogan",
+    "editTagline": "Sloganı düzenle",
+    "categoryLocation": "Kategori ve konum",
+    "audience": "Hedef kitle",
+    "editAudience": "Hedef kitleyi düzenle",
+    "products_one": "Tespit edilen ürünler ({{count}})",
+    "products_other": "Tespit edilen ürünler ({{count}})",
+    "found": "Bulundu",
+    "strengths": "Marka güçlü yönleri",
+    "tags": {
+      "homeLiving": "Ev & Yaşam",
+      "france": "Fransa",
+      "productCatalog": "Ürün kataloğu",
+      "showroomEshop": "Fiziksel showroom & e-mağaza"
+    }
+  },
+  "brand": {
+    "title": "Marka & yaratıcı stil",
+    "subtitle": "Espanda'nın fotoğraf çekimlerinizi ve sosyal paylaşımlarınızı nasıl şekillendirdiğini ayarlayın.",
+    "identity": "{{name}} kimliği",
+    "paletteMeta": "Web sitesi paleti · Düzenlenebilir",
+    "swatches": "İçe aktarılan web sitesi renk örnekleri",
+    "tone": "Yaratıcı ton",
+    "selected_one": "{{count}} seçildi",
+    "selected_other": "{{count}} seçildi",
+    "tones": {
+      "modern": "Modern",
+      "luxurious": "Lüks",
+      "elegant": "Zarif",
+      "premium": "Premium",
+      "natural": "Doğal",
+      "minimalist": "Minimalist"
+    },
+    "contentLanguage": "İçerik dili",
+    "contentLanguageA11y": "İçerik dili, {{language}}. Değiştir",
+    "languages": {
+      "fr": "Fransızca (FR)",
+      "en": "İngilizce (US)"
+    },
+    "audienceProfile": "Hedef kitle profili",
+    "audienceHome": "Ev & mobilya",
+    "featured": "Öne çıkan katalog ürünleri",
+    "readyForBatch_one": "{{count}} toplu işlem için hazır",
+    "readyForBatch_other": "{{count}} toplu işlem için hazır",
+    "sampleProducts": {
+      "table": "Bunting masa",
+      "tableDetail": "Acacia 240cm",
+      "tv": "TV ünitesi",
+      "tvDetail": "Acacia 2 kapı"
+    },
+    "channelsNote": "Instagram ve Facebook bir sonraki adımda bağlanabilir. (Henüz kanal bağlanmadı)"
+  },
+  "preparing": {
+    "ready": "Stüdyo hazır",
+    "preparing": "Stüdyo hazırlanıyor",
+    "loadingButton": "Fikirleriniz hazırlanıyor…",
+    "catalogSafe": "Kataloğunuz mağazanızda dokunulmadan kalır.",
+    "title": "İlk fikirlerinizi hazırlıyoruz",
+    "body": "{{name}} koleksiyonunuzdan özel sosyal videolar ve sahne setleri oluşturuluyor.",
+    "photosTitle": "Fotoğraflar toplanıyor",
+    "photosDetail": "{{product}} yemek takımı",
+    "storyboardTitle": "Storyboard oluşturuluyor",
+    "storyboardDetail_one": "{{count}} video sahnesi oluşturuluyor",
+    "storyboardDetail_other": "{{count}} video sahnesi oluşturuluyor",
+    "nextTitle": "Sıradaki: Fikirlerinizi gözden geçirin",
+    "nextDetail": "Kancaları ve ses ön ayarlarını seçin"
+  },
+  "connect": {
+    "readyToConnect": "• Bağlanmaya hazır",
+    "title": "Hazır olduğunuzda yayınlayın",
+    "subtitle": "Sosyal hesaplarınızı bağlayın, böylece Espanda doğrudan yayınlanmaya hazır videolar ve ürün spotları oluşturabilir veya taslak olarak kaydedebilir.",
+    "toolsTitle": "Yayınlama araçları",
+    "featureReels": "Instagram Akış & Reels'e yayınla",
+    "featureCaptions": "Altyazılarınızı ve hashtag'lerinizi kullanın",
+    "featureReview": "Her şey canlıya geçmeden önce her zaman gözden geçirirsiniz",
+    "assurance": "Onayınız olmadan içerik yayınlanmaz",
+    "connectInstagram": "Instagram'ı Bağla",
+    "connectFacebook": "Facebook'u Bağla",
+    "skip": "Şimdilik atla",
+    "laterTitle": "Daha sonra bağla?",
+    "laterBody": "Yine de yüksek çözünürlüklü videolar ve fotoğraf çekimlerini oluşturabilir, düzenleyebilir ve kamera rulonuza indirebilirsiniz. Instagram'ınızı Ayarlar'da istediğiniz zaman bağlayabilirsiniz.",
+    "laterDownload": "Oluşturduklarınızı indir",
+    "laterSettings": "Kanalları Ayarlar'da bağla",
+    "continueWithout": "Bağlamadan devam et"
+  }
+}

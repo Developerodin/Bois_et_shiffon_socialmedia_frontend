@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Arbeitsbereich {{name}}",
+    "customers": "Kunden",
+    "customerTabs": {
+      "inbox": "Posteingang",
+      "reviews": "Bewertungen",
+      "people": "Personen"
+    },
+    "status": {
+      "notConnected": "Nicht verbunden"
+    },
+    "draft": "Entwurf",
+    "googleGrowth": "Google-Wachstum",
+    "websiteStudio": "Website-Studio",
+    "editContent": "Inhalt bearbeiten",
+    "diningTableImage": "Acacia Bunting Esstisch",
+    "pages": {
+      "home": "Startseite",
+      "product": "Produkt",
+      "contact": "Kontakt"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Geschäft wechseln, {{name}}",
+    "title": "Marketing",
+    "subtitle": "Verwalte die Sichtbarkeit deines Shops, Gespräche und dein Markenprofil",
+    "cue": {
+      "imageLabel": "Acacia TV-Einheit im Wohnzimmer inszeniert",
+      "dismiss": "Hinweis für heute verwerfen",
+      "eyebrow": "Heutiger Hinweis",
+      "title": "Neue Katalogfotos hinzufügen",
+      "body": "Neue Fotos halten deine automatisierten Reels und den Website-Entwurf aktuell."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Kunden",
+        "body": "Posteingang, Bewertungen und Personen",
+        "cta": "Posteingang öffnen"
+      },
+      "google": {
+        "title": "Google-Wachstum",
+        "body": "Profil, Beiträge und Bewertungen",
+        "cta": "Konfigurieren"
+      },
+      "website": {
+        "title": "Website-Studio",
+        "body": "Entwurf, Bearbeitung und Veröffentlichung deiner Seite",
+        "cta": "Entwurf öffnen"
+      },
+      "business": {
+        "title": "Geschäft",
+        "body": "Marke, Assets und Verbindungen",
+        "cta": "Verwalten"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Noch keine Nachrichten",
+    "emptyBody": "Verbinde deine Kundenkanäle, um direkte Produktanfragen zu erhalten und KI-gestützte Entwürfe sicher zu prüfen, bevor du sie sendest.",
+    "connectChannel": "Kanal verbinden",
+    "emptyFootnote": "Neue Nachrichten werden automatisch verfügbar, sobald verbunden.",
+    "channelsTitle": "Unterstützte Nachrichtendienste",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Verbinde ein Konto, um Nachrichten zu empfangen."
+  },
+  "reply": {
+    "title": "Antwortassistent",
+    "referencedProduct": "Referenziertes Produkt",
+    "suggestionTitle": "Espanda Antwortvorschlag",
+    "draftLabel": "Antwortentwurf",
+    "tone": "Ton: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Poliert & handwerklich"
+    },
+    "done": "Fertig",
+    "editReply": "Antwort bearbeiten",
+    "approvalTitle": "Manuelle Genehmigung erforderlich",
+    "approvalBody": "Keine Nachricht wird ohne deinen ausdrücklichen Klick gesendet.",
+    "exampleTitle": "Beispielgesprächsmodus",
+    "exampleBody": "Das Verbinden deines Instagram- oder Facebook-Kontos ersetzt dieses Beispiel durch echte Kundenanfragen."
+  },
+  "reviews": {
+    "emptyTitle": "Noch keine Bewertungen",
+    "emptyBody": "Verbinde dein Google Business-Profil, um automatisch verifizierte Kundenfeedbacks zu sammeln und zu beantworten.",
+    "connectGoogle": "Google Business verbinden",
+    "automatedTitle": "Automatisierte Bewertungsanfragen",
+    "connectFirst": "Zuerst verbinden",
+    "automatedBody": "Erfordert eine Verbindung zu Google Business, um personalisierte Bewertungsanfragen zu senden."
+  },
+  "people": {
+    "emptyTitle": "Noch keine Kundendaten",
+    "emptyBody": "Personen, von denen du über verbundene Kundenkanäle hörst, werden hier angezeigt.",
+    "connectChannel": "Kanal verbinden",
+    "directoryTitle": "Dein Kundenverzeichnis",
+    "directoryBody": "Öffne den Datensatz einer Person, um ihre Gespräche und Kontaktdaten an einem Ort zu sehen.",
+    "connectedChannels": "Verbundene Kundenkanäle"
+  },
+  "google": {
+    "presenceTitle": "Deine Google-Präsenz",
+    "presenceBody": "Halte deinen lokalen französischen Showroom automatisch auf Google Maps und in der Suche sichtbar.",
+    "profileTitle": "Google Business-Profil",
+    "profileBody": "Synchronisiere deine offizielle Ladenadresse, Öffnungszeiten und neue Katalogfotos direkt mit Google Maps.",
+    "connectProfile": "Google Business-Profil verbinden",
+    "capabilitiesTitle": "Automatische Synchronisationsfähigkeiten",
+    "capabilities": {
+      "catalog": {
+        "title": "Profil- & Katalogaktualisierungen",
+        "body": "Synchronisiere neu inszenierte Fotos und Möbeldrops mit deinen lokalen Google-Post-Updates."
+      },
+      "reviews": {
+        "title": "Bewertungsanfragen",
+        "body": "Erstelle höfliche französische Bewertungsanfragen nach Showroombesuchen oder Käufen."
+      },
+      "replies": {
+        "title": "Kurierte Antwortentwürfe",
+        "body": "Espanda erstellt durchdachte Antwortentwürfe für alle eingehenden Kundenbewertungen zur Überprüfung."
+      }
+    },
+    "controlTitle": "Du behältst die Kontrolle",
+    "controlBody": "Nichts wird auf Google gepostet oder beantwortet, bis du es genehmigst."
+  },
+  "googleWorkspace": {
+    "newPost": "Neuer Google-Post",
+    "subtitle": "Vorschau, wie Produktdrops und Showroombewertungen direkt mit Google synchronisiert werden.",
+    "tabs": {
+      "profile": "Profil",
+      "posts": "Beiträge",
+      "reviews": "Bewertungen"
+    },
+    "draftPostTitle": "Google-Post-Entwurf",
+    "actionButton": "Aktionsbutton: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Mehr erfahren"
+    },
+    "reviewPost": "Post überprüfen",
+    "reviewsTitle": "Showroombewertungen",
+    "reviewsBody": "Bewertungen und Antwortentwürfe werden mit deinen Kundengesprächen gesammelt.",
+    "openReviews": "Bewertungen öffnen",
+    "checklistTitle": "Profil-Setup-Checkliste",
+    "checklist": {
+      "profile": {
+        "label": "Google-Profil verbunden",
+        "value": "Gefunden"
+      },
+      "reviewLink": {
+        "label": "Direkter Bewertungsanfragelink",
+        "value": "Einrichten"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Entwurfsvorschau",
+    "catalogConnected": "Quellkatalog des Shops verbunden",
+    "connectDomain": "Domain verbinden",
+    "previewLabel": "Website-Entwurfsvorschau",
+    "browserTitle": "Website-Entwurf",
+    "fullPreview": "Vollständige Vorschau",
+    "reviewPublish": "Entwurf überprüfen & veröffentlichen",
+    "footnote": "Überprüfe deinen Inhalt und deine Domain vor der Veröffentlichung."
+  },
+  "websiteEdit": {
+    "saveChanges": "Entwurfsänderungen speichern",
+    "reviewPublish": "Überprüfen & veröffentlichen",
+    "preview": "Vorschau",
+    "title": "Website-Inhalt bearbeiten",
+    "heroTitle": "Hero-Banner",
+    "replaceImage": "Bild ersetzen",
+    "heroImageLabel": "Hero-Banner-Bild",
+    "headline": "Überschrift (Französisch)",
+    "description": "Beschreibung",
+    "sectionsTitle": "Seitensektionen",
+    "sectionCount_one": "{{count}} Sektion",
+    "sectionCount_other": "{{count}} Sektionen",
+    "sections": {
+      "heroBanner": "Hero-Banner",
+      "featuredCollection": "Vorgestellte Kollektion",
+      "showroomContact": "Showroom & Kontakt"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Verifiziere eine Domain und überprüfe den Inhalt, um zu veröffentlichen.",
+    "publish": "Website veröffentlichen",
+    "keepDraft": "Als Entwurf behalten",
+    "title": "Überprüfe deine Website",
+    "subtitle": "Überprüfe deinen Inhalt und das Ziel, bevor du live gehst.",
+    "heroImageLabel": "Website-Hauptbild",
+    "destinationTitle": "Veröffentlichungsziel",
+    "destinationBody": "Verbinde und verifiziere eine Domain, um diesen Entwurf zu veröffentlichen.",
+    "setUpDomain": "Domain einrichten"
+  }
+}

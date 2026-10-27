@@ -1,0 +1,219 @@
+{
+  "status": {
+    "planned": "Plánováno",
+    "briefReady": "Brief připraven",
+    "needsReview": "Potřebuje kontrolu",
+    "draftReady": "Návrh připraven",
+    "approved": "Schváleno",
+    "scheduled": "Naplánováno",
+    "published": "Publikováno",
+    "draft": "Návrh"
+  },
+  "date": {
+    "long": "{{weekday}}, {{day}} {{month}} {{year}}",
+    "short": "{{day}} {{month}} {{year}}",
+    "slot": "{{day}} · {{time}}",
+    "today": "Dnes",
+    "tomorrow": "Zítra"
+  },
+  "chrome": {
+    "openMenu": "Otevřít menu",
+    "logo": "Espanda",
+    "credits_one": "{{count}} kredit k dispozici",
+    "credits_other": "{{count}} kreditů k dispozici",
+    "settings": "Nastavení",
+    "modulesLabel": "Moduly aplikace",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Příspěvky",
+      "photoshoot": "Fotoshoot",
+      "marketing": "Marketing"
+    },
+    "navLabel": "Navigace modulu",
+    "nav": {
+      "today": "Dnes",
+      "posts": "Příspěvky",
+      "create": "Vytvořit",
+      "stories": "Příběhy",
+      "settings": "Nastavení"
+    },
+    "back": "Zpět",
+    "switchBusiness": "Přepnout podnik, {{name}}",
+    "business": "Podnik: {{name}}"
+  },
+  "row": {
+    "timeZoned": "{{time}} CET",
+    "label": "{{title}}, {{status}}"
+  },
+  "today": {
+    "title": "Vaše příspěvky v pohybu",
+    "subtitle": "Zkontrolujte vygenerované produktové highlighty a naplánované příspěvky",
+    "needsApproval": "Potřebuje schválení",
+    "channelStatus": "{{channel}} · {{status}}",
+    "reviewPost": "Zkontrolovat příspěvek",
+    "agenda": "Nadcházející agenda",
+    "thisWeek": "Tento týden",
+    "slotLabel": "{{title}}, {{when}}, {{status}}",
+    "viewCalendar": "Zobrazit kalendář"
+  },
+  "calendar": {
+    "title": "Kalendář příspěvků",
+    "subtitle": "Plánujte a automatizujte své vydání",
+    "viewLabel": "Zobrazení kalendáře",
+    "views": {
+      "month": "Měsíc",
+      "list": "Seznam"
+    },
+    "plan": "Plán: {{n}} příspěvků / měsíc",
+    "managePlan": "Spravovat plán",
+    "postCount_one": "{{count}} příspěvek",
+    "postCount_other": "{{count}} příspěvků",
+    "empty": "Na tento den není nic naplánováno.",
+    "scheduled_one": "{{count}} naplánován",
+    "scheduled_other": "{{count}} naplánováno",
+    "previousMonth": "Předchozí měsíc",
+    "nextMonth": "Další měsíc",
+    "gridLabel": "Kalendář {{month}}",
+    "dayWithPosts_one": "{{day}} · {{count}} příspěvek",
+    "dayWithPosts_other": "{{day}} · {{count}} příspěvků"
+  },
+  "detail": {
+    "title": "Detaily příspěvku",
+    "moreOptions": "Více možností",
+    "feedPhoto": "4:5 Fotka pro feed",
+    "fullscreen": "Celá obrazovka",
+    "captionFrench": "Popisek (francouzsky)",
+    "editText": "Upravit text",
+    "channels": "Publikační kanály",
+    "instagramFeed": "Instagram Feed",
+    "instagramDetail": "Připojte účet pro publikování",
+    "facebookPage": "Facebook stránka",
+    "facebookDetail": "Automatické zveřejnění na oficiální stránce",
+    "notConnected": "Nepřipojeno",
+    "channelNotConnected": "{{name}}, nepřipojeno",
+    "editPost": "Upravit příspěvek",
+    "schedule": "Naplánovat"
+  },
+  "edit": {
+    "title": "Upravit příspěvek",
+    "cancel": "Zrušit",
+    "save": "Uložit změny",
+    "previewLabel": "{{title}}, původní poměr 4:5",
+    "ratio": "Původní poměr · 4:5",
+    "sectionLabel": "Upravit sekci",
+    "tabs": {
+      "image": "Obrázek",
+      "caption": "Popisek",
+      "brand": "Značka"
+    },
+    "description": "Popis příspěvku",
+    "language": "Jazyk: francouzština (FR)",
+    "suggestedHashtags": "Navrhované hashtagy",
+    "addHashtag": "Přidat hashtag",
+    "add": "+ Přidat",
+    "regenerate": "Znovu vygenerovat popisek pomocí AI",
+    "imageHint": "Původní poměr · 4:5. Přetáhněte náhled pro změnu výřezu.",
+    "brandHint": "Logo, barvy a tón odpovídají vaší značkové sadě {{brand}}."
+  },
+  "schedule": {
+    "title": "Naplánovat",
+    "storyFormat": "Příběh · 9:16 obrázek",
+    "feedFormat": "Feed příspěvek · 4:5 obrázek",
+    "destination": "Cíl",
+    "actionRequired": "Vyžadována akce",
+    "notLinked": "Instagram účet není propojen",
+    "notLinkedBody": "Propojte své sociální účty pro přímé naplánované publikování.",
+    "connect": "Propojit sociální účet",
+    "locked": "Plánování uzamčeno do propojení",
+    "timing": "Časování a plánování",
+    "date": "Datum",
+    "dateLabel": "Datum, {{date}}",
+    "time": "Čas",
+    "timeLabel": "Čas, {{time}}",
+    "timezone": "Časové pásmo",
+    "schedulePost": "Naplánovat příspěvek",
+    "scheduleLocked": "Naplánovat příspěvek (Nejprve propojte kanál)",
+    "saveDraft": "Uložit návrh"
+  },
+  "brief": {
+    "title": "Vytvořit příspěvek",
+    "subtitle": "Vyberte produkt a kreativní směr",
+    "format": "Formát obsahu",
+    "formatLabel": "Formát příspěvku",
+    "singlePhoto": "Jedna fotka",
+    "singlePhotoDetail": "4:5 Zaměření na feed",
+    "carousel": "Karusel",
+    "carouselDetail": "Více fotek",
+    "formatOption": "{{title}}, {{detail}}",
+    "goal": "Hlavní cíl",
+    "goals": {
+      "newArrival": "Novinka",
+      "productFeature": "Představení produktu",
+      "specialOffer": "Speciální nabídka"
+    },
+    "product": "Cílový produkt katalogu",
+    "changeProduct": "Změnit produkt",
+    "change": "Změnit",
+    "direction": "Kreativní směr (volitelné)",
+    "directionLanguage": "Francouzština (FR)",
+    "directionPlaceholder": "např. Zaměřte se na ruční zpracování a teplo",
+    "cost": "Cena vytvoření:",
+    "costPending": "Odhad čeká",
+    "draftPost": "Návrh příspěvku"
+  },
+  "stories": {
+    "title": "Příběhy",
+    "subtitle": "9:16 vertikální sociální momenty",
+    "newStory": "Nový příběh",
+    "statusLabel": "Stav příběhu",
+    "drafts_one": "Návrhy ({{count}})",
+    "drafts_other": "Návrhy ({{count}})",
+    "scheduled_one": "Naplánováno ({{count}})",
+    "scheduled_other": "Naplánováno ({{count}})",
+    "samplePreview": "Ukázkový náhled",
+    "moreOptions": "Další možnosti pro {{title}}",
+    "editStory": "Upravit příběh"
+  },
+  "editStory": {
+    "back": "Zpět",
+    "undo": "Zpět",
+    "tools": {
+      "text": "Text",
+      "image": "Obrázek",
+      "brand": "Značka",
+      "cta": "CTA"
+    },
+    "toolLabel": "Nástroj {{tool}}",
+    "captionTitle": "Titulek příběhu / Odkazový štítek",
+    "languageCode": "FR",
+    "saveDraft": "Uložit návrh",
+    "scheduleStory": "Naplánovat příběh"
+  },
+  "planner": {
+    "title": "Plánovač příspěvků",
+    "sectionsLabel": "Nastavení sekcí",
+    "sections": {
+      "business": "Moje firma",
+      "billing": "Fakturace",
+      "planner": "Plánovač příspěvků"
+    },
+    "cycle": "Plánovací cyklus",
+    "cadence": "Frekvence publikování",
+    "monthlyTarget": "Měsíční cíl",
+    "feedPosts": "Příspěvky ve feedu",
+    "stories": "Příběhy",
+    "perMonth": "{{n}} / měsíc",
+    "feedNote": "~1 příspěvek denně",
+    "storiesNote": "Rozloženo během měsíce",
+    "cadenceHint": "Doporučené cíle obsahu. Upravte před generováním kalendáře.",
+    "pillars": "Obsahové pilíře",
+    "pillar": {
+      "catalog": "Katalogové produkty (zaměření na Bunting)",
+      "craft": "Detaily materiálu & řemeslo (Acacia wood)",
+      "story": "Příběh značky & francouzské dědictví"
+    },
+    "pillarLabel": "{{label}}, {{share}}",
+    "reviewNote": "<b>Ruční kontrola před publikováním: </b>Generované návrhy jsou umístěny do vašeho kalendáře jako návrhy pro vaše konečné potvrzení. Žádný obsah není publikován bez schválení.",
+    "generate": "Generovat kalendář"
+  }
+}

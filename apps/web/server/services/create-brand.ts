@@ -63,5 +63,9 @@ export async function createBrandWithResearch(
     trigger: "event",
     userId,
   });
+  // Site scores alongside the documents: SEO and GEO read the site themselves, so they run in parallel.
+  for (const agentKey of ["seo", "geo"]) {
+    await startAgentRun({ workspaceId, brandId: brand.id, agentKey, trigger: "event", userId });
+  }
   return { brand, researchRunId: run.id };
 }

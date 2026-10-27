@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { AccessDeniedError } from "@/server/auth/errors";
 import { appUrl } from "@/server/auth/tokens";
-import { PROVIDER_SLUGS, ProviderError } from "@/server/integrations/providers";
+import { PROVIDERS, PROVIDER_SLUGS, ProviderError } from "@/server/integrations/providers";
 import { completeConnect, ConnectionError } from "@/server/services/connections";
 
 /** OAuth redirect target for every provider. Always lands the user back on Settings → Connections. */
@@ -19,13 +19,20 @@ export async function GET(request: Request, context: { params: Promise<{ provide
   }
 
   const session = await auth();
-  if (!session?.user?.id) return Response.redirect(appUrl("/login"), 303);
+  // Signed out mid-connect: sign in, then land back on Connections (the OAuth code is single-use, so they connect again).
+  if (!session?.user?.id) return Response.redirect(appUrl(`/login?next=${encodeURIComponent("/settings?tab=connections")}`), 303);
 
   try {
     const { connections } = await completeConnect({ provider, state, code, userId: session.user.id });
     return back({ connected: connections.map((c) => c.displayName).join(", ") });
   } catch (error) {
-    if (error instanceof ConnectionError || error instanceof ProviderError) return back({ connectError: error.message });
+    if (error instanceof ConnectionError) return back({ connectError: error.message });
+    if (error instanceof ProviderError) {
+      // "<status> <provider text>" (e.g. "400 Error validating verification code") is for logs, not people.
+      console.error(`[integrations] ${provider} connect failed:`, error.message);
+      const raw = /^\d{3} /.test(error.message);
+      return back({ connectError: raw ? `Couldn't connect ${PROVIDERS[provider].label}. Try again.` : error.message });
+    }
     if (error instanceof AccessDeniedError) return back({ connectError: "You don't have permission to connect accounts for this brand" });
     console.error("[integrations] callback failed", error);
     return back({ connectError: "Something went wrong while connecting. Try again." });

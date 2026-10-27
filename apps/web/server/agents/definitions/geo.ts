@@ -12,7 +12,7 @@ import { aiProviderName } from "@/server/ai/provider";
 import { aiCrawlerAccess, applyPriorities, geoTechnicalChecks, scoreFindings, type Finding } from "@/server/seo/checks";
 import { collectSiteFacts } from "@/server/seo/site-facts";
 import { saveAuditReport } from "@/server/services/audit-reports";
-import { confirmedContext } from "@/server/services/context-docs";
+import { latestContext } from "@/server/services/context-docs";
 
 const QUESTION_COUNT = 5; // ponytail: 5 web-search answers per run caps cost; raise for a wider panel
 
@@ -107,7 +107,7 @@ export const geoAgent: AgentDefinition = {
     });
     citP.catch(() => {}); // the error still surfaces at `await citP`; this only avoids an unhandled rejection meanwhile
 
-    const context = await confirmedContext(brand.workspaceId, brand.brandId);
+    const context = await latestContext(brand.workspaceId, brand.brandId);
     const q = await ctx.ai.generateObject({
       workflowId: "geo.questions",
       promptVersion: PROMPT_VERSION,

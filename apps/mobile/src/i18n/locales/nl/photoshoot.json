@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "Menu openen",
+    "creditsAvailable_one": "{{count}} tegoed beschikbaar",
+    "creditsAvailable_other": "{{count}} tegoeden beschikbaar",
+    "settings": "Instellingen",
+    "appModules": "App-modules",
+    "modules": {
+      "reels": "Reels",
+      "posts": "Berichten",
+      "photoshoot": "Fotoshoot",
+      "marketing": "Marketing"
+    },
+    "moduleNavigation": "Module-navigatie",
+    "create": "Creëer",
+    "results": "Resultaten",
+    "goBack": "Teruggaan",
+    "switchBusiness": "Wissel van bedrijf, {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} item",
+    "optionWithCount_other": "{{label}} {{count}} items"
+  },
+  "create": {
+    "title": "Fotoshoot maken",
+    "subtitle": "Maak productfoto's en style kleding op modellen.",
+    "product": {
+      "imageLabel": "{{name}} eettafel",
+      "pill": "Catalogusitem",
+      "title": "Productfotoshoot",
+      "body": "Plaats catalogusitems in architecturale interieurs en studio-omgevingen met natuurlijk licht.",
+      "cta": "Nieuwe productshoot"
+    },
+    "fashion": {
+      "imageLabel": "Illustratie kledingfotostudio",
+      "title": "Modefotoshoot",
+      "body": "Style kleding op modellen in campagneready scènes.",
+      "cta": "Nieuwe modeshow"
+    }
+  },
+  "product": {
+    "title": "Productfotoshoot",
+    "estimate_one": "Schatting: {{count}} tegoed",
+    "estimate_other": "Schatting: {{count}} tegoeden",
+    "available": "{{count}} beschikbaar",
+    "generate": "Fotoshoot genereren",
+    "selectedAsset": "Geselecteerd catalogusitem",
+    "changeAsset": "Wijzig item",
+    "aspectRatio": "Beeldverhouding",
+    "sceneStyle": "Scène stijl",
+    "scenes": {
+      "studio": "Studio",
+      "interior": "Interieur",
+      "custom": "Aangepast"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "Creatieve briefing",
+    "briefHint": "Verfijn verlichting, sfeer of specifieke decor cues",
+    "sourcePreview": "Bronvoorbeeld",
+    "fullPreview": "{{product}}, volledig voorbeeld",
+    "sourceImage": "Bronafbeelding"
+  },
+  "fashion": {
+    "title": "Modefotoshoot",
+    "generate": "Fotoshoot genereren",
+    "uploadToEnable": "Upload een kledingfoto om generatie in te schakelen",
+    "heading": "Bouw je modeshow",
+    "subtitle": "Transformeer flat lays of hangende kledingstukken in realistisch gestileerde modellen.",
+    "garmentPhoto": "Kledingfoto",
+    "required": "Vereist",
+    "garmentSelected": "Kledingfoto: {{label}}. Foto wijzigen",
+    "addGarment": "Kledingfoto toevoegen",
+    "changeGarment": "Kledingfoto wijzigen",
+    "garmentHint": "PNG of JPG op neutrale achtergrond, flat lay of ghost mannequin",
+    "modelStyling": "Model & styling",
+    "modelSelected": "Model & styling: {{model}}",
+    "models": {
+      "choose": "Kies een model",
+      "natural": "{{name}} · natuurlijke styling",
+      "editorial": "{{name}} · redactionele styling",
+      "casual": "{{name}} · casual styling"
+    },
+    "pose": "Pose",
+    "poses": {
+      "fullBody": "Volledig lichaam",
+      "threeQuarter": "Driekwart",
+      "closeUp": "Close-up detail"
+    },
+    "outputFormat": "Uitvoerformaat",
+    "formats": {
+      "feedPortrait": "Feed portret",
+      "storyReel": "Story / Reel"
+    },
+    "background": "Achtergrondinstelling",
+    "backgrounds": {
+      "studioMinimal": "Studio minimalistisch",
+      "urbanStreet": "Stedelijke straat",
+      "naturalInterior": "Natuurlijk interieur"
+    },
+    "requirementsTitle": "Uploadvereisten",
+    "requirements": {
+      "contrast": "Hoge contrast tegen achtergrond",
+      "wrinkles": "Geen zware kreukels",
+      "frontFacing": "Voorwaartse hoek"
+    }
+  },
+  "source": {
+    "title": "Kies bronitem",
+    "uploadNewLabel": "Nieuwe foto uploaden",
+    "uploadNew": "Nieuwe upload",
+    "noPhotoSelected": "Geen foto geselecteerd",
+    "photosSelected_one": "{{count}} foto geselecteerd",
+    "photosSelected_other": "{{count}} foto's geselecteerd",
+    "selectPhoto": "Selecteer een foto",
+    "usePhoto": "Gebruik foto",
+    "source": "Bron",
+    "tabs": {
+      "website": "Website",
+      "uploads": "Uploads"
+    },
+    "businessWebsite": "{{name}} · Website",
+    "fromWebsite": "Van website",
+    "filterCatalog": "Filter catalogus",
+    "filters": {
+      "all": "Alle items",
+      "tables": "Tafels",
+      "storage": "Opslag"
+    },
+    "addPhoto": "Foto toevoegen",
+    "tip": "Schoon productuitsnedes leveren optimale fotoshootresultaten. Espanda Studio behoudt de originele acaciahouttextuur."
+  },
+  "generating": {
+    "backToWorkspace": "Terug naar werkruimte",
+    "returnToWorkspace": "Terug naar werkruimte",
+    "title": "Je foto's voorbereiden",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "Je generatie draait veilig op de achtergrond. Je vindt voltooide items in Resultaten.",
+    "status": {
+      "done": "Klaar",
+      "active": "Bezig",
+      "queued": "In wachtrij"
+    },
+    "progress": "Genereren",
+    "sample": {
+      "title": "{{name}} eetfotoshoot",
+      "description": "{{product}} opstellen in architecturale daglichtinterieur.",
+      "variations_one": "{{count}} variatie",
+      "variations_other": "{{count}} variaties"
+    },
+    "steps": {
+      "catalog": "Catalogusitem verwerken",
+      "compose": "Scène & verlichting samenstellen",
+      "finish": "Afwerking & kleurkalibratie"
+    }
+  },
+  "results": {
+    "title": "Fotoshoots",
+    "subtitle": "Je product- en modefoto's",
+    "newPhotoshoot": "Nieuwe fotoshoot",
+    "filterLabel": "Filter fotoshoots",
+    "filters": {
+      "all": "Alle ({{count}})",
+      "product": "Product ({{count}})",
+      "fashion": "Mode ({{count}})"
+    },
+    "empty": "Nog geen fotoshoots.",
+    "processingLabel": "{{title}}. Verwerken, {{percent}}%",
+    "processingBadge_one": "Verwerken · {{count}} credit",
+    "processingBadge_other": "Verwerken · {{count}} credits",
+    "preview": "Voorbeeld",
+    "reviewPhotoLabel": "Foto beoordelen, {{title}}",
+    "reviewPhoto": "Foto beoordelen",
+    "sample": {
+      "studioStaging": "{{product}} · Studio opstelling",
+      "rendering": "Renderen · {{percent}}%",
+      "interiorReady_one": "Interieur · {{ratio}} · {{count}} foto klaar",
+      "interiorReady_other": "Interieur · {{ratio}} · {{count}} foto's klaar",
+      "studioDaylight": "Studio daglicht · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "Meer opties",
+    "downloadPhoto": "Foto downloaden",
+    "variation": "Variatie",
+    "share": "Fotoshoot delen",
+    "samplePreview": "Voorbeeldweergave",
+    "compareOriginal": "Vergelijk origineel",
+    "expandView": "Vergroot weergave",
+    "stagingSummary": "Opstellingssamenvatting",
+    "format": "Formaat",
+    "creationCost": "Creatiekosten",
+    "credits_one": "{{count}} credit",
+    "credits_other": "{{count}} credits",
+    "sample": {
+      "headerTitle": "{{name}} fotoshoot",
+      "vertical": "{{ratio}} Verticaal",
+      "architecturalInterior": "Architectonisch interieur",
+      "studioDaylight": "Studio daglicht",
+      "formatBadge": "{{ratio}} formaat",
+      "naturalStudio": "Natuurlijk studio",
+      "portraitPhoto": "Portretfoto"
+    }
+  }
+}

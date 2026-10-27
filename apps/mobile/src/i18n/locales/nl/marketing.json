@@ -1,0 +1,193 @@
+{
+  "shared": {
+    "workspace": "Werkruimte {{name}}",
+    "customers": "Klanten",
+    "customerTabs": {
+      "inbox": "Inbox",
+      "reviews": "Beoordelingen",
+      "people": "Mensen"
+    },
+    "status": {
+      "notConnected": "Niet verbonden"
+    },
+    "draft": "Concept",
+    "googleGrowth": "Google Groei",
+    "websiteStudio": "Website Studio",
+    "editContent": "Bewerk inhoud",
+    "diningTableImage": "Acacia Bunting eettafel",
+    "pages": {
+      "home": "Home",
+      "product": "Product",
+      "contact": "Contact"
+    }
+  },
+  "tools": {
+    "switchBusiness": "Wissel van bedrijf, {{name}}",
+    "title": "Marketing",
+    "subtitle": "Beheer de zichtbaarheid van je winkel, gesprekken en merkprofiel",
+    "cue": {
+      "imageLabel": "Acacia TV-meubel in een woonkamer",
+      "dismiss": "Sluit de tip van vandaag",
+      "eyebrow": "Tip van vandaag",
+      "title": "Voeg nieuwe catalogusfoto's toe",
+      "body": "Nieuwe foto's houden je automatische reels en websiteconcept up-to-date."
+    },
+    "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "cards": {
+      "customers": {
+        "title": "Klanten",
+        "body": "Inbox, beoordelingen en mensen",
+        "cta": "Open inbox"
+      },
+      "google": {
+        "title": "Google Groei",
+        "body": "Profiel, berichten en beoordelingen",
+        "cta": "Configureer"
+      },
+      "website": {
+        "title": "Website Studio",
+        "body": "Concept, bewerk en publiceer je site",
+        "cta": "Open concept"
+      },
+      "business": {
+        "title": "Bedrijf",
+        "body": "Merk, middelen en verbindingen",
+        "cta": "Beheer"
+      }
+    }
+  },
+  "inbox": {
+    "emptyTitle": "Nog geen berichten",
+    "emptyBody": "Verbind je klantkanalen om directe productvragen te ontvangen en AI-voorgestelde concepten veilig te beoordelen voordat je ze verzendt.",
+    "connectChannel": "Verbind je kanaal",
+    "emptyFootnote": "Nieuwe berichten worden automatisch beschikbaar zodra verbonden.",
+    "channelsTitle": "Ondersteunde berichtenkanalen",
+    "channelLabel": "{{name}}, {{status}}",
+    "lockNote": "Verbind een account om berichten te ontvangen."
+  },
+  "reply": {
+    "title": "Antwoordassistent",
+    "referencedProduct": "Genoemd product",
+    "suggestionTitle": "Espanda antwoordsuggestie",
+    "draftLabel": "Antwoordconcept",
+    "tone": "Toon: {{tone}}",
+    "tones": {
+      "polishedArtisan": "Verfijnd & ambachtelijk"
+    },
+    "done": "Klaar",
+    "editReply": "Bewerk antwoord",
+    "approvalTitle": "Handmatige goedkeuring vereist",
+    "approvalBody": "Er wordt nooit een bericht verzonden zonder jouw expliciete klik.",
+    "exampleTitle": "Voorbeeldgespreksmodus",
+    "exampleBody": "Het verbinden van je Instagram- of Facebook-account vervangt dit voorbeeld door echte klantvragen."
+  },
+  "reviews": {
+    "emptyTitle": "Nog geen beoordelingen",
+    "emptyBody": "Verbind je Google Bedrijfsprofiel om automatisch geverifieerde klantfeedback te verzamelen en te beantwoorden.",
+    "connectGoogle": "Verbind Google Bedrijf",
+    "automatedTitle": "Automatische beoordelingsverzoeken",
+    "connectFirst": "Eerst verbinden",
+    "automatedBody": "Vereist Google Bedrijfsverbinding om gepersonaliseerde beoordelingsuitnodigingen te verzenden."
+  },
+  "people": {
+    "emptyTitle": "Nog geen klantgegevens",
+    "emptyBody": "Mensen van wie je hoort via verbonden klantkanalen verschijnen hier.",
+    "connectChannel": "Verbind een kanaal",
+    "directoryTitle": "Je klantenbestand",
+    "directoryBody": "Open het record van een persoon om hun gesprekken en contactgegevens op één plek te zien.",
+    "connectedChannels": "Verbonden klantkanalen"
+  },
+  "google": {
+    "presenceTitle": "Je Google-aanwezigheid",
+    "presenceBody": "Houd je lokale Franse showroom automatisch zichtbaar op Google Maps en Zoeken.",
+    "profileTitle": "Google Bedrijfsprofiel",
+    "profileBody": "Synchroniseer je officiële winkeladres, openingstijden en nieuwe catalogusfoto's direct naar Google Maps.",
+    "connectProfile": "Verbind Google Bedrijfsprofiel",
+    "capabilitiesTitle": "Automatische synchronisatiemogelijkheden",
+    "capabilities": {
+      "catalog": {
+        "title": "Profiel- & catalogusupdates",
+        "body": "Synchroniseer nieuw gestileerde foto's en meubeluitvoeringen naar je lokale Google-berichtenupdates."
+      },
+      "reviews": {
+        "title": "Beoordelingsverzoeken",
+        "body": "Genereer beleefde Franse beoordelingsuitnodigingen na showroombezoeken of aankopen."
+      },
+      "replies": {
+        "title": "Geselecteerde antwoordconcepten",
+        "body": "Espanda maakt doordachte conceptantwoorden op alle binnenkomende klantbeoordelingen voor je beoordeling."
+      }
+    },
+    "controlTitle": "Jij blijft in controle",
+    "controlBody": "Niets wordt gepost of beantwoord op Google totdat je het goedkeurt."
+  },
+  "googleWorkspace": {
+    "newPost": "Nieuwe Google-bericht",
+    "subtitle": "Bekijk hoe productuitvoeringen en showroombeoordelingen direct naar Google synchroniseren.",
+    "tabs": {
+      "profile": "Profiel",
+      "posts": "Berichten",
+      "reviews": "Beoordelingen"
+    },
+    "draftPostTitle": "Concept Google-bericht",
+    "actionButton": "Actieknop: <value>{{action}}</value>",
+    "postActions": {
+      "learnMore": "Meer informatie"
+    },
+    "reviewPost": "Beoordeel bericht",
+    "reviewsTitle": "Showroombeoordelingen",
+    "reviewsBody": "Beoordelingen en antwoordconcepten worden verzameld met je klantgesprekken.",
+    "openReviews": "Open beoordelingen",
+    "checklistTitle": "Profielinstellingen checklist",
+    "checklist": {
+      "profile": {
+        "label": "Google-profiel verbonden",
+        "value": "Gevonden"
+      },
+      "reviewLink": {
+        "label": "Directe beoordelingsverzoeklink",
+        "value": "Ingesteld"
+      }
+    }
+  },
+  "website": {
+    "draftPreview": "Conceptvoorbeeld",
+    "catalogConnected": "Bronwinkelcatalogus verbonden",
+    "connectDomain": "Verbind domein",
+    "previewLabel": "Websiteconceptvoorbeeld",
+    "browserTitle": "Websiteconcept",
+    "fullPreview": "Volledig voorbeeld",
+    "reviewPublish": "Beoordeel & publiceer concept",
+    "footnote": "Beoordeel je inhoud en domein voordat je publiceert."
+  },
+  "websiteEdit": {
+    "saveChanges": "Conceptwijzigingen opslaan",
+    "reviewPublish": "Beoordeel & publiceer",
+    "preview": "Voorbeeld",
+    "title": "Bewerk website-inhoud",
+    "heroTitle": "Hero sectie banner",
+    "replaceImage": "Vervang afbeelding",
+    "heroImageLabel": "Hero banner afbeelding",
+    "headline": "Kop (Frans)",
+    "description": "Beschrijving",
+    "sectionsTitle": "Paginasecties",
+    "sectionCount_one": "{{count}} sectie",
+    "sectionCount_other": "{{count}} secties",
+    "sections": {
+      "heroBanner": "Hero banner",
+      "featuredCollection": "Uitgelichte collectie",
+      "showroomContact": "Showroom & contact"
+    }
+  },
+  "websitePublish": {
+    "footnote": "Verifieer een domein en controleer de inhoud om te publiceren.",
+    "publish": "Publiceer website",
+    "keepDraft": "Als concept bewaren",
+    "title": "Controleer je website",
+    "subtitle": "Controleer je inhoud en bestemming voordat je live gaat.",
+    "heroImageLabel": "Hero-afbeelding van de website",
+    "destinationTitle": "Publicatiebestemming",
+    "destinationBody": "Verbind en verifieer een domein om dit concept te publiceren.",
+    "setUpDomain": "Domein instellen"
+  }
+}

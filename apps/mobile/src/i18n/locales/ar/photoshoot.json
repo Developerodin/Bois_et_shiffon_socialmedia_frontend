@@ -1,0 +1,204 @@
+{
+  "chrome": {
+    "openMenu": "افتح القائمة",
+    "creditsAvailable_one": "{{count}} رصيد متاح",
+    "creditsAvailable_other": "{{count}} أرصدة متاحة",
+    "settings": "الإعدادات",
+    "appModules": "وحدات التطبيق",
+    "modules": {
+      "reels": "ريلز",
+      "posts": "منشورات",
+      "photoshoot": "جلسة تصوير",
+      "marketing": "تسويق"
+    },
+    "moduleNavigation": "تنقل الوحدات",
+    "create": "إنشاء",
+    "results": "النتائج",
+    "goBack": "الرجوع",
+    "switchBusiness": "تبديل العمل، {{name}}"
+  },
+  "controls": {
+    "optionWithCount_one": "{{label}} {{count}} عنصر",
+    "optionWithCount_other": "{{label}} {{count}} عناصر"
+  },
+  "create": {
+    "title": "إنشاء جلسة تصوير",
+    "subtitle": "إنشاء صور للمنتجات وتنسيق الملابس على العارضين.",
+    "product": {
+      "imageLabel": "{{name}} طاولة طعام",
+      "pill": "عنصر من الكتالوج",
+      "title": "جلسة تصوير للمنتجات",
+      "body": "وضع عناصر الكتالوج في إعدادات داخلية معمارية واستوديو بإضاءة طبيعية.",
+      "cta": "جلسة تصوير منتج جديدة"
+    },
+    "fashion": {
+      "imageLabel": "استوديو تصوير ملابس مصورة",
+      "title": "جلسة تصوير أزياء",
+      "body": "تنسيق الملابس على العارضين في مشاهد جاهزة للحملة.",
+      "cta": "جلسة تصوير أزياء جديدة"
+    }
+  },
+  "product": {
+    "title": "جلسة تصوير للمنتجات",
+    "estimate_one": "التقدير: {{count}} رصيد",
+    "estimate_other": "التقدير: {{count}} أرصدة",
+    "available": "{{count}} متاح",
+    "generate": "توليد جلسة تصوير",
+    "selectedAsset": "العنصر المختار من الكتالوج",
+    "changeAsset": "تغيير العنصر",
+    "aspectRatio": "نسبة العرض إلى الارتفاع",
+    "sceneStyle": "نمط المشهد",
+    "scenes": {
+      "studio": "استوديو",
+      "interior": "داخلي",
+      "custom": "مخصص"
+    },
+    "frenchPrompt": "French prompt",
+    "creativeBrief": "موجز إبداعي",
+    "briefHint": "تحسين الإضاءة أو الأجواء أو إشارات الديكور المحددة",
+    "sourcePreview": "معاينة المصدر",
+    "fullPreview": "{{product}}، معاينة كاملة",
+    "sourceImage": "صورة المصدر"
+  },
+  "fashion": {
+    "title": "جلسة تصوير أزياء",
+    "generate": "توليد جلسة تصوير",
+    "uploadToEnable": "قم بتحميل صورة للملابس لتفعيل التوليد",
+    "heading": "بناء جلسة تصوير الأزياء الخاصة بك",
+    "subtitle": "تحويل الملابس المسطحة أو المعلقة إلى عارضين واقعيين.",
+    "garmentPhoto": "صورة الملابس",
+    "required": "مطلوب",
+    "garmentSelected": "صورة الملابس: {{label}}. تغيير الصورة",
+    "addGarment": "إضافة صورة الملابس",
+    "changeGarment": "تغيير صورة الملابس",
+    "garmentHint": "PNG أو JPG على خلفية محايدة، مسطح أو عارضة خفية",
+    "modelStyling": "عارض & تنسيق",
+    "modelSelected": "عارض & تنسيق: {{model}}",
+    "models": {
+      "choose": "اختر عارضًا",
+      "natural": "{{name}} · تنسيق طبيعي",
+      "editorial": "{{name}} · تنسيق تحريري",
+      "casual": "{{name}} · تنسيق كاجوال"
+    },
+    "pose": "وضعية",
+    "poses": {
+      "fullBody": "الجسم بالكامل",
+      "threeQuarter": "ثلاثة أرباع",
+      "closeUp": "تفاصيل قريبة"
+    },
+    "outputFormat": "صيغة الإخراج",
+    "formats": {
+      "feedPortrait": "بورتريه الخلاصة",
+      "storyReel": "قصة / ريل"
+    },
+    "background": "إعداد الخلفية",
+    "backgrounds": {
+      "studioMinimal": "استوديو بسيط",
+      "urbanStreet": "شارع حضري",
+      "naturalInterior": "داخلي طبيعي"
+    },
+    "requirementsTitle": "متطلبات التحميل",
+    "requirements": {
+      "contrast": "تباين عالي مع الخلفية",
+      "wrinkles": "بدون تجاعيد ثقيلة",
+      "frontFacing": "زاوية مواجهة للأمام"
+    }
+  },
+  "source": {
+    "title": "اختر العنصر المصدر",
+    "uploadNewLabel": "تحميل صورة جديدة",
+    "uploadNew": "تحميل جديد",
+    "noPhotoSelected": "لم يتم اختيار صورة",
+    "photosSelected_one": "{{count}} صورة مختارة",
+    "photosSelected_other": "{{count}} صور مختارة",
+    "selectPhoto": "اختر صورة",
+    "usePhoto": "استخدام الصورة",
+    "source": "المصدر",
+    "tabs": {
+      "website": "الموقع الإلكتروني",
+      "uploads": "التحميلات"
+    },
+    "businessWebsite": "{{name}} · الموقع الإلكتروني",
+    "fromWebsite": "من الموقع الإلكتروني",
+    "filterCatalog": "تصفية الكتالوج",
+    "filters": {
+      "all": "جميع العناصر",
+      "tables": "طاولات",
+      "storage": "تخزين"
+    },
+    "addPhoto": "إضافة صورة",
+    "tip": "القصاصات النظيفة للمنتجات تعطي نتائج جلسة تصوير مثالية. Espanda Studio سيحافظ على نسيج خشب الأكاسيا الأصلي."
+  },
+  "generating": {
+    "backToWorkspace": "العودة إلى مساحة العمل",
+    "returnToWorkspace": "العودة إلى مساحة العمل",
+    "title": "تحضير صورك",
+    "stepStatus": "{{step}}: {{status}}",
+    "note": "تعمل عملية التوليد بأمان في الخلفية. ستجد العناصر المكتملة في النتائج.",
+    "status": {
+      "done": "تم",
+      "active": "قيد التقدم",
+      "queued": "في الانتظار"
+    },
+    "progress": "جاري التوليد",
+    "sample": {
+      "title": "{{name}} جلسة تصوير طعام",
+      "description": "تجهيز {{product}} في ضوء داخلي معماري.",
+      "variations_one": "{{count}} تنويع",
+      "variations_other": "{{count}} تنويعات"
+    },
+    "steps": {
+      "catalog": "معالجة عنصر الكتالوج",
+      "compose": "تكوين المشهد والإضاءة",
+      "finish": "التشطيب ومعايرة الألوان"
+    }
+  },
+  "results": {
+    "title": "جلسات التصوير",
+    "subtitle": "صور منتجاتك وأزيائك",
+    "newPhotoshoot": "جلسة تصوير جديدة",
+    "filterLabel": "تصفية جلسات التصوير",
+    "filters": {
+      "all": "الكل ({{count}})",
+      "product": "المنتجات ({{count}})",
+      "fashion": "الأزياء ({{count}})"
+    },
+    "empty": "لا توجد جلسات تصوير بعد.",
+    "processingLabel": "{{title}}. جاري المعالجة، {{percent}}%",
+    "processingBadge_one": "جاري المعالجة · {{count}} رصيد",
+    "processingBadge_other": "جاري المعالجة · {{count}} أرصدة",
+    "preview": "معاينة",
+    "reviewPhotoLabel": "مراجعة الصورة، {{title}}",
+    "reviewPhoto": "مراجعة الصورة",
+    "sample": {
+      "studioStaging": "{{product}} · إعداد الاستوديو",
+      "rendering": "مرحلة التصيير · {{percent}}%",
+      "interiorReady_one": "الداخلية · {{ratio}} · {{count}} صورة جاهزة",
+      "interiorReady_other": "الداخلية · {{ratio}} · {{count}} صور جاهزة",
+      "studioDaylight": "إضاءة نهارية في الاستوديو · {{ratio}}"
+    }
+  },
+  "detail": {
+    "moreOptions": "خيارات إضافية",
+    "downloadPhoto": "تحميل الصورة",
+    "variation": "تنويع",
+    "share": "مشاركة جلسة التصوير",
+    "samplePreview": "معاينة العينة",
+    "compareOriginal": "مقارنة الأصل",
+    "expandView": "توسيع العرض",
+    "stagingSummary": "ملخص الإعداد",
+    "format": "التنسيق",
+    "creationCost": "تكلفة الإنشاء",
+    "credits_one": "{{count}} رصيد",
+    "credits_other": "{{count}} أرصدة",
+    "sample": {
+      "headerTitle": "جلسة تصوير {{name}}",
+      "vertical": "{{ratio}} عمودي",
+      "architecturalInterior": "الداخلية المعمارية",
+      "studioDaylight": "إضاءة نهارية في الاستوديو",
+      "formatBadge": "تنسيق {{ratio}}",
+      "naturalStudio": "استوديو طبيعي",
+      "portraitPhoto": "صورة شخصية"
+    }
+  }
+}
