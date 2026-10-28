@@ -533,6 +533,8 @@ model OAuthStateTransaction {
   brandId     String
   userId      String
   provider    IntegrationProvider
+  /// "mobile": the callback hands the code back to the app, which completes with its own token (never by state alone)
+  client      String              @default("web")
   expiresAt   DateTime
   consumedAt  DateTime?
   createdAt   DateTime            @default(now())
