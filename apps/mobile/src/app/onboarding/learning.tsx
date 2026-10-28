@@ -19,7 +19,9 @@ const STAGES = ["open", "identity", "photos"] as const;
 /** A08 · Onboarding / Learning your business (Figma 408:478). */
 export default function Learning() {
   const { t } = useTranslation("onboarding");
-  const { site, name } = useLocalSearchParams<{ site?: string; name?: string }>();
+  const { site, name, place } = useLocalSearchParams<{ site?: string; name?: string; place?: string }>();
+  // Where the brand comes from: a website, a picked Google Maps listing, or the owner's description.
+  const via = site ? "Website" : place ? "Maps" : "Manual";
   const host = site ? site.replace(/^https?:\/\/(www\.)?/, "").replace(/\/.*$/, "") : name ?? t("learning.fallbackName");
 
   const { step: done, failed, retry } = useResearch(site);
@@ -56,7 +58,7 @@ export default function Learning() {
         <SpinnerMark />
         <Text style={[type.pageTitle, styles.center, { paddingTop: space[24], paddingHorizontal: space[8] }]}>{t("learning.title")}</Text>
         <Text style={[type.body, styles.center, { color: color.inkSecondary, paddingTop: space[8], maxWidth: 290 }]}>
-          {site ? t("learning.bodyWebsite") : t("learning.bodyManual")}
+          {t(`learning.body${via}`)}
         </Text>
       </View>
 
@@ -67,12 +69,12 @@ export default function Learning() {
             <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]} numberOfLines={1}>
               {host}
             </Text>
-            <Text style={[type.meta, { paddingTop: 2 }]}>{site ? t("learning.sourceWebsite") : t("learning.sourceManual")}</Text>
+            <Text style={[type.meta, { paddingTop: 2 }]}>{t(`learning.source${via}`)}</Text>
           </View>
         </View>
         <View style={styles.found}>
           <View style={styles.foundDot} />
-          <Text style={[type.meta, { color: color.ink }]}>{site ? t("learning.foundWebsite") : t("learning.foundManual")}</Text>
+          <Text style={[type.meta, { color: color.ink }]}>{t(`learning.found${via}`)}</Text>
         </View>
       </View>
 

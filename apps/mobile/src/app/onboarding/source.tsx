@@ -34,8 +34,8 @@ export default function SourceScreen() {
           arrow
           onPress={() => {
             onboarding.source = source;
-            // Only a website can be read today; every other source goes to the manual details form.
-            router.push(source === "website" ? "/onboarding/website" : "/onboarding/manual");
+            // A website is read; a Google Maps listing is searched and picked; every other source is described by hand.
+            router.push(source === "website" ? "/onboarding/website" : source === "google-maps" ? "/onboarding/maps" : "/onboarding/manual");
           }}
         />
       }

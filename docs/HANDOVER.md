@@ -26,7 +26,8 @@ Mobile tokens are Auth.js JWEs under their own salt (`server/auth/request-user.t
 | A01 Sign in, A02 Verify | Real |
 | A03 Welcome | Static by design |
 | A04 Creation goal | Real: saved on the brand (`BrandProfile.goal`) and decides where onboarding ends (Posts / Reels / Photoshoot fashion / product) |
-| A05 Business source | "Website" → A06; every other choice → A07 |
+| A05 Business source | "Website" → A06; "Google Maps" → Find on Google Maps (below); every other choice → A07 |
+| Find on Google Maps (no Figma frame) | Real. Search name + city (`POST /api/v1/places/search`, our server calls Places API (New), key `GOOGLE_MAPS_API_KEY` or the shared `GOOGLE_PAGESPEED_API_KEY`, which must allow Places API (New); 30 searches/hour per person) → "Is this your business?" cards → the brand is created from the listing (`placeId`; the server reads name, address, phone, hours, rating, website and Google's description, saved on `BrandProfile.place`). Listing has a website → Research reads it (logo, colours, products, SEO/GEO) plus the listing; no website → the online lookup starts from the listing. Picking is the owner's word, not proof of ownership (that needs Google Business Profile sign-in). "Not on the list?" → A07 |
 | A06 Website | Real. Continue first checks the site opens (`POST /api/v1/site-check`, SSRF-guarded like Research); if not, says so. "No website? Describe your business instead" → A07 |
 | A07 No website | Name, what they sell, city (optional). Brand is created without a website (`BrandProfile.about` / `location`); Research finds the business with one web search, then writes the five documents from that plus the owner's words. SEO and GEO are skipped (no site to score). Listing-link mode and the extra website field were removed. |
 | A08 Learning | Real: follows the Research run |

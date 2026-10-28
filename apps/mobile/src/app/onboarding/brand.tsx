@@ -181,7 +181,7 @@ export default function Brand() {
         ) : (
           <View style={[styles.row, { paddingTop: space[12] }]}>
             {photos.slice(0, 2).map((prod) => (
-              <View key={prod.url} style={styles.product}>
+              <View key={`${prod.url}#${prod.title}`} style={styles.product}>
                 <Image source={imageSource(prod.image!)} style={styles.productImage} contentFit="cover" />
                 <View style={{ flex: 1 }}>
                   <Text style={[type.meta, { color: color.ink }]} numberOfLines={2}>

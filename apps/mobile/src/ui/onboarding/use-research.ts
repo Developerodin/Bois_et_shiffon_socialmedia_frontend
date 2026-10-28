@@ -17,6 +17,10 @@ const POLL_MS = 2500;
  * Without a website (A07) the brand is made from onboarding.business and Research finds it online.
  * ponytail: polling every 2.5s while the screen is open; switch to server-sent events if it ever matters.
  */
+/** What the brand is made from: the website, the picked Maps listing, or the owner's description. */
+const sourceKey = (site: string | undefined) =>
+  site ?? (onboarding.place ? `place:${onboarding.place.id}` : JSON.stringify(onboarding.business));
+
 export function useResearch(site: string | undefined): ResearchProgress {
   const [step, setStep] = useState(0);
   const [failed, setFailed] = useState<string | null>(null);
@@ -49,8 +53,8 @@ export function useResearch(site: string | undefined): ResearchProgress {
         let ws = onboarding.workspaceId;
         let brandId = onboarding.brandId;
         let runId = onboarding.researchRunId;
-        const business = onboarding.business;
-        const from = site ?? JSON.stringify(business);
+        const { business, place } = onboarding;
+        const from = sourceKey(site);
         if (!ws || !brandId || !runId || onboarding.brandFrom !== from) {
           // Only once per site: going back and forth must not create a second brand.
           if (started.current) return;
@@ -62,7 +66,9 @@ export function useResearch(site: string | undefined): ResearchProgress {
             ws,
             site
               ? { websiteUrl: site, goal: onboarding.goal } // the server names it the way the site names itself
-              : { displayName: business!.name, about: business!.sells, location: business!.location, goal: onboarding.goal },
+              : place
+                ? { placeId: place.id, language: i18n.language, goal: onboarding.goal } // name, website, address from the listing
+                : { displayName: business!.name, about: business!.sells, location: business!.location, goal: onboarding.goal },
           );
           Object.assign(onboarding, { workspaceId: ws, brandId: created.brand.id, researchRunId: created.researchRunId, brandFrom: from });
           brandId = created.brand.id;
@@ -70,6 +76,8 @@ export function useResearch(site: string | undefined): ResearchProgress {
         }
         void poll(ws, brandId!, runId!);
       } catch (e) {
+        // Nothing was created (e.g. the daily brand limit): let "Try again" create it again.
+        started.current = false;
         if (e instanceof ApiError && e.status === 401) return router.replace("/onboarding/sign-in");
         setFailed(e instanceof ApiError ? e.message : i18n.t("onboarding:learning.errors.startFailed"));
       }
@@ -86,7 +94,9 @@ export function useResearch(site: string | undefined): ResearchProgress {
     setFailed(null);
     setStep(0);
     const { workspaceId: ws, brandId } = onboarding;
-    if (ws && brandId) {
+    // Restart Research only for the brand made from what's on screen now. A brand saved from an earlier onboarding
+    // (or none, when creating failed) means creating again, never re-running someone else's Research.
+    if (ws && brandId && onboarding.brandFrom === sourceKey(site)) {
       try {
         const { run } = await api<{ run: { id: string } }>(`/workspaces/${ws}/brands/${brandId}/agents/research/runs`, { body: {}, workspaceId: ws });
         onboarding.researchRunId = run.id;

@@ -14,6 +14,8 @@ export const onboarding: {
   source: Source;
   /** No website (A07): Research finds the business online from these. */
   business?: { name: string; sells: string; location?: string };
+  /** "Google Maps" source: the listing the owner picked; the server reads its details from the id. */
+  place?: { id: string; name: string; address: string | null };
   tones: string[];
   language: string;
   /** Set once the brand is created on the server (A08), so retries and later steps reuse it. `brandFrom` is the

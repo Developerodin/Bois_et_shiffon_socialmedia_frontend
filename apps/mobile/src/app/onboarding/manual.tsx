@@ -25,6 +25,7 @@ export default function Manual() {
 
   function next() {
     onboarding.business = { name: name.trim(), sells: sells.trim(), location: location.trim() || undefined };
+    onboarding.place = undefined; // described by hand: not the Maps listing picked earlier, if any
     router.push({ pathname: "/onboarding/learning", params: { name: name.trim() } });
   }
 

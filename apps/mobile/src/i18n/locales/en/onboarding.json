@@ -173,7 +173,10 @@
       "noWorkspace": "Your account has no workspace yet.",
       "startFailed": "Couldn't start reading your website.",
       "restartFailed": "Couldn't restart. Try again."
-    }
+    },
+    "bodyMaps": "Reading your Google Maps listing and finding your business online.",
+    "sourceMaps": "Google Maps listing",
+    "foundMaps": "Listing picked"
   },
   "review": {
     "title": "Review business details",
@@ -339,6 +342,19 @@
       "noBrand": "Your business isn’t set up yet. Go back a step.",
       "cancelled": "Connecting was cancelled. Try again when you’re ready.",
       "failed": "Couldn’t connect. Try again."
+    }
+  },
+  "maps": {
+    "title": "Find your business on Google Maps",
+    "subtitle": "Search your business name and city, then pick your listing.",
+    "placeholder": "Business name and city",
+    "search": "Search Google Maps",
+    "isThisYou": "Is this your business?",
+    "noResults": "No matches on Google Maps. Try another spelling, or describe your business instead.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Not on the list? Describe your business instead",
+    "errors": {
+      "failed": "Couldn’t search Google Maps. Try again."
     }
   }
 }

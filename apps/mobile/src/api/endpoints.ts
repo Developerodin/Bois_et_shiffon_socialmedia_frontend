@@ -42,7 +42,7 @@ export const me = () => api<Me>("/me");
 export const checkSite = (url: string) => api<{ ok: boolean }>("/site-check", { body: { url } });
 
 /** Creates the brand; the server starts Research, SEO and GEO for it. No name with a website: the server reads it from the site. */
-export const createBrand = (workspaceId: string, input: { displayName?: string; websiteUrl?: string; goal?: Goal; about?: string; location?: string }) =>
+export const createBrand = (workspaceId: string, input: { displayName?: string; websiteUrl?: string; goal?: Goal; about?: string; location?: string; placeId?: string; language?: string }) =>
   api<{ brand: { id: string; displayName: string }; researchRunId: string }>(`/workspaces/${encodeURIComponent(workspaceId)}/brands`, { body: input, workspaceId });
 
 export const contextDocs = (ws: string, brandId: string, signal?: AbortSignal) => api<ContextDocs>(`${brandBase(ws, brandId)}/context-docs`, { workspaceId: ws, signal });
@@ -95,3 +95,8 @@ export const startSocialConnect = (ws: string, brandId: string, provider: Social
 /** Finishes a connect this person started; returns the connected account names. */
 export const completeSocialConnect = (providerSlug: string, state: string, code: string) =>
   api<{ connected: string[] }>(`/integrations/${encodeURIComponent(providerSlug)}/complete`, { method: "POST", body: { state, code } });
+
+/** A business on Google Maps, for the owner to pick theirs (onboarding "Google Maps" source). */
+export type PlaceMatch = { id: string; name: string; address: string | null; type: string | null; rating: number | null; ratingCount: number | null };
+/** Up to 5 matches for "name + city"; the search runs on our server (Google's key never reaches the app). */
+export const searchPlaces = (query: string, language: string) => api<{ places: PlaceMatch[] }>("/places/search", { body: { query, language } });
