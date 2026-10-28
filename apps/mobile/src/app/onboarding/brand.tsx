@@ -160,8 +160,11 @@ export default function Brand() {
         </View>
         <View style={[styles.card, styles.half]}>
           <Text style={type.meta}>{t("brand.audienceProfile")}</Text>
+          {/* The audience from A09 (Research's, or the owner's edit there); the full sentence is on A09. */}
           <View style={styles.select}>
-            <Text style={[type.meta, { color: color.ink }]}>{t("brand.audienceHome")}</Text>
+            <Text style={[type.meta, { color: brand?.summary?.audience ? color.ink : color.inkSecondary, flex: 1 }]} numberOfLines={3}>
+              {brand?.summary?.audience ?? t("review.addAudience")}
+            </Text>
           </View>
         </View>
       </View>
