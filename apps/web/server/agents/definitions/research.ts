@@ -22,7 +22,7 @@ const GUIDANCE: Record<ContextDocKind, string> = {
   "marketing-strategy":
     "Positioning, target customer segments (as hypotheses), value proposition, differentiators, seasonal moments, channels the brand appears to use, and goals worth validating.",
   "competitor-analysis":
-    "Likely competitors and reference brands in the same market (use web search). For each: positioning, strengths, what lessons apply to this brand. Never invent metrics; label observations as public signals.",
+    "Likely competitors and reference brands in the same market (use web search). For each: positioning, strengths, what lessons apply to this brand. Never invent metrics; label observations as public signals. Put the source link right after each claim about a competitor, as a markdown link to the page it came from; leave out any claim you have no source for.",
   "brand-voice":
     "Tone, vocabulary, language(s) used, sentence style, words to use and avoid, example phrasings taken from the site, and topics that seem off-brand.",
   "content-strategy":
@@ -134,7 +134,7 @@ export const researchAgent: AgentDefinition = {
       await ctx.log("INFO", `Drafting ${title}`);
       const out = await ctx.ai.generateObject({
         workflowId: `research.${kind}`,
-        promptVersion: "1",
+        promptVersion: kind === "competitor-analysis" ? "2" : "1", // 2: a source link after each competitor claim
         schema: DocOutput,
         schemaName: kind.replace(/-/g, "_"),
         system: SYSTEM,
