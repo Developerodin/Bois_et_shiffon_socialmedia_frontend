@@ -367,10 +367,11 @@ export function pageAssets(html: string, base: URL) {
       // class/id only: alt/src "logo" also matches footer payment and partner badges
       .filter((i) => /logo/i.test(`${i.class ?? ""} ${i.id ?? ""}`))
       .map((i) => abs(i.src)),
-    ...["apple-touch-icon", "icon", "shortcut icon"].flatMap((r) =>
-      tagAttrs(html, "link").filter((l) => (l.rel ?? "").toLowerCase() === r).map((l) => abs(l.href)),
-    ),
   ].filter((u): u is string => u !== null);
+  // Site icons are a last resort: often a favicon (ICO) or a square mark rather than the logo.
+  const icons = ["apple-touch-icon", "icon", "shortcut icon"]
+    .flatMap((r) => tagAttrs(html, "link").filter((l) => (l.rel ?? "").toLowerCase() === r).map((l) => abs(l.href)))
+    .filter((u): u is string => u !== null);
 
   const products: PageProduct[] = nodes
     .filter((n) => types(n).includes("Product") && typeof n.name === "string")
@@ -415,6 +416,9 @@ export function pageAssets(html: string, base: URL) {
 
   return {
     logos: [...new Set(logos)],
+    icons: [...new Set(icons)].filter((u) => !logos.includes(u)),
+    /** Logos drawn as inline SVG in the page (no image file), only ones safe to render. */
+    inlineLogos: inlineSvgLogos(html, base),
     products,
     /** One entry per use (repeats kept), so callers can rank by use. */
     fonts: fonts.filter((f) => f && !GENERIC_FONT.test(f) && !ICON_FONT.test(f)),
@@ -425,6 +429,70 @@ export function pageAssets(html: string, base: URL) {
   };
 }
 export type PageAssets = ReturnType<typeof pageAssets>;
+
+const MAX_INLINE_SVG = 100_000;
+/** Anything that could run code or reach outside the drawing: such SVGs are never rendered. */
+const SVG_FORBIDDEN = /<script|<foreignObject|<image\b|<iframe|<embed|<object|<!DOCTYPE|<!ENTITY|@import|javascript:|data:/i;
+
+/** Self-contained drawing only: every href and url() points inside the SVG (#id). */
+export function safeSvg(svg: string) {
+  if (svg.length > MAX_INLINE_SVG || SVG_FORBIDDEN.test(svg)) return false;
+  for (const m of svg.matchAll(/(?:xlink:)?href\s*=\s*["']([^"']*)["']/gi)) if (!m[1].startsWith("#")) return false;
+  for (const m of svg.matchAll(/url\(\s*['"]?([^'")]*)/gi)) if (!m[1].startsWith("#")) return false;
+  return true;
+}
+
+/**
+ * Logos drawn as inline <svg> (no image file to download): an SVG inside the link to the homepage, or labelled
+ * "logo", or one that draws a "logo" symbol defined elsewhere on the page (<use href="#…logo…">), made standalone.
+ * Returns up to 3, each passing safeSvg. ponytail: regex over the HTML, like the rest of this parser.
+ */
+function inlineSvgLogos(html: string, base: URL): string[] {
+  const symbols = new Map<string, string>();
+  for (const m of html.matchAll(/<symbol\b([^>]*)>[\s\S]*?<\/symbol>/gi)) {
+    const id = /\bid\s*=\s*["']([^"']+)["']/i.exec(m[1])?.[1];
+    if (id) symbols.set(id, m[0]);
+  }
+  const homeLink = (before: string) => {
+    const open = before.lastIndexOf("<a ");
+    if (open < 0 || before.lastIndexOf("</a>") > open) return false;
+    const href = /\bhref\s*=\s*["']([^"']*)["']/i.exec(before.slice(open))?.[1];
+    try {
+      const u = new URL(decode(href ?? "x:"), base);
+      // the site root, or a locale root like /gb/en/
+      return sameSite(u.hostname, base.hostname) && /^\/([a-z]{2}([-_][a-z]{2})?\/?){0,2}$/i.test(u.pathname);
+    } catch {
+      return false;
+    }
+  };
+  const out: string[] = [];
+  for (const m of html.matchAll(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi)) {
+    if (out.length >= 3) break;
+    const svg = m[0];
+    if (svg.length > MAX_INLINE_SVG) continue;
+    const open = /^<svg\b[^>]*>/i.exec(svg)![0];
+    const use = /<use\b[^>]*href\s*=\s*["']#([^"']+)["']/i.exec(svg)?.[1];
+    const labelled = /logo/i.test(open) || /logo/i.test(use ?? "");
+    if (!labelled && !homeLink(html.slice(Math.max(0, m.index! - 600), m.index!))) continue;
+    // Small square drawings in the header link are interface icons (heart, cart, dot), not the logo.
+    const box = /\bviewBox\s*=\s*["'][\d.-]+[\s,]+[\d.-]+[\s,]+([\d.]+)[\s,]+([\d.]+)["']/i.exec(open);
+    const attr = (name: string) => Number(new RegExp(`\\b${name}\\s*=\\s*["']?([\\d.]+)`, "i").exec(open)?.[1] ?? 0);
+    const [w, h] = box ? [Number(box[1]), Number(box[2])] : [attr("width"), attr("height")];
+    if (!labelled && w > 0 && w <= 64 && h <= 64 && w / h >= 0.75 && w / h <= 1.33) continue;
+    let markup = svg;
+    if (use && !/<(path|g|rect|circle|polygon|text)\b/i.test(svg)) {
+      // Only a reference: draw the referenced symbol as its own SVG.
+      const symbol = symbols.get(use);
+      const viewBox = symbol && /\bviewBox\s*=\s*["']([^"']+)["']/i.exec(symbol)?.[1];
+      if (!symbol || !viewBox) continue;
+      markup = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">${symbol.replace(/^<symbol\b[^>]*>/i, "").replace(/<\/symbol>$/i, "")}</svg>`;
+    } else if (!/\bxmlns\s*=/.test(open)) {
+      markup = svg.replace(/^<svg\b/i, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    if (safeSvg(markup) && !out.includes(markup)) out.push(markup);
+  }
+  return out;
+}
 
 const PRIORITY = /about|a-propos|histoire|story|qui-sommes|collection|produit|product|shop|boutique|catalog|materi|savoir/i;
 
