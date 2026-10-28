@@ -2,7 +2,7 @@ import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
 import { prisma } from "@/server/db/prisma";
 import { assertPublicUrl, CrawlError } from "@/server/research/crawl";
-import { CreateBrandInput } from "@/server/services/create-brand";
+import { EditBrandInput } from "@/server/services/create-brand";
 
 /**
  * Rename the brand or fix its website. Agents read the website on their next run; re-reading it
@@ -12,7 +12,7 @@ export async function PATCH(request: Request, context: { params: Promise<BrandRo
   try {
     const scope = await authorizeBrandRoute(request, context.params, "context.edit");
     if (scope instanceof Response) return scope;
-    const body = CreateBrandInput.partial().safeParse(await request.json().catch(() => null));
+    const body = EditBrandInput.safeParse(await request.json().catch(() => null));
     if (!body.success) {
       return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid brand", status: 422, detail: body.error.issues.map((i) => i.message).join("; ") });
     }

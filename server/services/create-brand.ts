@@ -4,15 +4,33 @@ import { AgentStartError, startAgentRun } from "@/server/agents/engine";
 import { requirePermission } from "@/server/auth/permissions";
 import { hitRateLimit } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
+import { nameFromWebsite } from "@/server/research/brand-assets";
 
-export const CreateBrandInput = z.object({
-  displayName: z.string().trim().min(1).max(80),
-  websiteUrl: z
-    .string()
-    .trim()
-    .url()
-    .refine((u) => /^https?:\/\//i.test(u), "Website must start with http:// or https://"),
+/** Field rules shared by create and edit; each adds its own cross-field checks (zod 4 can't .partial() a refined schema). */
+export const BrandFields = z.object({
+  /** Optional with a website: the brand is then named the way the site names itself. */
+  displayName: z.string().trim().min(1).max(80).optional(),
+    websiteUrl: z
+      .string()
+      .trim()
+      .url()
+      .refine((u) => /^https?:\/\//i.test(u), "Website must start with http:// or https://")
+      .optional(),
+    goal: z.enum(["social-plan", "marketing-videos", "fashion-photoshoot", "product-photoshoot"]).optional(),
+    /** No website: what they sell and where, so Research can find the business with web search. */
+    about: z.string().trim().min(4).max(500).optional(),
+    location: z.string().trim().max(120).optional(),
 });
+
+export const CreateBrandInput = BrandFields
+  .refine((b) => b.websiteUrl || b.about, "Add a website, or say what the business sells")
+  .refine((b) => b.displayName || b.websiteUrl, "Name the business");
+
+/** Rename the brand or fix its website (brand PATCH): either or both. */
+export const EditBrandInput = BrandFields.pick({ displayName: true, websiteUrl: true }).refine(
+  (b) => b.displayName !== undefined || b.websiteUrl !== undefined,
+  "Change the name or the website",
+);
 
 const slugify = (s: string) =>
   s.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "brand";
@@ -28,7 +46,8 @@ export async function createBrandWithResearch(
   const { allowed } = await hitRateLimit(`brands:${userId}`, 10, 86_400_000);
   if (!allowed) throw new AgentStartError("You've added 10 brands today, the daily limit. Try again tomorrow.", 429);
 
-  const base = slugify(input.displayName);
+  const displayName = input.displayName ?? (await nameFromWebsite(input.websiteUrl!));
+  const base = slugify(displayName);
   let brand;
   for (let i = 0; !brand; i++) {
     try {
@@ -36,8 +55,8 @@ export async function createBrandWithResearch(
         data: {
           workspaceId,
           slug: i === 0 ? base : `${base}-${i + 1}`,
-          displayName: input.displayName,
-          profile: { create: { websiteUrl: input.websiteUrl } },
+          displayName,
+          profile: { create: { websiteUrl: input.websiteUrl, goal: input.goal, about: input.about, location: input.location } },
         },
       });
     } catch (error) {
@@ -64,7 +83,8 @@ export async function createBrandWithResearch(
     userId,
   });
   // Site scores alongside the documents: SEO and GEO read the site themselves, so they run in parallel.
-  for (const agentKey of ["seo", "geo"]) {
+  // No website, nothing to score.
+  for (const agentKey of input.websiteUrl ? ["seo", "geo"] : []) {
     await startAgentRun({ workspaceId, brandId: brand.id, agentKey, trigger: "event", userId });
   }
   return { brand, researchRunId: run.id };

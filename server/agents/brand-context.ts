@@ -9,6 +9,9 @@ export type BrandContext = {
   brandId: string;
   displayName: string;
   websiteUrl: string | null;
+  /** Owner's own words when there's no website (what they sell, where). */
+  about: string | null;
+  location: string | null;
   voiceSummary: string | null;
   pillars: unknown;
   locales: unknown;
@@ -27,6 +30,8 @@ export async function loadBrandContext(
     brandId,
     displayName: brand.displayName,
     websiteUrl: brand.profile?.websiteUrl ?? null,
+    about: brand.profile?.about ?? null,
+    location: brand.profile?.location ?? null,
     voiceSummary: brand.profile?.voiceSummary ?? null,
     pillars: brand.profile?.pillars ?? null,
     locales: brand.profile?.locales ?? null,

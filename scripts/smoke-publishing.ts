@@ -145,7 +145,7 @@ async function main() {
     const prompts: string[] = [];
     const ctx: AgentContext = {
       runId: "smoke",
-      brand: { workspaceId: ws.id, brandId: brand.id, displayName: "Smoke", websiteUrl: null, voiceSummary: null, pillars: null, locales: null },
+      brand: { workspaceId: ws.id, brandId: brand.id, displayName: "Smoke", websiteUrl: null, about: null, location: null, voiceSummary: null, pillars: null, locales: null },
       log: async () => {},
       ai: { generateObject: async (i) => { prompts.push(i.prompt); return i.mock!; } },
     };
