@@ -1,32 +1,107 @@
 import { router } from "expo-router";
-import { CircleCheck, Download, Hash, Lock, SlidersHorizontal, Star, Video } from "lucide-react-native";
+import * as WebBrowser from "expo-web-browser";
+import { Check, CircleCheck, Download, Hash, Lock, SlidersHorizontal, Star, Video } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { ApiError } from "@/api/client";
+import { completeSocialConnect, startSocialConnect, type SocialProvider } from "@/api/endpoints";
+import i18n from "@/i18n";
 import { Button } from "@/ui/button";
 import { Screen, StepHeader, Title } from "@/ui/layout";
 import { BrandLogo } from "@/ui/onboarding/brand-logo";
-import { GOAL_HOME, onboarding } from "@/ui/onboarding/state";
+import { clearOnboarding, GOAL_HOME, onboarding } from "@/ui/onboarding/state";
 import { useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
 /** A12 · Onboarding / Connect Instagram (Figma 408:896) with A13 "Connect later?" sheet (408:981). */
+const RETURN_URL = "espanda://connect";
+
+/**
+ * Connects Instagram or Facebook Pages: the server's consent page opens in the in-app browser, which comes back to
+ * RETURN_URL with state + code; the app then completes with its own token (the server checks it's the same person).
+ * Resolves to the connected account names, [] when the person closed the browser. Throws a readable message.
+ */
+async function connectSocial(provider: SocialProvider): Promise<string[]> {
+  const { workspaceId: ws, brandId } = onboarding;
+  if (!ws || !brandId) throw new Error(i18n.t("onboarding:connect.errors.noBrand"));
+  try {
+    const { url } = await startSocialConnect(ws, brandId, provider);
+    const result = await WebBrowser.openAuthSessionAsync(url, RETURN_URL);
+    if (result.type !== "success") return [];
+    const back = new URL(result.url).searchParams;
+    const [slug, state, code] = [back.get("provider"), back.get("state"), back.get("code")];
+    if (!slug || !state || !code) throw new Error(i18n.t("onboarding:connect.errors.cancelled"));
+    return (await completeSocialConnect(slug, state, code)).connected;
+  } catch (e) {
+    throw new Error(e instanceof ApiError || e instanceof Error ? e.message : i18n.t("onboarding:connect.errors.failed"));
+  }
+}
+
 export default function Connect() {
   const { t } = useTranslation("onboarding");
   const [skipSheet, setSkipSheet] = useState(false);
-  const finish = () => router.replace(GOAL_HOME[onboarding.goal]);
+  const finish = () => {
+    const home = GOAL_HOME[onboarding.goal];
+    clearOnboarding();
+    router.replace(home);
+  };
   const { data: brand } = useBrandAssets();
+  const [busy, setBusy] = useState<SocialProvider | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  const [connected, setConnected] = useState<string[]>([]);
+  const connect = async (provider: SocialProvider) => {
+    setSkipSheet(false);
+    setFailed(null);
+    setBusy(provider);
+    try {
+      const names = await connectSocial(provider);
+      setConnected((c) => [...new Set([...c, ...names])]);
+    } catch (e) {
+      setFailed((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <Screen
       header={<StepHeader step={5} />}
       footer={
         <>
-          {/* ponytail: Instagram/Facebook OAuth runs through the web app's Settings → Connections today;
-              the mobile flow opens it once the API client lands. */}
-          <Button label={t("connect.connectInstagram")} icon={require("../../../assets/figma/onboarding/logo-instagram.png")} onPress={finish} />
-          <Button label={t("connect.connectFacebook")} variant="outline" icon={require("../../../assets/figma/onboarding/logo-facebook.png")} onPress={finish} />
-          <Button label={t("connect.skip")} variant="ghost" height={56} onPress={() => setSkipSheet(true)} />
+          {failed ? (
+            <Text accessibilityRole="alert" style={[type.meta, { color: color.error, textAlign: "center" }]}>
+              {failed}
+            </Text>
+          ) : null}
+          {connected.length ? (
+            <>
+              <View style={styles.connected} accessibilityLiveRegion="polite">
+                <Check size={16} color={color.ink} strokeWidth={2} />
+                <Text style={[type.meta, { color: color.ink, flex: 1 }]} numberOfLines={2}>
+                  {t("connect.connectedAs", { names: connected.join(", ") })}
+                </Text>
+              </View>
+              <Button label={t("common:continue")} arrow onPress={finish} />
+            </>
+          ) : null}
+          <Button
+            label={t("connect.connectInstagram")}
+            variant={connected.length ? "outline" : "primary"}
+            icon={require("../../../assets/figma/onboarding/logo-instagram.png")}
+            loading={busy === "INSTAGRAM"}
+            disabled={busy !== null}
+            onPress={() => void connect("INSTAGRAM")}
+          />
+          <Button
+            label={t("connect.connectFacebook")}
+            variant="outline"
+            icon={require("../../../assets/figma/onboarding/logo-facebook.png")}
+            loading={busy === "META"}
+            disabled={busy !== null}
+            onPress={() => void connect("META")}
+          />
+          {connected.length ? null : <Button label={t("connect.skip")} variant="ghost" height={56} onPress={() => setSkipSheet(true)} />}
         </>
       }
     >
@@ -74,7 +149,7 @@ export default function Connect() {
             <Tile icon={<SlidersHorizontal size={18} color={color.ink} strokeWidth={1.75} />} text={t("connect.laterSettings")} />
           </View>
           <Button label={t("connect.continueWithout")} onPress={() => { setSkipSheet(false); finish(); }} />
-          <Button label={t("connect.connectInstagram")} variant="outline" style={{ marginTop: space[12] }} onPress={() => setSkipSheet(false)} />
+          <Button label={t("connect.connectInstagram")} variant="outline" style={{ marginTop: space[12] }} onPress={() => void connect("INSTAGRAM")} />
         </View>
       </Modal>
     </Screen>
@@ -112,5 +187,6 @@ const styles = StyleSheet.create({
   grabber: { alignSelf: "center", width: 36, height: 4, borderRadius: 2, backgroundColor: color.disabledBg, marginBottom: space[16] },
   sheetBrand: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingVertical: space[4], paddingHorizontal: space[8], borderWidth: 1, borderColor: color.divider, borderRadius: radius.round },
   tiles: { flexDirection: "row", gap: space[12], paddingVertical: space[20] },
+  connected: { flexDirection: "row", alignItems: "center", gap: space[8], padding: space[12], backgroundColor: color.surface, borderWidth: 1, borderColor: color.divider, borderRadius: radius.control },
   tile: { flex: 1, flexDirection: "row", alignItems: "center", gap: space[8], padding: space[12], borderWidth: 1, borderColor: color.divider, borderRadius: radius.control },
 });

@@ -3,10 +3,12 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { AppState } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "@/i18n";
 import { color } from "@/theme/tokens";
 import { loadAppLanguage } from "@/ui/language/languages";
+import { restoreOnboarding, saveOnboarding } from "@/ui/onboarding/state";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,7 +17,10 @@ export default function RootLayout() {
   // Keep the splash up until the saved language is applied, so the first screen isn't shown in the wrong one.
   const [languageReady, setLanguageReady] = useState(false);
   useEffect(() => {
-    void loadAppLanguage().finally(() => setLanguageReady(true));
+    void Promise.all([loadAppLanguage(), restoreOnboarding()]).finally(() => setLanguageReady(true));
+    // Leaving the app (e.g. for the Instagram sign-in) is when Android may kill it: save onboarding first.
+    const sub = AppState.addEventListener("change", (s) => s === "background" && saveOnboarding());
+    return () => sub.remove();
   }, []);
   const ready = (loaded || !!error) && languageReady;
 

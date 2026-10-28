@@ -329,6 +329,12 @@
     "laterBody": "You can still create, edit, and download high-resolution reels and photoshoots to your camera roll. You can link your Instagram anytime in Settings.",
     "laterDownload": "Download your creations",
     "laterSettings": "Connect channels in Settings",
-    "continueWithout": "Continue without connecting"
+    "continueWithout": "Continue without connecting",
+    "connectedAs": "Connected: {{names}}",
+    "errors": {
+      "noBrand": "Your business isn’t set up yet. Go back a step.",
+      "cancelled": "Connecting was cancelled. Try again when you’re ready.",
+      "failed": "Couldn’t connect. Try again."
+    }
   }
 }

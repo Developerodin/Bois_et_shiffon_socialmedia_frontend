@@ -86,3 +86,12 @@ export type FirstIdeas = { run: { id: string; status: RunStatus; error: string |
 /** Starts the first ideas run, or returns the brand's existing one (never a second). */
 export const startFirstIdeas = (ws: string, brandId: string) => api<FirstIdeas>(`${brandBase(ws, brandId)}/first-ideas`, { method: "POST", body: {}, workspaceId: ws });
 export const firstIdeas = (ws: string, brandId: string, signal?: AbortSignal) => api<FirstIdeas>(`${brandBase(ws, brandId)}/first-ideas`, { workspaceId: ws, signal });
+
+/** Instagram (Instagram Login) and Facebook Pages, the two A12 offers. */
+export type SocialProvider = "INSTAGRAM" | "META";
+/** The consent page to open in the in-app browser; it comes back to espanda://connect with state + code. */
+export const startSocialConnect = (ws: string, brandId: string, provider: SocialProvider) =>
+  api<{ url: string }>(`${brandBase(ws, brandId)}/connections/start`, { method: "POST", body: { provider, client: "mobile" }, workspaceId: ws });
+/** Finishes a connect this person started; returns the connected account names. */
+export const completeSocialConnect = (providerSlug: string, state: string, code: string) =>
+  api<{ connected: string[] }>(`/integrations/${encodeURIComponent(providerSlug)}/complete`, { method: "POST", body: { state, code } });

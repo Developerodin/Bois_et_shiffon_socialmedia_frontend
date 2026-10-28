@@ -87,18 +87,20 @@ export const listConnections = (workspaceId: string, brandId: string) =>
     orderBy: [{ provider: "asc" }, { createdAt: "asc" }],
   });
 
-/** Step 1: persist a single-use state bound to user + brand + provider, return the consent URL. */
+/** Step 1: persist a single-use state bound to user + brand + provider (+ where it started), return the consent URL. */
 export async function startConnect(input: {
   workspaceId: string;
   brandId: string;
   userId: string;
   provider: IntegrationProvider;
+  /** "mobile": the callback sends the code back to the app instead of connecting (see the callback route). */
+  client?: "web" | "mobile";
 }) {
   const cfg = providerConfig(input.provider);
   if (!cfg) throw new ConnectionError(`${PROVIDERS[input.provider].label} isn't set up yet (missing app keys)`);
   const { raw, hash } = newToken();
   await prisma.oAuthStateTransaction.create({
-    data: { ...input, stateHash: hash, expiresAt: new Date(Date.now() + STATE_TTL_MS) },
+    data: { ...input, client: input.client ?? "web", stateHash: hash, expiresAt: new Date(Date.now() + STATE_TTL_MS) },
   });
   return PROVIDERS[input.provider].authorizeUrl({
     clientId: cfg.clientId,
