@@ -11,7 +11,7 @@ import { AGENTS } from "@/server/agents/registry";
 import { AiProviderError } from "@/server/ai/provider";
 import { prisma } from "@/server/db/prisma";
 import { EMAIL_SEND_JOB, sendOutboxEmail } from "@/server/email/outbox";
-import { claimNextJob, completeJob, enqueueJob, failJob } from "@/server/jobs/queue";
+import { claimNextJob, completeJob, enqueueJob, failJob, holdLease } from "@/server/jobs/queue";
 import { refreshExpiringTokens } from "@/server/services/connections";
 import { executePublication, onPublishJobLost, PUBLISH_JOB } from "@/server/services/publishing";
 
@@ -50,6 +50,7 @@ export async function runDueJobs({ budgetMs = 45_000 } = {}) {
       await handler?.onFailure?.(job.payload, error, true).catch(() => {});
       continue;
     }
+    const release = holdLease(job);
     try {
       if (!handler) throw new Error(`No handler for job type ${job.type}`);
       await handler.run(job.payload);
@@ -58,6 +59,8 @@ export async function runDueJobs({ budgetMs = 45_000 } = {}) {
       const retryable = error instanceof AiProviderError ? error.retryable : !(error instanceof NothingToDoError);
       const exhausted = await failJob(job, error, retryable && Boolean(handler));
       await handler?.onFailure?.(job.payload, error, exhausted).catch(() => {});
+    } finally {
+      release();
     }
   }
   return { processed, workerId };
