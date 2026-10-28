@@ -171,6 +171,8 @@ model BrandProfile {
   summary      Json?
   /// Creative tones the owner picked (mobile A10); the content language lives in `locales`
   preferences  Json?
+  /// The Google Maps listing the owner picked in onboarding (server/integrations/places.ts PlaceListing)
+  place        Json?
   voiceSummary String?
   pillars      Json?
   locales      Json?

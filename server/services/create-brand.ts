@@ -4,7 +4,11 @@ import { AgentStartError, startAgentRun } from "@/server/agents/engine";
 import { requirePermission } from "@/server/auth/permissions";
 import { hitRateLimit } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
+import { PlaceId, placeDetails } from "@/server/integrations/places";
 import { nameFromWebsite } from "@/server/research/brand-assets";
+
+/** A listing's website, if it's an http(s) address (it's Google data; the crawler still applies its own guards). */
+const listingWebsite = (u: string | null | undefined) => (u && /^https?:\/\//i.test(u) && z.string().url().safeParse(u).success ? u : undefined);
 
 /** Field rules shared by create and edit; each adds its own cross-field checks (zod 4 can't .partial() a refined schema). */
 export const BrandFields = z.object({
@@ -22,9 +26,16 @@ export const BrandFields = z.object({
     location: z.string().trim().max(120).optional(),
 });
 
-export const CreateBrandInput = BrandFields
-  .refine((b) => b.websiteUrl || b.about, "Add a website, or say what the business sells")
-  .refine((b) => b.displayName || b.websiteUrl, "Name the business");
+/** Creating a brand can also start from a Google Maps listing the owner picked (mobile onboarding). */
+const CreateOnly = z.object({
+  placeId: PlaceId.optional(),
+  /** Language for the listing's type and hours (the app's language). */
+  language: z.string().regex(/^[a-z]{2}(-[A-Z]{2})?$/).optional(),
+});
+
+export const CreateBrandInput = BrandFields.extend(CreateOnly.shape)
+  .refine((b) => b.websiteUrl || b.about || b.placeId, "Add a website, or say what the business sells")
+  .refine((b) => b.displayName || b.websiteUrl || b.placeId, "Name the business");
 
 /** Rename the brand or fix its website (brand PATCH): either or both. */
 export const EditBrandInput = BrandFields.pick({ displayName: true, websiteUrl: true }).refine(
@@ -46,7 +57,15 @@ export async function createBrandWithResearch(
   const { allowed } = await hitRateLimit(`brands:${userId}`, 10, 86_400_000);
   if (!allowed) throw new AgentStartError("You've added 10 brands today, the daily limit. Try again tomorrow.", 429);
 
-  const displayName = input.displayName ?? (await nameFromWebsite(input.websiteUrl!));
+  // A picked Maps listing fills what the owner didn't type: name, website (Research then reads it), address, and a
+  // description for the no-website lookup. Read here, server-side, from the id: never trusted from the app.
+  const place = input.placeId ? await placeDetails(input.placeId, input.language ?? "en").catch(() => null) : null;
+  if (input.placeId && !place) throw new AgentStartError("Couldn't load that Google Maps listing. Search again or describe your business.", 422);
+  const websiteUrl = input.websiteUrl ?? listingWebsite(place?.website);
+  const about = input.about ?? (websiteUrl ? undefined : (place?.summary ?? place?.type ?? undefined));
+  if (!websiteUrl && !about) throw new AgentStartError("Say what the business sells", 422);
+  const location = input.location ?? place?.address ?? undefined;
+  const displayName = input.displayName ?? place?.name ?? (await nameFromWebsite(websiteUrl!));
   const base = slugify(displayName);
   let brand;
   for (let i = 0; !brand; i++) {
@@ -56,7 +75,7 @@ export async function createBrandWithResearch(
           workspaceId,
           slug: i === 0 ? base : `${base}-${i + 1}`,
           displayName,
-          profile: { create: { websiteUrl: input.websiteUrl, goal: input.goal, about: input.about, location: input.location } },
+          profile: { create: { websiteUrl, goal: input.goal, about, location: location?.slice(0, 120), place: place ?? undefined } },
         },
       });
     } catch (error) {
@@ -72,7 +91,7 @@ export async function createBrandWithResearch(
       action: "brand.created",
       entityType: "Brand",
       entityId: brand.id,
-      metadata: { websiteUrl: input.websiteUrl },
+      metadata: { websiteUrl: websiteUrl ?? null, placeId: place?.id ?? null },
     },
   });
   const run = await startAgentRun({
@@ -84,7 +103,7 @@ export async function createBrandWithResearch(
   });
   // Site scores alongside the documents: SEO and GEO read the site themselves, so they run in parallel.
   // No website, nothing to score.
-  for (const agentKey of input.websiteUrl ? ["seo", "geo"] : []) {
+  for (const agentKey of websiteUrl ? ["seo", "geo"] : []) {
     await startAgentRun({ workspaceId, brandId: brand.id, agentKey, trigger: "event", userId });
   }
   return { brand, researchRunId: run.id };
