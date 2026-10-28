@@ -9,14 +9,24 @@ export type Source = "website" | "google-maps" | "marketplace" | "wholesale" | "
 export const onboarding: {
   goal: Goal;
   source: Source;
-  website?: string;
-  business?: { name: string; sells: string; location?: string; website?: string };
+  /** No website (A07): Research finds the business online from these. */
+  business?: { name: string; sells: string; location?: string };
   tones: string[];
   language: string;
-  /** Set once the brand is created on the server (A08), so retries and later steps reuse it. */
+  /** Set once the brand is created on the server (A08), so retries and later steps reuse it. `brandFrom` is the
+   *  website or answers it was made from: changing them after going back makes a new brand. */
+  brandFrom?: string;
   workspaceId?: string;
   brandId?: string;
   researchRunId?: string;
   /** Set after a new mobile number is verified; the email step sends it so the number joins that account. */
   phoneTicket?: string;
 } = { goal: "marketing-videos", source: "website", tones: ["Modern", "Luxurious", "Elegant", "Premium"], language: "French (FR)" };
+
+/** Where onboarding drops people, by the goal picked on A04. */
+export const GOAL_HOME = {
+  "social-plan": "/posts",
+  "marketing-videos": "/reels",
+  "fashion-photoshoot": "/photoshoot/fashion",
+  "product-photoshoot": "/photoshoot/product",
+} as const satisfies Record<Goal, string>;

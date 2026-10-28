@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Tilføj virksomhedsoplysninger",
-    "subtitle": "Del et liste-link eller beskriv dit katalog manuelt.",
-    "modeLabel": "Hvordan tilføjer du din virksomhed",
-    "modeListing": "Liste-URL",
-    "modeDescribe": "Beskriv virksomhed",
-    "listingLabel": "Listelink *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps eller butik link",
     "nameLabel": "Virksomhedsnavn *",
     "namePlaceholder": "f.eks. Atelier Bois & Chiffons",
     "sellsLabel": "Hvad sælger du? *",
     "sellsPlaceholder": "f.eks. Håndlavede træborde, TV-stande og moderne boligindretning...",
     "locationLabel": "Placering (valgfri)",
-    "locationPlaceholder": "By, land eller showroom adresse",
-    "websiteLabel": "Hjemmeside (valgfri)"
+    "locationPlaceholder": "By, land eller showroom adresse"
   },
   "learning": {
     "working": "Arbejder",
@@ -189,13 +182,7 @@
     "products_one": "Opdaget produkt ({{count}})",
     "products_other": "Opdagede produkter ({{count}})",
     "found": "Fundet",
-    "strengths": "Brandstyrker",
-    "tags": {
-      "homeLiving": "Hjem & Livsstil",
-      "france": "Frankrig",
-      "productCatalog": "Produktkatalog",
-      "showroomEshop": "Fysisk showroom & e-shop"
-    }
+    "strengths": "Brandstyrker"
   },
   "brand": {
     "title": "Brand & kreativ stil",
@@ -225,12 +212,6 @@
     "featured": "Udvalgte katalogprodukter",
     "readyForBatch_one": "{{count}} klar til batch",
     "readyForBatch_other": "{{count}} klar til batch",
-    "sampleProducts": {
-      "table": "Bunting bord",
-      "tableDetail": "Acacia 240cm",
-      "tv": "TV-enhed",
-      "tvDetail": "Acacia 2 døre"
-    },
     "channelsNote": "Instagram og Facebook kan forbindes i næste trin. (Ingen kanaler forbundet endnu)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Forbereder dine første idéer",
     "body": "Genererer skræddersyede sociale reels og opsætningssæt fra din {{name}} kollektion.",
     "photosTitle": "Indsamler fotos",
-    "photosDetail": "{{product}} spisesæt",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Bygger storyboard",
     "storyboardDetail_one": "Komponerer {{count}} videoscene",
     "storyboardDetail_other": "Komponerer {{count}} videoscener",

@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Додати деталі бізнесу",
-    "subtitle": "Поділіться посиланням на оголошення або опишіть ваш каталог вручну.",
-    "modeLabel": "Як додати ваш бізнес",
-    "modeListing": "URL оголошення",
-    "modeDescribe": "Описати бізнес",
-    "listingLabel": "Посилання на оголошення *",
-    "listingPlaceholder": "Посилання на Etsy, Amazon, Google Maps або магазин",
     "nameLabel": "Назва бізнесу *",
     "namePlaceholder": "наприклад, Atelier Bois & Chiffons",
     "sellsLabel": "Що ви продаєте? *",
     "sellsPlaceholder": "наприклад, Ручної роботи дерев'яні столи, ТВ-стійки та сучасний домашній декор...",
     "locationLabel": "Місцезнаходження (необов'язково)",
-    "locationPlaceholder": "Місто, країна або адреса шоуруму",
-    "websiteLabel": "Вебсайт (необов'язково)"
+    "locationPlaceholder": "Місто, країна або адреса шоуруму"
   },
   "learning": {
     "working": "Працюємо",
@@ -189,13 +182,7 @@
     "products_one": "Виявлено продуктів ({{count}})",
     "products_other": "Виявлено продуктів ({{count}})",
     "found": "Знайдено",
-    "strengths": "Сильні сторони бренду",
-    "tags": {
-      "homeLiving": "Дім і життя",
-      "france": "Франція",
-      "productCatalog": "Каталог продуктів",
-      "showroomEshop": "Фізичний шоурум та інтернет-магазин"
-    }
+    "strengths": "Сильні сторони бренду"
   },
   "brand": {
     "title": "Бренд і креативний стиль",
@@ -225,12 +212,6 @@
     "featured": "Рекомендовані продукти каталогу",
     "readyForBatch_one": "{{count}} готовий до партії",
     "readyForBatch_other": "{{count}} готові до партії",
-    "sampleProducts": {
-      "table": "Стіл Bunting",
-      "tableDetail": "Acacia 240см",
-      "tv": "ТВ блок",
-      "tvDetail": "Acacia 2 двері"
-    },
     "channelsNote": "Instagram та Facebook можна підключити на наступному кроці. (Ще не підключено жодного каналу)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Підготовка ваших перших ідей",
     "body": "Генерація персоналізованих соціальних роликів та сцен з вашої колекції {{name}}.",
     "photosTitle": "Збір фотографій",
-    "photosDetail": "{{product}} обідній набір",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Створення сторіборду",
     "storyboardDetail_one": "Компонування {{count}} відеосцени",
     "storyboardDetail_other": "Компонування {{count}} відеосцен",

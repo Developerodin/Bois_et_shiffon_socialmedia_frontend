@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Üzleti adatok hozzáadása",
-    "subtitle": "Oszd meg egy lista linkjét vagy írd le a katalógusodat manuálisan.",
-    "modeLabel": "Hogyan adod hozzá az üzleted",
-    "modeListing": "Lista URL",
-    "modeDescribe": "Üzlet leírása",
-    "listingLabel": "Lista link *",
-    "listingPlaceholder": "Etsy, Amazon, Google Térkép vagy bolt link",
     "nameLabel": "Üzlet neve *",
     "namePlaceholder": "pl. Atelier Bois & Chiffons",
     "sellsLabel": "Mit árulsz? *",
     "sellsPlaceholder": "pl. Kézzel készített fa asztalok, TV állványok és modern lakásdekoráció...",
     "locationLabel": "Helyszín (opcionális)",
-    "locationPlaceholder": "Város, ország vagy bemutatóterem címe",
-    "websiteLabel": "Weboldal (opcionális)"
+    "locationPlaceholder": "Város, ország vagy bemutatóterem címe"
   },
   "learning": {
     "working": "Dolgozunk rajta",
@@ -189,13 +182,7 @@
     "products_one": "Észlelt termékek ({{count}})",
     "products_other": "Észlelt termékek ({{count}})",
     "found": "Talált",
-    "strengths": "Márka erősségei",
-    "tags": {
-      "homeLiving": "Otthon & Élet",
-      "france": "Franciaország",
-      "productCatalog": "Termékkatalógus",
-      "showroomEshop": "Fizikai bemutatóterem és e-shop"
-    }
+    "strengths": "Márka erősségei"
   },
   "brand": {
     "title": "Márka & kreatív stílus",
@@ -225,12 +212,6 @@
     "featured": "Kiemelt katalógus termékek",
     "readyForBatch_one": "{{count}} kész a csomaghoz",
     "readyForBatch_other": "{{count}} kész a csomaghoz",
-    "sampleProducts": {
-      "table": "Bunting asztal",
-      "tableDetail": "Akácia 240cm",
-      "tv": "TV állvány",
-      "tvDetail": "Akácia 2 ajtós"
-    },
     "channelsNote": "Instagram és Facebook a következő lépésben csatlakoztatható. (Még nincsenek csatornák csatlakoztatva)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Első ötleteid előkészítése",
     "body": "Személyre szabott közösségi videók és színpadkészletek generálása a(z) {{name}} kollekciódból.",
     "photosTitle": "Fotók összegyűjtése",
-    "photosDetail": "{{product}} étkezőgarnitúra",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Storyboard építése",
     "storyboardDetail_one": "{{count}} videójelenet összeállítása",
     "storyboardDetail_other": "{{count}} videójelenet összeállítása",

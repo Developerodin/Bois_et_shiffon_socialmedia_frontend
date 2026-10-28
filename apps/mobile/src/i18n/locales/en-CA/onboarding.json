@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Add business details",
-    "subtitle": "Share a listing link or describe your catalogue manually.",
-    "modeLabel": "How to add your business",
-    "modeListing": "Listing URL",
-    "modeDescribe": "Describe business",
-    "listingLabel": "Listing link *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps or shop link",
     "nameLabel": "Business name *",
     "namePlaceholder": "e.g. Atelier Bois & Chiffons",
     "sellsLabel": "What do you sell? *",
     "sellsPlaceholder": "e.g. Handcrafted wooden tables, TV stands, and modern home decor...",
     "locationLabel": "Location (optional)",
-    "locationPlaceholder": "City, country or showroom address",
-    "websiteLabel": "Website (optional)"
+    "locationPlaceholder": "City, country or showroom address"
   },
   "learning": {
     "working": "Working",
@@ -189,13 +182,7 @@
     "products_one": "Detected products ({{count}})",
     "products_other": "Detected products ({{count}})",
     "found": "Found",
-    "strengths": "Brand strengths",
-    "tags": {
-      "homeLiving": "Home & Living",
-      "france": "France",
-      "productCatalog": "Product catalogue",
-      "showroomEshop": "Physical showroom & e-shop"
-    }
+    "strengths": "Brand strengths"
   },
   "brand": {
     "title": "Brand & creative style",
@@ -225,12 +212,6 @@
     "featured": "Featured catalogue products",
     "readyForBatch_one": "{{count}} ready for batch",
     "readyForBatch_other": "{{count}} ready for batch",
-    "sampleProducts": {
-      "table": "Bunting table",
-      "tableDetail": "Acacia 240cm",
-      "tv": "TV unit",
-      "tvDetail": "Acacia 2 doors"
-    },
     "channelsNote": "Instagram and Facebook can be connected in the next step. (No channels connected yet)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Preparing your first ideas",
     "body": "Generating tailored social reels and staging sets from your {{name}} collection.",
     "photosTitle": "Gathering photos",
-    "photosDetail": "{{product}} dining set",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Building storyboard",
     "storyboardDetail_one": "Composing {{count}} video scene",
     "storyboardDetail_other": "Composing {{count}} video scenes",

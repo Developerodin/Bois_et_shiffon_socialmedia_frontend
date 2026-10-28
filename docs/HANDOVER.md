@@ -1,3 +1,73 @@
+# Handover: Espanda mobile app (2026-10-27)
+
+Native Expo app in `apps/mobile`, built from the Espanda Figma (file `dGILR13Xa3SLUnjGAtHn1C`, pages App·00–07). It talks to the same backend as the web app (`apps/web`, `/api/v1`). The desktop web app stays the place for approval.
+
+## Where it stands
+
+- **All 68 Figma screens are built** (onboarding, reels, posts, photoshoot, marketing, business, plans, recovery), in 24 languages (machine translated, needs native review; Arabic right-to-left not done). See `apps/mobile/src/i18n/README.md`.
+- **Real data so far: sign-in and onboarding up to Learning.** Everything after Learning still shows sample data (`src/ui/onboarding/profile.ts` and each module's sample files).
+- Backend-less features (video/image generation, inbox, website studio, payments) are designed screens only.
+
+### Sign-in
+
+| Method | Status |
+|---|---|
+| Email code | Works. `POST /api/v1/mobile/code` then `/mobile/session`. HTML email in the app's design (`server/email/sign-in-code.ts`), logo embedded. |
+| Google | Works in the Android dev build (`@react-native-google-signin`, needs a dev build, not Expo Go). Server verifies the ID token: `POST /api/v1/mobile/google`. |
+| Phone | Twilio Verify, any country (country picker + libphonenumber validation). New number → "Add your email" → email code links the number. Needs a Twilio upgrade before real users (trial only texts verified numbers). |
+| Apple | Parked until there's an Apple developer account. |
+
+Mobile tokens are Auth.js JWEs under their own salt (`server/auth/request-user.ts`); disabling an account or bumping `sessionVersion` signs out web and mobile together.
+
+### Onboarding (page 01), screen by screen
+
+| Screen | Status |
+|---|---|
+| A01 Sign in, A02 Verify | Real |
+| A03 Welcome | Static by design |
+| A04 Creation goal | Real: saved on the brand (`BrandProfile.goal`) and decides where onboarding ends (Posts / Reels / Photoshoot fashion / product) |
+| A05 Business source | "Website" → A06; every other choice → A07 |
+| A06 Website | Real. Continue first checks the site opens (`POST /api/v1/site-check`, SSRF-guarded like Research); if not, says so. "No website? Describe your business instead" → A07 |
+| A07 No website | Name, what they sell, city (optional). Brand is created without a website (`BrandProfile.about` / `location`); Research finds the business with one web search, then writes the five documents from that plus the owner's words. SEO and GEO are skipped (no site to score). Listing-link mode and the extra website field were removed. |
+| A08 Learning | Real: follows the Research run |
+| A09 Review, A10 Brand | Real. Logo, colours, fonts and products come from the website (see below). Tagline, tags, audience and strengths come from Research's summary (below). Name, tagline and audience can be edited in place. A10's tones and content language are saved on Continue and reach the agents |
+| A11 Preparing, A12 Connect | Real brand name, logo and first product photo; the rest is still the design's preview |
+
+**Brand assets** (spec `docs/superpowers/specs/2026-10-28-brand-assets-design.md`): after writing the documents, Research collects the logo, up to 5 colours, up to 4 fonts and up to 12 products with photos (Shopify `/products.json`, else JSON-LD on crawled pages). Images are re-encoded by sharp into the brand's private bucket; saved on `BrandProfile.assets`; served signed by `GET …/brands/:id/assets`. No AI cost; 30 s cap; failures are a WARN, never a failed Research. Colours come mostly from the logo and photos (B&C's CSS colours are only black/white), so they are approximate. Check: `npm run check:brand-assets -w web`.
+
+**v2 (same day, spec `…/2026-10-28-brand-assets-v2-design.md`):** brands made from a website are named the way the site names itself (`og:site_name` → "Bois & Chiffons") at creation; wide logos shown whole; fonts ranked from the homepage + its theme stylesheets (Poppins, Inter, Caveat for B&C); A10 palette editable (pick a colour + shade, Lighter/Darker, or hex; `PATCH …/brands/:id/assets`, `context.edit`); Research keeps people's colours. A10 creative tone now has Feel / Style / Positioning groups (22 options) — still kept on the phone only.
+
+**Summary + owner's choices** (spec `…/2026-10-28-brand-summary-design.md`): after the assets, Research makes one small AI call that writes `BrandProfile.summary`: the site's own tagline word for word, up to 4 tags, and one-sentence audience and strengths. On B&C it gave "Bois Vivant. Des Espaces Qui Respirent." Mock AI skips the call. A failure is only a warning. Fields people edit are listed in `edited`, and a Research re-run never overwrites them. Tones go to `BrandProfile.preferences`; content language goes to the existing `locales`. `brandKnowledge()` puts an "Owner's choices" block first for every content agent: edited text only, as quoted data. Edits go through `PATCH …/brands/:id/assets` (`context.edit`); renames go through the brand `PATCH` (`displayName`, whose schema was fixed: it used to fail on every call). Check: `npm run check:brand-assets -w web`. The A09 screen wasn't walked through on the emulator: getting there needs a fresh onboarding, which means a paid Research run.
+
+**Not yet tried end to end:** the A07 no-website path (each run is a paid Research run with web search). Try one business that's on Google Maps / Instagram and one that isn't online at all.
+
+## Decisions waiting on the owner
+
+1. ~~A06 promise vs Research~~: decided 2026-10-28, Research now collects them (above). Still open: A10 says the palette is "Editable" but editing isn't built; and DNS pinning in the crawler (named in the spec) before onboarding opens to the public.
+2. **New/changed strings are English-only** in the other 23 languages (they fall back to English): A06 error and "No website?" link, A07 subtitle, the "Finding your business online" Learning stage, and the A09/A10 empty states, colour sources and fonts line. Run `node apps/mobile/scripts/i18n-translate.mjs` once approved.
+3. **Gmail "Copy code" chip** doesn't show on our sign-in email. Likely sender trust: `theodin.in` has no SPF or DMARC record, and `EMAIL_FROM` (a gmail.com address) doesn't match the sending account (`developer@theodin.in`). Add SPF `v=spf1 include:_spf.google.com ~all` and DMARC `v=DMARC1; p=none; rua=mailto:developer@theodin.in` in GoDaddy DNS, and set `EMAIL_FROM="Espanda <developer@theodin.in>"`.
+
+## Owner's setup tasks
+
+- Android OAuth client in Google Cloud: package `com.espanda.app`, debug SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`.
+- Twilio: upgrade the account, set Geo permissions for the countries you'll serve, and an India sender ID / DLT registration.
+- Apple developer account (for Apple sign-in and iOS builds).
+
+## Running it
+
+- Web API: `cd apps/web && npm run dev` (port 3100). The phone reaches it at `EXPO_PUBLIC_API_URL` in `apps/mobile/.env.local`.
+- Android dev build on the Pixel_10 emulator: `npx expo run:android --no-bundler` (JAVA_HOME = JDK 17; Windows long paths on), then Metro `npx expo start --dev-client --port 8081`.
+- Android 17 needs `adb shell pm grant com.espanda.app android.permission.ACCESS_LOCAL_NETWORK` or the app can't reach Metro or the API.
+- After a schema change: `npm run db:deploy`, then restart the web server (a running server keeps the old Prisma client and fails on new columns).
+
+## Things to know
+
+- Rate limits live in `RateLimitBucket`: email codes 5 per 15 min per email, site checks 30 per hour per person, 10 new brands per person per day. Clear a row to reset one.
+- Known debt: four near-duplicate module headers in the mobile kit (`src/ui/reels/kit`, `posts/chrome`, `photoshoot/chrome`, `plans/kit`) to merge; Figma page 98 never exported.
+- `apps/web/scripts/_tmp/` holds throwaway debug scripts and isn't committed.
+
+---
+
 # Handover: production-readiness pass (2026-10-21)
 
 Prow PLUS AI CMO (`apps/web`, Next.js 15 + Prisma on Neon). This pass took an audit of the whole app (backend, user journeys, comparison with Okara and peers) and fixed what it found, in order of impact. Everything below is committed on `main`.

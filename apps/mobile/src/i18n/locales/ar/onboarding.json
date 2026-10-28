@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "أضف تفاصيل العمل",
-    "subtitle": "شارك رابط القائمة أو وصف الكتالوج يدويًا.",
-    "modeLabel": "كيفية إضافة عملك",
-    "modeListing": "رابط القائمة",
-    "modeDescribe": "وصف العمل",
-    "listingLabel": "رابط القائمة *",
-    "listingPlaceholder": "رابط Etsy، Amazon، خرائط Google أو المتجر",
     "nameLabel": "اسم العمل *",
     "namePlaceholder": "مثال: Atelier Bois & Chiffons",
     "sellsLabel": "ماذا تبيع؟ *",
     "sellsPlaceholder": "مثال: طاولات خشبية مصنوعة يدويًا، حوامل تلفزيون، وديكور منزلي حديث...",
     "locationLabel": "الموقع (اختياري)",
-    "locationPlaceholder": "المدينة، البلد أو عنوان صالة العرض",
-    "websiteLabel": "الموقع الإلكتروني (اختياري)"
+    "locationPlaceholder": "المدينة، البلد أو عنوان صالة العرض"
   },
   "learning": {
     "working": "جارٍ العمل",
@@ -189,13 +182,7 @@
     "products_one": "المنتجات المكتشفة ({{count}})",
     "products_other": "المنتجات المكتشفة ({{count}})",
     "found": "تم العثور",
-    "strengths": "نقاط قوة العلامة التجارية",
-    "tags": {
-      "homeLiving": "المنزل والمعيشة",
-      "france": "فرنسا",
-      "productCatalog": "كتالوج المنتجات",
-      "showroomEshop": "معرض فعلي ومتجر إلكتروني"
-    }
+    "strengths": "نقاط قوة العلامة التجارية"
   },
   "brand": {
     "title": "العلامة التجارية والأسلوب الإبداعي",
@@ -225,12 +212,6 @@
     "featured": "منتجات الكتالوج المميزة",
     "readyForBatch_one": "{{count}} جاهز للدفعة",
     "readyForBatch_other": "{{count}} جاهز للدفعة",
-    "sampleProducts": {
-      "table": "طاولة Bunting",
-      "tableDetail": "أكاسيا 240 سم",
-      "tv": "وحدة تلفاز",
-      "tvDetail": "أكاسيا بابين"
-    },
     "channelsNote": "يمكن ربط Instagram وFacebook في الخطوة التالية. (لم يتم ربط أي قنوات بعد)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "تحضير أفكارك الأولى",
     "body": "إنشاء مقاطع اجتماعية مخصصة ومجموعات عرض من مجموعة {{name}} الخاصة بك.",
     "photosTitle": "جمع الصور",
-    "photosDetail": "مجموعة طعام {{product}}",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "بناء لوحة القصة",
     "storyboardDetail_one": "تأليف {{count}} مشهد فيديو",
     "storyboardDetail_other": "تأليف {{count}} مشاهد فيديو",

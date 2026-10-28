@@ -1,4 +1,5 @@
 import { api, session } from "@/api/client";
+import type { Goal } from "@/ui/onboarding/state";
 
 /** Typed calls the screens use. Shapes mirror apps/web route responses. */
 
@@ -37,11 +38,45 @@ export const auth = {
 
 export const me = () => api<Me>("/me");
 
-/** Creates the brand; the server starts Research, SEO and GEO for it. */
-export const createBrand = (workspaceId: string, input: { displayName: string; websiteUrl: string }) =>
+/** Does this website open? Checked on A06 before a brand is created. */
+export const checkSite = (url: string) => api<{ ok: boolean }>("/site-check", { body: { url } });
+
+/** Creates the brand; the server starts Research, SEO and GEO for it. No name with a website: the server reads it from the site. */
+export const createBrand = (workspaceId: string, input: { displayName?: string; websiteUrl?: string; goal?: Goal; about?: string; location?: string }) =>
   api<{ brand: { id: string; displayName: string }; researchRunId: string }>(`/workspaces/${encodeURIComponent(workspaceId)}/brands`, { body: input, workspaceId });
 
 export const contextDocs = (ws: string, brandId: string, signal?: AbortSignal) => api<ContextDocs>(`${brandBase(ws, brandId)}/context-docs`, { workspaceId: ws, signal });
 
 export const agentEvents = (ws: string, brandId: string, after: string | null, signal?: AbortSignal) =>
   api<{ events: AgentEvent[] }>(`${brandBase(ws, brandId)}/agent-events?limit=100${after ? `&after=${encodeURIComponent(after)}` : ""}`, { workspaceId: ws, signal });
+
+export type StoredImage = { key: string; url: string };
+export type BrandAssetsView = {
+  name: string;
+  website: string | null;
+  /** Null until Research collected them (or the brand has no website). */
+  assets: {
+    logo: StoredImage | null;
+    colors: { hex: string; from: "site" | "logo" | "products" | "you" }[];
+    /** Set once a person edited the palette; Research keeps their colours from then on. */
+    colorsEditedAt: string | null;
+    fonts: string[];
+    products: { title: string; kind: string | null; url: string; image: StoredImage | null }[];
+  } | null;
+  /** Research's short summary (A09); null until written. Tags and sentences are English, the tagline is the site's own. */
+  summary: { tagline: string | null; tags: string[]; audience: string | null; strengths: string | null } | null;
+  /** The owner's A10 choices; null fields = not chosen yet. */
+  preferences: { tones: string[] | null; contentLanguage: "fr" | "en" | null };
+};
+export type BrandDetailsEdit = { colors?: string[]; tagline?: string; audience?: string; tones?: string[]; contentLanguage?: "fr" | "en" };
+
+/** Logo, colours, fonts and product photos Research read from the website, its summary and the owner's choices. Image URLs last an hour. */
+export const brandAssets = (ws: string, brandId: string) => api<BrandAssetsView>(`${brandBase(ws, brandId)}/assets`, { workspaceId: ws });
+
+/** People's edits (palette, tagline, audience, tones, language); returns the same view as stored. */
+export const updateBrandDetails = (ws: string, brandId: string, edit: BrandDetailsEdit) =>
+  api<BrandAssetsView>(`${brandBase(ws, brandId)}/assets`, { method: "PATCH", body: edit, workspaceId: ws });
+
+/** Renames the brand. */
+export const renameBrand = (ws: string, brandId: string, displayName: string) =>
+  api<{ ok: true }>(brandBase(ws, brandId), { method: "PATCH", body: { displayName }, workspaceId: ws });

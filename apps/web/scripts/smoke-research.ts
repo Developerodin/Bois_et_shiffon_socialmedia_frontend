@@ -6,6 +6,8 @@
 import assert from "node:assert/strict";
 import { prisma } from "@/server/db/prisma";
 import { runDueJobs } from "@/server/jobs/runner";
+import { BrandAssets } from "@/server/research/brand-assets";
+import { deleteMedia } from "@/server/storage/media";
 import { createBrandWithResearch } from "@/server/services/create-brand";
 import {
   confirmDoc,
@@ -35,6 +37,9 @@ async function main() {
     assert.ok(docs.every((d) => (d.latest?.sources.length ?? 0) > 0), "every doc cites sources");
     console.log("1 research: 5 draft docs with sources ✓");
 
+    const assets = BrandAssets.safeParse((await prisma.brandProfile.findUnique({ where: { brandId: brand.id } }))?.assets).data;
+    console.log(`  assets: ${JSON.stringify(assets && { ...assets, products: assets.products.map((p) => `${p.title} [${p.imageKey ? "photo" : "no photo"}]`) }, null, 1)}`);
+
     await confirmDoc({ workspaceId: ws, brandId: brand.id, kind: "brand-voice", version: 1, userId: owner.userId });
     await saveDraft({ workspaceId: ws, brandId: brand.id, kind: "brand-voice", markdown: "## Voice v2", baseVersion: 1, userId: owner.userId });
     const ctx = await confirmedContext(ws, brand.id);
@@ -51,6 +56,8 @@ async function main() {
     );
     console.log("3 stale edit and stale confirm rejected ✓");
   } finally {
+    const stored = BrandAssets.safeParse((await prisma.brandProfile.findUnique({ where: { brandId: brand.id } }))?.assets).data;
+    for (const key of [stored?.logo?.key, ...(stored?.products ?? []).map((p) => p.imageKey)]) if (key) await deleteMedia(key).catch(() => undefined);
     await prisma.brand.delete({ where: { id: brand.id } });
   }
 }

@@ -2,21 +2,36 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ChevronRight, Pencil } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type TextStyle } from "react-native";
 import { Button } from "@/ui/button";
-import { images } from "@/ui/icons";
 import { Screen, StepHeader, Title } from "@/ui/layout";
-import { sampleProfile } from "@/ui/onboarding/profile";
+import { BrandLogo } from "@/ui/onboarding/brand-logo";
+import { imageSource, saveBrandText, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
+
+type TextField = "name" | "tagline" | "audience";
 
 /** A09 · Onboarding / Review business (Figma 408:557). */
 export default function Review() {
   const { t } = useTranslation("onboarding");
-  const p = sampleProfile;
-  const [tagline, setTagline] = useState(p.tagline);
-  const [audience, setAudience] = useState(p.audience);
-  const [editing, setEditing] = useState<"tagline" | "audience" | null>(null);
+  const { data: brand, loading } = useBrandAssets();
+  const products = brand?.assets?.products ?? [];
+  const summary = brand?.summary;
+  const [editing, setEditing] = useState<TextField | null>(null);
+  const [failed, setFailed] = useState<TextField | null>(null);
+
+  // Saves when the field is left; an unchanged or (for the name) empty value isn't sent. Failure rolls back and says so.
+  const commit = (field: TextField, value: string) => {
+    setEditing(null);
+    const v = value.trim();
+    const current = field === "name" ? (brand?.name ?? "") : (summary?.[field] ?? "");
+    if (v === current || (field === "name" && !v)) return;
+    setFailed(null);
+    saveBrandText(field, v).catch(() => setFailed(field));
+  };
+  const editable = { editing, setEditing, commit, failed, t };
 
   return (
     <Screen header={<StepHeader step={3} />} footer={<Button label={t("common:continue")} arrow onPress={() => router.push("/onboarding/brand")} />}>
@@ -24,65 +39,122 @@ export default function Review() {
 
       <View style={[styles.card, styles.identity]}>
         <View style={styles.logo}>
-          <Image source={images.bcFavicon} style={{ width: 32, height: 32 }} contentFit="contain" />
+          <BrandLogo brand={brand} size={32} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={[type.cardTitle, { letterSpacing: -0.24 }]}>{p.name}</Text>
-          <Text style={[type.meta, { paddingTop: 2 }]}>{p.host}</Text>
+          <Editable {...editable} field="name" value={brand?.name ?? ""} label={t("review.name")} style={[type.cardTitle, { letterSpacing: -0.24 }]} />
+          <Text style={[type.meta, { paddingTop: 2 }]} numberOfLines={1}>{brand?.website?.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") ?? ""}</Text>
         </View>
-        <Button label={t("review.edit")} variant="ghost" height={44} onPress={() => setEditing("tagline")} />
+        {editing !== "name" ? <Button label={t("review.edit")} variant="ghost" height={44} accessibilityLabel={t("review.editName")} onPress={() => setEditing("name")} /> : null}
       </View>
 
       <Section label={t("review.tagline")}>
         <View style={styles.inlineRow}>
-          {editing === "tagline" ? (
-            <TextInput value={tagline} onChangeText={setTagline} autoFocus onBlur={() => setEditing(null)} style={styles.inlineInput} accessibilityLabel={t("review.tagline")} />
-          ) : (
-            <Text style={[styles.inlineInput, { paddingVertical: 12 }]}>{tagline}</Text>
-          )}
+          <View style={{ flex: 1 }}>
+            <Editable {...editable} field="tagline" value={summary?.tagline ?? ""} label={t("review.tagline")} placeholder={t("review.addTagline")} style={[styles.inlineInput, { paddingVertical: 12 }]} />
+          </View>
           <EditButton label={t("review.editTagline")} onPress={() => setEditing("tagline")} />
         </View>
       </Section>
 
-      <Section label={t("review.categoryLocation")}>
-        <View style={styles.tags}>
-          {p.tags.map((tag) => (
-            <Text key={tag} style={styles.tag}>
-              {t(`review.tags.${tag}`)}
-            </Text>
-          ))}
-        </View>
-      </Section>
+      {summary?.tags.length ? (
+        <Section label={t("review.categoryLocation")}>
+          <View style={styles.tags}>
+            {summary.tags.map((tag) => (
+              <Text key={tag} style={styles.tag}>
+                {tag}
+              </Text>
+            ))}
+          </View>
+        </Section>
+      ) : null}
 
       <Section label={t("review.audience")} action={<EditButton label={t("review.editAudience")} onPress={() => setEditing("audience")} />}>
-        {editing === "audience" ? (
-          <TextInput value={audience} onChangeText={setAudience} autoFocus multiline onBlur={() => setEditing(null)} style={[type.body, styles.areaInput]} accessibilityLabel={t("review.audience")} />
+        <Editable {...editable} field="audience" multiline value={summary?.audience ?? ""} label={t("review.audience")} placeholder={t("review.addAudience")} style={[type.body, { paddingTop: space[4] }]} />
+      </Section>
+
+      <Section label={t("review.products", { count: products.length })} action={products.length ? <Text style={type.meta}>{t("review.found")}</Text> : undefined}>
+        {loading ? (
+          <ActivityIndicator color={color.inkSecondary} style={{ paddingTop: space[12] }} />
+        ) : products.length === 0 ? (
+          <Text style={[type.body, { paddingTop: space[4], color: color.inkSecondary }]}>{t("review.noProducts")}</Text>
         ) : (
-          <Text style={[type.body, { paddingTop: space[4] }]}>{audience}</Text>
+          <View style={{ gap: space[12], paddingTop: space[12] }}>
+            {products.slice(0, 4).map((prod) => (
+              <View key={prod.url} style={styles.product}>
+                {prod.image ? <Image source={imageSource(prod.image)} style={styles.productImage} contentFit="cover" /> : <View style={styles.productImage} />}
+                <View style={{ flex: 1 }}>
+                  <Text style={[type.meta, { color: color.ink }]} numberOfLines={2}>
+                    {prod.title}
+                  </Text>
+                  {prod.kind ? <Text style={[type.meta, { paddingTop: 5 }]}>{prod.kind}</Text> : null}
+                </View>
+                <ChevronRight size={20} color={color.inkSecondary} strokeWidth={1.75} />
+              </View>
+            ))}
+          </View>
         )}
       </Section>
 
-      <Section label={t("review.products", { count: p.products.length })} action={<Text style={type.meta}>{t("review.found")}</Text>}>
-        <View style={{ gap: space[12], paddingTop: space[12] }}>
-          {p.products.map((prod) => (
-            <View key={prod.title} style={styles.product}>
-              <Image source={prod.image} style={styles.productImage} contentFit="cover" />
-              <View style={{ flex: 1 }}>
-                <Text style={[type.meta, { color: color.ink }]} numberOfLines={2}>
-                  {prod.title}
-                </Text>
-                <Text style={[type.meta, { paddingTop: 5 }]}>{prod.material}</Text>
-              </View>
-              <ChevronRight size={20} color={color.inkSecondary} strokeWidth={1.75} />
-            </View>
-          ))}
-        </View>
-      </Section>
-
-      <Section label={t("review.strengths")}>
-        <Text style={[type.body, { paddingTop: space[4] }]}>{p.strengths}</Text>
-      </Section>
+      {summary?.strengths ? (
+        <Section label={t("review.strengths")}>
+          <Text style={[type.body, { paddingTop: space[4] }]}>{summary.strengths}</Text>
+        </Section>
+      ) : null}
     </Screen>
+  );
+}
+
+type EditableProps = {
+  field: TextField;
+  value: string;
+  label: string;
+  placeholder?: string;
+  multiline?: boolean;
+  style: StyleProp<TextStyle>;
+  editing: TextField | null;
+  setEditing: (f: TextField | null) => void;
+  commit: (f: TextField, v: string) => void;
+  failed: TextField | null;
+  t: TFunction<"onboarding">;
+};
+
+/** Text that becomes a field in place; leaving the field saves it. A failed save is said in words under it. */
+function Editable({ field, value, label, placeholder, multiline, style, editing, setEditing, commit, failed, t }: EditableProps) {
+  return (
+    <>
+      {editing === field ? (
+        <Field field={field} value={value} label={label} placeholder={placeholder} multiline={multiline} style={style} commit={commit} />
+      ) : (
+        <Text style={[style, !value && { color: color.inkSecondary }]} onPress={() => setEditing(field)}>
+          {value || placeholder}
+        </Text>
+      )}
+      {failed === field ? (
+        <Text accessibilityLiveRegion="polite" style={[type.meta, { color: color.error, paddingTop: space[4] }]}>
+          {t("review.saveFailed")}
+        </Text>
+      ) : null}
+    </>
+  );
+}
+
+/** Mounts each time editing starts (text tap, pencil or "Edit"), so the draft always begins from the current value. */
+function Field({ field, value, label, placeholder, multiline, style, commit }: Pick<EditableProps, "field" | "value" | "label" | "placeholder" | "multiline" | "style" | "commit">) {
+  const [draft, setDraft] = useState(value);
+  return (
+    <TextInput
+      value={draft}
+      onChangeText={setDraft}
+      autoFocus
+      multiline={multiline}
+      maxLength={field === "tagline" ? 120 : field === "name" ? 80 : 240}
+      onBlur={() => commit(field, draft)}
+      onSubmitEditing={multiline ? undefined : () => commit(field, draft)}
+      placeholder={placeholder}
+      style={[style, multiline && styles.areaInput]}
+      accessibilityLabel={label}
+    />
   );
 }
 
@@ -118,7 +190,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
   },
   identity: { flexDirection: "row", alignItems: "center", gap: space[12], padding: space[16], borderRadius: radius.card, marginTop: space[16] },
-  logo: { width: 40, height: 40, padding: space[4], borderRadius: radius.badge, backgroundColor: "#EEEDF7" },
+  logo: { minWidth: 40, height: 40, padding: space[4], borderRadius: radius.badge, backgroundColor: "#EEEDF7", alignItems: "center", justifyContent: "center" },
   sectionHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 18 },
   sectionLabel: { ...type.meta, fontFamily: "Inter_600SemiBold", letterSpacing: 0.18 },
   inlineRow: { flexDirection: "row", alignItems: "center", paddingTop: space[4] },

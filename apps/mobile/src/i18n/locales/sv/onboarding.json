@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Lägg till företagsuppgifter",
-    "subtitle": "Dela en annonslänk eller beskriv din katalog manuellt.",
-    "modeLabel": "Hur man lägger till ditt företag",
-    "modeListing": "Annons-URL",
-    "modeDescribe": "Beskriv företag",
-    "listingLabel": "Annonslänk *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps eller butiks länk",
     "nameLabel": "Företagsnamn *",
     "namePlaceholder": "t.ex. Atelier Bois & Chiffons",
     "sellsLabel": "Vad säljer du? *",
     "sellsPlaceholder": "t.ex. Handgjorda träbord, TV-stativ och modern heminredning...",
     "locationLabel": "Plats (valfritt)",
-    "locationPlaceholder": "Stad, land eller showroom-adress",
-    "websiteLabel": "Webbplats (valfritt)"
+    "locationPlaceholder": "Stad, land eller showroom-adress"
   },
   "learning": {
     "working": "Arbetar",
@@ -189,13 +182,7 @@
     "products_one": "Upptäckta produkter ({{count}})",
     "products_other": "Upptäckta produkter ({{count}})",
     "found": "Hittad",
-    "strengths": "Varumärkesstyrkor",
-    "tags": {
-      "homeLiving": "Hem & Livsstil",
-      "france": "Frankrike",
-      "productCatalog": "Produktkatalog",
-      "showroomEshop": "Fysisk showroom & e-shop"
-    }
+    "strengths": "Varumärkesstyrkor"
   },
   "brand": {
     "title": "Varumärke & kreativ stil",
@@ -225,12 +212,6 @@
     "featured": "Utvalda katalogprodukter",
     "readyForBatch_one": "{{count}} redo för batch",
     "readyForBatch_other": "{{count}} redo för batch",
-    "sampleProducts": {
-      "table": "Bunting bord",
-      "tableDetail": "Acacia 240cm",
-      "tv": "TV-enhet",
-      "tvDetail": "Acacia 2 dörrar"
-    },
     "channelsNote": "Instagram och Facebook kan kopplas i nästa steg. (Inga kanaler kopplade än)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Förbereder dina första idéer",
     "body": "Skapar skräddarsydda sociala reels och scenarier från din {{name}} kollektion.",
     "photosTitle": "Samlar foton",
-    "photosDetail": "{{product}} matsalsset",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Bygger storyboard",
     "storyboardDetail_one": "Komponerar {{count}} videoscen",
     "storyboardDetail_other": "Komponerar {{count}} videoscener",

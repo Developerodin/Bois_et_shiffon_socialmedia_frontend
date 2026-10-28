@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Dodaj szczegóły biznesu",
-    "subtitle": "Podaj link do oferty lub opisz swój katalog ręcznie.",
-    "modeLabel": "Jak dodać swój biznes",
-    "modeListing": "URL oferty",
-    "modeDescribe": "Opisz biznes",
-    "listingLabel": "Link do oferty *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps lub link do sklepu",
     "nameLabel": "Nazwa biznesu *",
     "namePlaceholder": "np. Atelier Bois & Chiffons",
     "sellsLabel": "Co sprzedajesz? *",
     "sellsPlaceholder": "np. Ręcznie robione drewniane stoły, szafki RTV i nowoczesne dekoracje do domu...",
     "locationLabel": "Lokalizacja (opcjonalnie)",
-    "locationPlaceholder": "Miasto, kraj lub adres showroomu",
-    "websiteLabel": "Strona internetowa (opcjonalnie)"
+    "locationPlaceholder": "Miasto, kraj lub adres showroomu"
   },
   "learning": {
     "working": "Pracuję",
@@ -189,13 +182,7 @@
     "products_one": "Wykryte produkty ({{count}})",
     "products_other": "Wykryte produkty ({{count}})",
     "found": "Znaleziono",
-    "strengths": "Mocne strony marki",
-    "tags": {
-      "homeLiving": "Dom i życie",
-      "france": "Francja",
-      "productCatalog": "Katalog produktów",
-      "showroomEshop": "Showroom i e-sklep"
-    }
+    "strengths": "Mocne strony marki"
   },
   "brand": {
     "title": "Marka i styl kreatywny",
@@ -225,12 +212,6 @@
     "featured": "Polecane produkty z katalogu",
     "readyForBatch_one": "{{count}} gotowy do partii",
     "readyForBatch_other": "{{count}} gotowe do partii",
-    "sampleProducts": {
-      "table": "Stół Bunting",
-      "tableDetail": "Akacja 240cm",
-      "tv": "Szafka RTV",
-      "tvDetail": "Akacja 2 drzwi"
-    },
     "channelsNote": "Instagram i Facebook można połączyć w następnym kroku. (Brak połączonych kanałów)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Przygotowywanie pierwszych pomysłów",
     "body": "Generowanie dopasowanych rolek społecznościowych i zestawów scenicznych z kolekcji {{name}}.",
     "photosTitle": "Zbieranie zdjęć",
-    "photosDetail": "{{product}} zestaw jadalniany",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Tworzenie scenariusza",
     "storyboardDetail_one": "Komponowanie {{count}} sceny wideo",
     "storyboardDetail_other": "Komponowanie {{count}} scen wideo",

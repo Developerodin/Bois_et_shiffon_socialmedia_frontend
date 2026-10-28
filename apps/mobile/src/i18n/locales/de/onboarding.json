@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Geschäftsdaten hinzufügen",
-    "subtitle": "Teile einen Listungslink oder beschreibe deinen Katalog manuell.",
-    "modeLabel": "Wie du dein Geschäft hinzufügen kannst",
-    "modeListing": "Listungs-URL",
-    "modeDescribe": "Geschäft beschreiben",
-    "listingLabel": "Listungslink *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps oder Shop-Link",
     "nameLabel": "Geschäftsname *",
     "namePlaceholder": "z.B. Atelier Bois & Chiffons",
     "sellsLabel": "Was verkaufst du? *",
     "sellsPlaceholder": "z.B. Handgefertigte Holztische, TV-Ständer und moderne Wohnkultur...",
     "locationLabel": "Standort (optional)",
-    "locationPlaceholder": "Stadt, Land oder Showroom-Adresse",
-    "websiteLabel": "Website (optional)"
+    "locationPlaceholder": "Stadt, Land oder Showroom-Adresse"
   },
   "learning": {
     "working": "Wird bearbeitet",
@@ -189,13 +182,7 @@
     "products_one": "Erkannte Produkte ({{count}})",
     "products_other": "Erkannte Produkte ({{count}})",
     "found": "Gefunden",
-    "strengths": "Markenstärken",
-    "tags": {
-      "homeLiving": "Wohnen & Leben",
-      "france": "Frankreich",
-      "productCatalog": "Produktkatalog",
-      "showroomEshop": "Physischer Showroom & E-Shop"
-    }
+    "strengths": "Markenstärken"
   },
   "brand": {
     "title": "Marke & kreativer Stil",
@@ -225,12 +212,6 @@
     "featured": "Ausgewählte Katalogprodukte",
     "readyForBatch_one": "{{count}} bereit für Batch",
     "readyForBatch_other": "{{count}} bereit für Batch",
-    "sampleProducts": {
-      "table": "Bunting Tisch",
-      "tableDetail": "Akazie 240cm",
-      "tv": "TV-Einheit",
-      "tvDetail": "Akazie 2 Türen"
-    },
     "channelsNote": "Instagram und Facebook können im nächsten Schritt verbunden werden. (Noch keine Kanäle verbunden)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Bereite deine ersten Ideen vor",
     "body": "Erstelle maßgeschneiderte Social Reels und Bühnenbilder aus deiner {{name}}-Kollektion.",
     "photosTitle": "Fotos sammeln",
-    "photosDetail": "{{product}} Essgruppe",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Storyboard erstellen",
     "storyboardDetail_one": "{{count}} Videoszene komponieren",
     "storyboardDetail_other": "{{count}} Videoszenen komponieren",

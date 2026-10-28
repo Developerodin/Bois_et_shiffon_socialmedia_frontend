@@ -129,23 +129,20 @@
         "value": "Voice from your pages"
       }
     },
-    "safeNote": "Catalog import does not change anything on your live store."
+    "safeNote": "Catalog import does not change anything on your live store.",
+    "unreachable": "We couldn't open this site. Check the address.",
+    "checkFailed": "Couldn't check the site. Try again.",
+    "noWebsite": "No website? Describe your business instead"
   },
   "manual": {
     "title": "Add business details",
-    "subtitle": "Share a listing link or describe your catalog manually.",
-    "modeLabel": "How to add your business",
-    "modeListing": "Listing URL",
-    "modeDescribe": "Describe business",
-    "listingLabel": "Listing link *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps or shop link",
+    "subtitle": "Tell us what you sell and where. We'll look your business up online.",
     "nameLabel": "Business name *",
     "namePlaceholder": "e.g. Atelier Bois & Chiffons",
     "sellsLabel": "What do you sell? *",
     "sellsPlaceholder": "e.g. Handcrafted wooden tables, TV stands, and modern home decor...",
     "locationLabel": "Location (optional)",
-    "locationPlaceholder": "City, country or showroom address",
-    "websiteLabel": "Website (optional)"
+    "locationPlaceholder": "City, country or showroom address"
   },
   "learning": {
     "working": "Working",
@@ -163,7 +160,8 @@
     "stages": {
       "open": "Opening website",
       "identity": "Reading brand identity & tone",
-      "photos": "Gathering product photos"
+      "photos": "Gathering product photos",
+      "find": "Finding your business online"
     },
     "status": {
       "done": "Complete",
@@ -190,12 +188,12 @@
     "products_other": "Detected products ({{count}})",
     "found": "Found",
     "strengths": "Brand strengths",
-    "tags": {
-      "homeLiving": "Home & Living",
-      "france": "France",
-      "productCatalog": "Product catalog",
-      "showroomEshop": "Physical showroom & e-shop"
-    }
+    "noProducts": "We didn’t find products on your site yet.",
+    "name": "Business name",
+    "editName": "Edit business name",
+    "addTagline": "Add your tagline",
+    "addAudience": "Who buys from you?",
+    "saveFailed": "Couldn’t save that change — it’s back to what it was. Try again."
   },
   "brand": {
     "title": "Brand & creative style",
@@ -212,7 +210,23 @@
       "elegant": "Elegant",
       "premium": "Premium",
       "natural": "Natural",
-      "minimalist": "Minimalist"
+      "minimalist": "Minimalist",
+      "warm": "Warm",
+      "playful": "Playful",
+      "bold": "Bold",
+      "calm": "Calm",
+      "romantic": "Romantic",
+      "edgy": "Edgy",
+      "rustic": "Rustic",
+      "vintage": "Vintage",
+      "bohemian": "Bohemian",
+      "industrial": "Industrial",
+      "scandinavian": "Scandinavian",
+      "coastal": "Coastal",
+      "affordable": "Affordable",
+      "artisanal": "Artisanal",
+      "sustainable": "Sustainable",
+      "family-friendly": "Family-friendly"
     },
     "contentLanguage": "Content language",
     "contentLanguageA11y": "Content language, {{language}}. Change",
@@ -225,13 +239,54 @@
     "featured": "Featured catalog products",
     "readyForBatch_one": "{{count}} ready for batch",
     "readyForBatch_other": "{{count}} ready for batch",
-    "sampleProducts": {
-      "table": "Bunting table",
-      "tableDetail": "Acacia 240cm",
-      "tv": "TV unit",
-      "tvDetail": "Acacia 2 doors"
+    "channelsNote": "Instagram and Facebook can be connected in the next step. (No channels connected yet)",
+    "noColors": "We didn’t find brand colours on your site.",
+    "fonts": "Fonts: {{fonts}}",
+    "colorFrom": {
+      "site": "Website",
+      "logo": "Logo",
+      "products": "Photos",
+      "you": "Yours"
     },
-    "channelsNote": "Instagram and Facebook can be connected in the next step. (No channels connected yet)"
+    "editColor": "Edit colour",
+    "addColor": "Add colour",
+    "hexLabel": "Or type a hex code",
+    "hexHint": "Use a hex code like #7C6754",
+    "duplicateColor": "That colour is already in the palette",
+    "saveColor": "Save colour",
+    "removeColor": "Remove colour",
+    "cancel": "Cancel",
+    "saveFailed": "Couldn’t save. Your colours are unchanged — try again.",
+    "swatchA11y": "{{hex}}, {{source}}. Edit",
+    "pickColor": "Pick a colour, then a shade",
+    "lighter": "Lighter",
+    "darker": "Darker",
+    "toneGroups": {
+      "feel": "Feel",
+      "style": "Style",
+      "positioning": "Positioning"
+    },
+    "hues": {
+      "red": "Red",
+      "orange": "Orange",
+      "yellow": "Yellow",
+      "green": "Green",
+      "teal": "Teal",
+      "blue": "Blue",
+      "purple": "Purple",
+      "pink": "Pink",
+      "brown": "Brown",
+      "grey": "Grey"
+    },
+    "shades": {
+      "lightest": "lightest",
+      "light": "light",
+      "medium": "medium",
+      "dark": "dark",
+      "darkest": "darkest"
+    },
+    "prefsSaveFailed": "Couldn’t save your tone and language.",
+    "continueWithoutSaving": "Continue without saving"
   },
   "preparing": {
     "ready": "Studio ready",
@@ -241,7 +296,7 @@
     "title": "Preparing your first ideas",
     "body": "Generating tailored social reels and staging sets from your {{name}} collection.",
     "photosTitle": "Gathering photos",
-    "photosDetail": "{{product}} dining set",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Building storyboard",
     "storyboardDetail_one": "Composing {{count}} video scene",
     "storyboardDetail_other": "Composing {{count}} video scenes",

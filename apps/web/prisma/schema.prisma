@@ -160,6 +160,17 @@ model BrandProfile {
   workspaceId  String
   brandId      String   @unique
   websiteUrl   String?
+  /// What the owner said they mainly want to create (mobile onboarding A04): social-plan | marketing-videos | fashion-photoshoot | product-photoshoot
+  goal         String?
+  /// Typed by owners without a website (mobile onboarding A07); Research looks the business up from these
+  about        String?
+  location     String?
+  /// Logo, colours, fonts and product photos read from the website by Research (server/research/brand-assets.ts)
+  assets       Json?
+  /// Tagline, tags, audience, strengths drafted by Research; fields people edited are kept (server/research/brand-summary.ts)
+  summary      Json?
+  /// Creative tones the owner picked (mobile A10); the content language lives in `locales`
+  preferences  Json?
   voiceSummary String?
   pillars      Json?
   locales      Json?

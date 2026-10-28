@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Ajouter les détails de l'entreprise",
-    "subtitle": "Partagez un lien d'annonce ou décrivez votre catalogue manuellement.",
-    "modeLabel": "Comment ajouter votre entreprise",
-    "modeListing": "URL de l'annonce",
-    "modeDescribe": "Décrire l'entreprise",
-    "listingLabel": "Lien de l'annonce *",
-    "listingPlaceholder": "Lien Etsy, Amazon, Google Maps ou boutique",
     "nameLabel": "Nom de l'entreprise *",
     "namePlaceholder": "ex. Atelier Bois & Chiffons",
     "sellsLabel": "Que vendez-vous ? *",
     "sellsPlaceholder": "ex. Tables en bois artisanales, meubles TV et décoration moderne...",
     "locationLabel": "Emplacement (facultatif)",
-    "locationPlaceholder": "Ville, pays ou adresse du showroom",
-    "websiteLabel": "Site web (facultatif)"
+    "locationPlaceholder": "Ville, pays ou adresse du showroom"
   },
   "learning": {
     "working": "En cours",
@@ -189,13 +182,7 @@
     "products_one": "Produits détectés ({{count}})",
     "products_other": "Produits détectés ({{count}})",
     "found": "Trouvé",
-    "strengths": "Forces de la marque",
-    "tags": {
-      "homeLiving": "Maison & Vie",
-      "france": "France",
-      "productCatalog": "Catalogue de produits",
-      "showroomEshop": "Showroom physique & e-shop"
-    }
+    "strengths": "Forces de la marque"
   },
   "brand": {
     "title": "Marque & style créatif",
@@ -225,12 +212,6 @@
     "featured": "Produits du catalogue en vedette",
     "readyForBatch_one": "{{count}} prêt pour le lot",
     "readyForBatch_other": "{{count}} prêts pour le lot",
-    "sampleProducts": {
-      "table": "Table Bunting",
-      "tableDetail": "Acacia 240cm",
-      "tv": "Meuble TV",
-      "tvDetail": "Acacia 2 portes"
-    },
     "channelsNote": "Instagram et Facebook peuvent être connectés à l'étape suivante. (Aucun canal connecté pour le moment)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Préparation de vos premières idées",
     "body": "Génération de bobines sociales sur mesure et de décors à partir de votre collection {{name}}.",
     "photosTitle": "Rassemblement des photos",
-    "photosDetail": "Ensemble de salle à manger {{product}}",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Création du storyboard",
     "storyboardDetail_one": "Composition de {{count}} scène vidéo",
     "storyboardDetail_other": "Composition de {{count}} scènes vidéo",

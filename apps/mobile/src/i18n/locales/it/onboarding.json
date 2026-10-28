@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Aggiungi dettagli dell'attività",
-    "subtitle": "Condividi un link all'annuncio o descrivi il tuo catalogo manualmente.",
-    "modeLabel": "Come aggiungere la tua attività",
-    "modeListing": "URL dell'annuncio",
-    "modeDescribe": "Descrivi l'attività",
-    "listingLabel": "Link all'annuncio *",
-    "listingPlaceholder": "Link Etsy, Amazon, Google Maps o negozio",
     "nameLabel": "Nome dell'attività *",
     "namePlaceholder": "es. Atelier Bois & Chiffons",
     "sellsLabel": "Cosa vendi? *",
     "sellsPlaceholder": "es. Tavoli in legno fatti a mano, mobili TV e decorazioni moderne per la casa...",
     "locationLabel": "Posizione (opzionale)",
-    "locationPlaceholder": "Città, paese o indirizzo showroom",
-    "websiteLabel": "Sito web (opzionale)"
+    "locationPlaceholder": "Città, paese o indirizzo showroom"
   },
   "learning": {
     "working": "In lavorazione",
@@ -189,13 +182,7 @@
     "products_one": "Prodotti rilevati ({{count}})",
     "products_other": "Prodotti rilevati ({{count}})",
     "found": "Trovato",
-    "strengths": "Punti di forza del brand",
-    "tags": {
-      "homeLiving": "Casa & Arredamento",
-      "france": "Francia",
-      "productCatalog": "Catalogo prodotti",
-      "showroomEshop": "Showroom fisico & e-shop"
-    }
+    "strengths": "Punti di forza del brand"
   },
   "brand": {
     "title": "Brand & stile creativo",
@@ -225,12 +212,6 @@
     "featured": "Prodotti in evidenza del catalogo",
     "readyForBatch_one": "{{count}} pronto per il batch",
     "readyForBatch_other": "{{count}} pronti per il batch",
-    "sampleProducts": {
-      "table": "Tavolo Bunting",
-      "tableDetail": "Acacia 240cm",
-      "tv": "Mobile TV",
-      "tvDetail": "Acacia 2 ante"
-    },
     "channelsNote": "Instagram e Facebook possono essere collegati nel prossimo passaggio. (Nessun canale ancora collegato)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Preparando le tue prime idee",
     "body": "Generazione di reel social personalizzati e set di scena dalla tua collezione {{name}}.",
     "photosTitle": "Raccolta foto",
-    "photosDetail": "Set da pranzo {{product}}",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Costruzione storyboard",
     "storyboardDetail_one": "Composizione di {{count}} scena video",
     "storyboardDetail_other": "Composizione di {{count}} scene video",

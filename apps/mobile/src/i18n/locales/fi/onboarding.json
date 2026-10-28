@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Lisää yrityksen tiedot",
-    "subtitle": "Jaa listauslinkki tai kuvaile luettelosi manuaalisesti.",
-    "modeLabel": "Kuinka lisätä yrityksesi",
-    "modeListing": "Listaus-URL",
-    "modeDescribe": "Kuvaile yritystä",
-    "listingLabel": "Listauslinkki *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps tai kauppalinkki",
     "nameLabel": "Yrityksen nimi *",
     "namePlaceholder": "esim. Atelier Bois & Chiffons",
     "sellsLabel": "Mitä myyt? *",
     "sellsPlaceholder": "esim. Käsintehtyjä puupöytiä, TV-tasoja ja modernia sisustusta...",
     "locationLabel": "Sijainti (valinnainen)",
-    "locationPlaceholder": "Kaupunki, maa tai näyttelytilan osoite",
-    "websiteLabel": "Verkkosivusto (valinnainen)"
+    "locationPlaceholder": "Kaupunki, maa tai näyttelytilan osoite"
   },
   "learning": {
     "working": "Työstetään",
@@ -189,13 +182,7 @@
     "products_one": "Havaitut tuotteet ({{count}})",
     "products_other": "Havaitut tuotteet ({{count}})",
     "found": "Löydetty",
-    "strengths": "Brändin vahvuudet",
-    "tags": {
-      "homeLiving": "Koti & asuminen",
-      "france": "Ranska",
-      "productCatalog": "Tuotekatalogi",
-      "showroomEshop": "Fyysinen showroom & verkkokauppa"
-    }
+    "strengths": "Brändin vahvuudet"
   },
   "brand": {
     "title": "Brändi & luova tyyli",
@@ -225,12 +212,6 @@
     "featured": "Esillä olevat katalogituotteet",
     "readyForBatch_one": "{{count}} valmis erään",
     "readyForBatch_other": "{{count}} valmiina erään",
-    "sampleProducts": {
-      "table": "Bunting pöytä",
-      "tableDetail": "Acacia 240cm",
-      "tv": "TV-yksikkö",
-      "tvDetail": "Acacia 2 ovea"
-    },
     "channelsNote": "Instagram ja Facebook voidaan yhdistää seuraavassa vaiheessa. (Ei kanavia yhdistetty vielä)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Valmistellaan ensimmäisiä ideoitasi",
     "body": "Luodaan räätälöityjä somevideoita ja lavastuksia {{name}}-kokoelmastasi.",
     "photosTitle": "Kerätään kuvia",
-    "photosDetail": "{{product}} ruokailuryhmä",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Rakennetaan käsikirjoitusta",
     "storyboardDetail_one": "Koostetaan {{count}} videokohtaus",
     "storyboardDetail_other": "Koostetaan {{count}} videokohtausta",

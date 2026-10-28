@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Adaugă detalii despre afacere",
-    "subtitle": "Împărtășește un link de listare sau descrie catalogul tău manual.",
-    "modeLabel": "Cum să adaugi afacerea ta",
-    "modeListing": "URL de listare",
-    "modeDescribe": "Descrie afacerea",
-    "listingLabel": "Link de listare *",
-    "listingPlaceholder": "Link Etsy, Amazon, Google Maps sau magazin",
     "nameLabel": "Numele afacerii *",
     "namePlaceholder": "ex. Atelier Bois & Chiffons",
     "sellsLabel": "Ce vinzi? *",
     "sellsPlaceholder": "ex. Mese din lemn lucrate manual, suporturi TV și decor modern pentru casă...",
     "locationLabel": "Locație (opțional)",
-    "locationPlaceholder": "Oraș, țară sau adresă showroom",
-    "websiteLabel": "Website (opțional)"
+    "locationPlaceholder": "Oraș, țară sau adresă showroom"
   },
   "learning": {
     "working": "Se lucrează",
@@ -189,13 +182,7 @@
     "products_one": "Produse detectate ({{count}})",
     "products_other": "Produse detectate ({{count}})",
     "found": "Găsit",
-    "strengths": "Puncte tari ale brandului",
-    "tags": {
-      "homeLiving": "Casă & Living",
-      "france": "Franța",
-      "productCatalog": "Catalog de produse",
-      "showroomEshop": "Showroom fizic & e-shop"
-    }
+    "strengths": "Puncte tari ale brandului"
   },
   "brand": {
     "title": "Brand & stil creativ",
@@ -225,12 +212,6 @@
     "featured": "Produse de catalog recomandate",
     "readyForBatch_one": "{{count}} gata pentru lot",
     "readyForBatch_other": "{{count}} gata pentru lot",
-    "sampleProducts": {
-      "table": "Masă Bunting",
-      "tableDetail": "Acacia 240cm",
-      "tv": "Unitate TV",
-      "tvDetail": "Acacia 2 uși"
-    },
     "channelsNote": "Instagram și Facebook pot fi conectate în pasul următor. (Niciun canal conectat încă)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Pregătirea primelor tale idei",
     "body": "Generăm role sociale personalizate și seturi de scenă din colecția ta {{name}}.",
     "photosTitle": "Colectăm fotografii",
-    "photosDetail": "Set de dining {{product}}",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Construim storyboard-ul",
     "storyboardDetail_one": "Compunem {{count}} scenă video",
     "storyboardDetail_other": "Compunem {{count}} scene video",

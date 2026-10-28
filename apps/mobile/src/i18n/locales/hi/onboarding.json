@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "व्यवसाय विवरण जोड़ें",
-    "subtitle": "एक लिस्टिंग लिंक साझा करें या अपने कैटलॉग का मैन्युअल रूप से वर्णन करें।",
-    "modeLabel": "अपना व्यवसाय कैसे जोड़ें",
-    "modeListing": "लिस्टिंग यूआरएल",
-    "modeDescribe": "व्यवसाय का वर्णन करें",
-    "listingLabel": "लिस्टिंग लिंक *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps या शॉप लिंक",
     "nameLabel": "व्यवसाय का नाम *",
     "namePlaceholder": "उदा. Atelier Bois & Chiffons",
     "sellsLabel": "आप क्या बेचते हैं? *",
     "sellsPlaceholder": "उदा. हस्तनिर्मित लकड़ी की मेज, टीवी स्टैंड, और आधुनिक होम डेकोर...",
     "locationLabel": "स्थान (वैकल्पिक)",
-    "locationPlaceholder": "शहर, देश या शोरूम का पता",
-    "websiteLabel": "वेबसाइट (वैकल्पिक)"
+    "locationPlaceholder": "शहर, देश या शोरूम का पता"
   },
   "learning": {
     "working": "काम कर रहा है",
@@ -189,13 +182,7 @@
     "products_one": "पता लगाए गए उत्पाद ({{count}})",
     "products_other": "पता लगाए गए उत्पाद ({{count}})",
     "found": "मिला",
-    "strengths": "ब्रांड की ताकतें",
-    "tags": {
-      "homeLiving": "होम & लिविंग",
-      "france": "फ्रांस",
-      "productCatalog": "उत्पाद कैटलॉग",
-      "showroomEshop": "फिजिकल शोरूम & ई-शॉप"
-    }
+    "strengths": "ब्रांड की ताकतें"
   },
   "brand": {
     "title": "ब्रांड & क्रिएटिव स्टाइल",
@@ -225,12 +212,6 @@
     "featured": "फीचर्ड कैटलॉग उत्पाद",
     "readyForBatch_one": "{{count}} बैच के लिए तैयार",
     "readyForBatch_other": "{{count}} बैच के लिए तैयार",
-    "sampleProducts": {
-      "table": "Bunting टेबल",
-      "tableDetail": "Acacia 240cm",
-      "tv": "टीवी यूनिट",
-      "tvDetail": "Acacia 2 दरवाजे"
-    },
     "channelsNote": "Instagram और Facebook को अगले चरण में जोड़ा जा सकता है। (अभी तक कोई चैनल नहीं जुड़ा है)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "आपके पहले विचार तैयार कर रहे हैं",
     "body": "आपके {{name}} संग्रह से अनुकूलित सोशल रील्स और स्टेजिंग सेट तैयार कर रहे हैं।",
     "photosTitle": "फोटो इकट्ठा कर रहे हैं",
-    "photosDetail": "{{product}} डाइनिंग सेट",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "स्टोरीबोर्ड बना रहे हैं",
     "storyboardDetail_one": "{{count}} वीडियो सीन बना रहे हैं",
     "storyboardDetail_other": "{{count}} वीडियो सीन बना रहे हैं",

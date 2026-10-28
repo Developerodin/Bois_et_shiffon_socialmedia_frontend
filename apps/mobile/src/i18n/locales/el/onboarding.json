@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Προσθέστε στοιχεία επιχείρησης",
-    "subtitle": "Μοιραστείτε έναν σύνδεσμο καταχώρησης ή περιγράψτε τον κατάλογό σας χειροκίνητα.",
-    "modeLabel": "Πώς να προσθέσετε την επιχείρησή σας",
-    "modeListing": "URL καταχώρησης",
-    "modeDescribe": "Περιγράψτε την επιχείρηση",
-    "listingLabel": "Σύνδεσμος καταχώρησης *",
-    "listingPlaceholder": "Σύνδεσμος Etsy, Amazon, Google Maps ή καταστήματος",
     "nameLabel": "Όνομα επιχείρησης *",
     "namePlaceholder": "π.χ. Atelier Bois & Chiffons",
     "sellsLabel": "Τι πουλάτε; *",
     "sellsPlaceholder": "π.χ. Χειροποίητα ξύλινα τραπέζια, βάσεις τηλεόρασης και μοντέρνα διακόσμηση σπιτιού...",
     "locationLabel": "Τοποθεσία (προαιρετικό)",
-    "locationPlaceholder": "Πόλη, χώρα ή διεύθυνση εκθεσιακού χώρου",
-    "websiteLabel": "Ιστοσελίδα (προαιρετικό)"
+    "locationPlaceholder": "Πόλη, χώρα ή διεύθυνση εκθεσιακού χώρου"
   },
   "learning": {
     "working": "Εργασία σε εξέλιξη",
@@ -189,13 +182,7 @@
     "products_one": "Ανιχνευμένα προϊόντα ({{count}})",
     "products_other": "Ανιχνευμένα προϊόντα ({{count}})",
     "found": "Βρέθηκε",
-    "strengths": "Δυνατά σημεία της μάρκας",
-    "tags": {
-      "homeLiving": "Σπίτι & Διαβίωση",
-      "france": "Γαλλία",
-      "productCatalog": "Κατάλογος προϊόντων",
-      "showroomEshop": "Φυσικό κατάστημα & e-shop"
-    }
+    "strengths": "Δυνατά σημεία της μάρκας"
   },
   "brand": {
     "title": "Μάρκα & δημιουργικό στυλ",
@@ -225,12 +212,6 @@
     "featured": "Προβεβλημένα προϊόντα καταλόγου",
     "readyForBatch_one": "{{count}} έτοιμο για παρτίδα",
     "readyForBatch_other": "{{count}} έτοιμα για παρτίδα",
-    "sampleProducts": {
-      "table": "Τραπέζι Bunting",
-      "tableDetail": "Ακακία 240cm",
-      "tv": "Έπιπλο τηλεόρασης",
-      "tvDetail": "Ακακία 2 πόρτες"
-    },
     "channelsNote": "Instagram και Facebook μπορούν να συνδεθούν στο επόμενο βήμα. (Δεν έχουν συνδεθεί ακόμα κανάλια)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Προετοιμασία των πρώτων σας ιδεών",
     "body": "Δημιουργία προσαρμοσμένων κοινωνικών reels και σκηνικών από τη συλλογή {{name}} σας.",
     "photosTitle": "Συλλογή φωτογραφιών",
-    "photosDetail": "{{product}} σετ τραπεζαρίας",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Δημιουργία storyboard",
     "storyboardDetail_one": "Σύνθεση {{count}} σκηνής βίντεο",
     "storyboardDetail_other": "Σύνθεση {{count}} σκηνών βίντεο",

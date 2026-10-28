@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Voeg bedrijfsgegevens toe",
-    "subtitle": "Deel een vermeldinglink of beschrijf je catalogus handmatig.",
-    "modeLabel": "Hoe je je bedrijf toevoegt",
-    "modeListing": "Vermelding URL",
-    "modeDescribe": "Beschrijf bedrijf",
-    "listingLabel": "Vermelding link *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps of winkel link",
     "nameLabel": "Bedrijfsnaam *",
     "namePlaceholder": "bijv. Atelier Bois & Chiffons",
     "sellsLabel": "Wat verkoop je? *",
     "sellsPlaceholder": "bijv. Handgemaakte houten tafels, tv-meubels en moderne woondecoratie...",
     "locationLabel": "Locatie (optioneel)",
-    "locationPlaceholder": "Stad, land of showroomadres",
-    "websiteLabel": "Website (optioneel)"
+    "locationPlaceholder": "Stad, land of showroomadres"
   },
   "learning": {
     "working": "Bezig",
@@ -189,13 +182,7 @@
     "products_one": "Gedetecteerde producten ({{count}})",
     "products_other": "Gedetecteerde producten ({{count}})",
     "found": "Gevonden",
-    "strengths": "Merksterkten",
-    "tags": {
-      "homeLiving": "Wonen & Leven",
-      "france": "Frankrijk",
-      "productCatalog": "Productcatalogus",
-      "showroomEshop": "Fysieke showroom & e-shop"
-    }
+    "strengths": "Merksterkten"
   },
   "brand": {
     "title": "Merk & creatieve stijl",
@@ -225,12 +212,6 @@
     "featured": "Uitgelichte catalogusproducten",
     "readyForBatch_one": "{{count}} klaar voor batch",
     "readyForBatch_other": "{{count}} klaar voor batch",
-    "sampleProducts": {
-      "table": "Bunting tafel",
-      "tableDetail": "Acacia 240cm",
-      "tv": "TV-meubel",
-      "tvDetail": "Acacia 2 deuren"
-    },
     "channelsNote": "Instagram en Facebook kunnen in de volgende stap worden verbonden. (Nog geen kanalen verbonden)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Je eerste ideeën voorbereiden",
     "body": "Op maat gemaakte social reels en staging sets genereren uit je {{name}} collectie.",
     "photosTitle": "Foto's verzamelen",
-    "photosDetail": "{{product}} eetset",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Storyboard maken",
     "storyboardDetail_one": "{{count}} videoscène samenstellen",
     "storyboardDetail_other": "{{count}} videoscènes samenstellen",

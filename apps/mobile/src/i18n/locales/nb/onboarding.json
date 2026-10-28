@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Legg til bedriftsdetaljer",
-    "subtitle": "Del en oppføringslenke eller beskriv katalogen din manuelt.",
-    "modeLabel": "Hvordan legge til din bedrift",
-    "modeListing": "Oppførings-URL",
-    "modeDescribe": "Beskriv bedriften",
-    "listingLabel": "Oppføringslenke *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps eller butikklenke",
     "nameLabel": "Bedriftsnavn *",
     "namePlaceholder": "f.eks. Atelier Bois & Chiffons",
     "sellsLabel": "Hva selger du? *",
     "sellsPlaceholder": "f.eks. Håndlagde trebord, TV-stativ og moderne hjemmedekor...",
     "locationLabel": "Sted (valgfritt)",
-    "locationPlaceholder": "By, land eller showroom-adresse",
-    "websiteLabel": "Nettsted (valgfritt)"
+    "locationPlaceholder": "By, land eller showroom-adresse"
   },
   "learning": {
     "working": "Jobber",
@@ -189,13 +182,7 @@
     "products_one": "Oppdaget produkter ({{count}})",
     "products_other": "Oppdaget produkter ({{count}})",
     "found": "Funnet",
-    "strengths": "Merkevarestyrker",
-    "tags": {
-      "homeLiving": "Hjem & Livsstil",
-      "france": "Frankrike",
-      "productCatalog": "Produktkatalog",
-      "showroomEshop": "Fysisk showroom & nettbutikk"
-    }
+    "strengths": "Merkevarestyrker"
   },
   "brand": {
     "title": "Merkevare & kreativ stil",
@@ -225,12 +212,6 @@
     "featured": "Utvalgte katalogprodukter",
     "readyForBatch_one": "{{count}} klar for batch",
     "readyForBatch_other": "{{count}} klar for batch",
-    "sampleProducts": {
-      "table": "Bunting bord",
-      "tableDetail": "Acacia 240cm",
-      "tv": "TV-enhet",
-      "tvDetail": "Acacia 2 dører"
-    },
     "channelsNote": "Instagram og Facebook kan kobles til i neste steg. (Ingen kanaler koblet ennå)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Forbereder dine første ideer",
     "body": "Genererer skreddersydde sosiale reels og oppsett fra din {{name}}-kolleksjon.",
     "photosTitle": "Samler bilder",
-    "photosDetail": "{{product}} spisesett",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Bygger storyboard",
     "storyboardDetail_one": "Setter sammen {{count}} videoscene",
     "storyboardDetail_other": "Setter sammen {{count}} videoscener",

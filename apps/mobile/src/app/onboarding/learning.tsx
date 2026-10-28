@@ -87,7 +87,7 @@ export default function Learning() {
                   <View style={[styles.stageIcon, s === "done" ? styles.iconDone : s === "running" ? styles.iconRunning : styles.iconQueued]}>
                     {s === "done" ? <Check size={14} color={color.onPrimary} strokeWidth={2.5} /> : s === "running" ? <ActivityIndicator size={12} color={color.ink} /> : <View style={styles.queuedDot} />}
                   </View>
-                  <Text style={s === "running" ? [type.label, { fontFamily: "Inter_600SemiBold" }] : [type.meta, { color: s === "done" ? color.ink : color.inkSecondary }]}>{t(`learning.stages.${key}`)}</Text>
+                  <Text style={s === "running" ? [type.label, { fontFamily: "Inter_600SemiBold" }] : [type.meta, { color: s === "done" ? color.ink : color.inkSecondary }]}>{t(`learning.stages.${key === "open" && !site ? "find" : key}`)}</Text>
                 </View>
                 <Text style={[type.meta, s === "running" && { color: color.ink }]}>{t(`learning.status.${s}`)}</Text>
               </View>

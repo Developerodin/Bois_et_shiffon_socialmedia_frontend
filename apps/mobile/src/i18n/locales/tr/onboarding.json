@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "İşletme bilgilerini ekleyin",
-    "subtitle": "Bir liste bağlantısı paylaşın veya kataloğunuzu manuel olarak tanımlayın.",
-    "modeLabel": "İşletmenizi nasıl ekleyeceksiniz",
-    "modeListing": "Liste URL'si",
-    "modeDescribe": "İşletmeyi tanımla",
-    "listingLabel": "Liste bağlantısı *",
-    "listingPlaceholder": "Etsy, Amazon, Google Haritalar veya mağaza bağlantısı",
     "nameLabel": "İşletme adı *",
     "namePlaceholder": "ör. Atelier Bois & Chiffons",
     "sellsLabel": "Ne satıyorsunuz? *",
     "sellsPlaceholder": "ör. El yapımı ahşap masalar, TV üniteleri ve modern ev dekorasyonu...",
     "locationLabel": "Konum (isteğe bağlı)",
-    "locationPlaceholder": "Şehir, ülke veya showroom adresi",
-    "websiteLabel": "Web sitesi (isteğe bağlı)"
+    "locationPlaceholder": "Şehir, ülke veya showroom adresi"
   },
   "learning": {
     "working": "Çalışıyor",
@@ -189,13 +182,7 @@
     "products_one": "Tespit edilen ürünler ({{count}})",
     "products_other": "Tespit edilen ürünler ({{count}})",
     "found": "Bulundu",
-    "strengths": "Marka güçlü yönleri",
-    "tags": {
-      "homeLiving": "Ev & Yaşam",
-      "france": "Fransa",
-      "productCatalog": "Ürün kataloğu",
-      "showroomEshop": "Fiziksel showroom & e-mağaza"
-    }
+    "strengths": "Marka güçlü yönleri"
   },
   "brand": {
     "title": "Marka & yaratıcı stil",
@@ -225,12 +212,6 @@
     "featured": "Öne çıkan katalog ürünleri",
     "readyForBatch_one": "{{count}} toplu işlem için hazır",
     "readyForBatch_other": "{{count}} toplu işlem için hazır",
-    "sampleProducts": {
-      "table": "Bunting masa",
-      "tableDetail": "Acacia 240cm",
-      "tv": "TV ünitesi",
-      "tvDetail": "Acacia 2 kapı"
-    },
     "channelsNote": "Instagram ve Facebook bir sonraki adımda bağlanabilir. (Henüz kanal bağlanmadı)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "İlk fikirlerinizi hazırlıyoruz",
     "body": "{{name}} koleksiyonunuzdan özel sosyal videolar ve sahne setleri oluşturuluyor.",
     "photosTitle": "Fotoğraflar toplanıyor",
-    "photosDetail": "{{product}} yemek takımı",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Storyboard oluşturuluyor",
     "storyboardDetail_one": "{{count}} video sahnesi oluşturuluyor",
     "storyboardDetail_other": "{{count}} video sahnesi oluşturuluyor",

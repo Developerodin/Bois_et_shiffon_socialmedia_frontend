@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Agregar detalles del negocio",
-    "subtitle": "Comparte un enlace de listado o describe tu catálogo manualmente.",
-    "modeLabel": "Cómo agregar tu negocio",
-    "modeListing": "URL del listado",
-    "modeDescribe": "Describir negocio",
-    "listingLabel": "Enlace del listado *",
-    "listingPlaceholder": "Enlace de Etsy, Amazon, Google Maps o tienda",
     "nameLabel": "Nombre del negocio *",
     "namePlaceholder": "ej. Atelier Bois & Chiffons",
     "sellsLabel": "¿Qué vendes? *",
     "sellsPlaceholder": "ej. Mesas de madera hechas a mano, muebles para TV y decoración moderna para el hogar...",
     "locationLabel": "Ubicación (opcional)",
-    "locationPlaceholder": "Ciudad, país o dirección de showroom",
-    "websiteLabel": "Sitio web (opcional)"
+    "locationPlaceholder": "Ciudad, país o dirección de showroom"
   },
   "learning": {
     "working": "Trabajando",
@@ -189,13 +182,7 @@
     "products_one": "Productos detectados ({{count}})",
     "products_other": "Productos detectados ({{count}})",
     "found": "Encontrado",
-    "strengths": "Fortalezas de la marca",
-    "tags": {
-      "homeLiving": "Hogar y Vida",
-      "france": "Francia",
-      "productCatalog": "Catálogo de productos",
-      "showroomEshop": "Showroom físico y e-shop"
-    }
+    "strengths": "Fortalezas de la marca"
   },
   "brand": {
     "title": "Marca y estilo creativo",
@@ -225,12 +212,6 @@
     "featured": "Productos destacados del catálogo",
     "readyForBatch_one": "{{count}} listo para lote",
     "readyForBatch_other": "{{count}} listos para lote",
-    "sampleProducts": {
-      "table": "Mesa Bunting",
-      "tableDetail": "Acacia 240cm",
-      "tv": "Mueble de TV",
-      "tvDetail": "Acacia 2 puertas"
-    },
     "channelsNote": "Instagram y Facebook se pueden conectar en el siguiente paso. (Aún no hay canales conectados)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Preparando tus primeras ideas",
     "body": "Generando reels sociales personalizados y sets de escenografía de tu colección {{name}}.",
     "photosTitle": "Reuniendo fotos",
-    "photosDetail": "{{product}} juego de comedor",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Construyendo guion gráfico",
     "storyboardDetail_one": "Componiendo {{count}} escena de video",
     "storyboardDetail_other": "Componiendo {{count}} escenas de video",

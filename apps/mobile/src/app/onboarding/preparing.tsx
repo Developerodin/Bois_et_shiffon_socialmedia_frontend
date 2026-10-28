@@ -7,7 +7,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Aura } from "@/ui/aura";
 import { Button } from "@/ui/button";
 import { Screen } from "@/ui/layout";
-import { sampleProfile } from "@/ui/onboarding/profile";
+import { imageSource, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
 /** A11 · Onboarding / Preparing content (Figma 408:809). */
@@ -21,6 +21,8 @@ export default function Preparing() {
     return () => clearTimeout(timer);
   }, [step]);
   const ready = step >= 3;
+  const { data: brand } = useBrandAssets();
+  const product = brand?.assets?.products.find((p) => p.image);
 
   return (
     <Screen
@@ -55,15 +57,23 @@ export default function Preparing() {
         </View>
         <Text style={[type.pageTitle, styles.center, { paddingTop: space[24] }]}>{t("preparing.title")}</Text>
         <Text style={[type.body, styles.center, { color: color.inkSecondary, paddingTop: space[8], maxWidth: 310 }]}>
-          {t("preparing.body", { name: sampleProfile.name })}
+          {t("preparing.body", { name: brand?.name ?? "" })}
         </Text>
       </View>
 
       <View style={styles.list}>
         <Row
-          leading={<Image source={sampleProfile.products[0].image} style={styles.thumb} contentFit="cover" />}
+          leading={
+            product?.image ? (
+              <Image source={imageSource(product.image)} style={styles.thumb} contentFit="cover" />
+            ) : (
+              <View style={styles.iconBox}>
+                <Sparkles size={18} color={color.ink} strokeWidth={1.75} />
+              </View>
+            )
+          }
           title={t("preparing.photosTitle")}
-          detail={t("preparing.photosDetail", { product: "Acacia Bunting" })}
+          detail={t("preparing.photosDetail", { product: product?.title ?? brand?.name ?? "" })}
           state={step > 1 ? "done" : "running"}
         />
         <Row

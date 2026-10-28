@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Přidat podrobnosti o podniku",
-    "subtitle": "Sdílejte odkaz na výpis nebo popište svůj katalog ručně.",
-    "modeLabel": "Jak přidat svůj podnik",
-    "modeListing": "URL výpisu",
-    "modeDescribe": "Popište podnik",
-    "listingLabel": "Odkaz na výpis *",
-    "listingPlaceholder": "Etsy, Amazon, Google Maps nebo odkaz na obchod",
     "nameLabel": "Název podniku *",
     "namePlaceholder": "např. Atelier Bois & Chiffons",
     "sellsLabel": "Co prodáváte? *",
     "sellsPlaceholder": "např. Ručně vyráběné dřevěné stoly, TV stolky a moderní domácí dekorace...",
     "locationLabel": "Umístění (volitelné)",
-    "locationPlaceholder": "Město, země nebo adresa showroomu",
-    "websiteLabel": "Webová stránka (volitelné)"
+    "locationPlaceholder": "Město, země nebo adresa showroomu"
   },
   "learning": {
     "working": "Pracujeme",
@@ -189,13 +182,7 @@
     "products_one": "Zjištěné produkty ({{count}})",
     "products_other": "Zjištěné produkty ({{count}})",
     "found": "Nalezeno",
-    "strengths": "Silné stránky značky",
-    "tags": {
-      "homeLiving": "Domov & Bydlení",
-      "france": "Francie",
-      "productCatalog": "Katalog produktů",
-      "showroomEshop": "Fyzický showroom & e-shop"
-    }
+    "strengths": "Silné stránky značky"
   },
   "brand": {
     "title": "Značka & kreativní styl",
@@ -225,12 +212,6 @@
     "featured": "Doporučené produkty katalogu",
     "readyForBatch_one": "{{count}} připraveno k dávce",
     "readyForBatch_other": "{{count}} připraveno k dávce",
-    "sampleProducts": {
-      "table": "Stůl Bunting",
-      "tableDetail": "Akácie 240cm",
-      "tv": "TV jednotka",
-      "tvDetail": "Akácie 2 dveře"
-    },
     "channelsNote": "Instagram a Facebook lze připojit v dalším kroku. (Žádné kanály zatím nejsou připojeny)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Příprava vašich prvních nápadů",
     "body": "Generování přizpůsobených sociálních videí a scén z vaší kolekce {{name}}.",
     "photosTitle": "Shromažďování fotek",
-    "photosDetail": "{{product}} jídelní set",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Tvorba storyboardu",
     "storyboardDetail_one": "Skládání {{count}} video scény",
     "storyboardDetail_other": "Skládání {{count}} video scén",

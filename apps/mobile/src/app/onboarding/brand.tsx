@@ -1,21 +1,27 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { ChevronDown, Info } from "lucide-react-native";
+import { ChevronDown, Info, Plus } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { Button } from "@/ui/button";
 import { Chip } from "@/ui/chip";
-import { images } from "@/ui/icons";
 import { Screen, StepHeader, Title } from "@/ui/layout";
-import { sampleProfile } from "@/ui/onboarding/profile";
+import { BrandLogo } from "@/ui/onboarding/brand-logo";
+import { ColorSheet } from "@/ui/onboarding/color-sheet";
 import { onboarding } from "@/ui/onboarding/state";
+import { imageSource, saveBrandPreferences, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
 // Tone values stay English (stored in onboarding state); labels come from onboarding:brand.tones.<lowercase>.
-const TONES = ["Modern", "Luxurious", "Elegant", "Premium", "Natural", "Minimalist"];
+// Grouped so every kind of business finds itself, not only upscale ones; group titles: onboarding:brand.toneGroups.<key>.
+const TONE_GROUPS = [
+  { key: "feel", tones: ["Warm", "Playful", "Bold", "Calm", "Romantic", "Edgy"] },
+  { key: "style", tones: ["Modern", "Minimalist", "Rustic", "Vintage", "Bohemian", "Industrial", "Scandinavian", "Coastal"] },
+  { key: "positioning", tones: ["Luxurious", "Premium", "Elegant", "Affordable", "Artisanal", "Sustainable", "Natural", "Family-friendly"] },
+];
 // Stored value → label key under onboarding:brand.languages.
-const LANGUAGES = [
+const LANGUAGES: { value: string; key: "fr" | "en" }[] = [
   { value: "French (FR)", key: "fr" },
   { value: "English (US)", key: "en" },
 ];
@@ -23,27 +29,58 @@ const LANGUAGES = [
 /** A10 · Onboarding / Brand preferences (Figma 408:670). */
 export default function Brand() {
   const { t } = useTranslation("onboarding");
-  const p = sampleProfile;
-  const [tones, setTones] = useState<string[]>(onboarding.tones);
-  const [language, setLanguage] = useState(onboarding.language);
-  const toggle = (tone: string) => setTones((cur) => (cur.includes(tone) ? cur.filter((x) => x !== tone) : [...cur, tone]));
+  const { data: brand, loading } = useBrandAssets();
+  const colors = brand?.assets?.colors ?? [];
+  const fonts = brand?.assets?.fonts ?? [];
+  const photos = (brand?.assets?.products ?? []).filter((x) => x.image);
+  const [editing, setEditing] = useState<number | "new" | null>(null);
+  // Saved choices show until the person changes something here; after that, their own picks are kept.
+  const saved = brand?.preferences;
+  const [own, setOwn] = useState<{ tones?: string[]; language?: string }>({});
+  const tones = own.tones ?? saved?.tones ?? onboarding.tones;
+  const language = own.language ?? LANGUAGES.find((l) => l.key === saved?.contentLanguage)?.value ?? onboarding.language;
+  const toggle = (tone: string) => setOwn((o) => ({ ...o, tones: tones.includes(tone) ? tones.filter((x) => x !== tone) : [...tones, tone] }));
   const languageIndex = Math.max(0, LANGUAGES.findIndex((l) => l.value === language));
   const languageLabel = t(`brand.languages.${LANGUAGES[languageIndex].key}`);
+  const [saving, setSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
+
+  // Saves tones and language for the agents, then moves on. A failed save says so; pressing again continues anyway.
+  async function next() {
+    onboarding.tones = tones;
+    onboarding.language = language;
+    if (!saveFailed) {
+      setSaving(true);
+      try {
+        await saveBrandPreferences({ tones, contentLanguage: LANGUAGES[languageIndex].key });
+      } catch {
+        setSaveFailed(true);
+        return;
+      } finally {
+        setSaving(false);
+      }
+    }
+    router.push("/onboarding/preparing");
+  }
 
   return (
     <Screen
       header={<StepHeader step={4} pill />}
       footer={
-        <Button
-          label={t("common:continue")}
-          arrow
-          disabled={tones.length === 0}
-          onPress={() => {
-            onboarding.tones = tones;
-            onboarding.language = language;
-            router.push("/onboarding/preparing");
-          }}
-        />
+        <>
+          {saveFailed ? (
+            <Text accessibilityLiveRegion="polite" style={[type.meta, { color: color.error, textAlign: "center" }]}>
+              {t("brand.prefsSaveFailed")}
+            </Text>
+          ) : null}
+          <Button
+            label={saveFailed ? t("brand.continueWithoutSaving") : t("common:continue")}
+            arrow
+            loading={saving}
+            disabled={tones.length === 0}
+            onPress={() => void next()}
+          />
+        </>
       }
     >
       <Title title={t("brand.title")} subtitle={t("brand.subtitle")} style={{ paddingBottom: 0 }} />
@@ -51,23 +88,42 @@ export default function Brand() {
       <Section>
         <View style={styles.identity}>
           <View style={styles.logo}>
-            <Image source={images.bcFavicon} style={{ width: 30, height: 30 }} contentFit="contain" />
+            <BrandLogo brand={brand} size={30} />
           </View>
-          <View>
-            <Text style={styles.strong}>{t("brand.identity", { name: p.name })}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.strong} numberOfLines={1}>{t("brand.identity", { name: brand?.name ?? "" })}</Text>
             <Text style={type.meta}>{t("brand.paletteMeta")}</Text>
           </View>
         </View>
         <Text style={[type.meta, { paddingTop: space[12], paddingBottom: space[8] }]}>{t("brand.swatches")}</Text>
-        <View style={styles.row}>
-          {p.palette.map((c) => (
-            <View key={c.hex} style={styles.swatch}>
-              <View style={[styles.dot, { backgroundColor: c.hex }]} />
-              <Text style={[type.meta, { color: color.ink, paddingTop: space[8] }]}>{c.name}</Text>
-              <Text style={type.meta}>{c.hex}</Text>
-            </View>
-          ))}
-        </View>
+        {loading ? (
+          <ActivityIndicator color={color.inkSecondary} />
+        ) : !brand?.assets ? (
+          <Text style={[type.body, { color: color.inkSecondary }]}>{t("brand.noColors")}</Text>
+        ) : (
+          <View style={styles.swatches}>
+            {colors.map((c, i) => (
+              <Pressable
+                key={c.hex}
+                style={styles.swatch}
+                onPress={() => setEditing(i)}
+                accessibilityRole="button"
+                accessibilityLabel={t("brand.swatchA11y", { hex: c.hex, source: t(`brand.colorFrom.${c.from}`) })}
+              >
+                <View style={[styles.dot, { backgroundColor: c.hex }]} />
+                <Text style={[type.meta, { color: color.ink, paddingTop: space[8] }]}>{c.hex}</Text>
+                <Text style={type.meta} numberOfLines={1}>{t(`brand.colorFrom.${c.from}`)}</Text>
+              </Pressable>
+            ))}
+            {colors.length < 5 ? (
+              <Pressable style={[styles.swatch, styles.addSwatch]} onPress={() => setEditing("new")} accessibilityRole="button" accessibilityLabel={t("brand.addColor")}>
+                <Plus size={22} color={color.inkSecondary} strokeWidth={1.75} />
+                <Text style={[type.meta, { paddingTop: space[8] }]}>{t("brand.addColor")}</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        )}
+        {fonts.length ? <Text style={[type.meta, { paddingTop: space[12] }]}>{t("brand.fonts", { fonts: fonts.join(", ") })}</Text> : null}
       </Section>
 
       <Section>
@@ -75,11 +131,18 @@ export default function Brand() {
           <Text style={styles.strong}>{t("brand.tone")}</Text>
           <Text style={type.meta}>{t("brand.selected", { count: tones.length })}</Text>
         </View>
-        <View style={styles.chips}>
-          {TONES.map((tone) => (
-            <Chip key={tone} label={t(`brand.tones.${tone.toLowerCase()}`)} selected={tones.includes(tone)} onPress={() => toggle(tone)} />
-          ))}
-        </View>
+        {TONE_GROUPS.map((group) => (
+          <View key={group.key}>
+            <Text style={[type.meta, { paddingTop: space[16] }]} accessibilityRole="header">
+              {t(`brand.toneGroups.${group.key}`)}
+            </Text>
+            <View style={[styles.chips, { paddingTop: space[8] }]}>
+              {group.tones.map((tone) => (
+                <Chip key={tone} label={t(`brand.tones.${tone.toLowerCase()}`)} selected={tones.includes(tone)} onPress={() => toggle(tone)} />
+              ))}
+            </View>
+          </View>
+        ))}
       </Section>
 
       <View style={[styles.row, { marginTop: space[24] }]}>
@@ -88,7 +151,7 @@ export default function Brand() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("brand.contentLanguageA11y", { language: languageLabel })}
-            onPress={() => setLanguage(LANGUAGES[(languageIndex + 1) % LANGUAGES.length].value)}
+            onPress={() => setOwn((o) => ({ ...o, language: LANGUAGES[(languageIndex + 1) % LANGUAGES.length].value }))}
             style={styles.select}
           >
             <Text style={[type.meta, { color: color.ink }]}>{languageLabel}</Text>
@@ -106,29 +169,32 @@ export default function Brand() {
       <Section>
         <View style={styles.head}>
           <Text style={styles.strong}>{t("brand.featured")}</Text>
-          <Text style={type.meta}>{t("brand.readyForBatch", { count: p.products.length })}</Text>
+          <Text style={type.meta}>{t("brand.readyForBatch", { count: photos.length })}</Text>
         </View>
-        <View style={[styles.row, { paddingTop: space[12] }]}>
-          {p.products.map((prod, i) => (
-            <View key={prod.title} style={styles.product}>
-              <Image source={prod.image} style={styles.productImage} contentFit="cover" />
-              <View style={{ flex: 1 }}>
-                <Text style={[type.meta, { color: color.ink }]} numberOfLines={1}>
-                  {i === 0 ? t("brand.sampleProducts.table") : t("brand.sampleProducts.tv")}
-                </Text>
-                <Text style={type.meta} numberOfLines={2}>
-                  {i === 0 ? t("brand.sampleProducts.tableDetail") : t("brand.sampleProducts.tvDetail")}
-                </Text>
+        {!loading && photos.length === 0 ? (
+          <Text style={[type.body, { color: color.inkSecondary, paddingTop: space[12] }]}>{t("review.noProducts")}</Text>
+        ) : (
+          <View style={[styles.row, { paddingTop: space[12] }]}>
+            {photos.slice(0, 2).map((prod) => (
+              <View key={prod.url} style={styles.product}>
+                <Image source={imageSource(prod.image!)} style={styles.productImage} contentFit="cover" />
+                <View style={{ flex: 1 }}>
+                  <Text style={[type.meta, { color: color.ink }]} numberOfLines={2}>
+                    {prod.title}
+                  </Text>
+                  {prod.kind ? <Text style={type.meta} numberOfLines={1}>{prod.kind}</Text> : null}
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        )}
       </Section>
 
       <View style={styles.note}>
         <Info size={18} color={color.inkSecondary} strokeWidth={1.75} style={{ marginTop: 2 }} />
         <Text style={[type.body, { color: color.inkSecondary, flex: 1 }]}>{t("brand.channelsNote")}</Text>
       </View>
+      <ColorSheet colors={colors.map((c) => c.hex)} index={editing} onClose={() => setEditing(null)} />
     </Screen>
   );
 }
@@ -140,10 +206,13 @@ function Section({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   card: { backgroundColor: "rgba(255,255,255,0.95)", borderWidth: 1, borderColor: color.divider, borderRadius: 20, padding: space[16] },
   identity: { flexDirection: "row", alignItems: "center", gap: space[12], paddingBottom: space[12], borderBottomWidth: 1, borderBottomColor: color.divider },
-  logo: { width: 40, height: 40, padding: 4, borderRadius: radius.badge, backgroundColor: color.canvasAlt, borderWidth: 1, borderColor: color.divider },
+  logo: { minWidth: 40, height: 40, padding: 4, borderRadius: radius.badge, backgroundColor: color.canvasAlt, borderWidth: 1, borderColor: color.divider, alignItems: "center", justifyContent: "center" },
   strong: { ...type.label, fontFamily: "Inter_600SemiBold" },
   row: { flexDirection: "row", gap: space[16] },
-  swatch: { flex: 1, alignItems: "center", padding: space[8], backgroundColor: color.canvasAlt, borderWidth: 1, borderColor: color.divider, borderRadius: radius.control },
+  swatches: { flexDirection: "row", flexWrap: "wrap", gap: space[8] },
+  // 3 per row; min height keeps every swatch a comfortable touch target
+  swatch: { width: "31.5%", minHeight: 96, alignItems: "center", justifyContent: "center", padding: space[8], backgroundColor: color.canvasAlt, borderWidth: 1, borderColor: color.divider, borderRadius: radius.control },
+  addSwatch: { borderStyle: "dashed", backgroundColor: "transparent" },
   dot: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: "rgba(0,0,0,0.1)" },
   head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: space[8], paddingTop: space[16] },

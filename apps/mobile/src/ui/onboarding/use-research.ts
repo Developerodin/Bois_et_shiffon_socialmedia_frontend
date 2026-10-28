@@ -9,12 +9,12 @@ import { onboarding } from "@/ui/onboarding/state";
 export type ResearchProgress = { step: number; failed: string | null; retry: () => void };
 
 const POLL_MS = 2500;
-const titleFromHost = (host: string) => host.split(".")[0].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 /**
  * Creates the brand from the website (server starts Research + SEO + GEO) and follows the Research run:
- * any page-read event → step 1; three strategy docs drafted → step 2; run SUCCEEDED → done.
- * Without a website (manual path) it runs a short preview: Research needs a site to read.
+ * any page-read event → step 1; all five strategy docs drafted (Research then collects logo, colours and
+ * photos) → step 2; run SUCCEEDED → done.
+ * Without a website (A07) the brand is made from onboarding.business and Research finds it online.
  * ponytail: polling every 2.5s while the screen is open; switch to server-sent events if it ever matters.
  */
 export function useResearch(site: string | undefined): ResearchProgress {
@@ -24,11 +24,6 @@ export function useResearch(site: string | undefined): ResearchProgress {
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (!site) {
-      // Manual path: no website to read yet.
-      const t = setInterval(() => setStep((s) => Math.min(3, s + 1)), 1800);
-      return () => clearInterval(t);
-    }
     const ctrl = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -39,7 +34,7 @@ export function useResearch(site: string | undefined): ResearchProgress {
         const drafted = docs.docs.filter((d) => d.latest).length;
         const read = ev.events.some((e) => e.runId === runId);
         if (run?.status === "FAILED") return setFailed(run.error ?? i18n.t("onboarding:learning.errors.stopped"));
-        setStep(run?.status === "SUCCEEDED" ? 3 : drafted >= 3 ? 2 : read || run?.status === "RUNNING" ? 1 : 0);
+        setStep(run?.status === "SUCCEEDED" ? 3 : drafted >= 5 ? 2 : read || run?.status === "RUNNING" ? 1 : 0);
         if (run?.status !== "SUCCEEDED") timer = setTimeout(() => void poll(ws, brandId, runId), POLL_MS);
       } catch (e) {
         if (ctrl.signal.aborted) return;
@@ -54,16 +49,22 @@ export function useResearch(site: string | undefined): ResearchProgress {
         let ws = onboarding.workspaceId;
         let brandId = onboarding.brandId;
         let runId = onboarding.researchRunId;
-        if (!ws || !brandId || !runId || onboarding.website !== site) {
+        const business = onboarding.business;
+        const from = site ?? JSON.stringify(business);
+        if (!ws || !brandId || !runId || onboarding.brandFrom !== from) {
           // Only once per site: going back and forth must not create a second brand.
           if (started.current) return;
           started.current = true;
           const { workspaces } = await me();
           ws = (workspaces.find((w) => w.role === "OWNER") ?? workspaces[0])?.id;
           if (!ws) return setFailed(i18n.t("onboarding:learning.errors.noWorkspace"));
-          const host = new URL(site!).hostname.replace(/^www\./, "");
-          const created = await createBrand(ws, { displayName: onboarding.business?.name ?? titleFromHost(host), websiteUrl: site! });
-          Object.assign(onboarding, { workspaceId: ws, brandId: created.brand.id, researchRunId: created.researchRunId, website: site });
+          const created = await createBrand(
+            ws,
+            site
+              ? { websiteUrl: site, goal: onboarding.goal } // the server names it the way the site names itself
+              : { displayName: business!.name, about: business!.sells, location: business!.location, goal: onboarding.goal },
+          );
+          Object.assign(onboarding, { workspaceId: ws, brandId: created.brand.id, researchRunId: created.researchRunId, brandFrom: from });
           brandId = created.brand.id;
           runId = created.researchRunId;
         }

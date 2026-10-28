@@ -1,20 +1,21 @@
-import { Image } from "expo-image";
 import { router } from "expo-router";
 import { CircleCheck, Download, Hash, Lock, SlidersHorizontal, Star, Video } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Button } from "@/ui/button";
-import { images } from "@/ui/icons";
 import { Screen, StepHeader, Title } from "@/ui/layout";
-import { sampleProfile } from "@/ui/onboarding/profile";
+import { BrandLogo } from "@/ui/onboarding/brand-logo";
+import { GOAL_HOME, onboarding } from "@/ui/onboarding/state";
+import { useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
 /** A12 · Onboarding / Connect Instagram (Figma 408:896) with A13 "Connect later?" sheet (408:981). */
 export default function Connect() {
   const { t } = useTranslation("onboarding");
   const [skipSheet, setSkipSheet] = useState(false);
-  const finish = () => router.replace("/posts");
+  const finish = () => router.replace(GOAL_HOME[onboarding.goal]);
+  const { data: brand } = useBrandAssets();
 
   return (
     <Screen
@@ -30,8 +31,8 @@ export default function Connect() {
       }
     >
       <View style={styles.brand}>
-        <Image source={images.bcFavicon} style={{ width: 16, height: 16 }} contentFit="contain" />
-        <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>{sampleProfile.name}</Text>
+        <BrandLogo brand={brand} size={16} />
+        <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>{brand?.name ?? ""}</Text>
         <Text style={type.meta}>{t("connect.readyToConnect")}</Text>
       </View>
 
@@ -61,8 +62,8 @@ export default function Connect() {
         <View style={styles.sheet}>
           <View style={styles.grabber} />
           <View style={styles.sheetBrand}>
-            <Image source={images.bcFavicon} style={{ width: 14, height: 14 }} contentFit="contain" />
-            <Text style={[type.meta, { color: color.ink }]}>{sampleProfile.name}</Text>
+            <BrandLogo brand={brand} size={14} />
+            <Text style={[type.meta, { color: color.ink }]}>{brand?.name ?? ""}</Text>
           </View>
           <Text style={[type.pageTitle, { paddingTop: space[12] }]}>{t("connect.laterTitle")}</Text>
           <Text style={[type.body, { color: color.inkSecondary, paddingTop: space[8] }]}>

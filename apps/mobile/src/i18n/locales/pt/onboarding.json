@@ -133,19 +133,12 @@
   },
   "manual": {
     "title": "Adicionar detalhes do negócio",
-    "subtitle": "Partilhe um link de listagem ou descreva o seu catálogo manualmente.",
-    "modeLabel": "Como adicionar o seu negócio",
-    "modeListing": "URL da listagem",
-    "modeDescribe": "Descrever negócio",
-    "listingLabel": "Link da listagem *",
-    "listingPlaceholder": "Link da loja Etsy, Amazon, Google Maps ou outro",
     "nameLabel": "Nome do negócio *",
     "namePlaceholder": "ex. Atelier Bois & Chiffons",
     "sellsLabel": "O que vende? *",
     "sellsPlaceholder": "ex. Mesas de madeira artesanal, suportes para TV e decoração moderna para casa...",
     "locationLabel": "Localização (opcional)",
-    "locationPlaceholder": "Cidade, país ou endereço do showroom",
-    "websiteLabel": "Website (opcional)"
+    "locationPlaceholder": "Cidade, país ou endereço do showroom"
   },
   "learning": {
     "working": "A trabalhar",
@@ -189,13 +182,7 @@
     "products_one": "Produtos detectados ({{count}})",
     "products_other": "Produtos detectados ({{count}})",
     "found": "Encontrado",
-    "strengths": "Pontos fortes da marca",
-    "tags": {
-      "homeLiving": "Casa & Decoração",
-      "france": "França",
-      "productCatalog": "Catálogo de produtos",
-      "showroomEshop": "Showroom físico & e-shop"
-    }
+    "strengths": "Pontos fortes da marca"
   },
   "brand": {
     "title": "Marca & estilo criativo",
@@ -225,12 +212,6 @@
     "featured": "Produtos em destaque no catálogo",
     "readyForBatch_one": "{{count}} pronto para lote",
     "readyForBatch_other": "{{count}} prontos para lote",
-    "sampleProducts": {
-      "table": "Mesa Bunting",
-      "tableDetail": "Acácia 240cm",
-      "tv": "Unidade de TV",
-      "tvDetail": "Acácia 2 portas"
-    },
     "channelsNote": "Instagram e Facebook podem ser conectados no próximo passo. (Nenhum canal conectado ainda)"
   },
   "preparing": {
@@ -241,7 +222,7 @@
     "title": "Preparando suas primeiras ideias",
     "body": "Gerando reels sociais personalizados e cenários a partir da sua coleção {{name}}.",
     "photosTitle": "Reunindo fotos",
-    "photosDetail": "Conjunto de jantar {{product}}",
+    "photosDetail": "{{product}}",
     "storyboardTitle": "Construindo storyboard",
     "storyboardDetail_one": "Compondo {{count}} cena de vídeo",
     "storyboardDetail_other": "Compondo {{count}} cenas de vídeo",
