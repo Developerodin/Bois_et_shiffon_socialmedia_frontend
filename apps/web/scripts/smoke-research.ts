@@ -58,6 +58,8 @@ async function main() {
   } finally {
     const stored = BrandAssets.safeParse((await prisma.brandProfile.findUnique({ where: { brandId: brand.id } }))?.assets).data;
     for (const key of [stored?.logo?.key, ...(stored?.products ?? []).map((p) => p.imageKey)]) if (key) await deleteMedia(key).catch(() => undefined);
+    // Brand creation also queues SEO and GEO: drop their jobs too, or the runner later trips over runs that are gone.
+    await prisma.job.deleteMany({ where: { brandId: brand.id } });
     await prisma.brand.delete({ where: { id: brand.id } });
   }
 }
