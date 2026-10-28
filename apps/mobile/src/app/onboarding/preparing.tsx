@@ -1,28 +1,78 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Check, Clapperboard, Clock, Lock, Sparkles } from "lucide-react-native";
+import { Check, Clock, Lightbulb, Lock, Sparkles } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ApiError } from "@/api/client";
+import { firstIdeas, startFirstIdeas, type FirstIdeas } from "@/api/endpoints";
+import i18n from "@/i18n";
 import { Aura } from "@/ui/aura";
+import { onboarding } from "@/ui/onboarding/state";
 import { Button } from "@/ui/button";
 import { Screen } from "@/ui/layout";
 import { imageSource, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
-/** A11 · Onboarding / Preparing content (Figma 408:809). */
+const POLL_MS = 2500;
+
+/**
+ * Starts the brand's first Scout run (free, once: the server returns the existing run on a second call) and
+ * follows it. A failure says why and offers a retry; onboarding can always go on without ideas.
+ * ponytail: polling while the screen is open, like Learning.
+ */
+function useFirstIdeas() {
+  const [run, setRun] = useState<FirstIdeas["run"]>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  const { workspaceId: ws, brandId } = onboarding;
+  useEffect(() => {
+    if (!ws || !brandId) return;
+    const ctrl = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const follow = (next: FirstIdeas["run"]) => {
+      setRun(next);
+      if (next?.status === "FAILED") return setFailed(next.error ?? i18n.t("onboarding:preparing.errors.stopped"));
+      if (next?.status !== "SUCCEEDED") timer = setTimeout(poll, POLL_MS);
+    };
+    const poll = () =>
+      firstIdeas(ws, brandId, ctrl.signal).then(
+        (r) => follow(r.run),
+        () => {
+          // A network blip shouldn't end onboarding: keep polling.
+          if (!ctrl.signal.aborted) timer = setTimeout(poll, POLL_MS * 2);
+        },
+      );
+    startFirstIdeas(ws, brandId).then(
+      (r) => !ctrl.signal.aborted && follow(r.run),
+      (e) => !ctrl.signal.aborted && setFailed(e instanceof ApiError ? e.message : i18n.t("onboarding:preparing.errors.startFailed")),
+    );
+    return () => {
+      ctrl.abort();
+      clearTimeout(timer);
+    };
+  }, [ws, brandId, attempt]);
+
+  return {
+    run,
+    failed: !ws || !brandId ? i18n.t("onboarding:preparing.errors.noBrand") : failed,
+    retry: () => {
+      setFailed(null);
+      setAttempt((a) => a + 1);
+    },
+  };
+}
+
+/** A11 · Onboarding / Preparing content (Figma 408:809). Follows the brand's first Scout run. */
 export default function Preparing() {
   const { t } = useTranslation("onboarding");
-  // ponytail: preview timer; with the mobile API this follows the Scout run started at the end of onboarding.
-  const [step, setStep] = useState(1);
-  useEffect(() => {
-    if (step >= 3) return;
-    const timer = setTimeout(() => setStep((s) => s + 1), 2200);
-    return () => clearTimeout(timer);
-  }, [step]);
-  const ready = step >= 3;
+  const { run, failed, retry } = useFirstIdeas();
+  const ready = run?.status === "SUCCEEDED";
   const { data: brand } = useBrandAssets();
-  const product = brand?.assets?.products.find((p) => p.image);
+  const photos = brand?.assets?.products.filter((p) => p.image) ?? [];
+  const product = photos[0];
+  const next = () => router.push("/onboarding/connect");
 
   return (
     <Screen
@@ -37,13 +87,23 @@ export default function Preparing() {
             </View>
           </View>
           <View style={styles.track}>
-            <View style={[styles.bar, { width: ready ? "100%" : `${55 + step * 10}%` }]} />
+            <View style={[styles.bar, { width: ready ? "100%" : run?.status === "RUNNING" ? "85%" : "70%" }]} />
           </View>
         </>
       }
       footer={
         <>
-          <Button label={ready ? t("common:continue") : t("preparing.loadingButton")} arrow={ready} loading={!ready} disabled={!ready} onPress={() => router.push("/onboarding/connect")} />
+          {failed ? (
+            <>
+              <Text accessibilityRole="alert" style={[type.meta, { color: color.error, textAlign: "center" }]}>
+                {failed}
+              </Text>
+              <Button label={t("learning.tryAgain")} onPress={retry} />
+              <Button label={t("preparing.continueWithout")} variant="ghost" onPress={next} />
+            </>
+          ) : (
+            <Button label={ready ? t("common:continue") : t("preparing.loadingButton")} arrow={ready} loading={!ready} disabled={!ready} onPress={next} />
+          )}
           <View style={styles.footNote}>
             <Lock size={12} color={color.inkSecondary} strokeWidth={1.75} />
             <Text style={type.meta}>{t("preparing.catalogSafe")}</Text>
@@ -57,7 +117,7 @@ export default function Preparing() {
         </View>
         <Text style={[type.pageTitle, styles.center, { paddingTop: space[24] }]}>{t("preparing.title")}</Text>
         <Text style={[type.body, styles.center, { color: color.inkSecondary, paddingTop: space[8], maxWidth: 310 }]}>
-          {t("preparing.body", { name: brand?.name ?? "" })}
+          {t("preparing.bodyIdeas", { name: brand?.name ?? "" })}
         </Text>
       </View>
 
@@ -72,19 +132,19 @@ export default function Preparing() {
               </View>
             )
           }
-          title={t("preparing.photosTitle")}
-          detail={t("preparing.photosDetail", { product: product?.title ?? brand?.name ?? "" })}
-          state={step > 1 ? "done" : "running"}
+          title={t("preparing.photosReady")}
+          detail={product ? t("preparing.photosCount", { product: product.title, count: photos.length }) : t("preparing.noPhotos")}
+          state="done"
         />
         <Row
           leading={
             <View style={styles.iconBox}>
-              <Clapperboard size={18} color={color.ink} strokeWidth={1.75} />
+              <Lightbulb size={18} color={color.ink} strokeWidth={1.75} />
             </View>
           }
-          title={t("preparing.storyboardTitle")}
-          detail={t("preparing.storyboardDetail", { count: 3 })}
-          state={step > 2 ? "done" : step === 2 ? "running" : "queued"}
+          title={t("preparing.ideasTitle")}
+          detail={ready ? (run.ideas ? t("preparing.ideasFound", { count: run.ideas }) : t("preparing.ideasNone")) : t("preparing.ideasDetail")}
+          state={ready ? "done" : failed ? "queued" : "running"}
           emphasis
         />
         <Row
@@ -94,7 +154,7 @@ export default function Preparing() {
             </View>
           }
           title={t("preparing.nextTitle")}
-          detail={t("preparing.nextDetail")}
+          detail={t("preparing.nextPick")}
           state={ready ? "done" : "queued"}
           muted
         />
@@ -109,7 +169,7 @@ function Row({ leading, title, detail, state, emphasis, muted }: { leading: Reac
       {leading}
       <View style={{ flex: 1 }}>
         <Text style={emphasis && state === "running" ? [type.label, { fontFamily: "Inter_600SemiBold" }] : [type.meta, { color: muted ? color.inkSecondary : color.ink }]}>{title}</Text>
-        <Text style={type.meta}>{detail}</Text>
+        <Text style={type.meta} numberOfLines={1}>{detail}</Text>
       </View>
       {state === "done" ? (
         <View style={styles.done}>

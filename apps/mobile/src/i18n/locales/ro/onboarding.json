@@ -220,14 +220,7 @@
     "loadingButton": "Pregătim ideile tale…",
     "catalogSafe": "Catalogul tău rămâne neatins în magazinul tău.",
     "title": "Pregătirea primelor tale idei",
-    "body": "Generăm role sociale personalizate și seturi de scenă din colecția ta {{name}}.",
-    "photosTitle": "Colectăm fotografii",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Construim storyboard-ul",
-    "storyboardDetail_one": "Compunem {{count}} scenă video",
-    "storyboardDetail_other": "Compunem {{count}} scene video",
-    "nextTitle": "Urmează: Revizuiește-ți ideile",
-    "nextDetail": "Selectează hook-uri și presetări audio"
+    "nextTitle": "Urmează: Revizuiește-ți ideile"
   },
   "connect": {
     "readyToConnect": "• Gata de conectare",

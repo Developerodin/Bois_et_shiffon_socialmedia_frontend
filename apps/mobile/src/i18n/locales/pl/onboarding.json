@@ -220,14 +220,7 @@
     "loadingButton": "Przygotowywanie Twoich pomysłów…",
     "catalogSafe": "Twój katalog pozostaje nienaruszony w sklepie.",
     "title": "Przygotowywanie pierwszych pomysłów",
-    "body": "Generowanie dopasowanych rolek społecznościowych i zestawów scenicznych z kolekcji {{name}}.",
-    "photosTitle": "Zbieranie zdjęć",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Tworzenie scenariusza",
-    "storyboardDetail_one": "Komponowanie {{count}} sceny wideo",
-    "storyboardDetail_other": "Komponowanie {{count}} scen wideo",
-    "nextTitle": "Następne: Przejrzyj swoje pomysły",
-    "nextDetail": "Wybierz haki i ustawienia dźwięku"
+    "nextTitle": "Następne: Przejrzyj swoje pomysły"
   },
   "connect": {
     "readyToConnect": "• Gotowe do połączenia",

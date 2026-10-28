@@ -220,14 +220,7 @@
     "loadingButton": "Preparing your ideas…",
     "catalogSafe": "Your catalogue remains untouched on your store.",
     "title": "Preparing your first ideas",
-    "body": "Generating tailored social reels and staging sets from your {{name}} collection.",
-    "photosTitle": "Gathering photos",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Building storyboard",
-    "storyboardDetail_one": "Composing {{count}} video scene",
-    "storyboardDetail_other": "Composing {{count}} video scenes",
-    "nextTitle": "Next up: Review your ideas",
-    "nextDetail": "Select hooks and audio presets"
+    "nextTitle": "Next up: Review your ideas"
   },
   "connect": {
     "readyToConnect": "• Ready to connect",

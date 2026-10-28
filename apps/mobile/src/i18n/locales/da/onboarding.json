@@ -220,14 +220,7 @@
     "loadingButton": "Forbereder dine idéer…",
     "catalogSafe": "Dit katalog forbliver urørt i din butik.",
     "title": "Forbereder dine første idéer",
-    "body": "Genererer skræddersyede sociale reels og opsætningssæt fra din {{name}} kollektion.",
-    "photosTitle": "Indsamler fotos",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Bygger storyboard",
-    "storyboardDetail_one": "Komponerer {{count}} videoscene",
-    "storyboardDetail_other": "Komponerer {{count}} videoscener",
-    "nextTitle": "Næste: Gennemgå dine idéer",
-    "nextDetail": "Vælg hooks og lydpræferencer"
+    "nextTitle": "Næste: Gennemgå dine idéer"
   },
   "connect": {
     "readyToConnect": "• Klar til at forbinde",

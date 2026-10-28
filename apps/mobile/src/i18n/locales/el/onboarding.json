@@ -220,14 +220,7 @@
     "loadingButton": "Προετοιμασία των ιδεών σας…",
     "catalogSafe": "Ο κατάλογός σας παραμένει ανέπαφος στο κατάστημά σας.",
     "title": "Προετοιμασία των πρώτων σας ιδεών",
-    "body": "Δημιουργία προσαρμοσμένων κοινωνικών reels και σκηνικών από τη συλλογή {{name}} σας.",
-    "photosTitle": "Συλλογή φωτογραφιών",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Δημιουργία storyboard",
-    "storyboardDetail_one": "Σύνθεση {{count}} σκηνής βίντεο",
-    "storyboardDetail_other": "Σύνθεση {{count}} σκηνών βίντεο",
-    "nextTitle": "Επόμενο: Ανασκόπηση των ιδεών σας",
-    "nextDetail": "Επιλέξτε hooks και προεπιλογές ήχου"
+    "nextTitle": "Επόμενο: Ανασκόπηση των ιδεών σας"
   },
   "connect": {
     "readyToConnect": "• Έτοιμο για σύνδεση",

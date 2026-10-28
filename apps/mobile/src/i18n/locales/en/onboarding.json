@@ -294,14 +294,24 @@
     "loadingButton": "Preparing your ideas…",
     "catalogSafe": "Your catalog remains untouched on your store.",
     "title": "Preparing your first ideas",
-    "body": "Generating tailored social reels and staging sets from your {{name}} collection.",
-    "photosTitle": "Gathering photos",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Building storyboard",
-    "storyboardDetail_one": "Composing {{count}} video scene",
-    "storyboardDetail_other": "Composing {{count}} video scenes",
     "nextTitle": "Next up: Review your ideas",
-    "nextDetail": "Select hooks and audio presets"
+    "bodyIdeas": "Finding what is worth posting for {{name}}: seasons, trends and your catalogue.",
+    "photosReady": "Product photos ready",
+    "photosCount_one": "{{count}} photo · {{product}}",
+    "photosCount_other": "{{count}} photos · {{product}}",
+    "noPhotos": "No product photos found on your website",
+    "ideasTitle": "Finding post ideas",
+    "ideasDetail": "Seasons, trends and your catalogue",
+    "ideasFound_one": "{{count}} idea found",
+    "ideasFound_other": "{{count}} ideas found",
+    "ideasNone": "No new ideas this time",
+    "nextPick": "Pick the ones worth posting",
+    "continueWithout": "Continue without ideas",
+    "errors": {
+      "noBrand": "Your business isn’t set up yet. Go back a step.",
+      "stopped": "Finding ideas stopped.",
+      "startFailed": "Couldn’t start finding ideas."
+    }
   },
   "connect": {
     "readyToConnect": "• Ready to connect",

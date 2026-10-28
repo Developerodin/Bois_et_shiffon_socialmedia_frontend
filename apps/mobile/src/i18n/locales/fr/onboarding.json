@@ -220,14 +220,7 @@
     "loadingButton": "Préparation de vos idées…",
     "catalogSafe": "Votre catalogue reste intact sur votre boutique.",
     "title": "Préparation de vos premières idées",
-    "body": "Génération de bobines sociales sur mesure et de décors à partir de votre collection {{name}}.",
-    "photosTitle": "Rassemblement des photos",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Création du storyboard",
-    "storyboardDetail_one": "Composition de {{count}} scène vidéo",
-    "storyboardDetail_other": "Composition de {{count}} scènes vidéo",
-    "nextTitle": "Ensuite : Examinez vos idées",
-    "nextDetail": "Sélectionnez des accroches et des préréglages audio"
+    "nextTitle": "Ensuite : Examinez vos idées"
   },
   "connect": {
     "readyToConnect": "• Prêt à connecter",

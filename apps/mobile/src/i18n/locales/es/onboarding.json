@@ -220,14 +220,7 @@
     "loadingButton": "Preparando tus ideas…",
     "catalogSafe": "Tu catálogo permanece intacto en tu tienda.",
     "title": "Preparando tus primeras ideas",
-    "body": "Generando reels sociales personalizados y sets de escenografía de tu colección {{name}}.",
-    "photosTitle": "Reuniendo fotos",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Construyendo guion gráfico",
-    "storyboardDetail_one": "Componiendo {{count}} escena de video",
-    "storyboardDetail_other": "Componiendo {{count}} escenas de video",
-    "nextTitle": "A continuación: Revisa tus ideas",
-    "nextDetail": "Selecciona ganchos y preajustes de audio"
+    "nextTitle": "A continuación: Revisa tus ideas"
   },
   "connect": {
     "readyToConnect": "• Listo para conectar",

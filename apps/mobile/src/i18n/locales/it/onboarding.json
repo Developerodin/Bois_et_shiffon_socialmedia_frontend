@@ -220,14 +220,7 @@
     "loadingButton": "Preparando le tue idee…",
     "catalogSafe": "Il tuo catalogo rimane intatto nel tuo negozio.",
     "title": "Preparando le tue prime idee",
-    "body": "Generazione di reel social personalizzati e set di scena dalla tua collezione {{name}}.",
-    "photosTitle": "Raccolta foto",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Costruzione storyboard",
-    "storyboardDetail_one": "Composizione di {{count}} scena video",
-    "storyboardDetail_other": "Composizione di {{count}} scene video",
-    "nextTitle": "Prossimo: Rivedi le tue idee",
-    "nextDetail": "Seleziona hook e preset audio"
+    "nextTitle": "Prossimo: Rivedi le tue idee"
   },
   "connect": {
     "readyToConnect": "• Pronto per connettersi",

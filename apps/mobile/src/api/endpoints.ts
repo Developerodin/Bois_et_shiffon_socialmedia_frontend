@@ -80,3 +80,9 @@ export const updateBrandDetails = (ws: string, brandId: string, edit: BrandDetai
 /** Renames the brand. */
 export const renameBrand = (ws: string, brandId: string, displayName: string) =>
   api<{ ok: true }>(brandBase(ws, brandId), { method: "PATCH", body: { displayName }, workspaceId: ws });
+
+/** Scout's first post ideas for onboarding (A11). `ideas` is how many it found; null run = none started yet. */
+export type FirstIdeas = { run: { id: string; status: RunStatus; error: string | null; ideas: number } | null };
+/** Starts the first ideas run, or returns the brand's existing one (never a second). */
+export const startFirstIdeas = (ws: string, brandId: string) => api<FirstIdeas>(`${brandBase(ws, brandId)}/first-ideas`, { method: "POST", body: {}, workspaceId: ws });
+export const firstIdeas = (ws: string, brandId: string, signal?: AbortSignal) => api<FirstIdeas>(`${brandBase(ws, brandId)}/first-ideas`, { workspaceId: ws, signal });

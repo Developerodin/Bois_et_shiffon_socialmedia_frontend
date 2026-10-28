@@ -220,14 +220,7 @@
     "loadingButton": "Připravuji vaše nápady…",
     "catalogSafe": "Váš katalog zůstává nedotčen ve vašem obchodě.",
     "title": "Příprava vašich prvních nápadů",
-    "body": "Generování přizpůsobených sociálních videí a scén z vaší kolekce {{name}}.",
-    "photosTitle": "Shromažďování fotek",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Tvorba storyboardu",
-    "storyboardDetail_one": "Skládání {{count}} video scény",
-    "storyboardDetail_other": "Skládání {{count}} video scén",
-    "nextTitle": "Dále: Zkontrolujte své nápady",
-    "nextDetail": "Vyberte háčky a zvukové předvolby"
+    "nextTitle": "Dále: Zkontrolujte své nápady"
   },
   "connect": {
     "readyToConnect": "• Připraveno k připojení",

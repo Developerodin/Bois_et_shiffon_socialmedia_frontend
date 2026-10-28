@@ -220,14 +220,7 @@
     "loadingButton": "Förbereder dina idéer…",
     "catalogSafe": "Din katalog förblir orörd i din butik.",
     "title": "Förbereder dina första idéer",
-    "body": "Skapar skräddarsydda sociala reels och scenarier från din {{name}} kollektion.",
-    "photosTitle": "Samlar foton",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Bygger storyboard",
-    "storyboardDetail_one": "Komponerar {{count}} videoscen",
-    "storyboardDetail_other": "Komponerar {{count}} videoscener",
-    "nextTitle": "Nästa: Granska dina idéer",
-    "nextDetail": "Välj hooks och ljudinställningar"
+    "nextTitle": "Nästa: Granska dina idéer"
   },
   "connect": {
     "readyToConnect": "• Redo att ansluta",

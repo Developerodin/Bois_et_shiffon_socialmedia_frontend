@@ -220,14 +220,7 @@
     "loadingButton": "Ötleteid előkészítése…",
     "catalogSafe": "A katalógusod érintetlen marad az áruházadban.",
     "title": "Első ötleteid előkészítése",
-    "body": "Személyre szabott közösségi videók és színpadkészletek generálása a(z) {{name}} kollekciódból.",
-    "photosTitle": "Fotók összegyűjtése",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Storyboard építése",
-    "storyboardDetail_one": "{{count}} videójelenet összeállítása",
-    "storyboardDetail_other": "{{count}} videójelenet összeállítása",
-    "nextTitle": "Következő: Nézd át az ötleteidet",
-    "nextDetail": "Válassz horgokat és hangbeállításokat"
+    "nextTitle": "Következő: Nézd át az ötleteidet"
   },
   "connect": {
     "readyToConnect": "• Készen áll a csatlakozásra",

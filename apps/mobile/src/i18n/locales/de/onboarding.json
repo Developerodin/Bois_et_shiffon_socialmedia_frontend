@@ -220,14 +220,7 @@
     "loadingButton": "Bereite deine Ideen vor…",
     "catalogSafe": "Dein Katalog bleibt in deinem Shop unberührt.",
     "title": "Bereite deine ersten Ideen vor",
-    "body": "Erstelle maßgeschneiderte Social Reels und Bühnenbilder aus deiner {{name}}-Kollektion.",
-    "photosTitle": "Fotos sammeln",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Storyboard erstellen",
-    "storyboardDetail_one": "{{count}} Videoszene komponieren",
-    "storyboardDetail_other": "{{count}} Videoszenen komponieren",
-    "nextTitle": "Als Nächstes: Überprüfe deine Ideen",
-    "nextDetail": "Wähle Hooks und Audio-Presets"
+    "nextTitle": "Als Nächstes: Überprüfe deine Ideen"
   },
   "connect": {
     "readyToConnect": "• Bereit zum Verbinden",

@@ -220,14 +220,7 @@
     "loadingButton": "Preparando suas ideias…",
     "catalogSafe": "Seu catálogo permanece intacto na sua loja.",
     "title": "Preparando suas primeiras ideias",
-    "body": "Gerando reels sociais personalizados e cenários a partir da sua coleção {{name}}.",
-    "photosTitle": "Reunindo fotos",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Construindo storyboard",
-    "storyboardDetail_one": "Compondo {{count}} cena de vídeo",
-    "storyboardDetail_other": "Compondo {{count}} cenas de vídeo",
-    "nextTitle": "Próximo: Revise suas ideias",
-    "nextDetail": "Selecione ganchos e predefinições de áudio"
+    "nextTitle": "Próximo: Revise suas ideias"
   },
   "connect": {
     "readyToConnect": "• Pronto para conectar",

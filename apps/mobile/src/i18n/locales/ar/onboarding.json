@@ -220,14 +220,7 @@
     "loadingButton": "تحضير أفكارك…",
     "catalogSafe": "يبقى كتالوجك دون تغيير في متجرك.",
     "title": "تحضير أفكارك الأولى",
-    "body": "إنشاء مقاطع اجتماعية مخصصة ومجموعات عرض من مجموعة {{name}} الخاصة بك.",
-    "photosTitle": "جمع الصور",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "بناء لوحة القصة",
-    "storyboardDetail_one": "تأليف {{count}} مشهد فيديو",
-    "storyboardDetail_other": "تأليف {{count}} مشاهد فيديو",
-    "nextTitle": "التالي: مراجعة أفكارك",
-    "nextDetail": "اختر الخطافات والإعدادات الصوتية"
+    "nextTitle": "التالي: مراجعة أفكارك"
   },
   "connect": {
     "readyToConnect": "• جاهز للاتصال",

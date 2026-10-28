@@ -220,14 +220,7 @@
     "loadingButton": "Je ideeën voorbereiden…",
     "catalogSafe": "Je catalogus blijft onaangetast in je winkel.",
     "title": "Je eerste ideeën voorbereiden",
-    "body": "Op maat gemaakte social reels en staging sets genereren uit je {{name}} collectie.",
-    "photosTitle": "Foto's verzamelen",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Storyboard maken",
-    "storyboardDetail_one": "{{count}} videoscène samenstellen",
-    "storyboardDetail_other": "{{count}} videoscènes samenstellen",
-    "nextTitle": "Volgende: Beoordeel je ideeën",
-    "nextDetail": "Selecteer hooks en audiopresets"
+    "nextTitle": "Volgende: Beoordeel je ideeën"
   },
   "connect": {
     "readyToConnect": "• Klaar om te verbinden",

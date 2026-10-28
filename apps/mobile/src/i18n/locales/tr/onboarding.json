@@ -220,14 +220,7 @@
     "loadingButton": "Fikirleriniz hazırlanıyor…",
     "catalogSafe": "Kataloğunuz mağazanızda dokunulmadan kalır.",
     "title": "İlk fikirlerinizi hazırlıyoruz",
-    "body": "{{name}} koleksiyonunuzdan özel sosyal videolar ve sahne setleri oluşturuluyor.",
-    "photosTitle": "Fotoğraflar toplanıyor",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Storyboard oluşturuluyor",
-    "storyboardDetail_one": "{{count}} video sahnesi oluşturuluyor",
-    "storyboardDetail_other": "{{count}} video sahnesi oluşturuluyor",
-    "nextTitle": "Sıradaki: Fikirlerinizi gözden geçirin",
-    "nextDetail": "Kancaları ve ses ön ayarlarını seçin"
+    "nextTitle": "Sıradaki: Fikirlerinizi gözden geçirin"
   },
   "connect": {
     "readyToConnect": "• Bağlanmaya hazır",

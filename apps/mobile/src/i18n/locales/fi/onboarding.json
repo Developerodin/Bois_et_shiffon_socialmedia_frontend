@@ -220,14 +220,7 @@
     "loadingButton": "Valmistellaan ideoitasi…",
     "catalogSafe": "Katalogisi pysyy koskemattomana kaupassasi.",
     "title": "Valmistellaan ensimmäisiä ideoitasi",
-    "body": "Luodaan räätälöityjä somevideoita ja lavastuksia {{name}}-kokoelmastasi.",
-    "photosTitle": "Kerätään kuvia",
-    "photosDetail": "{{product}}",
-    "storyboardTitle": "Rakennetaan käsikirjoitusta",
-    "storyboardDetail_one": "Koostetaan {{count}} videokohtaus",
-    "storyboardDetail_other": "Koostetaan {{count}} videokohtausta",
-    "nextTitle": "Seuraavaksi: Arvioi ideasi",
-    "nextDetail": "Valitse koukut ja äänipresetit"
+    "nextTitle": "Seuraavaksi: Arvioi ideasi"
   },
   "connect": {
     "readyToConnect": "• Valmis yhdistettäväksi",
