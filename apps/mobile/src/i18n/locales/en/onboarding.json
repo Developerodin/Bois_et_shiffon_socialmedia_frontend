@@ -193,7 +193,9 @@
     "editName": "Edit business name",
     "addTagline": "Add your tagline",
     "addAudience": "Who buys from you?",
-    "saveFailed": "Couldn’t save that change — it’s back to what it was. Try again."
+    "saveFailed": "Couldn’t save that change — it’s back to what it was. Try again.",
+    "subtitleNoWebsite": "We found these details online and from what you told us. You can edit them anytime.",
+    "noProductsNoWebsite": "No product photos yet. Without a website there’s no catalogue to import."
   },
   "brand": {
     "title": "Brand & creative style",
@@ -285,7 +287,10 @@
       "darkest": "darkest"
     },
     "prefsSaveFailed": "Couldn’t save your tone and language.",
-    "continueWithoutSaving": "Continue without saving"
+    "continueWithoutSaving": "Continue without saving",
+    "paletteMetaNoWebsite": "Brand palette",
+    "swatchesNoWebsite": "Colour swatches",
+    "noColorsNoWebsite": "No colours yet. Without a website there’s nothing to import them from."
   },
   "preparing": {
     "ready": "Studio ready",

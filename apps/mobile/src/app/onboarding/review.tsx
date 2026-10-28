@@ -19,6 +19,8 @@ export default function Review() {
   const { data: brand, loading } = useBrandAssets();
   const products = brand?.assets?.products ?? [];
   const summary = brand?.summary;
+  // Made without a website (A07): don't talk about "your website".
+  const noSite = !!brand && !brand.website;
   const [editing, setEditing] = useState<TextField | null>(null);
   const [failed, setFailed] = useState<TextField | null>(null);
 
@@ -35,7 +37,7 @@ export default function Review() {
 
   return (
     <Screen header={<StepHeader step={3} />} footer={<Button label={t("common:continue")} arrow onPress={() => router.push("/onboarding/brand")} />}>
-      <Title title={t("review.title")} subtitle={t("review.subtitle")} style={{ paddingBottom: space[8] }} />
+      <Title title={t("review.title")} subtitle={t(noSite ? "review.subtitleNoWebsite" : "review.subtitle")} style={{ paddingBottom: space[8] }} />
 
       <View style={[styles.card, styles.identity]}>
         <View style={styles.logo}>
@@ -77,7 +79,7 @@ export default function Review() {
         {loading ? (
           <ActivityIndicator color={color.inkSecondary} style={{ paddingTop: space[12] }} />
         ) : products.length === 0 ? (
-          <Text style={[type.body, { paddingTop: space[4], color: color.inkSecondary }]}>{t("review.noProducts")}</Text>
+          <Text style={[type.body, { paddingTop: space[4], color: color.inkSecondary }]}>{t(noSite ? "review.noProductsNoWebsite" : "review.noProducts")}</Text>
         ) : (
           <View style={{ gap: space[12], paddingTop: space[12] }}>
             {products.slice(0, 4).map((prod) => (

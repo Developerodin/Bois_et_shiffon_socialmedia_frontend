@@ -30,6 +30,8 @@ const LANGUAGES: { value: string; key: "fr" | "en" }[] = [
 export default function Brand() {
   const { t } = useTranslation("onboarding");
   const { data: brand, loading } = useBrandAssets();
+  // Made without a website (A07): don't talk about "your website".
+  const noSite = !!brand && !brand.website;
   const colors = brand?.assets?.colors ?? [];
   const fonts = brand?.assets?.fonts ?? [];
   const photos = (brand?.assets?.products ?? []).filter((x) => x.image);
@@ -92,14 +94,14 @@ export default function Brand() {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.strong} numberOfLines={1}>{t("brand.identity", { name: brand?.name ?? "" })}</Text>
-            <Text style={type.meta}>{t("brand.paletteMeta")}</Text>
+            <Text style={type.meta}>{t(noSite ? "brand.paletteMetaNoWebsite" : "brand.paletteMeta")}</Text>
           </View>
         </View>
-        <Text style={[type.meta, { paddingTop: space[12], paddingBottom: space[8] }]}>{t("brand.swatches")}</Text>
+        <Text style={[type.meta, { paddingTop: space[12], paddingBottom: space[8] }]}>{t(noSite ? "brand.swatchesNoWebsite" : "brand.swatches")}</Text>
         {loading ? (
           <ActivityIndicator color={color.inkSecondary} />
         ) : !brand?.assets ? (
-          <Text style={[type.body, { color: color.inkSecondary }]}>{t("brand.noColors")}</Text>
+          <Text style={[type.body, { color: color.inkSecondary }]}>{t(noSite ? "brand.noColorsNoWebsite" : "brand.noColors")}</Text>
         ) : (
           <View style={styles.swatches}>
             {colors.map((c, i) => (
@@ -175,7 +177,7 @@ export default function Brand() {
           <Text style={type.meta}>{t("brand.readyForBatch", { count: photos.length })}</Text>
         </View>
         {!loading && photos.length === 0 ? (
-          <Text style={[type.body, { color: color.inkSecondary, paddingTop: space[12] }]}>{t("review.noProducts")}</Text>
+          <Text style={[type.body, { color: color.inkSecondary, paddingTop: space[12] }]}>{t(noSite ? "review.noProductsNoWebsite" : "review.noProducts")}</Text>
         ) : (
           <View style={[styles.row, { paddingTop: space[12] }]}>
             {photos.slice(0, 2).map((prod) => (
