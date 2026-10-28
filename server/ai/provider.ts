@@ -22,6 +22,10 @@ export type GenerateObjectInput<T extends z.ZodType> = {
   model?: string;
   /** Let the model use OpenAI's hosted web search (e.g. competitor research). */
   webSearch?: boolean;
+  /** How much search material the model reads (OpenAI default: medium). "low" is faster and cheaper. */
+  searchContext?: "low" | "medium" | "high";
+  /** How long the model thinks before writing (OpenAI default: medium). "low" cuts the hidden reasoning tokens. */
+  reasoningEffort?: "low" | "medium" | "high";
   /** Returned verbatim by the mock provider. */
   mock?: z.infer<T>;
 };
@@ -101,7 +105,8 @@ async function callOpenAi<T extends z.ZodType>(
       model,
       instructions: input.system,
       input: input.prompt,
-      ...(input.webSearch ? { tools: [{ type: "web_search" }] } : {}),
+      ...(input.webSearch ? { tools: [{ type: "web_search", ...(input.searchContext ? { search_context_size: input.searchContext } : {}) }] } : {}),
+      ...(input.reasoningEffort ? { reasoning: { effort: input.reasoningEffort } } : {}),
       text: {
         format: {
           type: "json_schema",

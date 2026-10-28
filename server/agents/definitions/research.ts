@@ -139,6 +139,9 @@ export const researchAgent: AgentDefinition = {
         schemaName: kind.replace(/-/g, "_"),
         system: SYSTEM,
         webSearch: kind === "competitor-analysis",
+        // The slowest document, and the run waits for it. Measured on B&C (2026-10-28): 61 s → 37 s with low reasoning
+        // and light search, naming more competitors (8 vs 5) with more sources.
+        ...(kind === "competitor-analysis" ? { reasoningEffort: "low" as const, searchContext: "low" as const } : {}),
         prompt: `Brand: ${brand.displayName}\nWebsite: ${brand.websiteUrl ?? "none"}\n\nDocument to write: ${title}\nWhat it must cover: ${GUIDANCE[kind]}\n\n${label}:\n${text}`,
         mock: mockDoc(kind, brand.displayName, [...known].map(([url, t]) => ({ url, title: t, description: null, text: "" }))),
       });
