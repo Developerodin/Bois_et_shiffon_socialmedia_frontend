@@ -39,6 +39,8 @@ Mobile tokens are Auth.js JWEs under their own salt (`server/auth/request-user.t
 
 **Summary + owner's choices** (spec `…/2026-10-28-brand-summary-design.md`): after the assets, Research makes one small AI call that writes `BrandProfile.summary`: the site's own tagline word for word, up to 4 tags, and one-sentence audience and strengths. On B&C it gave "Bois Vivant. Des Espaces Qui Respirent." Mock AI skips the call. A failure is only a warning. Fields people edit are listed in `edited`, and a Research re-run never overwrites them. Tones go to `BrandProfile.preferences`; content language goes to the existing `locales`. `brandKnowledge()` puts an "Owner's choices" block first for every content agent: edited text only, as quoted data. Edits go through `PATCH …/brands/:id/assets` (`context.edit`); renames go through the brand `PATCH` (`displayName`, whose schema was fixed: it used to fail on every call). Check: `npm run check:brand-assets -w web`. The A09 screen wasn't walked through on the emulator: getting there needs a fresh onboarding, which means a paid Research run.
 
+**Research speed (2026-10-28):** the five documents are written in parallel, and logo/colours/photos are collected alongside them. B&C went from 5 min 37 s to 2 min 21 s (the slowest document is competitor analysis, which searches the web). Running jobs renew their lock so a long run is never started a second time. The summary reads the whole homepage, so it finds slogans further down the page, and it ends long text on a whole word.
+
 **Not yet tried end to end:** the A07 no-website path (each run is a paid Research run with web search). Try one business that's on Google Maps / Instagram and one that isn't online at all.
 
 ## Decisions waiting on the owner

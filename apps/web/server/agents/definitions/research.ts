@@ -127,8 +127,10 @@ export const researchAgent: AgentDefinition = {
       select: { kind: true },
     });
 
-    for (const { kind, title } of CONTEXT_DOC_KINDS) {
-      if (done.some((d) => d.kind === kind)) continue; // retry after a crash: keep finished docs
+    // The documents only need the material, not each other: written in parallel, so the run takes about as long as
+    // the slowest one (competitor analysis, ~1.5 min with web search) instead of their sum (~5 min).
+    // ponytail: 5 concurrent AI calls per run; queue them if OpenAI rate limits start biting.
+    const writeDoc = async ({ kind, title }: (typeof CONTEXT_DOC_KINDS)[number]) => {
       await ctx.log("INFO", `Drafting ${title}`);
       const out = await ctx.ai.generateObject({
         workflowId: `research.${kind}`,
@@ -154,10 +156,11 @@ export const researchAgent: AgentDefinition = {
         type: "BrandContextDoc",
         id: doc.id,
       });
-    }
+    };
 
-    // After the documents, so a slow site can't cost document progress if the job runs out of time.
-    if (brand.websiteUrl && pages) {
+    // Best-effort and independent of the documents (own 30 s cap), so it runs alongside them.
+    const collectAssets = async () => {
+      if (!brand.websiteUrl || !pages) return;
       await ctx.log("INFO", "Collecting logo, colours, fonts and product photos");
       try {
         const assets = await collectBrandAssets({ workspaceId: brand.workspaceId, brandId: brand.brandId }, brand.websiteUrl, pages, ctx.runId);
@@ -169,9 +172,18 @@ export const researchAgent: AgentDefinition = {
         // Best-effort: the documents are what Research is for. Message only, never a response body.
         await ctx.log("WARN", `Couldn't collect brand assets: ${error instanceof Error ? error.message.slice(0, 200) : "unknown error"}`);
       }
-    }
+    };
 
-    // Last, so it never costs documents or assets their time: the short summary A09 shows. Websites and A07 brands alike.
+    // allSettled: one failed document mustn't abandon the others mid-call. Finished ones are saved, and a retry
+    // (`done` above) writes only what's missing.
+    const results = await Promise.allSettled([
+      ...CONTEXT_DOC_KINDS.filter(({ kind }) => !done.some((d) => d.kind === kind)).map(writeDoc),
+      collectAssets(),
+    ]);
+    const failure = results.find((r) => r.status === "rejected");
+    if (failure) throw failure.reason;
+
+    // Last, since it reads the documents: the short summary A09 shows. Websites and A07 brands alike.
     try {
       const summary = await writeSummary(ctx, pages?.[0]);
       if (summary) await ctx.log("SUCCESS", "Summary written for review");

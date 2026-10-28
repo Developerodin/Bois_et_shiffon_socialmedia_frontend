@@ -8,7 +8,7 @@ import { dominantColors, isNeutral, parseColor } from "@/server/research/colors"
 import { prisma } from "@/server/db/prisma";
 import { BrandAssets, nameFromHost, nameFromWebsite, rankFonts, saveCollected, saveEditedColors, shopifyProducts, storeImage } from "@/server/research/brand-assets";
 import { ownerChoices } from "@/server/content/knowledge";
-import { BrandSummary, savePreferences, saveSummary, saveSummaryEdit } from "@/server/research/brand-summary";
+import { BrandSummary, oneLine, savePreferences, saveSummary, saveSummaryEdit } from "@/server/research/brand-summary";
 import { cleanBrandName, fontFamilies, pageAssets, safeFetch, safeFetchBytes } from "@/server/research/crawl";
 import { deleteMedia } from "@/server/storage/media";
 
@@ -74,6 +74,10 @@ assert.equal(dominantColors(px, 4).length, 1);
 assert.equal(nameFromHost("https://www.bois-et-chiffons.fr/x"), "Bois Et Chiffons");
 assert.deepEqual(rankFonts(["Poppins", "Inter", "Poppins", "Azeret Mono", "Inter", "Poppins"]), ["Poppins", "Inter"]);
 assert.deepEqual(rankFonts(["Lora"]), ["Lora"]);
+assert.equal(oneLine("short\n line", 20), "short line");
+assert.equal(oneLine("with premium delivery and dedicated B2B services", 40), "with premium delivery and dedicated…");
+assert.equal(oneLine("solid wood, oak, pine and mango", 18), "solid wood, oak…");
+assert.ok(oneLine("x".repeat(300), 240).length === 240);
 console.log("✓ parsing");
 
 async function online() {
