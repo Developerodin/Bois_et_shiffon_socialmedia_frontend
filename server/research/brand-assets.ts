@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import sharp from "sharp";
+import sharp, { type Sharp } from "sharp";
 import { z } from "zod";
 import { prisma } from "@/server/db/prisma";
 import { distinctColors, dominantColors, isNeutral, parseColor, toHex, type Rgb } from "@/server/research/colors";
-import { fontFamilies, pageAssets, safeFetch, safeFetchBytes, type CrawledPage, type PageProduct } from "@/server/research/crawl";
+import { fontFamilies, pageAssets, safeFetch, safeFetchBytes, safeSvg, type CrawledPage, type PageProduct } from "@/server/research/crawl";
 import { mediaKey, putMedia } from "@/server/storage/media";
 import type { TenantScope } from "@/server/tenant/scope";
 
@@ -104,17 +104,39 @@ export async function storeImage(scope: Required<TenantScope>, url: string, name
   try {
     const img = sharp(res.bytes, { limitInputPixels: 16_000_000, sequentialRead: true });
     const { format } = await img.metadata();
-    if (!format || !IMAGE_FORMATS.has(format)) return null; // SVG, ICO, HTML error pages…
-    const sized = img.rotate().resize(1200, 1200, { fit: "inside", withoutEnlargement: true });
-    const body = as === "png" ? await sized.clone().png().toBuffer() : await sized.clone().flatten({ background: "#ffffff" }).jpeg({ quality: 80 }).toBuffer();
-    const thumb = await sized.clone().resize(24, 24, { fit: "inside" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-    // versioned: the key changes with the content, so apps caching by key show a new logo instead of the old one
-    const key = mediaKey(scope, `${versioned ? `${name}-${hash(body.toString("base64"))}` : name}.${as === "png" ? "png" : "jpg"}`);
-    await putMedia(key, body, `image/${as}`);
-    return { key, colors: dominantColors(thumb.data, thumb.info.channels) };
+    if (!format || !IMAGE_FORMATS.has(format)) return null; // SVG files, ICO, HTML error pages…
+    return await encodeAndStore(scope, img, name, as, versioned);
   } catch {
     return null;
   }
+}
+
+/**
+ * A logo drawn as inline SVG (see crawl.ts inlineSvgLogos): rendered to PNG only when safeSvg passes (no scripts,
+ * external references or embedded files), at a density that makes it ~800px wide so small vectors stay sharp.
+ * ponytail: a white logo (made for a dark header) comes out white on transparent; fine on dark tiles only.
+ */
+export async function storeSvgLogo(scope: Required<TenantScope>, svg: string, name: string) {
+  if (!safeSvg(svg)) return null;
+  try {
+    const { width, format } = await sharp(Buffer.from(svg)).metadata();
+    if (format !== "svg" || !width) return null;
+    const density = Math.min(2400, Math.max(72, Math.round((72 * 800) / width)));
+    return await encodeAndStore(scope, sharp(Buffer.from(svg), { density, limitInputPixels: 16_000_000 }), name, "png", true);
+  } catch {
+    return null;
+  }
+}
+
+/** Resize ≤1200px without metadata, encode, keep a 24px thumbnail for colours, put in the brand's private bucket. */
+async function encodeAndStore(scope: Required<TenantScope>, img: Sharp, name: string, as: "jpeg" | "png", versioned: boolean) {
+  const sized = img.rotate().resize(1200, 1200, { fit: "inside", withoutEnlargement: true });
+  const body = as === "png" ? await sized.clone().png().toBuffer() : await sized.clone().flatten({ background: "#ffffff" }).jpeg({ quality: 80 }).toBuffer();
+  const thumb = await sized.clone().resize(24, 24, { fit: "inside" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  // versioned: the key changes with the content, so apps caching by key show a new logo instead of the old one
+  const key = mediaKey(scope, `${versioned ? `${name}-${hash(body.toString("base64"))}` : name}.${as === "png" ? "png" : "jpg"}`);
+  await putMedia(key, body, `image/${as}`);
+  return { key, colors: dominantColors(thumb.data, thumb.info.channels) };
 }
 
 /** Run `fn` over items, `limit` at a time, keeping order. */
@@ -164,8 +186,17 @@ export async function collectBrandAssets(scope: Required<TenantScope>, websiteUr
     if (products.size < MAX_PRODUCTS && !products.has(key)) products.set(key, p);
   }
 
+  // A logo image first, then a logo drawn as inline SVG, and the site icon (often a favicon) only as a last resort.
   let logo: Awaited<ReturnType<typeof storeImage>> = null;
   for (const url of [...new Set(found.flatMap((a) => a.logos))].slice(0, MAX_LOGO_TRIES)) {
+    logo = await storeImage(scope, url, "brand-logo", "png", signal, true);
+    if (logo) break;
+  }
+  for (const svg of logo ? [] : [...new Set(found.flatMap((a) => a.inlineLogos))].slice(0, MAX_LOGO_TRIES)) {
+    logo = await storeSvgLogo(scope, svg, "brand-logo");
+    if (logo) break;
+  }
+  for (const url of logo ? [] : [...new Set(found.flatMap((a) => a.icons))].slice(0, MAX_LOGO_TRIES)) {
     logo = await storeImage(scope, url, "brand-logo", "png", signal, true);
     if (logo) break;
   }

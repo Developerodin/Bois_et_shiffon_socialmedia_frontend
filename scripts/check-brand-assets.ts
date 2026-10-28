@@ -9,7 +9,7 @@ import { prisma } from "@/server/db/prisma";
 import { BrandAssets, nameFromHost, nameFromWebsite, rankFonts, saveCollected, saveEditedColors, shopifyProducts, storeImage } from "@/server/research/brand-assets";
 import { ownerChoices } from "@/server/content/knowledge";
 import { BrandSummary, oneLine, savePreferences, saveSummary, saveSummaryEdit } from "@/server/research/brand-summary";
-import { cleanBrandName, fontFamilies, pageAssets, safeFetch, safeFetchBytes } from "@/server/research/crawl";
+import { cleanBrandName, fontFamilies, pageAssets, safeFetch, safeFetchBytes, safeSvg } from "@/server/research/crawl";
 import { deleteMedia } from "@/server/storage/media";
 
 const base = new URL("https://shop.example.com/fr/");
@@ -31,12 +31,32 @@ const html = `
 <script type="application/ld+json">{ broken json </script>`;
 
 const a = pageAssets(html, base);
-assert.deepEqual(a.logos, [
-  "https://cdn.example.com/org-logo.png",
-  "https://cdn.example.com/logo.png?v=1&width=600",
-  "https://shop.example.com/touch.png",
-  "https://shop.example.com/favicon.ico",
-]);
+assert.deepEqual(a.logos, ["https://cdn.example.com/org-logo.png", "https://cdn.example.com/logo.png?v=1&width=600"]);
+assert.deepEqual(a.icons, ["https://shop.example.com/touch.png", "https://shop.example.com/favicon.ico"]);
+
+// Inline SVG logos: in the homepage link, labelled, or a "logo" symbol made standalone; unsafe ones never pass.
+const svgPage = pageAssets(
+  `<svg style="display:none"><symbol id="icon:shop-logo" viewBox="0 0 10 4"><path d="M0 0h10v4H0z"/></symbol></svg>
+   <a href="https://shop.example.com/gb/en/"><span>Home</span><svg viewBox="0 0 465 208"><path d="M1 1h4"/></svg></a>
+   <svg class="tw-h-6"><use href="#icon:shop-logo"></use></svg>
+   <a href="/fr/cart"><svg viewBox="0 0 2 2"><path d="M0 0h1"/></svg></a>
+   <a href="/"><svg viewBox="0 0 24 24" class="icon icon-heart"><path d="M0 0h1"/></svg></a>
+   <a href="/"><svg width="60" height="60"><circle r="29"/></svg></a>
+   <svg class="logo"><path d="M0 0"/><script>alert(1)</script></svg>`,
+  base,
+);
+assert.equal(svgPage.inlineLogos.length, 2, "home-link svg + resolved symbol; cart, heart and dot icons and the scripted svg left out");
+assert.ok(svgPage.inlineLogos[0].startsWith('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 465 208">'));
+assert.ok(svgPage.inlineLogos[1].includes('viewBox="0 0 10 4"') && svgPage.inlineLogos[1].includes("<path"));
+for (const bad of [
+  '<svg><image href="file:///etc/passwd"/></svg>',
+  '<svg><use href="https://evil.example/x.svg#a"/></svg>',
+  '<svg><path style="fill:url(https://evil.example/a)"/></svg>',
+  '<!DOCTYPE svg [<!ENTITY x SYSTEM "file:///etc/passwd">]><svg>&x;</svg>',
+  '<svg><foreignObject><div/></foreignObject></svg>',
+  '<svg><a xlink:href="javascript:alert(1)"/></svg>',
+]) assert.equal(safeSvg(bad), false, bad);
+assert.equal(safeSvg('<svg><defs><linearGradient id="g"/></defs><path fill="url(#g)"/><use href="#g"/></svg>'), true);
 assert.deepEqual(a.products, [{ title: "Table & chaises", url: "https://shop.example.com/products/table", image: "https://cdn.example.com/table.jpg" }]);
 assert.deepEqual(a.fonts, ["Caveat", "Carattere", "Poppins"]);
 assert.equal(a.siteName, "Bois & Chiffons");
@@ -60,7 +80,7 @@ assert.equal(cleanBrandName("  Bois‮ &amp;\n Chiffons <b> "), "Bois & Chiffons
 for (const bad of ["Home", "x", "boisetchiffons.fr", "https://evil.example", "a".repeat(81)]) assert.equal(cleanBrandName(bad), null, bad);
 assert.equal(a.themeColor, "#6C4B2E");
 assert.deepEqual(a.cssColors, ["255,255,255", "#D9C3AC"]);
-assert.deepEqual(pageAssets("<html></html>", base), { logos: [], products: [], fonts: [], siteName: null, stylesheets: [], themeColor: null, cssColors: [] });
+assert.deepEqual(pageAssets("<html></html>", base), { logos: [], icons: [], inlineLogos: [], products: [], fonts: [], siteName: null, stylesheets: [], themeColor: null, cssColors: [] });
 
 assert.deepEqual(parseColor("255, 0, 10"), [255, 0, 10]);
 assert.deepEqual(parseColor("#abc"), [170, 187, 204]);
