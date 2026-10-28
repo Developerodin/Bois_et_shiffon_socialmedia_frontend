@@ -1,11 +1,19 @@
-# Handover: Espanda mobile app (2026-10-27)
+# Handover: Espanda mobile app (end of day 2026-10-28)
 
-Native Expo app in `apps/mobile`, built from the Espanda Figma (file `dGILR13Xa3SLUnjGAtHn1C`, pages App·00–07). It talks to the same backend as the web app (`apps/web`, `/api/v1`). The desktop web app stays the place for approval.
+Native Expo app in `apps/mobile`, built from the Espanda Figma (file `dGILR13Xa3SLUnjGAtHn1C`, pages App·00–07). It talks to the same backend as the web app (`apps/web`, `/api/v1`). The desktop web app stays the place for approval. Everything below is committed on `main` (not pushed).
+
+## Start here tomorrow
+
+1. **Try A12 with a real Instagram/Facebook login.** Built and security-checked, never run with a real account. Needs the tunnel + Meta dashboard steps under "Owner's setup tasks".
+2. **Approve the new English wording, then translate it.** Everything added this week is English-only in the other 23 languages (they fall back to English): A06–A12 wording, the Google Maps screen, the no-website wording on A09/A10, A11's rows. Run `node apps/mobile/scripts/i18n-translate.mjs` once approved.
+3. **Gaps found by the 14-brand test** (below): bot-blocked sites get no logo/colours/photos; custom-built sites expose few products (Bellroy 0, Rapha 1); some Google listing names carry SEO text ("Myth I Bangkok Street food | Best mango sticky rice"). Also open: when the online lookup finds a website the owner didn't give, offer "We found your website, use it?".
+4. **Next page:** onboarding ends on the goal's home (Posts / Reels / Photoshoot), which still shows sample data.
 
 ## Where it stands
 
 - **All 68 Figma screens are built** (onboarding, reels, posts, photoshoot, marketing, business, plans, recovery), in 24 languages (machine translated, needs native review; Arabic right-to-left not done). See `apps/mobile/src/i18n/README.md`.
-- **Real data so far: sign-in and onboarding up to Learning.** Everything after Learning still shows sample data (`src/ui/onboarding/profile.ts` and each module's sample files).
+- **Onboarding (page 01) runs on real data end to end**, tested on the emulator with real AI and Google calls. Only A12's real login is untried.
+- **After onboarding, everything is still sample data** (each module's sample files).
 - Backend-less features (video/image generation, inbox, website studio, payments) are designed screens only.
 
 ### Sign-in
@@ -26,50 +34,66 @@ Mobile tokens are Auth.js JWEs under their own salt (`server/auth/request-user.t
 | A01 Sign in, A02 Verify | Real |
 | A03 Welcome | Static by design |
 | A04 Creation goal | Real: saved on the brand (`BrandProfile.goal`) and decides where onboarding ends (Posts / Reels / Photoshoot fashion / product) |
-| A05 Business source | "Website" → A06; "Google Maps" → Find on Google Maps (below); every other choice → A07 |
-| Find on Google Maps (no Figma frame) | Real. Search name + city (`POST /api/v1/places/search`, our server calls Places API (New), key `GOOGLE_MAPS_API_KEY` or the shared `GOOGLE_PAGESPEED_API_KEY`, which must allow Places API (New); 30 searches/hour per person) → "Is this your business?" cards → the brand is created from the listing (`placeId`; the server reads name, address, phone, hours, rating, website and Google's description, saved on `BrandProfile.place`). Listing has a website → Research reads it (logo, colours, products, SEO/GEO) plus the listing; no website → the online lookup starts from the listing. Picking is the owner's word, not proof of ownership (that needs Google Business Profile sign-in). "Not on the list?" → A07 |
-| A06 Website | Real. Continue first checks the site opens (`POST /api/v1/site-check`, SSRF-guarded like Research); if not, says so. "No website? Describe your business instead" → A07 |
-| A07 No website | Name, what they sell, city (optional). Brand is created without a website (`BrandProfile.about` / `location`); Research finds the business with one web search, then writes the five documents from that plus the owner's words. SEO and GEO are skipped (no site to score). Listing-link mode and the extra website field were removed. |
-| A08 Learning | Real: follows the Research run |
-| A09 Review, A10 Brand | Real. Logo, colours, fonts and products come from the website (see below). Tagline, tags, audience and strengths come from Research's summary (below). Name, tagline and audience can be edited in place. A10's tones and content language are saved on Continue and reach the agents |
-| A11 Preparing | Real. Starts the brand's first Scout run (free, once per brand: `POST …/brands/:id/first-ideas` returns the existing run; at most 3 free restarts a day after failures) and follows it (~1 min): product photos ready → finding post ideas → "N ideas found". A failure says why, with Try again and "Continue without ideas". Scout runs after A10 so it uses the owner's tones and language |
-| A12 Connect | Built, **not yet tried with a real Instagram/Facebook login.** Buttons connect Instagram (Instagram Login) and Facebook Pages from the phone: the app gets the consent link (`…/connections/start` with `client: "mobile"`), opens it in an in-app browser, and the callback hands state + code back to `espanda://connect` instead of connecting; the app completes with its own token (`POST /api/v1/integrations/:provider/complete`), which only works for the person who started it (so a consent link sent to someone else can't put their account on your brand). Checked with a fake code (`scripts/_tmp/check-mobile-connect.ts`). Onboarding progress is now saved on the device when the app goes to the background and cleared at the end and on sign-out, because Android can kill the app while the sign-in browser is open |
+| A05 Business source | "Website" → A06; "Google Maps" → Find on Google Maps; every other choice → A07 |
+| Find on Google Maps (no Figma frame) | Real. Search name + city (`POST /api/v1/places/search`; our server calls Places API (New) with `GOOGLE_MAPS_API_KEY`, else the shared `GOOGLE_PAGESPEED_API_KEY`, which now allows Places API (New); 30 searches/hour per person) → "Is this your business?" cards → the brand is created from the listing (`placeId`; the server reads name, address, phone, hours, rating, website and Google's description, saved on `BrandProfile.place`). Listing has a website → Research reads it plus the listing; no website → the online lookup starts from the listing. Picking is the owner's word, not proof of ownership (that needs Google Business Profile sign-in). "Not on the list?" → A07 |
+| A06 Website | Real. Continue checks the address exists (`POST /api/v1/site-check`): only a bad URL, unknown domain or private address stops it. Sites that refuse bots pass; Research then looks them up online. "No website?" → A07 |
+| A07 No website | Real, tested with a real bakery (found online) and a made-up business (honestly reported as not found, nothing invented). Name, what they sell, city. SEO/GEO skipped |
+| A08 Learning | Real: follows the Research run. Website brands ~70–100 s; Maps-only / no-website ~85 s |
+| A09 Review, A10 Brand | Real. Logo, colours, fonts, products from the website; tagline, tags, audience, strengths from Research's summary. Name, tagline, audience editable in place; palette editable; tones and content language saved and reach the agents. A10's audience tile shows the real audience. No-website brands get no-website wording |
+| A11 Preparing | Real. Starts the brand's first Scout run (free, once per brand: `POST …/brands/:id/first-ideas`; at most 3 free restarts a day after failures) and follows it (~1 min, ~8 ideas in the brand's language). Failure → Try again or "Continue without ideas" |
+| A12 Connect | Built, **not yet tried with a real login.** Instagram (Instagram Login) and Facebook Pages: the app gets the consent link (`…/connections/start` with `client: "mobile"`) and opens it in an in-app browser; the callback hands state + code back to `espanda://connect`; the app completes with its own token (`POST /api/v1/integrations/:provider/complete`), which only works for the person who started it. "Skip for now" → "Continue without connecting" works |
 
-**Brand assets** (spec `docs/superpowers/specs/2026-10-28-brand-assets-design.md`): after writing the documents, Research collects the logo, up to 5 colours, up to 4 fonts and up to 12 products with photos (Shopify `/products.json`, else JSON-LD on crawled pages). Images are re-encoded by sharp into the brand's private bucket; saved on `BrandProfile.assets`; served signed by `GET …/brands/:id/assets`. No AI cost; 30 s cap; failures are a WARN, never a failed Research. Colours come mostly from the logo and photos (B&C's CSS colours are only black/white), so they are approximate. Check: `npm run check:brand-assets -w web`.
+Onboarding progress is saved on the device when the app goes to the background (Android can kill it while a sign-in browser is open), restored at start, and cleared at the end and on sign-out. "Try again" on Learning only restarts Research for the brand made from what's on screen; otherwise it creates the brand again.
 
-**v2 (same day, spec `…/2026-10-28-brand-assets-v2-design.md`):** brands made from a website are named the way the site names itself (`og:site_name` → "Bois & Chiffons") at creation; wide logos shown whole; fonts ranked from the homepage + its theme stylesheets (Poppins, Inter, Caveat for B&C); A10 palette editable (pick a colour + shade, Lighter/Darker, or hex; `PATCH …/brands/:id/assets`, `context.edit`); Research keeps people's colours. A10 creative tone now has Feel / Style / Positioning groups (22 options) — still kept on the phone only.
+### Research (what A08 waits for)
 
-**Summary + owner's choices** (spec `…/2026-10-28-brand-summary-design.md`): after the assets, Research makes one small AI call that writes `BrandProfile.summary`: the site's own tagline word for word, up to 4 tags, and one-sentence audience and strengths. On B&C it gave "Bois Vivant. Des Espaces Qui Respirent." Mock AI skips the call. A failure is only a warning. Fields people edit are listed in `edited`, and a Research re-run never overwrites them. Tones go to `BrandProfile.preferences`; content language goes to the existing `locales`. `brandKnowledge()` puts an "Owner's choices" block first for every content agent: edited text only, as quoted data. Edits go through `PATCH …/brands/:id/assets` (`context.edit`); renames go through the brand `PATCH` (`displayName`, whose schema was fixed: it used to fail on every call). Check: `npm run check:brand-assets -w web`. The A09 screen wasn't walked through on the emulator: getting there needs a fresh onboarding, which means a paid Research run.
+- **Reads the website** (8 pages, robots.txt respected, honest bot user-agent), then writes five documents **in parallel** and collects logo, colours, fonts and up to 12 products alongside; then a short summary (tagline, tags, audience, strengths). Specs: `docs/superpowers/specs/2026-10-28-brand-assets-design.md`, `…-brand-assets-v2-design.md`, `…-brand-summary-design.md`.
+- **Website blocks bots** (robots.txt, Cloudflare check, refused connection): Research says so once and **looks the business up online** instead; documents still written, no logo/colours/photos. Before: 10 minutes of retries, then a failure.
+- **Logos:** a logo image first, then a logo **drawn as inline SVG** (rendered to PNG only if self-contained: no scripts, external references, embedded files or entities), then the site icon. Small square interface icons are ignored.
+- **Competitor analysis:** low reasoning + light web search (it was the slowest document), with a source link after each competitor claim.
+- **Online lookup** (no website / blocked site / Maps-only): low reasoning + light search, 20–27 s (was 60–70 s), with a strict matching rule so same-name businesses elsewhere stay out.
+- Running jobs renew their lock, so a long run is never started twice.
 
-**Research speed (2026-10-28):** the five documents are written in parallel, and logo/colours/photos are collected alongside them. B&C went from 5 min 37 s to 2 min 21 s (the slowest document is competitor analysis, which searches the web). Running jobs renew their lock so a long run is never started a second time. The summary reads the whole homepage, so it finds slogans further down the page, and it ends long text on a whole word.
+**14-brand test (2026-10-28):** India, USA, UK, Germany, Spain, Netherlands, Denmark, Japan, Australia, Brazil (websites) and Thailand, Vietnam, Portugal, Kenya (Maps-only). After the fixes all succeed; documents in English even for German/Spanish/Japanese sites, taglines kept word for word; Maps-only prices credited to their source, gaps marked "Unknown". Harness: `apps/web/scripts/_tmp/batch-research.ts` (creates the brands through the real code, saves every document and timing to `scripts/_tmp/batch/`, then deletes the test brands, their jobs and images). It's in `_tmp`, so not committed: promote it to `scripts/` to keep it.
 
-**Not yet tried end to end:** the A07 no-website path (each run is a paid Research run with web search). Try one business that's on Google Maps / Instagram and one that isn't online at all.
+## Today's commits (2026-10-28)
+
+`ed39b33` A04–A10 real · `f3ea887` job lease renewal · `9cd70aa` documents in parallel, real tagline · `dfddf91` A11 first ideas · `598928c` A12 connect + saved onboarding progress · `9660a41` faster competitor analysis · `40b21e6` competitor citations · `5cb72bb` A10 real audience · `a22bea7` no-website wording · `038504b` Google Maps step (+ "Try again" fix) · `7bbe71e` bot-blocked fallback · `fdedc97` inline SVG logos · `abd7fe7` faster, stricter lookup.
 
 ## Decisions waiting on the owner
 
-1. ~~A06 promise vs Research~~: decided 2026-10-28, Research now collects them (above). Still open: A10 says the palette is "Editable" but editing isn't built; and DNS pinning in the crawler (named in the spec) before onboarding opens to the public.
-2. **New/changed strings are English-only** in the other 23 languages (they fall back to English): A06 error and "No website?" link, A07 subtitle, the "Finding your business online" Learning stage, and the A09/A10 empty states, colour sources and fonts line. Run `node apps/mobile/scripts/i18n-translate.mjs` once approved.
-3. **Gmail "Copy code" chip** doesn't show on our sign-in email. Likely sender trust: `theodin.in` has no SPF or DMARC record, and `EMAIL_FROM` (a gmail.com address) doesn't match the sending account (`developer@theodin.in`). Add SPF `v=spf1 include:_spf.google.com ~all` and DMARC `v=DMARC1; p=none; rua=mailto:developer@theodin.in` in GoDaddy DNS, and set `EMAIL_FROM="Espanda <developer@theodin.in>"`.
+1. **Translations** of this week's English wording (see "Start here" 2).
+2. **Gmail "Copy code" chip** doesn't show on our sign-in email. Likely sender trust: `theodin.in` has no SPF or DMARC record, and `EMAIL_FROM` (a gmail.com address) doesn't match the sending account (`developer@theodin.in`). Add SPF `v=spf1 include:_spf.google.com ~all` and DMARC `v=DMARC1; p=none; rua=mailto:developer@theodin.in` in GoDaddy DNS, and set `EMAIL_FROM="Espanda <developer@theodin.in>"`.
+3. **Ownership proof** for Google Maps listings (Google Business Profile sign-in, `business.manage`, needs Google's app approval): later.
+4. **Before onboarding opens to the public:** DNS pinning in the crawler; real-domain redirect addresses for Meta; restrict the Google key to the server's IP once deployed.
 
 ## Owner's setup tasks
 
-- **To test A12 on a phone:** Instagram only accepts https redirect addresses, so run a tunnel (`cloudflared tunnel --url http://localhost:3100`), add `https://<tunnel>/api/v1/integrations/instagram/callback` and `…/meta/callback` in the Meta developer dashboard (Instagram business login settings; Facebook Login → Valid OAuth Redirect URIs), and point `INSTAGRAM_REDIRECT_URI` / `META_REDIRECT_URI` in `apps/web/.env` at them while testing. With them pointing at the tunnel, connecting from the web app on localhost won't work; switch back afterwards. In production these are the real domain.
-
+- **To test A12 on a phone:** Instagram only accepts https redirect addresses. Run a tunnel (`cloudflared tunnel --url http://localhost:3100`; the address changes every restart), add `https://<tunnel>/api/v1/integrations/instagram/callback` and `…/meta/callback` in the Meta developer dashboard (Instagram business login settings; Facebook Login → Valid OAuth Redirect URIs), and point `INSTAGRAM_REDIRECT_URI` / `META_REDIRECT_URI` in `apps/web/.env` at them while testing. While they point at the tunnel, connecting from the web app on localhost won't work; switch back afterwards.
 - Android OAuth client in Google Cloud: package `com.espanda.app`, debug SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`.
 - Twilio: upgrade the account, set Geo permissions for the countries you'll serve, and an India sender ID / DLT registration.
 - Apple developer account (for Apple sign-in and iOS builds).
 
 ## Running it
 
-- Web API: `cd apps/web && npm run dev` (port 3100). The phone reaches it at `EXPO_PUBLIC_API_URL` in `apps/mobile/.env.local`.
-- Android dev build on the Pixel_10 emulator: `npx expo run:android --no-bundler` (JAVA_HOME = JDK 17; Windows long paths on), then Metro `npx expo start --dev-client --port 8081`.
-- Android 17 needs `adb shell pm grant com.espanda.app android.permission.ACCESS_LOCAL_NETWORK` or the app can't reach Metro or the API.
-- After a schema change: `npm run db:deploy`, then restart the web server (a running server keeps the old Prisma client and fails on new columns).
+- **Web API:** `npm run build -w web && npm run start -w web` (port 3100). Don't use `npm run dev`: Turbopack panics ("Next.js package not found") in this monorepo. Rebuild and restart after every server change.
+- After a schema change: stop the web server, `npm run db:deploy` and `npx prisma generate` in `apps/web` (Windows locks the Prisma engine file while the server runs), then build and start.
+- The phone reaches the API at `EXPO_PUBLIC_API_URL` in `apps/mobile/.env.local`. The host IP changes (DHCP, `.17` ↔ `.18`): check `ipconfig` if the app shows network errors.
+- **Emulator (Pixel_10):** cold-boot with `emulator -avd Pixel_10 -no-snapshot-load -no-snapshot-save -gpu swiftshader_indirect`. The saved snapshot runs a stale copy of the app, and hardware graphics crash Android's window manager when a browser opens on top of the app. Then `adb reverse tcp:8081 tcp:8081`, `adb reverse tcp:3100 tcp:3100`, `adb shell pm grant com.espanda.app android.permission.ACCESS_LOCAL_NETWORK`, and open the app with `adb shell am start -a android.intent.action.VIEW -d "espanda://expo-development-client/?url=http%3A%2F%2F192.168.0.17%3A8081" com.espanda.app`. Keep it awake: `adb shell svc power stayon true`.
+- Metro: `npx expo start --dev-client --port 8081` in `apps/mobile`.
+- Sign in on the emulator as `admin@cmo.local`: tap Continue on the email screen, then run `npx tsx --env-file=.env scripts/_tmp/plant-code.ts admin@cmo.local` in `apps/web` and type `424242`.
+
+## Checks
+
+- `npm run check:brand-assets -w web` (parsing, inline SVG safety, Shopify, logo storing, summary edits). `-- --offline` skips the network part.
+- `npm run smoke:research -w web -- <url>` (set `OPENAI_API_KEY=` empty for the free mock AI). Its cleanup now also removes the SEO/GEO jobs that brand creation queues.
+- Throwaway checks in `apps/web/scripts/_tmp/`: `check-first-ideas.ts`, `check-mobile-connect.ts`, `check-places.ts`, `batch-research.ts`.
 
 ## Things to know
 
-- Rate limits live in `RateLimitBucket`: email codes 5 per 15 min per email, site checks 30 per hour per person, 10 new brands per person per day. Clear a row to reset one.
-- Known debt: four near-duplicate module headers in the mobile kit (`src/ui/reels/kit`, `posts/chrome`, `photoshoot/chrome`, `plans/kit`) to merge; Figma page 98 never exported.
+- Rate limits live in `RateLimitBucket`: email codes 5 per 15 min per email, site checks and Maps searches 30 per hour per person, 10 new brands per person per day (today's testing hit it; clear the `brands:<userId>` row to reset).
+- Smoke and check scripts run against the live Neon database: read a script's cleanup before running it.
+- Known debt: four near-duplicate module headers in the mobile kit (`src/ui/reels/kit`, `posts/chrome`, `photoshoot/chrome`, `plans/kit`) to merge; Figma page 98 never exported; some failed jobs left from brands deleted before 2026-10-28 (harmless).
 - `apps/web/scripts/_tmp/` holds throwaway debug scripts and isn't committed.
 
 ---
