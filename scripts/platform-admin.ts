@@ -1,5 +1,5 @@
 /**
- * Who is a platform admin (User.isPlatformAdmin: Settings → AI models, /admin). Run by someone with database access;
+ * Who is a platform admin (User.isPlatformAdmin: Platform admin → AI models, /admin). Run by someone with database access;
  * there is deliberately no screen for it, since a platform admin sees every workspace.
  *   npm run platform-admin -w web -- list
  *   npm run platform-admin -w web -- create platform@example.com   a new account just for this, password printed once

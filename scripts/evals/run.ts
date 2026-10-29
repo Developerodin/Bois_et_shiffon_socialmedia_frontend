@@ -29,7 +29,7 @@ import { aiCostUsd, modelFor } from "@/server/ai/models";
 import { callOpenAi, logRun } from "@/server/ai/provider";
 import { prisma } from "@/server/db/prisma";
 
-// From Settings → AI models, read at start: the models "--models all" compares ("Compare in tests"), and the judges
+// From Platform admin → AI models, read at start: the models "--models all" compares ("Compare in tests"), and the judges
 // by rank. Judge 1 scores 1–5 and judges side by side; judge 2 also judges side by side. Pick judges stronger than
 // every candidate, and judge 2 from another model family: a judge tends to prefer answers from its own family.
 // ponytail: all OpenAI today; a judge from another vendor (its own API key) would remove that bias fully.
@@ -157,8 +157,8 @@ async function runOne(c: Case, model: string, n = 0): Promise<Result> {
   const judges = all.filter((m) => m.judgeRank !== null).sort((x, y) => x.judgeRank! - y.judgeRank!).map((m) => m.name);
   [JUDGE_MODEL] = judges;
   PAIR_JUDGES = judges.slice(0, 2);
-  if ((judging || pairwise) && !JUDGE_MODEL) throw new Error("No judge set: give a model a judge rank in Settings → AI models");
-  if (modelsArg === "all" && !CANDIDATES.length) throw new Error("No models to compare: tick \"Compare in tests\" in Settings → AI models");
+  if ((judging || pairwise) && !JUDGE_MODEL) throw new Error("No judge set: give a model a judge rank in Platform admin → AI models");
+  if (modelsArg === "all" && !CANDIDATES.length) throw new Error("No models to compare: tick \"Compare in tests\" in Platform admin → AI models");
   mkdirSync("scripts/evals/results/answers", { recursive: true });
   const cases = CASES.filter((c) => !only || only.some((o) => c.id.startsWith(o)));
   const models = (c: Case) => (modelsArg === "all" ? CANDIDATES : modelsArg ? modelsArg.split(",") : [modelFor(cfg, c.workflowId).model]);

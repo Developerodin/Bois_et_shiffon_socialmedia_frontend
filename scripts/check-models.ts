@@ -2,7 +2,7 @@
  * Model routing checks (server/ai/models.ts, server/ai/model-config.ts, server/ai/provider.ts): tiers, cost, cache
  * breakpoints, and the escalation / backup paths, with OpenAI, the model settings and the ledger write faked.
  * No network, no database. Uses a made-up line-up: it checks the logic, not a vendor's models (those are set in
- * Settings → AI models).
+ * Platform admin → AI models).
  * Run: npm run check:models -w web
  */
 import assert from "node:assert/strict";
@@ -15,7 +15,7 @@ import { prisma } from "@/server/db/prisma";
 import { checkDraft } from "@/server/content/rules";
 import { onPage } from "@/server/research/brand-summary";
 
-// Settings → AI models, as the database would return them.
+// Platform admin → AI models, as the database would return them.
 const row = (name: string, input: number, cached: number, output: number, cacheBreakpoints = true) => ({ name, inputUsdPerM: input, cachedUsdPerM: cached, outputUsdPerM: output, cacheBreakpoints, evalCandidate: false, judgeRank: null });
 const MODELS = [row("heavy-1", 2, 0.1, 10), row("heavy-backup", 2, 0.2, 10), row("medium-1", 1, 0.05, 5), row("light-1", 0.1, 0.01, 0.5), row("old-1", 0.25, 0.025, 2, false)];
 let TIER_ROWS = [
@@ -62,7 +62,7 @@ async function settingsChecks() {
   forgetModelConfig();
   const without = await modelConfig();
   assert.throws(() => modelFor(without, "geo.questions"), ModelNotConfiguredError);
-  await assert.rejects(generateObject({ workspaceId: "w", brandId: "b", workflowId: "geo.questions", promptVersion: "t" }, { schema: z.object({}), schemaName: "a", system: "s", prompt: "p" }), /Settings → AI models/);
+  await assert.rejects(generateObject({ workspaceId: "w", brandId: "b", workflowId: "geo.questions", promptVersion: "t" }, { schema: z.object({}), schemaName: "a", system: "s", prompt: "p" }), /Platform admin → AI models/);
   TIER_ROWS.push({ tier: "light", model: "light-1", backup: "medium-1" });
   forgetModelConfig();
 }

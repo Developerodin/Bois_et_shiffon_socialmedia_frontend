@@ -12,16 +12,17 @@ import { cn } from "@/lib/utils";
 export function TabLinks({ label, tabs }: { label: string; tabs: { href: string; label: string; count?: number }[] }) {
   const path = usePathname();
   const active = tabs.find((t, i) => (i === 0 ? path === t.href : path.startsWith(t.href)))?.href ?? "";
-  const { ref, style } = useIndicator<HTMLElement>(active, "underline");
+  const { ref, style, shown, pick } = useIndicator<HTMLElement>(active, "underline");
   return (
     <nav ref={ref} aria-label={label} className="relative flex flex-wrap gap-1 border-b border-border">
       <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-full bg-primary" style={style} />
       {tabs.map((t) => {
-        const on = t.href === active;
+        const on = t.href === shown;
         return (
           <Link
             key={t.href}
             href={t.href}
+            onClick={pick(t.href)}
             aria-current={on ? "page" : undefined}
             className={cn(
               "px-3 py-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

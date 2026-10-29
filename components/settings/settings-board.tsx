@@ -3,7 +3,6 @@
 import { useCallback, useRef, useState } from "react";
 import { ShieldOff } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
-import { AiModelsTab } from "@/components/settings/ai-models-tab";
 import { settingsApi } from "@/components/settings/api";
 import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { InvitationsTab } from "@/components/settings/invitations-tab";
@@ -13,16 +12,14 @@ import { RolesTab } from "@/components/settings/roles-tab";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
 
-type TabKey = "project" | "members" | "roles" | "invitations" | "connections" | "ai-models";
+type TabKey = "project" | "members" | "roles" | "invitations" | "connections";
 
-// "platform": not a workspace permission; shown to platform admins (User.isPlatformAdmin) only.
 const TABS: { key: TabKey; label: string; needs: string }[] = [
   { key: "project", label: "Project access", needs: "brand.read" },
   { key: "members", label: "Members", needs: "members.read" },
   { key: "roles", label: "Roles", needs: "roles.read" },
   { key: "invitations", label: "Invitations", needs: "invitations.manage" },
   { key: "connections", label: "Connections", needs: "brand.read" },
-  { key: "ai-models", label: "AI models", needs: "platform" },
 ];
 
 type Props = {
@@ -30,10 +27,9 @@ type Props = {
   brandId: string | null;
   initialTab?: TabKey;
   notice: { kind: "ok" | "error"; text: string; names?: string[] } | null;
-  platformAdmin: boolean;
 };
 
-export function SettingsBoard({ workspaceId, brandId, initialTab, notice, platformAdmin }: Props) {
+export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Props) {
   const permsFetcher = useCallback(
     // With a project open: workspace role plus that project's role.
     () => settingsApi.myPermissions(workspaceId, brandId).then((d) => new Set(d.permissions ?? [])),
@@ -53,7 +49,7 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice, platfo
 
   // Project access and Connections are per brand, so they only show with a brand selected.
   const visible = can
-    ? TABS.filter((t) => (t.needs === "platform" ? platformAdmin : can.has(t.needs)) && ((t.key !== "connections" && t.key !== "project") || brandId))
+    ? TABS.filter((t) => can.has(t.needs) && ((t.key !== "connections" && t.key !== "project") || brandId))
     : [];
   const [active, setActive] = useState<TabKey | null>(initialTab ?? null);
   const current = visible.find((t) => t.key === active) ?? visible[0];
@@ -135,8 +131,6 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice, platfo
             <RolesTab workspaceId={workspaceId} can={can!} roles={roles} />
           ) : current.key === "invitations" ? (
             <InvitationsTab workspaceId={workspaceId} roles={roleList} />
-          ) : current.key === "ai-models" ? (
-            <AiModelsTab />
           ) : (
             <ConnectionsTab
               workspaceId={workspaceId}
