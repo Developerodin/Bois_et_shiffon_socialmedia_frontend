@@ -12,7 +12,7 @@ const POLL_MS = 2500;
 
 /**
  * Creates the brand from the website (server starts Research + SEO + GEO) and follows the Research run:
- * any page-read event → step 1; all five strategy docs drafted (Research then collects logo, colours and
+ * any event of this run → step 1; all five strategy docs drafted by this run (Research then collects logo, colours and
  * photos) → step 2; run SUCCEEDED → done.
  * Without a website (A07) the brand is made from onboarding.business and Research finds it online.
  * ponytail: polling every 2.5s while the screen is open; switch to server-sent events if it ever matters.
@@ -35,8 +35,10 @@ export function useResearch(site: string | undefined): ResearchProgress {
       try {
         const [docs, ev] = await Promise.all([contextDocs(ws, brandId, ctrl.signal), agentEvents(ws, brandId, null, ctrl.signal)]);
         const run = docs.research?.runId === runId ? docs.research : null;
-        const drafted = docs.docs.filter((d) => d.latest).length;
-        const read = ev.events.some((e) => e.runId === runId);
+        // Documents this run wrote: the brand may already have all five from an earlier run (a retry, a website added on A09).
+        const mine = ev.events.filter((e) => e.runId === runId);
+        const drafted = mine.filter((e) => e.entityType === "BrandContextDoc").length;
+        const read = mine.length > 0;
         if (run?.status === "FAILED") return setFailed(run.error ?? i18n.t("onboarding:learning.errors.stopped"));
         setStep(run?.status === "SUCCEEDED" ? 3 : drafted >= 5 ? 2 : read || run?.status === "RUNNING" ? 1 : 0);
         if (run?.status !== "SUCCEEDED") timer = setTimeout(() => void poll(ws, brandId, runId), POLL_MS);

@@ -107,5 +107,12 @@ export async function saveBrandText(field: TextField, value: string) {
   }
 }
 
+/**
+ * Made without a website (A07, or a Maps listing without one): screens then don't talk about "your website".
+ * Until the brand has loaded, judged from what onboarding made it from, so the wording doesn't flip on load.
+ * ponytail: a Maps listing that has a website reads as "no website" until loaded; onboarding.place doesn't carry it.
+ */
+export const madeWithoutWebsite = (brand: BrandAssetsView | null) => (brand ? !brand.website : !onboarding.brandFrom?.startsWith("http"));
+
 /** expo-image source that caches by the storage key, not the signed URL (which changes every fetch). */
 export const imageSource = (img: StoredImage) => ({ uri: img.url, cacheKey: img.key });

@@ -5,7 +5,7 @@ import type { Goal } from "@/ui/onboarding/state";
 
 export type Me = { user: { id: string; email: string; name: string | null }; workspaces: { id: string; name: string; role: string }[] };
 export type RunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED";
-export type AgentEvent = { id: string; runId: string; agentKey: string; createdAt: string; level: "INFO" | "SUCCESS" | "WARN" | "ERROR"; message: string };
+export type AgentEvent = { id: string; runId: string; agentKey: string; createdAt: string; level: "INFO" | "SUCCESS" | "WARN" | "ERROR"; message: string; entityType?: string | null };
 export type ContextDocs = {
   docs: { kind: string; title: string; latest: { markdown: string; createdAt: string; status: string } | null }[];
   research: { runId: string; status: RunStatus; error?: string | null } | null;

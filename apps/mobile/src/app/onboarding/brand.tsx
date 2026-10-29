@@ -10,7 +10,7 @@ import { Screen, StepHeader, Title } from "@/ui/layout";
 import { BrandLogo } from "@/ui/onboarding/brand-logo";
 import { ColorSheet } from "@/ui/onboarding/color-sheet";
 import { onboarding } from "@/ui/onboarding/state";
-import { imageSource, saveBrandPreferences, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
+import { imageSource, madeWithoutWebsite, saveBrandPreferences, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
 // Tone values stay English (stored in onboarding state); labels come from onboarding:brand.tones.<lowercase>.
@@ -31,7 +31,7 @@ export default function Brand() {
   const { t } = useTranslation("onboarding");
   const { data: brand, loading } = useBrandAssets();
   // Made without a website (A07): don't talk about "your website".
-  const noSite = !!brand && !brand.website;
+  const noSite = madeWithoutWebsite(brand);
   const colors = brand?.assets?.colors ?? [];
   const fonts = brand?.assets?.fonts ?? [];
   const photos = (brand?.assets?.products ?? []).filter((x) => x.image);

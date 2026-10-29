@@ -10,7 +10,7 @@ import { Button } from "@/ui/button";
 import { Screen, StepHeader, Title } from "@/ui/layout";
 import { BrandLogo } from "@/ui/onboarding/brand-logo";
 import { onboarding } from "@/ui/onboarding/state";
-import { imageSource, saveBrandText, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
+import { imageSource, madeWithoutWebsite, saveBrandText, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
 type TextField = "name" | "tagline" | "audience";
@@ -22,7 +22,7 @@ export default function Review() {
   const products = brand?.assets?.products ?? [];
   const summary = brand?.summary;
   // Made without a website (A07): don't talk about "your website".
-  const noSite = !!brand && !brand.website;
+  const noSite = madeWithoutWebsite(brand);
   const [editing, setEditing] = useState<TextField | null>(null);
   const [failed, setFailed] = useState<TextField | null>(null);
 
