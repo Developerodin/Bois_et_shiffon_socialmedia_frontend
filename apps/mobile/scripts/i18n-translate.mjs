@@ -1,7 +1,8 @@
 // Machine-translates src/i18n/locales/en/*.json into every app language with OpenAI.
 // Only keys missing from a target file are sent, so re-running after adding strings is cheap.
 // Output is a first draft: have a native speaker review before release (see src/i18n/README.md).
-// Usage (from apps/mobile): node scripts/i18n-translate.mjs [lang …]   — key read from ../web/.env OPENAI_API_KEY
+// Usage (from apps/mobile): node scripts/i18n-translate.mjs --model <openai model id> [lang …]
+//   key read from ../web/.env OPENAI_API_KEY. No model is built in: pass one (e.g. the medium tier's, Settings → AI models).
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 
 const LANGS = {
@@ -13,7 +14,10 @@ const LANGS = {
   nl: "Dutch", pl: "Polish", sv: "Swedish", da: "Danish", nb: "Norwegian Bokmål", fi: "Finnish", cs: "Czech",
   ro: "Romanian", hu: "Hungarian", el: "Greek", uk: "Ukrainian", tr: "Turkish", ar: "Arabic",
 };
-const MODEL = "gpt-4o";
+const modelAt = process.argv.indexOf("--model");
+const MODEL = modelAt > -1 ? process.argv[modelAt + 1] : undefined;
+if (!MODEL) throw new Error("Pass the model: node scripts/i18n-translate.mjs --model <openai model id> [lang …]");
+if (modelAt > -1) process.argv.splice(modelAt, 2); // the rest are languages
 const ROOT = "src/i18n/locales";
 
 const key = (readFileSync("../web/.env", "utf8").match(/^OPENAI_API_KEY=(.+)$/m)?.[1] ?? "").trim().replace(/^["']|["']$/g, "");

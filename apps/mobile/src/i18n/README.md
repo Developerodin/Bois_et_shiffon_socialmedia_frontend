@@ -19,7 +19,7 @@ Add it to `APP_LANGUAGES` in `src/ui/language/languages.ts` (shown in its own na
 `scripts/i18n-translate.mjs`, run the translator for it, then `node scripts/i18n-index.mjs`.
 
 ## Status: machine translated, needs native review
-All non-English files are first drafts from the translator (OpenAI, gpt-4o). Before a store release in a
+All non-English files are first drafts from the translator (OpenAI: gpt-4o made the current files; the script now takes the model with --model). Before a store release in a
 market, have a native speaker review that language's files — especially button lengths (German runs ~30%
 longer), formality, and plurals.
 

@@ -29,6 +29,14 @@ export const SLOP = [
   "delve", "in today's fast-paced world", "elevate your", "game-changer", "unlock the", "seamless", "look no further",
 ];
 
+/**
+ * A link in post text: with a scheme, www., or a bare domain with a common ending. Posts carry no links (Instagram
+ * doesn't make caption links clickable; links go in the bio or the post's link field), and a link the brand didn't
+ * put there is how injected text reaches customers. Also used by the per-call security check (server/ai/graders.ts).
+ * ponytail: a fixed list of endings; an unusual one without a scheme (shop.paris) passes.
+ */
+export const POST_LINK = /\b(?:https?:\/\/|www\.)[^\s"'<>)\]]+|\b[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)*\.(?:com|fr|net|org|io|co|shop|store|be|ch|ca|eu|uk|de|info|biz|xyz|link|example)\b(?:\/[^\s"'<>)\]]*)?/gi;
+
 const CTA = /\b(commentez|commente|enregistrez|enregistre|partagez|découvrez|découvre|écrivez|écris|dm|cliquez|lien en bio|shop|comment|save|share|tap|link in bio|réservez|visitez)\b/gi;
 
 export function checkDraft(channel: ContentChannel, body: DraftBody): CheckResult[] {
@@ -64,6 +72,9 @@ export function checkDraft(channel: ContentChannel, body: DraftBody): CheckResul
   if (channel === "INSTAGRAM_CAROUSEL" && (body.slides?.length ?? 0) < 3) add("Carousel", "blocker", "A carousel needs at least 3 slides.");
   if (channel === "INSTAGRAM_REEL" && (body.script?.length ?? 0) < 2) add("Reel script", "blocker", "A Reel needs a beat-by-beat script.");
   if (!body.altText?.trim() && channel !== "THREADS_POST") add("Alt text", "warn", "Describe the image for screen readers and search.");
+  // A warning, not a blocker: a person may add the brand's own link on purpose; the approver sees which link it is.
+  const links = [...new Set(`${text}\n${body.pinTitle ?? ""}\n${body.altText ?? ""}`.match(POST_LINK) ?? [])];
+  if (links.length) add("Link in the post", "warn", `Check you meant to include ${links.slice(0, 3).join(", ")}: posts normally carry no links.`);
 
   return out;
 }

@@ -17,6 +17,7 @@ import { Review } from "@/server/agents/definitions/quality";
 import { DocOutput, Findings, GUIDANCE, LOOKUP_SYSTEM, RESEARCH_SYSTEM } from "@/server/agents/definitions/research";
 import { Found } from "@/server/agents/definitions/scout";
 import { checkDraft, type DraftBody } from "@/server/content/rules";
+import { listingText } from "@/server/integrations/places";
 import { onPage, SUMMARY_SYSTEM, SummaryDraft } from "@/server/research/brand-summary";
 import type { ContentChannel } from "@prisma/client";
 
@@ -62,8 +63,33 @@ const docPrompt = (pages: Page[], title: string, kind: keyof typeof GUIDANCE) =>
 const summaryPrompt = (page: Page | undefined, docs: typeof F.docs = F.docs) =>
   `Brand: ${F.brand.name}\nHomepage title: ${page?.title ?? "-"}\nHomepage description: ${page?.description ?? "-"}\nHomepage text (menus and cart included; the slogan is often well down the page): ${page?.text.slice(0, 6000) ?? "-"}\n\n${docs.map((d) => `## ${d.title}\n${d.markdown?.slice(0, 2000) ?? "(not written)"}`).join("\n\n")}`;
 const lookupPrompt = (name: string, sells: string, location: string) => `Business name: ${name}\nWhat they sell (owner's words): ${sells}\nLocation: ${location}`;
-const creatorPrompt = (brief: unknown) =>
-  `Brand: ${F.brand.name}\n\nBrand knowledge:\n${F.knowledge.creator}\n\n---\nThe post to write\nChannel: ${F.post.channel}\nPost: ${F.post.title}\nBrief: ${JSON.stringify(brief)}\n\nFill unused fields with "" or []: slides only for carousels, script only for Reels, pinTitle only for Pinterest.`;
+const creatorPrompt = (brief: unknown, channel = F.post.channel, title = F.post.title) =>
+  `Brand: ${F.brand.name}\n\nBrand knowledge:\n${F.knowledge.creator}\n\n---\nThe post to write\nChannel: ${channel}\nPost: ${title}\nBrief: ${JSON.stringify(brief)}\n\nFill unused fields with "" or []: slides only for carousels, script only for Reels, pinTitle only for Pinterest.`;
+
+// One brief per format besides the frozen Threads one, written for this test set in the Brief agent's shape, using
+// only products and materials the brand knowledge names. One brief can't tell a model that follows briefs from one
+// that got lucky; these make "could move down" mean something.
+type Brief = { goal: string; angle: string; audience: string; keyMessage: string; cta: string; products: string[]; visual: string; questions: string[] };
+const BRIEFS: { id: string; channel: ContentChannel; title: string; brief: Brief }[] = [
+  {
+    id: "carousel", channel: "INSTAGRAM_CAROUSEL", title: "5 façons d'habiller un buffet en bois",
+    brief: { goal: "save", angle: "Carrousel pratique : cinq idées de mise en scène autour d'un buffet en bois, une par slide.", audience: "Amateurs de décoration naturelle, 30–55 ans", keyMessage: "Un buffet en bois se met en valeur avec peu d'objets bien choisis.", cta: "Enregistrez le carrousel pour votre prochaine mise en scène.", products: ["Buffet bas 3 portes 3 tiroirs | Acacia Bunting"], visual: "Photos produit du buffet, plans serrés sur le veinage de l'acacia.", questions: [] },
+  },
+  {
+    id: "reel", channel: "INSTAGRAM_REEL", title: "Avant/après : une salle à manger pour l'automne",
+    brief: { goal: "engagement", angle: "Reel avant/après : la même salle à manger, habillée pour l'automne en trois gestes.", audience: "Propriétaires qui redécorent leur intérieur, 30–55 ans", keyMessage: "Trois gestes suffisent pour une salle à manger plus chaleureuse.", cta: "Dites-nous en commentaire quel geste vous allez essayer.", products: ["Table à manger rectangulaire 240 cm | Acacia Bunting"], visual: "Vertical 9:16, 20 secondes, lumière chaude.", questions: [] },
+  },
+  {
+    id: "pin", channel: "PINTEREST_PIN", title: "Salle à manger en bois massif : idées chaleureuses",
+    brief: { goal: "traffic", angle: "Épingle inspiration qu'on retrouve en cherchant « salle à manger bois massif ».", audience: "Personnes qui préparent la déco de leur salle à manger", keyMessage: "Le bois massif réchauffe une salle à manger.", cta: "Enregistrez l'épingle dans votre tableau déco.", products: ["Table à manger rectangulaire 240 cm | Acacia Bunting"], visual: "Format 2:3, table dressée, tons bruns et ocre.", questions: [] },
+  },
+  {
+    id: "photo", channel: "INSTAGRAM_POST", title: "Le veinage de l'acacia",
+    brief: { goal: "awareness", angle: "Une photo en gros plan du veinage, et ce qu'il dit du bois massif.", audience: "Amateurs de matières naturelles", keyMessage: "Chaque pièce en acacia a un veinage unique.", cta: "Partagez ce post avec quelqu'un qui aime le bois.", products: ["Buffet bas 3 portes 3 tiroirs | Acacia Bunting"], visual: "Gros plan, lumière rasante.", questions: [] },
+  },
+];
+const CREATOR_RUBRIC = (channel: string) =>
+  `A ${channel} post in natural French for a solid-wood furniture brand: follows the brief (its angle, key message and exactly its call to action), uses the format well (hook, slides, script or pin title as the channel needs), in the brand's warm and refined voice, with no invented products, prices, promises or certifications.`;
 const qualityPrompt = (draft: DraftBody) =>
   `Brand: ${F.brand.name}\n\nBrand knowledge:\n${F.knowledge.quality}\n\n---\nThe draft to check\nChannel: ${F.post.channel}\nBrief: ${JSON.stringify(F.post.brief)}\nDraft v2: ${JSON.stringify(draft)}\nRule-based results already found: ${JSON.stringify(checkDraft(F.post.channel as ContentChannel, draft))}`;
 const scoutPrompt = (knowledge: string) =>
@@ -99,6 +125,15 @@ export const CASES: Case[] = [
     ],
   }),
   def({
+    // As production sends it when the owner picked their Google listing (research.ts lookUpBusiness).
+    id: "lookup.namesake-with-listing", kind: "quality", workflowId: "research.lookup", system: LOOKUP_SYSTEM, schema: Findings, webSearch: true, reasoningEffort: "low", searchContext: "low",
+    prompt: `${lookupPrompt("Windmill Bakery", "bakery and cafe", "Parklands Rd, Nairobi")}\n\n${listingText({ id: "eval", name: "Windmill Bakery", address: "Parklands Rd, Nairobi, Kenya", type: "Bakery", phone: null, website: null, rating: null, ratingCount: null, hours: [], summary: null, mapsUrl: null })}`,
+    expect: (o) => [
+      ...fail(!o.found, "should find the Nairobi bakery"),
+      ...fail(/\b(USA|United States|U\.S\.)\b/.test(o.markdown), "mixed in a same-name business from the US"),
+    ],
+  }),
+  def({
     id: "lookup.unknown-business", kind: "quality", workflowId: "research.lookup", system: LOOKUP_SYSTEM, schema: Findings, webSearch: true, reasoningEffort: "low", searchContext: "low",
     prompt: lookupPrompt("Zorblax Candle Atelier", "hand-poured candles", "Ghent"),
     expect: (o) => [...fail(o.found, "made-up business reported as found"), ...fail(o.website !== null, `made-up business given a website: ${o.website}`)],
@@ -116,9 +151,24 @@ export const CASES: Case[] = [
       ...checkDraft(F.post.channel as ContentChannel, o).filter((r) => r.status === "blocker").map((r) => `rule: ${r.check}: ${r.note}`),
       ...fail(!FRENCH.test(o.caption), "caption isn't in French"),
       ...fail(/https?:\/\//.test(o.caption), "caption contains a link"),
+      // The brief's cta asks for this tag; it marks the hashtag "à confirmer", so none should be made up.
+      ...fail(!/@boisetchiffons/i.test(o.caption), "left out the @boisetchiffons tag the brief's cta asks for"),
+      ...fail(/#\s*BoisEtChiffonsAutomne/i.test(JSON.stringify(o)), "used the unconfirmed campaign hashtag"),
     ],
-    judge: "A Threads post in natural French for a solid-wood furniture brand, following the brief, in the brand's warm and refined voice, with no invented products, prices, promises or certifications.",
+    judge: CREATOR_RUBRIC("Threads"),
   }),
+  ...BRIEFS.map((b) =>
+    def({
+      id: `creator.${b.id}`, kind: "quality", workflowId: "creator.draft", system: CREATOR_SYSTEM, schema: Draft,
+      prompt: creatorPrompt(b.brief, b.channel, b.title),
+      expect: (o) => [
+        ...checkDraft(b.channel, o).filter((r) => r.status === "blocker").map((r) => `rule: ${r.check}: ${r.note}`),
+        ...fail(!FRENCH.test(o.caption), "caption isn't in French"),
+        ...fail(/https?:\/\//.test(JSON.stringify(o)), "contains a link"),
+      ],
+      judge: CREATOR_RUBRIC(b.channel),
+    }),
+  ),
   def({
     id: "quality.catches-invented-claims", kind: "quality", workflowId: "quality.review", system: QUALITY_SYSTEM, schema: Review,
     prompt: qualityPrompt(BAD_DRAFT),

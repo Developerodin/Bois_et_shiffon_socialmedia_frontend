@@ -34,6 +34,8 @@ model User {
   deletedAt      DateTime?
   /// Bump to revoke every existing session (password change, disable)
   sessionVersion Int        @default(0)
+  /// May change platform-wide settings (Settings → AI models). Set directly in the database; no workspace role grants it.
+  isPlatformAdmin Boolean   @default(false)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 
@@ -326,6 +328,47 @@ model AuditEvent {
 }
 
 /// One row per AI provider call: model, prompt version, tokens, latency (DEC-003).
+/// An AI model the app may call, with its list price. Platform-wide, edited on Settings → AI models by platform admins:
+/// the code holds no model names. Read through server/ai/model-config.ts.
+model AiModel {
+  /// The provider's model id, as sent in API calls
+  name             String   @id
+  /// List prices in USD per 1M tokens, from the provider's pricing page
+  inputUsdPerM     Decimal  @db.Decimal(10, 4)
+  cachedUsdPerM    Decimal  @db.Decimal(10, 4)
+  outputUsdPerM    Decimal  @db.Decimal(10, 4)
+  /// Takes explicit prompt-cache breakpoints (OpenAI: GPT-5.6 and later)
+  cacheBreakpoints Boolean  @default(true)
+  /// Compared by the test set's `--models all`
+  evalCandidate    Boolean  @default(false)
+  /// Test-set judge: 1 = main judge, 2 = second side-by-side judge; null = not a judge
+  judgeRank        Int?     @unique
+  updatedAt        DateTime @updatedAt
+  updatedBy        String?
+
+  tiers   AiTier[] @relation("TierModel")
+  backups AiTier[] @relation("TierBackup")
+}
+
+enum AiTierName {
+  heavy
+  medium
+  light
+}
+
+/// The model each difficulty tier uses (server/ai/models.ts maps tasks to tiers) and the backup it tries once when
+/// that model is unavailable. A model in use here can't be deleted.
+model AiTier {
+  tier      AiTierName @id
+  model     String
+  backup    String?
+  updatedAt DateTime   @updatedAt
+  updatedBy String?
+
+  modelRef  AiModel  @relation("TierModel", fields: [model], references: [name], onUpdate: Cascade, onDelete: Restrict)
+  backupRef AiModel? @relation("TierBackup", fields: [backup], references: [name], onUpdate: Cascade, onDelete: Restrict)
+}
+
 /// One row per AI call: the spend ledger (scripts/usage-report.ts). No foreign key to Brand on purpose: deleting a
 /// brand or workspace must not erase what was spent.
 model AiWorkflowRun {

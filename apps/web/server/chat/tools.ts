@@ -1,10 +1,8 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { AgentStartError, startAgentRun } from "@/server/agents/engine";
 import { AGENTS } from "@/server/agents/registry";
 import { effectivePermissions } from "@/server/auth/permissions";
 import { prisma } from "@/server/db/prisma";
-import { kickRunner } from "@/server/jobs/runner";
 import { latestAuditReports } from "@/server/services/audit-reports";
 import { CONTEXT_DOC_KINDS, listContextDocs } from "@/server/services/context-docs";
 
@@ -15,7 +13,7 @@ const RUNNABLE = AGENTS.filter((a) => a.key !== "systems-check" && !a.internal).
 
 /**
  * What the CMO chat may do. Read-only access to this brand's documents, reports and agents, and
- * starting an agent run (the same permission check as the Run button). Deliberately no tool that
+ * offering an agent run (the person starts it with a button; same permission check as the Run button). Deliberately no tool that
  * publishes, posts, replies, spends or approves: drafts only, people decide (design §4.4).
  */
 export function chatTools(scope: ChatScope) {
@@ -95,19 +93,16 @@ export function chatTools(scope: ChatScope) {
       },
     }),
 
+    // Proposes, never starts: the chat shows a Start button and the person presses it (the Run button's own route).
+    // Text injected into a web page or document can steer the model into calling a tool; it can't press a button.
+    // (Named startAgent still, so conversations saved before this change keep validating.)
     startAgent: tool({
       description:
-        "Start an agent run for this brand (research = re-read the website and redraft the documents; seo = website audit; geo = AI-visibility check). Only when the person asks for it.",
+        "Offer to start an agent run for this brand (research = re-read the website and redraft the documents; seo = website audit; geo = AI-visibility check). The person sees a Start button and starts it themselves; nothing runs until they press it. Only when the person asks for it.",
       inputSchema: z.object({ agentKey: z.enum(RUNNABLE) }),
       execute: async ({ agentKey }) => {
-        if (!(await can("agents.run"))) return { started: false, reason: "Your role can't run agents. Ask an owner or admin." };
-        try {
-          const run = await startAgentRun({ ...scope, agentKey, trigger: "manual" });
-          kickRunner();
-          return { started: true, runId: run.id, note: "Running in the background. Progress shows in Logs." };
-        } catch (e) {
-          return { started: false, reason: e instanceof AgentStartError ? e.message : "Could not start the agent." };
-        }
+        if (!(await can("agents.run"))) return { proposed: false, reason: "Your role can't run agents. Ask an owner or admin." };
+        return { proposed: true, agentKey, note: "A Start button is shown to the person; the agent runs only if they press it." };
       },
     }),
   };
