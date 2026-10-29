@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { aiCostUsd, fallbackModel, modelFor, modelForTier, nextTier, type AiUsage, type Tier } from "@/server/ai/models";
+import { grade, type Finding } from "@/server/ai/graders";
 import { prisma } from "@/server/db/prisma";
 
 /**
@@ -112,16 +113,21 @@ export async function generateObject<T extends z.ZodType>(
       }
       const parsed = input.schema.safeParse(json);
       if (!parsed.success) throw new AiProviderError(`Model output failed schema: ${parsed.error.message}`, true, "schema");
-      const problem = input.validate?.(parsed.data) ?? null;
+      // Online eval (server/ai/graders.ts) on every answer, plus the caller's own check. Security findings count as a
+      // failed check (asked again with the reason); the rest are recorded for the report.
+      const findings = grade({ workflowId: ctx.workflowId, system: input.system, prompt: input.prompt, webSearch: !!input.webSearch, output: parsed.data });
+      const own = input.validate?.(parsed.data) ?? null;
+      if (own) findings.push({ check: "Task check", note: own });
+      const problem = [own, ...findings.filter((f) => f.security).map((f) => `${f.check}: ${f.note}`)].filter(Boolean).join("; ") || null;
       if (!problem || retried) {
-        await logRun(ctx, provider, tier, model, "SUCCEEDED", started, usage, problem ? `Failed check again (kept): ${problem}` : undefined);
+        await logRun(ctx, provider, tier, model, "SUCCEEDED", started, usage, problem ? `Failed check again (kept): ${problem}` : undefined, findings);
         if (parsed.data && typeof parsed.data === "object") answered.set(parsed.data, { model, tier });
         return parsed.data;
       }
       const [was, wasTier] = [model, tier];
       const next = retry();
       feedback = problem;
-      await logRun(ctx, provider, wasTier, was, "ESCALATED", started, usage, `Failed check (${next}): ${problem}`);
+      await logRun(ctx, provider, wasTier, was, "ESCALATED", started, usage, `Failed check (${next}): ${problem}`, findings);
     } catch (error) {
       const kind = error instanceof AiProviderError ? error.kind : undefined;
       const [was, wasTier] = [model, tier];
@@ -155,7 +161,8 @@ async function mockCall<T extends z.ZodType>(ctx: AiCallContext, input: Generate
   }
 }
 
-async function callOpenAi<T extends z.ZodType>(
+/** One raw call, no retries or ledger row: generateObject adds those. Exported for the test set (scripts/evals). */
+export async function callOpenAi<T extends z.ZodType>(
   ctx: AiCallContext,
   input: GenerateObjectInput<T>,
   model: string,
@@ -222,15 +229,18 @@ async function callOpenAi<T extends z.ZodType>(
   return { text, usage };
 }
 
-async function logRun(
+export async function logRun(
   ctx: AiCallContext,
   provider: string,
-  tier: Tier,
+  /** "eval" for the test set's own calls (scripts/evals). */
+  tier: Tier | "eval",
   model: string,
   status: string,
   started: number,
   usage?: AiUsage,
   error?: string,
+  /** Online eval of an answer; undefined when there was no answer to grade (an error, or the mock). */
+  findings?: Finding[],
 ) {
   await prisma.aiWorkflowRun.create({
     data: {
@@ -251,6 +261,8 @@ async function logRun(
       costUsd: usage ? aiCostUsd(model, usage) : null,
       latencyMs: Date.now() - started,
       error: error?.slice(0, 2000),
+      evalPassed: findings ? findings.length === 0 : null,
+      evalFindings: findings?.length ? findings.map((f) => ({ ...f, note: f.note.slice(0, 300) })) : undefined,
     },
   });
 }

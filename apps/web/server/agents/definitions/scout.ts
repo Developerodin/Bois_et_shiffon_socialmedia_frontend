@@ -7,7 +7,7 @@ import { safeHttpUrl } from "@/lib/website";
 
 const CHANNELS = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "FACEBOOK_POST", "PINTEREST_PIN", "THREADS_POST"] as const;
 
-const Found = z.object({
+export const Found = z.object({
   opportunities: z.array(
     z.object({
       title: z.string(),
