@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { recordApiCall, type UsageScope } from "@/server/usage/api-calls";
 
 /**
  * Google Places API (New): find a business on Google Maps (mobile onboarding) and read the listing the owner picked.
@@ -33,15 +34,18 @@ const Place = z.object({
 });
 type Place = z.infer<typeof Place>;
 
-async function call(path: string, fields: string, init: { method: "GET" | "POST"; body?: unknown }) {
+async function call(path: string, fields: string, init: { method: "GET" | "POST"; body?: unknown }, scope: UsageScope) {
   const key = apiKey();
   if (!key) throw new PlacesError("Google Maps search isn't set up on this server");
+  const operation = path.startsWith("/places:searchText") ? "google-places.search" : "google-places.details";
+  const started = Date.now();
   const res = await fetch(`${BASE}${path}`, {
     method: init.method,
     signal: AbortSignal.timeout(TIMEOUT_MS),
     headers: { "X-Goog-Api-Key": key, "X-Goog-FieldMask": fields, ...(init.body ? { "content-type": "application/json" } : {}) },
     body: init.body ? JSON.stringify(init.body) : undefined,
   });
+  await recordApiCall(operation, res.ok, started, scope);
   if (res.status === 404) return null;
   if (!res.ok) {
     // Google's text names the key's project and reason: logs only, never a response body.
@@ -66,11 +70,12 @@ const match = (p: Place): PlaceMatch => ({
 });
 
 /** Up to 5 businesses for "name + city", for the owner to pick theirs. Closed-for-good places are left out. */
-export async function searchPlaces(query: string, language: string): Promise<PlaceMatch[]> {
+export async function searchPlaces(query: string, language: string, scope: UsageScope = {}): Promise<PlaceMatch[]> {
   const body = await call(
     "/places:searchText",
     "places.id,places.displayName,places.formattedAddress,places.primaryTypeDisplayName,places.rating,places.userRatingCount,places.businessStatus",
     { method: "POST", body: { textQuery: query, languageCode: language, maxResultCount: 5 } },
+    scope,
   );
   const places = z.object({ places: z.array(Place).optional() }).parse(body ?? {}).places ?? [];
   return places.filter((p) => p.businessStatus !== "CLOSED_PERMANENTLY" && p.displayName?.text).map(match);
@@ -93,11 +98,12 @@ export const PlaceListing = z.object({
 export type PlaceListing = z.infer<typeof PlaceListing>;
 
 /** The listing the owner picked. Null when Google no longer has it. */
-export async function placeDetails(id: string, language: string): Promise<PlaceListing | null> {
+export async function placeDetails(id: string, language: string, scope: UsageScope = {}): Promise<PlaceListing | null> {
   const body = await call(
     `/places/${encodeURIComponent(PlaceId.parse(id))}?languageCode=${encodeURIComponent(language)}`,
     "id,displayName,formattedAddress,primaryTypeDisplayName,rating,userRatingCount,websiteUri,nationalPhoneNumber,googleMapsUri,editorialSummary,regularOpeningHours.weekdayDescriptions",
     { method: "GET" },
+    scope,
   );
   if (!body) return null;
   const p = Place.parse(body);

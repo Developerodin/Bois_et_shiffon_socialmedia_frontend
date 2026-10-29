@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   const { allowed } = await hitRateLimit(`places-search:${userId}`, 30, 3_600_000);
   if (!allowed) return problemResponse({ type: "https://api.brandpilot/errors/limit", title: "Too many searches. Try again in a while.", status: 429 });
   try {
-    return Response.json({ places: await searchPlaces(body.data.query, body.data.language) });
+    return Response.json({ places: await searchPlaces(body.data.query, body.data.language, { userId }) });
   } catch (error) {
     if (error instanceof PlacesError) return problemResponse({ type: "https://api.brandpilot/errors/places", title: error.message, status: 503, detail: error.message });
     throw error;

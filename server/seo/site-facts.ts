@@ -1,5 +1,6 @@
 import { crawlSite, extractPage, safeFetch } from "@/server/research/crawl";
 import type { Finding, SiteFacts } from "@/server/seo/checks";
+import { recordApiCall } from "@/server/usage/api-calls";
 
 /** Crawl + robots/sitemap/llms.txt probes shared by the SEO and GEO agents. */
 export async function collectSiteFacts(startUrl: string, onPage?: (url: string, title: string | null) => Promise<void>) {
@@ -42,6 +43,7 @@ export async function runPageSpeed(url: string): Promise<{ result: PageSpeed | n
   if (!key) return { result: null, error: "GOOGLE_PAGESPEED_API_KEY not set" };
   const qs = new URLSearchParams({ url, strategy: "mobile", key });
   for (const c of ["performance", "seo", "accessibility", "best-practices"]) qs.append("category", c);
+  const started = Date.now();
   try {
     const res = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${qs}`, {
       signal: AbortSignal.timeout(90_000),
@@ -54,6 +56,7 @@ export async function runPageSpeed(url: string): Promise<{ result: PageSpeed | n
       };
     };
     const lh = body.lighthouseResult;
+    await recordApiCall("google-pagespeed.run", res.ok && !!lh, started);
     if (!res.ok || !lh) return { result: null, error: (body.error?.message ?? `HTTP ${res.status}`).slice(0, 200) };
     const pct = (k: string) => Math.round((lh.categories[k]?.score ?? 0) * 100);
     return {

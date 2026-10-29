@@ -8,6 +8,7 @@ import { queueEmail } from "@/server/email/outbox";
 import { signInCodeHtml } from "@/server/email/sign-in-code";
 import { AccountFlowError } from "@/server/services/accounts";
 import { provisionGoogleUser } from "@/server/services/google-signup";
+import { recordApiCall } from "@/server/usage/api-calls";
 
 /**
  * Passwordless email sign-in for the mobile app (Figma A14 → A02): a 6-digit code by email,
@@ -170,13 +171,22 @@ const TWILIO_ERRORS: Record<number, [string, 400 | 429]> = {
 async function twilioVerify(path: "Verifications" | "VerificationCheck", form: Record<string, string>): Promise<{ status?: string } | null> {
   const { TWILIO_ACCOUNT_SID: sid, TWILIO_AUTH_TOKEN: token, TWILIO_VERIFY_SERVICE_SID: service } = process.env;
   if (!sid || !token || !service) throw new AccountFlowError("Text-message sign-in isn't set up on this server yet.", 400);
+  const started = Date.now();
   const res = await fetch(`https://verify.twilio.com/v2/Services/${service}/${path}`, {
     method: "POST",
     headers: { Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`, "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams(form),
     signal: AbortSignal.timeout(10_000),
   });
-  if (res.ok) return res.json();
+  if (res.ok) {
+    const body = (await res.json()) as { status?: string };
+    // Twilio bills every SMS sent, and the $0.05 verification fee only when a code is approved.
+    await (path === "Verifications"
+      ? recordApiCall("twilio-verify.send", true, started)
+      : recordApiCall("twilio-verify.check", true, started, { billed: body.status === "approved" ? ["twilio-verify.approved"] : [] }));
+    return body;
+  }
+  await recordApiCall(path === "Verifications" ? "twilio-verify.send" : "twilio-verify.check", false, started);
   // Checking a code that expired or was already used comes back as 404.
   if (path === "VerificationCheck" && res.status === 404) return null;
   const err = (await res.json().catch(() => ({}))) as { code?: number; message?: string };

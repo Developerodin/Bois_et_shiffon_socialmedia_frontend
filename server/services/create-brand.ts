@@ -59,7 +59,7 @@ export async function createBrandWithResearch(
 
   // A picked Maps listing fills what the owner didn't type: name, website (Research then reads it), address, and a
   // description for the no-website lookup. Read here, server-side, from the id: never trusted from the app.
-  const place = input.placeId ? await placeDetails(input.placeId, input.language ?? "en").catch(() => null) : null;
+  const place = input.placeId ? await placeDetails(input.placeId, input.language ?? "en", { workspaceId, userId }).catch(() => null) : null;
   if (input.placeId && !place) throw new AgentStartError("Couldn't load that Google Maps listing. Search again or describe your business.", 422);
   const websiteUrl = input.websiteUrl ?? listingWebsite(place?.website);
   const about = input.about ?? (websiteUrl ? undefined : (place?.summary ?? place?.type ?? undefined));
