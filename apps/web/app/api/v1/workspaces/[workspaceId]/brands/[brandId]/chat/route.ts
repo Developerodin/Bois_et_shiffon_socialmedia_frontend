@@ -12,6 +12,7 @@ import {
 import { z } from "zod";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
+import { aiCostUsd, modelFor, type AiUsage } from "@/server/ai/models";
 import { isOutOfCreditsText, OUT_OF_CREDITS } from "@/server/ai/provider";
 import { hitRateLimit, limitKey } from "@/server/auth/rate-limit";
 import { chatSystemPrompt, CHAT_PROMPT_VERSION } from "@/server/chat/prompt";
@@ -79,29 +80,43 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     const previous = resent === -1 ? stored : stored.slice(0, resent);
     const messages = await validateUIMessages({ messages: [...previous, body.data.message], tools });
 
-    const model = process.env.OPENAI_MODEL_DEFAULT ?? "gpt-5-mini";
+    const { tier, model } = modelFor("chat.turn");
     const started = Date.now();
+    // Same ledger as agent calls (server/ai/provider.ts): one row per turn, with its cost; failed turns too.
+    const logTurn = (status: "SUCCEEDED" | "FAILED", usage?: AiUsage, error?: string) =>
+      prisma.aiWorkflowRun.create({
+        data: {
+          workspaceId: scope.workspaceId,
+          brandId: scope.brandId,
+          workflowId: "chat.turn",
+          promptVersion: CHAT_PROMPT_VERSION,
+          provider: "openai",
+          tier,
+          model,
+          status,
+          ...usage,
+          costUsd: usage ? aiCostUsd(model, usage) : null,
+          latencyMs: Date.now() - started,
+          error: error?.slice(0, 2000),
+        },
+      });
     const result = streamText({
       model: openai(model),
       system: chatSystemPrompt({ name: brand.displayName, website: brand.profile?.websiteUrl ?? null }),
       messages: await convertToModelMessages(messages.slice(-MODEL_HISTORY)),
       tools,
       stopWhen: isStepCount(6),
-      onFinish: async ({ totalUsage }) => {
-        await prisma.aiWorkflowRun.create({
-          data: {
-            workspaceId: scope.workspaceId,
-            brandId: scope.brandId,
-            workflowId: "chat.turn",
-            promptVersion: CHAT_PROMPT_VERSION,
-            provider: "openai",
-            model,
-            status: "SUCCEEDED",
-            inputTokens: totalUsage.inputTokens,
-            outputTokens: totalUsage.outputTokens,
-            latencyMs: Date.now() - started,
-          },
+      onFinish: async ({ totalUsage, steps }) => {
+        await logTurn("SUCCEEDED", {
+          inputTokens: totalUsage.inputTokens,
+          cachedInputTokens: totalUsage.inputTokenDetails?.cacheReadTokens,
+          outputTokens: totalUsage.outputTokens,
+          reasoningTokens: totalUsage.outputTokenDetails?.reasoningTokens,
+          webSearchCalls: steps.flatMap((s) => s.toolCalls).filter((c) => c.toolName === "webSearch").length,
         });
+      },
+      onError: async ({ error }) => {
+        await logTurn("FAILED", undefined, String(error)).catch(() => {});
       },
     });
     result.consumeStream(); // finish and save even if the browser disconnects

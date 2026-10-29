@@ -138,7 +138,6 @@ model Brand {
   agentRuns    AgentRun[]
   agentEvents  AgentEvent[]
   agentConfigs BrandAgentConfig[]
-  aiRuns       AiWorkflowRun[]
   contextDocs  BrandContextDoc[]
   connections  IntegrationConnection[]
   auditReports AuditReport[]
@@ -327,26 +326,55 @@ model AuditEvent {
 }
 
 /// One row per AI provider call: model, prompt version, tokens, latency (DEC-003).
+/// One row per AI call: the spend ledger (scripts/usage-report.ts). No foreign key to Brand on purpose: deleting a
+/// brand or workspace must not erase what was spent.
 model AiWorkflowRun {
-  id            String   @id @default(cuid())
-  workspaceId   String
-  brandId       String
-  agentRunId    String?
-  workflowId    String
-  promptVersion String
-  provider      String
-  model         String
-  status        String
-  inputTokens   Int?
-  outputTokens  Int?
-  latencyMs     Int?
-  error         String?
-  createdAt     DateTime @default(now())
-
-  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  id                String   @id @default(cuid())
+  workspaceId       String
+  brandId           String
+  agentRunId        String?
+  workflowId        String
+  promptVersion     String
+  provider          String
+  /// heavy | medium | light (server/ai/models.ts); null for rows from before routing
+  tier              String?
+  model             String
+  status            String
+  inputTokens       Int?
+  /// Part of inputTokens billed at the cached rate
+  cachedInputTokens Int?
+  outputTokens      Int?
+  /// Part of outputTokens spent thinking
+  reasoningTokens   Int?
+  webSearchCalls    Int?
+  /// List price at the time of the call (tokens + web searches); null when the model's price isn't known
+  costUsd           Decimal? @db.Decimal(12, 6)
+  latencyMs         Int?
+  error             String?
+  createdAt         DateTime @default(now())
 
   @@index([brandId, createdAt])
   @@index([agentRunId])
+  @@index([createdAt])
+}
+
+/// One row per call to a paid outside API that isn't an AI model (Google Places, PageSpeed, Twilio Verify).
+/// Same ledger rule: no foreign keys, rows outlive what they were for.
+model ApiCall {
+  id          String   @id @default(cuid())
+  workspaceId String?
+  brandId     String?
+  userId      String?
+  provider    String
+  operation   String
+  status      String
+  latencyMs   Int?
+  /// List price at the time of the call (free-tier allowances not subtracted)
+  costUsd     Decimal? @db.Decimal(12, 6)
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([provider, createdAt])
 }
 
 // --- Slice 1: brand context documents (design §4.1, §8b-3) ---

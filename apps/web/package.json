@@ -19,6 +19,8 @@
     "smoke:agents": "tsx --env-file=.env scripts/smoke-agents.ts",
     "smoke:research": "tsx --env-file=.env scripts/smoke-research.ts",
     "check:brand-assets": "tsx --env-file=.env scripts/check-brand-assets.ts",
+    "check:models": "tsx --env-file=.env scripts/check-models.ts",
+    "usage": "tsx --env-file=.env scripts/usage-report.ts",
     "smoke:auth": "tsx --env-file=.env scripts/smoke-auth.ts",
     "smoke:rbac": "tsx --env-file=.env scripts/smoke-rbac.ts",
     "smoke:connections": "tsx --env-file=.env scripts/smoke-connections.ts",

@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { aiCostUsd, modelFor, type AiUsage, type Tier } from "@/server/ai/models";
 import { prisma } from "@/server/db/prisma";
 
 /**
  * AI provider boundary (DEC-003). OpenAI via the Responses API with strict JSON
  * schema output; `mock` when no key is configured (tests, local without a key).
- * Every call is logged to AiWorkflowRun.
+ * The model comes from the task's tier (server/ai/models.ts). Every call is logged to AiWorkflowRun with its cost.
  */
 export type AiCallContext = {
   workspaceId: string;
@@ -19,6 +20,7 @@ export type GenerateObjectInput<T extends z.ZodType> = {
   schemaName: string;
   system: string;
   prompt: string;
+  /** Overrides the tier's model for this one call. */
   model?: string;
   /** Let the model use OpenAI's hosted web search (e.g. competitor research). */
   webSearch?: boolean;
@@ -50,8 +52,6 @@ export function aiProviderName(): "openai" | "mock" {
   return process.env.OPENAI_API_KEY ? "openai" : "mock";
 }
 
-const DEFAULT_MODEL = process.env.OPENAI_MODEL_DEFAULT ?? "gpt-5-mini";
-
 export async function generateObject<T extends z.ZodType>(
   ctx: AiCallContext,
   input: GenerateObjectInput<T>,
@@ -62,9 +62,10 @@ export async function generateObject<T extends z.ZodType>(
   if (provider === "mock" && process.env.NODE_ENV === "production" && process.env.AI_ALLOW_MOCK !== "1") {
     throw new AiProviderError("AI isn't set up on this server (OPENAI_API_KEY is missing). An admin needs to add it.", false);
   }
-  const model = provider === "mock" ? "mock" : (input.model ?? DEFAULT_MODEL);
+  const routed = modelFor(ctx.workflowId);
+  const model = provider === "mock" ? "mock" : (input.model ?? routed.model);
   const started = Date.now();
-  let usage: { input_tokens?: number; output_tokens?: number } | undefined;
+  let usage: AiUsage | undefined;
 
   try {
     const raw =
@@ -81,10 +82,10 @@ export async function generateObject<T extends z.ZodType>(
     if (!parsed.success) {
       throw new AiProviderError(`Model output failed schema: ${parsed.error.message}`, true);
     }
-    await logRun(ctx, provider, model, "SUCCEEDED", started, usage);
+    await logRun(ctx, provider, routed.tier, model, "SUCCEEDED", started, usage);
     return parsed.data;
   } catch (error) {
-    await logRun(ctx, provider, model, "FAILED", started, usage, String(error));
+    await logRun(ctx, provider, routed.tier, model, "FAILED", started, usage, String(error));
     throw error;
   }
 }
@@ -126,22 +127,35 @@ async function callOpenAi<T extends z.ZodType>(
   }
   const body = (await res.json()) as {
     output?: Array<{ type: string; content?: Array<{ type: string; text?: string }> }>;
-    usage?: { input_tokens?: number; output_tokens?: number };
+    usage?: {
+      input_tokens?: number;
+      input_tokens_details?: { cached_tokens?: number };
+      output_tokens?: number;
+      output_tokens_details?: { reasoning_tokens?: number };
+    };
   };
   const text = body.output
     ?.flatMap((o) => o.content ?? [])
     .find((c) => c.type === "output_text")?.text;
   if (!text) throw new AiProviderError("OpenAI returned no output_text", true);
-  return { value: JSON.parse(text) as unknown, usage: body.usage };
+  const usage: AiUsage = {
+    inputTokens: body.usage?.input_tokens,
+    cachedInputTokens: body.usage?.input_tokens_details?.cached_tokens,
+    outputTokens: body.usage?.output_tokens,
+    reasoningTokens: body.usage?.output_tokens_details?.reasoning_tokens,
+    webSearchCalls: body.output?.filter((o) => o.type === "web_search_call").length ?? 0,
+  };
+  return { value: JSON.parse(text) as unknown, usage };
 }
 
 async function logRun(
   ctx: AiCallContext,
   provider: string,
+  tier: Tier,
   model: string,
   status: string,
   started: number,
-  usage?: { input_tokens?: number; output_tokens?: number },
+  usage?: AiUsage,
   error?: string,
 ) {
   await prisma.aiWorkflowRun.create({
@@ -152,10 +166,15 @@ async function logRun(
       workflowId: ctx.workflowId,
       promptVersion: ctx.promptVersion,
       provider,
+      tier,
       model,
       status,
-      inputTokens: usage?.input_tokens,
-      outputTokens: usage?.output_tokens,
+      inputTokens: usage?.inputTokens,
+      cachedInputTokens: usage?.cachedInputTokens,
+      outputTokens: usage?.outputTokens,
+      reasoningTokens: usage?.reasoningTokens,
+      webSearchCalls: usage?.webSearchCalls,
+      costUsd: usage ? aiCostUsd(model, usage) : null,
       latencyMs: Date.now() - started,
       error: error?.slice(0, 2000),
     },
