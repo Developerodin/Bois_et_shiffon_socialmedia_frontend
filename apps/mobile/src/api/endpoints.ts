@@ -64,7 +64,8 @@ export type BrandAssetsView = {
     products: { title: string; kind: string | null; url: string; image: StoredImage | null }[];
   } | null;
   /** Research's short summary (A09); null until written. Tags and sentences are English, the tagline is the site's own. */
-  summary: { tagline: string | null; tags: string[]; audience: string | null; strengths: string | null } | null;
+  /** `foundWebsite`: a brand made without a website whose own site the online lookup found, for the owner to accept. */
+  summary: { tagline: string | null; tags: string[]; audience: string | null; strengths: string | null; foundWebsite: string | null } | null;
   /** The owner's A10 choices; null fields = not chosen yet. */
   preferences: { tones: string[] | null; contentLanguage: "fr" | "en" | null };
 };
@@ -80,6 +81,14 @@ export const updateBrandDetails = (ws: string, brandId: string, edit: BrandDetai
 /** Renames the brand. */
 export const renameBrand = (ws: string, brandId: string, displayName: string) =>
   api<{ ok: true }>(brandBase(ws, brandId), { method: "PATCH", body: { displayName }, workspaceId: ws });
+
+/** Sets the brand's website (A09 "use it?"); Research only reads it when started again. */
+export const setBrandWebsite = (ws: string, brandId: string, websiteUrl: string) =>
+  api<{ ok: true }>(brandBase(ws, brandId), { method: "PATCH", body: { websiteUrl }, workspaceId: ws });
+
+/** Starts Research again for the brand (a retry, or after its website changed). */
+export const startResearch = (ws: string, brandId: string) =>
+  api<{ run: { id: string } }>(`${brandBase(ws, brandId)}/agents/research/runs`, { body: {}, workspaceId: ws });
 
 /** Scout's first post ideas for onboarding (A11). `ideas` is how many it found; null run = none started yet. */
 export type FirstIdeas = { run: { id: string; status: RunStatus; error: string | null; ideas: number } | null };

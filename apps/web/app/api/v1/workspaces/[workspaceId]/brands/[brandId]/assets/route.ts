@@ -28,7 +28,7 @@ async function view(scope: Required<TenantScope>) {
       fonts: assets.fonts,
       products: await Promise.all(assets.products.map(async (p) => ({ title: p.title, kind: p.kind, url: p.url, image: await image(p.imageKey) }))),
     },
-    summary: summary && { tagline: summary.tagline ?? null, tags: summary.tags ?? [], audience: summary.audience ?? null, strengths: summary.strengths ?? null },
+    summary: summary && { tagline: summary.tagline ?? null, tags: summary.tags ?? [], audience: summary.audience ?? null, strengths: summary.strengths ?? null, foundWebsite: brand.profile?.websiteUrl ? null : (summary.foundWebsite ?? null) },
     preferences: {
       tones: Preferences.safeParse(brand.profile?.preferences).data?.tones ?? null,
       contentLanguage: CONTENT_LANGUAGES.find((l) => l === locales[0]) ?? null,

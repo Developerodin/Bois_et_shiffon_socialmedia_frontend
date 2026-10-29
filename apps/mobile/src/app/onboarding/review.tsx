@@ -5,9 +5,11 @@ import { useState, type ReactNode } from "react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type TextStyle } from "react-native";
+import { setBrandWebsite, startResearch } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Screen, StepHeader, Title } from "@/ui/layout";
 import { BrandLogo } from "@/ui/onboarding/brand-logo";
+import { onboarding } from "@/ui/onboarding/state";
 import { imageSource, saveBrandText, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
@@ -35,6 +37,28 @@ export default function Review() {
   };
   const editable = { editing, setEditing, commit, failed, t };
 
+  // The online lookup found a website the owner didn't give: "use it?" sets it and reads it (logo, colours, products).
+  const foundSite = noSite ? summary?.foundWebsite : null;
+  const [siteDismissed, setSiteDismissed] = useState(false);
+  const [switching, setSwitching] = useState(false);
+  const [siteFailed, setSiteFailed] = useState(false);
+  const acceptFoundSite = async (site: string) => {
+    const { workspaceId: ws, brandId } = onboarding;
+    if (!ws || !brandId) return;
+    setSwitching(true);
+    setSiteFailed(false);
+    try {
+      await setBrandWebsite(ws, brandId, site);
+      const { run } = await startResearch(ws, brandId);
+      // Same brand, now made from this site: Learning follows the new run instead of creating a brand.
+      Object.assign(onboarding, { researchRunId: run.id, brandFrom: site });
+      router.replace({ pathname: "/onboarding/learning", params: { site } });
+    } catch {
+      setSiteFailed(true);
+      setSwitching(false);
+    }
+  };
+
   return (
     <Screen header={<StepHeader step={3} />} footer={<Button label={t("common:continue")} arrow onPress={() => router.push("/onboarding/brand")} />}>
       <Title title={t("review.title")} subtitle={t(noSite ? "review.subtitleNoWebsite" : "review.subtitle")} style={{ paddingBottom: space[8] }} />
@@ -49,6 +73,21 @@ export default function Review() {
         </View>
         {editing !== "name" ? <Button label={t("review.edit")} variant="ghost" height={44} accessibilityLabel={t("review.editName")} onPress={() => setEditing("name")} /> : null}
       </View>
+
+      {foundSite && !siteDismissed ? (
+        <Section label={t("review.foundSite")}>
+          <Text style={[type.body, { paddingTop: space[4] }]}>{t("review.foundSiteBody", { host: foundSite.replace(/^https?:\/\/(www\.)?/, "") })}</Text>
+          {siteFailed ? (
+            <Text accessibilityLiveRegion="polite" style={[type.meta, { color: color.error, paddingTop: space[4] }]}>
+              {t("review.useSiteFailed")}
+            </Text>
+          ) : null}
+          <View style={styles.siteActions}>
+            <Button label={t("review.notMine")} variant="ghost" height={44} disabled={switching} onPress={() => setSiteDismissed(true)} />
+            <Button label={t("review.useSite")} height={44} loading={switching} onPress={() => void acceptFoundSite(foundSite)} />
+          </View>
+        </Section>
+      ) : null}
 
       <Section label={t("review.tagline")}>
         <View style={styles.inlineRow}>
@@ -199,6 +238,7 @@ const styles = StyleSheet.create({
   inlineInput: { flex: 1, fontFamily: "Inter_500Medium", fontSize: 16, lineHeight: 24, color: color.ink, minHeight: 48 },
   areaInput: { marginTop: space[8], padding: space[12], borderWidth: 1, borderColor: color.controlOutline, borderRadius: radius.control, minHeight: 72, textAlignVertical: "top" },
   edit: { width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radius.control },
+  siteActions: { flexDirection: "row", justifyContent: "flex-end", gap: space[8], paddingTop: space[12] },
   tags: { flexDirection: "row", flexWrap: "wrap", gap: space[8], paddingTop: space[8] },
   tag: { ...type.meta, color: color.ink, paddingVertical: space[4], paddingHorizontal: space[12], backgroundColor: color.canvasAlt, borderWidth: 1, borderColor: "rgba(232,231,237,0.8)", borderRadius: radius.badge, overflow: "hidden" },
   product: { flexDirection: "row", alignItems: "center", gap: space[12], padding: space[8], backgroundColor: "#FBF8FF", borderWidth: 1, borderColor: "rgba(232,231,237,0.6)", borderRadius: radius.control },

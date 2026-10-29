@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { api, ApiError } from "@/api/client";
-import { agentEvents, contextDocs, createBrand, me } from "@/api/endpoints";
+import { ApiError } from "@/api/client";
+import { agentEvents, contextDocs, createBrand, me, startResearch } from "@/api/endpoints";
 import i18n from "@/i18n";
 import { onboarding } from "@/ui/onboarding/state";
 
@@ -98,7 +98,7 @@ export function useResearch(site: string | undefined): ResearchProgress {
     // (or none, when creating failed) means creating again, never re-running someone else's Research.
     if (ws && brandId && onboarding.brandFrom === sourceKey(site)) {
       try {
-        const { run } = await api<{ run: { id: string } }>(`/workspaces/${ws}/brands/${brandId}/agents/research/runs`, { body: {}, workspaceId: ws });
+        const { run } = await startResearch(ws, brandId);
         onboarding.researchRunId = run.id;
       } catch (e) {
         return setFailed(e instanceof ApiError ? e.message : i18n.t("onboarding:learning.errors.restartFailed"));

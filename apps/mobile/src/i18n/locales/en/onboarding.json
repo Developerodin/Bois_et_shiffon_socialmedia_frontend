@@ -198,7 +198,12 @@
     "addAudience": "Who buys from you?",
     "saveFailed": "Couldn’t save that change — it’s back to what it was. Try again.",
     "subtitleNoWebsite": "We found these details online and from what you told us. You can edit them anytime.",
-    "noProductsNoWebsite": "No product photos yet. Without a website there’s no catalogue to import."
+    "noProductsNoWebsite": "No product photos yet. Without a website there’s no catalogue to import.",
+    "foundSite": "We found your website",
+    "foundSiteBody": "Is {{host}} yours? We’ll read it for your logo, colours and products (about a minute).",
+    "useSite": "Use it",
+    "notMine": "Not mine",
+    "useSiteFailed": "Couldn’t use that website. Try again, or continue without it."
   },
   "brand": {
     "title": "Brand & creative style",

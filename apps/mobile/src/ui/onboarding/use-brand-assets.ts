@@ -76,7 +76,7 @@ export async function saveBrandPreferences(prefs: { tones: string[]; contentLang
 }
 
 type TextField = "name" | "tagline" | "audience";
-const EMPTY_SUMMARY = { tagline: null, tags: [], audience: null, strengths: null };
+const EMPTY_SUMMARY = { tagline: null, tags: [], audience: null, strengths: null, foundWebsite: null };
 const readText = (d: BrandAssetsView, f: TextField) => (f === "name" ? d.name : (d.summary?.[f] ?? null));
 const withText = (d: BrandAssetsView, f: TextField, v: string | null): BrandAssetsView =>
   f === "name" ? { ...d, name: v ?? d.name } : { ...d, summary: { ...(d.summary ?? EMPTY_SUMMARY), [f]: v } };
