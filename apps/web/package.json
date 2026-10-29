@@ -21,6 +21,8 @@
     "check:brand-assets": "tsx --env-file=.env scripts/check-brand-assets.ts",
     "check:models": "tsx --env-file=.env scripts/check-models.ts",
     "check:net": "tsx scripts/check-net.ts",
+    "check:platform-admin": "tsx --env-file=.env scripts/check-platform-admin.ts",
+    "platform-admin": "tsx --env-file=.env scripts/platform-admin.ts",
     "usage": "tsx --env-file=.env scripts/usage-report.ts",
     "eval": "tsx --env-file=.env scripts/evals/run.ts",
     "smoke:auth": "tsx --env-file=.env scripts/smoke-auth.ts",

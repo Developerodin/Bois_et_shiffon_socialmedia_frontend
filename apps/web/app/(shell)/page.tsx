@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Workspace } from "@/components/workspace/workspace";
+import { isPlatformAdmin } from "@/server/auth/platform-admin";
 import { prisma } from "@/server/db/prisma";
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
@@ -10,6 +11,8 @@ export default async function WorkspacePage() {
   if (!session?.user?.id) redirect("/login");
   const shell = await loadShellContext(session.user.id);
 
+  // A platform-only account belongs to no workspace: its home is the admin console.
+  if (!shell.activeWorkspaceId && (await isPlatformAdmin(session.user.id))) redirect("/admin");
   // First run: no brand yet → the website step.
   if (shell.activeWorkspaceId && shell.brands.length === 0) redirect("/welcome");
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {

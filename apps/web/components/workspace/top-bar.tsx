@@ -12,10 +12,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AccountMenu } from "@/components/workspace/account-menu";
 import { ScoreRing } from "@/components/workspace/score-ring";
+import { SignOutItem } from "@/components/workspace/sign-out-item";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 
 export type TopBarScores = {
@@ -38,6 +42,8 @@ type Props = {
   googleConnected: boolean;
   /** brand.create in the active workspace: shows "New brand". */
   canCreateBrand: boolean;
+  /** User.isPlatformAdmin: shows "Platform admin" in the menu. */
+  platformAdmin: boolean;
 };
 
 const AREAS = [
@@ -135,8 +141,19 @@ export function TopBar(p: Props) {
                   </DropdownMenuItem>
                 ),
               )}
+              {p.platformAdmin && (
+                <DropdownMenuItem asChild>
+                  <Link href="/admin">Platform admin</Link>
+                </DropdownMenuItem>
+              )}
+              {/* Sign out on every page: on the workspace the account menu sits at the foot of the Context pane,
+                  easy to miss. */}
+              <DropdownMenuSeparator />
+              {p.userEmail ? <DropdownMenuLabel className="truncate text-xs font-normal text-muted-foreground">Signed in as {p.userEmail}</DropdownMenuLabel> : null}
+              <SignOutItem />
             </DropdownMenuContent>
           </DropdownMenu>
+          <ThemeToggle />
           <Button variant="ghost" size="icon" className="size-10 sm:size-9" asChild>
             <Link href="/settings" aria-label="Settings">
               <Settings aria-hidden="true" />

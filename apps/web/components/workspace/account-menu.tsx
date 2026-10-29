@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronUp, LogOut, Plug, Settings, Users } from "lucide-react";
-import { signOutAction } from "@/app/(shell)/actions/sign-out";
+import { ChevronUp, Plug, Settings, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SignOutItem } from "@/components/workspace/sign-out-item";
 
 type Props = {
   name?: string | null;
@@ -73,13 +73,7 @@ export function AccountMenu({ name, email, image, variant }: Props) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <form action={signOutAction}>
-          <DropdownMenuItem asChild>
-            <button type="submit" className="w-full text-destructive">
-              <LogOut aria-hidden="true" /> Sign out
-            </button>
-          </DropdownMenuItem>
-        </form>
+        <SignOutItem />
       </DropdownMenuContent>
     </DropdownMenu>
   );
