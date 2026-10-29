@@ -5,7 +5,10 @@
  * ponytail: loads every row in the period into memory; fine to ~100k calls, then aggregate in SQL (groupBy) instead.
  * Rows from before 2026-10-29 have tokens but no stored cost: they're priced from their tokens at today's list price,
  * without web searches (those weren't counted then). Rows for deleted brands before that date are gone.
+ * Cache writes (1.25× input) weren't counted before 2026-10-29 06:58 UTC; stored costs before then were corrected
+ * once on 2026-10-29 with an estimate (every uncached input of 1,024+ tokens written), and are exact after it.
  */
+import { modelConfig } from "@/server/ai/model-config";
 import { aiCostUsd } from "@/server/ai/models";
 import { prisma } from "@/server/db/prisma";
 
@@ -31,10 +34,11 @@ const add = (m: Map<string, Row>, key: string, r: Omit<Row, "key">) => {
 };
 
 (async () => {
-  const [ai, api, fx] = await Promise.all([
+  const [ai, api, fx, cfg] = await Promise.all([
     prisma.aiWorkflowRun.findMany({ where: { createdAt: { gte: since } }, select: { model: true, tier: true, workflowId: true, status: true, inputTokens: true, cachedInputTokens: true, outputTokens: true, webSearchCalls: true, costUsd: true, error: true, createdAt: true, workspaceId: true, evalPassed: true, evalFindings: true } }),
     prisma.apiCall.findMany({ where: { createdAt: { gte: since } }, select: { provider: true, operation: true, status: true, costUsd: true } }),
     inrRate(),
+    modelConfig(),
   ]);
   const money = (usd: number) => `$${usd.toFixed(4)}${fx ? `  ₹${(usd * fx.rate).toFixed(2)}` : ""}`;
   const table = (title: string, m: Map<string, Row>, tokens = true) => {
@@ -47,7 +51,10 @@ const add = (m: Map<string, Row>, key: string, r: Omit<Row, "key">) => {
   const byModel = new Map<string, Row>(), byTier = new Map<string, Row>(), byTask = new Map<string, Row>(), byApi = new Map<string, Row>();
   let aiUsd = 0, unpriced = 0;
   for (const r of ai) {
-    const usd = r.costUsd !== null ? Number(r.costUsd) : (aiCostUsd(r.model, { inputTokens: r.inputTokens ?? 0, cachedInputTokens: r.cachedInputTokens ?? 0, outputTokens: r.outputTokens ?? 0 }) ?? 0);
+    // Those rows also predate explicit caching: OpenAI wrote their uncached input (1,024+ tokens) to the cache at 1.25×.
+    const input = r.inputTokens ?? 0, cached = r.cachedInputTokens ?? 0;
+    const written = cfg.models.get(r.model)?.cacheBreakpoints && input >= 1024 ? input - cached : 0;
+    const usd = r.costUsd !== null ? Number(r.costUsd) : (aiCostUsd(cfg, r.model, { inputTokens: input, cachedInputTokens: cached, cacheWriteTokens: written, outputTokens: r.outputTokens ?? 0 }) ?? 0);
     if (r.costUsd === null && r.model !== "mock") unpriced++;
     aiUsd += usd;
     const row = { calls: 1, failed: r.status === "FAILED" ? 1 : 0, input: r.inputTokens ?? 0, output: r.outputTokens ?? 0, searches: r.webSearchCalls ?? 0, usd };

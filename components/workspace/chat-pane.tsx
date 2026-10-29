@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { ArrowUp, Check, Globe, Loader2, Plus, Square, TriangleAlert, Wrench } from "lucide-react";
+import { ArrowUp, Check, Globe, Loader2, Play, Plus, Square, TriangleAlert, Wrench } from "lucide-react";
+import { startRun } from "@/components/agents/api";
 import { Markdown } from "@/components/context/markdown";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,7 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
   readDocument: (i) => `Read ${String(i?.kind ?? "a document").replace(/-/g, " ")}`,
   getSiteReports: () => "Read the SEO and AI-visibility reports",
   listAgents: () => "Checked the agents",
-  startAgent: (i) => `Started the ${String(i?.agentKey ?? "")} agent`,
+  startAgent: (i) => `Offered to start the ${String(i?.agentKey ?? "")} agent`,
   webSearch: () => "Searched the web",
 };
 
@@ -50,8 +51,48 @@ export function ChatPane(props: Props) {
   return <ChatSession key={initial.id} {...props} api={base} initial={initial} onNew={() => setInitial({ id: crypto.randomUUID(), messages: [] })} />;
 }
 
+/**
+ * The chat only offers a run; the person starts it here, through the Run button's own route. Text injected into a
+ * page the chat read can make it offer, never start. ponytail: the button forgets it was pressed on reload; pressing
+ * again just starts another run, like the Run button.
+ */
+function StartAgent({ workspaceId, brandId, agentKey }: { workspaceId: string; brandId: string; agentKey: string }) {
+  const [state, setState] = useState<"idle" | "starting" | "started" | { error: string }>("idle");
+  const start = async () => {
+    setState("starting");
+    try {
+      await startRun(workspaceId, brandId, agentKey);
+      setState("started");
+    } catch (e) {
+      setState({ error: e instanceof Error ? e.message : "Could not start the agent." });
+    }
+  };
+  if (state === "started") {
+    return (
+      <p role="status" className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Check className="size-3.5 text-success" aria-hidden="true" /> Started the {agentKey} agent. Progress shows in Logs.
+      </p>
+    );
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <Button size="sm" variant="outline" onClick={() => void start()} disabled={state === "starting"}>
+        {state === "starting" ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Play aria-hidden="true" />}
+        Start the {agentKey} agent
+      </Button>
+      {typeof state === "object" && (
+        <span role="alert" className="text-destructive">
+          {state.error}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function ChatSession({
   api,
+  workspaceId,
+  brandId,
   website,
   initial,
   onNew,
@@ -102,7 +143,7 @@ function ChatSession({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-1.5">
-        <span className="text-xs text-muted-foreground">Your CMO reads your documents and reports, and can start agents. It never publishes.</span>
+        <span className="text-xs text-muted-foreground">Your CMO reads your documents and reports, and can offer to start agents. It never publishes.</span>
         <Button variant="ghost" size="sm" onClick={onNew} disabled={busy || messages.length === 0} aria-label="New chat">
           <Plus aria-hidden="true" /> New
         </Button>
@@ -153,7 +194,10 @@ function ChatSession({
                   }
                   if (part.type.startsWith("tool-")) {
                     const name = part.type.slice(5);
-                    const p = part as { state: string; input?: Record<string, unknown> };
+                    const p = part as { state: string; input?: Record<string, unknown>; output?: { proposed?: boolean; agentKey?: string } };
+                    if (name === "startAgent" && p.output?.proposed && p.output.agentKey) {
+                      return <StartAgent key={i} workspaceId={workspaceId} brandId={brandId} agentKey={p.output.agentKey} />;
+                    }
                     const label = (TOOL_LABEL[name] ?? (() => name))(p.input);
                     const done = p.state === "output-available";
                     const failed = p.state === "output-error";

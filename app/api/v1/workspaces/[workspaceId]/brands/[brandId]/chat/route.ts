@@ -12,8 +12,10 @@ import {
 import { z } from "zod";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
-import { aiCostUsd, modelFor, type AiUsage } from "@/server/ai/models";
-import { isOutOfCreditsText, OUT_OF_CREDITS } from "@/server/ai/provider";
+import { grade } from "@/server/ai/graders";
+import { modelConfig } from "@/server/ai/model-config";
+import { modelFor, ModelNotConfiguredError, type Tier } from "@/server/ai/models";
+import { isOutOfCreditsText, logRun, OUT_OF_CREDITS } from "@/server/ai/provider";
 import { hitRateLimit, limitKey } from "@/server/auth/rate-limit";
 import { chatSystemPrompt, CHAT_PROMPT_VERSION } from "@/server/chat/prompt";
 import { chatTools } from "@/server/chat/tools";
@@ -80,43 +82,45 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     const previous = resent === -1 ? stored : stored.slice(0, resent);
     const messages = await validateUIMessages({ messages: [...previous, body.data.message], tools });
 
-    const { tier, model } = modelFor("chat.turn");
+    let tier: Tier, model: string;
+    try {
+      ({ tier, model } = modelFor(await modelConfig(), "chat.turn"));
+    } catch (error) {
+      if (!(error instanceof ModelNotConfiguredError)) throw error;
+      return problemResponse({ type: "https://api.brandpilot/errors/ai-not-configured", title: "AI isn't set up", status: 503, detail: error.message });
+    }
     const started = Date.now();
-    // Same ledger as agent calls (server/ai/provider.ts): one row per turn, with its cost; failed turns too.
-    const logTurn = (status: "SUCCEEDED" | "FAILED", usage?: AiUsage, error?: string) =>
-      prisma.aiWorkflowRun.create({
-        data: {
-          workspaceId: scope.workspaceId,
-          brandId: scope.brandId,
-          workflowId: "chat.turn",
-          promptVersion: CHAT_PROMPT_VERSION,
-          provider: "openai",
-          tier,
-          model,
-          status,
-          ...usage,
-          costUsd: usage ? aiCostUsd(model, usage) : null,
-          latencyMs: Date.now() - started,
-          error: error?.slice(0, 2000),
-        },
-      });
+    // Same ledger and per-call checks as agent calls (server/ai/provider.ts): one row per turn, with its cost and
+    // grade; failed turns too. A streamed reply is already on screen, so a finding is recorded, not retried.
+    const ctx = { workspaceId: scope.workspaceId, brandId: scope.brandId, workflowId: "chat.turn", promptVersion: CHAT_PROMPT_VERSION };
+    const system = chatSystemPrompt({ name: brand.displayName, website: brand.profile?.websiteUrl ?? null });
+    const history = messages.slice(-MODEL_HISTORY);
     const result = streamText({
       model: openai(model),
-      system: chatSystemPrompt({ name: brand.displayName, website: brand.profile?.websiteUrl ?? null }),
-      messages: await convertToModelMessages(messages.slice(-MODEL_HISTORY)),
+      system,
+      messages: await convertToModelMessages(history),
       tools,
       stopWhen: isStepCount(6),
-      onFinish: async ({ totalUsage, steps }) => {
-        await logTurn("SUCCEEDED", {
+      onFinish: async ({ text, totalUsage, steps }) => {
+        const findings = grade({
+          workflowId: "chat.turn",
+          system,
+          // What it was given: the conversation and what our tools returned. Web results count as cited sources.
+          prompt: JSON.stringify([history, steps.flatMap((s) => s.toolResults.map((r) => r.output))]),
+          webSearch: true,
+          output: { text, sources: steps.flatMap((s) => s.sources.flatMap((x) => (x.sourceType === "url" ? [x.url] : []))) },
+        });
+        await logRun(ctx, "openai", tier, model, "SUCCEEDED", started, {
           inputTokens: totalUsage.inputTokens,
           cachedInputTokens: totalUsage.inputTokenDetails?.cacheReadTokens,
+          cacheWriteTokens: totalUsage.inputTokenDetails?.cacheWriteTokens,
           outputTokens: totalUsage.outputTokens,
           reasoningTokens: totalUsage.outputTokenDetails?.reasoningTokens,
           webSearchCalls: steps.flatMap((s) => s.toolCalls).filter((c) => c.toolName === "webSearch").length,
-        });
+        }, undefined, findings);
       },
       onError: async ({ error }) => {
-        await logTurn("FAILED", undefined, String(error)).catch(() => {});
+        await logRun(ctx, "openai", tier, model, "FAILED", started, undefined, String(error)).catch(() => {});
       },
     });
     result.consumeStream(); // finish and save even if the browser disconnects

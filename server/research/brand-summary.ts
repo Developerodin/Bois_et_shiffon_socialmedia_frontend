@@ -86,7 +86,7 @@ Homepage text (menus and cart included; the slogan is often well down the page):
 
 ${docs.map((d) => `## ${d.title}\n${d.latest?.markdown.slice(0, 2000) ?? "(not written)"}`).join("\n\n")}`,
     // A tagline that isn't on the homepage was made up: ask again (a bigger model, told why). This doesn't catch a
-    // real line from the page that isn't the slogan (gpt-6-luna picked a section heading in testing); the tier does.
+    // real line from the page that isn't the slogan (the cheapest model tested picked a section heading); the tier does.
     validate: (v) => (onPage(v.tagline, homepage) ? null : `tagline "${v.tagline}" isn't on the homepage`),
   });
   const summary: BrandSummary = {

@@ -44,7 +44,7 @@ async function main() {
   assert.ok(agents.some((a) => a.key === "seo") && !agents.some((a) => a.key === "systems-check"));
   console.log(`1 tools: ${docs.length} docs, brand voice ${voice.status}, SEO report ${typeof reports.seo === "object" ? "present" : "missing"}, ${agents.length} agents ✓`);
 
-  // 2. A viewer can chat but the startAgent tool refuses
+  // 2. An admin's startAgent only offers (the person presses Start); a viewer's is refused
   const email = `smoke-chat-${Date.now()}@example.com`;
   const password = `pw-${randomUUID()}`;
   const viewerRole = await prisma.role.findUniqueOrThrow({ where: { workspaceId_slug: { workspaceId: brand.workspaceId, slug: "viewer" } } });
@@ -52,9 +52,13 @@ async function main() {
   await prisma.workspaceMember.create({ data: { workspaceId: brand.workspaceId, userId: viewer.id, roleId: viewerRole.id } });
   const threadId = randomUUID();
   try {
-    const refused = await call<{ started: boolean; reason?: string }>(chatTools({ ...scope, userId: viewer.id }).startAgent, { agentKey: "seo" });
-    assert.equal(refused.started, false);
-    console.log(`2 viewer asks to start an agent → refused: "${refused.reason}" ✓`);
+    const runsBefore = await prisma.agentRun.count({ where: { brandId: brand.id } });
+    const offered = await call<{ proposed: boolean; agentKey?: string }>(tools.startAgent, { agentKey: "seo" });
+    assert.deepEqual([offered.proposed, offered.agentKey], [true, "seo"]);
+    assert.equal(await prisma.agentRun.count({ where: { brandId: brand.id } }), runsBefore, "the chat started a run by itself");
+    const refused = await call<{ proposed: boolean; reason?: string }>(chatTools({ ...scope, userId: viewer.id }).startAgent, { agentKey: "seo" });
+    assert.equal(refused.proposed, false);
+    console.log(`2 startAgent offers without starting; viewer refused: "${refused.reason}" ✓`);
 
     // 3. Live turn as admin: streams, saves, and explains an empty balance in plain words
     const adminCookie = await login(process.env.SEED_ADMIN_EMAIL!, process.env.SEED_ADMIN_PASSWORD!);

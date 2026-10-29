@@ -150,6 +150,27 @@ export const settingsApi = {
     request<{ url: string }>(`${brand(w, b)}/connections/start`, json("POST", { provider })),
   disconnect: (w: string, b: string, id: string) =>
     request<{ cancelled: number }>(`${brand(w, b)}/connections/${encodeURIComponent(id)}`, { method: "DELETE" }),
+
+  // Platform admins only (Settings → AI models); not per workspace.
+  aiModels: () => request<AiModelSettings>("/api/v1/ai-models"),
+  saveAiModel: (m: AiModel) => request<AiModelSettings>("/api/v1/ai-models", json("PUT", m)),
+  deleteAiModel: (name: string) => request<AiModelSettings>(`/api/v1/ai-models/${encodeURIComponent(name)}`, { method: "DELETE" }),
+  saveAiTier: (t: { tier: AiTierName; model: string; backup: string | null }) => request<AiModelSettings>("/api/v1/ai-tiers", json("PUT", t)),
+};
+
+export type AiTierName = "heavy" | "medium" | "light";
+export type AiModel = {
+  name: string;
+  inputUsdPerM: number;
+  cachedUsdPerM: number;
+  outputUsdPerM: number;
+  cacheBreakpoints: boolean;
+  evalCandidate: boolean;
+  judgeRank: 1 | 2 | null;
+};
+export type AiModelSettings = {
+  models: (AiModel & { updatedAt: string; updatedBy: string | null })[];
+  tiers: { tier: AiTierName; model: string | null; backup: string | null; updatedAt: string | null }[];
 };
 
 const brand = (w: string, b: string) => `${ws(w)}/brands/${encodeURIComponent(b)}`;
