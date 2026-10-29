@@ -9,22 +9,13 @@
  * once on 2026-10-29 with an estimate (every uncached input of 1,024+ tokens written), and are exact after it.
  */
 import { modelConfig } from "@/server/ai/model-config";
+import { usdInrRate } from "@/server/usage/fx";
 import { aiCostUsd } from "@/server/ai/models";
 import { prisma } from "@/server/db/prisma";
 
 const daysArg = process.argv.indexOf("--days");
 const days = daysArg > -1 ? Number(process.argv[daysArg + 1]) : null;
 const since = days ? new Date(Date.now() - days * 86_400_000) : new Date(0);
-
-async function inrRate(): Promise<{ rate: number; from: string } | null> {
-  if (process.env.USD_INR) return { rate: Number(process.env.USD_INR), from: "USD_INR in .env" };
-  try {
-    const body = (await (await fetch("https://open.er-api.com/v6/latest/USD", { signal: AbortSignal.timeout(5000) })).json()) as { rates?: { INR?: number }; time_last_update_utc?: string };
-    return body.rates?.INR ? { rate: body.rates.INR, from: `open.er-api.com, ${body.time_last_update_utc}` } : null;
-  } catch {
-    return null;
-  }
-}
 
 type Row = { key: string; calls: number; failed: number; input: number; output: number; searches: number; usd: number };
 const add = (m: Map<string, Row>, key: string, r: Omit<Row, "key">) => {
@@ -37,7 +28,7 @@ const add = (m: Map<string, Row>, key: string, r: Omit<Row, "key">) => {
   const [ai, api, fx, cfg] = await Promise.all([
     prisma.aiWorkflowRun.findMany({ where: { createdAt: { gte: since } }, select: { model: true, tier: true, workflowId: true, status: true, inputTokens: true, cachedInputTokens: true, outputTokens: true, webSearchCalls: true, costUsd: true, error: true, createdAt: true, workspaceId: true, evalPassed: true, evalFindings: true } }),
     prisma.apiCall.findMany({ where: { createdAt: { gte: since } }, select: { provider: true, operation: true, status: true, costUsd: true } }),
-    inrRate(),
+    usdInrRate(),
     modelConfig(),
   ]);
   const money = (usd: number) => `$${usd.toFixed(4)}${fx ? `  ₹${(usd * fx.rate).toFixed(2)}` : ""}`;

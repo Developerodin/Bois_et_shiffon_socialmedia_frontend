@@ -130,6 +130,37 @@
   font-family: var(--font-fraunces), Georgia, serif;
 }
 
+/* Theme switch (components/theme/theme-toggle.tsx). With View Transitions the new theme is revealed in a circle
+   from the button: the browser's default cross-fade is turned off so only that reveal plays. Without them, colours
+   ease for 300 ms while .theme-fade is on. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+  transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease, fill 300ms ease !important;
+}
+
+/* Chart marks (admin spend chart). A more saturated step of the brass than --primary: the brand brass reads
+   gray-ish as a data mark. Both values pass the dataviz validator (lightness band, chroma floor, >= 3:1 on card). */
+:root { --chart-1: #b8842a; }
+@media (prefers-color-scheme: light) { :root:not(.dark) { --chart-1: #8a5c12; } }
+:root.light { --chart-1: #8a5c12; }
+
+/* The Espanda logo (components/brand/espanda-logo.tsx): its lettering is black, so dark surfaces get a copy with
+   light lettering. Switched by the same rules as the colour tokens above. */
+.logo-on-light { display: none; }
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) .logo-on-light { display: block; }
+  :root:not(.dark) .logo-on-dark { display: none; }
+}
+:root.light .logo-on-light { display: block; }
+:root.light .logo-on-dark { display: none; }
+
 /* Soft warm glow behind page heroes (decorative only). */
 .surface-glow {
   background-image:
@@ -169,10 +200,47 @@
   animation: line-in 240ms ease-out both;
 }
 
+/* Page parts settling in on first paint (sign-in form): a short rise, staggered with animation-delay. */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.rise-in {
+  animation: rise-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Admin console motion. The sliding highlight under tabs, sidebar and filters (components/admin/use-indicator.ts). */
+.slide-indicator {
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1), width 250ms cubic-bezier(0.22, 1, 0.36, 1), height 250ms cubic-bezier(0.22, 1, 0.36, 1), opacity 150ms;
+}
+/* Data arriving: chart columns grow from the baseline, share bars from the left (both scale, no layout change). */
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: none; } }
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: none; } }
+.grow-y {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: grow-y 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.grow-x {
+  transform-origin: left;
+  animation: grow-x 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* An opened <details> eases its content in instead of popping. */
+details[open] > :not(summary) {
+  animation: rise-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .status-pulse,
   .typing-cursor::after,
-  .log-line-in {
+  .log-line-in,
+  .rise-in,
+  .grow-y,
+  .grow-x,
+  details[open] > :not(summary) {
     animation: none;
+  }
+  .slide-indicator {
+    transition: none;
   }
 }

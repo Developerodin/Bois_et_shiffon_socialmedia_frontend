@@ -1,3 +1,6 @@
+import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
+import { auth } from "@/auth";
 import { problemResponse } from "@/server/api/http-error";
 import { requestUserId } from "@/server/auth/request-user";
 import { prisma } from "@/server/db/prisma";
@@ -19,3 +22,15 @@ export async function platformAdmin(request: Request): Promise<string | Response
 
 export const isPlatformAdmin = async (userId: string) =>
   !!(await prisma.user.findUnique({ where: { id: userId }, select: { isPlatformAdmin: true } }))?.isPlatformAdmin;
+
+/**
+ * For every /admin page: signed out → sign in; not a platform admin → a plain 404, so the console's existence isn't
+ * revealed. Each page calls it (a layout alone doesn't guard the page's own data loading). Returns the user id.
+ */
+// cache(): the layout and the page both call it; one check (two queries) per request instead of two.
+export const requirePlatformAdminPage = cache(async (): Promise<string> => {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  if (!(await isPlatformAdmin(session.user.id))) notFound();
+  return session.user.id;
+});

@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { MainArea } from "@/components/workspace/main-area";
 import { TopBar, type TopBarScores } from "@/components/workspace/top-bar";
 import { effectivePermissions } from "@/server/auth/permissions";
+import { isPlatformAdmin } from "@/server/auth/platform-admin";
 import { prisma } from "@/server/db/prisma";
 import { latestAuditReports } from "@/server/services/audit-reports";
 import { loadShellContext } from "@/server/shell/load-shell-context";
@@ -53,6 +54,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
         scores={scores}
         googleConnected={googleConnected}
         canCreateBrand={canCreateBrand}
+        platformAdmin={await isPlatformAdmin(session.user.id)}
       />
       <MainArea>{children}</MainArea>
     </div>

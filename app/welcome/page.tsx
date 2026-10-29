@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
-import { signOutAction } from "@/app/(shell)/actions/sign-out";
+import { SignOutButton } from "@/components/workspace/sign-out-item";
 import { auth } from "@/auth";
+import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { WelcomeFlow } from "@/components/welcome/welcome-flow";
 import { effectivePermissions } from "@/server/auth/permissions";
 import { loadShellContext } from "@/server/shell/load-shell-context";
@@ -38,8 +40,9 @@ export default async function WelcomePage({
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="flex items-center justify-between px-6 py-5 sm:px-10">
-        <span className="font-display text-lg font-medium tracking-tight">Prow PLUS</span>
+        <EspandaLogo height={28} priority />
         <nav className="flex flex-wrap items-center justify-end gap-x-5 text-sm text-muted-foreground">
+          <ThemeToggle />
           {shell.brands.length > 0 || resume ? (
             <Link href="/" className="inline-block py-2 hover:text-foreground">
               Go to the app
@@ -57,9 +60,7 @@ export default async function WelcomePage({
                 <button type="submit" className="py-2 hover:text-foreground">Open {w.name}</button>
               </form>
             ))}
-          <form action={signOutAction}>
-            <button type="submit" className="py-2 hover:text-foreground">Sign out</button>
-          </form>
+          <SignOutButton className="py-2 hover:text-foreground" />
         </nav>
       </header>
       <main className="flex flex-1 items-center px-6 pb-16 pt-6 sm:px-10">

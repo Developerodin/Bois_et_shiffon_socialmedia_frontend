@@ -403,6 +403,7 @@ model AiWorkflowRun {
   @@index([brandId, createdAt])
   @@index([agentRunId])
   @@index([createdAt])
+  @@index([workspaceId, createdAt])
 }
 
 /// One row per call to a paid outside API that isn't an AI model (Google Places, PageSpeed, Twilio Verify).
@@ -422,6 +423,7 @@ model ApiCall {
 
   @@index([createdAt])
   @@index([provider, createdAt])
+  @@index([workspaceId, createdAt])
 }
 
 // --- Slice 1: brand context documents (design §4.1, §8b-3) ---

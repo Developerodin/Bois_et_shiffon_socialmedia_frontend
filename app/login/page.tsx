@@ -1,5 +1,7 @@
 import { signIn } from "@/auth";
-import { Button } from "@/components/ui/button";
+import { PendingButton } from "@/components/auth/pending-button";
+import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { AuthError, CredentialsSignin } from "next-auth";
 import Link from "next/link";
@@ -18,6 +20,9 @@ const ERRORS: Record<string, string> = {
 };
 
 const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
+/** Entrance stagger for the n-th part of the form (with the .rise-in class). */
+const rise = (n: number) => ({ animationDelay: `${n * 40}ms` });
 
 /** Where to go after sign-in: a same-site path only ("/x", never "//host" or "https://…"). */
 function safeNext(next?: string, callbackUrl?: string): string {
@@ -53,107 +58,169 @@ export default async function LoginPage({
         ? "You were signed out (the session ended, or you signed out elsewhere). Sign in again to pick up where you were."
         : null;
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-6">
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
-        <h1 className="font-display text-2xl font-semibold text-foreground">
-          Sign in to Prow PLUS
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {googleEnabled
-            ? "New here? Continue with Google to create your account."
-            : "Use the email and password from your invitation."}
-        </p>
-        {notice && !message ? (
-          <p role="status" className="mt-4 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm text-success">
-            {notice}
-          </p>
-        ) : null}
-        {googleEnabled ? (
-          <>
+    <main className="surface-glow relative min-h-dvh bg-background text-foreground">
+      <ThemeToggle className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6" />
+      <div className="mx-auto grid min-h-dvh max-w-6xl lg:grid-cols-[1.1fr_1fr]">
+        {/* The form comes first in the page order: on a phone it's what you see; on a wide screen it sits right. */}
+        <section aria-labelledby="signin-h" className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:order-2 lg:py-20">
+          {/* Entrance: the form's parts settle in top to bottom (rise-in, ~40 ms apart), then the example morning on the
+              left plays. Nothing waits on it: every field works from the first frame. */}
+          <div className="rise-in" style={rise(0)}>
+            <EspandaLogo height={34} priority />
+          </div>
+          <div className="mt-10 w-full max-w-sm">
+            <h1 id="signin-h" className="rise-in font-display text-4xl font-medium tracking-tight text-balance" style={rise(1)}>
+              Sign in
+            </h1>
+            <p className="rise-in mt-3 text-sm text-muted-foreground" style={rise(2)}>
+              {googleEnabled
+                ? "New here? Continue with Google to create your account."
+                : "Use the email and password from your invitation."}
+            </p>
+            {notice && !message ? (
+              <p role="status" className="rise-in mt-6 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm text-success" style={rise(3)}>
+                {notice}
+              </p>
+            ) : null}
+            {googleEnabled ? (
+              <>
+                <form
+                  className="rise-in mt-8"
+                  style={rise(4)}
+                  action={async () => {
+                    "use server";
+                    await signIn("google", { redirectTo: next });
+                  }}
+                >
+                  <PendingButton variant="outline" pendingLabel="Opening Google…" className="h-11 w-full">
+                    <GoogleMark />
+                    Continue with Google
+                  </PendingButton>
+                </form>
+                <div className="rise-in mt-6 flex items-center gap-3 text-xs text-muted-foreground" style={rise(5)}>
+                  <span className="h-px flex-1 bg-border" aria-hidden="true" />
+                  or with email
+                  <span className="h-px flex-1 bg-border" aria-hidden="true" />
+                </div>
+              </>
+            ) : null}
             <form
-              className="mt-6"
-              action={async () => {
+              className="rise-in mt-6 space-y-4"
+              style={rise(6)}
+              action={async (formData) => {
                 "use server";
-                await signIn("google", { redirectTo: next });
+                try {
+                  await signIn("credentials", {
+                    email: formData.get("email"),
+                    password: formData.get("password"),
+                    redirectTo: next,
+                  });
+                } catch (error) {
+                  if (error instanceof AuthError) {
+                    // Only CredentialsSignin means "wrong email/password"; anything else (e.g. the DB is
+                    // unreachable) must not tell people their password is wrong.
+                    const code = !(error instanceof CredentialsSignin)
+                      ? "unavailable"
+                      : error.code === "rate_limited"
+                        ? "rate_limited"
+                        : "invalid";
+                    redirect(`/login?error=${code}${keepNext}`);
+                  }
+                  throw error;
+                }
               }}
             >
-              <Button type="submit" variant="outline" className="w-full">
-                <GoogleMark />
-                Continue with Google
-              </Button>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">Email</span>
+                <Input
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  className="mt-1.5 h-11"
+                  placeholder="you@yourbrand.com"
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">Password</span>
+                <Input
+                  name="password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  className="mt-1.5 h-11"
+                />
+              </label>
+              {message ? (
+                <p role="alert" className="rise-in text-sm text-destructive">
+                  {message}
+                </p>
+              ) : null}
+              <PendingButton pendingLabel="Signing in…" className="h-11 w-full">
+                Sign in
+              </PendingButton>
+              <div className="text-center">
+                <Link
+                  href="/forgot-password"
+                  className="inline-block rounded-sm py-1 text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </form>
-            <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="h-px flex-1 bg-border" aria-hidden="true" />
-              or with email
-              <span className="h-px flex-1 bg-border" aria-hidden="true" />
-            </div>
-          </>
-        ) : null}
-        <form
-          className="mt-6 space-y-4"
-          action={async (formData) => {
-            "use server";
-            try {
-              await signIn("credentials", {
-                email: formData.get("email"),
-                password: formData.get("password"),
-                redirectTo: next,
-              });
-            } catch (error) {
-              if (error instanceof AuthError) {
-                // Only CredentialsSignin means "wrong email/password"; anything else (e.g. the DB is
-                // unreachable) must not tell people their password is wrong.
-                const code = !(error instanceof CredentialsSignin)
-                  ? "unavailable"
-                  : error.code === "rate_limited"
-                    ? "rate_limited"
-                    : "invalid";
-                redirect(`/login?error=${code}${keepNext}`);
-              }
-              throw error;
-            }
-          }}
-        >
-          <label className="block text-sm">
-            <span className="text-muted-foreground">Email</span>
-            <Input
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className="mt-1"
-              placeholder="you@yourbrand.com"
-            />
-          </label>
-          <label className="block text-sm">
-            <span className="text-muted-foreground">Password</span>
-            <Input
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="mt-1"
-            />
-          </label>
-          {message ? (
-            <p role="alert" className="text-sm text-destructive">
-              {message}
-            </p>
-          ) : null}
-          <Button type="submit" className="w-full">
-            Continue
-          </Button>
-          <div className="text-center">
-            <Link
-              href="/forgot-password"
-              className="inline-block rounded-sm py-1 text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Forgot password?
-            </Link>
           </div>
-        </form>
+        </section>
+
+        <MorningLog />
       </div>
     </main>
+  );
+}
+
+/**
+ * The page's one picture: an example of the Agent Log people find when they sign in. Typeset like the real log
+ * (time, agent, what it did), and labelled as an example. It ends where signing in begins: drafts waiting for a
+ * person, because agents never publish on their own.
+ */
+const MORNING: { at: string; agent: string; text: string; tone?: "warn" | "you" }[] = [
+  { at: "06:00", agent: "Research", text: "Read 38 pages of your website and updated your brand voice." },
+  { at: "06:07", agent: "Opportunities", text: "Found 7 post ideas in this week's searches." },
+  { at: "06:12", agent: "Planner", text: "Put 4 of them on next week's calendar." },
+  { at: "06:18", agent: "Creator", text: "Drafted a carousel and two Threads posts." },
+  { at: "06:19", agent: "Quality check", text: "Held one draft back: “FSC certified” isn’t in your product information.", tone: "warn" },
+  { at: "06:21", agent: "You", text: "2 drafts are waiting for your approval.", tone: "you" },
+];
+
+function MorningLog() {
+  return (
+    <aside aria-labelledby="morning-h" className="flex flex-col justify-center border-t border-border px-6 py-12 sm:px-12 lg:order-1 lg:border-r lg:border-t-0 lg:py-20">
+      <p id="morning-h" className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+        An example morning
+      </p>
+      <ol className="mt-6 max-w-lg border-l border-border">
+        {MORNING.map((l, i) => (
+          <li
+            key={l.at}
+            className={`log-line-in relative grid grid-cols-[3.5rem_1fr] gap-x-3 py-2.5 pl-5 ${l.tone === "you" ? "mt-2" : ""}`}
+            // Starts once the form has settled (its last part rises in at ~240 ms).
+            style={{ animationDelay: `${320 + i * 140}ms` }}
+          >
+            <span
+              aria-hidden="true"
+              className={`absolute -left-[5px] top-[1.05rem] size-2.5 rounded-full border-2 border-background ${l.tone === "warn" ? "bg-warning" : l.tone === "you" ? "status-pulse bg-primary" : "bg-success"}`}
+            />
+            <time className="pt-0.5 font-mono text-xs tabular-nums text-muted-foreground">{l.at}</time>
+            <p className={`text-sm ${l.tone === "you" ? "font-medium text-primary" : "text-foreground"}`}>
+              <span className={`mr-2 font-mono text-[11px] uppercase tracking-[0.12em] ${l.tone === "warn" ? "text-warning" : "text-muted-foreground"}`}>{l.agent}</span>
+              {l.text}
+            </p>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-8 max-w-sm font-display text-xl italic leading-snug text-muted-foreground">
+        Agents draft and check. Nothing is published until someone on your team approves it.
+      </p>
+    </aside>
   );
 }
 
