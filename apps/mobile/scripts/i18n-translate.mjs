@@ -41,7 +41,6 @@ async function translate(lang, entries) {
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: MODEL,
-      temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [
         {

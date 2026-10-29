@@ -33,5 +33,24 @@
     "create": "Criar",
     "ideas": "Ideias",
     "results": "Resultados"
+  },
+  "net": {
+    "unreachable": "Não foi possível ligar ao Espanda. Verifica a ligação à internet. Vamos continuar a tentar.",
+    "timeout": "O Espanda demorou demasiado tempo a responder. Verifica a ligação e tenta novamente.",
+    "serverDown": "O Espanda não está a responder de momento. Tenta novamente dentro de um minuto.",
+    "offline": "Sem ligação. Vamos restabelecê-la assim que possível. Não perdeste nada do que guardaste.",
+    "backOnline": "Ligação restabelecida.",
+    "signedOut": "A tua sessão terminou. Inicia sessão novamente para continuares onde estavas.",
+    "failed": "Algo correu mal. Tenta novamente."
+  },
+  "notFound": {
+    "title": "Este ecrã não existe.",
+    "body": "A ligação pode ser antiga ou o ecrã pode ter sido movido.",
+    "home": "Ir para o início"
+  },
+  "crash": {
+    "title": "Algo correu mal.",
+    "body": "Ocorreu um problema neste ecrã. Tenta novamente. Se o problema persistir, reinicia a app.",
+    "retry": "Tentar novamente"
   }
 }

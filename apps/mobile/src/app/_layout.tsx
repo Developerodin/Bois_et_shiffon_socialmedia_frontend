@@ -1,12 +1,17 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, useFonts } from "@expo-google-fonts/inter";
-import { Stack } from "expo-router";
+import { router, Stack, type ErrorBoundaryProps } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppState } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "@/i18n";
+import { onSignedOut } from "@/api/client";
 import { color } from "@/theme/tokens";
+import { Button } from "@/ui/button";
+import { ConnectionBanner } from "@/ui/connection-banner";
+import { ErrorScreen } from "@/ui/error-screen";
 import { loadAppLanguage } from "@/ui/language/languages";
 import { restoreOnboarding, saveOnboarding } from "@/ui/onboarding/state";
 
@@ -29,12 +34,31 @@ export default function RootLayout() {
     if (ready) void SplashScreen.hideAsync();
   }, [ready]);
 
+  // A saved sign-in that stops working (expired, signed out elsewhere): back to sign in, saying why. Onboarding
+  // answers are kept, so they continue where they were once signed in again.
+  useEffect(() => onSignedOut(() => router.replace({ pathname: "/onboarding/sign-in", params: { expired: "1" } })), []);
+
   if (!ready) return null;
 
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.canvas } }} />
+      <ConnectionBanner />
+    </SafeAreaProvider>
+  );
+}
+
+/** Any screen that throws while drawing lands here (expo-router: the nearest parent's ErrorBoundary). */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  const { t } = useTranslation();
+  useEffect(() => console.error(error), [error]);
+  return (
+    <SafeAreaProvider>
+      <ErrorScreen title={t("crash.title")} body={t("crash.body")}>
+        <Button label={t("crash.retry")} onPress={() => void retry()} />
+        <Button label={t("notFound.home")} variant="outline" onPress={() => router.replace("/")} />
+      </ErrorScreen>
     </SafeAreaProvider>
   );
 }

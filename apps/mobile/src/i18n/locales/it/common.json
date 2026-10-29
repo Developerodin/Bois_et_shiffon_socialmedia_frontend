@@ -33,5 +33,24 @@
     "create": "Crea",
     "ideas": "Idee",
     "results": "Risultati"
+  },
+  "net": {
+    "unreachable": "Impossibile raggiungere Espanda. Controlla la connessione a Internet: continueremo a riprovare.",
+    "timeout": "Espanda impiega troppo tempo a rispondere. Controlla la connessione e riprova.",
+    "serverDown": "Espanda non risponde al momento. Riprova tra un minuto.",
+    "offline": "Nessuna connessione. Ci riconnetteremo appena possibile; non perderai nulla di ciò che hai salvato.",
+    "backOnline": "Connessione ripristinata.",
+    "signedOut": "Hai effettuato la disconnessione. Accedi di nuovo per riprendere da dove eri rimasto.",
+    "failed": "Qualcosa è andato storto. Riprova."
+  },
+  "notFound": {
+    "title": "Questa schermata non esiste.",
+    "body": "Il link potrebbe essere vecchio o la schermata potrebbe essere stata spostata.",
+    "home": "Vai alla home"
+  },
+  "crash": {
+    "title": "Qualcosa è andato storto.",
+    "body": "Si è verificato un problema con questa schermata. Riprova; se il problema persiste, riavvia l’app.",
+    "retry": "Riprova"
   }
 }

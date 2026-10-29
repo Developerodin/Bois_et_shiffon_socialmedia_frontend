@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { getCountryCallingCode, getExampleNumber, parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js/mobile";
 import examples from "libphonenumber-js/mobile/examples";
 import { useState } from "react";
@@ -22,6 +22,8 @@ export default function SignIn() {
   const [picking, setPicking] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Sent here because the saved sign-in stopped working (src/app/_layout.tsx).
+  const { expired } = useLocalSearchParams<{ expired?: string }>();
   // National ("98765 43210", "0151 …") or international ("+44 …") input; a typed +code wins over the picker.
   const parsed = parsePhoneNumberFromString(phone, country);
   const shownCountry = (phone.trim().startsWith("+") && parsed?.country) || country;
@@ -44,6 +46,11 @@ export default function SignIn() {
 
   return (
     <AuthSheet title={t("signIn.title")} subtitle={t("signIn.subtitle")}>
+      {expired ? (
+        <Text accessibilityRole="alert" style={[type.meta, { paddingBottom: space[12] }]}>
+          {t("common:net.signedOut")}
+        </Text>
+      ) : null}
       <Field
         label={t("signIn.mobileNumber")}
         height={48}

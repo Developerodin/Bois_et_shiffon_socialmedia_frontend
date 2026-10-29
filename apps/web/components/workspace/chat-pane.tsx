@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { ArrowUp, Check, Globe, Loader2, Play, Plus, Square, TriangleAlert, Wrench } from "lucide-react";
 import { startRun } from "@/components/agents/api";
+import { isOffline, NET_MESSAGE, send } from "@/lib/net";
 import { Markdown } from "@/components/context/markdown";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,9 @@ type Props = { workspaceId: string; brandId: string; website: string | null };
 
 /** The AI SDK uses a failed response's body as the error message: show the problem+json detail, not the JSON. */
 function chatError(error: Error) {
+  // No response at all (fetch's TypeError): say why, and keep the retry. The message stays in the thread.
+  if (isOffline()) return { text: "You’re offline, so that message wasn’t sent. Press Try again once you’re back.", retry: true };
+  if (error.name === "TypeError") return { text: `${NET_MESSAGE.unreachable} Your message wasn't sent.`, retry: true };
   try {
     const p = JSON.parse(error.message) as { detail?: string; title?: string; status?: number };
     return { text: p.detail || p.title || "Something went wrong.", retry: !(p.status && p.status >= 400 && p.status < 500) };
@@ -38,7 +42,8 @@ export function ChatPane(props: Props) {
   const base = `/api/v1/workspaces/${encodeURIComponent(props.workspaceId)}/brands/${encodeURIComponent(props.brandId)}/chat`;
   useEffect(() => {
     let cancelled = false;
-    fetch(base, { cache: "no-store" })
+    // Offline: wait for the connection rather than open an empty chat and start a second conversation.
+    send(base, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : { thread: null }))
       .then((d: { thread: { id: string; messages: UIMessage[] } | null }) => !cancelled && setInitial(d.thread ?? { id: crypto.randomUUID(), messages: [] }))
       .catch(() => !cancelled && setInitial({ id: crypto.randomUUID(), messages: [] }));

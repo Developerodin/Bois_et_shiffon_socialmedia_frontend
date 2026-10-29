@@ -129,10 +129,14 @@
         "value": "Stimme von deinen Seiten"
       }
     },
-    "safeNote": "Der Katalogimport ändert nichts an deinem Live-Shop."
+    "safeNote": "Der Katalogimport ändert nichts an deinem Live-Shop.",
+    "unreachable": "Diese Website konnte nicht geöffnet werden. Prüfe die Adresse.",
+    "checkFailed": "Die Website konnte nicht geprüft werden. Versuche es erneut.",
+    "noWebsite": "Keine Website? Beschreibe stattdessen dein Geschäft"
   },
   "manual": {
     "title": "Geschäftsdaten hinzufügen",
+    "subtitle": "Erzähl uns, was und wo du verkaufst. Wir suchen dein Geschäft online.",
     "nameLabel": "Geschäftsname *",
     "namePlaceholder": "z.B. Atelier Bois & Chiffons",
     "sellsLabel": "Was verkaufst du? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Website öffnen",
       "identity": "Markenidentität & Ton lesen",
-      "photos": "Produktfotos sammeln"
+      "photos": "Produktfotos sammeln",
+      "find": "Dein Geschäft online finden"
     },
     "status": {
       "done": "Abgeschlossen",
@@ -168,7 +173,10 @@
       "noWorkspace": "Dein Konto hat noch keinen Arbeitsbereich.",
       "startFailed": "Konnte das Lesen deiner Website nicht starten.",
       "restartFailed": "Konnte nicht neu starten. Versuche es erneut."
-    }
+    },
+    "bodyMaps": "Dein Google Maps-Eintrag wird gelesen und dein Geschäft online gesucht.",
+    "sourceMaps": "Google Maps-Eintrag",
+    "foundMaps": "Eintrag ausgewählt"
   },
   "review": {
     "title": "Geschäftsdaten überprüfen",
@@ -182,7 +190,20 @@
     "products_one": "Erkannte Produkte ({{count}})",
     "products_other": "Erkannte Produkte ({{count}})",
     "found": "Gefunden",
-    "strengths": "Markenstärken"
+    "strengths": "Markenstärken",
+    "noProducts": "Wir haben noch keine Produkte auf deiner Website gefunden.",
+    "name": "Geschäftsname",
+    "editName": "Geschäftsnamen bearbeiten",
+    "addTagline": "Füge deinen Slogan hinzu",
+    "addAudience": "Wer kauft bei dir?",
+    "saveFailed": "Die Änderung konnte nicht gespeichert werden und wurde zurückgesetzt. Versuche es erneut.",
+    "subtitleNoWebsite": "Diese Angaben haben wir online gefunden und aus deinen Angaben übernommen. Du kannst sie jederzeit bearbeiten.",
+    "noProductsNoWebsite": "Noch keine Produktfotos. Ohne Website gibt es keinen Katalog zum Importieren.",
+    "foundSite": "Wir haben deine Website gefunden",
+    "foundSiteBody": "Gehört {{host}} dir? Wir suchen dort nach deinem Logo, deinen Farben und Produkten (etwa eine Minute).",
+    "useSite": "Website nutzen",
+    "notMine": "Nicht meine",
+    "useSiteFailed": "Die Website konnte nicht verwendet werden. Versuche es erneut oder fahre ohne sie fort."
   },
   "brand": {
     "title": "Marke & kreativer Stil",
@@ -199,7 +220,23 @@
       "elegant": "Elegant",
       "premium": "Premium",
       "natural": "Natürlich",
-      "minimalist": "Minimalistisch"
+      "minimalist": "Minimalistisch",
+      "warm": "Herzlich",
+      "playful": "Verspielt",
+      "bold": "Mutig",
+      "calm": "Ruhig",
+      "romantic": "Romantisch",
+      "edgy": "Unkonventionell",
+      "rustic": "Rustikal",
+      "vintage": "Vintage",
+      "bohemian": "Boho",
+      "industrial": "Industrial",
+      "scandinavian": "Skandinavisch",
+      "coastal": "Maritim",
+      "affordable": "Erschwinglich",
+      "artisanal": "Handwerklich",
+      "sustainable": "Nachhaltig",
+      "family-friendly": "Familienfreundlich"
     },
     "contentLanguage": "Inhaltssprache",
     "contentLanguageA11y": "Inhaltssprache, {{language}}. Ändern",
@@ -211,7 +248,57 @@
     "featured": "Ausgewählte Katalogprodukte",
     "readyForBatch_one": "{{count}} bereit für Batch",
     "readyForBatch_other": "{{count}} bereit für Batch",
-    "channelsNote": "Instagram und Facebook können im nächsten Schritt verbunden werden. (Noch keine Kanäle verbunden)"
+    "channelsNote": "Instagram und Facebook können im nächsten Schritt verbunden werden. (Noch keine Kanäle verbunden)",
+    "noColors": "Wir haben keine Markenfarben auf deiner Website gefunden.",
+    "fonts": "Schriftarten: {{fonts}}",
+    "colorFrom": {
+      "site": "Website",
+      "logo": "Logo",
+      "products": "Fotos",
+      "you": "Von dir"
+    },
+    "editColor": "Farbe bearbeiten",
+    "addColor": "Farbe hinzufügen",
+    "hexLabel": "Oder Hex-Code eingeben",
+    "hexHint": "Gib einen Hex-Code wie #7C6754 ein",
+    "duplicateColor": "Diese Farbe ist bereits in der Palette",
+    "saveColor": "Farbe speichern",
+    "removeColor": "Farbe entfernen",
+    "cancel": "Abbrechen",
+    "saveFailed": "Speichern fehlgeschlagen. Deine Farben sind unverändert – versuche es erneut.",
+    "swatchA11y": "{{hex}}, {{source}}. Bearbeiten",
+    "pickColor": "Wähle eine Farbe und dann einen Farbton",
+    "lighter": "Heller",
+    "darker": "Dunkler",
+    "toneGroups": {
+      "feel": "Stimmung",
+      "style": "Stil",
+      "positioning": "Positionierung"
+    },
+    "hues": {
+      "red": "Rot",
+      "orange": "Orange",
+      "yellow": "Gelb",
+      "green": "Grün",
+      "teal": "Türkis",
+      "blue": "Blau",
+      "purple": "Lila",
+      "pink": "Pink",
+      "brown": "Braun",
+      "grey": "Grau"
+    },
+    "shades": {
+      "lightest": "am hellsten",
+      "light": "hell",
+      "medium": "mittel",
+      "dark": "dunkel",
+      "darkest": "am dunkelsten"
+    },
+    "prefsSaveFailed": "Dein Stil und deine Sprache konnten nicht gespeichert werden.",
+    "continueWithoutSaving": "Ohne Speichern fortfahren",
+    "paletteMetaNoWebsite": "Markenpalette",
+    "swatchesNoWebsite": "Farbfelder",
+    "noColorsNoWebsite": "Noch keine Farben. Ohne Website können keine Farben importiert werden."
   },
   "preparing": {
     "ready": "Studio bereit",
@@ -219,7 +306,24 @@
     "loadingButton": "Bereite deine Ideen vor…",
     "catalogSafe": "Dein Katalog bleibt in deinem Shop unberührt.",
     "title": "Bereite deine ersten Ideen vor",
-    "nextTitle": "Als Nächstes: Überprüfe deine Ideen"
+    "nextTitle": "Als Nächstes: Überprüfe deine Ideen",
+    "bodyIdeas": "Wir suchen nach passenden Post-Ideen für {{name}}: Jahreszeiten, Trends und dein Katalog.",
+    "photosReady": "Produktfotos bereit",
+    "photosCount_one": "{{count}} Foto · {{product}}",
+    "photosCount_other": "{{count}} Fotos · {{product}}",
+    "noPhotos": "Keine Produktfotos auf deiner Website gefunden",
+    "ideasTitle": "Post-Ideen finden",
+    "ideasDetail": "Jahreszeiten, Trends und dein Katalog",
+    "ideasFound_one": "{{count}} Idee gefunden",
+    "ideasFound_other": "{{count}} Ideen gefunden",
+    "ideasNone": "Diesmal keine neuen Ideen",
+    "nextPick": "Wähle die Ideen aus, die du posten möchtest",
+    "continueWithout": "Ohne Ideen fortfahren",
+    "errors": {
+      "noBrand": "Dein Geschäft ist noch nicht eingerichtet. Gehe einen Schritt zurück.",
+      "stopped": "Die Suche nach Ideen wurde gestoppt.",
+      "startFailed": "Die Suche nach Ideen konnte nicht gestartet werden."
+    }
   },
   "connect": {
     "readyToConnect": "• Bereit zum Verbinden",
@@ -237,6 +341,25 @@
     "laterBody": "Du kannst weiterhin hochauflösende Reels und Fotoshootings erstellen, bearbeiten und auf deine Kamerarolle herunterladen. Du kannst dein Instagram jederzeit in den Einstellungen verknüpfen.",
     "laterDownload": "Lade deine Kreationen herunter",
     "laterSettings": "Kanäle in den Einstellungen verbinden",
-    "continueWithout": "Ohne Verbindung fortfahren"
+    "continueWithout": "Ohne Verbindung fortfahren",
+    "connectedAs": "Verbunden: {{names}}",
+    "errors": {
+      "noBrand": "Dein Geschäft ist noch nicht eingerichtet. Gehe einen Schritt zurück.",
+      "cancelled": "Die Verbindung wurde abgebrochen. Versuche es erneut, wenn du bereit bist.",
+      "failed": "Verbindung fehlgeschlagen. Versuche es erneut."
+    }
+  },
+  "maps": {
+    "title": "Finde dein Geschäft auf Google Maps",
+    "subtitle": "Suche nach deinem Geschäftsnamen und deiner Stadt und wähle dann deinen Eintrag aus.",
+    "placeholder": "Geschäftsname und Stadt",
+    "search": "Google Maps durchsuchen",
+    "isThisYou": "Ist das dein Geschäft?",
+    "noResults": "Keine Treffer auf Google Maps. Versuche eine andere Schreibweise oder beschreibe dein Geschäft stattdessen.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Nicht dabei? Beschreibe stattdessen dein Geschäft",
+    "errors": {
+      "failed": "Google Maps konnte nicht durchsucht werden. Versuche es erneut."
+    }
   }
 }

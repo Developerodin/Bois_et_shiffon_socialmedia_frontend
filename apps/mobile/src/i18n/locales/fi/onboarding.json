@@ -129,10 +129,14 @@
         "value": "Ääni sivuiltasi"
       }
     },
-    "safeNote": "Luettelon tuonti ei muuta mitään live-kaupassasi."
+    "safeNote": "Luettelon tuonti ei muuta mitään live-kaupassasi.",
+    "unreachable": "Sivustoa ei voitu avata. Tarkista osoite.",
+    "checkFailed": "Sivustoa ei voitu tarkistaa. Yritä uudelleen.",
+    "noWebsite": "Ei verkkosivustoa? Kuvaile yritystäsi"
   },
   "manual": {
     "title": "Lisää yrityksen tiedot",
+    "subtitle": "Kerro, mitä myyt ja missä. Etsimme yrityksesi verkosta.",
     "nameLabel": "Yrityksen nimi *",
     "namePlaceholder": "esim. Atelier Bois & Chiffons",
     "sellsLabel": "Mitä myyt? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Avataan verkkosivusto",
       "identity": "Luetaan brändi-identiteettiä & sävyä",
-      "photos": "Kerätään tuotekuvia"
+      "photos": "Kerätään tuotekuvia",
+      "find": "Etsitään yritystäsi verkosta"
     },
     "status": {
       "done": "Valmis",
@@ -168,7 +173,10 @@
       "noWorkspace": "Tililläsi ei ole vielä työtilaa.",
       "startFailed": "Verkkosivustosi lukemista ei voitu aloittaa.",
       "restartFailed": "Uudelleenkäynnistystä ei voitu suorittaa. Yritä uudelleen."
-    }
+    },
+    "bodyMaps": "Luetaan Google Maps -yritystietojasi ja etsitään yritystäsi verkosta.",
+    "sourceMaps": "Google Maps -yritystiedot",
+    "foundMaps": "Yritystiedot valittu"
   },
   "review": {
     "title": "Tarkista yrityksen tiedot",
@@ -182,7 +190,20 @@
     "products_one": "Havaitut tuotteet ({{count}})",
     "products_other": "Havaitut tuotteet ({{count}})",
     "found": "Löydetty",
-    "strengths": "Brändin vahvuudet"
+    "strengths": "Brändin vahvuudet",
+    "noProducts": "Sivustoltasi ei vielä löytynyt tuotteita.",
+    "name": "Yrityksen nimi",
+    "editName": "Muokkaa yrityksen nimeä",
+    "addTagline": "Lisää iskulauseesi",
+    "addAudience": "Ketkä ostavat sinulta?",
+    "saveFailed": "Muutosta ei voitu tallentaa, joten aiempi tieto palautettiin. Yritä uudelleen.",
+    "subtitleNoWebsite": "Löysimme nämä tiedot verkosta ja antamistasi tiedoista. Voit muokata niitä milloin vain.",
+    "noProductsNoWebsite": "Ei vielä tuotekuvia. Ilman verkkosivustoa tuoteluetteloa ei voi tuoda.",
+    "foundSite": "Löysimme verkkosivustosi",
+    "foundSiteBody": "Onko {{host}} sinun sivustosi? Haemme sieltä logosi, värisi ja tuotteesi. Tämä kestää noin minuutin.",
+    "useSite": "Käytä sivustoa",
+    "notMine": "Ei ole minun",
+    "useSiteFailed": "Sivustoa ei voitu käyttää. Yritä uudelleen tai jatka ilman sitä."
   },
   "brand": {
     "title": "Brändi & luova tyyli",
@@ -199,7 +220,23 @@
       "elegant": "Elegantti",
       "premium": "Premium",
       "natural": "Luonnollinen",
-      "minimalist": "Minimalistinen"
+      "minimalist": "Minimalistinen",
+      "warm": "Lämmin",
+      "playful": "Leikkisä",
+      "bold": "Rohkea",
+      "calm": "Rauhallinen",
+      "romantic": "Romanttinen",
+      "edgy": "Räikeä",
+      "rustic": "Rustii kki",
+      "vintage": "Vintage",
+      "bohemian": "Boheemi",
+      "industrial": "Teollinen",
+      "scandinavian": "Skandinaavinen",
+      "coastal": "Merellinen",
+      "affordable": "Edullinen",
+      "artisanal": "Käsityöläinen",
+      "sustainable": "Vastuullinen",
+      "family-friendly": "Perheystävällinen"
     },
     "contentLanguage": "Sisällön kieli",
     "contentLanguageA11y": "Sisällön kieli, {{language}}. Vaihda",
@@ -211,7 +248,57 @@
     "featured": "Esillä olevat katalogituotteet",
     "readyForBatch_one": "{{count}} valmis erään",
     "readyForBatch_other": "{{count}} valmiina erään",
-    "channelsNote": "Instagram ja Facebook voidaan yhdistää seuraavassa vaiheessa. (Ei kanavia yhdistetty vielä)"
+    "channelsNote": "Instagram ja Facebook voidaan yhdistää seuraavassa vaiheessa. (Ei kanavia yhdistetty vielä)",
+    "noColors": "Sivustoltasi ei löytynyt brändivärejä.",
+    "fonts": "Fontit: {{fonts}}",
+    "colorFrom": {
+      "site": "Verkkosivusto",
+      "logo": "Logo",
+      "products": "Kuvat",
+      "you": "Oma"
+    },
+    "editColor": "Muokkaa väriä",
+    "addColor": "Lisää väri",
+    "hexLabel": "Tai kirjoita heksakoodi",
+    "hexHint": "Käytä heksakoodia, esim. #7C6754",
+    "duplicateColor": "Väri on jo paletissa",
+    "saveColor": "Tallenna väri",
+    "removeColor": "Poista väri",
+    "cancel": "Peruuta",
+    "saveFailed": "Tallennus epäonnistui. Värisi pysyivät ennallaan. Yritä uudelleen.",
+    "swatchA11y": "{{hex}}, {{source}}. Muokkaa",
+    "pickColor": "Valitse väri ja sitten sävy",
+    "lighter": "Vaaleampi",
+    "darker": "Tummempi",
+    "toneGroups": {
+      "feel": "Tunnelma",
+      "style": "Tyyli",
+      "positioning": "Asemointi"
+    },
+    "hues": {
+      "red": "Punainen",
+      "orange": "Oranssi",
+      "yellow": "Keltainen",
+      "green": "Vihreä",
+      "teal": "Turkoosi",
+      "blue": "Sininen",
+      "purple": "Violetti",
+      "pink": "Pinkki",
+      "brown": "Ruskea",
+      "grey": "Harmaa"
+    },
+    "shades": {
+      "lightest": "vaalein",
+      "light": "vaalea",
+      "medium": "keskisävy",
+      "dark": "tumma",
+      "darkest": "tummin"
+    },
+    "prefsSaveFailed": "Sävyä ja kieltä ei voitu tallentaa.",
+    "continueWithoutSaving": "Jatka tallentamatta",
+    "paletteMetaNoWebsite": "Brändin väripaletti",
+    "swatchesNoWebsite": "Värimallit",
+    "noColorsNoWebsite": "Ei vielä värejä. Ilman verkkosivustoa värejä ei voi tuoda."
   },
   "preparing": {
     "ready": "Studio valmis",
@@ -219,7 +306,24 @@
     "loadingButton": "Valmistellaan ideoitasi…",
     "catalogSafe": "Katalogisi pysyy koskemattomana kaupassasi.",
     "title": "Valmistellaan ensimmäisiä ideoitasi",
-    "nextTitle": "Seuraavaksi: Arvioi ideasi"
+    "nextTitle": "Seuraavaksi: Arvioi ideasi",
+    "bodyIdeas": "Etsitään julkaisuideoita yritykselle {{name}}: sesongit, trendit ja tuotevalikoimasi.",
+    "photosReady": "Tuotekuvat valmiina",
+    "photosCount_one": "{{count}} kuva · {{product}}",
+    "photosCount_other": "{{count}} kuvaa · {{product}}",
+    "noPhotos": "Verkkosivustoltasi ei löytynyt tuotekuvia",
+    "ideasTitle": "Etsitään julkaisuideoita",
+    "ideasDetail": "Sesongit, trendit ja tuotevalikoimasi",
+    "ideasFound_one": "{{count}} idea löytyi",
+    "ideasFound_other": "{{count}} ideaa löytyi",
+    "ideasNone": "Ei uusia ideoita tällä kertaa",
+    "nextPick": "Valitse julkaisemisen arvoiset ideat",
+    "continueWithout": "Jatka ilman ideoita",
+    "errors": {
+      "noBrand": "Yritystäsi ei ole vielä määritetty. Palaa yksi vaihe taaksepäin.",
+      "stopped": "Ideoiden haku keskeytyi.",
+      "startFailed": "Ideoiden hakua ei voitu aloittaa."
+    }
   },
   "connect": {
     "readyToConnect": "• Valmis yhdistettäväksi",
@@ -237,6 +341,25 @@
     "laterBody": "Voit silti luoda, muokata ja ladata korkearesoluutioisia videoita ja kuvauksia kamerarullallesi. Voit yhdistää Instagramisi milloin tahansa Asetuksissa.",
     "laterDownload": "Lataa luomuksesi",
     "laterSettings": "Yhdistä kanavat Asetuksissa",
-    "continueWithout": "Jatka yhdistämättä"
+    "continueWithout": "Jatka yhdistämättä",
+    "connectedAs": "Yhdistetty: {{names}}",
+    "errors": {
+      "noBrand": "Yritystäsi ei ole vielä määritetty. Palaa yksi vaihe taaksepäin.",
+      "cancelled": "Yhdistäminen peruttiin. Yritä uudelleen, kun olet valmis.",
+      "failed": "Yhdistäminen epäonnistui. Yritä uudelleen."
+    }
+  },
+  "maps": {
+    "title": "Etsi yrityksesi Google Mapsista",
+    "subtitle": "Hae yrityksesi nimellä ja kaupungilla ja valitse sitten yrityksesi.",
+    "placeholder": "Yrityksen nimi ja kaupunki",
+    "search": "Hae Google Mapsista",
+    "isThisYou": "Onko tämä yrityksesi?",
+    "noResults": "Google Mapsista ei löytynyt osumia. Kokeile toista kirjoitusasua tai kuvaile yritystäsi.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Ei listalla? Kuvaile yritystäsi",
+    "errors": {
+      "failed": "Haku Google Mapsista epäonnistui. Yritä uudelleen."
+    }
   }
 }

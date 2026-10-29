@@ -33,5 +33,24 @@
     "create": "Maken",
     "ideas": "Ideeën",
     "results": "Resultaten"
+  },
+  "net": {
+    "unreachable": "Espanda is niet bereikbaar. Controleer je internetverbinding. We blijven het proberen.",
+    "timeout": "Espanda deed er te lang over om te reageren. Controleer je verbinding en probeer het opnieuw.",
+    "serverDown": "Espanda reageert nu niet. Probeer het over een minuut opnieuw.",
+    "offline": "Geen verbinding. We verbinden opnieuw zodra dat kan. Alles wat je hebt opgeslagen blijft bewaard.",
+    "backOnline": "Weer online.",
+    "signedOut": "Je bent uitgelogd. Log opnieuw in om verder te gaan waar je gebleven was.",
+    "failed": "Er is iets misgegaan. Probeer het opnieuw."
+  },
+  "notFound": {
+    "title": "Dit scherm bestaat niet.",
+    "body": "De link is misschien verouderd of het scherm is verplaatst.",
+    "home": "Naar start"
+  },
+  "crash": {
+    "title": "Er is iets misgegaan.",
+    "body": "Er ging iets mis op dit scherm. Probeer het opnieuw. Blijft het probleem zich voordoen? Start de app dan opnieuw.",
+    "retry": "Opnieuw proberen"
   }
 }

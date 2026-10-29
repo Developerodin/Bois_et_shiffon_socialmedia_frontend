@@ -33,5 +33,24 @@
     "create": "Oluştur",
     "ideas": "Fikirler",
     "results": "Sonuçlar"
+  },
+  "net": {
+    "unreachable": "Espanda'ya ulaşılamıyor. İnternet bağlantını kontrol et; denemeye devam edeceğiz.",
+    "timeout": "Espanda'nın yanıt vermesi çok uzun sürdü. Bağlantını kontrol edip tekrar dene.",
+    "serverDown": "Espanda şu anda yanıt vermiyor. Bir dakika sonra tekrar dene.",
+    "offline": "Bağlantı yok. Mümkün olan en kısa sürede yeniden bağlanacağız; kaydettiklerin güvende.",
+    "backOnline": "Bağlantı yeniden sağlandı.",
+    "signedOut": "Oturumun kapatıldı. Kaldığın yerden devam etmek için tekrar giriş yap.",
+    "failed": "Bir şeyler ters gitti. Tekrar dene."
+  },
+  "notFound": {
+    "title": "Bu ekran mevcut değil.",
+    "body": "Bağlantı eski olabilir veya ekran taşınmış olabilir.",
+    "home": "Başlangıca dön"
+  },
+  "crash": {
+    "title": "Bir şeyler ters gitti.",
+    "body": "Bu ekranda bir sorun oluştu. Tekrar dene; sorun devam ederse uygulamayı yeniden başlat.",
+    "retry": "Tekrar dene"
   }
 }

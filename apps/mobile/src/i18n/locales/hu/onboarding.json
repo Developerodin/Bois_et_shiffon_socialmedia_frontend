@@ -129,10 +129,14 @@
         "value": "Hang a lapjaidról"
       }
     },
-    "safeNote": "A katalógus importálása nem változtat semmit az élő boltodon."
+    "safeNote": "A katalógus importálása nem változtat semmit az élő boltodon.",
+    "unreachable": "Nem sikerült megnyitni az oldalt. Ellenőrizd a címet.",
+    "checkFailed": "Nem sikerült ellenőrizni az oldalt. Próbáld újra.",
+    "noWebsite": "Nincs weboldalad? Mutasd be inkább a vállalkozásodat"
   },
   "manual": {
     "title": "Üzleti adatok hozzáadása",
+    "subtitle": "Mondd el, mit és hol árulsz. Megkeressük a vállalkozásodat az interneten.",
     "nameLabel": "Üzlet neve *",
     "namePlaceholder": "pl. Atelier Bois & Chiffons",
     "sellsLabel": "Mit árulsz? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Weboldal megnyitása",
       "identity": "Márkaidentitás és hangnem olvasása",
-      "photos": "Termékfotók gyűjtése"
+      "photos": "Termékfotók gyűjtése",
+      "find": "Vállalkozásod keresése az interneten"
     },
     "status": {
       "done": "Kész",
@@ -168,7 +173,10 @@
       "noWorkspace": "A fiókodnak még nincs munkaterülete.",
       "startFailed": "Nem sikerült elindítani a weboldalad olvasását.",
       "restartFailed": "Nem sikerült újraindítani. Próbáld újra."
-    }
+    },
+    "bodyMaps": "A Google Maps-adatlapod átnézése és vállalkozásod keresése az interneten.",
+    "sourceMaps": "Google Maps-adatlap",
+    "foundMaps": "Adatlap kiválasztva"
   },
   "review": {
     "title": "Üzleti adatok áttekintése",
@@ -182,7 +190,20 @@
     "products_one": "Észlelt termékek ({{count}})",
     "products_other": "Észlelt termékek ({{count}})",
     "found": "Talált",
-    "strengths": "Márka erősségei"
+    "strengths": "Márka erősségei",
+    "noProducts": "Még nem találtunk termékeket a weboldaladon.",
+    "name": "Vállalkozás neve",
+    "editName": "Vállalkozás nevének szerkesztése",
+    "addTagline": "Add meg a szlogened",
+    "addAudience": "Kik vásárolnak tőled?",
+    "saveFailed": "Nem sikerült menteni a módosítást, ezért visszaállítottuk az eredetit. Próbáld újra.",
+    "subtitleNoWebsite": "Ezeket az adatokat az interneten és a megadott információk alapján találtuk. Bármikor szerkesztheted őket.",
+    "noProductsNoWebsite": "Még nincsenek termékfotók. Weboldal nélkül nincs honnan importálni a katalógust.",
+    "foundSite": "Megtaláltuk a weboldaladat",
+    "foundSiteBody": "A {{host}} a te oldalad? Megkeressük rajta a logódat, a színeidet és a termékeidet. Ez körülbelül egy perc.",
+    "useSite": "Használom",
+    "notMine": "Nem az enyém",
+    "useSiteFailed": "Nem sikerült használni ezt a weboldalt. Próbáld újra, vagy folytasd nélküle."
   },
   "brand": {
     "title": "Márka & kreatív stílus",
@@ -199,7 +220,23 @@
       "elegant": "Elegáns",
       "premium": "Prémium",
       "natural": "Természetes",
-      "minimalist": "Minimalista"
+      "minimalist": "Minimalista",
+      "warm": "Meleg",
+      "playful": "Játékos",
+      "bold": "Merész",
+      "calm": "Nyugodt",
+      "romantic": "Romantikus",
+      "edgy": "Bevállalós",
+      "rustic": "Rusztikus",
+      "vintage": "Vintage",
+      "bohemian": "Bohém",
+      "industrial": "Indusztriális",
+      "scandinavian": "Skandináv",
+      "coastal": "Tengerparti",
+      "affordable": "Megfizethető",
+      "artisanal": "Kézműves",
+      "sustainable": "Fenntartható",
+      "family-friendly": "Családbarát"
     },
     "contentLanguage": "Tartalom nyelve",
     "contentLanguageA11y": "Tartalom nyelve, {{language}}. Módosítás",
@@ -211,7 +248,57 @@
     "featured": "Kiemelt katalógus termékek",
     "readyForBatch_one": "{{count}} kész a csomaghoz",
     "readyForBatch_other": "{{count}} kész a csomaghoz",
-    "channelsNote": "Instagram és Facebook a következő lépésben csatlakoztatható. (Még nincsenek csatornák csatlakoztatva)"
+    "channelsNote": "Instagram és Facebook a következő lépésben csatlakoztatható. (Még nincsenek csatornák csatlakoztatva)",
+    "noColors": "Nem találtunk márkaszíneket a weboldaladon.",
+    "fonts": "Betűtípusok: {{fonts}}",
+    "colorFrom": {
+      "site": "Weboldal",
+      "logo": "Logó",
+      "products": "Fotók",
+      "you": "Saját"
+    },
+    "editColor": "Szín szerkesztése",
+    "addColor": "Szín hozzáadása",
+    "hexLabel": "Vagy adj meg egy hexkódot",
+    "hexHint": "Például: #7C6754",
+    "duplicateColor": "Ez a szín már szerepel a palettán",
+    "saveColor": "Szín mentése",
+    "removeColor": "Szín eltávolítása",
+    "cancel": "Mégse",
+    "saveFailed": "Nem sikerült menteni. A színeid nem változtak — próbáld újra.",
+    "swatchA11y": "{{hex}}, {{source}}. Szerkesztés",
+    "pickColor": "Válassz egy színt, majd egy árnyalatot",
+    "lighter": "Világosabb",
+    "darker": "Sötétebb",
+    "toneGroups": {
+      "feel": "Hangulat",
+      "style": "Stílus",
+      "positioning": "Pozicionálás"
+    },
+    "hues": {
+      "red": "Piros",
+      "orange": "Narancssárga",
+      "yellow": "Sárga",
+      "green": "Zöld",
+      "teal": "Türkiz",
+      "blue": "Kék",
+      "purple": "Lila",
+      "pink": "Rózsaszín",
+      "brown": "Barna",
+      "grey": "Szürke"
+    },
+    "shades": {
+      "lightest": "legvilágosabb",
+      "light": "világos",
+      "medium": "közepes",
+      "dark": "sötét",
+      "darkest": "legsötétebb"
+    },
+    "prefsSaveFailed": "Nem sikerült menteni a hangvételt és a nyelvet.",
+    "continueWithoutSaving": "Folytatás mentés nélkül",
+    "paletteMetaNoWebsite": "Márkapaletta",
+    "swatchesNoWebsite": "Színminták",
+    "noColorsNoWebsite": "Még nincsenek színek. Weboldal nélkül nincs honnan importálni őket."
   },
   "preparing": {
     "ready": "Stúdió kész",
@@ -219,7 +306,24 @@
     "loadingButton": "Ötleteid előkészítése…",
     "catalogSafe": "A katalógusod érintetlen marad az áruházadban.",
     "title": "Első ötleteid előkészítése",
-    "nextTitle": "Következő: Nézd át az ötleteidet"
+    "nextTitle": "Következő: Nézd át az ötleteidet",
+    "bodyIdeas": "Posztötleteket keresünk itt: {{name}}. Figyelembe vesszük az évszakokat, a trendeket és a katalógusodat.",
+    "photosReady": "Termékfotók készen",
+    "photosCount_one": "{{count}} fotó · {{product}}",
+    "photosCount_other": "{{count}} fotó · {{product}}",
+    "noPhotos": "Nem találtunk termékfotókat a weboldaladon",
+    "ideasTitle": "Posztötletek keresése",
+    "ideasDetail": "Évszakok, trendek és a katalógusod",
+    "ideasFound_one": "{{count}} ötletet találtunk",
+    "ideasFound_other": "{{count}} ötletet találtunk",
+    "ideasNone": "Ezúttal nem találtunk új ötleteket",
+    "nextPick": "Válaszd ki, mit érdemes posztolni",
+    "continueWithout": "Folytatás ötletek nélkül",
+    "errors": {
+      "noBrand": "A vállalkozásodat még nem állítottad be. Lépj vissza egyet.",
+      "stopped": "Az ötletek keresése leállt.",
+      "startFailed": "Nem sikerült elindítani az ötletek keresését."
+    }
   },
   "connect": {
     "readyToConnect": "• Készen áll a csatlakozásra",
@@ -237,6 +341,25 @@
     "laterBody": "Még mindig létrehozhatsz, szerkeszthetsz és letölthetsz nagy felbontású videókat és fotózásokat a kameratekercsedre. Az Instagramot bármikor összekapcsolhatod a Beállításokban.",
     "laterDownload": "Kreációid letöltése",
     "laterSettings": "Csatornák csatlakoztatása a Beállításokban",
-    "continueWithout": "Folytatás csatlakozás nélkül"
+    "continueWithout": "Folytatás csatlakozás nélkül",
+    "connectedAs": "Csatlakoztatva: {{names}}",
+    "errors": {
+      "noBrand": "A vállalkozásodat még nem állítottad be. Lépj vissza egyet.",
+      "cancelled": "A csatlakozás megszakadt. Próbáld újra, ha készen állsz.",
+      "failed": "Nem sikerült csatlakozni. Próbáld újra."
+    }
+  },
+  "maps": {
+    "title": "Keresd meg a vállalkozásodat a Google Mapsen",
+    "subtitle": "Keress rá a vállalkozásod nevére és a városra, majd válaszd ki az adatlapját.",
+    "placeholder": "Vállalkozás neve és város",
+    "search": "Keresés a Google Mapsen",
+    "isThisYou": "Ez a te vállalkozásod?",
+    "noResults": "Nincs találat a Google Mapsen. Próbáld másképp írni, vagy mutasd be inkább a vállalkozásodat.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Nincs a listán? Mutasd be inkább a vállalkozásodat",
+    "errors": {
+      "failed": "Nem sikerült keresni a Google Mapsen. Próbáld újra."
+    }
   }
 }

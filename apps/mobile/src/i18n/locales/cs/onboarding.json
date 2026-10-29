@@ -129,10 +129,14 @@
         "value": "Hlas z vašich stránek"
       }
     },
-    "safeNote": "Import katalogu nic nezmění na vašem živém obchodě."
+    "safeNote": "Import katalogu nic nezmění na vašem živém obchodě.",
+    "unreachable": "Web se nepodařilo otevřít. Zkontroluj adresu.",
+    "checkFailed": "Web se nepodařilo zkontrolovat. Zkus to znovu.",
+    "noWebsite": "Nemáš web? Popiš své podnikání"
   },
   "manual": {
     "title": "Přidat podrobnosti o podniku",
+    "subtitle": "Řekni nám, co prodáváš a kde. Vyhledáme tvoji firmu online.",
     "nameLabel": "Název podniku *",
     "namePlaceholder": "např. Atelier Bois & Chiffons",
     "sellsLabel": "Co prodáváte? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Otevírání webové stránky",
       "identity": "Čtení identity značky a tónu",
-      "photos": "Shromažďování produktových fotografií"
+      "photos": "Shromažďování produktových fotografií",
+      "find": "Hledáme tvoji firmu online"
     },
     "status": {
       "done": "Dokončeno",
@@ -168,7 +173,10 @@
       "noWorkspace": "Váš účet zatím nemá pracovní prostor.",
       "startFailed": "Nepodařilo se začít číst vaši webovou stránku.",
       "restartFailed": "Nepodařilo se restartovat. Zkuste to znovu."
-    }
+    },
+    "bodyMaps": "Procházíme tvůj profil na Google Maps a hledáme tvoji firmu online.",
+    "sourceMaps": "Profil na Google Maps",
+    "foundMaps": "Profil vybrán"
   },
   "review": {
     "title": "Zkontrolujte podrobnosti o podniku",
@@ -182,7 +190,20 @@
     "products_one": "Zjištěné produkty ({{count}})",
     "products_other": "Zjištěné produkty ({{count}})",
     "found": "Nalezeno",
-    "strengths": "Silné stránky značky"
+    "strengths": "Silné stránky značky",
+    "noProducts": "Na tvém webu jsme zatím nenašli žádné produkty.",
+    "name": "Název firmy",
+    "editName": "Upravit název firmy",
+    "addTagline": "Přidej svůj slogan",
+    "addAudience": "Kdo u tebe nakupuje?",
+    "saveFailed": "Změnu se nepodařilo uložit. Vrátili jsme původní údaj. Zkus to znovu.",
+    "subtitleNoWebsite": "Tyto údaje jsme našli online a získali od tebe. Kdykoli je můžeš upravit.",
+    "noProductsNoWebsite": "Zatím žádné fotky produktů. Bez webu není odkud importovat katalog.",
+    "foundSite": "Našli jsme tvůj web",
+    "foundSiteBody": "Je {{host}} tvůj web? Najdeme na něm tvoje logo, barvy a produkty. Zabere to asi minutu.",
+    "useSite": "Použít",
+    "notMine": "Není můj",
+    "useSiteFailed": "Web se nepodařilo použít. Zkus to znovu nebo pokračuj bez něj."
   },
   "brand": {
     "title": "Značka & kreativní styl",
@@ -199,7 +220,23 @@
       "elegant": "Elegantní",
       "premium": "Prémiový",
       "natural": "Přírodní",
-      "minimalist": "Minimalistický"
+      "minimalist": "Minimalistický",
+      "warm": "Vřelý",
+      "playful": "Hravý",
+      "bold": "Odvážný",
+      "calm": "Klidný",
+      "romantic": "Romantický",
+      "edgy": "Provokativní",
+      "rustic": "Rustikální",
+      "vintage": "Vintage",
+      "bohemian": "Bohémský",
+      "industrial": "Industriální",
+      "scandinavian": "Skandinávský",
+      "coastal": "Přímořský",
+      "affordable": "Cenově dostupný",
+      "artisanal": "Řemeslný",
+      "sustainable": "Udržitelný",
+      "family-friendly": "Pro celou rodinu"
     },
     "contentLanguage": "Jazyk obsahu",
     "contentLanguageA11y": "Jazyk obsahu, {{language}}. Změnit",
@@ -211,7 +248,57 @@
     "featured": "Doporučené produkty katalogu",
     "readyForBatch_one": "{{count}} připraveno k dávce",
     "readyForBatch_other": "{{count}} připraveno k dávce",
-    "channelsNote": "Instagram a Facebook lze připojit v dalším kroku. (Žádné kanály zatím nejsou připojeny)"
+    "channelsNote": "Instagram a Facebook lze připojit v dalším kroku. (Žádné kanály zatím nejsou připojeny)",
+    "noColors": "Na tvém webu jsme nenašli barvy značky.",
+    "fonts": "Písma: {{fonts}}",
+    "colorFrom": {
+      "site": "Web",
+      "logo": "Logo",
+      "products": "Fotky",
+      "you": "Tvoje"
+    },
+    "editColor": "Upravit barvu",
+    "addColor": "Přidat barvu",
+    "hexLabel": "Nebo zadej hex kód",
+    "hexHint": "Zadej hex kód, například #7C6754",
+    "duplicateColor": "Tato barva už je v paletě",
+    "saveColor": "Uložit barvu",
+    "removeColor": "Odebrat barvu",
+    "cancel": "Zrušit",
+    "saveFailed": "Uložení se nezdařilo. Barvy zůstaly beze změny. Zkus to znovu.",
+    "swatchA11y": "{{hex}}, {{source}}. Upravit",
+    "pickColor": "Vyber barvu a potom odstín",
+    "lighter": "Světlejší",
+    "darker": "Tmavší",
+    "toneGroups": {
+      "feel": "Nálada",
+      "style": "Styl",
+      "positioning": "Zaměření"
+    },
+    "hues": {
+      "red": "Červená",
+      "orange": "Oranžová",
+      "yellow": "Žlutá",
+      "green": "Zelená",
+      "teal": "Tyrkysová",
+      "blue": "Modrá",
+      "purple": "Fialová",
+      "pink": "Růžová",
+      "brown": "Hnědá",
+      "grey": "Šedá"
+    },
+    "shades": {
+      "lightest": "nejsvětlejší",
+      "light": "světlý",
+      "medium": "střední",
+      "dark": "tmavý",
+      "darkest": "nejtmavší"
+    },
+    "prefsSaveFailed": "Tón a jazyk se nepodařilo uložit.",
+    "continueWithoutSaving": "Pokračovat bez uložení",
+    "paletteMetaNoWebsite": "Paleta značky",
+    "swatchesNoWebsite": "Vzorník barev",
+    "noColorsNoWebsite": "Zatím žádné barvy. Bez webu je není odkud importovat."
   },
   "preparing": {
     "ready": "Studio připraveno",
@@ -219,7 +306,24 @@
     "loadingButton": "Připravuji vaše nápady…",
     "catalogSafe": "Váš katalog zůstává nedotčen ve vašem obchodě.",
     "title": "Příprava vašich prvních nápadů",
-    "nextTitle": "Dále: Zkontrolujte své nápady"
+    "nextTitle": "Dále: Zkontrolujte své nápady",
+    "bodyIdeas": "Hledáme, co se pro {{name}} vyplatí zveřejnit: sezónní témata, trendy a produkty z katalogu.",
+    "photosReady": "Fotky produktů jsou připravené",
+    "photosCount_one": "{{count}} fotka · {{product}}",
+    "photosCount_other": "Fotky: {{count}} · {{product}}",
+    "noPhotos": "Na tvém webu jsme nenašli žádné fotky produktů",
+    "ideasTitle": "Hledáme nápady na příspěvky",
+    "ideasDetail": "Sezónní témata, trendy a tvůj katalog",
+    "ideasFound_one": "Nalezený nápad: {{count}}",
+    "ideasFound_other": "Nalezené nápady: {{count}}",
+    "ideasNone": "Tentokrát žádné nové nápady",
+    "nextPick": "Vyber, co stojí za zveřejnění",
+    "continueWithout": "Pokračovat bez nápadů",
+    "errors": {
+      "noBrand": "Tvoje firma ještě není nastavená. Vrať se o krok zpět.",
+      "stopped": "Hledání nápadů se zastavilo.",
+      "startFailed": "Hledání nápadů se nepodařilo spustit."
+    }
   },
   "connect": {
     "readyToConnect": "• Připraveno k připojení",
@@ -237,6 +341,25 @@
     "laterBody": "Stále můžete vytvářet, upravovat a stahovat videa a focení ve vysokém rozlišení do svého fotoaparátu. Instagram můžete kdykoli propojit v Nastavení.",
     "laterDownload": "Stáhnout vaše výtvory",
     "laterSettings": "Připojit kanály v Nastavení",
-    "continueWithout": "Pokračovat bez připojení"
+    "continueWithout": "Pokračovat bez připojení",
+    "connectedAs": "Připojeno: {{names}}",
+    "errors": {
+      "noBrand": "Tvoje firma ještě není nastavená. Vrať se o krok zpět.",
+      "cancelled": "Připojování bylo zrušeno. Až budeš chtít, zkus to znovu.",
+      "failed": "Připojení se nezdařilo. Zkus to znovu."
+    }
+  },
+  "maps": {
+    "title": "Najdi svoji firmu na Google Maps",
+    "subtitle": "Vyhledej název firmy a město a pak vyber svůj profil.",
+    "placeholder": "Název firmy a město",
+    "search": "Hledat na Google Maps",
+    "isThisYou": "Je to tvoje firma?",
+    "noResults": "Na Google Maps jsme nic nenašli. Zkus jiný zápis nebo popiš své podnikání.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Není na seznamu? Popiš své podnikání",
+    "errors": {
+      "failed": "Vyhledávání na Google Maps se nezdařilo. Zkus to znovu."
+    }
   }
 }

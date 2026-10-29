@@ -26,7 +26,25 @@ class TooManyAttempts extends CredentialsSignin {
   code = "rate_limited";
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+/** The session couldn't be checked (database unreachable). Pages show their error page; API routes fail. */
+export class SessionUnverifiedError extends Error {
+  constructor() {
+    super("Couldn't verify your session right now. Try again in a moment.");
+    this.name = "SessionUnverifiedError";
+  }
+}
+
+/**
+ * The signed-in session, or null. Throws SessionUnverifiedError when the session couldn't be checked, so no caller
+ * mistakes "couldn't check" for either "signed in" or "signed out".
+ */
+export async function auth() {
+  const session = await nextAuth.auth();
+  if ((session as { unverified?: boolean } | null)?.unverified) throw new SessionUnverifiedError();
+  return session;
+}
+
+const nextAuth = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   callbacks: {
@@ -49,10 +67,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Revocation: a disabled account or bumped sessionVersion ends every session.
       // ponytail: one indexed DB read per auth() call; cache per request if it shows up in traces.
       if (token.sub) {
-        const current = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: { status: true, deletedAt: true, sessionVersion: true },
-        });
+        // The check itself failed (database unreachable, pool exhausted): fail closed, but say so. The session is
+        // marked unverified and grants nothing (no user id, and auth() below throws), so a revoked session can't slip
+        // through a failed check; people see "this page didn't load" rather than a login page that looks like being
+        // signed out. The next request checks again and clears the mark.
+        const current = await prisma.user
+          .findUnique({ where: { id: token.sub }, select: { status: true, deletedAt: true, sessionVersion: true } })
+          .catch((error: unknown) => (console.error("[auth] session check failed:", error instanceof Error ? error.message.slice(0, 200) : error), "unreachable" as const));
+        if (current === "unreachable") return { ...token, unverified: true };
+        delete token.unverified;
         if (
           !current ||
           current.status !== "ACTIVE" ||
@@ -65,6 +88,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     session({ session, token }) {
+      // An unverified session carries no user id: nothing can treat it as signed in.
+      if (token.unverified) return { ...session, user: undefined, unverified: true } as unknown as typeof session;
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }
@@ -160,3 +185,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
 });
+export const { handlers, signIn, signOut } = nextAuth;

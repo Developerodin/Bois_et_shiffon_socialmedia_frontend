@@ -129,10 +129,14 @@
         "value": "Voz das suas páginas"
       }
     },
-    "safeNote": "A importação do catálogo não altera nada na sua loja ao vivo."
+    "safeNote": "A importação do catálogo não altera nada na sua loja ao vivo.",
+    "unreachable": "Não foi possível abrir este site. Verifica o endereço.",
+    "checkFailed": "Não foi possível verificar o site. Tenta novamente.",
+    "noWebsite": "Não tens site? Descreve o teu negócio"
   },
   "manual": {
     "title": "Adicionar detalhes do negócio",
+    "subtitle": "Diz-nos o que vendes e onde. Vamos procurar o teu negócio online.",
     "nameLabel": "Nome do negócio *",
     "namePlaceholder": "ex. Atelier Bois & Chiffons",
     "sellsLabel": "O que vende? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Abrindo website",
       "identity": "Lendo identidade da marca & tom",
-      "photos": "Recolhendo fotos de produtos"
+      "photos": "Recolhendo fotos de produtos",
+      "find": "A procurar o teu negócio online"
     },
     "status": {
       "done": "Concluído",
@@ -168,7 +173,10 @@
       "noWorkspace": "A sua conta ainda não tem espaço de trabalho.",
       "startFailed": "Não foi possível iniciar a leitura do seu website.",
       "restartFailed": "Não foi possível reiniciar. Tente novamente."
-    }
+    },
+    "bodyMaps": "A consultar a tua ficha no Google Maps e a procurar o teu negócio online.",
+    "sourceMaps": "Ficha do Google Maps",
+    "foundMaps": "Ficha selecionada"
   },
   "review": {
     "title": "Rever detalhes do negócio",
@@ -182,7 +190,20 @@
     "products_one": "Produtos detectados ({{count}})",
     "products_other": "Produtos detectados ({{count}})",
     "found": "Encontrado",
-    "strengths": "Pontos fortes da marca"
+    "strengths": "Pontos fortes da marca",
+    "noProducts": "Ainda não encontrámos produtos no teu site.",
+    "name": "Nome do negócio",
+    "editName": "Editar nome do negócio",
+    "addTagline": "Adiciona o teu slogan",
+    "addAudience": "Quem compra os teus produtos?",
+    "saveFailed": "Não foi possível guardar a alteração — repusemos o valor anterior. Tenta novamente.",
+    "subtitleNoWebsite": "Encontrámos estes dados online e a partir do que nos disseste. Podes editá-los a qualquer momento.",
+    "noProductsNoWebsite": "Ainda não há fotos de produtos. Sem site, não há catálogo para importar.",
+    "foundSite": "Encontrámos o teu site",
+    "foundSiteBody": "O site {{host}} é teu? Vamos procurar nele o teu logótipo, cores e produtos (cerca de um minuto).",
+    "useSite": "Usar site",
+    "notMine": "Não é meu",
+    "useSiteFailed": "Não foi possível usar esse site. Tenta novamente ou continua sem ele."
   },
   "brand": {
     "title": "Marca & estilo criativo",
@@ -199,7 +220,23 @@
       "elegant": "Elegante",
       "premium": "Premium",
       "natural": "Natural",
-      "minimalist": "Minimalista"
+      "minimalist": "Minimalista",
+      "warm": "Acolhedor",
+      "playful": "Divertido",
+      "bold": "Ousado",
+      "calm": "Tranquilo",
+      "romantic": "Romântico",
+      "edgy": "Irreverente",
+      "rustic": "Rústico",
+      "vintage": "Vintage",
+      "bohemian": "Boémio",
+      "industrial": "Industrial",
+      "scandinavian": "Escandinavo",
+      "coastal": "Costeiro",
+      "affordable": "Acessível",
+      "artisanal": "Artesanal",
+      "sustainable": "Sustentável",
+      "family-friendly": "Para famílias"
     },
     "contentLanguage": "Idioma do conteúdo",
     "contentLanguageA11y": "Idioma do conteúdo, {{language}}. Alterar",
@@ -211,7 +248,57 @@
     "featured": "Produtos em destaque no catálogo",
     "readyForBatch_one": "{{count}} pronto para lote",
     "readyForBatch_other": "{{count}} prontos para lote",
-    "channelsNote": "Instagram e Facebook podem ser conectados no próximo passo. (Nenhum canal conectado ainda)"
+    "channelsNote": "Instagram e Facebook podem ser conectados no próximo passo. (Nenhum canal conectado ainda)",
+    "noColors": "Não encontrámos cores da marca no teu site.",
+    "fonts": "Tipos de letra: {{fonts}}",
+    "colorFrom": {
+      "site": "Site",
+      "logo": "Logótipo",
+      "products": "Fotos",
+      "you": "Tua"
+    },
+    "editColor": "Editar cor",
+    "addColor": "Adicionar cor",
+    "hexLabel": "Ou escreve um código hexadecimal",
+    "hexHint": "Usa um código hexadecimal, como #7C6754",
+    "duplicateColor": "Essa cor já está na paleta",
+    "saveColor": "Guardar cor",
+    "removeColor": "Remover cor",
+    "cancel": "Cancelar",
+    "saveFailed": "Não foi possível guardar. As tuas cores não foram alteradas — tenta novamente.",
+    "swatchA11y": "{{hex}}, {{source}}. Editar",
+    "pickColor": "Escolhe uma cor e depois uma tonalidade",
+    "lighter": "Mais claro",
+    "darker": "Mais escuro",
+    "toneGroups": {
+      "feel": "Sensação",
+      "style": "Estilo",
+      "positioning": "Posicionamento"
+    },
+    "hues": {
+      "red": "Vermelho",
+      "orange": "Laranja",
+      "yellow": "Amarelo",
+      "green": "Verde",
+      "teal": "Verde-azulado",
+      "blue": "Azul",
+      "purple": "Roxo",
+      "pink": "Rosa",
+      "brown": "Castanho",
+      "grey": "Cinzento"
+    },
+    "shades": {
+      "lightest": "o mais claro",
+      "light": "claro",
+      "medium": "médio",
+      "dark": "escuro",
+      "darkest": "o mais escuro"
+    },
+    "prefsSaveFailed": "Não foi possível guardar o tom e o idioma.",
+    "continueWithoutSaving": "Continuar sem guardar",
+    "paletteMetaNoWebsite": "Paleta da marca",
+    "swatchesNoWebsite": "Amostras de cores",
+    "noColorsNoWebsite": "Ainda não há cores. Sem site, não há de onde as importar."
   },
   "preparing": {
     "ready": "Estúdio pronto",
@@ -219,7 +306,24 @@
     "loadingButton": "Preparando suas ideias…",
     "catalogSafe": "Seu catálogo permanece intacto na sua loja.",
     "title": "Preparando suas primeiras ideias",
-    "nextTitle": "Próximo: Revise suas ideias"
+    "nextTitle": "Próximo: Revise suas ideias",
+    "bodyIdeas": "A descobrir o que vale a pena publicar para {{name}}: estações do ano, tendências e o teu catálogo.",
+    "photosReady": "Fotos de produtos prontas",
+    "photosCount_one": "{{count}} foto · {{product}}",
+    "photosCount_other": "{{count}} fotos · {{product}}",
+    "noPhotos": "Não encontrámos fotos de produtos no teu site",
+    "ideasTitle": "A procurar ideias para publicações",
+    "ideasDetail": "Estações do ano, tendências e o teu catálogo",
+    "ideasFound_one": "{{count}} ideia encontrada",
+    "ideasFound_other": "{{count}} ideias encontradas",
+    "ideasNone": "Sem novas ideias desta vez",
+    "nextPick": "Escolhe as que vale a pena publicar",
+    "continueWithout": "Continuar sem ideias",
+    "errors": {
+      "noBrand": "O teu negócio ainda não está configurado. Volta ao passo anterior.",
+      "stopped": "A procura de ideias foi interrompida.",
+      "startFailed": "Não foi possível iniciar a procura de ideias."
+    }
   },
   "connect": {
     "readyToConnect": "• Pronto para conectar",
@@ -237,6 +341,25 @@
     "laterBody": "Você ainda pode criar, editar e baixar reels e sessões de fotos em alta resolução para o rolo da câmera. Você pode vincular seu Instagram a qualquer momento nas Configurações.",
     "laterDownload": "Baixar suas criações",
     "laterSettings": "Conectar canais nas Configurações",
-    "continueWithout": "Continuar sem conectar"
+    "continueWithout": "Continuar sem conectar",
+    "connectedAs": "Ligado: {{names}}",
+    "errors": {
+      "noBrand": "O teu negócio ainda não está configurado. Volta ao passo anterior.",
+      "cancelled": "A ligação foi cancelada. Tenta novamente quando quiseres.",
+      "failed": "Não foi possível ligar. Tenta novamente."
+    }
+  },
+  "maps": {
+    "title": "Encontra o teu negócio no Google Maps",
+    "subtitle": "Pesquisa o nome e a cidade do teu negócio e escolhe a tua ficha.",
+    "placeholder": "Nome do negócio e cidade",
+    "search": "Pesquisar no Google Maps",
+    "isThisYou": "Este é o teu negócio?",
+    "noResults": "Sem resultados no Google Maps. Tenta escrever de outra forma ou descreve o teu negócio.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Não está na lista? Descreve o teu negócio",
+    "errors": {
+      "failed": "Não foi possível pesquisar no Google Maps. Tenta novamente."
+    }
   }
 }

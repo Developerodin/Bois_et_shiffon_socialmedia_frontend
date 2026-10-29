@@ -2,6 +2,7 @@
 // Keep these types in sync with the route handlers under app/api/v1.
 
 import type { RunStatus } from "@/components/agents/api";
+import { NetworkError, send } from "@/lib/net";
 
 export type ContextDocKind =
   | "product-information"
@@ -46,13 +47,20 @@ export class ProblemError extends Error {
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    cache: "no-store",
-    ...init,
-    headers: init?.body
-      ? { "content-type": "application/json", ...init.headers }
-      : init?.headers,
-  });
+  let res: Response;
+  try {
+    res = await send(url, {
+      cache: "no-store",
+      ...init,
+      headers: init?.body
+        ? { "content-type": "application/json", ...init.headers }
+        : init?.headers,
+    });
+  } catch (error) {
+    // Offline, timed out, server unreachable: status 0, with a message that says which (lib/net.ts).
+    if (error instanceof NetworkError) throw new ProblemError(0, error.message);
+    throw error;
+  }
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     try {

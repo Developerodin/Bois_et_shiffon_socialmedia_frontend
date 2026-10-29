@@ -33,5 +33,24 @@
     "create": "Crear",
     "ideas": "Ideas",
     "results": "Resultados"
+  },
+  "net": {
+    "unreachable": "No se puede conectar con Espanda. Comprueba tu conexión a internet; seguiremos intentándolo.",
+    "timeout": "Espanda ha tardado demasiado en responder. Comprueba tu conexión y vuelve a intentarlo.",
+    "serverDown": "Espanda no responde ahora mismo. Inténtalo de nuevo en un minuto.",
+    "offline": "Sin conexión. Nos reconectaremos en cuanto sea posible; no has perdido nada de lo que guardaste.",
+    "backOnline": "Conexión restablecida.",
+    "signedOut": "Se cerró tu sesión. Inicia sesión de nuevo para continuar donde lo dejaste.",
+    "failed": "Algo salió mal. Inténtalo de nuevo."
+  },
+  "notFound": {
+    "title": "Esta pantalla no existe.",
+    "body": "Puede que el enlace sea antiguo o que la pantalla se haya movido.",
+    "home": "Ir al inicio"
+  },
+  "crash": {
+    "title": "Algo salió mal.",
+    "body": "Ha habido un problema con esta pantalla. Inténtalo de nuevo; si sigue ocurriendo, reinicia la app.",
+    "retry": "Reintentar"
   }
 }

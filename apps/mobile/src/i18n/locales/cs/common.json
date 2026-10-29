@@ -33,5 +33,24 @@
     "create": "Vytvořit",
     "ideas": "Nápady",
     "results": "Výsledky"
+  },
+  "net": {
+    "unreachable": "Nelze se spojit s Espanda. Zkontroluj připojení k internetu, budeme to dál zkoušet.",
+    "timeout": "Espanda neodpověděla včas. Zkontroluj připojení a zkus to znovu.",
+    "serverDown": "Espanda teď neodpovídá. Zkus to za chvíli znovu.",
+    "offline": "Bez připojení. Jakmile to půjde, znovu tě připojíme. O nic uloženého nepřijdeš.",
+    "backOnline": "Zpět online.",
+    "signedOut": "Byl jsi odhlášen. Přihlas se znovu a pokračuj v práci.",
+    "failed": "Něco se pokazilo. Zkus to znovu."
+  },
+  "notFound": {
+    "title": "Tato obrazovka neexistuje.",
+    "body": "Odkaz může být zastaralý nebo byla obrazovka přesunuta.",
+    "home": "Na úvod"
+  },
+  "crash": {
+    "title": "Něco se pokazilo.",
+    "body": "Na této obrazovce došlo k chybě. Zkus to znovu. Pokud problém přetrvává, restartuj aplikaci.",
+    "retry": "Zkusit znovu"
   }
 }

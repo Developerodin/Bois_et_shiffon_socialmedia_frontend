@@ -33,5 +33,24 @@
     "create": "Luo",
     "ideas": "Ideat",
     "results": "Tulokset"
+  },
+  "net": {
+    "unreachable": "Espandaan ei saada yhteyttä. Tarkista internetyhteytesi – yritämme edelleen.",
+    "timeout": "Espandan vastaus viipyi liian kauan. Tarkista yhteytesi ja yritä uudelleen.",
+    "serverDown": "Espanda ei vastaa juuri nyt. Yritä uudelleen hetken kuluttua.",
+    "offline": "Ei yhteyttä. Yhdistämme uudelleen heti kun mahdollista. Mitään tallentamaasi ei ole kadonnut.",
+    "backOnline": "Yhteys palautettu.",
+    "signedOut": "Sinut on kirjattu ulos. Kirjaudu uudelleen sisään jatkaaksesi siitä, mihin jäit.",
+    "failed": "Jokin meni pieleen. Yritä uudelleen."
+  },
+  "notFound": {
+    "title": "Tätä näkymää ei ole.",
+    "body": "Linkki voi olla vanhentunut tai näkymä on siirretty.",
+    "home": "Siirry alkuun"
+  },
+  "crash": {
+    "title": "Jokin meni pieleen.",
+    "body": "Tässä näkymässä ilmeni ongelma. Yritä uudelleen. Jos ongelma jatkuu, käynnistä sovellus uudelleen.",
+    "retry": "Yritä uudelleen"
   }
 }

@@ -33,5 +33,24 @@
     "create": "Create",
     "ideas": "Ideas",
     "results": "Results"
+  },
+  "net": {
+    "unreachable": "Can’t reach Espanda. Check your internet connection: we’ll keep trying.",
+    "timeout": "Espanda took too long to answer. Check your connection and try again.",
+    "serverDown": "Espanda isn’t responding right now. Try again in a minute.",
+    "offline": "No connection. We’ll reconnect as soon as we can; nothing you’ve saved is lost.",
+    "backOnline": "Back online.",
+    "signedOut": "You were signed out. Sign in again to pick up where you were.",
+    "failed": "Something went wrong. Try again."
+  },
+  "notFound": {
+    "title": "This screen doesn’t exist.",
+    "body": "The link may be old, or the screen was moved.",
+    "home": "Go to the start"
+  },
+  "crash": {
+    "title": "Something went wrong.",
+    "body": "This screen hit a problem. Try again; if it keeps happening, restart the app.",
+    "retry": "Try again"
   }
 }

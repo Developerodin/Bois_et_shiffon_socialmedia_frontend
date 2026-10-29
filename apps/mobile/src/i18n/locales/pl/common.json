@@ -33,5 +33,24 @@
     "create": "Utwórz",
     "ideas": "Pomysły",
     "results": "Wyniki"
+  },
+  "net": {
+    "unreachable": "Nie można połączyć się z Espanda. Sprawdź połączenie z internetem — będziemy próbować dalej.",
+    "timeout": "Espanda odpowiada zbyt długo. Sprawdź połączenie i spróbuj ponownie.",
+    "serverDown": "Espanda teraz nie odpowiada. Spróbuj ponownie za chwilę.",
+    "offline": "Brak połączenia. Połączymy Cię ponownie, gdy tylko będzie to możliwe. Nic z tego, co zapisano, nie zostało utracone.",
+    "backOnline": "Połączenie przywrócone.",
+    "signedOut": "Nastąpiło wylogowanie. Zaloguj się ponownie, aby kontynuować.",
+    "failed": "Coś poszło nie tak. Spróbuj ponownie."
+  },
+  "notFound": {
+    "title": "Ten ekran nie istnieje.",
+    "body": "Link może być nieaktualny lub ekran został przeniesiony.",
+    "home": "Wróć na start"
+  },
+  "crash": {
+    "title": "Coś poszło nie tak.",
+    "body": "Wystąpił problem z tym ekranem. Spróbuj ponownie, a jeśli problem się powtarza, uruchom aplikację ponownie.",
+    "retry": "Spróbuj ponownie"
   }
 }

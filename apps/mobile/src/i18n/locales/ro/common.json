@@ -33,5 +33,24 @@
     "create": "Creează",
     "ideas": "Idei",
     "results": "Rezultate"
+  },
+  "net": {
+    "unreachable": "Nu ne putem conecta la Espanda. Verifică-ți conexiunea la internet; vom încerca în continuare.",
+    "timeout": "Espanda nu a răspuns la timp. Verifică-ți conexiunea și încearcă din nou.",
+    "serverDown": "Espanda nu răspunde momentan. Încearcă din nou peste un minut.",
+    "offline": "Nu ai conexiune. Ne vom reconecta cât de curând; nu s-a pierdut nimic din ce ai salvat.",
+    "backOnline": "Din nou online.",
+    "signedOut": "Ai fost deconectat. Conectează-te din nou ca să reiei de unde ai rămas.",
+    "failed": "Ceva nu a mers bine. Încearcă din nou."
+  },
+  "notFound": {
+    "title": "Acest ecran nu există.",
+    "body": "Este posibil ca linkul să fie vechi sau ecranul să fi fost mutat.",
+    "home": "Mergi la început"
+  },
+  "crash": {
+    "title": "Ceva nu a mers bine.",
+    "body": "A apărut o problemă la acest ecran. Încearcă din nou; dacă problema persistă, repornește aplicația.",
+    "retry": "Încearcă din nou"
   }
 }

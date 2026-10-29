@@ -129,10 +129,14 @@
         "value": "Stem van je pagina's"
       }
     },
-    "safeNote": "Catalogusimport verandert niets aan je live winkel."
+    "safeNote": "Catalogusimport verandert niets aan je live winkel.",
+    "unreachable": "We konden deze site niet openen. Controleer het adres.",
+    "checkFailed": "We konden de site niet controleren. Probeer het opnieuw.",
+    "noWebsite": "Geen website? Beschrijf je bedrijf"
   },
   "manual": {
     "title": "Voeg bedrijfsgegevens toe",
+    "subtitle": "Vertel ons wat je verkoopt en waar. We zoeken je bedrijf online op.",
     "nameLabel": "Bedrijfsnaam *",
     "namePlaceholder": "bijv. Atelier Bois & Chiffons",
     "sellsLabel": "Wat verkoop je? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Website openen",
       "identity": "Merkidentiteit & toon lezen",
-      "photos": "Productfoto's verzamelen"
+      "photos": "Productfoto's verzamelen",
+      "find": "Je bedrijf online zoeken"
     },
     "status": {
       "done": "Voltooid",
@@ -168,7 +173,10 @@
       "noWorkspace": "Je account heeft nog geen werkruimte.",
       "startFailed": "Kon het lezen van je website niet starten.",
       "restartFailed": "Kon niet opnieuw starten. Probeer opnieuw."
-    }
+    },
+    "bodyMaps": "Je Google Maps-vermelding bekijken en je bedrijf online zoeken.",
+    "sourceMaps": "Google Maps-vermelding",
+    "foundMaps": "Vermelding gekozen"
   },
   "review": {
     "title": "Bekijk bedrijfsgegevens",
@@ -182,7 +190,20 @@
     "products_one": "Gedetecteerde producten ({{count}})",
     "products_other": "Gedetecteerde producten ({{count}})",
     "found": "Gevonden",
-    "strengths": "Merksterkten"
+    "strengths": "Merksterkten",
+    "noProducts": "We hebben nog geen producten op je site gevonden.",
+    "name": "Bedrijfsnaam",
+    "editName": "Bedrijfsnaam bewerken",
+    "addTagline": "Voeg je slogan toe",
+    "addAudience": "Wie koopt er bij je?",
+    "saveFailed": "Opslaan is mislukt. Je wijziging is teruggedraaid. Probeer het opnieuw.",
+    "subtitleNoWebsite": "We vonden deze gegevens online en via wat je ons vertelde. Je kunt ze altijd aanpassen.",
+    "noProductsNoWebsite": "Nog geen productfoto's. Zonder website kunnen we geen catalogus importeren.",
+    "foundSite": "We hebben je website gevonden",
+    "foundSiteBody": "Is {{host}} van jou? We halen je logo, kleuren en producten van de site. Dit duurt ongeveer een minuut.",
+    "useSite": "Gebruiken",
+    "notMine": "Niet van mij",
+    "useSiteFailed": "We konden die website niet gebruiken. Probeer het opnieuw of ga verder zonder website."
   },
   "brand": {
     "title": "Merk & creatieve stijl",
@@ -199,7 +220,23 @@
       "elegant": "Elegant",
       "premium": "Premium",
       "natural": "Natuurlijk",
-      "minimalist": "Minimalistisch"
+      "minimalist": "Minimalistisch",
+      "warm": "Warm",
+      "playful": "Speels",
+      "bold": "Gedurfd",
+      "calm": "Rustig",
+      "romantic": "Romantisch",
+      "edgy": "Eigenzinnig",
+      "rustic": "Rustiek",
+      "vintage": "Vintage",
+      "bohemian": "Bohemian",
+      "industrial": "Industrieel",
+      "scandinavian": "Scandinavisch",
+      "coastal": "Kuststijl",
+      "affordable": "Betaalbaar",
+      "artisanal": "Ambachtelijk",
+      "sustainable": "Duurzaam",
+      "family-friendly": "Gezinsvriendelijk"
     },
     "contentLanguage": "Inhoudstaal",
     "contentLanguageA11y": "Inhoudstaal, {{language}}. Wijzig",
@@ -211,7 +248,57 @@
     "featured": "Uitgelichte catalogusproducten",
     "readyForBatch_one": "{{count}} klaar voor batch",
     "readyForBatch_other": "{{count}} klaar voor batch",
-    "channelsNote": "Instagram en Facebook kunnen in de volgende stap worden verbonden. (Nog geen kanalen verbonden)"
+    "channelsNote": "Instagram en Facebook kunnen in de volgende stap worden verbonden. (Nog geen kanalen verbonden)",
+    "noColors": "We hebben geen merkkleuren op je site gevonden.",
+    "fonts": "Lettertypen: {{fonts}}",
+    "colorFrom": {
+      "site": "Website",
+      "logo": "Logo",
+      "products": "Foto's",
+      "you": "Van jou"
+    },
+    "editColor": "Kleur bewerken",
+    "addColor": "Kleur toevoegen",
+    "hexLabel": "Of typ een hexcode",
+    "hexHint": "Gebruik een hexcode zoals #7C6754",
+    "duplicateColor": "Die kleur staat al in het palet",
+    "saveColor": "Kleur opslaan",
+    "removeColor": "Kleur verwijderen",
+    "cancel": "Annuleren",
+    "saveFailed": "Opslaan is mislukt. Je kleuren zijn ongewijzigd. Probeer het opnieuw.",
+    "swatchA11y": "{{hex}}, {{source}}. Bewerken",
+    "pickColor": "Kies een kleur en daarna een tint",
+    "lighter": "Lichter",
+    "darker": "Donkerder",
+    "toneGroups": {
+      "feel": "Gevoel",
+      "style": "Stijl",
+      "positioning": "Positionering"
+    },
+    "hues": {
+      "red": "Rood",
+      "orange": "Oranje",
+      "yellow": "Geel",
+      "green": "Groen",
+      "teal": "Blauwgroen",
+      "blue": "Blauw",
+      "purple": "Paars",
+      "pink": "Roze",
+      "brown": "Bruin",
+      "grey": "Grijs"
+    },
+    "shades": {
+      "lightest": "lichtst",
+      "light": "licht",
+      "medium": "gemiddeld",
+      "dark": "donker",
+      "darkest": "donkerst"
+    },
+    "prefsSaveFailed": "We konden je toon en taal niet opslaan.",
+    "continueWithoutSaving": "Verder zonder opslaan",
+    "paletteMetaNoWebsite": "Merkpalet",
+    "swatchesNoWebsite": "Kleurstalen",
+    "noColorsNoWebsite": "Nog geen kleuren. Zonder website kunnen we ze niet importeren."
   },
   "preparing": {
     "ready": "Studio klaar",
@@ -219,7 +306,24 @@
     "loadingButton": "Je ideeën voorbereiden…",
     "catalogSafe": "Je catalogus blijft onaangetast in je winkel.",
     "title": "Je eerste ideeën voorbereiden",
-    "nextTitle": "Volgende: Beoordeel je ideeën"
+    "nextTitle": "Volgende: Beoordeel je ideeën",
+    "bodyIdeas": "We zoeken naar ideeën voor posts voor {{name}}: seizoenen, trends en je catalogus.",
+    "photosReady": "Productfoto's staan klaar",
+    "photosCount_one": "{{count}} foto · {{product}}",
+    "photosCount_other": "{{count}} foto's · {{product}}",
+    "noPhotos": "Geen productfoto's gevonden op je website",
+    "ideasTitle": "Ideeën voor posts zoeken",
+    "ideasDetail": "Seizoenen, trends en je catalogus",
+    "ideasFound_one": "{{count}} idee gevonden",
+    "ideasFound_other": "{{count}} ideeën gevonden",
+    "ideasNone": "Deze keer geen nieuwe ideeën",
+    "nextPick": "Kies wat je wilt posten",
+    "continueWithout": "Verder zonder ideeën",
+    "errors": {
+      "noBrand": "Je bedrijf is nog niet ingesteld. Ga een stap terug.",
+      "stopped": "Het zoeken naar ideeën is gestopt.",
+      "startFailed": "We konden niet beginnen met zoeken naar ideeën."
+    }
   },
   "connect": {
     "readyToConnect": "• Klaar om te verbinden",
@@ -237,6 +341,25 @@
     "laterBody": "Je kunt nog steeds high-resolution reels en fotoshoots maken, bewerken en downloaden naar je camerarol. Je kunt je Instagram op elk moment in Instellingen koppelen.",
     "laterDownload": "Download je creaties",
     "laterSettings": "Verbind kanalen in Instellingen",
-    "continueWithout": "Doorgaan zonder te verbinden"
+    "continueWithout": "Doorgaan zonder te verbinden",
+    "connectedAs": "Verbonden: {{names}}",
+    "errors": {
+      "noBrand": "Je bedrijf is nog niet ingesteld. Ga een stap terug.",
+      "cancelled": "Verbinden is geannuleerd. Probeer het opnieuw wanneer je wilt.",
+      "failed": "Verbinden is mislukt. Probeer het opnieuw."
+    }
+  },
+  "maps": {
+    "title": "Zoek je bedrijf op Google Maps",
+    "subtitle": "Zoek op bedrijfsnaam en plaats en kies je vermelding.",
+    "placeholder": "Bedrijfsnaam en plaats",
+    "search": "Zoeken op Google Maps",
+    "isThisYou": "Is dit jouw bedrijf?",
+    "noResults": "Geen resultaten op Google Maps. Probeer een andere spelling of beschrijf je bedrijf.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Niet in de lijst? Beschrijf je bedrijf",
+    "errors": {
+      "failed": "Zoeken op Google Maps is mislukt. Probeer het opnieuw."
+    }
   }
 }

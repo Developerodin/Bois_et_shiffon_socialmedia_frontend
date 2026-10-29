@@ -129,10 +129,14 @@
         "value": "Voce din paginile tale"
       }
     },
-    "safeNote": "Importul catalogului nu schimbă nimic pe magazinul tău live."
+    "safeNote": "Importul catalogului nu schimbă nimic pe magazinul tău live.",
+    "unreachable": "Nu am putut deschide site-ul. Verifică adresa.",
+    "checkFailed": "Nu am putut verifica site-ul. Încearcă din nou.",
+    "noWebsite": "Nu ai un site? Descrie-ți afacerea"
   },
   "manual": {
     "title": "Adaugă detalii despre afacere",
+    "subtitle": "Spune-ne ce vinzi și unde. Îți vom căuta afacerea online.",
     "nameLabel": "Numele afacerii *",
     "namePlaceholder": "ex. Atelier Bois & Chiffons",
     "sellsLabel": "Ce vinzi? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Deschidem site-ul",
       "identity": "Citirea identității brandului & tonului",
-      "photos": "Colectăm fotografii de produs"
+      "photos": "Colectăm fotografii de produs",
+      "find": "Îți căutăm afacerea online"
     },
     "status": {
       "done": "Complet",
@@ -168,7 +173,10 @@
       "noWorkspace": "Contul tău nu are încă un spațiu de lucru.",
       "startFailed": "Nu am putut începe citirea site-ului tău.",
       "restartFailed": "Nu am putut reporni. Încearcă din nou."
-    }
+    },
+    "bodyMaps": "Citim fișa ta Google Maps și îți căutăm afacerea online.",
+    "sourceMaps": "Fișă Google Maps",
+    "foundMaps": "Fișă selectată"
   },
   "review": {
     "title": "Revizuiește detaliile afacerii",
@@ -182,7 +190,20 @@
     "products_one": "Produse detectate ({{count}})",
     "products_other": "Produse detectate ({{count}})",
     "found": "Găsit",
-    "strengths": "Puncte tari ale brandului"
+    "strengths": "Puncte tari ale brandului",
+    "noProducts": "Nu am găsit încă produse pe site-ul tău.",
+    "name": "Numele afacerii",
+    "editName": "Editează numele afacerii",
+    "addTagline": "Adaugă sloganul",
+    "addAudience": "Cine cumpără de la tine?",
+    "saveFailed": "Nu am putut salva modificarea. Am revenit la varianta anterioară. Încearcă din nou.",
+    "subtitleNoWebsite": "Am găsit aceste detalii online și din ce ne-ai spus. Le poți edita oricând.",
+    "noProductsNoWebsite": "Nu ai încă fotografii de produse. Fără un site, nu avem un catalog de importat.",
+    "foundSite": "Am găsit site-ul tău",
+    "foundSiteBody": "{{host}} este site-ul tău? Îl vom analiza pentru a găsi logo-ul, culorile și produsele tale (durează aproximativ un minut).",
+    "useSite": "Folosește-l",
+    "notMine": "Nu e al meu",
+    "useSiteFailed": "Nu am putut folosi site-ul. Încearcă din nou sau continuă fără el."
   },
   "brand": {
     "title": "Brand & stil creativ",
@@ -199,7 +220,23 @@
       "elegant": "Elegant",
       "premium": "Premium",
       "natural": "Natural",
-      "minimalist": "Minimalist"
+      "minimalist": "Minimalist",
+      "warm": "Cald",
+      "playful": "Jucăuș",
+      "bold": "Îndrăzneț",
+      "calm": "Calm",
+      "romantic": "Romantic",
+      "edgy": "Nonconformist",
+      "rustic": "Rustic",
+      "vintage": "Vintage",
+      "bohemian": "Boem",
+      "industrial": "Industrial",
+      "scandinavian": "Scandinav",
+      "coastal": "Marin",
+      "affordable": "Accesibil",
+      "artisanal": "Artizanal",
+      "sustainable": "Sustenabil",
+      "family-friendly": "Pentru familii"
     },
     "contentLanguage": "Limba conținutului",
     "contentLanguageA11y": "Limba conținutului, {{language}}. Schimbă",
@@ -211,7 +248,57 @@
     "featured": "Produse de catalog recomandate",
     "readyForBatch_one": "{{count}} gata pentru lot",
     "readyForBatch_other": "{{count}} gata pentru lot",
-    "channelsNote": "Instagram și Facebook pot fi conectate în pasul următor. (Niciun canal conectat încă)"
+    "channelsNote": "Instagram și Facebook pot fi conectate în pasul următor. (Niciun canal conectat încă)",
+    "noColors": "Nu am găsit culorile brandului pe site-ul tău.",
+    "fonts": "Fonturi: {{fonts}}",
+    "colorFrom": {
+      "site": "Site",
+      "logo": "Logo",
+      "products": "Fotografii",
+      "you": "Ale tale"
+    },
+    "editColor": "Editează culoarea",
+    "addColor": "Adaugă o culoare",
+    "hexLabel": "Sau introdu un cod hex",
+    "hexHint": "Folosește un cod hex, de exemplu #7C6754",
+    "duplicateColor": "Culoarea este deja în paletă",
+    "saveColor": "Salvează culoarea",
+    "removeColor": "Elimină culoarea",
+    "cancel": "Anulează",
+    "saveFailed": "Nu am putut salva. Culorile au rămas neschimbate. Încearcă din nou.",
+    "swatchA11y": "{{hex}}, {{source}}. Editează",
+    "pickColor": "Alege o culoare, apoi o nuanță",
+    "lighter": "Mai deschis",
+    "darker": "Mai închis",
+    "toneGroups": {
+      "feel": "Atmosferă",
+      "style": "Stil",
+      "positioning": "Poziționare"
+    },
+    "hues": {
+      "red": "Roșu",
+      "orange": "Portocaliu",
+      "yellow": "Galben",
+      "green": "Verde",
+      "teal": "Verde-albăstrui",
+      "blue": "Albastru",
+      "purple": "Mov",
+      "pink": "Roz",
+      "brown": "Maro",
+      "grey": "Gri"
+    },
+    "shades": {
+      "lightest": "cel mai deschis",
+      "light": "deschis",
+      "medium": "mediu",
+      "dark": "închis",
+      "darkest": "cel mai închis"
+    },
+    "prefsSaveFailed": "Nu am putut salva tonul și limba.",
+    "continueWithoutSaving": "Continuă fără salvare",
+    "paletteMetaNoWebsite": "Paleta brandului",
+    "swatchesNoWebsite": "Mostre de culoare",
+    "noColorsNoWebsite": "Nu ai încă nicio culoare. Fără un site, nu avem de unde să le importăm."
   },
   "preparing": {
     "ready": "Studioul este gata",
@@ -219,7 +306,24 @@
     "loadingButton": "Pregătim ideile tale…",
     "catalogSafe": "Catalogul tău rămâne neatins în magazinul tău.",
     "title": "Pregătirea primelor tale idei",
-    "nextTitle": "Urmează: Revizuiește-ți ideile"
+    "nextTitle": "Urmează: Revizuiește-ți ideile",
+    "bodyIdeas": "Căutăm idei de postări pentru {{name}}: anotimpuri, tendințe și catalogul tău.",
+    "photosReady": "Fotografiile produselor sunt gata",
+    "photosCount_one": "{{count}} fotografie · {{product}}",
+    "photosCount_other": "{{count}} fotografii · {{product}}",
+    "noPhotos": "Nu am găsit fotografii de produse pe site-ul tău",
+    "ideasTitle": "Căutăm idei de postări",
+    "ideasDetail": "Anotimpuri, tendințe și catalogul tău",
+    "ideasFound_one": "{{count}} idee găsită",
+    "ideasFound_other": "{{count}} idei găsite",
+    "ideasNone": "Nicio idee nouă de data aceasta",
+    "nextPick": "Alege ce merită postat",
+    "continueWithout": "Continuă fără idei",
+    "errors": {
+      "noBrand": "Afacerea ta nu este încă configurată. Revino la pasul anterior.",
+      "stopped": "Căutarea ideilor s-a oprit.",
+      "startFailed": "Nu am putut începe căutarea ideilor."
+    }
   },
   "connect": {
     "readyToConnect": "• Gata de conectare",
@@ -237,6 +341,25 @@
     "laterBody": "Poți încă să creezi, editezi și descarci role și ședințe foto de înaltă rezoluție în galeria ta. Poți să-ți conectezi Instagram-ul oricând în Setări.",
     "laterDownload": "Descarcă-ți creațiile",
     "laterSettings": "Conectează canalele în Setări",
-    "continueWithout": "Continuă fără conectare"
+    "continueWithout": "Continuă fără conectare",
+    "connectedAs": "Conectat: {{names}}",
+    "errors": {
+      "noBrand": "Afacerea ta nu este încă configurată. Revino la pasul anterior.",
+      "cancelled": "Conectarea a fost anulată. Încearcă din nou când ești gata.",
+      "failed": "Nu am putut conecta contul. Încearcă din nou."
+    }
+  },
+  "maps": {
+    "title": "Găsește-ți afacerea pe Google Maps",
+    "subtitle": "Caută numele afacerii și orașul, apoi alege fișa ta.",
+    "placeholder": "Numele afacerii și orașul",
+    "search": "Caută pe Google Maps",
+    "isThisYou": "Aceasta este afacerea ta?",
+    "noResults": "Nu am găsit rezultate pe Google Maps. Încearcă o altă scriere sau descrie-ți afacerea.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Nu e în listă? Descrie-ți afacerea",
+    "errors": {
+      "failed": "Nu am putut căuta pe Google Maps. Încearcă din nou."
+    }
   }
 }

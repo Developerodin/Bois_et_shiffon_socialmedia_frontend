@@ -129,10 +129,14 @@
         "value": "Sayfalarınızdan ses"
       }
     },
-    "safeNote": "Katalog içe aktarma, canlı mağazanızda hiçbir şeyi değiştirmez."
+    "safeNote": "Katalog içe aktarma, canlı mağazanızda hiçbir şeyi değiştirmez.",
+    "unreachable": "Bu siteyi açamadık. Adresi kontrol et.",
+    "checkFailed": "Siteyi kontrol edemedik. Tekrar dene.",
+    "noWebsite": "Web siten yok mu? İşletmeni anlat"
   },
   "manual": {
     "title": "İşletme bilgilerini ekleyin",
+    "subtitle": "Ne sattığını ve nerede olduğunu anlat. İşletmeni internette arayalım.",
     "nameLabel": "İşletme adı *",
     "namePlaceholder": "ör. Atelier Bois & Chiffons",
     "sellsLabel": "Ne satıyorsunuz? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Web sitesi açılıyor",
       "identity": "Marka kimliği ve tonu okunuyor",
-      "photos": "Ürün fotoğrafları toplanıyor"
+      "photos": "Ürün fotoğrafları toplanıyor",
+      "find": "İşletmen internette aranıyor"
     },
     "status": {
       "done": "Tamamlandı",
@@ -168,7 +173,10 @@
       "noWorkspace": "Hesabınızda henüz bir çalışma alanı yok.",
       "startFailed": "Web sitenizi okumaya başlayamadık.",
       "restartFailed": "Yeniden başlatılamadı. Tekrar deneyin."
-    }
+    },
+    "bodyMaps": "Google Maps kaydın inceleniyor ve işletmen internette aranıyor.",
+    "sourceMaps": "Google Maps kaydı",
+    "foundMaps": "Kayıt seçildi"
   },
   "review": {
     "title": "İşletme detaylarını gözden geçirin",
@@ -182,7 +190,20 @@
     "products_one": "Tespit edilen ürünler ({{count}})",
     "products_other": "Tespit edilen ürünler ({{count}})",
     "found": "Bulundu",
-    "strengths": "Marka güçlü yönleri"
+    "strengths": "Marka güçlü yönleri",
+    "noProducts": "Sitende henüz ürün bulamadık.",
+    "name": "İşletme adı",
+    "editName": "İşletme adını düzenle",
+    "addTagline": "Sloganını ekle",
+    "addAudience": "Senden kimler alışveriş yapıyor?",
+    "saveFailed": "Değişiklik kaydedilemedi ve eski hâline döndü. Tekrar dene.",
+    "subtitleNoWebsite": "Bu bilgileri internetten ve anlattıklarından derledik. İstediğin zaman düzenleyebilirsin.",
+    "noProductsNoWebsite": "Henüz ürün fotoğrafı yok. Web siten olmadan içe aktarılacak bir katalog yok.",
+    "foundSite": "Web siteni bulduk",
+    "foundSiteBody": "{{host}} sana mı ait? Logonu, renklerini ve ürünlerini bulmak için siteyi inceleyeceğiz (yaklaşık bir dakika).",
+    "useSite": "Kullan",
+    "notMine": "Benim değil",
+    "useSiteFailed": "Bu web sitesini kullanamadık. Tekrar dene veya site olmadan devam et."
   },
   "brand": {
     "title": "Marka & yaratıcı stil",
@@ -199,7 +220,23 @@
       "elegant": "Zarif",
       "premium": "Premium",
       "natural": "Doğal",
-      "minimalist": "Minimalist"
+      "minimalist": "Minimalist",
+      "warm": "Samimi",
+      "playful": "Eğlenceli",
+      "bold": "Cesur",
+      "calm": "Sakin",
+      "romantic": "Romantik",
+      "edgy": "Sıra dışı",
+      "rustic": "Rustik",
+      "vintage": "Vintage",
+      "bohemian": "Bohem",
+      "industrial": "Endüstriyel",
+      "scandinavian": "İskandinav",
+      "coastal": "Sahil",
+      "affordable": "Uygun fiyatlı",
+      "artisanal": "El yapımı",
+      "sustainable": "Sürdürülebilir",
+      "family-friendly": "Aile dostu"
     },
     "contentLanguage": "İçerik dili",
     "contentLanguageA11y": "İçerik dili, {{language}}. Değiştir",
@@ -211,7 +248,57 @@
     "featured": "Öne çıkan katalog ürünleri",
     "readyForBatch_one": "{{count}} toplu işlem için hazır",
     "readyForBatch_other": "{{count}} toplu işlem için hazır",
-    "channelsNote": "Instagram ve Facebook bir sonraki adımda bağlanabilir. (Henüz kanal bağlanmadı)"
+    "channelsNote": "Instagram ve Facebook bir sonraki adımda bağlanabilir. (Henüz kanal bağlanmadı)",
+    "noColors": "Sitende marka renkleri bulamadık.",
+    "fonts": "Yazı tipleri: {{fonts}}",
+    "colorFrom": {
+      "site": "Web sitesi",
+      "logo": "Logo",
+      "products": "Fotoğraflar",
+      "you": "Senin seçimin"
+    },
+    "editColor": "Rengi düzenle",
+    "addColor": "Renk ekle",
+    "hexLabel": "Veya bir hex kodu gir",
+    "hexHint": "#7C6754 gibi bir hex kodu kullan",
+    "duplicateColor": "Bu renk zaten palette var",
+    "saveColor": "Rengi kaydet",
+    "removeColor": "Rengi kaldır",
+    "cancel": "İptal",
+    "saveFailed": "Kaydedilemedi. Renklerin değişmedi; tekrar dene.",
+    "swatchA11y": "{{hex}}, {{source}}. Düzenle",
+    "pickColor": "Bir renk, ardından bir ton seç",
+    "lighter": "Daha açık",
+    "darker": "Daha koyu",
+    "toneGroups": {
+      "feel": "Hissettirdiği",
+      "style": "Stil",
+      "positioning": "Konumlandırma"
+    },
+    "hues": {
+      "red": "Kırmızı",
+      "orange": "Turuncu",
+      "yellow": "Sarı",
+      "green": "Yeşil",
+      "teal": "Turkuaz",
+      "blue": "Mavi",
+      "purple": "Mor",
+      "pink": "Pembe",
+      "brown": "Kahverengi",
+      "grey": "Gri"
+    },
+    "shades": {
+      "lightest": "en açık",
+      "light": "açık",
+      "medium": "orta",
+      "dark": "koyu",
+      "darkest": "en koyu"
+    },
+    "prefsSaveFailed": "Ton ve dil tercihlerün kaydedilemedi.",
+    "continueWithoutSaving": "Kaydetmeden devam et",
+    "paletteMetaNoWebsite": "Marka paleti",
+    "swatchesNoWebsite": "Renk örnekleri",
+    "noColorsNoWebsite": "Henüz renk yok. Web siten olmadan içe aktarılacak renk yok."
   },
   "preparing": {
     "ready": "Stüdyo hazır",
@@ -219,7 +306,24 @@
     "loadingButton": "Fikirleriniz hazırlanıyor…",
     "catalogSafe": "Kataloğunuz mağazanızda dokunulmadan kalır.",
     "title": "İlk fikirlerinizi hazırlıyoruz",
-    "nextTitle": "Sıradaki: Fikirlerinizi gözden geçirin"
+    "nextTitle": "Sıradaki: Fikirlerinizi gözden geçirin",
+    "bodyIdeas": "{{name}} için paylaşılmaya değer fikirler aranıyor: mevsimler, trendler ve kataloğun.",
+    "photosReady": "Ürün fotoğrafları hazır",
+    "photosCount_one": "{{count}} fotoğraf · {{product}}",
+    "photosCount_other": "{{count}} fotoğraf · {{product}}",
+    "noPhotos": "Web sitende ürün fotoğrafı bulunamadı",
+    "ideasTitle": "Gönderi fikirleri aranıyor",
+    "ideasDetail": "Mevsimler, trendler ve kataloğun",
+    "ideasFound_one": "{{count}} fikir bulundu",
+    "ideasFound_other": "{{count}} fikir bulundu",
+    "ideasNone": "Bu sefer yeni fikir bulunamadı",
+    "nextPick": "Paylaşmaya değer olanları seç",
+    "continueWithout": "Fikirler olmadan devam et",
+    "errors": {
+      "noBrand": "İşletmen henüz kurulmadı. Bir adım geri dön.",
+      "stopped": "Fikir arama durduruldu.",
+      "startFailed": "Fikir arama başlatılamadı."
+    }
   },
   "connect": {
     "readyToConnect": "• Bağlanmaya hazır",
@@ -237,6 +341,25 @@
     "laterBody": "Yine de yüksek çözünürlüklü videolar ve fotoğraf çekimlerini oluşturabilir, düzenleyebilir ve kamera rulonuza indirebilirsiniz. Instagram'ınızı Ayarlar'da istediğiniz zaman bağlayabilirsiniz.",
     "laterDownload": "Oluşturduklarınızı indir",
     "laterSettings": "Kanalları Ayarlar'da bağla",
-    "continueWithout": "Bağlamadan devam et"
+    "continueWithout": "Bağlamadan devam et",
+    "connectedAs": "Bağlandı: {{names}}",
+    "errors": {
+      "noBrand": "İşletmen henüz kurulmadı. Bir adım geri dön.",
+      "cancelled": "Bağlantı iptal edildi. Hazır olduğunda tekrar dene.",
+      "failed": "Bağlanılamadı. Tekrar dene."
+    }
+  },
+  "maps": {
+    "title": "İşletmeni Google Maps'te bul",
+    "subtitle": "İşletme adını ve şehri ara, ardından kaydını seç.",
+    "placeholder": "İşletme adı ve şehir",
+    "search": "Google Maps'te ara",
+    "isThisYou": "Bu senin işletmen mi?",
+    "noResults": "Google Maps'te eşleşme bulunamadı. Farklı bir yazım dene veya işletmeni anlat.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Listede yok mu? İşletmeni anlat",
+    "errors": {
+      "failed": "Google Maps'te arama yapılamadı. Tekrar dene."
+    }
   }
 }

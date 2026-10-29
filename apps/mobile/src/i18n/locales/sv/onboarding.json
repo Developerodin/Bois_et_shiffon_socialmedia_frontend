@@ -129,10 +129,14 @@
         "value": "Röst från dina sidor"
       }
     },
-    "safeNote": "Katalogimport ändrar inget på din livebutik."
+    "safeNote": "Katalogimport ändrar inget på din livebutik.",
+    "unreachable": "Vi kunde inte öppna webbplatsen. Kontrollera adressen.",
+    "checkFailed": "Kunde inte kontrollera webbplatsen. Försök igen.",
+    "noWebsite": "Ingen webbplats? Beskriv ditt företag i stället"
   },
   "manual": {
     "title": "Lägg till företagsuppgifter",
+    "subtitle": "Berätta vad du säljer och var. Vi letar upp ditt företag på nätet.",
     "nameLabel": "Företagsnamn *",
     "namePlaceholder": "t.ex. Atelier Bois & Chiffons",
     "sellsLabel": "Vad säljer du? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Öppnar webbplats",
       "identity": "Läser varumärkesidentitet & ton",
-      "photos": "Samlar produktfoton"
+      "photos": "Samlar produktfoton",
+      "find": "Letar efter ditt företag på nätet"
     },
     "status": {
       "done": "Komplett",
@@ -168,7 +173,10 @@
       "noWorkspace": "Ditt konto har ingen arbetsyta än.",
       "startFailed": "Kunde inte börja läsa din webbplats.",
       "restartFailed": "Kunde inte starta om. Försök igen."
-    }
+    },
+    "bodyMaps": "Läser din företagsprofil på Google Maps och letar efter ditt företag på nätet.",
+    "sourceMaps": "Företagsprofil på Google Maps",
+    "foundMaps": "Företagsprofil vald"
   },
   "review": {
     "title": "Granska företagsdetaljer",
@@ -182,7 +190,20 @@
     "products_one": "Upptäckta produkter ({{count}})",
     "products_other": "Upptäckta produkter ({{count}})",
     "found": "Hittad",
-    "strengths": "Varumärkesstyrkor"
+    "strengths": "Varumärkesstyrkor",
+    "noProducts": "Vi hittade inga produkter på din webbplats ännu.",
+    "name": "Företagsnamn",
+    "editName": "Ändra företagsnamn",
+    "addTagline": "Lägg till din slogan",
+    "addAudience": "Vilka handlar av dig?",
+    "saveFailed": "Kunde inte spara ändringen – den har återställts. Försök igen.",
+    "subtitleNoWebsite": "Vi hittade de här uppgifterna på nätet och utifrån det du berättade. Du kan ändra dem när som helst.",
+    "noProductsNoWebsite": "Inga produktbilder ännu. Utan en webbplats finns ingen katalog att importera.",
+    "foundSite": "Vi hittade din webbplats",
+    "foundSiteBody": "Är {{host}} din? Vi hämtar din logotyp, dina färger och produkter därifrån (tar ungefär en minut).",
+    "useSite": "Använd den",
+    "notMine": "Inte min",
+    "useSiteFailed": "Kunde inte använda webbplatsen. Försök igen eller fortsätt utan den."
   },
   "brand": {
     "title": "Varumärke & kreativ stil",
@@ -199,7 +220,23 @@
       "elegant": "Elegant",
       "premium": "Premium",
       "natural": "Naturlig",
-      "minimalist": "Minimalistisk"
+      "minimalist": "Minimalistisk",
+      "warm": "Varm",
+      "playful": "Lekfull",
+      "bold": "Djärv",
+      "calm": "Lugn",
+      "romantic": "Romantisk",
+      "edgy": "Kaxig",
+      "rustic": "Rustik",
+      "vintage": "Vintage",
+      "bohemian": "Bohemisk",
+      "industrial": "Industriell",
+      "scandinavian": "Skandinavisk",
+      "coastal": "Kustnära",
+      "affordable": "Prisvärd",
+      "artisanal": "Hantverksmässig",
+      "sustainable": "Hållbar",
+      "family-friendly": "Familjevänlig"
     },
     "contentLanguage": "Innehållsspråk",
     "contentLanguageA11y": "Innehållsspråk, {{language}}. Ändra",
@@ -211,7 +248,57 @@
     "featured": "Utvalda katalogprodukter",
     "readyForBatch_one": "{{count}} redo för batch",
     "readyForBatch_other": "{{count}} redo för batch",
-    "channelsNote": "Instagram och Facebook kan kopplas i nästa steg. (Inga kanaler kopplade än)"
+    "channelsNote": "Instagram och Facebook kan kopplas i nästa steg. (Inga kanaler kopplade än)",
+    "noColors": "Vi hittade inga varumärkesfärger på din webbplats.",
+    "fonts": "Typsnitt: {{fonts}}",
+    "colorFrom": {
+      "site": "Webbplats",
+      "logo": "Logotyp",
+      "products": "Bilder",
+      "you": "Dina"
+    },
+    "editColor": "Ändra färg",
+    "addColor": "Lägg till färg",
+    "hexLabel": "Eller ange en hexkod",
+    "hexHint": "Använd en hexkod som #7C6754",
+    "duplicateColor": "Färgen finns redan i paletten",
+    "saveColor": "Spara färg",
+    "removeColor": "Ta bort färg",
+    "cancel": "Avbryt",
+    "saveFailed": "Kunde inte spara. Dina färger är oförändrade – försök igen.",
+    "swatchA11y": "{{hex}}, {{source}}. Ändra",
+    "pickColor": "Välj en färg och sedan en nyans",
+    "lighter": "Ljusare",
+    "darker": "Mörkare",
+    "toneGroups": {
+      "feel": "Känsla",
+      "style": "Stil",
+      "positioning": "Positionering"
+    },
+    "hues": {
+      "red": "Röd",
+      "orange": "Orange",
+      "yellow": "Gul",
+      "green": "Grön",
+      "teal": "Turkos",
+      "blue": "Blå",
+      "purple": "Lila",
+      "pink": "Rosa",
+      "brown": "Brun",
+      "grey": "Grå"
+    },
+    "shades": {
+      "lightest": "ljusast",
+      "light": "ljus",
+      "medium": "mellan",
+      "dark": "mörk",
+      "darkest": "mörkast"
+    },
+    "prefsSaveFailed": "Kunde inte spara din tonalitet och ditt språk.",
+    "continueWithoutSaving": "Fortsätt utan att spara",
+    "paletteMetaNoWebsite": "Varumärkespalett",
+    "swatchesNoWebsite": "Färgprover",
+    "noColorsNoWebsite": "Inga färger ännu. Utan en webbplats finns inget att importera dem från."
   },
   "preparing": {
     "ready": "Studio redo",
@@ -219,7 +306,24 @@
     "loadingButton": "Förbereder dina idéer…",
     "catalogSafe": "Din katalog förblir orörd i din butik.",
     "title": "Förbereder dina första idéer",
-    "nextTitle": "Nästa: Granska dina idéer"
+    "nextTitle": "Nästa: Granska dina idéer",
+    "bodyIdeas": "Letar efter sådant som är värt att publicera för {{name}}: säsonger, trender och din katalog.",
+    "photosReady": "Produktbilder klara",
+    "photosCount_one": "{{count}} bild · {{product}}",
+    "photosCount_other": "{{count}} bilder · {{product}}",
+    "noPhotos": "Inga produktbilder hittades på din webbplats",
+    "ideasTitle": "Letar efter idéer till inlägg",
+    "ideasDetail": "Säsonger, trender och din katalog",
+    "ideasFound_one": "{{count}} idé hittad",
+    "ideasFound_other": "{{count}} idéer hittade",
+    "ideasNone": "Inga nya idéer den här gången",
+    "nextPick": "Välj vad som är värt att publicera",
+    "continueWithout": "Fortsätt utan idéer",
+    "errors": {
+      "noBrand": "Ditt företag är inte konfigurerat ännu. Gå tillbaka ett steg.",
+      "stopped": "Sökningen efter idéer avbröts.",
+      "startFailed": "Kunde inte börja leta efter idéer."
+    }
   },
   "connect": {
     "readyToConnect": "• Redo att ansluta",
@@ -237,6 +341,25 @@
     "laterBody": "Du kan fortfarande skapa, redigera och ladda ner högupplösta reels och fotosessioner till din kamerarulle. Du kan länka ditt Instagram när som helst i Inställningar.",
     "laterDownload": "Ladda ner dina skapelser",
     "laterSettings": "Anslut kanaler i Inställningar",
-    "continueWithout": "Fortsätt utan att ansluta"
+    "continueWithout": "Fortsätt utan att ansluta",
+    "connectedAs": "Ansluten: {{names}}",
+    "errors": {
+      "noBrand": "Ditt företag är inte konfigurerat ännu. Gå tillbaka ett steg.",
+      "cancelled": "Anslutningen avbröts. Försök igen när du är redo.",
+      "failed": "Kunde inte ansluta. Försök igen."
+    }
+  },
+  "maps": {
+    "title": "Hitta ditt företag på Google Maps",
+    "subtitle": "Sök på företagsnamn och ort och välj sedan din företagsprofil.",
+    "placeholder": "Företagsnamn och ort",
+    "search": "Sök på Google Maps",
+    "isThisYou": "Är det här ditt företag?",
+    "noResults": "Inga träffar på Google Maps. Prova en annan stavning eller beskriv ditt företag i stället.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Finns du inte med? Beskriv ditt företag i stället",
+    "errors": {
+      "failed": "Kunde inte söka på Google Maps. Försök igen."
+    }
   }
 }

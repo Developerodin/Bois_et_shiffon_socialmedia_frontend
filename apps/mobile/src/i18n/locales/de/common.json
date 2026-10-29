@@ -33,5 +33,24 @@
     "create": "Erstellen",
     "ideas": "Ideen",
     "results": "Ergebnisse"
+  },
+  "net": {
+    "unreachable": "Espanda ist nicht erreichbar. Prüfe deine Internetverbindung – wir versuchen es weiter.",
+    "timeout": "Espanda hat zu lange zum Antworten gebraucht. Prüfe deine Verbindung und versuche es erneut.",
+    "serverDown": "Espanda antwortet gerade nicht. Versuche es in einer Minute erneut.",
+    "offline": "Keine Verbindung. Wir verbinden dich so schnell wie möglich wieder. Deine gespeicherten Daten gehen nicht verloren.",
+    "backOnline": "Wieder online.",
+    "signedOut": "Du wurdest abgemeldet. Melde dich erneut an, um dort weiterzumachen, wo du aufgehört hast.",
+    "failed": "Etwas ist schiefgelaufen. Versuche es erneut."
+  },
+  "notFound": {
+    "title": "Diese Seite gibt es nicht.",
+    "body": "Der Link ist möglicherweise veraltet oder die Seite wurde verschoben.",
+    "home": "Zur Startseite"
+  },
+  "crash": {
+    "title": "Etwas ist schiefgelaufen.",
+    "body": "Auf dieser Seite ist ein Problem aufgetreten. Versuche es erneut. Falls das Problem bestehen bleibt, starte die App neu.",
+    "retry": "Erneut versuchen"
   }
 }

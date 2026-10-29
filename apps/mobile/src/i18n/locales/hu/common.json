@@ -33,5 +33,24 @@
     "create": "Létrehozás",
     "ideas": "Ötletek",
     "results": "Eredmények"
+  },
+  "net": {
+    "unreachable": "Nem érjük el az Espandát. Ellenőrizd az internetkapcsolatot, mi pedig tovább próbálkozunk.",
+    "timeout": "Az Espanda nem válaszolt időben. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "serverDown": "Az Espanda most nem válaszol. Próbáld újra egy perc múlva.",
+    "offline": "Nincs kapcsolat. Amint tudunk, újra csatlakozunk; a mentett adataid nem vesztek el.",
+    "backOnline": "Újra online.",
+    "signedOut": "A rendszer kijelentkeztetett. Jelentkezz be újra, és folytasd ott, ahol abbahagytad.",
+    "failed": "Valami hiba történt. Próbáld újra."
+  },
+  "notFound": {
+    "title": "Ez a képernyő nem létezik.",
+    "body": "Lehet, hogy a hivatkozás régi, vagy a képernyő máshová került.",
+    "home": "Kezdőlapra"
+  },
+  "crash": {
+    "title": "Valami hiba történt.",
+    "body": "Hiba történt ezen a képernyőn. Próbáld újra; ha a hiba továbbra is fennáll, indítsd újra az alkalmazást.",
+    "retry": "Próbáld újra"
   }
 }

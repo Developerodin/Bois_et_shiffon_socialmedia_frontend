@@ -129,10 +129,14 @@
         "value": "Stemme fra sidene dine"
       }
     },
-    "safeNote": "Katalogimport endrer ingenting på din live-butikk."
+    "safeNote": "Katalogimport endrer ingenting på din live-butikk.",
+    "unreachable": "Vi kunne ikke åpne nettstedet. Sjekk adressen.",
+    "checkFailed": "Kunne ikke sjekke nettstedet. Prøv igjen.",
+    "noWebsite": "Ingen nettside? Beskriv bedriften din i stedet"
   },
   "manual": {
     "title": "Legg til bedriftsdetaljer",
+    "subtitle": "Fortell oss hva du selger og hvor. Vi søker etter bedriften din på nettet.",
     "nameLabel": "Bedriftsnavn *",
     "namePlaceholder": "f.eks. Atelier Bois & Chiffons",
     "sellsLabel": "Hva selger du? *",
@@ -156,7 +160,8 @@
     "stages": {
       "open": "Åpner nettsted",
       "identity": "Leser merkevareidentitet & tone",
-      "photos": "Samler produktbilder"
+      "photos": "Samler produktbilder",
+      "find": "Finner bedriften din på nettet"
     },
     "status": {
       "done": "Fullført",
@@ -168,7 +173,10 @@
       "noWorkspace": "Kontoen din har ikke noe arbeidsområde ennå.",
       "startFailed": "Kunne ikke starte lesing av nettstedet ditt.",
       "restartFailed": "Kunne ikke starte på nytt. Prøv igjen."
-    }
+    },
+    "bodyMaps": "Leser Google Maps-oppføringen og finner bedriften din på nettet.",
+    "sourceMaps": "Google Maps-oppføring",
+    "foundMaps": "Oppføring valgt"
   },
   "review": {
     "title": "Gjennomgå bedriftsdetaljer",
@@ -182,7 +190,20 @@
     "products_one": "Oppdaget produkter ({{count}})",
     "products_other": "Oppdaget produkter ({{count}})",
     "found": "Funnet",
-    "strengths": "Merkevarestyrker"
+    "strengths": "Merkevarestyrker",
+    "noProducts": "Vi fant ingen produkter på nettstedet ditt ennå.",
+    "name": "Bedriftsnavn",
+    "editName": "Rediger bedriftsnavn",
+    "addTagline": "Legg til slagord",
+    "addAudience": "Hvem kjøper fra deg?",
+    "saveFailed": "Kunne ikke lagre endringen – den er tilbakestilt. Prøv igjen.",
+    "subtitleNoWebsite": "Vi fant disse opplysningene på nettet og ut fra det du fortalte oss. Du kan endre dem når som helst.",
+    "noProductsNoWebsite": "Ingen produktbilder ennå. Uten en nettside er det ingen katalog å importere.",
+    "foundSite": "Vi fant nettsiden din",
+    "foundSiteBody": "Er {{host}} din? Vi henter logo, farger og produkter derfra (tar omtrent ett minutt).",
+    "useSite": "Bruk nettsiden",
+    "notMine": "Ikke min",
+    "useSiteFailed": "Kunne ikke bruke nettsiden. Prøv igjen, eller fortsett uten."
   },
   "brand": {
     "title": "Merkevare & kreativ stil",
@@ -199,7 +220,23 @@
       "elegant": "Elegant",
       "premium": "Premium",
       "natural": "Naturlig",
-      "minimalist": "Minimalistisk"
+      "minimalist": "Minimalistisk",
+      "warm": "Varm",
+      "playful": "Leken",
+      "bold": "Dristig",
+      "calm": "Rolig",
+      "romantic": "Romantisk",
+      "edgy": "Utfordrende",
+      "rustic": "Rustikk",
+      "vintage": "Vintage",
+      "bohemian": "Bohemsk",
+      "industrial": "Industriell",
+      "scandinavian": "Skandinavisk",
+      "coastal": "Maritim",
+      "affordable": "Rimelig",
+      "artisanal": "Håndverksmessig",
+      "sustainable": "Bærekraftig",
+      "family-friendly": "Familievennlig"
     },
     "contentLanguage": "Innholdsspråk",
     "contentLanguageA11y": "Innholdsspråk, {{language}}. Endre",
@@ -211,7 +248,57 @@
     "featured": "Utvalgte katalogprodukter",
     "readyForBatch_one": "{{count}} klar for batch",
     "readyForBatch_other": "{{count}} klar for batch",
-    "channelsNote": "Instagram og Facebook kan kobles til i neste steg. (Ingen kanaler koblet ennå)"
+    "channelsNote": "Instagram og Facebook kan kobles til i neste steg. (Ingen kanaler koblet ennå)",
+    "noColors": "Vi fant ingen merkevarefarger på nettstedet ditt.",
+    "fonts": "Skrifttyper: {{fonts}}",
+    "colorFrom": {
+      "site": "Nettside",
+      "logo": "Logo",
+      "products": "Bilder",
+      "you": "Dine"
+    },
+    "editColor": "Rediger farge",
+    "addColor": "Legg til farge",
+    "hexLabel": "Eller skriv inn en hex-kode",
+    "hexHint": "Bruk en hex-kode som #7C6754",
+    "duplicateColor": "Fargen er allerede i paletten",
+    "saveColor": "Lagre farge",
+    "removeColor": "Fjern farge",
+    "cancel": "Avbryt",
+    "saveFailed": "Kunne ikke lagre. Fargene dine er uendret – prøv igjen.",
+    "swatchA11y": "{{hex}}, {{source}}. Rediger",
+    "pickColor": "Velg en farge, deretter en nyanse",
+    "lighter": "Lysere",
+    "darker": "Mørkere",
+    "toneGroups": {
+      "feel": "Stemning",
+      "style": "Stil",
+      "positioning": "Posisjonering"
+    },
+    "hues": {
+      "red": "Rød",
+      "orange": "Oransje",
+      "yellow": "Gul",
+      "green": "Grønn",
+      "teal": "Turkis",
+      "blue": "Blå",
+      "purple": "Lilla",
+      "pink": "Rosa",
+      "brown": "Brun",
+      "grey": "Grå"
+    },
+    "shades": {
+      "lightest": "lysest",
+      "light": "lys",
+      "medium": "middels",
+      "dark": "mørk",
+      "darkest": "mørkest"
+    },
+    "prefsSaveFailed": "Kunne ikke lagre tone og språk.",
+    "continueWithoutSaving": "Fortsett uten å lagre",
+    "paletteMetaNoWebsite": "Merkevarepalett",
+    "swatchesNoWebsite": "Fargeprøver",
+    "noColorsNoWebsite": "Ingen farger ennå. Uten en nettside er det ingenting å importere dem fra."
   },
   "preparing": {
     "ready": "Studio klart",
@@ -219,7 +306,24 @@
     "loadingButton": "Forbereder dine ideer…",
     "catalogSafe": "Din katalog forblir urørt i butikken din.",
     "title": "Forbereder dine første ideer",
-    "nextTitle": "Neste: Gjennomgå dine ideer"
+    "nextTitle": "Neste: Gjennomgå dine ideer",
+    "bodyIdeas": "Finner ideer det er verdt å poste for {{name}}: sesonger, trender og katalogen din.",
+    "photosReady": "Produktbilder klare",
+    "photosCount_one": "{{count}} bilde · {{product}}",
+    "photosCount_other": "{{count}} bilder · {{product}}",
+    "noPhotos": "Fant ingen produktbilder på nettstedet ditt",
+    "ideasTitle": "Finner ideer til innlegg",
+    "ideasDetail": "Sesonger, trender og katalogen din",
+    "ideasFound_one": "{{count}} idé funnet",
+    "ideasFound_other": "{{count}} ideer funnet",
+    "ideasNone": "Ingen nye ideer denne gangen",
+    "nextPick": "Velg dem som er verdt å poste",
+    "continueWithout": "Fortsett uten ideer",
+    "errors": {
+      "noBrand": "Bedriften din er ikke satt opp ennå. Gå tilbake ett steg.",
+      "stopped": "Søket etter ideer stoppet.",
+      "startFailed": "Kunne ikke starte søket etter ideer."
+    }
   },
   "connect": {
     "readyToConnect": "• Klar til å koble til",
@@ -237,6 +341,25 @@
     "laterBody": "Du kan fortsatt lage, redigere og laste ned høyoppløselige reels og fotoshoots til kamerarullen din. Du kan koble til Instagram når som helst i Innstillinger.",
     "laterDownload": "Last ned dine kreasjoner",
     "laterSettings": "Koble til kanaler i Innstillinger",
-    "continueWithout": "Fortsett uten å koble til"
+    "continueWithout": "Fortsett uten å koble til",
+    "connectedAs": "Tilkoblet: {{names}}",
+    "errors": {
+      "noBrand": "Bedriften din er ikke satt opp ennå. Gå tilbake ett steg.",
+      "cancelled": "Tilkoblingen ble avbrutt. Prøv igjen når du er klar.",
+      "failed": "Kunne ikke koble til. Prøv igjen."
+    }
+  },
+  "maps": {
+    "title": "Finn bedriften din på Google Maps",
+    "subtitle": "Søk etter bedriftsnavn og sted, og velg oppføringen din.",
+    "placeholder": "Bedriftsnavn og sted",
+    "search": "Søk på Google Maps",
+    "isThisYou": "Er dette bedriften din?",
+    "noResults": "Ingen treff på Google Maps. Prøv en annen skrivemåte, eller beskriv bedriften din i stedet.",
+    "rating": "★ {{rating}} ({{count}})",
+    "notListed": "Ikke på listen? Beskriv bedriften din i stedet",
+    "errors": {
+      "failed": "Kunne ikke søke på Google Maps. Prøv igjen."
+    }
   }
 }
