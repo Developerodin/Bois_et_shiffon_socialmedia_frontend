@@ -3,7 +3,7 @@
  *
  * Tasks are grouped by how hard they are, not given a model each: a new workflow lands in "medium" until someone
  * moves it. Which model each tier uses, its backup, and every model's price live in the database (AiTier, AiModel),
- * set by platform admins on Settings → AI models; this file holds no model names. Read them with modelConfig()
+ * set by platform admins on Platform admin → AI models; this file holds no model names. Read them with modelConfig()
  * (server/ai/model-config.ts) and pass the result in.
  * The tiers (from the 2026-10-29 comparison and the test set, scripts/evals):
  * - heavy: writing that shapes everything else or reaches customers (strategy documents, post drafts, the check
@@ -38,7 +38,7 @@ export function tierFor(workflowId: string): Tier {
 /** No model is set for a tier: an AI call can't go anywhere until a platform admin picks one. */
 export class ModelNotConfiguredError extends Error {
   constructor(readonly tier: Tier) {
-    super(`No AI model is set for the ${tier} tier. A platform admin sets it in Settings → AI models.`);
+    super(`No AI model is set for the ${tier} tier. A platform admin sets it in Platform admin → AI models.`);
     this.name = "ModelNotConfiguredError";
   }
 }
@@ -76,7 +76,7 @@ const CACHE_WRITE = 1.25;
 
 export type AiUsage = { inputTokens?: number; cachedInputTokens?: number; cacheWriteTokens?: number; outputTokens?: number; reasoningTokens?: number; webSearchCalls?: number };
 
-/** List price of one call; null when the model has no price in Settings → AI models (or for the mock provider). */
+/** List price of one call; null when the model has no price in Platform admin → AI models (or for the mock provider). */
 export function aiCostUsd(cfg: ModelConfig, model: string, u: AiUsage): number | null {
   const price = cfg.models.get(model);
   if (!price) return null;

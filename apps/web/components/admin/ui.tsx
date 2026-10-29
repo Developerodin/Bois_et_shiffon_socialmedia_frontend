@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SegmentedLinks } from "@/components/admin/segmented-links";
+export { Table } from "@/components/admin/table";
 import { cn } from "@/lib/utils";
 
 /** Small building blocks for the platform admin console (app/(shell)/admin). Server components only. */
@@ -82,62 +83,6 @@ export function Section({ id, title, description, children }: { id: string; titl
   );
 }
 
-/**
- * A table where there's room for one, stacked cards where there isn't. It answers to its own width (a container
- * query), not the screen's, so a table in a half-width column on a wide screen becomes cards too. Cards: the first
- * column is the card's title, the rest are label / value pairs. Both forms are in the page; CSS shows one.
- * `wide`: many columns, so the table form waits for more room (64 rem instead of 48).
- */
-export function Table({ head, rows, empty, numeric = [], wide = false }: { head: string[]; rows: React.ReactNode[][]; empty: string; numeric?: number[]; wide?: boolean }) {
-  if (!rows.length) return <p className="rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">{empty}</p>;
-  return (
-    <div className="@container">
-      <div className={cn("hidden overflow-x-auto rounded-xl border border-border bg-card", wide ? "@5xl:block" : "@3xl:block")}>
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-border text-xs text-muted-foreground">
-            <tr>
-              {head.map((h, i) => (
-                <th key={h} scope="col" className={cn("whitespace-nowrap px-3 py-2.5 font-medium", numeric.includes(i) && "text-right")}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {rows.map((r, i) => (
-              <tr key={i} className="align-top transition-colors hover:bg-muted/40">
-                {r.map((c, j) => (
-                  <td key={j} className={cn("px-3 py-2.5", numeric.includes(j) && "whitespace-nowrap text-right tabular-nums")}>
-                    {c}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <ul className={cn("divide-y divide-border rounded-xl border border-border bg-card", wide ? "@5xl:hidden" : "@3xl:hidden")}>
-        {rows.map((r, i) => (
-          <li key={i} className="flex flex-col gap-2.5 px-4 py-3 text-sm">
-            <div className="min-w-0 break-words">{r[0]}</div>
-            {r.length > 1 ? (
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-2 @md:grid-cols-3">
-                {r.slice(1).map((c, j) => (
-                  <div key={j} className="min-w-0">
-                    <dt className="text-xs text-muted-foreground">{head[j + 1]}</dt>
-                    {/* Values left-aligned here (Money right-aligns itself for table columns). */}
-                    <dd className="mt-0.5 break-words tabular-nums [&_.items-end]:items-start">{c}</dd>
-                  </div>
-                ))}
-              </dl>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 export function Pill({ tone = "muted", children }: { tone?: "good" | "warn" | "bad" | "muted"; children: React.ReactNode }) {
   const tones = { good: "border-success/40 bg-success/10 text-success", warn: "border-warning/40 bg-warning/10 text-warning", bad: "border-destructive/40 bg-destructive/10 text-destructive", muted: "border-border bg-muted text-muted-foreground" };
   return <span className={cn("inline-flex whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-medium", tones[tone])}>{children}</span>;
@@ -203,9 +148,10 @@ export function Pager({ page, hasMore, href }: { page: number; hasMore: boolean;
   const link = "rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   return (
     <nav aria-label="Pages" className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-      {page > 1 ? <Link className={link} href={href(page - 1)}>← Newer</Link> : <span />}
+      {/* Plain links, like the filters: see components/admin/segmented-links.tsx. */}
+      {page > 1 ? <a className={link} href={href(page - 1)}>← Newer</a> : <span />}
       <span>Page {page}</span>
-      {hasMore ? <Link className={link} href={href(page + 1)}>Older →</Link> : <span />}
+      {hasMore ? <a className={link} href={href(page + 1)}>Older →</a> : <span />}
     </nav>
   );
 }

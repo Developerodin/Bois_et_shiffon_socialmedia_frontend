@@ -4,7 +4,7 @@ import { forgetModelConfig } from "@/server/ai/model-config";
 import { prisma } from "@/server/db/prisma";
 
 /**
- * Settings → AI models (platform admins): the models the app may call with their prices, and which one each tier
+ * Platform admin → AI models (platform admins): the models the app may call with their prices, and which one each tier
  * uses. Every change is checked, recorded as an AuditEvent, and live within a minute everywhere (at once on the
  * server that saved it; server/ai/model-config.ts).
  */

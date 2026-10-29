@@ -2,7 +2,7 @@ import type { z } from "zod";
 import { problemResponse } from "@/server/api/http-error";
 import { AiModelSettingsError } from "@/server/services/ai-models";
 
-/** Settings → AI models: one error shape for every route. */
+/** Platform admin → AI models: one error shape for every route. */
 export function settingsError(error: unknown) {
   if (error instanceof AiModelSettingsError) {
     return problemResponse({ type: "https://api.brandpilot/errors/ai-model-settings", title: "Can't save that", status: error.status, detail: error.message });

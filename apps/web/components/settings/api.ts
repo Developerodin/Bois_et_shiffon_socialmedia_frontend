@@ -160,7 +160,7 @@ export const settingsApi = {
   disconnect: (w: string, b: string, id: string) =>
     request<{ cancelled: number }>(`${brand(w, b)}/connections/${encodeURIComponent(id)}`, { method: "DELETE" }),
 
-  // Platform admins only (Settings → AI models); not per workspace.
+  // Platform admins only (Platform admin → AI models); not per workspace.
   aiModels: () => request<AiModelSettings>("/api/v1/ai-models"),
   saveAiModel: (m: AiModel) => request<AiModelSettings>("/api/v1/ai-models", json("PUT", m)),
   deleteAiModel: (name: string) => request<AiModelSettings>(`/api/v1/ai-models/${encodeURIComponent(name)}`, { method: "DELETE" }),

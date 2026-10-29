@@ -2,7 +2,7 @@ import { invalidBody, settingsError } from "@/server/api/ai-model-route";
 import { platformAdmin } from "@/server/auth/platform-admin";
 import { listAiModels, ModelInput, saveAiModel } from "@/server/services/ai-models";
 
-/** Settings → AI models: every model with its price and flags, and each tier's model and backup. */
+/** Platform admin → AI models: every model with its price and flags, and each tier's model and backup. */
 export async function GET(request: Request) {
   const admin = await platformAdmin(request);
   if (admin instanceof Response) return admin;

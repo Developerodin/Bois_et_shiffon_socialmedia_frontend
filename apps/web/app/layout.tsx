@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Suspense } from "react";
 import { ConnectionBanner } from "@/components/net/connection-banner";
+import { NavProgress } from "@/components/nav/nav-progress";
 import { THEME_SCRIPT } from "@/components/theme/theme-script";
 import "./globals.css";
 
@@ -40,6 +42,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} antialiased`}
       >
+        {/* Suspense: it reads the URL's query, which would otherwise stop static pages being prerendered. */}
+        <Suspense fallback={null}>
+          <NavProgress />
+        </Suspense>
         {children}
         <ConnectionBanner />
       </body>

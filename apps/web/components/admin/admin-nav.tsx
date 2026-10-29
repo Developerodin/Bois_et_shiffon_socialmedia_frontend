@@ -12,7 +12,7 @@ const ITEMS = [
   { href: "/admin/people", label: "People", icon: Users },
   { href: "/admin/spend", label: "Spend & usage", icon: ChartColumn },
   { href: "/admin/logs", label: "Logs", icon: ScrollText },
-  { href: "/settings?tab=ai-models", label: "AI models", icon: Cpu },
+  { href: "/admin/models", label: "AI models", icon: Cpu },
 ];
 
 /**
@@ -21,19 +21,20 @@ const ITEMS = [
  */
 export function AdminNav() {
   const path = usePathname();
-  const active = ITEMS.find(({ href, exact }) => (exact ? path === href : path.startsWith(href.split("?")[0])))?.href ?? "";
-  const { ref, style } = useIndicator<HTMLDivElement>(active, "box");
+  const active = ITEMS.find(({ href, exact }) => (exact ? path === href : path.startsWith(href)))?.href ?? "";
+  const { ref, style, shown, pick } = useIndicator<HTMLDivElement>(active, "box");
   return (
     <nav aria-label="Platform admin" className="lg:sticky lg:top-20">
       <p className="mb-2 hidden px-3 font-mono text-[11px] uppercase tracking-[0.14em] text-primary lg:block">Platform admin</p>
       <div ref={ref} className="relative flex flex-wrap gap-1 lg:flex-col">
         <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-lg bg-muted" style={style} />
         {ITEMS.map(({ href, label, icon: Icon }) => {
-          const on = href === active;
+          const on = href === shown;
           return (
             <Link
               key={href}
               href={href}
+              onClick={pick(href)}
               aria-current={on ? "page" : undefined}
               className={cn(
                 "relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

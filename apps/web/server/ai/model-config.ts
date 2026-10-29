@@ -17,7 +17,7 @@ const TTL_MS = 60_000;
 let cache: { at: number; value: Promise<ModelConfig> } | null = null;
 
 /**
- * The AI model settings (Settings → AI models), read from the database at most once a minute per server instance.
+ * The AI model settings (Platform admin → AI models), read from the database at most once a minute per server instance.
  * ponytail: a change saved on one instance reaches the others within a minute (the saving one at once); a shared
  * cache or a change notification if that ever matters.
  */

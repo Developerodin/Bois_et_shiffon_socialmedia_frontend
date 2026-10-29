@@ -7,7 +7,7 @@ import { prisma } from "@/server/db/prisma";
 /**
  * AI provider boundary (DEC-003). OpenAI via the Responses API with strict JSON
  * schema output; `mock` when no key is configured (tests, local without a key).
- * The model comes from the task's tier (server/ai/models.ts), set in Settings → AI models. An answer that fails its schema or the caller's
+ * The model comes from the task's tier (server/ai/models.ts), set in Platform admin → AI models. An answer that fails its schema or the caller's
  * `validate` check is asked again one tier up; a model that's unavailable is swapped for its backup once.
  * Every attempt is logged to AiWorkflowRun with its cost.
  */
@@ -183,7 +183,7 @@ export async function callOpenAi<T extends z.ZodType>(
   // same start reads it at 5–10% of the input price. Explicit mode: a prompt with no such line isn't written to the
   // cache, since a write costs 1.25× input and nobody would read it back.
   // Measured 2026-10-29 on the medium tier's model: same 5,100-token start, different ending: 0 cached without a
-  // breakpoint, 5,122 with one. Models without this ("Cache breakpoints" off in Settings → AI models; OpenAI's before
+  // breakpoint, 5,122 with one. Models without this ("Cache breakpoints" off in Platform admin → AI models; OpenAI's before
   // GPT-5.6) get the prompt as one string.
   const retryNote = feedback ? `\n\n---\nYour previous answer was rejected, fix this: ${feedback}` : "";
   const prompt = input.prompt + retryNote;

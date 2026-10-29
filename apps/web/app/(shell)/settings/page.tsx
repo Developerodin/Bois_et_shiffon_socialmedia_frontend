@@ -3,7 +3,6 @@ import { Settings } from "lucide-react";
 import { auth } from "@/auth";
 import { SettingsBoard } from "@/components/settings/settings-board";
 import { EmptyState } from "@/components/ui/empty-state";
-import { isPlatformAdmin } from "@/server/auth/platform-admin";
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
 export default async function SettingsPage({
@@ -44,9 +43,8 @@ export default async function SettingsPage({
       key={shell.activeWorkspaceId}
       workspaceId={shell.activeWorkspaceId}
       brandId={shell.activeBrandId ?? null}
-      initialTab={q.tab === "connections" ? "connections" : q.tab === "ai-models" ? "ai-models" : undefined}
+      initialTab={q.tab === "connections" ? "connections" : undefined}
       notice={notice}
-      platformAdmin={await isPlatformAdmin(session.user.id)}
     />
   );
 }
