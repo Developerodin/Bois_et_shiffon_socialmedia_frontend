@@ -2,6 +2,7 @@
  * What we've spent: AI calls by model, tier and task, and other paid APIs, in USD and INR. Read-only.
  * Run: npm run usage -w web [-- --days 30]   (default: everything recorded)
  * INR uses USD_INR from .env when set, else today's rate from open.er-api.com.
+ * ponytail: loads every row in the period into memory; fine to ~100k calls, then aggregate in SQL (groupBy) instead.
  * Rows from before 2026-10-29 have tokens but no stored cost: they're priced from their tokens at today's list price,
  * without web searches (those weren't counted then). Rows for deleted brands before that date are gone.
  */
@@ -31,7 +32,7 @@ const add = (m: Map<string, Row>, key: string, r: Omit<Row, "key">) => {
 
 (async () => {
   const [ai, api, fx] = await Promise.all([
-    prisma.aiWorkflowRun.findMany({ where: { createdAt: { gte: since } }, select: { model: true, tier: true, workflowId: true, status: true, inputTokens: true, cachedInputTokens: true, outputTokens: true, webSearchCalls: true, costUsd: true, createdAt: true } }),
+    prisma.aiWorkflowRun.findMany({ where: { createdAt: { gte: since } }, select: { model: true, tier: true, workflowId: true, status: true, inputTokens: true, cachedInputTokens: true, outputTokens: true, webSearchCalls: true, costUsd: true, error: true, createdAt: true } }),
     prisma.apiCall.findMany({ where: { createdAt: { gte: since } }, select: { provider: true, operation: true, status: true, costUsd: true } }),
     inrRate(),
   ]);
@@ -67,6 +68,34 @@ const add = (m: Map<string, Row>, key: string, r: Omit<Row, "key">) => {
   table("AI by tier", byTier);
   table("AI by task", byTask);
   table("Other APIs", byApi, false);
+
+  // Routing health: answers asked again (failed a check or the schema), backups used, share of input from cache.
+  const escalated = ai.filter((r) => r.status === "ESCALATED").length;
+  const fellBack = ai.filter((r) => r.status === "FELL_BACK").length;
+  console.log(`\nRouting  ${escalated} answers asked again (failed a check or the schema), ${fellBack} switched to a backup model`);
+  for (const m of [...byModel.keys()]) {
+    const rows = ai.filter((r) => r.model === m && r.cachedInputTokens !== null);
+    const input = rows.reduce((s, r) => s + (r.inputTokens ?? 0), 0);
+    if (input) console.log(`  ${m.padEnd(32)} ${Math.round((100 * rows.reduce((s, r) => s + (r.cachedInputTokens ?? 0), 0)) / input)}% of input from cache`);
+  }
+
+  // Quality signal (Cursor's "keep rate" for us): what approvers decided on drafts, by the model that wrote them.
+  const decisions = await prisma.approvalDecision.findMany({ where: { createdAt: { gte: since } }, select: { verdict: true, contentVersionId: true } });
+  const versions = await prisma.contentVersion.findMany({ where: { id: { in: [...new Set(decisions.map((d) => d.contentVersionId))] } }, select: { id: true, model: true, createdBy: true } });
+  const writer = new Map(versions.map((v) => [v.id, v.createdBy === "agent" ? (v.model ?? "AI (model not recorded)") : "edited by a person"]));
+  const verdicts = new Map<string, Record<string, number>>();
+  for (const d of decisions) {
+    const w = writer.get(d.contentVersionId) ?? "unknown";
+    const v = verdicts.get(w) ?? { APPROVED: 0, CHANGES_REQUESTED: 0, REJECTED: 0 };
+    v[d.verdict]++;
+    verdicts.set(w, v);
+  }
+  console.log("\nApprovals by who wrote the draft");
+  if (!verdicts.size) console.log("  no approval decisions yet");
+  for (const [w, v] of verdicts) {
+    const total = v.APPROVED + v.CHANGES_REQUESTED + v.REJECTED;
+    console.log(`  ${w.padEnd(32)} ${String(total).padStart(4)} decisions  ${Math.round((100 * v.APPROVED) / total)}% approved  (${v.CHANGES_REQUESTED} changes requested, ${v.REJECTED} rejected)`);
+  }
   console.log(`\nTotal  AI ${money(aiUsd)}   APIs ${money(apiUsd)}   All ${money(aiUsd + apiUsd)}`);
   if (unpriced) console.log(`(${unpriced} older AI calls priced from tokens at today's list price; their web searches weren't recorded)`);
   console.log("List prices: OpenAI's bill can be lower (cached input before 2026-10-29, free Google allowances). The OpenAI dashboard has the exact bill.");

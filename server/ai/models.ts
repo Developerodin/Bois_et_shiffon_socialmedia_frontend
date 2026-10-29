@@ -7,8 +7,8 @@
  *   before approval). gpt-6.1-sol wrote the most natural French and gave the most precise review notes.
  * - medium: reading, finding and structuring (lookup, summary, ideas, audits, chat). gpt-6.1-terra matched the
  *   others on accuracy and was the fastest at every one of them.
- * - light: short, low-stakes calls where an invented answer is fine. gpt-6-luna is the cheapest, but it broke a
- *   "copy exactly, never invent" rule in the comparison, so nothing that quotes the brand goes here.
+ * - light: short, low-stakes calls where a loose answer is fine. gpt-6-luna is the cheapest, but asked for the
+ *   site's slogan it returned a section heading from the page instead, so nothing that quotes the brand goes here.
  * Each tier's model can be changed in .env (AI_MODEL_HEAVY / AI_MODEL_MEDIUM / AI_MODEL_LIGHT) without a code change.
  */
 export type Tier = "heavy" | "medium" | "light";
@@ -34,9 +34,27 @@ export function tierFor(workflowId: string): Tier {
   return listed(TIERS.heavy) ? "heavy" : listed(TIERS.light) ? "light" : "medium";
 }
 
+export const modelForTier = (tier: Tier) => process.env[ENV[tier]] || DEFAULT_MODEL[tier];
+
 export function modelFor(workflowId: string) {
   const tier = tierFor(workflowId);
-  return { tier, model: process.env[ENV[tier]] || DEFAULT_MODEL[tier] };
+  return { tier, model: modelForTier(tier) };
+}
+
+/** Where an answer that failed its check goes next (FrugalGPT-style cascade): one tier up; heavy is the top. */
+export const nextTier = (tier: Tier): Tier | null => (tier === "light" ? "medium" : tier === "medium" ? "heavy" : null);
+
+/**
+ * When a tier's model is unavailable (rate limited, down, retired), the call tries this once: a model of the same
+ * standing or the next one up, never a smaller one, so an outage doesn't quietly lower quality.
+ * ponytail: one fixed backup per tier; a health-scored pool (Copilot-style) if outages become routine.
+ */
+const FALLBACK: Record<Tier, string> = { heavy: "gpt-6-sol", medium: "gpt-6.1-sol", light: "gpt-6.1-terra" };
+export function fallbackModel(tier: Tier, failed: string): string | null {
+  // The tier's backup, then each higher tier's model: the first that isn't the one that just failed.
+  const candidates = [FALLBACK[tier]];
+  for (let up = nextTier(tier); up; up = nextTier(up)) candidates.push(modelForTier(up));
+  return candidates.find((m) => m !== failed) ?? null;
 }
 
 /**

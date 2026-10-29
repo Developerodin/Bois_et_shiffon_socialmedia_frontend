@@ -41,7 +41,8 @@ export const briefAgent: AgentDefinition = {
         schema: Brief,
         schemaName: "content_brief",
         system: BRIEF_SYSTEM,
-        prompt: `Brand: ${brand.displayName}\nPost: ${item.title}\nChannel: ${item.channel}\nPillar: ${item.pillar ?? "-"}\nDate: ${item.scheduledFor?.toISOString().slice(0, 10) ?? "unscheduled"}\nAngle: ${String(prior.angle ?? "")}\nIdea: ${item.opportunity ? `${item.opportunity.title}. ${item.opportunity.summary} Why now: ${item.opportunity.reason}` : "-"}\n\nBrand knowledge:\n${knowledge.text}`,
+        // Brand knowledge first: shared by every post in this run, so it can be billed at the cached rate.
+        prompt: `Brand: ${brand.displayName}\n\nBrand knowledge:\n${knowledge.text}\n\n---\nThe post to brief\nPost: ${item.title}\nChannel: ${item.channel}\nPillar: ${item.pillar ?? "-"}\nDate: ${item.scheduledFor?.toISOString().slice(0, 10) ?? "unscheduled"}\nAngle: ${String(prior.angle ?? "")}\nIdea: ${item.opportunity ? `${item.opportunity.title}. ${item.opportunity.summary} Why now: ${item.opportunity.reason}` : "-"}`,
         mock: {
           goal: "saves",
           audience: "Couples aménageant leur salon ou salle à manger, sensibles au bois massif",

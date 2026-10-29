@@ -168,7 +168,8 @@ export const researchAgent: AgentDefinition = {
       await ctx.log("INFO", `Drafting ${title}`);
       const out = await ctx.ai.generateObject({
         workflowId: `research.${kind}`,
-        promptVersion: kind === "competitor-analysis" ? "2" : "1", // 2: a source link after each competitor claim
+        // competitor-analysis 2: a source link after each competitor claim. 3 (and 2 for the others): material first.
+        promptVersion: kind === "competitor-analysis" ? "3" : "2",
         schema: DocOutput,
         schemaName: kind.replace(/-/g, "_"),
         system: SYSTEM,
@@ -176,7 +177,9 @@ export const researchAgent: AgentDefinition = {
         // The slowest document, and the run waits for it. Measured on B&C (2026-10-28): 61 s → 37 s with low reasoning
         // and light search, naming more competitors (8 vs 5) with more sources.
         ...(kind === "competitor-analysis" ? { reasoningEffort: "low" as const, searchContext: "low" as const } : {}),
-        prompt: `Brand: ${brand.displayName}\nWebsite: ${brand.websiteUrl ?? "none"}\n\nDocument to write: ${title}\nWhat it must cover: ${GUIDANCE[kind]}\n\n${label}:\n${text}`,
+        // The material first and the document's own instructions last: the five documents then share one long prompt
+        // start, which OpenAI can bill at the cached rate (on retries and staggered starts; parallel first calls may miss).
+        prompt: `Brand: ${brand.displayName}\nWebsite: ${brand.websiteUrl ?? "none"}\n\n${label}:\n${text}\n\n---\nDocument to write: ${title}\nWhat it must cover: ${GUIDANCE[kind]}`,
         mock: mockDoc(kind, brand.displayName, [...known].map(([url, t]) => ({ url, title: t, description: null, text: "" }))),
       });
       const doc = await saveDraft({

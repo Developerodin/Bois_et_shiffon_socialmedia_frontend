@@ -46,6 +46,13 @@ export const oneLine = (s: string, max: number) => {
 
 const Draft = z.object({ tagline: z.string(), tags: z.array(z.string()).max(4), audience: z.string(), strengths: z.string() });
 
+/** Case, quotes, spacing and end punctuation aside, is this text on the page? Empty text always is. */
+const comparable = (s: string) => s.normalize("NFKC").toLowerCase().replace(/[’‘`]/g, "'").replace(/[“”«»]/g, '"').replace(/\s+/g, " ").trim();
+export const onPage = (tagline: string, page: CrawledPage | undefined) => {
+  const t = comparable(tagline).replace(/[\s.!…]+$/, "");
+  return !t || (!!page && comparable(`${page.title ?? ""}\n${page.description ?? ""}\n${page.text}`).includes(t));
+};
+
 type Ctx = Parameters<AgentDefinition["run"]>[0];
 
 /** Drafts and saves the summary. Null when skipped (mock AI: there's nothing real to summarise). */
@@ -75,9 +82,13 @@ Homepage description: ${homepage?.description ?? "-"}
 Homepage text (menus and cart included; the slogan is often well down the page): ${homepage?.text.slice(0, 6000) ?? "-"}
 
 ${docs.map((d) => `## ${d.title}\n${d.latest?.markdown.slice(0, 2000) ?? "(not written)"}`).join("\n\n")}`,
+    // A tagline that isn't on the homepage was made up: ask again (a bigger model, told why). This doesn't catch a
+    // real line from the page that isn't the slogan (gpt-6-luna picked a section heading in testing); the tier does.
+    validate: (v) => (onPage(v.tagline, homepage) ? null : `tagline "${v.tagline}" isn't on the homepage`),
   });
   const summary: BrandSummary = {
-    tagline: oneLine(out.tagline, MAX.tagline) || undefined,
+    // Even the bigger model's answer must quote the site: otherwise no tagline, which the owner can type on A09.
+    tagline: (onPage(out.tagline, homepage) && oneLine(out.tagline, MAX.tagline)) || undefined,
     tags: out.tags.map((t) => oneLine(t, MAX.tag)).filter(Boolean).slice(0, 4),
     audience: oneLine(out.audience, MAX.audience) || undefined,
     strengths: oneLine(out.strengths, MAX.strengths) || undefined,
