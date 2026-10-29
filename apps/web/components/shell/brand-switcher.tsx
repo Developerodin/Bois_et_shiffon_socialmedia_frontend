@@ -46,17 +46,17 @@ export function BrandSwitcher({ workspaceId, brands, activeBrandId, canCreate }:
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex min-w-0 flex-col gap-1">
       <span className="sr-only">Brand</span>
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
-              className="h-10 min-w-[9rem] justify-between sm:h-8 sm:min-w-[12rem]"
+              className="h-10 min-w-0 max-w-[40vw] justify-between sm:h-8 sm:max-w-none sm:min-w-[12rem]"
               aria-label="Select brand"
             >
-              <span className="flex items-center gap-2 truncate">
+              <span className="flex min-w-0 items-center gap-2 truncate">
                 {active?.displayName ?? "Select brand"}
                 {active?.status === "ARCHIVED" ? (
                   <Badge variant="secondary">Archived</Badge>

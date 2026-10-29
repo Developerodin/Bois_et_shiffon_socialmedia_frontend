@@ -38,7 +38,7 @@ export default async function AdminOverview() {
         <SpendChart days={spend.days} fx={fx} title="Customer spend per day, last 30 days" />
       </Section>
 
-      <div className="grid gap-10 xl:grid-cols-2">
+      <div className="flex flex-col gap-10">
         <Section id="top" title="Costliest workspaces, last 30 days">
           <Table
             head={["Workspace", "AI calls", "Spend", "Last activity"]}

@@ -114,12 +114,12 @@ export function TopBar(p: Props) {
           </div>
         )}
 
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
           {p.activeBrandId && (
             <Button variant={logsOpen ? "secondary" : "ghost"} size="sm" className="h-10 sm:h-8" onClick={toggleLogs} aria-label="Logs" aria-expanded={logsOpen} aria-controls="agent-log-drawer">
               <SquareTerminal aria-hidden="true" />
               <span className="hidden sm:inline">Logs</span>
-              {logsOpen ? <ChevronUp aria-hidden="true" /> : <ChevronDown aria-hidden="true" />}
+              {logsOpen ? <ChevronUp aria-hidden="true" className="hidden sm:block" /> : <ChevronDown aria-hidden="true" className="hidden sm:block" />}
             </Button>
           )}
           <DropdownMenu>
@@ -154,7 +154,8 @@ export function TopBar(p: Props) {
             </DropdownMenuContent>
           </DropdownMenu>
           <ThemeToggle />
-          <Button variant="ghost" size="icon" className="size-10 sm:size-9" asChild>
+          {/* On phones Settings is in the avatar's menu, to leave the project name room. */}
+          <Button variant="ghost" size="icon" className={cn("size-10 sm:size-9", !onWorkspace && "hidden sm:inline-flex")} asChild>
             <Link href="/settings" aria-label="Settings">
               <Settings aria-hidden="true" />
             </Link>
