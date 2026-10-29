@@ -11,6 +11,8 @@ import { ownerChoices } from "@/server/content/knowledge";
 import { BrandSummary, oneLine, savePreferences, saveSummary, saveSummaryEdit } from "@/server/research/brand-summary";
 import { cleanBrandName, fontFamilies, pageAssets, safeFetch, safeFetchBytes, safeSvg } from "@/server/research/crawl";
 import { deleteMedia } from "@/server/storage/media";
+import { listingName } from "@/server/integrations/places";
+import { ownWebsite } from "@/server/agents/definitions/research";
 
 const base = new URL("https://shop.example.com/fr/");
 const html = `
@@ -186,6 +188,17 @@ async function online() {
     await prisma.brand.delete({ where: { id: brand.id } });
   }
 }
+
+// Google listing names lose their SEO text; the lookup's "found website" is only ever the business's own site.
+assert.equal(listingName("Myth I Bangkok Street food | Best mango sticky rice"), "Myth I Bangkok Street food");
+assert.equal(listingName("Windmill Bakery"), "Windmill Bakery");
+assert.equal(listingName("A|B Studio"), "A|B Studio");
+assert.equal(ownWebsite("https://www.windmillbakery.co.ke/menu?x=1"), "https://www.windmillbakery.co.ke");
+assert.equal(ownWebsite("https://x.bakery.com"), "https://x.bakery.com");
+for (const u of ["https://www.instagram.com/shop", "https://m.facebook.com/p", "https://www.etsy.com/shop/a", "https://amazon.co.uk/x", "https://maps.google.com/?cid=1", "javascript:alert(1)", "not a url", null]) {
+  assert.equal(ownWebsite(u), null, String(u));
+}
+console.log("✓ listing names, found website");
 
 if (!process.argv.includes("--offline")) {
   online()

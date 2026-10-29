@@ -17,6 +17,8 @@ export const BrandSummary = z.object({
   tags: z.array(z.string()).optional(),
   audience: z.string().optional(),
   strengths: z.string().optional(),
+  /** No-website brands: the website the online lookup found, for the owner to accept on A09. */
+  foundWebsite: z.string().optional(),
   runId: z.string().optional(),
   edited: z.array(z.enum(EDITABLE)).optional(),
 });
@@ -47,7 +49,7 @@ const Draft = z.object({ tagline: z.string(), tags: z.array(z.string()).max(4), 
 type Ctx = Parameters<AgentDefinition["run"]>[0];
 
 /** Drafts and saves the summary. Null when skipped (mock AI: there's nothing real to summarise). */
-export async function writeSummary(ctx: Ctx, homepage: CrawledPage | undefined) {
+export async function writeSummary(ctx: Ctx, homepage: CrawledPage | undefined, foundWebsite?: string | null) {
   if (aiProviderName() === "mock") return null;
   const { brand } = ctx;
   const row = await prisma.brandProfile.findFirst({ where: { brandId: brand.brandId, workspaceId: brand.workspaceId }, select: { summary: true } });
@@ -79,6 +81,7 @@ ${docs.map((d) => `## ${d.title}\n${d.latest?.markdown.slice(0, 2000) ?? "(not w
     tags: out.tags.map((t) => oneLine(t, MAX.tag)).filter(Boolean).slice(0, 4),
     audience: oneLine(out.audience, MAX.audience) || undefined,
     strengths: oneLine(out.strengths, MAX.strengths) || undefined,
+    foundWebsite: foundWebsite ?? undefined,
     runId: ctx.runId,
   };
   await saveSummary({ workspaceId: brand.workspaceId, brandId: brand.brandId }, summary);

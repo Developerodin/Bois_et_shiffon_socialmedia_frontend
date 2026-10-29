@@ -53,9 +53,12 @@ async function call(path: string, fields: string, init: { method: "GET" | "POST"
 
 export type PlaceMatch = { id: string; name: string; address: string | null; type: string | null; rating: number | null; ratingCount: number | null };
 
+/** Some owners put SEO text in the listing name ("Myth I Bangkok Street food | Best mango sticky rice"): the name is the part before the first " | ". */
+export const listingName = (s: string) => s.split(/\s+\|\s+/)[0].trim() || s.trim();
+
 const match = (p: Place): PlaceMatch => ({
   id: p.id,
-  name: p.displayName?.text ?? "",
+  name: listingName(p.displayName?.text ?? ""),
   address: p.formattedAddress ?? null,
   type: p.primaryTypeDisplayName?.text ?? null,
   rating: p.rating ?? null,
