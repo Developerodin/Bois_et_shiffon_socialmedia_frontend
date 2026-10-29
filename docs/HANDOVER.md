@@ -1,3 +1,92 @@
+# Handover: platform admin console and AI cost tracking (end of day 2026-10-29)
+
+Today built the platform admin console (`/admin`) and made AI calls route by difficulty and record their cost.
+The commits listed below are on `main` (not pushed). This file and the user activity design
+(`docs/superpowers/specs/2026-10-29-user-activity-design.md`) are new and not committed yet.
+
+## Start here tomorrow
+
+1. **Build user activity tracking.**
+   - The design is written and has had two reviews: a builder check, then correctness, security, performance
+     and maintainability.
+   - The owner hasn't approved it yet: read it, approve it, then plan and build.
+   - What it adds:
+     - the person on every AI call row, with older agent calls filled in by the migration;
+     - page visits from web and mobile, kept forever;
+     - workspace and person pickers on every Logs tab;
+     - a new Activity page: a list per person per workspace, then one person's timeline with their spend in the
+       header.
+   - Chat text is never stored or shown.
+2. **One workspace per person** (owner's decision today). Decide what happens to people who are in more than
+   one: invitees currently get their own workspace as well (`ensurePersonalWorkspace`), and project access is
+   shared across workspaces. This needs its own design. The activity design already assumes one workspace
+   (mobile visits are filed under the person's only workspace, and are left without one if there are several).
+3. **Check the admin console on a real 1280 px laptop.** At 1280 and 1366 px the wide tables were checked on a
+   stand-in page with the same layout, because the test account isn't a platform admin. Below 1280 they turn
+   into cards.
+
+## Admin console (`/admin`, platform admins only)
+
+- **Pages:** Overview, Workspaces (each with Overview, People, Projects, Roles, Spend & usage, Logs), People,
+  Spend & usage, Logs (Audit, Agent runs, Agent log, AI calls), AI models.
+- **AI models moved here** from Settings. Settings now has Project access, Members, Roles, Invitations and
+  Connections.
+- **Who can open it:**
+  - `User.isPlatformAdmin`, which is set directly in the database. The owner has to grant it; it can't be
+    granted from the app.
+  - Anyone else gets the 404 page. The status code is 200, because `admin/loading.tsx` starts streaming before
+    the check. No admin data is sent.
+  - Drop that loading screen if a real 404 status matters.
+- **Recorded in the audit log:** each admin visit to a workspace (`platform.workspace_viewed`) and to a person
+  (`platform.person_viewed`).
+- **Filters and the pager are plain `<a>` links, not `next/link`:**
+  - In production, switching only the query in place sometimes never finished: React's transition stayed
+    suspended.
+  - The cost is a full page load per filter, about 3.5 s, mostly the shell layout.
+  - Try `next/link` again after a Next upgrade. The note is in `components/admin/segmented-links.tsx`.
+- **`Table` is a client component** (`components/admin/table.tsx`). Drawing it twice on the server, for the
+  table and card views, caused hangs.
+- **A page loading bar** (`components/nav/nav-progress.tsx`) shows on every link click and GET form.
+- **Layout:** works from phone to wide monitor through container queries.
+
+## Today's commits (2026-10-29)
+
+- `35a4836` Offer the website the online lookup found, and drop SEO text from Google listing names
+- `dea9f58` Learning follows only its own run's documents; no-website wording from the first frame
+- `5832c8b` Route AI tasks to models by difficulty, and record what every paid call costs
+- `a250045` Retry bad AI answers with reasons, back up unavailable models, cache shared prompt starts, track
+  approvals per model
+- `be2d027` Grade every AI answer, and add a test set to choose models and catch regressions
+- `65ffcaf` Move AI models into Settings, compare writing side by side, and close gaps found in the AI audit
+- `ac6b70c` Explain lost connections, errors and ended sessions instead of failing silently, on web and mobile
+- `9a81726` Check a saved mobile sign-in with the server at launch and on returning to the app
+- `4b2b653` Admin console, redesigned sign-in, light and dark themes, fix signing out
+- `4039fb5` Fix admin filters that never switched, move AI models into the admin console, add the loading bar
+- `a01d2c2` Keep the admin console readable from phones to wide monitors
+- `da6b0db` Show the wide tables as tables on 1280 px laptops
+
+## What is logged today (before the activity work)
+
+| Log | Keeps | Person? |
+|---|---|---|
+| Audit (`AuditEvent`) | Sign-ins, member and role changes, invitations, brand edits, connections, AI model changes, admin visits | Yes (`actorUserId`) |
+| AI calls (`AiWorkflowRun`) | Model, tokens, cost, time, errors, grading; no prompt or answer text | **No** (the activity work adds it) |
+| Other paid APIs (`ApiCall`) | Places, PageSpeed, Twilio: cost and time | Yes |
+| Agent runs (`AgentRun`) | Input and output, status | Yes (`triggeredByUserId`) |
+| Agent log (`AgentEvent`) | Step messages inside a run | Through the run |
+| Chat (`ChatThread`) | Full conversation, the latest 200 messages | Yes. Not shown in the console, and it stays that way |
+
+## Things to know
+
+- **The audit log has many `admin@cmo.local` `auth.login` rows** from today's automated browser sign-ins.
+  They're harmless noise.
+- **Temporary check pages:** the layout checks used pages under `app/(shell)/probe`. All of them were deleted
+  before each commit.
+- **Servers running from today:** web on port 3100 (production build), Metro on 8081, and the Pixel_10
+  emulator. Rebuild the web app after any server change (see "Running it" below).
+
+---
+
 # Handover: Espanda mobile app (end of day 2026-10-28)
 
 Native Expo app in `apps/mobile`, built from the Espanda Figma (file `dGILR13Xa3SLUnjGAtHn1C`, pages App·00–07). It talks to the same backend as the web app (`apps/web`, `/api/v1`). The desktop web app stays the place for approval. Everything below is committed on `main` (not pushed).
