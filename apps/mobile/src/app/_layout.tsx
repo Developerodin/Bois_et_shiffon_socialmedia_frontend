@@ -7,7 +7,8 @@ import { useTranslation } from "react-i18next";
 import { AppState } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "@/i18n";
-import { onSignedOut } from "@/api/client";
+import { onSignedOut, session } from "@/api/client";
+import { me } from "@/api/endpoints";
 import { color } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { ConnectionBanner } from "@/ui/connection-banner";
@@ -37,6 +38,20 @@ export default function RootLayout() {
   // A saved sign-in that stops working (expired, signed out elsewhere): back to sign in, saying why. Onboarding
   // answers are kept, so they continue where they were once signed in again.
   useEffect(() => onSignedOut(() => router.replace({ pathname: "/onboarding/sign-in", params: { expired: "1" } })), []);
+
+  // Is the saved sign-in still good? Asked at launch and whenever the app comes back to the front, so one that
+  // stopped working is noticed right away, not on whichever screen next happens to call the server. In the
+  // background: offline, it waits and never holds up the app; a 401 goes through onSignedOut above.
+  useEffect(() => {
+    if (!ready) return; // navigation has to be mounted before it can send anyone to sign in
+    const check = () =>
+      void session.token().then(async (t) => {
+        if (t) await me().catch(() => undefined);
+      });
+    check();
+    const sub = AppState.addEventListener("change", (s) => s === "active" && check());
+    return () => sub.remove();
+  }, [ready]);
 
   if (!ready) return null;
 

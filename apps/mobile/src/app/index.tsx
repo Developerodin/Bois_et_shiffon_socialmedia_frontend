@@ -9,7 +9,7 @@ export default function Index() {
     void session.token().then((t) => setSignedIn(!!t));
   }, []);
   if (signedIn === null) return null; // splash is still up for a moment while the keychain is read
-  // ponytail: a stored token isn't proof it's still valid; the first API call that gets 401 clears it
-  // (api client) and the screen sends people back to sign-in.
+  // A stored token isn't proof it's still valid: the root layout checks it with the server in the background and
+  // sends people back to sign-in if it's been rejected.
   return <Redirect href={signedIn ? "/posts" : "/onboarding/sign-in"} />;
 }
