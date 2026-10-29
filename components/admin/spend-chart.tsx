@@ -5,8 +5,8 @@ import { Table, type Fx } from "@/components/admin/ui";
  * bars ≤ 24 px with a 4 px rounded top and square base, a gap between neighbours, recessive grid, three clean
  * y-ticks, only the peak labelled, a per-bar tooltip (the whole column is the hover target) and a table view.
  * The bar colour is --chart-1 (globals.css), validated against both themes' surfaces.
- * Server-rendered SVG, drawn twice: a wide canvas and a narrow one (same data, labels kept at a readable size);
- * the container's width picks which one shows.
+ * Server-rendered SVG, drawn three times on canvases of different widths (same data) so the labels stay near their
+ * real size from a phone to a wide monitor; the container's width picks which one shows.
  */
 type Day = { day: string; aiUsd: number; apiUsd: number; calls: number };
 
@@ -90,7 +90,8 @@ export function SpendChart({ days, fx, title }: { days: Day[]; fx: Fx; title: st
     <figure className="@container flex flex-col gap-3">
       <figcaption className="sr-only">{title}</figcaption>
       <div className="rounded-xl border border-border bg-card p-3">
-        <Plot days={days} totals={totals} fx={fx} W={720} ariaLabel={ariaLabel} className="hidden h-auto w-full @xl:block" />
+        <Plot days={days} totals={totals} fx={fx} W={1120} ariaLabel={ariaLabel} className="hidden h-auto w-full @4xl:block" />
+        <Plot days={days} totals={totals} fx={fx} W={720} ariaLabel={ariaLabel} className="hidden h-auto w-full @xl:block @4xl:hidden" />
         <Plot days={days} totals={totals} fx={fx} W={360} ariaLabel={ariaLabel} className="h-auto w-full @xl:hidden" />
       </div>
       <details className="text-sm">
