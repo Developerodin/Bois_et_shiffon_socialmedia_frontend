@@ -9,7 +9,7 @@ import { checkDraft } from "@/server/content/rules";
 import { prisma } from "@/server/db/prisma";
 import { lock, TX } from "@/server/services/publishing";
 
-const Draft = z.object({
+export const Draft = z.object({
   hook: z.string(),
   caption: z.string(),
   hashtags: z.array(z.string()),

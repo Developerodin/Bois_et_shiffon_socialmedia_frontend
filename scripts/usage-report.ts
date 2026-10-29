@@ -32,7 +32,7 @@ const add = (m: Map<string, Row>, key: string, r: Omit<Row, "key">) => {
 
 (async () => {
   const [ai, api, fx] = await Promise.all([
-    prisma.aiWorkflowRun.findMany({ where: { createdAt: { gte: since } }, select: { model: true, tier: true, workflowId: true, status: true, inputTokens: true, cachedInputTokens: true, outputTokens: true, webSearchCalls: true, costUsd: true, error: true, createdAt: true } }),
+    prisma.aiWorkflowRun.findMany({ where: { createdAt: { gte: since } }, select: { model: true, tier: true, workflowId: true, status: true, inputTokens: true, cachedInputTokens: true, outputTokens: true, webSearchCalls: true, costUsd: true, error: true, createdAt: true, workspaceId: true, evalPassed: true, evalFindings: true } }),
     prisma.apiCall.findMany({ where: { createdAt: { gte: since } }, select: { provider: true, operation: true, status: true, costUsd: true } }),
     inrRate(),
   ]);
@@ -78,6 +78,14 @@ const add = (m: Map<string, Row>, key: string, r: Omit<Row, "key">) => {
     const input = rows.reduce((s, r) => s + (r.inputTokens ?? 0), 0);
     if (input) console.log(`  ${m.padEnd(32)} ${Math.round((100 * rows.reduce((s, r) => s + (r.cachedInputTokens ?? 0), 0)) / input)}% of input from cache`);
   }
+
+  // Online evals: every production answer is graded (server/ai/graders.ts); the test set's own calls are left out.
+  const graded = ai.filter((r) => r.evalPassed !== null && r.workspaceId !== "eval");
+  console.log(`
+Online evals  ${graded.filter((r) => r.evalPassed).length}/${graded.length} answers passed every check`);
+  const failing = new Map<string, number>();
+  for (const r of graded) for (const f of (r.evalFindings as { check: string; security?: boolean }[] | null) ?? []) failing.set(`${r.workflowId}: ${f.security ? "[security] " : ""}${f.check}`, (failing.get(`${r.workflowId}: ${f.security ? "[security] " : ""}${f.check}`) ?? 0) + 1);
+  for (const [k, n] of [...failing].sort((a, b) => b[1] - a[1]).slice(0, 10)) console.log(`  ${String(n).padStart(4)}×  ${k}`);
 
   // Quality signal (Cursor's "keep rate" for us): what approvers decided on drafts, by the model that wrote them.
   const decisions = await prisma.approvalDecision.findMany({ where: { createdAt: { gte: since } }, select: { verdict: true, contentVersionId: true } });

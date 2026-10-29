@@ -8,7 +8,7 @@ import { checkDraft, overallOf, type CheckResult, type DraftBody } from "@/serve
 import { prisma } from "@/server/db/prisma";
 import { lock, TX } from "@/server/services/publishing";
 
-const Review = z.object({
+export const Review = z.object({
   results: z.array(z.object({ check: z.string(), status: z.enum(["pass", "warn", "blocker"]), note: z.string() })),
 });
 const PER_RUN = 10;

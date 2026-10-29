@@ -351,6 +351,10 @@ model AiWorkflowRun {
   costUsd           Decimal? @db.Decimal(12, 6)
   latencyMs         Int?
   error             String?
+  /// Online eval (server/ai/graders.ts): true when the answer passed every check; null when there was no answer
+  evalPassed        Boolean?
+  /// What failed: [{ check, note, security? }]
+  evalFindings      Json?
   createdAt         DateTime @default(now())
 
   @@index([brandId, createdAt])
