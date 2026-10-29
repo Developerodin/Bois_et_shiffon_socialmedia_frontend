@@ -67,7 +67,8 @@ export const qualityAgent: AgentDefinition = {
         schema: Review,
         schemaName: "quality_review",
         system: QUALITY_SYSTEM,
-        prompt: `Brand: ${brand.displayName}\nChannel: ${item.channel}\nBrief: ${JSON.stringify(item.brief)}\nDraft v${v.version}: ${JSON.stringify(body)}\nRule-based results already found: ${JSON.stringify(rules)}\n\nBrand knowledge:\n${knowledge.text}`,
+        // Brand knowledge first: shared by every draft in this run, so it can be billed at the cached rate.
+        prompt: `Brand: ${brand.displayName}\n\nBrand knowledge:\n${knowledge.text}\n\n---\nThe draft to check\nChannel: ${item.channel}\nBrief: ${JSON.stringify(item.brief)}\nDraft v${v.version}: ${JSON.stringify(body)}\nRule-based results already found: ${JSON.stringify(rules)}`,
         mock: {
           results: [
             { check: "Brand voice", status: "pass", note: "Calm, practical tone consistent with the voice document." },

@@ -3,7 +3,9 @@ import { z } from "zod";
 import { NothingToDoError } from "@/server/agents/engine";
 import { CONTENT_PROMPT_VERSION, CREATOR_SYSTEM } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
+import { answeredBy } from "@/server/ai/provider";
 import { brandKnowledge } from "@/server/content/knowledge";
+import { checkDraft } from "@/server/content/rules";
 import { prisma } from "@/server/db/prisma";
 import { lock, TX } from "@/server/services/publishing";
 
@@ -60,11 +62,18 @@ export const creatorAgent: AgentDefinition = {
         schema: Draft,
         schemaName: "content_draft",
         system: CREATOR_SYSTEM,
-        prompt: `Brand: ${brand.displayName}\nChannel: ${item.channel}\nPost: ${item.title}\nBrief: ${JSON.stringify(item.brief)}\n${
+        // Brand knowledge first: it's the same for every post in this run, so OpenAI can bill it at the cached rate.
+        prompt: `Brand: ${brand.displayName}\n\nBrand knowledge:\n${knowledge.text}\n\n---\nThe post to write\nChannel: ${item.channel}\nPost: ${item.title}\nBrief: ${JSON.stringify(item.brief)}\n${
           last ? `\nPrevious draft:\n${JSON.stringify(last.body)}\n` : ""
         }${reviewer ? `\nThe approver asked for these changes (do exactly this):\n${reviewer}\n` : ""}${
           report?.length ? `\nQuality report to fix:\n${report.map((r) => `- [${r.status}] ${r.check}: ${r.note}`).join("\n")}\n` : ""
-        }\nBrand knowledge:\n${knowledge.text}\n\nFill unused fields with "" or []: slides only for carousels, script only for Reels, pinTitle only for Pinterest.`,
+        }\nFill unused fields with "" or []: slides only for carousels, script only for Reels, pinTitle only for Pinterest.`,
+        // Our own hard rules (length, hashtags, slides…): a draft that breaks one is asked again with the reasons
+        // (Creator is already the top tier, so the same model rewrites it); if it still breaks one, Quality blocks it.
+        validate: (d) => {
+          const blockers = checkDraft(item.channel, d).filter((r) => r.status === "blocker");
+          return blockers.length ? blockers.map((r) => `${r.check}: ${r.note}`).join("; ") : null;
+        },
         mock: {
           hook: "3 gestes pour garder votre table en bois massif comme neuve",
           caption: "3 gestes pour garder votre table en bois massif comme neuve.\n\nUn dessous-de-plat sous chaque plat chaud. Un chiffon humide, jamais mouillé. Une huile d'entretien deux fois par an.\n\nEnregistrez ce post pour votre prochain entretien.",
@@ -83,7 +92,7 @@ export const creatorAgent: AgentDefinition = {
         const now = await tx.contentItem.findUnique({ where: { id: item.id }, select: { status: true, versions: { orderBy: { version: "desc" }, take: 1, select: { version: true } } } });
         if (!now || now.status !== item.status || (now.versions[0]?.version ?? 0) !== (last?.version ?? 0)) return false;
         await tx.contentVersion.create({
-          data: { contentItemId: item.id, version, body: body as Prisma.InputJsonValue, createdBy: "agent", agentRunId: ctx.runId },
+          data: { contentItemId: item.id, version, body: body as Prisma.InputJsonValue, createdBy: "agent", agentRunId: ctx.runId, model: answeredBy(out)?.model },
         });
         await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW" } });
         return true;

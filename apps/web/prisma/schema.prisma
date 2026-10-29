@@ -710,6 +710,8 @@ model ContentVersion {
   body          Json // { hook, caption, hashtags[], slides[], script[], pinTitle, altText }
   createdBy     String // "agent" | user id
   agentRunId    String?
+  /// The AI model that wrote this version (null for people's edits and drafts from before 2026-10-29)
+  model         String?
   createdAt     DateTime @default(now())
 
   item   ContentItem    @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
