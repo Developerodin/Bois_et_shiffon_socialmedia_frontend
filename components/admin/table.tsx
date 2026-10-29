@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
  * Drawn in the browser: the rows arrive once and are rendered twice here. Rendered twice on the server, the same
  * cells were sent as references from the cards into the table, and React left the page hanging on the next
  * navigation (a filter or tab click did nothing).
- * The table form needs room for its columns: 28 rem for three or fewer, 48 rem otherwise, 64 rem with `wide`.
+ * The table form needs room for its columns: 28 rem for three or fewer, 48 rem otherwise, 56 rem with `wide` (a 1280 px laptop beside the admin sidebar has about 58).
  */
 export function Table({ head, rows, empty, numeric = [], wide = false }: { head: string[]; rows: React.ReactNode[][]; empty: string; numeric?: number[]; wide?: boolean }) {
   // Literal class names, so Tailwind sees them.
-  const room = wide ? ["@5xl:block", "@5xl:hidden"] : head.length <= 3 ? ["@md:block", "@md:hidden"] : ["@3xl:block", "@3xl:hidden"];
+  const room = wide ? ["@4xl:block", "@4xl:hidden"] : head.length <= 3 ? ["@md:block", "@md:hidden"] : ["@3xl:block", "@3xl:hidden"];
   if (!rows.length) return <p className="rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">{empty}</p>;
   return (
     <div className="@container">
