@@ -192,5 +192,12 @@ export function useLoad<T>(fetcher: (() => Promise<T>) | null) {
     };
   }, [fetcher, nonce]);
   const reload = useCallback(() => setNonce((n) => n + 1), []);
+  // Failed while offline: load again as soon as the connection is back.
+  const failed = state.kind === "error";
+  useEffect(() => {
+    if (!failed) return;
+    window.addEventListener("online", reload);
+    return () => window.removeEventListener("online", reload);
+  }, [failed, reload]);
   return { state, reload };
 }

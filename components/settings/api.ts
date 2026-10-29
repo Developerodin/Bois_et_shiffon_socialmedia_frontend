@@ -1,5 +1,7 @@
 // Client-side contract for the RBAC API
 // (docs/superpowers/specs/2026-10-21-rbac-api-contract.md). Keep in sync with the route handlers.
+import { NetworkError, send } from "@/lib/net";
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -66,7 +68,14 @@ export type PublicInvitation = {
 // Errors are problem+json {type,title,status,detail?}; surface detail/title when present.
 export async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const headers = init?.body ? { "Content-Type": "application/json" } : undefined;
-  const res = await fetch(url, { cache: "no-store", headers, ...init });
+  let res: Response;
+  try {
+    res = await send(url, { cache: "no-store", headers, ...init });
+  } catch (error) {
+    // Offline, timed out, server unreachable: status 0, with a message that says which (lib/net.ts).
+    if (error instanceof NetworkError) throw new ApiError(0, error.message);
+    throw error;
+  }
   if (res.status === 401 && url.startsWith("/api/")) redirectToLogin();
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
@@ -91,7 +100,7 @@ export function redirectToLogin() {
   const { pathname, search } = window.location;
   if (PUBLIC_PAGES.some((p) => pathname.startsWith(p))) return;
   redirecting = true;
-  window.location.assign(`/login?next=${encodeURIComponent(pathname + search)}`);
+  window.location.assign(`/login?expired=1&next=${encodeURIComponent(pathname + search)}`);
 }
 
 export function errorMessage(err: unknown, fallback = "Something went wrong. Try again.") {

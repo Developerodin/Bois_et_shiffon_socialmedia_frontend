@@ -22,6 +22,10 @@ export function fromAccessError(error: unknown) {
       detail: "Access denied",
     });
   }
+  // auth.ts SessionUnverifiedError, matched by name (importing auth.ts here would pull Auth.js into every route).
+  if (error instanceof Error && error.name === "SessionUnverifiedError") {
+    return problemResponse({ type: "https://api.brandpilot/errors/session-unverified", title: "Service unavailable", status: 503, detail: error.message });
+  }
   if (error instanceof BrandArchivedError) {
     return problemResponse({
       type: "https://api.brandpilot/errors/brand-archived",

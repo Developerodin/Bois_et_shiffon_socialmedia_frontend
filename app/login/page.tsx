@@ -39,9 +39,9 @@ function pathOf(url: string) {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; reset?: string; invited?: string; next?: string; callbackUrl?: string }>;
+  searchParams: Promise<{ error?: string; reset?: string; invited?: string; expired?: string; next?: string; callbackUrl?: string }>;
 }) {
-  const { error, reset, invited, next: nextParam, callbackUrl } = await searchParams;
+  const { error, reset, invited, expired, next: nextParam, callbackUrl } = await searchParams;
   const next = safeNext(nextParam, callbackUrl);
   const keepNext = next === "/" ? "" : `&next=${encodeURIComponent(next)}`;
   const message = error ? (ERRORS[error] ?? ERRORS.invalid) : null;
@@ -49,7 +49,9 @@ export default async function LoginPage({
     ? "Password updated. Sign in with your new password."
     : invited
       ? "Invitation accepted. Sign in to continue."
-      : null;
+      : expired
+        ? "You were signed out (the session ended, or you signed out elsewhere). Sign in again to pick up where you were."
+        : null;
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">

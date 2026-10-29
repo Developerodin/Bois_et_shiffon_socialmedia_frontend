@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { ConnectionBanner } from "@/components/net/connection-banner";
 import "./globals.css";
 
 const inter = Inter({
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} antialiased`}
       >
         {children}
+        <ConnectionBanner />
       </body>
     </html>
   );

@@ -20,6 +20,7 @@
     "smoke:research": "tsx --env-file=.env scripts/smoke-research.ts",
     "check:brand-assets": "tsx --env-file=.env scripts/check-brand-assets.ts",
     "check:models": "tsx --env-file=.env scripts/check-models.ts",
+    "check:net": "tsx scripts/check-net.ts",
     "usage": "tsx --env-file=.env scripts/usage-report.ts",
     "eval": "tsx --env-file=.env scripts/evals/run.ts",
     "smoke:auth": "tsx --env-file=.env scripts/smoke-auth.ts",
