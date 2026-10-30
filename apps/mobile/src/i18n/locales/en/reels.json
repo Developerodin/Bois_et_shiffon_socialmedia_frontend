@@ -107,7 +107,9 @@
     "cost_one": "{{count}} credit",
     "cost_other": "{{count}} credits",
     "balance_one": "Current balance: {{balance}} credits · {{count}} credit will be reserved · Draft saved automatically",
-    "balance_other": "Current balance: {{balance}} credits · {{count}} credits will be reserved · Draft saved automatically"
+    "balance_other": "Current balance: {{balance}} credits · {{count}} credits will be reserved · Draft saved automatically",
+    "seeProgress": "See progress",
+    "onScreen": "On screen: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Back to workspace",

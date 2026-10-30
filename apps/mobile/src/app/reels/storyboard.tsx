@@ -1,22 +1,54 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Lock, Sparkles, Volume2 } from "lucide-react-native";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ApiError } from "@/api/client";
+import { reels } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Footer } from "@/ui/layout";
 import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag, bodyMuted, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
-import { storyboard } from "@/ui/reels/sample";
+import { useReel } from "@/ui/reels/use-reel";
 
-/** R03 · Reels / Storyboard. */
+/** Which video model the director routed each scene to (apps/web/server/reels/router.ts). */
+const MODEL_NAMES: Record<string, string> = { "kling-3-std": "Kling 3.0", "seedance-2.5": "Seedance 2.5", "hailuo-2.3": "Hailuo 2.3" };
+const sceneSeconds = (voice: string) => Math.min(15, Math.max(3, Math.ceil(voice.trim().split(/\s+/).filter(Boolean).length / 2)));
+
+/** R03 · Reels / Storyboard. "Make video" charges the shown price and starts the render. */
 export default function ReelsStoryboard() {
   const { t } = useTranslation("reels");
-  const facts = [
-    t("storyboard.durationFact", { seconds: storyboard.seconds }),
-    t("storyboard.verticalFact"),
-    t("noPresenter"),
-    t("scene.count", { count: storyboard.scenes.length }),
-  ];
+  const { id, detail, error, setError } = useReel();
+  const [starting, setStarting] = useState(false);
+  const plan = detail?.plan;
+  const price = detail?.price ?? 0;
+  const seconds = plan ? plan.scenes.reduce((n, s) => n + sceneSeconds(s.voiceText), 0) : 0;
+  const rendering = detail?.renders.some((r) => r.step !== "DONE" && r.step !== "FAILED");
+
+  const make = async () => {
+    if (!id || !detail) return;
+    if (rendering) return router.push("/reels/generating");
+    setStarting(true);
+    try {
+      await reels.render(id, detail.version);
+      router.push("/reels/generating");
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 402) router.push("/plans/reels");
+      else setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  if (!plan) {
+    return (
+      <ReelsScreen header={<PageHeader left={<BackButton label={t("goBack")} />} center={<HeaderTitle center>{t("storyboard.title")}</HeaderTitle>} />}>
+        {error ? <Text style={[bodyMuted, { color: color.error }]}>{error}</Text> : <ActivityIndicator style={{ marginTop: space[32] }} color={color.primary} />}
+      </ReelsScreen>
+    );
+  }
+
+  const facts = [t("storyboard.durationFact", { seconds }), t("storyboard.verticalFact"), t("noPresenter"), t("scene.count", { count: plan.scenes.length })];
   return (
     <ReelsScreen
       header={
@@ -26,7 +58,7 @@ export default function ReelsStoryboard() {
           right={
             <View style={styles.productPill}>
               <View style={styles.dot} />
-              <Text style={metaInk}>{storyboard.product}</Text>
+              <Text style={metaInk} numberOfLines={1}>{plan.scenes[0].shot}</Text>
             </View>
           }
         />
@@ -34,26 +66,32 @@ export default function ReelsStoryboard() {
       contentStyle={{ paddingTop: 12, paddingBottom: space[24] }}
       footer={
         <Footer>
+          {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
           <View style={{ flexDirection: "row", gap: space[12] }}>
             <ActionButton label={t("storyboard.editInChat")} variant="ghost" leading={Sparkles} onPress={() => router.push("/reels/chat")} style={{ paddingHorizontal: space[16] }} />
             <ActionButton
               style={{ flex: 1 }}
-              accessibilityLabel={t("storyboard.makeVideoA11y", { count: 40 })}
-              onPress={() => router.push("/reels/generating")}
+              disabled={starting}
+              accessibilityLabel={t("storyboard.makeVideoA11y", { count: price })}
+              onPress={() => void make()}
               label={
-                <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
-                  <Text style={[type.label, { color: color.onPrimary }]}>{t("storyboard.makeVideo")}</Text>
-                  <View style={styles.sep} />
-                  <Text style={[type.label, { color: color.onPrimary }]}>{t("storyboard.cost", { count: 40 })}</Text>
-                </View>
+                starting ? (
+                  <ActivityIndicator color={color.onPrimary} />
+                ) : (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
+                    <Text style={[type.label, { color: color.onPrimary }]}>{rendering ? t("storyboard.seeProgress") : t("storyboard.makeVideo")}</Text>
+                    {rendering ? null : <View style={styles.sep} />}
+                    {rendering ? null : <Text style={[type.label, { color: color.onPrimary }]}>{t("storyboard.cost", { count: price })}</Text>}
+                  </View>
+                )
               }
             />
           </View>
-          <Text style={[bodyMuted, { textAlign: "center" }]}>{t("storyboard.balance", { balance: 160, count: 40 })}</Text>
+          <Text style={[bodyMuted, { textAlign: "center" }]}>{t("storyboard.balance", { balance: detail.credits, count: price })}</Text>
         </Footer>
       }
     >
-      <Text style={type.pageTitle}>{storyboard.title}</Text>
+      <Text style={type.pageTitle}>{plan.title}</Text>
       <View style={styles.facts}>
         {facts.map((f) => (
           <Tag key={f} label={f} style={styles.fact} />
@@ -67,23 +105,24 @@ export default function ReelsStoryboard() {
       </View>
 
       <View style={{ gap: space[12], paddingTop: space[24] }}>
-        {storyboard.scenes.map((s) => (
-          <View key={s.n} style={styles.scene}>
+        {plan.scenes.map((s, i) => (
+          <View key={i} style={styles.scene}>
             <View style={styles.sceneHead}>
-              <Text style={strong14}>{t("scene.label", { n: s.n, seconds: s.seconds })}</Text>
-              <Tag label={t(`shot.${s.shot}`)} />
+              <Text style={strong14}>{t("scene.label", { n: i + 1, seconds: sceneSeconds(s.voiceText) })}</Text>
+              <Tag label={s.model ? MODEL_NAMES[s.model] ?? s.model : s.shot} />
             </View>
             <View style={{ gap: space[16], paddingTop: space[12] }}>
-              <Image source={s.image} style={styles.still} contentFit="cover" accessibilityLabel={t(s.direction)} />
+              <Image source={detail.photoUrls[s.photoKey] ? { uri: detail.photoUrls[s.photoKey] } : undefined} style={styles.still} contentFit="cover" accessibilityLabel={s.shot} />
               <View>
                 <Text style={eyebrow}>{t("storyboard.sceneDirection")}</Text>
-                <Text style={type.body}>{t(s.direction)}</Text>
+                <Text style={type.body}>{s.direction}</Text>
+                {s.onScreenText ? <Text style={[meta, { paddingTop: 4 }]}>{t("storyboard.onScreen", { text: s.onScreenText })}</Text> : null}
                 <View style={styles.voice}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                     <Volume2 size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
                     <Text style={meta}>{t("storyboard.voiceoverFr")}</Text>
                   </View>
-                  <Text style={[bodyMuted, { paddingTop: 2 }]}>{s.voiceover}</Text>
+                  <Text style={[bodyMuted, { paddingTop: 2 }]}>{s.voiceText}</Text>
                 </View>
               </View>
             </View>

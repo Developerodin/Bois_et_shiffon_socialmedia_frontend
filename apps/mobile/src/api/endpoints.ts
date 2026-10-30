@@ -149,6 +149,7 @@ export type ReelDetail = {
   renders: { id: string; versionId: string; attempt: number; step: RenderStep; error: string | null; videoKey: string | null; createdAt: string }[];
   chat: ChatTurn[];
   credits: number;
+  photoUrls: Record<string, string>;
 };
 export type PlanResult = { version: number; plan: ReelPlan; price: number; reply?: string };
 export type Opportunity = { id: string; title: string; summary: string; angle: string; channels: string[]; decision: "RECOMMEND" | "HOLD" | "REJECT"; score: number; timing: string | null };
