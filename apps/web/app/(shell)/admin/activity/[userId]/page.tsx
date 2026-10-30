@@ -41,7 +41,7 @@ export default async function AdminPersonActivity({ params, searchParams }: { pa
         <Stat label="AI spend" value={<Money usd={s.aiUsd} fx={fx} />} hint={`${workspaceId === null ? "outside any workspace" : ws ? "in this workspace" : "everywhere"}, ${span}`} />
         <Stat label="Other paid APIs" value={<Money usd={s.apiUsd} fx={fx} />} hint="maps, page speed, phone checks" />
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col items-start gap-3">
         <ActivityPickers ws={ws} options={options} person={false} noWorkspace hidden={{ days: param }} />
         <Segmented label="Period" options={PERIODS} value={days} href={(v) => withQuery(path, current, { days: v === "30" ? undefined : v })} />
       </div>

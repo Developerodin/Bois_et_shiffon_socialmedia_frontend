@@ -13,25 +13,28 @@ export function ActivityPickers({ ws, who, options, hidden = {}, person = true, 
   return (
     <AutoSubmitForm className="flex flex-wrap items-center gap-2">
       {Object.entries(hidden).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
-      <label className="text-xs text-muted-foreground" htmlFor="pick-ws">
-        Workspace
-      </label>
-      <select id="pick-ws" name="ws" defaultValue={ws ?? ""} className={field}>
-        <option value="">All workspaces</option>
-        {noWorkspace ? <option value={NO_WORKSPACE}>No workspace</option> : null}
-        {options.workspaces.map((w) => (
-          <option key={w.id} value={w.id}>
-            {w.name}
-          </option>
-        ))}
-      </select>
+      {/* Each label stays with its field when the row wraps on a phone. */}
+      <span className="flex items-center gap-2">
+        <label className="text-xs text-muted-foreground" htmlFor="pick-ws">
+          Workspace
+        </label>
+        <select id="pick-ws" name="ws" defaultValue={ws ?? ""} className={field}>
+          <option value="">All workspaces</option>
+          {noWorkspace ? <option value={NO_WORKSPACE}>No workspace</option> : null}
+          {options.workspaces.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.name}
+            </option>
+          ))}
+        </select>
+      </span>
       {person ? (
-        <>
-          <label className="ml-1 text-xs text-muted-foreground" htmlFor="pick-who">
+        <span className="flex items-center gap-2">
+          <label className="text-xs text-muted-foreground" htmlFor="pick-who">
             Person
           </label>
           <input id="pick-who" name="who" type="search" defaultValue={who} placeholder="Name or email" className={`${field} w-56 px-4 placeholder:text-muted-foreground`} />
-        </>
+        </span>
       ) : null}
       <button type="submit" className={button}>
         Show

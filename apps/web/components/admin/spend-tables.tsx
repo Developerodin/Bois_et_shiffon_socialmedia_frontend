@@ -4,7 +4,7 @@ import type { SpendBreakdown } from "@/server/services/platform-admin";
 
 const COMPACT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 const compact = (n: number) => (n ? COMPACT.format(n) : <Empty />);
-const count = (n: number) => (n ? n.toLocaleString("en") : <Empty />);
+const count = (n: number) => (n ? n.toLocaleString("en") : <Empty key="n" />);
 
 /** Every breakdown of a SpendBreakdown, as tables. `workspaceLinks`: link workspace rows to their pages. */
 export function SpendTables({ s, fx, workspaceLinks }: { s: SpendBreakdown; fx: Fx; workspaceLinks?: boolean }) {

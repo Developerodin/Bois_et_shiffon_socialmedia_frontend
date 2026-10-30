@@ -14,7 +14,7 @@ const SORTS: { value: WorkspaceSort; label: string }[] = [
   { value: "name", label: "Name" },
 ];
 const usd30 = (s: { aiUsd30: number; apiUsd30: number }) => s.aiUsd30 + s.apiUsd30;
-const count = (n: number) => (n ? n.toLocaleString("en") : <Empty />);
+const count = (n: number, key: string) => (n ? n.toLocaleString("en") : <Empty key={key} />);
 
 export default async function AdminWorkspaces({ searchParams }: { searchParams: Promise<{ q?: string; sort?: string; page?: string }> }) {
   await requirePlatformAdminPage();
@@ -51,10 +51,10 @@ export default async function AdminWorkspaces({ searchParams }: { searchParams: 
               {x.owner?.email ?? "No owner"} · since {day(x.createdAt)}
             </p>
           </div>,
-          count(x._count.brands),
-          count(x._count.members),
-          count(x.credits),
-          count(x.spend.calls30),
+          count(x._count.brands, "b"),
+          count(x._count.members, "p"),
+          count(x.credits, "c"),
+          count(x.spend.calls30, "n"),
           <Money key="m" usd={usd30(x.spend)} fx={fx} share={c30 ? usd30(x.spend) / c30 : undefined} />,
           <Ago key="a" at={x.lastActive} />,
         ])}
