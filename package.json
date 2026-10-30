@@ -23,6 +23,7 @@
     "check:net": "tsx scripts/check-net.ts",
     "check:platform-admin": "tsx --env-file=.env scripts/check-platform-admin.ts",
     "platform-admin": "tsx --env-file=.env scripts/platform-admin.ts",
+    "set-password": "tsx --env-file=.env scripts/set-password.ts",
     "usage": "tsx --env-file=.env scripts/usage-report.ts",
     "eval": "tsx --env-file=.env scripts/evals/run.ts",
     "smoke:auth": "tsx --env-file=.env scripts/smoke-auth.ts",
