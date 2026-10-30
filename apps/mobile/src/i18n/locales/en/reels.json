@@ -338,6 +338,10 @@
       "macro": "Detail",
       "staged": "Styled",
       "tv": "TV unit"
-    }
+    },
+    "yourPhoto": "Your photo",
+    "planFirst": "Plan the reel first (Create → Plan a reel together), then pick its photos.",
+    "saving": "Saving…",
+    "sceneN": "Scene {{n}}"
   }
 }
