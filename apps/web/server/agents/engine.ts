@@ -187,6 +187,7 @@ export async function executeAgentRun(rawPayload: unknown) {
             workspaceId: run.workspaceId,
             brandId: run.brandId,
             agentRunId: run.id,
+            userId: run.triggeredByUserId ?? undefined,
             workflowId,
             promptVersion,
           },

@@ -264,6 +264,7 @@ model AgentRun {
 
   @@index([brandId, agentKey, createdAt])
   @@index([agentKey, status])
+  @@index([triggeredByUserId, createdAt])
 }
 
 enum AgentEventLevel {
@@ -376,6 +377,8 @@ model AiWorkflowRun {
   workspaceId       String
   brandId           String
   agentRunId        String?
+  /// Who caused it: the chat user, or whoever started the agent run; null = system (scheduled, evals)
+  userId            String?
   workflowId        String
   promptVersion     String
   provider          String
@@ -404,6 +407,7 @@ model AiWorkflowRun {
   @@index([agentRunId])
   @@index([createdAt])
   @@index([workspaceId, createdAt])
+  @@index([userId, createdAt])
 }
 
 /// One row per call to a paid outside API that isn't an AI model (Google Places, PageSpeed, Twilio Verify).
@@ -424,6 +428,23 @@ model ApiCall {
   @@index([createdAt])
   @@index([provider, createdAt])
   @@index([workspaceId, createdAt])
+  @@index([userId, createdAt])
+}
+
+/// One row per page opened, on the web app or the mobile app (admin console → Activity). Same ledger rule: no
+/// foreign keys. Kept forever for now. Only the path is stored: query strings and fragments are stripped.
+model PageView {
+  id          String   @id @default(cuid())
+  userId      String
+  workspaceId String?
+  brandId     String?
+  /// web | mobile
+  platform    String
+  path        String
+  createdAt   DateTime @default(now())
+
+  @@index([workspaceId, userId, createdAt])
+  @@index([userId, createdAt])
 }
 
 // --- Slice 1: brand context documents (design §4.1, §8b-3) ---
