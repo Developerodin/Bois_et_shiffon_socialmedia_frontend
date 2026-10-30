@@ -23,6 +23,18 @@ export const auth = {
     await session.save(r.token);
     return r.user;
   },
+  async passwordSignIn(email: string, password: string) {
+    const r = await api<{ token: string; user: Me["user"] }>("/mobile/password", { body: { email, password } });
+    await session.save(r.token);
+    return r.user;
+  },
+  /** Register with email + password: emails a code; the account is made when verifyRegistration checks it. */
+  register: (email: string, password: string) => api<{ ok: true }>("/mobile/register", { body: { email, password } }),
+  async verifyRegistration(email: string, code: string, password: string) {
+    const r = await api<{ token: string; user: Me["user"] }>("/mobile/register/verify", { body: { email, code, password } });
+    await session.save(r.token);
+    return r.user;
+  },
   sendPhoneCode: (phone: string) => api<{ ok: true }>("/mobile/phone/code", { body: { phone } }),
   /** A known number signs in; a new one returns a ticket and the app asks for an email next. */
   async verifyPhone(phone: string, code: string): Promise<{ phoneTicket: string } | null> {

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputInstance } from "react-native";
 import { ApiError } from "@/api/client";
 import { auth } from "@/api/endpoints";
+import { clearRegistration, registrationFor } from "@/ui/onboarding/registration";
 import { onboarding } from "@/ui/onboarding/state";
 import { Glow } from "@/ui/aura";
 import { Button } from "@/ui/button";
@@ -18,7 +19,7 @@ const RESEND_S = 42;
 /** A02 · Onboarding / Verify code (Figma 408:74). */
 export default function Verify() {
   const { t } = useTranslation("onboarding");
-  const { phone = "", email, linkPhone } = useLocalSearchParams<{ phone?: string; email?: string; linkPhone?: string }>();
+  const { phone = "", email, linkPhone, register } = useLocalSearchParams<{ phone?: string; email?: string; linkPhone?: string; register?: string }>();
   const [code, setCode] = useState("");
   const [left, setLeft] = useState(RESEND_S);
   const input = useRef<TextInputInstance>(null);
@@ -29,7 +30,13 @@ export default function Verify() {
     setBusy(true);
     setError(null);
     try {
-      if (email) {
+      if (email && register === "1") {
+        // "Create an account": the code proves the email, then the account is made with the password typed before.
+        const password = registrationFor(email);
+        if (!password) return router.replace("/onboarding/email"); // app restarted in between: ask again
+        await auth.verifyRegistration(email, code, password);
+        clearRegistration();
+      } else if (email) {
         // Only the "add your email" step carries the number; a plain email sign-in never fails on an old ticket.
         await auth.verify(email, code, linkPhone === "1" ? onboarding.phoneTicket : undefined);
         onboarding.phoneTicket = undefined;

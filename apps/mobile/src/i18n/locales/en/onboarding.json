@@ -20,7 +20,21 @@
     "sendFailed": "Couldn't send the code. Try again.",
     "useMobile": "Use mobile number instead",
     "linkTitle": "Add your email",
-    "linkSubtitle": "Your number is verified. Add an email for receipts and team invites. We’ll send it a code."
+    "linkSubtitle": "Your number is verified. Add an email for receipts and team invites. We’ll send it a code.",
+    "passwordSubtitle": "Sign in with your email and password.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Choose a password. We will email you a code to confirm your address.",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Your password",
+    "newPasswordPlaceholder": "At least {{count}} characters",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "signInFailed": "Couldn't sign in. Try again.",
+    "useCode": "Use an email code instead",
+    "usePassword": "Sign in with a password",
+    "register": "New here? Create an account"
   },
   "verify": {
     "title": "Enter your code",
