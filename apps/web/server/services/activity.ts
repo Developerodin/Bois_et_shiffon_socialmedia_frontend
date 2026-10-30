@@ -101,3 +101,75 @@ async function namesFor(rows: { userId?: string; workspaceId: string | null; bra
     brand: r.brandId ? (brand.get(r.brandId) ?? "(deleted project)") : null,
   });
 }
+
+// ── One person's timeline ───────────────────────────────────────────────────
+
+export type TimelineItem = {
+  kind: "visit" | "action" | "task" | "ai";
+  id: string;
+  at: Date;
+  workspaceId: string | null;
+  brandId: string | null;
+  /** The path, the audit action, the agent, or the AI task */
+  detail?: string;
+  platform?: string;
+  entityType?: string;
+  status?: string;
+  model?: string;
+  usd?: number;
+};
+const KIND_ORDER = ["visit", "action", "task", "ai"];
+
+/**
+ * One page of several newest-first lists, merged newest first. Ties keep each list's own order (the database's), then
+ * go by kind, so the same rows land on the same page whichever page is asked for.
+ */
+export function mergeTimeline(lists: TimelineItem[][], page: number) {
+  const all = lists
+    .flatMap((list) => list.map((item, i) => ({ item, i })))
+    .sort((a, b) => +b.item.at - +a.item.at || KIND_ORDER.indexOf(a.item.kind) - KIND_ORDER.indexOf(b.item.kind) || a.i - b.i)
+    .map((x) => x.item);
+  return { items: all.slice((page - 1) * PAGE, page * PAGE), hasMore: all.length > page * PAGE };
+}
+
+/**
+ * Page visits, actions, agent tasks (cost = their AI calls) and AI calls outside agent runs (in practice chat turns:
+ * task, model and cost, never text), newest first. An agent's own AI calls are folded into its task row.
+ * ponytail: page n reads the newest n×50+1 rows of each source, so deep pages read more. If people page past ~20,
+ * switch to a (createdAt, id) cursor.
+ */
+export async function personTimeline({ userId, workspaceId, page = 1 }: { userId: string; workspaceId?: string; page?: number }) {
+  const ws = workspaceId ? { workspaceId } : {};
+  const take = page * PAGE + 1;
+  const orderBy = [{ createdAt: "desc" as const }, { id: "desc" as const }];
+  const [visits, actions, tasks, calls] = await Promise.all([
+    prisma.pageView.findMany({ where: { userId, ...ws }, orderBy, take }),
+    prisma.auditEvent.findMany({ where: { actorUserId: userId, ...ws }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, action: true, entityType: true, createdAt: true } }),
+    prisma.agentRun.findMany({ where: { triggeredByUserId: userId, ...ws }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, agentKey: true, status: true, createdAt: true } }),
+    prisma.aiWorkflowRun.findMany({ where: { userId, agentRunId: null, ...ws }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, workflowId: true, model: true, status: true, costUsd: true, createdAt: true } }),
+  ]);
+  const runCost = await prisma.aiWorkflowRun.groupBy({ by: ["agentRunId"], where: { agentRunId: { in: tasks.map((t) => t.id) } }, _sum: { costUsd: true } });
+  const cost = new Map(runCost.map((r) => [r.agentRunId, Number(r._sum.costUsd ?? 0)]));
+  const { items, hasMore } = mergeTimeline(
+    [
+      visits.map((v) => ({ kind: "visit" as const, id: v.id, at: v.createdAt, workspaceId: v.workspaceId, brandId: v.brandId, detail: v.path, platform: v.platform })),
+      actions.map((a) => ({ kind: "action" as const, id: a.id, at: a.createdAt, workspaceId: a.workspaceId, brandId: a.brandId, detail: a.action, entityType: a.entityType })),
+      tasks.map((t) => ({ kind: "task" as const, id: t.id, at: t.createdAt, workspaceId: t.workspaceId, brandId: t.brandId, detail: t.agentKey, status: t.status, usd: cost.get(t.id) ?? 0 })),
+      calls.map((c) => ({ kind: "ai" as const, id: c.id, at: c.createdAt, workspaceId: c.workspaceId, brandId: c.brandId, detail: c.workflowId, model: c.model, status: c.status, usd: Number(c.costUsd ?? 0) })),
+    ],
+    page,
+  );
+  const names = await namesFor(items);
+  return { hasMore, items: items.map((i) => ({ ...i, ...names(i) })) };
+}
+
+/** The person, and what they've cost (in one workspace, or everywhere): AI calls and other paid APIs. Null if unknown. */
+export async function personSummary({ userId, workspaceId }: { userId: string; workspaceId?: string }) {
+  const ws = workspaceId ? { workspaceId } : {};
+  const [user, ai, api] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { id: true, name: true, email: true } }),
+    prisma.aiWorkflowRun.aggregate({ where: { userId, ...ws }, _sum: { costUsd: true } }),
+    prisma.apiCall.aggregate({ where: { userId, ...ws }, _sum: { costUsd: true } }),
+  ]);
+  return user ? { user, aiUsd: Number(ai._sum.costUsd ?? 0), apiUsd: Number(api._sum.costUsd ?? 0) } : null;
+}
