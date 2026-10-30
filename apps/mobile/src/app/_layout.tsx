@@ -1,14 +1,14 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, useFonts } from "@expo-google-fonts/inter";
-import { router, Stack, type ErrorBoundaryProps } from "expo-router";
+import { router, Stack, usePathname, type ErrorBoundaryProps } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppState } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "@/i18n";
 import { onSignedOut, session } from "@/api/client";
-import { me } from "@/api/endpoints";
+import { me, recordPageView } from "@/api/endpoints";
 import { color } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { ConnectionBanner } from "@/ui/connection-banner";
@@ -52,6 +52,15 @@ export default function RootLayout() {
     const sub = AppState.addEventListener("change", (s) => s === "active" && check());
     return () => sub.remove();
   }, [ready]);
+
+  // Each screen opened, for the admin console's Activity page. Signed-in only; never waited on or retried.
+  const path = usePathname();
+  const sent = useRef<string | null>(null);
+  useEffect(() => {
+    if (sent.current === path) return;
+    sent.current = path;
+    void session.token().then((t) => t && recordPageView(path).catch(() => undefined));
+  }, [path]);
 
   if (!ready) return null;
 

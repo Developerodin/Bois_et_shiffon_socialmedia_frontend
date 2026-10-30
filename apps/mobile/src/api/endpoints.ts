@@ -38,6 +38,9 @@ export const auth = {
 
 export const me = () => api<Me>("/me");
 
+/** One screen opened (admin console → Activity). The server files it under the person's workspace. */
+export const recordPageView = (path: string) => api<null>("/activity/page-views", { body: { path, platform: "mobile" } });
+
 /** Does this website open? Checked on A06 before a brand is created. */
 export const checkSite = (url: string) => api<{ ok: boolean }>("/site-check", { body: { url } });
 
