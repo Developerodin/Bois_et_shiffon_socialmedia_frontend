@@ -33,7 +33,7 @@ export const creatorAgent: AgentDefinition = {
   async run(ctx) {
     const { brand } = ctx;
     const items = await prisma.contentItem.findMany({
-      where: { brandId: brand.brandId, status: { in: ["BRIEF_READY", "DRAFT_REVIEW"] } },
+      where: { brandId: brand.brandId, status: { in: ["BRIEF_READY", "DRAFT_REVIEW"] }, studio: false }, // studio reels are written in the app
       orderBy: [{ scheduledFor: "asc" }, { createdAt: "asc" }],
       include: {
         versions: { orderBy: { version: "desc" }, take: 1, include: { checks: { orderBy: { createdAt: "desc" }, take: 1 } } },

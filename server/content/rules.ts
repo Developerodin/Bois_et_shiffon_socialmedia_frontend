@@ -13,6 +13,7 @@ export type DraftBody = {
   script?: string[];
   pinTitle?: string;
   altText?: string;
+  videoKey?: string; // a studio reel's rendered video
 };
 export type CheckStatus = "pass" | "warn" | "blocker";
 export type CheckResult = { check: string; status: CheckStatus; note: string };
@@ -71,6 +72,8 @@ export function checkDraft(channel: ContentChannel, body: DraftBody): CheckResul
   if (channel === "THREADS_POST" && caption.length > LIMITS.threadsMax) add("Threads length", "blocker", `${caption.length} characters; Threads allows ${LIMITS.threadsMax}.`);
   if (channel === "INSTAGRAM_CAROUSEL" && (body.slides?.length ?? 0) < 3) add("Carousel", "blocker", "A carousel needs at least 3 slides.");
   if (channel === "INSTAGRAM_REEL" && (body.script?.length ?? 0) < 2) add("Reel script", "blocker", "A Reel needs a beat-by-beat script.");
+  // No AI looks at the video itself, so this stays open for the person sending it (the brief: unresolved checks stay visible).
+  if (channel === "INSTAGRAM_REEL" && body.videoKey) add("Visual check", "warn", "Not checked by AI: watch the video and confirm the product looks right.");
   if (!body.altText?.trim() && channel !== "THREADS_POST") add("Alt text", "warn", "Describe the image for screen readers and search.");
   // A warning, not a blocker: a person may add the brand's own link on purpose; the approver sees which link it is.
   const links = [...new Set(`${text}\n${body.pinTitle ?? ""}\n${body.altText ?? ""}`.match(POST_LINK) ?? [])];
