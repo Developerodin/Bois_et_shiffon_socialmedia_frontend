@@ -39,7 +39,7 @@ export default async function AdminActivity({ searchParams }: { searchParams: Pr
           ) : (
             <div key="p">
               <span className="font-medium">Unattributed</span>
-              <p className="text-xs text-muted-foreground">system runs, or before people were recorded</p>
+              <p className="text-xs text-muted-foreground">system runs, removed test accounts, or before people were recorded</p>
             </div>
           ),
           r.workspace ?? <span key="w" className="text-muted-foreground">no workspace</span>,

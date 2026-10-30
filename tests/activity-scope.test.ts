@@ -83,6 +83,20 @@ describe("unattributed activity on the list", () => {
   });
 });
 
+describe("accounts removed from the database (smoke-test users)", () => {
+  it("fold into the workspace's unattributed row instead of their own nameless rows", async () => {
+    const last = { _max: { createdAt: new Date(1) } };
+    m.auditGroups.mockResolvedValue([
+      { workspaceId: "w1", actorUserId: "gone", _count: { _all: 1 }, ...last },
+      { workspaceId: "w1", actorUserId: null, _count: { _all: 5 }, ...last },
+      { workspaceId: "w1", actorUserId: "u1", _count: { _all: 2 }, ...last },
+    ]);
+    m.none.mockImplementation(async (q: { where: { id: { in: string[] } } }) => q.where.id.in.filter((id) => id === "u1").map((id) => ({ id, email: "a@x.com" })));
+    const { rows } = await activityList({});
+    expect(rows.map((r) => [r.userId, r.actions])).toEqual([[null, 6], ["u1", 2]]);
+  });
+});
+
 describe("a deleted account's activity", () => {
   it("still has a summary, with no user", async () => {
     m.user.mockResolvedValue(null);
