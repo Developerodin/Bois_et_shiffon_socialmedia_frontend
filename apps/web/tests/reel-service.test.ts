@@ -75,6 +75,12 @@ describe("higgsfield webhook", () => {
     expect(m.enqueueTick).not.toHaveBeenCalled();
   });
 
+  it("doesn't nudge a render that is joining (the join is already running)", async () => {
+    m.tx.reelRender.findUnique.mockResolvedValue({ id: "r1abcdefghij", step: "JOIN", webhookSecret: "a".repeat(64) });
+    await call("r1abcdefghij", "a".repeat(64));
+    expect(m.enqueueTick).not.toHaveBeenCalled();
+  });
+
   it("nudges the render on the right secret", async () => {
     m.tx.reelRender.findUnique.mockResolvedValue({ id: "r1abcdefghij", step: "CLIPS", webhookSecret: "a".repeat(64) });
     await call("r1abcdefghij", "a".repeat(64));

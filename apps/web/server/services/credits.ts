@@ -43,25 +43,30 @@ export async function creditBalance(workspaceId: string) {
 export async function spendCredits(input: { workspaceId: string; amount: number; reason: string; userId?: string; refId?: string }) {
   await ensureStarterGrant(input.workspaceId);
   const chargeId = input.refId ?? randomUUID();
-  if (input.refId && (await prisma.creditEntry.findFirst({ where: { workspaceId: input.workspaceId, reason: input.reason, refId: input.refId } }))) return chargeId;
+  const charged = (db: Pick<typeof prisma, "creditEntry">) =>
+    input.refId ? db.creditEntry.findFirst({ where: { workspaceId: input.workspaceId, reason: input.reason, refId: input.refId } }) : null;
+  // Two calls with the same refId at once: the unique (workspaceId, reason, refId) lets one through.
+  const duplicate = (e: unknown) => {
+    if (input.refId && (e as { code?: string }).code === "P2002") return;
+    throw e;
+  };
+  if (await charged(prisma)) return chargeId;
   if (hasUnlimitedCredits(input.workspaceId)) {
     // Zero-delta row keeps the usage trail; refundCharge finds no negative row, so nothing to give back.
-    await prisma.creditEntry.create({ data: { workspaceId: input.workspaceId, delta: 0, reason: input.reason, refId: chargeId, userId: input.userId } });
+    await prisma.creditEntry.create({ data: { workspaceId: input.workspaceId, delta: 0, reason: input.reason, refId: chargeId, userId: input.userId } }).catch(duplicate);
     return chargeId;
   }
   await prisma.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`credits:${input.workspaceId}`}))`;
+    // A double tap that waited on the lock: the first tap's charge is there now; don't judge the balance again.
+    if (await charged(tx)) return;
     const { _sum } = await tx.creditEntry.aggregate({ where: { workspaceId: input.workspaceId }, _sum: { delta: true } });
     const balance = _sum.delta ?? 0;
     if (balance < input.amount) throw new InsufficientCreditsError(balance, input.amount);
     await tx.creditEntry.create({
       data: { workspaceId: input.workspaceId, delta: -input.amount, reason: input.reason, refId: chargeId, userId: input.userId },
     });
-  }).catch((e: unknown) => {
-    // Two calls with the same refId at once: the unique (workspaceId, reason, refId) lets one through.
-    if (input.refId && (e as { code?: string }).code === "P2002") return;
-    throw e;
-  });
+  }).catch(duplicate);
   return chargeId;
 }
 

@@ -19,7 +19,7 @@ export async function POST(request: Request, context: { params: Promise<{ render
   if (limited.allowed && /^[a-z0-9]{10,40}$/.test(renderId)) {
     const r = await prisma.reelRender.findUnique({ where: { id: renderId } });
     const ok = r && secret.length === r.webhookSecret.length && timingSafeEqual(Buffer.from(secret), Buffer.from(r.webhookSecret));
-    if (ok && ["CLIPS", "JOIN"].includes(r.step)) {
+    if (ok && r.step === "CLIPS") { // only clips finish at Higgsfield; a JOIN is already running
       await enqueueTick(r);
       kickRunner();
     }

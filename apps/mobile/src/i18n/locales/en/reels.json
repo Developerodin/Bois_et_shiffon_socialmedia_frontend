@@ -194,7 +194,8 @@
     "checking": "Checking the reel… Download and Schedule open when the checks are done.",
     "askForChanges": "Not right? Ask for changes",
     "checks": "Checks",
-    "audioVoiceOnly": "French voiceover"
+    "audioVoiceOnly": "French voiceover",
+    "blocked": "A check found a problem (see Checks). Fix it in the caption, or tap \"Not right? Ask for changes\"."
   },
   "publish": {
     "title": "Publish reel",

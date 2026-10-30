@@ -25,7 +25,8 @@ export default function ReelsReview() {
   const player = useVideoPlayer(detail?.videoUrl ?? null);
   const plan = detail?.plan;
   const status = detail?.item.status;
-  const sendable = !!status && SENDABLE.includes(status) && detail?.checks?.overall !== "BLOCKER";
+  const blocked = detail?.checks?.overall === "BLOCKER";
+  const sendable = !!status && SENDABLE.includes(status) && !blocked;
   const shownCaption = caption ?? detail?.caption?.caption ?? "";
   const hashtags = detail?.caption?.hashtags ?? [];
 
@@ -64,7 +65,7 @@ export default function ReelsReview() {
             />
             <ActionButton style={{ flex: 1, paddingHorizontal: 0 }} trailing={ArrowRight} disabled={!sendable} label={t("schedule")} onPress={() => router.push("/reels/publish")} />
           </View>
-          <Text style={[meta, { textAlign: "center" }]}>{sendable ? t("review.connectFirst") : t("review.checking")}</Text>
+          <Text style={[meta, { textAlign: "center" }]}>{sendable ? t("review.connectFirst") : blocked ? t("review.blocked") : t("review.checking")}</Text>
         </Footer>
       }
     >

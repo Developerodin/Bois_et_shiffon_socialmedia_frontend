@@ -30,7 +30,7 @@ const TIMING = ["now", "schedule"] as const;
 /** R08 · Reels / Publish or schedule. Confirming approves this exact version (if not yet) and hands it to Instagram. */
 export default function ReelsPublish() {
   const { t } = useTranslation("reels");
-  const { id, detail } = useReel();
+  const { id, detail, load } = useReel();
   const [account, setAccount] = useState<Connection | null>(null);
   const [busy, setBusy] = useState<"send" | "download" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +53,7 @@ export default function ReelsPublish() {
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+      await load(); // the approval may have gone through: the retry must not ask for it again
     } finally {
       setBusy(null);
     }
