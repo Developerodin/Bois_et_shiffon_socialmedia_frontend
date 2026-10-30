@@ -1,12 +1,12 @@
 import { safeFetchBytes } from "@/server/research/crawl";
+import { type ModelId, VIDEO_MODELS } from "@/server/reels/router";
 
 /**
- * Higgsfield API, the parts reels use: Kling 3.0 image-to-video and request status.
+ * Higgsfield API, the parts reels use: image-to-video on the routed model (router.ts) and request status.
  * Its API has no voice or stitch models (checked 2026-10-30 via GET /models), so those are ours (voice.ts, join.ts).
- * ponytail: one model, hard-wired; a user's own video service later sits behind the same two calls.
+ * A user's own video service later sits behind the same two calls.
  */
 const BASE = "https://api.higgsfield.ai";
-const CLIP_MODEL = "/kling-video/v3.0/std/image-to-video";
 
 export type HfStatus = { state: "queued" | "in_progress" | "completed" | "failed"; url?: string; error?: string };
 
@@ -32,11 +32,12 @@ async function call(path: string, init: { method?: string; body?: unknown; heade
 
 export const higgsfield = {
   /** Submit one scene clip. The idempotency key makes a resend return the same job, uncharged. */
-  async animate(input: { photoUrl: string; prompt: string; seconds: number; webhook: string; idempotencyKey: string }) {
-    const data = await call(`${CLIP_MODEL}?hf_webhook=${encodeURIComponent(input.webhook)}`, {
+  async animate(input: { model: ModelId; photoUrl: string; prompt: string; seconds: number; webhook: string; idempotencyKey: string }) {
+    const m = VIDEO_MODELS[input.model];
+    const data = await call(`${m.path}?hf_webhook=${encodeURIComponent(input.webhook)}`, {
       method: "POST",
       headers: { "Idempotency-Key": input.idempotencyKey },
-      body: { image_url: input.photoUrl, prompt: input.prompt, duration: input.seconds, sound: "off" },
+      body: m.body(input),
     });
     if (typeof data.request_id !== "string") throw new Error("Higgsfield accepted the clip but sent no request id");
     return data.request_id;
