@@ -1,5 +1,5 @@
 import { prisma } from "@/server/db/prisma";
-import { nameLookup, PAGE } from "@/server/services/platform-admin";
+import { nameLookup, PAGE, TEST_WORKSPACE } from "@/server/services/platform-admin";
 
 // ── Recording page visits ───────────────────────────────────────────────────
 
@@ -41,8 +41,9 @@ export async function recordPageView({ userId, platform, path, workspaceId, bran
 /** Admin console actions (viewing a workspace or person) are the admin's audit trail, in Logs › Audit; not customer activity. */
 const NOT_ADMIN_CONSOLE = { NOT: { action: { startsWith: "platform." } } };
 
-type Counted = { userId: string; workspaceId: string | null; n?: number; usd?: number; last: Date };
-export type ActivityCount = { userId: string; workspaceId: string | null; last: Date; visits: number; actions: number; tasks: number; usd: number };
+/** userId null: unattributed (system and scheduled runs, and AI calls from before people were recorded). */
+type Counted = { userId: string | null; workspaceId: string | null; n?: number; usd?: number; last: Date };
+export type ActivityCount = { userId: string | null; workspaceId: string | null; last: Date; visits: number; actions: number; tasks: number; usd: number };
 
 /** Add up the per-source counts for each (person, workspace), most recently active first. */
 export function mergeActivityCounts(sources: { visits: Counted[]; actions: Counted[]; tasks: Counted[]; ai: Counted[]; api: Counted[] }): ActivityCount[] {
@@ -61,26 +62,29 @@ export function mergeActivityCounts(sources: { visits: Counted[]; actions: Count
 }
 
 /**
- * Everyone's activity, per workspace: five all-time GROUP BYs merged in memory, then one page.
+ * Everyone's activity, per workspace: five all-time GROUP BYs merged in memory, then one page. Without a person
+ * filter, each workspace also gets an unattributed row, so its spend adds up to the Spend page (test runs left out,
+ * as there).
  * ponytail: fine into the low millions of page-visit rows. Past that, roll daily counts into a summary table, or add
  * retention.
  */
 export async function activityList({ workspaceId, userId, page = 1 }: { workspaceId?: string; userId?: string; page?: number }) {
-  const ws = workspaceId ? { workspaceId } : {};
+  // Only for tables whose workspaceId is never null: NOT (workspaceId = 'eval') is false for NULL in SQL.
+  const ws = workspaceId ? { workspaceId } : { NOT: { workspaceId: TEST_WORKSPACE } };
   const last = (g: { _max: { createdAt: Date | null } }) => g._max.createdAt!;
   const [visits, actions, tasks, ai, api] = await Promise.all([
-    prisma.pageView.groupBy({ by: ["workspaceId", "userId"], where: { ...ws, ...(userId ? { userId } : {}) }, _count: { _all: true }, _max: { createdAt: true } }),
-    prisma.auditEvent.groupBy({ by: ["workspaceId", "actorUserId"], where: { ...ws, actorUserId: userId ?? { not: null }, ...NOT_ADMIN_CONSOLE }, _count: { _all: true }, _max: { createdAt: true } }),
-    prisma.agentRun.groupBy({ by: ["workspaceId", "triggeredByUserId"], where: { ...ws, triggeredByUserId: userId ?? { not: null } }, _count: { _all: true }, _max: { createdAt: true } }),
-    prisma.aiWorkflowRun.groupBy({ by: ["workspaceId", "userId"], where: { ...ws, userId: userId ?? { not: null } }, _sum: { costUsd: true }, _max: { createdAt: true } }),
-    prisma.apiCall.groupBy({ by: ["workspaceId", "userId"], where: { ...ws, userId: userId ?? { not: null } }, _sum: { costUsd: true }, _max: { createdAt: true } }),
+    prisma.pageView.groupBy({ by: ["workspaceId", "userId"], where: { ...(workspaceId ? { workspaceId } : {}), ...(userId ? { userId } : {}) }, _count: { _all: true }, _max: { createdAt: true } }),
+    prisma.auditEvent.groupBy({ by: ["workspaceId", "actorUserId"], where: { ...(workspaceId ? { workspaceId } : {}), ...(userId ? { actorUserId: userId } : {}), ...NOT_ADMIN_CONSOLE }, _count: { _all: true }, _max: { createdAt: true } }),
+    prisma.agentRun.groupBy({ by: ["workspaceId", "triggeredByUserId"], where: { ...ws, ...(userId ? { triggeredByUserId: userId } : {}) }, _count: { _all: true }, _max: { createdAt: true } }),
+    prisma.aiWorkflowRun.groupBy({ by: ["workspaceId", "userId"], where: { ...ws, ...(userId ? { userId } : {}) }, _sum: { costUsd: true }, _max: { createdAt: true } }),
+    prisma.apiCall.groupBy({ by: ["workspaceId", "userId"], where: { ...(workspaceId ? { workspaceId } : { OR: [{ workspaceId: null }, { NOT: { workspaceId: TEST_WORKSPACE } }] }), ...(userId ? { userId } : {}) }, _sum: { costUsd: true }, _max: { createdAt: true } }),
   ]);
   const all = mergeActivityCounts({
     visits: visits.map((g) => ({ userId: g.userId, workspaceId: g.workspaceId, n: g._count._all, last: last(g) })),
-    actions: actions.map((g) => ({ userId: g.actorUserId!, workspaceId: g.workspaceId, n: g._count._all, last: last(g) })),
-    tasks: tasks.map((g) => ({ userId: g.triggeredByUserId!, workspaceId: g.workspaceId, n: g._count._all, last: last(g) })),
-    ai: ai.map((g) => ({ userId: g.userId!, workspaceId: g.workspaceId, usd: Number(g._sum.costUsd ?? 0), last: last(g) })),
-    api: api.map((g) => ({ userId: g.userId!, workspaceId: g.workspaceId, usd: Number(g._sum.costUsd ?? 0), last: last(g) })),
+    actions: actions.map((g) => ({ userId: g.actorUserId, workspaceId: g.workspaceId, n: g._count._all, last: last(g) })),
+    tasks: tasks.map((g) => ({ userId: g.triggeredByUserId, workspaceId: g.workspaceId, n: g._count._all, last: last(g) })),
+    ai: ai.map((g) => ({ userId: g.userId, workspaceId: g.workspaceId, usd: Number(g._sum.costUsd ?? 0), last: last(g) })),
+    api: api.map((g) => ({ userId: g.userId, workspaceId: g.workspaceId, usd: Number(g._sum.costUsd ?? 0), last: last(g) })),
   });
   const rows = all.slice((page - 1) * PAGE, page * PAGE);
   const names = await nameLookup(rows);

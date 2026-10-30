@@ -47,4 +47,17 @@ describe("mergeActivityCounts", () => {
     expect(rows).toHaveLength(2);
     expect(rows[1]).toMatchObject({ workspaceId: null, actions: 3, visits: 0 });
   });
+
+  it("keeps unattributed activity as its own row per workspace", () => {
+    const rows = mergeActivityCounts({
+      ...none,
+      ai: [
+        { userId: "u1", workspaceId: "w1", usd: 0.5, last: at(2) },
+        { userId: null, workspaceId: "w1", usd: 2, last: at(1) },
+      ],
+      tasks: [{ userId: null, workspaceId: "w1", n: 3, last: at(1) }],
+    });
+    expect(rows).toHaveLength(2);
+    expect(rows[1]).toMatchObject({ userId: null, workspaceId: "w1", usd: 2, tasks: 3 });
+  });
 });
