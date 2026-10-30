@@ -766,6 +766,8 @@ model ContentItem {
   scheduledFor  DateTime?
   pillar        String?
   brief         Json? // { goal, audience, keyMessage, products, cta, references, notes }
+  studio        Boolean        @default(false) // made in the mobile Reels studio: the writing agents leave it alone
+  postUrl       String? // posted by hand after a download; the link the person pasted back
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -774,9 +776,45 @@ model ContentItem {
   versions     ContentVersion[]
   decisions    ApprovalDecision[]
   publications PublicationAttempt[]
+  renders      ReelRender[]
 
   @@index([workspaceId, brandId, status])
   @@index([brandId, scheduledFor])
+}
+
+enum ReelRenderStep {
+  VOICE
+  CLIPS
+  STITCH
+  STORE
+  DONE
+  FAILED
+}
+
+/** One paid attempt at turning a reel plan version into a video (Higgsfield: voice → clips → stitch → our storage). */
+model ReelRender {
+  id               String         @id @default(cuid())
+  workspaceId      String
+  brandId          String
+  contentItemId    String
+  contentVersionId String // the plan version rendered
+  attempt          Int // 1, 2, … per version: "Try again" is a new attempt with its own charge
+  step             ReelRenderStep @default(VOICE)
+  claimedAt        DateTime? // set while a step's submit is in flight; cleared once its request ids are saved
+  requests         Json           @default("{}") // { VOICE?: string[], CLIPS?: string[], STITCH?: string[] } Higgsfield request ids
+  outputs          Json           @default("{}") // { voiceUrls, voiceSeconds, clipUrls, finalUrl }
+  ticks            Int            @default(0) // polling jobs enqueued so far; makes each tick's job key unique
+  chargeId         String
+  webhookSecret    String
+  videoKey         String? // the finished MP4 in our media storage
+  error            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  item ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@unique([contentVersionId, attempt])
+  @@index([contentItemId, createdAt])
 }
 
 /** Immutable draft text. Approval (later slice) binds to one exact version. */
