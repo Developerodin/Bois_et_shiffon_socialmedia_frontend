@@ -51,7 +51,7 @@ export function publishRequirements(channel: ContentChannel) {
 }
 
 /** Where the post's media lives: our private uploads (signed at posting time) and/or public links. */
-type Target = { boardId: string | null; imageUrl?: string | null; media?: string[]; links?: string[]; videoUrl?: string | null };
+type Target = { boardId: string | null; imageUrl?: string | null; media?: string[]; links?: string[]; videoUrl?: string | null; videoKey?: string | null };
 
 export function postText(body: Body) {
   return [body.caption?.trim(), body.hashtags?.length ? body.hashtags.join(" ") : ""].filter(Boolean).join("\n\n");
@@ -110,8 +110,9 @@ export async function saveDraft(input: { workspaceId: string; brandId: string; u
     if (item.status === "SCHEDULED") throw new PublishingError("This post is scheduled. Cancel it first, then edit.");
     if (!EDITABLE.includes(item.status)) throw new PublishingError("A published post can't be edited");
     if (latest && JSON.stringify({ ...(latest.body as object), ...body }) === JSON.stringify(latest.body)) throw new PublishingError("Nothing changed", 400);
+    // Fields the editor doesn't show (a studio reel's scenes and video) carry over to the new version.
     const version = await tx.contentVersion.create({
-      data: { contentItemId: item.id, version: (latest?.version ?? 0) + 1, body, createdBy: input.userId },
+      data: { contentItemId: item.id, version: (latest?.version ?? 0) + 1, body: { ...(latest?.body as object | undefined), ...body }, createdBy: input.userId },
     });
     await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW" } });
     await tx.auditEvent.create({
@@ -142,7 +143,8 @@ export async function decide(input: {
     if (item.status !== "AWAITING_APPROVAL") throw new PublishingError("This post isn't waiting for approval");
     if (input.verdict === "APPROVED") {
       if (latest.checks[0]?.overall === "BLOCKER" || !latest.checks[0]) throw new PublishingError("The quality check must pass before approval");
-      if (latest.createdBy === input.userId) throw new PublishingError("You wrote this draft, so someone else has to approve it", 403);
+      // Studio reels are made and sent by the same person (owner's call, 2026-10-30).
+      if (latest.createdBy === input.userId && !item.studio) throw new PublishingError("You wrote this draft, so someone else has to approve it", 403);
     }
     const decision = await tx.approvalDecision.create({
       data: {
@@ -215,9 +217,13 @@ export async function schedulePublication(input: {
     if (count < req.minImages) throw new PublishingError(req.minImages === 1 ? "This channel needs an image" : `A carousel needs at least ${req.minImages} images`, 400);
     if (count > req.maxImages) throw new PublishingError(req.maxImages === 0 ? "Reels take a video, not images" : `This channel takes at most ${req.maxImages} image${req.maxImages === 1 ? "" : "s"}`, 400);
     if (req.provider === "INSTAGRAM" && media.some((k) => !/\.jpe?g$/i.test(k))) throw new PublishingError("Instagram only accepts JPEG photos. Upload a .jpg instead.", 400);
+    // A studio reel posts the video that was approved, from our storage, signed at posting time.
+    const videoKey = item.studio ? ((latest.body as { videoKey?: string }).videoKey ?? null) : null;
+    if (item.studio && input.videoUrl?.trim()) throw new PublishingError("This reel posts its own video", 400);
+    if (item.studio && !videoKey) throw new PublishingError("This reel has no video yet", 400);
     const videoUrl = input.videoUrl?.trim() ? https(input.videoUrl) : null;
     if (input.videoUrl?.trim() && !videoUrl) throw new PublishingError("The video link must be a public https:// address", 400);
-    if (req.needsVideo && !videoUrl) throw new PublishingError("A Reel needs a video link", 400);
+    if (req.needsVideo && !videoUrl && !videoKey) throw new PublishingError("A Reel needs a video link", 400);
     const imageUrl = links[0] ?? null;
     if (req.needsBoard && !input.boardId) throw new PublishingError("Choose a board", 400);
     const limit = TEXT_LIMIT[item.channel];
@@ -230,7 +236,7 @@ export async function schedulePublication(input: {
       data: {
         workspaceId: input.workspaceId, brandId: input.brandId, contentItemId: item.id, contentVersionId: latest.id,
         packageHash: approval.packageHash, connectionId: conn.id, provider: conn.provider,
-        target: { boardId: input.boardId ?? null, imageUrl, media, links: links as string[], videoUrl } satisfies Target, runAt, createdByUserId: input.userId,
+        target: { boardId: input.boardId ?? null, imageUrl, media, links: links as string[], videoUrl, videoKey } satisfies Target, runAt, createdByUserId: input.userId,
       },
     });
     await tx.contentItem.update({ where: { id: item.id }, data: { status: "SCHEDULED", scheduledFor: runAt } });
@@ -286,7 +292,7 @@ export async function executePublication(payload: unknown) {
     // Uploads are private: the platform gets a link valid for an hour, made at the moment of posting.
     const images = [...(await Promise.all((target.media ?? []).map((k) => signedMediaUrl(k, 3600)))), ...(target.links ?? (target.imageUrl ? [target.imageUrl] : []))];
     const res = await publisher(
-      { text: postText(body), title: body.pinTitle || body.hook || item.title, altText: body.altText ?? "", link: safeHttpUrl(profile?.websiteUrl)?.href ?? null, imageUrl: images[0] ?? null, imageUrls: images, videoUrl: target.videoUrl ?? null, boardId: target.boardId },
+      { text: postText(body), title: body.pinTitle || body.hook || item.title, altText: body.altText ?? "", link: safeHttpUrl(profile?.websiteUrl)?.href ?? null, imageUrl: images[0] ?? null, imageUrls: images, videoUrl: target.videoKey ? await signedMediaUrl(target.videoKey, 3600) : (target.videoUrl ?? null), boardId: target.boardId },
       { id: conn.externalAccountId, token },
     );
     await finish("PUBLISHED", { externalId: res.externalId, externalUrl: safeHttpUrl(res.externalUrl)?.href ?? null, publishedAt: new Date(), error: null }, "PUBLISHED");

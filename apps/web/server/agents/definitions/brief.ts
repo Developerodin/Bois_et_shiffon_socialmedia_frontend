@@ -25,7 +25,7 @@ export const briefAgent: AgentDefinition = {
   async run(ctx) {
     const { brand } = ctx;
     const items = await prisma.contentItem.findMany({
-      where: { brandId: brand.brandId, status: "PLANNED" },
+      where: { brandId: brand.brandId, status: "PLANNED", studio: false }, // studio reels plan themselves
       orderBy: [{ scheduledFor: "asc" }, { createdAt: "asc" }],
       take: PER_RUN,
       include: { opportunity: { select: { title: true, summary: true, angle: true, reason: true } } },

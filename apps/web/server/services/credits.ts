@@ -6,7 +6,7 @@ import { prisma } from "@/server/db/prisma";
  * ponytail: one starter grant per workspace; plans, monthly allowances and Stripe top-ups come later
  * as more "grant"/"top-up" rows, no schema change needed.
  */
-export const CREDIT_COSTS = { siteAudit: 10, manualRun: 5 } as const;
+export const CREDIT_COSTS = { siteAudit: 10, manualRun: 5, reelPerSecond: 2 } as const;
 export const STARTER_CREDITS = 20;
 /** The quality check is the required gate before approval: never charge for it on top of the draft it checks. */
 export const FREE_MANUAL_AGENTS: ReadonlySet<string> = new Set(["quality"]);
@@ -38,10 +38,12 @@ export async function creditBalance(workspaceId: string) {
 /**
  * Spend credits atomically. A transaction-scoped advisory lock per workspace serialises spends,
  * so two clicks at once can't both pass the balance check. Returns the charge id to refund later.
+ * With `refId` the spend is idempotent: a second call for the same (reason, refId) returns it without charging again.
  */
-export async function spendCredits(input: { workspaceId: string; amount: number; reason: string; userId?: string }) {
+export async function spendCredits(input: { workspaceId: string; amount: number; reason: string; userId?: string; refId?: string }) {
   await ensureStarterGrant(input.workspaceId);
-  const chargeId = randomUUID();
+  const chargeId = input.refId ?? randomUUID();
+  if (input.refId && (await prisma.creditEntry.findFirst({ where: { workspaceId: input.workspaceId, reason: input.reason, refId: input.refId } }))) return chargeId;
   if (hasUnlimitedCredits(input.workspaceId)) {
     // Zero-delta row keeps the usage trail; refundCharge finds no negative row, so nothing to give back.
     await prisma.creditEntry.create({ data: { workspaceId: input.workspaceId, delta: 0, reason: input.reason, refId: chargeId, userId: input.userId } });
@@ -55,6 +57,10 @@ export async function spendCredits(input: { workspaceId: string; amount: number;
     await tx.creditEntry.create({
       data: { workspaceId: input.workspaceId, delta: -input.amount, reason: input.reason, refId: chargeId, userId: input.userId },
     });
+  }).catch((e: unknown) => {
+    // Two calls with the same refId at once: the unique (workspaceId, reason, refId) lets one through.
+    if (input.refId && (e as { code?: string }).code === "P2002") return;
+    throw e;
   });
   return chargeId;
 }

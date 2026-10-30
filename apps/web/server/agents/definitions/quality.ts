@@ -43,11 +43,13 @@ export const qualityAgent: AgentDefinition = {
   key: "quality",
   name: "Quality check",
   description: "Checks each draft for brand voice, product accuracy, French quality and platform rules before approval.",
-  inputSchema: z.object({}).strict(),
-  async run(ctx) {
+  // itemId: check just that item (a studio reel after its render or a caption edit), as its own run.
+  inputSchema: z.object({ itemId: z.string().min(1).max(100).optional() }).strict(),
+  async run(ctx, input) {
     const { brand } = ctx;
+    const { itemId } = input as { itemId?: string }; // parsed by the engine against inputSchema
     const items = await prisma.contentItem.findMany({
-      where: { brandId: brand.brandId, status: "DRAFT_REVIEW" },
+      where: { brandId: brand.brandId, status: "DRAFT_REVIEW", ...(itemId ? { id: itemId } : {}) },
       include: { versions: { orderBy: { version: "desc" }, take: 1, include: { checks: { select: { id: true } } } } },
       take: 50,
     });
