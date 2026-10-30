@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, ChartColumn, Cpu, LayoutDashboard, ScrollText, Users } from "lucide-react";
+import { Activity, Building2, ChartColumn, Cpu, LayoutDashboard, ScrollText, Users } from "lucide-react";
 import { useIndicator } from "@/components/admin/use-indicator";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,7 @@ const ITEMS = [
   { href: "/admin/workspaces", label: "Workspaces", icon: Building2 },
   { href: "/admin/people", label: "People", icon: Users },
   { href: "/admin/spend", label: "Spend & usage", icon: ChartColumn },
+  { href: "/admin/activity", label: "Activity", icon: Activity },
   { href: "/admin/logs", label: "Logs", icon: ScrollText },
   { href: "/admin/models", label: "AI models", icon: Cpu },
 ];
