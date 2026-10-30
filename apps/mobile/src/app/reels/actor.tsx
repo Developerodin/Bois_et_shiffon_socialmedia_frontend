@@ -15,6 +15,8 @@ const STYLES = ["calm", "expressive"] as const;
 export default function ReelsActor() {
   const { t } = useTranslation("reels");
   const [choice, setChoice] = useState<string>("none");
+  // Presenters who speak on camera need lip-synced video: a later step. Until then a reel is product-only.
+  const [soon, setSoon] = useState(false);
   return (
     <ReelsScreen
       bg={rc.pageAlt}
@@ -23,6 +25,7 @@ export default function ReelsActor() {
       contentStyle={{ paddingHorizontal: space[16], paddingTop: space[16], paddingBottom: space[24] }}
       footer={
         <Footer>
+          {soon ? <Text style={[meta, { textAlign: "center" }]}>{t("actor.comingSoon")}</Text> : null}
           <Button label={t("common:continue")} arrow onPress={() => router.push("/reels/script")} />
         </Footer>
       }
@@ -62,7 +65,7 @@ export default function ReelsActor() {
               accessibilityRole="radio"
               accessibilityState={{ checked: on }}
               accessibilityLabel={t("actor.styleA11y", s)}
-              onPress={() => setChoice(id)}
+              onPress={() => (setChoice("none"), setSoon(true))}
               style={[styles.option, styles.styleCard, on && styles.optionOn]}
             >
               <View style={{ alignItems: "center" }}>

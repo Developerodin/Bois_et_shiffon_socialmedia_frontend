@@ -10,6 +10,7 @@ import { Field } from "@/ui/field";
 import { Footer } from "@/ui/layout";
 import { BackTitle, BrandPill, Chip, ChipRow, ICON, PageHeader, ReelsScreen, Tag, meta, rc, strong14 } from "@/ui/reels/kit";
 import { templateFilters, templates } from "@/ui/reels/sample";
+import { useReel } from "@/ui/reels/use-reel";
 
 /** R12 · Reels / Templates. */
 export default function ReelsTemplates() {
@@ -17,6 +18,13 @@ export default function ReelsTemplates() {
   const [filter, setFilter] = useState<string>(templateFilters[0]);
   const [selected, setSelected] = useState<string>(templates[0].id);
   const [query, setQuery] = useState("");
+  const { id, busy, error, chat } = useReel();
+  // A template is an instruction to the scriptwriter: it reshapes the open plan, or starts a new one.
+  const use = async () => {
+    const tpl = templates.find((x) => x.id === selected)!;
+    const ask = t("templates.useAsk", { title: t(`templates.item.${tpl.id}.title`), subtitle: t(`templates.item.${tpl.id}.subtitle`), seconds: tpl.seconds });
+    if (await chat(ask)) router.push(id ? "/reels/storyboard" : "/reels/chat");
+  };
 
   return (
     <ReelsScreen
@@ -26,7 +34,8 @@ export default function ReelsTemplates() {
       contentStyle={{ paddingHorizontal: space[16], paddingTop: space[12], paddingBottom: space[24] }}
       footer={
         <Footer>
-          <Button label={t("templates.useTemplate")} arrow onPress={() => router.push("/reels/assets")} />
+          {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
+          <Button label={busy ? t("templates.applying") : t("templates.useTemplate")} arrow disabled={busy} onPress={() => void use()} />
         </Footer>
       }
     >

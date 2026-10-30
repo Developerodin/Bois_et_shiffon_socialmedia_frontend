@@ -255,7 +255,8 @@
     "sampleVoiceA11y": "Sample voice, {{title}}",
     "sampleVoice": "Sample voice",
     "voiceLed": "Voice-led style",
-    "notice": "Choose a voice-led style, or keep the focus on your product."
+    "notice": "Choose a voice-led style, or keep the focus on your product.",
+    "comingSoon": "Presenters who speak on camera are coming soon. This reel stays product-only for now."
   },
   "script": {
     "title": "Script & voice",
@@ -314,7 +315,9 @@
         "subtitle": "Announcement & showroom CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Use the \"{{title}}\" format ({{subtitle}}), about {{seconds}} seconds.",
+    "applying": "Applying…"
   },
   "assets": {
     "title": "Select assets",
