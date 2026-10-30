@@ -35,7 +35,7 @@ Why: the B&C functional brief wants the team reviewing and approving, not produc
 - **Hybrid publishing:** connected Instagram posts/schedules; otherwise download.
 - **Redo:** person says what's wrong; new render from the plan + the note; full credits again; old versions stay on R06.
 - **Video service:** Higgsfield API (pay-as-you-go key from console.higgsfield.ai, separate from the owner's web plan). Users' own service later.
-- **Joining:** Higgsfield stitch (`explainer_video`), not ffmpeg, to keep render load off our functions.
+- **Joining:** ~~Higgsfield stitch~~ — superseded 2026-10-30: Higgsfield's API has no voice or stitch models (checked with the key: 91 models, all image/video). Owner chose **OpenAI text-to-speech for the voice** and a **copy-only ffmpeg join on our server** (no re-encode: ~1 s, little CPU). Subtitles come from Instagram's automatic captions for now; burned-in subtitles (a re-encode) are later.
 - **Pricing:** 1 credit ≈ $0.10; 2 credits per second (15 s = 30, 20 s = 40, 30 s = 60); redo same price; failure refunded.
 
 ## Screen-by-screen
@@ -70,19 +70,16 @@ Confirmed by the owner.
 
 ## How a render works
 
-Per scene, in parallel, each from its own photo:
+1. **Voice.** OpenAI `gpt-4o-mini-tts`, one WAV per scene, French instructions, the plan's voice. Synchronous (seconds). Length read from the file size (OpenAI's streamed WAV header has no data size). Stored in our media.
+2. **Clips.** Per scene, in parallel: our photo cropped to 1080×1920 (Kling's image-to-video has no aspect setting; output follows the photo), Kling 3.0 Standard image-to-video on Higgsfield, `prompt` = direction (+ redo note), `duration` = voice length rounded up (3–15), `sound: "off"`, `Idempotency-Key` per scene.
+3. **Join.** On our server with `ffmpeg-static`: each scene's voice padded with silence to its clip's length and joined into one WAV (plain byte work), clips concatenated with stream copy, voice encoded to AAC alongside: no video re-encode. Result stored in our media; Higgsfield's files (deleted after 7 days) are no longer needed.
+4. **Check.** Existing Quality agent on the text (free).
 
-1. **Voice.** French text-to-speech per scene (Higgsfield). Measure length.
-2. **Clip.** Kling 3.0 Standard image-to-video, `image_url` = a signed URL of the scene photo (our bucket is private), `prompt` = direction (+ redo note), `duration` = voice length rounded up, min 3, max 15, `sound: "off"`, 9:16.
-3. **Join.** Higgsfield `explainer_video` with ordered (clip, voice) pairs, 1080×1920, subtitles on.
-4. **Keep.** Download the result into our media storage (Higgsfield deletes after 7 days); store the key on the version.
-5. **Check.** Existing Quality agent on the text (free).
+**Driving it.** No step waits minutes inside a function (jobs run in `after()`, 300 s cap; Vercel cron is daily). Voice and join run inside one job (seconds); only the clips step waits on Higgsfield. It submits and returns; it advances when (a) Higgsfield's webhook calls us or (b) the app's R05/R06 polling calls `kickIfDue()` and checks outstanding request ids — the onboarding Learning pattern. Closed app + lost webhook → caught up on next R06 open or the daily cron. Per-minute cron is the upgrade.
 
-**Driving it.** No step waits minutes inside a function (jobs run in `after()`, 300 s cap; Vercel cron is daily). Each step submits and returns. Steps advance when (a) Higgsfield's webhook calls us or (b) the app's R05/R06 polling calls `kickIfDue()` and checks outstanding request ids — the onboarding Learning pattern. Closed app + lost webhook → caught up on next R06 open or the daily cron. Per-minute cron is the upgrade.
+**One step at a time.** Advancing a render takes a per-render advisory lock and moves state with compare-and-set (`WHERE step = <expected>`), so a webhook and a poll arriving together can't both submit the next Higgsfield call. Request ids are stored right after submitting; a crash between the two is safe because every submit carries a per-scene `Idempotency-Key`, so resending returns the original job without a second charge (Higgsfield docs, concepts/idempotency).
 
-**One step at a time.** Advancing a render takes a per-render advisory lock and moves state with compare-and-set (`WHERE step = <expected>`), so a webhook and a poll arriving together can't both submit the next Higgsfield call. Request ids are stored before anything else happens, so a crash resumes instead of resubmitting.
-
-**Webhook trust.** The webhook is only a nudge. On receipt we re-fetch status from Higgsfield with our key and download only from the result URL that status returns — never from the webhook body. The endpoint takes a per-render secret in its URL and is rate-limited.
+**Webhook trust.** The webhook is only a nudge. On receipt we re-fetch status from Higgsfield with our key and download only from the result URL that status returns — never from the webhook body. The endpoint takes a per-render secret in its URL and is rate-limited. (Higgsfield also signs deliveries, Standard Webhooks HMAC with a `whsec_` console secret; verifying that is optional on top.)
 
 ## Data (builds on what exists)
 
@@ -106,7 +103,7 @@ Per scene, in parallel, each from its own photo:
 
 ## Cost check (unverified, needs a real key)
 
-20 s reel, three scenes rounded up ≈ 21–23 s of Kling at ~$0.112/s ≈ $2.35–2.60, + TTS cents, + stitch (price not published). At 40 credits ($4) margin is thinner than first estimated but positive. Re-check with real invoices before launch.
+20 s reel, three scenes rounded up ≈ 21–23 s of Kling at ~$0.112/s ≈ $2.35–2.60, + OpenAI TTS ≈ $0.01–0.02. No stitch cost. At 40 credits ($4) margin is thinner than first estimated but positive. Re-check with real invoices before launch.
 
 ## Owner answers (2026-10-30)
 
@@ -120,7 +117,7 @@ Per scene, in parallel, each from its own photo:
 1. AI presenter (lip-synced speech).
 2. Page 03 Posts.
 3. Users' own video service behind the same "video maker" interface.
-4. ffmpeg joining if stitch falls short.
+4. Burned-in subtitles (an ffmpeg re-encode, or a hosted video API).
 5. Facebook reels.
 
 ## Left to the builder
@@ -129,8 +126,9 @@ Exact Higgsfield request shapes; voice preset list; render state as table vs JSO
 
 ## Verify with a real Higgsfield key first
 
-- French voices exist and sound right.
-- `explainer_video` takes per-scene audio, burns subtitles acceptably, and its price.
-- Kling 3.0 Standard i2v gives 9:16 from a 9:16 photo (docs list no `aspect_ratio`; fall back to Kling 2.6 Pro, which has it).
-- Webhook mechanism and whether Higgsfield signs it.
-- Real per-reel cost.
+- ✅ Key works (`Authorization: Key id:secret`; one env var `HIGGSFIELD_API_KEY_ID` holding `id:secret` is accepted). `GET /models` lists what the key can use.
+- ✅ No TTS or stitch in the API → OpenAI voice + ffmpeg join (above).
+- ✅ OpenAI French voice works (`gpt-4o-mini-tts`, WAV; streamed header data size is 0xFFFFFFFF).
+- ✅ Webhook: `hf_webhook` query param on submit; JSON `{ request_id, status, error, payload }`; Standard Webhooks signatures. Idempotency: `Idempotency-Key` header.
+- ✅ Kling 3.0 std accepted our request shape; stopped at `403 not_enough_credits` (API balance $0).
+- ⏳ After top-up: 9:16 output from a 9:16 crop, clip quality, real cost/second, result URL host (for the download allow-list), ffmpeg stream-copy concat of Kling clips.
