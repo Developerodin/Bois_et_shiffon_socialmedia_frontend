@@ -153,7 +153,21 @@
     "meta": {
       "tv": "20s · French voiceover · Ready to schedule",
       "atelier": "15s · Ambient acoustic · Ready to schedule"
-    }
+    },
+    "empty": "No reels yet. Start one from Create or Ideas.",
+    "posted": "Posted on Instagram",
+    "failed": "Couldn't be made: {{error}}",
+    "readyMeta": "{{seconds}}s · French voiceover · Ready",
+    "draftMeta": "{{seconds}}s · Plan, no video yet",
+    "addLink": "Downloaded · Posted it? Add link",
+    "tryAgain_one": "Try again ({{count}} credit)",
+    "tryAgain_other": "Try again ({{count}} credits)",
+    "openPlan": "Open plan",
+    "closeSheet": "Close",
+    "linkTitle": "Add the post link",
+    "linkBody": "Paste the link of the reel you posted on Instagram, so its results can be followed.",
+    "saveLink": "Save link",
+    "saving": "Saving…"
   },
   "review": {
     "subtitle": "Reel draft · Ready to review",
