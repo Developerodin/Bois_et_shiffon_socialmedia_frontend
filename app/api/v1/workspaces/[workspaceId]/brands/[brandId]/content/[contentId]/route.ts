@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
+import { startAgentRun } from "@/server/agents/engine";
 import { prisma } from "@/server/db/prisma";
 import { pinterestBoards } from "@/server/integrations/publishers";
 import { kickRunner } from "@/server/jobs/runner";
@@ -73,6 +74,11 @@ export async function POST(request: Request, context: Params) {
     const { contentId: itemId } = await context.params;
     if (body.action === "edit") {
       await saveDraft({ ...scope, itemId, version: body.version, body: body.body });
+      // Studio reels have no Creator/Quality schedule behind them: check this edit now.
+      if ((await prisma.contentItem.findUnique({ where: { id: itemId }, select: { studio: true } }))?.studio) {
+        await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: "quality", trigger: "event", input: { itemId } }).catch(() => null);
+        kickRunner();
+      }
     } else if (body.action === "decide") {
       await decide({ ...scope, itemId, version: body.version, verdict: body.verdict, note: body.note });
     } else if (body.action === "publish") {
