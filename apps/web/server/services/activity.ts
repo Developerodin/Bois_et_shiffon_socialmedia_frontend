@@ -1,5 +1,5 @@
 import { prisma } from "@/server/db/prisma";
-import { PAGE } from "@/server/services/platform-admin";
+import { nameLookup, PAGE } from "@/server/services/platform-admin";
 
 // ── Recording page visits ───────────────────────────────────────────────────
 
@@ -80,26 +80,8 @@ export async function activityList({ workspaceId, userId, page = 1 }: { workspac
     api: api.map((g) => ({ userId: g.userId!, workspaceId: g.workspaceId, usd: Number(g._sum.costUsd ?? 0), last: last(g) })),
   });
   const rows = all.slice((page - 1) * PAGE, page * PAGE);
-  const names = await namesFor(rows);
+  const names = await nameLookup(rows);
   return { hasMore: all.length > page * PAGE, rows: rows.map((r) => ({ ...r, ...names(r) })) };
-}
-
-/** Display names for the people, workspaces and projects on a page of rows. */
-async function namesFor(rows: { userId?: string; workspaceId: string | null; brandId?: string | null }[]) {
-  const ids = <K extends "userId" | "workspaceId" | "brandId">(k: K) => [...new Set(rows.map((r) => r[k]).filter((x): x is string => !!x))];
-  const [people, workspaces, brands] = await Promise.all([
-    prisma.user.findMany({ where: { id: { in: ids("userId") } }, select: { id: true, name: true, email: true } }),
-    prisma.workspace.findMany({ where: { id: { in: ids("workspaceId") } }, select: { id: true, name: true } }),
-    prisma.brand.findMany({ where: { id: { in: ids("brandId") } }, select: { id: true, displayName: true } }),
-  ]);
-  const person = new Map(people.map((p) => [p.id, p.name ?? p.email]));
-  const workspace = new Map(workspaces.map((w) => [w.id, w.name]));
-  const brand = new Map(brands.map((b) => [b.id, b.displayName]));
-  return (r: { userId?: string; workspaceId: string | null; brandId?: string | null }) => ({
-    who: r.userId ? (person.get(r.userId) ?? "(deleted user)") : "",
-    workspace: r.workspaceId ? (workspace.get(r.workspaceId) ?? "(deleted workspace)") : null,
-    brand: r.brandId ? (brand.get(r.brandId) ?? "(deleted project)") : null,
-  });
 }
 
 // ── One person's timeline ───────────────────────────────────────────────────
@@ -159,7 +141,7 @@ export async function personTimeline({ userId, workspaceId, page = 1 }: { userId
     ],
     page,
   );
-  const names = await namesFor(items);
+  const names = await nameLookup(items);
   return { hasMore, items: items.map((i) => ({ ...i, ...names(i) })) };
 }
 
