@@ -129,7 +129,10 @@
     "remaining_one": "Remaining: {{count}} credit",
     "remaining_other": "Remaining: {{count}} credits",
     "safeToLeave": "You can safely leave this screen. Your draft is automatically saved in your Results tab.",
-    "keepWorking": "Keep working in background"
+    "keepWorking": "Keep working in background",
+    "failed": "The video couldn't be made: {{error}}",
+    "creditsRefunded_one": "{{count}} credit refunded",
+    "creditsRefunded_other": "{{count}} credits refunded"
   },
   "results": {
     "title": "Video reels",

@@ -1,18 +1,54 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ArrowLeft, Check, Clock, Coins, Info, LoaderCircle } from "lucide-react-native";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Button } from "@/ui/button";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BrandPill, ICON, PageHeader, ReelsScreen, Tag, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { photos } from "@/ui/reels/sample";
+import { useReel } from "@/ui/reels/use-reel";
 
-/** R05 · Reels / Generating. Static: there is no render backend, so progress is the designed snapshot. */
+const ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
+
+/** R05 · Reels / Generating. Polls the render; the three designed rows are its voice, clips and join steps. */
 export default function ReelsGenerating() {
   const { t } = useTranslation("reels");
-  const title = "Bunting spotlight";
+  const { detail } = useReel(3000);
+  const render = detail?.renders[0];
+  const plan = detail?.plan;
+  const title = plan?.title ?? "";
+  const at = render ? (render.step === "DONE" ? 3 : ORDER.indexOf(render.step as (typeof ORDER)[number])) : 0;
+  const failed = render?.step === "FAILED";
+  useEffect(() => {
+    if (render?.step === "DONE") router.replace("/reels/review");
+  }, [render?.step]);
+  const row = (i: number, label: string) => {
+    const done = at > i;
+    const now = at === i && !failed;
+    return (
+      <Step
+        icon={
+          done ? (
+            <View style={[styles.stepIcon, { backgroundColor: rc.black, borderColor: rc.black }]}>
+              <Check size={14} color={color.onPrimary} strokeWidth={2.25} />
+            </View>
+          ) : now ? (
+            <View style={[styles.stepIcon, { borderColor: rc.black }]}>
+              <LoaderCircle size={16} color={color.primary} strokeWidth={ICON.strokeWidth} />
+            </View>
+          ) : (
+            <View style={[styles.stepIcon, { borderColor: "#C8C5CB" }]}>
+              <Clock size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
+            </View>
+          )
+        }
+        label={<Text style={now ? strong14 : done ? metaInk : meta}>{label}</Text>}
+        status={done ? <Text style={meta}>{t("generating.done")}</Text> : now ? <Tag label={t("inProgress")} textStyle={{ color: color.ink }} /> : <Text style={meta}>{t("generating.queued")}</Text>}
+      />
+    );
+  };
   return (
     <ReelsScreen
       header={
@@ -41,40 +77,17 @@ export default function ReelsGenerating() {
 
       <View style={[styles.card, { marginTop: space[16] }]}>
         <View style={styles.product}>
-          <Image source={photos.table} style={styles.thumb} contentFit="cover" />
+          <Image source={plan && detail?.photoUrls[plan.scenes[0].photoKey] ? { uri: detail.photoUrls[plan.scenes[0].photoKey] } : photos.table} style={styles.thumb} contentFit="cover" />
           <View style={{ flex: 1 }}>
-            <Text style={strong14}>{t("generating.summary", { title, seconds: 20 })}</Text>
+            <Text style={strong14}>{t("generating.summary", { title, seconds: detail?.price ? detail.price / 2 : 0 })}</Text>
             <Text style={[meta, { paddingTop: 2 }]}>{t("generating.assetNote")}</Text>
           </View>
         </View>
         <View style={{ gap: space[12], paddingTop: 2 }}>
-          <Step
-            icon={
-              <View style={[styles.stepIcon, { backgroundColor: rc.black, borderColor: rc.black }]}>
-                <Check size={14} color={color.onPrimary} strokeWidth={2.25} />
-              </View>
-            }
-            label={<Text style={metaInk}>{t("generating.preparingScenes", { count: 3 })}</Text>}
-            status={<Text style={meta}>{t("generating.done")}</Text>}
-          />
-          <Step
-            icon={
-              <View style={[styles.stepIcon, { borderColor: rc.black }]}>
-                <LoaderCircle size={16} color={color.primary} strokeWidth={ICON.strokeWidth} />
-              </View>
-            }
-            label={<Text style={strong14}>{t("generating.renderingFrames")}</Text>}
-            status={<Tag label={t("inProgress")} textStyle={{ color: color.ink }} />}
-          />
-          <Step
-            icon={
-              <View style={[styles.stepIcon, { borderColor: "#C8C5CB" }]}>
-                <Clock size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
-              </View>
-            }
-            label={<Text style={meta}>{t("generating.addingAudio")}</Text>}
-            status={<Text style={meta}>{t("generating.queued")}</Text>}
-          />
+          {row(0, t("generating.preparingScenes", { count: plan?.scenes.length ?? 0 }))}
+          {row(1, t("generating.renderingFrames"))}
+          {row(2, t("generating.addingAudio"))}
+          {failed ? <Text style={[meta, { color: color.error }]}>{t("generating.failed", { error: render?.error ?? "" })}</Text> : null}
         </View>
       </View>
 
@@ -82,9 +95,9 @@ export default function ReelsGenerating() {
         <View style={styles.credits}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
             <Coins size={20} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
-            <Text style={metaInk}>{t("generating.creditsReserved", { count: 40 })}</Text>
+            <Text style={metaInk}>{failed ? t("generating.creditsRefunded", { count: detail?.price ?? 0 }) : t("generating.creditsReserved", { count: detail?.price ?? 0 })}</Text>
           </View>
-          <Text style={meta}>{t("generating.remaining", { count: 120 })}</Text>
+          <Text style={meta}>{t("generating.remaining", { count: detail?.credits ?? 0 })}</Text>
         </View>
         <View style={{ flexDirection: "row", gap: space[8], paddingHorizontal: space[8] }}>
           <Info size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} style={{ marginTop: 2 }} />
