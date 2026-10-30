@@ -20,18 +20,20 @@ export default async function AdminPersonActivity({ params, searchParams }: { pa
   const workspaceId = ws === NO_WORKSPACE ? null : ws; // null: only what happened outside any workspace
   const page = pageNumber(q.page);
   const [s, t, options, fx] = await Promise.all([personSummary({ userId, workspaceId }), personTimeline({ userId, workspaceId, page }), pickerOptions(), usdInrRate()]);
-  if (!s) notFound();
-  const name = s.user.name ?? s.user.email;
+  if (!s.user && !t.items.length && page === 1) notFound(); // a deleted account still shows what it left behind
+  const name = s.user ? (s.user.name ?? s.user.email) : "(deleted user)";
   const path = `/admin/activity/${userId}`;
   const current = { ws, page: page > 1 ? String(page) : undefined };
 
   return (
     <>
       <PageHeader title={name} crumbs={[{ href: "/admin/activity", label: "Activity" }, { label: name }]}>
-        {s.user.name ? `${s.user.email} · ` : ""}newest first, {PAGE} a page. An agent task’s AI calls are counted in its row. Chat text is never shown.{" "}
-        <Link href={`/admin/people/${userId}`} className="underline underline-offset-4">
-          Their workspaces and roles
-        </Link>
+        {s.user?.name ? `${s.user.email} · ` : ""}newest first, {PAGE} a page. An agent task’s AI calls are counted in its row. Chat text is never shown.{" "}
+        {s.user ? (
+          <Link href={`/admin/people/${userId}`} className="underline underline-offset-4">
+            Their workspaces and roles
+          </Link>
+        ) : null}
       </PageHeader>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat label="AI spend" value={<Money usd={s.aiUsd} fx={fx} />} hint={workspaceId === null ? "outside any workspace" : ws ? "in this workspace" : "everywhere"} />

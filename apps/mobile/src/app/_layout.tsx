@@ -59,7 +59,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (sent.current === path) return;
     sent.current = path;
-    void session.token().then((t) => t && recordPageView(path).catch(() => undefined));
+    void session.token().then((t) => t && recordPageView(path)).catch(() => undefined);
   }, [path]);
 
   if (!ready) return null;

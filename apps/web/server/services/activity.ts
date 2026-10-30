@@ -38,6 +38,9 @@ export async function recordPageView({ userId, platform, path, workspaceId, bran
 
 // ── Activity list: one row per person per workspace ─────────────────────────
 
+/** Admin console actions (viewing a workspace or person) are the admin's audit trail, in Logs › Audit; not customer activity. */
+const NOT_ADMIN_CONSOLE = { NOT: { action: { startsWith: "platform." } } };
+
 type Counted = { userId: string; workspaceId: string | null; n?: number; usd?: number; last: Date };
 export type ActivityCount = { userId: string; workspaceId: string | null; last: Date; visits: number; actions: number; tasks: number; usd: number };
 
@@ -67,7 +70,7 @@ export async function activityList({ workspaceId, userId, page = 1 }: { workspac
   const last = (g: { _max: { createdAt: Date | null } }) => g._max.createdAt!;
   const [visits, actions, tasks, ai, api] = await Promise.all([
     prisma.pageView.groupBy({ by: ["workspaceId", "userId"], where: { ...ws, ...(userId ? { userId } : {}) }, _count: { _all: true }, _max: { createdAt: true } }),
-    prisma.auditEvent.groupBy({ by: ["workspaceId", "actorUserId"], where: { ...ws, actorUserId: userId ?? { not: null } }, _count: { _all: true }, _max: { createdAt: true } }),
+    prisma.auditEvent.groupBy({ by: ["workspaceId", "actorUserId"], where: { ...ws, actorUserId: userId ?? { not: null }, ...NOT_ADMIN_CONSOLE }, _count: { _all: true }, _max: { createdAt: true } }),
     prisma.agentRun.groupBy({ by: ["workspaceId", "triggeredByUserId"], where: { ...ws, triggeredByUserId: userId ?? { not: null } }, _count: { _all: true }, _max: { createdAt: true } }),
     prisma.aiWorkflowRun.groupBy({ by: ["workspaceId", "userId"], where: { ...ws, userId: userId ?? { not: null } }, _sum: { costUsd: true }, _max: { createdAt: true } }),
     prisma.apiCall.groupBy({ by: ["workspaceId", "userId"], where: { ...ws, userId: userId ?? { not: null } }, _sum: { costUsd: true }, _max: { createdAt: true } }),
@@ -130,7 +133,7 @@ export async function personTimeline({ userId, workspaceId, page = 1 }: { userId
   const orderBy = [{ createdAt: "desc" as const }, { id: "desc" as const }];
   const [visits, actions, tasks, calls] = await Promise.all([
     prisma.pageView.findMany({ where: { userId, ...ws }, orderBy, take }),
-    prisma.auditEvent.findMany({ where: { actorUserId: userId, ...ws }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, action: true, createdAt: true } }),
+    prisma.auditEvent.findMany({ where: { actorUserId: userId, ...ws, ...NOT_ADMIN_CONSOLE }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, action: true, createdAt: true } }),
     !always ? [] : prisma.agentRun.findMany({ where: { triggeredByUserId: userId, workspaceId: workspaceId ?? undefined }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, agentKey: true, status: true, createdAt: true } }),
     !always ? [] : prisma.aiWorkflowRun.findMany({ where: { userId, agentRunId: null, workspaceId: workspaceId ?? undefined }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, workflowId: true, model: true, status: true, costUsd: true, createdAt: true } }),
   ]);
@@ -149,7 +152,7 @@ export async function personTimeline({ userId, workspaceId, page = 1 }: { userId
   return { hasMore, items: items.map((i) => ({ ...i, ...names(i) })) };
 }
 
-/** The person, and what they've cost (in one workspace, or everywhere): AI calls and other paid APIs. Null if unknown. */
+/** The person (null once their account is deleted), and what they've cost (in one workspace, or everywhere): AI calls and other paid APIs. */
 export async function personSummary({ userId, workspaceId }: { userId: string; workspaceId?: string | null }) {
   const ws = workspaceId === undefined ? {} : { workspaceId };
   const [user, ai, api] = await Promise.all([
@@ -157,5 +160,5 @@ export async function personSummary({ userId, workspaceId }: { userId: string; w
     workspaceId === null ? { _sum: { costUsd: null } } : prisma.aiWorkflowRun.aggregate({ where: { userId, workspaceId: workspaceId ?? undefined }, _sum: { costUsd: true } }),
     prisma.apiCall.aggregate({ where: { userId, ...ws }, _sum: { costUsd: true } }),
   ]);
-  return user ? { user, aiUsd: Number(ai._sum.costUsd ?? 0), apiUsd: Number(api._sum.costUsd ?? 0) } : null;
+  return { user, aiUsd: Number(ai._sum.costUsd ?? 0), apiUsd: Number(api._sum.costUsd ?? 0) };
 }
