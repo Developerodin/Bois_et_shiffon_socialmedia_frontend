@@ -308,21 +308,21 @@ export async function platformLogs({ kind, workspaceId, actorId, status, include
     rows = r.map((a) => ({ at: a.createdAt, workspaceId: a.workspaceId, brandId: a.brandId, userId: a.actorUserId, action: a.action, entityType: a.entityType, entityId: a.entityId }));
   } else if (kind === "runs") {
     const r = await prisma.agentRun.findMany({
-      where: { ...wsFilter, ...(s ? { status: s as "FAILED" } : {}) },
+      where: { ...wsFilter, ...(actorId ? { triggeredByUserId: actorId } : {}), ...(s ? { status: s as "FAILED" } : {}) },
       orderBy: { createdAt: "desc" }, skip, take,
       select: { id: true, workspaceId: true, brandId: true, agentKey: true, trigger: true, status: true, error: true, triggeredByUserId: true, createdAt: true, startedAt: true, finishedAt: true },
     });
     rows = r.map((x) => ({ at: x.createdAt, workspaceId: x.workspaceId, brandId: x.brandId, userId: x.triggeredByUserId, agent: x.agentKey, trigger: x.trigger, status: x.status, error: x.error, seconds: x.startedAt && x.finishedAt ? Math.round((+x.finishedAt - +x.startedAt) / 1000) : null }));
   } else if (kind === "events") {
-    const r = await prisma.agentEvent.findMany({ where: { ...wsFilter, ...(s ? { level: s as "ERROR" } : {}) }, orderBy: { id: "desc" }, skip, take, select: { workspaceId: true, brandId: true, agentKey: true, level: true, message: true, createdAt: true } });
+    const r = await prisma.agentEvent.findMany({ where: { ...wsFilter, ...(actorId ? { run: { triggeredByUserId: actorId } } : {}), ...(s ? { level: s as "ERROR" } : {}) }, orderBy: { id: "desc" }, skip, take, select: { workspaceId: true, brandId: true, agentKey: true, level: true, message: true, createdAt: true } });
     rows = r.map((x) => ({ at: x.createdAt, workspaceId: x.workspaceId, brandId: x.brandId, userId: null, agent: x.agentKey, level: x.level, message: x.message }));
   } else {
     const r = await prisma.aiWorkflowRun.findMany({
-      where: { ...(workspaceId ? { workspaceId } : includeTests ? {} : { NOT: { workspaceId: TEST_WORKSPACE } }), ...(s === "flagged" ? { evalPassed: false } : s ? { status: s } : {}) },
+      where: { ...(workspaceId ? { workspaceId } : includeTests ? {} : { NOT: { workspaceId: TEST_WORKSPACE } }), ...(actorId ? { userId: actorId } : {}), ...(s === "flagged" ? { evalPassed: false } : s ? { status: s } : {}) },
       orderBy: { createdAt: "desc" }, skip, take,
-      select: { workspaceId: true, brandId: true, workflowId: true, tier: true, model: true, status: true, costUsd: true, latencyMs: true, inputTokens: true, outputTokens: true, evalPassed: true, error: true, createdAt: true },
+      select: { workspaceId: true, brandId: true, userId: true, workflowId: true, tier: true, model: true, status: true, costUsd: true, latencyMs: true, inputTokens: true, outputTokens: true, evalPassed: true, error: true, createdAt: true },
     });
-    rows = r.map((c) => ({ at: c.createdAt, workspaceId: c.workspaceId, brandId: c.brandId, userId: null, task: c.workflowId, tier: c.tier, model: c.model, status: c.status, usd: c.costUsd === null ? null : num(c.costUsd), ms: c.latencyMs, tokens: (c.inputTokens ?? 0) + (c.outputTokens ?? 0), checks: c.evalPassed, error: c.error }));
+    rows = r.map((c) => ({ at: c.createdAt, workspaceId: c.workspaceId, brandId: c.brandId, userId: c.userId, task: c.workflowId, tier: c.tier, model: c.model, status: c.status, usd: c.costUsd === null ? null : num(c.costUsd), ms: c.latencyMs, tokens: (c.inputTokens ?? 0) + (c.outputTokens ?? 0), checks: c.evalPassed, error: c.error }));
   }
 
   const hasMore = rows.length > PAGE;
@@ -348,6 +348,23 @@ export async function platformLogs({ kind, workspaceId, actorId, status, include
   };
 }
 export type LogRow = Awaited<ReturnType<typeof platformLogs>>["rows"][number];
+
+/**
+ * Choices for the workspace and person pickers (Logs, Activity). People are the workspace's members, plus the chosen
+ * person if they've since left, so the filter still reads right.
+ * ponytail: every workspace in one <select> is fine into the low thousands; past that, search like the Workspaces page.
+ */
+export async function pickerOptions(workspaceId?: string, userId?: string) {
+  const [workspaces, members, chosen] = await Promise.all([
+    prisma.workspace.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    workspaceId ? prisma.workspaceMember.findMany({ where: { workspaceId }, select: { user: { select: { id: true, email: true } } } }) : [],
+    userId ? prisma.user.findUnique({ where: { id: userId }, select: { id: true, email: true } }) : null,
+  ]);
+  const people = members.map((m) => ({ id: m.user.id, label: m.user.email })).sort((a, b) => a.label.localeCompare(b.label));
+  if (workspaceId && chosen && !people.some((p) => p.id === chosen.id)) people.push({ id: chosen.id, label: `${chosen.email} (left)` });
+  return { workspaces, people };
+}
+export type PickerOptions = Awaited<ReturnType<typeof pickerOptions>>;
 
 // ── Audit of admin views ────────────────────────────────────────────────────
 
