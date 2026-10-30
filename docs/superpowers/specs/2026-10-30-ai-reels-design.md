@@ -132,3 +132,25 @@ Exact Higgsfield request shapes; voice preset list; render state as table vs JSO
 - ✅ Webhook: `hf_webhook` query param on submit; JSON `{ request_id, status, error, payload }`; Standard Webhooks signatures. Idempotency: `Idempotency-Key` header.
 - ✅ Kling 3.0 std accepted our request shape; stopped at `403 not_enough_credits` (API balance $0).
 - ⏳ After top-up: 9:16 output from a 9:16 crop, clip quality, real cost/second, result URL host (for the download allow-list), ffmpeg stream-copy concat of Kling clips.
+
+## Addendum 2026-10-30: scene routing and the reel agents
+
+Owner: "we have so many models, why stay stuck on one or two" → **automatic model choice per scene**; and "create agents based on these skills" (installed: higgsfield-generate, seedance-prompt-en, h3-prompt-writing, video-marketing, social-content/content-strategy/copywriting/ad-creative, content-strategy-sms). MIT sources adapted with credit in NOTICE.md; MiniMax's H3 skill has no licence and is read for reference only.
+
+**Routing (deterministic table, the AI only classifies the scene).** From Higgsfield's own catalog guidance:
+
+| Scene kind (AI picks one) | Model | Why (higgsfield-generate catalog) | Clip length |
+|---|---|---|---|
+| `detail` — close-up on material, texture, a still product; slow push/orbit | Kling 3.0 Std `kling-video/v3.0/std/image-to-video` | "lower-cost for single-plane scenes that don't need heavy motion" | 3–15 s |
+| `room` — the product in a styled interior, camera travels, light changes | Seedance 2.5 `bytedance/seedance-2.5/image-to-video` (`resolution: "1080p"`, `generate_audio: false`) | "default for serious motion, cinematic" | 4–30 s |
+| `physics` — something moves physically: fabric falls, a door/drawer opens, liquid pours | MiniMax Hailuo 2.3 `minimax/hailuo-2.3/standard/image-to-video` | "cheap with strong physics" | 6 or 10 s, trimmed |
+
+Backup when a model refuses or fails: Kling 3.0 Std (the cheapest, most predictable). Prices stay 2 credits/second whatever the model (routing is our cost, not the customer's).
+
+**Consequence for joining (owner chose per-scene, so stated plainly):** clips from different models differ in frame rate and size, so a mixed reel is joined with a light re-encode (scale/pad to 1080×1920, 30 fps, `-preset veryfast`, ≈ 5–10 s CPU for 20 s). When every scene lands on the same model and no trim is needed, the copy-only join (~0.2 s) is kept.
+
+**Agents (server prompts built from the skills, each a small focused step):**
+1. **Reel scriptwriter** (R04 plan chat, plan creation): short-form structure from video-marketing — hook in scene 1 (≤ 3 s, one of: question, contrarian, result, story), problem → solution beats, CTA in the last scene; 15–30 s; brand voice from brand knowledge; copywriting's "no AI tells" rules; French.
+2. **Reel director** (runs on every plan save, before the storyboard): per scene → `kind` + a model-specific prompt following that model's guide (image-to-video prompts describe motion only, ≤ ~200 tokens, concrete camera verbs, positive phrasing; Seedance: subject + action + camera + style, time-segmented for ≥ 10 s; product fidelity: "keep the product's shape, material and colour exactly as in the photo"). Stored on the scene (`kind`, `model`, `prompt`) so R03 can show it and redo notes can edit it.
+3. **Prompt check (deterministic, free)** before charging: per-model lint (length, negative phrasing, re-describing the still, banned terms that trigger refusals). Fails → the director rewrites once; still failing → shown on R03, no charge. This is the "fewer iterations" lever: most failed renders are bad prompts caught before money is spent.
+4. **Ideas** (Scout): its reel ideas get a hook type and a content pillar (content-strategy-sms) so R02 cards carry an angle, not just a topic.
