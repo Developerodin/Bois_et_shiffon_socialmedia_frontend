@@ -8,7 +8,7 @@ import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Activity · Platform admin" };
 
-const count = (n: number) => (n ? n.toLocaleString("en") : <Empty />);
+const count = (n: number, key: string) => (n ? n.toLocaleString("en") : <Empty key={key} />);
 
 /** What each person does in each workspace: visits, actions, agent tasks and spend. Never chat text. */
 export default async function AdminActivity({ searchParams }: { searchParams: Promise<{ ws?: string; user?: string; page?: string }> }) {
@@ -37,9 +37,9 @@ export default async function AdminActivity({ searchParams }: { searchParams: Pr
           </Link>,
           r.workspace ?? <span key="w" className="text-muted-foreground">no workspace</span>,
           <Ago key="l" at={r.last} />,
-          count(r.visits),
-          count(r.actions),
-          count(r.tasks),
+          count(r.visits, "v"),
+          count(r.actions, "a"),
+          count(r.tasks, "t"),
           <Money key="s" usd={r.usd} fx={fx} />,
         ])}
       />
