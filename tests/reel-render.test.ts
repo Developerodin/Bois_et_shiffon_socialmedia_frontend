@@ -119,6 +119,50 @@ describe("advanceRender", () => {
     expect(m.startAgentRun).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", input: { itemId: "i1" } }));
     vi.unstubAllGlobals();
   });
+
+  it("join is single-flight: a tick while a join runs waits", () => {
+    const now = Date.now();
+    expect(nextStep(render({ step: "JOIN", claimedAt: new Date(now - 30_000), outputs: { ...outputs, clipUrls: ["u"] } }), [], now)).toEqual({ action: "wait" });
+    expect(nextStep(render({ step: "JOIN", claimedAt: new Date(now - 180_000), outputs: { ...outputs, clipUrls: ["u"] } }), [], now)).toEqual({ action: "join", urls: ["u"] });
+  });
+
+  it("a join that lost its claim writes nothing", async () => {
+    m.tx.reelRender.findUnique.mockResolvedValue(render({ step: "JOIN", claimedAt: null, outputs: { ...outputs, clipUrls: ["https://cdn/a.mp4", "https://cdn/b.mp4"] } }));
+    m.tx.reelRender.updateMany.mockResolvedValue({ count: 0 });
+    await advanceRender({ renderId: "r1" });
+    expect(m.tx.contentVersion.create).not.toHaveBeenCalled();
+  });
+
+  it("a late join after the render was marked failed doesn't publish a video", async () => {
+    const wav = Buffer.alloc(44 + 48_000);
+    wav.write("RIFF", 0); wav.write("WAVEfmt ", 8); wav.writeUInt32LE(16, 16); wav.writeUInt16LE(1, 20); wav.writeUInt16LE(1, 22);
+    wav.writeUInt32LE(24_000, 24); wav.writeUInt32LE(48_000, 28); wav.writeUInt16LE(2, 32); wav.writeUInt16LE(16, 34); wav.write("data", 36);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(wav)));
+    m.tx.reelRender.findUnique.mockResolvedValue(render({ requests: { CLIPS: ["ra", "rb"] } }));
+    m.status.mockResolvedValue({ state: "completed", url: "https://cdn/x.mp4" });
+    m.tx.reelRender.updateMany.mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 0 });
+    m.tx.contentItem.findFirst.mockResolvedValue({ id: "i1", versions: [{ id: "v1", version: 2, body: plan }] });
+    await advanceRender({ renderId: "r1" }).catch(() => null);
+    expect(m.tx.contentVersion.create).not.toHaveBeenCalled();
+    expect(m.startAgentRun).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it("a refused submit fails the render at once and refunds", async () => {
+    m.tx.reelRender.findUnique.mockResolvedValue(render());
+    m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
+    m.animate.mockRejectedValue(new Error("Higgsfield 403: not_enough_credits"));
+    await advanceRender({ renderId: "r1" }).catch(() => null);
+    expect(m.refund).toHaveBeenCalledWith("w1", "v1:1");
+  });
+
+  it("resubmits send the same photo link, so the idempotency key matches the same body", async () => {
+    m.tx.reelRender.findUnique.mockResolvedValue(render({ outputs: { ...outputs, photoUrls: ["https://s3/fixed-0", "https://s3/fixed-1"] } }));
+    m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
+    m.animate.mockResolvedValue("rx");
+    await advanceRender({ renderId: "r1" });
+    expect(m.animate.mock.calls.map((c) => c[0].photoUrl)).toEqual(["https://s3/fixed-0", "https://s3/fixed-1"]);
+  });
 });
 
 describe("startRender", () => {

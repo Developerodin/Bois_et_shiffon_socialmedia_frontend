@@ -32,6 +32,9 @@ const withLatest = (i: object, v: object) => db.tx.contentItem.findFirst.mockRes
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Queued once-values would leak between tests (clearAllMocks keeps them).
+  db.tx.creditEntry.findFirst.mockReset();
+  db.tx.creditEntry.create.mockReset();
   db.tx.creditEntry.createMany.mockResolvedValue({ count: 0 });
   db.tx.creditEntry.aggregate.mockResolvedValue({ _sum: { delta: 100 } });
 });
@@ -41,6 +44,21 @@ describe("credits for reels", () => {
     db.tx.creditEntry.findFirst.mockResolvedValue({ id: "c1", refId: "v1:1", delta: -40 });
     await expect(spendCredits({ ...scope, amount: 40, reason: "reel-render", refId: "v1:1" })).resolves.toBe("v1:1");
     expect(db.tx.creditEntry.create).not.toHaveBeenCalled();
+  });
+
+  it("a double tap that waited on the lock finds the first charge instead of failing on balance", async () => {
+    db.tx.creditEntry.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: "c1", refId: "v1:1", delta: -40 });
+    db.tx.creditEntry.aggregate.mockResolvedValue({ _sum: { delta: 10 } }); // after the first tap's charge
+    await expect(spendCredits({ ...scope, amount: 40, reason: "reel-render", refId: "v1:1" })).resolves.toBe("v1:1");
+    expect(db.tx.creditEntry.create).not.toHaveBeenCalled();
+  });
+
+  it("unlimited workspaces: a concurrent duplicate charge isn't an error", async () => {
+    vi.stubEnv("UNLIMITED_CREDIT_WORKSPACES", "w1");
+    db.tx.creditEntry.findFirst.mockResolvedValue(null);
+    db.tx.creditEntry.create.mockRejectedValueOnce(Object.assign(new Error("dup"), { code: "P2002" }));
+    await expect(spendCredits({ ...scope, amount: 40, reason: "reel-render", refId: "v1:1" })).resolves.toBe("v1:1");
+    vi.unstubAllEnvs();
   });
 
   it("different attempt refIds both charge", async () => {

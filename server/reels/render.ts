@@ -35,6 +35,7 @@ type Outputs = {
   voiceKeys: string[];
   voiceSeconds: number[];
   photoKeys: string[];
+  photoUrls?: string[]; // signed once at VOICE (24 h): a resubmit must send the identical body
   models: ModelId[];
   clipSeconds: number[]; // what each model was asked for
   backups: number[]; // scenes already retried on the backup model
@@ -56,7 +57,7 @@ export function nextStep(r: RenderState, statuses: HfStatus[], now = Date.now())
   if (r.step === "DONE" || r.step === "FAILED") return { action: "done" };
   if (r.step === "VOICE") return { action: "voice" };
   const out = r.outputs as Outputs;
-  if (r.step === "JOIN") return { action: "join", urls: out.clipUrls ?? [] };
+  if (r.step === "JOIN") return r.claimedAt && now - r.claimedAt.getTime() < CLAIM_STALE_MS ? { action: "wait" } : { action: "join", urls: out.clipUrls ?? [] };
   if (now - r.createdAt.getTime() > GIVE_UP_MS) return { action: "fail", error: "The video service took more than a day. Credits refunded; try again." };
   const ids = (r.requests as Requests).CLIPS;
   if (!ids?.length) return r.claimedAt && now - r.claimedAt.getTime() < CLAIM_STALE_MS ? { action: "wait" } : { action: "submit" };
@@ -174,6 +175,7 @@ async function prepareVoice(r: ReelRender) {
     voiceKeys: scenes.map((s) => s.voiceKey),
     voiceSeconds: scenes.map((s) => s.seconds),
     photoKeys: scenes.map((s) => s.photoKey),
+    photoUrls: await Promise.all(scenes.map((s) => signedMediaUrl(s.photoKey, 24 * 3600))),
     models: scenes.map((s) => s.model),
     clipSeconds: scenes.map((s) => modelSeconds(s.model, s.seconds)),
     backups: [],
@@ -182,15 +184,27 @@ async function prepareVoice(r: ReelRender) {
   await prisma.reelRender.updateMany({ where: { id: r.id, step: "VOICE" }, data: { step: "CLIPS", outputs: outputs as Prisma.InputJsonValue } });
 }
 
+const photoUrl = async (out: Outputs, i: number) => out.photoUrls?.[i] ?? signedMediaUrl(out.photoKeys[i], 24 * 3600);
+/** Higgsfield refused the request itself (bad input, no balance): resending won't help. */
+const refused = (e: unknown) => e instanceof Error && /^Higgsfield 4\d\d\b/.test(e.message) && !/^Higgsfield 429\b/.test(e.message);
+const SUBMIT_TRIES = 3;
+
 async function submitClips(r: ReelRender) {
   const claim = await prisma.reelRender.updateMany({ where: { id: r.id, step: "CLIPS", claimedAt: r.claimedAt }, data: { claimedAt: new Date() } });
   if (claim.count !== 1) return;
   const plan = await planOf(r);
-  const out = r.outputs as Outputs;
-  const ids = await Promise.all(plan.scenes.map(async (s, i) =>
-    higgsfield.animate({ model: out.models[i], photoUrl: await signedMediaUrl(out.photoKeys[i], 6 * 3600), prompt: s.prompt ?? s.direction, seconds: out.clipSeconds[i], webhook: webhookFor(r), idempotencyKey: `${r.id}:clip:${i}` }),
-  ));
-  await prisma.reelRender.update({ where: { id: r.id }, data: { requests: { CLIPS: ids }, claimedAt: null } });
+  const out = r.outputs as Outputs & { submitErrors?: number };
+  try {
+    const ids = await Promise.all(plan.scenes.map(async (s, i) =>
+      higgsfield.animate({ model: out.models[i], photoUrl: await photoUrl(out, i), prompt: s.prompt ?? s.direction, seconds: out.clipSeconds[i], webhook: webhookFor(r), idempotencyKey: `${r.id}:clip:${i}` }),
+    ));
+    await prisma.reelRender.update({ where: { id: r.id }, data: { requests: { CLIPS: ids }, claimedAt: null } });
+  } catch (e) {
+    // Fail fast instead of waiting a day: a refusal at once, anything else after a few tries.
+    const tries = (out.submitErrors ?? 0) + 1;
+    if (refused(e) || tries >= SUBMIT_TRIES) return failRender({ renderId: r.id }, e, true);
+    await prisma.reelRender.update({ where: { id: r.id }, data: { claimedAt: null, outputs: { ...out, submitErrors: tries } as Prisma.InputJsonValue } });
+  }
 }
 
 async function retryOnBackup(r: ReelRender, scenes: number[]) {
@@ -199,7 +213,7 @@ async function retryOnBackup(r: ReelRender, scenes: number[]) {
   const ids = [...((r.requests as Requests).CLIPS ?? [])];
   for (const i of scenes) {
     const seconds = modelSeconds(BACKUP_MODEL, out.voiceSeconds[i]);
-    ids[i] = await higgsfield.animate({ model: BACKUP_MODEL, photoUrl: await signedMediaUrl(out.photoKeys[i], 6 * 3600), prompt: plan.scenes[i].prompt ?? plan.scenes[i].direction, seconds, webhook: webhookFor(r), idempotencyKey: `${r.id}:clip:${i}:backup` });
+    ids[i] = await higgsfield.animate({ model: BACKUP_MODEL, photoUrl: await photoUrl(out, i), prompt: plan.scenes[i].prompt ?? plan.scenes[i].direction, seconds, webhook: webhookFor(r), idempotencyKey: `${r.id}:clip:${i}:backup` });
     out.models[i] = BACKUP_MODEL;
     out.clipSeconds[i] = seconds;
     out.backups.push(i);
@@ -209,10 +223,11 @@ async function retryOnBackup(r: ReelRender, scenes: number[]) {
 
 async function join(r: ReelRender, urls: string[]) {
   const out = { ...(r.outputs as Outputs), clipUrls: urls };
-  if (r.step === "CLIPS") {
-    const moved = await prisma.reelRender.updateMany({ where: { id: r.id, step: "CLIPS" }, data: { step: "JOIN", outputs: out as Prisma.InputJsonValue } });
-    if (moved.count !== 1) return;
-  }
+  // One join at a time: CLIPS→JOIN, or re-claiming a JOIN whose claim went stale (a crashed join).
+  const claimed = r.step === "CLIPS"
+    ? await prisma.reelRender.updateMany({ where: { id: r.id, step: "CLIPS" }, data: { step: "JOIN", outputs: out as Prisma.InputJsonValue, claimedAt: new Date() } })
+    : await prisma.reelRender.updateMany({ where: { id: r.id, step: "JOIN", claimedAt: r.claimedAt }, data: { claimedAt: new Date() } });
+  if (claimed.count !== 1) return;
   const scope = { workspaceId: r.workspaceId, brandId: r.brandId };
   const dir = await mkdtemp(path.join(tmpdir(), "reel-"));
   try {
@@ -237,9 +252,11 @@ async function join(r: ReelRender, urls: string[]) {
       const item = await tx.contentItem.findFirst({ where: { id: r.contentItemId }, include: { versions: { orderBy: { version: "desc" }, take: 1 } } });
       const latest = item?.versions[0];
       if (!item || !latest) throw new Error("The reel was deleted while rendering");
+      // Only the join that still holds the step publishes; a render marked failed (and refunded) meanwhile writes nothing.
+      const done = await tx.reelRender.updateMany({ where: { id: r.id, step: "JOIN" }, data: { step: "DONE", videoKey, error: null, claimedAt: null } });
+      if (done.count !== 1) throw new Error("This render is no longer joining");
       await tx.contentVersion.create({ data: { contentItemId: item.id, version: latest.version + 1, body: { ...(latest.body as object), videoKey }, createdBy: "agent" } });
       await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW" } });
-      await tx.reelRender.update({ where: { id: r.id }, data: { step: "DONE", videoKey, error: null } });
     }, TX);
   } finally {
     await rm(dir, { recursive: true, force: true });
