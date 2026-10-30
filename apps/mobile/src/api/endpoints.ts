@@ -112,3 +112,115 @@ export const completeSocialConnect = (providerSlug: string, state: string, code:
 export type PlaceMatch = { id: string; name: string; address: string | null; type: string | null; rating: number | null; ratingCount: number | null };
 /** Up to 5 matches for "name + city"; the search runs on our server (Google's key never reaches the app). */
 export const searchPlaces = (query: string, language: string) => api<{ places: PlaceMatch[] }>("/places/search", { body: { query, language } });
+
+// ---- Reels studio (mobile page 02). Shapes mirror apps/web/server/reels/service.ts. ----
+
+/** The brand the app works on after onboarding: the onboarding one, else the first brand of the first workspace. */
+let current: { workspaceId: string; brandId: string; name: string } | null = null;
+export async function currentBrand() {
+  if (current) return current;
+  const { workspaces } = await me();
+  const ws = workspaces[0]?.id;
+  if (!ws) throw new Error("No workspace");
+  const { brands } = await api<{ brands: { id: string; displayName: string }[] }>(`/workspaces/${encodeURIComponent(ws)}/brands`, { workspaceId: ws });
+  if (!brands[0]) throw new Error("No business yet");
+  current = { workspaceId: ws, brandId: brands[0].id, name: brands[0].displayName };
+  return current;
+}
+export const useBrand = (b: { workspaceId: string; brandId: string; name: string }) => void (current = b);
+
+export type SceneKind = "detail" | "room" | "physics";
+export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string };
+export type ReelPlan = { title: string; presenter: "none"; template: string; voice: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
+export type RenderStep = "VOICE" | "CLIPS" | "JOIN" | "DONE" | "FAILED";
+export type ContentStatus = "PLANNED" | "DRAFT_REVIEW" | "AWAITING_APPROVAL" | "APPROVED" | "SCHEDULED" | "PUBLISHED" | "REJECTED" | "BLOCKED" | "CANCELLED";
+export type ReelSummary = {
+  id: string; title: string; status: ContentStatus; version: number; postUrl: string | null; createdAt: string;
+  render: { step: RenderStep; attempt: number; error: string | null } | null;
+  seconds: number | null; price: number | null; thumbUrl: string | null; videoUrl: string | null;
+};
+export type ChatTurn = { role: "user" | "assistant"; text: string; at: string };
+export type CheckResult = { check: string; status: "pass" | "warn" | "blocker"; note: string };
+export type ReelDetail = {
+  item: { id: string; title: string; status: ContentStatus; postUrl: string | null };
+  version: number; plan: ReelPlan | null; price: number | null;
+  caption: { caption?: string; hashtags?: string[] } | null; videoUrl: string | null;
+  checks: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
+  renders: { id: string; versionId: string; attempt: number; step: RenderStep; error: string | null; videoKey: string | null; createdAt: string }[];
+  chat: ChatTurn[];
+};
+export type PlanResult = { version: number; plan: ReelPlan; price: number; reply?: string };
+export type Opportunity = { id: string; title: string; summary: string; angle: string; channels: string[]; decision: "RECOMMEND" | "HOLD" | "REJECT"; score: number; timing: string | null };
+export type Connection = { id: string; provider: string; displayName: string; status: "ACTIVE" | "ERROR" | "REVOKED" };
+
+const AI_MS = 120_000;
+const reelBase = async () => {
+  const b = await currentBrand();
+  return { ws: b.workspaceId, base: `${brandBase(b.workspaceId, b.brandId)}` };
+};
+
+export const reels = {
+  async list(signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<{ reels: ReelSummary[] }>(`${base}/reels`, { workspaceId: ws, signal });
+  },
+  async create(input: { opportunityId?: string; prompt?: string }) {
+    const { ws, base } = await reelBase();
+    return api<PlanResult & { id: string }>(`${base}/reels`, { body: input, workspaceId: ws, timeoutMs: AI_MS });
+  },
+  async get(id: string, signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<ReelDetail>(`${base}/reels/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
+  },
+  async chat(id: string, version: number, message: string) {
+    const { ws, base } = await reelBase();
+    return api<PlanResult>(`${base}/reels/${encodeURIComponent(id)}/plan`, { body: { version, message }, workspaceId: ws, timeoutMs: AI_MS });
+  },
+  async save(id: string, version: number, plan: ReelPlan) {
+    const { ws, base } = await reelBase();
+    return api<PlanResult>(`${base}/reels/${encodeURIComponent(id)}`, { method: "PATCH", body: { version, plan }, workspaceId: ws, timeoutMs: AI_MS });
+  },
+  /** 402 (ApiError.status) = not enough credits: the app opens the plans screen. */
+  async render(id: string, version: number) {
+    const { ws, base } = await reelBase();
+    return api<{ render: { id: string; step: RenderStep; attempt: number } }>(`${base}/reels/${encodeURIComponent(id)}`, { body: { action: "render", version }, workspaceId: ws });
+  },
+  async download(id: string, version: number) {
+    const { ws, base } = await reelBase();
+    return api<{ videoUrl: string }>(`${base}/reels/${encodeURIComponent(id)}`, { body: { action: "send", version, how: "download" }, workspaceId: ws });
+  },
+  async registerLink(id: string, url: string) {
+    const { ws, base } = await reelBase();
+    return api<{ ok: true }>(`${base}/reels/${encodeURIComponent(id)}`, { body: { action: "register-link", url }, workspaceId: ws });
+  },
+  /** Caption/hashtags edit on R07: the shared content route (a new version, checks run again). */
+  // The edit route rewrites every text field, so the reel's hook and script go along unchanged.
+  async editCaption(id: string, version: number, plan: ReelPlan, caption: string, hashtags: string[]) {
+    const { ws, base } = await reelBase();
+    const body = { caption, hashtags, hook: plan.scenes[0]?.onScreenText ?? "", script: plan.scenes.map((s) => s.voiceText) };
+    return api<unknown>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "edit", version, body }, workspaceId: ws });
+  },
+  /** Publish now / schedule on a connected Instagram account. Approves first when the version isn't approved yet. */
+  async publish(id: string, version: number, connectionId: string, runAt?: Date, approved = false) {
+    const { ws, base } = await reelBase();
+    const path = `${base}/content/${encodeURIComponent(id)}`;
+    if (!approved) await api(path, { body: { action: "decide", version, verdict: "APPROVED" }, workspaceId: ws });
+    return api<{ attempts?: { id: string; runAt: string; status: string }[] }>(path, { body: { action: "publish", version, connectionId, runAt: runAt?.toISOString() }, workspaceId: ws });
+  },
+};
+
+export async function opportunities(signal?: AbortSignal) {
+  const { ws, base } = await reelBase();
+  return api<{ opportunities: Opportunity[] }>(`${base}/opportunities`, { workspaceId: ws, signal });
+}
+export async function connections() {
+  const { ws, base } = await reelBase();
+  return api<{ connections: Connection[] }>(`${base}/connections`, { workspaceId: ws });
+}
+/** R13 "Upload photos": a JPG/PNG up to 4 MB into this brand's media; returns its storage key. */
+export async function uploadPhoto(uri: string, name = "photo.jpg", type = "image/jpeg") {
+  const { ws, base } = await reelBase();
+  const form = new FormData();
+  form.append("file", { uri, name, type } as unknown as Blob);
+  return api<{ key: string; previewUrl: string }>(`${base}/media`, { form, workspaceId: ws, timeoutMs: 60_000 });
+}

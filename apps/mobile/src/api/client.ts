@@ -98,13 +98,14 @@ const WAIT_FOR_SERVER_MS = 60_000;
  * or the server not responding. A read (GET) that can't get through waits for the server, up to a minute, and
  * tries once more; a write never repeats by itself, so nothing is sent twice.
  */
-export async function api<T>(path: string, init: { method?: string; body?: unknown; workspaceId?: string; signal?: AbortSignal } = {}, retried = false): Promise<T> {
-  const method = init.method ?? (init.body ? "POST" : "GET");
+/** timeoutMs: for calls that run AI on the server (a reel plan takes ~30–60 s). form: a file upload (multipart). */
+export async function api<T>(path: string, init: { method?: string; body?: unknown; form?: FormData; workspaceId?: string; signal?: AbortSignal; timeoutMs?: number } = {}, retried = false): Promise<T> {
+  const method = init.method ?? (init.body || init.form ? "POST" : "GET");
   const token = await store.get();
   let res: Response;
   try {
     res = await withTimeout(
-      TIMEOUT_MS,
+      init.timeoutMs ?? TIMEOUT_MS,
       (signal) =>
         fetch(`${API_URL}/api/v1${path}`, {
           method,
@@ -114,7 +115,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...(init.workspaceId ? { "X-Workspace-Id": init.workspaceId } : {}),
           },
-          body: init.body ? JSON.stringify(init.body) : undefined,
+          body: init.form ?? (init.body ? JSON.stringify(init.body) : undefined),
         }),
       init.signal,
     );

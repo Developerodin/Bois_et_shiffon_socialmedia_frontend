@@ -1,20 +1,33 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ChevronDown, LayoutTemplate, Sparkle, UserRound, WandSparkles, type LucideIcon } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { currentBrand, opportunities, type ReelSummary, reels } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, ICON, ModuleHeader, Panel, ReelsScreen, Tag, ActionButton, meta, metaInk, strong14 } from "@/ui/reels/kit";
-import { brand, photos, recentReels } from "@/ui/reels/sample";
+import { photos } from "@/ui/reels/sample";
+import { openReel } from "@/ui/reels/use-reel";
+
+const statusOf = (r: ReelSummary) => (r.render && r.render.step !== "DONE" && r.render.step !== "FAILED" ? "processing" : r.videoUrl ? "ready" : "draft");
 
 /** R01 · Reels / Create. */
 export default function ReelsCreate() {
   const { t } = useTranslation("reels");
+  const [name, setName] = useState("");
+  const [ideas, setIdeas] = useState(0);
+  const [recent, setRecent] = useState<ReelSummary[]>([]);
+  useEffect(() => {
+    currentBrand().then((b) => setName(b.name), () => {});
+    opportunities().then((r) => setIdeas(r.opportunities.filter((o) => o.channels.includes("INSTAGRAM_REEL") && o.decision !== "REJECT").length), () => {});
+    reels.list().then((r) => setRecent(r.reels.slice(0, 2)), () => {});
+  }, []);
   return (
     <ReelsScreen bg="#FBFBFE" header={<ModuleHeader />} footer={<BottomNav active="create" />}>
-      <Pressable accessibilityRole="button" accessibilityLabel={t("create.switchBusiness", { name: brand.name })} onPress={() => router.push("/business/menu")} style={styles.switcher}>
+      <Pressable accessibilityRole="button" accessibilityLabel={t("create.switchBusiness", { name })} onPress={() => router.push("/business/menu")} style={styles.switcher}>
         <Image source={photos.bcFavicon} style={{ width: 20, height: 20, borderRadius: 4 }} contentFit="contain" />
-        <Text style={type.label}>{brand.name}</Text>
+        <Text style={type.label}>{name}</Text>
         <ChevronDown size={16} color="#64646F" strokeWidth={ICON.strokeWidth} />
       </Pressable>
 
@@ -42,12 +55,12 @@ export default function ReelsCreate() {
             <WandSparkles size={20} color="#64646F" strokeWidth={ICON.strokeWidth} />
             <Text style={metaInk}>{t("create.planTogether")}</Text>
           </View>
-          <ActionButton label={t("create.start")} onPress={() => router.push("/reels/chat")} accessibilityLabel={t("create.startA11y")} />
+          <ActionButton label={t("create.start")} onPress={() => (openReel(null), router.push("/reels/chat"))} accessibilityLabel={t("create.startA11y")} />
         </View>
         <View style={styles.ideasRow}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
             <View style={styles.dot} />
-            <Text style={meta}>{t("create.ideasReady", { count: 21 })}</Text>
+            <Text style={meta}>{t("create.ideasReady", { count: ideas })}</Text>
           </View>
           <Pressable accessibilityRole="button" onPress={() => router.push("/reels/ideas")} style={styles.textButton}>
             <Text style={strong14}>{t("create.viewIdeas")}</Text>
@@ -68,24 +81,24 @@ export default function ReelsCreate() {
           </Pressable>
         </View>
         <View style={[styles.shortcuts, { paddingTop: space[12] }]}>
-          {recentReels.map((r) => (
+          {recent.map((r) => (
             <Pressable
               key={r.id}
               accessibilityRole="button"
-              accessibilityLabel={t("create.recentA11y", { title: r.title, status: t(`status.${r.status}`) })}
-              onPress={() => router.push(r.status === "draft" ? "/reels/storyboard" : "/reels/review")}
+              accessibilityLabel={t("create.recentA11y", { title: r.title, status: t(`status.${statusOf(r)}`) })}
+              onPress={() => (openReel(r.id), router.push(statusOf(r) === "draft" ? "/reels/storyboard" : statusOf(r) === "processing" ? "/reels/generating" : "/reels/review"))}
               style={styles.recent}
             >
               <View>
-                <Image source={r.image} style={{ height: 128, backgroundColor: "#F0EEF6" }} contentFit="cover" />
-                <Tag label={t(`status.${r.status}`)} tone="white" style={styles.status} textStyle={{ color: color.ink }} />
+                <Image source={r.thumbUrl ? { uri: r.thumbUrl } : undefined} style={{ height: 128, backgroundColor: "#F0EEF6" }} contentFit="cover" />
+                <Tag label={t(`status.${statusOf(r)}`)} tone="white" style={styles.status} textStyle={{ color: color.ink }} />
               </View>
               <View style={{ padding: space[12] }}>
                 <Text style={strong14} numberOfLines={1}>
                   {r.title}
                 </Text>
                 <Text style={[meta, { paddingTop: 2 }]} numberOfLines={1}>
-                  {r.subtitle}
+                  {r.seconds ? t("create.recentMeta", { seconds: r.seconds }) : ""}
                 </Text>
               </View>
             </Pressable>

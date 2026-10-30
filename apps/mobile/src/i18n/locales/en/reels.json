@@ -13,7 +13,8 @@
   "timezone": "Timezone",
   "status": {
     "draft": "Draft",
-    "ready": "Ready"
+    "ready": "Ready",
+    "processing": "Processing"
   },
   "scene": {
     "label": "Scene {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Fast catalog cuts",
     "jumpBackIn": "Jump back in",
     "seeAll": "See all",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}}s · 9:16 vertical"
   },
   "ideas": {
     "title": "Video ideas",
