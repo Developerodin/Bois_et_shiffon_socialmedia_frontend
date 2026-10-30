@@ -92,7 +92,7 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     const started = Date.now();
     // Same ledger and per-call checks as agent calls (server/ai/provider.ts): one row per turn, with its cost and
     // grade; failed turns too. A streamed reply is already on screen, so a finding is recorded, not retried.
-    const ctx = { workspaceId: scope.workspaceId, brandId: scope.brandId, workflowId: "chat.turn", promptVersion: CHAT_PROMPT_VERSION };
+    const ctx = { workspaceId: scope.workspaceId, brandId: scope.brandId, userId: scope.userId, workflowId: "chat.turn", promptVersion: CHAT_PROMPT_VERSION };
     const system = chatSystemPrompt({ name: brand.displayName, website: brand.profile?.websiteUrl ?? null });
     const history = messages.slice(-MODEL_HISTORY);
     const result = streamText({

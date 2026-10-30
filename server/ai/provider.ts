@@ -15,6 +15,8 @@ export type AiCallContext = {
   workspaceId: string;
   brandId: string;
   agentRunId?: string;
+  /** Who caused the call: the chat user, or the agent run's starter. Unset for system calls. */
+  userId?: string;
   workflowId: string;
   promptVersion: string;
 };
@@ -274,6 +276,7 @@ export async function logRun(
       workspaceId: ctx.workspaceId,
       brandId: ctx.brandId,
       agentRunId: ctx.agentRunId,
+      userId: ctx.userId,
       workflowId: ctx.workflowId,
       promptVersion: ctx.promptVersion,
       provider,
