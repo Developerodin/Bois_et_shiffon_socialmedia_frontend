@@ -69,7 +69,10 @@ export default async function AdminPerson({ params }: { params: Promise<{ userId
         )}
       </Section>
 
-      <Section id="activity" title="Their recent actions">
+      <Section id="activity" title="Their recent actions" description="Their page visits, agent tasks and spend are on their Activity page.">
+        <Link href={`/admin/activity/${userId}`} className="text-sm underline underline-offset-4">
+          See their activity
+        </Link>
         <LogTable kind="audit" rows={audit} fx={null} platform />
       </Section>
     </>
