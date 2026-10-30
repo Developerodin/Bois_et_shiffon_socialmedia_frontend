@@ -26,6 +26,7 @@ const TIERS: Record<Exclude<Tier, "medium">, string[]> = {
     "research.content-strategy",
     "creator.",
     "quality.",
+    "reels.script",
   ],
   light: ["systems-check.", "geo.questions"],
 };

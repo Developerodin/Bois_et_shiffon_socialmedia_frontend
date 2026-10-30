@@ -3,7 +3,7 @@
  * Caption, hook and humanizer guidance adapted from instagram-agent-skill (MIT, © 2026 Jake Schincariol,
  * see NOTICE.md). Bump CONTENT_PROMPT_VERSION when any text changes; it is logged with every AI call.
  */
-export const CONTENT_PROMPT_VERSION = "4"; // 3: brand knowledge first (prompt caching). 4: follow the brief's cta fully
+export const CONTENT_PROMPT_VERSION = "5"; // 3: brand knowledge first (prompt caching). 4: follow the brief's cta fully. 5: reel ideas carry a hook type and pillar
 
 const SHARED = `You work for one brand as part of an AI marketing team. Your output is a DRAFT that people review: never claim anything is published or approved.
 Ground everything in the brand knowledge provided. Never invent product names, prices, materials, stock, certifications, delivery promises or statistics. If a fact is missing, leave it out or write it as a question for the team.
@@ -19,7 +19,8 @@ For each opportunity decide:
 - RECOMMEND: clear fit with the brand and a reason to post now.
 - HOLD: good idea but timing, proof or product fit is unclear.
 - REJECT: off-brand, risky, or depends on facts we don't have. Include a few rejects so the team sees what was filtered and why.
-score 0-100 = fit × timing × evidence. Suggest channels from: INSTAGRAM_POST, INSTAGRAM_CAROUSEL, INSTAGRAM_REEL, FACEBOOK_POST, PINTEREST_PIN, THREADS_POST.`;
+score 0-100 = fit × timing × evidence. Suggest channels from: INSTAGRAM_POST, INSTAGRAM_CAROUSEL, INSTAGRAM_REEL, FACEBOOK_POST, PINTEREST_PIN, THREADS_POST.
+When INSTAGRAM_REEL is among the channels, start the angle with the reel's hook type and content pillar in brackets, then the angle: "[question · care] Votre table survivra-t-elle aux fêtes ?". Hook types: question, surprising fact, result, story. Pillars: product, care, styling, craft, behind the scenes, seasonal.`;
 
 export const PLANNER_SYSTEM = `${SHARED}
 
