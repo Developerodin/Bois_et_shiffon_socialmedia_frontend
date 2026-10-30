@@ -265,6 +265,8 @@ model AgentRun {
   @@index([brandId, agentKey, createdAt])
   @@index([agentKey, status])
   @@index([triggeredByUserId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@index([createdAt])
 }
 
 enum AgentEventLevel {
@@ -327,6 +329,8 @@ model AuditEvent {
   @@index([workspaceId, brandId, createdAt])
   @@index([entityType, entityId])
   @@index([actorUserId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@index([createdAt])
 }
 
 /// One row per AI provider call: model, prompt version, tokens, latency (DEC-003).
@@ -434,7 +438,7 @@ model ApiCall {
 }
 
 /// One row per page opened, on the web app or the mobile app (admin console → Activity). Same ledger rule: no
-/// foreign keys. Kept forever for now. Only the path is stored: query strings and fragments are stripped.
+/// foreign keys. Kept 180 days (the daily sweep). Only the path is stored: query strings and fragments are stripped.
 model PageView {
   id          String   @id @default(cuid())
   userId      String
@@ -447,6 +451,7 @@ model PageView {
 
   @@index([workspaceId, userId, createdAt])
   @@index([userId, createdAt])
+  @@index([createdAt])
 }
 
 // --- Slice 1: brand context documents (design §4.1, §8b-3) ---

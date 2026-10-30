@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { mergeActivityCounts } from "@/server/services/activity";
+import { mergeActivityCounts, sortActivity } from "@/server/services/activity";
 
 vi.mock("@/server/db/prisma", () => ({ prisma: {} }));
 
@@ -59,5 +59,14 @@ describe("mergeActivityCounts", () => {
     });
     expect(rows).toHaveLength(2);
     expect(rows[1]).toMatchObject({ userId: null, workspaceId: "w1", usd: 2, tasks: 3 });
+  });
+});
+
+describe("sortActivity", () => {
+  const row = (userId: string, last: number, usd: number) => ({ userId, workspaceId: "w1", last: at(last), visits: 0, actions: 0, tasks: 0, usd });
+  it("biggest first, ties most recently active first", () => {
+    const rows = [row("a", 1, 2), row("b", 3, 5), row("c", 2, 2)];
+    expect(sortActivity(rows, "spend").map((r) => r.userId)).toEqual(["b", "c", "a"]);
+    expect(sortActivity(rows, "active").map((r) => r.userId)).toEqual(["b", "c", "a"]);
   });
 });

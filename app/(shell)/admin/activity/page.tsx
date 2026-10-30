@@ -1,39 +1,54 @@
 import Link from "next/link";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
-import { Ago, Empty, Money, PageHeader, Pager, Table, withQuery } from "@/components/admin/ui";
+import { Ago, Empty, Money, PageHeader, Pager, period as periodOf, PERIODS, Segmented, Table, withQuery } from "@/components/admin/ui";
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { activityList, NO_WORKSPACE } from "@/server/services/activity";
-import { PAGE, pageNumber, pickerOptions } from "@/server/services/platform-admin";
+import { activityList, NO_WORKSPACE, type ActivitySort } from "@/server/services/activity";
+import { PAGE, pageCount, pageNumber, peopleMatching, pickerOptions } from "@/server/services/platform-admin";
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Activity · Platform admin" };
 
+const SORTS: { value: ActivitySort; label: string }[] = [
+  { value: "active", label: "Last active" },
+  { value: "visits", label: "Visits" },
+  { value: "actions", label: "Actions" },
+  { value: "tasks", label: "Agent tasks" },
+  { value: "spend", label: "Spend" },
+];
 const count = (n: number, key: string) => (n ? n.toLocaleString("en") : <Empty key={key} />);
 
 /** What each person does in each workspace: visits, actions, agent tasks and spend. Never chat text. */
-export default async function AdminActivity({ searchParams }: { searchParams: Promise<{ ws?: string; user?: string; page?: string }> }) {
+export default async function AdminActivity({ searchParams }: { searchParams: Promise<{ ws?: string; who?: string; days?: string; sort?: string; page?: string }> }) {
   await requirePlatformAdminPage();
   const q = await searchParams;
   const ws = q.ws || undefined;
-  const user = q.user || undefined;
+  const who = q.who?.trim() || undefined;
+  const { value: days, days: n, param, span } = periodOf(q.days);
+  const sort = (SORTS.some((s) => s.value === q.sort) ? q.sort : "active") as ActivitySort;
   const page = pageNumber(q.page);
-  const [a, options, fx] = await Promise.all([activityList({ workspaceId: ws, userId: user, page }), pickerOptions(ws, user), usdInrRate()]);
-  const current = { ws, user, page: page > 1 ? String(page) : undefined };
+  const [a, options, fx] = await Promise.all([peopleMatching(who).then((userIds) => activityList({ workspaceId: ws, userIds, days: n, sort, page })), pickerOptions(), usdInrRate()]);
+  const current = { ws, who, days: param, sort: sort === "active" ? undefined : sort, page: page > 1 ? String(page) : undefined };
 
   return (
     <>
       <PageHeader eyebrow="Platform admin" title="Activity">
-        One row per person per workspace, most recently active first, {PAGE} a page, plus each workspace’s unattributed activity. Open someone for their timeline. Chat text is never shown.
+        {a.total.toLocaleString("en")} {a.total === 1 ? "row" : "rows"}, {span}: one per person per workspace, {PAGE} a page, plus each workspace’s unattributed activity. Open someone for their timeline. Chat text is never shown.
       </PageHeader>
-      <ActivityPickers ws={ws} user={user} options={options} />
+      <div className="flex flex-col gap-3">
+        <ActivityPickers ws={ws} who={who} options={options} hidden={{ days: param, sort: current.sort }} />
+        <div className="flex flex-wrap items-center gap-3">
+          <Segmented label="Period" options={PERIODS} value={days} href={(v) => withQuery("/admin/activity", current, { days: v === "30" ? undefined : v })} />
+          <Segmented label="Sort by" options={SORTS} value={sort} href={(v) => withQuery("/admin/activity", current, { sort: v === "active" ? undefined : v })} />
+        </div>
+      </div>
       <Table
         wide
         head={["Person", "Workspace", "Last active", "Page visits", "Actions", "Agent tasks", "Spend"]}
         numeric={[3, 4, 5, 6]}
-        empty="No activity recorded yet."
+        empty={who ? "Nobody matching that search did anything in this period." : "No activity in this period."}
         rows={a.rows.map((r) => [
           r.userId ? (
-            <Link key="p" href={withQuery(`/admin/activity/${r.userId}`, {}, { ws: r.workspaceId ?? NO_WORKSPACE })} className="font-medium underline-offset-4 hover:underline">
+            <Link key="p" href={withQuery(`/admin/activity/${r.userId}`, {}, { ws: r.workspaceId ?? NO_WORKSPACE, days: param })} className="font-medium underline-offset-4 hover:underline">
               {r.who}
             </Link>
           ) : (
@@ -50,7 +65,7 @@ export default async function AdminActivity({ searchParams }: { searchParams: Pr
           <Money key="s" usd={r.usd} fx={fx} />,
         ])}
       />
-      <Pager page={page} hasMore={a.hasMore} href={(n) => withQuery("/admin/activity", current, { page: n > 1 ? String(n) : undefined })} />
+      <Pager page={page} hasMore={a.hasMore} pages={pageCount(a.total)} href={(n) => withQuery("/admin/activity", current, { page: n > 1 ? String(n) : undefined })} />
     </>
   );
 }

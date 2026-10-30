@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Ago, day, Empty, Money, PageHeader, Pager, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { listWorkspaces, type WorkspaceSort } from "@/server/services/platform-admin";
+import { listWorkspaces, pageCount, pageNumber, type WorkspaceSort } from "@/server/services/platform-admin";
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Workspaces · Platform admin" };
@@ -20,9 +20,9 @@ export default async function AdminWorkspaces({ searchParams }: { searchParams: 
   await requirePlatformAdminPage();
   const q = await searchParams;
   const sort = (SORTS.some((s) => s.value === q.sort) ? q.sort : "newest") as WorkspaceSort;
-  const page = Math.max(1, Number(q.page) || 1);
+  const page = pageNumber(q.page);
   const [w, fx] = await Promise.all([listWorkspaces({ q: q.q, sort, page }), usdInrRate()]);
-  const c30 = usd30(w.customers);
+  const c30 = w.customers30;
   const current = { q: q.q, sort: sort === "newest" ? undefined : sort, page: page > 1 ? String(page) : undefined };
 
   return (
@@ -59,7 +59,7 @@ export default async function AdminWorkspaces({ searchParams }: { searchParams: 
           <Ago key="a" at={x.lastActive} />,
         ])}
       />
-      <Pager page={page} hasMore={w.hasMore} href={(p) => withQuery("/admin/workspaces", current, { page: p > 1 ? String(p) : undefined })} />
+      <Pager page={page} hasMore={w.hasMore} pages={pageCount(w.total)} href={(p) => withQuery("/admin/workspaces", current, { page: p > 1 ? String(p) : undefined })} />
     </>
   );
 }

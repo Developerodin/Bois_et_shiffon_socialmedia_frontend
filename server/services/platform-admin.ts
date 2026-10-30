@@ -8,8 +8,8 @@ import { prisma } from "@/server/db/prisma";
  * Spend is the ledger's stored cost (AiWorkflowRun, ApiCall). Calls from before 2026-10-29 that have no stored
  * cost aren't counted here (npm run usage prices them from tokens).
  * Test-set calls are logged under workspace "eval"; they're left out of customer figures unless asked for.
- * ponytail: lists (workspaces, people) are loaded whole and filtered in memory; move filter/sort into SQL past a
- * few thousand rows. Logs page with skip/take (50 a page); keyset paging if someone pages deep into big logs.
+ * Lists filter, sort and page in SQL (People, Workspaces); logs page by keyset (`?before=`), so a deep page costs
+ * what the first does. ponytail: the Overview still loads every workspace's totals; fine into the thousands.
  */
 const DAY = 86_400_000;
 export const PAGE = 50;
@@ -18,7 +18,19 @@ export const pageNumber = (v?: string) => {
   const n = Number(v);
   return Number.isSafeInteger(n) && n > 0 ? Math.min(n, 1000) : 1;
 };
+export const pageCount = (total: number) => Math.ceil(total / PAGE);
 export const TEST_WORKSPACE = "eval";
+
+/** A keyset cursor (`?before=`): the last row shown, "<ms>~<id>", plus "~<kind>" on a merged timeline. */
+export type Cursor = { at: Date; id: string; kind?: string };
+export const cursorOf = (r: { at: Date; id: string | number; kind?: string }) => [+r.at, r.id, r.kind].filter((x) => x !== undefined).join("~");
+export function parseCursor(v?: string): Cursor | undefined {
+  const [ms, id, kind] = (v ?? "").split("~");
+  const at = new Date(Number(ms));
+  return ms && id && /^[\w-]{1,64}$/.test(id) && !Number.isNaN(+at) ? { at, id, kind } : undefined;
+}
+/** Rows after the cursor in (createdAt desc, id desc) order. */
+export const olderThan = (c?: Cursor) => (c ? { OR: [{ createdAt: { lt: c.at } }, { createdAt: c.at, id: { lt: c.id } }] } : {});
 const num = (d: Prisma.Decimal | number | null | undefined) => Number(d ?? 0);
 const since = (days: number | null) => (days ? new Date(Date.now() - days * DAY) : undefined);
 
@@ -29,12 +41,13 @@ const blankSpend = (): Spend => ({ aiUsd: 0, aiUsd30: 0, apiUsd: 0, apiUsd30: 0,
 const addSpend = (rows: Spend[]) =>
   rows.reduce<Spend>((a, r) => ({ aiUsd: a.aiUsd + r.aiUsd, aiUsd30: a.aiUsd30 + r.aiUsd30, apiUsd: a.apiUsd + r.apiUsd, apiUsd30: a.apiUsd30 + r.apiUsd30, calls: a.calls + r.calls, calls30: a.calls30 + r.calls30, apiCalls: a.apiCalls + r.apiCalls, apiCalls30: a.apiCalls30 + r.apiCalls30, tokens: a.tokens + r.tokens, lastCall: null }), blankSpend());
 
-/** Spend and usage keyed by workspace id ("" = no workspace), all time and the last 30 days. */
-async function spendByWorkspace() {
+/** Spend and usage keyed by workspace id ("" = no workspace), all time and the last 30 days; every workspace, or these. */
+async function spendByWorkspace(ids?: string[]) {
   const d30 = since(30);
+  const only = ids ? { workspaceId: { in: ids } } : {};
   const ai = (where: Prisma.AiWorkflowRunWhereInput) =>
-    prisma.aiWorkflowRun.groupBy({ by: ["workspaceId"], where, _sum: { costUsd: true, inputTokens: true, outputTokens: true }, _count: { _all: true }, _max: { createdAt: true } });
-  const api = (where: Prisma.ApiCallWhereInput) => prisma.apiCall.groupBy({ by: ["workspaceId"], where, _sum: { costUsd: true }, _count: { _all: true } });
+    prisma.aiWorkflowRun.groupBy({ by: ["workspaceId"], where: { ...only, ...where }, _sum: { costUsd: true, inputTokens: true, outputTokens: true }, _count: { _all: true }, _max: { createdAt: true } });
+  const api = (where: Prisma.ApiCallWhereInput) => prisma.apiCall.groupBy({ by: ["workspaceId"], where: { ...only, ...where }, _sum: { costUsd: true }, _count: { _all: true } });
   const [aiAll, ai30, apiAll, api30] = await Promise.all([ai({}), ai({ createdAt: { gte: d30 } }), api({}), api({ createdAt: { gte: d30 } })]);
   const out = new Map<string, Spend>();
   const get = (id: string | null) => out.get(id ?? "") ?? out.set(id ?? "", blankSpend()).get(id ?? "")!;
@@ -80,18 +93,52 @@ export async function platformOverview() {
 }
 
 export type WorkspaceSort = "newest" | "spend" | "active" | "name";
+/**
+ * One page of workspaces, searched (name or owner email), sorted and paged in SQL; spend and last activity are
+ * worked out for that page only. Spend is the last 30 days, AI calls plus other paid APIs; last activity is the
+ * newer of the last AI call and the last audit entry.
+ */
 export async function listWorkspaces({ q = "", sort = "newest", page = 1 }: { q?: string; sort?: WorkspaceSort; page?: number }) {
-  const o = await platformOverview();
-  const needle = q.trim().toLowerCase();
-  const found = o.workspaces.filter((w) => !needle || w.name.toLowerCase().includes(needle) || (w.owner?.email ?? "").toLowerCase().includes(needle));
-  const by: Record<WorkspaceSort, (a: (typeof found)[number], b: (typeof found)[number]) => number> = {
-    newest: (a, b) => +b.createdAt - +a.createdAt,
-    spend: (a, b) => b.spend.aiUsd30 + b.spend.apiUsd30 - (a.spend.aiUsd30 + a.spend.apiUsd30),
-    active: (a, b) => +(b.lastActive ?? 0) - +(a.lastActive ?? 0),
-    name: (a, b) => a.name.localeCompare(b.name),
-  };
-  found.sort(by[sort]);
-  return { ...o, total: found.length, rows: found.slice((page - 1) * PAGE, page * PAGE), hasMore: found.length > page * PAGE };
+  const d30 = since(30)!;
+  const like = `%${q.trim().replace(/[\\%_]/g, "\\$&")}%`;
+  const match = q.trim() ? Prisma.sql`WHERE w.name ILIKE ${like} OR o.email ILIKE ${like}` : Prisma.empty;
+  const order = {
+    newest: Prisma.sql`w."createdAt" DESC`,
+    name: Prisma.sql`w.name ASC`,
+    spend: Prisma.sql`COALESCE((SELECT SUM(a."costUsd") FROM "AiWorkflowRun" a WHERE a."workspaceId" = w.id AND a."createdAt" >= ${d30}), 0)
+      + COALESCE((SELECT SUM(c."costUsd") FROM "ApiCall" c WHERE c."workspaceId" = w.id AND c."createdAt" >= ${d30}), 0) DESC`,
+    active: Prisma.sql`GREATEST((SELECT MAX(a."createdAt") FROM "AiWorkflowRun" a WHERE a."workspaceId" = w.id),
+      (SELECT MAX(e."createdAt") FROM "AuditEvent" e WHERE e."workspaceId" = w.id)) DESC NULLS LAST`,
+  }[sort];
+  const [found, [{ total }], [{ usd }]] = await Promise.all([
+    prisma.$queryRaw<{ id: string }[]>`SELECT w.id FROM "Workspace" w LEFT JOIN "User" o ON o.id = w."ownerUserId" ${match}
+      ORDER BY ${order}, w.id LIMIT ${PAGE} OFFSET ${(page - 1) * PAGE}`,
+    prisma.$queryRaw<{ total: bigint }[]>`SELECT COUNT(*) AS total FROM "Workspace" w LEFT JOIN "User" o ON o.id = w."ownerUserId" ${match}`,
+    // Every customer's 30-day spend (for each row's share bar): existing workspaces only, so test runs are left out.
+    prisma.$queryRaw<{ usd: Prisma.Decimal | null }[]>`SELECT
+      COALESCE((SELECT SUM("costUsd") FROM "AiWorkflowRun" WHERE "createdAt" >= ${d30} AND "workspaceId" IN (SELECT id FROM "Workspace")), 0)
+      + COALESCE((SELECT SUM("costUsd") FROM "ApiCall" WHERE "createdAt" >= ${d30} AND "workspaceId" IN (SELECT id FROM "Workspace")), 0) AS usd`,
+  ]);
+  const ids = found.map((r) => r.id);
+  const [workspaces, spend, credits, audited] = await Promise.all([
+    prisma.workspace.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, name: true, slug: true, createdAt: true, owner: { select: { email: true, name: true } }, _count: { select: { members: true, brands: true } } },
+    }),
+    spendByWorkspace(ids),
+    prisma.creditEntry.groupBy({ by: ["workspaceId"], where: { workspaceId: { in: ids } }, _sum: { delta: true } }),
+    prisma.auditEvent.groupBy({ by: ["workspaceId"], where: { workspaceId: { in: ids } }, _max: { createdAt: true } }),
+  ]);
+  const byId = new Map(workspaces.map((w) => [w.id, w]));
+  const rows = ids.flatMap((id) => {
+    const w = byId.get(id);
+    if (!w) return []; // deleted between the two reads
+    const s = spend.get(id) ?? blankSpend();
+    const seen = audited.find((a) => a.workspaceId === id)?._max.createdAt ?? null;
+    const lastActive = [s.lastCall, seen].filter((d): d is Date => !!d).sort((a, b) => +b - +a)[0] ?? null;
+    return [{ ...w, spend: s, lastActive, credits: credits.find((c) => c.workspaceId === id)?._sum.delta ?? 0 }];
+  });
+  return { total: Number(total), customers30: num(usd), rows, hasMore: Number(total) > page * PAGE };
 }
 
 export type MemberPermissions = { key: PermissionKey; description: string; via: string }[];
@@ -295,45 +342,66 @@ export const LOG_FILTERS: Record<LogKind, { value: string; label: string }[]> = 
   calls: [{ value: "FAILED", label: "Failed" }, { value: "ESCALATED", label: "Asked again" }, { value: "FELL_BACK", label: "Used a backup" }, { value: "flagged", label: "Checks flagged" }],
 };
 
-/** One page of a log, newest first, for the platform or one workspace (and, for the audit log, one person). */
-export async function platformLogs({ kind, workspaceId, actorId, status, includeTests = false, page = 1 }: { kind: LogKind; workspaceId?: string; actorId?: string; status?: string; includeTests?: boolean; page?: number }) {
-  const skip = (page - 1) * PAGE;
+/**
+ * One page of a log, newest first, for the platform or one workspace, narrowed to some people (`actorIds`, from a
+ * search) and a period (`days`). Keyset paged: `before` is the last row of the page before. `total` counts every
+ * matching row.
+ */
+export async function platformLogs({ kind, workspaceId, actorIds, status, includeTests = false, days = null, before }: { kind: LogKind; workspaceId?: string; actorIds?: string[]; status?: string; includeTests?: boolean; days?: number | null; before?: Cursor }) {
   const take = PAGE + 1; // one extra tells whether there's an older page
+  const orderBy = [{ createdAt: "desc" as const }, { id: "desc" as const }];
   const wsFilter = workspaceId ? { workspaceId } : {};
+  const period = days ? { createdAt: { gte: since(days) } } : {};
+  const who = actorIds ? { in: actorIds } : undefined;
   const ok = (v: string | undefined) => (v && LOG_FILTERS[kind].some((f) => f.value === v) ? v : undefined);
   const s = ok(status);
 
-  let rows: { at: Date; workspaceId: string | null; brandId: string | null; userId: string | null; [k: string]: unknown }[];
+  let rows: { id: string | number; at: Date; workspaceId: string | null; brandId: string | null; userId: string | null; [k: string]: unknown }[];
+  let total: number;
   if (kind === "audit") {
     const actionPrefix: Record<string, string[]> = { auth: ["auth."], platform: ["platform."], content: ["content.", "approval.", "publish"], member: ["member", "role", "invitation"] };
-    const r = await prisma.auditEvent.findMany({
-      where: { ...wsFilter, ...(actorId ? { actorUserId: actorId } : {}), ...(s ? { OR: actionPrefix[s].map((p) => ({ action: { startsWith: p } })) } : {}) },
-      orderBy: { createdAt: "desc" }, skip, take,
-    });
-    rows = r.map((a) => ({ at: a.createdAt, workspaceId: a.workspaceId, brandId: a.brandId, userId: a.actorUserId, action: a.action, entityType: a.entityType, entityId: a.entityId }));
+    const where: Prisma.AuditEventWhereInput = { ...wsFilter, ...period, ...(who ? { actorUserId: who } : {}), ...(s ? { OR: actionPrefix[s].map((p) => ({ action: { startsWith: p } })) } : {}) };
+    const [r, n] = await Promise.all([prisma.auditEvent.findMany({ where: { AND: [where, olderThan(before)] }, orderBy, take }), prisma.auditEvent.count({ where })]);
+    rows = r.map((a) => ({ id: a.id, at: a.createdAt, workspaceId: a.workspaceId, brandId: a.brandId, userId: a.actorUserId, action: a.action, entityType: a.entityType, entityId: a.entityId }));
+    total = n;
   } else if (kind === "runs") {
-    const r = await prisma.agentRun.findMany({
-      where: { ...wsFilter, ...(actorId ? { triggeredByUserId: actorId } : {}), ...(s ? { status: s as "FAILED" } : {}) },
-      orderBy: { createdAt: "desc" }, skip, take,
-      select: { id: true, workspaceId: true, brandId: true, agentKey: true, trigger: true, status: true, error: true, triggeredByUserId: true, createdAt: true, startedAt: true, finishedAt: true },
-    });
-    rows = r.map((x) => ({ at: x.createdAt, workspaceId: x.workspaceId, brandId: x.brandId, userId: x.triggeredByUserId, agent: x.agentKey, trigger: x.trigger, status: x.status, error: x.error, seconds: x.startedAt && x.finishedAt ? Math.round((+x.finishedAt - +x.startedAt) / 1000) : null }));
+    const where: Prisma.AgentRunWhereInput = { ...wsFilter, ...period, ...(who ? { triggeredByUserId: who } : {}), ...(s ? { status: s as "FAILED" } : {}) };
+    const [r, n] = await Promise.all([
+      prisma.agentRun.findMany({
+        where: { AND: [where, olderThan(before)] }, orderBy, take,
+        select: { id: true, workspaceId: true, brandId: true, agentKey: true, trigger: true, status: true, error: true, triggeredByUserId: true, createdAt: true, startedAt: true, finishedAt: true },
+      }),
+      prisma.agentRun.count({ where }),
+    ]);
+    rows = r.map((x) => ({ id: x.id, at: x.createdAt, workspaceId: x.workspaceId, brandId: x.brandId, userId: x.triggeredByUserId, agent: x.agentKey, trigger: x.trigger, status: x.status, error: x.error, seconds: x.startedAt && x.finishedAt ? Math.round((+x.finishedAt - +x.startedAt) / 1000) : null }));
+    total = n;
   } else if (kind === "events") {
-    const r = await prisma.agentEvent.findMany({ where: { ...wsFilter, ...(actorId ? { run: { triggeredByUserId: actorId } } : {}), ...(s ? { level: s as "ERROR" } : {}) }, orderBy: { id: "desc" }, skip, take, select: { workspaceId: true, brandId: true, agentKey: true, level: true, message: true, createdAt: true } });
-    rows = r.map((x) => ({ at: x.createdAt, workspaceId: x.workspaceId, brandId: x.brandId, userId: null, agent: x.agentKey, level: x.level, message: x.message }));
+    // The Agent Log's id rises with time, so it is the cursor on its own.
+    const where: Prisma.AgentEventWhereInput = { ...wsFilter, ...period, ...(who ? { run: { triggeredByUserId: who } } : {}), ...(s ? { level: s as "ERROR" } : {}) };
+    const after = before && Number.isSafeInteger(Number(before.id)) ? { id: { lt: Number(before.id) } } : {};
+    const [r, n] = await Promise.all([
+      prisma.agentEvent.findMany({ where: { ...where, ...after }, orderBy: { id: "desc" }, take, select: { id: true, workspaceId: true, brandId: true, agentKey: true, level: true, message: true, createdAt: true } }),
+      prisma.agentEvent.count({ where }),
+    ]);
+    rows = r.map((x) => ({ id: x.id, at: x.createdAt, workspaceId: x.workspaceId, brandId: x.brandId, userId: null, agent: x.agentKey, level: x.level, message: x.message }));
+    total = n;
   } else {
-    const r = await prisma.aiWorkflowRun.findMany({
-      where: { ...(workspaceId ? { workspaceId } : includeTests ? {} : { NOT: { workspaceId: TEST_WORKSPACE } }), ...(actorId ? { userId: actorId } : {}), ...(s === "flagged" ? { evalPassed: false } : s ? { status: s } : {}) },
-      orderBy: { createdAt: "desc" }, skip, take,
-      select: { workspaceId: true, brandId: true, userId: true, workflowId: true, tier: true, model: true, status: true, costUsd: true, latencyMs: true, inputTokens: true, outputTokens: true, evalPassed: true, error: true, createdAt: true },
-    });
-    rows = r.map((c) => ({ at: c.createdAt, workspaceId: c.workspaceId, brandId: c.brandId, userId: c.userId, task: c.workflowId, tier: c.tier, model: c.model, status: c.status, usd: c.costUsd === null ? null : num(c.costUsd), ms: c.latencyMs, tokens: (c.inputTokens ?? 0) + (c.outputTokens ?? 0), checks: c.evalPassed, error: c.error }));
+    const where: Prisma.AiWorkflowRunWhereInput = { ...(workspaceId ? { workspaceId } : includeTests ? {} : { NOT: { workspaceId: TEST_WORKSPACE } }), ...period, ...(who ? { userId: who } : {}), ...(s === "flagged" ? { evalPassed: false } : s ? { status: s } : {}) };
+    const [r, n] = await Promise.all([
+      prisma.aiWorkflowRun.findMany({
+        where: { AND: [where, olderThan(before)] }, orderBy, take,
+        select: { id: true, workspaceId: true, brandId: true, userId: true, workflowId: true, tier: true, model: true, status: true, costUsd: true, latencyMs: true, inputTokens: true, outputTokens: true, evalPassed: true, error: true, createdAt: true },
+      }),
+      prisma.aiWorkflowRun.count({ where }),
+    ]);
+    rows = r.map((c) => ({ id: c.id, at: c.createdAt, workspaceId: c.workspaceId, brandId: c.brandId, userId: c.userId, task: c.workflowId, tier: c.tier, model: c.model, status: c.status, usd: c.costUsd === null ? null : num(c.costUsd), ms: c.latencyMs, tokens: (c.inputTokens ?? 0) + (c.outputTokens ?? 0), checks: c.evalPassed, error: c.error }));
+    total = n;
   }
 
   const hasMore = rows.length > PAGE;
   rows = rows.slice(0, PAGE);
   const names = await nameLookup(rows);
-  return { hasMore, rows: rows.map((r) => ({ ...r, ...names(r) })) };
+  return { total, hasMore, next: hasMore ? cursorOf(rows[rows.length - 1]) : undefined, rows: rows.map((r) => ({ ...r, ...names(r) })) };
 }
 
 type Named = { userId?: string | null; workspaceId?: string | null; brandId?: string | null };
@@ -357,19 +425,23 @@ export async function nameLookup(rows: Named[]) {
 export type LogRow = Awaited<ReturnType<typeof platformLogs>>["rows"][number];
 
 /**
- * Choices for the workspace and person pickers (Logs, Activity). People are the workspace's members, plus the chosen
- * person if they've since left, so the filter still reads right.
- * ponytail: every workspace in one <select> is fine into the low thousands; past that, search like the Workspaces page.
+ * Every workspace, for the workspace picker (Logs, Activity).
+ * ponytail: one <select> is fine into the low thousands of workspaces; past that, search like the person filter.
  */
-export async function pickerOptions(workspaceId?: string, userId?: string) {
-  const [workspaces, members, chosen] = await Promise.all([
-    prisma.workspace.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    workspaceId ? prisma.workspaceMember.findMany({ where: { workspaceId }, select: { user: { select: { id: true, email: true } } } }) : [],
-    userId ? prisma.user.findUnique({ where: { id: userId }, select: { id: true, email: true } }) : null,
-  ]);
-  const people = members.map((m) => ({ id: m.user.id, label: m.user.email })).sort((a, b) => a.label.localeCompare(b.label));
-  if (workspaceId && chosen && !people.some((p) => p.id === chosen.id)) people.push({ id: chosen.id, label: `${chosen.email} (left)` });
-  return { workspaces, people };
+export async function pickerOptions() {
+  return { workspaces: await prisma.workspace.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }) };
+}
+
+/**
+ * The ids of people whose email or name contains `who` (deleted accounts too: their activity is still theirs), or
+ * undefined for no person filter.
+ * ponytail: the first 200 matches; a search that broad is a typo, not a filter.
+ */
+export async function peopleMatching(who?: string) {
+  const needle = who?.trim();
+  if (!needle) return undefined;
+  const people = await prisma.user.findMany({ where: { OR: [{ email: { contains: needle, mode: "insensitive" } }, { name: { contains: needle, mode: "insensitive" } }] }, select: { id: true }, take: 200 });
+  return people.map((p) => p.id);
 }
 export type PickerOptions = Awaited<ReturnType<typeof pickerOptions>>;
 

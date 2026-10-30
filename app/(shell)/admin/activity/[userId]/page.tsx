@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
-import { Ago, Empty, Money, PageHeader, Pager, Pill, Stat, Table, withQuery } from "@/components/admin/ui";
+import { Ago, CursorPager, Empty, Money, PageHeader, period as periodOf, PERIODS, Pill, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
 import { NO_WORKSPACE, personSummary, personTimeline } from "@/server/services/activity";
-import { PAGE, pageNumber, pickerOptions } from "@/server/services/platform-admin";
+import { PAGE, parseCursor, pickerOptions } from "@/server/services/platform-admin";
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Person activity · Platform admin" };
@@ -12,23 +12,25 @@ export const metadata = { title: "Person activity · Platform admin" };
 const LABEL = { visit: "Page visit", action: "Action", task: "Agent task", ai: "AI call" } as const;
 
 /** One person's timeline, with what they've cost in the header. Never chat text. */
-export default async function AdminPersonActivity({ params, searchParams }: { params: Promise<{ userId: string }>; searchParams: Promise<{ ws?: string; page?: string }> }) {
+export default async function AdminPersonActivity({ params, searchParams }: { params: Promise<{ userId: string }>; searchParams: Promise<{ ws?: string; days?: string; before?: string }> }) {
   await requirePlatformAdminPage();
   const { userId } = await params;
   const q = await searchParams;
   const ws = q.ws || undefined;
   const workspaceId = ws === NO_WORKSPACE ? null : ws; // null: only what happened outside any workspace
-  const page = pageNumber(q.page);
-  const [s, t, options, fx] = await Promise.all([personSummary({ userId, workspaceId }), personTimeline({ userId, workspaceId, page }), pickerOptions(), usdInrRate()]);
-  if (!s.user && !t.items.length && page === 1) notFound(); // a deleted account still shows what it left behind
+  const { value: days, days: n, param, span } = periodOf(q.days);
+  const before = parseCursor(q.before);
+  const [s, t, options, fx] = await Promise.all([personSummary({ userId, workspaceId, days: n }), personTimeline({ userId, workspaceId, days: n, before }), pickerOptions(), usdInrRate()]);
+  if (!s.user && !t.total) notFound(); // a deleted account still shows what it left behind
   const name = s.user ? (s.user.name ?? s.user.email) : "(deleted user)";
   const path = `/admin/activity/${userId}`;
-  const current = { ws, page: page > 1 ? String(page) : undefined };
+  const current = { ws, days: param };
 
   return (
     <>
       <PageHeader title={name} crumbs={[{ href: "/admin/activity", label: "Activity" }, { label: name }]}>
-        {s.user?.name ? `${s.user.email} · ` : ""}newest first, {PAGE} a page. An agent task’s AI calls are counted in its row. Chat text is never shown.{" "}
+        {s.user?.name ? `${s.user.email} · ` : ""}
+        {t.total.toLocaleString("en")} {t.total === 1 ? "entry" : "entries"}, {span}, newest first, {PAGE} a page. An agent task’s AI calls are counted in its row. Chat text is never shown.{" "}
         {s.user ? (
           <Link href={`/admin/people/${userId}`} className="underline underline-offset-4">
             Their workspaces and roles
@@ -36,15 +38,18 @@ export default async function AdminPersonActivity({ params, searchParams }: { pa
         ) : null}
       </PageHeader>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat label="AI spend" value={<Money usd={s.aiUsd} fx={fx} />} hint={workspaceId === null ? "outside any workspace" : ws ? "in this workspace" : "everywhere"} />
+        <Stat label="AI spend" value={<Money usd={s.aiUsd} fx={fx} />} hint={`${workspaceId === null ? "outside any workspace" : ws ? "in this workspace" : "everywhere"}, ${span}`} />
         <Stat label="Other paid APIs" value={<Money usd={s.apiUsd} fx={fx} />} hint="maps, page speed, phone checks" />
       </div>
-      <ActivityPickers ws={ws} options={options} person={false} noWorkspace />
+      <div className="flex flex-col gap-3">
+        <ActivityPickers ws={ws} options={options} person={false} noWorkspace hidden={{ days: param }} />
+        <Segmented label="Period" options={PERIODS} value={days} href={(v) => withQuery(path, current, { days: v === "30" ? undefined : v })} />
+      </div>
       <Table
         wide
         head={["When", "What", "Detail", "Workspace", "Project", "Cost"]}
         numeric={[5]}
-        empty="Nothing recorded for them here yet."
+        empty="Nothing recorded for them here in this period."
         rows={t.items.map((i) => [
           <Ago key="w" at={i.at} />,
           <Pill key="k" tone={i.kind === "task" && i.status === "FAILED" ? "bad" : "muted"}>
@@ -59,7 +64,7 @@ export default async function AdminPersonActivity({ params, searchParams }: { pa
           typeof i.usd === "number" ? <Money key="c" usd={i.usd} fx={fx} /> : <Empty key="c" />,
         ])}
       />
-      <Pager page={page} hasMore={t.hasMore} href={(n) => withQuery(path, current, { page: n > 1 ? String(n) : undefined })} />
+      <CursorPager newest={before ? withQuery(path, current, {}) : undefined} older={t.next ? withQuery(path, current, { before: t.next }) : undefined} />
     </>
   );
 }
