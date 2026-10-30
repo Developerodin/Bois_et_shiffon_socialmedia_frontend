@@ -1,7 +1,7 @@
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { LogTable } from "@/components/admin/log-table";
-import { Pager, Segmented, withQuery } from "@/components/admin/ui";
-import { LOG_FILTERS, PAGE, pageNumber, pickerOptions, platformLogs, type LogKind } from "@/server/services/platform-admin";
+import { CursorPager, period as periodOf, PERIODS, Segmented, withQuery } from "@/components/admin/ui";
+import { LOG_FILTERS, PAGE, parseCursor, peopleMatching, pickerOptions, platformLogs, type LogKind } from "@/server/services/platform-admin";
 import { usdInrRate } from "@/server/usage/fx";
 
 const KINDS: { value: LogKind; label: string; about: string }[] = [
@@ -12,32 +12,35 @@ const KINDS: { value: LogKind; label: string; about: string }[] = [
 ];
 
 /**
- * One log at a time, filterable and paged, for the platform (no workspaceId) or one workspace. On the platform page,
- * `?ws=` and `?user=` narrow every log to a workspace and a person.
+ * One log at a time, filterable and paged, for the platform (no workspaceId) or one workspace, over a period
+ * (`?days=`). On the platform page, `?ws=` and `?who=` (part of a name or email) narrow every log to a workspace and
+ * the people matching.
  */
-export async function LogsView({ path, query, workspaceId }: { path: string; query: { log?: string; status?: string; tests?: string; page?: string; ws?: string; user?: string }; workspaceId?: string }) {
+export async function LogsView({ path, query, workspaceId }: { path: string; query: { log?: string; status?: string; tests?: string; days?: string; before?: string; ws?: string; who?: string }; workspaceId?: string }) {
   const kind = (KINDS.some((k) => k.value === query.log) ? query.log : "audit") as LogKind;
   const status = LOG_FILTERS[kind].some((f) => f.value === query.status) ? query.status : undefined;
   const tests = !workspaceId && kind === "calls" && query.tests === "1";
-  const page = pageNumber(query.page);
+  const { value: days, days: n, param, span } = periodOf(query.days);
+  const before = parseCursor(query.before);
   const ws = workspaceId ? undefined : query.ws || undefined;
-  const user = workspaceId ? undefined : query.user || undefined;
+  const who = workspaceId ? undefined : query.who?.trim() || undefined;
   const [l, fx, options] = await Promise.all([
-    platformLogs({ kind, workspaceId: workspaceId ?? ws, actorId: user, status, includeTests: tests, page }),
+    peopleMatching(who).then((actorIds) => platformLogs({ kind, workspaceId: workspaceId ?? ws, actorIds, status, includeTests: tests, days: n, before })),
     usdInrRate(),
-    workspaceId ? null : pickerOptions(ws, user),
+    workspaceId ? null : pickerOptions(),
   ]);
-  const current = { log: kind === "audit" ? undefined : kind, ws, user, status, tests: tests ? "1" : undefined, page: page > 1 ? String(page) : undefined };
+  const current = { log: kind === "audit" ? undefined : kind, ws, who, days: param, status, tests: tests ? "1" : undefined };
 
   return (
     <>
       <div className="flex flex-col gap-3">
-        <Segmented label="Log" options={KINDS} value={kind} href={(v) => withQuery(path, { ws, user }, { log: v === "audit" ? undefined : v })} />
-        {options ? <ActivityPickers ws={ws} user={user} options={options} hidden={{ log: current.log, status, tests: current.tests }} /> : null}
+        <Segmented label="Log" options={KINDS} value={kind} href={(v) => withQuery(path, { ws, who, days: param }, { log: v === "audit" ? undefined : v })} />
+        {options ? <ActivityPickers ws={ws} who={who} options={options} hidden={{ log: current.log, days: param, status, tests: current.tests }} /> : null}
         <p className="max-w-prose text-sm text-muted-foreground">
-          {KINDS.find((k) => k.value === kind)!.about} Newest first, {PAGE} a page; hover a time for the exact moment (UTC).
+          {KINDS.find((k) => k.value === kind)!.about} {l.total.toLocaleString("en")} {l.total === 1 ? "entry" : "entries"}, {span}, newest first, {PAGE} a page; hover a time for the exact moment (UTC).
         </p>
         <div className="flex flex-wrap items-center gap-3">
+          <Segmented label="Period" options={PERIODS} value={days} href={(v) => withQuery(path, current, { days: v === "30" ? undefined : v })} />
           <Segmented label="Show" options={[{ value: "", label: "All" }, ...LOG_FILTERS[kind]]} value={status ?? ""} href={(v) => withQuery(path, current, { status: v || undefined })} />
           {kind === "calls" && !workspaceId ? (
             <Segmented label="Test runs" options={[{ value: "", label: "Customers only" }, { value: "1", label: "With test runs" }]} value={tests ? "1" : ""} href={(v) => withQuery(path, current, { tests: v || undefined })} />
@@ -45,7 +48,7 @@ export async function LogsView({ path, query, workspaceId }: { path: string; que
         </div>
       </div>
       <LogTable kind={kind} rows={l.rows} fx={fx} platform={!workspaceId} />
-      <Pager page={page} hasMore={l.hasMore} href={(p) => withQuery(path, current, { page: p > 1 ? String(p) : undefined })} />
+      <CursorPager newest={before ? withQuery(path, current, {}) : undefined} older={l.next ? withQuery(path, current, { before: l.next }) : undefined} />
     </>
   );
 }

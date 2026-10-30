@@ -1,3 +1,4 @@
+import { AutoSubmitForm } from "@/components/admin/auto-submit-form";
 import { pillButton as button } from "@/components/admin/ui";
 import { NO_WORKSPACE } from "@/server/services/activity";
 import type { PickerOptions } from "@/server/services/platform-admin";
@@ -5,51 +6,36 @@ import type { PickerOptions } from "@/server/services/platform-admin";
 const field = "h-9 max-w-64 rounded-full border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 /**
- * Workspace and person filters as plain GET forms: no JavaScript, and every view has its own URL. Two forms, so picking
- * another workspace clears the person (who may not be in it). The person picker shows once a workspace is chosen.
+ * Workspace and person filters in one plain GET form: every view has its own URL, and a new choice starts again at
+ * the newest page. The person box matches any part of a name or email.
  */
-export function ActivityPickers({ ws, user, options, hidden = {}, person = true, noWorkspace = false }: { ws?: string; user?: string; options: PickerOptions; hidden?: Record<string, string | undefined>; person?: boolean; noWorkspace?: boolean }) {
-  const keep = (extra: Record<string, string | undefined>) =>
-    Object.entries({ ...hidden, ...extra }).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null));
+export function ActivityPickers({ ws, who, options, hidden = {}, person = true, noWorkspace = false }: { ws?: string; who?: string; options: PickerOptions; hidden?: Record<string, string | undefined>; person?: boolean; noWorkspace?: boolean }) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <form className="flex items-center gap-2">
-        {keep({})}
-        <label className="text-xs text-muted-foreground" htmlFor="pick-ws">
-          Workspace
-        </label>
-        <select id="pick-ws" name="ws" defaultValue={ws ?? ""} className={field}>
-          <option value="">All workspaces</option>
-          {noWorkspace ? <option value={NO_WORKSPACE}>No workspace</option> : null}
-          {options.workspaces.map((w) => (
-            <option key={w.id} value={w.id}>
-              {w.name}
-            </option>
-          ))}
-        </select>
-        <button type="submit" className={button}>
-          Show
-        </button>
-      </form>
-      {person && ws ? (
-        <form className="flex items-center gap-2">
-          {keep({ ws })}
-          <label className="text-xs text-muted-foreground" htmlFor="pick-user">
+    <AutoSubmitForm className="flex flex-wrap items-center gap-2">
+      {Object.entries(hidden).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
+      <label className="text-xs text-muted-foreground" htmlFor="pick-ws">
+        Workspace
+      </label>
+      <select id="pick-ws" name="ws" defaultValue={ws ?? ""} className={field}>
+        <option value="">All workspaces</option>
+        {noWorkspace ? <option value={NO_WORKSPACE}>No workspace</option> : null}
+        {options.workspaces.map((w) => (
+          <option key={w.id} value={w.id}>
+            {w.name}
+          </option>
+        ))}
+      </select>
+      {person ? (
+        <>
+          <label className="ml-1 text-xs text-muted-foreground" htmlFor="pick-who">
             Person
           </label>
-          <select id="pick-user" name="user" defaultValue={user ?? ""} className={field}>
-            <option value="">Everyone</option>
-            {options.people.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className={button}>
-            Show
-          </button>
-        </form>
+          <input id="pick-who" name="who" type="search" defaultValue={who} placeholder="Name or email" className={`${field} w-56 px-4 placeholder:text-muted-foreground`} />
+        </>
       ) : null}
-    </div>
+      <button type="submit" className={button}>
+        Show
+      </button>
+    </AutoSubmitForm>
   );
 }

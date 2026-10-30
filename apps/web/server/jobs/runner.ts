@@ -131,6 +131,7 @@ async function pruneOldRows() {
   await prisma.job.deleteMany({ where: { status: "COMPLETED", updatedAt: { lt: ago(30) } } });
   await prisma.emailOutbox.deleteMany({ where: { status: { in: ["SENT", "NOT_CONFIGURED"] }, createdAt: { lt: ago(30) } } });
   await prisma.agentEvent.deleteMany({ where: { createdAt: { lt: ago(90) } } });
+  await prisma.pageView.deleteMany({ where: { createdAt: { lt: ago(180) } } });
 }
 
 export async function enqueueDailySweep() {

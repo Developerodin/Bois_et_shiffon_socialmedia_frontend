@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { Ago, day, Empty, PageHeader, Pager, Pill, SearchBox, Table, withQuery } from "@/components/admin/ui";
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { listPeople } from "@/server/services/platform-admin";
+import { listPeople, pageCount, pageNumber } from "@/server/services/platform-admin";
 
 export const metadata = { title: "People · Platform admin" };
 
 export default async function AdminPeople({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
   await requirePlatformAdminPage();
   const q = await searchParams;
-  const page = Math.max(1, Number(q.page) || 1);
+  const page = pageNumber(q.page);
   const p = await listPeople({ q: q.q, page });
   const current = { q: q.q, page: page > 1 ? String(page) : undefined };
 
@@ -48,7 +48,7 @@ export default async function AdminPeople({ searchParams }: { searchParams: Prom
           <span key="j" className="whitespace-nowrap">{day(u.createdAt)}</span>,
         ])}
       />
-      <Pager page={page} hasMore={p.hasMore} href={(n) => withQuery("/admin/people", current, { page: n > 1 ? String(n) : undefined })} />
+      <Pager page={page} hasMore={p.hasMore} pages={pageCount(p.total)} href={(n) => withQuery("/admin/people", current, { page: n > 1 ? String(n) : undefined })} />
     </>
   );
 }

@@ -4,14 +4,14 @@ import { pageNumber } from "@/server/services/platform-admin";
 
 const m = vi.hoisted(() => ({
   visits: vi.fn(), audit: vi.fn(), runs: vi.fn(), calls: vi.fn(), runCost: vi.fn(), auditGroups: vi.fn(), groups: vi.fn(),
-  aiSum: vi.fn(), apiSum: vi.fn(), user: vi.fn(), none: vi.fn(),
+  aiSum: vi.fn(), apiSum: vi.fn(), user: vi.fn(), none: vi.fn(), count: vi.fn(),
 }));
 vi.mock("@/server/db/prisma", () => ({
   prisma: {
-    pageView: { findMany: m.visits, groupBy: m.groups },
-    auditEvent: { findMany: m.audit, groupBy: m.auditGroups },
-    agentRun: { findMany: m.runs, groupBy: m.groups },
-    aiWorkflowRun: { findMany: m.calls, groupBy: m.runCost, aggregate: m.aiSum },
+    pageView: { findMany: m.visits, groupBy: m.groups, count: m.count },
+    auditEvent: { findMany: m.audit, groupBy: m.auditGroups, count: m.count },
+    agentRun: { findMany: m.runs, groupBy: m.groups, count: m.count },
+    aiWorkflowRun: { findMany: m.calls, groupBy: m.runCost, aggregate: m.aiSum, count: m.count },
     apiCall: { aggregate: m.apiSum, groupBy: m.groups },
     user: { findUnique: m.user, findMany: m.none },
     brand: { findMany: m.none },
@@ -24,13 +24,17 @@ beforeEach(() => {
   m.aiSum.mockResolvedValue({ _sum: { costUsd: 2 } });
   m.apiSum.mockResolvedValue({ _sum: { costUsd: 1 } });
   m.user.mockResolvedValue({ id: "u1", name: null, email: "a@x.com" });
+  m.count.mockResolvedValue(0);
 });
+
+/** A timeline query's filter, without the (absent) cursor. */
+const filter = (f: typeof m.visits) => f.mock.calls[0][0].where.AND[0];
 
 describe("activity outside any workspace (workspaceId: null)", () => {
   it("timeline keeps only rows with no workspace; agent tasks and AI calls always have one", async () => {
     await personTimeline({ userId: "u1", workspaceId: null });
-    expect(m.visits.mock.calls[0][0].where).toEqual({ userId: "u1", workspaceId: null });
-    expect(m.audit.mock.calls[0][0].where).toEqual({ actorUserId: "u1", workspaceId: null, NOT: { action: { startsWith: "platform." } } });
+    expect(filter(m.visits)).toEqual({ userId: "u1", workspaceId: null });
+    expect(filter(m.audit)).toEqual({ actorUserId: "u1", workspaceId: null, NOT: { action: { startsWith: "platform." } } });
     expect(m.runs).not.toHaveBeenCalled();
     expect(m.calls).not.toHaveBeenCalled();
   });
@@ -44,7 +48,7 @@ describe("activity outside any workspace (workspaceId: null)", () => {
 
   it("no workspace given still means everywhere", async () => {
     await personTimeline({ userId: "u1" });
-    expect(m.visits.mock.calls[0][0].where).toEqual({ userId: "u1" });
+    expect(filter(m.visits)).toEqual({ userId: "u1" });
     expect(m.runs).toHaveBeenCalled();
   });
 });
@@ -57,7 +61,7 @@ describe("admin console actions stay in Logs, not Activity", () => {
 
   it("the timeline leaves them out too", async () => {
     await personTimeline({ userId: "u1" });
-    expect(m.audit.mock.calls[0][0].where).toEqual(expect.objectContaining({ NOT: { action: { startsWith: "platform." } } }));
+    expect(filter(m.audit)).toEqual(expect.objectContaining({ NOT: { action: { startsWith: "platform." } } }));
   });
 });
 
@@ -77,9 +81,16 @@ describe("unattributed activity on the list", () => {
     expect(m.groups.mock.calls.find(([q]) => q.by.includes("userId") && "_sum" in q)![0].where).toMatchObject({ OR: [{ workspaceId: null }, { NOT: { workspaceId: "eval" } }] });
   });
 
-  it("one person: only theirs", async () => {
-    await activityList({ userId: "u1" });
-    expect(m.runCost.mock.calls[0][0].where).toMatchObject({ userId: "u1" });
+  it("a person search: only the people it matched", async () => {
+    await activityList({ userIds: ["u1", "u2"] });
+    expect(m.runCost.mock.calls[0][0].where).toMatchObject({ userId: { in: ["u1", "u2"] } });
+  });
+
+  it("a period bounds every source", async () => {
+    await activityList({ days: 7 });
+    const wheres = [...m.groups.mock.calls, ...m.auditGroups.mock.calls, ...m.runCost.mock.calls].map(([q]) => q.where);
+    expect(wheres).toHaveLength(5);
+    for (const w of wheres) expect(+w.createdAt.gte).toBeGreaterThan(Date.now() - 7.01 * 86_400_000);
   });
 });
 

@@ -4,7 +4,7 @@ import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
 
 export const metadata = { title: "Logs · Platform admin" };
 
-export default async function AdminLogs({ searchParams }: { searchParams: Promise<{ log?: string; status?: string; tests?: string; page?: string; ws?: string; user?: string }> }) {
+export default async function AdminLogs({ searchParams }: { searchParams: Promise<{ log?: string; status?: string; tests?: string; days?: string; before?: string; ws?: string; who?: string }> }) {
   await requirePlatformAdminPage();
   return (
     <>

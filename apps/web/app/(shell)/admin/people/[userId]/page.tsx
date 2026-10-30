@@ -16,7 +16,7 @@ export default async function AdminPerson({ params }: { params: Promise<{ userId
   const p = await personDetail(userId);
   if (!p) notFound();
   after(() => recordPersonView(userId, viewer)); // written after the page is sent: the visit never waits on it
-  const audit = (await platformLogs({ kind: "audit", actorId: userId })).rows.slice(0, 15);
+  const audit = (await platformLogs({ kind: "audit", actorIds: [userId] })).rows.slice(0, 15);
 
   return (
     <>
