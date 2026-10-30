@@ -190,7 +190,11 @@
     "audioTrack": "Audio track",
     "audioValue": "French voiceover (Studio Natural) + Ambient acoustic",
     "resolution": "Resolution",
-    "resolutionValue": "Portrait video · 9:16"
+    "resolutionValue": "Portrait video · 9:16",
+    "checking": "Checking the reel… Download and Schedule open when the checks are done.",
+    "askForChanges": "Not right? Ask for changes",
+    "checks": "Checks",
+    "audioVoiceOnly": "French voiceover"
   },
   "publish": {
     "title": "Publish reel",

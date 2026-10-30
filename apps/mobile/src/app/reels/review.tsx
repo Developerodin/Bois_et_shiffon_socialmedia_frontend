@@ -1,76 +1,87 @@
-import { Image } from "expo-image";
-import { LinearGradient } from "expo-linear-gradient";
+import { File, Paths } from "expo-file-system";
 import { router } from "expo-router";
-import { ArrowRight, AudioLines, Download, Ellipsis, Maximize, MonitorPlay, Play, Plus, Smartphone, Volume2, type LucideIcon } from "lucide-react-native";
+import * as Sharing from "expo-sharing";
+import { useVideoPlayer, VideoView } from "expo-video";
+import { ArrowRight, AudioLines, CircleAlert, CircleCheck, Download, MessageSquareText, MonitorPlay, Smartphone, TriangleAlert, type LucideIcon } from "lucide-react-native";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { reels, type CheckResult } from "@/api/endpoints";
 import { color, font, radius, space } from "@/theme/tokens";
 import { Field } from "@/ui/field";
 import { Footer } from "@/ui/layout";
 import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
-import { captionFr, hashtags, photos } from "@/ui/reels/sample";
+import { useReel } from "@/ui/reels/use-reel";
 
-/** R07 · Reels / Result review. The player is a still: no video file exists yet. */
+/** Statuses from which the reel may be sent: the checks have run (studio reels: the maker approves by sending). */
+const SENDABLE = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED", "PUBLISHED"];
+const CHECK_ICON: Record<CheckResult["status"], LucideIcon> = { pass: CircleCheck, warn: TriangleAlert, blocker: CircleAlert };
+
+/** R07 · Reels / Result review. Plays the reel; Download or Schedule is the approval of exactly this version. */
 export default function ReelsReview() {
   const { t } = useTranslation("reels");
-  const [caption, setCaption] = useState(captionFr);
+  const { id, detail, error, setError, change } = useReelWithChange();
+  const [caption, setCaption] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const player = useVideoPlayer(detail?.videoUrl ?? null);
+  const plan = detail?.plan;
+  const status = detail?.item.status;
+  const sendable = !!status && SENDABLE.includes(status) && detail?.checks?.overall !== "BLOCKER";
+  const shownCaption = caption ?? detail?.caption?.caption ?? "";
+  const hashtags = detail?.caption?.hashtags ?? [];
+
+  const saveCaption = () => {
+    if (!id || !detail || !plan || caption === null || caption === detail.caption?.caption) return;
+    void change(() => reels.editCaption(id, detail.version, plan, caption, hashtags)).then(() => setCaption(null));
+  };
+  const download = async () => {
+    if (!id || !detail) return;
+    setDownloading(true);
+    try {
+      const { videoUrl } = await reels.download(id, detail.version);
+      const file = await File.downloadFileAsync(videoUrl, new File(Paths.cache, `reel-${id}-v${detail.version}.mp4`), { idempotent: true });
+      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(file.uri, { mimeType: "video/mp4", dialogTitle: plan?.title });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <ReelsScreen
-      header={
-        <PageHeader
-          left={<BackButton label={t("goBack")} />}
-          center={<HeaderTitle center subtitle={t("review.subtitle")}>Bunting spotlight</HeaderTitle>}
-          right={
-            <Pressable accessibilityRole="button" accessibilityLabel={t("review.options")} style={styles.icon44}>
-              <Ellipsis size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
-            </Pressable>
-          }
-        />
-      }
+      header={<PageHeader left={<BackButton label={t("goBack")} />} center={<HeaderTitle center subtitle={t("review.subtitle")}>{plan?.title ?? ""}</HeaderTitle>} />}
       contentStyle={{ paddingTop: 0, paddingBottom: space[24] }}
       footer={
         <Footer>
+          {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
           <View style={{ flexDirection: "row", gap: space[12] }}>
-            <ActionButton style={{ flex: 1, paddingHorizontal: 0 }} variant="outline" leading={Download} label={t("review.downloadVideo")} />
-            <ActionButton style={{ flex: 1, paddingHorizontal: 0 }} trailing={ArrowRight} label={t("schedule")} onPress={() => router.push("/reels/publish")} />
+            <ActionButton
+              style={{ flex: 1, paddingHorizontal: 0 }}
+              variant="outline"
+              leading={Download}
+              disabled={!sendable || downloading}
+              label={downloading ? <ActivityIndicator color={color.ink} /> : t("review.downloadVideo")}
+              onPress={() => void download()}
+            />
+            <ActionButton style={{ flex: 1, paddingHorizontal: 0 }} trailing={ArrowRight} disabled={!sendable} label={t("schedule")} onPress={() => router.push("/reels/publish")} />
           </View>
-          <Text style={[meta, { textAlign: "center" }]}>{t("review.connectFirst")}</Text>
+          <Text style={[meta, { textAlign: "center" }]}>{sendable ? t("review.connectFirst") : t("review.checking")}</Text>
         </Footer>
       }
     >
       <View style={styles.player}>
         <View style={styles.video}>
-          <Image source={photos.table} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel="Bois & Chiffons Table à manger Acacia Bunting" />
-          <LinearGradient colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.6)"]} style={styles.shade} />
-          <View style={styles.sample}>
-            <View style={styles.sampleDot} />
-            <Text style={metaInk}>{t("review.samplePreview")}</Text>
-          </View>
-          <View style={styles.duration}>
-            <Text style={[meta, { color: color.onPrimary }]}>{t("secondsShort", { seconds: 20 })}</Text>
-          </View>
-          <View style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center" }]} pointerEvents="box-none">
-            <Pressable accessibilityRole="button" accessibilityLabel={t("review.play")} style={styles.playBtn}>
-              <Play size={28} color={color.ink} strokeWidth={ICON.strokeWidth} style={{ marginLeft: 3 }} />
-            </Pressable>
-          </View>
-          <View style={styles.controls}>
-            <View style={styles.slider} accessibilityRole="adjustable" accessibilityLabel={t("review.position")}>
-              <View style={{ width: "33%", height: 4, borderRadius: 16, backgroundColor: color.surface }} />
+          {detail?.videoUrl ? (
+            <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls fullscreenOptions={{ enable: true }} />
+          ) : (
+            <ActivityIndicator style={StyleSheet.absoluteFill} color={color.onPrimary} />
+          )}
+          {detail?.price ? (
+            <View style={styles.duration} pointerEvents="none">
+              <Text style={[meta, { color: color.onPrimary }]}>{t("secondsShort", { seconds: detail.price / 2 })}</Text>
             </View>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              <Text style={[meta, { color: color.onPrimary }]}>0:00 / 0:20</Text>
-              <View style={{ flexDirection: "row", gap: space[8] }}>
-                <Pressable accessibilityRole="button" accessibilityLabel={t("review.sound")} style={styles.ctrl}>
-                  <Volume2 size={20} color="rgba(255,255,255,0.9)" strokeWidth={ICON.strokeWidth} />
-                </Pressable>
-                <Pressable accessibilityRole="button" accessibilityLabel={t("review.fullscreen")} style={styles.ctrl}>
-                  <Maximize size={20} color="rgba(255,255,255,0.9)" strokeWidth={ICON.strokeWidth} />
-                </Pressable>
-              </View>
-            </View>
-          </View>
+          ) : null}
         </View>
         <View style={styles.formatRow}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
@@ -81,7 +92,12 @@ export default function ReelsReview() {
         </View>
       </View>
 
-      <View style={[styles.section, { marginTop: space[24] }]}>
+      <Pressable accessibilityRole="button" onPress={() => router.push("/reels/chat")} style={styles.redo}>
+        <MessageSquareText size={18} color={color.ink} strokeWidth={ICON.strokeWidth} />
+        <Text style={[metaInk, { fontFamily: font.semibold }]}>{t("review.askForChanges")}</Text>
+      </Pressable>
+
+      <View style={[styles.section, { marginTop: space[16] }]}>
         <View style={styles.rowBetween}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
             <Text style={strong14}>{t("review.captionFrench")}</Text>
@@ -92,8 +108,9 @@ export default function ReelsReview() {
         <View style={{ paddingTop: space[12] }}>
           <Field
             multiline
-            value={caption}
+            value={shownCaption}
             onChangeText={setCaption}
+            onBlur={saveCaption}
             accessibilityLabel={t("review.captionA11y")}
             style={{ flex: 1, fontFamily: font.regular, fontSize: 16, lineHeight: 24, color: color.ink, minHeight: 96, textAlignVertical: "top" }}
           />
@@ -102,16 +119,24 @@ export default function ReelsReview() {
           {hashtags.map((h) => (
             <Tag key={h} label={h} style={{ paddingVertical: 4, paddingHorizontal: space[12] }} textStyle={{ color: color.ink }} />
           ))}
-          <Pressable accessibilityRole="button" accessibilityLabel={t("review.addTag")} style={styles.icon44}>
-            <Plus size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
-          </Pressable>
+        </View>
+      </View>
+
+      <View style={[styles.section, { marginTop: space[24] }]}>
+        <Text style={eyebrow}>{t("review.checks")}</Text>
+        <View style={{ paddingTop: space[16], gap: space[12] }}>
+          {detail?.checks ? (
+            detail.checks.results.map((c, i) => <Spec key={i} Icon={CHECK_ICON[c.status]} label={c.check} value={c.note} tone={c.status} />)
+          ) : (
+            <Text style={meta}>{t("review.checking")}</Text>
+          )}
         </View>
       </View>
 
       <View style={[styles.section, { marginTop: space[24] }]}>
         <Text style={eyebrow}>{t("review.specifications")}</Text>
         <View style={{ paddingTop: space[16], gap: space[8] }}>
-          <Spec Icon={AudioLines} label={t("review.audioTrack")} value={t("review.audioValue")} />
+          <Spec Icon={AudioLines} label={t("review.audioTrack")} value={t("review.audioVoiceOnly")} />
           <Spec Icon={MonitorPlay} label={t("review.resolution")} value={t("review.resolutionValue")} />
         </View>
       </View>
@@ -119,11 +144,18 @@ export default function ReelsReview() {
   );
 }
 
-function Spec({ Icon, label, value }: { Icon: LucideIcon; label: string; value: string }) {
+/** useReel polls every 5 s here, so the checks appear as soon as the Quality run finishes. */
+function useReelWithChange() {
+  const r = useReel(5000);
+  return { ...r, change: (run: () => Promise<unknown>) => r.load().then(run).then(r.load, (e: unknown) => r.setError(e instanceof Error ? e.message : String(e))) };
+}
+
+function Spec({ Icon, label, value, tone }: { Icon: LucideIcon; label: string; value: string; tone?: CheckResult["status"] }) {
+  const ink = tone === "blocker" ? color.error : tone === "warn" ? "#8A5A00" : color.inkSecondary;
   return (
     <View style={{ flexDirection: "row", gap: space[12] }}>
       <View style={styles.specIcon}>
-        <Icon size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
+        <Icon size={16} color={ink} strokeWidth={ICON.strokeWidth} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={meta}>{label}</Text>
@@ -134,31 +166,11 @@ function Spec({ Icon, label, value }: { Icon: LucideIcon; label: string; value: 
 }
 
 const styles = StyleSheet.create({
-  icon44: { width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radius.control },
   player: { backgroundColor: color.surface, borderWidth: 1, borderColor: rc.border, borderRadius: radius.card, overflow: "hidden" },
-  video: { aspectRatio: 348 / 619, backgroundColor: "#171717" },
-  shade: { position: "absolute", left: 0, right: 0, bottom: 0, height: 96 },
-  sample: {
-    position: "absolute",
-    top: 14,
-    left: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space[8],
-    paddingVertical: 4,
-    paddingHorizontal: space[12],
-    backgroundColor: color.surface,
-    borderWidth: 1,
-    borderColor: "#DDD7E5",
-    borderRadius: radius.badge,
-  },
-  sampleDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#000", opacity: 0.5 },
+  video: { aspectRatio: 9 / 16, backgroundColor: "#171717" },
   duration: { position: "absolute", top: 14, right: 14, paddingVertical: 4, paddingHorizontal: space[12], borderRadius: 9999, backgroundColor: "rgba(26,27,36,0.8)" },
-  playBtn: { width: 44, height: 44, borderRadius: radius.control, backgroundColor: "rgba(255,255,255,0.95)", alignItems: "center", justifyContent: "center" },
-  controls: { position: "absolute", left: 0, right: 0, bottom: 0, padding: space[16], gap: space[8] },
-  slider: { height: 4, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.35)" },
-  ctrl: { width: 44, height: 44, borderRadius: radius.control, backgroundColor: "rgba(33,29,42,0.85)", alignItems: "center", justifyContent: "center" },
   formatRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: space[12], paddingHorizontal: space[16] },
+  redo: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: space[8], minHeight: 44, marginTop: space[12] },
   section: {
     padding: space[16],
     backgroundColor: "rgba(255,255,255,0.95)",
@@ -171,4 +183,3 @@ const styles = StyleSheet.create({
   tags: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: space[8], paddingTop: space[12] },
   specIcon: { width: 28, height: 28, marginTop: 2, borderRadius: radius.control, backgroundColor: "#EEEDF7", alignItems: "center", justifyContent: "center" },
 });
-
