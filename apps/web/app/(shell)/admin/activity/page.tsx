@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { Ago, Empty, Money, PageHeader, Pager, Table, withQuery } from "@/components/admin/ui";
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { activityList } from "@/server/services/activity";
-import { PAGE, pickerOptions } from "@/server/services/platform-admin";
+import { activityList, NO_WORKSPACE } from "@/server/services/activity";
+import { PAGE, pageNumber, pickerOptions } from "@/server/services/platform-admin";
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Activity · Platform admin" };
@@ -16,7 +16,7 @@ export default async function AdminActivity({ searchParams }: { searchParams: Pr
   const q = await searchParams;
   const ws = q.ws || undefined;
   const user = q.user || undefined;
-  const page = Math.max(1, Number(q.page) || 1);
+  const page = pageNumber(q.page);
   const [a, options, fx] = await Promise.all([activityList({ workspaceId: ws, userId: user, page }), pickerOptions(ws, user), usdInrRate()]);
   const current = { ws, user, page: page > 1 ? String(page) : undefined };
 
@@ -32,7 +32,7 @@ export default async function AdminActivity({ searchParams }: { searchParams: Pr
         numeric={[3, 4, 5, 6]}
         empty="No activity recorded yet."
         rows={a.rows.map((r) => [
-          <Link key="p" href={withQuery(`/admin/activity/${r.userId}`, {}, { ws: r.workspaceId ?? undefined })} className="font-medium underline-offset-4 hover:underline">
+          <Link key="p" href={withQuery(`/admin/activity/${r.userId}`, {}, { ws: r.workspaceId ?? NO_WORKSPACE })} className="font-medium underline-offset-4 hover:underline">
             {r.who}
           </Link>,
           r.workspace ?? <span key="w" className="text-muted-foreground">no workspace</span>,

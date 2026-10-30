@@ -294,6 +294,7 @@ model AgentEvent {
 
   @@index([brandId, id])
   @@index([runId, id])
+  @@index([workspaceId, id])
 }
 
 model BrandAgentConfig {
@@ -407,7 +408,8 @@ model AiWorkflowRun {
   @@index([agentRunId])
   @@index([createdAt])
   @@index([workspaceId, createdAt])
-  @@index([userId, createdAt])
+  /// agentRunId in the middle: a person's chat turns (agentRunId IS NULL) without walking all their agent calls
+  @@index([userId, agentRunId, createdAt])
 }
 
 /// One row per call to a paid outside API that isn't an AI model (Google Places, PageSpeed, Twilio Verify).

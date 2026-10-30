@@ -1,7 +1,7 @@
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { LogTable } from "@/components/admin/log-table";
 import { Pager, Segmented, withQuery } from "@/components/admin/ui";
-import { LOG_FILTERS, PAGE, pickerOptions, platformLogs, type LogKind } from "@/server/services/platform-admin";
+import { LOG_FILTERS, PAGE, pageNumber, pickerOptions, platformLogs, type LogKind } from "@/server/services/platform-admin";
 import { usdInrRate } from "@/server/usage/fx";
 
 const KINDS: { value: LogKind; label: string; about: string }[] = [
@@ -19,7 +19,7 @@ export async function LogsView({ path, query, workspaceId }: { path: string; que
   const kind = (KINDS.some((k) => k.value === query.log) ? query.log : "audit") as LogKind;
   const status = LOG_FILTERS[kind].some((f) => f.value === query.status) ? query.status : undefined;
   const tests = !workspaceId && kind === "calls" && query.tests === "1";
-  const page = Math.max(1, Number(query.page) || 1);
+  const page = pageNumber(query.page);
   const ws = workspaceId ? undefined : query.ws || undefined;
   const user = workspaceId ? undefined : query.user || undefined;
   const [l, fx, options] = await Promise.all([
