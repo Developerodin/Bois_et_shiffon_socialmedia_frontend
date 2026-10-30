@@ -16,7 +16,7 @@ vi.mock("@/server/auth/request-user", () => ({ issueMobileToken: vi.fn(async () 
 vi.mock("@/server/email/outbox", () => ({ queueEmail: m.queueEmail }));
 vi.mock("@/server/services/google-signup", () => ({ provisionGoogleUser: vi.fn() }));
 
-import { completeRegistration, passwordSignIn, startRegistration } from "@/server/services/mobile-auth";
+import { completeRegistration, emailNextStep, passwordSignIn, startRegistration } from "@/server/services/mobile-auth";
 
 const request = new Request("https://app/api/v1/mobile/password", { headers: { "x-forwarded-for": "1.2.3.4" } });
 const PASSWORD = "correct horse battery";
@@ -78,5 +78,24 @@ describe("register with email + password (mobile)", () => {
     m.db.verificationToken.deleteMany.mockResolvedValue({ count: 0 });
     await expect(completeRegistration({ email: "n@b.co", code: "000000", password: PASSWORD }, request)).rejects.toMatchObject({ status: 400 });
     expect(m.db.user.updateMany).not.toHaveBeenCalled();
+  });
+});
+
+describe("email-first: which screen comes next", () => {
+  it("an account with a password asks for it", async () => {
+    m.db.user.findUnique.mockResolvedValue(await active());
+    await expect(emailNextStep({ email: "a@b.co" }, request)).resolves.toEqual({ next: "password" });
+  });
+  it("an account without a password (email code, phone, Google) gets a code", async () => {
+    m.db.user.findUnique.mockResolvedValue(await active({ passwordHash: null }));
+    await expect(emailNextStep({ email: "a@b.co" }, request)).resolves.toEqual({ next: "code" });
+  });
+  it("a new email registers", async () => {
+    m.db.user.findUnique.mockResolvedValue(null);
+    await expect(emailNextStep({ email: "n@b.co" }, request)).resolves.toEqual({ next: "register" });
+  });
+  it("a disabled account looks like one without a password", async () => {
+    m.db.user.findUnique.mockResolvedValue(await active({ status: "DISABLED" }));
+    await expect(emailNextStep({ email: "a@b.co" }, request)).resolves.toEqual({ next: "code" });
   });
 });

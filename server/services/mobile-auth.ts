@@ -76,6 +76,19 @@ async function spendCode(email: string, code: string) {
  * Registration proves the email first: the code goes out on start, and the password is only saved once the code
  * checks out (the app keeps the password in memory between the two screens; nothing is stored before then).
  */
+/**
+ * Email-first sign-in: after the email screen, which screen comes next. This tells the app whether an email has an
+ * account (as most apps do); it's rate-limited, and a disabled account answers like one without a password.
+ */
+export async function emailNextStep(input: z.infer<typeof EmailInput>, request: Request): Promise<{ next: "password" | "code" | "register" }> {
+  const email = input.email.trim().toLowerCase();
+  const byIp = await hitRateLimit(limitKey("mobile-email-step:ip", clientIp(request)), 30, 15 * 60_000);
+  if (!byIp.allowed) throw new AccountFlowError("Too many attempts. Wait 15 minutes and try again.", 429);
+  const user = await prisma.user.findUnique({ where: { email }, select: { passwordHash: true, status: true, deletedAt: true } });
+  if (!user) return { next: "register" };
+  return { next: user.passwordHash && user.status === "ACTIVE" && !user.deletedAt ? "password" : "code" };
+}
+
 export const PasswordSignInInput = EmailInput.extend({ password: z.string().min(1).max(200) });
 export const RegisterInput = EmailInput.extend({ password: z.string().max(200) });
 export const RegisterVerifyInput = RegisterInput.extend({ code: Code });
