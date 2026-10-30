@@ -142,7 +142,7 @@ export type ReelSummary = {
 export type ChatTurn = { role: "user" | "assistant"; text: string; at: string };
 export type CheckResult = { check: string; status: "pass" | "warn" | "blocker"; note: string };
 export type ReelDetail = {
-  item: { id: string; title: string; status: ContentStatus; postUrl: string | null };
+  item: { id: string; title: string; status: ContentStatus; postUrl: string | null; scheduledFor: string | null };
   version: number; plan: ReelPlan | null; price: number | null;
   caption: { caption?: string; hashtags?: string[] } | null; videoUrl: string | null;
   checks: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;

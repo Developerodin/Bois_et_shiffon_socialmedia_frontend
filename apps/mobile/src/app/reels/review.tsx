@@ -1,6 +1,4 @@
-import { File, Paths } from "expo-file-system";
 import { router } from "expo-router";
-import * as Sharing from "expo-sharing";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { ArrowRight, AudioLines, CircleAlert, CircleCheck, Download, MessageSquareText, MonitorPlay, Smartphone, TriangleAlert, type LucideIcon } from "lucide-react-native";
 import { useState } from "react";
@@ -11,6 +9,7 @@ import { color, font, radius, space } from "@/theme/tokens";
 import { Field } from "@/ui/field";
 import { Footer } from "@/ui/layout";
 import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
+import { downloadReel } from "@/ui/reels/download";
 import { useReel } from "@/ui/reels/use-reel";
 
 /** Statuses from which the reel may be sent: the checks have run (studio reels: the maker approves by sending). */
@@ -38,9 +37,8 @@ export default function ReelsReview() {
     if (!id || !detail) return;
     setDownloading(true);
     try {
-      const { videoUrl } = await reels.download(id, detail.version);
-      const file = await File.downloadFileAsync(videoUrl, new File(Paths.cache, `reel-${id}-v${detail.version}.mp4`), { idempotent: true });
-      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(file.uri, { mimeType: "video/mp4", dialogTitle: plan?.title });
+      await downloadReel(id, detail.version, plan?.title);
+      await change(async () => undefined); // status is now APPROVED
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {

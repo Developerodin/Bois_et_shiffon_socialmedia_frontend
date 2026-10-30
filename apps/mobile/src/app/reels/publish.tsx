@@ -2,32 +2,70 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { ArrowRight, CalendarDays, Camera, ChevronDown, Clock, Download, Info, Lock, Play } from "lucide-react-native";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { type Connection, connections, reels } from "@/api/endpoints";
 import { formatDate, formatNumber } from "@/i18n";
 import { color, font, radius, space } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Footer } from "@/ui/layout";
 import { ActionButton, BackTitle, BrandPill, ICON, PageHeader, Panel, ReelsScreen, SegmentedTabs, Tag, bodyMuted, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
-import { photos, schedule } from "@/ui/reels/sample";
+import { photos } from "@/ui/reels/sample";
+import { downloadReel } from "@/ui/reels/download";
+import { useReel } from "@/ui/reels/use-reel";
+
+const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone; // the phone's, which is what the slot is in
+/** ponytail: the slot is tomorrow 18:00 local; a date/time picker comes with the Posts calendar wiring. */
+const nextSlot = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(18, 0, 0, 0);
+  return d;
+};
 
 /** Labels: reels:publish.publishNow / reels:schedule. */
 const TIMING = ["now", "schedule"] as const;
 
-/** R08 · Reels / Publish or schedule. "Connect" is a local toggle: no social integration exists yet. */
+/** R08 · Reels / Publish or schedule. Confirming approves this exact version (if not yet) and hands it to Instagram. */
 export default function ReelsPublish() {
-  const [connected, setConnected] = useState(false);
   const { t } = useTranslation("reels");
+  const { id, detail } = useReel();
+  const [account, setAccount] = useState<Connection | null>(null);
+  const [busy, setBusy] = useState<"send" | "download" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [at] = useState(nextSlot);
+  const connected = !!account;
+  useEffect(() => {
+    connections().then((r) => setAccount(r.connections.find((c) => c.provider === "INSTAGRAM" && c.status === "ACTIVE") ?? null), () => {});
+  }, []);
+  const plan = detail?.plan;
+  const thumb = plan ? detail?.photoUrls[plan.scenes[0].photoKey] : undefined;
+  const run = async (kind: "send" | "download") => {
+    if (!id || !detail) return;
+    setBusy(kind);
+    setError(null);
+    try {
+      if (kind === "download") await downloadReel(id, detail.version, plan?.title);
+      else {
+        await reels.publish(id, detail.version, account!.id, timing === "schedule" ? at : undefined, detail.item.status === "APPROVED");
+        router.replace("/reels/scheduled");
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
   const [timing, setTiming] = useState<(typeof TIMING)[number]>("schedule");
   const timingLabel = (o: (typeof TIMING)[number]) => (o === "schedule" ? t("schedule") : t("publish.publishNow"));
   const confirmLabel = timing === "schedule" ? t("publish.confirmSchedule") : t("publish.publishNow");
   const date = t("publish.dateValue", {
-    day: formatNumber(schedule.at.getDate()),
-    month: formatDate(schedule.at, { month: "long" }),
-    year: formatNumber(schedule.at.getFullYear(), { useGrouping: false }),
+    day: formatNumber(at.getDate()),
+    month: formatDate(at, { month: "long" }),
+    year: formatNumber(at.getFullYear(), { useGrouping: false }),
   });
-  const time = formatDate(schedule.at, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const time = formatDate(at, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 
   return (
     <ReelsScreen
@@ -37,11 +75,12 @@ export default function ReelsPublish() {
       contentStyle={{ paddingHorizontal: space[16], paddingTop: space[16], paddingBottom: space[24] }}
       footer={
         <Footer>
+          {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
           <ActionButton
-            label={confirmLabel}
-            disabled={!connected}
+            label={busy === "send" ? <ActivityIndicator color={color.onPrimary} /> : confirmLabel}
+            disabled={!connected || !!busy || !detail}
             trailing={connected ? ArrowRight : Lock}
-            onPress={() => router.push("/reels/scheduled")}
+            onPress={() => void run("send")}
           />
           <Button label={t("publish.saveDraft")} variant="ghost" height={44} onPress={() => router.replace("/reels/results")} style={{ marginTop: -8 }} />
         </Footer>
@@ -49,16 +88,16 @@ export default function ReelsPublish() {
     >
       <Panel style={styles.summary}>
         <View style={styles.thumb}>
-          <Image source={photos.table} style={StyleSheet.absoluteFill} contentFit="cover" />
-          <Tag label={t("secondsShort", { seconds: 20 })} tone="dark" style={styles.thumbTag} />
+          <Image source={thumb ? { uri: thumb } : photos.table} style={StyleSheet.absoluteFill} contentFit="cover" />
+          <Tag label={t("secondsShort", { seconds: (detail?.price ?? 0) / 2 })} tone="dark" style={styles.thumbTag} />
         </View>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
             <View style={styles.greyDot} />
             <Text style={eyebrow}>{t("publish.readyToSchedule")}</Text>
           </View>
-          <Text style={[styles.title16, { paddingTop: 4 }]}>Bunting spotlight</Text>
-          <Text style={meta}>{t("publish.format", { product: "Acacia Massif" })}</Text>
+          <Text style={[styles.title16, { paddingTop: 4 }]}>{plan?.title ?? ""}</Text>
+          <Text style={meta}>{t("publish.format", { product: plan?.scenes[0].shot ?? "" })}</Text>
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel={t("publish.playPreview")} onPress={() => router.push("/reels/review")} style={styles.icon44}>
           <Play size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
@@ -81,9 +120,9 @@ export default function ReelsPublish() {
             </View>
           </View>
           <ActionButton
-            label={connected ? t("publish.connected") : t("publish.connect")}
+            label={connected ? account!.displayName : t("publish.connect")}
             variant={connected ? "outline" : "primary"}
-            onPress={() => setConnected((c) => !c)}
+            onPress={() => router.push("/business/connections")}
             style={{ paddingHorizontal: space[12] }}
           />
         </View>
@@ -92,8 +131,8 @@ export default function ReelsPublish() {
             <Download size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
             <Text style={metaInk}>{t("publish.orDownload")}</Text>
           </View>
-          <Pressable accessibilityRole="button" style={styles.textBtn}>
-            <Text style={strong14}>{t("publish.download")}</Text>
+          <Pressable accessibilityRole="button" disabled={!!busy} onPress={() => void run("download")} style={styles.textBtn}>
+            {busy === "download" ? <ActivityIndicator color={color.ink} /> : <Text style={strong14}>{t("publish.download")}</Text>}
           </Pressable>
         </View>
       </Panel>
@@ -109,10 +148,10 @@ export default function ReelsPublish() {
               <PickerBox label={t("publish.date")} value={date} icon={<CalendarDays size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />} />
               <PickerBox label={t("publish.time")} value={time} icon={<Clock size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />} />
             </View>
-            <Pressable accessibilityRole="button" accessibilityLabel={t("publish.timezoneA11y", { value: schedule.timezone })} style={[styles.box, styles.rowBetween]}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t("publish.timezoneA11y", { value: TIME_ZONE })} style={[styles.box, styles.rowBetween]}>
               <View>
                 <Text style={eyebrow}>{t("timezone")}</Text>
-                <Text style={metaInk}>{schedule.timezone}</Text>
+                <Text style={metaInk}>{TIME_ZONE}</Text>
               </View>
               <ChevronDown size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
             </Pressable>

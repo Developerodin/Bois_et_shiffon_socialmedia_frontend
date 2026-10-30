@@ -169,7 +169,7 @@ export async function reelDetail(scope: Omit<Scope, "userId">, itemId: string) {
   const body = latest?.body as { videoKey?: string } | undefined;
   const plan = ReelPlan.safeParse(latest?.body);
   return {
-    item: { id: item.id, title: item.title, status: item.status, postUrl: item.postUrl },
+    item: { id: item.id, title: item.title, status: item.status, postUrl: item.postUrl, scheduledFor: item.scheduledFor },
     version: latest?.version ?? 0,
     plan: plan.success ? plan.data : null,
     price: plan.success ? reelPrice(plan.data) : null,
