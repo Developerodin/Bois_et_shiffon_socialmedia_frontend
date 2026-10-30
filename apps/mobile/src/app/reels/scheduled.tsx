@@ -2,7 +2,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Check, Clock, Globe, Share2, Store, X, type LucideIcon } from "lucide-react-native";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { formatDate, formatNumber } from "@/i18n";
@@ -10,17 +10,29 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Footer } from "@/ui/layout";
 import { BrandPill, ICON, PageHeader, Panel, ReelsScreen, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
-import { brand, photos, schedule } from "@/ui/reels/sample";
+import { currentBrand } from "@/api/endpoints";
+import { photos } from "@/ui/reels/sample";
+import { useReel } from "@/ui/reels/use-reel";
 
-/** R09 · Reels / Schedule confirmation. */
+const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+/** R09 · Reels / Schedule confirmation, from the reel's real slot. */
 export default function ReelsScheduled() {
   const { t } = useTranslation("reels");
+  const { detail } = useReel();
+  const [brandName, setBrandName] = useState("");
+  useEffect(() => {
+    currentBrand().then((b) => setBrandName(b.name), () => {});
+  }, []);
+  const at = detail?.item.scheduledFor ? new Date(detail.item.scheduledFor) : new Date();
+  const plan = detail?.plan;
+  const thumb = plan ? detail?.photoUrls[plan.scenes[0].photoKey] : undefined;
   const date = t("publish.dateValue", {
-    day: formatNumber(schedule.at.getDate()),
-    month: formatDate(schedule.at, { month: "long" }),
-    year: formatNumber(schedule.at.getFullYear(), { useGrouping: false }),
+    day: formatNumber(at.getDate()),
+    month: formatDate(at, { month: "long" }),
+    year: formatNumber(at.getFullYear(), { useGrouping: false }),
   });
-  const time = formatDate(schedule.at, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const time = formatDate(at, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
   return (
     <ReelsScreen
       bg={rc.pageAlt}
@@ -59,16 +71,16 @@ export default function ReelsScheduled() {
 
       <Panel style={{ alignSelf: "stretch", marginTop: space[24] }}>
         <View style={styles.product}>
-          <Image source={photos.table} style={styles.thumb} contentFit="cover" />
-          <View>
-            <Text style={strong14}>Bunting spotlight</Text>
-            <Text style={meta}>{t("scheduled.meta", { seconds: 20 })}</Text>
+          <Image source={thumb ? { uri: thumb } : photos.table} style={styles.thumb} contentFit="cover" />
+          <View style={{ flex: 1 }}>
+            <Text style={strong14}>{plan?.title ?? ""}</Text>
+            <Text style={meta}>{t("scheduled.meta", { seconds: (detail?.price ?? 0) / 2 })}</Text>
           </View>
         </View>
         <View style={{ paddingTop: space[16], gap: space[12] }}>
           <Row Icon={Clock} label={t("scheduled.publishDate")} value={<Text style={metaInk}>{t("scheduled.dateTime", { date, time })}</Text>} />
-          <Row Icon={Globe} label={t("timezone")} value={<Text style={metaInk}>Europe/Paris</Text>} />
-          <Row Icon={Store} label={t("scheduled.brandWorkspace")} value={<Text style={metaInk}>{brand.name}</Text>} />
+          <Row Icon={Globe} label={t("timezone")} value={<Text style={metaInk}>{TIME_ZONE}</Text>} />
+          <Row Icon={Store} label={t("scheduled.brandWorkspace")} value={<Text style={metaInk}>{brandName}</Text>} />
           <Row
             Icon={Share2}
             label={t("scheduled.channel")}
