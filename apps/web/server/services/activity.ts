@@ -79,13 +79,19 @@ export async function activityList({ workspaceId, userId, page = 1 }: { workspac
     prisma.aiWorkflowRun.groupBy({ by: ["workspaceId", "userId"], where: { ...ws, ...(userId ? { userId } : {}) }, _sum: { costUsd: true }, _max: { createdAt: true } }),
     prisma.apiCall.groupBy({ by: ["workspaceId", "userId"], where: { ...(workspaceId ? { workspaceId } : { OR: [{ workspaceId: null }, { NOT: { workspaceId: TEST_WORKSPACE } }] }), ...(userId ? { userId } : {}) }, _sum: { costUsd: true }, _max: { createdAt: true } }),
   ]);
-  const all = mergeActivityCounts({
+  const sources = {
     visits: visits.map((g) => ({ userId: g.userId, workspaceId: g.workspaceId, n: g._count._all, last: last(g) })),
     actions: actions.map((g) => ({ userId: g.actorUserId, workspaceId: g.workspaceId, n: g._count._all, last: last(g) })),
     tasks: tasks.map((g) => ({ userId: g.triggeredByUserId, workspaceId: g.workspaceId, n: g._count._all, last: last(g) })),
     ai: ai.map((g) => ({ userId: g.userId, workspaceId: g.workspaceId, usd: Number(g._sum.costUsd ?? 0), last: last(g) })),
     api: api.map((g) => ({ userId: g.userId, workspaceId: g.workspaceId, usd: Number(g._sum.costUsd ?? 0), last: last(g) })),
-  });
+  };
+  // Accounts removed from the database (only smoke-test scripts do that; the app marks people deleted and keeps them)
+  // have no name left: their activity joins the workspace's unattributed row.
+  const ids = [...new Set(Object.values(sources).flatMap((list) => list.map((c) => c.userId).filter((x): x is string => !!x)))];
+  const kept = new Set((await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true } })).map((u) => u.id));
+  const known = (list: Counted[]) => list.map((c) => (c.userId && !kept.has(c.userId) ? { ...c, userId: null } : c));
+  const all = mergeActivityCounts({ visits: known(sources.visits), actions: known(sources.actions), tasks: known(sources.tasks), ai: known(sources.ai), api: known(sources.api) });
   const rows = all.slice((page - 1) * PAGE, page * PAGE);
   const names = await nameLookup(rows);
   return { hasMore: all.length > page * PAGE, rows: rows.map((r) => ({ ...r, ...names(r) })) };
