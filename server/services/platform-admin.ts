@@ -13,6 +13,11 @@ import { prisma } from "@/server/db/prisma";
  */
 const DAY = 86_400_000;
 export const PAGE = 50;
+/** `?page=` as a page number: anything odd is page 1. ponytail: capped at 1000 (deep pages read more rows, see activity.ts). */
+export const pageNumber = (v?: string) => {
+  const n = Number(v);
+  return Number.isSafeInteger(n) && n > 0 ? Math.min(n, 1000) : 1;
+};
 const TEST_WORKSPACE = "eval";
 const num = (d: Prisma.Decimal | number | null | undefined) => Number(d ?? 0);
 const since = (days: number | null) => (days ? new Date(Date.now() - days * DAY) : undefined);

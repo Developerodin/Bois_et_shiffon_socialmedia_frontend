@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { Ago, Empty, Money, PageHeader, Pager, Pill, Stat, Table, withQuery } from "@/components/admin/ui";
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { personSummary, personTimeline } from "@/server/services/activity";
-import { PAGE, pickerOptions } from "@/server/services/platform-admin";
+import { NO_WORKSPACE, personSummary, personTimeline } from "@/server/services/activity";
+import { PAGE, pageNumber, pickerOptions } from "@/server/services/platform-admin";
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Person activity · Platform admin" };
@@ -17,8 +17,9 @@ export default async function AdminPersonActivity({ params, searchParams }: { pa
   const { userId } = await params;
   const q = await searchParams;
   const ws = q.ws || undefined;
-  const page = Math.max(1, Number(q.page) || 1);
-  const [s, t, options, fx] = await Promise.all([personSummary({ userId, workspaceId: ws }), personTimeline({ userId, workspaceId: ws, page }), pickerOptions(), usdInrRate()]);
+  const workspaceId = ws === NO_WORKSPACE ? null : ws; // null: only what happened outside any workspace
+  const page = pageNumber(q.page);
+  const [s, t, options, fx] = await Promise.all([personSummary({ userId, workspaceId }), personTimeline({ userId, workspaceId, page }), pickerOptions(), usdInrRate()]);
   if (!s) notFound();
   const name = s.user.name ?? s.user.email;
   const path = `/admin/activity/${userId}`;
@@ -33,10 +34,10 @@ export default async function AdminPersonActivity({ params, searchParams }: { pa
         </Link>
       </PageHeader>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat label="AI spend" value={<Money usd={s.aiUsd} fx={fx} />} hint={ws ? "in this workspace" : "everywhere"} />
+        <Stat label="AI spend" value={<Money usd={s.aiUsd} fx={fx} />} hint={workspaceId === null ? "outside any workspace" : ws ? "in this workspace" : "everywhere"} />
         <Stat label="Other paid APIs" value={<Money usd={s.apiUsd} fx={fx} />} hint="maps, page speed, phone checks" />
       </div>
-      <ActivityPickers ws={ws} options={options} person={false} />
+      <ActivityPickers ws={ws} options={options} person={false} noWorkspace />
       <Table
         wide
         head={["When", "What", "Detail", "Workspace", "Project", "Cost"]}

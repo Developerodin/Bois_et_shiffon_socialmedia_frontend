@@ -23,8 +23,9 @@ export function PageViewTracker({ workspaceId, brandId }: { workspaceId: string 
   const path = usePathname();
   const sent = useRef<string | null>(null); // React runs effects twice in development: one visit, one row
   useEffect(() => {
-    if (sent.current === path) return;
-    sent.current = path;
+    const key = `${path}|${workspaceId}|${brandId}`; // switching workspace or project on the same page is a new visit
+    if (sent.current === key) return;
+    sent.current = key;
     sendPageView(path, workspaceId, brandId);
   }, [path, workspaceId, brandId]);
   return null;
