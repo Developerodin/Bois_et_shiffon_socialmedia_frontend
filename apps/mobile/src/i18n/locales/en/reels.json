@@ -81,7 +81,12 @@
     "openingHook": "Opening hook",
     "reviewStoryboard_one": "Review storyboard ({{count}} scene)",
     "reviewStoryboard_other": "Review storyboard ({{count}} scenes)",
-    "readyStatus": "Ready to generate or refine"
+    "readyStatus": "Ready to generate or refine",
+    "empty": "Tell me what the reel should show, or pick an idea first.",
+    "writing": "Writing…",
+    "planMeta_one": "{{count}} scene · ~{{seconds}}s",
+    "planMeta_other": "{{count}} scenes · ~{{seconds}}s",
+    "makeItSeconds": "Make it about {{seconds}} seconds."
   },
   "storyboard": {
     "title": "Storyboard",
