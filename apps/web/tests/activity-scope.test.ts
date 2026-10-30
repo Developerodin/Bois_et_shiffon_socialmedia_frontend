@@ -61,6 +61,28 @@ describe("admin console actions stay in Logs, not Activity", () => {
   });
 });
 
+describe("unattributed activity on the list", () => {
+  it("everyone: counts rows with no person too, but not the test runs", async () => {
+    await activityList({});
+    const ai = m.runCost.mock.calls[0][0].where;
+    expect(ai).not.toHaveProperty("userId");
+    expect(ai).toMatchObject({ NOT: { workspaceId: "eval" } });
+  });
+
+  it("never filters visits, actions or other API calls in a way that drops rows with no workspace", async () => {
+    await activityList({});
+    // NOT (workspaceId = 'eval') is unknown, so false, for NULL in SQL: those nullable columns must not use it bare.
+    expect(m.groups.mock.calls.find(([q]) => q.by.includes("userId") && !("_sum" in q))![0].where).not.toHaveProperty("NOT");
+    expect(m.auditGroups.mock.calls[0][0].where).not.toHaveProperty("workspaceId");
+    expect(m.groups.mock.calls.find(([q]) => q.by.includes("userId") && "_sum" in q)![0].where).toMatchObject({ OR: [{ workspaceId: null }, { NOT: { workspaceId: "eval" } }] });
+  });
+
+  it("one person: only theirs", async () => {
+    await activityList({ userId: "u1" });
+    expect(m.runCost.mock.calls[0][0].where).toMatchObject({ userId: "u1" });
+  });
+});
+
 describe("a deleted account's activity", () => {
   it("still has a summary, with no user", async () => {
     m.user.mockResolvedValue(null);

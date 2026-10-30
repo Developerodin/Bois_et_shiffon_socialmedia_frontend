@@ -23,7 +23,7 @@ export default async function AdminActivity({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader eyebrow="Platform admin" title="Activity">
-        One row per person per workspace, most recently active first, {PAGE} a page. Open someone for their timeline. Chat text is never shown.
+        One row per person per workspace, most recently active first, {PAGE} a page, plus each workspace’s unattributed activity. Open someone for their timeline. Chat text is never shown.
       </PageHeader>
       <ActivityPickers ws={ws} user={user} options={options} />
       <Table
@@ -32,9 +32,16 @@ export default async function AdminActivity({ searchParams }: { searchParams: Pr
         numeric={[3, 4, 5, 6]}
         empty="No activity recorded yet."
         rows={a.rows.map((r) => [
-          <Link key="p" href={withQuery(`/admin/activity/${r.userId}`, {}, { ws: r.workspaceId ?? NO_WORKSPACE })} className="font-medium underline-offset-4 hover:underline">
-            {r.who}
-          </Link>,
+          r.userId ? (
+            <Link key="p" href={withQuery(`/admin/activity/${r.userId}`, {}, { ws: r.workspaceId ?? NO_WORKSPACE })} className="font-medium underline-offset-4 hover:underline">
+              {r.who}
+            </Link>
+          ) : (
+            <div key="p">
+              <span className="font-medium">Unattributed</span>
+              <p className="text-xs text-muted-foreground">system runs, or before people were recorded</p>
+            </div>
+          ),
           r.workspace ?? <span key="w" className="text-muted-foreground">no workspace</span>,
           <Ago key="l" at={r.last} />,
           count(r.visits, "v"),
