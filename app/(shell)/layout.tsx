@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { PageViewTracker } from "@/components/page-view-tracker";
 import { MainArea } from "@/components/workspace/main-area";
 import { TopBar, type TopBarScores } from "@/components/workspace/top-bar";
 import { effectivePermissions } from "@/server/auth/permissions";
@@ -57,6 +58,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
         platformAdmin={await isPlatformAdmin(session.user.id)}
       />
       <MainArea>{children}</MainArea>
+      <PageViewTracker workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} />
     </div>
   );
 }
