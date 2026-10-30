@@ -93,8 +93,8 @@ export const setBrandWebsite = (ws: string, brandId: string, websiteUrl: string)
 export const startResearch = (ws: string, brandId: string) =>
   api<{ run: { id: string } }>(`${brandBase(ws, brandId)}/agents/research/runs`, { body: {}, workspaceId: ws });
 
-/** Scout's first post ideas for onboarding (A11). `ideas` is how many it found; null run = none started yet. */
-export type FirstIdeas = { run: { id: string; status: RunStatus; error: string | null; ideas: number } | null };
+/** Scout's first post ideas for onboarding (A11). `ideas` is how many it found; null run = none started yet. `waiting`: Research is still writing, ask again. */
+export type FirstIdeas = { run: { id: string; status: RunStatus; error: string | null; ideas: number } | null; waiting?: boolean };
 /** Starts the first ideas run, or returns the brand's existing one (never a second). */
 export const startFirstIdeas = (ws: string, brandId: string) => api<FirstIdeas>(`${brandBase(ws, brandId)}/first-ideas`, { method: "POST", body: {}, workspaceId: ws });
 export const firstIdeas = (ws: string, brandId: string, signal?: AbortSignal) => api<FirstIdeas>(`${brandBase(ws, brandId)}/first-ideas`, { workspaceId: ws, signal });

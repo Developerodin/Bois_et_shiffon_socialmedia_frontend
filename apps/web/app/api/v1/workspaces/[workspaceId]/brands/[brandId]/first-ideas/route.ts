@@ -24,7 +24,8 @@ function view(run: AgentRun | null) {
 /**
  * The brand's first post ideas (mobile onboarding A11): Scout run as part of onboarding, so it's free like Research.
  * GET follows the latest Scout run (null before any). POST starts one only when the brand has none yet, or the
- * last one failed; otherwise it returns that run, so going back and forth never starts a second.
+ * last one failed; otherwise it returns that run, so going back and forth never starts a second. While Research is
+ * still writing, POST answers `waiting: true` and starts nothing.
  */
 export async function GET(request: Request, context: { params: Promise<BrandRouteParams> }) {
   try {
@@ -45,6 +46,14 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     if (scope instanceof Response) return scope;
     const latest = await latestScout(scope);
     if (latest && latest.status !== "FAILED") return Response.json(view(latest));
+    // Scout plans from Research's five documents, which now finish after onboarding has moved on to A09: don't start
+    // it until they're written. The app asks again. A failed Research still lets Scout work from what was written.
+    // (Other runners can run jobs in parallel, so the queue's order alone doesn't guarantee this.)
+    const research = await prisma.agentRun.findFirst({ where: { brandId: scope.brandId, workspaceId: scope.workspaceId, agentKey: "research" }, orderBy: { createdAt: "desc" }, select: { status: true } });
+    if (research?.status === "QUEUED" || research?.status === "RUNNING") {
+      await kickIfDue().catch(() => {});
+      return Response.json({ run: null, waiting: true }, { status: 202 });
+    }
     const { allowed } = await hitRateLimit(`first-ideas:${scope.brandId}`, RESTARTS_PER_DAY, 86_400_000);
     if (!allowed) {
       return problemResponse({ type: "https://api.brandpilot/errors/agent-start", title: "Agent could not start", status: 429, detail: "Finding ideas failed several times today. Your ideas will come with tomorrow's daily run." });

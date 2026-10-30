@@ -23,6 +23,7 @@ const POLL_MS = 2500;
  */
 function useFirstIdeas() {
   const [run, setRun] = useState<FirstIdeas["run"]>(null);
+  const [waiting, setWaiting] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
@@ -44,10 +45,18 @@ function useFirstIdeas() {
           if (!ctrl.signal.aborted) timer = setTimeout(poll, POLL_MS * 2);
         },
       );
-    startFirstIdeas(ws, brandId).then(
-      (r) => !ctrl.signal.aborted && follow(r.run),
-      (e) => !ctrl.signal.aborted && setFailed(e instanceof ApiError ? e.message : i18n.t("onboarding:preparing.errors.startFailed")),
-    );
+    // Research may still be writing the documents Scout plans from: the server says wait, and this asks again.
+    const start = () =>
+      startFirstIdeas(ws, brandId).then(
+        (r) => {
+          if (ctrl.signal.aborted) return;
+          setWaiting(!!r.waiting);
+          if (r.waiting) timer = setTimeout(start, POLL_MS);
+          else follow(r.run);
+        },
+        (e) => !ctrl.signal.aborted && setFailed(e instanceof ApiError ? e.message : i18n.t("onboarding:preparing.errors.startFailed")),
+      );
+    start();
     return () => {
       ctrl.abort();
       clearTimeout(timer);
@@ -56,6 +65,7 @@ function useFirstIdeas() {
 
   return {
     run,
+    waiting,
     failed: !ws || !brandId ? i18n.t("onboarding:preparing.errors.noBrand") : failed,
     retry: () => {
       setFailed(null);
@@ -67,7 +77,7 @@ function useFirstIdeas() {
 /** A11 · Onboarding / Preparing content (Figma 408:809). Follows the brand's first Scout run. */
 export default function Preparing() {
   const { t } = useTranslation("onboarding");
-  const { run, failed, retry } = useFirstIdeas();
+  const { run, waiting, failed, retry } = useFirstIdeas();
   const ready = run?.status === "SUCCEEDED";
   const { data: brand } = useBrandAssets();
   const photos = brand?.assets?.products.filter((p) => p.image) ?? [];
@@ -143,7 +153,7 @@ export default function Preparing() {
             </View>
           }
           title={t("preparing.ideasTitle")}
-          detail={ready ? (run.ideas ? t("preparing.ideasFound", { count: run.ideas }) : t("preparing.ideasNone")) : t("preparing.ideasDetail")}
+          detail={ready ? (run.ideas ? t("preparing.ideasFound", { count: run.ideas }) : t("preparing.ideasNone")) : waiting ? t("preparing.finishingResearch") : t("preparing.ideasDetail")}
           state={ready ? "done" : failed ? "queued" : "running"}
           emphasis
         />

@@ -12,8 +12,8 @@ const POLL_MS = 2500;
 
 /**
  * Creates the brand from the website (server starts Research + SEO + GEO) and follows the Research run:
- * any event of this run → step 1; all five strategy docs drafted by this run (Research then collects logo, colours and
- * photos) → step 2; run SUCCEEDED → done.
+ * any event of this run → step 1; summary written → step 2; logo, colours and photos collected too ("ready for review")
+ * → done, while the five strategy documents keep going in the background.
  * Without a website (A07) the brand is made from onboarding.business and Research finds it online.
  * ponytail: polling every 2.5s while the screen is open; switch to server-sent events if it ever matters.
  */
@@ -37,11 +37,12 @@ export function useResearch(site: string | undefined): ResearchProgress {
         const run = docs.research?.runId === runId ? docs.research : null;
         // Documents this run wrote: the brand may already have all five from an earlier run (a retry, a website added on A09).
         const mine = ev.events.filter((e) => e.runId === runId);
-        const drafted = mine.filter((e) => e.entityType === "BrandContextDoc").length;
-        const read = mine.length > 0;
+        const has = (type: string) => mine.some((e) => e.entityType === type);
+        // What A09/A10 show is ready: the owner goes on while the five documents finish on the server (A11 waits for them).
+        if (has("BrandReview") || run?.status === "SUCCEEDED") return setStep(3);
         if (run?.status === "FAILED") return setFailed(run.error ?? i18n.t("onboarding:learning.errors.stopped"));
-        setStep(run?.status === "SUCCEEDED" ? 3 : drafted >= 5 ? 2 : read || run?.status === "RUNNING" ? 1 : 0);
-        if (run?.status !== "SUCCEEDED") timer = setTimeout(() => void poll(ws, brandId, runId), POLL_MS);
+        setStep(has("BrandSummary") ? 2 : mine.length > 0 || run?.status === "RUNNING" ? 1 : 0);
+        timer = setTimeout(() => void poll(ws, brandId, runId), POLL_MS);
       } catch (e) {
         if (ctrl.signal.aborted) return;
         // A network blip shouldn't end onboarding: keep polling.
