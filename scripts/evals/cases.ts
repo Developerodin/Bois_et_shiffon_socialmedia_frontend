@@ -60,8 +60,8 @@ function corpus(pages: Page[]) {
 }
 const docPrompt = (pages: Page[], title: string, kind: keyof typeof GUIDANCE) =>
   `Brand: ${F.brand.name}\nWebsite: ${F.brand.website}\n\nWebsite pages:\n${corpus(pages)}\n\n---\nDocument to write: ${title}\nWhat it must cover: ${GUIDANCE[kind]}`;
-const summaryPrompt = (page: Page | undefined, docs: typeof F.docs = F.docs) =>
-  `Brand: ${F.brand.name}\nHomepage title: ${page?.title ?? "-"}\nHomepage description: ${page?.description ?? "-"}\nHomepage text (menus and cart included; the slogan is often well down the page): ${page?.text.slice(0, 6000) ?? "-"}\n\n${docs.map((d) => `## ${d.title}\n${d.markdown?.slice(0, 2000) ?? "(not written)"}`).join("\n\n")}`;
+const summaryPrompt = (page: Page | undefined, material = corpus(F.pages)) =>
+  `Brand: ${F.brand.name}\nHomepage title: ${page?.title ?? "-"}\nHomepage description: ${page?.description ?? "-"}\nHomepage text (menus and cart included; the slogan is often well down the page): ${page?.text.slice(0, 6000) ?? "-"}\n\nEverything read about the business:\n${material.slice(0, 12_000)}`;
 const lookupPrompt = (name: string, sells: string, location: string) => `Business name: ${name}\nWhat they sell (owner's words): ${sells}\nLocation: ${location}`;
 const creatorPrompt = (brief: unknown, channel = F.post.channel, title = F.post.title) =>
   `Brand: ${F.brand.name}\n\nBrand knowledge:\n${F.knowledge.creator}\n\n---\nThe post to write\nChannel: ${channel}\nPost: ${title}\nBrief: ${JSON.stringify(brief)}\n\nFill unused fields with "" or []: slides only for carousels, script only for Reels, pinTitle only for Pinterest.`;
@@ -110,9 +110,9 @@ export const CASES: Case[] = [
   }),
   def({
     id: "summary.no-website", kind: "quality", workflowId: "research.summary", system: SUMMARY_SYSTEM, schema: SummaryDraft,
-    // A brand without a website: no homepage, and its documents come from the online lookup, not the site (the
-    // fixture's documents quote the site, so they're left out here).
-    prompt: summaryPrompt(undefined, []),
+    // A brand without a website: no homepage, and its material comes from the online lookup, not the site (the
+    // fixture's pages are the site, so they're left out here).
+    prompt: summaryPrompt(undefined, `Business name: ${F.brand.name}`),
     expect: (o) => fail(o.tagline !== "", `no homepage, so no tagline; got "${o.tagline}"`),
   }),
   def({

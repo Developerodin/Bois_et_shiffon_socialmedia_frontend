@@ -218,23 +218,32 @@ export const researchAgent: AgentDefinition = {
       }
     };
 
+    // The short summary A09 shows, from the material rather than the documents. Websites and A07 brands alike.
+    const summarize = async () => {
+      try {
+        const summary = await writeSummary(ctx, pages?.[0], text, foundWebsite);
+        if (summary) await ctx.log("SUCCESS", "Summary written for review", { type: "BrandSummary", id: brand.brandId });
+      } catch (error) {
+        // Message only (an out-of-credits error says so here too).
+        await ctx.log("WARN", `Couldn't write the summary: ${error instanceof Error ? error.message.slice(0, 200) : "unknown error"}`);
+      }
+    };
+
+    // Everything A09 and A10 show, then a marker the app watches: it lets the owner go on (~30 s) while the documents
+    // finish. A11's Scout waits for the documents (first-ideas route). Both halves are best-effort, so this never throws.
+    const prepareReview = async () => {
+      await Promise.all([collectAssets(), summarize()]);
+      await ctx.log("SUCCESS", "Ready for review", { type: "BrandReview", id: brand.brandId });
+    };
+
     // allSettled: one failed document mustn't abandon the others mid-call. Finished ones are saved, and a retry
     // (`done` above) writes only what's missing.
     const results = await Promise.allSettled([
       ...CONTEXT_DOC_KINDS.filter(({ kind }) => !done.some((d) => d.kind === kind)).map(writeDoc),
-      collectAssets(),
+      prepareReview(),
     ]);
     const failure = results.find((r) => r.status === "rejected");
     if (failure) throw failure.reason;
-
-    // Last, since it reads the documents: the short summary A09 shows. Websites and A07 brands alike.
-    try {
-      const summary = await writeSummary(ctx, pages?.[0], foundWebsite);
-      if (summary) await ctx.log("SUCCESS", "Summary written for review");
-    } catch (error) {
-      // Message only (an out-of-credits error says so here too); the documents are already saved.
-      await ctx.log("WARN", `Couldn't write the summary: ${error instanceof Error ? error.message.slice(0, 200) : "unknown error"}`);
-    }
     return { pagesRead, failures };
   },
 };
