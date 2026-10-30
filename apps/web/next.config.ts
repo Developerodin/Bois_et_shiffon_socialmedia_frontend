@@ -2,6 +2,9 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Reel joining runs ffmpeg (server/reels/join.ts); jobs run in any API route's after(), so every v1 route ships the binary (ponytail: ~75 MB per function; move rendering to one route if size bites).
+  outputFileTracingIncludes: { "/api/v1/**/*": ["../../node_modules/ffmpeg-static/ffmpeg*"] },
+  serverExternalPackages: ["ffmpeg-static"],
   turbopack: {
     // Monorepo root: npm workspaces hoist `next` into ../../node_modules.
     root: path.join(__dirname, "../.."),

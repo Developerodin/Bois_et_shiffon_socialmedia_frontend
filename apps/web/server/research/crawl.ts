@@ -79,13 +79,13 @@ export async function safeFetch(raw: string, accept = "text/html", signal?: Abor
 }
 
 /** Same guard as safeFetch, raw bytes (images). `truncated` = the body hit maxBytes and was cut. `signal` = caller's overall deadline. */
-export async function safeFetchBytes(raw: string, accept: string, maxBytes = MAX_BYTES, signal?: AbortSignal): Promise<{ url: URL; status: number; bytes: Uint8Array; contentType: string; truncated: boolean }> {
+export async function safeFetchBytes(raw: string, accept: string, maxBytes = MAX_BYTES, signal?: AbortSignal, timeoutMs = TIMEOUT_MS): Promise<{ url: URL; status: number; bytes: Uint8Array; contentType: string; truncated: boolean }> {
   let url = await assertPublicUrl(raw);
   for (let hop = 0; hop < 4; hop++) {
     const res = await fetch(url, {
       redirect: "manual",
       headers: { "user-agent": USER_AGENT, accept },
-      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(TIMEOUT_MS)]) : AbortSignal.timeout(TIMEOUT_MS),
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs),
     });
     if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
       await res.body?.cancel();
