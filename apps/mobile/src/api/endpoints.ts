@@ -23,6 +23,8 @@ export const auth = {
     await session.save(r.token);
     return r.user;
   },
+  /** Email-first sign-in: which screen comes next for this email. */
+  emailStep: (email: string) => api<{ next: "password" | "code" | "register" }>("/mobile/email-step", { body: { email } }),
   async passwordSignIn(email: string, password: string) {
     const r = await api<{ token: string; user: Me["user"] }>("/mobile/password", { body: { email, password } });
     await session.save(r.token);

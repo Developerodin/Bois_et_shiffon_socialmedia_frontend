@@ -21,7 +21,6 @@
     "useMobile": "Use mobile number instead",
     "linkTitle": "Add your email",
     "linkSubtitle": "Your number is verified. Add an email for receipts and team invites. We’ll send it a code.",
-    "passwordSubtitle": "Sign in with your email and password.",
     "registerTitle": "Create your account",
     "registerSubtitle": "Choose a password. We will email you a code to confirm your address.",
     "passwordLabel": "Password",
@@ -32,9 +31,7 @@
     "signIn": "Sign in",
     "createAccount": "Create account",
     "signInFailed": "Couldn't sign in. Try again.",
-    "useCode": "Use an email code instead",
-    "usePassword": "Sign in with a password",
-    "register": "New here? Create an account"
+    "subtitleEmailFirst": "Enter your email. We will ask for your password, or send you a code."
   },
   "verify": {
     "title": "Enter your code",
@@ -376,5 +373,12 @@
     "errors": {
       "failed": "Couldn’t search Google Maps. Try again."
     }
+  },
+  "password": {
+    "title": "Welcome back",
+    "subtitle": "Enter your password to sign in.",
+    "change": "Change",
+    "changeEmail": "Signing in as {{email}}. Change email",
+    "useCode": "Forgot it? Sign in with an email code"
   }
 }
