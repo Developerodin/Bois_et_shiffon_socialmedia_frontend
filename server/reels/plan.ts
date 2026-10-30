@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MODEL_IDS, SCENE_KINDS } from "@/server/reels/router";
 import { CREDIT_COSTS } from "@/server/services/credits";
 
 /**
@@ -11,6 +12,10 @@ export const ReelScene = z.object({
   direction: z.string().max(500),
   onScreenText: z.string().max(80),
   voiceText: z.string().min(1).max(400),
+  // Set by the reel director: what kind of scene, the video model it routes to, and the prompt written for that model.
+  kind: z.enum(SCENE_KINDS).optional(),
+  model: z.enum(MODEL_IDS).optional(),
+  prompt: z.string().max(1200).optional(),
 });
 export const ReelPlan = z.object({
   title: z.string().min(1).max(120),

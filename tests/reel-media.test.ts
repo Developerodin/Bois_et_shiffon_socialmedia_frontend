@@ -57,7 +57,7 @@ describe("higgsfield", () => {
 
   it("animates a photo with our key, a webhook and an idempotency key", async () => {
     respond(200, { status: "queued", request_id: "r1" });
-    const id = await higgsfield.animate({ photoUrl: "https://s3/p.jpg", prompt: "push in", seconds: 8, webhook: "https://app/hook?s=x", idempotencyKey: "rend:clip:0" });
+    const id = await higgsfield.animate({ model: "kling-3-std", photoUrl: "https://s3/p.jpg", prompt: "push in", seconds: 8, webhook: "https://app/hook?s=x", idempotencyKey: "rend:clip:0" });
     expect(id).toBe("r1");
     const { url, init } = calls[0];
     expect(url).toBe(`https://api.higgsfield.ai/kling-video/v3.0/std/image-to-video?hf_webhook=${encodeURIComponent("https://app/hook?s=x")}`);
@@ -71,7 +71,7 @@ describe("higgsfield", () => {
     vi.stubEnv("HIGGSFIELD_API_KEY_ID", "id2");
     vi.stubEnv("HIGGSFIELD_API_KEY_SECRET", "secret2");
     respond(200, { request_id: "r2" });
-    await higgsfield.animate({ photoUrl: "https://s3/p.jpg", prompt: "p", seconds: 3, webhook: "https://app/h", idempotencyKey: "k" });
+    await higgsfield.animate({ model: "kling-3-std", photoUrl: "https://s3/p.jpg", prompt: "p", seconds: 3, webhook: "https://app/h", idempotencyKey: "k" });
     expect((calls[0].init.headers as Record<string, string>).Authorization).toBe("Key id2:secret2");
   });
 
@@ -87,7 +87,7 @@ describe("higgsfield", () => {
 
   it("surfaces Higgsfield's reason on a refusal", async () => {
     respond(403, { detail: "not_enough_credits" });
-    await expect(higgsfield.animate({ photoUrl: "https://s3/p.jpg", prompt: "p", seconds: 3, webhook: "https://app/h", idempotencyKey: "k" })).rejects.toThrow(/not_enough_credits/);
+    await expect(higgsfield.animate({ model: "kling-3-std", photoUrl: "https://s3/p.jpg", prompt: "p", seconds: 3, webhook: "https://app/h", idempotencyKey: "k" })).rejects.toThrow(/not_enough_credits/);
   });
 
   it("never downloads from a private address", async () => {
