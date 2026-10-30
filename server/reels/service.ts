@@ -5,6 +5,7 @@ import { prisma } from "@/server/db/prisma";
 import { directScenes, type ReelPhoto, writePlan } from "@/server/reels/agents";
 import { isStudioPlan, planProblems, ReelPlan, reelPrice, reelSeconds, toVersionBody } from "@/server/reels/plan";
 import { renderView } from "@/server/reels/render";
+import { creditBalance } from "@/server/services/credits";
 import { decide, lock, PublishingError, TX } from "@/server/services/publishing";
 import { signedMediaUrl } from "@/server/storage/media";
 
@@ -177,5 +178,6 @@ export async function reelDetail(scope: Omit<Scope, "userId">, itemId: string) {
     checks: latest?.checks[0] ? { overall: latest.checks[0].overall, results: latest.checks[0].results } : null,
     renders: await renderView(item.id),
     chat: chatOf(item.brief),
+    credits: await creditBalance(scope.workspaceId),
   };
 }
