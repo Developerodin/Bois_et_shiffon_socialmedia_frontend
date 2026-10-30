@@ -327,8 +327,14 @@ export async function platformLogs({ kind, workspaceId, actorId, status, include
 
   const hasMore = rows.length > PAGE;
   rows = rows.slice(0, PAGE);
-  // Names for the ids: people (incl. ones who've left), projects and workspaces.
-  const ids = (k: "workspaceId" | "brandId" | "userId") => [...new Set(rows.map((r) => r[k]).filter((x): x is string => !!x))];
+  const names = await nameLookup(rows);
+  return { hasMore, rows: rows.map((r) => ({ ...r, ...names(r) })) };
+}
+
+type Named = { userId?: string | null; workspaceId?: string | null; brandId?: string | null };
+/** Names for the ids on a page of rows: people by email (incl. ones who've left), projects and workspaces. */
+export async function nameLookup(rows: Named[]) {
+  const ids = (k: keyof Named) => [...new Set(rows.map((r) => r[k]).filter((x): x is string => !!x))];
   const [people, brands, workspaces] = await Promise.all([
     prisma.user.findMany({ where: { id: { in: ids("userId") } }, select: { id: true, email: true } }),
     prisma.brand.findMany({ where: { id: { in: ids("brandId") } }, select: { id: true, displayName: true } }),
@@ -337,15 +343,11 @@ export async function platformLogs({ kind, workspaceId, actorId, status, include
   const person = new Map(people.map((p) => [p.id, p.email]));
   const brand = new Map(brands.map((b) => [b.id, b.displayName]));
   const ws = new Map(workspaces.map((w) => [w.id, w.name]));
-  return {
-    hasMore,
-    rows: rows.map((r) => ({
-      ...r,
-      who: r.userId ? (person.get(r.userId) ?? "(deleted user)") : null,
-      brand: r.brandId ? (brand.get(r.brandId) ?? "(deleted project)") : null,
-      workspace: r.workspaceId === TEST_WORKSPACE ? "Test runs" : r.workspaceId ? (ws.get(r.workspaceId) ?? "(deleted workspace)") : null,
-    })),
-  };
+  return (r: Named) => ({
+    who: r.userId ? (person.get(r.userId) ?? "(deleted user)") : null,
+    workspace: r.workspaceId === TEST_WORKSPACE ? "Test runs" : r.workspaceId ? (ws.get(r.workspaceId) ?? "(deleted workspace)") : null,
+    brand: r.brandId ? (brand.get(r.brandId) ?? "(deleted project)") : null,
+  });
 }
 export type LogRow = Awaited<ReturnType<typeof platformLogs>>["rows"][number];
 
