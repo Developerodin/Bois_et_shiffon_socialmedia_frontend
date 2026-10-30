@@ -1,12 +1,14 @@
 import { createHash, randomInt } from "node:crypto";
+import bcrypt from "bcryptjs";
 import { createRemoteJWKSet, jwtVerify, SignJWT } from "jose";
 import { z } from "zod";
+import { checkPassword, LoginRateLimited } from "@/server/auth/password-check";
 import { issueMobileToken } from "@/server/auth/request-user";
 import { clientIp, hitRateLimit, limitKey } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
 import { queueEmail } from "@/server/email/outbox";
 import { signInCodeHtml } from "@/server/email/sign-in-code";
-import { AccountFlowError } from "@/server/services/accounts";
+import { AccountFlowError, Password } from "@/server/services/accounts";
 import { provisionGoogleUser } from "@/server/services/google-signup";
 import { recordApiCall } from "@/server/usage/api-calls";
 
@@ -53,15 +55,61 @@ export async function verifyEmailCode(input: z.infer<typeof CodeInput>, request:
   const { email, code } = input;
   // Checked before the code is used up, so a stale ticket doesn't cost the person their code.
   const phone = input.phoneTicket ? await readPhoneTicket(input.phoneTicket) : null;
-  const attempts = await hitRateLimit(limitKey("mobile-verify:email", email), 8, 15 * 60_000);
-  if (!attempts.allowed) throw new AccountFlowError("Too many attempts. Request a new code in 15 minutes.", 429);
-
-  // Single use: the delete is the check, so two parallel submits can't both succeed.
-  const used = await prisma.verificationToken.deleteMany({ where: { identifier: identifier(email), token: hash(email, code), expires: { gt: new Date() } } });
-  if (used.count !== 1) throw new AccountFlowError("That code is wrong or has expired.", 400);
+  await spendCode(email, code);
   const result = await signInVerifiedEmail({ email, name: null }, "mobile-email-code", request);
   // The code is already spent: a failed link must not also fail the sign-in. They can add the number again.
   if (phone) await linkPhone(result.user.id, phone).catch((e: unknown) => console.error("[mobile-auth] phone link failed", e));
+  return result;
+}
+
+/** Spends an emailed code: throws unless it's right and unexpired. */
+async function spendCode(email: string, code: string) {
+  const attempts = await hitRateLimit(limitKey("mobile-verify:email", email), 8, 15 * 60_000);
+  if (!attempts.allowed) throw new AccountFlowError("Too many attempts. Request a new code in 15 minutes.", 429);
+  // Single use: the delete is the check, so two parallel submits can't both succeed.
+  const used = await prisma.verificationToken.deleteMany({ where: { identifier: identifier(email), token: hash(email, code), expires: { gt: new Date() } } });
+  if (used.count !== 1) throw new AccountFlowError("That code is wrong or has expired.", 400);
+}
+
+/**
+ * Email + password on the phone. Sign-in shares web's check (rate limits, timing, audit).
+ * Registration proves the email first: the code goes out on start, and the password is only saved once the code
+ * checks out (the app keeps the password in memory between the two screens; nothing is stored before then).
+ */
+export const PasswordSignInInput = EmailInput.extend({ password: z.string().min(1).max(200) });
+export const RegisterInput = EmailInput.extend({ password: z.string().max(200) });
+export const RegisterVerifyInput = RegisterInput.extend({ code: Code });
+
+export async function passwordSignIn(input: z.infer<typeof PasswordSignInInput>, request: Request) {
+  const user = await checkPassword(input.email, input.password, request).catch((e: unknown) => {
+    if (e instanceof LoginRateLimited) throw new AccountFlowError("Too many attempts. Try again in 15 minutes, or sign in with an email code.", 429);
+    throw e;
+  });
+  if (!user) throw new AccountFlowError("Wrong email or password.", 400); // not 401: the app reads 401 as "session expired"
+  return { token: await issueMobileToken(user), user: { id: user.id, email: user.email, name: user.name } };
+}
+
+const validPassword = (password: string) => {
+  const ok = Password.safeParse(password);
+  if (!ok.success) throw new AccountFlowError(ok.error.issues[0]?.message ?? "Choose a longer password.", 400);
+};
+
+export async function startRegistration(input: z.infer<typeof RegisterInput>, request: Request) {
+  const email = input.email.trim().toLowerCase();
+  validPassword(input.password);
+  const existing = await prisma.user.findUnique({ where: { email }, select: { passwordHash: true } });
+  if (existing?.passwordHash) throw new AccountFlowError("You already have an account with this email. Sign in with your password.", 409);
+  await sendEmailCode({ email }, request);
+}
+
+export async function completeRegistration(input: z.infer<typeof RegisterVerifyInput>, request: Request) {
+  const email = input.email.trim().toLowerCase();
+  validPassword(input.password);
+  await spendCode(email, input.code);
+  const result = await signInVerifiedEmail({ email, name: null }, "mobile-register", request);
+  // An account made by email code or Google gets its first password here; one that has a password keeps it.
+  // (Changing a password is the reset-by-email flow, not this.)
+  await prisma.user.updateMany({ where: { id: result.user.id, passwordHash: null }, data: { passwordHash: await bcrypt.hash(input.password, 12) } });
   return result;
 }
 
