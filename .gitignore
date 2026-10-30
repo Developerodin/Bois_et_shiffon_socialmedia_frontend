@@ -41,3 +41,4 @@ _vendor/
 
 # Test set run output (scripts/evals/run.ts): kept locally, not committed
 apps/web/scripts/evals/results/
+.superpowers/
