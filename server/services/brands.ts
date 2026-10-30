@@ -7,6 +7,7 @@ export type BrandListItem = {
   slug: string;
   displayName: string;
   status: BrandStatus;
+  createdAt: Date; // the mobile app falls back to the newest business
 };
 
 /**
@@ -29,6 +30,7 @@ export async function listAccessibleBrands(
       slug: true,
       displayName: true,
       status: true,
+      createdAt: true,
     },
   });
 
