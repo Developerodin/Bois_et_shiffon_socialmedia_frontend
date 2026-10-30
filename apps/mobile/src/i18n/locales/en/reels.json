@@ -60,7 +60,9 @@
       "angle02": "Focusing on hand-carved slat doors, wire management, and warm living ambience."
     },
     "readyToReview": "Ready to review",
-    "viewStoryboard": "View storyboard"
+    "viewStoryboard": "View storyboard",
+    "making": "Writing the storyboard…",
+    "empty": "No reel ideas yet. They appear here after the ideas agent runs."
   },
   "chat": {
     "creditsA11y_one": "{{count}} credit",

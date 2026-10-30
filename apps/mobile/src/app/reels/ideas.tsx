@@ -1,56 +1,100 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ChevronRight, Video } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { brandAssets, currentBrand, type Opportunity, opportunities, reels } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { ActionButton, BottomNav, Chip, ChipRow, ICON, ModuleHeader, ReelsScreen, Tag, bodyMuted, meta } from "@/ui/reels/kit";
-import { ideaFilters, ideas } from "@/ui/reels/sample";
+import { openReel } from "@/ui/reels/use-reel";
+
+/** Scout writes reel angles as "[hook · pillar] angle"; split them for the chips and the card. */
+function parseAngle(o: Opportunity) {
+  const m = /^\[([^\]·]+)·([^\]]+)\]\s*(.*)$/.exec(o.angle);
+  return m ? { hook: m[1].trim(), pillar: m[2].trim(), text: m[3].trim() } : { hook: null, pillar: null, text: o.angle };
+}
 
 /** R02 · Reels / Ideas. */
 export default function ReelsIdeas() {
   const { t } = useTranslation("reels");
-  const [filter, setFilter] = useState<string>(ideaFilters[0].key);
+  const [filter, setFilter] = useState<string>("all");
+  const [ideas, setIdeas] = useState<Opportunity[] | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const [making, setMaking] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    opportunities().then(
+      (r) => setIdeas(r.opportunities.filter((o) => o.channels.includes("INSTAGRAM_REEL") && o.decision !== "REJECT")),
+      (e: unknown) => (setIdeas([]), setError(e instanceof Error ? e.message : String(e))),
+    );
+    currentBrand().then((b) => brandAssets(b.workspaceId, b.brandId)).then((a) => setImages((a.assets?.products ?? []).flatMap((p) => (p.image ? [p.image.url] : []))), () => {});
+  }, []);
+  const pillars = [...new Set((ideas ?? []).map((o) => parseAngle(o).pillar).filter((p): p is string => !!p))];
+  const shown = (ideas ?? []).filter((o) => filter === "all" || parseAngle(o).pillar === filter);
+  const make = async (o: Opportunity) => {
+    setMaking(o.id);
+    setError(null);
+    try {
+      const r = await reels.create({ opportunityId: o.id });
+      openReel(r.id);
+      router.push("/reels/storyboard");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setMaking(null);
+    }
+  };
   return (
     <ReelsScreen header={<ModuleHeader />} footer={<BottomNav active="ideas" />}>
       <View style={styles.titleRow}>
         <Text style={type.pageTitle}>{t("ideas.title")}</Text>
-        <Tag label={t("create.ideasReady", { count: 21 })} tone="white" style={{ paddingVertical: 2, boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }} />
+        <Tag label={t("create.ideasReady", { count: ideas?.length ?? 0 })} tone="white" style={{ paddingVertical: 2, boxShadow: "0 1px 2px rgba(0,0,0,0.03)" }} />
       </View>
       <Text style={[bodyMuted, { paddingTop: 4 }]}>{t("ideas.subtitle")}</Text>
 
       <ChipRow style={{ marginTop: space[24] }} bleed={20}>
-        {ideaFilters.map((f) => (
-          <Chip key={f.key} label={t(`ideas.filter.${f.key}`, { n: f.count })} selected={f.key === filter} onPress={() => setFilter(f.key)} />
+        <Chip label={t("ideas.filter.all", { n: ideas?.length ?? 0 })} selected={filter === "all"} onPress={() => setFilter("all")} />
+        {pillars.map((p) => (
+          <Chip key={p} label={`${p} (${(ideas ?? []).filter((o) => parseAngle(o).pillar === p).length})`} selected={filter === p} onPress={() => setFilter(p)} />
         ))}
       </ChipRow>
 
+      {error ? <Text style={[bodyMuted, { color: color.error, paddingTop: space[16] }]}>{error}</Text> : null}
+      {ideas === null ? <ActivityIndicator style={{ marginTop: space[32] }} color={color.primary} /> : null}
+      {ideas?.length === 0 && !error ? <Text style={[bodyMuted, { paddingTop: space[24] }]}>{t("ideas.empty")}</Text> : null}
       <View style={{ gap: space[24], paddingTop: space[24] }}>
-        {ideas.map((idea) => (
-          <View key={idea.id} style={styles.card}>
-            <View>
-              <Image source={idea.image} style={styles.photo} contentFit="cover" accessibilityLabel={idea.product} />
-              <View style={styles.angle}>
-                <Video size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
-                <Text style={[meta, { color: color.ink }]}>{t("ideas.angle", { n: idea.angle })}</Text>
+        {shown.map((idea, i) => {
+          const a = parseAngle(idea);
+          return (
+            <View key={idea.id} style={styles.card}>
+              <View>
+                <Image source={images.length ? { uri: images[i % images.length] } : undefined} style={styles.photo} contentFit="cover" accessibilityLabel={idea.title} />
+                <View style={styles.angle}>
+                  <Video size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
+                  <Text style={[meta, { color: color.ink }]}>{t("ideas.angle", { n: String(i + 1).padStart(2, "0") })}</Text>
+                </View>
+              </View>
+              <View style={styles.tags}>
+                {[a.hook, a.pillar, idea.timing, t("noPresenter")].filter((x): x is string => !!x).map((tag) => (
+                  <Tag key={tag} label={tag} tone="soft" />
+                ))}
+              </View>
+              <View style={{ paddingTop: space[12] }}>
+                <Text style={[type.label]}>{a.text || idea.title}</Text>
+                <Text style={[bodyMuted, { paddingTop: 4 }]}>{idea.summary}</Text>
+              </View>
+              <View style={styles.cardFoot}>
+                <Text style={meta}>{making === idea.id ? t("ideas.making") : t("ideas.readyToReview")}</Text>
+                {making === idea.id ? (
+                  <ActivityIndicator color={color.primary} />
+                ) : (
+                  <ActionButton label={t("ideas.viewStoryboard")} trailing={ChevronRight} onPress={() => void make(idea)} disabled={!!making} />
+                )}
               </View>
             </View>
-            <View style={styles.tags}>
-              {[t("seconds", { count: idea.seconds }), t("noPresenter"), idea.product].map((tag) => (
-                <Tag key={tag} label={tag} tone="soft" />
-              ))}
-            </View>
-            <View style={{ paddingTop: space[12] }}>
-              <Text style={[type.label]}>{idea.hook}</Text>
-              <Text style={[bodyMuted, { paddingTop: 4 }]}>{t(idea.bodyKey)}</Text>
-            </View>
-            <View style={styles.cardFoot}>
-              <Text style={meta}>{t("ideas.readyToReview")}</Text>
-              <ActionButton label={t("ideas.viewStoryboard")} trailing={ChevronRight} onPress={() => router.push("/reels/storyboard")} />
-            </View>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </ReelsScreen>
   );
