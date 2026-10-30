@@ -3,7 +3,7 @@ import { mergeTimeline, type TimelineItem } from "@/server/services/activity";
 
 vi.mock("@/server/db/prisma", () => ({ prisma: {} }));
 
-const item = (kind: TimelineItem["kind"], id: string, at: number): TimelineItem => ({ kind, id, at: new Date(at), workspaceId: null, brandId: null });
+const item = (kind: TimelineItem["kind"], id: string, at: number): TimelineItem => ({ kind, id, at: new Date(at), workspaceId: null, brandId: null, detail: "" });
 
 describe("mergeTimeline", () => {
   it("puts the newest first across sources", () => {

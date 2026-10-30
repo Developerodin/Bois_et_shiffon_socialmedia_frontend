@@ -10,7 +10,6 @@ import { usdInrRate } from "@/server/usage/fx";
 export const metadata = { title: "Person activity · Platform admin" };
 
 const LABEL = { visit: "Page visit", action: "Action", task: "Agent task", ai: "AI call" } as const;
-const str = (v: unknown) => (v === null || v === undefined ? "" : String(v));
 
 /** One person's timeline, with what they've cost in the header. Never chat text. */
 export default async function AdminPersonActivity({ params, searchParams }: { params: Promise<{ userId: string }>; searchParams: Promise<{ ws?: string; page?: string }> }) {
@@ -46,11 +45,11 @@ export default async function AdminPersonActivity({ params, searchParams }: { pa
         rows={t.items.map((i) => [
           <Ago key="w" at={i.at} />,
           <Pill key="k" tone={i.kind === "task" && i.status === "FAILED" ? "bad" : "muted"}>
-            {i.kind === "visit" ? `${LABEL.visit} · ${str(i.platform)}` : LABEL[i.kind]}
+            {i.kind === "visit" ? `${LABEL.visit} · ${i.platform}` : LABEL[i.kind]}
           </Pill>,
           <div key="d" className="min-w-0 max-w-sm">
-            <span className="font-mono text-xs">{str(i.detail)}</span>
-            {i.kind === "task" || i.kind === "ai" ? <p className="text-xs text-muted-foreground">{[i.model, str(i.status).toLowerCase()].filter(Boolean).join(" · ")}</p> : null}
+            <span className="font-mono text-xs">{i.detail}</span>
+            {i.kind === "task" || i.kind === "ai" ? <p className="text-xs text-muted-foreground">{[i.model, i.status?.toLowerCase()].filter(Boolean).join(" · ")}</p> : null}
           </div>,
           i.workspace ?? <Empty key="ws" />,
           i.brand ?? <Empty key="b" />,
