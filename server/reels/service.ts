@@ -179,5 +179,7 @@ export async function reelDetail(scope: Omit<Scope, "userId">, itemId: string) {
     renders: await renderView(item.id),
     chat: chatOf(item.brief),
     credits: await creditBalance(scope.workspaceId),
+    // Scene photos are private storage keys; the app shows them through short-lived links.
+    photoUrls: plan.success ? Object.fromEntries(await Promise.all([...new Set(plan.data.scenes.map((x) => x.photoKey))].map(async (k) => [k, await signedMediaUrl(k, 3600)] as const))) : {},
   };
 }
