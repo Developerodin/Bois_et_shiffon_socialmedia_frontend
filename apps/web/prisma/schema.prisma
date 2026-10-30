@@ -783,15 +783,14 @@ model ContentItem {
 }
 
 enum ReelRenderStep {
-  VOICE
-  CLIPS
-  STITCH
-  STORE
+  VOICE // OpenAI voiceover per scene, photos cropped to 9:16
+  CLIPS // one Higgsfield clip per scene, on the model its scene kind routes to
+  JOIN // clips + voice → one MP4 in our storage
   DONE
   FAILED
 }
 
-/** One paid attempt at turning a reel plan version into a video (Higgsfield: voice → clips → stitch → our storage). */
+/** One paid attempt at turning a reel plan version into a video: voice (OpenAI) → clips (Higgsfield) → join (ffmpeg). */
 model ReelRender {
   id               String         @id @default(cuid())
   workspaceId      String
@@ -801,9 +800,8 @@ model ReelRender {
   attempt          Int // 1, 2, … per version: "Try again" is a new attempt with its own charge
   step             ReelRenderStep @default(VOICE)
   claimedAt        DateTime? // set while a step's submit is in flight; cleared once its request ids are saved
-  requests         Json           @default("{}") // { VOICE?: string[], CLIPS?: string[], STITCH?: string[] } Higgsfield request ids
-  outputs          Json           @default("{}") // { voiceUrls, voiceSeconds, clipUrls, finalUrl }
-  ticks            Int            @default(0) // polling jobs enqueued so far; makes each tick's job key unique
+  requests         Json           @default("{}") // { CLIPS?: string[] } Higgsfield request ids, one per scene
+  outputs          Json           @default("{}") // { voiceKeys, voiceSeconds, photoKeys, models, clipSeconds, backups, clipUrls }
   chargeId         String
   webhookSecret    String
   videoKey         String? // the finished MP4 in our media storage
