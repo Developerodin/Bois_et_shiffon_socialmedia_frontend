@@ -5,7 +5,7 @@ import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { ApiError } from "@/api/client";
-import { completeSocialConnect, startSocialConnect, type SocialProvider } from "@/api/endpoints";
+import { completeSocialConnect, rememberBrand, startSocialConnect, type SocialProvider } from "@/api/endpoints";
 import i18n from "@/i18n";
 import { Button } from "@/ui/button";
 import { Screen, StepHeader, Title } from "@/ui/layout";
@@ -43,6 +43,8 @@ export default function Connect() {
   const [skipSheet, setSkipSheet] = useState(false);
   const finish = () => {
     const home = GOAL_HOME[onboarding.goal];
+    // The rest of the app works on the business just set up.
+    if (onboarding.workspaceId && onboarding.brandId) rememberBrand({ workspaceId: onboarding.workspaceId, brandId: onboarding.brandId });
     clearOnboarding();
     router.replace(home);
   };

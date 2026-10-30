@@ -1,5 +1,7 @@
+import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 import { api, session } from "@/api/client";
-import type { Goal } from "@/ui/onboarding/state";
+import { onboarding, type Goal } from "@/ui/onboarding/state";
 
 /** Typed calls the screens use. Shapes mirror apps/web route responses. */
 
@@ -115,19 +117,51 @@ export const searchPlaces = (query: string, language: string) => api<{ places: P
 
 // ---- Reels studio (mobile page 02). Shapes mirror apps/web/server/reels/service.ts. ----
 
-/** The brand the app works on after onboarding: the onboarding one, else the first brand of the first workspace. */
-let current: { workspaceId: string; brandId: string; name: string } | null = null;
-export async function currentBrand() {
-  if (current) return current;
+/**
+ * The business the app works on: the one remembered on this device (set when onboarding finishes or the person
+ * switches), else the onboarding one, else the newest. One lookup per app session; signing out forgets it.
+ */
+type CurrentBrand = { workspaceId: string; brandId: string; name: string };
+const BRAND_KEY = "espanda.brand";
+const web = Platform.OS === "web";
+const brandStore = {
+  get: () => (web ? Promise.resolve(globalThis.localStorage?.getItem(BRAND_KEY) ?? null) : SecureStore.getItemAsync(BRAND_KEY)).catch(() => null),
+  set: (v: string) => void (web ? Promise.resolve(globalThis.localStorage?.setItem(BRAND_KEY, v)) : SecureStore.setItemAsync(BRAND_KEY, v)).catch(() => {}),
+  clear: () => void (web ? Promise.resolve(globalThis.localStorage?.removeItem(BRAND_KEY)) : SecureStore.deleteItemAsync(BRAND_KEY)).catch(() => {}),
+};
+let current: CurrentBrand | null = null;
+let pending: Promise<CurrentBrand> | null = null;
+
+async function lookUpBrand(): Promise<CurrentBrand> {
   const { workspaces } = await me();
-  const ws = workspaces[0]?.id;
+  const saved = await brandStore.get().then((raw) => (raw ? (JSON.parse(raw) as { workspaceId: string; brandId: string }) : null), () => null);
+  const ws = workspaces.find((w) => w.id === saved?.workspaceId)?.id ?? workspaces.find((w) => w.id === onboarding.workspaceId)?.id ?? workspaces[0]?.id;
   if (!ws) throw new Error("No workspace");
-  const { brands } = await api<{ brands: { id: string; displayName: string }[] }>(`/workspaces/${encodeURIComponent(ws)}/brands`, { workspaceId: ws });
-  if (!brands[0]) throw new Error("No business yet");
-  current = { workspaceId: ws, brandId: brands[0].id, name: brands[0].displayName };
-  return current;
+  const { brands } = await api<{ brands: { id: string; displayName: string; createdAt: string }[] }>(`/workspaces/${encodeURIComponent(ws)}/brands`, { workspaceId: ws });
+  const newest = [...brands].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  const pick = brands.find((b) => b.id === saved?.brandId) ?? brands.find((b) => b.id === onboarding.brandId) ?? newest;
+  if (!pick) throw new Error("No business yet");
+  return rememberBrand({ workspaceId: ws, brandId: pick.id, name: pick.displayName });
 }
-export const useBrand = (b: { workspaceId: string; brandId: string; name: string }) => void (current = b);
+
+/** Screens call this at once; they share one lookup. */
+export function currentBrand(): Promise<CurrentBrand> {
+  if (current) return Promise.resolve(current);
+  pending ??= lookUpBrand().finally(() => void (pending = null));
+  return pending;
+}
+/** The business to use from now on (end of onboarding, business switcher). Without a name, the next lookup loads it. */
+export function rememberBrand(b: CurrentBrand): CurrentBrand;
+export function rememberBrand(b: Omit<CurrentBrand, "name">): void;
+export function rememberBrand(b: Omit<CurrentBrand, "name"> & { name?: string }) {
+  current = b.name === undefined ? null : (b as CurrentBrand);
+  brandStore.set(JSON.stringify({ workspaceId: b.workspaceId, brandId: b.brandId }));
+  return current ?? undefined;
+}
+export function forgetBrand() {
+  current = null;
+  brandStore.clear();
+}
 
 export type SceneKind = "detail" | "room" | "physics";
 export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string };
