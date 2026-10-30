@@ -93,9 +93,8 @@ export type TimelineItem = {
   workspaceId: string | null;
   brandId: string | null;
   /** The path, the audit action, the agent, or the AI task */
-  detail?: string;
+  detail: string;
   platform?: string;
-  entityType?: string;
   status?: string;
   model?: string;
   usd?: number;
@@ -126,7 +125,7 @@ export async function personTimeline({ userId, workspaceId, page = 1 }: { userId
   const orderBy = [{ createdAt: "desc" as const }, { id: "desc" as const }];
   const [visits, actions, tasks, calls] = await Promise.all([
     prisma.pageView.findMany({ where: { userId, ...ws }, orderBy, take }),
-    prisma.auditEvent.findMany({ where: { actorUserId: userId, ...ws }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, action: true, entityType: true, createdAt: true } }),
+    prisma.auditEvent.findMany({ where: { actorUserId: userId, ...ws }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, action: true, createdAt: true } }),
     prisma.agentRun.findMany({ where: { triggeredByUserId: userId, ...ws }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, agentKey: true, status: true, createdAt: true } }),
     prisma.aiWorkflowRun.findMany({ where: { userId, agentRunId: null, ...ws }, orderBy, take, select: { id: true, workspaceId: true, brandId: true, workflowId: true, model: true, status: true, costUsd: true, createdAt: true } }),
   ]);
@@ -135,7 +134,7 @@ export async function personTimeline({ userId, workspaceId, page = 1 }: { userId
   const { items, hasMore } = mergeTimeline(
     [
       visits.map((v) => ({ kind: "visit" as const, id: v.id, at: v.createdAt, workspaceId: v.workspaceId, brandId: v.brandId, detail: v.path, platform: v.platform })),
-      actions.map((a) => ({ kind: "action" as const, id: a.id, at: a.createdAt, workspaceId: a.workspaceId, brandId: a.brandId, detail: a.action, entityType: a.entityType })),
+      actions.map((a) => ({ kind: "action" as const, id: a.id, at: a.createdAt, workspaceId: a.workspaceId, brandId: a.brandId, detail: a.action })),
       tasks.map((t) => ({ kind: "task" as const, id: t.id, at: t.createdAt, workspaceId: t.workspaceId, brandId: t.brandId, detail: t.agentKey, status: t.status, usd: cost.get(t.id) ?? 0 })),
       calls.map((c) => ({ kind: "ai" as const, id: c.id, at: c.createdAt, workspaceId: c.workspaceId, brandId: c.brandId, detail: c.workflowId, model: c.model, status: c.status, usd: Number(c.costUsd ?? 0) })),
     ],

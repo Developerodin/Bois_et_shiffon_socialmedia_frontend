@@ -1,7 +1,7 @@
+import { pillButton as button } from "@/components/admin/ui";
 import type { PickerOptions } from "@/server/services/platform-admin";
 
 const field = "h-9 max-w-64 rounded-full border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
-const button = "rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 /**
  * Workspace and person filters as plain GET forms: no JavaScript, and every view has its own URL. Two forms, so picking

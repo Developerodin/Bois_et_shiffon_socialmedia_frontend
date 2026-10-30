@@ -142,10 +142,13 @@ export function SearchBox({ placeholder, value, hidden = {} }: { placeholder: st
   );
 }
 
+/** The small outlined pill used for pager links and filter buttons. */
+export const pillButton = "rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
 /** Newer / older page links under a list. */
 export function Pager({ page, hasMore, href }: { page: number; hasMore: boolean; href: (page: number) => string }) {
   if (page === 1 && !hasMore) return null;
-  const link = "rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  const link = pillButton;
   return (
     <nav aria-label="Pages" className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
       {/* Plain links, like the filters: see components/admin/segmented-links.tsx. */}
