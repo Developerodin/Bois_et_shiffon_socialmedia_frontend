@@ -40,6 +40,13 @@ export type GenerateObjectInput<T extends z.ZodType> = {
   validate?: (value: z.infer<T>) => string | null;
   /** Returned verbatim by the mock provider. */
   mock?: z.infer<T>;
+  /**
+   * Streams the answer: called with the raw text written so far (partial JSON) as the model writes it. A retry starts
+   * over, so callers treat each call as the whole text so far, not a delta. Not called by the mock provider.
+   */
+  onText?: (soFar: string) => void;
+  /** Images the model looks at with the prompt, as data: URLs (e.g. two video frames for the reel seam check). */
+  images?: string[];
 };
 
 /** Shown to people as-is (Agent Log, workspace banner); `readable()` also recognises it. */
@@ -195,6 +202,7 @@ export async function callOpenAi<T extends z.ZodType>(
     { type: "input_text", text: input.prompt.slice(cut > 1 ? cut : 0) + retryNote },
   ];
   const breakpoints = (await modelConfig()).models.get(model)?.cacheBreakpoints ?? false;
+  const images = (input.images ?? []).map((url) => ({ type: "input_image", image_url: url }));
   // ponytail: one call can include web search; 2.5 min covers slow ones without holding the runner forever.
   const res = await fetch("https://api.openai.com/v1/responses", {
     signal: AbortSignal.timeout(150_000),
@@ -207,12 +215,13 @@ export async function callOpenAi<T extends z.ZodType>(
       model,
       instructions: input.system,
       // A retry's reason goes last, so the prompt before it is still a cached start.
-      input: breakpoints ? [{ role: "user", content: parts }] : prompt,
+      input: breakpoints || images.length ? [{ role: "user", content: [...(breakpoints ? parts : [{ type: "input_text", text: prompt }]), ...images] }] : prompt,
       ...(breakpoints ? { prompt_cache_options: { mode: "explicit" } } : {}),
       // Same brand + agent share a prompt start: this keeps them on one cache (routing; no guarantee of a hit).
       prompt_cache_key: `${ctx.brandId}:${ctx.workflowId.split(".")[0]}`,
       ...(input.webSearch ? { tools: [{ type: "web_search", ...(input.searchContext ? { search_context_size: input.searchContext } : {}) }] } : {}),
       ...(input.reasoningEffort ? { reasoning: { effort: input.reasoningEffort } } : {}),
+      ...(input.onText ? { stream: true } : {}),
       text: {
         format: {
           type: "json_schema",
@@ -234,15 +243,7 @@ export async function callOpenAi<T extends z.ZodType>(
     const unavailable = retryable || res.status === 404 || (res.status === 400 && /\bmodel\b.{0,80}?\b(not found|does not exist|not supported|unsupported|deprecated|no access|not available)/i.test(body));
     throw new AiProviderError(`OpenAI ${res.status}: ${body}`, retryable, unavailable ? "unavailable" : undefined);
   }
-  const body = (await res.json()) as {
-    output?: Array<{ type: string; content?: Array<{ type: string; text?: string }> }>;
-    usage?: {
-      input_tokens?: number;
-      input_tokens_details?: { cached_tokens?: number; cache_write_tokens?: number };
-      output_tokens?: number;
-      output_tokens_details?: { reasoning_tokens?: number };
-    };
-  };
+  const body = (input.onText ? await readStream(res, input.onText) : await res.json()) as ResponseBody;
   const text = body.output
     ?.flatMap((o) => o.content ?? [])
     .find((c) => c.type === "output_text")?.text;
@@ -256,6 +257,43 @@ export async function callOpenAi<T extends z.ZodType>(
     webSearchCalls: body.output?.filter((o) => o.type === "web_search_call").length ?? 0,
   };
   return { text, usage };
+}
+
+type ResponseBody = {
+  output?: Array<{ type: string; content?: Array<{ type: string; text?: string }> }>;
+  usage?: {
+    input_tokens?: number;
+    input_tokens_details?: { cached_tokens?: number; cache_write_tokens?: number };
+    output_tokens?: number;
+    output_tokens_details?: { reasoning_tokens?: number };
+  };
+};
+
+/**
+ * A streamed Responses call (server-sent events): hands on the text as it grows, and returns the finished response
+ * (`response.completed` carries the same output and usage as a plain call).
+ */
+async function readStream(res: Response, onText: (soFar: string) => void): Promise<ResponseBody> {
+  if (!res.body) throw new AiProviderError("OpenAI sent no stream", true, "unavailable");
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    for (let end = buffer.indexOf("\n\n"); end >= 0; end = buffer.indexOf("\n\n")) {
+      const data = buffer.slice(0, end).split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trim()).join("");
+      buffer = buffer.slice(end + 2);
+      if (!data || data === "[DONE]") continue;
+      const event = JSON.parse(data) as { type: string; delta?: string; response?: ResponseBody };
+      if (event.type === "response.output_text.delta" && event.delta) onText((text += event.delta));
+      else if (event.type === "response.completed" && event.response) return event.response;
+      else if (event.type === "response.failed" || event.type === "error") throw new AiProviderError(`OpenAI stream failed: ${data.slice(0, 300)}`, true, "unavailable");
+    }
+  }
+  throw new AiProviderError("OpenAI's stream ended before the answer was complete", true, "unavailable");
 }
 
 export async function logRun(

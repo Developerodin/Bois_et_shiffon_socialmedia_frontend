@@ -2,9 +2,9 @@ import type { Prisma } from "@prisma/client";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { brandKnowledge } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
-import { directScenes, type ReelPhoto, writePlan } from "@/server/reels/agents";
-import { isStudioPlan, planProblems, ReelPlan, reelPrice, reelSeconds, toVersionBody } from "@/server/reels/plan";
-import { renderView } from "@/server/reels/render";
+import { directScenes, type DraftSoFar, type ReelPhoto, writePlan } from "@/server/reels/agents";
+import { carryStandIns, isStudioPlan, planProblems, ReelPlan, reelPrice, reelSeconds, toVersionBody } from "@/server/reels/plan";
+import { renderFailure, renderView } from "@/server/reels/render";
 import { creditBalance } from "@/server/services/credits";
 import { decide, lock, PublishingError, TX } from "@/server/services/publishing";
 import { signedMediaUrl } from "@/server/storage/media";
@@ -12,6 +12,31 @@ import { signedMediaUrl } from "@/server/storage/media";
 /** Mobile Reels studio (R01–R13): create, chat, edit, send, register a manual post. Rendering is render.ts. */
 type Scope = { workspaceId: string; brandId: string; userId: string };
 type ChatTurn = { role: "user" | "assistant"; text: string; at: string };
+/** Progress while a plan is written (R04 streams it): the reply so far, then the director's step. */
+export type PlanEvent = { type: "stage"; stage: "reading" | "writing" | "directing" } | ({ type: "draft" } & DraftSoFar);
+type Emit = (event: PlanEvent) => void;
+
+/**
+ * A plan call as a stream of JSON lines: progress events, then {type:"done",result} or {type:"error",status,detail}.
+ * The HTTP status is already 200 once streaming starts, so failures travel as the last line.
+ */
+export function streamPlan(run: (emit: Emit) => Promise<unknown>) {
+  const encoder = new TextEncoder();
+  return new Response(new ReadableStream({
+    async start(controller) {
+      const send = (line: object) => controller.enqueue(encoder.encode(`${JSON.stringify(line)}\n`));
+      try {
+        send({ type: "done", result: await run(send) });
+      } catch (error) {
+        const problem = (await toReelProblem(error).json().catch(() => ({}))) as { status?: number; detail?: string; title?: string };
+        send({ type: "error", status: problem.status ?? 500, detail: problem.detail ?? problem.title ?? "Something went wrong" });
+      } finally {
+        controller.close();
+      }
+    },
+  }), { headers: { "Content-Type": "application/x-ndjson", "Cache-Control": "no-store" } });
+}
+export const wantsStream = (request: Request) => (request.headers.get("accept") ?? "").includes("application/x-ndjson");
 const ACTIVE = ["VOICE", "CLIPS", "JOIN"] as const;
 
 /** Route error → problem response (shared by the reels routes; route files may only export handlers). */
@@ -23,7 +48,7 @@ export function toReelProblem(error: unknown) {
 /** Photos the scriptwriter may use: the brand's product photos from Research, plus any already in the plan. */
 async function brandPhotos(scope: Scope, current?: ReelPlan): Promise<ReelPhoto[]> {
   const profile = await prisma.brandProfile.findFirst({ where: { brandId: scope.brandId, workspaceId: scope.workspaceId }, select: { assets: true } });
-  const products = ((profile?.assets as { products?: { title: string; imageKey: string | null }[] } | null)?.products ?? []).flatMap((p) => (p.imageKey ? [{ key: p.imageKey, title: p.title }] : []));
+  const products = ((profile?.assets as { products?: { title: string; imageKey: string | null }[] } | null)?.products ?? []).flatMap((p) => (p.imageKey ? [{ key: p.imageKey, title: p.title, product: p.title }] : []));
   const inPlan = (current?.scenes ?? []).filter((s) => !products.some((p) => p.key === s.photoKey)).map((s) => ({ key: s.photoKey, title: s.shot }));
   return [...products, ...inPlan].slice(0, 30);
 }
@@ -37,13 +62,14 @@ async function loadReel(scope: Scope, itemId: string, db: Prisma.TransactionClie
 const chatOf = (brief: unknown) => ((brief as { reelChat?: ChatTurn[] } | null)?.reelChat ?? []);
 
 /** Keeps each scene's director output when the scene didn't change; directs again otherwise. */
-async function directed(scope: Scope, plan: ReelPlan, previous?: ReelPlan): Promise<ReelPlan> {
+async function directed(scope: Scope, plan: ReelPlan, previous?: ReelPlan, emit?: Emit): Promise<ReelPlan> {
   const same = (i: number) => {
     const a = plan.scenes[i];
     const b = previous?.scenes[i];
     return b?.prompt && a.photoKey === b.photoKey && a.direction === b.direction && a.shot === b.shot;
   };
-  if (plan.scenes.every((_, i) => same(i))) return { ...plan, scenes: plan.scenes.map((s, i) => ({ ...s, kind: previous!.scenes[i].kind, model: previous!.scenes[i].model, prompt: previous!.scenes[i].prompt })) };
+  if (plan.scenes.every((_, i) => same(i))) return { ...plan, scenes: plan.scenes.map((s, i) => ({ ...s, kind: previous!.scenes[i].kind, model: previous!.scenes[i].model, prompt: previous!.scenes[i].prompt, transition: previous!.scenes[i].transition })) };
+  emit?.({ type: "stage", stage: "directing" });
   return directScenes(scope, plan);
 }
 
@@ -64,7 +90,8 @@ async function savePlan(scope: Scope, itemId: string, version: number, plan: Ree
   }, TX);
 }
 
-export async function createReel(scope: Scope, input: { opportunityId?: string; prompt?: string }) {
+export async function createReel(scope: Scope, input: { opportunityId?: string; prompt?: string; language?: string }, emit?: Emit) {
+  emit?.({ type: "stage", stage: "reading" });
   const idea = input.opportunityId
     ? await prisma.opportunity.findFirst({ where: { id: input.opportunityId, workspaceId: scope.workspaceId, brandId: scope.brandId } })
     : null;
@@ -72,8 +99,9 @@ export async function createReel(scope: Scope, input: { opportunityId?: string; 
   const photos = await brandPhotos(scope);
   if (photos.length === 0) throw new PublishingError("Add product photos first (Select assets), then plan a reel.", 400);
   const { text: knowledge } = await brandKnowledge(scope.workspaceId, scope.brandId, 3000);
-  const { plan, reply } = await writePlan(scope, { knowledge, photos, idea: idea ?? undefined, message: input.prompt });
-  const ready = await directed(scope, plan);
+  emit?.({ type: "stage", stage: "writing" });
+  const { plan, reply } = await writePlan(scope, { knowledge, photos, idea: idea ?? undefined, message: input.prompt, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
+  const ready = await directed(scope, plan, undefined, emit);
   const now = new Date().toISOString();
   const chat: ChatTurn[] = [...(input.prompt ? [{ role: "user" as const, text: input.prompt, at: now }] : []), { role: "assistant", text: reply, at: now }];
   const item = await prisma.contentItem.create({
@@ -87,13 +115,15 @@ export async function createReel(scope: Scope, input: { opportunityId?: string; 
 }
 
 /** R04: the person says what they want (or what's wrong with the video); the scriptwriter revises the plan. */
-export async function chatPlan(scope: Scope, itemId: string, input: { version: number; message: string }) {
+export async function chatPlan(scope: Scope, itemId: string, input: { version: number; message: string; language?: string }, emit?: Emit) {
+  emit?.({ type: "stage", stage: "reading" });
   const { item, latest } = await loadReel(scope, itemId);
   const current = isStudioPlan(latest?.body) ? ReelPlan.parse(latest!.body) : undefined;
   const [photos, { text: knowledge }] = await Promise.all([brandPhotos(scope, current), brandKnowledge(scope.workspaceId, scope.brandId, 3000)]);
   const chat = chatOf(item.brief);
-  const { plan, reply } = await writePlan(scope, { knowledge, photos, current, chat, message: input.message });
-  const ready = await directed(scope, plan, current);
+  emit?.({ type: "stage", stage: "writing" });
+  const { plan, reply } = await writePlan(scope, { knowledge, photos, current, chat, message: input.message, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
+  const ready = await directed(scope, carryStandIns(plan, current, true), current, emit);
   const now = new Date().toISOString();
   const v = await savePlan(scope, itemId, input.version, ready, [...chat, { role: "user", text: input.message.slice(0, 2000), at: now }, { role: "assistant", text: reply, at: now }]);
   return { version: v.version, plan: ready, price: reelPrice(ready), reply };
@@ -105,7 +135,7 @@ export async function editPlan(scope: Scope, itemId: string, input: { version: n
   if (problems.length) throw new PublishingError(problems.join(" "), 400);
   const { latest } = await loadReel(scope, itemId);
   const previous = isStudioPlan(latest?.body) ? ReelPlan.parse(latest!.body) : undefined;
-  const ready = await directed(scope, input.plan, previous);
+  const ready = await directed(scope, carryStandIns(input.plan, previous, false), previous);
   const v = await savePlan(scope, itemId, input.version, ready);
   return { version: v.version, plan: ready, price: reelPrice(ready) };
 }
@@ -150,7 +180,7 @@ export async function listReels(scope: Omit<Scope, "userId">) {
     const r = i.renders[0];
     return {
       id: i.id, title: i.title, status: i.status, version: i.versions[0]?.version ?? 0, postUrl: i.postUrl, createdAt: i.createdAt,
-      render: r ? { step: r.step, attempt: r.attempt, error: r.error } : null,
+      render: r ? { step: r.step, attempt: r.attempt, failure: renderFailure(r) } : null,
       seconds: plan.success ? reelSeconds(plan.data) : null,
       price: plan.success ? reelPrice(plan.data) : null,
       thumbUrl: plan.success ? await signedMediaUrl(plan.data.scenes[0].photoKey, 3600) : null,
@@ -168,17 +198,18 @@ export async function reelDetail(scope: Omit<Scope, "userId">, itemId: string) {
   const latest = item.versions[0];
   const body = latest?.body as { videoKey?: string } | undefined;
   const plan = ReelPlan.safeParse(latest?.body);
+  const [videoUrl, renders, credits] = await Promise.all([body?.videoKey ? signedMediaUrl(body.videoKey, 3600) : null, renderView(item.id), creditBalance(scope.workspaceId)]);
   return {
     item: { id: item.id, title: item.title, status: item.status, postUrl: item.postUrl, scheduledFor: item.scheduledFor },
     version: latest?.version ?? 0,
     plan: plan.success ? plan.data : null,
     price: plan.success ? reelPrice(plan.data) : null,
     caption: (latest?.body as { caption?: string; hashtags?: string[] } | undefined) ?? null,
-    videoUrl: body?.videoKey ? await signedMediaUrl(body.videoKey, 3600) : null,
+    videoUrl,
     checks: latest?.checks[0] ? { overall: latest.checks[0].overall, results: latest.checks[0].results } : null,
-    renders: await renderView(item.id),
+    renders,
     chat: chatOf(item.brief),
-    credits: await creditBalance(scope.workspaceId),
+    credits,
     // Scene photos are private storage keys; the app shows them through short-lived links.
     photoUrls: plan.success ? Object.fromEntries(await Promise.all([...new Set(plan.data.scenes.map((x) => x.photoKey))].map(async (k) => [k, await signedMediaUrl(k, 3600)] as const))) : {},
   };

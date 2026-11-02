@@ -12,6 +12,10 @@ const DUMMY_PASSWORD_HASH = "$2b$12$UkddbF/86alJWNEWq7F2ju4bDGe23vdxWL6PsTYN8jA7
 
 export class LoginRateLimited extends Error {}
 
+/** Who can sign in with a password: the one rule web sign-in, mobile sign-in and the app's email step share. */
+export const canUsePassword = (user: Pick<User, "passwordHash" | "status" | "deletedAt"> | null) =>
+  Boolean(user?.passwordHash && user.status === "ACTIVE" && !user.deletedAt);
+
 /**
  * Email + password check shared by web sign-in (Auth.js credentials) and the mobile app.
  * Returns the user, or null for a wrong/unknown/disabled account (same timing either way).
@@ -30,7 +34,7 @@ export async function checkPassword(emailRaw: string, password: string, request:
   if (!byEmailIp.allowed || !byEmail.allowed || !byIp.allowed) throw new LoginRateLimited();
 
   const user = await prisma.user.findUnique({ where: { email } });
-  const eligible = Boolean(user && user.status === "ACTIVE" && !user.deletedAt && user.passwordHash);
+  const eligible = canUsePassword(user);
   const valid = await bcrypt.compare(String(password), eligible && user?.passwordHash ? user.passwordHash : DUMMY_PASSWORD_HASH);
   if (!eligible || !user || !valid) {
     await prisma.auditEvent.create({

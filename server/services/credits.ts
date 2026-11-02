@@ -71,10 +71,10 @@ export async function spendCredits(input: { workspaceId: string; amount: number;
 }
 
 /** Give a charge back (failed run). Idempotent: one refund per charge. */
-export async function refundCharge(workspaceId: string, chargeId: string) {
-  const charge = await prisma.creditEntry.findFirst({ where: { workspaceId, refId: chargeId, delta: { lt: 0 } } });
+export async function refundCharge(workspaceId: string, chargeId: string, db: Pick<typeof prisma, "creditEntry"> = prisma) {
+  const charge = await db.creditEntry.findFirst({ where: { workspaceId, refId: chargeId, delta: { lt: 0 } } });
   if (!charge) return false;
-  const res = await prisma.creditEntry.createMany({
+  const res = await db.creditEntry.createMany({
     data: [{ workspaceId, delta: -charge.delta, reason: "refund", refId: chargeId }],
     skipDuplicates: true,
   });
