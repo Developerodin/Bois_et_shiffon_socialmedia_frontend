@@ -12,6 +12,7 @@ import { AiProviderError } from "@/server/ai/provider";
 import { prisma } from "@/server/db/prisma";
 import { EMAIL_SEND_JOB, sendOutboxEmail } from "@/server/email/outbox";
 import { claimNextJob, completeJob, enqueueJob, failJob, holdLease } from "@/server/jobs/queue";
+import { onShootFailure, PHOTOSHOOT_JOB, runShoot } from "@/server/photoshoot/shoot";
 import { advanceRender, failRender, REEL_RENDER_JOB } from "@/server/reels/render";
 import { refreshExpiringTokens } from "@/server/services/connections";
 import { executePublication, onPublishJobLost, PUBLISH_JOB } from "@/server/services/publishing";
@@ -29,6 +30,7 @@ const HANDLERS: Record<string, Handler> = {
   [AGENT_RUN_JOB]: { run: executeAgentRun, onFailure: onAgentRunFailure },
   [DAILY_SWEEP_JOB]: { run: dailySweep },
   [EMAIL_SEND_JOB]: { run: sendOutboxEmail },
+  [PHOTOSHOOT_JOB]: { run: runShoot, onFailure: onShootFailure },
   [PUBLISH_JOB]: { run: executePublication, onFailure: onPublishJobLost },
   [REEL_RENDER_JOB]: { run: advanceRender, onFailure: failRender },
 };

@@ -23,29 +23,29 @@ enum BrandStatus {
 }
 
 model User {
-  id             String     @id @default(cuid())
-  email          String     @unique
-  emailVerified  DateTime?
-  name           String?
-  image          String?
-  passwordHash   String?
+  id              String     @id @default(cuid())
+  email           String     @unique
+  emailVerified   DateTime?
+  name            String?
+  image           String?
+  passwordHash    String?
   /// Only ACTIVE accounts can sign in (ported from Cad account-eligibility)
-  status         UserStatus @default(ACTIVE)
-  deletedAt      DateTime?
+  status          UserStatus @default(ACTIVE)
+  deletedAt       DateTime?
   /// Bump to revoke every existing session (password change, disable)
-  sessionVersion Int        @default(0)
+  sessionVersion  Int        @default(0)
   /// May change platform-wide settings (Settings → AI models). Set directly in the database; no workspace role grants it.
-  isPlatformAdmin Boolean   @default(false)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  isPlatformAdmin Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
-  accounts       Account[]
-  sessions       Session[]
-  memberships    WorkspaceMember[]
-  passwordResets PasswordResetToken[]
-  brandMembers   BrandMember[]
-  ownedWorkspaces Workspace[] @relation("WorkspacePrimaryOwner")
-  pushDevices    PushDevice[]
+  accounts        Account[]
+  sessions        Session[]
+  memberships     WorkspaceMember[]
+  passwordResets  PasswordResetToken[]
+  brandMembers    BrandMember[]
+  ownedWorkspaces Workspace[]          @relation("WorkspacePrimaryOwner")
+  pushDevices     PushDevice[]
 }
 
 /// A phone that gets push notifications (reel ready / couldn't be made). messages: the notification texts in the
@@ -105,21 +105,21 @@ model VerificationToken {
 }
 
 model Workspace {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
   /// Primary owner (the creator): can't be demoted or removed; only they can hand it over
   ownerUserId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  owner       User?             @relation("WorkspacePrimaryOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  owner User? @relation("WorkspacePrimaryOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
 
-  members     WorkspaceMember[]
-  brands      Brand[]
-  roles       Role[]
-  invitations Invitation[]
-  credits     CreditEntry[]
+  members      WorkspaceMember[]
+  brands       Brand[]
+  roles        Role[]
+  invitations  Invitation[]
+  credits      CreditEntry[]
   subscription Subscription?
 }
 
@@ -175,21 +175,22 @@ model Brand {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  workspace    Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  profile      BrandProfile?
-  members      BrandMember[]
-  agentRuns    AgentRun[]
-  agentEvents  AgentEvent[]
-  agentConfigs BrandAgentConfig[]
-  contextDocs  BrandContextDoc[]
-  connections  IntegrationConnection[]
-  auditReports AuditReport[]
-  chatThreads  ChatThread[]
+  workspace     Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  profile       BrandProfile?
+  members       BrandMember[]
+  agentRuns     AgentRun[]
+  agentEvents   AgentEvent[]
+  agentConfigs  BrandAgentConfig[]
+  contextDocs   BrandContextDoc[]
+  connections   IntegrationConnection[]
+  auditReports  AuditReport[]
+  chatThreads   ChatThread[]
   opportunities Opportunity[]
   contentItems  ContentItem[]
   learningNotes LearningNote[]
   competitors   Competitor[]
   invitations   Invitation[]
+  photoShoots   PhotoShoot[]
 
   // target for composite tenant FKs (AT-021): children reference (id, workspaceId)
   @@unique([id, workspaceId])
@@ -558,19 +559,19 @@ model RateLimitBucket {
 /// ponytail: permissions as a text[] instead of Cad's RolePermission join table; add the
 /// join table when per-permission scope/conditions are needed.
 model Role {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   workspaceId String
   slug        String
   name        String
   description String?
-  isSystem    Boolean  @default(false)
+  isSystem    Boolean   @default(false)
   /// WORKSPACE roles go on workspace members; PROJECT roles on a brand (BrandMember)
   scope       RoleScope @default(WORKSPACE)
   permissions String[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace    Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   members      WorkspaceMember[]
   brandMembers BrandMember[]
   invitations  Invitation[]
@@ -652,7 +653,9 @@ enum ConnectionStatus {
   REVOKED
 }
 
-/** A brand's connected channel account. Tokens only ever live encrypted (DEC-002/018). */
+/**
+ * A brand's connected channel account. Tokens only ever live encrypted (DEC-002/018).
+ */
 model IntegrationConnection {
   id                   String              @id @default(cuid())
   workspaceId          String
@@ -661,7 +664,7 @@ model IntegrationConnection {
   externalAccountId    String
   displayName          String
   scopes               String[]
-  encryptedCredentials String?             // null once revoked
+  encryptedCredentials String? // null once revoked
   credentialKeyVersion Int
   tokenExpiresAt       DateTime?
   status               ConnectionStatus    @default(ACTIVE)
@@ -677,7 +680,9 @@ model IntegrationConnection {
   @@index([status, tokenExpiresAt])
 }
 
-/** Single-use OAuth state (DEC-017): only the hash is stored; consumed atomically on callback. */
+/**
+ * Single-use OAuth state (DEC-017): only the hash is stored; consumed atomically on callback.
+ */
 model OAuthStateTransaction {
   id          String              @id @default(cuid())
   stateHash   String              @unique
@@ -699,7 +704,9 @@ enum AuditKind {
   GEO
 }
 
-/** One SEO or GEO audit produced by an agent run. Append-only; the UI shows the latest per kind. */
+/**
+ * One SEO or GEO audit produced by an agent run. Append-only; the UI shows the latest per kind.
+ */
 model AuditReport {
   id          String    @id @default(cuid())
   workspaceId String
@@ -718,7 +725,9 @@ model AuditReport {
   @@index([workspaceId, brandId])
 }
 
-/** One CMO chat conversation for one person and one brand. Messages are AI SDK UIMessage[] (text + tool parts). */
+/**
+ * One CMO chat conversation for one person and one brand. Messages are AI SDK UIMessage[] (text + tool parts).
+ */
 model ChatThread {
   id          String   @id // client-generated by the chat UI
   workspaceId String
@@ -748,7 +757,9 @@ enum OpportunityStatus {
   PLANNED // turned into calendar slots
 }
 
-/** An idea worth posting about, found by the Opportunities agent. Deduped per brand. */
+/**
+ * An idea worth posting about, found by the Opportunities agent. Deduped per brand.
+ */
 model Opportunity {
   id          String              @id @default(cuid())
   workspaceId String
@@ -762,13 +773,13 @@ model Opportunity {
   reason      String
   score       Int // 0-100, for ordering
   timing      String? // e.g. "before 15 Nov", "evergreen"
-  sources     Json    @default("[]") // [{ url, title }]
+  sources     Json                @default("[]") // [{ url, title }]
   status      OpportunityStatus   @default(NEW)
   agentRunId  String?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
-  brand Brand          @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  brand Brand         @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
   items ContentItem[]
 
   @@unique([brandId, dedupeKey])
@@ -784,7 +795,9 @@ enum ContentChannel {
   THREADS_POST
 }
 
-/** Content lifecycle (design §4.5). Agents move items up to AWAITING_APPROVAL; people do the rest. */
+/**
+ * Content lifecycle (design §4.5). Agents move items up to AWAITING_APPROVAL; people do the rest.
+ */
 enum ContentStatus {
   PLANNED
   BRIEF_READY
@@ -799,7 +812,9 @@ enum ContentStatus {
   CANCELLED
 }
 
-/** One planned post for one channel and date. Brief + versions + quality checks hang off it. */
+/**
+ * One planned post for one channel and date. Brief + versions + quality checks hang off it.
+ */
 model ContentItem {
   id            String         @id @default(cuid())
   workspaceId   String
@@ -816,8 +831,8 @@ model ContentItem {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  brand       Brand            @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
-  opportunity Opportunity?     @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  brand        Brand                @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  opportunity  Opportunity?         @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
   versions     ContentVersion[]
   decisions    ApprovalDecision[]
   publications PublicationAttempt[]
@@ -835,7 +850,9 @@ enum ReelRenderStep {
   FAILED
 }
 
-/** One paid attempt at turning a reel plan version into a video: voice (OpenAI) → clips (Higgsfield) → join (ffmpeg). */
+/**
+ * One paid attempt at turning a reel plan version into a video: voice (OpenAI) → clips (Higgsfield) → join (ffmpeg).
+ */
 model ReelRender {
   id               String         @id @default(cuid())
   workspaceId      String
@@ -860,7 +877,37 @@ model ReelRender {
   @@index([contentItemId, createdAt])
 }
 
-/** Immutable draft text. Approval (later slice) binds to one exact version. */
+/// A photoshoot (mobile "04 Photoshoot"): four shots of one brand photo, on the tier the person picked (server/photoshoot).
+model PhotoShoot {
+  id          String   @id @default(cuid())
+  workspaceId String
+  brandId     String
+  /// product | fashion
+  kind        String
+  /// base | moderate | higher | ultra (tiers.ts)
+  tier        String
+  /// RUNNING | DONE | FAILED
+  status      String   @default("RUNNING")
+  /// What was asked: sourceKey, ratio and the setup choices
+  input       Json
+  /// Higgsfield request ids, one per shot (empty for OpenAI tiers, which answer at once)
+  requests    String[]
+  /// The finished shots in our media storage
+  outputKeys  String[]
+  credits     Int
+  chargeId    String
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId, createdAt])
+}
+
+/**
+ * Immutable draft text. Approval (later slice) binds to one exact version.
+ */
 model ContentVersion {
   id            String   @id @default(cuid())
   contentItemId String
@@ -897,7 +944,9 @@ model QualityCheck {
   @@index([contentVersionId, createdAt])
 }
 
-/** What the Analyst learned and what to test next. Append-only. */
+/**
+ * What the Analyst learned and what to test next. Append-only.
+ */
 model LearningNote {
   id          String   @id @default(cuid())
   workspaceId String
@@ -913,7 +962,9 @@ model LearningNote {
   @@index([workspaceId, brandId, createdAt])
 }
 
-/** A competitor this brand tracks. Private to the brand; its audits live in the shared SiteAudit library. */
+/**
+ * A competitor this brand tracks. Private to the brand; its audits live in the shared SiteAudit library.
+ */
 model Competitor {
   id          String   @id @default(cuid())
   workspaceId String
@@ -943,7 +994,7 @@ model SiteAudit {
   aiCrawlers             Json // [{ ua, allowed }]
   approach               Json // { positioning, audience, products, priceSignals, contentThemes, strengths, weaknesses }
   socials                Json // [{ platform, url }]
-  sources                Json @default("[]")
+  sources                Json     @default("[]")
   pagesRead              Int
   requestedByWorkspaceId String?
   agentRunId             String?
@@ -952,7 +1003,9 @@ model SiteAudit {
   @@index([domain, createdAt])
 }
 
-/** Credit ledger: grants are positive, spends negative. Balance = sum of delta. */
+/**
+ * Credit ledger: grants are positive, spends negative. Balance = sum of delta.
+ */
 model CreditEntry {
   id          String   @id @default(cuid())
   workspaceId String
@@ -974,7 +1027,9 @@ enum ApprovalVerdict {
   REJECTED
 }
 
-/** Append-only. An approval counts only while its version is still the latest and its hash matches. */
+/**
+ * Append-only. An approval counts only while its version is still the latest and its hash matches.
+ */
 model ApprovalDecision {
   id               String          @id @default(cuid())
   workspaceId      String
