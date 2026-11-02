@@ -67,10 +67,10 @@
   "chat": {
     "creditsA11y_one": "{{count}} credit",
     "creditsA11y_other": "{{count}} credits",
-    "addAssets": "Add assets",
+    "addAssets": "Photos",
     "composerPlaceholder": "Refine tone, voiceover, or add directions...",
     "composerA11y": "Refine tone, voiceover, or add directions",
-    "send": "Send refinement",
+    "send": "Send",
     "day": "Today · Reels Studio",
     "userMessage": "Show the Bunting collection in a calm, premium reel.",
     "reply": "I've tailored a concept for your <b>{{brand}}</b> {{product}} table. Here are the recommended parameters:",
@@ -86,15 +86,37 @@
     "writing": "Writing…",
     "planMeta_one": "{{count}} scene · ~{{seconds}}s",
     "planMeta_other": "{{count}} scenes · ~{{seconds}}s",
-    "makeItSeconds": "Make it about {{seconds}} seconds."
+    "makeItSeconds": "Make it about {{seconds}} seconds.",
+    "greeting": "What should this reel show? Describe it, or start from one of these.",
+    "starterProduct": "A reel about {{product}}",
+    "placeholderNew": "Describe your reel…",
+    "placeholderRevise": "Ask for changes…",
+    "currentLength": "~{{seconds}}s now",
+    "tryAgain": "Try again",
+    "writingPlan": "Writing the script",
+    "directing": "Choosing a video model for each scene",
+    "stageReading": "Reading your brand and photos",
+    "stageScenes_one": "Writing scene {{count}}",
+    "stageScenes_other": "Writing scene {{count}}",
+    "draftScene": "Scene {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "{{seconds}}s duration",
     "verticalFact": "9:16 vertical",
     "readyToRender": "Ready to render <muted>· Draft saved for review</muted>",
+    "needsPhotos_one": "{{count}} scene needs its own photo <muted>· Its photo shows something else</muted>",
+    "needsPhotos_other": "{{count}} scenes need their own photo <muted>· Their photos show something else</muted>",
+    "standIn": "This photo shows something else. Pick the right one before making the video.",
+    "join": {
+      "match": "Match cut: this shot ends where the next begins",
+      "cut": "Cut on the beat",
+      "dissolve": "Dissolve into the next shot"
+    },
+    "pickPhotos": "Pick photos",
     "sceneDirection": "Scene direction",
     "voiceoverFr": "Voiceover (FR)",
+    "voiceover": "Voiceover ({{lang}})",
     "direction": {
       "scene1": "Slow gliding reveal across modern dining setting",
       "scene2": "Smooth macro sweep over rich natural wood grain and bevelled edge",
@@ -131,10 +153,24 @@
     "safeToLeave": "You can safely leave this screen. Your draft is automatically saved in your Results tab.",
     "keepWorking": "Keep working in background",
     "failed": "The video couldn't be made: {{error}}",
+    "failedTitle": "This video couldn't be made",
+    "bodyAny": "Composing visuals, voiceover and motion pacing for {{title}}.",
+    "stopped": "Stopped",
+    "notStarted": "Not started",
+    "tryAgain": "Try again",
+    "retrying": "Starting again…",
+    "editPlan": "Edit plan",
     "creditsRefunded_one": "{{count}} credit refunded",
     "creditsRefunded_other": "{{count}} credits refunded"
   },
+  "failure": {
+    "unavailable": "Video making is unavailable right now. Your credits are back. Please try again later.",
+    "slow": "The video took too long to make. Your credits are back. Try again.",
+    "scene": "Scene {{n}} couldn't be animated. Your credits are back. Try again, or pick another photo for it.",
+    "other": "Something went wrong while making the video. Your credits are back. Try again."
+  },
   "results": {
+    "failedShort": "Couldn't be made · credits refunded",
     "title": "Video reels",
     "newReel": "New reel",
     "filter": {
@@ -170,6 +206,8 @@
     "saving": "Saving…"
   },
   "review": {
+    "joinSoftened": "Scene {{n}} → {{next}}",
+    "joinSoftenedNote": "The two shots didn't quite match, so they blend with a dissolve",
     "subtitle": "Reel draft · Ready to review",
     "options": "Options menu",
     "downloadVideo": "Download video",

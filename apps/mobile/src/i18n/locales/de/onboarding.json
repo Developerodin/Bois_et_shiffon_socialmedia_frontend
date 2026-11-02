@@ -20,7 +20,18 @@
     "sendFailed": "Code konnte nicht gesendet werden. Versuche es erneut.",
     "useMobile": "Handynummer stattdessen verwenden",
     "linkTitle": "E-Mail hinzufügen",
-    "linkSubtitle": "Deine Nummer ist verifiziert. Füge eine E-Mail für Belege und Team-Einladungen hinzu. Wir senden dir einen Code."
+    "linkSubtitle": "Deine Nummer ist verifiziert. Füge eine E-Mail für Belege und Team-Einladungen hinzu. Wir senden dir einen Code.",
+    "registerTitle": "Erstelle dein Konto",
+    "registerSubtitle": "Wähle ein Passwort. Wir senden dir einen Code per E-Mail, um deine Adresse zu bestätigen.",
+    "passwordLabel": "Passwort",
+    "passwordPlaceholder": "Dein Passwort",
+    "newPasswordPlaceholder": "Mindestens {{count}} Zeichen",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
+    "signIn": "Anmelden",
+    "createAccount": "Konto erstellen",
+    "signInFailed": "Anmeldung fehlgeschlagen. Versuche es erneut.",
+    "subtitleEmailFirst": "Gib deine E-Mail-Adresse ein. Wir fragen dich nach deinem Passwort oder senden dir einen Code."
   },
   "verify": {
     "title": "Gib deinen Code ein",
@@ -314,6 +325,7 @@
     "noPhotos": "Keine Produktfotos auf deiner Website gefunden",
     "ideasTitle": "Post-Ideen finden",
     "ideasDetail": "Jahreszeiten, Trends und dein Katalog",
+    "finishingResearch": "Recherche zu deinem Unternehmen wird abgeschlossen…",
     "ideasFound_one": "{{count}} Idee gefunden",
     "ideasFound_other": "{{count}} Ideen gefunden",
     "ideasNone": "Diesmal keine neuen Ideen",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Google Maps konnte nicht durchsucht werden. Versuche es erneut."
     }
+  },
+  "password": {
+    "title": "Willkommen zurück",
+    "subtitle": "Gib dein Passwort ein, um dich anzumelden.",
+    "change": "Ändern",
+    "changeEmail": "Anmeldung als {{email}}. E-Mail-Adresse ändern",
+    "useCode": "Passwort vergessen? Mit E-Mail-Code anmelden"
   }
 }

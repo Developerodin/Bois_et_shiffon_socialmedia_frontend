@@ -20,7 +20,18 @@
     "sendFailed": "Impossible d'envoyer le code. Réessayez.",
     "useMobile": "Utiliser le numéro de mobile à la place",
     "linkTitle": "Ajoutez votre email",
-    "linkSubtitle": "Votre numéro est vérifié. Ajoutez un email pour les reçus et les invitations d'équipe. Nous vous enverrons un code."
+    "linkSubtitle": "Votre numéro est vérifié. Ajoutez un email pour les reçus et les invitations d'équipe. Nous vous enverrons un code.",
+    "registerTitle": "Créez votre compte",
+    "registerSubtitle": "Choisissez un mot de passe. Nous vous enverrons un code par e-mail pour confirmer votre adresse.",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "Votre mot de passe",
+    "newPasswordPlaceholder": "Au moins {{count}} caractères",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "signIn": "Se connecter",
+    "createAccount": "Créer un compte",
+    "signInFailed": "Connexion impossible. Réessayez.",
+    "subtitleEmailFirst": "Saisissez votre e-mail. Nous vous demanderons votre mot de passe ou vous enverrons un code."
   },
   "verify": {
     "title": "Entrez votre code",
@@ -314,6 +325,7 @@
     "noPhotos": "Aucune photo de produit trouvée sur votre site",
     "ideasTitle": "Recherche d’idées de publications",
     "ideasDetail": "Saisons, tendances et votre catalogue",
+    "finishingResearch": "Finalisation de l’analyse de votre entreprise…",
     "ideasFound_one": "{{count}} idée trouvée",
     "ideasFound_other": "{{count}} idées trouvées",
     "ideasNone": "Pas de nouvelles idées cette fois",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Recherche sur Google Maps impossible. Réessayez."
     }
+  },
+  "password": {
+    "title": "Bon retour",
+    "subtitle": "Saisissez votre mot de passe pour vous connecter.",
+    "change": "Modifier",
+    "changeEmail": "Connexion avec {{email}}. Modifier l’adresse e-mail",
+    "useCode": "Mot de passe oublié ? Connectez-vous avec un code par e-mail"
   }
 }

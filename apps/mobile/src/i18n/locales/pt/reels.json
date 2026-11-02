@@ -13,7 +13,8 @@
   "timezone": "Fuso horário",
   "status": {
     "draft": "Rascunho",
-    "ready": "Pronto"
+    "ready": "Pronto",
+    "processing": "A processar"
   },
   "scene": {
     "label": "Cena {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Cortes rápidos do catálogo",
     "jumpBackIn": "Voltar",
     "seeAll": "Ver tudo",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}}s · Vertical 9:16"
   },
   "ideas": {
     "title": "Ideias de vídeo",
@@ -58,7 +60,9 @@
       "angle02": "Focando nas portas esculpidas à mão, gestão de cabos e ambiente acolhedor."
     },
     "readyToReview": "Pronto para revisão",
-    "viewStoryboard": "Ver storyboard"
+    "viewStoryboard": "Ver storyboard",
+    "making": "A escrever o guião…",
+    "empty": "Ainda não há ideias para reels. Aparecem aqui depois de o agente de ideias trabalhar."
   },
   "chat": {
     "creditsA11y_one": "{{count}} crédito",
@@ -77,15 +81,42 @@
     "openingHook": "Gancho de abertura",
     "reviewStoryboard_one": "Rever storyboard ({{count}} cena)",
     "reviewStoryboard_other": "Rever storyboard ({{count}} cenas)",
-    "readyStatus": "Pronto para gerar ou refinar"
+    "readyStatus": "Pronto para gerar ou refinar",
+    "empty": "Diz-me o que o reel deve mostrar ou escolhe primeiro uma ideia.",
+    "writing": "A escrever…",
+    "planMeta_one": "{{count}} cena · ~{{seconds}}s",
+    "planMeta_other": "{{count}} cenas · ~{{seconds}}s",
+    "makeItSeconds": "Faz com que dure cerca de {{seconds}} segundos.",
+    "greeting": "O que deve mostrar este reel? Descreve-o ou começa com uma destas ideias.",
+    "starterProduct": "Um reel sobre {{product}}",
+    "placeholderNew": "Descreve o teu reel…",
+    "placeholderRevise": "Pede alterações…",
+    "currentLength": "~{{seconds}}s agora",
+    "tryAgain": "Tentar novamente",
+    "writingPlan": "A escrever o plano do teu reel",
+    "directing": "A escolher um modelo de vídeo para cada cena",
+    "stageReading": "A analisar a tua marca e as tuas fotografias",
+    "stageScenes_one": "A escrever a cena {{count}}",
+    "stageScenes_other": "A escrever a cena {{count}}",
+    "draftScene": "Cena {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "Duração de {{seconds}}s",
     "verticalFact": "9:16 vertical",
     "readyToRender": "Pronto para renderizar <muted>· Rascunho salvo para revisão</muted>",
+    "needsPhotos_one": "{{count}} cena precisa da sua própria foto <muted>· A foto atual mostra outra coisa</muted>",
+    "needsPhotos_other": "{{count}} cenas precisam das suas próprias fotos <muted>· As fotos atuais mostram outras coisas</muted>",
+    "standIn": "Esta foto mostra outra coisa. Escolhe a foto certa antes de criares o vídeo.",
+    "join": {
+      "match": "Corte por correspondência: este plano termina onde começa o seguinte",
+      "cut": "Corte ao ritmo",
+      "dissolve": "Transição em fusão para o plano seguinte"
+    },
+    "pickPhotos": "Escolher fotos",
     "sceneDirection": "Direção da cena",
     "voiceoverFr": "Narração (FR)",
+    "voiceover": "Narração ({{lang}})",
     "direction": {
       "scene1": "Revelação suave sobre cenário de jantar moderno",
       "scene2": "Varredura macro suave sobre grão de madeira natural rico e borda chanfrada",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} crédito",
     "cost_other": "{{count}} créditos",
     "balance_one": "Saldo atual: {{balance}} créditos · {{count}} crédito será reservado · Rascunho salvo automaticamente",
-    "balance_other": "Saldo atual: {{balance}} créditos · {{count}} créditos serão reservados · Rascunho salvo automaticamente"
+    "balance_other": "Saldo atual: {{balance}} créditos · {{count}} créditos serão reservados · Rascunho salvo automaticamente",
+    "seeProgress": "Ver progresso",
+    "onScreen": "No ecrã: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Voltar ao espaço de trabalho",
@@ -118,9 +151,26 @@
     "remaining_one": "Restante: {{count}} crédito",
     "remaining_other": "Restante: {{count}} créditos",
     "safeToLeave": "Pode sair desta tela com segurança. O seu rascunho é salvo automaticamente na aba Resultados.",
-    "keepWorking": "Continue a trabalhar em segundo plano"
+    "keepWorking": "Continue a trabalhar em segundo plano",
+    "failed": "Não foi possível criar o vídeo: {{error}}",
+    "failedTitle": "Não foi possível criar este vídeo",
+    "bodyAny": "A compor os elementos visuais, a narração e o ritmo da animação para {{title}}.",
+    "stopped": "Interrompido",
+    "notStarted": "Não iniciado",
+    "tryAgain": "Tentar novamente",
+    "retrying": "A iniciar novamente…",
+    "editPlan": "Editar plano",
+    "creditsRefunded_one": "{{count}} crédito devolvido",
+    "creditsRefunded_other": "{{count}} créditos devolvidos"
+  },
+  "failure": {
+    "unavailable": "Não é possível criar vídeos de momento. Os teus créditos foram devolvidos. Tenta novamente mais tarde.",
+    "slow": "A criação do vídeo demorou demasiado tempo. Os teus créditos foram devolvidos. Tenta novamente.",
+    "scene": "Não foi possível animar a cena {{n}}. Os teus créditos foram devolvidos. Tenta novamente ou escolhe outra foto para esta cena.",
+    "other": "Ocorreu um erro ao criar o vídeo. Os teus créditos foram devolvidos. Tenta novamente."
   },
   "results": {
+    "failedShort": "Não foi possível criar · créditos devolvidos",
     "title": "Reels de vídeo",
     "newReel": "Novo reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Narração em francês · Pronto para agendar",
       "atelier": "15s · Acústica ambiente · Pronto para agendar"
-    }
+    },
+    "empty": "Ainda não há reels. Começa um em Criar ou Ideias.",
+    "posted": "Publicado no Instagram",
+    "failed": "Não foi possível criar: {{error}}",
+    "readyMeta": "{{seconds}}s · Locução em francês · Pronto",
+    "draftMeta": "{{seconds}}s · Plano, ainda sem vídeo",
+    "addLink": "Descarregado · Já publicaste? Adiciona o link",
+    "tryAgain_one": "Tentar novamente ({{count}} crédito)",
+    "tryAgain_other": "Tentar novamente ({{count}} créditos)",
+    "openPlan": "Abrir plano",
+    "closeSheet": "Fechar",
+    "linkTitle": "Adicionar link da publicação",
+    "linkBody": "Cola o link do reel que publicaste no Instagram para poderes acompanhar os resultados.",
+    "saveLink": "Guardar link",
+    "saving": "A guardar…"
   },
   "review": {
+    "joinSoftened": "Cena {{n}} → {{next}}",
+    "joinSoftenedNote": "Os dois planos não coincidiam bem, por isso foram unidos com uma transição em fusão",
     "subtitle": "Rascunho do reel · Pronto para revisão",
     "options": "Menu de opções",
     "downloadVideo": "Baixar vídeo",
@@ -162,7 +228,12 @@
     "audioTrack": "Faixa de áudio",
     "audioValue": "Narração em francês (Studio Natural) + Acústica ambiente",
     "resolution": "Resolução",
-    "resolutionValue": "Vídeo retrato · 9:16"
+    "resolutionValue": "Vídeo retrato · 9:16",
+    "checking": "A verificar o reel… As opções Descarregar e Agendar ficam disponíveis quando as verificações terminarem.",
+    "askForChanges": "Algo não está bem? Pede alterações",
+    "checks": "Verificações",
+    "audioVoiceOnly": "Locução em francês",
+    "blocked": "Uma verificação encontrou um problema (ver Verificações). Corrige-o na legenda ou toca em \"Algo não está bem? Pede alterações\"."
   },
   "publish": {
     "title": "Publicar reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Amostra de voz, {{title}}",
     "sampleVoice": "Amostra de voz",
     "voiceLed": "Estilo guiado por voz",
-    "notice": "Escolha um estilo guiado por voz ou mantenha o foco no seu produto."
+    "notice": "Escolha um estilo guiado por voz ou mantenha o foco no seu produto.",
+    "comingSoon": "Em breve, haverá apresentadores a falar para a câmara. Por agora, este reel mostra apenas o produto."
   },
   "script": {
     "title": "Guia & voz",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Francês natural, ritmo acústico quente",
     "recordOwn": "Grave a sua própria voz",
     "recordOwnMeta": "Narração personalizada opcional da marca",
-    "record": "Gravar"
+    "record": "Gravar",
+    "saving": "A guardar…",
+    "sceneTooLong": "A cena {{n}} tem mais de 30 palavras (15 s). Encurta-a.",
+    "keepScenes_one": "Mantém {{count}} parágrafo, um por cena.",
+    "keepScenes_other": "Mantém {{count}} parágrafos, um por cena, com uma linha em branco entre eles.",
+    "rewriteOpeningAsk": "Reescreve a frase inicial da cena 1: mais curta e surpreendente.",
+    "voiceName": "Voz: {{name}}",
+    "nextVoice": "Próxima voz"
   },
   "templates": {
     "title": "Modelos de reel",
@@ -275,7 +354,9 @@
         "subtitle": "Anúncio & CTA de showroom"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Usa o formato \"{{title}}\" ({{subtitle}}), com cerca de {{seconds}} segundos.",
+    "applying": "A aplicar…"
   },
   "assets": {
     "title": "Selecionar recursos",
@@ -296,6 +377,10 @@
       "macro": "Detalhe",
       "staged": "Estilizado",
       "tv": "Unidade de TV"
-    }
+    },
+    "yourPhoto": "A tua foto",
+    "planFirst": "Planeia primeiro o reel (Criar → Planear um reel em conjunto) e depois escolhe as fotos.",
+    "saving": "A guardar…",
+    "sceneN": "Cena {{n}}"
   }
 }

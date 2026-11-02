@@ -13,7 +13,8 @@
   "timezone": "Aikavyöhyke",
   "status": {
     "draft": "Luonnos",
-    "ready": "Valmis"
+    "ready": "Valmis",
+    "processing": "Käsitellään"
   },
   "scene": {
     "label": "Kohtaus {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Nopeat katalogileikkaukset",
     "jumpBackIn": "Palaa takaisin",
     "seeAll": "Näytä kaikki",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}} s · 9:16 pysty"
   },
   "ideas": {
     "title": "Videoideat",
@@ -58,7 +60,9 @@
       "angle02": "Keskitytään käsin veistettyihin säleoviin, johdonhallintaan ja lämpimään elinympäristöön."
     },
     "readyToReview": "Valmis tarkastettavaksi",
-    "viewStoryboard": "Näytä kuvakäsikirjoitus"
+    "viewStoryboard": "Näytä kuvakäsikirjoitus",
+    "making": "Kirjoitetaan kuvakäsikirjoitusta…",
+    "empty": "Ei vielä reels-ideoita. Ne näkyvät täällä, kun idea-agentti on valmis."
   },
   "chat": {
     "creditsA11y_one": "{{count}} krediitti",
@@ -77,15 +81,42 @@
     "openingHook": "Avauskoukku",
     "reviewStoryboard_one": "Tarkista kuvakäsikirjoitus ({{count}} kohtaus)",
     "reviewStoryboard_other": "Tarkista kuvakäsikirjoitus ({{count}} kohtausta)",
-    "readyStatus": "Valmis luotavaksi tai tarkennettavaksi"
+    "readyStatus": "Valmis luotavaksi tai tarkennettavaksi",
+    "empty": "Kerro, mitä reels-videolla näytetään, tai valitse ensin idea.",
+    "writing": "Kirjoitetaan…",
+    "planMeta_one": "{{count}} kohtaus · ~{{seconds}} s",
+    "planMeta_other": "{{count}} kohtausta · ~{{seconds}} s",
+    "makeItSeconds": "Tee siitä noin {{seconds}} sekunnin mittainen.",
+    "greeting": "Mitä reels-videolla näytetään? Kuvaile ideasi tai aloita jostakin näistä.",
+    "starterProduct": "Reels-video tuotteesta {{product}}",
+    "placeholderNew": "Kuvaile reels-videosi…",
+    "placeholderRevise": "Pyydä muutoksia…",
+    "currentLength": "Nyt ~{{seconds}} s",
+    "tryAgain": "Yritä uudelleen",
+    "writingPlan": "Kirjoitetaan reels-videon suunnitelmaa",
+    "directing": "Valitaan videomalli jokaiselle kohtaukselle",
+    "stageReading": "Tutustutaan brändiisi ja kuviisi",
+    "stageScenes_one": "Kirjoitetaan kohtausta {{count}}",
+    "stageScenes_other": "Kirjoitetaan kohtausta {{count}}",
+    "draftScene": "Kohtaus {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Kuvakäsikirjoitus",
     "durationFact": "{{seconds}}s kesto",
     "verticalFact": "9:16 pysty",
     "readyToRender": "Valmis renderöitäväksi <muted>· Luonnos tallennettu tarkistettavaksi</muted>",
+    "needsPhotos_one": "{{count}} kohtaus tarvitsee oman kuvan <muted>· Sen kuvassa näkyy jotain muuta</muted>",
+    "needsPhotos_other": "{{count}} kohtausta tarvitsee oman kuvan <muted>· Niiden kuvissa näkyy jotain muuta</muted>",
+    "standIn": "Tässä kuvassa näkyy jotain muuta. Valitse oikea kuva ennen videon luomista.",
+    "join": {
+      "match": "Täsmäleikkaus: tämä otos päättyy siihen, mistä seuraava alkaa",
+      "cut": "Leikkaus musiikin tahtiin",
+      "dissolve": "Ristihäivytys seuraavaan otokseen"
+    },
+    "pickPhotos": "Valitse kuvat",
     "sceneDirection": "Kohtauksen ohjaus",
     "voiceoverFr": "Ääniraita (FR)",
+    "voiceover": "Kertojaääni ({{lang}})",
     "direction": {
       "scene1": "Hidas liukuva paljastus modernin ruokailuympäristön yli",
       "scene2": "Pehmeä makrosweep rikkaan luonnonpuun syyn ja viistetyn reunan yli",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} krediitti",
     "cost_other": "{{count}} krediittiä",
     "balance_one": "Nykyinen saldo: {{balance}} krediittiä · {{count}} krediitti varataan · Luonnos tallennetaan automaattisesti",
-    "balance_other": "Nykyinen saldo: {{balance}} krediittiä · {{count}} krediittiä varataan · Luonnos tallennetaan automaattisesti"
+    "balance_other": "Nykyinen saldo: {{balance}} krediittiä · {{count}} krediittiä varataan · Luonnos tallennetaan automaattisesti",
+    "seeProgress": "Katso edistyminen",
+    "onScreen": "Ruudulla: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Takaisin työtilaan",
@@ -118,9 +151,26 @@
     "remaining_one": "Jäljellä: {{count}} krediitti",
     "remaining_other": "Jäljellä: {{count}} krediittiä",
     "safeToLeave": "Voit turvallisesti poistua tältä näytöltä. Luonnoksesi tallennetaan automaattisesti Tulokset-välilehdelle.",
-    "keepWorking": "Jatka työskentelyä taustalla"
+    "keepWorking": "Jatka työskentelyä taustalla",
+    "failed": "Videota ei voitu luoda: {{error}}",
+    "failedTitle": "Videon luominen epäonnistui",
+    "bodyAny": "Koostetaan visuaalista ilmettä, selostusta ja liikkeen rytmitystä: {{title}}.",
+    "stopped": "Pysäytetty",
+    "notStarted": "Ei aloitettu",
+    "tryAgain": "Yritä uudelleen",
+    "retrying": "Aloitetaan uudelleen…",
+    "editPlan": "Muokkaa suunnitelmaa",
+    "creditsRefunded_one": "{{count}} krediitti palautettu",
+    "creditsRefunded_other": "{{count}} krediittiä palautettu"
+  },
+  "failure": {
+    "unavailable": "Videon luominen ei ole juuri nyt käytettävissä. Krediittisi on palautettu. Yritä myöhemmin uudelleen.",
+    "slow": "Videon luominen kesti liian kauan. Krediittisi on palautettu. Yritä uudelleen.",
+    "scene": "Kohtausta {{n}} ei voitu animoida. Krediittisi on palautettu. Yritä uudelleen tai valitse kohtaukseen toinen kuva.",
+    "other": "Videon luomisessa tapahtui virhe. Krediittisi on palautettu. Yritä uudelleen."
   },
   "results": {
+    "failedShort": "Luonti epäonnistui · krediitit palautettu",
     "title": "Videoreelsit",
     "newReel": "Uusi reels",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Ranskalainen ääniraita · Valmis aikataulutettavaksi",
       "atelier": "15s · Ambient-akustinen · Valmis aikataulutettavaksi"
-    }
+    },
+    "empty": "Ei vielä reels-videoita. Aloita kohdasta Luo tai Ideat.",
+    "posted": "Julkaistu Instagramissa",
+    "failed": "Ei voitu luoda: {{error}}",
+    "readyMeta": "{{seconds}} s · Ranskankielinen kertojaääni · Valmis",
+    "draftMeta": "{{seconds}} s · Suunnitelma, ei vielä videota",
+    "addLink": "Ladattu · Julkaisitko? Lisää linkki",
+    "tryAgain_one": "Yritä uudelleen ({{count}} krediitti)",
+    "tryAgain_other": "Yritä uudelleen ({{count}} krediittiä)",
+    "openPlan": "Avaa suunnitelma",
+    "closeSheet": "Sulje",
+    "linkTitle": "Lisää julkaisun linkki",
+    "linkBody": "Liitä Instagramissa julkaisemasi reels-videon linkki, jotta sen tuloksia voidaan seurata.",
+    "saveLink": "Tallenna linkki",
+    "saving": "Tallennetaan…"
   },
   "review": {
+    "joinSoftened": "Kohtaus {{n}} → {{next}}",
+    "joinSoftenedNote": "Otokset eivät aivan vastanneet toisiaan, joten ne yhdistetään ristihäivytyksellä",
     "subtitle": "Reels-luonnos · Valmis tarkistettavaksi",
     "options": "Valikko",
     "downloadVideo": "Lataa video",
@@ -162,7 +228,12 @@
     "audioTrack": "Ääniraita",
     "audioValue": "Ranskalainen kertoja (Studio Natural) + Ympäristöääni",
     "resolution": "Resoluutio",
-    "resolutionValue": "Pystysuuntainen video · 9:16"
+    "resolutionValue": "Pystysuuntainen video · 9:16",
+    "checking": "Tarkistetaan reels-videota… Lataus ja ajastus avautuvat, kun tarkistukset ovat valmiit.",
+    "askForChanges": "Eikö näytä oikealta? Pyydä muutoksia",
+    "checks": "Tarkistukset",
+    "audioVoiceOnly": "Ranskankielinen kertojaääni",
+    "blocked": "Tarkistuksessa löytyi ongelma (katso Tarkistukset). Korjaa se kuvatekstissä tai napauta \"Eikö näytä oikealta? Pyydä muutoksia\"."
   },
   "publish": {
     "title": "Julkaise rulla",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Ääninäyte, {{title}}",
     "sampleVoice": "Ääninäyte",
     "voiceLed": "Äänivetoinen tyyli",
-    "notice": "Valitse äänivetoinen tyyli tai keskity tuotteeseesi."
+    "notice": "Valitse äänivetoinen tyyli tai keskity tuotteeseesi.",
+    "comingSoon": "Kameralle puhuvat juontajat ovat tulossa pian. Tässä reels-videossa näytetään toistaiseksi vain tuotteita."
   },
   "script": {
     "title": "Käsikirjoitus & ääni",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Luonnollinen ranska, lämmin akustinen tempo",
     "recordOwn": "Tallenna oma äänesi",
     "recordOwnMeta": "Valinnainen mukautettu brändikerronta",
-    "record": "Tallenna"
+    "record": "Tallenna",
+    "saving": "Tallennetaan…",
+    "sceneTooLong": "Kohtauksessa {{n}} on yli 30 sanaa (15 s). Lyhennä sitä.",
+    "keepScenes_one": "Säilytä {{count}} kappale, yksi per kohtaus.",
+    "keepScenes_other": "Säilytä {{count}} kappaletta, yksi per kohtaus. Jätä kappaleiden väliin tyhjä rivi.",
+    "rewriteOpeningAsk": "Kirjoita ensimmäisen kohtauksen aloituskoukku uudelleen: lyhyemmäksi ja yllättävämmäksi.",
+    "voiceName": "Ääni: {{name}}",
+    "nextVoice": "Seuraava ääni"
   },
   "templates": {
     "title": "Rullapohjat",
@@ -275,7 +354,9 @@
         "subtitle": "Ilmoitus & showroom CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Käytä muotoa \"{{title}}\" ({{subtitle}}), noin {{seconds}} sekuntia.",
+    "applying": "Otetaan käyttöön…"
   },
   "assets": {
     "title": "Valitse aineistot",
@@ -296,6 +377,10 @@
       "macro": "Yksityiskohta",
       "staged": "Stailattu",
       "tv": "TV-yksikkö"
-    }
+    },
+    "yourPhoto": "Oma kuvasi",
+    "planFirst": "Suunnittele reels-video ensin (Luo → Suunnitellaan reels-video yhdessä) ja valitse sitten sen kuvat.",
+    "saving": "Tallennetaan…",
+    "sceneN": "Kohtaus {{n}}"
   }
 }

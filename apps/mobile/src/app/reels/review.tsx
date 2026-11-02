@@ -129,6 +129,10 @@ export default function ReelsReview() {
           ) : (
             <Text style={meta}>{t("review.checking")}</Text>
           )}
+          {/* Joins the seam check softened while rendering: the person sees why the cut became a blend. */}
+          {(detail?.renders.find((r) => r.step === "DONE")?.softened ?? []).map((n) => (
+            <Spec key={`join${n}`} Icon={CHECK_ICON.warn} label={t("review.joinSoftened", { n, next: n + 1 })} value={t("review.joinSoftenedNote")} tone="warn" />
+          ))}
         </View>
       </View>
 

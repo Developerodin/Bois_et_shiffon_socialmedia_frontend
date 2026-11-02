@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clipSeconds, planProblems, ReelPlan, reelPrice, reelSeconds, speechSeconds, toVersionBody } from "@/server/reels/plan";
+import { carryStandIns, clipSeconds, planProblems, ReelPlan, reelPrice, reelSeconds, speechSeconds, standInProblems, toVersionBody } from "@/server/reels/plan";
 
 const scope = { workspaceId: "w1", brandId: "b1" };
 const words = (n: number) => Array.from({ length: n }, (_, i) => `mot${i}`).join(" ");
@@ -42,5 +42,23 @@ describe("reel plan", () => {
     expect(b.script).toHaveLength(2);
     expect(b.hook).toBe("Acacia");
     expect(b.caption).toBe("Une table.");
+  });
+
+  it("won't render a stand-in photo, and only replacing that photo clears it", () => {
+    const flagged = ReelPlan.parse({ ...plan(4, 4), scenes: [{ ...scene(4, "w1/b1/dimona.jpg"), standIn: true }, scene(4)] });
+    expect(standInProblems(flagged)).toEqual([expect.stringContaining("Scene 1's photo doesn't show")]);
+    // The app sending standIn: false (or leaving it out) for the same photo doesn't clear it, nor does a chat revision.
+    const sameFalse = ReelPlan.parse({ ...flagged, scenes: [{ ...scene(4, "w1/b1/dimona.jpg"), standIn: false }, scene(4)] });
+    expect(carryStandIns(sameFalse, flagged, false).scenes[0].standIn).toBe(true);
+    expect(carryStandIns(sameFalse, flagged, true).scenes[0].standIn).toBe(true);
+    // Deleting or reordering scenes keeps the flag with the photo.
+    const moved = ReelPlan.parse({ ...flagged, scenes: [scene(4), scene(4, "w1/b1/dimona.jpg")] });
+    expect(carryStandIns(moved, flagged, false).scenes.map((s) => s.standIn)).toEqual([undefined, true]);
+    // A new photo clears it; the app can't add a flag, the scriptwriter can.
+    const swapped = ReelPlan.parse({ ...flagged, scenes: [scene(4, "w1/b1/tv.jpg"), { ...scene(4), standIn: true }] });
+    expect(carryStandIns(swapped, flagged, true).scenes.map((s) => s.standIn)).toEqual([undefined, true]);
+    const carried = carryStandIns(swapped, flagged, false);
+    expect(carried.scenes.map((s) => s.standIn)).toEqual([undefined, undefined]);
+    expect(standInProblems(carried)).toEqual([]);
   });
 });

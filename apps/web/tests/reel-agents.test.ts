@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/ai/provider", async (orig) => ({ ...(await orig<object>()), generateObject: vi.fn(async (_ctx: unknown, input: { mock: unknown }) => input.mock) }));
 
-import { directionProblems, directScenes, scriptProblems, writePlan } from "@/server/reels/agents";
+import { directionProblems, directScenes, partialDraft, scriptProblems, writePlan } from "@/server/reels/agents";
 import { ReelPlan } from "@/server/reels/plan";
 
 const scope = { workspaceId: "w1", brandId: "b1" };
@@ -43,5 +43,35 @@ describe("reel director", () => {
   it("rejects negative phrasing and the wrong scene count", () => {
     expect(directionProblems([{ prompt: "pan across, no people" }], 1)).toEqual([expect.stringMatching(/^Scene 1: .*positively/)]);
     expect(directionProblems([{ prompt: "pan" }], 2)).toEqual(["Write exactly 2 scenes."]);
+  });
+});
+
+describe("streamed draft", () => {
+  it("reads what the scriptwriter has written so far, scene by scene", () => {
+    expect(partialDraft("")).toBeNull();
+    expect(partialDraft('{"rep')).toBeNull();
+    expect(partialDraft('{"reply":"Voici une')).toEqual({ reply: "Voici une", title: "", scenes: [] });
+    expect(partialDraft(String.raw`{"reply":"Il dit \"oui\"","titl`)).toEqual({ reply: 'Il dit "oui"', title: "", scenes: [] });
+    expect(partialDraft('{"reply":"Voici.","title":"Dimona","voice":"sage","caption":"c","hashtags":["#a"],"scenes":[{"photoKey":"k","shot":"Wide","direction":"d","onScreenText":"o","voiceText":"Envie d')).toEqual({
+      reply: "Voici.", title: "Dimona", scenes: [{ shot: "Wide", voiceText: "Envie d" }],
+    });
+    expect(partialDraft(String.raw`{"reply":"caf\u00e`)).toEqual({ reply: "caf", title: "", scenes: [] });
+  });
+});
+
+describe("one subject per reel", () => {
+  const catalogue = [
+    { key: "w1/b1/table.jpg", title: "Table Bunting", product: "Table Bunting" },
+    { key: "w1/b1/bench.jpg", title: "Banc Bunting", product: "Banc Bunting" },
+    { key: "w1/b1/upload.jpg", title: "Wide" },
+  ];
+  const two = (a: string, b: string) => plan([scene("Votre table ?", { photoKey: a }), scene("Découvrez-la.", { photoKey: b })]);
+  it("refuses scenes of different products unless the person asked for several", () => {
+    expect(scriptProblems(two("w1/b1/table.jpg", "w1/b1/bench.jpg"), catalogue, scope).join(" ")).toMatch(/same product/);
+    expect(scriptProblems(two("w1/b1/table.jpg", "w1/b1/bench.jpg"), catalogue, scope, true).join(" ")).not.toMatch(/same product/);
+  });
+  it("accepts one product, and an uploaded photo alongside it", () => {
+    expect(scriptProblems(two("w1/b1/table.jpg", "w1/b1/table.jpg"), catalogue, scope).join(" ")).not.toMatch(/same product/);
+    expect(scriptProblems(two("w1/b1/table.jpg", "w1/b1/upload.jpg"), catalogue, scope).join(" ")).not.toMatch(/same product/);
   });
 });

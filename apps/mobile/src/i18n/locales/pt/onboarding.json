@@ -20,7 +20,18 @@
     "sendFailed": "Não foi possível enviar o código. Tente novamente.",
     "useMobile": "Usar número de telemóvel em vez disso",
     "linkTitle": "Adiciona o teu email",
-    "linkSubtitle": "O teu número está verificado. Adiciona um email para recibos e convites de equipa. Vamos enviar um código."
+    "linkSubtitle": "O teu número está verificado. Adiciona um email para recibos e convites de equipa. Vamos enviar um código.",
+    "registerTitle": "Cria a tua conta",
+    "registerSubtitle": "Escolhe uma palavra-passe. Enviamos-te um código por email para confirmares o teu endereço.",
+    "passwordLabel": "Palavra-passe",
+    "passwordPlaceholder": "A tua palavra-passe",
+    "newPasswordPlaceholder": "Pelo menos {{count}} caracteres",
+    "showPassword": "Mostrar palavra-passe",
+    "hidePassword": "Ocultar palavra-passe",
+    "signIn": "Iniciar sessão",
+    "createAccount": "Criar conta",
+    "signInFailed": "Não foi possível iniciar sessão. Tenta novamente.",
+    "subtitleEmailFirst": "Introduz o teu email. Vamos pedir-te a palavra-passe ou enviar-te um código."
   },
   "verify": {
     "title": "Insira o seu código",
@@ -314,6 +325,7 @@
     "noPhotos": "Não encontrámos fotos de produtos no teu site",
     "ideasTitle": "A procurar ideias para publicações",
     "ideasDetail": "Estações do ano, tendências e o teu catálogo",
+    "finishingResearch": "A concluir a pesquisa sobre o teu negócio…",
     "ideasFound_one": "{{count}} ideia encontrada",
     "ideasFound_other": "{{count}} ideias encontradas",
     "ideasNone": "Sem novas ideias desta vez",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Não foi possível pesquisar no Google Maps. Tenta novamente."
     }
+  },
+  "password": {
+    "title": "Bem-vindo de volta",
+    "subtitle": "Introduz a tua palavra-passe para iniciar sessão.",
+    "change": "Alterar",
+    "changeEmail": "A iniciar sessão como {{email}}. Alterar email",
+    "useCode": "Esqueceste-te? Inicia sessão com um código por email"
   }
 }

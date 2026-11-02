@@ -20,7 +20,18 @@
     "sendFailed": "Nepodařilo se odeslat kód. Zkuste to znovu.",
     "useMobile": "Použít telefonní číslo místo toho",
     "linkTitle": "Přidejte svůj e-mail",
-    "linkSubtitle": "Vaše číslo je ověřeno. Přidejte e-mail pro účtenky a pozvánky pro tým. Pošleme vám kód."
+    "linkSubtitle": "Vaše číslo je ověřeno. Přidejte e-mail pro účtenky a pozvánky pro tým. Pošleme vám kód.",
+    "registerTitle": "Vytvoř si účet",
+    "registerSubtitle": "Zvol si heslo. E-mailem ti pošleme kód pro potvrzení adresy.",
+    "passwordLabel": "Heslo",
+    "passwordPlaceholder": "Tvoje heslo",
+    "newPasswordPlaceholder": "Alespoň {{count}} znaků",
+    "showPassword": "Zobrazit heslo",
+    "hidePassword": "Skrýt heslo",
+    "signIn": "Přihlásit se",
+    "createAccount": "Vytvořit účet",
+    "signInFailed": "Přihlášení se nezdařilo. Zkus to znovu.",
+    "subtitleEmailFirst": "Zadej svůj e-mail. Požádáme tě o heslo nebo ti pošleme kód."
   },
   "verify": {
     "title": "Zadejte svůj kód",
@@ -314,6 +325,7 @@
     "noPhotos": "Na tvém webu jsme nenašli žádné fotky produktů",
     "ideasTitle": "Hledáme nápady na příspěvky",
     "ideasDetail": "Sezónní témata, trendy a tvůj katalog",
+    "finishingResearch": "Dokončujeme průzkum tvého podnikání…",
     "ideasFound_one": "Nalezený nápad: {{count}}",
     "ideasFound_other": "Nalezené nápady: {{count}}",
     "ideasNone": "Tentokrát žádné nové nápady",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Vyhledávání na Google Maps se nezdařilo. Zkus to znovu."
     }
+  },
+  "password": {
+    "title": "Vítej zpět",
+    "subtitle": "Pro přihlášení zadej heslo.",
+    "change": "Změnit",
+    "changeEmail": "Přihlašuješ se jako {{email}}. Změnit e-mail",
+    "useCode": "Zapomenuté heslo? Přihlas se kódem z e-mailu"
   }
 }

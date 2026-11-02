@@ -6,6 +6,13 @@
  * ponytail: a code table; move it to the database next to AiTier if admins need to change it without a deploy.
  */
 export type SceneKind = "detail" | "room" | "physics";
+/**
+ * How a scene hands over to the next (the director picks; the seam check can soften it):
+ * match = it ends on the framing the next starts from (a cut that feels continuous), cut = a deliberate cut on the
+ * voice's beat between views of the same subject, dissolve = a soft blend where place, light or distance changes.
+ */
+export const TRANSITIONS = ["cut", "match", "dissolve"] as const;
+export type Transition = (typeof TRANSITIONS)[number];
 export const SCENE_KINDS = ["detail", "room", "physics"] as const satisfies readonly SceneKind[];
 
 type ClipInput = { photoUrl: string; prompt: string; seconds: number };
@@ -50,7 +57,7 @@ export function modelSeconds(model: ModelId, voiceSeconds: number): number {
   return Math.min(m.maxSeconds, Math.max(m.minSeconds, want));
 }
 
-/** Copy-joining needs identical clips at their exact scene length; anything else is re-encoded. */
-export function needsReencode(clips: { model: ModelId; clip: number; scene: number }[]) {
-  return new Set(clips.map((c) => c.model)).size > 1 || clips.some((c) => c.clip !== c.scene);
+/** Copy-joining needs identical clips at their exact scene length and plain cuts; anything else is re-encoded. */
+export function needsReencode(clips: { model: ModelId; clip: number; scene: number; transition?: Transition }[]) {
+  return new Set(clips.map((c) => c.model)).size > 1 || clips.some((c) => c.clip !== c.scene || c.transition === "dissolve");
 }

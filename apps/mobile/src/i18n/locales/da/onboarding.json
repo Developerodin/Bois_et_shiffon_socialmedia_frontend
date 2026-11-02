@@ -20,7 +20,18 @@
     "sendFailed": "Kunne ikke sende koden. Prøv igen.",
     "useMobile": "Brug mobilnummer i stedet",
     "linkTitle": "Tilføj din e-mail",
-    "linkSubtitle": "Dit nummer er bekræftet. Tilføj en e-mail til kvitteringer og teaminvitationer. Vi sender en kode."
+    "linkSubtitle": "Dit nummer er bekræftet. Tilføj en e-mail til kvitteringer og teaminvitationer. Vi sender en kode.",
+    "registerTitle": "Opret din konto",
+    "registerSubtitle": "Vælg en adgangskode. Vi sender dig en kode på e-mail for at bekræfte din adresse.",
+    "passwordLabel": "Adgangskode",
+    "passwordPlaceholder": "Din adgangskode",
+    "newPasswordPlaceholder": "Mindst {{count}} tegn",
+    "showPassword": "Vis adgangskode",
+    "hidePassword": "Skjul adgangskode",
+    "signIn": "Log ind",
+    "createAccount": "Opret konto",
+    "signInFailed": "Kunne ikke logge ind. Prøv igen.",
+    "subtitleEmailFirst": "Indtast din e-mail. Vi beder om din adgangskode eller sender dig en kode."
   },
   "verify": {
     "title": "Indtast din kode",
@@ -314,6 +325,7 @@
     "noPhotos": "Ingen produktbilleder fundet på din hjemmeside",
     "ideasTitle": "Finder idéer til opslag",
     "ideasDetail": "Sæsoner, trends og dit katalog",
+    "finishingResearch": "Afslutter undersøgelsen af din virksomhed…",
     "ideasFound_one": "{{count}} idé fundet",
     "ideasFound_other": "{{count}} idéer fundet",
     "ideasNone": "Ingen nye idéer denne gang",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Kunne ikke søge på Google Maps. Prøv igen."
     }
+  },
+  "password": {
+    "title": "Velkommen tilbage",
+    "subtitle": "Indtast din adgangskode for at logge ind.",
+    "change": "Skift",
+    "changeEmail": "Du logger ind som {{email}}. Skift e-mail",
+    "useCode": "Glemt adgangskoden? Log ind med en kode via e-mail"
   }
 }

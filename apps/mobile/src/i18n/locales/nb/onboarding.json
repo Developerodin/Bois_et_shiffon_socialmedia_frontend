@@ -20,7 +20,18 @@
     "sendFailed": "Kunne ikke sende koden. Prøv igjen.",
     "useMobile": "Bruk mobilnummer i stedet",
     "linkTitle": "Legg til e-post",
-    "linkSubtitle": "Nummeret ditt er bekreftet. Legg til en e-post for kvitteringer og invitasjoner. Vi sender deg en kode."
+    "linkSubtitle": "Nummeret ditt er bekreftet. Legg til en e-post for kvitteringer og invitasjoner. Vi sender deg en kode.",
+    "registerTitle": "Opprett kontoen din",
+    "registerSubtitle": "Velg et passord. Vi sender deg en kode på e-post for å bekrefte adressen din.",
+    "passwordLabel": "Passord",
+    "passwordPlaceholder": "Passordet ditt",
+    "newPasswordPlaceholder": "Minst {{count}} tegn",
+    "showPassword": "Vis passord",
+    "hidePassword": "Skjul passord",
+    "signIn": "Logg inn",
+    "createAccount": "Opprett konto",
+    "signInFailed": "Kunne ikke logge inn. Prøv igjen.",
+    "subtitleEmailFirst": "Skriv inn e-postadressen din. Vi ber deg om passordet ditt eller sender deg en kode."
   },
   "verify": {
     "title": "Skriv inn koden din",
@@ -314,6 +325,7 @@
     "noPhotos": "Fant ingen produktbilder på nettstedet ditt",
     "ideasTitle": "Finner ideer til innlegg",
     "ideasDetail": "Sesonger, trender og katalogen din",
+    "finishingResearch": "Fullfører kartleggingen av bedriften din…",
     "ideasFound_one": "{{count}} idé funnet",
     "ideasFound_other": "{{count}} ideer funnet",
     "ideasNone": "Ingen nye ideer denne gangen",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Kunne ikke søke på Google Maps. Prøv igjen."
     }
+  },
+  "password": {
+    "title": "Velkommen tilbake",
+    "subtitle": "Skriv inn passordet ditt for å logge inn.",
+    "change": "Endre",
+    "changeEmail": "Logger inn som {{email}}. Endre e-postadresse",
+    "useCode": "Glemt passordet? Logg inn med en kode på e-post"
   }
 }

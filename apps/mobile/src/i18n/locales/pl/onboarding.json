@@ -20,7 +20,18 @@
     "sendFailed": "Nie udało się wysłać kodu. Spróbuj ponownie.",
     "useMobile": "Użyj numeru telefonu",
     "linkTitle": "Dodaj swój e-mail",
-    "linkSubtitle": "Twój numer jest zweryfikowany. Dodaj e-mail do paragonów i zaproszeń dla zespołu. Wyślemy na niego kod."
+    "linkSubtitle": "Twój numer jest zweryfikowany. Dodaj e-mail do paragonów i zaproszeń dla zespołu. Wyślemy na niego kod.",
+    "registerTitle": "Utwórz konto",
+    "registerSubtitle": "Wybierz hasło. Wyślemy ci kod do potwierdzenia adresu e-mail.",
+    "passwordLabel": "Hasło",
+    "passwordPlaceholder": "Twoje hasło",
+    "newPasswordPlaceholder": "Co najmniej {{count}} znaków",
+    "showPassword": "Pokaż hasło",
+    "hidePassword": "Ukryj hasło",
+    "signIn": "Zaloguj się",
+    "createAccount": "Utwórz konto",
+    "signInFailed": "Nie udało się zalogować. Spróbuj ponownie.",
+    "subtitleEmailFirst": "Podaj adres e-mail. Poprosimy cię o hasło lub wyślemy ci kod."
   },
   "verify": {
     "title": "Wprowadź swój kod",
@@ -314,6 +325,7 @@
     "noPhotos": "Nie znaleźliśmy zdjęć produktów na Twojej stronie",
     "ideasTitle": "Szukamy pomysłów na posty",
     "ideasDetail": "Pory roku, trendy i Twój katalog",
+    "finishingResearch": "Kończymy analizę twojej firmy…",
     "ideasFound_one": "Znalezione pomysły: {{count}}",
     "ideasFound_other": "Znalezione pomysły: {{count}}",
     "ideasNone": "Tym razem nie ma nowych pomysłów",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Nie udało się przeszukać Google Maps. Spróbuj ponownie."
     }
+  },
+  "password": {
+    "title": "Witaj ponownie",
+    "subtitle": "Wpisz hasło, aby się zalogować.",
+    "change": "Zmień",
+    "changeEmail": "Logujesz się jako {{email}}. Zmień adres e-mail",
+    "useCode": "Nie pamiętasz hasła? Zaloguj się kodem z e-maila"
   }
 }

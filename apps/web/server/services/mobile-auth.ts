@@ -2,7 +2,7 @@ import { createHash, randomInt } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { createRemoteJWKSet, jwtVerify, SignJWT } from "jose";
 import { z } from "zod";
-import { checkPassword, LoginRateLimited } from "@/server/auth/password-check";
+import { canUsePassword, checkPassword, LoginRateLimited } from "@/server/auth/password-check";
 import { issueMobileToken } from "@/server/auth/request-user";
 import { clientIp, hitRateLimit, limitKey } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
@@ -86,7 +86,7 @@ export async function emailNextStep(input: z.infer<typeof EmailInput>, request: 
   if (!byIp.allowed) throw new AccountFlowError("Too many attempts. Wait 15 minutes and try again.", 429);
   const user = await prisma.user.findUnique({ where: { email }, select: { passwordHash: true, status: true, deletedAt: true } });
   if (!user) return { next: "register" };
-  return { next: user.passwordHash && user.status === "ACTIVE" && !user.deletedAt ? "password" : "code" };
+  return { next: canUsePassword(user) ? "password" : "code" };
 }
 
 export const PasswordSignInInput = EmailInput.extend({ password: z.string().min(1).max(200) });
@@ -110,6 +110,9 @@ const validPassword = (password: string) => {
 export async function startRegistration(input: z.infer<typeof RegisterInput>, request: Request) {
   const email = input.email.trim().toLowerCase();
   validPassword(input.password);
+  // Limited before the account check: the "already have an account" answer must cost the same as the email step's.
+  const byIp = await hitRateLimit(limitKey("mobile-register:ip", clientIp(request)), 30, 15 * 60_000);
+  if (!byIp.allowed) throw new AccountFlowError("Too many attempts. Wait 15 minutes and try again.", 429);
   const existing = await prisma.user.findUnique({ where: { email }, select: { passwordHash: true } });
   if (existing?.passwordHash) throw new AccountFlowError("You already have an account with this email. Sign in with your password.", 409);
   await sendEmailCode({ email }, request);

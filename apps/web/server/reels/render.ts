@@ -8,10 +8,11 @@ import { startAgentRun } from "@/server/agents/engine";
 import { prisma } from "@/server/db/prisma";
 import { enqueueJob } from "@/server/jobs/queue";
 import { fetchResult, type HfStatus, higgsfield } from "@/server/reels/higgsfield";
-import { joinReel } from "@/server/reels/join";
-import { clipSeconds, planProblems, ReelPlan, reelPrice } from "@/server/reels/plan";
+import { checkSeam } from "@/server/reels/agents";
+import { frameOf, joinReel } from "@/server/reels/join";
+import { clipSeconds, planProblems, ReelPlan, reelPrice, standInProblems } from "@/server/reels/plan";
 import { promptProblems } from "@/server/reels/prompt-check";
-import { BACKUP_MODEL, type ModelId, modelSeconds, needsReencode, routeScene, VIDEO_MODELS } from "@/server/reels/router";
+import { BACKUP_MODEL, type ModelId, modelSeconds, needsReencode, routeScene, type Transition, VIDEO_MODELS } from "@/server/reels/router";
 import { speak } from "@/server/reels/voice";
 import { padAndJoinWav, wavSeconds } from "@/server/reels/wav";
 import { refundCharge, spendCredits } from "@/server/services/credits";
@@ -28,10 +29,19 @@ import { mediaKey, putMedia, signedMediaUrl } from "@/server/storage/media";
 export const REEL_RENDER_JOB = "reel.render";
 const POLL_MS = 20_000;
 const CLAIM_STALE_MS = 2 * 60_000;
+// A join downloads every clip and runs ffmpeg (each capped at 120 s) inside one job (300 s cap): only a claim older
+// than that is a crashed join. Shorter, and a second tick would join the same reel in parallel.
+const JOIN_STALE_MS = 6 * 60_000;
+const JOIN_TRIES = 3;
 const GIVE_UP_MS = 24 * 3600_000;
 
 type Requests = { CLIPS?: string[] };
+/** One join between scenes after the seam check: what the director planned, what was used, and why. */
+export type Seam = { after: number; planned: Transition; used: Transition; fits: boolean | null; note?: string };
+
 type Outputs = {
+  joinErrors?: number;
+  seams?: Seam[];
   voiceKeys: string[];
   voiceSeconds: number[];
   photoKeys: string[];
@@ -57,8 +67,8 @@ export function nextStep(r: RenderState, statuses: HfStatus[], now = Date.now())
   if (r.step === "DONE" || r.step === "FAILED") return { action: "done" };
   if (r.step === "VOICE") return { action: "voice" };
   const out = r.outputs as Outputs;
-  if (r.step === "JOIN") return r.claimedAt && now - r.claimedAt.getTime() < CLAIM_STALE_MS ? { action: "wait" } : { action: "join", urls: out.clipUrls ?? [] };
-  if (now - r.createdAt.getTime() > GIVE_UP_MS) return { action: "fail", error: "The video service took more than a day. Credits refunded; try again." };
+  if (now - r.createdAt.getTime() > GIVE_UP_MS) return { action: "fail", error: "The video took more than a day. Credits refunded; try again." };
+  if (r.step === "JOIN") return r.claimedAt && now - r.claimedAt.getTime() < JOIN_STALE_MS ? { action: "wait" } : { action: "join", urls: out.clipUrls ?? [] };
   const ids = (r.requests as Requests).CLIPS;
   if (!ids?.length) return r.claimedAt && now - r.claimedAt.getTime() < CLAIM_STALE_MS ? { action: "wait" } : { action: "submit" };
   const failed = statuses.flatMap((s, i) => (s.state === "failed" ? [i] : []));
@@ -88,9 +98,10 @@ export async function startRender(input: { workspaceId: string; brandId: string;
     const running = await tx.reelRender.findFirst({ where: { contentItemId: item.id, step: { in: [...ACTIVE] } } });
     if (running) return { running };
     if (latest.version !== input.version) throw new PublishingError("A newer plan exists. Review it, then make the video.");
+    if (["SCHEDULED", "PUBLISHED"].includes(item.status)) throw new PublishingError("This reel is already scheduled or posted.", 409);
     const parsed = ReelPlan.safeParse(latest.body);
     if (!parsed.success) throw new PublishingError("This plan isn't complete yet", 400);
-    const problems = [...planProblems(parsed.data, scope), ...parsed.data.scenes.flatMap((s, i) => promptProblems(s.prompt ?? s.direction).map((p) => `Scene ${i + 1}: ${p}`))];
+    const problems = [...planProblems(parsed.data, scope), ...standInProblems(parsed.data), ...parsed.data.scenes.flatMap((s, i) => promptProblems(s.prompt ?? s.direction).map((p) => `Scene ${i + 1}: ${p}`))];
     if (problems.length) throw new PublishingError(problems.join(" "), 400);
     const { _max } = await tx.reelRender.aggregate({ where: { contentVersionId: latest.id }, _max: { attempt: true } });
     return { versionId: latest.id, plan: parsed.data, attempt: (_max.attempt ?? 0) + 1 };
@@ -103,11 +114,17 @@ export async function startRender(input: { workspaceId: string; brandId: string;
     await lock(tx, input.itemId);
     const running = await tx.reelRender.findFirst({ where: { contentItemId: input.itemId, step: { in: [...ACTIVE] } } });
     if (running) return running;
+    // The plan may have changed while paying: render only the version that was checked and priced.
+    const latest = await tx.contentVersion.findFirst({ where: { contentItemId: input.itemId }, orderBy: { version: "desc" }, select: { id: true } });
+    if (latest?.id !== loaded.versionId) throw new PublishingError("A newer plan exists. Review it, then make the video.");
     return tx.reelRender.create({
       data: { ...scope, contentItemId: input.itemId, contentVersionId: loaded.versionId, attempt: loaded.attempt, chargeId, webhookSecret: randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "") },
     });
   }, TX).catch(async (e: unknown) => {
     if ((e as { code?: string }).code === "P2002") return prisma.reelRender.findUniqueOrThrow({ where: { contentVersionId_attempt: { contentVersionId: loaded.versionId, attempt: loaded.attempt } } });
+    // No render row holds this charge: give it back. ponytail: a process killed right here still keeps it; a sweep
+    // for reel-render charges with no render and no refund is the fix if that ever shows up in the ledger.
+    await refundCharge(input.workspaceId, chargeId);
     throw e;
   });
   if (render.chargeId !== chargeId) await refundCharge(input.workspaceId, chargeId); // lost the race to another start
@@ -121,7 +138,10 @@ export async function advanceRender(payload: unknown) {
   const r = await prisma.reelRender.findUnique({ where: { id: renderId } });
   if (!r) return;
   const ids = (r.requests as Requests).CLIPS ?? [];
-  const statuses = r.step === "CLIPS" && ids.length ? await Promise.all(ids.map((id) => higgsfield.status(id))) : [];
+  // Can't read the clips' status (Higgsfield or network down): wait, as they're still running and billed there;
+  // the day-long give-up still applies. Failing here would refund a render that may well finish.
+  const statuses = r.step === "CLIPS" && ids.length ? await Promise.all(ids.map((id) => higgsfield.status(id))).catch(() => null) : [];
+  if (statuses === null) return enqueueTick(r, POLL_MS);
   const next = nextStep(r, statuses);
   // A throw here is retried by the queue with backoff; failRender runs once its attempts are exhausted.
   switch (next.action) {
@@ -159,7 +179,7 @@ async function prepareVoice(r: ReelRender) {
   const plan = await planOf(r);
   const scope = { workspaceId: r.workspaceId, brandId: r.brandId };
   const scenes = await Promise.all(plan.scenes.map(async (s) => {
-    const wav = await speak({ text: s.voiceText, voice: plan.voice });
+    const wav = await speak({ text: s.voiceText, voice: plan.voice, language: plan.language });
     const voiceKey = mediaKey(scope, `${randomUUID()}.wav`);
     await putMedia(voiceKey, wav, "audio/wav");
     // Kling and Seedance follow the photo's shape: crop to 9:16 first.
@@ -231,37 +251,68 @@ async function join(r: ReelRender, urls: string[]) {
   const scope = { workspaceId: r.workspaceId, brandId: r.brandId };
   const dir = await mkdtemp(path.join(tmpdir(), "reel-"));
   try {
-    // Each scene lasts as long as its voice (rounded up); longer clips are trimmed to it.
-    const sceneSeconds = out.voiceSeconds.map(clipSeconds);
-    const clips = await Promise.all(urls.map(async (u, i) => {
-      const file = path.join(dir, `clip${i}.mp4`);
-      await writeFile(file, await fetchResult(u));
-      return { file, seconds: Math.min(sceneSeconds[i], out.clipSeconds[i]) };
-    }));
-    const voices = await Promise.all(out.voiceKeys.map(async (k) => new Uint8Array(await (await fetch(await signedMediaUrl(k))).arrayBuffer())));
-    const wav = path.join(dir, "voice.wav");
-    await writeFile(wav, padAndJoinWav(voices, clips.map((c) => c.seconds)));
-    const mp4 = path.join(dir, "reel.mp4");
-    const reencode = needsReencode(clips.map((c, i) => ({ model: out.models[i], clip: out.clipSeconds[i], scene: c.seconds })));
-    await joinReel(clips, wav, mp4, { reencode });
-    const videoKey = mediaKey(scope, `${randomUUID()}.mp4`);
-    await putMedia(videoKey, await readFile(mp4), "video/mp4");
-
-    await prisma.$transaction(async (tx) => {
-      await lock(tx, r.contentItemId);
-      const item = await tx.contentItem.findFirst({ where: { id: r.contentItemId }, include: { versions: { orderBy: { version: "desc" }, take: 1 } } });
-      const latest = item?.versions[0];
-      if (!item || !latest) throw new Error("The reel was deleted while rendering");
-      // Only the join that still holds the step publishes; a render marked failed (and refunded) meanwhile writes nothing.
-      const done = await tx.reelRender.updateMany({ where: { id: r.id, step: "JOIN" }, data: { step: "DONE", videoKey, error: null, claimedAt: null } });
-      if (done.count !== 1) throw new Error("This render is no longer joining");
-      await tx.contentVersion.create({ data: { contentItemId: item.id, version: latest.version + 1, body: { ...(latest.body as object), videoKey }, createdBy: "agent" } });
-      await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW" } });
-    }, TX);
+    await joinClips(r, out, urls, scope, dir);
+  } catch (e) {
+    // Release the claim so the queue's retry joins again at once; give up (and refund) after a few failures,
+    // e.g. clip links that expired or a clip ffmpeg can't read.
+    const tries = (out.joinErrors ?? 0) + 1;
+    if (tries >= JOIN_TRIES) return failRender({ renderId: r.id }, e, true);
+    await prisma.reelRender.updateMany({ where: { id: r.id, step: "JOIN" }, data: { claimedAt: null, outputs: { ...out, joinErrors: tries } as Prisma.InputJsonValue } });
+    throw e;
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
   await startAgentRun({ ...scope, agentKey: "quality", trigger: "event", input: { itemId: r.contentItemId } }).catch(() => null); // the app's next poll shows "checking"; a missed run is retried from R07
+}
+
+async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { workspaceId: string; brandId: string }, dir: string) {
+  // Each scene lasts as long as its voice (rounded up); longer clips are trimmed to it.
+  const sceneSeconds = out.voiceSeconds.map(clipSeconds);
+  const clips = await Promise.all(urls.map(async (u, i) => {
+    const file = path.join(dir, `clip${i}.mp4`);
+    await writeFile(file, await fetchResult(u));
+    return { file, seconds: Math.min(sceneSeconds[i], out.clipSeconds[i]) };
+  }));
+  // Look at every join before joining: a seam that doesn't read as one film is softened to a dissolve.
+  const plan = await planOf(r);
+  const seams = await Promise.all(clips.slice(1).map((_, i) => checkJoin(scope, plan.scenes[i].transition ?? "cut", clips[i].file, clips[i + 1].file, dir, i)));
+  const joined = clips.map((c, i) => ({ ...c, transition: seams[i]?.used }));
+  const voices = await Promise.all(out.voiceKeys.map(async (k) => new Uint8Array(await (await fetch(await signedMediaUrl(k))).arrayBuffer())));
+  const wav = path.join(dir, "voice.wav");
+  await writeFile(wav, padAndJoinWav(voices, joined.map((c) => c.seconds)));
+  const mp4 = path.join(dir, "reel.mp4");
+  const reencode = needsReencode(joined.map((c, i) => ({ model: out.models[i], clip: out.clipSeconds[i], scene: c.seconds, transition: c.transition })));
+  await joinReel(joined, wav, mp4, { reencode });
+  const videoKey = mediaKey(scope, `${randomUUID()}.mp4`);
+  await putMedia(videoKey, await readFile(mp4), "video/mp4");
+
+  await prisma.$transaction(async (tx) => {
+    await lock(tx, r.contentItemId);
+    const item = await tx.contentItem.findFirst({ where: { id: r.contentItemId }, include: { versions: { orderBy: { version: "desc" }, take: 1 } } });
+    const latest = item?.versions[0];
+    if (!item || !latest) throw new Error("The reel was deleted while rendering");
+    // Only the join that still holds the step publishes; a render marked failed (and refunded) meanwhile writes nothing.
+    const done = await tx.reelRender.updateMany({ where: { id: r.id, step: "JOIN" }, data: { step: "DONE", videoKey, error: null, claimedAt: null, outputs: { ...out, seams } as Prisma.InputJsonValue } });
+    if (done.count !== 1) throw new Error("This render is no longer joining");
+    await tx.contentVersion.create({ data: { contentItemId: item.id, version: latest.version + 1, body: { ...(latest.body as object), videoKey }, createdBy: "agent" } });
+    await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW" } });
+  }, TX);
+}
+
+/**
+ * The seam check for one join: the last frame of a scene and the first of the next, judged by a light vision model.
+ * A join that doesn't fit becomes a dissolve. A failed check never stops the reel: the planned transition stands.
+ */
+async function checkJoin(scope: { workspaceId: string; brandId: string }, planned: Transition, from: string, to: string, dir: string, i: number): Promise<Seam> {
+  try {
+    const frames = [path.join(dir, `seam${i}-end.jpg`), path.join(dir, `seam${i}-start.jpg`)];
+    await Promise.all([frameOf(from, "last", frames[0]), frameOf(to, "first", frames[1])]);
+    const [a, b] = await Promise.all(frames.map(async (f) => `data:image/jpeg;base64,${(await readFile(f)).toString("base64")}`));
+    const verdict = await checkSeam(scope, [a, b]);
+    return { after: i + 1, planned, used: verdict.fits ? planned : "dissolve", fits: verdict.fits, note: verdict.note.slice(0, 200) };
+  } catch (e) {
+    return { after: i + 1, planned, used: planned, fits: null, note: `Not checked: ${e instanceof Error ? e.message.slice(0, 150) : "error"}` };
+  }
 }
 
 /** Job onFailure, and the step machine's own give-up: mark failed once, refund once. */
@@ -269,16 +320,39 @@ export async function failRender(payload: unknown, error: unknown, exhausted: bo
   if (!exhausted) return;
   const { renderId } = payload as { renderId: string };
   const message = error instanceof Error ? error.message : String(error);
-  const moved = await prisma.reelRender.updateMany({ where: { id: renderId, step: { in: [...ACTIVE] } }, data: { step: "FAILED", error: message.slice(0, 500), claimedAt: null } });
-  if (moved.count !== 1) return;
-  const r = await prisma.reelRender.findUnique({ where: { id: renderId } });
-  if (!r) return;
-  await refundCharge(r.workspaceId, r.chargeId);
-  await prisma.auditEvent.create({ data: { workspaceId: r.workspaceId, brandId: r.brandId, action: "reel.render.failed", entityType: "ReelRender", entityId: r.id, metadata: { error: message.slice(0, 500), attempt: r.attempt } } });
+  // One transaction: a render is never FAILED without its refund (a crash in between would lose it for good,
+  // since a retry finds the render already failed).
+  await prisma.$transaction(async (tx) => {
+    const moved = await tx.reelRender.updateMany({ where: { id: renderId, step: { in: [...ACTIVE] } }, data: { step: "FAILED", error: message.slice(0, 500), claimedAt: null } });
+    if (moved.count !== 1) return;
+    const r = await tx.reelRender.findUniqueOrThrow({ where: { id: renderId } });
+    await refundCharge(r.workspaceId, r.chargeId, tx);
+    await tx.auditEvent.create({ data: { workspaceId: r.workspaceId, brandId: r.brandId, action: "reel.render.failed", entityType: "ReelRender", entityId: r.id, metadata: { error: message.slice(0, 500), attempt: r.attempt } } });
+  }, TX);
+}
+
+/**
+ * What the app may show about a failed render: a kind it words in the person's language. The provider's own message
+ * ("Higgsfield 403: not_enough_credits") stays in the row and the audit log for admins, never on a customer's screen.
+ */
+export type RenderFailure = { kind: "unavailable" | "slow" | "scene" | "other"; scene?: number; stoppedAt: "VOICE" | "CLIPS" | "JOIN" };
+export function renderFailure(r: Pick<ReelRender, "step" | "error" | "requests" | "outputs">): RenderFailure | null {
+  if (r.step !== "FAILED") return null;
+  const raw = r.error ?? "";
+  const out = (r.outputs ?? {}) as Partial<Outputs>;
+  const stoppedAt = out.clipUrls ? "JOIN" : (r.requests as Requests).CLIPS?.length || out.voiceKeys ? "CLIPS" : "VOICE";
+  // Our account with a provider (out of credit, key refused, not set up): nothing the person can fix.
+  if (/^(Higgsfield (401|402|403)|OpenAI (401|402|403)|Voiceover failed \((401|402|403)\))|not_enough_credits|isn't set up/i.test(raw)) return { kind: "unavailable", stoppedAt };
+  if (/more than a day/.test(raw)) return { kind: "slow", stoppedAt };
+  const scene = /^Scene (\d+):/.exec(raw);
+  if (scene) return { kind: "scene", scene: Number(scene[1]), stoppedAt };
+  return { kind: "other", stoppedAt };
 }
 
 /** For the app: each version's latest render. */
 export async function renderView(itemId: string) {
   const renders = await prisma.reelRender.findMany({ where: { contentItemId: itemId }, orderBy: { createdAt: "desc" }, take: 20 });
-  return renders.map((r) => ({ id: r.id, versionId: r.contentVersionId, attempt: r.attempt, step: r.step, error: r.error, videoKey: r.videoKey, createdAt: r.createdAt }));
+  // Joins the seam check softened, so R07 can say so (its reason stays here: it's the model's English note).
+  const softened = (r: ReelRender) => ((r.outputs as Partial<Outputs> | null)?.seams ?? []).filter((s) => s.used !== s.planned).map((s) => s.after);
+  return renders.map((r) => ({ id: r.id, versionId: r.contentVersionId, attempt: r.attempt, step: r.step, failure: renderFailure(r), softened: softened(r), videoKey: r.videoKey, createdAt: r.createdAt }));
 }

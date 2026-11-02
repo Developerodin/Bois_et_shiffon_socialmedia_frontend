@@ -13,7 +13,8 @@
   "timezone": "Fuso orario",
   "status": {
     "draft": "Bozza",
-    "ready": "Pronto"
+    "ready": "Pronto",
+    "processing": "Elaborazione"
   },
   "scene": {
     "label": "Scena {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Tagli rapidi del catalogo",
     "jumpBackIn": "Rientra",
     "seeAll": "Vedi tutto",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}}s · verticale 9:16"
   },
   "ideas": {
     "title": "Idee video",
@@ -58,7 +60,9 @@
       "angle02": "Concentrandosi su porte intagliate a mano, gestione dei cavi e atmosfera calda del soggiorno."
     },
     "readyToReview": "Pronto per la revisione",
-    "viewStoryboard": "Vedi storyboard"
+    "viewStoryboard": "Vedi storyboard",
+    "making": "Scrittura dello storyboard…",
+    "empty": "Nessuna idea per reel. Appariranno qui quando l'agente delle idee avrà fatto il suo lavoro."
   },
   "chat": {
     "creditsA11y_one": "{{count}} credito",
@@ -77,15 +81,42 @@
     "openingHook": "Apertura accattivante",
     "reviewStoryboard_one": "Rivedi storyboard ({{count}} scena)",
     "reviewStoryboard_other": "Rivedi storyboard ({{count}} scene)",
-    "readyStatus": "Pronto per generare o rifinire"
+    "readyStatus": "Pronto per generare o rifinire",
+    "empty": "Dimmi cosa dovrebbe mostrare il reel, oppure scegli prima un'idea.",
+    "writing": "Scrittura…",
+    "planMeta_one": "{{count}} scena · ~{{seconds}}s",
+    "planMeta_other": "{{count}} scene · ~{{seconds}}s",
+    "makeItSeconds": "Fallo durare circa {{seconds}} secondi.",
+    "greeting": "Cosa dovrebbe mostrare questo reel? Descrivilo o parti da una di queste idee.",
+    "starterProduct": "Un reel su {{product}}",
+    "placeholderNew": "Descrivi il tuo reel…",
+    "placeholderRevise": "Chiedi modifiche…",
+    "currentLength": "~{{seconds}}s al momento",
+    "tryAgain": "Riprova",
+    "writingPlan": "Scrittura del piano del reel",
+    "directing": "Scelta di un modello video per ogni scena",
+    "stageReading": "Analisi del tuo brand e delle tue foto",
+    "stageScenes_one": "Scrittura della scena {{count}}",
+    "stageScenes_other": "Scrittura della scena {{count}}",
+    "draftScene": "Scena {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "Durata {{seconds}}s",
     "verticalFact": "9:16 verticale",
     "readyToRender": "Pronto per il rendering <muted>· Bozza salvata per la revisione</muted>",
+    "needsPhotos_one": "{{count}} scena ha bisogno di una foto dedicata <muted>· La sua foto mostra qualcos'altro</muted>",
+    "needsPhotos_other": "{{count}} scene hanno bisogno di foto dedicate <muted>· Le loro foto mostrano qualcos'altro</muted>",
+    "standIn": "Questa foto mostra qualcos'altro. Scegli quella giusta prima di creare il video.",
+    "join": {
+      "match": "Raccordo: questa inquadratura finisce dove inizia la successiva",
+      "cut": "Taglio a tempo",
+      "dissolve": "Dissolvenza verso l'inquadratura successiva"
+    },
+    "pickPhotos": "Scegli foto",
     "sceneDirection": "Direzione scena",
     "voiceoverFr": "Voce fuori campo (FR)",
+    "voiceover": "Voce fuori campo ({{lang}})",
     "direction": {
       "scene1": "Rivelazione lenta e scorrevole su un moderno ambiente da pranzo",
       "scene2": "Sweep macro fluido su ricca venatura del legno naturale e bordo smussato",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} credito",
     "cost_other": "{{count}} crediti",
     "balance_one": "Saldo attuale: {{balance}} crediti · {{count}} credito sarà riservato · Bozza salvata automaticamente",
-    "balance_other": "Saldo attuale: {{balance}} crediti · {{count}} crediti saranno riservati · Bozza salvata automaticamente"
+    "balance_other": "Saldo attuale: {{balance}} crediti · {{count}} crediti saranno riservati · Bozza salvata automaticamente",
+    "seeProgress": "Vedi avanzamento",
+    "onScreen": "Sul video: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Torna al workspace",
@@ -118,9 +151,26 @@
     "remaining_one": "Rimanente: {{count}} credito",
     "remaining_other": "Rimanenti: {{count}} crediti",
     "safeToLeave": "Puoi lasciare tranquillamente questa schermata. La tua bozza è salvata automaticamente nella scheda Risultati.",
-    "keepWorking": "Continua a lavorare in background"
+    "keepWorking": "Continua a lavorare in background",
+    "failed": "Non è stato possibile creare il video: {{error}}",
+    "failedTitle": "Impossibile creare questo video",
+    "bodyAny": "Composizione di immagini, voce narrante e ritmo delle animazioni per {{title}}.",
+    "stopped": "Interrotto",
+    "notStarted": "Non iniziato",
+    "tryAgain": "Riprova",
+    "retrying": "Riavvio in corso…",
+    "editPlan": "Modifica piano",
+    "creditsRefunded_one": "{{count}} credito rimborsato",
+    "creditsRefunded_other": "{{count}} crediti rimborsati"
+  },
+  "failure": {
+    "unavailable": "La creazione di video non è disponibile al momento. I tuoi crediti sono stati restituiti. Riprova più tardi.",
+    "slow": "La creazione del video ha richiesto troppo tempo. I tuoi crediti sono stati restituiti. Riprova.",
+    "scene": "Impossibile animare la scena {{n}}. I tuoi crediti sono stati restituiti. Riprova o scegli un'altra foto per la scena.",
+    "other": "Qualcosa è andato storto durante la creazione del video. I tuoi crediti sono stati restituiti. Riprova."
   },
   "results": {
+    "failedShort": "Creazione non riuscita · crediti restituiti",
     "title": "Video reel",
     "newReel": "Nuovo reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Voce fuori campo in francese · Pronto per la programmazione",
       "atelier": "15s · Acustica ambientale · Pronto per la programmazione"
-    }
+    },
+    "empty": "Nessun reel. Creane uno da Crea o Idee.",
+    "posted": "Pubblicato su Instagram",
+    "failed": "Non è stato possibile crearlo: {{error}}",
+    "readyMeta": "{{seconds}}s · Voce fuori campo in francese · Pronto",
+    "draftMeta": "{{seconds}}s · Piano, senza video",
+    "addLink": "Scaricato · L'hai pubblicato? Aggiungi il link",
+    "tryAgain_one": "Riprova ({{count}} credito)",
+    "tryAgain_other": "Riprova ({{count}} crediti)",
+    "openPlan": "Apri piano",
+    "closeSheet": "Chiudi",
+    "linkTitle": "Aggiungi il link al post",
+    "linkBody": "Incolla il link del reel che hai pubblicato su Instagram per seguirne i risultati.",
+    "saveLink": "Salva link",
+    "saving": "Salvataggio…"
   },
   "review": {
+    "joinSoftened": "Scena {{n}} → {{next}}",
+    "joinSoftenedNote": "Le due inquadrature non combaciavano perfettamente, quindi sono state unite con una dissolvenza",
     "subtitle": "Bozza del reel · Pronto per la revisione",
     "options": "Menu opzioni",
     "downloadVideo": "Scarica video",
@@ -162,7 +228,12 @@
     "audioTrack": "Traccia audio",
     "audioValue": "Voce fuori campo francese (Studio Natural) + Acustica ambientale",
     "resolution": "Risoluzione",
-    "resolutionValue": "Video verticale · 9:16"
+    "resolutionValue": "Video verticale · 9:16",
+    "checking": "Controllo del reel… Potrai scaricarlo e programmarlo al termine dei controlli.",
+    "askForChanges": "Non va bene? Chiedi modifiche",
+    "checks": "Controlli",
+    "audioVoiceOnly": "Voce fuori campo in francese",
+    "blocked": "Un controllo ha rilevato un problema (vedi Controlli). Correggilo nella didascalia oppure tocca \"Non va bene? Chiedi modifiche\"."
   },
   "publish": {
     "title": "Pubblica reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Voce campione, {{title}}",
     "sampleVoice": "Voce campione",
     "voiceLed": "Stile guidato dalla voce",
-    "notice": "Scegli uno stile guidato dalla voce, o mantieni il focus sul tuo prodotto."
+    "notice": "Scegli uno stile guidato dalla voce, o mantieni il focus sul tuo prodotto.",
+    "comingSoon": "Presto arriveranno i presentatori che parlano in video. Per ora questo reel mostrerà solo il prodotto."
   },
   "script": {
     "title": "Script & voce",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Francese naturale, ritmo acustico caldo",
     "recordOwn": "Registra la tua voce",
     "recordOwnMeta": "Narrazione personalizzata opzionale del brand",
-    "record": "Registra"
+    "record": "Registra",
+    "saving": "Salvataggio…",
+    "sceneTooLong": "La scena {{n}} supera le 30 parole (15 s). Accorciala.",
+    "keepScenes_one": "Mantieni {{count}} paragrafo, uno per scena.",
+    "keepScenes_other": "Mantieni {{count}} paragrafi, uno per scena, con una riga vuota tra loro.",
+    "rewriteOpeningAsk": "Riscrivi l'apertura della scena 1: più breve e sorprendente.",
+    "voiceName": "Voce: {{name}}",
+    "nextVoice": "Voce successiva"
   },
   "templates": {
     "title": "Template reel",
@@ -275,7 +354,9 @@
         "subtitle": "Annuncio & CTA showroom"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Usa il formato \"{{title}}\" ({{subtitle}}), per circa {{seconds}} secondi.",
+    "applying": "Applicazione…"
   },
   "assets": {
     "title": "Seleziona risorse",
@@ -296,6 +377,10 @@
       "macro": "Dettaglio",
       "staged": "Stilizzato",
       "tv": "Unità TV"
-    }
+    },
+    "yourPhoto": "La tua foto",
+    "planFirst": "Prima pianifica il reel (Crea → Pianifica un reel insieme), poi scegli le foto.",
+    "saving": "Salvataggio…",
+    "sceneN": "Scena {{n}}"
   }
 }

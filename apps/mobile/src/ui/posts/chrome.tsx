@@ -9,6 +9,7 @@ import { images } from "@/ui/icons";
 import { Footer } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BUSINESS } from "@/ui/posts/sample";
+import { useCredits } from "@/ui/use-credits";
 
 /** Colours the module chrome uses that aren't in the design-system tokens. */
 export const chrome = { headerBg: "#F8F7FB", pageHeaderBg: "#FBFAFD", rule: "#DED9E6", navActive: "#4C40BB", navIdle: "#64646F" } as const;
@@ -64,6 +65,7 @@ const MODULES = [
 /** "≡ Espanda · 160 · ⚙" bar + Reels · Posts · Photoshoot · Marketing tabs (Figma "Module header"). */
 export function ModuleHeader() {
   const { t } = useTranslation("posts");
+  const credits = useCredits();
   return (
     <View style={styles.module}>
       <View style={styles.moduleBar}>
@@ -72,8 +74,8 @@ export function ModuleHeader() {
         </HeaderIcon>
         <Image source={images.logo} style={{ width: 112, height: 33 }} contentFit="contain" accessibilityLabel={t("chrome.logo")} />
         <View style={{ flex: 1 }} />
-        <Pressable accessibilityRole="button" accessibilityLabel={t("chrome.credits", { count: BUSINESS.credits })} onPress={() => router.push("/business/billing")} style={styles.credits}>
-          <Text style={[type.label, { textAlign: "center" }]}>{BUSINESS.credits}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={t("chrome.credits", { count: credits ?? 0 })} onPress={() => router.push("/business/billing")} style={styles.credits}>
+          <Text style={[type.label, { textAlign: "center" }]}>{credits ?? "–"}</Text>
         </Pressable>
         <HeaderIcon label={t("chrome.settings")} onPress={() => router.navigate("/posts/planner")}>
           <Image source={A.settings} style={styles.i20} contentFit="contain" />

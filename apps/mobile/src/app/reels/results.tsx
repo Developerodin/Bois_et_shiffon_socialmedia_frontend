@@ -114,7 +114,7 @@ export default function ReelsResults() {
           const metaLine = r.postUrl
             ? t("results.posted")
             : failed
-              ? t("results.failed", { error: r.render?.error ?? "" })
+              ? t("results.failedShort")
               : r.videoUrl
                 ? t("results.readyMeta", { seconds: r.seconds ?? 0 })
                 : t("results.draftMeta", { seconds: r.seconds ?? 0 });

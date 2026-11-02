@@ -20,7 +20,18 @@
     "sendFailed": "Koodia ei voitu lähettää. Yritä uudelleen.",
     "useMobile": "Käytä puhelinnumeroa",
     "linkTitle": "Lisää sähköposti",
-    "linkSubtitle": "Numerosi on vahvistettu. Lisää sähköposti kuittien ja tiimikutsujen saamiseksi. Lähetämme siihen koodin."
+    "linkSubtitle": "Numerosi on vahvistettu. Lisää sähköposti kuittien ja tiimikutsujen saamiseksi. Lähetämme siihen koodin.",
+    "registerTitle": "Luo tili",
+    "registerSubtitle": "Valitse salasana. Lähetämme sähköpostiisi koodin osoitteen vahvistamiseksi.",
+    "passwordLabel": "Salasana",
+    "passwordPlaceholder": "Salasanasi",
+    "newPasswordPlaceholder": "Vähintään {{count}} merkkiä",
+    "showPassword": "Näytä salasana",
+    "hidePassword": "Piilota salasana",
+    "signIn": "Kirjaudu sisään",
+    "createAccount": "Luo tili",
+    "signInFailed": "Sisäänkirjautuminen epäonnistui. Yritä uudelleen.",
+    "subtitleEmailFirst": "Anna sähköpostiosoitteesi. Pyydämme salasanaasi tai lähetämme sinulle koodin."
   },
   "verify": {
     "title": "Syötä koodisi",
@@ -314,6 +325,7 @@
     "noPhotos": "Verkkosivustoltasi ei löytynyt tuotekuvia",
     "ideasTitle": "Etsitään julkaisuideoita",
     "ideasDetail": "Sesongit, trendit ja tuotevalikoimasi",
+    "finishingResearch": "Viimeistellään yrityksesi taustaselvitystä…",
     "ideasFound_one": "{{count}} idea löytyi",
     "ideasFound_other": "{{count}} ideaa löytyi",
     "ideasNone": "Ei uusia ideoita tällä kertaa",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Haku Google Mapsista epäonnistui. Yritä uudelleen."
     }
+  },
+  "password": {
+    "title": "Tervetuloa takaisin",
+    "subtitle": "Kirjaudu sisään antamalla salasanasi.",
+    "change": "Vaihda",
+    "changeEmail": "Kirjaudut sisään osoitteella {{email}}. Vaihda sähköpostiosoite",
+    "useCode": "Unohditko salasanan? Kirjaudu sähköpostikoodilla"
   }
 }

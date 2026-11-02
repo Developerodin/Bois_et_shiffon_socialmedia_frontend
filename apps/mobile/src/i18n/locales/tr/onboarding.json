@@ -20,7 +20,18 @@
     "sendFailed": "Kodu gönderemedik. Tekrar deneyin.",
     "useMobile": "Cep telefonu numarası kullan",
     "linkTitle": "E-posta ekle",
-    "linkSubtitle": "Numaranız doğrulandı. Makbuzlar ve ekip davetleri için bir e-posta ekleyin. Size bir kod göndereceğiz."
+    "linkSubtitle": "Numaranız doğrulandı. Makbuzlar ve ekip davetleri için bir e-posta ekleyin. Size bir kod göndereceğiz.",
+    "registerTitle": "Hesabını oluştur",
+    "registerSubtitle": "Bir şifre belirle. Adresini doğrulaman için sana e-postayla bir kod göndereceğiz.",
+    "passwordLabel": "Şifre",
+    "passwordPlaceholder": "Şifren",
+    "newPasswordPlaceholder": "En az {{count}} karakter",
+    "showPassword": "Şifreyi göster",
+    "hidePassword": "Şifreyi gizle",
+    "signIn": "Giriş yap",
+    "createAccount": "Hesap oluştur",
+    "signInFailed": "Giriş yapılamadı. Tekrar dene.",
+    "subtitleEmailFirst": "E-posta adresini gir. Şifreni isteyeceğiz veya sana bir kod göndereceğiz."
   },
   "verify": {
     "title": "Kodunuzu girin",
@@ -314,6 +325,7 @@
     "noPhotos": "Web sitende ürün fotoğrafı bulunamadı",
     "ideasTitle": "Gönderi fikirleri aranıyor",
     "ideasDetail": "Mevsimler, trendler ve kataloğun",
+    "finishingResearch": "İşletmenle ilgili araştırma tamamlanıyor…",
     "ideasFound_one": "{{count}} fikir bulundu",
     "ideasFound_other": "{{count}} fikir bulundu",
     "ideasNone": "Bu sefer yeni fikir bulunamadı",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Google Maps'te arama yapılamadı. Tekrar dene."
     }
+  },
+  "password": {
+    "title": "Tekrar hoş geldin",
+    "subtitle": "Giriş yapmak için şifreni gir.",
+    "change": "Değiştir",
+    "changeEmail": "{{email}} olarak giriş yapılıyor. E-postayı değiştir",
+    "useCode": "Şifreni mi unuttun? E-posta koduyla giriş yap"
   }
 }

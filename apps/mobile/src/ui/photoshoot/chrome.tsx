@@ -8,6 +8,7 @@ import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 import { images } from "@/ui/icons";
 import { color, font, layout, radius, space, type } from "@/theme/tokens";
 import { business } from "./sample";
+import { useCredits } from "@/ui/use-credits";
 
 /** Colours the Photoshoot frames use that the token set doesn't name. */
 export const ps = {
@@ -35,16 +36,17 @@ const MODULES: { id: string; href: Href; icon: LucideIcon }[] = [
 ];
 
 /** Logo row + Reels · Posts · Photoshoot · Marketing tabs (Figma "Module header"). */
-export function ModuleHeader({ credits, active = "photoshoot" }: { credits: number; active?: string }) {
+export function ModuleHeader({ active = "photoshoot" }: { active?: string }) {
   const { t } = useTranslation("photoshoot");
+  const credits = useCredits();
   return (
     <View style={styles.moduleHeader}>
       <View style={styles.logoRow}>
         <HeaderIcon icon={Menu} label={t("chrome.openMenu")} onPress={() => router.push("/business/menu")} />
         <Image source={images.logo} style={{ width: 112, height: 33 }} contentFit="contain" accessibilityLabel="Espanda" />
         <View style={{ flex: 1 }} />
-        <Pressable accessibilityRole="button" accessibilityLabel={t("chrome.creditsAvailable", { count: credits })} onPress={() => router.push("/business/billing")} style={styles.credits}>
-          <Text style={[type.label, { textAlign: "center" }]}>{credits}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={t("chrome.creditsAvailable", { count: credits ?? 0 })} onPress={() => router.push("/business/billing")} style={styles.credits}>
+          <Text style={[type.label, { textAlign: "center" }]}>{credits ?? "–"}</Text>
         </Pressable>
         <HeaderIcon icon={Settings} label={t("chrome.settings")} onPress={() => router.push("/business")} />
       </View>

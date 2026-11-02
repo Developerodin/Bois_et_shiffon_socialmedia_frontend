@@ -13,7 +13,8 @@
   "timezone": "Zeitzone",
   "status": {
     "draft": "Entwurf",
-    "ready": "Bereit"
+    "ready": "Bereit",
+    "processing": "Wird verarbeitet"
   },
   "scene": {
     "label": "Szene {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Schnelle Katalogschnitte",
     "jumpBackIn": "Wieder einsteigen",
     "seeAll": "Alle ansehen",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}}s · 9:16 Hochformat"
   },
   "ideas": {
     "title": "Videoideen",
@@ -58,7 +60,9 @@
       "angle02": "Fokus auf handgeschnitzte Lamellentüren, Kabelmanagement und warme Wohnatmosphäre."
     },
     "readyToReview": "Bereit zur Überprüfung",
-    "viewStoryboard": "Storyboard ansehen"
+    "viewStoryboard": "Storyboard ansehen",
+    "making": "Storyboard wird erstellt…",
+    "empty": "Noch keine Reel-Ideen. Sie erscheinen hier, sobald der Ideen-Agent gelaufen ist."
   },
   "chat": {
     "creditsA11y_one": "{{count}} Guthaben",
@@ -77,15 +81,42 @@
     "openingHook": "Einstiegshaken",
     "reviewStoryboard_one": "Storyboard überprüfen ({{count}} Szene)",
     "reviewStoryboard_other": "Storyboard überprüfen ({{count}} Szenen)",
-    "readyStatus": "Bereit zur Erstellung oder Verfeinerung"
+    "readyStatus": "Bereit zur Erstellung oder Verfeinerung",
+    "empty": "Sag mir, was das Reel zeigen soll, oder wähle zuerst eine Idee.",
+    "writing": "Wird geschrieben…",
+    "planMeta_one": "{{count}} Szene · ~{{seconds}}s",
+    "planMeta_other": "{{count}} Szenen · ~{{seconds}}s",
+    "makeItSeconds": "Es soll etwa {{seconds}} Sekunden lang sein.",
+    "greeting": "Was soll dieses Reel zeigen? Beschreib es oder starte mit einer dieser Ideen.",
+    "starterProduct": "Ein Reel über {{product}}",
+    "placeholderNew": "Beschreibe dein Reel…",
+    "placeholderRevise": "Änderungen anfordern…",
+    "currentLength": "Aktuell ~{{seconds}}s",
+    "tryAgain": "Erneut versuchen",
+    "writingPlan": "Dein Reel-Plan wird erstellt",
+    "directing": "Für jede Szene wird ein Videomodell ausgewählt",
+    "stageReading": "Deine Marke und Fotos werden analysiert",
+    "stageScenes_one": "Szene {{count}} wird geschrieben",
+    "stageScenes_other": "Szene {{count}} wird geschrieben",
+    "draftScene": "Szene {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "{{seconds}}s Dauer",
     "verticalFact": "9:16 vertikal",
     "readyToRender": "Bereit zum Rendern <muted>· Entwurf zur Überprüfung gespeichert</muted>",
+    "needsPhotos_one": "{{count}} Szene braucht ein eigenes Foto <muted>· Ihr Foto zeigt etwas anderes</muted>",
+    "needsPhotos_other": "{{count}} Szenen brauchen eigene Fotos <muted>· Ihre Fotos zeigen etwas anderes</muted>",
+    "standIn": "Dieses Foto zeigt etwas anderes. Wähle das richtige aus, bevor du das Video erstellst.",
+    "join": {
+      "match": "Match Cut: Dieser Shot endet dort, wo der nächste beginnt",
+      "cut": "Auf den Beat schneiden",
+      "dissolve": "In den nächsten Shot überblenden"
+    },
+    "pickPhotos": "Fotos auswählen",
     "sceneDirection": "Szenenrichtung",
     "voiceoverFr": "Voiceover (FR)",
+    "voiceover": "Sprechertext ({{lang}})",
     "direction": {
       "scene1": "Langsame Gleitenthüllung über modernes Essenssetting",
       "scene2": "Sanfter Makroschwenk über reichhaltige natürliche Holzmaserung und abgeschrägte Kante",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} Guthaben",
     "cost_other": "{{count}} Guthaben",
     "balance_one": "Aktuelles Guthaben: {{balance}} Guthaben · {{count}} Guthaben wird reserviert · Entwurf wird automatisch gespeichert",
-    "balance_other": "Aktuelles Guthaben: {{balance}} Guthaben · {{count}} Guthaben werden reserviert · Entwurf wird automatisch gespeichert"
+    "balance_other": "Aktuelles Guthaben: {{balance}} Guthaben · {{count}} Guthaben werden reserviert · Entwurf wird automatisch gespeichert",
+    "seeProgress": "Fortschritt ansehen",
+    "onScreen": "Im Bild: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Zurück zum Arbeitsbereich",
@@ -118,9 +151,26 @@
     "remaining_one": "Verbleibend: {{count}} Guthaben",
     "remaining_other": "Verbleibend: {{count}} Guthaben",
     "safeToLeave": "Du kannst diesen Bildschirm sicher verlassen. Dein Entwurf wird automatisch im Ergebnistab gespeichert.",
-    "keepWorking": "Im Hintergrund weiterarbeiten"
+    "keepWorking": "Im Hintergrund weiterarbeiten",
+    "failed": "Das Video konnte nicht erstellt werden: {{error}}",
+    "failedTitle": "Dieses Video konnte nicht erstellt werden",
+    "bodyAny": "Bilder, Vertonung und Animationstempo für {{title}} werden zusammengestellt.",
+    "stopped": "Gestoppt",
+    "notStarted": "Nicht gestartet",
+    "tryAgain": "Erneut versuchen",
+    "retrying": "Wird neu gestartet…",
+    "editPlan": "Plan bearbeiten",
+    "creditsRefunded_one": "{{count}} Credit erstattet",
+    "creditsRefunded_other": "{{count}} Credits erstattet"
+  },
+  "failure": {
+    "unavailable": "Die Videoerstellung ist gerade nicht verfügbar. Deine Credits wurden erstattet. Versuch es später erneut.",
+    "slow": "Die Videoerstellung hat zu lange gedauert. Deine Credits wurden erstattet. Versuch es erneut.",
+    "scene": "Szene {{n}} konnte nicht animiert werden. Deine Credits wurden erstattet. Versuch es erneut oder wähle ein anderes Foto für diese Szene.",
+    "other": "Bei der Videoerstellung ist etwas schiefgelaufen. Deine Credits wurden erstattet. Versuch es erneut."
   },
   "results": {
+    "failedShort": "Erstellung fehlgeschlagen · Credits erstattet",
     "title": "Video-Reels",
     "newReel": "Neues Reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Französisches Voiceover · Bereit zur Planung",
       "atelier": "15s · Ambient Akustik · Bereit zur Planung"
-    }
+    },
+    "empty": "Noch keine Reels. Starte eines unter Erstellen oder Ideen.",
+    "posted": "Auf Instagram gepostet",
+    "failed": "Konnte nicht erstellt werden: {{error}}",
+    "readyMeta": "{{seconds}}s · Französisches Voiceover · Fertig",
+    "draftMeta": "{{seconds}}s · Plan, noch kein Video",
+    "addLink": "Heruntergeladen · Schon gepostet? Link hinzufügen",
+    "tryAgain_one": "Erneut versuchen ({{count}} Credit)",
+    "tryAgain_other": "Erneut versuchen ({{count}} Credits)",
+    "openPlan": "Plan öffnen",
+    "closeSheet": "Schließen",
+    "linkTitle": "Link zum Post hinzufügen",
+    "linkBody": "Füge den Link zu deinem auf Instagram geposteten Reel ein, damit seine Ergebnisse verfolgt werden können.",
+    "saveLink": "Link speichern",
+    "saving": "Wird gespeichert…"
   },
   "review": {
+    "joinSoftened": "Szene {{n}} → {{next}}",
+    "joinSoftenedNote": "Die beiden Shots passten nicht ganz zusammen und wurden daher überblendet",
     "subtitle": "Reel-Entwurf · Bereit zur Überprüfung",
     "options": "Optionsmenü",
     "downloadVideo": "Video herunterladen",
@@ -162,7 +228,12 @@
     "audioTrack": "Audiotrack",
     "audioValue": "Französische Stimme (Studio Natural) + Umgebungsakustik",
     "resolution": "Auflösung",
-    "resolutionValue": "Hochformat-Video · 9:16"
+    "resolutionValue": "Hochformat-Video · 9:16",
+    "checking": "Das Reel wird geprüft… Herunterladen und Planen sind verfügbar, sobald die Prüfungen abgeschlossen sind.",
+    "askForChanges": "Nicht richtig? Änderungen anfordern",
+    "checks": "Prüfungen",
+    "audioVoiceOnly": "Französisches Voiceover",
+    "blocked": "Eine Prüfung hat ein Problem gefunden (siehe Prüfungen). Korrigiere es in der Bildunterschrift oder tippe auf „Nicht richtig? Änderungen anfordern“."
   },
   "publish": {
     "title": "Reel veröffentlichen",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Beispielstimme, {{title}}",
     "sampleVoice": "Beispielstimme",
     "voiceLed": "Stimmgeführter Stil",
-    "notice": "Wähle einen stimmgeführten Stil oder konzentriere dich auf dein Produkt."
+    "notice": "Wähle einen stimmgeführten Stil oder konzentriere dich auf dein Produkt.",
+    "comingSoon": "Moderierende, die vor der Kamera sprechen, kommen bald. Dieses Reel zeigt vorerst nur Produkte."
   },
   "script": {
     "title": "Skript & Stimme",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Natürliche französische Stimme, warmes akustisches Tempo",
     "recordOwn": "Eigene Stimme aufnehmen",
     "recordOwnMeta": "Optionale benutzerdefinierte Marken-Narration",
-    "record": "Aufnehmen"
+    "record": "Aufnehmen",
+    "saving": "Wird gespeichert…",
+    "sceneTooLong": "Szene {{n}} hat mehr als 30 Wörter (15 s). Kürze sie.",
+    "keepScenes_one": "Behalte {{count}} Absatz bei, einen pro Szene.",
+    "keepScenes_other": "Behalte {{count}} Absätze bei, einen pro Szene, mit einer Leerzeile dazwischen.",
+    "rewriteOpeningAsk": "Schreibe den Einstieg von Szene 1 um: kürzer und überraschender.",
+    "voiceName": "Stimme: {{name}}",
+    "nextVoice": "Nächste Stimme"
   },
   "templates": {
     "title": "Reel-Vorlagen",
@@ -275,7 +354,9 @@
         "subtitle": "Ankündigung & Showroom-CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Verwende das Format „{{title}}“ ({{subtitle}}), etwa {{seconds}} Sekunden lang.",
+    "applying": "Wird angewendet…"
   },
   "assets": {
     "title": "Assets auswählen",
@@ -296,6 +377,10 @@
       "macro": "Detail",
       "staged": "Gestylt",
       "tv": "TV-Einheit"
-    }
+    },
+    "yourPhoto": "Dein Foto",
+    "planFirst": "Plane zuerst das Reel (Erstellen → Gemeinsam ein Reel planen) und wähle dann die Fotos dafür aus.",
+    "saving": "Wird gespeichert…",
+    "sceneN": "Szene {{n}}"
   }
 }

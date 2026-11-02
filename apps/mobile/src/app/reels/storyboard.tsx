@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Lock, Sparkles, Volume2 } from "lucide-react-native";
-import { useState } from "react";
+import { ArrowDown, Lock, Sparkles, TriangleAlert, Volume2 } from "lucide-react-native";
+import { Fragment, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { ApiError } from "@/api/client";
@@ -24,10 +24,13 @@ export default function ReelsStoryboard() {
   const price = detail?.price ?? 0;
   const seconds = plan ? plan.scenes.reduce((n, s) => n + sceneSeconds(s.voiceText), 0) : 0;
   const rendering = detail?.renders.some((r) => r.step !== "DONE" && r.step !== "FAILED");
+  // The server refuses to render a stand-in photo (another product); send the person to R13 instead.
+  const standIns = plan?.scenes.filter((s) => s.standIn).length ?? 0;
 
   const make = async () => {
     if (!id || !detail) return;
     if (rendering) return router.push("/reels/generating");
+    if (standIns) return router.push("/reels/assets");
     setStarting(true);
     try {
       await reels.render(id, detail.version);
@@ -72,11 +75,13 @@ export default function ReelsStoryboard() {
             <ActionButton
               style={{ flex: 1 }}
               disabled={starting}
-              accessibilityLabel={t("storyboard.makeVideoA11y", { count: price })}
+              accessibilityLabel={standIns && !rendering ? t("storyboard.pickPhotos") : t("storyboard.makeVideoA11y", { count: price })}
               onPress={() => void make()}
               label={
                 starting ? (
                   <ActivityIndicator color={color.onPrimary} />
+                ) : standIns && !rendering ? (
+                  <Text style={[type.label, { color: color.onPrimary }]}>{t("storyboard.pickPhotos")}</Text>
                 ) : (
                   <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
                     <Text style={[type.label, { color: color.onPrimary }]}>{rendering ? t("storyboard.seeProgress") : t("storyboard.makeVideo")}</Text>
@@ -98,35 +103,49 @@ export default function ReelsStoryboard() {
         ))}
       </View>
       <View style={styles.ready}>
-        <Lock size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
+        {standIns ? <TriangleAlert size={16} color={color.error} strokeWidth={ICON.strokeWidth} /> : <Lock size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />}
         <Text style={metaInk}>
-          <Trans t={t} ns="reels" i18nKey="storyboard.readyToRender" components={{ muted: <Text style={meta} /> }} />
+          {standIns ? (
+            <Trans t={t} ns="reels" i18nKey="storyboard.needsPhotos" count={standIns} components={{ muted: <Text style={meta} /> }} />
+          ) : (
+            <Trans t={t} ns="reels" i18nKey="storyboard.readyToRender" components={{ muted: <Text style={meta} /> }} />
+          )}
         </Text>
       </View>
 
       <View style={{ gap: space[12], paddingTop: space[24] }}>
         {plan.scenes.map((s, i) => (
-          <View key={i} style={styles.scene}>
-            <View style={styles.sceneHead}>
-              <Text style={strong14}>{t("scene.label", { n: i + 1, seconds: sceneSeconds(s.voiceText) })}</Text>
-              <Tag label={s.model ? MODEL_NAMES[s.model] ?? s.model : s.shot} />
-            </View>
-            <View style={{ gap: space[16], paddingTop: space[12] }}>
-              <Image source={detail.photoUrls[s.photoKey] ? { uri: detail.photoUrls[s.photoKey] } : undefined} style={styles.still} contentFit="cover" accessibilityLabel={s.shot} />
-              <View>
-                <Text style={eyebrow}>{t("storyboard.sceneDirection")}</Text>
-                <Text style={type.body}>{s.direction}</Text>
-                {s.onScreenText ? <Text style={[meta, { paddingTop: 4 }]}>{t("storyboard.onScreen", { text: s.onScreenText })}</Text> : null}
-                <View style={styles.voice}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                    <Volume2 size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
-                    <Text style={meta}>{t("storyboard.voiceoverFr")}</Text>
+          <Fragment key={i}>
+            <View style={styles.scene}>
+              <View style={styles.sceneHead}>
+                <Text style={strong14}>{t("scene.label", { n: i + 1, seconds: sceneSeconds(s.voiceText) })}</Text>
+                <Tag label={s.model ? MODEL_NAMES[s.model] ?? s.model : s.shot} />
+              </View>
+              <View style={{ gap: space[16], paddingTop: space[12] }}>
+                <Image source={detail.photoUrls[s.photoKey] ? { uri: detail.photoUrls[s.photoKey] } : undefined} style={styles.still} contentFit="cover" accessibilityLabel={s.shot} />
+                {s.standIn ? <Text style={[meta, { color: color.error }]}>{t("storyboard.standIn")}</Text> : null}
+                <View>
+                  <Text style={eyebrow}>{t("storyboard.sceneDirection")}</Text>
+                  <Text style={type.body}>{s.direction}</Text>
+                  {s.onScreenText ? <Text style={[meta, { paddingTop: 4 }]}>{t("storyboard.onScreen", { text: s.onScreenText })}</Text> : null}
+                  <View style={styles.voice}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                      <Volume2 size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
+                      <Text style={meta}>{t("storyboard.voiceover", { lang: (plan.language ?? "fr").toUpperCase() })}</Text>
+                    </View>
+                    <Text style={[bodyMuted, { paddingTop: 2 }]}>{s.voiceText}</Text>
                   </View>
-                  <Text style={[bodyMuted, { paddingTop: 2 }]}>{s.voiceText}</Text>
                 </View>
               </View>
             </View>
-          </View>
+            {/* How this scene hands over to the next: the director plans it, so nobody has to write it. */}
+            {i < plan.scenes.length - 1 && s.transition ? (
+              <View style={styles.join} accessibilityLabel={t(`storyboard.join.${s.transition}`)}>
+                <ArrowDown size={14} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
+                <Text style={meta}>{t(`storyboard.join.${s.transition}`)}</Text>
+              </View>
+            ) : null}
+          </Fragment>
         ))}
       </View>
     </ReelsScreen>
@@ -162,6 +181,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.control,
   },
   scene: { padding: space[16], backgroundColor: color.surface, borderWidth: 1, borderColor: rc.border, borderRadius: radius.card },
+  join: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
   sceneHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   still: { height: 198, borderRadius: radius.control, borderWidth: 1, borderColor: "#E8E7F1", backgroundColor: "#EEEDF7" },
   voice: { marginTop: space[8], padding: space[12], borderRadius: radius.control, backgroundColor: rc.softPanel },

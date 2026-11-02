@@ -20,7 +20,18 @@
     "sendFailed": "Couldn't send the code. Try again.",
     "useMobile": "Use mobile number instead",
     "linkTitle": "Add your email",
-    "linkSubtitle": "Your number is verified. Add an email for receipts and team invites. We’ll send it a code."
+    "linkSubtitle": "Your number is verified. Add an email for receipts and team invites. We’ll send it a code.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Choose a password. We will email you a code to confirm your address.",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Your password",
+    "newPasswordPlaceholder": "At least {{count}} characters",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "signInFailed": "Couldn't sign in. Try again.",
+    "subtitleEmailFirst": "Enter your email. We will ask for your password, or send you a code."
   },
   "verify": {
     "title": "Enter your code",
@@ -314,6 +325,7 @@
     "noPhotos": "No product photos found on your website",
     "ideasTitle": "Finding post ideas",
     "ideasDetail": "Seasons, trends and your catalogue",
+    "finishingResearch": "Finishing your business research…",
     "ideasFound_one": "{{count}} idea found",
     "ideasFound_other": "{{count}} ideas found",
     "ideasNone": "No new ideas this time",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Couldn’t search Google Maps. Try again."
     }
+  },
+  "password": {
+    "title": "Welcome back",
+    "subtitle": "Enter your password to sign in.",
+    "change": "Change",
+    "changeEmail": "Signing in as {{email}}. Change email",
+    "useCode": "Forgot it? Sign in with an email code"
   }
 }

@@ -13,7 +13,8 @@
   "timezone": "Strefa czasowa",
   "status": {
     "draft": "Szkic",
-    "ready": "Gotowe"
+    "ready": "Gotowe",
+    "processing": "Przetwarzanie"
   },
   "scene": {
     "label": "Scena {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Szybkie cięcia katalogowe",
     "jumpBackIn": "Wróć do pracy",
     "seeAll": "Zobacz wszystko",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}} s · pionowy 9:16"
   },
   "ideas": {
     "title": "Pomysły na wideo",
@@ -58,7 +60,9 @@
       "angle02": "Skupienie na ręcznie rzeźbionych drzwiach, zarządzaniu kablami i ciepłej atmosferze salonu."
     },
     "readyToReview": "Gotowe do przeglądu",
-    "viewStoryboard": "Zobacz storyboard"
+    "viewStoryboard": "Zobacz storyboard",
+    "making": "Tworzenie scenariusza…",
+    "empty": "Nie ma jeszcze pomysłów na rolki. Pojawią się tutaj po uruchomieniu agenta pomysłów."
   },
   "chat": {
     "creditsA11y_one": "{{count}} kredyt",
@@ -77,15 +81,42 @@
     "openingHook": "Zaczep otwierający",
     "reviewStoryboard_one": "Przegląd storyboardu ({{count}} scena)",
     "reviewStoryboard_other": "Przegląd storyboardu ({{count}} scen)",
-    "readyStatus": "Gotowe do generowania lub dopracowania"
+    "readyStatus": "Gotowe do generowania lub dopracowania",
+    "empty": "Powiedz, co ma pokazywać rolka, lub najpierw wybierz pomysł.",
+    "writing": "Pisanie…",
+    "planMeta_one": "{{count}} scena · ~{{seconds}} s",
+    "planMeta_other": "{{count}} × scena · ~{{seconds}} s",
+    "makeItSeconds": "Niech trwa około {{seconds}} sekund.",
+    "greeting": "Co ma pokazywać ta rolka? Opisz ją lub zacznij od jednego z tych pomysłów.",
+    "starterProduct": "Rolka o {{product}}",
+    "placeholderNew": "Opisz swoją rolkę…",
+    "placeholderRevise": "Poproś o zmiany…",
+    "currentLength": "Obecnie ~{{seconds}} s",
+    "tryAgain": "Spróbuj ponownie",
+    "writingPlan": "Tworzenie planu rolki",
+    "directing": "Dobieranie modelu wideo do każdej sceny",
+    "stageReading": "Analizowanie Twojej marki i zdjęć",
+    "stageScenes_one": "Pisanie sceny {{count}}",
+    "stageScenes_other": "Pisanie sceny {{count}}",
+    "draftScene": "Scena {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "Czas trwania {{seconds}}s",
     "verticalFact": "9:16 pionowy",
     "readyToRender": "Gotowe do renderowania <muted>· Szkic zapisany do przeglądu</muted>",
+    "needsPhotos_one": "{{count}} scena potrzebuje własnego zdjęcia <muted>· Jej zdjęcie pokazuje coś innego</muted>",
+    "needsPhotos_other": "Sceny wymagające własnego zdjęcia: {{count}} <muted>· Ich zdjęcia pokazują coś innego</muted>",
+    "standIn": "To zdjęcie pokazuje coś innego. Wybierz właściwe przed utworzeniem filmu.",
+    "join": {
+      "match": "Cięcie dopasowane: to ujęcie kończy się tam, gdzie zaczyna się następne",
+      "cut": "Cięcie w rytm",
+      "dissolve": "Przenikanie do następnego ujęcia"
+    },
+    "pickPhotos": "Wybierz zdjęcia",
     "sceneDirection": "Kierunek sceny",
     "voiceoverFr": "Lektor (FR)",
+    "voiceover": "Lektor ({{lang}})",
     "direction": {
       "scene1": "Powolne ujawnienie nowoczesnej aranżacji jadalni",
       "scene2": "Płynne makro ujęcie bogatego naturalnego ziarna drewna i fazowanej krawędzi",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} kredyt",
     "cost_other": "{{count}} kredytów",
     "balance_one": "Bieżące saldo: {{balance}} kredytów · {{count}} kredyt zostanie zarezerwowany · Szkic zapisany automatycznie",
-    "balance_other": "Bieżące saldo: {{balance}} kredytów · {{count}} kredytów zostanie zarezerwowanych · Szkic zapisany automatycznie"
+    "balance_other": "Bieżące saldo: {{balance}} kredytów · {{count}} kredytów zostanie zarezerwowanych · Szkic zapisany automatycznie",
+    "seeProgress": "Zobacz postęp",
+    "onScreen": "Na ekranie: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Powrót do przestrzeni roboczej",
@@ -118,9 +151,26 @@
     "remaining_one": "Pozostało: {{count}} kredyt",
     "remaining_other": "Pozostało: {{count}} kredytów",
     "safeToLeave": "Możesz bezpiecznie opuścić ten ekran. Twój szkic jest automatycznie zapisywany w zakładce Wyniki.",
-    "keepWorking": "Pracuj dalej w tle"
+    "keepWorking": "Pracuj dalej w tle",
+    "failed": "Nie udało się utworzyć filmu: {{error}}",
+    "failedTitle": "Nie udało się utworzyć filmu",
+    "bodyAny": "Dopasowujemy obraz, lektora i tempo animacji do {{title}}.",
+    "stopped": "Zatrzymano",
+    "notStarted": "Nie rozpoczęto",
+    "tryAgain": "Spróbuj ponownie",
+    "retrying": "Rozpoczynamy ponownie…",
+    "editPlan": "Edytuj plan",
+    "creditsRefunded_one": "Zwrócono {{count}} kredyt",
+    "creditsRefunded_other": "Zwrócone kredyty: {{count}}"
+  },
+  "failure": {
+    "unavailable": "Tworzenie filmów jest teraz niedostępne. Twoje kredyty zostały zwrócone. Spróbuj ponownie później.",
+    "slow": "Tworzenie filmu trwało zbyt długo. Twoje kredyty zostały zwrócone. Spróbuj ponownie.",
+    "scene": "Nie udało się animować sceny {{n}}. Twoje kredyty zostały zwrócone. Spróbuj ponownie lub wybierz inne zdjęcie do tej sceny.",
+    "other": "Coś poszło nie tak podczas tworzenia filmu. Twoje kredyty zostały zwrócone. Spróbuj ponownie."
   },
   "results": {
+    "failedShort": "Nie udało się utworzyć · kredyty zwrócone",
     "title": "Reele wideo",
     "newReel": "Nowy reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Francuski lektor · Gotowe do zaplanowania",
       "atelier": "15s · Akustyka ambientowa · Gotowe do zaplanowania"
-    }
+    },
+    "empty": "Nie ma jeszcze rolek. Zacznij w zakładce Utwórz lub Pomysły.",
+    "posted": "Opublikowano na Instagram",
+    "failed": "Nie udało się utworzyć: {{error}}",
+    "readyMeta": "{{seconds}} s · lektor po francusku · Gotowe",
+    "draftMeta": "{{seconds}} s · Plan, jeszcze bez filmu",
+    "addLink": "Pobrano · Opublikowano? Dodaj link",
+    "tryAgain_one": "Spróbuj ponownie ({{count}} kredyt)",
+    "tryAgain_other": "Spróbuj ponownie (kredyty: {{count}})",
+    "openPlan": "Otwórz plan",
+    "closeSheet": "Zamknij",
+    "linkTitle": "Dodaj link do posta",
+    "linkBody": "Wklej link do rolki opublikowanej na Instagram, aby śledzić jej wyniki.",
+    "saveLink": "Zapisz link",
+    "saving": "Zapisywanie…"
   },
   "review": {
+    "joinSoftened": "Scena {{n}} → {{next}}",
+    "joinSoftenedNote": "Ujęcia nie do końca do siebie pasowały, więc połączono je przenikaniem",
     "subtitle": "Szkic reel · Gotowe do przeglądu",
     "options": "Menu opcji",
     "downloadVideo": "Pobierz wideo",
@@ -162,7 +228,12 @@
     "audioTrack": "Ścieżka dźwiękowa",
     "audioValue": "Francuski lektor (Studio Natural) + Akustyka otoczenia",
     "resolution": "Rozdzielczość",
-    "resolutionValue": "Wideo portretowe · 9:16"
+    "resolutionValue": "Wideo portretowe · 9:16",
+    "checking": "Sprawdzanie rolki… Pobieranie i planowanie będą dostępne po zakończeniu sprawdzania.",
+    "askForChanges": "Coś nie tak? Poproś o zmiany",
+    "checks": "Kontrole",
+    "audioVoiceOnly": "Lektor po francusku",
+    "blocked": "Wykryto problem (zobacz Kontrole). Popraw go w opisie lub wybierz „Coś nie tak? Poproś o zmiany”."
   },
   "publish": {
     "title": "Opublikuj rolkę",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Próbka głosu, {{title}}",
     "sampleVoice": "Próbka głosu",
     "voiceLed": "Styl prowadzony głosem",
-    "notice": "Wybierz styl prowadzony głosem lub skup się na swoim produkcie."
+    "notice": "Wybierz styl prowadzony głosem lub skup się na swoim produkcie.",
+    "comingSoon": "Prezenterzy mówiący przed kamerą pojawią się wkrótce. Na razie ta rolka będzie pokazywać tylko produkty."
   },
   "script": {
     "title": "Scenariusz i głos",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Naturalny francuski, ciepłe tempo akustyczne",
     "recordOwn": "Nagraj swój głos",
     "recordOwnMeta": "Opcjonalna narracja marki",
-    "record": "Nagraj"
+    "record": "Nagraj",
+    "saving": "Zapisywanie…",
+    "sceneTooLong": "Scena {{n}} ma ponad 30 słów (15 s). Skróć ją.",
+    "keepScenes_one": "Zachowaj {{count}} akapit, po jednym na scenę.",
+    "keepScenes_other": "Zachowaj akapity: {{count}}, po jednym na scenę, oddzielone pustymi wierszami.",
+    "rewriteOpeningAsk": "Napisz od nowa początek sceny 1 tak, by był krótszy i bardziej zaskakujący.",
+    "voiceName": "Głos: {{name}}",
+    "nextVoice": "Następny głos"
   },
   "templates": {
     "title": "Szablony rolek",
@@ -275,7 +354,9 @@
         "subtitle": "Ogłoszenie i CTA showroom"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Użyj formatu „{{title}}” ({{subtitle}}), około {{seconds}} sekund.",
+    "applying": "Stosowanie…"
   },
   "assets": {
     "title": "Wybierz zasoby",
@@ -296,6 +377,10 @@
       "macro": "Szczegół",
       "staged": "Stylizowane",
       "tv": "Jednostka TV"
-    }
+    },
+    "yourPhoto": "Twoje zdjęcie",
+    "planFirst": "Najpierw zaplanuj rolkę (Utwórz → Zaplanujmy rolkę), a potem wybierz zdjęcia.",
+    "saving": "Zapisywanie…",
+    "sceneN": "Scena {{n}}"
   }
 }

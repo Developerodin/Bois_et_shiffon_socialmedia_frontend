@@ -20,7 +20,18 @@
     "sendFailed": "Kon de code niet verzenden. Probeer opnieuw.",
     "useMobile": "Gebruik mobiel nummer in plaats daarvan",
     "linkTitle": "Voeg je e-mail toe",
-    "linkSubtitle": "Je nummer is geverifieerd. Voeg een e-mail toe voor bonnetjes en teamuitnodigingen. We sturen je een code."
+    "linkSubtitle": "Je nummer is geverifieerd. Voeg een e-mail toe voor bonnetjes en teamuitnodigingen. We sturen je een code.",
+    "registerTitle": "Maak je account aan",
+    "registerSubtitle": "Kies een wachtwoord. We sturen je een code om je e-mailadres te bevestigen.",
+    "passwordLabel": "Wachtwoord",
+    "passwordPlaceholder": "Je wachtwoord",
+    "newPasswordPlaceholder": "Minimaal {{count}} tekens",
+    "showPassword": "Wachtwoord tonen",
+    "hidePassword": "Wachtwoord verbergen",
+    "signIn": "Inloggen",
+    "createAccount": "Account aanmaken",
+    "signInFailed": "Inloggen is niet gelukt. Probeer het opnieuw.",
+    "subtitleEmailFirst": "Vul je e-mailadres in. We vragen je om je wachtwoord of sturen je een code."
   },
   "verify": {
     "title": "Voer je code in",
@@ -314,6 +325,7 @@
     "noPhotos": "Geen productfoto's gevonden op je website",
     "ideasTitle": "Ideeën voor posts zoeken",
     "ideasDetail": "Seizoenen, trends en je catalogus",
+    "finishingResearch": "Je bedrijfsonderzoek wordt afgerond…",
     "ideasFound_one": "{{count}} idee gevonden",
     "ideasFound_other": "{{count}} ideeën gevonden",
     "ideasNone": "Deze keer geen nieuwe ideeën",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Zoeken op Google Maps is mislukt. Probeer het opnieuw."
     }
+  },
+  "password": {
+    "title": "Welkom terug",
+    "subtitle": "Vul je wachtwoord in om in te loggen.",
+    "change": "Wijzigen",
+    "changeEmail": "Je logt in als {{email}}. E-mailadres wijzigen",
+    "useCode": "Vergeten? Log in met een code per e-mail"
   }
 }

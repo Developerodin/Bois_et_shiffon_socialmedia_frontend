@@ -13,7 +13,8 @@
   "timezone": "Fus orar",
   "status": {
     "draft": "Ciornă",
-    "ready": "Gata"
+    "ready": "Gata",
+    "processing": "Se procesează"
   },
   "scene": {
     "label": "Scena {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Tăieturi rapide din catalog",
     "jumpBackIn": "Reia",
     "seeAll": "Vezi tot",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}}s · vertical 9:16"
   },
   "ideas": {
     "title": "Idei video",
@@ -58,7 +60,9 @@
       "angle02": "Concentrare pe ușile sculptate manual, gestionarea cablurilor și ambianța caldă a livingului."
     },
     "readyToReview": "Gata de revizuire",
-    "viewStoryboard": "Vezi storyboard-ul"
+    "viewStoryboard": "Vezi storyboard-ul",
+    "making": "Se scrie scenariul…",
+    "empty": "Nu ai încă idei de reeluri. Vor apărea aici după ce rulează agentul de idei."
   },
   "chat": {
     "creditsA11y_one": "{{count}} credit",
@@ -77,15 +81,42 @@
     "openingHook": "Introducere captivantă",
     "reviewStoryboard_one": "Revizuiește storyboard-ul ({{count}} scenă)",
     "reviewStoryboard_other": "Revizuiește storyboard-ul ({{count}} scene)",
-    "readyStatus": "Gata de generare sau rafinare"
+    "readyStatus": "Gata de generare sau rafinare",
+    "empty": "Spune-mi ce ar trebui să arate reelul sau alege mai întâi o idee.",
+    "writing": "Se scrie…",
+    "planMeta_one": "{{count}} scenă · ~{{seconds}}s",
+    "planMeta_other": "{{count}} scene · ~{{seconds}}s",
+    "makeItSeconds": "Să aibă aproximativ {{seconds}} secunde.",
+    "greeting": "Ce ar trebui să arate acest reel? Descrie-l sau pornește de la una dintre aceste idei.",
+    "starterProduct": "Un reel despre {{product}}",
+    "placeholderNew": "Descrie reelul…",
+    "placeholderRevise": "Cere modificări…",
+    "currentLength": "~{{seconds}}s acum",
+    "tryAgain": "Încearcă din nou",
+    "writingPlan": "Se scrie planul reelului",
+    "directing": "Se alege un model video pentru fiecare scenă",
+    "stageReading": "Analizăm brandul și fotografiile tale",
+    "stageScenes_one": "Scriem scena {{count}}",
+    "stageScenes_other": "Scriem scena {{count}}",
+    "draftScene": "Scena {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "Durată {{seconds}}s",
     "verticalFact": "9:16 vertical",
     "readyToRender": "Gata de redare <muted>· Ciornă salvată pentru revizuire</muted>",
+    "needsPhotos_one": "{{count}} scenă are nevoie de propria fotografie <muted>· Fotografia ei arată altceva</muted>",
+    "needsPhotos_other": "{{count}} scene au nevoie de propriile fotografii <muted>· Fotografiile lor arată altceva</muted>",
+    "standIn": "Această fotografie arată altceva. Alege-o pe cea potrivită înainte de a crea videoclipul.",
+    "join": {
+      "match": "Racord: acest cadru se încheie unde începe următorul",
+      "cut": "Tăietură pe ritm",
+      "dissolve": "Dizolvare către următorul cadru"
+    },
+    "pickPhotos": "Alege fotografii",
     "sceneDirection": "Direcția scenei",
     "voiceoverFr": "Voiceover (FR)",
+    "voiceover": "Voce din off ({{lang}})",
     "direction": {
       "scene1": "Dezvăluire lentă printr-un cadru modern de dining",
       "scene2": "Trecere macro lină peste granulația bogată a lemnului natural și marginea teșită",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} credit",
     "cost_other": "{{count}} credite",
     "balance_one": "Sold curent: {{balance}} credite · {{count}} credit va fi rezervat · Ciorna salvată automat",
-    "balance_other": "Sold curent: {{balance}} credite · {{count}} credite vor fi rezervate · Ciorna salvată automat"
+    "balance_other": "Sold curent: {{balance}} credite · {{count}} credite vor fi rezervate · Ciorna salvată automat",
+    "seeProgress": "Vezi progresul",
+    "onScreen": "Pe ecran: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Înapoi la spațiul de lucru",
@@ -118,9 +151,26 @@
     "remaining_one": "Rămase: {{count}} credit",
     "remaining_other": "Rămase: {{count}} credite",
     "safeToLeave": "Poți părăsi această pagină în siguranță. Ciorna ta este salvată automat în fila Rezultate.",
-    "keepWorking": "Continuă să lucrezi în fundal"
+    "keepWorking": "Continuă să lucrezi în fundal",
+    "failed": "Videoclipul nu a putut fi creat: {{error}}",
+    "failedTitle": "Acest videoclip nu a putut fi creat",
+    "bodyAny": "Combinăm imaginile, vocea din off și ritmul mișcării pentru {{title}}.",
+    "stopped": "Oprit",
+    "notStarted": "Nepornit",
+    "tryAgain": "Încearcă din nou",
+    "retrying": "Repornim…",
+    "editPlan": "Editează planul",
+    "creditsRefunded_one": "{{count}} credit returnat",
+    "creditsRefunded_other": "{{count}} credite returnate"
+  },
+  "failure": {
+    "unavailable": "Crearea videoclipurilor nu este disponibilă momentan. Creditele ți-au fost returnate. Încearcă din nou mai târziu.",
+    "slow": "Crearea videoclipului a durat prea mult. Creditele ți-au fost returnate. Încearcă din nou.",
+    "scene": "Scena {{n}} nu a putut fi animată. Creditele ți-au fost returnate. Încearcă din nou sau alege o altă fotografie pentru ea.",
+    "other": "Ceva nu a mers bine la crearea videoclipului. Creditele ți-au fost returnate. Încearcă din nou."
   },
   "results": {
+    "failedShort": "Nu a putut fi creat · credite returnate",
     "title": "Reel-uri video",
     "newReel": "Reel nou",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Voiceover în franceză · Gata de programare",
       "atelier": "15s · Acustică ambientală · Gata de programare"
-    }
+    },
+    "empty": "Nu ai încă reeluri. Creează unul din Creează sau Idei.",
+    "posted": "Postat pe Instagram",
+    "failed": "Nu a putut fi creat: {{error}}",
+    "readyMeta": "{{seconds}}s · Voce în franceză · Gata",
+    "draftMeta": "{{seconds}}s · Plan, fără videoclip încă",
+    "addLink": "Descărcat · L-ai postat? Adaugă linkul",
+    "tryAgain_one": "Încearcă din nou ({{count}} credit)",
+    "tryAgain_other": "Încearcă din nou ({{count}} credite)",
+    "openPlan": "Deschide planul",
+    "closeSheet": "Închide",
+    "linkTitle": "Adaugă linkul postării",
+    "linkBody": "Lipește linkul reelului postat pe Instagram, ca să-i poți urmări rezultatele.",
+    "saveLink": "Salvează linkul",
+    "saving": "Se salvează…"
   },
   "review": {
+    "joinSoftened": "Scena {{n}} → {{next}}",
+    "joinSoftenedNote": "Cadrele nu s-au potrivit perfect, așa că se îmbină prin dizolvare",
     "subtitle": "Ciornă reel · Gata de revizuire",
     "options": "Meniu opțiuni",
     "downloadVideo": "Descarcă video",
@@ -162,7 +228,12 @@
     "audioTrack": "Piesă audio",
     "audioValue": "Voce franceză (Studio Natural) + Acustică ambientală",
     "resolution": "Rezoluție",
-    "resolutionValue": "Video portret · 9:16"
+    "resolutionValue": "Video portret · 9:16",
+    "checking": "Se verifică reelul… Descărcarea și programarea devin disponibile după verificări.",
+    "askForChanges": "Nu e bine? Cere modificări",
+    "checks": "Verificări",
+    "audioVoiceOnly": "Voce în franceză",
+    "blocked": "A fost găsită o problemă (vezi Verificări). Corecteaz-o în descriere sau apasă „Nu e bine? Cere modificări”."
   },
   "publish": {
     "title": "Publică reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Voce de probă, {{title}}",
     "sampleVoice": "Voce de probă",
     "voiceLed": "Stil condus de voce",
-    "notice": "Alege un stil condus de voce sau concentrează-te pe produsul tău."
+    "notice": "Alege un stil condus de voce sau concentrează-te pe produsul tău.",
+    "comingSoon": "Prezentatorii care vorbesc în fața camerei vor fi disponibili în curând. Deocamdată, acest reel va arăta doar produsul."
   },
   "script": {
     "title": "Script & voce",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Franceză naturală, ritm acustic cald",
     "recordOwn": "Înregistrează-ți propria voce",
     "recordOwnMeta": "Narațiune personalizată opțională pentru brand",
-    "record": "Înregistrează"
+    "record": "Înregistrează",
+    "saving": "Se salvează…",
+    "sceneTooLong": "Scena {{n}} are peste 30 de cuvinte (15 s). Scurteaz-o.",
+    "keepScenes_one": "Păstrează {{count}} paragraf, câte unul pe scenă.",
+    "keepScenes_other": "Păstrează {{count}} paragrafe, câte unul pe scenă, cu un rând gol între ele.",
+    "rewriteOpeningAsk": "Rescrie introducerea scenei 1, ca să fie mai scurtă și mai surprinzătoare.",
+    "voiceName": "Voce: {{name}}",
+    "nextVoice": "Următoarea voce"
   },
   "templates": {
     "title": "Șabloane de reel",
@@ -275,7 +354,9 @@
         "subtitle": "Anunț & CTA showroom"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Folosește formatul „{{title}}” ({{subtitle}}), pentru aproximativ {{seconds}} secunde.",
+    "applying": "Se aplică…"
   },
   "assets": {
     "title": "Selectează resurse",
@@ -296,6 +377,10 @@
       "macro": "Detaliu",
       "staged": "Stilizat",
       "tv": "Unitate TV"
-    }
+    },
+    "yourPhoto": "Fotografia ta",
+    "planFirst": "Planifică mai întâi reelul (Creează → Planificăm un reel împreună), apoi alege fotografiile.",
+    "saving": "Se salvează…",
+    "sceneN": "Scena {{n}}"
   }
 }

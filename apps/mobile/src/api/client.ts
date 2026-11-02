@@ -1,3 +1,4 @@
+import { fetch as streamingFetch } from "expo/fetch";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import i18n from "@/i18n";
@@ -98,8 +99,12 @@ const WAIT_FOR_SERVER_MS = 60_000;
  * or the server not responding. A read (GET) that can't get through waits for the server, up to a minute, and
  * tries once more; a write never repeats by itself, so nothing is sent twice.
  */
-/** timeoutMs: for calls that run AI on the server (a reel plan takes ~30–60 s). form: a file upload (multipart). */
-export async function api<T>(path: string, init: { method?: string; body?: unknown; form?: FormData; workspaceId?: string; signal?: AbortSignal; timeoutMs?: number } = {}, retried = false): Promise<T> {
+/**
+ * timeoutMs: for calls that run AI on the server (a reel plan takes ~30–60 s). form: a file upload (multipart).
+ * onLine: ask for a stream (JSON lines); each progress line is handed on, and the last one ({type:"done",result} or
+ * {type:"error",status,detail}) settles the call like a plain answer would. Uses Expo's fetch, which can read a stream.
+ */
+export async function api<T>(path: string, init: { method?: string; body?: unknown; form?: FormData; workspaceId?: string; signal?: AbortSignal; timeoutMs?: number; onLine?: (line: unknown) => void } = {}, retried = false): Promise<T> {
   const method = init.method ?? (init.body || init.form ? "POST" : "GET");
   const token = await store.get();
   let res: Response;
@@ -107,10 +112,11 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     res = await withTimeout(
       init.timeoutMs ?? TIMEOUT_MS,
       (signal) =>
-        fetch(`${API_URL}/api/v1${path}`, {
+        (init.onLine ? (streamingFetch as unknown as typeof fetch) : fetch)(`${API_URL}/api/v1${path}`, {
           method,
           signal,
           headers: {
+            ...(init.onLine ? { Accept: "application/x-ndjson" } : {}),
             ...(init.body ? { "Content-Type": "application/json" } : {}),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             ...(init.workspaceId ? { "X-Workspace-Id": init.workspaceId } : {}),
@@ -130,6 +136,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     throw new ApiError(0, i18n.t(timedOut ? "common:net.timeout" : "common:net.unreachable"));
   }
   setConnection("online");
+  if (init.onLine && res.ok && res.body && (res.headers.get("content-type") ?? "").includes("application/x-ndjson")) return readLines<T>(res.body, init.onLine);
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     // A server error with no message of its own (a gateway page, a route that failed before answering).
@@ -141,4 +148,23 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     throw new ApiError(res.status, data?.detail ?? data?.title ?? i18n.t("common:net.failed"));
   }
   return data as T;
+}
+
+/** Reads a JSON-lines answer: progress lines go to onLine, the closing line resolves or rejects the call. */
+async function readLines<T>(body: ReadableStream<Uint8Array>, onLine: (line: unknown) => void): Promise<T> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (value) buffer += decoder.decode(value, { stream: !done });
+    for (let end = buffer.indexOf("\n"); end >= 0; end = buffer.indexOf("\n")) {
+      const line = JSON.parse(buffer.slice(0, end)) as { type?: string; result?: T; status?: number; detail?: string };
+      buffer = buffer.slice(end + 1);
+      if (line.type === "done") return line.result as T;
+      if (line.type === "error") throw new ApiError(line.status ?? 500, line.detail ?? i18n.t("common:net.failed"));
+      onLine(line);
+    }
+    if (done) throw new ApiError(0, i18n.t("common:net.failed")); // the stream stopped before its last line
+  }
 }

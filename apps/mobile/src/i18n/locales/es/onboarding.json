@@ -20,7 +20,18 @@
     "sendFailed": "No se pudo enviar el código. Inténtalo de nuevo.",
     "useMobile": "Usar número de móvil",
     "linkTitle": "Añadir tu correo",
-    "linkSubtitle": "Tu número está verificado. Añade un correo para recibos e invitaciones de equipo. Te enviaremos un código."
+    "linkSubtitle": "Tu número está verificado. Añade un correo para recibos e invitaciones de equipo. Te enviaremos un código.",
+    "registerTitle": "Crea tu cuenta",
+    "registerSubtitle": "Elige una contraseña. Te enviaremos un código por correo para confirmar tu dirección.",
+    "passwordLabel": "Contraseña",
+    "passwordPlaceholder": "Tu contraseña",
+    "newPasswordPlaceholder": "Al menos {{count}} caracteres",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "signIn": "Iniciar sesión",
+    "createAccount": "Crear cuenta",
+    "signInFailed": "No se pudo iniciar sesión. Inténtalo de nuevo.",
+    "subtitleEmailFirst": "Introduce tu correo. Te pediremos tu contraseña o te enviaremos un código."
   },
   "verify": {
     "title": "Introduce tu código",
@@ -314,6 +325,7 @@
     "noPhotos": "No encontramos fotos de productos en tu sitio web",
     "ideasTitle": "Buscando ideas para publicar",
     "ideasDetail": "Temporadas, tendencias y tu catálogo",
+    "finishingResearch": "Terminando el análisis de tu negocio…",
     "ideasFound_one": "{{count}} idea encontrada",
     "ideasFound_other": "{{count}} ideas encontradas",
     "ideasNone": "Esta vez no hay ideas nuevas",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "No pudimos buscar en Google Maps. Inténtalo de nuevo."
     }
+  },
+  "password": {
+    "title": "Te damos la bienvenida de nuevo",
+    "subtitle": "Introduce tu contraseña para iniciar sesión.",
+    "change": "Cambiar",
+    "changeEmail": "Inicias sesión como {{email}}. Cambiar correo",
+    "useCode": "¿La olvidaste? Entra con un código por correo"
   }
 }

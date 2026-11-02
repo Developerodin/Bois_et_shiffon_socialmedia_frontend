@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import { api, session } from "@/api/client";
+import i18n from "@/i18n";
 import { onboarding, type Goal } from "@/ui/onboarding/state";
 
 /** Typed calls the screens use. Shapes mirror apps/web route responses. */
@@ -91,6 +92,12 @@ export type BrandAssetsView = {
 export type BrandDetailsEdit = { colors?: string[]; tagline?: string; audience?: string; tones?: string[]; contentLanguage?: "fr" | "en" };
 
 /** Logo, colours, fonts and product photos Research read from the website, its summary and the owner's choices. Image URLs last an hour. */
+/** The workspace's credit balance (module header). */
+export const workspaceCredits = async (signal?: AbortSignal) => {
+  const b = await currentBrand();
+  return api<{ credits: number }>(`/workspaces/${encodeURIComponent(b.workspaceId)}/credits`, { workspaceId: b.workspaceId, signal });
+};
+
 export const brandAssets = (ws: string, brandId: string) => api<BrandAssetsView>(`${brandBase(ws, brandId)}/assets`, { workspaceId: ws });
 
 /** People's edits (palette, tagline, audience, tones, language); returns the same view as stored. */
@@ -178,13 +185,17 @@ export function forgetBrand() {
 }
 
 export type SceneKind = "detail" | "room" | "physics";
-export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string };
-export type ReelPlan = { title: string; presenter: "none"; template: string; voice: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
+/** transition: how the scene hands over to the next, set by the director (apps/web/server/reels/router.ts). */
+export type Transition = "cut" | "match" | "dissolve";
+export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string; standIn?: boolean; transition?: Transition };
+export type ReelPlan = { title: string; presenter: "none"; template: string; voice: string; language?: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
 export type RenderStep = "VOICE" | "CLIPS" | "JOIN" | "DONE" | "FAILED";
+/** Why a render failed, as a kind the app words itself (apps/web/server/reels/render.ts renderFailure). */
+export type RenderFailure = { kind: "unavailable" | "slow" | "scene" | "other"; scene?: number; stoppedAt: "VOICE" | "CLIPS" | "JOIN" };
 export type ContentStatus = "PLANNED" | "DRAFT_REVIEW" | "AWAITING_APPROVAL" | "APPROVED" | "SCHEDULED" | "PUBLISHED" | "REJECTED" | "BLOCKED" | "CANCELLED";
 export type ReelSummary = {
   id: string; title: string; status: ContentStatus; version: number; postUrl: string | null; createdAt: string;
-  render: { step: RenderStep; attempt: number; error: string | null } | null;
+  render: { step: RenderStep; attempt: number; failure: RenderFailure | null } | null;
   seconds: number | null; price: number | null; thumbUrl: string | null; videoUrl: string | null;
 };
 export type ChatTurn = { role: "user" | "assistant"; text: string; at: string };
@@ -194,12 +205,17 @@ export type ReelDetail = {
   version: number; plan: ReelPlan | null; price: number | null;
   caption: { caption?: string; hashtags?: string[] } | null; videoUrl: string | null;
   checks: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
-  renders: { id: string; versionId: string; attempt: number; step: RenderStep; error: string | null; videoKey: string | null; createdAt: string }[];
+  // softened: joins (scene n → n+1) the seam check turned into a dissolve because the two shots didn't match.
+  renders: { id: string; versionId: string; attempt: number; step: RenderStep; failure: RenderFailure | null; softened: number[]; videoKey: string | null; createdAt: string }[];
   chat: ChatTurn[];
   credits: number;
   photoUrls: Record<string, string>;
 };
 export type PlanResult = { version: number; plan: ReelPlan; price: number; reply?: string };
+/** Progress while a plan is written (apps/web/server/reels/service.ts PlanEvent). */
+export type PlanStage = "reading" | "writing" | "directing";
+export type DraftSoFar = { reply: string; title: string; scenes: { shot: string; voiceText: string }[] };
+export type PlanEvent = { type: "stage"; stage: PlanStage } | ({ type: "draft" } & DraftSoFar);
 export type Opportunity = { id: string; title: string; summary: string; angle: string; channels: string[]; decision: "RECOMMEND" | "HOLD" | "REJECT"; score: number; timing: string | null };
 export type Connection = { id: string; provider: string; displayName: string; status: "ACTIVE" | "ERROR" | "REVOKED" };
 
@@ -214,17 +230,18 @@ export const reels = {
     const { ws, base } = await reelBase();
     return api<{ reels: ReelSummary[] }>(`${base}/reels`, { workspaceId: ws, signal });
   },
-  async create(input: { opportunityId?: string; prompt?: string }) {
+  /** onEvent: the plan's progress as it's written (R04 streams it). The scriptwriter replies in the app's language. */
+  async create(input: { opportunityId?: string; prompt?: string }, onEvent?: (e: PlanEvent) => void) {
     const { ws, base } = await reelBase();
-    return api<PlanResult & { id: string }>(`${base}/reels`, { body: input, workspaceId: ws, timeoutMs: AI_MS });
+    return api<PlanResult & { id: string }>(`${base}/reels`, { body: { ...input, language: i18n.language }, workspaceId: ws, timeoutMs: AI_MS, onLine: onEvent as ((l: unknown) => void) | undefined });
   },
   async get(id: string, signal?: AbortSignal) {
     const { ws, base } = await reelBase();
     return api<ReelDetail>(`${base}/reels/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
   },
-  async chat(id: string, version: number, message: string) {
+  async chat(id: string, version: number, message: string, onEvent?: (e: PlanEvent) => void) {
     const { ws, base } = await reelBase();
-    return api<PlanResult>(`${base}/reels/${encodeURIComponent(id)}/plan`, { body: { version, message }, workspaceId: ws, timeoutMs: AI_MS });
+    return api<PlanResult>(`${base}/reels/${encodeURIComponent(id)}/plan`, { body: { version, message, language: i18n.language }, workspaceId: ws, timeoutMs: AI_MS, onLine: onEvent as ((l: unknown) => void) | undefined });
   },
   async save(id: string, version: number, plan: ReelPlan) {
     const { ws, base } = await reelBase();

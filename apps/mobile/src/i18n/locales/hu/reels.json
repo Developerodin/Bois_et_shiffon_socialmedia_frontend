@@ -13,7 +13,8 @@
   "timezone": "Időzóna",
   "status": {
     "draft": "Piszkozat",
-    "ready": "Kész"
+    "ready": "Kész",
+    "processing": "Feldolgozás"
   },
   "scene": {
     "label": "Jelenet {{n}} · {{seconds}} mp",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Gyors katalógus vágások",
     "jumpBackIn": "Folytatás",
     "seeAll": "Összes megtekintése",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}} mp · 9:16 álló"
   },
   "ideas": {
     "title": "Videó ötletek",
@@ -58,7 +60,9 @@
       "angle02": "Kézzel faragott lamellás ajtók, kábelkezelés és meleg lakókörnyezet fókuszban."
     },
     "readyToReview": "Készen áll az átnézésre",
-    "viewStoryboard": "Forgatókönyv megtekintése"
+    "viewStoryboard": "Forgatókönyv megtekintése",
+    "making": "Forgatókönyv írása…",
+    "empty": "Még nincsenek reelötletek. Az ötletügynök futtatása után itt jelennek meg."
   },
   "chat": {
     "creditsA11y_one": "{{count}} kredit",
@@ -77,15 +81,42 @@
     "openingHook": "Nyitó fogás",
     "reviewStoryboard_one": "Forgatókönyv átnézése ({{count}} jelenet)",
     "reviewStoryboard_other": "Forgatókönyv átnézése ({{count}} jelenet)",
-    "readyStatus": "Készen áll a generálásra vagy finomításra"
+    "readyStatus": "Készen áll a generálásra vagy finomításra",
+    "empty": "Mondd el, mit mutasson a reel, vagy előbb válassz egy ötletet.",
+    "writing": "Írás…",
+    "planMeta_one": "{{count}} jelenet · ~{{seconds}} mp",
+    "planMeta_other": "{{count}} jelenet · ~{{seconds}} mp",
+    "makeItSeconds": "Legyen körülbelül {{seconds}} másodperces.",
+    "greeting": "Mit mutasson a reel? Írd le, vagy indulj ki ezek egyikéből.",
+    "starterProduct": "Egy reel erről: {{product}}",
+    "placeholderNew": "Írd le a reelt…",
+    "placeholderRevise": "Kérj módosításokat…",
+    "currentLength": "Most ~{{seconds}} mp",
+    "tryAgain": "Újrapróbálás",
+    "writingPlan": "A reel tervének írása",
+    "directing": "Videómodell kiválasztása minden jelenethez",
+    "stageReading": "Márkád és fotóid áttekintése",
+    "stageScenes_one": "{{count}}. jelenet írása",
+    "stageScenes_other": "{{count}}. jelenet írása",
+    "draftScene": "{{n}}. jelenet · {{shot}}"
   },
   "storyboard": {
     "title": "Forgatókönyv",
     "durationFact": "{{seconds}} mp időtartam",
     "verticalFact": "9:16 függőleges",
     "readyToRender": "Készen áll a renderelésre <muted>· Piszkozat mentve átnézésre</muted>",
+    "needsPhotos_one": "{{count}} jelenethez saját fotó kell <muted>· A fotón valami más látható</muted>",
+    "needsPhotos_other": "{{count}} jelenethez saját fotó kell <muted>· A fotókon valami más látható</muted>",
+    "standIn": "Ezen a fotón valami más látható. A videó elkészítése előtt válaszd ki a megfelelőt.",
+    "join": {
+      "match": "Illesztett vágás: ez a snitt ott ér véget, ahol a következő kezdődik",
+      "cut": "Vágás az ütemre",
+      "dissolve": "Áttűnés a következő snittbe"
+    },
+    "pickPhotos": "Fotók kiválasztása",
     "sceneDirection": "Jelenet irányítása",
     "voiceoverFr": "Narráció (FR)",
+    "voiceover": "Narráció ({{lang}})",
     "direction": {
       "scene1": "Lassú sikló felfedés a modern étkező beállításon keresztül",
       "scene2": "Simított makró söprés a gazdag természetes fa erezeten és a ferde élen",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} kredit",
     "cost_other": "{{count}} kredit",
     "balance_one": "Jelenlegi egyenleg: {{balance}} kredit · {{count}} kredit lesz lefoglalva · Piszkozat automatikusan mentve",
-    "balance_other": "Jelenlegi egyenleg: {{balance}} kredit · {{count}} kredit lesz lefoglalva · Piszkozat automatikusan mentve"
+    "balance_other": "Jelenlegi egyenleg: {{balance}} kredit · {{count}} kredit lesz lefoglalva · Piszkozat automatikusan mentve",
+    "seeProgress": "Folyamat megtekintése",
+    "onScreen": "A képernyőn: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Vissza a munkaterületre",
@@ -118,9 +151,26 @@
     "remaining_one": "Hátralévő: {{count}} kredit",
     "remaining_other": "Hátralévő: {{count}} kredit",
     "safeToLeave": "Biztonságosan elhagyhatod ezt a képernyőt. A piszkozatod automatikusan mentésre kerül az Eredmények fülön.",
-    "keepWorking": "Folytasd a munkát a háttérben"
+    "keepWorking": "Folytasd a munkát a háttérben",
+    "failed": "Nem sikerült elkészíteni a videót: {{error}}",
+    "failedTitle": "Nem sikerült elkészíteni a videót",
+    "bodyAny": "{{title}} látványvilágának, narrációjának és mozgásritmusának összeállítása.",
+    "stopped": "Leállítva",
+    "notStarted": "Még nem kezdődött el",
+    "tryAgain": "Próbáld újra",
+    "retrying": "Újraindítás…",
+    "editPlan": "Terv szerkesztése",
+    "creditsRefunded_one": "{{count}} kredit visszatérítve",
+    "creditsRefunded_other": "{{count}} kredit visszatérítve"
+  },
+  "failure": {
+    "unavailable": "A videókészítés jelenleg nem érhető el. Kreditjeidet visszatérítettük. Próbáld újra később.",
+    "slow": "A videó elkészítése túl sokáig tartott. Kreditjeidet visszatérítettük. Próbáld újra.",
+    "scene": "A(z) {{n}}. jelenetet nem sikerült animálni. Kreditjeidet visszatérítettük. Próbáld újra, vagy válassz másik fotót a jelenethez.",
+    "other": "Hiba történt a videó készítése közben. Kreditjeidet visszatérítettük. Próbáld újra."
   },
   "results": {
+    "failedShort": "Nem készült el · kreditek visszatérítve",
     "title": "Videó videók",
     "newReel": "Új videó",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20 mp · Francia narráció · Készen áll az ütemezésre",
       "atelier": "15 mp · Környezeti akusztika · Készen áll az ütemezésre"
-    }
+    },
+    "empty": "Még nincsenek reelek. Kezdj egyet a Létrehozás vagy az Ötletek menüpontban.",
+    "posted": "Közzétéve az Instagramon",
+    "failed": "Nem sikerült elkészíteni: {{error}}",
+    "readyMeta": "{{seconds}} mp · Francia narráció · Kész",
+    "draftMeta": "{{seconds}} mp · Terv, videó még nincs",
+    "addLink": "Letöltve · Közzétetted? Add meg a linket",
+    "tryAgain_one": "Újrapróbálás ({{count}} kredit)",
+    "tryAgain_other": "Újrapróbálás ({{count}} kredit)",
+    "openPlan": "Terv megnyitása",
+    "closeSheet": "Bezárás",
+    "linkTitle": "Add meg a bejegyzés linkjét",
+    "linkBody": "Illeszd be az Instagramon közzétett reel linkjét, hogy követni tudd az eredményeit.",
+    "saveLink": "Link mentése",
+    "saving": "Mentés…"
   },
   "review": {
+    "joinSoftened": "Jelenet {{n}} → {{next}}",
+    "joinSoftenedNote": "A két snitt nem teljesen illeszkedett, ezért áttűnéssel kapcsolódnak",
     "subtitle": "Videó piszkozat · Készen áll az átnézésre",
     "options": "Opciók menü",
     "downloadVideo": "Videó letöltése",
@@ -162,7 +228,12 @@
     "audioTrack": "Hang sáv",
     "audioValue": "Francia narráció (Studio Natural) + Környezeti akusztika",
     "resolution": "Felbontás",
-    "resolutionValue": "Portré videó · 9:16"
+    "resolutionValue": "Portré videó · 9:16",
+    "checking": "A reel ellenőrzése… A letöltés és az ütemezés az ellenőrzések után válik elérhetővé.",
+    "askForChanges": "Nem jó? Kérj módosításokat",
+    "checks": "Ellenőrzések",
+    "audioVoiceOnly": "Francia narráció",
+    "blocked": "Az ellenőrzés problémát talált (lásd: Ellenőrzések). Javítsd a feliratban, vagy koppints a „Nem jó? Kérj módosításokat” gombra."
   },
   "publish": {
     "title": "Reel közzététele",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Minta hang, {{title}}",
     "sampleVoice": "Minta hang",
     "voiceLed": "Hangvezérelt stílus",
-    "notice": "Válassz hangvezérelt stílust, vagy tartsd a fókuszt a termékeden."
+    "notice": "Válassz hangvezérelt stílust, vagy tartsd a fókuszt a termékeden.",
+    "comingSoon": "Hamarosan kamerába beszélő szereplők is elérhetők lesznek. Ebben a reelben egyelőre csak termékek szerepelnek."
   },
   "script": {
     "title": "Forgatókönyv és hang",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Természetes francia, meleg akusztikus tempó",
     "recordOwn": "Vedd fel saját hangodat",
     "recordOwnMeta": "Opcionális egyedi márka narráció",
-    "record": "Felvétel"
+    "record": "Felvétel",
+    "saving": "Mentés…",
+    "sceneTooLong": "A(z) {{n}}. jelenet több mint 30 szó (15 mp). Rövidítsd le.",
+    "keepScenes_one": "Maradjon {{count}} bekezdés, jelenetenként egy.",
+    "keepScenes_other": "Maradjon {{count}} bekezdés, jelenetenként egy, köztük üres sorral.",
+    "rewriteOpeningAsk": "Írd át az 1. jelenet nyitását: legyen rövidebb és meglepőbb.",
+    "voiceName": "Hang: {{name}}",
+    "nextVoice": "Következő hang"
   },
   "templates": {
     "title": "Reel sablonok",
@@ -275,7 +354,9 @@
         "subtitle": "Bejelentés & bemutatóterem CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Használd a(z) „{{title}}” formátumot ({{subtitle}}), körülbelül {{seconds}} másodpercesen.",
+    "applying": "Alkalmazás…"
   },
   "assets": {
     "title": "Válassz eszközöket",
@@ -296,6 +377,10 @@
       "macro": "Részlet",
       "staged": "Stílusos",
       "tv": "TV egység"
-    }
+    },
+    "yourPhoto": "A fotód",
+    "planFirst": "Előbb tervezd meg a reelt (Létrehozás → Reel közös tervezése), majd válaszd ki a fotóit.",
+    "saving": "Mentés…",
+    "sceneN": "{{n}}. jelenet"
   }
 }

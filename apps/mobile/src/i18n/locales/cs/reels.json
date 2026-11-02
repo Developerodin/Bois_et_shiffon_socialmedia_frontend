@@ -13,7 +13,8 @@
   "timezone": "Časové pásmo",
   "status": {
     "draft": "Koncept",
-    "ready": "Připraveno"
+    "ready": "Připraveno",
+    "processing": "Zpracovává se"
   },
   "scene": {
     "label": "Scéna {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Rychlé střihy katalogu",
     "jumpBackIn": "Pokračovat",
     "seeAll": "Zobrazit vše",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}} s · 9:16 na výšku"
   },
   "ideas": {
     "title": "Video nápady",
@@ -58,7 +60,9 @@
       "angle02": "Zaměření na ručně vyřezávané lamelové dveře, správu kabelů a teplou atmosféru obývacího pokoje."
     },
     "readyToReview": "Připraveno k recenzi",
-    "viewStoryboard": "Zobrazit storyboard"
+    "viewStoryboard": "Zobrazit storyboard",
+    "making": "Připravujeme scénář…",
+    "empty": "Zatím tu nejsou žádné nápady na reely. Objeví se po spuštění agenta pro nápady."
   },
   "chat": {
     "creditsA11y_one": "{{count}} kredit",
@@ -77,15 +81,42 @@
     "openingHook": "Úvodní háček",
     "reviewStoryboard_one": "Zkontrolovat storyboard ({{count}} scéna)",
     "reviewStoryboard_other": "Zkontrolovat storyboard ({{count}} scén)",
-    "readyStatus": "Připraveno k vytvoření nebo úpravě"
+    "readyStatus": "Připraveno k vytvoření nebo úpravě",
+    "empty": "Napiš, co má reel ukazovat, nebo si nejdřív vyber nápad.",
+    "writing": "Píšeme…",
+    "planMeta_one": "{{count}} scéna · ~{{seconds}} s",
+    "planMeta_other": "Scény: {{count}} · ~{{seconds}} s",
+    "makeItSeconds": "Ať trvá asi {{seconds}} sekund.",
+    "greeting": "Co má reel ukazovat? Popiš svůj nápad nebo začni jedním z těchto.",
+    "starterProduct": "Reel o produktu {{product}}",
+    "placeholderNew": "Popiš svůj reel…",
+    "placeholderRevise": "Požádej o změny…",
+    "currentLength": "Zatím ~{{seconds}} s",
+    "tryAgain": "Zkusit znovu",
+    "writingPlan": "Připravujeme plán reelu",
+    "directing": "Vybíráme video model pro každou scénu",
+    "stageReading": "Analyzujeme vaši značku a fotky",
+    "stageScenes_one": "Píšeme scénu {{count}}",
+    "stageScenes_other": "Píšeme scénu {{count}}",
+    "draftScene": "Scéna {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "Délka {{seconds}}s",
     "verticalFact": "9:16 vertikální",
     "readyToRender": "Připraveno k renderování <muted>· Koncept uložen k recenzi</muted>",
+    "needsPhotos_one": "{{count}} scéna potřebuje vlastní fotku <muted>· Na její fotce je něco jiného</muted>",
+    "needsPhotos_other": "Scény, které potřebují vlastní fotku: {{count}} <muted>· Na jejich fotkách je něco jiného</muted>",
+    "standIn": "Na této fotce je něco jiného. Před vytvořením videa vyber správnou fotku.",
+    "join": {
+      "match": "Návazný střih: tento záběr končí tam, kde začíná další",
+      "cut": "Střih do rytmu",
+      "dissolve": "Prolnutí do dalšího záběru"
+    },
+    "pickPhotos": "Vybrat fotky",
     "sceneDirection": "Směr scény",
     "voiceoverFr": "Hlasový komentář (FR)",
+    "voiceover": "Hlasový komentář ({{lang}})",
     "direction": {
       "scene1": "Pomalu klouzavé odhalení moderního jídelního prostředí",
       "scene2": "Hladký makro záběr na bohaté přírodní dřevo a zkosenou hranu",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} kredit",
     "cost_other": "{{count}} kreditů",
     "balance_one": "Aktuální zůstatek: {{balance}} kreditů · {{count}} kredit bude rezervován · Koncept uložen automaticky",
-    "balance_other": "Aktuální zůstatek: {{balance}} kreditů · {{count}} kreditů bude rezervováno · Koncept uložen automaticky"
+    "balance_other": "Aktuální zůstatek: {{balance}} kreditů · {{count}} kreditů bude rezervováno · Koncept uložen automaticky",
+    "seeProgress": "Zobrazit průběh",
+    "onScreen": "Na obrazovce: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Zpět do pracovního prostoru",
@@ -118,9 +151,26 @@
     "remaining_one": "Zbývá: {{count}} kredit",
     "remaining_other": "Zbývá: {{count}} kreditů",
     "safeToLeave": "Můžeš bezpečně opustit tuto obrazovku. Tvůj koncept je automaticky uložen na kartě Výsledky.",
-    "keepWorking": "Pokračovat v práci na pozadí"
+    "keepWorking": "Pokračovat v práci na pozadí",
+    "failed": "Video se nepodařilo vytvořit: {{error}}",
+    "failedTitle": "Toto video se nepodařilo vytvořit",
+    "bodyAny": "Připravujeme vizuály, hlasový komentář a tempo animace pro {{title}}.",
+    "stopped": "Zastaveno",
+    "notStarted": "Nezahájeno",
+    "tryAgain": "Zkusit znovu",
+    "retrying": "Spouštíme znovu…",
+    "editPlan": "Upravit plán",
+    "creditsRefunded_one": "Vrácen {{count}} kredit",
+    "creditsRefunded_other": "Vrácené kredity: {{count}}"
+  },
+  "failure": {
+    "unavailable": "Tvorba videa teď není dostupná. Kredity jsme ti vrátili. Zkus to prosím později.",
+    "slow": "Tvorba videa trvala příliš dlouho. Kredity jsme ti vrátili. Zkus to znovu.",
+    "scene": "Scénu {{n}} se nepodařilo animovat. Kredity jsme ti vrátili. Zkus to znovu nebo pro ni vyber jinou fotku.",
+    "other": "Při tvorbě videa se něco pokazilo. Kredity jsme ti vrátili. Zkus to znovu."
   },
   "results": {
+    "failedShort": "Nepodařilo se vytvořit · kredity vráceny",
     "title": "Video reely",
     "newReel": "Nový reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Francouzský hlasový komentář · Připraveno k naplánování",
       "atelier": "15s · Ambientní akustika · Připraveno k naplánování"
-    }
+    },
+    "empty": "Zatím žádné reely. Začni v sekci Vytvořit nebo Nápady.",
+    "posted": "Zveřejněno na Instagram",
+    "failed": "Nepodařilo se vytvořit: {{error}}",
+    "readyMeta": "{{seconds}} s · Francouzský komentář · Připraveno",
+    "draftMeta": "{{seconds}} s · Plán, zatím bez videa",
+    "addLink": "Staženo · Už jsi reel zveřejnil/a? Přidej odkaz",
+    "tryAgain_one": "Zkusit znovu ({{count}} kredit)",
+    "tryAgain_other": "Zkusit znovu (kredity: {{count}})",
+    "openPlan": "Otevřít plán",
+    "closeSheet": "Zavřít",
+    "linkTitle": "Přidat odkaz na příspěvek",
+    "linkBody": "Vlož odkaz na reel zveřejněný na Instagram, abychom mohli sledovat jeho výsledky.",
+    "saveLink": "Uložit odkaz",
+    "saving": "Ukládáme…"
   },
   "review": {
+    "joinSoftened": "Scéna {{n}} → {{next}}",
+    "joinSoftenedNote": "Záběry na sebe úplně nenavazovaly, proto jsou spojené prolínačkou",
     "subtitle": "Koncept reelu · Připraveno k recenzi",
     "options": "Možnosti",
     "downloadVideo": "Stáhnout video",
@@ -162,7 +228,12 @@
     "audioTrack": "Zvuková stopa",
     "audioValue": "Francouzský voiceover (Studio Natural) + Ambientní akustika",
     "resolution": "Rozlišení",
-    "resolutionValue": "Portrétové video · 9:16"
+    "resolutionValue": "Portrétové video · 9:16",
+    "checking": "Kontrolujeme reel… Po dokončení kontrol bude možné video stáhnout nebo naplánovat.",
+    "askForChanges": "Není to ono? Požádat o změny",
+    "checks": "Kontroly",
+    "audioVoiceOnly": "Francouzský komentář",
+    "blocked": "Kontrola odhalila problém (viz Kontroly). Oprav ho v popisku nebo klepni na „Není to ono? Požádat o změny“."
   },
   "publish": {
     "title": "Publikovat reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Ukázka hlasu, {{title}}",
     "sampleVoice": "Ukázka hlasu",
     "voiceLed": "Styl vedený hlasem",
-    "notice": "Vyberte styl vedený hlasem, nebo se zaměřte na svůj produkt."
+    "notice": "Vyberte styl vedený hlasem, nebo se zaměřte na svůj produkt.",
+    "comingSoon": "Moderátoři, kteří mluví na kameru, budou brzy k dispozici. Tento reel zatím zůstane jen o produktu."
   },
   "script": {
     "title": "Scénář & hlas",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Přirozený francouzský, teplé akustické tempo",
     "recordOwn": "Nahrát vlastní hlas",
     "recordOwnMeta": "Volitelná vlastní narace značky",
-    "record": "Nahrát"
+    "record": "Nahrát",
+    "saving": "Ukládáme…",
+    "sceneTooLong": "Scéna {{n}} má víc než 30 slov (15 s). Zkrať ji.",
+    "keepScenes_one": "Ponech {{count}} odstavec, jeden pro každou scénu.",
+    "keepScenes_other": "Počet odstavců: {{count}}. Každá scéna má vlastní odstavec, odděl je prázdným řádkem.",
+    "rewriteOpeningAsk": "Přepiš úvodní upoutávku ve scéně 1: kratší a překvapivější.",
+    "voiceName": "Hlas: {{name}}",
+    "nextVoice": "Další hlas"
   },
   "templates": {
     "title": "Šablony reelu",
@@ -275,7 +354,9 @@
         "subtitle": "Oznámení & výzva k návštěvě showroomu"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Použij formát „{{title}}“ ({{subtitle}}), přibližně na {{seconds}} sekund.",
+    "applying": "Používáme…"
   },
   "assets": {
     "title": "Vyberte materiály",
@@ -296,6 +377,10 @@
       "macro": "Detail",
       "staged": "Stylizované",
       "tv": "TV jednotka"
-    }
+    },
+    "yourPhoto": "Tvoje fotka",
+    "planFirst": "Nejdřív naplánuj reel (Vytvořit → Naplánovat reel společně), pak vyber fotky.",
+    "saving": "Ukládáme…",
+    "sceneN": "Scéna {{n}}"
   }
 }

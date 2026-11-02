@@ -13,7 +13,8 @@
   "timezone": "Saat dilimi",
   "status": {
     "draft": "Taslak",
-    "ready": "Hazır"
+    "ready": "Hazır",
+    "processing": "İşleniyor"
   },
   "scene": {
     "label": "Sahne {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Hızlı katalog kesitleri",
     "jumpBackIn": "Geri dön",
     "seeAll": "Hepsini gör",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}} sn · 9:16 dikey"
   },
   "ideas": {
     "title": "Video fikirleri",
@@ -58,7 +60,9 @@
       "angle02": "El oyması çıtalı kapılar, kablo yönetimi ve sıcak yaşam ambiyansına odaklanma."
     },
     "readyToReview": "İncelemeye hazır",
-    "viewStoryboard": "Storyboard'u gör"
+    "viewStoryboard": "Storyboard'u gör",
+    "making": "Hikâye akışı yazılıyor…",
+    "empty": "Henüz reel fikri yok. Fikir asistanı çalıştıktan sonra burada görünecekler."
   },
   "chat": {
     "creditsA11y_one": "{{count}} kredi",
@@ -77,15 +81,42 @@
     "openingHook": "Açılış kancası",
     "reviewStoryboard_one": "Storyboard'u incele ({{count}} sahne)",
     "reviewStoryboard_other": "Storyboard'u incele ({{count}} sahne)",
-    "readyStatus": "Oluşturmaya veya düzenlemeye hazır"
+    "readyStatus": "Oluşturmaya veya düzenlemeye hazır",
+    "empty": "Reel'de ne gösterilmesini istediğini anlat veya önce bir fikir seç.",
+    "writing": "Yazılıyor…",
+    "planMeta_one": "{{count}} sahne · ~{{seconds}} sn",
+    "planMeta_other": "{{count}} sahne · ~{{seconds}} sn",
+    "makeItSeconds": "Yaklaşık {{seconds}} saniye olsun.",
+    "greeting": "Bu reel'de ne gösterilsin? Anlat veya bunlardan biriyle başla.",
+    "starterProduct": "{{product}} hakkında bir reel",
+    "placeholderNew": "Reel'ini anlat…",
+    "placeholderRevise": "Değişiklik iste…",
+    "currentLength": "Şu an ~{{seconds}} sn",
+    "tryAgain": "Tekrar dene",
+    "writingPlan": "Reel planın yazılıyor",
+    "directing": "Her sahne için video modeli seçiliyor",
+    "stageReading": "Markan ve fotoğrafların inceleniyor",
+    "stageScenes_one": "Sahne {{count}} yazılıyor",
+    "stageScenes_other": "Sahne {{count}} yazılıyor",
+    "draftScene": "Sahne {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "{{seconds}}s süre",
     "verticalFact": "9:16 dikey",
     "readyToRender": "Render'a hazır <muted>· İnceleme için taslak kaydedildi</muted>",
+    "needsPhotos_one": "{{count}} sahne için ayrı bir fotoğraf gerekli <muted>· Mevcut fotoğraf başka bir şey gösteriyor</muted>",
+    "needsPhotos_other": "{{count}} sahne için ayrı fotoğraflar gerekli <muted>· Mevcut fotoğraflar başka şeyler gösteriyor</muted>",
+    "standIn": "Bu fotoğraf başka bir şey gösteriyor. Videoyu oluşturmadan önce doğru fotoğrafı seç.",
+    "join": {
+      "match": "Eşleşmeli kesme: Bu çekim, sonraki çekimin başladığı yerde biter",
+      "cut": "Ritme göre kes",
+      "dissolve": "Sonraki çekime zincirleme geçiş"
+    },
+    "pickPhotos": "Fotoğraf seç",
     "sceneDirection": "Sahne yönü",
     "voiceoverFr": "Seslendirme (FR)",
+    "voiceover": "Seslendirme ({{lang}})",
     "direction": {
       "scene1": "Modern yemek ortamı üzerinde yavaş kayan bir açılış",
       "scene2": "Zengin doğal ahşap damarları ve eğimli kenar üzerinde pürüzsüz makro süpürme",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} kredi",
     "cost_other": "{{count}} kredi",
     "balance_one": "Mevcut bakiye: {{balance}} kredi · {{count}} kredi rezerve edilecek · Taslak otomatik olarak kaydedildi",
-    "balance_other": "Mevcut bakiye: {{balance}} kredi · {{count}} kredi rezerve edilecek · Taslak otomatik olarak kaydedildi"
+    "balance_other": "Mevcut bakiye: {{balance}} kredi · {{count}} kredi rezerve edilecek · Taslak otomatik olarak kaydedildi",
+    "seeProgress": "İlerlemeyi gör",
+    "onScreen": "Ekranda: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Çalışma alanına geri dön",
@@ -118,9 +151,26 @@
     "remaining_one": "Kalan: {{count}} kredi",
     "remaining_other": "Kalan: {{count}} kredi",
     "safeToLeave": "Bu ekrandan güvenle ayrılabilirsiniz. Taslağınız Sonuçlar sekmenizde otomatik olarak kaydedilir.",
-    "keepWorking": "Arka planda çalışmaya devam et"
+    "keepWorking": "Arka planda çalışmaya devam et",
+    "failed": "Video oluşturulamadı: {{error}}",
+    "failedTitle": "Bu video oluşturulamadı",
+    "bodyAny": "{{title}} için görseller, seslendirme ve hareketlerin temposu düzenleniyor.",
+    "stopped": "Durduruldu",
+    "notStarted": "Başlamadı",
+    "tryAgain": "Tekrar dene",
+    "retrying": "Yeniden başlatılıyor…",
+    "editPlan": "Planı düzenle",
+    "creditsRefunded_one": "{{count}} kredi iade edildi",
+    "creditsRefunded_other": "{{count}} kredi iade edildi"
+  },
+  "failure": {
+    "unavailable": "Video oluşturma şu anda kullanılamıyor. Kredilerin iade edildi. Lütfen daha sonra tekrar dene.",
+    "slow": "Videonun oluşturulması çok uzun sürdü. Kredilerin iade edildi. Tekrar dene.",
+    "scene": "Sahne {{n}} canlandırılamadı. Kredilerin iade edildi. Tekrar dene veya bu sahne için başka bir fotoğraf seç.",
+    "other": "Video oluşturulurken bir sorun oluştu. Kredilerin iade edildi. Tekrar dene."
   },
   "results": {
+    "failedShort": "Oluşturulamadı · krediler iade edildi",
     "title": "Video reel'leri",
     "newReel": "Yeni reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Fransızca seslendirme · Zamanlamaya hazır",
       "atelier": "15s · Ortam akustiği · Zamanlamaya hazır"
-    }
+    },
+    "empty": "Henüz reel yok. Oluştur veya Fikirler bölümünden bir tane başlat.",
+    "posted": "Instagram'da paylaşıldı",
+    "failed": "Oluşturulamadı: {{error}}",
+    "readyMeta": "{{seconds}} sn · Fransızca seslendirme · Hazır",
+    "draftMeta": "{{seconds}} sn · Plan hazır, henüz video yok",
+    "addLink": "İndirildi · Paylaştın mı? Bağlantı ekle",
+    "tryAgain_one": "Tekrar dene ({{count}} kredi)",
+    "tryAgain_other": "Tekrar dene ({{count}} kredi)",
+    "openPlan": "Planı aç",
+    "closeSheet": "Kapat",
+    "linkTitle": "Gönderi bağlantısını ekle",
+    "linkBody": "Sonuçları takip edebilmek için Instagram'da paylaştığın reel'in bağlantısını yapıştır.",
+    "saveLink": "Bağlantıyı kaydet",
+    "saving": "Kaydediliyor…"
   },
   "review": {
+    "joinSoftened": "Sahne {{n}} → {{next}}",
+    "joinSoftenedNote": "İki çekim tam eşleşmediği için zincirleme geçişle birbirine bağlandı",
     "subtitle": "Reel taslağı · İncelemeye hazır",
     "options": "Seçenekler menüsü",
     "downloadVideo": "Videoyu indir",
@@ -162,7 +228,12 @@
     "audioTrack": "Ses parçası",
     "audioValue": "Fransızca seslendirme (Studio Natural) + Ortam akustiği",
     "resolution": "Çözünürlük",
-    "resolutionValue": "Portre video · 9:16"
+    "resolutionValue": "Portre video · 9:16",
+    "checking": "Reel kontrol ediliyor… Kontroller bitince İndir ve Planla seçenekleri açılacak.",
+    "askForChanges": "Olmadı mı? Değişiklik iste",
+    "checks": "Kontroller",
+    "audioVoiceOnly": "Fransızca seslendirme",
+    "blocked": "Kontrolde bir sorun bulundu (bkz. Kontroller). Açıklamada düzelt veya \"Olmadı mı? Değişiklik iste\" seçeneğine dokun."
   },
   "publish": {
     "title": "Reel yayınla",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Örnek ses, {{title}}",
     "sampleVoice": "Örnek ses",
     "voiceLed": "Ses odaklı stil",
-    "notice": "Ses odaklı bir stil seçin veya odağı ürününüzde tutun."
+    "notice": "Ses odaklı bir stil seçin veya odağı ürününüzde tutun.",
+    "comingSoon": "Kamera karşısında konuşan sunucular yakında geliyor. Şimdilik bu reel'de yalnızca ürün yer alacak."
   },
   "script": {
     "title": "Metin & ses",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Doğal Fransızca, sıcak akustik tempo",
     "recordOwn": "Kendi sesinizi kaydedin",
     "recordOwnMeta": "Opsiyonel özel marka anlatımı",
-    "record": "Kaydet"
+    "record": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "sceneTooLong": "{{n}}. sahne 30 kelimeyi (15 sn) aşıyor. Kısalt.",
+    "keepScenes_one": "Her sahne için bir tane olmak üzere {{count}} paragraf kullan.",
+    "keepScenes_other": "Her sahne için bir tane olmak üzere {{count}} paragraf kullan ve aralarında birer boş satır bırak.",
+    "rewriteOpeningAsk": "1. sahnenin açılışını daha kısa ve şaşırtıcı olacak şekilde yeniden yaz.",
+    "voiceName": "Ses: {{name}}",
+    "nextVoice": "Sonraki ses"
   },
   "templates": {
     "title": "Reel şablonları",
@@ -275,7 +354,9 @@
         "subtitle": "Duyuru & showroom CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "\"{{title}}\" biçimini kullan ({{subtitle}}), yaklaşık {{seconds}} saniye olsun.",
+    "applying": "Uygulanıyor…"
   },
   "assets": {
     "title": "Varlıkları seç",
@@ -296,6 +377,10 @@
       "macro": "Detay",
       "staged": "Stilize",
       "tv": "TV ünitesi"
-    }
+    },
+    "yourPhoto": "Fotoğrafın",
+    "planFirst": "Önce reel'i planla (Oluştur → Birlikte reel planla), ardından fotoğraflarını seç.",
+    "saving": "Kaydediliyor…",
+    "sceneN": "Sahne {{n}}"
   }
 }

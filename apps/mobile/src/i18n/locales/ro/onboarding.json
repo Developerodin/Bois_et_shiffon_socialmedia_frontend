@@ -20,7 +20,18 @@
     "sendFailed": "Nu am putut trimite codul. Încearcă din nou.",
     "useMobile": "Folosește numărul de telefon",
     "linkTitle": "Adaugă emailul",
-    "linkSubtitle": "Numărul tău este verificat. Adaugă un email pentru chitanțe și invitații de echipă. Îți vom trimite un cod."
+    "linkSubtitle": "Numărul tău este verificat. Adaugă un email pentru chitanțe și invitații de echipă. Îți vom trimite un cod.",
+    "registerTitle": "Creează-ți contul",
+    "registerSubtitle": "Alege o parolă. Îți vom trimite un cod pe e-mail pentru a-ți confirma adresa.",
+    "passwordLabel": "Parolă",
+    "passwordPlaceholder": "Parola ta",
+    "newPasswordPlaceholder": "Cel puțin {{count}} caractere",
+    "showPassword": "Arată parola",
+    "hidePassword": "Ascunde parola",
+    "signIn": "Autentifică-te",
+    "createAccount": "Creează cont",
+    "signInFailed": "Autentificarea a eșuat. Încearcă din nou.",
+    "subtitleEmailFirst": "Introdu adresa de e-mail. Îți vom cere parola sau îți vom trimite un cod."
   },
   "verify": {
     "title": "Introdu codul tău",
@@ -314,6 +325,7 @@
     "noPhotos": "Nu am găsit fotografii de produse pe site-ul tău",
     "ideasTitle": "Căutăm idei de postări",
     "ideasDetail": "Anotimpuri, tendințe și catalogul tău",
+    "finishingResearch": "Finalizăm analiza afacerii tale…",
     "ideasFound_one": "{{count}} idee găsită",
     "ideasFound_other": "{{count}} idei găsite",
     "ideasNone": "Nicio idee nouă de data aceasta",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Nu am putut căuta pe Google Maps. Încearcă din nou."
     }
+  },
+  "password": {
+    "title": "Bine ai revenit",
+    "subtitle": "Introdu parola pentru a te autentifica.",
+    "change": "Schimbă",
+    "changeEmail": "Te autentifici ca {{email}}. Schimbă adresa de e-mail",
+    "useCode": "Ai uitat parola? Autentifică-te cu un cod primit pe e-mail"
   }
 }

@@ -1,3 +1,4 @@
+import { DISSOLVE_SECONDS, videoFilter } from "@/server/reels/join";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchResult, higgsfield } from "@/server/reels/higgsfield";
 import { padAndJoinWav, wavSeconds } from "@/server/reels/wav";
@@ -93,5 +94,19 @@ describe("higgsfield", () => {
   it("never downloads from a private address", async () => {
     await expect(fetchResult("http://10.0.0.1/x.mp4")).rejects.toThrow();
     await expect(fetchResult("https://127.0.0.1/x.mp4")).rejects.toThrow();
+  });
+});
+
+describe("videoFilter (cuts and dissolves)", () => {
+  it("joins plain cuts with concat and nothing held at the end", () => {
+    const f = videoFilter([{ seconds: 3, transition: "match" }, { seconds: 4 }]);
+    expect(f).toContain("[v0][v1]concat=n=2:v=1:a=0[j1]");
+    expect(f.endsWith("[j1]null[v]")).toBe(true);
+  });
+  it("crossfades a dissolve at the end of the first scene and holds the last frame by the time it overlaps", () => {
+    const f = videoFilter([{ seconds: 3, transition: "dissolve" }, { seconds: 4, transition: "cut" }, { seconds: 5 }]);
+    expect(f).toContain(`[v0][v1]xfade=transition=fade:duration=${DISSOLVE_SECONDS}:offset=${(3 - DISSOLVE_SECONDS).toFixed(3)}[j1]`);
+    expect(f).toContain("[j1][v2]concat=n=2:v=1:a=0[j2]");
+    expect(f.endsWith(`[j2]tpad=stop_mode=clone:stop_duration=${DISSOLVE_SECONDS.toFixed(3)}[v]`)).toBe(true);
   });
 });

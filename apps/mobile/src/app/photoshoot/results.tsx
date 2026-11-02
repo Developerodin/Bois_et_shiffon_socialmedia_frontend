@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { BottomNav, BusinessSwitch, Glow, ModuleHeader, ps, STROKE } from "@/ui/photoshoot/chrome";
 import { Badge, FilterChips, IconLabelButton, Page } from "@/ui/photoshoot/controls";
-import { credits, say, shoots, type Shoot } from "@/ui/photoshoot/sample";
+import { say, shoots, type Shoot } from "@/ui/photoshoot/sample";
 import { color, font, radius, space, type } from "@/theme/tokens";
 
 type Filter = "all" | Shoot["kind"];
@@ -29,7 +29,7 @@ export default function Results() {
           ]}
         />
       }
-      header={<ModuleHeader credits={credits.available - credits.shootCost} />}
+      header={<ModuleHeader />}
       bottom={<BottomNav active="results" />}
       contentStyle={{ paddingTop: 28 }}
     >

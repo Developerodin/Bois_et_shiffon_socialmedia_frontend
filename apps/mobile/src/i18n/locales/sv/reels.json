@@ -13,7 +13,8 @@
   "timezone": "Tidszon",
   "status": {
     "draft": "Utkast",
-    "ready": "Klar"
+    "ready": "Klar",
+    "processing": "Bearbetar"
   },
   "scene": {
     "label": "Scen {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Snabba katalogklipp",
     "jumpBackIn": "Hoppa tillbaka in",
     "seeAll": "Se alla",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}} s · 9:16 stående"
   },
   "ideas": {
     "title": "Videoidéer",
@@ -58,7 +60,9 @@
       "angle02": "Fokuserar på handkarvade spaltdörrar, kabelhantering och varm levande atmosfär."
     },
     "readyToReview": "Redo att granska",
-    "viewStoryboard": "Visa storyboard"
+    "viewStoryboard": "Visa storyboard",
+    "making": "Skriver storyboarden…",
+    "empty": "Inga reel-idéer ännu. De visas här när idéagenten har körts."
   },
   "chat": {
     "creditsA11y_one": "{{count}} kredit",
@@ -77,15 +81,42 @@
     "openingHook": "Inledande krok",
     "reviewStoryboard_one": "Granska storyboard ({{count}} scen)",
     "reviewStoryboard_other": "Granska storyboard ({{count}} scener)",
-    "readyStatus": "Redo att generera eller förfina"
+    "readyStatus": "Redo att generera eller förfina",
+    "empty": "Berätta vad din reel ska visa eller välj en idé först.",
+    "writing": "Skriver…",
+    "planMeta_one": "{{count}} scen · ca {{seconds}} s",
+    "planMeta_other": "{{count}} scener · ca {{seconds}} s",
+    "makeItSeconds": "Gör den cirka {{seconds}} sekunder lång.",
+    "greeting": "Vad ska din reel visa? Beskriv den eller utgå från ett av förslagen.",
+    "starterProduct": "En reel om {{product}}",
+    "placeholderNew": "Beskriv din reel…",
+    "placeholderRevise": "Be om ändringar…",
+    "currentLength": "ca {{seconds}} s nu",
+    "tryAgain": "Försök igen",
+    "writingPlan": "Skriver planen för din reel",
+    "directing": "Väljer videomodell för varje scen",
+    "stageReading": "Analyserar ditt varumärke och dina bilder",
+    "stageScenes_one": "Skriver scen {{count}}",
+    "stageScenes_other": "Skriver scen {{count}}",
+    "draftScene": "Scen {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "{{seconds}}s varaktighet",
     "verticalFact": "9:16 vertikal",
     "readyToRender": "Redo att rendera <muted>· Utkast sparat för granskning</muted>",
+    "needsPhotos_one": "{{count}} scen behöver ett eget foto <muted>· Fotot visar något annat</muted>",
+    "needsPhotos_other": "{{count}} scener behöver egna foton <muted>· Fotona visar något annat</muted>",
+    "standIn": "Det här fotot visar något annat. Välj rätt foto innan du skapar videon.",
+    "join": {
+      "match": "Matchklipp: klippet slutar där nästa börjar",
+      "cut": "Klipp på taktslaget",
+      "dissolve": "Tona över till nästa klipp"
+    },
+    "pickPhotos": "Välj foton",
     "sceneDirection": "Scenriktning",
     "voiceoverFr": "Röstöver (FR)",
+    "voiceover": "Berättarröst ({{lang}})",
     "direction": {
       "scene1": "Långsam glidande avslöjande över modern matmiljö",
       "scene2": "Jämn makrosvep över rik naturlig träådring och fasad kant",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} kredit",
     "cost_other": "{{count}} krediter",
     "balance_one": "Aktuellt saldo: {{balance}} krediter · {{count}} kredit kommer att reserveras · Utkast sparas automatiskt",
-    "balance_other": "Aktuellt saldo: {{balance}} krediter · {{count}} krediter kommer att reserveras · Utkast sparas automatiskt"
+    "balance_other": "Aktuellt saldo: {{balance}} krediter · {{count}} krediter kommer att reserveras · Utkast sparas automatiskt",
+    "seeProgress": "Se förlopp",
+    "onScreen": "På skärmen: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Tillbaka till arbetsytan",
@@ -118,9 +151,26 @@
     "remaining_one": "Återstående: {{count}} kredit",
     "remaining_other": "Återstående: {{count}} krediter",
     "safeToLeave": "Du kan säkert lämna denna skärm. Ditt utkast sparas automatiskt i din Resultat-flik.",
-    "keepWorking": "Fortsätt arbeta i bakgrunden"
+    "keepWorking": "Fortsätt arbeta i bakgrunden",
+    "failed": "Videon kunde inte skapas: {{error}}",
+    "failedTitle": "Videon kunde inte skapas",
+    "bodyAny": "Sätter ihop bilder, berättarröst och rörelsernas tempo för {{title}}.",
+    "stopped": "Stoppad",
+    "notStarted": "Inte påbörjad",
+    "tryAgain": "Försök igen",
+    "retrying": "Startar om…",
+    "editPlan": "Redigera plan",
+    "creditsRefunded_one": "{{count}} kredit återbetald",
+    "creditsRefunded_other": "{{count}} krediter återbetalda"
+  },
+  "failure": {
+    "unavailable": "Det går inte att skapa videor just nu. Dina krediter har återbetalats. Försök igen senare.",
+    "slow": "Det tog för lång tid att skapa videon. Dina krediter har återbetalats. Försök igen.",
+    "scene": "Scen {{n}} kunde inte animeras. Dina krediter har återbetalats. Försök igen eller välj en annan bild för scenen.",
+    "other": "Något gick fel när videon skapades. Dina krediter har återbetalats. Försök igen."
   },
   "results": {
+    "failedShort": "Kunde inte skapas · krediter återbetalda",
     "title": "Videoreels",
     "newReel": "Ny reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Fransk röstöver · Klar att schemalägga",
       "atelier": "15s · Ambient akustik · Klar att schemalägga"
-    }
+    },
+    "empty": "Inga reels ännu. Starta en under Skapa eller Idéer.",
+    "posted": "Publicerad på Instagram",
+    "failed": "Kunde inte skapas: {{error}}",
+    "readyMeta": "{{seconds}} s · Fransk speakerröst · Klar",
+    "draftMeta": "{{seconds}} s · Plan, ingen video ännu",
+    "addLink": "Nedladdad · Publicerat? Lägg till länk",
+    "tryAgain_one": "Försök igen ({{count}} kredit)",
+    "tryAgain_other": "Försök igen ({{count}} krediter)",
+    "openPlan": "Öppna plan",
+    "closeSheet": "Stäng",
+    "linkTitle": "Lägg till länk till inlägget",
+    "linkBody": "Klistra in länken till den reel du publicerade på Instagram så att resultaten kan följas.",
+    "saveLink": "Spara länk",
+    "saving": "Sparar…"
   },
   "review": {
+    "joinSoftened": "Scen {{n}} → {{next}}",
+    "joinSoftenedNote": "De två klippen matchade inte riktigt, så de tonas ihop",
     "subtitle": "Reelutkast · Redo att granska",
     "options": "Alternativmeny",
     "downloadVideo": "Ladda ner video",
@@ -162,7 +228,12 @@
     "audioTrack": "Ljudspår",
     "audioValue": "Fransk voiceover (Studio Natural) + Miljöljud",
     "resolution": "Upplösning",
-    "resolutionValue": "Porträttvideo · 9:16"
+    "resolutionValue": "Porträttvideo · 9:16",
+    "checking": "Kontrollerar din reel… Ladda ner och Schemalägg blir tillgängliga när kontrollerna är klara.",
+    "askForChanges": "Inte rätt? Be om ändringar",
+    "checks": "Kontroller",
+    "audioVoiceOnly": "Fransk speakerröst",
+    "blocked": "En kontroll hittade ett problem (se Kontroller). Rätta det i inläggstexten eller tryck på \"Inte rätt? Be om ändringar\"."
   },
   "publish": {
     "title": "Publicera reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Exempelröst, {{title}}",
     "sampleVoice": "Exempelröst",
     "voiceLed": "Röstledd stil",
-    "notice": "Välj en röstledd stil, eller håll fokus på din produkt."
+    "notice": "Välj en röstledd stil, eller håll fokus på din produkt.",
+    "comingSoon": "Presentatörer som pratar framför kameran kommer snart. Den här reelen visar bara produkter så länge."
   },
   "script": {
     "title": "Manus & röst",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Naturlig franska, varm akustisk takt",
     "recordOwn": "Spela in din egen röst",
     "recordOwnMeta": "Valfri anpassad varumärkesberättelse",
-    "record": "Spela in"
+    "record": "Spela in",
+    "saving": "Sparar…",
+    "sceneTooLong": "Scen {{n}} är längre än 30 ord (15 s). Korta ner den.",
+    "keepScenes_one": "Behåll {{count}} stycke, ett per scen.",
+    "keepScenes_other": "Behåll {{count}} stycken, ett per scen, med en tom rad mellan dem.",
+    "rewriteOpeningAsk": "Skriv om inledningen i scen 1 så att den blir kortare och mer överraskande.",
+    "voiceName": "Röst: {{name}}",
+    "nextVoice": "Nästa röst"
   },
   "templates": {
     "title": "Reel-mallar",
@@ -275,7 +354,9 @@
         "subtitle": "Tillkännagivande & showroom CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Använd formatet \"{{title}}\" ({{subtitle}}), cirka {{seconds}} sekunder.",
+    "applying": "Tillämpar…"
   },
   "assets": {
     "title": "Välj tillgångar",
@@ -296,6 +377,10 @@
       "macro": "Detalj",
       "staged": "Stiliserad",
       "tv": "TV-enhet"
-    }
+    },
+    "yourPhoto": "Ditt foto",
+    "planFirst": "Planera din reel först (Skapa → Planera en reel tillsammans) och välj sedan foton.",
+    "saving": "Sparar…",
+    "sceneN": "Scen {{n}}"
   }
 }

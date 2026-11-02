@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 import { Image } from "expo-image";
 import { router, type Href } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -14,12 +14,13 @@ import {
   Settings,
   type LucideIcon,
 } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View, type ScrollViewInstance, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { formatNumber } from "@/i18n";
 import { Glow } from "@/ui/aura";
 import { color, font, layout, radius, space, type } from "@/theme/tokens";
 import { brand, photos } from "@/ui/reels/sample";
+import { useCredits } from "@/ui/use-credits";
 
 /**
  * Shared pieces of the Reels module (Figma "02 Reels"): module header, bottom navigation,
@@ -65,6 +66,7 @@ export function ReelsScreen({
   bg = rc.page,
   glow = true,
   contentStyle,
+  stickToBottom = false,
 }: {
   header?: ReactNode;
   footer?: ReactNode;
@@ -72,17 +74,28 @@ export function ReelsScreen({
   bg?: string;
   glow?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
+  /** Chat: keep the newest message in view as the content grows. */
+  stickToBottom?: boolean;
 }) {
+  const scroll = useRef<ScrollViewInstance>(null);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: bg }} edges={["bottom"]}>
       {header}
-      <View style={{ flex: 1 }}>
-        {glow ? <Glow height={520} /> : null}
-        <ScrollView contentContainerStyle={[styles.body, contentStyle]} keyboardShouldPersistTaps="handled">
-          {children}
-        </ScrollView>
-      </View>
-      {footer}
+      {/* Lifts the footer (R04's message box, R11's editor) above the on-screen keyboard. */}
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
+          {glow ? <Glow height={520} /> : null}
+          <ScrollView
+            ref={scroll}
+            contentContainerStyle={[styles.body, contentStyle]}
+            keyboardShouldPersistTaps="handled"
+            onContentSizeChange={stickToBottom ? () => scroll.current?.scrollToEnd({ animated: true }) : undefined}
+          >
+            {children}
+          </ScrollView>
+        </View>
+        {footer}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -99,8 +112,9 @@ const MODULES: { key: ModuleKey; Icon: LucideIcon; href: Href }[] = [
 ];
 
 /** "Module header · 160 · Reels · Posts · Photoshoot · Marketing" (390×132). */
-export function ModuleHeader({ active = "reels", credits = brand.credits }: { active?: ModuleKey; credits?: number }) {
+export function ModuleHeader({ active = "reels" }: { active?: ModuleKey }) {
   const { top } = useSafeAreaInsets();
+  const credits = useCredits();
   const { t } = useTranslation();
   return (
     <View style={[styles.moduleHeader, { paddingTop: top }]}>
@@ -110,8 +124,8 @@ export function ModuleHeader({ active = "reels", credits = brand.credits }: { ac
         </Pressable>
         <Image source={photos.logo} style={{ width: 112, height: 33 }} contentFit="contain" accessibilityLabel="Espanda" />
         <View style={{ flex: 1 }} />
-        <Pressable accessibilityRole="button" accessibilityLabel={t("module.credits", { count: credits })} onPress={() => router.push("/business/billing")} style={styles.credits}>
-          <Text style={[type.label, { textAlign: "center" }]}>{formatNumber(credits)}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={t("module.credits", { count: credits ?? 0 })} onPress={() => router.push("/business/billing")} style={styles.credits}>
+          <Text style={[type.label, { textAlign: "center" }]}>{credits === null ? "–" : formatNumber(credits)}</Text>
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel={t("module.settings")} onPress={() => router.push("/business")} style={styles.square44}>
           <Settings size={20} color={rc.navInk} strokeWidth={ICON.strokeWidth} />

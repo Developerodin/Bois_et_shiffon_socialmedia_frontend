@@ -6,7 +6,7 @@ import { Button } from "@/ui/button";
 import { Card } from "@/ui/layout";
 import { BottomNav, BusinessSwitch, Glow, ModuleHeader } from "@/ui/photoshoot/chrome";
 import { Page, PhotoPill } from "@/ui/photoshoot/controls";
-import { credits, photoshootImages } from "@/ui/photoshoot/sample";
+import { photoshootImages } from "@/ui/photoshoot/sample";
 import { color, space, type } from "@/theme/tokens";
 
 /** F01 · Photoshoot / Create. */
@@ -15,7 +15,7 @@ export default function PhotoshootCreate() {
   return (
     <Page
       background={<Glow blobs={[{ x: 30, y: 180, size: 256, color: "#EAE7FA", opacity: 0.55 }, { x: 345, y: 215, size: 224, color: "#FCECE4", opacity: 0.6 }]} />}
-      header={<ModuleHeader credits={credits.available} />}
+      header={<ModuleHeader />}
       bottom={<BottomNav active="create" />}
     >
       <BusinessSwitch />

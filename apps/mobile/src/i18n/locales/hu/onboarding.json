@@ -20,7 +20,18 @@
     "sendFailed": "Nem sikerült elküldeni a kódot. Próbáld újra.",
     "useMobile": "Használj mobilszámot",
     "linkTitle": "Add meg az emailed",
-    "linkSubtitle": "A számod ellenőrizve. Adj meg egy emailt a nyugtákhoz és csapatmeghívókhoz. Küldünk rá egy kódot."
+    "linkSubtitle": "A számod ellenőrizve. Adj meg egy emailt a nyugtákhoz és csapatmeghívókhoz. Küldünk rá egy kódot.",
+    "registerTitle": "Fiók létrehozása",
+    "registerSubtitle": "Válassz jelszót. E-mailben küldünk egy kódot a címed megerősítéséhez.",
+    "passwordLabel": "Jelszó",
+    "passwordPlaceholder": "Jelszavad",
+    "newPasswordPlaceholder": "Legalább {{count}} karakter",
+    "showPassword": "Jelszó megjelenítése",
+    "hidePassword": "Jelszó elrejtése",
+    "signIn": "Bejelentkezés",
+    "createAccount": "Fiók létrehozása",
+    "signInFailed": "Nem sikerült bejelentkezni. Próbáld újra.",
+    "subtitleEmailFirst": "Add meg az e-mail-címed. Kérjük majd a jelszavad, vagy küldünk egy kódot."
   },
   "verify": {
     "title": "Add meg a kódot",
@@ -314,6 +325,7 @@
     "noPhotos": "Nem találtunk termékfotókat a weboldaladon",
     "ideasTitle": "Posztötletek keresése",
     "ideasDetail": "Évszakok, trendek és a katalógusod",
+    "finishingResearch": "Befejezzük a vállalkozásod feltérképezését…",
     "ideasFound_one": "{{count}} ötletet találtunk",
     "ideasFound_other": "{{count}} ötletet találtunk",
     "ideasNone": "Ezúttal nem találtunk új ötleteket",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Nem sikerült keresni a Google Mapsen. Próbáld újra."
     }
+  },
+  "password": {
+    "title": "Üdv újra!",
+    "subtitle": "Add meg a jelszavad a bejelentkezéshez.",
+    "change": "Módosítás",
+    "changeEmail": "Bejelentkezés ezzel: {{email}}. E-mail-cím módosítása",
+    "useCode": "Elfelejtetted? Jelentkezz be e-mailben küldött kóddal"
   }
 }

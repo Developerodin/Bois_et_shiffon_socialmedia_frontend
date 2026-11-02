@@ -13,7 +13,8 @@
   "timezone": "Tijdzone",
   "status": {
     "draft": "Concept",
-    "ready": "Klaar"
+    "ready": "Klaar",
+    "processing": "Bezig met verwerken"
   },
   "scene": {
     "label": "Scene {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Snelle catalogus cuts",
     "jumpBackIn": "Ga verder",
     "seeAll": "Bekijk alles",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}}s · 9:16 verticaal"
   },
   "ideas": {
     "title": "Video-ideeën",
@@ -58,7 +60,9 @@
       "angle02": "Focussen op handgesneden latdeuren, kabelbeheer en warme woonambiance."
     },
     "readyToReview": "Klaar om te beoordelen",
-    "viewStoryboard": "Bekijk storyboard"
+    "viewStoryboard": "Bekijk storyboard",
+    "making": "Storyboard schrijven…",
+    "empty": "Nog geen reelideeën. Ze verschijnen hier zodra de ideeënagent klaar is."
   },
   "chat": {
     "creditsA11y_one": "{{count}} tegoed",
@@ -77,15 +81,42 @@
     "openingHook": "Opening hook",
     "reviewStoryboard_one": "Beoordeel storyboard ({{count}} scene)",
     "reviewStoryboard_other": "Beoordeel storyboard ({{count}} scenes)",
-    "readyStatus": "Klaar om te genereren of verfijnen"
+    "readyStatus": "Klaar om te genereren of verfijnen",
+    "empty": "Vertel wat de reel moet laten zien, of kies eerst een idee.",
+    "writing": "Aan het schrijven…",
+    "planMeta_one": "{{count}} scène · ~{{seconds}}s",
+    "planMeta_other": "{{count}} scènes · ~{{seconds}}s",
+    "makeItSeconds": "Maak hem ongeveer {{seconds}} seconden lang.",
+    "greeting": "Wat moet deze reel laten zien? Beschrijf het, of begin met een van deze ideeën.",
+    "starterProduct": "Een reel over {{product}}",
+    "placeholderNew": "Beschrijf je reel…",
+    "placeholderRevise": "Vraag om aanpassingen…",
+    "currentLength": "Nu ~{{seconds}}s",
+    "tryAgain": "Opnieuw proberen",
+    "writingPlan": "Je reelplan schrijven",
+    "directing": "Voor elke scène een videomodel kiezen",
+    "stageReading": "Je merk en foto's analyseren",
+    "stageScenes_one": "Scène {{count}} schrijven",
+    "stageScenes_other": "Scène {{count}} schrijven",
+    "draftScene": "Scène {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "{{seconds}}s duur",
     "verticalFact": "9:16 verticaal",
     "readyToRender": "Klaar om te renderen <muted>· Concept opgeslagen voor beoordeling</muted>",
+    "needsPhotos_one": "{{count}} scène heeft een eigen foto nodig <muted>· De foto toont iets anders</muted>",
+    "needsPhotos_other": "{{count}} scènes hebben een eigen foto nodig <muted>· De foto's tonen iets anders</muted>",
+    "standIn": "Deze foto toont iets anders. Kies de juiste foto voordat je de video maakt.",
+    "join": {
+      "match": "Match cut: dit shot eindigt waar het volgende begint",
+      "cut": "Knip op de maat",
+      "dissolve": "Laat overvloeien naar het volgende shot"
+    },
+    "pickPhotos": "Foto's kiezen",
     "sceneDirection": "Scenerichting",
     "voiceoverFr": "Voice-over (FR)",
+    "voiceover": "Voice-over ({{lang}})",
     "direction": {
       "scene1": "Langzame glijdende onthulling over moderne eetkameropstelling",
       "scene2": "Vloeiende macroveeg over rijke natuurlijke houtnerf en afgeschuinde rand",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} tegoed",
     "cost_other": "{{count}} tegoeden",
     "balance_one": "Huidig saldo: {{balance}} tegoeden · {{count}} tegoed wordt gereserveerd · Concept automatisch opgeslagen",
-    "balance_other": "Huidig saldo: {{balance}} tegoeden · {{count}} tegoeden worden gereserveerd · Concept automatisch opgeslagen"
+    "balance_other": "Huidig saldo: {{balance}} tegoeden · {{count}} tegoeden worden gereserveerd · Concept automatisch opgeslagen",
+    "seeProgress": "Voortgang bekijken",
+    "onScreen": "In beeld: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Terug naar werkruimte",
@@ -118,9 +151,26 @@
     "remaining_one": "Resterend: {{count}} tegoed",
     "remaining_other": "Resterend: {{count}} tegoeden",
     "safeToLeave": "Je kunt dit scherm veilig verlaten. Je concept wordt automatisch opgeslagen in je Resultaten-tabblad.",
-    "keepWorking": "Blijf werken op de achtergrond"
+    "keepWorking": "Blijf werken op de achtergrond",
+    "failed": "De video kon niet worden gemaakt: {{error}}",
+    "failedTitle": "Deze video kon niet worden gemaakt",
+    "bodyAny": "Beelden, voice-over en bewegingstempo worden samengesteld voor {{title}}.",
+    "stopped": "Gestopt",
+    "notStarted": "Niet gestart",
+    "tryAgain": "Opnieuw proberen",
+    "retrying": "Opnieuw starten…",
+    "editPlan": "Plan bewerken",
+    "creditsRefunded_one": "{{count}} credit teruggestort",
+    "creditsRefunded_other": "{{count}} credits teruggestort"
+  },
+  "failure": {
+    "unavailable": "Video's maken is momenteel niet beschikbaar. Je credits zijn teruggestort. Probeer het later opnieuw.",
+    "slow": "Het maken van de video duurde te lang. Je credits zijn teruggestort. Probeer het opnieuw.",
+    "scene": "Scène {{n}} kon niet worden geanimeerd. Je credits zijn teruggestort. Probeer het opnieuw of kies een andere foto voor deze scène.",
+    "other": "Er is iets misgegaan bij het maken van de video. Je credits zijn teruggestort. Probeer het opnieuw."
   },
   "results": {
+    "failedShort": "Kon niet worden gemaakt · credits teruggestort",
     "title": "Videoreels",
     "newReel": "Nieuwe reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Franse voice-over · Klaar om in te plannen",
       "atelier": "15s · Omgevingsakoestiek · Klaar om in te plannen"
-    }
+    },
+    "empty": "Nog geen reels. Maak er een via Maken of Ideeën.",
+    "posted": "Geplaatst op Instagram",
+    "failed": "Kon niet worden gemaakt: {{error}}",
+    "readyMeta": "{{seconds}}s · Franse voice-over · Klaar",
+    "draftMeta": "{{seconds}}s · Plan, nog geen video",
+    "addLink": "Gedownload · Geplaatst? Voeg link toe",
+    "tryAgain_one": "Opnieuw proberen ({{count}} credit)",
+    "tryAgain_other": "Opnieuw proberen ({{count}} credits)",
+    "openPlan": "Plan openen",
+    "closeSheet": "Sluiten",
+    "linkTitle": "Link naar je post toevoegen",
+    "linkBody": "Plak de link naar de reel die je op Instagram hebt geplaatst, zodat je de resultaten kunt volgen.",
+    "saveLink": "Link opslaan",
+    "saving": "Opslaan…"
   },
   "review": {
+    "joinSoftened": "Scène {{n}} → {{next}}",
+    "joinSoftenedNote": "De twee shots sloten niet helemaal op elkaar aan, dus vloeien ze in elkaar over",
     "subtitle": "Reel concept · Klaar om te beoordelen",
     "options": "Optiemenu",
     "downloadVideo": "Download video",
@@ -162,7 +228,12 @@
     "audioTrack": "Audiotrack",
     "audioValue": "Franse voice-over (Studio Natural) + Omgevingsgeluid",
     "resolution": "Resolutie",
-    "resolutionValue": "Portretvideo · 9:16"
+    "resolutionValue": "Portretvideo · 9:16",
+    "checking": "Reel controleren… Downloaden en Inplannen zijn beschikbaar zodra de controles klaar zijn.",
+    "askForChanges": "Niet goed? Vraag om aanpassingen",
+    "checks": "Controles",
+    "audioVoiceOnly": "Franse voice-over",
+    "blocked": "Een controle heeft een probleem gevonden (zie Controles). Pas de caption aan of tik op \"Niet goed? Vraag om aanpassingen\"."
   },
   "publish": {
     "title": "Publiceer reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Voorbeeldstem, {{title}}",
     "sampleVoice": "Voorbeeldstem",
     "voiceLed": "Stem-geleide stijl",
-    "notice": "Kies een stem-geleide stijl, of houd de focus op je product."
+    "notice": "Kies een stem-geleide stijl, of houd de focus op je product.",
+    "comingSoon": "Presentatoren die voor de camera spreken komen binnenkort. Deze reel toont voorlopig alleen producten."
   },
   "script": {
     "title": "Script & stem",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Natuurlijk Frans, warme akoestische snelheid",
     "recordOwn": "Neem je eigen stem op",
     "recordOwnMeta": "Optionele aangepaste merkvertelling",
-    "record": "Opnemen"
+    "record": "Opnemen",
+    "saving": "Opslaan…",
+    "sceneTooLong": "Scène {{n}} bevat meer dan 30 woorden (15 s). Maak de tekst korter.",
+    "keepScenes_one": "Houd {{count}} alinea aan, één per scène.",
+    "keepScenes_other": "Houd {{count}} alinea's aan, één per scène, met een witregel ertussen.",
+    "rewriteOpeningAsk": "Herschrijf de opening van scène 1: korter en verrassender.",
+    "voiceName": "Stem: {{name}}",
+    "nextVoice": "Volgende stem"
   },
   "templates": {
     "title": "Reel sjablonen",
@@ -275,7 +354,9 @@
         "subtitle": "Aankondiging & showroom CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Gebruik het format \"{{title}}\" ({{subtitle}}), ongeveer {{seconds}} seconden.",
+    "applying": "Toepassen…"
   },
   "assets": {
     "title": "Selecteer assets",
@@ -296,6 +377,10 @@
       "macro": "Detail",
       "staged": "Gestyled",
       "tv": "TV-meubel"
-    }
+    },
+    "yourPhoto": "Je foto",
+    "planFirst": "Plan eerst de reel (Maken → Samen een reel plannen) en kies daarna de foto's.",
+    "saving": "Opslaan…",
+    "sceneN": "Scène {{n}}"
   }
 }

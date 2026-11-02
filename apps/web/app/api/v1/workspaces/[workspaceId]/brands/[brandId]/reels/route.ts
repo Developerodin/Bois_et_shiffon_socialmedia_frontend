@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
-import { createReel, listReels, toReelProblem as toProblem } from "@/server/reels/service";
+import { createReel, listReels, streamPlan, toReelProblem as toProblem, wantsStream } from "@/server/reels/service";
 
 // Writing and directing a new plan is two AI calls.
 export const maxDuration = 120;
@@ -19,7 +19,7 @@ export async function GET(request: Request, context: Params) {
   }
 }
 
-const Create = z.object({ opportunityId: z.string().min(1).max(100).optional(), prompt: z.string().min(1).max(2000).optional() }).refine((b) => b.opportunityId || b.prompt, "Pick an idea or say what the reel is about");
+const Create = z.object({ opportunityId: z.string().min(1).max(100).optional(), prompt: z.string().min(1).max(2000).optional(), language: z.string().regex(/^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})?$/).optional() }).refine((b) => b.opportunityId || b.prompt, "Pick an idea or say what the reel is about");
 
 /** R02 (from an idea) or R04 (from the person's words): a new reel with its first plan. */
 export async function POST(request: Request, context: Params) {
@@ -28,6 +28,7 @@ export async function POST(request: Request, context: Params) {
     if (!parsed.success) return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid request", status: 400, detail: parsed.error.issues[0]?.message });
     const scope = await authorizeBrandRoute(request, context.params, "content.create");
     if (scope instanceof Response) return scope;
+    if (wantsStream(request)) return streamPlan((emit) => createReel(scope, parsed.data, emit));
     return Response.json(await createReel(scope, parsed.data), { status: 201 });
   } catch (error) {
     return toProblem(error);

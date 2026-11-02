@@ -13,7 +13,8 @@
   "timezone": "Timezone",
   "status": {
     "draft": "Draft",
-    "ready": "Ready"
+    "ready": "Ready",
+    "processing": "Processing"
   },
   "scene": {
     "label": "Scene {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Fast catalogue cuts",
     "jumpBackIn": "Jump back in",
     "seeAll": "See all",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}}s · 9:16 vertical"
   },
   "ideas": {
     "title": "Video ideas",
@@ -58,7 +60,9 @@
       "angle02": "Focusing on hand-carved slat doors, wire management, and warm living ambience."
     },
     "readyToReview": "Ready to review",
-    "viewStoryboard": "View storyboard"
+    "viewStoryboard": "View storyboard",
+    "making": "Writing the storyboard…",
+    "empty": "No reel ideas yet. They appear here after the ideas agent runs."
   },
   "chat": {
     "creditsA11y_one": "{{count}} credit",
@@ -77,15 +81,42 @@
     "openingHook": "Opening hook",
     "reviewStoryboard_one": "Review storyboard ({{count}} scene)",
     "reviewStoryboard_other": "Review storyboard ({{count}} scenes)",
-    "readyStatus": "Ready to generate or refine"
+    "readyStatus": "Ready to generate or refine",
+    "empty": "Tell me what the reel should show, or pick an idea first.",
+    "writing": "Writing…",
+    "planMeta_one": "{{count}} scene · ~{{seconds}}s",
+    "planMeta_other": "{{count}} scenes · ~{{seconds}}s",
+    "makeItSeconds": "Make it about {{seconds}} seconds.",
+    "greeting": "What should this reel show? Describe it, or start from one of these.",
+    "starterProduct": "A reel about {{product}}",
+    "placeholderNew": "Describe your reel…",
+    "placeholderRevise": "Ask for changes…",
+    "currentLength": "~{{seconds}}s now",
+    "tryAgain": "Try again",
+    "writingPlan": "Writing your reel plan",
+    "directing": "Choosing a video model for each scene",
+    "stageReading": "Reading your brand and photos",
+    "stageScenes_one": "Writing scene {{count}}",
+    "stageScenes_other": "Writing scene {{count}}",
+    "draftScene": "Scene {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "{{seconds}}s duration",
     "verticalFact": "9:16 vertical",
     "readyToRender": "Ready to render <muted>· Draft saved for review</muted>",
+    "needsPhotos_one": "{{count}} scene needs its own photo <muted>· Its photo shows something else</muted>",
+    "needsPhotos_other": "{{count}} scenes need their own photo <muted>· Their photos show something else</muted>",
+    "standIn": "This photo shows something else. Pick the right one before making the video.",
+    "join": {
+      "match": "Match cut: this shot ends where the next begins",
+      "cut": "Cut on the beat",
+      "dissolve": "Dissolve into the next shot"
+    },
+    "pickPhotos": "Pick photos",
     "sceneDirection": "Scene direction",
     "voiceoverFr": "Voiceover (FR)",
+    "voiceover": "Voiceover ({{lang}})",
     "direction": {
       "scene1": "Slow gliding reveal across modern dining setting",
       "scene2": "Smooth macro sweep over rich natural wood grain and bevelled edge",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} credit",
     "cost_other": "{{count}} credits",
     "balance_one": "Current balance: {{balance}} credits · {{count}} credit will be reserved · Draft saved automatically",
-    "balance_other": "Current balance: {{balance}} credits · {{count}} credits will be reserved · Draft saved automatically"
+    "balance_other": "Current balance: {{balance}} credits · {{count}} credits will be reserved · Draft saved automatically",
+    "seeProgress": "See progress",
+    "onScreen": "On screen: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Back to workspace",
@@ -118,9 +151,26 @@
     "remaining_one": "Remaining: {{count}} credit",
     "remaining_other": "Remaining: {{count}} credits",
     "safeToLeave": "You can safely leave this screen. Your draft is automatically saved in your Results tab.",
-    "keepWorking": "Keep working in background"
+    "keepWorking": "Keep working in background",
+    "failed": "The video couldn't be made: {{error}}",
+    "failedTitle": "This video couldn't be made",
+    "bodyAny": "Composing visuals, voiceover and motion pacing for {{title}}.",
+    "stopped": "Stopped",
+    "notStarted": "Not started",
+    "tryAgain": "Try again",
+    "retrying": "Starting again…",
+    "editPlan": "Edit plan",
+    "creditsRefunded_one": "{{count}} credit refunded",
+    "creditsRefunded_other": "{{count}} credits refunded"
+  },
+  "failure": {
+    "unavailable": "Video making is unavailable right now. Your credits are back. Please try again later.",
+    "slow": "The video took too long to make. Your credits are back. Try again.",
+    "scene": "Scene {{n}} couldn't be animated. Your credits are back. Try again, or pick another photo for it.",
+    "other": "Something went wrong while making the video. Your credits are back. Try again."
   },
   "results": {
+    "failedShort": "Couldn't be made · credits refunded",
     "title": "Video reels",
     "newReel": "New reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · French voiceover · Ready to schedule",
       "atelier": "15s · Ambient acoustic · Ready to schedule"
-    }
+    },
+    "empty": "No reels yet. Start one from Create or Ideas.",
+    "posted": "Posted on Instagram",
+    "failed": "Couldn't be made: {{error}}",
+    "readyMeta": "{{seconds}}s · French voiceover · Ready",
+    "draftMeta": "{{seconds}}s · Plan, no video yet",
+    "addLink": "Downloaded · Posted it? Add link",
+    "tryAgain_one": "Try again ({{count}} credit)",
+    "tryAgain_other": "Try again ({{count}} credits)",
+    "openPlan": "Open plan",
+    "closeSheet": "Close",
+    "linkTitle": "Add the post link",
+    "linkBody": "Paste the link of the reel you posted on Instagram, so its results can be followed.",
+    "saveLink": "Save link",
+    "saving": "Saving…"
   },
   "review": {
+    "joinSoftened": "Scene {{n}} → {{next}}",
+    "joinSoftenedNote": "The two shots didn't quite match, so they blend with a dissolve",
     "subtitle": "Reel draft · Ready to review",
     "options": "Options menu",
     "downloadVideo": "Download video",
@@ -162,7 +228,12 @@
     "audioTrack": "Audio track",
     "audioValue": "French voiceover (Studio Natural) + Ambient acoustic",
     "resolution": "Resolution",
-    "resolutionValue": "Portrait video · 9:16"
+    "resolutionValue": "Portrait video · 9:16",
+    "checking": "Checking the reel… Download and Schedule open when the checks are done.",
+    "askForChanges": "Not right? Ask for changes",
+    "checks": "Checks",
+    "audioVoiceOnly": "French voiceover",
+    "blocked": "A check found a problem (see Checks). Fix it in the caption, or tap \"Not right? Ask for changes\"."
   },
   "publish": {
     "title": "Publish reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Sample voice, {{title}}",
     "sampleVoice": "Sample voice",
     "voiceLed": "Voice-led style",
-    "notice": "Choose a voice-led style, or keep the focus on your product."
+    "notice": "Choose a voice-led style, or keep the focus on your product.",
+    "comingSoon": "Presenters who speak on camera are coming soon. This reel stays product-only for now."
   },
   "script": {
     "title": "Script & voice",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Natural French, warm acoustic pace",
     "recordOwn": "Record your own voice",
     "recordOwnMeta": "Optional custom brand narration",
-    "record": "Record"
+    "record": "Record",
+    "saving": "Saving…",
+    "sceneTooLong": "Scene {{n}} is over 30 words (15 s). Shorten it.",
+    "keepScenes_one": "Keep {{count}} paragraph, one per scene.",
+    "keepScenes_other": "Keep {{count}} paragraphs, one per scene, with a blank line between.",
+    "rewriteOpeningAsk": "Rewrite the opening hook of scene 1: shorter and more surprising.",
+    "voiceName": "Voice: {{name}}",
+    "nextVoice": "Next voice"
   },
   "templates": {
     "title": "Reel templates",
@@ -275,7 +354,9 @@
         "subtitle": "Announcement & showroom CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Use the \"{{title}}\" format ({{subtitle}}), about {{seconds}} seconds.",
+    "applying": "Applying…"
   },
   "assets": {
     "title": "Select assets",
@@ -296,6 +377,10 @@
       "macro": "Detail",
       "staged": "Styled",
       "tv": "TV unit"
-    }
+    },
+    "yourPhoto": "Your photo",
+    "planFirst": "Plan the reel first (Create → Plan a reel together), then pick its photos.",
+    "saving": "Saving…",
+    "sceneN": "Scene {{n}}"
   }
 }

@@ -6,8 +6,8 @@ const m = vi.hoisted(() => {
   const tx = {
     $executeRaw: vi.fn(async () => 0),
     contentItem: { findFirst: fn(), update: fn() },
-    contentVersion: { create: fn() },
-    reelRender: { create: fn(), findFirst: fn(), update: fn(), updateMany: fn(), findUnique: fn(), aggregate: fn() },
+    contentVersion: { create: fn(), findFirst: fn() },
+    reelRender: { create: fn(), findFirst: fn(), update: fn(), updateMany: fn(), findUnique: fn(), findUniqueOrThrow: fn(), aggregate: fn() },
     auditEvent: { create: fn() },
   };
   return {
@@ -19,6 +19,8 @@ const m = vi.hoisted(() => {
     refund: fn(),
     enqueue: fn(),
     startAgentRun: fn(),
+    joinReel: vi.fn(async () => undefined),
+    seam: vi.fn(async () => ({ fits: true, note: "" })),
   };
 });
 vi.mock("@/server/db/prisma", () => ({ prisma: m.prisma }));
@@ -27,10 +29,11 @@ vi.mock("@/server/services/credits", async (orig) => ({ ...(await orig<object>()
 vi.mock("@/server/jobs/queue", () => ({ enqueueJob: m.enqueue }));
 vi.mock("@/server/agents/engine", () => ({ startAgentRun: m.startAgentRun }));
 vi.mock("@/server/storage/media", async (orig) => ({ ...(await orig<object>()), putMedia: vi.fn(), signedMediaUrl: vi.fn(async (k: string) => `https://s3/${k}`) }));
-vi.mock("@/server/reels/join", () => ({ joinReel: vi.fn(async () => undefined) }));
+vi.mock("@/server/reels/join", () => ({ joinReel: m.joinReel, frameOf: vi.fn(async () => undefined) }));
+vi.mock("@/server/reels/agents", () => ({ checkSeam: m.seam }));
 vi.mock("node:fs/promises", async (orig) => ({ ...(await orig<object>()), readFile: vi.fn(async () => Buffer.alloc(8)) }));
 
-import { advanceRender, nextStep, startRender } from "@/server/reels/render";
+import { advanceRender, nextStep, renderFailure, startRender } from "@/server/reels/render";
 
 const scope = { workspaceId: "w1", brandId: "b1" };
 const photo = "w1/b1/0b4b2c1e-6a1d-4f7e-9a40-0c6f2d8e1a11.jpg";
@@ -49,6 +52,7 @@ beforeEach(() => {
   m.prisma.contentVersion.findUnique.mockResolvedValue({ id: "v1", version: 2, body: plan });
   m.enqueue.mockResolvedValue({});
   m.startAgentRun.mockResolvedValue({});
+  m.tx.reelRender.findUniqueOrThrow.mockImplementation(async () => render());
 });
 
 describe("nextStep", () => {
@@ -102,7 +106,7 @@ describe("advanceRender", () => {
     m.status.mockResolvedValue({ state: "failed", error: "nope" });
     m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
     await advanceRender({ renderId: "r1" });
-    expect(m.refund).toHaveBeenCalledWith("w1", "v1:1");
+    expect(m.refund).toHaveBeenCalledWith("w1", "v1:1", m.tx);
   });
 
   it("joining starts the quality check for that reel", async () => {
@@ -123,7 +127,9 @@ describe("advanceRender", () => {
   it("join is single-flight: a tick while a join runs waits", () => {
     const now = Date.now();
     expect(nextStep(render({ step: "JOIN", claimedAt: new Date(now - 30_000), outputs: { ...outputs, clipUrls: ["u"] } }), [], now)).toEqual({ action: "wait" });
-    expect(nextStep(render({ step: "JOIN", claimedAt: new Date(now - 180_000), outputs: { ...outputs, clipUrls: ["u"] } }), [], now)).toEqual({ action: "join", urls: ["u"] });
+    // A join can run ~4 min (downloads + ffmpeg): a 3-minute-old claim is still a join in progress.
+    expect(nextStep(render({ step: "JOIN", claimedAt: new Date(now - 180_000), outputs: { ...outputs, clipUrls: ["u"] } }), [], now)).toEqual({ action: "wait" });
+    expect(nextStep(render({ step: "JOIN", claimedAt: new Date(now - 400_000), outputs: { ...outputs, clipUrls: ["u"] } }), [], now)).toEqual({ action: "join", urls: ["u"] });
   });
 
   it("a join that lost its claim writes nothing", async () => {
@@ -153,7 +159,29 @@ describe("advanceRender", () => {
     m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
     m.animate.mockRejectedValue(new Error("Higgsfield 403: not_enough_credits"));
     await advanceRender({ renderId: "r1" }).catch(() => null);
-    expect(m.refund).toHaveBeenCalledWith("w1", "v1:1");
+    expect(m.refund).toHaveBeenCalledWith("w1", "v1:1", m.tx);
+  });
+
+  it("can't read the clips' status: waits instead of failing (they're still running and billed)", async () => {
+    m.tx.reelRender.findUnique.mockResolvedValue(render({ requests: { CLIPS: ["ra", "rb"] } }));
+    m.status.mockRejectedValue(new Error("fetch failed"));
+    await advanceRender({ renderId: "r1" });
+    expect(m.refund).not.toHaveBeenCalled();
+    expect(m.enqueue).toHaveBeenCalled();
+  });
+
+  it("a failing join releases its claim and retries, then fails and refunds on the third", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("link expired"); }));
+    const joining = (joinErrors: number) => render({ step: "JOIN", claimedAt: null, outputs: { ...outputs, clipUrls: ["https://cdn/a.mp4", "https://cdn/b.mp4"], joinErrors } });
+    m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
+    m.tx.reelRender.findUnique.mockResolvedValue(joining(0));
+    await expect(advanceRender({ renderId: "r1" })).rejects.toThrow("link expired");
+    expect(m.tx.reelRender.updateMany).toHaveBeenLastCalledWith({ where: { id: "r1", step: "JOIN" }, data: expect.objectContaining({ claimedAt: null, outputs: expect.objectContaining({ joinErrors: 1 }) }) });
+    expect(m.refund).not.toHaveBeenCalled();
+    m.tx.reelRender.findUnique.mockResolvedValue(joining(2));
+    await advanceRender({ renderId: "r1" });
+    expect(m.refund).toHaveBeenCalledWith("w1", "v1:1", m.tx);
+    vi.unstubAllGlobals();
   });
 
   it("resubmits send the same photo link, so the idempotency key matches the same body", async () => {
@@ -173,6 +201,7 @@ describe("startRender", () => {
     m.tx.reelRender.create.mockImplementation(async (a: { data: object }) => ({ id: "r1", ...a.data }));
     m.tx.reelRender.update.mockResolvedValue({});
     m.spend.mockImplementation(async (i: { refId: string }) => i.refId);
+    m.tx.contentVersion.findFirst.mockResolvedValue({ id: "v1" });
   };
 
   it("charges the plan's price once per attempt", async () => {
@@ -196,11 +225,72 @@ describe("startRender", () => {
     expect(m.spend).toHaveBeenCalledWith(expect.objectContaining({ refId: "v1:2" }));
   });
 
+  it("a plan changed while paying isn't rendered, and the charge comes back", async () => {
+    ready();
+    m.tx.contentVersion.findFirst.mockResolvedValue({ id: "v2" });
+    await expect(startRender({ ...scope, userId: "u1", itemId: "i1", version: 2 })).rejects.toThrow(/newer plan/);
+    expect(m.tx.reelRender.create).not.toHaveBeenCalled();
+    expect(m.refund).toHaveBeenCalledWith("w1", "v1:1");
+  });
+
+  it("won't render a reel that's already scheduled or posted", async () => {
+    ready();
+    m.tx.contentItem.findFirst.mockResolvedValue({ id: "i1", studio: true, status: "SCHEDULED", versions: [{ id: "v1", version: 2, body: plan }] });
+    await expect(startRender({ ...scope, userId: "u1", itemId: "i1", version: 2 })).rejects.toThrow(/scheduled or posted/);
+    expect(m.spend).not.toHaveBeenCalled();
+  });
+
+  it("refuses a stand-in photo before charging", async () => {
+    ready();
+    const standIn = { ...plan, scenes: [{ ...plan.scenes[0], standIn: true }, plan.scenes[1]] };
+    m.tx.contentItem.findFirst.mockResolvedValue({ id: "i1", studio: true, versions: [{ id: "v1", version: 2, body: standIn }] });
+    await expect(startRender({ ...scope, userId: "u1", itemId: "i1", version: 2 })).rejects.toThrow(/doesn't show what it talks about/);
+    expect(m.spend).not.toHaveBeenCalled();
+  });
+
   it("refuses a plan with prompt problems before charging", async () => {
     ready();
     const bad = { ...plan, scenes: [{ ...plan.scenes[0], prompt: "no people please" }, plan.scenes[1]] };
     m.tx.contentItem.findFirst.mockResolvedValue({ id: "i1", studio: true, versions: [{ id: "v1", version: 2, body: bad }] });
     await expect(startRender({ ...scope, userId: "u1", itemId: "i1", version: 2 })).rejects.toThrow(/positively/);
     expect(m.spend).not.toHaveBeenCalled();
+  });
+});
+
+describe("renderFailure (what the app may show)", () => {
+  const failed = (error: string, over: object = {}) => render({ step: "FAILED", error, ...over });
+  it("never passes the provider's message on, only a kind and where it stopped", () => {
+    expect(renderFailure(failed("Higgsfield 403: not_enough_credits"))).toEqual({ kind: "unavailable", stoppedAt: "CLIPS" });
+    expect(renderFailure(failed("Voiceover failed (401): bad key", { outputs: {} }))).toEqual({ kind: "unavailable", stoppedAt: "VOICE" });
+    expect(renderFailure(failed("The video took more than a day. Credits refunded; try again.", { requests: { CLIPS: ["a"] } }))).toEqual({ kind: "slow", stoppedAt: "CLIPS" });
+    expect(renderFailure(failed("Scene 2: content flagged", { requests: { CLIPS: ["a", "b"] } }))).toEqual({ kind: "scene", scene: 2, stoppedAt: "CLIPS" });
+    expect(renderFailure(failed("Joining the reel failed: boom", { outputs: { ...outputs, clipUrls: ["u"] } }))).toEqual({ kind: "other", stoppedAt: "JOIN" });
+    expect(renderFailure(render({ step: "CLIPS" }))).toBeNull();
+  });
+});
+
+describe("seam check", () => {
+  it("softens a join that doesn't read as one film to a dissolve, and keeps the planned one otherwise", async () => {
+    const wav = Buffer.alloc(44 + 48_000);
+    wav.write("RIFF", 0); wav.write("WAVEfmt ", 8); wav.writeUInt32LE(16, 16); wav.writeUInt16LE(1, 20); wav.writeUInt16LE(1, 22);
+    wav.writeUInt32LE(24_000, 24); wav.writeUInt32LE(48_000, 28); wav.writeUInt16LE(2, 32); wav.writeUInt16LE(16, 34); wav.write("data", 36);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(wav)));
+    const three = { ...plan, scenes: [{ ...plan.scenes[0], transition: "match" }, { ...plan.scenes[1], transition: "cut" }, { ...plan.scenes[1], transition: "cut" }] };
+    m.prisma.contentVersion.findUnique.mockResolvedValue({ id: "v1", version: 2, body: three });
+    const out3 = { ...outputs, voiceKeys: ["a", "b", "c"], voiceSeconds: [6, 5, 5], photoKeys: [photo, photo, photo], models: ["kling-3-std", "kling-3-std", "kling-3-std"], clipSeconds: [6, 5, 5] };
+    m.tx.reelRender.findUnique.mockResolvedValue(render({ step: "JOIN", claimedAt: null, outputs: { ...out3, clipUrls: ["https://cdn/a.mp4", "https://cdn/b.mp4", "https://cdn/c.mp4"] } }));
+    m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
+    m.tx.contentItem.findFirst.mockResolvedValue({ id: "i1", versions: [{ id: "v1", version: 2, body: three }] });
+    m.seam.mockResolvedValueOnce({ fits: false, note: "different room" }).mockResolvedValueOnce({ fits: true, note: "same sideboard" });
+    await advanceRender({ renderId: "r1" });
+    const [clips, , , opts] = m.joinReel.mock.calls[0] as unknown as [{ transition?: string }[], string, string, { reencode: boolean }];
+    expect(clips.map((c) => c.transition)).toEqual(["dissolve", "cut", undefined]);
+    expect(opts.reencode).toBe(true); // a dissolve needs the re-encode path
+    const done = m.tx.reelRender.updateMany.mock.calls.find((c) => (c[0] as { data: { step?: string } }).data.step === "DONE")![0] as { data: { outputs: { seams: unknown[] } } };
+    expect(done.data.outputs.seams).toEqual([
+      { after: 1, planned: "match", used: "dissolve", fits: false, note: "different room" },
+      { after: 2, planned: "cut", used: "cut", fits: true, note: "same sideboard" },
+    ]);
+    vi.unstubAllGlobals();
   });
 });

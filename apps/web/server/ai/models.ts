@@ -28,12 +28,22 @@ const TIERS: Record<Exclude<Tier, "medium">, string[]> = {
     "quality.",
     "reels.script",
   ],
-  light: ["systems-check.", "geo.questions"],
+  light: ["systems-check.", "geo.questions", "reels.seam"],
+};
+
+const RANK: Record<Tier, number> = { light: 0, medium: 1, heavy: 2 };
+/**
+ * AI_MAX_TIER (light | medium) caps every call, retries included: cheap test runs on a dev box. Unset in production.
+ * The ledger records the tier a call actually ran on.
+ */
+const capped = (tier: Tier): Tier => {
+  const cap = process.env.AI_MAX_TIER as Tier | undefined;
+  return cap && cap in RANK && RANK[tier] > RANK[cap] ? cap : tier;
 };
 
 export function tierFor(workflowId: string): Tier {
   const listed = (ids: string[]) => ids.some((id) => (id.endsWith(".") ? workflowId.startsWith(id) : workflowId === id));
-  return listed(TIERS.heavy) ? "heavy" : listed(TIERS.light) ? "light" : "medium";
+  return capped(listed(TIERS.heavy) ? "heavy" : listed(TIERS.light) ? "light" : "medium");
 }
 
 /** No model is set for a tier: an AI call can't go anywhere until a platform admin picks one. */
@@ -56,7 +66,10 @@ export function modelFor(cfg: ModelConfig, workflowId: string) {
 }
 
 /** Where an answer that failed its check goes next (FrugalGPT-style cascade): one tier up; heavy is the top. */
-export const nextTier = (tier: Tier): Tier | null => (tier === "light" ? "medium" : tier === "medium" ? "heavy" : null);
+export const nextTier = (tier: Tier): Tier | null => {
+  const up: Tier | null = tier === "light" ? "medium" : tier === "medium" ? "heavy" : null;
+  return up && capped(up) === up ? up : null;
+};
 
 /**
  * When a tier's model is unavailable (rate limited, down, retired), the call tries one other model: the tier's

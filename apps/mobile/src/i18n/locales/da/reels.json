@@ -13,7 +13,8 @@
   "timezone": "Tidszone",
   "status": {
     "draft": "Kladde",
-    "ready": "Klar"
+    "ready": "Klar",
+    "processing": "Behandler"
   },
   "scene": {
     "label": "Scene {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Hurtige katalogklip",
     "jumpBackIn": "Hop tilbage",
     "seeAll": "Se alle",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}} sek. · 9:16 lodret"
   },
   "ideas": {
     "title": "Videoidéer",
@@ -58,7 +60,9 @@
       "angle02": "Fokuserer på håndskårne lameldøre, kabelstyring og varm stueatmosfære."
     },
     "readyToReview": "Klar til gennemgang",
-    "viewStoryboard": "Se storyboard"
+    "viewStoryboard": "Se storyboard",
+    "making": "Skriver storyboardet…",
+    "empty": "Ingen reel-idéer endnu. De vises her, når idéagenten har kørt."
   },
   "chat": {
     "creditsA11y_one": "{{count}} kredit",
@@ -77,15 +81,42 @@
     "openingHook": "Åbningskrog",
     "reviewStoryboard_one": "Gennemgå storyboard ({{count}} scene)",
     "reviewStoryboard_other": "Gennemgå storyboard ({{count}} scener)",
-    "readyStatus": "Klar til at generere eller forfine"
+    "readyStatus": "Klar til at generere eller forfine",
+    "empty": "Fortæl, hvad din reel skal vise, eller vælg en idé først.",
+    "writing": "Skriver…",
+    "planMeta_one": "{{count}} scene · ~{{seconds}} sek.",
+    "planMeta_other": "{{count}} scener · ~{{seconds}} sek.",
+    "makeItSeconds": "Lav den på cirka {{seconds}} sekunder.",
+    "greeting": "Hvad skal din reel vise? Beskriv det, eller start med en af disse.",
+    "starterProduct": "En reel om {{product}}",
+    "placeholderNew": "Beskriv din reel…",
+    "placeholderRevise": "Bed om ændringer…",
+    "currentLength": "~{{seconds}} sek. nu",
+    "tryAgain": "Prøv igen",
+    "writingPlan": "Skriver din reel-plan",
+    "directing": "Vælger en videomodel til hver scene",
+    "stageReading": "Gennemgår dit brand og dine billeder",
+    "stageScenes_one": "Skriver scene {{count}}",
+    "stageScenes_other": "Skriver scene {{count}}",
+    "draftScene": "Scene {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "{{seconds}}s varighed",
     "verticalFact": "9:16 vertikal",
     "readyToRender": "Klar til at gengive <muted>· Kladde gemt til gennemgang</muted>",
+    "needsPhotos_one": "{{count}} scene skal have sit eget billede <muted>· Billedet viser noget andet</muted>",
+    "needsPhotos_other": "{{count}} scener skal have deres egne billeder <muted>· Billederne viser noget andet</muted>",
+    "standIn": "Dette billede viser noget andet. Vælg det rigtige, før du laver videoen.",
+    "join": {
+      "match": "Matchklip: Klippet slutter, hvor det næste begynder",
+      "cut": "Klip på taktslaget",
+      "dissolve": "Ton over til næste klip"
+    },
+    "pickPhotos": "Vælg billeder",
     "sceneDirection": "Sceneretning",
     "voiceoverFr": "Voiceover (FR)",
+    "voiceover": "Voiceover ({{lang}})",
     "direction": {
       "scene1": "Langsom glidende afsløring over moderne spisesætning",
       "scene2": "Jævn makrosvep over rigt naturligt træmønster og skrå kant",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} kredit",
     "cost_other": "{{count}} kreditter",
     "balance_one": "Nuværende saldo: {{balance}} kreditter · {{count}} kredit vil blive reserveret · Kladde gemmes automatisk",
-    "balance_other": "Nuværende saldo: {{balance}} kreditter · {{count}} kreditter vil blive reserveret · Kladde gemmes automatisk"
+    "balance_other": "Nuværende saldo: {{balance}} kreditter · {{count}} kreditter vil blive reserveret · Kladde gemmes automatisk",
+    "seeProgress": "Se status",
+    "onScreen": "På skærmen: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Tilbage til arbejdsområde",
@@ -118,9 +151,26 @@
     "remaining_one": "Tilbage: {{count}} kredit",
     "remaining_other": "Tilbage: {{count}} kreditter",
     "safeToLeave": "Du kan trygt forlade denne skærm. Din kladde gemmes automatisk i din Resultater-fane.",
-    "keepWorking": "Fortsæt arbejdet i baggrunden"
+    "keepWorking": "Fortsæt arbejdet i baggrunden",
+    "failed": "Videoen kunne ikke laves: {{error}}",
+    "failedTitle": "Videoen kunne ikke laves",
+    "bodyAny": "Sammensætter billeder, speak og animationernes tempo til {{title}}.",
+    "stopped": "Stoppet",
+    "notStarted": "Ikke startet",
+    "tryAgain": "Prøv igen",
+    "retrying": "Starter igen…",
+    "editPlan": "Rediger plan",
+    "creditsRefunded_one": "{{count}} kredit tilbagebetalt",
+    "creditsRefunded_other": "{{count}} kreditter tilbagebetalt"
+  },
+  "failure": {
+    "unavailable": "Det er ikke muligt at lave videoer lige nu. Dine kreditter er tilbageført. Prøv igen senere.",
+    "slow": "Det tog for lang tid at lave videoen. Dine kreditter er tilbageført. Prøv igen.",
+    "scene": "Scene {{n}} kunne ikke animeres. Dine kreditter er tilbageført. Prøv igen, eller vælg et andet billede til scenen.",
+    "other": "Noget gik galt, da videoen skulle laves. Dine kreditter er tilbageført. Prøv igen."
   },
   "results": {
+    "failedShort": "Kunne ikke laves · kreditter tilbageført",
     "title": "Videoreels",
     "newReel": "Ny reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Fransk voiceover · Klar til planlægning",
       "atelier": "15s · Ambient akustik · Klar til planlægning"
-    }
+    },
+    "empty": "Ingen reels endnu. Start en under Opret eller Idéer.",
+    "posted": "Slået op på Instagram",
+    "failed": "Kunne ikke laves: {{error}}",
+    "readyMeta": "{{seconds}} sek. · Fransk voiceover · Klar",
+    "draftMeta": "{{seconds}} sek. · Plan, ingen video endnu",
+    "addLink": "Downloadet · Slået den op? Tilføj link",
+    "tryAgain_one": "Prøv igen ({{count}} kredit)",
+    "tryAgain_other": "Prøv igen ({{count}} kreditter)",
+    "openPlan": "Åbn plan",
+    "closeSheet": "Luk",
+    "linkTitle": "Tilføj link til opslaget",
+    "linkBody": "Indsæt linket til den reel, du har slået op på Instagram, så du kan følge dens resultater.",
+    "saveLink": "Gem link",
+    "saving": "Gemmer…"
   },
   "review": {
+    "joinSoftened": "Scene {{n}} → {{next}}",
+    "joinSoftenedNote": "De to klip matchede ikke helt, så de bindes sammen med en overtoning",
     "subtitle": "Reel kladde · Klar til gennemgang",
     "options": "Optionsmenu",
     "downloadVideo": "Download video",
@@ -162,7 +228,12 @@
     "audioTrack": "Lydspor",
     "audioValue": "Fransk voiceover (Studio Natural) + Ambient akustik",
     "resolution": "Opløsning",
-    "resolutionValue": "Portrætvideo · 9:16"
+    "resolutionValue": "Portrætvideo · 9:16",
+    "checking": "Tjekker din reel… Download og Planlæg åbner, når tjekkene er færdige.",
+    "askForChanges": "Ikke helt rigtigt? Bed om ændringer",
+    "checks": "Tjek",
+    "audioVoiceOnly": "Fransk voiceover",
+    "blocked": "Et tjek fandt et problem (se Tjek). Ret det i opslagsteksten, eller tryk på \"Ikke helt rigtigt? Bed om ændringer\"."
   },
   "publish": {
     "title": "Udgiv reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Eksempelstemme, {{title}}",
     "sampleVoice": "Eksempelstemme",
     "voiceLed": "Stemmeledet stil",
-    "notice": "Vælg en stemmeledet stil, eller hold fokus på dit produkt."
+    "notice": "Vælg en stemmeledet stil, eller hold fokus på dit produkt.",
+    "comingSoon": "Værter, der taler foran kameraet, kommer snart. Indtil videre viser denne reel kun produkter."
   },
   "script": {
     "title": "Manuskript & stemme",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Naturlig fransk, varm akustisk tempo",
     "recordOwn": "Optag din egen stemme",
     "recordOwnMeta": "Valgfri tilpasset brandfortælling",
-    "record": "Optag"
+    "record": "Optag",
+    "saving": "Gemmer…",
+    "sceneTooLong": "Scene {{n}} er på over 30 ord (15 sek.). Gør den kortere.",
+    "keepScenes_one": "Behold {{count}} afsnit, ét pr. scene.",
+    "keepScenes_other": "Behold {{count}} afsnit, ét pr. scene, med en tom linje imellem.",
+    "rewriteOpeningAsk": "Omskriv åbningen i scene 1, så den er kortere og mere overraskende.",
+    "voiceName": "Stemme: {{name}}",
+    "nextVoice": "Næste stemme"
   },
   "templates": {
     "title": "Reel skabeloner",
@@ -275,7 +354,9 @@
         "subtitle": "Annoncering & showroom CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Brug formatet \"{{title}}\" ({{subtitle}}), cirka {{seconds}} sekunder.",
+    "applying": "Anvender…"
   },
   "assets": {
     "title": "Vælg aktiver",
@@ -296,6 +377,10 @@
       "macro": "Detalje",
       "staged": "Stylet",
       "tv": "TV enhed"
-    }
+    },
+    "yourPhoto": "Dit billede",
+    "planFirst": "Planlæg først din reel (Opret → Planlæg en reel sammen), og vælg derefter billeder.",
+    "saving": "Gemmer…",
+    "sceneN": "Scene {{n}}"
   }
 }

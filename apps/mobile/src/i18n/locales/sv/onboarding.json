@@ -20,7 +20,18 @@
     "sendFailed": "Kunde inte skicka koden. Försök igen.",
     "useMobile": "Använd mobilnummer istället",
     "linkTitle": "Lägg till din e-post",
-    "linkSubtitle": "Ditt nummer är verifierat. Lägg till en e-post för kvitton och teaminbjudningar. Vi skickar en kod."
+    "linkSubtitle": "Ditt nummer är verifierat. Lägg till en e-post för kvitton och teaminbjudningar. Vi skickar en kod.",
+    "registerTitle": "Skapa ditt konto",
+    "registerSubtitle": "Välj ett lösenord. Vi skickar en kod till din e-post för att bekräfta din adress.",
+    "passwordLabel": "Lösenord",
+    "passwordPlaceholder": "Ditt lösenord",
+    "newPasswordPlaceholder": "Minst {{count}} tecken",
+    "showPassword": "Visa lösenord",
+    "hidePassword": "Dölj lösenord",
+    "signIn": "Logga in",
+    "createAccount": "Skapa konto",
+    "signInFailed": "Det gick inte att logga in. Försök igen.",
+    "subtitleEmailFirst": "Ange din e-postadress. Vi ber dig ange ditt lösenord eller skickar en kod till dig."
   },
   "verify": {
     "title": "Ange din kod",
@@ -314,6 +325,7 @@
     "noPhotos": "Inga produktbilder hittades på din webbplats",
     "ideasTitle": "Letar efter idéer till inlägg",
     "ideasDetail": "Säsonger, trender och din katalog",
+    "finishingResearch": "Slutför analysen av ditt företag…",
     "ideasFound_one": "{{count}} idé hittad",
     "ideasFound_other": "{{count}} idéer hittade",
     "ideasNone": "Inga nya idéer den här gången",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Kunde inte söka på Google Maps. Försök igen."
     }
+  },
+  "password": {
+    "title": "Välkommen tillbaka",
+    "subtitle": "Ange ditt lösenord för att logga in.",
+    "change": "Ändra",
+    "changeEmail": "Loggar in som {{email}}. Ändra e-postadress",
+    "useCode": "Glömt lösenordet? Logga in med en kod via e-post"
   }
 }

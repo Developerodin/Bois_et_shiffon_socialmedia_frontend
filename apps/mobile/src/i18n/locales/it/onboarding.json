@@ -20,7 +20,18 @@
     "sendFailed": "Impossibile inviare il codice. Riprova.",
     "useMobile": "Usa numero di cellulare invece",
     "linkTitle": "Aggiungi la tua email",
-    "linkSubtitle": "Il tuo numero è verificato. Aggiungi un'email per ricevute e inviti al team. Ti invieremo un codice."
+    "linkSubtitle": "Il tuo numero è verificato. Aggiungi un'email per ricevute e inviti al team. Ti invieremo un codice.",
+    "registerTitle": "Crea il tuo account",
+    "registerSubtitle": "Scegli una password. Ti invieremo un codice via email per confermare il tuo indirizzo.",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "La tua password",
+    "newPasswordPlaceholder": "Almeno {{count}} caratteri",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "signIn": "Accedi",
+    "createAccount": "Crea account",
+    "signInFailed": "Accesso non riuscito. Riprova.",
+    "subtitleEmailFirst": "Inserisci la tua email. Ti chiederemo la password o ti invieremo un codice."
   },
   "verify": {
     "title": "Inserisci il tuo codice",
@@ -314,6 +325,7 @@
     "noPhotos": "Nessuna foto dei prodotti trovata sul tuo sito",
     "ideasTitle": "Cerchiamo idee per i post",
     "ideasDetail": "Stagioni, tendenze e il tuo catalogo",
+    "finishingResearch": "Stiamo completando la ricerca sulla tua attività…",
     "ideasFound_one": "{{count}} idea trovata",
     "ideasFound_other": "{{count}} idee trovate",
     "ideasNone": "Nessuna nuova idea questa volta",
@@ -361,5 +373,12 @@
     "errors": {
       "failed": "Non siamo riusciti a cercare su Google Maps. Riprova."
     }
+  },
+  "password": {
+    "title": "Bentornato",
+    "subtitle": "Inserisci la password per accedere.",
+    "change": "Cambia",
+    "changeEmail": "Accedi come {{email}}. Cambia email",
+    "useCode": "Password dimenticata? Accedi con un codice via email"
   }
 }

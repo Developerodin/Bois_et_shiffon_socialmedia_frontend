@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MODEL_IDS, SCENE_KINDS } from "@/server/reels/router";
+import { MODEL_IDS, SCENE_KINDS, TRANSITIONS } from "@/server/reels/router";
 import { CREDIT_COSTS } from "@/server/services/credits";
 
 /**
@@ -16,12 +16,19 @@ export const ReelScene = z.object({
   kind: z.enum(SCENE_KINDS).optional(),
   model: z.enum(MODEL_IDS).optional(),
   prompt: z.string().max(1200).optional(),
+  // Set by the director: how this scene hands over to the next one (the last scene's is ignored).
+  transition: z.enum(TRANSITIONS).optional(),
+  // The scriptwriter found no photo of what this scene talks about and used the closest one; it can't be rendered
+  // until the scene gets another photo (R13). carryStandIns keeps it through edits and chat revisions.
+  standIn: z.boolean().optional(),
 });
 export const ReelPlan = z.object({
   title: z.string().min(1).max(120),
   presenter: z.literal("none"), // presenters that speak on camera come later
   template: z.string().max(60),
   voice: z.string().min(1).max(100),
+  // The reel's own language (voiceover, on-screen text, caption): the brand's by default, or what the person asked for.
+  language: z.string().regex(/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/).optional(),
   scenes: z.array(ReelScene).min(2).max(6), // the reel rule needs a script of at least two beats
   caption: z.string().max(2200),
   hashtags: z.array(z.string().max(100)).max(5),
@@ -53,6 +60,20 @@ export function planProblems(plan: ReelPlan, scope: { workspaceId: string; brand
   });
 }
 
+/** Scenes whose photo shows something else than the scene talks about: rendering them would misrepresent the product. */
+export const standInProblems = (plan: ReelPlan) =>
+  plan.scenes.flatMap((s, i) => (s.standIn ? [`Scene ${i + 1}'s photo doesn't show what it talks about. Pick its photo in Select assets, or ask the chat to change the scene.`] : []));
+
+/**
+ * An edit can't clear a stand-in: a photo flagged in the previous version stays flagged wherever it's used (moved,
+ * reordered or kept), until it's replaced (R13). `fromScriptwriter` also keeps the new plan's own flags (a chat
+ * revision); a person's edit from the app passes false, so the app's value is ignored.
+ */
+export const carryStandIns = (plan: ReelPlan, previous: ReelPlan | undefined, fromScriptwriter: boolean): ReelPlan => {
+  const flagged = new Set(previous?.scenes.filter((s) => s.standIn).map((s) => s.photoKey));
+  return { ...plan, scenes: plan.scenes.map((s) => ({ ...s, standIn: (fromScriptwriter && s.standIn) || flagged.has(s.photoKey) ? true : undefined })) };
+};
+
 /** The version body: the plan, plus the fields the shared content rules and publisher read. */
 export const toVersionBody = (plan: ReelPlan) => ({
   ...plan,
@@ -62,5 +83,14 @@ export const toVersionBody = (plan: ReelPlan) => ({
   pinTitle: "",
   altText: "",
 });
+
+/** "en" → "English": models are told languages by name. */
+export const languageName = (code: string) => {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "language" }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+};
 
 export const isStudioPlan = (body: unknown): body is ReelPlan => ReelPlan.safeParse(body).success;

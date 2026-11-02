@@ -13,7 +13,8 @@
   "timezone": "Tidssone",
   "status": {
     "draft": "Utkast",
-    "ready": "Klar"
+    "ready": "Klar",
+    "processing": "Behandler"
   },
   "scene": {
     "label": "Scene {{n}} · {{seconds}}s",
@@ -42,7 +43,8 @@
     "templatesSubtitle": "Raske katalogklipp",
     "jumpBackIn": "Fortsett",
     "seeAll": "Se alle",
-    "recentA11y": "{{title}}, {{status}}"
+    "recentA11y": "{{title}}, {{status}}",
+    "recentMeta": "{{seconds}}s · 9:16 stående"
   },
   "ideas": {
     "title": "Videoforslag",
@@ -58,7 +60,9 @@
       "angle02": "Fokuserer på håndskårne spalte-dører, kabelhåndtering og varm stueatmosfære."
     },
     "readyToReview": "Klar til gjennomgang",
-    "viewStoryboard": "Se storyboard"
+    "viewStoryboard": "Se storyboard",
+    "making": "Skriver bildemanuset…",
+    "empty": "Ingen reel-ideer ennå. De vises her når idéagenten har kjørt."
   },
   "chat": {
     "creditsA11y_one": "{{count}} kreditt",
@@ -77,15 +81,42 @@
     "openingHook": "Åpningskrok",
     "reviewStoryboard_one": "Gjennomgå storyboard ({{count}} scene)",
     "reviewStoryboard_other": "Gjennomgå storyboard ({{count}} scener)",
-    "readyStatus": "Klar til å generere eller forbedre"
+    "readyStatus": "Klar til å generere eller forbedre",
+    "empty": "Fortell meg hva reelen skal vise, eller velg en idé først.",
+    "writing": "Skriver…",
+    "planMeta_one": "{{count}} scene · ~{{seconds}}s",
+    "planMeta_other": "{{count}} scener · ~{{seconds}}s",
+    "makeItSeconds": "Lag den på omtrent {{seconds}} sekunder.",
+    "greeting": "Hva skal denne reelen vise? Beskriv den, eller start med en av disse.",
+    "starterProduct": "En reel om {{product}}",
+    "placeholderNew": "Beskriv reelen din…",
+    "placeholderRevise": "Be om endringer…",
+    "currentLength": "~{{seconds}}s nå",
+    "tryAgain": "Prøv igjen",
+    "writingPlan": "Skriver planen for reelen",
+    "directing": "Velger en videomodell for hver scene",
+    "stageReading": "Analyserer merkevaren og bildene dine",
+    "stageScenes_one": "Skriver scene {{count}}",
+    "stageScenes_other": "Skriver scene {{count}}",
+    "draftScene": "Scene {{n}} · {{shot}}"
   },
   "storyboard": {
     "title": "Storyboard",
     "durationFact": "{{seconds}}s varighet",
     "verticalFact": "9:16 vertikal",
     "readyToRender": "Klar til å rendere <muted>· Utkast lagret for gjennomgang</muted>",
+    "needsPhotos_one": "{{count}} scene trenger sitt eget bilde <muted>· Bildet viser noe annet</muted>",
+    "needsPhotos_other": "{{count}} scener trenger hvert sitt bilde <muted>· Bildene viser noe annet</muted>",
+    "standIn": "Dette bildet viser noe annet. Velg riktig bilde før du lager videoen.",
+    "join": {
+      "match": "Matchklipp: Klippet slutter der det neste begynner",
+      "cut": "Klipp på taktslaget",
+      "dissolve": "Ton over til neste klipp"
+    },
+    "pickPhotos": "Velg bilder",
     "sceneDirection": "Sceneretning",
     "voiceoverFr": "Voiceover (FR)",
+    "voiceover": "Fortellerstemme ({{lang}})",
     "direction": {
       "scene1": "Langsom glidende avsløring over moderne spiseoppsett",
       "scene2": "Jevn makrosveip over rik naturlig åremønster og faset kant",
@@ -98,7 +129,9 @@
     "cost_one": "{{count}} kreditt",
     "cost_other": "{{count}} kreditter",
     "balance_one": "Nåværende saldo: {{balance}} kreditter · {{count}} kreditt vil bli reservert · Utkast lagres automatisk",
-    "balance_other": "Nåværende saldo: {{balance}} kreditter · {{count}} kreditter vil bli reservert · Utkast lagres automatisk"
+    "balance_other": "Nåværende saldo: {{balance}} kreditter · {{count}} kreditter vil bli reservert · Utkast lagres automatisk",
+    "seeProgress": "Se fremdrift",
+    "onScreen": "På skjermen: {{text}}"
   },
   "generating": {
     "backToWorkspace": "Tilbake til arbeidsområde",
@@ -118,9 +151,26 @@
     "remaining_one": "Gjenstående: {{count}} kreditt",
     "remaining_other": "Gjenstående: {{count}} kreditter",
     "safeToLeave": "Du kan trygt forlate denne skjermen. Utkastet ditt lagres automatisk i Resultater-fanen.",
-    "keepWorking": "Fortsett å jobbe i bakgrunnen"
+    "keepWorking": "Fortsett å jobbe i bakgrunnen",
+    "failed": "Videoen kunne ikke lages: {{error}}",
+    "failedTitle": "Videoen kunne ikke lages",
+    "bodyAny": "Setter sammen bilder, fortellerstemme og animasjonstempo for {{title}}.",
+    "stopped": "Stoppet",
+    "notStarted": "Ikke startet",
+    "tryAgain": "Prøv igjen",
+    "retrying": "Starter på nytt…",
+    "editPlan": "Rediger plan",
+    "creditsRefunded_one": "{{count}} kreditt refundert",
+    "creditsRefunded_other": "{{count}} kreditter refundert"
+  },
+  "failure": {
+    "unavailable": "Det er ikke mulig å lage video akkurat nå. Kredittene dine er tilbakeført. Prøv igjen senere.",
+    "slow": "Det tok for lang tid å lage videoen. Kredittene dine er tilbakeført. Prøv igjen.",
+    "scene": "Scene {{n}} kunne ikke animeres. Kredittene dine er tilbakeført. Prøv igjen, eller velg et annet bilde til scenen.",
+    "other": "Noe gikk galt da videoen skulle lages. Kredittene dine er tilbakeført. Prøv igjen."
   },
   "results": {
+    "failedShort": "Kunne ikke lages · kreditter tilbakeført",
     "title": "Videoreels",
     "newReel": "Ny reel",
     "filter": {
@@ -139,9 +189,25 @@
     "meta": {
       "tv": "20s · Fransk voiceover · Klar til å planlegge",
       "atelier": "15s · Akustisk atmosfære · Klar til å planlegge"
-    }
+    },
+    "empty": "Ingen reels ennå. Start en fra Lag eller Ideer.",
+    "posted": "Publisert på Instagram",
+    "failed": "Kunne ikke lages: {{error}}",
+    "readyMeta": "{{seconds}}s · Fransk fortellerstemme · Klar",
+    "draftMeta": "{{seconds}}s · Plan, ingen video ennå",
+    "addLink": "Lastet ned · Publisert? Legg til lenke",
+    "tryAgain_one": "Prøv igjen ({{count}} kreditt)",
+    "tryAgain_other": "Prøv igjen ({{count}} kreditter)",
+    "openPlan": "Åpne plan",
+    "closeSheet": "Lukk",
+    "linkTitle": "Legg til lenken til innlegget",
+    "linkBody": "Lim inn lenken til reelen du publiserte på Instagram, så du kan følge med på resultatene.",
+    "saveLink": "Lagre lenke",
+    "saving": "Lagrer…"
   },
   "review": {
+    "joinSoftened": "Scene {{n}} → {{next}}",
+    "joinSoftenedNote": "Klippene passet ikke helt sammen, så de tones over i hverandre",
     "subtitle": "Reel utkast · Klar til gjennomgang",
     "options": "Alternativmeny",
     "downloadVideo": "Last ned video",
@@ -162,7 +228,12 @@
     "audioTrack": "Lydspor",
     "audioValue": "Fransk voiceover (Studio Natural) + Miljølyd",
     "resolution": "Oppløsning",
-    "resolutionValue": "Portrettvideo · 9:16"
+    "resolutionValue": "Portrettvideo · 9:16",
+    "checking": "Sjekker reelen… Nedlasting og planlegging åpnes når sjekkene er ferdige.",
+    "askForChanges": "Ikke helt riktig? Be om endringer",
+    "checks": "Sjekker",
+    "audioVoiceOnly": "Fransk fortellerstemme",
+    "blocked": "En sjekk fant et problem (se Sjekker). Rett det i bildeteksten, eller trykk på «Ikke helt riktig? Be om endringer»."
   },
   "publish": {
     "title": "Publiser reel",
@@ -223,7 +294,8 @@
     "sampleVoiceA11y": "Eksempelstemme, {{title}}",
     "sampleVoice": "Eksempelstemme",
     "voiceLed": "Stemmeledet stil",
-    "notice": "Velg en stemmeledet stil, eller hold fokus på produktet ditt."
+    "notice": "Velg en stemmeledet stil, eller hold fokus på produktet ditt.",
+    "comingSoon": "Presentatører som snakker foran kamera, kommer snart. Foreløpig viser denne reelen bare produkter."
   },
   "script": {
     "title": "Manus & stemme",
@@ -244,7 +316,14 @@
     "calmVoiceMeta": "Naturlig fransk, varm akustisk tempo",
     "recordOwn": "Ta opp din egen stemme",
     "recordOwnMeta": "Valgfri tilpasset merkevarefortelling",
-    "record": "Ta opp"
+    "record": "Ta opp",
+    "saving": "Lagrer…",
+    "sceneTooLong": "Scene {{n}} har over 30 ord (15 s). Kort den ned.",
+    "keepScenes_one": "Behold {{count}} avsnitt, ett per scene.",
+    "keepScenes_other": "Behold {{count}} avsnitt, ett per scene, med en tom linje mellom.",
+    "rewriteOpeningAsk": "Skriv om åpningsreplikken i scene 1: kortere og mer overraskende.",
+    "voiceName": "Stemme: {{name}}",
+    "nextVoice": "Neste stemme"
   },
   "templates": {
     "title": "Reel-maler",
@@ -275,7 +354,9 @@
         "subtitle": "Kunngjøring & showroom CTA"
       }
     },
-    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}"
+    "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
+    "useAsk": "Bruk formatet «{{title}}» ({{subtitle}}), på omtrent {{seconds}} sekunder.",
+    "applying": "Bruker…"
   },
   "assets": {
     "title": "Velg ressurser",
@@ -296,6 +377,10 @@
       "macro": "Detalj",
       "staged": "Stylet",
       "tv": "TV-enhet"
-    }
+    },
+    "yourPhoto": "Ditt bilde",
+    "planFirst": "Planlegg reelen først (Lag → Planlegg en reel sammen), og velg deretter bilder.",
+    "saving": "Lagrer…",
+    "sceneN": "Scene {{n}}"
   }
 }
