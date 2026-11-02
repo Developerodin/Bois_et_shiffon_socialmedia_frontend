@@ -16,13 +16,11 @@ export type Post = {
   status: PostStatus;
   scheduledFor: string | null;
   caption?: string;
-  image?: number /* require() */ | { uri: string };
+  image?: number /* require() */ | { uri: string; cacheKey?: string };
 };
 
 const TV = require("../../../assets/figma/posts/bunting-tv-unit.jpg");
 const DINING = require("../../../assets/figma/onboarding/bunting-dining-room.png");
-
-export const BUSINESS = { name: "Bois & Chiffons", favicon: require("../../../assets/figma/bc-favicon.png"), credits: 160 } as const;
 
 /**
  * Days and times read in the phone's timezone, which is what the person picks a slot in (as on the reels R09 screen).
@@ -155,12 +153,6 @@ export const CHANNEL_LABEL: Record<PostChannel, string> = {
 export const isLockedIn = (s: PostStatus) => s === "SCHEDULED" || s === "PUBLISHED" || s === "REVIEWED";
 
 export const getPost = (id: string | string[] | undefined) => POSTS.find((p) => p.id === id);
-
-/** Caption body without the trailing hashtag block, and the hashtags on their own. */
-export function splitCaption(caption = "") {
-  const tags = caption.match(/#[^\s#]+/g) ?? [];
-  return { text: caption.replace(/#[^\s#]+/g, "").trim(), tags };
-}
 
 // ── dates, always read in the business timezone ──────────────────────────────
 

@@ -105,7 +105,15 @@
     "schedule": "Zaplanuj",
     "slow": "Trwa to dłużej niż zwykle. Wróć za kilka minut.",
     "checkFound": "Wykryto problem podczas sprawdzania",
-    "fixIt": "Poproś copywritera o poprawki"
+    "fixIt": "Poproś copywritera o poprawki",
+    "tryAgain": "Spróbuj ponownie",
+    "publishFailed": "Ostatnia próba publikacji się nie powiodła",
+    "checkAccount": "Sprawdź {{account}}: czy wpis został opublikowany?",
+    "wasPosted": "Opublikowano",
+    "notPosted": "Nie opublikowano",
+    "cancelSchedule": "Anuluj zaplanowaną publikację",
+    "cancelling": "Anulowanie...",
+    "noPermission": "Publikację musi zaplanować osoba z uprawnieniami do zatwierdzania i publikowania w tej przestrzeni roboczej."
   },
   "edit": {
     "title": "Edytuj post",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Ten kanał przyjmuje maksymalnie {{count}} zdjęć. Naciśnij, aby je wybrać.",
     "jpegOnly": "Instagram przyjmuje tylko zdjęcia JPEG. Naciśnij, aby wybrać plik .jpg.",
     "expired": "{{channel}}: zaloguj się ponownie",
-    "reconnect": "Połącz ponownie {{channel}}"
+    "reconnect": "Połącz ponownie {{channel}}",
+    "reelInStudio": "Rolki tworzy się i publikuje w studiu rolek, a nie tutaj."
   },
   "brief": {
     "title": "Utwórz post",

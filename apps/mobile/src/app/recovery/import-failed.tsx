@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ApiError } from "@/api/client";
 import { checkSite } from "@/api/endpoints";
+import { normalizeWebsite } from "@/ui/onboarding/website";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Footer, Label } from "@/ui/layout";
@@ -20,7 +21,7 @@ const OPTIONS = ["retry", "manual"] as const;
  */
 export default function ImportFailed() {
   const { t } = useTranslation("recovery");
-  const { site = "" } = useLocalSearchParams<{ site?: string }>();
+  const site = normalizeWebsite(useLocalSearchParams<{ site?: string }>().site ?? "") ?? "";
   const [checking, setChecking] = useState(false);
   const [stillDown, setStillDown] = useState<string | null>(null);
   const change = () => (router.canGoBack() ? router.back() : router.replace("/onboarding/website"));

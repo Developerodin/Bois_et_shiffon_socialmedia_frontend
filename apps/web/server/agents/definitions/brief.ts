@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { CHAIN_ROUNDS } from "@/server/agents/chain";
 import { NothingToDoError, startAgentRun } from "@/server/agents/engine";
+import { postAiAllowed } from "@/server/services/publishing";
 import { BRIEF_SYSTEM, CONTENT_PROMPT_VERSION } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
 import { brandKnowledge } from "@/server/content/knowledge";
@@ -22,7 +24,7 @@ export const briefAgent: AgentDefinition = {
   name: "Brief writer",
   description: "Writes a production brief for each planned post: goal, audience, message, products, call to action.",
   // chain: start the next agent of the posts chain when done (Planner → Brief writer → Creator → Quality), the app's "Generate calendar".
-  inputSchema: z.object({ chain: z.boolean().optional() }).strict(),
+  inputSchema: z.object({ chain: z.boolean().optional(), round: z.number().int().min(0).max(CHAIN_ROUNDS).optional() }).strict(),
   async run(ctx, input) {
     const { brand } = ctx;
     const items = await prisma.contentItem.findMany({
@@ -58,7 +60,14 @@ export const briefAgent: AgentDefinition = {
       const { count } = await prisma.contentItem.updateMany({ where: { id: item.id, status: "PLANNED" }, data: { brief: { ...prior, ...out }, status: "BRIEF_READY" } });
       await ctx.log(count ? "SUCCESS" : "WARN", count ? `Brief ready: ${item.title}` : `Skipped (it moved on while I was writing): ${item.title}`, { type: "ContentItem", id: item.id });
     }
-    if ((input as { chain?: boolean }).chain) await startAgentRun({ workspaceId: brand.workspaceId, brandId: brand.brandId, agentKey: "creator", trigger: "event", input: { chain: true } }).catch(() => null);
+    const { chain, round = 0 } = input as { chain?: boolean; round?: number };
+    if (chain) {
+      const start = (agentKey: string, next: number) =>
+        startAgentRun({ workspaceId: brand.workspaceId, brandId: brand.brandId, agentKey, trigger: "event", input: { chain: true, round: next } }).catch(() => null);
+      await start("creator", round);
+      const waiting = await prisma.contentItem.count({ where: { brandId: brand.brandId, status: "PLANNED", studio: false } });
+      if (waiting > 0 && round + 1 < CHAIN_ROUNDS && (await postAiAllowed(brand.workspaceId))) await start("brief", round + 1);
+    }
     return { briefed: items.length };
   },
 };

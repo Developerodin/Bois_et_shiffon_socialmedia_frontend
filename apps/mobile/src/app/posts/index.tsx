@@ -9,7 +9,7 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge } from "@/ui/posts/controls";
 import { CHANNEL_LABEL, STATUS_KEY, isLockedIn, relativeSlot, upcomingThisWeek } from "@/ui/posts/sample";
-import { coverUrl, openPost, usePosts } from "@/ui/posts/use-posts";
+import { coverSource, coverUrl, openPost, usePosts } from "@/ui/posts/use-posts";
 
 /** P01 · Posts / Today: the post waiting for approval and this week's agenda. */
 export default function PostsToday() {
@@ -48,7 +48,7 @@ export default function PostsToday() {
           </View>
           <View style={{ paddingTop: space[12], gap: space[12] }}>
             <View style={styles.photo}>
-              {coverUrl(pending) ? <Image source={{ uri: coverUrl(pending)! }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={pending.title} /> : null}
+              {coverUrl(pending) ? <Image source={coverSource(pending)} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={pending.title} /> : null}
             </View>
             <View style={{ paddingHorizontal: 2 }}>
               <Text style={[type.cardTitle, { letterSpacing: -0.24 }]}>{pending.title}</Text>

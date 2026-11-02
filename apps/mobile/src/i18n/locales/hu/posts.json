@@ -105,7 +105,15 @@
     "schedule": "Ütemezés",
     "slow": "Ez a szokásosnál tovább tart. Gyere vissza néhány perc múlva.",
     "checkFound": "Az ellenőrzés problémát talált",
-    "fixIt": "Javítás kérése"
+    "fixIt": "Javítás kérése",
+    "tryAgain": "Próbáld újra",
+    "publishFailed": "A legutóbbi közzététel nem sikerült",
+    "checkAccount": "Nézd meg a(z) {{account}} fiókot: megjelent a bejegyzés?",
+    "wasPosted": "Megjelent",
+    "notPosted": "Nem jelent meg",
+    "cancelSchedule": "Ütemezés törlése",
+    "cancelling": "Törlés...",
+    "noPermission": "A munkaterületen jóváhagyási és közzétételi jogosultsággal rendelkező személynek kell ütemeznie."
   },
   "edit": {
     "title": "Bejegyzés szerkesztése",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Ez a csatorna legfeljebb {{count}} fotót fogad el. Koppints a kiválasztásukhoz.",
     "jpegOnly": "Az Instagram csak JPEG-fotókat fogad el. Koppints egy .jpg-fájl kiválasztásához.",
     "expired": "{{channel}}: jelentkezz be újra",
-    "reconnect": "Csatlakoztasd újra: {{channel}}"
+    "reconnect": "Csatlakoztasd újra: {{channel}}",
+    "reelInStudio": "A Reels-videókat a Reels-stúdióban készítheted el és teheted közzé, nem itt."
   },
   "brief": {
     "title": "Bejegyzés létrehozása",

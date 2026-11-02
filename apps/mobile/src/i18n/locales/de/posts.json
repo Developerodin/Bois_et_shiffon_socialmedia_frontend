@@ -105,7 +105,15 @@
     "schedule": "Planen",
     "slow": "Das dauert länger als üblich. Schau in ein paar Minuten wieder vorbei.",
     "checkFound": "Bei der Prüfung wurde ein Problem gefunden",
-    "fixIt": "Texter um Korrektur bitten"
+    "fixIt": "Texter um Korrektur bitten",
+    "tryAgain": "Erneut versuchen",
+    "publishFailed": "Die letzte Veröffentlichung hat nicht geklappt",
+    "checkAccount": "Prüfe {{account}}: Wurde es veröffentlicht?",
+    "wasPosted": "Veröffentlicht",
+    "notPosted": "Nicht veröffentlicht",
+    "cancelSchedule": "Planung abbrechen",
+    "cancelling": "Wird abgebrochen...",
+    "noPermission": "Jemand mit Freigabe- und Veröffentlichungsrechten in diesem Arbeitsbereich muss es einplanen."
   },
   "edit": {
     "title": "Beitrag bearbeiten",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Dieser Kanal akzeptiert höchstens {{count}} Fotos. Tippe, um sie auszuwählen.",
     "jpegOnly": "Instagram akzeptiert nur JPEG-Fotos. Tippe, um stattdessen eine .jpg-Datei auszuwählen.",
     "expired": "{{channel}}: Bitte melde dich erneut an",
-    "reconnect": "{{channel}} erneut verbinden"
+    "reconnect": "{{channel}} erneut verbinden",
+    "reelInStudio": "Reels werden im Reels-Studio erstellt und veröffentlicht, nicht hier."
   },
   "brief": {
     "title": "Beitrag erstellen",

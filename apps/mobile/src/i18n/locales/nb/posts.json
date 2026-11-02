@@ -105,7 +105,15 @@
     "schedule": "Planlegg",
     "slow": "Dette tar lengre tid enn vanlig. Kom tilbake om noen minutter.",
     "checkFound": "Kontrollen fant et problem",
-    "fixIt": "Be skribenten rette det"
+    "fixIt": "Be skribenten rette det",
+    "tryAgain": "Prøv igjen",
+    "publishFailed": "Siste publisering gikk ikke gjennom",
+    "checkAccount": "Sjekk {{account}}: Ble det publisert?",
+    "wasPosted": "Det er publisert",
+    "notPosted": "Det er ikke publisert",
+    "cancelSchedule": "Avbryt planlagt publisering",
+    "cancelling": "Avbryter...",
+    "noPermission": "Noen med rettigheter til å godkjenne og publisere i dette arbeidsområdet må planlegge publiseringen."
   },
   "edit": {
     "title": "Rediger innlegg",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Denne kanalen tillater maks {{count}} bilder. Trykk for å velge dem.",
     "jpegOnly": "Instagram godtar bare JPEG-bilder. Trykk for å velge en .jpg-fil i stedet.",
     "expired": "Du må logge inn på {{channel}} på nytt",
-    "reconnect": "Koble til {{channel}} på nytt"
+    "reconnect": "Koble til {{channel}} på nytt",
+    "reelInStudio": "Reels opprettes og publiseres i Reels-studioet, ikke herfra."
   },
   "brief": {
     "title": "Opprett et innlegg",

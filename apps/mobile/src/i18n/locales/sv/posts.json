@@ -105,7 +105,15 @@
     "schedule": "Schemalägg",
     "slow": "Det här tar längre tid än vanligt. Kom tillbaka om några minuter.",
     "checkFound": "Granskningen hittade ett problem",
-    "fixIt": "Be skribenten fixa det"
+    "fixIt": "Be skribenten fixa det",
+    "tryAgain": "Försök igen",
+    "publishFailed": "Den senaste publiceringen gick inte igenom",
+    "checkAccount": "Kolla {{account}}: publicerades det?",
+    "wasPosted": "Det är publicerat",
+    "notPosted": "Det är inte publicerat",
+    "cancelSchedule": "Avbryt schemaläggning",
+    "cancelling": "Avbryter...",
+    "noPermission": "Någon med behörighet att godkänna och publicera i den här arbetsytan måste schemalägga det."
   },
   "edit": {
     "title": "Redigera inlägg",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Den här kanalen tar högst {{count}} foton. Tryck för att välja dem.",
     "jpegOnly": "Instagram tar bara JPEG-foton. Tryck för att välja en .jpg-fil i stället.",
     "expired": "{{channel}} kräver att du loggar in igen",
-    "reconnect": "Anslut {{channel}} igen"
+    "reconnect": "Anslut {{channel}} igen",
+    "reelInStudio": "Reels skapas och publiceras i Reels-studion, inte här."
   },
   "brief": {
     "title": "Skapa ett inlägg",

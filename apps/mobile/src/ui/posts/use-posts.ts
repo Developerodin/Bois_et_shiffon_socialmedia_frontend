@@ -61,11 +61,15 @@ export const fullCaption = (p: PostItem) => {
 
 /** The cover photo (the first of the post's pictures). */
 export const coverUrl = (p: PostItem) => p.latest?.photoUrls[0] ?? null;
+/** For expo-image: cached by the photo's storage key, since the signed link changes on every read. */
+export const coverSource = (p: PostItem) => {
+  const uri = coverUrl(p);
+  return uri ? { uri, cacheKey: p.latest?.body.photoKeys?.[0] } : undefined;
+};
 
 /** The shape the Posts rows and cards draw (shared with the sample stories). */
 export const asPost = (p: PostItem): Post => {
-  const cover = coverUrl(p);
-  return { id: p.id, title: p.title, channel: p.channel, status: p.status, scheduledFor: p.scheduledFor, caption: fullCaption(p), image: cover ? { uri: cover } : undefined };
+  return { id: p.id, title: p.title, channel: p.channel, status: p.status, scheduledFor: p.scheduledFor, caption: fullCaption(p), image: coverSource(p) };
 };
 
 /** Opens a post; studio reels live in the Reels module. */

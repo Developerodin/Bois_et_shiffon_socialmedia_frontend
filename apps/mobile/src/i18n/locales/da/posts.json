@@ -105,7 +105,15 @@
     "schedule": "Planlæg",
     "slow": "Det tager længere tid end normalt. Kom tilbage om et par minutter.",
     "checkFound": "Kontrollen fandt et problem",
-    "fixIt": "Bed skribenten om at rette det"
+    "fixIt": "Bed skribenten om at rette det",
+    "tryAgain": "Prøv igen",
+    "publishFailed": "Seneste udgivelse mislykkedes",
+    "checkAccount": "Tjek {{account}}: Er det slået op?",
+    "wasPosted": "Det er slået op",
+    "notPosted": "Det er ikke slået op",
+    "cancelSchedule": "Annuller planlægning",
+    "cancelling": "Annullerer...",
+    "noPermission": "En person med godkendelses- og udgivelsesrettigheder i dette arbejdsområde skal planlægge det."
   },
   "edit": {
     "title": "Rediger indlæg",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Denne kanal tillader højst {{count}} billeder. Tryk for at vælge dem.",
     "jpegOnly": "Instagram tillader kun JPEG-billeder. Tryk for at vælge en .jpg-fil i stedet.",
     "expired": "{{channel}} kræver, at du logger ind igen",
-    "reconnect": "Forbind {{channel}} igen"
+    "reconnect": "Forbind {{channel}} igen",
+    "reelInStudio": "Reels oprettes og udgives i Reels-studiet, ikke herfra."
   },
   "brief": {
     "title": "Opret et indlæg",

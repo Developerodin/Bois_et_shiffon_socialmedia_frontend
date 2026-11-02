@@ -12,6 +12,7 @@ import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, CardTitle, SegmentedTabs, tint } from "@/ui/posts/controls";
 import { coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
 import { useCurrentBrand } from "@/ui/use-current-brand";
+import { usePermissions } from "@/ui/use-permissions";
 
 const TABS = ["image", "caption", "brand"] as const;
 type Tab = (typeof TABS)[number];
@@ -29,6 +30,7 @@ export default function EditPost() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { post } = usePost(id);
   const brand = useCurrentBrand();
+  const { can } = usePermissions();
   const body = post?.latest?.body;
   const [tab, setTab] = useState<Tab>("caption");
   // null = unchanged from the draft, so a reload of the list doesn't overwrite what the person is typing.
@@ -105,7 +107,7 @@ export default function EditPost() {
     setBusy("upload");
     setError(null);
     try {
-      const up = await uploadPhoto(a.uri, a.fileName ?? "photo.jpg", a.mimeType ?? "image/jpeg");
+      const up = await uploadPhoto(a.uri);
       const mine = { key: up.key, url: up.previewUrl, title: a.fileName ?? t("edit.yourPhoto") };
       setLibrary((l) => [mine, ...l]);
       togglePhoto(mine.key);
@@ -179,7 +181,7 @@ export default function EditPost() {
             </View>
           </View>
           {/* Only a draft waiting for approval can be sent back; the writer rewrites it in a minute or so. */}
-          {post.status === "AWAITING_APPROVAL" ? (
+          {post.status === "AWAITING_APPROVAL" && can("content.approve") ? (
             <Button
               label={busy === "rewrite" ? t("edit.regenerating") : t("edit.regenerate")}
               variant="outline"

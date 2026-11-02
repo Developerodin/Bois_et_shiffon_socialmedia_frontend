@@ -105,7 +105,15 @@
     "schedule": "Inplannen",
     "slow": "Dit duurt langer dan normaal. Kom over een paar minuten terug.",
     "checkFound": "De controle heeft een probleem gevonden",
-    "fixIt": "Vraag de schrijver om het op te lossen"
+    "fixIt": "Vraag de schrijver om het op te lossen",
+    "tryAgain": "Opnieuw proberen",
+    "publishFailed": "De laatste publicatie is mislukt",
+    "checkAccount": "Controleer {{account}}: is het geplaatst?",
+    "wasPosted": "Het is geplaatst",
+    "notPosted": "Niet geplaatst",
+    "cancelSchedule": "Planning annuleren",
+    "cancelling": "Annuleren...",
+    "noPermission": "Iemand met goedkeurings- en publicatierechten in deze werkruimte moet dit inplannen."
   },
   "edit": {
     "title": "Bericht bewerken",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Dit kanaal accepteert maximaal {{count}} foto's. Tik om ze te kiezen.",
     "jpegOnly": "Instagram accepteert alleen JPEG-foto's. Tik om een .jpg te kiezen.",
     "expired": "Log opnieuw in bij {{channel}}",
-    "reconnect": "Koppel {{channel}} opnieuw"
+    "reconnect": "Koppel {{channel}} opnieuw",
+    "reelInStudio": "Reels maak en plaats je vanuit de Reels-studio, niet hier."
   },
   "brief": {
     "title": "Maak een bericht",

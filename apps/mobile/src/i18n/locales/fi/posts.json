@@ -105,7 +105,15 @@
     "schedule": "Aikataulu",
     "slow": "Tämä kestää tavallista kauemmin. Palaa muutaman minuutin kuluttua.",
     "checkFound": "Tarkistuksessa löytyi ongelma",
-    "fixIt": "Pyydä kirjoittajaa korjaamaan"
+    "fixIt": "Pyydä kirjoittajaa korjaamaan",
+    "tryAgain": "Yritä uudelleen",
+    "publishFailed": "Viimeisin julkaisu ei onnistunut",
+    "checkAccount": "Tarkista {{account}}: julkaistiinko se?",
+    "wasPosted": "Se julkaistiin",
+    "notPosted": "Ei julkaistu",
+    "cancelSchedule": "Peru ajastus",
+    "cancelling": "Perutaan...",
+    "noPermission": "Jonkun, jolla on tässä työtilassa hyväksymis- ja julkaisuoikeudet, täytyy ajastaa se."
   },
   "edit": {
     "title": "Muokkaa julkaisua",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Tähän kanavaan voi lisätä enintään {{count}} kuvaa. Valitse ne napauttamalla.",
     "jpegOnly": "Instagram hyväksyy vain JPEG-kuvat. Valitse .jpg-kuva napauttamalla.",
     "expired": "{{channel}} edellyttää, että kirjaudut uudelleen sisään",
-    "reconnect": "Yhdistä {{channel}} uudelleen"
+    "reconnect": "Yhdistä {{channel}} uudelleen",
+    "reelInStudio": "Reels-videot luodaan ja julkaistaan Reels-studiossa, ei täällä."
   },
   "brief": {
     "title": "Luo julkaisu",

@@ -112,7 +112,8 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     res = await withTimeout(
       init.timeoutMs ?? TIMEOUT_MS,
       (signal) =>
-        (init.onLine ? (streamingFetch as unknown as typeof fetch) : fetch)(`${API_URL}/api/v1${path}`, {
+        // expo/fetch for streamed answers and for uploads (a FormData holding expo-file-system Files, as Expo documents).
+        (init.onLine || init.form ? (streamingFetch as unknown as typeof fetch) : fetch)(`${API_URL}/api/v1${path}`, {
           method,
           signal,
           headers: {

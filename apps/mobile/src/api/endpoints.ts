@@ -1,3 +1,4 @@
+import { File } from "expo-file-system";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import { api, session } from "@/api/client";
@@ -74,6 +75,9 @@ export type StoredImage = { key: string; url: string };
 export type BrandAssetsView = {
   name: string;
   website: string | null;
+  /** Business address (Google Maps listing or the owner's own words) and type, e.g. "Furniture store"; null when unknown. */
+  location: string | null;
+  category: string | null;
   /** Null until Research collected them (or the brand has no website). */
   assets: {
     logo: StoredImage | null;
@@ -83,13 +87,15 @@ export type BrandAssetsView = {
     fonts: string[];
     products: { title: string; kind: string | null; url: string; image: StoredImage | null }[];
   } | null;
+  /** Photos the owner added to the library (Business M08), newest first. */
+  uploads: { title: string; addedAt: string; image: StoredImage | null }[];
   /** Research's short summary (A09); null until written. Tags and sentences are English, the tagline is the site's own. */
   /** `foundWebsite`: a brand made without a website whose own site the online lookup found, for the owner to accept. */
   summary: { tagline: string | null; tags: string[]; audience: string | null; strengths: string | null; foundWebsite: string | null } | null;
   /** The owner's A10 choices; null fields = not chosen yet. */
   preferences: { tones: string[] | null; contentLanguage: "fr" | "en" | null };
 };
-export type BrandDetailsEdit = { colors?: string[]; tagline?: string; audience?: string; tones?: string[]; contentLanguage?: "fr" | "en" };
+export type BrandDetailsEdit = { colors?: string[]; tagline?: string; audience?: string; tones?: string[]; contentLanguage?: "fr" | "en"; removeUpload?: string };
 
 /** Logo, colours, fonts and product photos Research read from the website, its summary and the owner's choices. Image URLs last an hour. */
 /** The workspace's credit balance (module header). */
@@ -206,7 +212,8 @@ export type ReelDetail = {
   caption: { caption?: string; hashtags?: string[] } | null; videoUrl: string | null;
   checks: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
   // softened: joins (scene n → n+1) the seam check turned into a dissolve because the two shots didn't match.
-  renders: { id: string; versionId: string; attempt: number; step: RenderStep; failure: RenderFailure | null; softened: number[]; videoKey: string | null; createdAt: string }[];
+  // credits: what that attempt was charged (refunded if it failed); null when unknown.
+  renders: { id: string; versionId: string; attempt: number; step: RenderStep; failure: RenderFailure | null; softened: number[]; videoKey: string | null; credits: number | null; createdAt: string }[];
   chat: ChatTurn[];
   credits: number;
   photoUrls: Record<string, string>;
@@ -290,11 +297,19 @@ export async function connections() {
   const { ws, base } = await reelBase();
   return api<{ connections: Connection[] }>(`${base}/connections`, { workspaceId: ws });
 }
-/** R13 "Upload photos": a JPG/PNG up to 4 MB into this brand's media; returns its storage key. */
-export async function uploadPhoto(uri: string, name = "photo.jpg", type = "image/jpeg") {
+/**
+ * R13 / P04 / M08 "Upload": a JPG/PNG up to 4 MB into this brand's media; returns its storage key.
+ * `library`: also add it to the brand's photo library (Business M08) under `title`.
+ */
+export async function uploadPhoto(uri: string, library?: { title: string }) {
   const { ws, base } = await reelBase();
   const form = new FormData();
-  form.append("file", { uri, name, type } as unknown as Blob);
+  // An expo-file-system File (Expo's documented upload with expo/fetch); the server reads the type from its bytes.
+  form.append("file", new File(uri) as unknown as Blob);
+  if (library) {
+    form.append("library", "1");
+    form.append("title", library.title);
+  }
   return api<{ key: string; previewUrl: string }>(`${base}/media`, { form, workspaceId: ws, timeoutMs: 60_000 });
 }
 
@@ -337,7 +352,12 @@ export const posts = {
   /** Schedules the post with its photo on a connected account (approving it first). */
   schedule: (id: string, version: number, o: { connectionId: string; runAt: Date; approve: boolean; photoKeys?: string[]; boardId?: string }) =>
     publishContent(id, version, { ...o, mediaKeys: o.photoKeys?.length ? o.photoKeys : undefined }),
-  /** The check blocked the draft: the writer rewrites it with the check's report. */
+  /** A scheduled post: cancel it. A publish that may or may not have gone out (CHECK): say what the account shows. */
+  async settle(id: string, attemptId: string, action: "cancel" | "posted" | "not-posted") {
+    const { ws, base } = await reelBase();
+    return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action, attemptId }, workspaceId: ws });
+  },
+  /** "Fix it" / "Try again": the writer (re)writes a post stuck without a new draft, or the check runs again. */
   async rewrite(id: string, version: number) {
     const { ws, base } = await reelBase();
     return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "rewrite", version }, workspaceId: ws });
@@ -348,6 +368,13 @@ export const posts = {
     return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "decide", version, verdict: "CHANGES_REQUESTED", note }, workspaceId: ws });
   },
 };
+
+/** The person's permissions on the current business (apps/web permissions.catalog.ts keys). */
+export async function myPermissions() {
+  const b = await currentBrand();
+  const r = await api<{ permissions: string[] }>(`/workspaces/${encodeURIComponent(b.workspaceId)}/my-permissions?brandId=${encodeURIComponent(b.brandId)}`, { workspaceId: b.workspaceId });
+  return new Set(r.permissions);
+}
 
 /** GET …/content/:id (apps/web publishing.ts releaseState): approval and where the post can go. */
 export type PostRelease = {

@@ -12,7 +12,8 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, tint } from "@/ui/posts/controls";
 import { STATUS_KEY, isLockedIn } from "@/ui/posts/sample";
-import { coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
+import { coverSource, coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
+import { usePermissions } from "@/ui/use-permissions";
 
 const editIcon = require("../../../assets/figma/posts/btn-edit.svg");
 const scheduleIcon = require("../../../assets/figma/posts/btn-schedule-white.svg");
@@ -40,6 +41,8 @@ export default function PostDetail() {
     return () => ctrl.abort();
   }, [id, post?.latest?.version]);
   const edit = () => router.push({ pathname: "/posts/edit", params: { id } });
+  const { can } = usePermissions();
+  const [settling, setSettling] = useState(false);
   // "Fix it" was tapped on this version: the writer is on it until a newer version lands.
   const [fixing, setFixing] = useState<number | null>(null);
   const [fixError, setFixError] = useState<string | null>(null);
@@ -71,12 +74,12 @@ export default function PostDetail() {
   const blocked = !working && post.status === "DRAFT_REVIEW" && post.latest?.check?.overall === "BLOCKER";
   const problems = blocked ? (post.latest?.check?.results ?? []).filter((r) => r.status === "blocker") : [];
   const fix = async () => {
-    if (!post.latest) return;
     setFixError(null);
     setAsking(true);
     try {
-      await posts.rewrite(post.id, post.latest.version);
-      setFixing(post.latest.version);
+      await posts.rewrite(post.id, post.latest?.version ?? 0);
+      setFixing(post.latest?.version ?? 0);
+      setSlowAt(null);
     } catch (e) {
       setFixError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -84,8 +87,25 @@ export default function PostDetail() {
     }
   };
   const account = release?.accounts[0];
-  // Schedule approves this draft first: only once the writer and the check are done with it.
+  // Schedule approves this draft first: only once the writer and the check are done with it, and only for people who
+  // may (publish.execute, and content.approve when it still needs approving).
   const ready = post.status === "AWAITING_APPROVAL" || post.status === "APPROVED";
+  const allowed = can("publish.execute") && (post.status !== "AWAITING_APPROVAL" || can("content.approve"));
+  // The live publish attempt: a scheduled one can be cancelled; an uncertain one (CHECK) needs the person to look.
+  const scheduled = release?.attempts.find((a) => a.status === "SCHEDULED");
+  const uncertain = release?.attempts.find((a) => a.status === "PENDING_VERIFY");
+  const settle = async (attemptId: string, action: "cancel" | "posted" | "not-posted") => {
+    setSettling(true);
+    setFixError(null);
+    try {
+      setRelease(await posts.settle(post.id, attemptId, action));
+      await reloadPosts();
+    } catch (e) {
+      setFixError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSettling(false);
+    }
+  };
 
   return (
     <PostsScreen
@@ -101,7 +121,7 @@ export default function PostDetail() {
       contentStyle={{ paddingHorizontal: space[16], paddingTop: space[12], paddingBottom: space[24] }}
     >
       <View style={styles.visual}>
-        {coverUrl(post) ? <Image source={{ uri: coverUrl(post)! }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={body?.altText || post.title} /> : null}
+        {coverUrl(post) ? <Image source={coverSource(post)} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={body?.altText || post.title} /> : null}
         <View style={styles.ratio}>
           <Text style={[type.meta, { color: color.onPrimary }]}>{t("detail.feedPhoto")}</Text>
         </View>
@@ -141,10 +161,30 @@ export default function PostDetail() {
         </View>
       </Card>
 
+      {post.publishIssue === "FAILED" && post.publishError ? (
+        <Card style={{ marginTop: space[12], gap: space[4] }}>
+          <Text style={styles.eyebrow}>{t("detail.publishFailed")}</Text>
+          <Text style={type.body}>{post.publishError}</Text>
+        </Card>
+      ) : null}
+      {uncertain ? (
+        <Card style={{ marginTop: space[12], gap: space[8] }}>
+          <Text style={styles.eyebrow}>{t("detail.checkAccount", { account: uncertain.account })}</Text>
+          {uncertain.error ? <Text style={type.body}>{uncertain.error}</Text> : null}
+          <View style={styles.actions}>
+            <Button label={t("detail.wasPosted")} variant="outline" height={44} style={{ flex: 1 }} disabled={settling} onPress={() => void settle(uncertain.id, "posted")} />
+            <Button label={t("detail.notPosted")} variant="outline" height={44} style={{ flex: 1 }} disabled={settling} onPress={() => void settle(uncertain.id, "not-posted")} />
+          </View>
+        </Card>
+      ) : null}
+      {fixError && !blocked ? <Text style={[type.meta, { color: color.error, paddingTop: space[12] }]}>{fixError}</Text> : null}
       {working ? (
-        <Text style={[type.meta, { paddingTop: space[16] }]} accessibilityLiveRegion="polite">
-          {slow ? t("detail.slow") : t("detail.notReady")}
-        </Text>
+        <View style={{ paddingTop: space[16], gap: space[8] }}>
+          <Text style={type.meta} accessibilityLiveRegion="polite">
+            {slow ? t("detail.slow") : t("detail.notReady")}
+          </Text>
+          {slow ? <Button label={asking ? t("edit.regenerating") : t("detail.tryAgain")} variant="outline" height={44} disabled={asking} onPress={() => void fix()} /> : null}
+        </View>
       ) : blocked ? (
         <Card style={{ marginTop: space[12], gap: space[8] }}>
           <Text style={styles.eyebrow}>{t("detail.checkFound")}</Text>
@@ -157,10 +197,17 @@ export default function PostDetail() {
           <Button label={asking ? t("edit.regenerating") : t("detail.fixIt")} variant="outline" height={44} disabled={asking} onPress={() => void fix()} />
         </Card>
       ) : null}
-      <View style={styles.actions}>
-        <Button label={t("detail.editPost")} variant="outline" icon={editIcon} style={{ flex: 1 }} onPress={edit} />
-        <Button label={t("detail.schedule")} icon={scheduleIcon} style={{ flex: 1 }} disabled={!ready} onPress={() => router.push({ pathname: "/posts/schedule", params: { id: post.id } })} />
-      </View>
+      {scheduled ? (
+        <View style={styles.actions}>
+          <Button label={settling ? t("detail.cancelling") : t("detail.cancelSchedule")} variant="outline" style={{ flex: 1 }} disabled={settling || !can("publish.execute")} onPress={() => void settle(scheduled.id, "cancel")} />
+        </View>
+      ) : (
+        <View style={styles.actions}>
+          <Button label={t("detail.editPost")} variant="outline" icon={editIcon} style={{ flex: 1 }} onPress={edit} />
+          <Button label={t("detail.schedule")} icon={scheduleIcon} style={{ flex: 1 }} disabled={!ready || !allowed} onPress={() => router.push({ pathname: "/posts/schedule", params: { id: post.id } })} />
+        </View>
+      )}
+      {ready && !allowed ? <Text style={[type.meta, { paddingTop: space[8] }]}>{t("detail.noPermission")}</Text> : null}
     </PostsScreen>
   );
 }

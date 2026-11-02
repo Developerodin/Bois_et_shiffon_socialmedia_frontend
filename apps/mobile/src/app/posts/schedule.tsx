@@ -12,7 +12,7 @@ import { MonthCalendar } from "@/ui/posts/calendar";
 import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { CardTitle, Pill, tint } from "@/ui/posts/controls";
 import { BUSINESS_TZ_LABEL, dayKey, shortDate, time24, ymd } from "@/ui/posts/sample";
-import { coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
+import { coverSource, reloadPosts, usePost } from "@/ui/posts/use-posts";
 
 const icons = {
   link: require("../../../assets/figma/posts/btn-link.svg"),
@@ -95,6 +95,8 @@ export default function SchedulePost() {
   const req = release?.requirements;
   const imageProblem = !req
     ? null
+    : post.channel === "INSTAGRAM_REEL"
+      ? t("schedule.reelInStudio")
     : keys.length < req.minImages
       ? t("schedule.needImages", { count: req.minImages })
       : keys.length > req.maxImages
@@ -138,7 +140,7 @@ export default function SchedulePost() {
   return (
     <PostsScreen header={<PageHeader title={t("schedule.title")} right={<BusinessChip />} />} contentStyle={{ paddingHorizontal: space[16], paddingTop: space[12], paddingBottom: space[24] }}>
       <Card style={styles.summary}>
-        <Image source={coverUrl(post) ? { uri: coverUrl(post)! } : undefined} style={styles.thumb} contentFit="cover" />
+        <Image source={coverSource(post)} style={styles.thumb} contentFit="cover" />
         <View style={{ flex: 1 }}>
           <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]} numberOfLines={1}>
             {post.title}

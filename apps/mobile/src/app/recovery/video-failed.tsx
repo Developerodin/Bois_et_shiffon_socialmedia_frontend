@@ -44,7 +44,10 @@ export default function VideoFailed() {
   }, [detail, render]);
   const plan = detail?.plan;
   const price = detail?.price ?? 0;
-  const credits = { count: price, n: formatNumber(price) };
+  // The failed attempt's own charge (the plan may have changed price since); Try again costs today's price.
+  const refunded = detail?.renders[0]?.credits ?? price;
+  const credits = { count: refunded, n: formatNumber(refunded) };
+  const again = { count: price, n: formatNumber(price) };
   const failure = render?.failure;
   const photo = plan ? detail?.photoUrls[plan.scenes[0]?.photoKey] : undefined;
   const details = [
@@ -127,7 +130,7 @@ export default function VideoFailed() {
       <Footer>
         {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
         <ActionButton
-          label={retrying ? t("videoFailed.retrying") : detail ? t("videoFailed.tryAgain", credits) : t("videoFailed.tryAgainPlain")}
+          label={retrying ? t("videoFailed.retrying") : detail ? t("videoFailed.tryAgain", again) : t("videoFailed.tryAgainPlain")}
           leading={RotateCcw}
           disabled={!detail || retrying}
           onPress={() => void retry()}

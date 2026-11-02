@@ -105,7 +105,15 @@
     "schedule": "Programează",
     "slow": "Durează mai mult decât de obicei. Revino peste câteva minute.",
     "checkFound": "Verificarea a găsit o problemă",
-    "fixIt": "Cere redactorului să o rezolve"
+    "fixIt": "Cere redactorului să o rezolve",
+    "tryAgain": "Încearcă din nou",
+    "publishFailed": "Ultima publicare nu a reușit",
+    "checkAccount": "Verifică {{account}}: s-a publicat?",
+    "wasPosted": "S-a publicat",
+    "notPosted": "Nu s-a publicat",
+    "cancelSchedule": "Anulează programarea",
+    "cancelling": "Se anulează...",
+    "noPermission": "Cineva cu drepturi de aprobare și publicare în acest spațiu de lucru trebuie să programeze postarea."
   },
   "edit": {
     "title": "Editează postarea",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Acest canal acceptă cel mult {{count}} fotografii. Apasă pentru a le alege.",
     "jpegOnly": "Instagram acceptă doar fotografii JPEG. Apasă pentru a alege un fișier .jpg.",
     "expired": "Trebuie să te autentifici din nou pe {{channel}}",
-    "reconnect": "Reconectează {{channel}}"
+    "reconnect": "Reconectează {{channel}}",
+    "reelInStudio": "Reels se creează și se publică din studioul Reels, nu de aici."
   },
   "brief": {
     "title": "Creează o postare",

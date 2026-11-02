@@ -105,7 +105,15 @@
     "schedule": "Naplánovat",
     "slow": "Trvá to déle než obvykle. Vrať se za pár minut.",
     "checkFound": "Kontrola odhalila problém",
-    "fixIt": "Požádat textaře o opravu"
+    "fixIt": "Požádat textaře o opravu",
+    "tryAgain": "Zkusit znovu",
+    "publishFailed": "Poslední zveřejnění se nezdařilo",
+    "checkAccount": "Zkontroluj {{account}}: je příspěvek zveřejněný?",
+    "wasPosted": "Je zveřejněný",
+    "notPosted": "Není zveřejněný",
+    "cancelSchedule": "Zrušit naplánování",
+    "cancelling": "Ruší se...",
+    "noPermission": "Naplánovat to může jen někdo, kdo má v tomto pracovním prostoru práva ke schvalování a zveřejňování."
   },
   "edit": {
     "title": "Upravit příspěvek",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Tento kanál umožňuje nejvýše {{count}} fotek. Klepnutím je vyber.",
     "jpegOnly": "Instagram přijímá pouze fotky ve formátu JPEG. Klepnutím vyber fotku ve formátu .jpg.",
     "expired": "Pro {{channel}} je potřeba se znovu přihlásit",
-    "reconnect": "Znovu připojit {{channel}}"
+    "reconnect": "Znovu připojit {{channel}}",
+    "reelInStudio": "Reels se vytvářejí a zveřejňují ve studiu Reels, ne tady."
   },
   "brief": {
     "title": "Vytvořit příspěvek",

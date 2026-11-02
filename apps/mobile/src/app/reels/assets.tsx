@@ -45,7 +45,7 @@ export default function ReelsAssets() {
     setUploading(true);
     try {
       for (const a of r.assets) {
-        const up = await uploadPhoto(a.uri, a.fileName ?? "photo.jpg", a.mimeType ?? "image/jpeg");
+        const up = await uploadPhoto(a.uri);
         setUploads((u) => [{ key: up.key, url: up.previewUrl, title: a.fileName ?? t("assets.yourPhoto") }, ...u]);
       }
     } catch (e) {

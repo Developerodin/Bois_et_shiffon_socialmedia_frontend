@@ -105,7 +105,15 @@
     "schedule": "Planifier",
     "slow": "Cela prend plus de temps que prévu. Reviens dans quelques minutes.",
     "checkFound": "La vérification a détecté un problème",
-    "fixIt": "Demander une correction"
+    "fixIt": "Demander une correction",
+    "tryAgain": "Réessayer",
+    "publishFailed": "La dernière publication a échoué",
+    "checkAccount": "Vérifie {{account}} : la publication est-elle en ligne ?",
+    "wasPosted": "C’est publié",
+    "notPosted": "Ce n’est pas publié",
+    "cancelSchedule": "Annuler la programmation",
+    "cancelling": "Annulation...",
+    "noPermission": "Une personne ayant les droits d’approbation et de publication dans cet espace de travail doit le programmer."
   },
   "edit": {
     "title": "Modifier la publication",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Ce canal accepte au maximum {{count}} photos. Appuie pour les choisir.",
     "jpegOnly": "Instagram accepte uniquement les photos JPEG. Appuie pour choisir un fichier .jpg.",
     "expired": "Tu dois te reconnecter à {{channel}}",
-    "reconnect": "Reconnecter {{channel}}"
+    "reconnect": "Reconnecter {{channel}}",
+    "reelInStudio": "Les Reels se créent et se publient dans le studio Reels, pas ici."
   },
   "brief": {
     "title": "Créer une publication",

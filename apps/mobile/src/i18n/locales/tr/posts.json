@@ -105,7 +105,15 @@
     "schedule": "Zamanla",
     "slow": "Bu işlem normalden uzun sürüyor. Birkaç dakika sonra tekrar gel.",
     "checkFound": "Kontrolde bir sorun bulundu",
-    "fixIt": "Yazardan düzeltmesini iste"
+    "fixIt": "Yazardan düzeltmesini iste",
+    "tryAgain": "Tekrar dene",
+    "publishFailed": "Son paylaşım başarısız oldu",
+    "checkAccount": "{{account}} hesabını kontrol et: Paylaşılmış mı?",
+    "wasPosted": "Paylaşılmış",
+    "notPosted": "Paylaşılmamış",
+    "cancelSchedule": "Planlamayı iptal et",
+    "cancelling": "İptal ediliyor...",
+    "noPermission": "Bunu, bu çalışma alanında onaylama ve paylaşma yetkisi olan biri planlamalı."
   },
   "edit": {
     "title": "Gönderiyi düzenle",
@@ -170,7 +178,8 @@
     "tooManyImages_other": "Bu kanal en fazla {{count}} fotoğraf kabul eder. Seçmek için dokun.",
     "jpegOnly": "Instagram yalnızca JPEG fotoğrafları kabul eder. Bir .jpg seçmek için dokun.",
     "expired": "{{channel}} için yeniden giriş yapman gerekiyor",
-    "reconnect": "{{channel}} bağlantısını yenile"
+    "reconnect": "{{channel}} bağlantısını yenile",
+    "reelInStudio": "Reels videoları burada değil, Reels stüdyosunda oluşturulup paylaşılır."
   },
   "brief": {
     "title": "Gönderi oluştur",

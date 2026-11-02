@@ -50,7 +50,7 @@ export default function LowCredits() {
           </View>
           <View style={[styles.row, { paddingTop: space[12] }]}>
             <Text style={[meta, { flex: 1 }]}>{t("lowCredits.neededLabel")}</Text>
-            <Text style={metaInk}>{t("lowCredits.remaining", { available: formatNumber(available ?? 0), needed: formatNumber(needed) })}</Text>
+            <Text style={metaInk}>{t("lowCredits.remaining", { available: available === null ? "…" : formatNumber(available), needed: formatNumber(needed) })}</Text>
           </View>
           <View style={styles.track} accessibilityRole="progressbar" accessibilityLabel={t("lowCredits.remainingA11y")} accessibilityValue={{ min: 0, max: needed, now: available ?? 0 }}>
             <View style={[styles.fill, { width: `${share * 100}%` }]} />
