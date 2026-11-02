@@ -7,6 +7,7 @@
     "approved": "Hyväksytty",
     "scheduled": "Aikataulutettu",
     "published": "Julkaistu",
+    "rejected": "Hylätty",
     "draft": "Luonnos"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Tuleva aikataulu",
     "thisWeek": "Tällä viikolla",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Näytä kalenteri"
+    "viewCalendar": "Näytä kalenteri",
+    "loadFailed": "Julkaisuja ei voitu ladata. Tarkista yhteytesi.",
+    "retry": "Yritä uudelleen",
+    "empty": "Tällä viikolla ei ole vielä julkaisuja. Suunnittele niitä Suunnittelussa.",
+    "slides": "Karuselli · {{count}} kuvaa"
   },
   "calendar": {
     "title": "Julkaisukalenteri",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Julkaisun tiedot",
-    "moreOptions": "Lisää vaihtoehtoja",
     "feedPhoto": "4:5 Syötekuva",
-    "fullscreen": "Koko näyttö",
-    "captionFrench": "Kuvateksti (ranska)",
+    "caption": "Kuvateksti",
+    "noDraft": "Kirjoittaja ei ole vielä luonnostellut tätä julkaisua.",
+    "notFound": "Tätä julkaisua ei enää ole.",
+    "notReady": "Kirjoittaja työstää julkaisua. Luonnos ja sen tarkistus näkyvät tässä parin minuutin kuluttua.",
+    "instagramCarousel": "Instagram-karuselli",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Yhdistetty",
     "editText": "Muokkaa tekstiä",
     "channels": "Julkaisukanavat",
     "instagramFeed": "Instagram-syöte",
     "instagramDetail": "Yhdistä tili julkaisemista varten",
     "facebookPage": "Facebook-sivu",
-    "facebookDetail": "Automaattinen julkaisu viralliselle sivulle",
     "notConnected": "Ei yhdistetty",
     "channelNotConnected": "{{name}}, ei yhdistetty",
     "editPost": "Muokkaa julkaisua",
-    "schedule": "Aikataulu"
+    "schedule": "Aikataulu",
+    "slow": "Tämä kestää tavallista kauemmin. Palaa muutaman minuutin kuluttua.",
+    "checkFound": "Tarkistuksessa löytyi ongelma",
+    "fixIt": "Pyydä kirjoittajaa korjaamaan"
   },
   "edit": {
     "title": "Muokkaa julkaisua",
@@ -110,18 +123,35 @@
     "language": "Kieli: ranska (FR)",
     "suggestedHashtags": "Ehdotetut hashtagit",
     "addHashtag": "Lisää hashtag",
+    "removeHashtag": "Poista {{tag}}",
     "add": "+ Lisää",
     "regenerate": "Luo kuvateksti uudelleen AI:lla",
+    "regenerating": "Lähetetään kirjoittajalle...",
+    "saving": "Tallennetaan...",
+    "upload": "Lataa oma kuva",
+    "uploading": "Ladataan...",
+    "yourPhoto": "Oma kuvasi",
     "imageHint": "Alkuperäinen suhde · 4:5. Vedä esikatselua rajataksesi uudelleen.",
-    "brandHint": "Logo, värit ja sävy seuraavat {{brand}} brändipakettiasi."
+    "carouselHint": "Valitse 2–10 kuvaa siinä järjestyksessä, jossa ne näytetään. Instagram hyväksyy JPEG-kuvat.",
+    "brandHint": "Logo, värit ja sävy seuraavat {{brand}} brändipakettiasi.",
+    "carouselMin": "Karuselli tarvitsee vähintään 2 kuvaa."
   },
   "schedule": {
     "title": "Aikataulu",
-    "storyFormat": "Tarina · 9:16 kuva",
     "feedFormat": "Syötepostaus · 4:5 kuva",
+    "carouselFormat": "Karuselli · 4:5-kuvat",
     "destination": "Kohde",
     "actionRequired": "Toimenpide vaaditaan",
     "notLinked": "Instagram-tili ei yhdistetty",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Pinterest-taulujasi ei voitu ladata. Yhdistä Pinterest uudelleen ja yritä uudestaan.",
+    "past": "Valitse aika, johon on vähintään {{count}} minuuttia.",
+    "scheduling": "Ajastetaan...",
     "notLinkedBody": "Yhdistä sosiaalitilisi avataksesi suoran aikataulutetun julkaisun.",
     "connect": "Yhdistä sosiaalitili",
     "locked": "Aikataulu lukittu, kunnes yhteys on muodostettu",
@@ -133,7 +163,12 @@
     "timezone": "Aikavyöhyke",
     "schedulePost": "Aikatauluta julkaisu",
     "scheduleLocked": "Aikatauluta julkaisu (Yhdistä kanava ensin)",
-    "saveDraft": "Tallenna luonnos"
+    "later": "Ei nyt",
+    "needImages_one": "Tämä julkaisu tarvitsee kuvan. Lisää kuva napauttamalla.",
+    "needImages_other": "Tämä julkaisu tarvitsee vähintään {{count}} kuvaa. Lisää kuvat napauttamalla.",
+    "tooManyImages_one": "Tähän kanavaan voi lisätä yhden kuvan. Valitse se napauttamalla.",
+    "tooManyImages_other": "Tähän kanavaan voi lisätä enintään {{count}} kuvaa. Valitse ne napauttamalla.",
+    "jpegOnly": "Instagram hyväksyy vain JPEG-kuvat. Valitse .jpg-kuva napauttamalla."
   },
   "brief": {
     "title": "Luo julkaisu",
@@ -155,10 +190,12 @@
     "changeProduct": "Vaihda tuote",
     "change": "Vaihda",
     "direction": "Luova suunta (valinnainen)",
-    "directionLanguage": "Ranska (FR)",
     "directionPlaceholder": "esim. Keskity käsintehtyyn puusepäntyöhön ja lämpöön",
     "cost": "Luomiskustannus:",
-    "costPending": "Arvio odottaa",
+    "costIncluded": "Sisältyy",
+    "drafting": "Lähetetään kirjoittajalle...",
+    "noProducts": "Ei vielä tuotekuvia. Lisää kuvia, jotta kirjoittajalla on jotain näytettävää.",
+    "addPhotos": "Lisää tuotekuvia",
     "draftPost": "Luonnosjulkaisu"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Suunnittelusykli",
     "cadence": "Julkaisutahti",
-    "monthlyTarget": "Kuukausitavoite",
     "feedPosts": "Syötejulkaisut",
-    "stories": "Tarinoita",
     "perMonth": "{{n}} / kuukausi",
-    "feedNote": "~1 julkaisu päivässä",
-    "storiesNote": "Levitä kuukauden aikana",
     "cadenceHint": "Ehdotetut sisällön tavoitteet. Säädä ennen kalenterin luomista.",
     "pillars": "Sisältöpilareita",
-    "pillar": {
-      "catalog": "Tuoteluettelon tuotteet (Bunting painotus)",
-      "craft": "Materiaalin yksityiskohdat & käsityö (Acacia-puu)",
-      "story": "Bränditarina & ranskalainen perintö"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Manuaalinen tarkistus ennen julkaisua: </b>Luodut julkaisut sijoitetaan kalenteriisi luonnoksina lopullista vahvistusta varten. Mitään sisältöä ei julkaista ilman hyväksyntää.",
-    "generate": "Luo kalenteri"
+    "generate": "Luo kalenteri",
+    "onCalendar": "Kalenterissa",
+    "reels": "Reels",
+    "noPillars": "Tälle kuukaudelle ei ole vielä suunniteltu julkaisuja.",
+    "started": "Suunnitellaan seuraavia 30 päivääsi. Ensimmäiset luonnokset ilmestyvät kalenteriin muutaman minuutin kuluttua hyväksyttäviksi. Loput ilmestyvät sitä mukaa kuin ne valmistuvat.",
+    "generating": "Aloitetaan...",
+    "cost": "Maksaa {{n}} krediittiä."
   }
 }

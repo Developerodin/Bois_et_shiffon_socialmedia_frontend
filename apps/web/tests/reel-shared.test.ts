@@ -17,6 +17,8 @@ const db = vi.hoisted(() => {
 });
 vi.mock("@/server/db/prisma", () => ({ prisma: db.prisma }));
 vi.mock("@/server/jobs/queue", () => ({ enqueueJob: vi.fn(async () => ({})) }));
+const approvers = vi.hoisted(() => ({ other: true }));
+vi.mock("@/server/auth/permissions", () => ({ hasOtherApprover: vi.fn(async () => approvers.other) }));
 
 import { creatorAgent } from "@/server/agents/definitions/creator";
 import { briefAgent } from "@/server/agents/definitions/brief";
@@ -88,6 +90,14 @@ describe("studio reels in the publishing flow", () => {
   it("non-studio author still may not", async () => {
     withLatest(item({ channel: "INSTAGRAM_POST", studio: false }), version());
     await expect(decide({ ...scope, userId: "u1", itemId: "i1", version: 3, verdict: "APPROVED" })).rejects.toThrow(/someone else/);
+  });
+
+  it("non-studio author may when nobody else can approve", async () => {
+    approvers.other = false;
+    withLatest(item({ channel: "INSTAGRAM_POST", studio: false }), version());
+    db.tx.approvalDecision.create.mockResolvedValue({ packageHash: "h" });
+    await expect(decide({ ...scope, userId: "u1", itemId: "i1", version: 3, verdict: "APPROVED" })).resolves.toBeTruthy();
+    approvers.other = true;
   });
 
   it("studio reel schedules with videoKey not client url", async () => {

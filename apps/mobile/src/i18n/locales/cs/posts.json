@@ -7,6 +7,7 @@
     "approved": "Schváleno",
     "scheduled": "Naplánováno",
     "published": "Publikováno",
+    "rejected": "Odmítnuto",
     "draft": "Návrh"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Nadcházející agenda",
     "thisWeek": "Tento týden",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Zobrazit kalendář"
+    "viewCalendar": "Zobrazit kalendář",
+    "loadFailed": "Příspěvky se nepodařilo načíst. Zkontroluj připojení.",
+    "retry": "Zkusit znovu",
+    "empty": "Na tento týden zatím nemáš žádné příspěvky. Naplánuj je v Plánovači.",
+    "slides": "Karusel · počet snímků: {{count}}"
   },
   "calendar": {
     "title": "Kalendář příspěvků",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Detaily příspěvku",
-    "moreOptions": "Více možností",
     "feedPhoto": "4:5 Fotka pro feed",
-    "fullscreen": "Celá obrazovka",
-    "captionFrench": "Popisek (francouzsky)",
+    "caption": "Popisek",
+    "noDraft": "Textař ještě tento příspěvek nepřipravil.",
+    "notFound": "Tento příspěvek už tu není.",
+    "notReady": "Textař na tom pracuje. Návrh a jeho kontrola se tu objeví za minutu nebo dvě.",
+    "instagramCarousel": "Karusel na Instagramu",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Připojeno",
     "editText": "Upravit text",
     "channels": "Publikační kanály",
     "instagramFeed": "Instagram Feed",
     "instagramDetail": "Připojte účet pro publikování",
     "facebookPage": "Facebook stránka",
-    "facebookDetail": "Automatické zveřejnění na oficiální stránce",
     "notConnected": "Nepřipojeno",
     "channelNotConnected": "{{name}}, nepřipojeno",
     "editPost": "Upravit příspěvek",
-    "schedule": "Naplánovat"
+    "schedule": "Naplánovat",
+    "slow": "Trvá to déle než obvykle. Vrať se za pár minut.",
+    "checkFound": "Kontrola odhalila problém",
+    "fixIt": "Požádat textaře o opravu"
   },
   "edit": {
     "title": "Upravit příspěvek",
@@ -110,18 +123,35 @@
     "language": "Jazyk: francouzština (FR)",
     "suggestedHashtags": "Navrhované hashtagy",
     "addHashtag": "Přidat hashtag",
+    "removeHashtag": "Odebrat {{tag}}",
     "add": "+ Přidat",
     "regenerate": "Znovu vygenerovat popisek pomocí AI",
+    "regenerating": "Odesílání textaři...",
+    "saving": "Ukládání...",
+    "upload": "Nahrát vlastní fotku",
+    "uploading": "Nahrávání...",
+    "yourPhoto": "Tvoje fotka",
     "imageHint": "Původní poměr · 4:5. Přetáhněte náhled pro změnu výřezu.",
-    "brandHint": "Logo, barvy a tón odpovídají vaší značkové sadě {{brand}}."
+    "carouselHint": "Vyber 2 až 10 fotek v pořadí, v jakém se mají zobrazit. Instagram přijímá fotky ve formátu JPEG.",
+    "brandHint": "Logo, barvy a tón odpovídají vaší značkové sadě {{brand}}.",
+    "carouselMin": "Karusel potřebuje alespoň 2 fotky."
   },
   "schedule": {
     "title": "Naplánovat",
-    "storyFormat": "Příběh · 9:16 obrázek",
     "feedFormat": "Feed příspěvek · 4:5 obrázek",
+    "carouselFormat": "Karusel · obrázky 4:5",
     "destination": "Cíl",
     "actionRequired": "Vyžadována akce",
     "notLinked": "Instagram účet není propojen",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Nástěnky z Pinterestu se nepodařilo načíst. Znovu připoj Pinterest a zkus to znovu.",
+    "past": "Vyber čas nejdříve za {{count}} min.",
+    "scheduling": "Plánování...",
     "notLinkedBody": "Propojte své sociální účty pro přímé naplánované publikování.",
     "connect": "Propojit sociální účet",
     "locked": "Plánování uzamčeno do propojení",
@@ -133,7 +163,12 @@
     "timezone": "Časové pásmo",
     "schedulePost": "Naplánovat příspěvek",
     "scheduleLocked": "Naplánovat příspěvek (Nejprve propojte kanál)",
-    "saveDraft": "Uložit návrh"
+    "later": "Teď ne",
+    "needImages_one": "Tento příspěvek potřebuje fotku. Klepnutím ji přidej.",
+    "needImages_other": "Tento příspěvek potřebuje alespoň {{count}} fotek. Klepnutím je přidej.",
+    "tooManyImages_one": "Tento kanál umožňuje jednu fotku. Klepnutím ji vyber.",
+    "tooManyImages_other": "Tento kanál umožňuje nejvýše {{count}} fotek. Klepnutím je vyber.",
+    "jpegOnly": "Instagram přijímá pouze fotky ve formátu JPEG. Klepnutím vyber fotku ve formátu .jpg."
   },
   "brief": {
     "title": "Vytvořit příspěvek",
@@ -155,10 +190,12 @@
     "changeProduct": "Změnit produkt",
     "change": "Změnit",
     "direction": "Kreativní směr (volitelné)",
-    "directionLanguage": "Francouzština (FR)",
     "directionPlaceholder": "např. Zaměřte se na ruční zpracování a teplo",
     "cost": "Cena vytvoření:",
-    "costPending": "Odhad čeká",
+    "costIncluded": "V ceně",
+    "drafting": "Odesílání textaři...",
+    "noProducts": "Zatím nemáš žádné fotky produktů. Přidej je, aby měl textař co ukázat.",
+    "addPhotos": "Přidat fotky produktů",
     "draftPost": "Návrh příspěvku"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Plánovací cyklus",
     "cadence": "Frekvence publikování",
-    "monthlyTarget": "Měsíční cíl",
     "feedPosts": "Příspěvky ve feedu",
-    "stories": "Příběhy",
     "perMonth": "{{n}} / měsíc",
-    "feedNote": "~1 příspěvek denně",
-    "storiesNote": "Rozloženo během měsíce",
     "cadenceHint": "Doporučené cíle obsahu. Upravte před generováním kalendáře.",
     "pillars": "Obsahové pilíře",
-    "pillar": {
-      "catalog": "Katalogové produkty (zaměření na Bunting)",
-      "craft": "Detaily materiálu & řemeslo (Acacia wood)",
-      "story": "Příběh značky & francouzské dědictví"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Ruční kontrola před publikováním: </b>Generované návrhy jsou umístěny do vašeho kalendáře jako návrhy pro vaše konečné potvrzení. Žádný obsah není publikován bez schválení.",
-    "generate": "Generovat kalendář"
+    "generate": "Generovat kalendář",
+    "onCalendar": "V kalendáři",
+    "reels": "Reels",
+    "noPillars": "Na tento měsíc zatím nemáš naplánované žádné příspěvky.",
+    "started": "Plánujeme tvých dalších 30 dní. První návrhy se za pár minut objeví v kalendáři ke schválení. Ostatní budou přibývat postupně.",
+    "generating": "Spouštění...",
+    "cost": "Cena: {{n}} kreditů."
   }
 }

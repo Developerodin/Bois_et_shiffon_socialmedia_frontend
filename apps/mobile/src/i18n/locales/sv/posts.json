@@ -7,6 +7,7 @@
     "approved": "Godkänd",
     "scheduled": "Schemalagd",
     "published": "Publicerad",
+    "rejected": "Avvisad",
     "draft": "Utkast"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Kommande agenda",
     "thisWeek": "Denna vecka",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Visa kalender"
+    "viewCalendar": "Visa kalender",
+    "loadFailed": "Kunde inte ladda dina inlägg. Kontrollera din anslutning.",
+    "retry": "Försök igen",
+    "empty": "Inga inlägg den här veckan än. Planera några i Planeraren.",
+    "slides": "Karusell · {{count}} bilder"
   },
   "calendar": {
     "title": "Inläggskalender",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Inläggsdetaljer",
-    "moreOptions": "Fler alternativ",
     "feedPhoto": "4:5 Flödesfoto",
-    "fullscreen": "Helskärm",
-    "captionFrench": "Bildtext (Franska)",
+    "caption": "Inläggstext",
+    "noDraft": "Skribenten har inte skrivit ett utkast till det här inlägget än.",
+    "notFound": "Det här inlägget finns inte längre.",
+    "notReady": "Skribenten jobbar på det. Utkastet och granskningen visas här om någon minut.",
+    "instagramCarousel": "Instagram-karusell",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Ansluten",
     "editText": "Redigera text",
     "channels": "Publiceringskanaler",
     "instagramFeed": "Instagram-flöde",
     "instagramDetail": "Anslut ett konto för att publicera",
     "facebookPage": "Facebook-sida",
-    "facebookDetail": "Autoposta till officiell sida",
     "notConnected": "Inte ansluten",
     "channelNotConnected": "{{name}}, inte ansluten",
     "editPost": "Redigera inlägg",
-    "schedule": "Schemalägg"
+    "schedule": "Schemalägg",
+    "slow": "Det här tar längre tid än vanligt. Kom tillbaka om några minuter.",
+    "checkFound": "Granskningen hittade ett problem",
+    "fixIt": "Be skribenten fixa det"
   },
   "edit": {
     "title": "Redigera inlägg",
@@ -110,18 +123,35 @@
     "language": "Språk: Franska (FR)",
     "suggestedHashtags": "Föreslagna hashtags",
     "addHashtag": "Lägg till hashtag",
+    "removeHashtag": "Ta bort {{tag}}",
     "add": "+ Lägg till",
     "regenerate": "Återskapa bildtext med AI",
+    "regenerating": "Skickar till skribenten...",
+    "saving": "Sparar...",
+    "upload": "Ladda upp ett eget foto",
+    "uploading": "Laddar upp...",
+    "yourPhoto": "Ditt foto",
     "imageHint": "Originalförhållande · 4:5. Dra förhandsvisningen för att omrama beskärningen.",
-    "brandHint": "Logotyp, färger och ton följer ditt {{brand}} varumärkespaket."
+    "carouselHint": "Välj 2 till 10 foton i den ordning de ska visas. Instagram tar emot JPEG-foton.",
+    "brandHint": "Logotyp, färger och ton följer ditt {{brand}} varumärkespaket.",
+    "carouselMin": "En karusell behöver minst 2 foton."
   },
   "schedule": {
     "title": "Schemalägg",
-    "storyFormat": "Story · 9:16 bild",
     "feedFormat": "Flödesinlägg · 4:5 bild",
+    "carouselFormat": "Karusell · bilder i 4:5",
     "destination": "Destination",
     "actionRequired": "Åtgärd krävs",
     "notLinked": "Instagram-konto inte länkat",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Kunde inte ladda dina Pinterest-anslagstavlor. Anslut Pinterest igen och försök på nytt.",
+    "past": "Välj en tid minst {{count}} minuter från nu.",
+    "scheduling": "Schemalägger...",
     "notLinkedBody": "Anslut dina sociala konton för att låsa upp direkt schemalagd publicering.",
     "connect": "Anslut socialt konto",
     "locked": "Schema låst tills anslutning",
@@ -133,7 +163,12 @@
     "timezone": "Tidszon",
     "schedulePost": "Schemalägg inlägg",
     "scheduleLocked": "Schemalägg inlägg (Anslut kanal först)",
-    "saveDraft": "Spara utkast"
+    "later": "Inte nu",
+    "needImages_one": "Det här inlägget behöver ett foto. Tryck för att lägga till ett.",
+    "needImages_other": "Det här inlägget behöver minst {{count}} foton. Tryck för att lägga till dem.",
+    "tooManyImages_one": "Den här kanalen tar ett foto. Tryck för att välja det.",
+    "tooManyImages_other": "Den här kanalen tar högst {{count}} foton. Tryck för att välja dem.",
+    "jpegOnly": "Instagram tar bara JPEG-foton. Tryck för att välja en .jpg-fil i stället."
   },
   "brief": {
     "title": "Skapa ett inlägg",
@@ -155,10 +190,12 @@
     "changeProduct": "Byt produkt",
     "change": "Ändra",
     "direction": "Kreativ riktning (valfritt)",
-    "directionLanguage": "Franska (FR)",
     "directionPlaceholder": "t.ex. Fokusera på handgjorda snickerier och värme",
     "cost": "Skapandekostnad:",
-    "costPending": "Uppskattning pågår",
+    "costIncluded": "Ingår",
+    "drafting": "Skickar till skribenten...",
+    "noProducts": "Inga produktfoton än. Lägg till några så att skribenten har något att visa.",
+    "addPhotos": "Lägg till produktfoton",
     "draftPost": "Utkast till inlägg"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Planeringscykel",
     "cadence": "Publiceringsfrekvens",
-    "monthlyTarget": "Månatligt mål",
     "feedPosts": "Flödesinlägg",
-    "stories": "Stories",
     "perMonth": "{{n}} / månad",
-    "feedNote": "~1 inlägg dagligen",
-    "storiesNote": "Sprid över månaden",
     "cadenceHint": "Föreslagna innehållsmål. Justera innan du genererar din kalender.",
     "pillars": "Innehållspelare",
-    "pillar": {
-      "catalog": "Katalogprodukter (Bunting-fokus)",
-      "craft": "Materialdetaljer & hantverk (Acacia-trä)",
-      "story": "Varumärkesberättelse & franskt arv"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Manuell granskning innan publicering: </b>Genererade droppar placeras i din kalender som utkast för ditt slutgiltiga godkännande. Inget innehåll publiceras utan godkännande.",
-    "generate": "Generera kalender"
+    "generate": "Generera kalender",
+    "onCalendar": "I kalendern",
+    "reels": "Reels",
+    "noPillars": "Inga inlägg planerade för den här månaden än.",
+    "started": "Planerar dina kommande 30 dagar. De första utkasten visas i kalendern om några minuter, redo att godkännas. Resten kommer allt eftersom de skrivs.",
+    "generating": "Startar...",
+    "cost": "Kostar {{n}} krediter."
   }
 }

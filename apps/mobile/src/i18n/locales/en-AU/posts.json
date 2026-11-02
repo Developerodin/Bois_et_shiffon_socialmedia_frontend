@@ -7,6 +7,7 @@
     "approved": "Approved",
     "scheduled": "Scheduled",
     "published": "Published",
+    "rejected": "Rejected",
     "draft": "Draft"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Upcoming agenda",
     "thisWeek": "This week",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "View calendar"
+    "viewCalendar": "View calendar",
+    "loadFailed": "Couldn't load your posts. Check your connection.",
+    "retry": "Try again",
+    "empty": "No posts this week yet. Plan some from the Planner.",
+    "slides": "Carousel · {{count}} slides"
   },
   "calendar": {
     "title": "Posts calendar",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Post details",
-    "moreOptions": "More options",
     "feedPhoto": "4:5 Feed photo",
-    "fullscreen": "Fullscreen",
-    "captionFrench": "Caption (French)",
+    "caption": "Caption",
+    "noDraft": "The writer hasn't drafted this post yet.",
+    "notFound": "This post isn't here any more.",
+    "notReady": "The writer is on it. The draft and its check show here in a minute or two.",
+    "instagramCarousel": "Instagram carousel",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Connected",
     "editText": "Edit text",
     "channels": "Publishing channels",
     "instagramFeed": "Instagram Feed",
     "instagramDetail": "Connect an account to publish",
     "facebookPage": "Facebook Page",
-    "facebookDetail": "Auto-post to official page",
     "notConnected": "Not connected",
     "channelNotConnected": "{{name}}, not connected",
     "editPost": "Edit post",
-    "schedule": "Schedule"
+    "schedule": "Schedule",
+    "slow": "This is taking longer than usual. Come back in a few minutes.",
+    "checkFound": "The check found a problem",
+    "fixIt": "Ask the writer to fix it"
   },
   "edit": {
     "title": "Edit post",
@@ -110,18 +123,35 @@
     "language": "Language: French (FR)",
     "suggestedHashtags": "Suggested hashtags",
     "addHashtag": "Add hashtag",
+    "removeHashtag": "Remove {{tag}}",
     "add": "+ Add",
     "regenerate": "Re-generate caption with AI",
+    "regenerating": "Sending to the writer...",
+    "saving": "Saving...",
+    "upload": "Upload your own photo",
+    "uploading": "Uploading...",
+    "yourPhoto": "Your photo",
     "imageHint": "Original ratio · 4:5. Drag the preview to reframe the crop.",
-    "brandHint": "Logo, colours and tone follow your {{brand}} brand kit."
+    "carouselHint": "Pick 2 to 10 photos in the order they should show. Instagram takes JPEG photos.",
+    "brandHint": "Logo, colours and tone follow your {{brand}} brand kit.",
+    "carouselMin": "A carousel needs at least 2 photos."
   },
   "schedule": {
     "title": "Schedule",
-    "storyFormat": "Story · 9:16 image",
     "feedFormat": "Feed post · 4:5 image",
+    "carouselFormat": "Carousel · 4:5 images",
     "destination": "Destination",
     "actionRequired": "Action required",
     "notLinked": "Instagram account not linked",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Couldn't load your Pinterest boards. Reconnect Pinterest and try again.",
+    "past": "Pick a time at least {{count}} minutes from now.",
+    "scheduling": "Scheduling...",
     "notLinkedBody": "Connect your social accounts to unlock direct scheduled publishing.",
     "connect": "Connect social account",
     "locked": "Schedule locked until connection",
@@ -133,7 +163,12 @@
     "timezone": "Timezone",
     "schedulePost": "Schedule post",
     "scheduleLocked": "Schedule post (Connect channel first)",
-    "saveDraft": "Save draft"
+    "later": "Not now",
+    "needImages_one": "This post needs a photo. Tap to add one.",
+    "needImages_other": "This post needs at least {{count}} photos. Tap to add them.",
+    "tooManyImages_one": "This channel takes one photo. Tap to choose it.",
+    "tooManyImages_other": "This channel takes at most {{count}} photos. Tap to choose them.",
+    "jpegOnly": "Instagram only takes JPEG photos. Tap to pick a .jpg instead."
   },
   "brief": {
     "title": "Create a post",
@@ -155,10 +190,12 @@
     "changeProduct": "Change product",
     "change": "Change",
     "direction": "Creative direction (optional)",
-    "directionLanguage": "French (FR)",
     "directionPlaceholder": "e.g. Focus on hand-crafted joinery and warmth",
     "cost": "Creation cost:",
-    "costPending": "Estimate pending",
+    "costIncluded": "Included",
+    "drafting": "Sending to the writer...",
+    "noProducts": "No product photos yet. Add some so the writer has something to show.",
+    "addPhotos": "Add product photos",
     "draftPost": "Draft post"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Planning cycle",
     "cadence": "Publishing cadence",
-    "monthlyTarget": "Monthly target",
     "feedPosts": "Feed Posts",
-    "stories": "Stories",
     "perMonth": "{{n}} / month",
-    "feedNote": "~1 post daily",
-    "storiesNote": "Spread across your month",
     "cadenceHint": "Suggested content targets. Adjust before generating your calendar.",
     "pillars": "Content pillars",
-    "pillar": {
-      "catalog": "Catalogue products (Bunting focus)",
-      "craft": "Material details & craft (Acacia wood)",
-      "story": "Brand story & French heritage"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Manual review before publishing: </b>Generated drops are placed in your calendar as drafts for your final confirmation. No content is published without approval.",
-    "generate": "Generate calendar"
+    "generate": "Generate calendar",
+    "onCalendar": "On the calendar",
+    "reels": "Reels",
+    "noPillars": "No posts planned for this month yet.",
+    "started": "Planning your next 30 days. The first drafts appear on the calendar in a few minutes, ready for you to approve; the rest follow as they're written.",
+    "generating": "Starting...",
+    "cost": "Costs {{n}} credits."
   }
 }

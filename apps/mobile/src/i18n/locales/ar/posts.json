@@ -7,6 +7,7 @@
     "approved": "موافق عليه",
     "scheduled": "مجدول",
     "published": "منشور",
+    "rejected": "مرفوض",
     "draft": "مسودة"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "الأجندة القادمة",
     "thisWeek": "هذا الأسبوع",
     "slotLabel": "{{title}}، {{when}}، {{status}}",
-    "viewCalendar": "عرض التقويم"
+    "viewCalendar": "عرض التقويم",
+    "loadFailed": "تعذّر تحميل منشوراتك. تحقق من اتصالك.",
+    "retry": "حاول مجددًا",
+    "empty": "لا توجد منشورات لهذا الأسبوع بعد. خطط لبعضها من المخطط.",
+    "slides": "منشور متعدد الصور · {{count}} شرائح"
   },
   "calendar": {
     "title": "تقويم المنشورات",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "تفاصيل المنشور",
-    "moreOptions": "خيارات إضافية",
     "feedPhoto": "صورة 4:5 للخلاصة",
-    "fullscreen": "شاشة كاملة",
-    "captionFrench": "التسمية التوضيحية (بالفرنسية)",
+    "caption": "التعليق",
+    "noDraft": "لم يكتب الكاتب مسودة هذا المنشور بعد.",
+    "notFound": "هذا المنشور لم يعد موجودًا.",
+    "notReady": "الكاتب يعمل على المنشور. ستظهر المسودة ونتيجة التحقق هنا خلال دقيقة أو دقيقتين.",
+    "instagramCarousel": "منشور Instagram متعدد الصور",
+    "instagramReel": "ريل Instagram",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "متصل",
     "editText": "تحرير النص",
     "channels": "قنوات النشر",
     "instagramFeed": "خلاصة Instagram",
     "instagramDetail": "اتصل بحساب للنشر",
     "facebookPage": "صفحة Facebook",
-    "facebookDetail": "نشر تلقائي إلى الصفحة الرسمية",
     "notConnected": "غير متصل",
     "channelNotConnected": "{{name}}، غير متصل",
     "editPost": "تحرير المنشور",
-    "schedule": "جدولة"
+    "schedule": "جدولة",
+    "slow": "يستغرق هذا وقتًا أطول من المعتاد. عد بعد بضع دقائق.",
+    "checkFound": "رصد التحقق مشكلة",
+    "fixIt": "اطلب من الكاتب إصلاحها"
   },
   "edit": {
     "title": "تحرير المنشور",
@@ -110,18 +123,35 @@
     "language": "اللغة: الفرنسية (FR)",
     "suggestedHashtags": "الهاشتاجات المقترحة",
     "addHashtag": "إضافة هاشتاج",
+    "removeHashtag": "إزالة {{tag}}",
     "add": "+ إضافة",
     "regenerate": "إعادة توليد التسمية التوضيحية بالذكاء الاصطناعي",
+    "regenerating": "جارٍ الإرسال إلى الكاتب...",
+    "saving": "جارٍ الحفظ...",
+    "upload": "ارفع صورتك",
+    "uploading": "جارٍ الرفع...",
+    "yourPhoto": "صورتك",
     "imageHint": "النسبة الأصلية · 4:5. اسحب المعاينة لإعادة تأطير القص.",
-    "brandHint": "الشعار، الألوان والنبرة تتبع مجموعة علامتك التجارية {{brand}}."
+    "carouselHint": "اختر من صورتين إلى 10 صور بالترتيب الذي تريد عرضها به. يقبل Instagram صور JPEG.",
+    "brandHint": "الشعار، الألوان والنبرة تتبع مجموعة علامتك التجارية {{brand}}.",
+    "carouselMin": "يحتاج المنشور متعدد الصور إلى صورتين على الأقل."
   },
   "schedule": {
     "title": "جدولة",
-    "storyFormat": "قصة · صورة 9:16",
     "feedFormat": "منشور الخلاصة · صورة 4:5",
+    "carouselFormat": "منشور متعدد الصور · صور بنسبة 4:5",
     "destination": "الوجهة",
     "actionRequired": "الإجراء مطلوب",
     "notLinked": "حساب Instagram غير مرتبط",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "تعذّر تحميل لوحاتك على Pinterest. أعد ربط Pinterest وحاول مجددًا.",
+    "past": "اختر وقتًا يبعد {{count}} دقيقة على الأقل من الآن.",
+    "scheduling": "جارٍ الجدولة...",
     "notLinkedBody": "اتصل بحساباتك الاجتماعية لفتح النشر المجدول المباشر.",
     "connect": "اتصل بحساب اجتماعي",
     "locked": "الجدولة مقفلة حتى الاتصال",
@@ -133,7 +163,12 @@
     "timezone": "المنطقة الزمنية",
     "schedulePost": "جدولة المنشور",
     "scheduleLocked": "جدولة المنشور (اتصل بالقناة أولاً)",
-    "saveDraft": "حفظ المسودة"
+    "later": "ليس الآن",
+    "needImages_one": "يحتاج هذا المنشور إلى صورة. اضغط لإضافتها.",
+    "needImages_other": "يحتاج هذا المنشور إلى {{count}} صور على الأقل. اضغط لإضافتها.",
+    "tooManyImages_one": "تقبل هذه القناة صورة واحدة. اضغط لاختيارها.",
+    "tooManyImages_other": "تقبل هذه القناة {{count}} صور كحد أقصى. اضغط لاختيارها.",
+    "jpegOnly": "يقبل Instagram صور JPEG فقط. اضغط لاختيار صورة بصيغة .jpg بدلًا منها."
   },
   "brief": {
     "title": "إنشاء منشور",
@@ -155,10 +190,12 @@
     "changeProduct": "تغيير المنتج",
     "change": "تغيير",
     "direction": "التوجيه الإبداعي (اختياري)",
-    "directionLanguage": "الفرنسية (FR)",
     "directionPlaceholder": "مثال: التركيز على النجارة اليدوية والدفء",
     "cost": "تكلفة الإنشاء:",
-    "costPending": "التقدير قيد الانتظار",
+    "costIncluded": "مشمول",
+    "drafting": "جارٍ الإرسال إلى الكاتب...",
+    "noProducts": "لا توجد صور للمنتجات بعد. أضف بعضها ليتمكن الكاتب من عرضها.",
+    "addPhotos": "أضف صور المنتجات",
     "draftPost": "مسودة المنشور"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "دورة التخطيط",
     "cadence": "وتيرة النشر",
-    "monthlyTarget": "الهدف الشهري",
     "feedPosts": "منشورات الخلاصة",
-    "stories": "قصص",
     "perMonth": "{{n}} / الشهر",
-    "feedNote": "~منشور واحد يوميًا",
-    "storiesNote": "منتشرة على مدار الشهر",
     "cadenceHint": "أهداف المحتوى المقترحة. قم بتعديلها قبل إنشاء تقويمك.",
     "pillars": "ركائز المحتوى",
-    "pillar": {
-      "catalog": "منتجات الكتالوج (تركيز Bunting)",
-      "craft": "تفاصيل المواد والحرفية (خشب Acacia)",
-      "story": "قصة العلامة التجارية والتراث الفرنسي"
-    },
     "pillarLabel": "{{label}}، {{share}}",
     "reviewNote": "<b>مراجعة يدوية قبل النشر: </b>يتم وضع القطرات المولدة في تقويمك كمسودات لتأكيدك النهائي. لا يتم نشر أي محتوى بدون موافقة.",
-    "generate": "إنشاء التقويم"
+    "generate": "إنشاء التقويم",
+    "onCalendar": "على التقويم",
+    "reels": "ريلز",
+    "noPillars": "لا توجد منشورات مخططة لهذا الشهر بعد.",
+    "started": "نخطط للأيام الـ30 القادمة. ستظهر المسودات الأولى على التقويم خلال بضع دقائق لتراجعها وتوافق عليها، وستظهر البقية تباعًا.",
+    "generating": "جارٍ البدء...",
+    "cost": "التكلفة: {{n}} رصيد."
   }
 }

@@ -5,6 +5,8 @@ import { PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
 import { enqueueJob } from "@/server/jobs/queue";
 import { accessToken, markReconnect, ReconnectNeeded } from "@/server/services/connections";
 import { safeHttpUrl } from "@/lib/website";
+import { hasOtherApprover } from "@/server/auth/permissions";
+import { hitRateLimit } from "@/server/auth/rate-limit";
 import { signedMediaUrl } from "@/server/storage/media";
 
 /**
@@ -83,7 +85,45 @@ export const TX = { maxWait: 10_000, timeout: 20_000 };
 /** Per-post lock shared by people (edit, approve, publish) and agents (Creator, Quality). */
 export const lock = (tx: Prisma.TransactionClient, itemId: string) => tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`content:${itemId}`}))`;
 
-export type DraftInput = { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
+export type DraftInput = { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; photoKeys?: string[] };
+
+const APP_GOALS = { newArrival: "awareness", productFeature: "saves", specialOffer: "sales" } as const;
+/**
+ * Writing and checking posts from the app is free (event runs), so cap it per workspace per day.
+ * ponytail: one flat cap shared by create, edit and re-generate; per-plan allowances come with billing.
+ */
+export async function postAiAllowed(workspaceId: string) {
+  return (await hitRateLimit(`post-ai:${workspaceId}`, 60, 86_400_000)).allowed;
+}
+
+export type NewPost = { channel: "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL"; goal: keyof typeof APP_GOALS; product: { title: string; photoKey: string }; direction?: string };
+
+/**
+ * A post the person asks for in the app (P06): its brief is what they chose, so it skips the Brief writer;
+ * the caller starts the Creator on it. Unscheduled until they pick a slot (P05).
+ */
+export async function createPost(input: { workspaceId: string; brandId: string; userId: string } & NewPost) {
+  if (!ownMediaKey(input, input.product.photoKey)) throw new PublishingError("Unknown image", 400);
+  const direction = input.direction?.trim() || null;
+  return prisma.$transaction(async (tx) => {
+    const item = await tx.contentItem.create({
+      data: {
+        workspaceId: input.workspaceId, brandId: input.brandId, title: input.product.title, channel: input.channel, status: "BRIEF_READY",
+        brief: { goal: APP_GOALS[input.goal], products: [input.product.title], keyMessage: direction ?? "", angle: input.goal, photoKeys: [input.product.photoKey] },
+      },
+    });
+    await tx.auditEvent.create({
+      data: { workspaceId: input.workspaceId, brandId: input.brandId, actorUserId: input.userId, action: "content.create", entityType: "ContentItem", entityId: item.id, metadata: { channel: input.channel, goal: input.goal } },
+    });
+    return item;
+  }, TX);
+}
+
+/** A picture this brand owns: one of its uploads (uuid.jpg|png) or Research's product photos, never another brand's file. */
+export const ownMediaKey = (scope: { workspaceId: string; brandId: string }, key: string) => {
+  const prefix = `${scope.workspaceId}/${scope.brandId}/`;
+  return key.startsWith(prefix) && /^[A-Za-z0-9][A-Za-z0-9._-]*\.(jpg|png)$/.test(key.slice(prefix.length)) && !key.includes("..");
+};
 // A person can edit until the post is handed to a platform; a scheduled post must be cancelled first.
 const EDITABLE = ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"];
 
@@ -101,8 +141,10 @@ export async function saveDraft(input: { workspaceId: string; brandId: string; u
     script: input.body.script.map((s) => s.trim()).filter(Boolean),
     pinTitle: input.body.pinTitle.trim(),
     altText: input.body.altText.trim(),
+    ...(input.body.photoKeys === undefined ? {} : { photoKeys: [...new Set(input.body.photoKeys)] }),
   };
   if (!body.caption) throw new PublishingError("The caption can't be empty", 400);
+  if (body.photoKeys?.some((k) => !ownMediaKey(input, k))) throw new PublishingError("Unknown image", 400);
   return prisma.$transaction(async (tx) => {
     await lock(tx, input.itemId);
     const { item, latest } = await loadItem(input, input.itemId, tx);
@@ -143,8 +185,11 @@ export async function decide(input: {
     if (item.status !== "AWAITING_APPROVAL") throw new PublishingError("This post isn't waiting for approval");
     if (input.verdict === "APPROVED") {
       if (latest.checks[0]?.overall === "BLOCKER" || !latest.checks[0]) throw new PublishingError("The quality check must pass before approval");
-      // Studio reels are made and sent by the same person (owner's call, 2026-10-30).
-      if (latest.createdBy === input.userId && !item.studio) throw new PublishingError("You wrote this draft, so someone else has to approve it", 403);
+      // Studio reels are made and sent by the same person (owner's call, 2026-10-30). Other posts need a second
+      // person, unless there is nobody else who can approve (a one-person business, owner's call 2026-11-02).
+      if (latest.createdBy === input.userId && !item.studio && (await hasOtherApprover(input.workspaceId, input.brandId, input.userId))) {
+        throw new PublishingError("You wrote this draft, so someone else has to approve it", 403);
+      }
     }
     const decision = await tx.approvalDecision.create({
       data: {
@@ -210,9 +255,7 @@ export async function schedulePublication(input: {
     const links = rawLinks.map(https);
     if (links.some((l) => !l)) throw new PublishingError("Image links must be public https:// addresses", 400);
     const media = input.mediaKeys ?? [];
-    // Uploaded files must be this brand's own, named exactly as the upload route names them (uuid.jpg|png).
-    const prefix = `${input.workspaceId}/${input.brandId}/`;
-    if (media.some((k) => !k.startsWith(prefix) || !/^[0-9a-f-]{36}\.(jpg|png)$/.test(k.slice(prefix.length)))) throw new PublishingError("Unknown image", 400);
+    if (media.some((k) => !ownMediaKey(input, k))) throw new PublishingError("Unknown image", 400);
     const count = media.length + links.length;
     if (count < req.minImages) throw new PublishingError(req.minImages === 1 ? "This channel needs an image" : `A carousel needs at least ${req.minImages} images`, 400);
     if (count > req.maxImages) throw new PublishingError(req.maxImages === 0 ? "Reels take a video, not images" : `This channel takes at most ${req.maxImages} image${req.maxImages === 1 ? "" : "s"}`, 400);

@@ -7,6 +7,7 @@
     "approved": "Godkendt",
     "scheduled": "Planlagt",
     "published": "Udgivet",
+    "rejected": "Afvist",
     "draft": "Kladde"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Kommende agenda",
     "thisWeek": "Denne uge",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Se kalender"
+    "viewCalendar": "Se kalender",
+    "loadFailed": "Kunne ikke indlæse dine opslag. Tjek din forbindelse.",
+    "retry": "Prøv igen",
+    "empty": "Ingen opslag i denne uge endnu. Planlæg nogle i Planlæggeren.",
+    "slides": "Karrusel · {{count}} slides"
   },
   "calendar": {
     "title": "Indlægskalender",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Indlægsdetaljer",
-    "moreOptions": "Flere muligheder",
     "feedPhoto": "4:5 Feed foto",
-    "fullscreen": "Fuld skærm",
-    "captionFrench": "Billedtekst (fransk)",
+    "caption": "Opslagstekst",
+    "noDraft": "Skribenten har ikke skrevet et udkast til dette opslag endnu.",
+    "notFound": "Dette opslag findes ikke længere.",
+    "notReady": "Skribenten er i gang. Udkastet og kontrollen vises her om et par minutter.",
+    "instagramCarousel": "Instagram-karrusel",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Forbundet",
     "editText": "Rediger tekst",
     "channels": "Udgivelseskanaler",
     "instagramFeed": "Instagram Feed",
     "instagramDetail": "Forbind en konto for at udgive",
     "facebookPage": "Facebook-side",
-    "facebookDetail": "Auto-post til officiel side",
     "notConnected": "Ikke forbundet",
     "channelNotConnected": "{{name}}, ikke forbundet",
     "editPost": "Rediger indlæg",
-    "schedule": "Planlæg"
+    "schedule": "Planlæg",
+    "slow": "Det tager længere tid end normalt. Kom tilbage om et par minutter.",
+    "checkFound": "Kontrollen fandt et problem",
+    "fixIt": "Bed skribenten om at rette det"
   },
   "edit": {
     "title": "Rediger indlæg",
@@ -110,18 +123,35 @@
     "language": "Sprog: Fransk (FR)",
     "suggestedHashtags": "Foreslåede hashtags",
     "addHashtag": "Tilføj hashtag",
+    "removeHashtag": "Fjern {{tag}}",
     "add": "+ Tilføj",
     "regenerate": "Genskab billedtekst med AI",
+    "regenerating": "Sender til skribenten...",
+    "saving": "Gemmer...",
+    "upload": "Upload dit eget billede",
+    "uploading": "Uploader...",
+    "yourPhoto": "Dit billede",
     "imageHint": "Originalt format · 4:5. Træk forhåndsvisningen for at omramme beskæringen.",
-    "brandHint": "Logo, farver og tone følger din {{brand}} brandpakke."
+    "carouselHint": "Vælg 2 til 10 billeder i den rækkefølge, de skal vises. Instagram bruger JPEG-billeder.",
+    "brandHint": "Logo, farver og tone følger din {{brand}} brandpakke.",
+    "carouselMin": "En karrusel kræver mindst 2 billeder."
   },
   "schedule": {
     "title": "Planlæg",
-    "storyFormat": "Story · 9:16 billede",
     "feedFormat": "Feed indlæg · 4:5 billede",
+    "carouselFormat": "Karrusel · 4:5-billeder",
     "destination": "Destination",
     "actionRequired": "Handling påkrævet",
     "notLinked": "Instagram-konto ikke forbundet",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Kunne ikke indlæse dine Pinterest-tavler. Forbind Pinterest igen, og prøv igen.",
+    "past": "Vælg et tidspunkt mindst {{count}} minutter fra nu.",
+    "scheduling": "Planlægger...",
     "notLinkedBody": "Forbind dine sociale konti for at låse op for direkte planlagt udgivelse.",
     "connect": "Forbind social konto",
     "locked": "Planlægning låst indtil forbindelse",
@@ -133,7 +163,12 @@
     "timezone": "Tidszone",
     "schedulePost": "Planlæg indlæg",
     "scheduleLocked": "Planlæg indlæg (Forbind kanal først)",
-    "saveDraft": "Gem kladde"
+    "later": "Ikke nu",
+    "needImages_one": "Dette opslag skal have et billede. Tryk for at tilføje et.",
+    "needImages_other": "Dette opslag skal have mindst {{count}} billeder. Tryk for at tilføje dem.",
+    "tooManyImages_one": "Denne kanal tillader ét billede. Tryk for at vælge det.",
+    "tooManyImages_other": "Denne kanal tillader højst {{count}} billeder. Tryk for at vælge dem.",
+    "jpegOnly": "Instagram tillader kun JPEG-billeder. Tryk for at vælge en .jpg-fil i stedet."
   },
   "brief": {
     "title": "Opret et indlæg",
@@ -155,10 +190,12 @@
     "changeProduct": "Skift produkt",
     "change": "Skift",
     "direction": "Kreativ retning (valgfri)",
-    "directionLanguage": "Fransk (FR)",
     "directionPlaceholder": "f.eks. Fokus på håndlavet snedkerarbejde og varme",
     "cost": "Oprettelsesomkostning:",
-    "costPending": "Vurdering afventer",
+    "costIncluded": "Inkluderet",
+    "drafting": "Sender til skribenten...",
+    "noProducts": "Ingen produktbilleder endnu. Tilføj nogle, så skribenten har noget at vise.",
+    "addPhotos": "Tilføj produktbilleder",
     "draftPost": "Kladdeopslag"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Planlægningscyklus",
     "cadence": "Udgivelsesfrekvens",
-    "monthlyTarget": "Månedligt mål",
     "feedPosts": "Feed-opslag",
-    "stories": "Stories",
     "perMonth": "{{n}} / måned",
-    "feedNote": "~1 opslag dagligt",
-    "storiesNote": "Fordelt over din måned",
     "cadenceHint": "Foreslåede indholdsmål. Juster før du genererer din kalender.",
     "pillars": "Indholdssøjler",
-    "pillar": {
-      "catalog": "Katalogprodukter (Bunting fokus)",
-      "craft": "Materialedetaljer & håndværk (Acacia træ)",
-      "story": "Brandhistorie & fransk arv"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Manuel gennemgang før udgivelse: </b>Genererede opslag placeres i din kalender som kladder til din endelige bekræftelse. Intet indhold udgives uden godkendelse.",
-    "generate": "Generer kalender"
+    "generate": "Generer kalender",
+    "onCalendar": "I kalenderen",
+    "reels": "Reels",
+    "noPillars": "Ingen opslag planlagt for denne måned endnu.",
+    "started": "Planlægger dine næste 30 dage. De første udkast vises i kalenderen om et par minutter, klar til din godkendelse. Resten følger, efterhånden som de bliver skrevet.",
+    "generating": "Starter...",
+    "cost": "Koster {{n}} kreditter."
   }
 }

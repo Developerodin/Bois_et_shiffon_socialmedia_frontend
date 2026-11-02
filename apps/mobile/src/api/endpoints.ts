@@ -268,13 +268,19 @@ export const reels = {
     return api<unknown>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "edit", version, body }, workspaceId: ws });
   },
   /** Publish now / schedule on a connected Instagram account. Approves first when the version isn't approved yet. */
-  async publish(id: string, version: number, connectionId: string, runAt?: Date, approved = false) {
-    const { ws, base } = await reelBase();
-    const path = `${base}/content/${encodeURIComponent(id)}`;
-    if (!approved) await api(path, { body: { action: "decide", version, verdict: "APPROVED" }, workspaceId: ws });
-    return api<{ attempts?: { id: string; runAt: string; status: string }[] }>(path, { body: { action: "publish", version, connectionId, runAt: runAt?.toISOString() }, workspaceId: ws });
-  },
+  publish: (id: string, version: number, connectionId: string, runAt?: Date, approved = false) => publishContent(id, version, { connectionId, runAt, approve: !approved }),
 };
+
+/** Shared by reels and posts: approves the version first when asked to (it's waiting for approval), then publishes or schedules it. */
+async function publishContent(id: string, version: number, o: { connectionId: string; runAt?: Date; approve: boolean; mediaKeys?: string[]; boardId?: string }) {
+  const { ws, base } = await reelBase();
+  const path = `${base}/content/${encodeURIComponent(id)}`;
+  if (o.approve) await api(path, { body: { action: "decide", version, verdict: "APPROVED" }, workspaceId: ws });
+  return api<{ attempts?: { id: string; runAt: string; status: string }[] }>(path, {
+    body: { action: "publish", version, connectionId: o.connectionId, runAt: o.runAt?.toISOString(), mediaKeys: o.mediaKeys, boardId: o.boardId },
+    workspaceId: ws,
+  });
+}
 
 export async function opportunities(signal?: AbortSignal) {
   const { ws, base } = await reelBase();
@@ -290,4 +296,69 @@ export async function uploadPhoto(uri: string, name = "photo.jpg", type = "image
   const form = new FormData();
   form.append("file", { uri, name, type } as unknown as Blob);
   return api<{ key: string; previewUrl: string }>(`${base}/media`, { form, workspaceId: ws, timeoutMs: 60_000 });
+}
+
+/** A post's text (apps/web ContentVersion.body); photoKeys are the brand photos it shows, the first is the cover. */
+export type PostBody = { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; photoKeys?: string[] };
+export type PostChannel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL" | "INSTAGRAM_REEL" | "FACEBOOK_POST" | "PINTEREST_PIN" | "THREADS_POST";
+export type PostStatus = "PLANNED" | "BRIEF_READY" | "DRAFT_REVIEW" | "AWAITING_APPROVAL" | "APPROVED" | "SCHEDULED" | "PUBLISHED" | "REVIEWED" | "REJECTED" | "BLOCKED";
+/** One calendar item (GET …/content): the latest draft, its check and the approver's last word on it. */
+export type PostItem = {
+  id: string; title: string; channel: PostChannel; status: PostStatus; scheduledFor: string | null; studio: boolean; pillar: string | null;
+  brief: { goal?: string; products?: string[]; cta?: string } | null;
+  publishIssue: "FAILED" | "CHECK" | null; publishError: string | null;
+  latest: {
+    version: number; body: PostBody; createdAt: string; byPerson: boolean; photoUrls: string[];
+    check: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
+    review: { verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null } | null;
+  } | null;
+};
+
+export const posts = {
+  async list(signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<{ items: PostItem[] }>(`${base}/content`, { workspaceId: ws, signal });
+  },
+  /** P09 "Generate calendar": the Planner (5 credits; 402 = not enough) plans 30 days, then the writer and the check draft them. */
+  async generate() {
+    const { ws, base } = await reelBase();
+    return api<{ run: { id: string; status: string } }>(`${base}/agents/planner/runs`, { body: { input: { chain: true } }, workspaceId: ws });
+  },
+  /** P06: a new post from a product photo; the writer drafts it now and the check follows (about a minute). */
+  async create(input: { channel: "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL"; goal: "newArrival" | "productFeature" | "specialOffer"; product: { title: string; photoKey: string }; direction?: string }) {
+    const { ws, base } = await reelBase();
+    return api<{ id: string }>(`${base}/content`, { body: input, workspaceId: ws });
+  },
+  /** A new draft version (the server checks it again straight away). */
+  async edit(id: string, version: number, body: PostBody) {
+    const { ws, base } = await reelBase();
+    return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "edit", version, body }, workspaceId: ws });
+  },
+  /** Schedules the post with its photo on a connected account (approving it first). */
+  schedule: (id: string, version: number, o: { connectionId: string; runAt: Date; approve: boolean; photoKeys?: string[]; boardId?: string }) =>
+    publishContent(id, version, { ...o, mediaKeys: o.photoKeys?.length ? o.photoKeys : undefined }),
+  /** The check blocked the draft: the writer rewrites it with the check's report. */
+  async rewrite(id: string, version: number) {
+    const { ws, base } = await reelBase();
+    return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "rewrite", version }, workspaceId: ws });
+  },
+  /** "Re-generate": sends the draft back to the writer with what to change; it rewrites it now. */
+  async sendBack(id: string, version: number, note: string) {
+    const { ws, base } = await reelBase();
+    return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "decide", version, verdict: "CHANGES_REQUESTED", note }, workspaceId: ws });
+  },
+};
+
+/** GET …/content/:id (apps/web publishing.ts releaseState): approval and where the post can go. */
+export type PostRelease = {
+  latestVersion: number | null; approvalValid: boolean;
+  requirements: { provider: "INSTAGRAM" | "FACEBOOK" | "PINTEREST" | "THREADS" | null; minImages: number; maxImages: number; needsBoard: boolean };
+  accounts: { id: string; displayName: string }[];
+  /** Pinterest boards per account; null = couldn't load them. */
+  boards: Record<string, { id: string; name: string }[] | null>;
+  attempts: { id: string; status: string; account: string; runAt: string; publishedAt: string | null; externalUrl: string | null; error: string | null }[];
+};
+export async function postRelease(id: string, signal?: AbortSignal) {
+  const { ws, base } = await reelBase();
+  return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
 }

@@ -1,34 +1,69 @@
 import { router } from "expo-router";
 import { Layers, ShieldCheck, Sofa, Store } from "lucide-react-native";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
+import { ApiError } from "@/api/client";
+import { posts } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Card } from "@/ui/layout";
 import { formatDate, formatNumber } from "@/i18n";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, CardTitle, SegmentedTabs, tint } from "@/ui/posts/controls";
+import { dayKey } from "@/ui/posts/sample";
+import { usePosts } from "@/ui/posts/use-posts";
 
 const SECTIONS = ["business", "billing", "planner"] as const;
-const CYCLES = ["2026-10", "2026-11"] as const;
-const CADENCE = [
-  { key: "feedPosts", target: 30, note: "feedNote" },
-  { key: "stories", target: 25, note: "storiesNote" },
-] as const;
-const PILLARS = [
-  { Icon: Sofa, key: "catalog", share: 50 },
-  { Icon: Layers, key: "craft", share: 30 },
-  { Icon: Store, key: "story", share: 20 },
-] as const;
+const SECTION_HREF = { business: "/business", billing: "/business/billing" } as const;
+const PILLAR_ICONS = [Sofa, Layers, Store];
 
 const sparkles = require("../../../assets/figma/posts/btn-sparkles-white.svg");
 
-/** P09 · Posts / Planner: monthly cadence and content pillars that seed the calendar. */
+/** "2026-11" for this month and the next: the cycles the Planner fills (it plans 30 days ahead). */
+function cycles(now: Date) {
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return [dayKey(now).slice(0, 7), dayKey(next).slice(0, 7)];
+}
+
+/** P09 · Posts / Planner: what's planned per month (feed posts, reels, pillars), then plan the next 30 days. */
 export default function Planner() {
   const { t } = useTranslation("posts");
-  const [cycle, setCycle] = useState<(typeof CYCLES)[number]>("2026-10");
-  const cycles = CYCLES.map((value) => ({ value, label: formatDate(`${value}-01T12:00:00Z`, { month: "long", year: "numeric", timeZone: "UTC" }) }));
+  const { items } = usePosts();
+  const [now] = useState(() => new Date());
+  const months = cycles(now);
+  const [cycle, setCycle] = useState(months[0]);
+  const [busy, setBusy] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const options = months.map((value) => ({ value, label: formatDate(`${value}-01T12:00:00Z`, { month: "long", year: "numeric", timeZone: "UTC" }) }));
+
+  // What's on the calendar that month: feed posts vs reels, and the share of each content pillar.
+  const { feed, reels, pillars } = useMemo(() => {
+    const inMonth = (items ?? []).filter((p) => p.scheduledFor && dayKey(new Date(p.scheduledFor)).startsWith(cycle) && p.status !== "REJECTED");
+    const byPillar = new Map<string, number>();
+    for (const p of inMonth) if (p.pillar) byPillar.set(p.pillar, (byPillar.get(p.pillar) ?? 0) + 1);
+    const total = [...byPillar.values()].reduce((a, b) => a + b, 0);
+    return {
+      feed: inMonth.filter((p) => p.channel !== "INSTAGRAM_REEL").length,
+      reels: inMonth.filter((p) => p.channel === "INSTAGRAM_REEL").length,
+      pillars: [...byPillar].sort((a, b) => b[1] - a[1]).map(([label, n]) => ({ label, share: n / total })),
+    };
+  }, [items, cycle]);
+
+  const generate = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await posts.generate();
+      setStarted(true);
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 402) router.push("/plans/posts");
+      else setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <PostsScreen
@@ -42,28 +77,35 @@ export default function Planner() {
               </View>
             }
           />
-          {/* My Business and Billing live in the Business settings pages, which aren't routed yet. */}
-          <SegmentedTabs label={t("planner.sectionsLabel")} options={SECTIONS.map((value) => ({ value, label: t(`planner.sections.${value}`) }))} value="planner" onChange={() => {}} fill />
+          <SegmentedTabs
+            label={t("planner.sectionsLabel")}
+            options={SECTIONS.map((value) => ({ value, label: t(`planner.sections.${value}`) }))}
+            value="planner"
+            onChange={(v) => v !== "planner" && router.push(SECTION_HREF[v])}
+            fill
+          />
         </>
       }
       contentStyle={{ paddingHorizontal: space[16], paddingTop: space[12], paddingBottom: space[24] }}
     >
       <Card style={{ padding: space[12] }}>
         <CardTitle>{t("planner.cycle")}</CardTitle>
-        <SegmentedTabs label={t("planner.cycle")} options={cycles} value={cycle} onChange={setCycle} fill style={{ marginTop: space[8] }} />
+        <SegmentedTabs label={t("planner.cycle")} options={options} value={cycle} onChange={setCycle} fill style={{ marginTop: space[8] }} />
       </Card>
 
       <Card style={{ marginTop: space[12] }}>
         <View style={styles.between}>
           <CardTitle>{t("planner.cadence")}</CardTitle>
-          <Badge>{t("planner.monthlyTarget")}</Badge>
+          <Badge>{t("planner.onCalendar")}</Badge>
         </View>
         <View style={styles.pair}>
-          {CADENCE.map((c) => (
+          {[
+            { key: "feedPosts", n: feed },
+            { key: "reels", n: reels },
+          ].map((c) => (
             <View key={c.key} style={styles.well}>
               <Text style={[type.meta, { paddingBottom: 2 }]}>{t(`planner.${c.key}`)}</Text>
-              <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>{t("planner.perMonth", { n: c.target })}</Text>
-              <Text style={type.meta}>{t(`planner.${c.note}`)}</Text>
+              <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>{t("planner.perMonth", { n: c.n })}</Text>
             </View>
           ))}
         </View>
@@ -73,11 +115,12 @@ export default function Planner() {
       <Card style={{ marginTop: space[12] }}>
         <CardTitle>{t("planner.pillars")}</CardTitle>
         <View style={{ paddingTop: space[8], gap: space[8] }}>
-          {PILLARS.map(({ Icon, key, share }) => {
-            const label = t(`planner.pillar.${key}`);
-            const pct = formatNumber(share / 100, { style: "percent" });
+          {pillars.length === 0 ? <Text style={type.meta}>{t("planner.noPillars")}</Text> : null}
+          {pillars.map(({ label, share }, i) => {
+            const Icon = PILLAR_ICONS[i % PILLAR_ICONS.length];
+            const pct = formatNumber(share, { style: "percent" });
             return (
-              <View key={key} style={styles.pillar} accessibilityLabel={t("planner.pillarLabel", { label, share: pct })}>
+              <View key={label} style={styles.pillar} accessibilityLabel={t("planner.pillarLabel", { label, share: pct })}>
                 <View style={[styles.between, { gap: space[8], flexShrink: 1 }]}>
                   <Icon size={16} color={color.ink} strokeWidth={1.75} />
                   <Text style={[type.meta, { color: color.ink, flexShrink: 1 }]}>{label}</Text>
@@ -96,7 +139,18 @@ export default function Planner() {
         </Text>
       </Card>
 
-      <Button label={t("planner.generate")} icon={sparkles} style={{ marginTop: space[16] }} onPress={() => router.navigate("/posts/calendar")} />
+      {error ? <Text style={[type.meta, { color: color.error, textAlign: "center", paddingTop: space[12] }]}>{error}</Text> : null}
+      {started ? (
+        <View style={{ gap: space[8], marginTop: space[16] }}>
+          <Text style={[type.body, { textAlign: "center" }]} accessibilityLiveRegion="polite">
+            {t("planner.started")}
+          </Text>
+          <Button label={t("today.viewCalendar")} variant="outline" onPress={() => router.navigate("/posts/calendar")} />
+        </View>
+      ) : (
+        <Button label={busy ? t("planner.generating") : t("planner.generate")} icon={sparkles} disabled={busy} style={{ marginTop: space[16] }} onPress={() => void generate()} />
+      )}
+      {!started ? <Text style={[type.meta, { textAlign: "center", paddingTop: space[8] }]}>{t("planner.cost", { n: 5 })}</Text> : null}
     </PostsScreen>
   );
 }

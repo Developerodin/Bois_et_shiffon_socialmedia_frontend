@@ -7,6 +7,7 @@
     "approved": "Aprovado",
     "scheduled": "Agendado",
     "published": "Publicado",
+    "rejected": "Rejeitado",
     "draft": "Rascunho"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Agenda futura",
     "thisWeek": "Esta semana",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Ver calendário"
+    "viewCalendar": "Ver calendário",
+    "loadFailed": "Não foi possível carregar as tuas publicações. Verifica a ligação.",
+    "retry": "Tentar novamente",
+    "empty": "Ainda não há publicações esta semana. Planeia algumas no Planeador.",
+    "slides": "Carrossel · {{count}} diapositivos"
   },
   "calendar": {
     "title": "Calendário de publicações",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Detalhes da publicação",
-    "moreOptions": "Mais opções",
     "feedPhoto": "Foto de feed 4:5",
-    "fullscreen": "Ecrã inteiro",
-    "captionFrench": "Legenda (Francês)",
+    "caption": "Legenda",
+    "noDraft": "O redator ainda não criou o rascunho desta publicação.",
+    "notFound": "Esta publicação já não está disponível.",
+    "notReady": "O redator está a tratar disso. O rascunho e a verificação aparecem aqui dentro de um ou dois minutos.",
+    "instagramCarousel": "Carrossel do Instagram",
+    "instagramReel": "Reel do Instagram",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Ligado",
     "editText": "Editar texto",
     "channels": "Canais de publicação",
     "instagramFeed": "Feed do Instagram",
     "instagramDetail": "Conectar uma conta para publicar",
     "facebookPage": "Página do Facebook",
-    "facebookDetail": "Auto-publicar na página oficial",
     "notConnected": "Não conectado",
     "channelNotConnected": "{{name}}, não conectado",
     "editPost": "Editar publicação",
-    "schedule": "Agendar"
+    "schedule": "Agendar",
+    "slow": "Está a demorar mais do que o habitual. Volta daqui a alguns minutos.",
+    "checkFound": "A verificação encontrou um problema",
+    "fixIt": "Pedir ao redator para corrigir"
   },
   "edit": {
     "title": "Editar publicação",
@@ -110,18 +123,35 @@
     "language": "Idioma: Francês (FR)",
     "suggestedHashtags": "Hashtags sugeridas",
     "addHashtag": "Adicionar hashtag",
+    "removeHashtag": "Remover {{tag}}",
     "add": "+ Adicionar",
     "regenerate": "Re-gerar legenda com IA",
+    "regenerating": "A enviar ao redator...",
+    "saving": "A guardar...",
+    "upload": "Carregar a tua foto",
+    "uploading": "A carregar...",
+    "yourPhoto": "A tua foto",
     "imageHint": "Proporção original · 4:5. Arrasta a pré-visualização para reenquadrar o corte.",
-    "brandHint": "Logotipo, cores e tom seguem o teu kit de marca {{brand}}."
+    "carouselHint": "Escolhe 2 a 10 fotos pela ordem em que devem aparecer. O Instagram aceita fotos JPEG.",
+    "brandHint": "Logotipo, cores e tom seguem o teu kit de marca {{brand}}.",
+    "carouselMin": "Um carrossel precisa de pelo menos 2 fotos."
   },
   "schedule": {
     "title": "Agendar",
-    "storyFormat": "Story · imagem 9:16",
     "feedFormat": "Publicação de feed · imagem 4:5",
+    "carouselFormat": "Carrossel · imagens 4:5",
     "destination": "Destino",
     "actionRequired": "Ação necessária",
     "notLinked": "Conta do Instagram não ligada",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Não foi possível carregar os teus painéis do Pinterest. Volta a ligar o Pinterest e tenta novamente.",
+    "past": "Escolhe uma hora pelo menos {{count}} minutos a partir de agora.",
+    "scheduling": "A agendar...",
     "notLinkedBody": "Conecta as tuas contas sociais para desbloquear a publicação agendada direta.",
     "connect": "Conectar conta social",
     "locked": "Agendamento bloqueado até conexão",
@@ -133,7 +163,12 @@
     "timezone": "Fuso horário",
     "schedulePost": "Agendar publicação",
     "scheduleLocked": "Agendar publicação (Conectar canal primeiro)",
-    "saveDraft": "Guardar rascunho"
+    "later": "Agora não",
+    "needImages_one": "Esta publicação precisa de uma foto. Toca para adicionar.",
+    "needImages_other": "Esta publicação precisa de pelo menos {{count}} fotos. Toca para as adicionar.",
+    "tooManyImages_one": "Este canal aceita uma foto. Toca para a escolher.",
+    "tooManyImages_other": "Este canal aceita no máximo {{count}} fotos. Toca para as escolher.",
+    "jpegOnly": "O Instagram só aceita fotos JPEG. Toca para escolher um ficheiro .jpg."
   },
   "brief": {
     "title": "Criar uma publicação",
@@ -155,10 +190,12 @@
     "changeProduct": "Alterar produto",
     "change": "Alterar",
     "direction": "Direção criativa (opcional)",
-    "directionLanguage": "Francês (FR)",
     "directionPlaceholder": "ex.: Focar na marcenaria artesanal e no aconchego",
     "cost": "Custo de criação:",
-    "costPending": "Estimativa pendente",
+    "costIncluded": "Incluído",
+    "drafting": "A enviar ao redator...",
+    "noProducts": "Ainda não há fotos de produtos. Adiciona algumas para o redator ter o que mostrar.",
+    "addPhotos": "Adicionar fotos de produtos",
     "draftPost": "Rascunho de publicação"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Ciclo de planeamento",
     "cadence": "Cadência de publicação",
-    "monthlyTarget": "Meta mensal",
     "feedPosts": "Publicações no feed",
-    "stories": "Stories",
     "perMonth": "{{n}} / mês",
-    "feedNote": "~1 publicação diária",
-    "storiesNote": "Distribuídas ao longo do mês",
     "cadenceHint": "Metas de conteúdo sugeridas. Ajuste antes de gerar o seu calendário.",
     "pillars": "Pilares de conteúdo",
-    "pillar": {
-      "catalog": "Produtos do catálogo (foco em Bunting)",
-      "craft": "Detalhes de materiais & artesanato (madeira Acacia)",
-      "story": "História da marca & herança francesa"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Revisão manual antes da publicação: </b>As publicações geradas são colocadas no seu calendário como rascunhos para a sua confirmação final. Nenhum conteúdo é publicado sem aprovação.",
-    "generate": "Gerar calendário"
+    "generate": "Gerar calendário",
+    "onCalendar": "No calendário",
+    "reels": "Reels",
+    "noPillars": "Ainda não há publicações planeadas para este mês.",
+    "started": "A planear os próximos 30 dias. Os primeiros rascunhos aparecem no calendário dentro de alguns minutos, prontos para aprovares. Os restantes aparecem à medida que forem criados.",
+    "generating": "A iniciar...",
+    "cost": "Custa {{n}} créditos."
   }
 }

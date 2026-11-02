@@ -7,6 +7,7 @@
     "approved": "Approuvé",
     "scheduled": "Planifié",
     "published": "Publié",
+    "rejected": "Refusé",
     "draft": "Brouillon"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Agenda à venir",
     "thisWeek": "Cette semaine",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Voir le calendrier"
+    "viewCalendar": "Voir le calendrier",
+    "loadFailed": "Impossible de charger tes publications. Vérifie ta connexion.",
+    "retry": "Réessayer",
+    "empty": "Aucune publication cette semaine. Planifies-en depuis le planning.",
+    "slides": "Carrousel · {{count}} diapositives"
   },
   "calendar": {
     "title": "Calendrier des publications",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Détails de la publication",
-    "moreOptions": "Plus d'options",
     "feedPhoto": "Photo 4:5 du fil",
-    "fullscreen": "Plein écran",
-    "captionFrench": "Légende (Français)",
+    "caption": "Légende",
+    "noDraft": "Le rédacteur n'a pas encore préparé cette publication.",
+    "notFound": "Cette publication n'est plus disponible.",
+    "notReady": "Le rédacteur s'en occupe. Le brouillon et sa vérification apparaîtront ici dans une ou deux minutes.",
+    "instagramCarousel": "Carrousel Instagram",
+    "instagramReel": "Reel Instagram",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Connecté",
     "editText": "Modifier le texte",
     "channels": "Canaux de publication",
     "instagramFeed": "Fil Instagram",
     "instagramDetail": "Connectez un compte pour publier",
     "facebookPage": "Page Facebook",
-    "facebookDetail": "Publication automatique sur la page officielle",
     "notConnected": "Non connecté",
     "channelNotConnected": "{{name}}, non connecté",
     "editPost": "Modifier la publication",
-    "schedule": "Planifier"
+    "schedule": "Planifier",
+    "slow": "Cela prend plus de temps que prévu. Reviens dans quelques minutes.",
+    "checkFound": "La vérification a détecté un problème",
+    "fixIt": "Demander une correction"
   },
   "edit": {
     "title": "Modifier la publication",
@@ -110,18 +123,35 @@
     "language": "Langue : Français (FR)",
     "suggestedHashtags": "Hashtags suggérés",
     "addHashtag": "Ajouter un hashtag",
+    "removeHashtag": "Retirer {{tag}}",
     "add": "+ Ajouter",
     "regenerate": "Régénérer la légende avec l'IA",
+    "regenerating": "Envoi au rédacteur...",
+    "saving": "Enregistrement...",
+    "upload": "Importer ta photo",
+    "uploading": "Importation...",
+    "yourPhoto": "Ta photo",
     "imageHint": "Ratio original · 4:5. Faites glisser l'aperçu pour recadrer.",
-    "brandHint": "Logo, couleurs et ton suivent votre kit de marque {{brand}}."
+    "carouselHint": "Choisis 2 à 10 photos dans l'ordre d'affichage souhaité. Instagram accepte les photos JPEG.",
+    "brandHint": "Logo, couleurs et ton suivent votre kit de marque {{brand}}.",
+    "carouselMin": "Un carrousel nécessite au moins 2 photos."
   },
   "schedule": {
     "title": "Planifier",
-    "storyFormat": "Story · image 9:16",
     "feedFormat": "Publication du fil · image 4:5",
+    "carouselFormat": "Carrousel · Images 4:5",
     "destination": "Destination",
     "actionRequired": "Action requise",
     "notLinked": "Compte Instagram non lié",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Impossible de charger tes tableaux Pinterest. Reconnecte Pinterest et réessaie.",
+    "past": "Choisis une heure dans au moins {{count}} minutes.",
+    "scheduling": "Planification...",
     "notLinkedBody": "Connectez vos comptes sociaux pour débloquer la publication planifiée directe.",
     "connect": "Connecter le compte social",
     "locked": "Planification verrouillée jusqu'à la connexion",
@@ -133,7 +163,12 @@
     "timezone": "Fuseau horaire",
     "schedulePost": "Planifier la publication",
     "scheduleLocked": "Planifier la publication (Connecter le canal d'abord)",
-    "saveDraft": "Enregistrer le brouillon"
+    "later": "Pas maintenant",
+    "needImages_one": "Cette publication nécessite une photo. Appuie pour en ajouter une.",
+    "needImages_other": "Cette publication nécessite au moins {{count}} photos. Appuie pour les ajouter.",
+    "tooManyImages_one": "Ce canal accepte une seule photo. Appuie pour la choisir.",
+    "tooManyImages_other": "Ce canal accepte au maximum {{count}} photos. Appuie pour les choisir.",
+    "jpegOnly": "Instagram accepte uniquement les photos JPEG. Appuie pour choisir un fichier .jpg."
   },
   "brief": {
     "title": "Créer une publication",
@@ -155,10 +190,12 @@
     "changeProduct": "Changer de produit",
     "change": "Changer",
     "direction": "Direction créative (facultatif)",
-    "directionLanguage": "Français (FR)",
     "directionPlaceholder": "ex. Mettre l'accent sur la menuiserie artisanale et la chaleur",
     "cost": "Coût de création :",
-    "costPending": "Estimation en attente",
+    "costIncluded": "Inclus",
+    "drafting": "Envoi au rédacteur...",
+    "noProducts": "Pas encore de photos de produits. Ajoute-en pour que le rédacteur ait quelque chose à montrer.",
+    "addPhotos": "Ajouter des photos de produits",
     "draftPost": "Brouillon de publication"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Cycle de planification",
     "cadence": "Cadence de publication",
-    "monthlyTarget": "Objectif mensuel",
     "feedPosts": "Publications du fil",
-    "stories": "Stories",
     "perMonth": "{{n}} / mois",
-    "feedNote": "~1 publication par jour",
-    "storiesNote": "Réparties sur votre mois",
     "cadenceHint": "Objectifs de contenu suggérés. Ajustez avant de générer votre calendrier.",
     "pillars": "Piliers de contenu",
-    "pillar": {
-      "catalog": "Produits du catalogue (focus Bunting)",
-      "craft": "Détails des matériaux & artisanat (bois d'Acacia)",
-      "story": "Histoire de la marque & héritage français"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Revue manuelle avant publication : </b>Les publications générées sont placées dans votre calendrier en tant que brouillons pour votre confirmation finale. Aucun contenu n'est publié sans approbation.",
-    "generate": "Générer le calendrier"
+    "generate": "Générer le calendrier",
+    "onCalendar": "Dans le calendrier",
+    "reels": "Reels",
+    "noPillars": "Aucune publication prévue pour ce mois.",
+    "started": "Planification de tes 30 prochains jours. Les premiers brouillons apparaîtront dans le calendrier dans quelques minutes, prêts à être approuvés ; les autres suivront au fur et à mesure de leur rédaction.",
+    "generating": "Démarrage...",
+    "cost": "Coûte {{n}} crédits."
   }
 }

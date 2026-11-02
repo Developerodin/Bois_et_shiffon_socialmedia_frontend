@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
-import { brandKnowledge } from "@/server/content/knowledge";
+import { brandKnowledge, productPhotos } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
 import { directScenes, type DraftSoFar, type ReelPhoto, writePlan } from "@/server/reels/agents";
 import { carryStandIns, isStudioPlan, planProblems, ReelPlan, reelPrice, reelSeconds, toVersionBody } from "@/server/reels/plan";
@@ -47,8 +47,7 @@ export function toReelProblem(error: unknown) {
 
 /** Photos the scriptwriter may use: the brand's product photos from Research, plus any already in the plan. */
 async function brandPhotos(scope: Scope, current?: ReelPlan): Promise<ReelPhoto[]> {
-  const profile = await prisma.brandProfile.findFirst({ where: { brandId: scope.brandId, workspaceId: scope.workspaceId }, select: { assets: true } });
-  const products = ((profile?.assets as { products?: { title: string; imageKey: string | null }[] } | null)?.products ?? []).flatMap((p) => (p.imageKey ? [{ key: p.imageKey, title: p.title, product: p.title }] : []));
+  const products = (await productPhotos(scope.workspaceId, scope.brandId)).map((p) => ({ ...p, product: p.title }));
   const inPlan = (current?.scenes ?? []).filter((s) => !products.some((p) => p.key === s.photoKey)).map((s) => ({ key: s.photoKey, title: s.shot }));
   return [...products, ...inPlan].slice(0, 30);
 }

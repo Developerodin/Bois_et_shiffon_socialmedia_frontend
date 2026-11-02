@@ -7,6 +7,7 @@
     "approved": "Approvato",
     "scheduled": "Programmato",
     "published": "Pubblicato",
+    "rejected": "Rifiutato",
     "draft": "Bozza"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Agenda prossima",
     "thisWeek": "Questa settimana",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Visualizza calendario"
+    "viewCalendar": "Visualizza calendario",
+    "loadFailed": "Impossibile caricare i tuoi post. Controlla la connessione.",
+    "retry": "Riprova",
+    "empty": "Nessun post per questa settimana. Pianificali dal calendario.",
+    "slides": "Carosello · {{count}} slide"
   },
   "calendar": {
     "title": "Calendario dei post",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Dettagli del post",
-    "moreOptions": "Altre opzioni",
     "feedPhoto": "Foto feed 4:5",
-    "fullscreen": "Schermo intero",
-    "captionFrench": "Didascalia (Francese)",
+    "caption": "Didascalia",
+    "noDraft": "Il redattore non ha ancora preparato la bozza di questo post.",
+    "notFound": "Questo post non è più disponibile.",
+    "notReady": "Il redattore ci sta lavorando. La bozza e la verifica appariranno qui tra un minuto o due.",
+    "instagramCarousel": "Carosello Instagram",
+    "instagramReel": "Reel Instagram",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Connesso",
     "editText": "Modifica testo",
     "channels": "Canali di pubblicazione",
     "instagramFeed": "Feed di Instagram",
     "instagramDetail": "Connetti un account per pubblicare",
     "facebookPage": "Pagina Facebook",
-    "facebookDetail": "Auto-pubblica sulla pagina ufficiale",
     "notConnected": "Non connesso",
     "channelNotConnected": "{{name}}, non connesso",
     "editPost": "Modifica post",
-    "schedule": "Programma"
+    "schedule": "Programma",
+    "slow": "Ci vuole più tempo del solito. Torna tra qualche minuto.",
+    "checkFound": "La verifica ha rilevato un problema",
+    "fixIt": "Chiedi al redattore di correggerlo"
   },
   "edit": {
     "title": "Modifica post",
@@ -110,18 +123,35 @@
     "language": "Lingua: Francese (FR)",
     "suggestedHashtags": "Hashtag suggeriti",
     "addHashtag": "Aggiungi hashtag",
+    "removeHashtag": "Rimuovi {{tag}}",
     "add": "+ Aggiungi",
     "regenerate": "Rigenera didascalia con AI",
+    "regenerating": "Invio al redattore...",
+    "saving": "Salvataggio...",
+    "upload": "Carica una tua foto",
+    "uploading": "Caricamento...",
+    "yourPhoto": "La tua foto",
     "imageHint": "Rapporto originale · 4:5. Trascina l'anteprima per ritagliare.",
-    "brandHint": "Logo, colori e tono seguono il tuo kit brand {{brand}}."
+    "carouselHint": "Scegli da 2 a 10 foto nell'ordine in cui devono apparire. Instagram accetta foto JPEG.",
+    "brandHint": "Logo, colori e tono seguono il tuo kit brand {{brand}}.",
+    "carouselMin": "Un carosello richiede almeno 2 foto."
   },
   "schedule": {
     "title": "Programma",
-    "storyFormat": "Storia · Immagine 9:16",
     "feedFormat": "Post feed · Immagine 4:5",
+    "carouselFormat": "Carosello · immagini 4:5",
     "destination": "Destinazione",
     "actionRequired": "Azione richiesta",
     "notLinked": "Account Instagram non collegato",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Impossibile caricare le tue bacheche Pinterest. Ricollega Pinterest e riprova.",
+    "past": "Scegli un orario tra almeno {{count}} minuti.",
+    "scheduling": "Programmazione...",
     "notLinkedBody": "Connetti i tuoi account social per sbloccare la pubblicazione programmata diretta.",
     "connect": "Connetti account social",
     "locked": "Programmazione bloccata fino alla connessione",
@@ -133,7 +163,12 @@
     "timezone": "Fuso orario",
     "schedulePost": "Programma post",
     "scheduleLocked": "Programma post (Connetti prima il canale)",
-    "saveDraft": "Salva bozza"
+    "later": "Non ora",
+    "needImages_one": "Questo post richiede una foto. Tocca per aggiungerla.",
+    "needImages_other": "Questo post richiede almeno {{count}} foto. Tocca per aggiungerle.",
+    "tooManyImages_one": "Questo canale accetta una sola foto. Tocca per sceglierla.",
+    "tooManyImages_other": "Questo canale accetta al massimo {{count}} foto. Tocca per sceglierle.",
+    "jpegOnly": "Instagram accetta solo foto JPEG. Tocca per scegliere un file .jpg."
   },
   "brief": {
     "title": "Crea un post",
@@ -155,10 +190,12 @@
     "changeProduct": "Cambia prodotto",
     "change": "Cambia",
     "direction": "Direzione creativa (opzionale)",
-    "directionLanguage": "Francese (FR)",
     "directionPlaceholder": "es. Focus su giunzioni artigianali e calore",
     "cost": "Costo creazione:",
-    "costPending": "Stima in sospeso",
+    "costIncluded": "Incluso",
+    "drafting": "Invio al redattore...",
+    "noProducts": "Non ci sono ancora foto dei prodotti. Aggiungine alcune per permettere al redattore di mostrarli.",
+    "addPhotos": "Aggiungi foto dei prodotti",
     "draftPost": "Bozza post"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Ciclo di pianificazione",
     "cadence": "Cadenza di pubblicazione",
-    "monthlyTarget": "Obiettivo mensile",
     "feedPosts": "Post nel feed",
-    "stories": "Storie",
     "perMonth": "{{n}} / mese",
-    "feedNote": "~1 post al giorno",
-    "storiesNote": "Distribuite nel mese",
     "cadenceHint": "Obiettivi di contenuto suggeriti. Regola prima di generare il tuo calendario.",
     "pillars": "Pilastri di contenuto",
-    "pillar": {
-      "catalog": "Prodotti del catalogo (focus su Bunting)",
-      "craft": "Dettagli materiali & artigianato (legno di Acacia)",
-      "story": "Storia del brand & eredità francese"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Revisione manuale prima della pubblicazione: </b>Le bozze generate sono inserite nel tuo calendario per la conferma finale. Nessun contenuto viene pubblicato senza approvazione.",
-    "generate": "Genera calendario"
+    "generate": "Genera calendario",
+    "onCalendar": "Nel calendario",
+    "reels": "Reels",
+    "noPillars": "Nessun post pianificato per questo mese.",
+    "started": "Stiamo pianificando i tuoi prossimi 30 giorni. Le prime bozze appariranno nel calendario tra pochi minuti, pronte per la tua approvazione; le altre seguiranno man mano che saranno pronte.",
+    "generating": "Avvio...",
+    "cost": "Costa {{n}} crediti."
   }
 }

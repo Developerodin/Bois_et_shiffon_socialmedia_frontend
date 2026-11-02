@@ -56,6 +56,16 @@ export async function effectivePermissions(
   return perms;
 }
 
+/**
+ * Can someone other than `userId` approve this brand's content? A one-person business can't follow a four-eyes rule.
+ * ponytail: checks every workspace member one by one; fine for small teams, a joined query if workspaces get large.
+ */
+export async function hasOtherApprover(workspaceId: string, brandId: string, userId: string) {
+  const others = await prisma.workspaceMember.findMany({ where: { workspaceId, userId: { not: userId } }, select: { userId: true } });
+  for (const o of others) if ((await effectivePermissions(workspaceId, o.userId, brandId)).has("content.approve")) return true;
+  return false;
+}
+
 export async function requirePermission(
   workspaceId: string,
   userId: string,

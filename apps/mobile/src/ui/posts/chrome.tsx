@@ -8,7 +8,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { images } from "@/ui/icons";
 import { Footer } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
-import { BUSINESS } from "@/ui/posts/sample";
+import { useCurrentBrand } from "@/ui/use-current-brand";
 import { useCredits } from "@/ui/use-credits";
 
 /** Colours the module chrome uses that aren't in the design-system tokens. */
@@ -175,10 +175,12 @@ export function PageHeader({ title, right }: { title?: string; right?: ReactNode
 /** 44-tall "favicon · Bois & Chiffons ⌄" switcher (Figma "Button · Bois & Chiffons"). */
 export function BusinessSwitcher() {
   const { t } = useTranslation("posts");
+  const brand = useCurrentBrand();
+  const name = brand?.name ?? "";
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={t("chrome.switchBusiness", { name: BUSINESS.name })} onPress={() => router.push("/business/menu")} style={({ pressed }) => [styles.switcher, pressed && { opacity: 0.85 }]}>
-      <Image source={BUSINESS.favicon} style={{ width: 20, height: 20, borderRadius: 4 }} contentFit="contain" />
-      <Text style={type.label}>{BUSINESS.name}</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel={t("chrome.switchBusiness", { name })} onPress={() => router.push("/business/menu")} style={({ pressed }) => [styles.switcher, pressed && { opacity: 0.85 }]}>
+      <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={{ width: 20, height: 20, borderRadius: 4 }} contentFit="contain" />
+      <Text style={type.label}>{name}</Text>
       <ChevronDown size={16} color={color.ink} strokeWidth={1.75} />
     </Pressable>
   );
@@ -187,10 +189,12 @@ export function BusinessSwitcher() {
 /** 36-tall business pill in page headers; `dark` is the glass variant on the story editor. */
 export function BusinessChip({ dark }: { dark?: boolean }) {
   const { t } = useTranslation("posts");
+  const brand = useCurrentBrand();
+  const name = brand?.name ?? "";
   return (
-    <View style={[styles.chip, dark && styles.glass]} accessibilityLabel={t("chrome.business", { name: BUSINESS.name })}>
-      <Image source={BUSINESS.favicon} style={{ width: 16, height: 16, borderRadius: 3 }} contentFit="contain" />
-      <Text style={[type.meta, { color: dark ? color.onPrimary : color.ink }]}>{BUSINESS.name}</Text>
+    <View style={[styles.chip, dark && styles.glass]} accessibilityLabel={t("chrome.business", { name })}>
+      <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={{ width: 16, height: 16, borderRadius: 3 }} contentFit="contain" />
+      <Text style={[type.meta, { color: dark ? color.onPrimary : color.ink }]}>{name}</Text>
     </View>
   );
 }

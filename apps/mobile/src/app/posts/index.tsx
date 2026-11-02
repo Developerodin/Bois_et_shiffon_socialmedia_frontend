@@ -2,20 +2,24 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ArrowRight, Clock, SquarePen } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { Glow } from "@/ui/aura";
 import { Button } from "@/ui/button";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge } from "@/ui/posts/controls";
-import { CHANNEL_LABEL, POSTS, POST_COPY, STATUS_KEY, isLockedIn, relativeSlot, upcomingThisWeek } from "@/ui/posts/sample";
+import { CHANNEL_LABEL, STATUS_KEY, isLockedIn, relativeSlot, upcomingThisWeek } from "@/ui/posts/sample";
+import { coverUrl, openPost, usePosts } from "@/ui/posts/use-posts";
 
 /** P01 · Posts / Today: the post waiting for approval and this week's agenda. */
 export default function PostsToday() {
   const { t } = useTranslation("posts");
-  const pending = POSTS.find((p) => p.status === "AWAITING_APPROVAL");
-  const copy = pending ? POST_COPY[pending.id] ?? {} : {};
-  const agenda = upcomingThisWeek().slice(0, 2);
+  const { items, error, loading, reload } = usePosts();
+  // Studio reels are approved in Reels (R07); this card is for the agents' posts.
+  const pending = items?.find((p) => p.status === "AWAITING_APPROVAL" && !p.studio);
+  const agenda = upcomingThisWeek(items ?? []).slice(0, 2);
+  const product = pending?.brief?.products?.[0];
+  const format = pending && (pending.channel === "INSTAGRAM_CAROUSEL" ? t("today.slides", { count: pending.latest?.body.slides.length ?? 0 }) : CHANNEL_LABEL[pending.channel]);
 
   return (
     <PostsScreen header={<ModuleHeader />} nav={<BottomNav active="today" />} background={color.canvasAlt}>
@@ -28,6 +32,14 @@ export default function PostsToday() {
       </Text>
       <Text style={[type.body, { color: color.inkSecondary, paddingTop: 2 }]}>{t("today.subtitle")}</Text>
 
+      {loading ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
+      {error && !items ? (
+        <View style={[styles.section, styles.agenda, { gap: space[12] }]}>
+          <Text style={type.body}>{t("today.loadFailed")}</Text>
+          <Button label={t("today.retry")} variant="outline" onPress={() => void reload()} />
+        </View>
+      ) : null}
+
       {pending ? (
         <View style={[styles.section, styles.approval]}>
           <View style={styles.between}>
@@ -36,19 +48,19 @@ export default function PostsToday() {
           </View>
           <View style={{ paddingTop: space[12], gap: space[12] }}>
             <View style={styles.photo}>
-              <Image source={pending.image} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={pending.title} />
+              {coverUrl(pending) ? <Image source={{ uri: coverUrl(pending)! }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={pending.title} /> : null}
             </View>
             <View style={{ paddingHorizontal: 2 }}>
-              <Text style={[type.cardTitle, { letterSpacing: -0.24 }]}>{copy.collection ?? pending.title}</Text>
-              {copy.product ? <Text style={[type.meta, { paddingTop: 4 }]}>{copy.product}</Text> : null}
-              {copy.format ? <Text style={[type.meta, { paddingTop: 4 }]}>{copy.format}</Text> : null}
+              <Text style={[type.cardTitle, { letterSpacing: -0.24 }]}>{pending.title}</Text>
+              {product ? <Text style={[type.meta, { paddingTop: 4 }]}>{product}</Text> : null}
+              <Text style={[type.meta, { paddingTop: 4 }]}>{format}</Text>
             </View>
           </View>
-          <Button label={t("today.reviewPost")} arrow style={{ marginTop: space[16] }} onPress={() => router.push(`/posts/${pending.id}`)} />
+          <Button label={t("today.reviewPost")} arrow style={{ marginTop: space[16] }} onPress={() => openPost(pending)} />
         </View>
       ) : null}
 
-      <View style={[styles.section, styles.agenda]}>
+      {items ? <View style={[styles.section, styles.agenda]}>
         <View style={styles.between}>
           <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]} accessibilityRole="header">
             {t("today.agenda")}
@@ -56,6 +68,7 @@ export default function PostsToday() {
           <Text style={type.meta}>{t("today.thisWeek")}</Text>
         </View>
         <View style={{ paddingTop: space[12], gap: space[12] }}>
+          {agenda.length === 0 ? <Text style={[type.body, { color: color.inkSecondary }]}>{t("today.empty")}</Text> : null}
           {agenda.map((p) => {
             const locked = isLockedIn(p.status);
             const status = t(STATUS_KEY[p.status]);
@@ -64,7 +77,7 @@ export default function PostsToday() {
                   key={p.id}
                   accessibilityRole="button"
                   accessibilityLabel={t("today.slotLabel", { title: p.title, when: relativeSlot(p.scheduledFor!), status })}
-                  onPress={() => router.push(`/posts/${p.id}`)}
+                  onPress={() => openPost(p)}
                   style={({ pressed }) => [styles.slot, pressed && { opacity: 0.85 }]}
                 >
                   <View style={styles.slotLeft}>
@@ -87,7 +100,7 @@ export default function PostsToday() {
             <ArrowRight size={16} color={color.ink} strokeWidth={1.75} />
           </Pressable>
         </View>
-      </View>
+      </View> : null}
     </PostsScreen>
   );
 }

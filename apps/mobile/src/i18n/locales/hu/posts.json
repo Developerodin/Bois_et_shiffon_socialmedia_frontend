@@ -7,6 +7,7 @@
     "approved": "Jóváhagyva",
     "scheduled": "Ütemezett",
     "published": "Közzétéve",
+    "rejected": "Elutasítva",
     "draft": "Vázlat"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Közelgő napirend",
     "thisWeek": "Ezen a héten",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Naptár megtekintése"
+    "viewCalendar": "Naptár megtekintése",
+    "loadFailed": "Nem sikerült betölteni a bejegyzéseidet. Ellenőrizd a kapcsolatot.",
+    "retry": "Újra",
+    "empty": "Erre a hétre még nincs bejegyzés. Tervezz néhányat a Tervezőben.",
+    "slides": "Lapozós poszt · {{count}} dia"
   },
   "calendar": {
     "title": "Bejegyzések naptára",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Bejegyzés részletei",
-    "moreOptions": "További lehetőségek",
     "feedPhoto": "4:5 Feed fotó",
-    "fullscreen": "Teljes képernyő",
-    "captionFrench": "Felirat (francia)",
+    "caption": "Képaláírás",
+    "noDraft": "A szövegíró még nem készítette el a bejegyzés piszkozatát.",
+    "notFound": "Ez a bejegyzés már nem található.",
+    "notReady": "A szövegíró már dolgozik rajta. A piszkozat és az ellenőrzés eredménye egy-két percen belül itt jelenik meg.",
+    "instagramCarousel": "Instagram lapozós poszt",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Csatlakoztatva",
     "editText": "Szöveg szerkesztése",
     "channels": "Közzétételi csatornák",
     "instagramFeed": "Instagram Feed",
     "instagramDetail": "Csatlakoztass egy fiókot a közzétételhez",
     "facebookPage": "Facebook oldal",
-    "facebookDetail": "Automatikus közzététel a hivatalos oldalon",
     "notConnected": "Nincs csatlakoztatva",
     "channelNotConnected": "{{name}}, nincs csatlakoztatva",
     "editPost": "Bejegyzés szerkesztése",
-    "schedule": "Ütemezés"
+    "schedule": "Ütemezés",
+    "slow": "Ez a szokásosnál tovább tart. Gyere vissza néhány perc múlva.",
+    "checkFound": "Az ellenőrzés problémát talált",
+    "fixIt": "Javítás kérése"
   },
   "edit": {
     "title": "Bejegyzés szerkesztése",
@@ -110,18 +123,35 @@
     "language": "Nyelv: francia (FR)",
     "suggestedHashtags": "Javasolt hashtagek",
     "addHashtag": "Hashtag hozzáadása",
+    "removeHashtag": "{{tag}} eltávolítása",
     "add": "+ Hozzáadás",
     "regenerate": "Felirat újragenerálása AI-val",
+    "regenerating": "Küldés a szövegírónak...",
+    "saving": "Mentés...",
+    "upload": "Saját fotó feltöltése",
+    "uploading": "Feltöltés...",
+    "yourPhoto": "A fotód",
     "imageHint": "Eredeti arány · 4:5. Húzd a nézetet az újravágáshoz.",
-    "brandHint": "Logó, színek és hangnem a(z) {{brand}} márkakészlet szerint."
+    "carouselHint": "Válassz ki 2–10 fotót a megjelenítés sorrendjében. Az Instagram JPEG-fotókat fogad el.",
+    "brandHint": "Logó, színek és hangnem a(z) {{brand}} márkakészlet szerint.",
+    "carouselMin": "A lapozós poszthoz legalább 2 fotó kell."
   },
   "schedule": {
     "title": "Ütemezés",
-    "storyFormat": "Történet · 9:16 kép",
     "feedFormat": "Feed bejegyzés · 4:5 kép",
+    "carouselFormat": "Lapozós poszt · 4:5 arányú képek",
     "destination": "Cél",
     "actionRequired": "Művelet szükséges",
     "notLinked": "Instagram fiók nincs csatlakoztatva",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Nem sikerült betölteni a Pinterest-tábláidat. Csatlakoztasd újra a Pinterestet, és próbáld újra.",
+    "past": "Válassz legalább {{count}} perccel későbbi időpontot.",
+    "scheduling": "Időzítés...",
     "notLinkedBody": "Csatlakoztasd a közösségi fiókjaidat a közvetlen ütemezett közzététel feloldásához.",
     "connect": "Közösségi fiók csatlakoztatása",
     "locked": "Ütemezés zárolva, amíg nincs csatlakoztatva",
@@ -133,7 +163,12 @@
     "timezone": "Időzóna",
     "schedulePost": "Bejegyzés ütemezése",
     "scheduleLocked": "Bejegyzés ütemezése (Először csatlakoztasd a csatornát)",
-    "saveDraft": "Vázlat mentése"
+    "later": "Most nem",
+    "needImages_one": "Ehhez a bejegyzéshez fotó kell. Koppints a hozzáadáshoz.",
+    "needImages_other": "Ehhez a bejegyzéshez legalább {{count}} fotó kell. Koppints a hozzáadásukhoz.",
+    "tooManyImages_one": "Ez a csatorna egy fotót fogad el. Koppints a kiválasztásához.",
+    "tooManyImages_other": "Ez a csatorna legfeljebb {{count}} fotót fogad el. Koppints a kiválasztásukhoz.",
+    "jpegOnly": "Az Instagram csak JPEG-fotókat fogad el. Koppints egy .jpg-fájl kiválasztásához."
   },
   "brief": {
     "title": "Bejegyzés létrehozása",
@@ -155,10 +190,12 @@
     "changeProduct": "Termék módosítása",
     "change": "Módosítás",
     "direction": "Kreatív irány (opcionális)",
-    "directionLanguage": "Francia (FR)",
     "directionPlaceholder": "pl. Kézműves asztalosmunka és melegség kiemelése",
     "cost": "Létrehozási költség:",
-    "costPending": "Becslés folyamatban",
+    "costIncluded": "Benne van",
+    "drafting": "Küldés a szövegírónak...",
+    "noProducts": "Még nincsenek termékfotók. Adj hozzá néhányat, hogy a szövegírónak legyen mit bemutatnia.",
+    "addPhotos": "Termékfotók hozzáadása",
     "draftPost": "Vázlat poszt"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Tervezési ciklus",
     "cadence": "Közzétételi ütem",
-    "monthlyTarget": "Havi cél",
     "feedPosts": "Hírfolyam posztok",
-    "stories": "Történetek",
     "perMonth": "{{n}} / hónap",
-    "feedNote": "~1 poszt naponta",
-    "storiesNote": "Szétosztva a hónap során",
     "cadenceHint": "Javasolt tartalmi célok. Állítsd be, mielőtt létrehozod a naptáradat.",
     "pillars": "Tartalmi pillérek",
-    "pillar": {
-      "catalog": "Katalógustermékek (Bunting fókusz)",
-      "craft": "Anyag részletek és kézművesség (Acacia fa)",
-      "story": "Márkatörténet és francia örökség"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Kézi átnézés közzététel előtt: </b>Az előállított tartalmak vázlatként kerülnek a naptáradba, végső megerősítésedre. Tartalom nem kerül közzétételre jóváhagyás nélkül.",
-    "generate": "Naptár generálása"
+    "generate": "Naptár generálása",
+    "onCalendar": "A naptárban",
+    "reels": "Reels",
+    "noPillars": "Erre a hónapra még nincs tervezett bejegyzés.",
+    "started": "Tervezzük a következő 30 napodat. Az első piszkozatok néhány percen belül megjelennek a naptárban, ahol jóváhagyhatod őket. A többi is megjelenik, amint elkészül.",
+    "generating": "Indítás...",
+    "cost": "Ára: {{n}} kredit."
   }
 }

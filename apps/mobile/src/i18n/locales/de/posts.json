@@ -7,6 +7,7 @@
     "approved": "Genehmigt",
     "scheduled": "Geplant",
     "published": "Veröffentlicht",
+    "rejected": "Abgelehnt",
     "draft": "Entwurf"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Bevorstehende Agenda",
     "thisWeek": "Diese Woche",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Kalender ansehen"
+    "viewCalendar": "Kalender ansehen",
+    "loadFailed": "Deine Beiträge konnten nicht geladen werden. Prüfe deine Verbindung.",
+    "retry": "Erneut versuchen",
+    "empty": "Diese Woche gibt es noch keine Beiträge. Plane welche im Planer.",
+    "slides": "Karussell · {{count}} Slides"
   },
   "calendar": {
     "title": "Beitragskalender",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Beitragsdetails",
-    "moreOptions": "Mehr Optionen",
     "feedPhoto": "4:5 Feed-Foto",
-    "fullscreen": "Vollbild",
-    "captionFrench": "Bildunterschrift (Französisch)",
+    "caption": "Bildunterschrift",
+    "noDraft": "Der Texter hat diesen Beitrag noch nicht entworfen.",
+    "notFound": "Diesen Beitrag gibt es nicht mehr.",
+    "notReady": "Der Texter arbeitet daran. Der Entwurf und seine Prüfung erscheinen hier in ein bis zwei Minuten.",
+    "instagramCarousel": "Instagram-Karussell",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Verbunden",
     "editText": "Text bearbeiten",
     "channels": "Veröffentlichungskanäle",
     "instagramFeed": "Instagram-Feed",
     "instagramDetail": "Konto verbinden, um zu veröffentlichen",
     "facebookPage": "Facebook-Seite",
-    "facebookDetail": "Automatisch auf offizieller Seite posten",
     "notConnected": "Nicht verbunden",
     "channelNotConnected": "{{name}}, nicht verbunden",
     "editPost": "Beitrag bearbeiten",
-    "schedule": "Planen"
+    "schedule": "Planen",
+    "slow": "Das dauert länger als üblich. Schau in ein paar Minuten wieder vorbei.",
+    "checkFound": "Bei der Prüfung wurde ein Problem gefunden",
+    "fixIt": "Texter um Korrektur bitten"
   },
   "edit": {
     "title": "Beitrag bearbeiten",
@@ -110,18 +123,35 @@
     "language": "Sprache: Französisch (FR)",
     "suggestedHashtags": "Vorgeschlagene Hashtags",
     "addHashtag": "Hashtag hinzufügen",
+    "removeHashtag": "{{tag}} entfernen",
     "add": "+ Hinzufügen",
     "regenerate": "Bildunterschrift mit KI neu generieren",
+    "regenerating": "Wird an den Texter gesendet...",
+    "saving": "Wird gespeichert...",
+    "upload": "Eigenes Foto hochladen",
+    "uploading": "Wird hochgeladen...",
+    "yourPhoto": "Dein Foto",
     "imageHint": "Originalverhältnis · 4:5. Ziehe die Vorschau, um den Zuschnitt neu zu rahmen.",
-    "brandHint": "Logo, Farben und Ton folgen deinem {{brand}} Markenkit."
+    "carouselHint": "Wähle 2 bis 10 Fotos in der gewünschten Reihenfolge aus. Instagram akzeptiert JPEG-Fotos.",
+    "brandHint": "Logo, Farben und Ton folgen deinem {{brand}} Markenkit.",
+    "carouselMin": "Ein Karussell braucht mindestens 2 Fotos."
   },
   "schedule": {
     "title": "Planen",
-    "storyFormat": "Story · 9:16 Bild",
     "feedFormat": "Feed-Beitrag · 4:5 Bild",
+    "carouselFormat": "Karussell · Bilder im 4:5-Format",
     "destination": "Ziel",
     "actionRequired": "Aktion erforderlich",
     "notLinked": "Instagram-Konto nicht verknüpft",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Deine Pinterest-Pinnwände konnten nicht geladen werden. Verbinde Pinterest erneut und versuche es noch einmal.",
+    "past": "Wähle einen Zeitpunkt, der mindestens {{count}} Minuten in der Zukunft liegt.",
+    "scheduling": "Wird eingeplant...",
     "notLinkedBody": "Verbinde deine sozialen Konten, um direkt geplante Veröffentlichungen freizuschalten.",
     "connect": "Soziales Konto verbinden",
     "locked": "Planung gesperrt bis zur Verbindung",
@@ -133,7 +163,12 @@
     "timezone": "Zeitzone",
     "schedulePost": "Beitrag planen",
     "scheduleLocked": "Beitrag planen (Kanal zuerst verbinden)",
-    "saveDraft": "Entwurf speichern"
+    "later": "Jetzt nicht",
+    "needImages_one": "Dieser Beitrag braucht ein Foto. Tippe, um eines hinzuzufügen.",
+    "needImages_other": "Dieser Beitrag braucht mindestens {{count}} Fotos. Tippe, um sie hinzuzufügen.",
+    "tooManyImages_one": "Dieser Kanal akzeptiert ein Foto. Tippe, um es auszuwählen.",
+    "tooManyImages_other": "Dieser Kanal akzeptiert höchstens {{count}} Fotos. Tippe, um sie auszuwählen.",
+    "jpegOnly": "Instagram akzeptiert nur JPEG-Fotos. Tippe, um stattdessen eine .jpg-Datei auszuwählen."
   },
   "brief": {
     "title": "Beitrag erstellen",
@@ -155,10 +190,12 @@
     "changeProduct": "Produkt ändern",
     "change": "Ändern",
     "direction": "Kreative Richtung (optional)",
-    "directionLanguage": "Französisch (FR)",
     "directionPlaceholder": "z.B. Fokus auf handgefertigte Tischlerei und Wärme",
     "cost": "Erstellungskosten:",
-    "costPending": "Schätzung ausstehend",
+    "costIncluded": "Inklusive",
+    "drafting": "Wird an den Texter gesendet...",
+    "noProducts": "Noch keine Produktfotos vorhanden. Füge welche hinzu, damit der Texter etwas zeigen kann.",
+    "addPhotos": "Produktfotos hinzufügen",
     "draftPost": "Entwurfspost"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Planungszyklus",
     "cadence": "Veröffentlichungsfrequenz",
-    "monthlyTarget": "Monatsziel",
     "feedPosts": "Feed-Posts",
-    "stories": "Stories",
     "perMonth": "{{n}} / Monat",
-    "feedNote": "~1 Post täglich",
-    "storiesNote": "Über den Monat verteilt",
     "cadenceHint": "Vorgeschlagene Inhaltsziele. Vor der Kalendererstellung anpassen.",
     "pillars": "Inhaltssäulen",
-    "pillar": {
-      "catalog": "Katalogprodukte (Bunting-Fokus)",
-      "craft": "Materialdetails & Handwerk (Acacia-Holz)",
-      "story": "Markengeschichte & französisches Erbe"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Manuelle Überprüfung vor der Veröffentlichung: </b>Generierte Beiträge werden als Entwürfe in Ihren Kalender eingefügt, um Ihre endgültige Bestätigung zu erhalten. Kein Inhalt wird ohne Genehmigung veröffentlicht.",
-    "generate": "Kalender generieren"
+    "generate": "Kalender generieren",
+    "onCalendar": "Im Kalender",
+    "reels": "Reels",
+    "noPillars": "Für diesen Monat sind noch keine Beiträge geplant.",
+    "started": "Deine nächsten 30 Tage werden geplant. Die ersten Entwürfe erscheinen in wenigen Minuten im Kalender und warten auf deine Freigabe. Die übrigen folgen, sobald sie fertig sind.",
+    "generating": "Wird gestartet...",
+    "cost": "Kostet {{n}} Credits."
   }
 }

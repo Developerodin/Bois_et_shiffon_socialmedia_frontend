@@ -7,6 +7,7 @@
     "approved": "Goedgekeurd",
     "scheduled": "Gepland",
     "published": "Gepubliceerd",
+    "rejected": "Afgewezen",
     "draft": "Concept"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Aankomende agenda",
     "thisWeek": "Deze week",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Bekijk kalender"
+    "viewCalendar": "Bekijk kalender",
+    "loadFailed": "Je berichten konden niet worden geladen. Controleer je verbinding.",
+    "retry": "Opnieuw proberen",
+    "empty": "Nog geen berichten deze week. Plan er een paar in via de Planner.",
+    "slides": "Carrousel · {{count}} slides"
   },
   "calendar": {
     "title": "Berichtenkalender",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Berichtdetails",
-    "moreOptions": "Meer opties",
     "feedPhoto": "4:5 Feed foto",
-    "fullscreen": "Volledig scherm",
-    "captionFrench": "Onderschrift (Frans)",
+    "caption": "Bijschrift",
+    "noDraft": "De schrijver heeft nog geen concept voor dit bericht gemaakt.",
+    "notFound": "Dit bericht bestaat niet meer.",
+    "notReady": "De schrijver is ermee bezig. Het concept en de controle verschijnen hier over een paar minuten.",
+    "instagramCarousel": "Instagram-carrousel",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Verbonden",
     "editText": "Tekst bewerken",
     "channels": "Publicatiekanalen",
     "instagramFeed": "Instagram Feed",
     "instagramDetail": "Verbind een account om te publiceren",
     "facebookPage": "Facebook-pagina",
-    "facebookDetail": "Automatisch posten op officiële pagina",
     "notConnected": "Niet verbonden",
     "channelNotConnected": "{{name}}, niet verbonden",
     "editPost": "Bericht bewerken",
-    "schedule": "Inplannen"
+    "schedule": "Inplannen",
+    "slow": "Dit duurt langer dan normaal. Kom over een paar minuten terug.",
+    "checkFound": "De controle heeft een probleem gevonden",
+    "fixIt": "Vraag de schrijver om het op te lossen"
   },
   "edit": {
     "title": "Bericht bewerken",
@@ -110,18 +123,35 @@
     "language": "Taal: Frans (FR)",
     "suggestedHashtags": "Voorgestelde hashtags",
     "addHashtag": "Hashtag toevoegen",
+    "removeHashtag": "{{tag}} verwijderen",
     "add": "+ Toevoegen",
     "regenerate": "Onderschrift opnieuw genereren met AI",
+    "regenerating": "Versturen naar de schrijver...",
+    "saving": "Opslaan...",
+    "upload": "Upload je eigen foto",
+    "uploading": "Uploaden...",
+    "yourPhoto": "Je foto",
     "imageHint": "Origineel formaat · 4:5. Sleep de preview om de uitsnede aan te passen.",
-    "brandHint": "Logo, kleuren en toon volgen je {{brand}} merkset."
+    "carouselHint": "Kies 2 tot 10 foto's in de volgorde waarin ze moeten verschijnen. Instagram accepteert JPEG-foto's.",
+    "brandHint": "Logo, kleuren en toon volgen je {{brand}} merkset.",
+    "carouselMin": "Een carrousel heeft minimaal 2 foto's nodig."
   },
   "schedule": {
     "title": "Inplannen",
-    "storyFormat": "Verhaal · 9:16 afbeelding",
     "feedFormat": "Feed bericht · 4:5 afbeelding",
+    "carouselFormat": "Carrousel · 4:5-afbeeldingen",
     "destination": "Bestemming",
     "actionRequired": "Actie vereist",
     "notLinked": "Instagram-account niet gekoppeld",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Je Pinterest-borden konden niet worden geladen. Verbind Pinterest opnieuw en probeer het nog eens.",
+    "past": "Kies een tijdstip dat minstens {{count}} minuten vanaf nu ligt.",
+    "scheduling": "Inplannen...",
     "notLinkedBody": "Verbind je sociale accounts om directe geplande publicatie te ontgrendelen.",
     "connect": "Verbind sociaal account",
     "locked": "Planning vergrendeld tot verbinding",
@@ -133,7 +163,12 @@
     "timezone": "Tijdzone",
     "schedulePost": "Bericht inplannen",
     "scheduleLocked": "Bericht inplannen (Verbind eerst kanaal)",
-    "saveDraft": "Concept opslaan"
+    "later": "Niet nu",
+    "needImages_one": "Dit bericht heeft een foto nodig. Tik om er een toe te voegen.",
+    "needImages_other": "Dit bericht heeft minstens {{count}} foto's nodig. Tik om ze toe te voegen.",
+    "tooManyImages_one": "Dit kanaal accepteert één foto. Tik om er een te kiezen.",
+    "tooManyImages_other": "Dit kanaal accepteert maximaal {{count}} foto's. Tik om ze te kiezen.",
+    "jpegOnly": "Instagram accepteert alleen JPEG-foto's. Tik om een .jpg te kiezen."
   },
   "brief": {
     "title": "Maak een bericht",
@@ -155,10 +190,12 @@
     "changeProduct": "Product wijzigen",
     "change": "Wijzig",
     "direction": "Creatieve richting (optioneel)",
-    "directionLanguage": "Frans (FR)",
     "directionPlaceholder": "bijv. Focus op handgemaakte houtverbindingen en warmte",
     "cost": "Creatiekosten:",
-    "costPending": "Schatting in afwachting",
+    "costIncluded": "Inbegrepen",
+    "drafting": "Versturen naar de schrijver...",
+    "noProducts": "Nog geen productfoto's. Voeg ze toe zodat de schrijver iets heeft om te laten zien.",
+    "addPhotos": "Productfoto's toevoegen",
     "draftPost": "Conceptbericht"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Planningscyclus",
     "cadence": "Publicatieritme",
-    "monthlyTarget": "Maanddoel",
     "feedPosts": "Feedberichten",
-    "stories": "Verhalen",
     "perMonth": "{{n}} / maand",
-    "feedNote": "~1 bericht dagelijks",
-    "storiesNote": "Verspreid over je maand",
     "cadenceHint": "Voorgestelde contentdoelen. Pas aan voordat je je kalender genereert.",
     "pillars": "Contentpijlers",
-    "pillar": {
-      "catalog": "Catalogusproducten (Bunting focus)",
-      "craft": "Materiaal details & vakmanschap (Acacia hout)",
-      "story": "Merkverhaal & Franse erfgoed"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Handmatige controle voor publicatie: </b>Gegenereerde drops worden als concepten in je kalender geplaatst voor je definitieve bevestiging. Geen content wordt gepubliceerd zonder goedkeuring.",
-    "generate": "Kalender genereren"
+    "generate": "Kalender genereren",
+    "onCalendar": "Op de kalender",
+    "reels": "Reels",
+    "noPillars": "Nog geen berichten gepland voor deze maand.",
+    "started": "Je komende 30 dagen worden gepland. De eerste concepten verschijnen over een paar minuten op de kalender, klaar om goed te keuren. De rest volgt zodra ze geschreven zijn.",
+    "generating": "Starten...",
+    "cost": "Kost {{n}} credits."
   }
 }

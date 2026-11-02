@@ -1,6 +1,6 @@
 import type { ContentChannel } from "@prisma/client";
 import { z } from "zod";
-import { NothingToDoError } from "@/server/agents/engine";
+import { NothingToDoError, startAgentRun } from "@/server/agents/engine";
 import { CONTENT_PROMPT_VERSION, PLANNER_SYSTEM } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
 import { nextSlot, takenKey } from "@/server/content/calendar";
@@ -22,8 +22,9 @@ export const plannerAgent: AgentDefinition = {
   key: "planner",
   name: "Planner",
   description: "Turns shortlisted ideas into dated posts on your 30-day calendar.",
-  inputSchema: z.object({}).strict(),
-  async run(ctx) {
+  // chain: start the next agent of the posts chain when done (Planner → Brief writer → Creator → Quality), the app's "Generate calendar".
+  inputSchema: z.object({ chain: z.boolean().optional() }).strict(),
+  async run(ctx, input) {
     const { brand } = ctx;
     let opps = await prisma.opportunity.findMany({
       where: { brandId: brand.brandId, status: "SHORTLISTED" },
@@ -93,6 +94,7 @@ export const plannerAgent: AgentDefinition = {
     }
     await prisma.opportunity.updateMany({ where: { id: { in: opps.map((o) => o.id) } }, data: { status: "PLANNED" } });
     if (unscheduled) await ctx.log("WARN", `${unscheduled} post(s) had no free slot in the next 30 days`);
+    if ((input as { chain?: boolean }).chain && planned) await startAgentRun({ workspaceId: brand.workspaceId, brandId: brand.brandId, agentKey: "brief", trigger: "event", input: { chain: true } }).catch(() => null);
     return { planned, unscheduled };
   },
 };

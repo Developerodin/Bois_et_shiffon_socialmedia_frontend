@@ -1,11 +1,13 @@
+import type { PostChannel as ApiChannel, PostStatus as ApiStatus } from "@/api/endpoints";
 import i18n, { formatDate } from "@/i18n";
 
 /**
- * Typed sample data for the Posts module. The shape of `Post` mirrors the backend posts pipeline so the
- * mobile API client can replace these constants later without touching the screens.
+ * Posts module helpers: statuses, channels and dates (read in the phone's timezone). The constants below
+ * (POSTS, POST_COPY) are still sample data, for the Stories screens, which have no backend channel yet.
  */
-export type PostChannel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL" | "INSTAGRAM_REEL" | "INSTAGRAM_STORY" | "PINTEREST" | "THREADS";
-export type PostStatus = "PLANNED" | "BRIEF_READY" | "DRAFT_REVIEW" | "AWAITING_APPROVAL" | "APPROVED" | "SCHEDULED" | "PUBLISHED";
+// Stories have no backend channel yet: they stay sample data on P04/P08.
+export type PostChannel = ApiChannel | "INSTAGRAM_STORY";
+export type PostStatus = ApiStatus;
 
 export type Post = {
   id: string;
@@ -14,7 +16,7 @@ export type Post = {
   status: PostStatus;
   scheduledFor: string | null;
   caption?: string;
-  image?: number /* require() */;
+  image?: number /* require() */ | { uri: string };
 };
 
 const TV = require("../../../assets/figma/posts/bunting-tv-unit.jpg");
@@ -22,14 +24,12 @@ const DINING = require("../../../assets/figma/onboarding/bunting-dining-room.png
 
 export const BUSINESS = { name: "Bois & Chiffons", favicon: require("../../../assets/figma/bc-favicon.png"), credits: 160 } as const;
 
-/** Publishing happens in the business's timezone, not the phone's. */
-export const BUSINESS_TZ = "Europe/Paris";
-export const BUSINESS_TZ_LABEL = "Europe / Paris (CET)";
-
 /**
- * The design is pinned to Monday 26 October 2026. ponytail: swap for `new Date()` once real data lands.
+ * Days and times read in the phone's timezone, which is what the person picks a slot in (as on the reels R09 screen).
+ * ponytail: a brand has no timezone field yet; store one on the brand if teams post from other timezones.
  */
-export const TODAY = new Date("2026-10-26T09:00:00+01:00");
+export const BUSINESS_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+export const BUSINESS_TZ_LABEL = BUSINESS_TZ.replace(/_/g, " ").replace("/", " / ");
 
 export const POSTS: Post[] = [
   {
@@ -136,6 +136,9 @@ export const STATUS_KEY: Record<PostStatus, string> = {
   APPROVED: "status.approved",
   SCHEDULED: "status.scheduled",
   PUBLISHED: "status.published",
+  REVIEWED: "status.published",
+  REJECTED: "status.rejected",
+  BLOCKED: "status.needsReview",
 };
 
 export const CHANNEL_LABEL: Record<PostChannel, string> = {
@@ -143,12 +146,13 @@ export const CHANNEL_LABEL: Record<PostChannel, string> = {
   INSTAGRAM_CAROUSEL: "Instagram",
   INSTAGRAM_REEL: "Instagram",
   INSTAGRAM_STORY: "Instagram",
-  PINTEREST: "Pinterest",
-  THREADS: "Threads",
+  FACEBOOK_POST: "Facebook",
+  PINTEREST_PIN: "Pinterest",
+  THREADS_POST: "Threads",
 };
 
 /** A slot is locked in once the post is scheduled or out; everything before is still a draft. */
-export const isLockedIn = (s: PostStatus) => s === "SCHEDULED" || s === "PUBLISHED";
+export const isLockedIn = (s: PostStatus) => s === "SCHEDULED" || s === "PUBLISHED" || s === "REVIEWED";
 
 export const getPost = (id: string | string[] | undefined) => POSTS.find((p) => p.id === id);
 
@@ -207,7 +211,7 @@ export const weekdayHeads = () =>
   });
 
 /** "Tomorrow · 10:30 AM", "Friday · 06:00 PM". */
-export function relativeSlot(iso: string, today = TODAY) {
+export function relativeSlot(iso: string, today = new Date()) {
   const date = new Date(iso);
   const p = parts(date);
   const t = parts(today);
@@ -224,14 +228,13 @@ export const ymd = (d: Date) => {
   return { y: p.y, m: p.m, d: p.d };
 };
 
-export const postsOnDay = (key: string) =>
-  POSTS.filter((p) => p.scheduledFor && dayKey(new Date(p.scheduledFor)) === key).sort((a, b) => a.scheduledFor!.localeCompare(b.scheduledFor!));
+export const postsOnDay = <P extends { scheduledFor: string | null }>(list: P[], key: string) =>
+  list.filter((p) => p.scheduledFor && dayKey(new Date(p.scheduledFor)) === key).sort((a, b) => a.scheduledFor!.localeCompare(b.scheduledFor!));
 
-/** Upcoming slots after today, within the next week (the Today agenda). */
-export function upcomingThisWeek(today = TODAY) {
-  const start = dayKey(today);
+/** Slots from now through the next 7 days (the Today agenda). */
+export function upcomingThisWeek<P extends { scheduledFor: string | null }>(list: P[], today = new Date()) {
   const end = dayKey(new Date(today.getTime() + 7 * 86400000));
-  return POSTS.filter((p) => p.scheduledFor && dayKey(new Date(p.scheduledFor)) > start && dayKey(new Date(p.scheduledFor)) <= end).sort((a, b) =>
+  return list.filter((p) => p.scheduledFor && new Date(p.scheduledFor) >= today && dayKey(new Date(p.scheduledFor)) <= end).sort((a, b) =>
     a.scheduledFor!.localeCompare(b.scheduledFor!),
   );
 }

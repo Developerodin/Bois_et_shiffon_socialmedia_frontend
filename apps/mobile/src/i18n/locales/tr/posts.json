@@ -7,6 +7,7 @@
     "approved": "Onaylandı",
     "scheduled": "Zamanlandı",
     "published": "Yayınlandı",
+    "rejected": "Reddedildi",
     "draft": "Taslak"
   },
   "date": {
@@ -54,7 +55,11 @@
     "agenda": "Yaklaşan gündem",
     "thisWeek": "Bu hafta",
     "slotLabel": "{{title}}, {{when}}, {{status}}",
-    "viewCalendar": "Takvimi görüntüle"
+    "viewCalendar": "Takvimi görüntüle",
+    "loadFailed": "Gönderilerin yüklenemedi. Bağlantını kontrol et.",
+    "retry": "Tekrar dene",
+    "empty": "Bu hafta henüz gönderi yok. Planlayıcı'dan gönderi planlayabilirsin.",
+    "slides": "Karusel · {{count}} slayt"
   },
   "calendar": {
     "title": "Gönderi takvimi",
@@ -79,20 +84,28 @@
   },
   "detail": {
     "title": "Gönderi detayları",
-    "moreOptions": "Daha fazla seçenek",
     "feedPhoto": "4:5 Akış fotoğrafı",
-    "fullscreen": "Tam ekran",
-    "captionFrench": "Altyazı (Fransızca)",
+    "caption": "Gönderi açıklaması",
+    "noDraft": "Yazar bu gönderiyi henüz taslak olarak hazırlamadı.",
+    "notFound": "Bu gönderi artık burada değil.",
+    "notReady": "Yazar üzerinde çalışıyor. Taslak ve kontrol sonucu birkaç dakika içinde burada görünür.",
+    "instagramCarousel": "Instagram karuseli",
+    "instagramReel": "Instagram Reel",
+    "pinterest": "Pinterest",
+    "threads": "Threads",
+    "connected": "Bağlı",
     "editText": "Metni düzenle",
     "channels": "Yayın kanalları",
     "instagramFeed": "Instagram Akışı",
     "instagramDetail": "Yayınlamak için bir hesap bağlayın",
     "facebookPage": "Facebook Sayfası",
-    "facebookDetail": "Resmi sayfaya otomatik gönder",
     "notConnected": "Bağlı değil",
     "channelNotConnected": "{{name}}, bağlı değil",
     "editPost": "Gönderiyi düzenle",
-    "schedule": "Zamanla"
+    "schedule": "Zamanla",
+    "slow": "Bu işlem normalden uzun sürüyor. Birkaç dakika sonra tekrar gel.",
+    "checkFound": "Kontrolde bir sorun bulundu",
+    "fixIt": "Yazardan düzeltmesini iste"
   },
   "edit": {
     "title": "Gönderiyi düzenle",
@@ -110,18 +123,35 @@
     "language": "Dil: Fransızca (FR)",
     "suggestedHashtags": "Önerilen etiketler",
     "addHashtag": "Etiket ekle",
+    "removeHashtag": "{{tag}} etiketini kaldır",
     "add": "+ Ekle",
     "regenerate": "Altyazıyı AI ile yeniden oluştur",
+    "regenerating": "Yazara gönderiliyor...",
+    "saving": "Kaydediliyor...",
+    "upload": "Kendi fotoğrafını yükle",
+    "uploading": "Yükleniyor...",
+    "yourPhoto": "Senin fotoğrafın",
     "imageHint": "Orijinal oran · 4:5. Kırpma önizlemesini yeniden çerçevelemek için sürükleyin.",
-    "brandHint": "Logo, renkler ve ton {{brand}} marka kitinize göre ayarlanır."
+    "carouselHint": "2 ila 10 fotoğrafı, görünmelerini istediğin sırayla seç. Instagram JPEG fotoğrafları kabul eder.",
+    "brandHint": "Logo, renkler ve ton {{brand}} marka kitinize göre ayarlanır.",
+    "carouselMin": "Karusel için en az 2 fotoğraf gerekli."
   },
   "schedule": {
     "title": "Zamanla",
-    "storyFormat": "Hikaye · 9:16 görsel",
     "feedFormat": "Akış gönderisi · 4:5 görsel",
+    "carouselFormat": "Karusel · 4:5 görseller",
     "destination": "Hedef",
     "actionRequired": "Eylem gerekli",
     "notLinked": "Instagram hesabı bağlı değil",
+    "provider": {
+      "INSTAGRAM": "Instagram",
+      "FACEBOOK": "Facebook",
+      "PINTEREST": "Pinterest",
+      "THREADS": "Threads"
+    },
+    "boardsFailed": "Pinterest panoların yüklenemedi. Pinterest bağlantını yenileyip tekrar dene.",
+    "past": "Şu andan en az {{count}} dakika sonrası için bir zaman seç.",
+    "scheduling": "Planlanıyor...",
     "notLinkedBody": "Doğrudan planlanmış yayınları açmak için sosyal hesaplarınızı bağlayın.",
     "connect": "Sosyal hesabı bağla",
     "locked": "Bağlantı sağlanana kadar zamanlama kilitli",
@@ -133,7 +163,12 @@
     "timezone": "Saat dilimi",
     "schedulePost": "Gönderiyi zamanla",
     "scheduleLocked": "Gönderiyi zamanla (Önce kanalı bağlayın)",
-    "saveDraft": "Taslağı kaydet"
+    "later": "Şimdi değil",
+    "needImages_one": "Bu gönderi için bir fotoğraf gerekli. Eklemek için dokun.",
+    "needImages_other": "Bu gönderi için en az {{count}} fotoğraf gerekli. Eklemek için dokun.",
+    "tooManyImages_one": "Bu kanal bir fotoğraf kabul eder. Seçmek için dokun.",
+    "tooManyImages_other": "Bu kanal en fazla {{count}} fotoğraf kabul eder. Seçmek için dokun.",
+    "jpegOnly": "Instagram yalnızca JPEG fotoğrafları kabul eder. Bir .jpg seçmek için dokun."
   },
   "brief": {
     "title": "Gönderi oluştur",
@@ -155,10 +190,12 @@
     "changeProduct": "Ürünü değiştir",
     "change": "Değiştir",
     "direction": "Yaratıcı yön (isteğe bağlı)",
-    "directionLanguage": "Fransızca (FR)",
     "directionPlaceholder": "ör. El yapımı marangozluk ve sıcaklığa odaklan",
     "cost": "Oluşturma maliyeti:",
-    "costPending": "Tahmin bekleniyor",
+    "costIncluded": "Dahil",
+    "drafting": "Yazara gönderiliyor...",
+    "noProducts": "Henüz ürün fotoğrafı yok. Yazarın kullanabilmesi için birkaç tane ekle.",
+    "addPhotos": "Ürün fotoğrafı ekle",
     "draftPost": "Taslak gönderi"
   },
   "stories": {
@@ -199,21 +236,18 @@
     },
     "cycle": "Planlama döngüsü",
     "cadence": "Yayınlama sıklığı",
-    "monthlyTarget": "Aylık hedef",
     "feedPosts": "Akış Gönderileri",
-    "stories": "Hikayeler",
     "perMonth": "{{n}} / ay",
-    "feedNote": "~Günlük 1 gönderi",
-    "storiesNote": "Ay boyunca yayılmış",
     "cadenceHint": "Önerilen içerik hedefleri. Takviminizi oluşturmadan önce ayarlayın.",
     "pillars": "İçerik sütunları",
-    "pillar": {
-      "catalog": "Katalog ürünleri (Bunting odaklı)",
-      "craft": "Malzeme detayları & zanaat (Acacia ağacı)",
-      "story": "Marka hikayesi & Fransız mirası"
-    },
     "pillarLabel": "{{label}}, {{share}}",
     "reviewNote": "<b>Yayınlamadan önce manuel inceleme: </b>Oluşturulan damlalar, son onayınız için takviminize taslak olarak yerleştirilir. Onay olmadan içerik yayınlanmaz.",
-    "generate": "Takvimi oluştur"
+    "generate": "Takvimi oluştur",
+    "onCalendar": "Takvimde",
+    "reels": "Reels",
+    "noPillars": "Bu ay için henüz gönderi planlanmadı.",
+    "started": "Önümüzdeki 30 gün planlanıyor. İlk taslaklar birkaç dakika içinde onaylaman için takvimde görünür; diğerleri hazırlandıkça eklenir.",
+    "generating": "Başlatılıyor...",
+    "cost": "{{n}} kredi tutar."
   }
 }

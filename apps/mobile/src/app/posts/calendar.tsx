@@ -8,38 +8,44 @@ import { color, space, type } from "@/theme/tokens";
 import { MonthCalendar } from "@/ui/posts/calendar";
 import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/posts/chrome";
 import { PostRow, SegmentedTabs } from "@/ui/posts/controls";
-import { POSTS, TODAY, dayKey, isLockedIn, longDay, monthYear, postsOnDay, ymd } from "@/ui/posts/sample";
+import { dayKey, isLockedIn, longDay, monthYear, postsOnDay, ymd } from "@/ui/posts/sample";
+import { asPost, openPost, usePosts } from "@/ui/posts/use-posts";
 
 const VIEWS = ["month", "list"] as const;
 
 /** P02 · Posts / Calendar: month grid with a dot per posting day, then the selected day's posts. */
 export default function PostsCalendar() {
   const { t } = useTranslation("posts");
-  const today = ymd(TODAY);
+  const { items } = usePosts();
+  const all = useMemo(() => items ?? [], [items]);
+  const rows = useMemo(() => new Map(all.map((p) => [p.id, asPost(p)])), [all]);
+  const [now] = useState(() => new Date());
+  const today = ymd(now);
   const [view, setView] = useState<"month" | "list">("month");
   const [cursor, setCursor] = useState({ y: today.y, m: today.m });
-  const [selected, setSelected] = useState(dayKey(TODAY));
+  const [selected, setSelected] = useState(dayKey(now));
 
   const { counts, scheduled } = useMemo(() => {
     const counts: Record<string, number> = {};
     let scheduled = 0;
     const prefix = `${cursor.y}-${String(cursor.m).padStart(2, "0")}`;
-    for (const p of POSTS) {
+    for (const p of all) {
       if (!p.scheduledFor) continue;
       const k = dayKey(new Date(p.scheduledFor));
       counts[k] = (counts[k] ?? 0) + 1;
       if (k.startsWith(prefix) && isLockedIn(p.status)) scheduled++;
     }
     return { counts, scheduled };
-  }, [cursor]);
+  }, [cursor, all]);
 
   const [sy, sm, sd] = selected.split("-").map(Number);
   // List view: every dated post of the month, in order. Month view: the selected day only.
   const prefix = `${cursor.y}-${String(cursor.m).padStart(2, "0")}`;
   const list =
     view === "month"
-      ? postsOnDay(selected)
-      : POSTS.filter((p) => p.scheduledFor && dayKey(new Date(p.scheduledFor)).startsWith(prefix)).sort((a, b) => a.scheduledFor!.localeCompare(b.scheduledFor!));
+      ? postsOnDay(all, selected)
+      : // Posts with no date yet (made in the app, not scheduled) lead the list.
+        all.filter((p) => !p.scheduledFor).concat(all.filter((p) => p.scheduledFor && dayKey(new Date(p.scheduledFor)).startsWith(prefix)).sort((a, b) => a.scheduledFor!.localeCompare(b.scheduledFor!)));
 
   const shift = (delta: -1 | 1) =>
     setCursor(({ y, m }) => {
@@ -64,7 +70,7 @@ export default function PostsCalendar() {
         <Card style={{ marginTop: space[24] }}>
           <MonthCalendar year={cursor.y} month={cursor.m} selected={selected} counts={counts} scheduled={scheduled} onSelect={setSelected} onMonth={shift} />
           <View style={styles.planRow}>
-            <Text style={type.meta}>{t("calendar.plan", { n: 30 })}</Text>
+            <Text style={type.meta}>{t("calendar.plan", { n: Object.entries(counts).filter(([k]) => k.startsWith(prefix)).reduce((a, [, n]) => a + n, 0) })}</Text>
             <Pressable accessibilityRole="link" onPress={() => router.push("/posts/planner")} style={styles.link}>
               <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>{t("calendar.managePlan")}</Text>
               <ArrowRight size={16} color={color.ink} strokeWidth={1.75} />
@@ -81,7 +87,7 @@ export default function PostsCalendar() {
       </View>
       <View style={{ paddingTop: space[12], gap: space[8] }}>
         {list.length ? (
-          list.map((p) => <PostRow key={p.id} post={p} onPress={() => router.push(`/posts/${p.id}`)} />)
+          list.map((p) => <PostRow key={p.id} post={rows.get(p.id)!} onPress={() => openPost(p)} />)
         ) : (
           <Text style={[type.meta, { paddingVertical: space[16], textAlign: "center" }]}>{t("calendar.empty")}</Text>
         )}

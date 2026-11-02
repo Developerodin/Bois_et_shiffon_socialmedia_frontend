@@ -2,33 +2,71 @@ import type { ReactNode } from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { GalleryHorizontalEnd, Image as ImageIcon } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { brandAssets, currentBrand, posts } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { Card } from "@/ui/layout";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/posts/chrome";
 import { CardTitle, Pill, tint } from "@/ui/posts/controls";
-import type { PostChannel } from "@/ui/posts/sample";
+import { reloadPosts } from "@/ui/posts/use-posts";
 
 const GOALS = ["newArrival", "productFeature", "specialOffer"] as const;
-const PRODUCT = { name: "Table rectangulaire 240cm", collection: "Collection Acacia Bunting", image: require("../../../assets/figma/onboarding/bunting-dining-room.png") };
+type Product = { title: string; kind: string | null; key: string; url: string };
 const draftIcon = require("../../../assets/figma/posts/btn-draft-white.svg");
 
 /** P06 · Posts / Create brief: format, goal, product and optional direction for a new post. */
 export default function CreateBrief() {
   const { t } = useTranslation("posts");
-  const [format, setFormat] = useState<Extract<PostChannel, "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL">>("INSTAGRAM_POST");
+  const [format, setFormat] = useState<"INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL">("INSTAGRAM_POST");
   const [goal, setGoal] = useState<(typeof GOALS)[number]>("newArrival");
   const [direction, setDirection] = useState("");
+  // Research's product photos: what the post is made from.
+  const [products, setProducts] = useState<Product[] | null>(null);
+  const [language, setLanguage] = useState<string | null>(null);
+  const [chosen, setChosen] = useState(0);
+  const [picking, setPicking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    currentBrand()
+      .then((b) => brandAssets(b.workspaceId, b.brandId))
+      .then(
+        (a) => {
+          setProducts((a.assets?.products ?? []).flatMap((p) => (p.image ? [{ title: p.title, kind: p.kind, key: p.image.key, url: p.image.url }] : [])));
+          setLanguage(a.preferences.contentLanguage);
+        },
+        () => setProducts([]),
+      );
+  }, []);
+  const product = products?.[chosen];
+  const draft = async () => {
+    if (!product) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const { id } = await posts.create({ channel: format, goal, product: { title: product.title, photoKey: product.key }, direction: direction.trim() || undefined });
+      await reloadPosts();
+      router.replace(`/posts/${id}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      setBusy(false);
+    }
+  };
 
   return (
     <PostsScreen
       header={<ModuleHeader />}
       nav={<BottomNav active="create" />}
-      footer={<Button label={t("brief.draftPost")} icon={draftIcon} onPress={() => router.push("/posts/table-bunting")} />}
+      footer={
+        <View style={{ gap: space[8] }}>
+          {error ? <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
+          <Button label={busy ? t("brief.drafting") : t("brief.draftPost")} icon={draftIcon} disabled={!product || busy} onPress={() => void draft()} />
+        </View>
+      }
     >
       <BusinessSwitcher />
       <View style={{ paddingTop: space[24] }}>
@@ -69,24 +107,53 @@ export default function CreateBrief() {
 
       <Card style={styles.card}>
         <CardTitle>{t("brief.product")}</CardTitle>
-        <View style={styles.product}>
-          <Image source={PRODUCT.image} style={styles.productImg} contentFit="cover" />
-          <View style={{ flex: 1 }}>
-            <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]} numberOfLines={1}>
-              {PRODUCT.name}
-            </Text>
-            <Text style={type.meta}>{PRODUCT.collection}</Text>
+        {!products ? (
+          <ActivityIndicator color={color.primary} style={{ marginTop: space[8] }} />
+        ) : !product ? (
+          <View style={{ paddingTop: space[8], gap: space[8] }}>
+            <Text style={type.meta}>{t("brief.noProducts")}</Text>
+            <Button label={t("brief.addPhotos")} variant="outline" height={44} onPress={() => router.push("/business/photos")} />
           </View>
-          <Pressable accessibilityRole="button" accessibilityLabel={t("brief.changeProduct")} style={styles.change}>
-            <Text style={type.label}>{t("brief.change")}</Text>
-          </Pressable>
-        </View>
+        ) : (
+          <>
+            <View style={styles.product}>
+              <Image source={{ uri: product.url }} style={styles.productImg} contentFit="cover" />
+              <View style={{ flex: 1 }}>
+                <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]} numberOfLines={1}>
+                  {product.title}
+                </Text>
+                {product.kind ? <Text style={type.meta}>{product.kind}</Text> : null}
+              </View>
+              {products.length > 1 ? (
+                <Pressable accessibilityRole="button" accessibilityLabel={t("brief.changeProduct")} accessibilityState={{ expanded: picking }} onPress={() => setPicking(!picking)} style={styles.change}>
+                  <Text style={type.label}>{t("brief.change")}</Text>
+                </Pressable>
+              ) : null}
+            </View>
+            {picking ? (
+              <View style={styles.grid}>
+                {products.map((p, i) => (
+                  <Pressable
+                    key={p.key}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: i === chosen }}
+                    accessibilityLabel={p.title}
+                    onPress={() => (setChosen(i), setPicking(false))}
+                    style={[styles.pick, i === chosen && styles.pickOn]}
+                  >
+                    <Image source={{ uri: p.url }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+          </>
+        )}
       </Card>
 
       <View style={styles.direction}>
         <View style={styles.between}>
           <CardTitle>{t("brief.direction")}</CardTitle>
-          <Text style={type.meta}>{t("brief.directionLanguage")}</Text>
+          {language ? <Text style={type.meta}>{language.toUpperCase()}</Text> : null}
         </View>
         <View style={{ paddingTop: space[8], paddingBottom: space[8] }}>
           <Field
@@ -100,7 +167,7 @@ export default function CreateBrief() {
         </View>
         <View style={[styles.between, styles.cost]}>
           <Text style={type.meta}>{t("brief.cost")}</Text>
-          <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>{t("brief.costPending")}</Text>
+          <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>{t("brief.costIncluded")}</Text>
         </View>
       </View>
     </PostsScreen>
@@ -152,4 +219,7 @@ const styles = StyleSheet.create({
   between: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space[8] },
   input: { flex: 1, fontFamily: font.regular, fontSize: 16, lineHeight: 19, color: color.ink, paddingVertical: 10 },
   cost: { paddingTop: space[4], borderTopWidth: 1, borderTopColor: tint.hair },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: space[8], paddingTop: space[8] },
+  pick: { width: 64, height: 64, borderRadius: radius.control, overflow: "hidden", backgroundColor: tint.hair, borderWidth: 1, borderColor: tint.hair },
+  pickOn: { borderWidth: 2, borderColor: color.primary },
 });
