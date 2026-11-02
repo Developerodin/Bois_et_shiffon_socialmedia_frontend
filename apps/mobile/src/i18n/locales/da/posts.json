@@ -145,9 +145,9 @@
     "notLinked": "Instagram-konto ikke forbundet",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Kunne ikke indlæse dine Pinterest-tavler. Forbind Pinterest igen, og prøv igen.",
     "past": "Vælg et tidspunkt mindst {{count}} minutter fra nu.",
@@ -168,7 +168,9 @@
     "needImages_other": "Dette opslag skal have mindst {{count}} billeder. Tryk for at tilføje dem.",
     "tooManyImages_one": "Denne kanal tillader ét billede. Tryk for at vælge det.",
     "tooManyImages_other": "Denne kanal tillader højst {{count}} billeder. Tryk for at vælge dem.",
-    "jpegOnly": "Instagram tillader kun JPEG-billeder. Tryk for at vælge en .jpg-fil i stedet."
+    "jpegOnly": "Instagram tillader kun JPEG-billeder. Tryk for at vælge en .jpg-fil i stedet.",
+    "expired": "{{channel}} kræver, at du logger ind igen",
+    "reconnect": "Forbind {{channel}} igen"
   },
   "brief": {
     "title": "Opret et indlæg",

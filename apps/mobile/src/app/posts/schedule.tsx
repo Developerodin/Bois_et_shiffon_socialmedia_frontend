@@ -1,10 +1,10 @@
 import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { CalendarDays, Clock, Lock, TriangleAlert } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { postRelease, posts, type PostRelease } from "@/api/endpoints";
+import { connections, postRelease, posts, type Connection, type PostRelease } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Card } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
@@ -39,6 +39,7 @@ export default function SchedulePost() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { post } = usePost(id);
   const [release, setRelease] = useState<PostRelease | null>(null);
+  const [linked, setLinked] = useState<Connection[]>([]);
   const [slot, setSlot] = useState<Date | null>(null);
   const [open, setOpen] = useState<"date" | "time" | null>(null);
   const [month, setMonth] = useState<{ y: number; m: number } | null>(null);
@@ -50,12 +51,23 @@ export default function SchedulePost() {
   const [error, setError] = useState<string | null>(null);
   const back = () => (router.canGoBack() ? router.back() : router.navigate("/posts"));
 
-  useEffect(() => {
-    if (!id) return;
-    const ctrl = new AbortController();
-    postRelease(id, ctrl.signal).then(setRelease, (e: unknown) => setError(e instanceof Error ? e.message : String(e)));
-    return () => ctrl.abort();
-  }, [id]);
+  // Read again on every focus: coming back from X03 Reconnect (or Connections) unlocks Schedule.
+  useFocusEffect(
+    useCallback(() => {
+      if (!id) return;
+      const ctrl = new AbortController();
+      setError(null);
+      postRelease(id, ctrl.signal).then(
+        (r) => {
+          setRelease(r);
+          // Only when no account can post: is one linked but signed out?
+          if (r.accounts.length === 0) connections().then((c) => !ctrl.signal.aborted && setLinked(c.connections), () => {});
+        },
+        (e: unknown) => !ctrl.signal.aborted && setError(e instanceof Error ? e.message : String(e)),
+      );
+      return () => ctrl.abort();
+    }, [id]),
+  );
 
   if (!post || !post.latest) {
     return (
@@ -71,6 +83,11 @@ export default function SchedulePost() {
   const boards = connectionId ? release?.boards[connectionId] : undefined;
   const boardId = board ?? boards?.[0]?.id ?? null;
   const connected = accounts.length > 0;
+  // Linked but its sign-in expired: X03 reconnects it instead of starting over from Connections. X03 signs in to
+  // Instagram and Facebook (the app's consent flow); other networks reconnect from Connections.
+  const provider = release?.requirements.provider;
+  const expired = !connected && linked.some((c) => c.provider === provider && c.status === "ERROR");
+  const inApp = provider === "INSTAGRAM" || provider === "META";
   const needsBoard = !!release?.requirements.needsBoard;
   const future = at.getTime() > now + MIN_LEAD_MS;
   // What the server would refuse, said before the tap: image count for the channel, and Instagram's JPEG-only rule.
@@ -169,11 +186,22 @@ export default function SchedulePost() {
               <View style={{ flexDirection: "row", gap: space[12] }}>
                 <TriangleAlert size={20} color={color.ink} strokeWidth={1.75} style={{ marginTop: 2 }} />
                 <View style={{ flex: 1 }}>
-                  <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>{t("schedule.notLinked", { channel: release.requirements.provider ? t(`schedule.provider.${release.requirements.provider}`) : "" })}</Text>
+                  <Text style={[type.label, { fontFamily: "Inter_600SemiBold" }]}>
+                    {t(expired ? "schedule.expired" : "schedule.notLinked", { channel: release.requirements.provider ? t(`schedule.provider.${release.requirements.provider}`) : "" })}
+                  </Text>
                   <Text style={[type.body, { paddingTop: 2 }]}>{t("schedule.notLinkedBody")}</Text>
                 </View>
               </View>
-              <Button label={t("schedule.connect")} variant="outline" icon={icons.link} height={44} style={{ marginTop: space[12] }} onPress={() => router.push("/business/connections")} />
+              <Button
+                label={expired ? t("schedule.reconnect", { channel: t(`schedule.provider.${provider}`) }) : t("schedule.connect")}
+                variant="outline"
+                icon={icons.link}
+                height={44}
+                style={{ marginTop: space[12] }}
+                onPress={() =>
+                  expired && inApp ? router.push({ pathname: "/recovery/reconnect", params: { id: post.id, provider: provider ?? "" } }) : router.push("/business/connections")
+                }
+              />
             </View>
             <View style={styles.lockRow}>
               <Lock size={16} color={color.inkSecondary} strokeWidth={1.75} />

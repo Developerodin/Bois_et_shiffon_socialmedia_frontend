@@ -153,13 +153,7 @@
     "safeToLeave": "Du kan säkert lämna denna skärm. Ditt utkast sparas automatiskt i din Resultat-flik.",
     "keepWorking": "Fortsätt arbeta i bakgrunden",
     "failed": "Videon kunde inte skapas: {{error}}",
-    "failedTitle": "Videon kunde inte skapas",
     "bodyAny": "Sätter ihop bilder, berättarröst och rörelsernas tempo för {{title}}.",
-    "stopped": "Stoppad",
-    "notStarted": "Inte påbörjad",
-    "tryAgain": "Försök igen",
-    "retrying": "Startar om…",
-    "editPlan": "Redigera plan",
     "creditsRefunded_one": "{{count}} kredit återbetald",
     "creditsRefunded_other": "{{count}} krediter återbetalda"
   },

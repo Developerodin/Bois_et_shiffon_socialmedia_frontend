@@ -23,17 +23,18 @@ export function ReadyBanner() {
   const [shown, setShown] = useState<RenderFinished | null>(null);
   useEffect(() => onRenderFinished((f) => setShown(f)), []);
   // A tapped push notification opens its reel the same way (mounted with navigation, so it can go there).
-  useNotificationOpens(useCallback((id: string, ok: boolean) => (openReel(id), router.push(ok ? "/reels/review" : "/reels/generating")), []));
+  useNotificationOpens(useCallback((id: string, ok: boolean) => (openReel(id), router.push(ok ? "/reels/review" : "/recovery/video-failed")), []));
   useEffect(() => {
     if (!shown) return;
     const timer = setTimeout(() => setShown(null), SHOW_MS);
     return () => clearTimeout(timer);
   }, [shown]);
-  if (!shown || pushActive() || (path === "/reels/generating" && reelId() === shown.id)) return null;
+  const onIt = (path === "/reels/generating" || path === "/recovery/video-failed") && reelId() === shown?.id;
+  if (!shown || pushActive() || onIt) return null;
   const go = () => {
     openReel(shown.id);
     setShown(null);
-    router.push(shown.ok ? "/reels/review" : "/reels/generating");
+    router.push(shown.ok ? "/reels/review" : "/recovery/video-failed");
   };
   const Icon = shown.ok ? CircleCheck : CircleAlert;
   return (

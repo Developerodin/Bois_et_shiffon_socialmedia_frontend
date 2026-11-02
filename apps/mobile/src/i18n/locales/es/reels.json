@@ -153,13 +153,7 @@
     "safeToLeave": "Puedes salir de esta pantalla con seguridad. Tu borrador se guarda automáticamente en tu pestaña de Resultados.",
     "keepWorking": "Sigue trabajando en segundo plano",
     "failed": "No se pudo crear el vídeo: {{error}}",
-    "failedTitle": "No se pudo crear este video",
     "bodyAny": "Preparando las imágenes, la voz en off y el ritmo del movimiento para {{title}}.",
-    "stopped": "Detenido",
-    "notStarted": "Sin iniciar",
-    "tryAgain": "Reintentar",
-    "retrying": "Reiniciando…",
-    "editPlan": "Editar plan",
     "creditsRefunded_one": "{{count}} crédito reembolsado",
     "creditsRefunded_other": "{{count}} créditos reembolsados"
   },

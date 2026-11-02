@@ -145,9 +145,9 @@
     "notLinked": "Instagram-tili ei yhdistetty",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Pinterest-taulujasi ei voitu ladata. Yhdistä Pinterest uudelleen ja yritä uudestaan.",
     "past": "Valitse aika, johon on vähintään {{count}} minuuttia.",
@@ -168,7 +168,9 @@
     "needImages_other": "Tämä julkaisu tarvitsee vähintään {{count}} kuvaa. Lisää kuvat napauttamalla.",
     "tooManyImages_one": "Tähän kanavaan voi lisätä yhden kuvan. Valitse se napauttamalla.",
     "tooManyImages_other": "Tähän kanavaan voi lisätä enintään {{count}} kuvaa. Valitse ne napauttamalla.",
-    "jpegOnly": "Instagram hyväksyy vain JPEG-kuvat. Valitse .jpg-kuva napauttamalla."
+    "jpegOnly": "Instagram hyväksyy vain JPEG-kuvat. Valitse .jpg-kuva napauttamalla.",
+    "expired": "{{channel}} edellyttää, että kirjaudut uudelleen sisään",
+    "reconnect": "Yhdistä {{channel}} uudelleen"
   },
   "brief": {
     "title": "Luo julkaisu",

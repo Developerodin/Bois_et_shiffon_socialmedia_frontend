@@ -145,9 +145,9 @@
     "notLinked": "Instagram fiók nincs csatlakoztatva",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Nem sikerült betölteni a Pinterest-tábláidat. Csatlakoztasd újra a Pinterestet, és próbáld újra.",
     "past": "Válassz legalább {{count}} perccel későbbi időpontot.",
@@ -168,7 +168,9 @@
     "needImages_other": "Ehhez a bejegyzéshez legalább {{count}} fotó kell. Koppints a hozzáadásukhoz.",
     "tooManyImages_one": "Ez a csatorna egy fotót fogad el. Koppints a kiválasztásához.",
     "tooManyImages_other": "Ez a csatorna legfeljebb {{count}} fotót fogad el. Koppints a kiválasztásukhoz.",
-    "jpegOnly": "Az Instagram csak JPEG-fotókat fogad el. Koppints egy .jpg-fájl kiválasztásához."
+    "jpegOnly": "Az Instagram csak JPEG-fotókat fogad el. Koppints egy .jpg-fájl kiválasztásához.",
+    "expired": "{{channel}}: jelentkezz be újra",
+    "reconnect": "Csatlakoztasd újra: {{channel}}"
   },
   "brief": {
     "title": "Bejegyzés létrehozása",

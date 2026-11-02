@@ -145,9 +145,9 @@
     "notLinked": "Ο λογαριασμός Instagram δεν είναι συνδεδεμένος",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Δεν ήταν δυνατή η φόρτωση των πινάκων σου στο Pinterest. Σύνδεσε ξανά το Pinterest και δοκίμασε ξανά.",
     "past": "Επίλεξε ώρα τουλάχιστον {{count}} λεπτά από τώρα.",
@@ -168,7 +168,9 @@
     "needImages_other": "Αυτή η δημοσίευση χρειάζεται τουλάχιστον {{count}} φωτογραφίες. Πάτησε για να τις προσθέσεις.",
     "tooManyImages_one": "Αυτό το κανάλι δέχεται μία φωτογραφία. Πάτησε για να την επιλέξεις.",
     "tooManyImages_other": "Αυτό το κανάλι δέχεται έως {{count}} φωτογραφίες. Πάτησε για να τις επιλέξεις.",
-    "jpegOnly": "Το Instagram δέχεται μόνο φωτογραφίες JPEG. Πάτησε για να επιλέξεις ένα αρχείο .jpg."
+    "jpegOnly": "Το Instagram δέχεται μόνο φωτογραφίες JPEG. Πάτησε για να επιλέξεις ένα αρχείο .jpg.",
+    "expired": "Πρέπει να συνδεθείς ξανά στο {{channel}}",
+    "reconnect": "Επανασύνδεση {{channel}}"
   },
   "brief": {
     "title": "Δημιουργία ανάρτησης",

@@ -153,13 +153,7 @@
     "safeToLeave": "Du kan trygt forlate denne skjermen. Utkastet ditt lagres automatisk i Resultater-fanen.",
     "keepWorking": "Fortsett å jobbe i bakgrunnen",
     "failed": "Videoen kunne ikke lages: {{error}}",
-    "failedTitle": "Videoen kunne ikke lages",
     "bodyAny": "Setter sammen bilder, fortellerstemme og animasjonstempo for {{title}}.",
-    "stopped": "Stoppet",
-    "notStarted": "Ikke startet",
-    "tryAgain": "Prøv igjen",
-    "retrying": "Starter på nytt…",
-    "editPlan": "Rediger plan",
     "creditsRefunded_one": "{{count}} kreditt refundert",
     "creditsRefunded_other": "{{count}} kreditter refundert"
   },

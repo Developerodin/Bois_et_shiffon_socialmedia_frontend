@@ -153,13 +153,7 @@
     "safeToLeave": "You can safely leave this screen. Your draft is automatically saved in your Results tab.",
     "keepWorking": "Keep working in background",
     "failed": "The video couldn't be made: {{error}}",
-    "failedTitle": "This video couldn't be made",
     "bodyAny": "Composing visuals, voiceover and motion pacing for {{title}}.",
-    "stopped": "Stopped",
-    "notStarted": "Not started",
-    "tryAgain": "Try again",
-    "retrying": "Starting again…",
-    "editPlan": "Edit plan",
     "creditsRefunded_one": "{{count}} credit refunded",
     "creditsRefunded_other": "{{count}} credits refunded"
   },

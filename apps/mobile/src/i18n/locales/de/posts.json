@@ -145,9 +145,9 @@
     "notLinked": "Instagram-Konto nicht verknüpft",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Deine Pinterest-Pinnwände konnten nicht geladen werden. Verbinde Pinterest erneut und versuche es noch einmal.",
     "past": "Wähle einen Zeitpunkt, der mindestens {{count}} Minuten in der Zukunft liegt.",
@@ -168,7 +168,9 @@
     "needImages_other": "Dieser Beitrag braucht mindestens {{count}} Fotos. Tippe, um sie hinzuzufügen.",
     "tooManyImages_one": "Dieser Kanal akzeptiert ein Foto. Tippe, um es auszuwählen.",
     "tooManyImages_other": "Dieser Kanal akzeptiert höchstens {{count}} Fotos. Tippe, um sie auszuwählen.",
-    "jpegOnly": "Instagram akzeptiert nur JPEG-Fotos. Tippe, um stattdessen eine .jpg-Datei auszuwählen."
+    "jpegOnly": "Instagram akzeptiert nur JPEG-Fotos. Tippe, um stattdessen eine .jpg-Datei auszuwählen.",
+    "expired": "{{channel}}: Bitte melde dich erneut an",
+    "reconnect": "{{channel}} erneut verbinden"
   },
   "brief": {
     "title": "Beitrag erstellen",

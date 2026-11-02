@@ -145,9 +145,9 @@
     "notLinked": "Konto Instagram nie połączone",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Nie udało się wczytać Twoich tablic Pinterest. Połącz Pinterest ponownie i spróbuj jeszcze raz.",
     "past": "Wybierz termin za co najmniej {{count}} min.",
@@ -168,7 +168,9 @@
     "needImages_other": "Ten post wymaga co najmniej {{count}} zdjęć. Naciśnij, aby je dodać.",
     "tooManyImages_one": "Ten kanał przyjmuje jedno zdjęcie. Naciśnij, aby je wybrać.",
     "tooManyImages_other": "Ten kanał przyjmuje maksymalnie {{count}} zdjęć. Naciśnij, aby je wybrać.",
-    "jpegOnly": "Instagram przyjmuje tylko zdjęcia JPEG. Naciśnij, aby wybrać plik .jpg."
+    "jpegOnly": "Instagram przyjmuje tylko zdjęcia JPEG. Naciśnij, aby wybrać plik .jpg.",
+    "expired": "{{channel}}: zaloguj się ponownie",
+    "reconnect": "Połącz ponownie {{channel}}"
   },
   "brief": {
     "title": "Utwórz post",

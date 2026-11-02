@@ -153,13 +153,7 @@
     "safeToLeave": "Bu ekrandan güvenle ayrılabilirsiniz. Taslağınız Sonuçlar sekmenizde otomatik olarak kaydedilir.",
     "keepWorking": "Arka planda çalışmaya devam et",
     "failed": "Video oluşturulamadı: {{error}}",
-    "failedTitle": "Bu video oluşturulamadı",
     "bodyAny": "{{title}} için görseller, seslendirme ve hareketlerin temposu düzenleniyor.",
-    "stopped": "Durduruldu",
-    "notStarted": "Başlamadı",
-    "tryAgain": "Tekrar dene",
-    "retrying": "Yeniden başlatılıyor…",
-    "editPlan": "Planı düzenle",
     "creditsRefunded_one": "{{count}} kredi iade edildi",
     "creditsRefunded_other": "{{count}} kredi iade edildi"
   },

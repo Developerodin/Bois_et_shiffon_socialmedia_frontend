@@ -1,62 +1,64 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ArrowRight, Coins } from "lucide-react-native";
 import { Trans, useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { formatNumber } from "@/i18n";
 import { color, font, radius, space, type } from "@/theme/tokens";
-import { ActionButton, ICON, Tag, meta, metaInk, strong14 } from "@/ui/reels/kit";
+import { ActionButton, ICON, meta, metaInk, strong14 } from "@/ui/reels/kit";
 import { SheetBackdrop, rx } from "@/ui/recovery/parts";
-import { failedReel, lowCredits as c } from "@/ui/recovery/sample";
 import { Sheet } from "@/ui/recovery/sheet";
+import { useCredits } from "@/ui/use-credits";
 
-/** X02 · Recovery / Low credits — sheet over the storyboard. */
+/**
+ * X02 · Recovery / Low credits: sheet over the screen whose paid action was refused (402). Shows what it needs against
+ * the workspace's real balance. ponytail: no plans or billing backend yet, so the design's monthly-plan bar shows the
+ * balance against what's needed instead of a plan allowance; "Manage credits" opens the Plans screens.
+ */
 export default function LowCredits() {
   const { t } = useTranslation("recovery");
+  const p = useLocalSearchParams<{ needed?: string; title?: string; meta?: string; backdrop?: string }>();
+  const needed = Math.max(0, Number(p.needed) || 0);
+  const available = useCredits();
   const close = () => (router.canGoBack() ? router.back() : router.replace("/reels/storyboard"));
-  const share = c.available / c.monthly;
+  const share = available === null || needed === 0 ? 0 : Math.min(1, available / needed);
   return (
     <View style={{ flex: 1 }}>
-      <SheetBackdrop
-        title={t("lowCredits.backdropTitle")}
-        card={failedReel.title}
-        meta={t("lowCredits.backdropMeta", { seconds: formatNumber(failedReel.seconds) })}
-      />
+      <SheetBackdrop title={p.backdrop || t("lowCredits.backdropTitle")} card={p.title ?? ""} meta={p.meta ?? ""} />
       <Sheet onClose={close} label={t("lowCredits.sheetLabel")}>
         <View style={styles.icon}>
           <Coins size={24} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
         </View>
-        <Text accessibilityRole="header" style={styles.title}>{t("lowCredits.title", { count: c.needed, n: formatNumber(c.needed) })}</Text>
-        <Text style={styles.body}>
-          <Trans t={t}
-            ns="recovery"
-            i18nKey="lowCredits.body"
-            count={c.available}
-            values={{ n: formatNumber(c.available) }}
-            components={{ b: <Text style={{ fontFamily: font.semibold, color: color.ink }} /> }}
-          />
+        <Text accessibilityRole="header" style={styles.title}>
+          {t("lowCredits.title", { count: needed, n: formatNumber(needed) })}
         </Text>
+        {available !== null ? (
+          <Text style={styles.body}>
+            <Trans
+              t={t}
+              ns="recovery"
+              i18nKey="lowCredits.body"
+              count={available}
+              values={{ n: formatNumber(available) }}
+              components={{ b: <Text style={{ fontFamily: font.semibold, color: color.ink }} /> }}
+            />
+          </Text>
+        ) : null}
 
         <View style={styles.plan}>
           <View style={styles.row}>
-            <Text style={[strong14, { flex: 1 }]}>{t("lowCredits.planName")}</Text>
-            <Tag label={t("lowCredits.active")} tone="grey" />
+            <Text style={[strong14, { flex: 1 }]}>{t("lowCredits.balance")}</Text>
           </View>
           <View style={[styles.row, { paddingTop: space[12] }]}>
-            <Text style={[meta, { flex: 1 }]}>{t("lowCredits.renews")}</Text>
-            <Text style={metaInk}>{t("lowCredits.remaining", { available: formatNumber(c.available), monthly: formatNumber(c.monthly) })}</Text>
+            <Text style={[meta, { flex: 1 }]}>{t("lowCredits.neededLabel")}</Text>
+            <Text style={metaInk}>{t("lowCredits.remaining", { available: formatNumber(available ?? 0), needed: formatNumber(needed) })}</Text>
           </View>
-          <View
-            style={styles.track}
-            accessibilityRole="progressbar"
-            accessibilityLabel={t("lowCredits.remainingA11y")}
-            accessibilityValue={{ min: 0, max: c.monthly, now: c.available }}
-          >
+          <View style={styles.track} accessibilityRole="progressbar" accessibilityLabel={t("lowCredits.remainingA11y")} accessibilityValue={{ min: 0, max: needed, now: available ?? 0 }}>
             <View style={[styles.fill, { width: `${share * 100}%` }]} />
           </View>
         </View>
 
         <View style={{ gap: space[12], paddingTop: space[24] }}>
-          <ActionButton label={t("lowCredits.manage")} trailing={ArrowRight} onPress={() => router.push("/plans/billing")} />
+          <ActionButton label={t("lowCredits.manage")} trailing={ArrowRight} onPress={() => router.push("/plans")} />
           <ActionButton label={t("lowCredits.keepEditing")} variant="outline" onPress={close} />
         </View>
       </Sheet>

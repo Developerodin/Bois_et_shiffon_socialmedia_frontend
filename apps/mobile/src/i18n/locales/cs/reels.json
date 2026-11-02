@@ -153,13 +153,7 @@
     "safeToLeave": "Můžeš bezpečně opustit tuto obrazovku. Tvůj koncept je automaticky uložen na kartě Výsledky.",
     "keepWorking": "Pokračovat v práci na pozadí",
     "failed": "Video se nepodařilo vytvořit: {{error}}",
-    "failedTitle": "Toto video se nepodařilo vytvořit",
     "bodyAny": "Připravujeme vizuály, hlasový komentář a tempo animace pro {{title}}.",
-    "stopped": "Zastaveno",
-    "notStarted": "Nezahájeno",
-    "tryAgain": "Zkusit znovu",
-    "retrying": "Spouštíme znovu…",
-    "editPlan": "Upravit plán",
     "creditsRefunded_one": "Vrácen {{count}} kredit",
     "creditsRefunded_other": "Vrácené kredity: {{count}}"
   },

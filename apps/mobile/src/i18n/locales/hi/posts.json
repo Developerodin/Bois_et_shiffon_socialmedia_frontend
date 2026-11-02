@@ -145,9 +145,9 @@
     "notLinked": "Instagram खाता लिंक नहीं है",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "आपके Pinterest बोर्ड लोड नहीं हो सके। Pinterest को फिर से कनेक्ट करके कोशिश करें।",
     "past": "अभी से कम से कम {{count}} मिनट बाद का समय चुनें।",
@@ -168,7 +168,9 @@
     "needImages_other": "इस पोस्ट के लिए कम से कम {{count}} फ़ोटो चाहिए। जोड़ने के लिए टैप करें।",
     "tooManyImages_one": "इस चैनल पर एक फ़ोटो लगती है। चुनने के लिए टैप करें।",
     "tooManyImages_other": "इस चैनल पर ज़्यादा से ज़्यादा {{count}} फ़ोटो लगती हैं। चुनने के लिए टैप करें।",
-    "jpegOnly": "Instagram पर सिर्फ़ JPEG फ़ोटो चलती हैं। .jpg फ़ोटो चुनने के लिए टैप करें।"
+    "jpegOnly": "Instagram पर सिर्फ़ JPEG फ़ोटो चलती हैं। .jpg फ़ोटो चुनने के लिए टैप करें।",
+    "expired": "{{channel}} में फिर से साइन इन करना होगा",
+    "reconnect": "{{channel}} दोबारा कनेक्ट करें"
   },
   "brief": {
     "title": "पोस्ट बनाएं",

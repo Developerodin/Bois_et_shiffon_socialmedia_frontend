@@ -153,13 +153,7 @@
     "safeToLeave": "Du kan trygt forlade denne skærm. Din kladde gemmes automatisk i din Resultater-fane.",
     "keepWorking": "Fortsæt arbejdet i baggrunden",
     "failed": "Videoen kunne ikke laves: {{error}}",
-    "failedTitle": "Videoen kunne ikke laves",
     "bodyAny": "Sammensætter billeder, speak og animationernes tempo til {{title}}.",
-    "stopped": "Stoppet",
-    "notStarted": "Ikke startet",
-    "tryAgain": "Prøv igen",
-    "retrying": "Starter igen…",
-    "editPlan": "Rediger plan",
     "creditsRefunded_one": "{{count}} kredit tilbagebetalt",
     "creditsRefunded_other": "{{count}} kreditter tilbagebetalt"
   },

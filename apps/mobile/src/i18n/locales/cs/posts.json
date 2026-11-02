@@ -145,9 +145,9 @@
     "notLinked": "Instagram účet není propojen",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Nástěnky z Pinterestu se nepodařilo načíst. Znovu připoj Pinterest a zkus to znovu.",
     "past": "Vyber čas nejdříve za {{count}} min.",
@@ -168,7 +168,9 @@
     "needImages_other": "Tento příspěvek potřebuje alespoň {{count}} fotek. Klepnutím je přidej.",
     "tooManyImages_one": "Tento kanál umožňuje jednu fotku. Klepnutím ji vyber.",
     "tooManyImages_other": "Tento kanál umožňuje nejvýše {{count}} fotek. Klepnutím je vyber.",
-    "jpegOnly": "Instagram přijímá pouze fotky ve formátu JPEG. Klepnutím vyber fotku ve formátu .jpg."
+    "jpegOnly": "Instagram přijímá pouze fotky ve formátu JPEG. Klepnutím vyber fotku ve formátu .jpg.",
+    "expired": "Pro {{channel}} je potřeba se znovu přihlásit",
+    "reconnect": "Znovu připojit {{channel}}"
   },
   "brief": {
     "title": "Vytvořit příspěvek",

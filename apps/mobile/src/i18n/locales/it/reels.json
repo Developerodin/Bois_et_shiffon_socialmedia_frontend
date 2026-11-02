@@ -153,13 +153,7 @@
     "safeToLeave": "Puoi lasciare tranquillamente questa schermata. La tua bozza è salvata automaticamente nella scheda Risultati.",
     "keepWorking": "Continua a lavorare in background",
     "failed": "Non è stato possibile creare il video: {{error}}",
-    "failedTitle": "Impossibile creare questo video",
     "bodyAny": "Composizione di immagini, voce narrante e ritmo delle animazioni per {{title}}.",
-    "stopped": "Interrotto",
-    "notStarted": "Non iniziato",
-    "tryAgain": "Riprova",
-    "retrying": "Riavvio in corso…",
-    "editPlan": "Modifica piano",
     "creditsRefunded_one": "{{count}} credito rimborsato",
     "creditsRefunded_other": "{{count}} crediti rimborsati"
   },

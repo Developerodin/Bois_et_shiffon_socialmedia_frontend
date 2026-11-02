@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} kredyt",
   "credits_other": "{{n}} kredytów",
-  "tableAlt": "{{product}} stół jadalniany",
   "sheet": {
     "dismiss": "Zamknij"
   },
   "videoFailed": {
     "title": "Twój film nie jest gotowy",
-    "body": "Renderowanie zostało przerwane podczas kompozycji sceny. Twoje zarezerwowane kredyty zostały zwolnione.",
     "failed": "Niepowodzenie",
     "facts_one": "{{seconds}}s · 9:16 Pionowy · {{count}} scena",
     "facts_other": "{{seconds}}s · 9:16 Pionowy · {{count}} sceny",
@@ -22,12 +20,16 @@
       "reserved": "Zarezerwowane",
       "released": "Zwolnione",
       "stages": {
-        "sceneComposition": "Kompozycja sceny"
+        "VOICE": "Lektor",
+        "CLIPS": "Sceny wideo",
+        "JOIN": "Łączenie scen"
       }
     },
     "tryAgain_one": "Spróbuj ponownie ({{n}} kredyt)",
     "tryAgain_other": "Spróbuj ponownie ({{n}} kredytów)",
-    "editStoryboard": "Edytuj scenariusz"
+    "editStoryboard": "Edytuj scenariusz",
+    "retrying": "Ponowne uruchamianie...",
+    "tryAgainPlain": "Spróbuj ponownie"
   },
   "lowCredits": {
     "backdropTitle": "Scenariusz",
@@ -35,15 +37,14 @@
     "sheetLabel": "Za mało kredytów",
     "title_one": "Potrzebujesz {{n}} kredyt",
     "title_other": "Potrzebujesz {{n}} kredytów",
-    "body_one": "Obecnie masz <b>{{n}} dostępny kredyt</b> w swoim profesjonalnym workspace. Twój szkic scenariusza jest bezpiecznie zapisany.",
-    "body_other": "Obecnie masz <b>{{n}} dostępnych kredytów</b> w swoim profesjonalnym workspace. Twój szkic scenariusza jest bezpiecznie zapisany.",
-    "planName": "Plan profesjonalny",
-    "active": "Aktywny",
-    "renews": "Odnawia się co miesiąc",
-    "remaining": "Pozostało {{available}} / {{monthly}}",
-    "remainingA11y": "Pozostałe miesięczne kredyty",
+    "body_one": "Masz obecnie <b>{{n}} dostępny kredyt</b> w tej przestrzeni roboczej. Twoja praca jest zapisana.",
+    "body_other": "Dostępne kredyty w tej przestrzeni roboczej: <b>{{n}}</b>. Twoja praca jest zapisana.",
+    "remaining": "{{available}} / {{needed}} wymaganych",
+    "remainingA11y": "Dostępne kredyty w stosunku do wymaganych",
     "manage": "Zarządzaj kredytami",
-    "keepEditing": "Kontynuuj edytowanie scenariusza"
+    "keepEditing": "Edytuj dalej",
+    "balance": "Saldo kredytów",
+    "neededLabel": "Dostępne na ten cel"
   },
   "reconnect": {
     "backdropTitle": "Harmonogram",
@@ -52,23 +53,24 @@
     "body": "Autoryzacja Twojego konta wygasła. Połącz ponownie swoje konto, aby wznowić planowanie.",
     "draftSaved": "Istniejący szkic zapisany bezpiecznie",
     "noPosting": "Żadne postowanie nie rozpocznie się, dopóki nie potwierdzisz tego wyraźnie.",
-    "saveForLater": "Zapisz szkic na później"
+    "saveForLater": "Zapisz szkic na później",
+    "reconnecting": "Otwieranie logowania..."
   },
   "importFailed": {
     "title": "Nie można odczytać tej strony",
-    "body": "Nie mogliśmy dotrzeć do zdjęć katalogu lub ich wyodrębnić z tego adresu. Sprawdź swój URL lub kontynuuj, opisując swój sklep.",
+    "body": "Nie udało się otworzyć tego adresu. Sprawdź go, spróbuj ponownie lub opisz swoją firmę samodzielnie.",
     "urlLabel": "Adres URL strony sklepu",
     "changeUrlA11y": "Zmień adres URL strony",
     "changeUrl": "Zmień URL",
-    "reasons": {
-      "timeout": "Strona zbyt długo odpowiadała. Nie wprowadzono żadnych zmian."
-    },
     "quickOptions": "Szybkie opcje kontynuacji:",
     "options": {
       "retry": "Spróbuj ponownie skanować, jeśli serwer Twojego sklepu był chwilowo zajęty.",
       "manual": "Dodaj nazwę firmy i produkty ręcznie bez czekania."
     },
     "tryAgain": "Spróbuj ponownie",
-    "addManually": "Dodaj firmę ręcznie"
+    "addManually": "Dodaj firmę ręcznie",
+    "reason": "Strona nie odpowiada lub adres nie istnieje. Nic nie zostało zmienione.",
+    "stillDown": "Nadal nie można otworzyć strony. Sprawdź adres lub dodaj firmę ręcznie.",
+    "checking": "Sprawdzanie..."
   }
 }

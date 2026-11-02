@@ -145,9 +145,9 @@
     "notLinked": "Instagram-account niet gekoppeld",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Je Pinterest-borden konden niet worden geladen. Verbind Pinterest opnieuw en probeer het nog eens.",
     "past": "Kies een tijdstip dat minstens {{count}} minuten vanaf nu ligt.",
@@ -168,7 +168,9 @@
     "needImages_other": "Dit bericht heeft minstens {{count}} foto's nodig. Tik om ze toe te voegen.",
     "tooManyImages_one": "Dit kanaal accepteert één foto. Tik om er een te kiezen.",
     "tooManyImages_other": "Dit kanaal accepteert maximaal {{count}} foto's. Tik om ze te kiezen.",
-    "jpegOnly": "Instagram accepteert alleen JPEG-foto's. Tik om een .jpg te kiezen."
+    "jpegOnly": "Instagram accepteert alleen JPEG-foto's. Tik om een .jpg te kiezen.",
+    "expired": "Log opnieuw in bij {{channel}}",
+    "reconnect": "Koppel {{channel}} opnieuw"
   },
   "brief": {
     "title": "Maak een bericht",

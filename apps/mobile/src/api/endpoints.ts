@@ -352,7 +352,7 @@ export const posts = {
 /** GET …/content/:id (apps/web publishing.ts releaseState): approval and where the post can go. */
 export type PostRelease = {
   latestVersion: number | null; approvalValid: boolean;
-  requirements: { provider: "INSTAGRAM" | "FACEBOOK" | "PINTEREST" | "THREADS" | null; minImages: number; maxImages: number; needsBoard: boolean };
+  requirements: { provider: "INSTAGRAM" | "META" | "PINTEREST" | "THREADS" | null; minImages: number; maxImages: number; needsBoard: boolean };
   accounts: { id: string; displayName: string }[];
   /** Pinterest boards per account; null = couldn't load them. */
   boards: Record<string, { id: string; name: string }[] | null>;

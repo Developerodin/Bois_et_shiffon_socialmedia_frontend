@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} kreditt",
   "credits_other": "{{n}} kreditter",
-  "tableAlt": "{{product}} spisebord",
   "sheet": {
     "dismiss": "Lukk"
   },
   "videoFailed": {
     "title": "Videoen din er ikke klar",
-    "body": "Gjengivelsen ble avbrutt under scenekomposisjonen. Dine reserverte kreditter er frigitt.",
     "failed": "Mislyktes",
     "facts_one": "{{seconds}}s · 9:16 Vertikal · {{count}} scene",
     "facts_other": "{{seconds}}s · 9:16 Vertikal · {{count}} scener",
@@ -22,12 +20,16 @@
       "reserved": "Reservert",
       "released": "Frigitt",
       "stages": {
-        "sceneComposition": "Scenekomposisjon"
+        "VOICE": "Fortellerstemme",
+        "CLIPS": "Videoscener",
+        "JOIN": "Setter sammen scenene"
       }
     },
     "tryAgain_one": "Prøv igjen ({{n}} kreditt)",
     "tryAgain_other": "Prøv igjen ({{n}} kreditter)",
-    "editStoryboard": "Rediger storyboard"
+    "editStoryboard": "Rediger storyboard",
+    "retrying": "Starter på nytt...",
+    "tryAgainPlain": "Prøv igjen"
   },
   "lowCredits": {
     "backdropTitle": "Storyboard",
@@ -35,15 +37,14 @@
     "sheetLabel": "Ikke nok kreditter",
     "title_one": "Du trenger {{n}} kreditt",
     "title_other": "Du trenger {{n}} kreditter",
-    "body_one": "Du har for øyeblikket <b>{{n}} kreditt tilgjengelig</b> i din Professional-arbeidsplass. Din storyboard-utkast er trygt lagret.",
-    "body_other": "Du har for øyeblikket <b>{{n}} kreditter tilgjengelig</b> i din Professional-arbeidsplass. Din storyboard-utkast er trygt lagret.",
-    "planName": "Professional-plan",
-    "active": "Aktiv",
-    "renews": "Fornyes månedlig",
-    "remaining": "{{available}} / {{monthly}} igjen",
-    "remainingA11y": "Månedlige kreditter igjen",
+    "body_one": "Du har nå <b>{{n}} kreditt tilgjengelig</b> i dette arbeidsområdet. Arbeidet ditt er lagret.",
+    "body_other": "Du har nå <b>{{n}} kreditter tilgjengelig</b> i dette arbeidsområdet. Arbeidet ditt er lagret.",
+    "remaining": "{{available}} / {{needed}} kreves",
+    "remainingA11y": "Tilgjengelige kreditter sammenlignet med antallet som kreves",
     "manage": "Administrer kreditter",
-    "keepEditing": "Fortsett å redigere storyboard"
+    "keepEditing": "Fortsett å redigere",
+    "balance": "Kredittsaldo",
+    "neededLabel": "Tilgjengelig for dette"
   },
   "reconnect": {
     "backdropTitle": "Planlegg",
@@ -52,23 +53,24 @@
     "body": "Din kontoautorisasjon har utløpt. Koble til kontoen din igjen for å fortsette planleggingen.",
     "draftSaved": "Eksisterende utkast lagret trygt",
     "noPosting": "Ingen innlegg vil starte før du eksplisitt bekrefter.",
-    "saveForLater": "Lagre utkast for senere"
+    "saveForLater": "Lagre utkast for senere",
+    "reconnecting": "Åpner innlogging..."
   },
   "importFailed": {
     "title": "Kunne ikke lese denne nettsiden",
-    "body": "Vi kunne ikke nå eller hente katalogbilder fra denne adressen. Sjekk URL-en din eller fortsett ved å beskrive butikken din.",
+    "body": "Vi kunne ikke åpne denne adressen. Sjekk den, prøv igjen eller beskriv bedriften din selv.",
     "urlLabel": "Butikkens nettadresse",
     "changeUrlA11y": "Endre nettadresse",
     "changeUrl": "Endre URL",
-    "reasons": {
-      "timeout": "Nettsiden tok for lang tid å svare. Ingen endringer ble gjort."
-    },
     "quickOptions": "Raske alternativer for å fortsette:",
     "options": {
       "retry": "Prøv å skanne på nytt hvis butikkserveren din var midlertidig opptatt.",
       "manual": "Legg til bedriftsnavn og produkter manuelt uten å vente."
     },
     "tryAgain": "Prøv igjen",
-    "addManually": "Legg til bedrift manuelt"
+    "addManually": "Legg til bedrift manuelt",
+    "reason": "Nettstedet svarte ikke, eller adressen finnes ikke. Ingenting ble endret.",
+    "stillDown": "Kan fortsatt ikke åpne adressen. Sjekk den, eller legg til bedriften din manuelt.",
+    "checking": "Sjekker..."
   }
 }

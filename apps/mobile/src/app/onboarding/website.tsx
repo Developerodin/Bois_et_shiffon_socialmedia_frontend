@@ -28,7 +28,8 @@ export default function Website() {
     try {
       const { ok } = await checkSite(site);
       if (ok) router.push({ pathname: "/onboarding/learning", params: { site } });
-      else setError(t("website.unreachable"));
+      // The address doesn't open: X04 says so and offers retry, a new address or adding the business by hand.
+      else router.push({ pathname: "/recovery/import-failed", params: { site } });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("website.checkFailed"));
     } finally {

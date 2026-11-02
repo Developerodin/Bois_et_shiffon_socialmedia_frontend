@@ -145,9 +145,9 @@
     "notLinked": "Compte Instagram non lié",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Impossible de charger tes tableaux Pinterest. Reconnecte Pinterest et réessaie.",
     "past": "Choisis une heure dans au moins {{count}} minutes.",
@@ -168,7 +168,9 @@
     "needImages_other": "Cette publication nécessite au moins {{count}} photos. Appuie pour les ajouter.",
     "tooManyImages_one": "Ce canal accepte une seule photo. Appuie pour la choisir.",
     "tooManyImages_other": "Ce canal accepte au maximum {{count}} photos. Appuie pour les choisir.",
-    "jpegOnly": "Instagram accepte uniquement les photos JPEG. Appuie pour choisir un fichier .jpg."
+    "jpegOnly": "Instagram accepte uniquement les photos JPEG. Appuie pour choisir un fichier .jpg.",
+    "expired": "Tu dois te reconnecter à {{channel}}",
+    "reconnect": "Reconnecter {{channel}}"
   },
   "brief": {
     "title": "Créer une publication",

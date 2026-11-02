@@ -145,9 +145,9 @@
     "notLinked": "Cont Instagram neconectat",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Nu am putut încărca panourile tale Pinterest. Reconectează Pinterest și încearcă din nou.",
     "past": "Alege o oră la cel puțin {{count}} minute de acum.",
@@ -168,7 +168,9 @@
     "needImages_other": "Această postare are nevoie de cel puțin {{count}} fotografii. Apasă pentru a le adăuga.",
     "tooManyImages_one": "Acest canal acceptă o singură fotografie. Apasă pentru a o alege.",
     "tooManyImages_other": "Acest canal acceptă cel mult {{count}} fotografii. Apasă pentru a le alege.",
-    "jpegOnly": "Instagram acceptă doar fotografii JPEG. Apasă pentru a alege un fișier .jpg."
+    "jpegOnly": "Instagram acceptă doar fotografii JPEG. Apasă pentru a alege un fișier .jpg.",
+    "expired": "Trebuie să te autentifici din nou pe {{channel}}",
+    "reconnect": "Reconectează {{channel}}"
   },
   "brief": {
     "title": "Creează o postare",

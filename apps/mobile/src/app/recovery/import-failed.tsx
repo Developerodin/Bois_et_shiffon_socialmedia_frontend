@@ -1,26 +1,47 @@
-import { Image } from "expo-image";
-import { router } from "expo-router";
-import { Info, RefreshCw, Unplug } from "lucide-react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
+import { Globe, Info, RefreshCw, Unplug } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ApiError } from "@/api/client";
+import { checkSite } from "@/api/endpoints";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Footer, Label } from "@/ui/layout";
 import { ActionButton, ICON, Panel } from "@/ui/reels/kit";
 import { ErrorHero, RecoveryTopBar, rx } from "@/ui/recovery/parts";
-import { importFailure as f, photos } from "@/ui/recovery/sample";
 
 /** Quick options: recovery.json "importFailed.options.<key>". */
 const OPTIONS = ["retry", "manual"] as const;
 
-/** X04 · Recovery / Website import failed (onboarding step 2). */
+/**
+ * X04 · Recovery / Website import failed: onboarding A06's address didn't open (apps/web site-check). Try again checks
+ * it once more and goes on to Learning if it opens now; Change URL goes back to A06; or the business is added by hand (A07).
+ */
 export default function ImportFailed() {
   const { t } = useTranslation("recovery");
-  const retry = () => router.replace("/onboarding/website");
+  const { site = "" } = useLocalSearchParams<{ site?: string }>();
+  const [checking, setChecking] = useState(false);
+  const [stillDown, setStillDown] = useState<string | null>(null);
+  const change = () => (router.canGoBack() ? router.back() : router.replace("/onboarding/website"));
+  const retry = async () => {
+    if (!site) return change();
+    setChecking(true);
+    setStillDown(null);
+    try {
+      const { ok } = await checkSite(site);
+      if (ok) router.replace({ pathname: "/onboarding/learning", params: { site } });
+      else setStillDown(t("importFailed.stillDown"));
+    } catch (e) {
+      setStillDown(e instanceof ApiError ? e.message : t("importFailed.stillDown"));
+    } finally {
+      setChecking(false);
+    }
+  };
   return (
     <SafeAreaView style={styles.screen} edges={["bottom"]}>
       <RecoveryTopBar
-        onBack={() => (router.canGoBack() ? router.back() : retry())}
+        onBack={change}
         center={<Text style={[type.meta, { fontFamily: "Inter_600SemiBold" }]}>{t("step", { ns: "common", step: 2, total: 5 })}</Text>}
       />
       <ScrollView contentContainerStyle={styles.body}>
@@ -34,17 +55,19 @@ export default function ImportFailed() {
         <Panel style={styles.card}>
           <Label>{t("importFailed.urlLabel")}</Label>
           <View style={styles.url}>
-            <Image source={photos.bcFavicon} style={{ width: 16, height: 16, borderRadius: 3 }} contentFit="contain" />
+            <Globe size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
             <Text style={[type.label, { flex: 1 }]} numberOfLines={1}>
-              {f.url}
+              {site.replace(/^https?:\/\//, "")}
             </Text>
-            <Pressable accessibilityRole="button" accessibilityLabel={t("importFailed.changeUrlA11y")} onPress={retry} style={styles.change}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t("importFailed.changeUrlA11y")} onPress={change} style={styles.change}>
               <Text style={type.label}>{t("importFailed.changeUrl")}</Text>
             </Pressable>
           </View>
           <View style={styles.reason}>
             <Info size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
-            <Text style={[type.meta, { flex: 1 }]}>{t(`importFailed.reasons.${f.reason}`)}</Text>
+            <Text style={[type.meta, { flex: 1 }]} accessibilityLiveRegion="polite">
+              {stillDown ?? t("importFailed.reason")}
+            </Text>
           </View>
         </Panel>
 
@@ -59,7 +82,7 @@ export default function ImportFailed() {
         </View>
       </ScrollView>
       <Footer>
-        <ActionButton label={t("importFailed.tryAgain")} leading={RefreshCw} onPress={retry} />
+        <ActionButton label={checking ? t("importFailed.checking") : t("importFailed.tryAgain")} leading={RefreshCw} disabled={checking} onPress={() => void retry()} />
         <ActionButton label={t("importFailed.addManually")} variant="outline" onPress={() => router.replace("/onboarding/manual")} />
       </Footer>
     </SafeAreaView>

@@ -153,13 +153,7 @@
     "safeToLeave": "Voit turvallisesti poistua tältä näytöltä. Luonnoksesi tallennetaan automaattisesti Tulokset-välilehdelle.",
     "keepWorking": "Jatka työskentelyä taustalla",
     "failed": "Videota ei voitu luoda: {{error}}",
-    "failedTitle": "Videon luominen epäonnistui",
     "bodyAny": "Koostetaan visuaalista ilmettä, selostusta ja liikkeen rytmitystä: {{title}}.",
-    "stopped": "Pysäytetty",
-    "notStarted": "Ei aloitettu",
-    "tryAgain": "Yritä uudelleen",
-    "retrying": "Aloitetaan uudelleen…",
-    "editPlan": "Muokkaa suunnitelmaa",
     "creditsRefunded_one": "{{count}} krediitti palautettu",
     "creditsRefunded_other": "{{count}} krediittiä palautettu"
   },

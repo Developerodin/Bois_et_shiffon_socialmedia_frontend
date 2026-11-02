@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} crédit",
   "credits_other": "{{n}} crédits",
-  "tableAlt": "Table à manger {{product}}",
   "sheet": {
     "dismiss": "Fermer"
   },
   "videoFailed": {
     "title": "Votre vidéo n'est pas prête",
-    "body": "Le rendu a été interrompu lors de la composition des scènes. Vos crédits réservés ont été libérés.",
     "failed": "Échec",
     "facts_one": "{{seconds}}s · 9:16 Vertical · {{count}} scène",
     "facts_other": "{{seconds}}s · 9:16 Vertical · {{count}} scènes",
@@ -22,12 +20,16 @@
       "reserved": "Réservé",
       "released": "Libéré",
       "stages": {
-        "sceneComposition": "Composition des scènes"
+        "VOICE": "Voix off",
+        "CLIPS": "Scènes vidéo",
+        "JOIN": "Assemblage des scènes"
       }
     },
     "tryAgain_one": "Réessayer ({{n}} crédit)",
     "tryAgain_other": "Réessayer ({{n}} crédits)",
-    "editStoryboard": "Modifier le storyboard"
+    "editStoryboard": "Modifier le storyboard",
+    "retrying": "Nouvelle tentative...",
+    "tryAgainPlain": "Réessayer"
   },
   "lowCredits": {
     "backdropTitle": "Storyboard",
@@ -35,15 +37,14 @@
     "sheetLabel": "Pas assez de crédits",
     "title_one": "Vous avez besoin de {{n}} crédit",
     "title_other": "Vous avez besoin de {{n}} crédits",
-    "body_one": "Vous avez actuellement <b>{{n}} crédit disponible</b> dans votre espace de travail Professionnel. Votre brouillon de storyboard est sauvegardé en toute sécurité.",
-    "body_other": "Vous avez actuellement <b>{{n}} crédits disponibles</b> dans votre espace de travail Professionnel. Votre brouillon de storyboard est sauvegardé en toute sécurité.",
-    "planName": "Plan Professionnel",
-    "active": "Actif",
-    "renews": "Renouvellement mensuel",
-    "remaining": "{{available}} / {{monthly}} restants",
-    "remainingA11y": "Crédits mensuels restants",
+    "body_one": "Vous avez actuellement <b>{{n}} crédit disponible</b> dans cet espace de travail. Votre travail est enregistré.",
+    "body_other": "Vous avez actuellement <b>{{n}} crédits disponibles</b> dans cet espace de travail. Votre travail est enregistré.",
+    "remaining": "{{available}} / {{needed}} nécessaires",
+    "remainingA11y": "Crédits disponibles par rapport aux crédits nécessaires",
     "manage": "Gérer les crédits",
-    "keepEditing": "Continuer à modifier le storyboard"
+    "keepEditing": "Continuer à modifier",
+    "balance": "Solde de crédits",
+    "neededLabel": "Disponibles pour cette action"
   },
   "reconnect": {
     "backdropTitle": "Planification",
@@ -52,23 +53,24 @@
     "body": "L'autorisation de votre compte a expiré. Reconnectez votre compte pour reprendre la planification.",
     "draftSaved": "Brouillon existant sauvegardé en toute sécurité",
     "noPosting": "Aucune publication ne commencera tant que vous n'avez pas confirmé explicitement.",
-    "saveForLater": "Enregistrer le brouillon pour plus tard"
+    "saveForLater": "Enregistrer le brouillon pour plus tard",
+    "reconnecting": "Ouverture de la page de connexion..."
   },
   "importFailed": {
     "title": "Impossible de lire ce site web",
-    "body": "Nous n'avons pas pu atteindre ou extraire les photos du catalogue de cette adresse. Vérifiez votre URL ou continuez en décrivant votre magasin.",
+    "body": "Impossible d’ouvrir cette adresse. Vérifiez-la, réessayez ou décrivez vous-même votre entreprise.",
     "urlLabel": "URL du site web du magasin",
     "changeUrlA11y": "Changer l'URL du site web",
     "changeUrl": "Changer l'URL",
-    "reasons": {
-      "timeout": "Le site web a mis trop de temps à répondre. Aucun changement n'a été effectué."
-    },
     "quickOptions": "Options rapides pour continuer :",
     "options": {
       "retry": "Réessayez de scanner si le serveur de votre magasin était momentanément occupé.",
       "manual": "Ajoutez le nom de l'entreprise et les produits manuellement sans attendre."
     },
     "tryAgain": "Réessayer",
-    "addManually": "Ajouter l'entreprise manuellement"
+    "addManually": "Ajouter l'entreprise manuellement",
+    "reason": "Le site n’a pas répondu ou l’adresse n’existe pas. Rien n’a été modifié.",
+    "stillDown": "L’adresse ne s’ouvre toujours pas. Vérifiez-la ou ajoutez votre entreprise manuellement.",
+    "checking": "Vérification..."
   }
 }

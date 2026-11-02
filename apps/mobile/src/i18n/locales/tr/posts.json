@@ -145,9 +145,9 @@
     "notLinked": "Instagram hesabı bağlı değil",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Pinterest panoların yüklenemedi. Pinterest bağlantını yenileyip tekrar dene.",
     "past": "Şu andan en az {{count}} dakika sonrası için bir zaman seç.",
@@ -168,7 +168,9 @@
     "needImages_other": "Bu gönderi için en az {{count}} fotoğraf gerekli. Eklemek için dokun.",
     "tooManyImages_one": "Bu kanal bir fotoğraf kabul eder. Seçmek için dokun.",
     "tooManyImages_other": "Bu kanal en fazla {{count}} fotoğraf kabul eder. Seçmek için dokun.",
-    "jpegOnly": "Instagram yalnızca JPEG fotoğrafları kabul eder. Bir .jpg seçmek için dokun."
+    "jpegOnly": "Instagram yalnızca JPEG fotoğrafları kabul eder. Bir .jpg seçmek için dokun.",
+    "expired": "{{channel}} için yeniden giriş yapman gerekiyor",
+    "reconnect": "{{channel}} bağlantısını yenile"
   },
   "brief": {
     "title": "Gönderi oluştur",

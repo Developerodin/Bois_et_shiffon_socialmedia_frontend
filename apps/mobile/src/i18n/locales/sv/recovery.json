@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} kredit",
   "credits_other": "{{n}} krediter",
-  "tableAlt": "{{product}} matbord",
   "sheet": {
     "dismiss": "Avfärda"
   },
   "videoFailed": {
     "title": "Din reel är inte klar",
-    "body": "Rendering avbröts under scenkompositionen. Dina reserverade krediter har släppts.",
     "failed": "Misslyckades",
     "facts_one": "{{seconds}}s · 9:16 Vertikal · {{count}} scen",
     "facts_other": "{{seconds}}s · 9:16 Vertikal · {{count}} scener",
@@ -22,12 +20,16 @@
       "reserved": "Reserverad",
       "released": "Släppt",
       "stages": {
-        "sceneComposition": "Scenkomposition"
+        "VOICE": "Speakerröst",
+        "CLIPS": "Videoscener",
+        "JOIN": "Sammanfogning av scener"
       }
     },
     "tryAgain_one": "Försök igen ({{n}} kredit)",
     "tryAgain_other": "Försök igen ({{n}} krediter)",
-    "editStoryboard": "Redigera storyboard"
+    "editStoryboard": "Redigera storyboard",
+    "retrying": "Startar igen...",
+    "tryAgainPlain": "Försök igen"
   },
   "lowCredits": {
     "backdropTitle": "Storyboard",
@@ -35,15 +37,14 @@
     "sheetLabel": "Inte tillräckligt med krediter",
     "title_one": "Du behöver {{n}} kredit",
     "title_other": "Du behöver {{n}} krediter",
-    "body_one": "Du har för närvarande <b>{{n}} kredit tillgänglig</b> i ditt Professional-arbetsutrymme. Din storyboard-utkast är säkert sparad.",
-    "body_other": "Du har för närvarande <b>{{n}} krediter tillgängliga</b> i ditt Professional-arbetsutrymme. Din storyboard-utkast är säkert sparad.",
-    "planName": "Professional-plan",
-    "active": "Aktiv",
-    "renews": "Förnyas månadsvis",
-    "remaining": "{{available}} / {{monthly}} kvar",
-    "remainingA11y": "Månadsvis krediter kvar",
+    "body_one": "Du har just nu <b>{{n}} kredit tillgänglig</b> i den här arbetsytan. Ditt arbete är sparat.",
+    "body_other": "Du har just nu <b>{{n}} krediter tillgängliga</b> i den här arbetsytan. Ditt arbete är sparat.",
+    "remaining": "{{available}} / {{needed}} behövs",
+    "remainingA11y": "Tillgängliga krediter jämfört med antalet som behövs",
     "manage": "Hantera krediter",
-    "keepEditing": "Fortsätt redigera storyboard"
+    "keepEditing": "Fortsätt redigera",
+    "balance": "Kreditsaldo",
+    "neededLabel": "Tillgängligt för detta"
   },
   "reconnect": {
     "backdropTitle": "Schema",
@@ -52,23 +53,24 @@
     "body": "Din kontobehörighet har gått ut. Återanslut ditt konto för att fortsätta schemaläggningen.",
     "draftSaved": "Befintligt utkast sparat säkert",
     "noPosting": "Ingen publicering kommer att starta förrän du uttryckligen bekräftar.",
-    "saveForLater": "Spara utkast för senare"
+    "saveForLater": "Spara utkast för senare",
+    "reconnecting": "Öppnar inloggning..."
   },
   "importFailed": {
     "title": "Kunde inte läsa denna webbplats",
-    "body": "Vi kunde inte nå eller extrahera katalogfoton från denna adress. Kontrollera din URL eller fortsätt genom att beskriva din butik.",
+    "body": "Vi kunde inte öppna adressen. Kontrollera den, försök igen eller beskriv ditt företag själv.",
     "urlLabel": "Butikens webbplats-URL",
     "changeUrlA11y": "Ändra webbplats-URL",
     "changeUrl": "Ändra URL",
-    "reasons": {
-      "timeout": "Webbplatsen tog för lång tid att svara. Inga ändringar gjordes."
-    },
     "quickOptions": "Snabbalternativ för att fortsätta:",
     "options": {
       "retry": "Försök skanna igen om din butiksserver var tillfälligt upptagen.",
       "manual": "Lägg till företagsnamn och produkter manuellt utan att vänta."
     },
     "tryAgain": "Försök igen",
-    "addManually": "Lägg till företag manuellt"
+    "addManually": "Lägg till företag manuellt",
+    "reason": "Webbplatsen svarade inte eller adressen finns inte. Inget har ändrats.",
+    "stillDown": "Det går fortfarande inte att öppna adressen. Kontrollera den eller lägg till ditt företag manuellt.",
+    "checking": "Kontrollerar..."
   }
 }

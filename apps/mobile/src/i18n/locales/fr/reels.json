@@ -153,13 +153,7 @@
     "safeToLeave": "Vous pouvez quitter cet écran en toute sécurité. Votre brouillon est automatiquement enregistré dans votre onglet Résultats.",
     "keepWorking": "Continuer à travailler en arrière-plan",
     "failed": "La vidéo n’a pas pu être créée : {{error}}",
-    "failedTitle": "Impossible de créer cette vidéo",
     "bodyAny": "Création des visuels, de la voix off et du rythme des animations pour {{title}}.",
-    "stopped": "Arrêté",
-    "notStarted": "Non démarré",
-    "tryAgain": "Réessayer",
-    "retrying": "Redémarrage…",
-    "editPlan": "Modifier le plan",
     "creditsRefunded_one": "{{count}} crédit remboursé",
     "creditsRefunded_other": "{{count}} crédits remboursés"
   },

@@ -145,9 +145,9 @@
     "notLinked": "حساب Instagram غير مرتبط",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "تعذّر تحميل لوحاتك على Pinterest. أعد ربط Pinterest وحاول مجددًا.",
     "past": "اختر وقتًا يبعد {{count}} دقيقة على الأقل من الآن.",
@@ -168,7 +168,9 @@
     "needImages_other": "يحتاج هذا المنشور إلى {{count}} صور على الأقل. اضغط لإضافتها.",
     "tooManyImages_one": "تقبل هذه القناة صورة واحدة. اضغط لاختيارها.",
     "tooManyImages_other": "تقبل هذه القناة {{count}} صور كحد أقصى. اضغط لاختيارها.",
-    "jpegOnly": "يقبل Instagram صور JPEG فقط. اضغط لاختيار صورة بصيغة .jpg بدلًا منها."
+    "jpegOnly": "يقبل Instagram صور JPEG فقط. اضغط لاختيار صورة بصيغة .jpg بدلًا منها.",
+    "expired": "سجّل الدخول إلى {{channel}} مجددًا",
+    "reconnect": "إعادة ربط {{channel}}"
   },
   "brief": {
     "title": "إنشاء منشور",

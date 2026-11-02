@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} credit",
   "credits_other": "{{n}} credite",
-  "tableAlt": "masă de dining {{product}}",
   "sheet": {
     "dismiss": "Închide"
   },
   "videoFailed": {
     "title": "Reel-ul tău nu este gata",
-    "body": "Redarea a fost întreruptă în timpul compoziției scenei. Creditele tale rezervate au fost eliberate.",
     "failed": "Eșuat",
     "facts_one": "{{seconds}}s · 9:16 Vertical · {{count}} scenă",
     "facts_other": "{{seconds}}s · 9:16 Vertical · {{count}} scene",
@@ -22,12 +20,16 @@
       "reserved": "Rezervat",
       "released": "Eliberat",
       "stages": {
-        "sceneComposition": "Compoziția scenei"
+        "VOICE": "Voce din off",
+        "CLIPS": "Scene video",
+        "JOIN": "Îmbinarea scenelor"
       }
     },
     "tryAgain_one": "Încearcă din nou ({{n}} credit)",
     "tryAgain_other": "Încearcă din nou ({{n}} credite)",
-    "editStoryboard": "Editează storyboard"
+    "editStoryboard": "Editează storyboard",
+    "retrying": "Repornim...",
+    "tryAgainPlain": "Încearcă din nou"
   },
   "lowCredits": {
     "backdropTitle": "Storyboard",
@@ -35,15 +37,14 @@
     "sheetLabel": "Credite insuficiente",
     "title_one": "Ai nevoie de {{n}} credit",
     "title_other": "Ai nevoie de {{n}} credite",
-    "body_one": "În prezent ai <b>{{n}} credit disponibil</b> în workspace-ul tău Professional. Draftul storyboard-ului tău este salvat în siguranță.",
-    "body_other": "În prezent ai <b>{{n}} credite disponibile</b> în workspace-ul tău Professional. Draftul storyboard-ului tău este salvat în siguranță.",
-    "planName": "Plan Professional",
-    "active": "Activ",
-    "renews": "Se reînnoiește lunar",
-    "remaining": "{{available}} / {{monthly}} rămase",
-    "remainingA11y": "Credite lunare rămase",
+    "body_one": "Ai <b>{{n}} credit disponibil</b> în acest spațiu de lucru. Munca ta este salvată.",
+    "body_other": "Ai <b>{{n}} credite disponibile</b> în acest spațiu de lucru. Munca ta este salvată.",
+    "remaining": "{{available}} / {{needed}} necesare",
+    "remainingA11y": "Credite disponibile din totalul necesar",
     "manage": "Gestionează creditele",
-    "keepEditing": "Continuă editarea storyboard-ului"
+    "keepEditing": "Continuă editarea",
+    "balance": "Sold credite",
+    "neededLabel": "Disponibile pentru asta"
   },
   "reconnect": {
     "backdropTitle": "Programare",
@@ -52,23 +53,24 @@
     "body": "Autorizarea contului tău a expirat. Reconectează-ți contul pentru a relua programarea.",
     "draftSaved": "Draftul existent salvat în siguranță",
     "noPosting": "Nicio postare nu va începe până când nu confirmi explicit.",
-    "saveForLater": "Salvează draftul pentru mai târziu"
+    "saveForLater": "Salvează draftul pentru mai târziu",
+    "reconnecting": "Deschidem pagina de conectare..."
   },
   "importFailed": {
     "title": "Nu am putut citi acest site",
-    "body": "Nu am putut accesa sau extrage fotografii de catalog de la această adresă. Verifică URL-ul sau continuă descriind magazinul tău.",
+    "body": "Nu am putut deschide această adresă. Verific-o, încearcă din nou sau descrie-ți afacerea chiar tu.",
     "urlLabel": "URL-ul site-ului magazinului",
     "changeUrlA11y": "Schimbă URL-ul site-ului",
     "changeUrl": "Schimbă URL",
-    "reasons": {
-      "timeout": "Site-ul a răspuns prea târziu. Nu s-au făcut modificări."
-    },
     "quickOptions": "Opțiuni rapide pentru a continua:",
     "options": {
       "retry": "Reîncearcă scanarea dacă serverul magazinului tău a fost ocupat temporar.",
       "manual": "Adaugă manual numele afacerii și produsele fără a aștepta."
     },
     "tryAgain": "Încearcă din nou",
-    "addManually": "Adaugă afacerea manual"
+    "addManually": "Adaugă afacerea manual",
+    "reason": "Site-ul nu a răspuns sau adresa nu există. Nu s-a schimbat nimic.",
+    "stillDown": "Tot nu se deschide. Verifică adresa sau adaugă-ți afacerea manual.",
+    "checking": "Verificăm..."
   }
 }

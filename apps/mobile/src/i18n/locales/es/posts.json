@@ -145,9 +145,9 @@
     "notLinked": "Cuenta de Instagram no vinculada",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "No se pudieron cargar tus tableros de Pinterest. Vuelve a conectar Pinterest e inténtalo de nuevo.",
     "past": "Elige una hora que sea al menos dentro de {{count}} minutos.",
@@ -168,7 +168,9 @@
     "needImages_other": "Esta publicación necesita al menos {{count}} fotos. Toca para añadirlas.",
     "tooManyImages_one": "Este canal acepta una sola foto. Toca para elegirla.",
     "tooManyImages_other": "Este canal acepta hasta {{count}} fotos. Toca para elegirlas.",
-    "jpegOnly": "Instagram solo acepta fotos JPEG. Toca para elegir un archivo .jpg."
+    "jpegOnly": "Instagram solo acepta fotos JPEG. Toca para elegir un archivo .jpg.",
+    "expired": "{{channel}} necesita que vuelvas a iniciar sesión",
+    "reconnect": "Volver a conectar {{channel}}"
   },
   "brief": {
     "title": "Crear una publicación",

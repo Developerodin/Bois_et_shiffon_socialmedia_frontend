@@ -145,9 +145,9 @@
     "notLinked": "Instagram-konto ikke tilkoblet",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Kunne ikke laste Pinterest-tavlene dine. Koble til Pinterest på nytt og prøv igjen.",
     "past": "Velg et tidspunkt minst {{count}} minutter frem i tid.",
@@ -168,7 +168,9 @@
     "needImages_other": "Dette innlegget trenger minst {{count}} bilder. Trykk for å legge dem til.",
     "tooManyImages_one": "Denne kanalen tillater ett bilde. Trykk for å velge det.",
     "tooManyImages_other": "Denne kanalen tillater maks {{count}} bilder. Trykk for å velge dem.",
-    "jpegOnly": "Instagram godtar bare JPEG-bilder. Trykk for å velge en .jpg-fil i stedet."
+    "jpegOnly": "Instagram godtar bare JPEG-bilder. Trykk for å velge en .jpg-fil i stedet.",
+    "expired": "Du må logge inn på {{channel}} på nytt",
+    "reconnect": "Koble til {{channel}} på nytt"
   },
   "brief": {
     "title": "Opprett et innlegg",

@@ -153,13 +153,7 @@
     "safeToLeave": "Pode sair desta tela com segurança. O seu rascunho é salvo automaticamente na aba Resultados.",
     "keepWorking": "Continue a trabalhar em segundo plano",
     "failed": "Não foi possível criar o vídeo: {{error}}",
-    "failedTitle": "Não foi possível criar este vídeo",
     "bodyAny": "A compor os elementos visuais, a narração e o ritmo da animação para {{title}}.",
-    "stopped": "Interrompido",
-    "notStarted": "Não iniciado",
-    "tryAgain": "Tentar novamente",
-    "retrying": "A iniciar novamente…",
-    "editPlan": "Editar plano",
     "creditsRefunded_one": "{{count}} crédito devolvido",
     "creditsRefunded_other": "{{count}} créditos devolvidos"
   },

@@ -153,13 +153,7 @@
     "safeToLeave": "Możesz bezpiecznie opuścić ten ekran. Twój szkic jest automatycznie zapisywany w zakładce Wyniki.",
     "keepWorking": "Pracuj dalej w tle",
     "failed": "Nie udało się utworzyć filmu: {{error}}",
-    "failedTitle": "Nie udało się utworzyć filmu",
     "bodyAny": "Dopasowujemy obraz, lektora i tempo animacji do {{title}}.",
-    "stopped": "Zatrzymano",
-    "notStarted": "Nie rozpoczęto",
-    "tryAgain": "Spróbuj ponownie",
-    "retrying": "Rozpoczynamy ponownie…",
-    "editPlan": "Edytuj plan",
     "creditsRefunded_one": "Zwrócono {{count}} kredyt",
     "creditsRefunded_other": "Zwrócone kredyty: {{count}}"
   },

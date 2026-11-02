@@ -153,13 +153,7 @@
     "safeToLeave": "Je kunt dit scherm veilig verlaten. Je concept wordt automatisch opgeslagen in je Resultaten-tabblad.",
     "keepWorking": "Blijf werken op de achtergrond",
     "failed": "De video kon niet worden gemaakt: {{error}}",
-    "failedTitle": "Deze video kon niet worden gemaakt",
     "bodyAny": "Beelden, voice-over en bewegingstempo worden samengesteld voor {{title}}.",
-    "stopped": "Gestopt",
-    "notStarted": "Niet gestart",
-    "tryAgain": "Opnieuw proberen",
-    "retrying": "Opnieuw starten…",
-    "editPlan": "Plan bewerken",
     "creditsRefunded_one": "{{count}} credit teruggestort",
     "creditsRefunded_other": "{{count}} credits teruggestort"
   },

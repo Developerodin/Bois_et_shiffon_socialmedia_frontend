@@ -145,9 +145,9 @@
     "notLinked": "Instagram-konto inte länkat",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Kunde inte ladda dina Pinterest-anslagstavlor. Anslut Pinterest igen och försök på nytt.",
     "past": "Välj en tid minst {{count}} minuter från nu.",
@@ -168,7 +168,9 @@
     "needImages_other": "Det här inlägget behöver minst {{count}} foton. Tryck för att lägga till dem.",
     "tooManyImages_one": "Den här kanalen tar ett foto. Tryck för att välja det.",
     "tooManyImages_other": "Den här kanalen tar högst {{count}} foton. Tryck för att välja dem.",
-    "jpegOnly": "Instagram tar bara JPEG-foton. Tryck för att välja en .jpg-fil i stället."
+    "jpegOnly": "Instagram tar bara JPEG-foton. Tryck för att välja en .jpg-fil i stället.",
+    "expired": "{{channel}} kräver att du loggar in igen",
+    "reconnect": "Anslut {{channel}} igen"
   },
   "brief": {
     "title": "Skapa ett inlägg",

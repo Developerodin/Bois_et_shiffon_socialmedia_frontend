@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} crédito",
   "credits_other": "{{n}} créditos",
-  "tableAlt": "Mesa de jantar {{product}}",
   "sheet": {
     "dismiss": "Fechar"
   },
   "videoFailed": {
     "title": "O teu vídeo não está pronto",
-    "body": "A renderização foi interrompida durante a composição da cena. Os teus créditos reservados foram libertados.",
     "failed": "Falhou",
     "facts_one": "{{seconds}}s · 9:16 Vertical · {{count}} cena",
     "facts_other": "{{seconds}}s · 9:16 Vertical · {{count}} cenas",
@@ -22,12 +20,16 @@
       "reserved": "Reservado",
       "released": "Libertado",
       "stages": {
-        "sceneComposition": "Composição da cena"
+        "VOICE": "Locução",
+        "CLIPS": "Cenas do vídeo",
+        "JOIN": "A juntar as cenas"
       }
     },
     "tryAgain_one": "Tentar novamente ({{n}} crédito)",
     "tryAgain_other": "Tentar novamente ({{n}} créditos)",
-    "editStoryboard": "Editar storyboard"
+    "editStoryboard": "Editar storyboard",
+    "retrying": "A recomeçar...",
+    "tryAgainPlain": "Tentar novamente"
   },
   "lowCredits": {
     "backdropTitle": "Storyboard",
@@ -35,15 +37,14 @@
     "sheetLabel": "Créditos insuficientes",
     "title_one": "Precisas de {{n}} crédito",
     "title_other": "Precisas de {{n}} créditos",
-    "body_one": "Atualmente tens <b>{{n}} crédito disponível</b> no teu espaço de trabalho Professional. O teu rascunho do storyboard está guardado em segurança.",
-    "body_other": "Atualmente tens <b>{{n}} créditos disponíveis</b> no teu espaço de trabalho Professional. O teu rascunho do storyboard está guardado em segurança.",
-    "planName": "Plano Professional",
-    "active": "Ativo",
-    "renews": "Renova mensalmente",
-    "remaining": "{{available}} / {{monthly}} restantes",
-    "remainingA11y": "Créditos mensais restantes",
+    "body_one": "Tens <b>{{n}} crédito disponível</b> neste espaço de trabalho. O teu trabalho está guardado.",
+    "body_other": "Tens <b>{{n}} créditos disponíveis</b> neste espaço de trabalho. O teu trabalho está guardado.",
+    "remaining": "{{available}} / {{needed}} necessários",
+    "remainingA11y": "Créditos disponíveis em relação aos necessários",
     "manage": "Gerir créditos",
-    "keepEditing": "Continuar a editar storyboard"
+    "keepEditing": "Continuar a editar",
+    "balance": "Saldo de créditos",
+    "neededLabel": "Disponível para isto"
   },
   "reconnect": {
     "backdropTitle": "Agendar",
@@ -52,23 +53,24 @@
     "body": "A autorização da tua conta expirou. Reconecta a tua conta para retomar o agendamento.",
     "draftSaved": "Rascunho existente guardado em segurança",
     "noPosting": "Nenhuma publicação será iniciada até confirmares explicitamente.",
-    "saveForLater": "Guardar rascunho para mais tarde"
+    "saveForLater": "Guardar rascunho para mais tarde",
+    "reconnecting": "A abrir o início de sessão..."
   },
   "importFailed": {
     "title": "Não foi possível ler este site",
-    "body": "Não conseguimos aceder ou extrair fotos do catálogo deste endereço. Verifica o teu URL ou continua descrevendo a tua loja.",
+    "body": "Não foi possível abrir este endereço. Verifica-o, tenta novamente ou descreve tu o teu negócio.",
     "urlLabel": "URL do site da loja",
     "changeUrlA11y": "Alterar URL do site",
     "changeUrl": "Alterar URL",
-    "reasons": {
-      "timeout": "O site demorou muito a responder. Nenhuma alteração foi feita."
-    },
     "quickOptions": "Opções rápidas para continuar:",
     "options": {
       "retry": "Tentar novamente se o servidor da tua loja estava temporariamente ocupado.",
       "manual": "Adicionar nome do negócio e produtos manualmente sem esperar."
     },
     "tryAgain": "Tentar novamente",
-    "addManually": "Adicionar negócio manualmente"
+    "addManually": "Adicionar negócio manualmente",
+    "reason": "O site não respondeu ou o endereço não existe. Nada foi alterado.",
+    "stillDown": "Continua sem abrir. Verifica o endereço ou adiciona o teu negócio manualmente.",
+    "checking": "A verificar..."
   }
 }

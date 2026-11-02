@@ -13,10 +13,13 @@ import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, CardTitle, SegmentedTabs, tint } from "@/ui/posts/controls";
 import { dayKey } from "@/ui/posts/sample";
 import { usePosts } from "@/ui/posts/use-posts";
+import { openLowCredits } from "@/ui/recovery/open";
 
 const SECTIONS = ["business", "billing", "planner"] as const;
 const SECTION_HREF = { business: "/business", billing: "/business/billing" } as const;
 const PILLAR_ICONS = [Sofa, Layers, Store];
+// The Planner run "Generate calendar" starts (apps/web CREDIT_COSTS.manualRun).
+const GENERATE_CREDITS = 5;
 
 const sparkles = require("../../../assets/figma/posts/btn-sparkles-white.svg");
 
@@ -58,7 +61,7 @@ export default function Planner() {
       await posts.generate();
       setStarted(true);
     } catch (e) {
-      if (e instanceof ApiError && e.status === 402) router.push("/plans/posts");
+      if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: GENERATE_CREDITS, title: t("planner.generate"), backdrop: t("planner.title") });
       else setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
@@ -150,7 +153,7 @@ export default function Planner() {
       ) : (
         <Button label={busy ? t("planner.generating") : t("planner.generate")} icon={sparkles} disabled={busy} style={{ marginTop: space[16] }} onPress={() => void generate()} />
       )}
-      {!started ? <Text style={[type.meta, { textAlign: "center", paddingTop: space[8] }]}>{t("planner.cost", { n: 5 })}</Text> : null}
+      {!started ? <Text style={[type.meta, { textAlign: "center", paddingTop: space[8] }]}>{t("planner.cost", { n: GENERATE_CREDITS })}</Text> : null}
     </PostsScreen>
   );
 }

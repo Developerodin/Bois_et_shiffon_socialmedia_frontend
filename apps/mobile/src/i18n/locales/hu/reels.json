@@ -153,13 +153,7 @@
     "safeToLeave": "Biztonságosan elhagyhatod ezt a képernyőt. A piszkozatod automatikusan mentésre kerül az Eredmények fülön.",
     "keepWorking": "Folytasd a munkát a háttérben",
     "failed": "Nem sikerült elkészíteni a videót: {{error}}",
-    "failedTitle": "Nem sikerült elkészíteni a videót",
     "bodyAny": "{{title}} látványvilágának, narrációjának és mozgásritmusának összeállítása.",
-    "stopped": "Leállítva",
-    "notStarted": "Még nem kezdődött el",
-    "tryAgain": "Próbáld újra",
-    "retrying": "Újraindítás…",
-    "editPlan": "Terv szerkesztése",
     "creditsRefunded_one": "{{count}} kredit visszatérítve",
     "creditsRefunded_other": "{{count}} kredit visszatérítve"
   },

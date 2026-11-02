@@ -153,13 +153,7 @@
     "safeToLeave": "Poți părăsi această pagină în siguranță. Ciorna ta este salvată automat în fila Rezultate.",
     "keepWorking": "Continuă să lucrezi în fundal",
     "failed": "Videoclipul nu a putut fi creat: {{error}}",
-    "failedTitle": "Acest videoclip nu a putut fi creat",
     "bodyAny": "Combinăm imaginile, vocea din off și ritmul mișcării pentru {{title}}.",
-    "stopped": "Oprit",
-    "notStarted": "Nepornit",
-    "tryAgain": "Încearcă din nou",
-    "retrying": "Repornim…",
-    "editPlan": "Editează planul",
     "creditsRefunded_one": "{{count}} credit returnat",
     "creditsRefunded_other": "{{count}} credite returnate"
   },

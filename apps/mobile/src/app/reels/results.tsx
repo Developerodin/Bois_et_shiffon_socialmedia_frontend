@@ -12,6 +12,7 @@ import { Button } from "@/ui/button";
 import { ActionButton, BottomNav, Chip, ICON, ModuleHeader, Panel, ReelsScreen, bodyMuted, meta, metaInk, rc } from "@/ui/reels/kit";
 import { startRender } from "@/ui/reels/render-watch";
 import { openReel } from "@/ui/reels/use-reel";
+import { openLowCredits } from "@/ui/recovery/open";
 
 /** Progress shown per render step; Higgsfield reports no percentage, so this moves by step. */
 const STEP_PERCENT = { VOICE: 0.15, CLIPS: 0.6, JOIN: 0.9 } as const;
@@ -36,14 +37,14 @@ export default function ReelsResults() {
 
   const counts = { all: list?.length ?? 0, ready: list?.filter((r) => r.videoUrl).length ?? 0, processing: list?.filter(isRunning).length ?? 0 };
   const shown = (list ?? []).filter((r) => filter === "all" || (filter === "ready" ? !!r.videoUrl : isRunning(r)));
-  const open = (r: ReelSummary, to: "/reels/review" | "/reels/generating" | "/reels/storyboard") => (openReel(r.id), router.push(to));
+  const open = (r: ReelSummary, to: "/reels/review" | "/reels/generating" | "/reels/storyboard" | "/recovery/video-failed") => (openReel(r.id), router.push(to));
   const retry = async (r: ReelSummary) => {
     setRetrying(r.id);
     try {
       await startRender(r.id, r.version);
       open(r, "/reels/generating");
     } catch (e) {
-      if (e instanceof ApiError && e.status === 402) router.push("/plans/reels");
+      if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: r.price ?? 0, title: r.title });
       else setError(e instanceof Error ? e.message : String(e));
     } finally {
       setRetrying(null);
@@ -125,7 +126,8 @@ export default function ReelsResults() {
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t("results.previewA11y", { title: r.title })}
-                  onPress={() => open(r, r.videoUrl ? "/reels/review" : "/reels/storyboard")}
+                  // A failed render opens X01 (why it failed, Try again).
+                  onPress={() => open(r, r.videoUrl ? "/reels/review" : failed ? "/recovery/video-failed" : "/reels/storyboard")}
                   style={styles.thumb}
                 >
                   <Image source={r.thumbUrl ? { uri: r.thumbUrl } : undefined} style={StyleSheet.absoluteFill} contentFit="cover" />

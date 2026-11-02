@@ -145,9 +145,9 @@
     "notLinked": "Акаунт Instagram не підключено",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Не вдалося завантажити ваші дошки Pinterest. Підключіть Pinterest повторно та спробуйте ще раз.",
     "past": "Виберіть час щонайменше через {{count}} хв відтепер.",
@@ -168,7 +168,9 @@
     "needImages_other": "Для цього допису потрібно щонайменше {{count}} фото. Натисніть, щоб додати.",
     "tooManyImages_one": "Для цього каналу можна додати одне фото. Натисніть, щоб вибрати.",
     "tooManyImages_other": "Для цього каналу можна додати не більше {{count}} фото. Натисніть, щоб вибрати.",
-    "jpegOnly": "Instagram приймає лише фото у форматі JPEG. Натисніть, щоб вибрати файл .jpg."
+    "jpegOnly": "Instagram приймає лише фото у форматі JPEG. Натисніть, щоб вибрати файл .jpg.",
+    "expired": "Увійди в {{channel}} ще раз",
+    "reconnect": "Підключити {{channel}} знову"
   },
   "brief": {
     "title": "Створити пост",

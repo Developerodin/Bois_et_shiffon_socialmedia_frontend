@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} kredit",
   "credits_other": "{{n}} kredity",
-  "tableAlt": "{{product}} jídelní stůl",
   "sheet": {
     "dismiss": "Zavřít"
   },
   "videoFailed": {
     "title": "Vaše video není připraveno",
-    "body": "Vykreslování bylo přerušeno během skládání scény. Vaše rezervované kredity byly uvolněny.",
     "failed": "Selhalo",
     "facts_one": "{{seconds}}s · 9:16 Vertikální · {{count}} scéna",
     "facts_other": "{{seconds}}s · 9:16 Vertikální · {{count}} scény",
@@ -22,12 +20,16 @@
       "reserved": "Rezervováno",
       "released": "Uvolněno",
       "stages": {
-        "sceneComposition": "Skládání scény"
+        "VOICE": "Komentář",
+        "CLIPS": "Scény videa",
+        "JOIN": "Spojování scén"
       }
     },
     "tryAgain_one": "Zkusit znovu ({{n}} kredit)",
     "tryAgain_other": "Zkusit znovu ({{n}} kredity)",
-    "editStoryboard": "Upravit storyboard"
+    "editStoryboard": "Upravit storyboard",
+    "retrying": "Spouštíme znovu...",
+    "tryAgainPlain": "Zkusit znovu"
   },
   "lowCredits": {
     "backdropTitle": "Storyboard",
@@ -35,15 +37,14 @@
     "sheetLabel": "Nedostatek kreditů",
     "title_one": "Potřebujete {{n}} kredit",
     "title_other": "Potřebujete {{n}} kredity",
-    "body_one": "Momentálně máte <b>{{n}} kredit k dispozici</b> ve vašem Profesionálním workspace. Váš návrh storyboardu je bezpečně uložen.",
-    "body_other": "Momentálně máte <b>{{n}} kredity k dispozici</b> ve vašem Profesionálním workspace. Váš návrh storyboardu je bezpečně uložen.",
-    "planName": "Profesionální plán",
-    "active": "Aktivní",
-    "renews": "Obnovuje se měsíčně",
-    "remaining": "{{available}} / {{monthly}} zbývá",
-    "remainingA11y": "Zbývající měsíční kredity",
+    "body_one": "V tomto pracovním prostoru máš k dispozici <b>{{n}} kredit</b>. Tvá práce je uložená.",
+    "body_other": "V tomto pracovním prostoru je <b>počet dostupných kreditů: {{n}}</b>. Tvá práce je uložená.",
+    "remaining": "{{available}} / {{needed}} potřebných",
+    "remainingA11y": "Dostupné kredity oproti potřebnému počtu",
     "manage": "Spravovat kredity",
-    "keepEditing": "Pokračovat v úpravách storyboardu"
+    "keepEditing": "Pokračovat v úpravách",
+    "balance": "Stav kreditů",
+    "neededLabel": "K dispozici pro tuto akci"
   },
   "reconnect": {
     "backdropTitle": "Plán",
@@ -52,23 +53,24 @@
     "body": "Platnost autorizace vašeho účtu vypršela. Znovu připojte svůj účet, abyste mohli pokračovat v plánování.",
     "draftSaved": "Stávající návrh bezpečně uložen",
     "noPosting": "Žádné zveřejnění nezačne, dokud to výslovně nepotvrdíte.",
-    "saveForLater": "Uložit návrh na později"
+    "saveForLater": "Uložit návrh na později",
+    "reconnecting": "Otevíráme přihlášení..."
   },
   "importFailed": {
     "title": "Nelze načíst tuto webovou stránku",
-    "body": "Nepodařilo se nám dosáhnout nebo extrahovat katalogové fotografie z této adresy. Zkontrolujte svou URL nebo pokračujte popisem svého obchodu.",
+    "body": "Tuto adresu se nepodařilo otevřít. Zkontroluj ji, zkus to znovu nebo popiš své podnikání ručně.",
     "urlLabel": "URL webu obchodu",
     "changeUrlA11y": "Změnit URL webu",
     "changeUrl": "Změnit URL",
-    "reasons": {
-      "timeout": "Webová stránka reagovala příliš dlouho. Žádné změny nebyly provedeny."
-    },
     "quickOptions": "Rychlé možnosti pokračování:",
     "options": {
       "retry": "Zkuste znovu skenovat, pokud byl server vašeho obchodu dočasně zaneprázdněn.",
       "manual": "Přidejte název firmy a produkty ručně bez čekání."
     },
     "tryAgain": "Zkusit znovu",
-    "addManually": "Přidat firmu ručně"
+    "addManually": "Přidat firmu ručně",
+    "reason": "Web neodpověděl nebo adresa neexistuje. Nic se nezměnilo.",
+    "stillDown": "Stránku se stále nedaří otevřít. Zkontroluj adresu nebo přidej své podnikání ručně.",
+    "checking": "Kontrolujeme..."
   }
 }

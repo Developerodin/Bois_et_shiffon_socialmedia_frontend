@@ -153,13 +153,7 @@
     "safeToLeave": "Du kannst diesen Bildschirm sicher verlassen. Dein Entwurf wird automatisch im Ergebnistab gespeichert.",
     "keepWorking": "Im Hintergrund weiterarbeiten",
     "failed": "Das Video konnte nicht erstellt werden: {{error}}",
-    "failedTitle": "Dieses Video konnte nicht erstellt werden",
     "bodyAny": "Bilder, Vertonung und Animationstempo für {{title}} werden zusammengestellt.",
-    "stopped": "Gestoppt",
-    "notStarted": "Nicht gestartet",
-    "tryAgain": "Erneut versuchen",
-    "retrying": "Wird neu gestartet…",
-    "editPlan": "Plan bearbeiten",
     "creditsRefunded_one": "{{count}} Credit erstattet",
     "creditsRefunded_other": "{{count}} Credits erstattet"
   },

@@ -1,50 +1,31 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { ArrowLeft, Check, Clock, Coins, Info, LoaderCircle, X } from "lucide-react-native";
-import { type ReactNode, useEffect, useState } from "react";
+import { ArrowLeft, Check, Clock, Coins, Info, LoaderCircle } from "lucide-react-native";
+import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { ApiError } from "@/api/client";
 import { Button } from "@/ui/button";
 import { color, radius, space, type } from "@/theme/tokens";
-import { ActionButton, BrandPill, ICON, PageHeader, ReelsScreen, Tag, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
+import { BrandPill, ICON, PageHeader, ReelsScreen, Tag, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { photos } from "@/ui/reels/sample";
-import { startRender } from "@/ui/reels/render-watch";
 import { useReel } from "@/ui/reels/use-reel";
 
 const ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
 
 /**
  * R05 · Reels / Generating. Polls the render; the three designed rows are its voice, clips and join steps.
- * A failed render says what happened in plain words (never the provider's message), marks the step it stopped at,
- * and offers Try again and Edit plan.
+ * Done → R07 Review; failed → X01 Video failed (which says why and offers Try again).
  */
 export default function ReelsGenerating() {
   const { t } = useTranslation("reels");
   const { id, detail } = useReel(3000);
-  const [retrying, setRetrying] = useState(false);
-  const [retryError, setRetryError] = useState<string | null>(null);
   const render = detail?.renders[0];
   const plan = detail?.plan;
   const title = plan?.title ?? "";
-  const failure = render?.step === "FAILED" ? render.failure : null;
-  const failed = render?.step === "FAILED";
-  const at = !render ? 0 : render.step === "DONE" ? 3 : failed ? ORDER.indexOf(failure?.stoppedAt ?? "VOICE") : ORDER.indexOf(render.step as (typeof ORDER)[number]);
-  const retry = async () => {
-    if (!id || !detail) return;
-    setRetrying(true);
-    setRetryError(null);
-    try {
-      await startRender(id, detail.version);
-    } catch (e) {
-      if (e instanceof ApiError && e.status === 402) router.push("/plans/reels");
-      else setRetryError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setRetrying(false);
-    }
-  };
+  const at = !render || render.step === "FAILED" ? 0 : render.step === "DONE" ? 3 : ORDER.indexOf(render.step);
   useEffect(() => {
     if (render?.step === "DONE") router.replace("/reels/review");
+    if (render?.step === "FAILED") router.replace("/recovery/video-failed");
   }, [render?.step]);
   // No reel open (a cold start or a link straight here): the Results list has every render.
   useEffect(() => {
@@ -52,16 +33,11 @@ export default function ReelsGenerating() {
   }, [id]);
   const row = (i: number, label: string) => {
     const done = at > i;
-    const now = at === i && !failed;
-    const stopped = at === i && failed;
+    const now = at === i;
     return (
       <Step
         icon={
-          stopped ? (
-            <View style={[styles.stepIcon, { borderColor: color.error }]}>
-              <X size={14} color={color.error} strokeWidth={2.25} />
-            </View>
-          ) : done ? (
+          done ? (
             <View style={[styles.stepIcon, { backgroundColor: rc.black, borderColor: rc.black }]}>
               <Check size={14} color={color.onPrimary} strokeWidth={2.25} />
             </View>
@@ -75,16 +51,14 @@ export default function ReelsGenerating() {
             </View>
           )
         }
-        label={<Text style={now || stopped ? strong14 : done ? metaInk : meta}>{label}</Text>}
+        label={<Text style={now ? strong14 : done ? metaInk : meta}>{label}</Text>}
         status={
-          stopped ? (
-            <Text style={[meta, { color: color.error }]}>{t("generating.stopped")}</Text>
-          ) : done ? (
+          done ? (
             <Text style={meta}>{t("generating.done")}</Text>
           ) : now ? (
             <Tag label={t("inProgress")} textStyle={{ color: color.ink }} />
           ) : (
-            <Text style={meta}>{failed ? t("generating.notStarted") : t("generating.queued")}</Text>
+            <Text style={meta}>{t("generating.queued")}</Text>
           )
         }
       />
@@ -107,14 +81,14 @@ export default function ReelsGenerating() {
     >
       <View style={{ alignItems: "center", paddingTop: space[8] }}>
         <View style={styles.ringBox} accessibilityLabel={t("generating.renderingA11y")}>
-          <View style={[styles.ring, failed && { borderColor: color.error }]} />
+          <View style={styles.ring} />
           <View style={styles.core}>
             <Image source={photos.mark} style={{ width: 48, height: 48 }} contentFit="contain" />
           </View>
         </View>
-        <Text style={[type.pageTitle, { textAlign: "center", paddingTop: space[12] }]}>{failed ? t("generating.failedTitle") : t("generating.title")}</Text>
+        <Text style={[type.pageTitle, { textAlign: "center", paddingTop: space[12] }]}>{t("generating.title")}</Text>
         <Text style={[bodyMuted, { textAlign: "center", paddingTop: 4, maxWidth: 300 }]} accessibilityLiveRegion="polite">
-          {failed ? t(`failure.${failure?.kind ?? "other"}`, { n: failure?.scene }) : detail ? t("generating.bodyAny", { title }) : ""}
+          {detail ? t("generating.bodyAny", { title }) : ""}
         </Text>
       </View>
 
@@ -146,29 +120,19 @@ export default function ReelsGenerating() {
           <View style={styles.credits}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
               <Coins size={20} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
-              <Text style={metaInk}>{failed ? t("generating.creditsRefunded", { count: detail.price ?? 0 }) : t("generating.creditsReserved", { count: detail.price ?? 0 })}</Text>
+              <Text style={metaInk}>{t("generating.creditsReserved", { count: detail.price ?? 0 })}</Text>
             </View>
             <Text style={meta}>{t("generating.remaining", { count: detail.credits })}</Text>
           </View>
         ) : null}
-        {failed ? null : (
-          <View style={{ flexDirection: "row", gap: space[8], paddingHorizontal: space[8] }}>
-            <Info size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} style={{ marginTop: 2 }} />
-            <Text style={[bodyMuted, { flex: 1 }]}>{t("generating.safeToLeave")}</Text>
-          </View>
-        )}
+        <View style={{ flexDirection: "row", gap: space[8], paddingHorizontal: space[8] }}>
+          <Info size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} style={{ marginTop: 2 }} />
+          <Text style={[bodyMuted, { flex: 1 }]}>{t("generating.safeToLeave")}</Text>
+        </View>
       </View>
 
       <View style={{ gap: space[12], paddingTop: space[16] + 4, paddingBottom: 4 }}>
-        {retryError ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{retryError}</Text> : null}
-        {failed ? (
-          <>
-            <Button label={retrying ? t("generating.retrying") : t("generating.tryAgain")} disabled={retrying} onPress={() => void retry()} />
-            <ActionButton label={t("generating.editPlan")} variant="outline" onPress={() => router.replace("/reels/chat")} />
-          </>
-        ) : (
-          <Button label={t("generating.keepWorking")} onPress={() => router.replace("/reels/results")} />
-        )}
+        <Button label={t("generating.keepWorking")} onPress={() => router.replace("/reels/results")} />
       </View>
     </ReelsScreen>
   );

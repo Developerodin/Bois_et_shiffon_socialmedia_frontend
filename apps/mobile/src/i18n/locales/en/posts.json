@@ -145,9 +145,9 @@
     "notLinked": "{{channel}} account not linked",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Couldn't load your Pinterest boards. Reconnect Pinterest and try again.",
     "past": "Pick a time at least {{count}} minutes from now.",
@@ -168,7 +168,9 @@
     "needImages_other": "This post needs at least {{count}} photos. Tap to add them.",
     "tooManyImages_one": "This channel takes one photo. Tap to choose it.",
     "tooManyImages_other": "This channel takes at most {{count}} photos. Tap to choose them.",
-    "jpegOnly": "Instagram only takes JPEG photos. Tap to pick a .jpg instead."
+    "jpegOnly": "Instagram only takes JPEG photos. Tap to pick a .jpg instead.",
+    "expired": "{{channel}} needs you to sign in again",
+    "reconnect": "Reconnect {{channel}}"
   },
   "brief": {
     "title": "Create a post",

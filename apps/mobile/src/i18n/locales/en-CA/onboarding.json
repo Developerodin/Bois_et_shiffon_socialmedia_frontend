@@ -141,7 +141,6 @@
       }
     },
     "safeNote": "Catalogue import does not change anything on your live store.",
-    "unreachable": "We couldn't open this site. Check the address.",
     "checkFailed": "Couldn't check the site. Try again.",
     "noWebsite": "No website? Describe your business instead"
   },

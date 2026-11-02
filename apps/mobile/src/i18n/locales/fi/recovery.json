@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} krediitti",
   "credits_other": "{{n}} krediittiä",
-  "tableAlt": "{{product}} ruokapöytä",
   "sheet": {
     "dismiss": "Sulje"
   },
   "videoFailed": {
     "title": "Rullasi ei ole valmis",
-    "body": "Renderöinti keskeytyi kohtauksen koostamisen aikana. Varatut krediittisi on vapautettu.",
     "failed": "Epäonnistui",
     "facts_one": "{{seconds}}s · 9:16 Pysty · {{count}} kohtaus",
     "facts_other": "{{seconds}}s · 9:16 Pysty · {{count}} kohtausta",
@@ -22,12 +20,16 @@
       "reserved": "Varattu",
       "released": "Vapautettu",
       "stages": {
-        "sceneComposition": "Kohtauksen koostaminen"
+        "VOICE": "Selostus",
+        "CLIPS": "Videon kohtaukset",
+        "JOIN": "Kohtausten yhdistäminen"
       }
     },
     "tryAgain_one": "Yritä uudelleen ({{n}} krediitti)",
     "tryAgain_other": "Yritä uudelleen ({{n}} krediittiä)",
-    "editStoryboard": "Muokkaa kuvakäsikirjoitusta"
+    "editStoryboard": "Muokkaa kuvakäsikirjoitusta",
+    "retrying": "Aloitetaan uudelleen...",
+    "tryAgainPlain": "Yritä uudelleen"
   },
   "lowCredits": {
     "backdropTitle": "Kuvakäsikirjoitus",
@@ -35,15 +37,14 @@
     "sheetLabel": "Ei tarpeeksi krediittejä",
     "title_one": "Tarvitset {{n}} krediitin",
     "title_other": "Tarvitset {{n}} krediittiä",
-    "body_one": "Sinulla on tällä hetkellä <b>{{n}} krediitti käytettävissä</b> Professional-työtilassasi. Kuvakäsikirjoituksen luonnos on tallennettu turvallisesti.",
-    "body_other": "Sinulla on tällä hetkellä <b>{{n}} krediittiä käytettävissä</b> Professional-työtilassasi. Kuvakäsikirjoituksen luonnos on tallennettu turvallisesti.",
-    "planName": "Professional-suunnitelma",
-    "active": "Aktiivinen",
-    "renews": "Uusiutuu kuukausittain",
-    "remaining": "{{available}} / {{monthly}} jäljellä",
-    "remainingA11y": "Kuukausittaiset krediitit jäljellä",
+    "body_one": "Tässä työtilassa on nyt <b>{{n}} krediitti käytettävissä</b>. Työsi on tallennettu.",
+    "body_other": "Tässä työtilassa on nyt <b>{{n}} krediittiä käytettävissä</b>. Työsi on tallennettu.",
+    "remaining": "{{available}} / {{needed}} tarvittavaa krediittiä",
+    "remainingA11y": "Käytettävissä olevat ja tarvittavat krediitit",
     "manage": "Hallitse krediittejä",
-    "keepEditing": "Jatka kuvakäsikirjoituksen muokkaamista"
+    "keepEditing": "Jatka muokkaamista",
+    "balance": "Krediittisaldo",
+    "neededLabel": "Käytettävissä tähän"
   },
   "reconnect": {
     "backdropTitle": "Aikataulu",
@@ -52,23 +53,24 @@
     "body": "Tilisi valtuutus on vanhentunut. Yhdistä tilisi uudelleen jatkaaksesi aikataulutusta.",
     "draftSaved": "Olemassa oleva luonnos tallennettu turvallisesti",
     "noPosting": "Julkaiseminen ei ala ennen kuin vahvistat sen erikseen.",
-    "saveForLater": "Tallenna luonnos myöhemmäksi"
+    "saveForLater": "Tallenna luonnos myöhemmäksi",
+    "reconnecting": "Avataan kirjautuminen..."
   },
   "importFailed": {
     "title": "Emme voineet lukea tätä verkkosivustoa",
-    "body": "Emme voineet tavoittaa tai hakea luettelokuvia tästä osoitteesta. Tarkista URL-osoitteesi tai jatka kuvailemalla kauppaasi.",
+    "body": "Osoitetta ei voitu avata. Tarkista se, yritä uudelleen tai kuvaile yritystäsi itse.",
     "urlLabel": "Kaupan verkkosivuston URL",
     "changeUrlA11y": "Vaihda verkkosivuston URL",
     "changeUrl": "Vaihda URL",
-    "reasons": {
-      "timeout": "Verkkosivusto vastasi liian hitaasti. Muutoksia ei tehty."
-    },
     "quickOptions": "Nopeat vaihtoehdot jatkamiseen:",
     "options": {
       "retry": "Yritä skannausta uudelleen, jos kauppasi palvelin oli hetkellisesti varattu.",
       "manual": "Lisää yrityksen nimi ja tuotteet manuaalisesti odottamatta."
     },
     "tryAgain": "Yritä uudelleen",
-    "addManually": "Lisää yritys manuaalisesti"
+    "addManually": "Lisää yritys manuaalisesti",
+    "reason": "Verkkosivusto ei vastannut tai osoitetta ei ole olemassa. Mitään ei muutettu.",
+    "stillDown": "Osoite ei vieläkään avaudu. Tarkista se tai lisää yrityksesi tiedot itse.",
+    "checking": "Tarkistetaan..."
   }
 }

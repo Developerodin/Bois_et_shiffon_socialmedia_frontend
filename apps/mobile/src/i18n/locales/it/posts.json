@@ -145,9 +145,9 @@
     "notLinked": "Account Instagram non collegato",
     "provider": {
       "INSTAGRAM": "Instagram",
-      "FACEBOOK": "Facebook",
       "PINTEREST": "Pinterest",
-      "THREADS": "Threads"
+      "THREADS": "Threads",
+      "META": "Facebook"
     },
     "boardsFailed": "Impossibile caricare le tue bacheche Pinterest. Ricollega Pinterest e riprova.",
     "past": "Scegli un orario tra almeno {{count}} minuti.",
@@ -168,7 +168,9 @@
     "needImages_other": "Questo post richiede almeno {{count}} foto. Tocca per aggiungerle.",
     "tooManyImages_one": "Questo canale accetta una sola foto. Tocca per sceglierla.",
     "tooManyImages_other": "Questo canale accetta al massimo {{count}} foto. Tocca per sceglierle.",
-    "jpegOnly": "Instagram accetta solo foto JPEG. Tocca per scegliere un file .jpg."
+    "jpegOnly": "Instagram accetta solo foto JPEG. Tocca per scegliere un file .jpg.",
+    "expired": "Devi accedere di nuovo a {{channel}}",
+    "reconnect": "Ricollega {{channel}}"
   },
   "brief": {
     "title": "Crea un post",

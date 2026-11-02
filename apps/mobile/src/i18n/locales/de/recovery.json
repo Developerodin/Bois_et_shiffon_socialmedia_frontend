@@ -1,13 +1,11 @@
 {
   "credits_one": "{{n}} Guthaben",
   "credits_other": "{{n}} Guthaben",
-  "tableAlt": "{{product}} Esstisch",
   "sheet": {
     "dismiss": "Schließen"
   },
   "videoFailed": {
     "title": "Dein Reel ist nicht bereit",
-    "body": "Das Rendering wurde während der Szenenzusammenstellung unterbrochen. Deine reservierten Guthaben wurden freigegeben.",
     "failed": "Fehlgeschlagen",
     "facts_one": "{{seconds}}s · 9:16 Vertikal · {{count}} Szene",
     "facts_other": "{{seconds}}s · 9:16 Vertikal · {{count}} Szenen",
@@ -22,12 +20,16 @@
       "reserved": "Reserviert",
       "released": "Freigegeben",
       "stages": {
-        "sceneComposition": "Szenenzusammenstellung"
+        "VOICE": "Sprecherstimme",
+        "CLIPS": "Videoszenen",
+        "JOIN": "Szenen zusammenfügen"
       }
     },
     "tryAgain_one": "Erneut versuchen ({{n}} Guthaben)",
     "tryAgain_other": "Erneut versuchen ({{n}} Guthaben)",
-    "editStoryboard": "Storyboard bearbeiten"
+    "editStoryboard": "Storyboard bearbeiten",
+    "retrying": "Wird erneut gestartet...",
+    "tryAgainPlain": "Erneut versuchen"
   },
   "lowCredits": {
     "backdropTitle": "Storyboard",
@@ -35,15 +37,14 @@
     "sheetLabel": "Nicht genug Guthaben",
     "title_one": "Du benötigst {{n}} Guthaben",
     "title_other": "Du benötigst {{n}} Guthaben",
-    "body_one": "Du hast derzeit <b>{{n}} Guthaben verfügbar</b> in deinem Professional-Arbeitsbereich. Dein Storyboard-Entwurf ist sicher gespeichert.",
-    "body_other": "Du hast derzeit <b>{{n}} Guthaben verfügbar</b> in deinem Professional-Arbeitsbereich. Dein Storyboard-Entwurf ist sicher gespeichert.",
-    "planName": "Professional-Plan",
-    "active": "Aktiv",
-    "renews": "Erneuert sich monatlich",
-    "remaining": "{{available}} / {{monthly}} verbleibend",
-    "remainingA11y": "Verbleibende monatliche Guthaben",
+    "body_one": "Dir steht in diesem Arbeitsbereich derzeit <b>{{n}} Credit zur Verfügung</b>. Deine Arbeit ist gespeichert.",
+    "body_other": "Dir stehen in diesem Arbeitsbereich derzeit <b>{{n}} Credits zur Verfügung</b>. Deine Arbeit ist gespeichert.",
+    "remaining": "{{available}} / {{needed}} benötigt",
+    "remainingA11y": "Verfügbare Credits im Verhältnis zum Bedarf",
     "manage": "Guthaben verwalten",
-    "keepEditing": "Storyboard weiter bearbeiten"
+    "keepEditing": "Weiter bearbeiten",
+    "balance": "Credit-Guthaben",
+    "neededLabel": "Dafür verfügbar"
   },
   "reconnect": {
     "backdropTitle": "Zeitplan",
@@ -52,23 +53,24 @@
     "body": "Deine Kontoautorisierung ist abgelaufen. Verbinde dein Konto erneut, um die Planung fortzusetzen.",
     "draftSaved": "Vorhandener Entwurf sicher gespeichert",
     "noPosting": "Es wird nichts gepostet, bis du es ausdrücklich bestätigst.",
-    "saveForLater": "Entwurf für später speichern"
+    "saveForLater": "Entwurf für später speichern",
+    "reconnecting": "Anmeldung wird geöffnet..."
   },
   "importFailed": {
     "title": "Konnte diese Website nicht lesen",
-    "body": "Wir konnten keine Katalogfotos von dieser Adresse abrufen oder extrahieren. Überprüfe deine URL oder beschreibe deinen Laden weiter.",
+    "body": "Diese Adresse konnte nicht geöffnet werden. Prüfe sie, versuche es erneut oder beschreibe dein Geschäft selbst.",
     "urlLabel": "Store-Website-URL",
     "changeUrlA11y": "Website-URL ändern",
     "changeUrl": "URL ändern",
-    "reasons": {
-      "timeout": "Die Website hat zu lange zum Antworten gebraucht. Es wurden keine Änderungen vorgenommen."
-    },
     "quickOptions": "Schnelle Optionen zum Fortfahren:",
     "options": {
       "retry": "Erneut scannen, wenn dein Store-Server kurzzeitig beschäftigt war.",
       "manual": "Geschäftsnamen und Produkte manuell hinzufügen, ohne zu warten."
     },
     "tryAgain": "Erneut versuchen",
-    "addManually": "Geschäft manuell hinzufügen"
+    "addManually": "Geschäft manuell hinzufügen",
+    "reason": "Die Website hat nicht geantwortet oder die Adresse existiert nicht. Es wurde nichts geändert.",
+    "stillDown": "Lässt sich immer noch nicht öffnen. Prüfe die Adresse oder füge dein Geschäft manuell hinzu.",
+    "checking": "Wird geprüft..."
   }
 }
