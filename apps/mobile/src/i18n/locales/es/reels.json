@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} crédito reembolsado",
     "creditsRefunded_other": "{{count}} créditos reembolsados"
   },
+  "ready": {
+    "title": "Tu reel está listo",
+    "failedTitle": "No se pudo crear un reel",
+    "watch": "Ver",
+    "seeWhy": "Ver por qué"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Tu reel está listo",
+    "readyBody": "Ya puedes ver {{title}}.",
+    "failedTitle": "No se pudo crear un reel",
+    "failedBody": "No se pudo crear {{title}}. Te devolvimos los créditos."
+  },
   "failure": {
     "unavailable": "La creación de videos no está disponible ahora. Te hemos devuelto los créditos. Inténtalo más tarde.",
     "slow": "El video tardó demasiado en crearse. Te hemos devuelto los créditos. Inténtalo de nuevo.",

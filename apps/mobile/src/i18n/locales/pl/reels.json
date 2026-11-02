@@ -163,6 +163,19 @@
     "creditsRefunded_one": "Zwrócono {{count}} kredyt",
     "creditsRefunded_other": "Zwrócone kredyty: {{count}}"
   },
+  "ready": {
+    "title": "Twoja rolka jest gotowa",
+    "failedTitle": "Nie udało się utworzyć rolki",
+    "watch": "Obejrzyj",
+    "seeWhy": "Zobacz dlaczego"
+  },
+  "push": {
+    "channel": "Rolki",
+    "readyTitle": "Twoja rolka jest gotowa",
+    "readyBody": "{{title}} – rolka jest gotowa do obejrzenia.",
+    "failedTitle": "Nie udało się utworzyć rolki",
+    "failedBody": "{{title}} – nie udało się utworzyć rolki. Kredyty wróciły na Twoje konto."
+  },
   "failure": {
     "unavailable": "Tworzenie filmów jest teraz niedostępne. Twoje kredyty zostały zwrócone. Spróbuj ponownie później.",
     "slow": "Tworzenie filmu trwało zbyt długo. Twoje kredyty zostały zwrócone. Spróbuj ponownie.",

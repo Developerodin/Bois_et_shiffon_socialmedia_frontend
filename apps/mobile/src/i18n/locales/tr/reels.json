@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} kredi iade edildi",
     "creditsRefunded_other": "{{count}} kredi iade edildi"
   },
+  "ready": {
+    "title": "Reels videon hazır",
+    "failedTitle": "Bir Reels videosu oluşturulamadı",
+    "watch": "İzle",
+    "seeWhy": "Nedenini gör"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Reels videon hazır",
+    "readyBody": "{{title}} izlemeye hazır.",
+    "failedTitle": "Bir Reels videosu oluşturulamadı",
+    "failedBody": "{{title}} oluşturulamadı. Kredilerin iade edildi."
+  },
   "failure": {
     "unavailable": "Video oluşturma şu anda kullanılamıyor. Kredilerin iade edildi. Lütfen daha sonra tekrar dene.",
     "slow": "Videonun oluşturulması çok uzun sürdü. Kredilerin iade edildi. Tekrar dene.",

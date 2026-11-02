@@ -5,11 +5,11 @@ import { type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { ApiError } from "@/api/client";
-import { reels } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { color, radius, space, type } from "@/theme/tokens";
 import { ActionButton, BrandPill, ICON, PageHeader, ReelsScreen, Tag, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { photos } from "@/ui/reels/sample";
+import { startRender } from "@/ui/reels/render-watch";
 import { useReel } from "@/ui/reels/use-reel";
 
 const ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
@@ -35,7 +35,7 @@ export default function ReelsGenerating() {
     setRetrying(true);
     setRetryError(null);
     try {
-      await reels.render(id, detail.version);
+      await startRender(id, detail.version);
     } catch (e) {
       if (e instanceof ApiError && e.status === 402) router.push("/plans/reels");
       else setRetryError(e instanceof Error ? e.message : String(e));

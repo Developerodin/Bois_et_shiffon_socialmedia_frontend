@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} krediitti palautettu",
     "creditsRefunded_other": "{{count}} krediittiä palautettu"
   },
+  "ready": {
+    "title": "Reels-videosi on valmis",
+    "failedTitle": "Reels-videota ei voitu luoda",
+    "watch": "Katso",
+    "seeWhy": "Katso syy"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Reels-videosi on valmis",
+    "readyBody": "{{title}} on valmis katsottavaksi.",
+    "failedTitle": "Reels-videota ei voitu luoda",
+    "failedBody": "Videota {{title}} ei voitu luoda. Krediittisi on palautettu."
+  },
   "failure": {
     "unavailable": "Videon luominen ei ole juuri nyt käytettävissä. Krediittisi on palautettu. Yritä myöhemmin uudelleen.",
     "slow": "Videon luominen kesti liian kauan. Krediittisi on palautettu. Yritä uudelleen.",

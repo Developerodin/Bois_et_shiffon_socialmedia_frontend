@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} credit teruggestort",
     "creditsRefunded_other": "{{count}} credits teruggestort"
   },
+  "ready": {
+    "title": "Je reel is klaar",
+    "failedTitle": "Reel maken mislukt",
+    "watch": "Bekijken",
+    "seeWhy": "Bekijk waarom"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Je reel is klaar",
+    "readyBody": "{{title}} is klaar om te bekijken.",
+    "failedTitle": "Reel maken mislukt",
+    "failedBody": "{{title}} kon niet worden gemaakt. Je credits zijn terug op je account."
+  },
   "failure": {
     "unavailable": "Video's maken is momenteel niet beschikbaar. Je credits zijn teruggestort. Probeer het later opnieuw.",
     "slow": "Het maken van de video duurde te lang. Je credits zijn teruggestort. Probeer het opnieuw.",

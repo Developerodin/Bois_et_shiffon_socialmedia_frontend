@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} Credit erstattet",
     "creditsRefunded_other": "{{count}} Credits erstattet"
   },
+  "ready": {
+    "title": "Dein Reel ist fertig",
+    "failedTitle": "Ein Reel konnte nicht erstellt werden",
+    "watch": "Ansehen",
+    "seeWhy": "Grund ansehen"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Dein Reel ist fertig",
+    "readyBody": "{{title}} ist fertig und kann angesehen werden.",
+    "failedTitle": "Ein Reel konnte nicht erstellt werden",
+    "failedBody": "{{title}} konnte nicht erstellt werden. Deine Credits wurden zurückerstattet."
+  },
   "failure": {
     "unavailable": "Die Videoerstellung ist gerade nicht verfügbar. Deine Credits wurden erstattet. Versuch es später erneut.",
     "slow": "Die Videoerstellung hat zu lange gedauert. Deine Credits wurden erstattet. Versuch es erneut.",

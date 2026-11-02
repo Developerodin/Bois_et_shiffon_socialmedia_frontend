@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} credit returnat",
     "creditsRefunded_other": "{{count}} credite returnate"
   },
+  "ready": {
+    "title": "Reelul tău este gata",
+    "failedTitle": "Nu am putut crea un reel",
+    "watch": "Urmărește",
+    "seeWhy": "Află de ce"
+  },
+  "push": {
+    "channel": "Reeluri",
+    "readyTitle": "Reelul tău este gata",
+    "readyBody": "{{title}} este gata de vizionat.",
+    "failedTitle": "Nu am putut crea un reel",
+    "failedBody": "Nu am putut crea {{title}}. Creditele ți-au fost returnate."
+  },
   "failure": {
     "unavailable": "Crearea videoclipurilor nu este disponibilă momentan. Creditele ți-au fost returnate. Încearcă din nou mai târziu.",
     "slow": "Crearea videoclipului a durat prea mult. Creditele ți-au fost returnate. Încearcă din nou.",

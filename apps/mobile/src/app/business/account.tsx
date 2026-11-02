@@ -11,6 +11,7 @@ import { useAppLanguage } from "@/ui/language/languages";
 import { ActionButton, ICON, bodyMuted, meta } from "@/ui/reels/kit";
 import { forgetBrand } from "@/api/endpoints";
 import { clearOnboarding } from "@/ui/onboarding/state";
+import { disablePush } from "@/ui/push";
 
 /** M12 · Business / Account settings: workspace, preferences, support and sign-out. */
 export default function AccountSettings() {
@@ -82,7 +83,7 @@ export default function AccountSettings() {
         height={44}
         labelStyle={{ fontFamily: font.semibold }}
         style={{ marginTop: space[20] }}
-        onPress={() => void session.signOut().then(() => { clearOnboarding(); forgetBrand(); router.replace("/onboarding/sign-in"); })}
+        onPress={() => void disablePush().then(() => session.signOut()).then(() => { clearOnboarding(); forgetBrand(); router.replace("/onboarding/sign-in"); })}
       />
       <Text style={[bodyMuted, { textAlign: "center", paddingTop: space[12], paddingHorizontal: space[8] }]}>
         {t("account.signOutNote")}

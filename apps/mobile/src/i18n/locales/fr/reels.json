@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} crédit remboursé",
     "creditsRefunded_other": "{{count}} crédits remboursés"
   },
+  "ready": {
+    "title": "Ton reel est prêt",
+    "failedTitle": "Impossible de créer un reel",
+    "watch": "Regarder",
+    "seeWhy": "Voir pourquoi"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Ton reel est prêt",
+    "readyBody": "{{title}} est prêt. Tu peux le regarder.",
+    "failedTitle": "Impossible de créer un reel",
+    "failedBody": "{{title}} n’a pas pu être créé. Tes crédits t’ont été remboursés."
+  },
   "failure": {
     "unavailable": "La création de vidéos est momentanément indisponible. Tes crédits ont été remboursés. Réessaie plus tard.",
     "slow": "La création de la vidéo a pris trop de temps. Tes crédits ont été remboursés. Réessaie.",

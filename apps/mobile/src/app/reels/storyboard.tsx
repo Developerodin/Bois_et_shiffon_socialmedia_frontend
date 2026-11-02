@@ -5,10 +5,10 @@ import { Fragment, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { ApiError } from "@/api/client";
-import { reels } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Footer } from "@/ui/layout";
 import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag, bodyMuted, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
+import { startRender } from "@/ui/reels/render-watch";
 import { useReel } from "@/ui/reels/use-reel";
 
 /** Which video model the director routed each scene to (apps/web/server/reels/router.ts). */
@@ -33,7 +33,7 @@ export default function ReelsStoryboard() {
     if (standIns) return router.push("/reels/assets");
     setStarting(true);
     try {
-      await reels.render(id, detail.version);
+      await startRender(id, detail.version);
       router.push("/reels/generating");
     } catch (e) {
       if (e instanceof ApiError && e.status === 402) router.push("/plans/reels");

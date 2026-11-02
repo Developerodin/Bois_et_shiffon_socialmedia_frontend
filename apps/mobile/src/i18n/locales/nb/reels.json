@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} kreditt refundert",
     "creditsRefunded_other": "{{count}} kreditter refundert"
   },
+  "ready": {
+    "title": "Reelen din er klar",
+    "failedTitle": "Vi kunne ikke lage en reel",
+    "watch": "Se",
+    "seeWhy": "Se hvorfor"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Reelen din er klar",
+    "readyBody": "Du kan nå se {{title}}.",
+    "failedTitle": "Vi kunne ikke lage en reel",
+    "failedBody": "{{title}} kunne ikke lages. Kredittene dine er tilbakeført."
+  },
   "failure": {
     "unavailable": "Det er ikke mulig å lage video akkurat nå. Kredittene dine er tilbakeført. Prøv igjen senere.",
     "slow": "Det tok for lang tid å lage videoen. Kredittene dine er tilbakeført. Prøv igjen.",

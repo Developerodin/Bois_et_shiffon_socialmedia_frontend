@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} credit refunded",
     "creditsRefunded_other": "{{count}} credits refunded"
   },
+  "ready": {
+    "title": "Your reel is ready",
+    "failedTitle": "A reel couldn't be made",
+    "watch": "Watch",
+    "seeWhy": "See why"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Your reel is ready",
+    "readyBody": "{{title}} is ready to watch.",
+    "failedTitle": "A reel couldn't be made",
+    "failedBody": "{{title}} couldn't be made. Your credits are back."
+  },
   "failure": {
     "unavailable": "Video making is unavailable right now. Your credits are back. Please try again later.",
     "slow": "The video took too long to make. Your credits are back. Try again.",

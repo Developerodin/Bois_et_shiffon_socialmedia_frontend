@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} kredit visszatérítve",
     "creditsRefunded_other": "{{count}} kredit visszatérítve"
   },
+  "ready": {
+    "title": "Elkészült a Reels-videód",
+    "failedTitle": "Nem sikerült elkészíteni a Reels-videót",
+    "watch": "Megnézem",
+    "seeWhy": "Megnézem, miért"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Elkészült a Reels-videód",
+    "readyBody": "{{title}} elkészült, már megnézheted.",
+    "failedTitle": "Nem sikerült elkészíteni a Reels-videót",
+    "failedBody": "{{title}} nem készült el. A krediteket visszakaptad."
+  },
   "failure": {
     "unavailable": "A videókészítés jelenleg nem érhető el. Kreditjeidet visszatérítettük. Próbáld újra később.",
     "slow": "A videó elkészítése túl sokáig tartott. Kreditjeidet visszatérítettük. Próbáld újra.",

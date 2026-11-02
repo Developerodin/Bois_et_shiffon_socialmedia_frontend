@@ -163,6 +163,19 @@
     "creditsRefunded_one": "{{count}} kredit återbetald",
     "creditsRefunded_other": "{{count}} krediter återbetalda"
   },
+  "ready": {
+    "title": "Din reel är klar",
+    "failedTitle": "En reel kunde inte skapas",
+    "watch": "Titta",
+    "seeWhy": "Se varför"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Din reel är klar",
+    "readyBody": "{{title}} är klar att titta på.",
+    "failedTitle": "En reel kunde inte skapas",
+    "failedBody": "{{title}} kunde inte skapas. Du har fått tillbaka dina krediter."
+  },
   "failure": {
     "unavailable": "Det går inte att skapa videor just nu. Dina krediter har återbetalats. Försök igen senare.",
     "slow": "Det tog för lång tid att skapa videon. Dina krediter har återbetalats. Försök igen.",

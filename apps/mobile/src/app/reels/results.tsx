@@ -10,6 +10,7 @@ import { formatNumber } from "@/i18n";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { ActionButton, BottomNav, Chip, ICON, ModuleHeader, Panel, ReelsScreen, bodyMuted, meta, metaInk, rc } from "@/ui/reels/kit";
+import { startRender } from "@/ui/reels/render-watch";
 import { openReel } from "@/ui/reels/use-reel";
 
 /** Progress shown per render step; Higgsfield reports no percentage, so this moves by step. */
@@ -39,7 +40,7 @@ export default function ReelsResults() {
   const retry = async (r: ReelSummary) => {
     setRetrying(r.id);
     try {
-      await reels.render(r.id, r.version);
+      await startRender(r.id, r.version);
       open(r, "/reels/generating");
     } catch (e) {
       if (e instanceof ApiError && e.status === 402) router.push("/plans/reels");

@@ -15,6 +15,7 @@ import { ConnectionBanner } from "@/ui/connection-banner";
 import { ErrorScreen } from "@/ui/error-screen";
 import { loadAppLanguage } from "@/ui/language/languages";
 import { restoreOnboarding, saveOnboarding } from "@/ui/onboarding/state";
+import { ReadyBanner } from "@/ui/reels/ready-banner";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -69,6 +70,7 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.canvas } }} />
       <ConnectionBanner />
+      <ReadyBanner />
     </SafeAreaProvider>
   );
 }

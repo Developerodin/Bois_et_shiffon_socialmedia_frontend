@@ -163,6 +163,19 @@
     "creditsRefunded_one": "Vrácen {{count}} kredit",
     "creditsRefunded_other": "Vrácené kredity: {{count}}"
   },
+  "ready": {
+    "title": "Tvůj reel je připraven",
+    "failedTitle": "Reel se nepodařilo vytvořit",
+    "watch": "Přehrát",
+    "seeWhy": "Zjistit proč"
+  },
+  "push": {
+    "channel": "Reels",
+    "readyTitle": "Tvůj reel je připraven",
+    "readyBody": "Reel {{title}} je připraven k přehrání.",
+    "failedTitle": "Reel se nepodařilo vytvořit",
+    "failedBody": "{{title}} se nepodařilo vytvořit. Kredity jsme ti vrátili."
+  },
   "failure": {
     "unavailable": "Tvorba videa teď není dostupná. Kredity jsme ti vrátili. Zkus to prosím později.",
     "slow": "Tvorba videa trvala příliš dlouho. Kredity jsme ti vrátili. Zkus to znovu.",
