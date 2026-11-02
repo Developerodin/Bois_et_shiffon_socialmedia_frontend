@@ -18,6 +18,13 @@ export async function brandKnowledge(workspaceId: string, brandId: string, maxPe
   return { text };
 }
 
+/** The brand's product photos Research stored (mobile A09 "Products"): what posts and reels are made from. */
+export async function productPhotos(workspaceId: string, brandId: string) {
+  const profile = await prisma.brandProfile.findFirst({ where: { brandId, workspaceId }, select: { assets: true } });
+  const products = (profile?.assets as { products?: { title: string; imageKey: string | null }[] } | null)?.products ?? [];
+  return products.flatMap((p) => (p.imageKey ? [{ key: p.imageKey, title: p.title }] : []));
+}
+
 /**
  * What the owner picked or rewrote (mobile A09/A10), as quoted JSON so it reads as data, never as instructions.
  * Only text people edited themselves; Research's own drafts are already in the documents.

@@ -23,7 +23,7 @@ export const PERMISSIONS = [
   ["context.confirm", "context", "Confirm strategy documents as brand truth"],
   ["rules.approve", "context", "Approve brand rules and product claims"],
   ["content.create", "content", "Create and edit briefs and drafts"],
-  ["content.approve", "content", "Approve content for publishing (never your own)"],
+  ["content.approve", "content", "Approve content for publishing (your own only when nobody else can approve)"],
   ["publish.execute", "publishing", "Publish or schedule approved content"],
   ["integrations.manage", "publishing", "Connect and disconnect channel accounts"],
   ["analytics.read", "analytics", "See performance, learning notes and reports"],

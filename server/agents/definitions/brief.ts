@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { NothingToDoError } from "@/server/agents/engine";
+import { NothingToDoError, startAgentRun } from "@/server/agents/engine";
 import { BRIEF_SYSTEM, CONTENT_PROMPT_VERSION } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
 import { brandKnowledge } from "@/server/content/knowledge";
@@ -21,8 +21,9 @@ export const briefAgent: AgentDefinition = {
   key: "brief",
   name: "Brief writer",
   description: "Writes a production brief for each planned post: goal, audience, message, products, call to action.",
-  inputSchema: z.object({}).strict(),
-  async run(ctx) {
+  // chain: start the next agent of the posts chain when done (Planner → Brief writer → Creator → Quality), the app's "Generate calendar".
+  inputSchema: z.object({ chain: z.boolean().optional() }).strict(),
+  async run(ctx, input) {
     const { brand } = ctx;
     const items = await prisma.contentItem.findMany({
       where: { brandId: brand.brandId, status: "PLANNED", studio: false }, // studio reels plan themselves
@@ -57,6 +58,7 @@ export const briefAgent: AgentDefinition = {
       const { count } = await prisma.contentItem.updateMany({ where: { id: item.id, status: "PLANNED" }, data: { brief: { ...prior, ...out }, status: "BRIEF_READY" } });
       await ctx.log(count ? "SUCCESS" : "WARN", count ? `Brief ready: ${item.title}` : `Skipped (it moved on while I was writing): ${item.title}`, { type: "ContentItem", id: item.id });
     }
+    if ((input as { chain?: boolean }).chain) await startAgentRun({ workspaceId: brand.workspaceId, brandId: brand.brandId, agentKey: "creator", trigger: "event", input: { chain: true } }).catch(() => null);
     return { briefed: items.length };
   },
 };
