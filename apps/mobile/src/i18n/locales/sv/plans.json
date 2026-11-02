@@ -2,7 +2,6 @@
   "viewPlans": "Visa planer",
   "credits_one": "{{n}} kredit",
   "credits_other": "{{n}} krediter",
-  "tableAlt": "{{product}} matbord",
   "plans": {
     "professional": "Professionell",
     "starter": "Start",
@@ -39,7 +38,8 @@
     "terms": "Användarvillkor",
     "privacy": "Integritetspolicy",
     "lead": "Skala din detaljhandelsstudio med automatiserade videorullar, iscensatta fotograferingar och social publicering.",
-    "planA11y": "{{name}} plan, {{price}}"
+    "planA11y": "{{name}} plan, {{price}}",
+    "current": "Ditt nuvarande abonnemang: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Fortsätt göra rulle ({{n}} kredit)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}} rulle",
     "scenesReady_one": "{{n}} scen redo för skapande",
     "scenesReady_other": "{{n}} scener redo för skapande",
-    "noDeduction": "Inga krediter har dragits än. Generering börjar först när du bekräftar."
-  },
-  "billing": {
-    "title": "Inställningar",
-    "tabs": {
-      "business": "Mitt företag",
-      "billing": "Fakturering",
-      "postsPlanner": "Inläggsplanerare"
-    },
-    "status": "Ingen aktiv prenumeration",
-    "plan": "Gratis arbetsyta",
-    "balance": "Saldo",
-    "note": "Utkast, butikskatalogsynk och affärsinställningar förblir tillgängliga.",
-    "recentUsage": "Senaste kreditanvändning",
-    "creditActivity": "Kreditaktivitet",
-    "empty": "Inga krediter har använts än. Välj en plan för att börja rendera rullar och automatiserad iscensättning.",
-    "restore": "Återställ prenumerationsköp",
-    "appLanguage": "Appens gränssnittsspråk",
-    "languages": {
-      "englishUS": "Engelska US",
-      "frenchFR": "Franska FR"
-    },
-    "push": "Push-notiser",
-    "pushHint": "Renderingsvarningar och batchslutföranden",
-    "terms": "Användarvillkor",
-    "privacy": "Integritetspolicy"
+    "noDeduction": "Inga krediter har dragits än. Generering börjar först när du bekräftar.",
+    "makeReel": "Skapa en reel"
   },
   "gate": {
     "sheetLabel": "Prenumeration krävs",
     "subscriberGeneration": "Prenumerantgenerering",
     "title": "Redo att göra denna rulle?",
-    "body": "En aktiv plan krävs för att rendera videorullar med franskt röstspår och ljud. Din storyboard är sparad och väntar.",
+    "body": "Ett aktivt abonnemang krävs för att skapa reels med berättarröst och ljud. Ditt bildmanus är sparat och väntar.",
     "saved": "Sparad",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertikal · {{count}} scen · Franskt röstspår",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertikal · {{count}} scener · Franskt röstspår",
+    "reelFacts_one": "{{seconds}}s · 9:16 stående · {{count}} scen",
+    "reelFacts_other": "{{seconds}}s · 9:16 stående · {{count}} scener",
     "creditsPerReel_one": "{{n}} kredit per rulle",
     "creditsPerReel_other": "{{n}} krediter per rulle",
     "keepEditing": "Fortsätt redigera storyboard",
@@ -154,7 +130,6 @@
     "subtitle": "Skapa studiovideorullar från din butikskatalog",
     "notice_one": "Dina idéer är fortfarande här. Utforska {{n}} idé och granska storyboards när som helst. Aktiv plan låser upp videorendering.",
     "notice_other": "Dina idéer är fortfarande här. Utforska {{n}} idéer och granska storyboards när som helst. Aktiv plan låser upp videorendering.",
-    "heroAlt": "{{product}} matkollektion, iscensatt",
     "creativePrompt": "Kreativ prompt",
     "yourAssistant": "Din assistent",
     "question": "Vad vill du visa?",

@@ -233,6 +233,10 @@ export type PlanEvent = { type: "stage"; stage: PlanStage } | ({ type: "draft" }
 export type Opportunity = { id: string; title: string; summary: string; angle: string; channels: string[]; decision: "RECOMMEND" | "HOLD" | "REJECT"; score: number; timing: string | null };
 export type Connection = { id: string; provider: string; displayName: string; status: "ACTIVE" | "ERROR" | "REVOKED" };
 
+/** A reel costs this many credits per second (apps/web CREDIT_COSTS.reelPerSecond), so seconds = price / this. */
+export const REEL_CREDITS_PER_SECOND = 2;
+export const reelSeconds = (price: number | null | undefined) => (price ? price / REEL_CREDITS_PER_SECOND : 0);
+
 const AI_MS = 120_000;
 const reelBase = async () => {
   const b = await currentBrand();
@@ -307,6 +311,14 @@ export async function workspaceMemberCount() {
   const r = await api<{ members: unknown[] }>(`/workspaces/${encodeURIComponent(b.workspaceId)}/members`, { workspaceId: b.workspaceId });
   return r.members.length;
 }
+
+/** The workspace's plan (null = none) and the plans on offer (apps/web subscriptions.ts). */
+export type Subscription = { plan: { id: "starter" | "professional"; credits: number; renewsAt: string } | null; unlimited: boolean; plans: { id: string; credits: number }[] };
+export const subscription = async () => {
+  const b = await currentBrand();
+  const s = await api<Subscription>(`/workspaces/${encodeURIComponent(b.workspaceId)}/subscription`, { workspaceId: b.workspaceId });
+  return { ...s, workspaceId: b.workspaceId };
+};
 
 /** The business's automations (Business M10); see apps/web server/services/automations.ts. */
 export type Automations = { monthlyPlan: boolean; autoPublish: boolean };

@@ -2,7 +2,6 @@
   "viewPlans": "Se planer",
   "credits_one": "{{n}} kredit",
   "credits_other": "{{n}} kreditter",
-  "tableAlt": "{{product}} spisebord",
   "plans": {
     "professional": "Professionel",
     "starter": "Starter",
@@ -39,7 +38,8 @@
     "terms": "Servicevilkår",
     "privacy": "Privatlivspolitik",
     "lead": "Skalér dit detailstudie med automatiserede video reels, iscenesatte shoots og social udgivelse.",
-    "planA11y": "{{name}} plan, {{price}}"
+    "planA11y": "{{name}} plan, {{price}}",
+    "current": "Dit nuværende abonnement: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Fortsæt med at lave reel ({{n}} kredit)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}} reel",
     "scenesReady_one": "{{n}} scene klar til oprettelse",
     "scenesReady_other": "{{n}} scener klar til oprettelse",
-    "noDeduction": "Ingen kreditter er trukket endnu. Generering begynder først, når du bekræfter."
-  },
-  "billing": {
-    "title": "Indstillinger",
-    "tabs": {
-      "business": "Min virksomhed",
-      "billing": "Fakturering",
-      "postsPlanner": "Opslagsplanlægger"
-    },
-    "status": "Ingen aktivt abonnement",
-    "plan": "Gratis arbejdsområde",
-    "balance": "Saldo",
-    "note": "Kladder, butikskatalog synkronisering og virksomhedsindstillinger forbliver tilgængelige.",
-    "recentUsage": "Seneste kreditforbrug",
-    "creditActivity": "Kreditaktivitet",
-    "empty": "Ingen kreditter brugt endnu. Vælg en plan for at begynde at gengive reels og automatiseret iscenesættelse.",
-    "restore": "Gendan abonnements køb",
-    "appLanguage": "App sprog",
-    "languages": {
-      "englishUS": "Engelsk US",
-      "frenchFR": "Fransk FR"
-    },
-    "push": "Push notifikationer",
-    "pushHint": "Gengivelsesalarmer og batch færdiggørelser",
-    "terms": "Servicevilkår",
-    "privacy": "Privatlivspolitik"
+    "noDeduction": "Ingen kreditter er trukket endnu. Generering begynder først, når du bekræfter.",
+    "makeReel": "Lav en reel"
   },
   "gate": {
     "sheetLabel": "Abonnement påkrævet",
     "subscriberGeneration": "Abonnentgenerering",
     "title": "Klar til at lave denne reel?",
-    "body": "En aktiv plan er påkrævet for at gengive video reels med fransk voiceover og lyd. Dit storyboard er gemt og venter.",
+    "body": "Du skal have et aktivt abonnement for at generere reels med speak og lyd. Dit storyboard er gemt og venter på dig.",
     "saved": "Gemt",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertikal · {{count}} scene · Fransk voiceover",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertikal · {{count}} scener · Fransk voiceover",
+    "reelFacts_one": "{{seconds}} sek. · 9:16 lodret · {{count}} scene",
+    "reelFacts_other": "{{seconds}} sek. · 9:16 lodret · {{count}} scener",
     "creditsPerReel_one": "{{n}} kredit per reel",
     "creditsPerReel_other": "{{n}} kreditter per reel",
     "keepEditing": "Fortsæt med at redigere storyboard",
@@ -154,7 +130,6 @@
     "subtitle": "Skab studie video reels fra dit butikskatalog",
     "notice_one": "Dine idéer er stadig her. Udforsk {{n}} idé og gennemgå storyboards når som helst. Aktiv plan låser op for video gengivelse.",
     "notice_other": "Dine idéer er stadig her. Udforsk {{n}} idéer og gennemgå storyboards når som helst. Aktiv plan låser op for video gengivelse.",
-    "heroAlt": "{{product}} spise kollektion, iscenesat",
     "creativePrompt": "Kreativ prompt",
     "yourAssistant": "Din assistent",
     "question": "Hvad vil du gerne vise?",

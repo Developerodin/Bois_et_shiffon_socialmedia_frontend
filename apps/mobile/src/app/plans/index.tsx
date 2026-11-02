@@ -10,11 +10,18 @@ import { Footer } from "@/ui/layout";
 import { CloseButton } from "@/ui/plans/kit";
 import { plans, pricing, type Plan } from "@/ui/plans/sample";
 import { BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag } from "@/ui/reels/kit";
+import { usePlan } from "@/ui/plans/use-plan";
 
 /** L03 · No subscription / Plans. */
 export default function Plans() {
   const { t } = useTranslation("plans");
+  const { plan: current, plans: offered } = usePlan();
   const [selected, setSelected] = useState<Plan["id"]>("professional");
+  // The design's features and "recommended", with each plan's monthly credits from the server.
+  const shown = plans.flatMap((p) => {
+    const o = offered.find((x) => x.id === p.id);
+    return o ? [{ ...p, credits: o.credits }] : [];
+  });
   const leave = () => (router.canGoBack() ? router.back() : router.replace("/plans/reels"));
   return (
     <ReelsScreen
@@ -39,7 +46,8 @@ export default function Plans() {
     >
       <Text style={[type.body, styles.lead]}>{t("choose.lead")}</Text>
       <View accessibilityRole="radiogroup" style={{ gap: space[16], paddingTop: space[24] }}>
-        {plans.map((p) => (
+        {current ? <Text style={[type.body, { textAlign: "center" }]}>{t("choose.current", { plan: t(`plans.${current.id}`) })}</Text> : null}
+        {shown.map((p) => (
           <PlanCard key={p.id} plan={p} selected={p.id === selected} onPress={() => setSelected(p.id)} />
         ))}
       </View>
@@ -47,7 +55,7 @@ export default function Plans() {
   );
 }
 
-function PlanCard({ plan, selected, onPress }: { plan: Plan; selected: boolean; onPress: () => void }) {
+function PlanCard({ plan, selected, onPress }: { plan: Plan & { credits: number }; selected: boolean; onPress: () => void }) {
   const { t } = useTranslation("plans");
   const name = t(`plans.${plan.id}`);
   const price = t("plans.priceToBeConfirmed");

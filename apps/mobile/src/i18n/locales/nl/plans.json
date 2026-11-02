@@ -2,7 +2,6 @@
   "viewPlans": "Bekijk plannen",
   "credits_one": "{{n}} credit",
   "credits_other": "{{n}} credits",
-  "tableAlt": "{{product}} eettafel",
   "plans": {
     "professional": "Professional",
     "starter": "Starter",
@@ -39,7 +38,8 @@
     "terms": "Servicevoorwaarden",
     "privacy": "Privacybeleid",
     "lead": "Schaal je retailstudio op met geautomatiseerde videoreels, gestage shoots en sociale publicatie.",
-    "planA11y": "{{name}} plan, {{price}}"
+    "planA11y": "{{name}} plan, {{price}}",
+    "current": "Je huidige abonnement: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Ga door met reel maken ({{n}} credit)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}} reel",
     "scenesReady_one": "{{n}} scène klaar voor creatie",
     "scenesReady_other": "{{n}} scènes klaar voor creatie",
-    "noDeduction": "Er zijn nog geen credits afgetrokken. Generatie begint pas na bevestiging."
-  },
-  "billing": {
-    "title": "Instellingen",
-    "tabs": {
-      "business": "Mijn Bedrijf",
-      "billing": "Facturering",
-      "postsPlanner": "Posts planner"
-    },
-    "status": "Geen actief abonnement",
-    "plan": "Gratis Werkruimte",
-    "balance": "Saldo",
-    "note": "Concepten, winkelcatalogussynchronisatie en bedrijfsinstellingen blijven beschikbaar.",
-    "recentUsage": "Recent creditgebruik",
-    "creditActivity": "Creditactiviteit",
-    "empty": "Nog geen credits gebruikt. Kies een plan om te beginnen met het renderen van reels en geautomatiseerde staging.",
-    "restore": "Abonnement aankopen herstellen",
-    "appLanguage": "App-interface taal",
-    "languages": {
-      "englishUS": "Engels VS",
-      "frenchFR": "Frans FR"
-    },
-    "push": "Pushmeldingen",
-    "pushHint": "Renderwaarschuwingen en batchvoltooiingen",
-    "terms": "Servicevoorwaarden",
-    "privacy": "Privacybeleid"
+    "noDeduction": "Er zijn nog geen credits afgetrokken. Generatie begint pas na bevestiging.",
+    "makeReel": "Maak een reel"
   },
   "gate": {
     "sheetLabel": "Abonnement vereist",
     "subscriberGeneration": "Abonneegeneratie",
     "title": "Klaar om deze reel te maken?",
-    "body": "Een actief plan is vereist om videoreels met Franse voice-over en audio te renderen. Je storyboard is opgeslagen en wacht.",
+    "body": "Je hebt een actief abonnement nodig om reels met voice-over en audio te maken. Je storyboard is opgeslagen en staat klaar.",
     "saved": "Opgeslagen",
-    "reelFacts_one": "{{seconds}}s · 9:16 verticaal · {{count}} scène · Franse voice-over",
-    "reelFacts_other": "{{seconds}}s · 9:16 verticaal · {{count}} scènes · Franse voice-over",
+    "reelFacts_one": "{{seconds}}s · 9:16 verticaal · {{count}} scène",
+    "reelFacts_other": "{{seconds}}s · 9:16 verticaal · {{count}} scènes",
     "creditsPerReel_one": "{{n}} credit per reel",
     "creditsPerReel_other": "{{n}} credits per reel",
     "keepEditing": "Blijf storyboard bewerken",
@@ -154,7 +130,6 @@
     "subtitle": "Creëer studiovideoreels vanuit je winkelcatalogus",
     "notice_one": "Je ideeën zijn er nog steeds. Verken {{n}} idee en bekijk storyboards op elk moment. Actief plan ontgrendelt videorendering.",
     "notice_other": "Je ideeën zijn er nog steeds. Verken {{n}} ideeën en bekijk storyboards op elk moment. Actief plan ontgrendelt videorendering.",
-    "heroAlt": "{{product}} eetkamercollectie, gestaged",
     "creativePrompt": "Creatieve prompt",
     "yourAssistant": "Je assistent",
     "question": "Wat wil je laten zien?",

@@ -2,7 +2,6 @@
   "viewPlans": "Planları Görüntüle",
   "credits_one": "{{n}} kredi",
   "credits_other": "{{n}} kredi",
-  "tableAlt": "{{product}} yemek masası",
   "plans": {
     "professional": "Profesyonel",
     "starter": "Başlangıç",
@@ -39,7 +38,8 @@
     "terms": "Hizmet Şartları",
     "privacy": "Gizlilik Politikası",
     "lead": "Perakende stüdyonuzu otomatik video makaraları, sahnelenmiş çekimler ve sosyal yayınlarla büyütün.",
-    "planA11y": "{{name}} planı, {{price}}"
+    "planA11y": "{{name}} planı, {{price}}",
+    "current": "Mevcut planın: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Makara yapmaya devam et ({{n}} kredi)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}} makara",
     "scenesReady_one": "{{n}} sahne oluşturulmaya hazır",
     "scenesReady_other": "{{n}} sahne oluşturulmaya hazır",
-    "noDeduction": "Henüz kredi düşülmedi. Oluşturma, yalnızca onayladığınızda başlar."
-  },
-  "billing": {
-    "title": "Ayarlar",
-    "tabs": {
-      "business": "İşletmem",
-      "billing": "Faturalama",
-      "postsPlanner": "Gönderi planlayıcı"
-    },
-    "status": "Aktif abonelik yok",
-    "plan": "Ücretsiz Çalışma Alanı",
-    "balance": "Bakiye",
-    "note": "Taslaklar, mağaza kataloğu senkronizasyonu ve işletme ayarları kullanılabilir durumda kalır.",
-    "recentUsage": "Son kredi kullanımı",
-    "creditActivity": "Kredi etkinliği",
-    "empty": "Henüz kredi kullanılmadı. Makaraları oluşturmak ve otomatik sahneleme başlatmak için bir plan seçin.",
-    "restore": "Abonelik satın alımlarını geri yükle",
-    "appLanguage": "Uygulama arayüz dili",
-    "languages": {
-      "englishUS": "İngilizce US",
-      "frenchFR": "Fransızca FR"
-    },
-    "push": "Bildirimler",
-    "pushHint": "İşleme uyarıları ve toplu tamamlamalar",
-    "terms": "Hizmet Şartları",
-    "privacy": "Gizlilik Politikası"
+    "noDeduction": "Henüz kredi düşülmedi. Oluşturma, yalnızca onayladığınızda başlar.",
+    "makeReel": "Reels oluştur"
   },
   "gate": {
     "sheetLabel": "Abonelik gerekli",
     "subscriberGeneration": "Abone oluşturma",
     "title": "Bu makarayı yapmaya hazır mısınız?",
-    "body": "Fransızca seslendirme ve ses ile video makaraları oluşturmak için aktif bir plan gereklidir. Hikaye tahtanız kaydedildi ve bekliyor.",
+    "body": "Seslendirme ve ses içeren Reels videoları oluşturmak için aktif bir plan gerekir. Hikâye panon kaydedildi ve seni bekliyor.",
     "saved": "Kaydedildi",
-    "reelFacts_one": "{{seconds}}s · 9:16 dikey · {{count}} sahne · Fransızca seslendirme",
-    "reelFacts_other": "{{seconds}}s · 9:16 dikey · {{count}} sahne · Fransızca seslendirme",
+    "reelFacts_one": "{{seconds}} sn · 9:16 dikey · {{count}} sahne",
+    "reelFacts_other": "{{seconds}} sn · 9:16 dikey · {{count}} sahne",
     "creditsPerReel_one": "Makara başına {{n}} kredi",
     "creditsPerReel_other": "Makara başına {{n}} kredi",
     "keepEditing": "Hikaye tahtasını düzenlemeye devam et",
@@ -154,7 +130,6 @@
     "subtitle": "Mağaza kataloğunuzdan stüdyo video makaraları oluşturun",
     "notice_one": "Fikirleriniz hala burada. {{n}} fikri keşfedin ve hikaye tahtalarını istediğiniz zaman inceleyin. Aktif plan, video oluşturmayı açar.",
     "notice_other": "Fikirleriniz hala burada. {{n}} fikri keşfedin ve hikaye tahtalarını istediğiniz zaman inceleyin. Aktif plan, video oluşturmayı açar.",
-    "heroAlt": "{{product}} yemek koleksiyonu, sahnelenmiş",
     "creativePrompt": "Yaratıcı öneri",
     "yourAssistant": "Asistanınız",
     "question": "Ne göstermek istersiniz?",

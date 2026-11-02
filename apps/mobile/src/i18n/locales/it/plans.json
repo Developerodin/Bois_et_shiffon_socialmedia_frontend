@@ -2,7 +2,6 @@
   "viewPlans": "Vedi piani",
   "credits_one": "{{n}} credito",
   "credits_other": "{{n}} crediti",
-  "tableAlt": "{{product}} tavolo da pranzo",
   "plans": {
     "professional": "Professionale",
     "starter": "Iniziale",
@@ -39,7 +38,8 @@
     "terms": "Termini di servizio",
     "privacy": "Informativa sulla privacy",
     "lead": "Scala il tuo studio retail con video reel automatizzati, servizi fotografici e pubblicazione sui social.",
-    "planA11y": "Piano {{name}}, {{price}}"
+    "planA11y": "Piano {{name}}, {{price}}",
+    "current": "Il tuo piano attuale: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Continua a creare il reel ({{n}} credito)",
@@ -57,41 +57,17 @@
     "reelTitle": "Reel {{title}}",
     "scenesReady_one": "{{n}} scena pronta per la creazione",
     "scenesReady_other": "{{n}} scene pronte per la creazione",
-    "noDeduction": "Nessun credito è stato ancora detratto. La generazione inizia solo quando confermi."
-  },
-  "billing": {
-    "title": "Impostazioni",
-    "tabs": {
-      "business": "La mia attività",
-      "billing": "Fatturazione",
-      "postsPlanner": "Pianificatore di post"
-    },
-    "status": "Nessun abbonamento attivo",
-    "plan": "Spazio di lavoro gratuito",
-    "balance": "Saldo",
-    "note": "Bozze, sincronizzazione catalogo negozio e impostazioni aziendali rimangono disponibili.",
-    "recentUsage": "Uso recente dei crediti",
-    "creditActivity": "Attività dei crediti",
-    "empty": "Nessun credito usato ancora. Scegli un piano per iniziare a creare reel e staging automatizzati.",
-    "restore": "Ripristina acquisti di abbonamento",
-    "appLanguage": "Lingua dell'interfaccia app",
-    "languages": {
-      "englishUS": "Inglese US",
-      "frenchFR": "Francese FR"
-    },
-    "push": "Notifiche push",
-    "pushHint": "Avvisi di rendering e completamenti batch",
-    "terms": "Termini di servizio",
-    "privacy": "Informativa sulla privacy"
+    "noDeduction": "Nessun credito è stato ancora detratto. La generazione inizia solo quando confermi.",
+    "makeReel": "Crea un reel"
   },
   "gate": {
     "sheetLabel": "Abbonamento richiesto",
     "subscriberGeneration": "Generazione abbonato",
     "title": "Pronto a creare questo reel?",
-    "body": "È richiesto un piano attivo per creare video reel con voiceover e audio in francese. La tua storyboard è salvata e in attesa.",
+    "body": "Per creare reel video con voce narrante e audio serve un piano attivo. Il tuo storyboard è salvato e ti aspetta.",
     "saved": "Salvato",
-    "reelFacts_one": "{{seconds}}s · 9:16 verticale · {{count}} scena · Voiceover in francese",
-    "reelFacts_other": "{{seconds}}s · 9:16 verticale · {{count}} scene · Voiceover in francese",
+    "reelFacts_one": "{{seconds}}s · 9:16 verticale · {{count}} scena",
+    "reelFacts_other": "{{seconds}}s · 9:16 verticale · {{count}} scene",
     "creditsPerReel_one": "{{n}} credito per reel",
     "creditsPerReel_other": "{{n}} crediti per reel",
     "keepEditing": "Continua a modificare la storyboard",
@@ -154,7 +130,6 @@
     "subtitle": "Crea video reel studio dal catalogo del tuo negozio",
     "notice_one": "Le tue idee sono ancora qui. Esplora {{n}} idea e rivedi le storyboard in qualsiasi momento. Il piano attivo sblocca il rendering video.",
     "notice_other": "Le tue idee sono ancora qui. Esplora {{n}} idee e rivedi le storyboard in qualsiasi momento. Il piano attivo sblocca il rendering video.",
-    "heroAlt": "{{product}} collezione da pranzo, allestita",
     "creativePrompt": "Spunto creativo",
     "yourAssistant": "Il tuo assistente",
     "question": "Cosa vorresti mostrare?",

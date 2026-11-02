@@ -11,6 +11,7 @@ import { Footer } from "@/ui/layout";
 import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { downloadReel } from "@/ui/reels/download";
 import { useReel } from "@/ui/reels/use-reel";
+import { reelSeconds } from "@/api/endpoints";
 
 /** Statuses from which the reel may be sent: the checks have run (studio reels: the maker approves by sending). */
 const SENDABLE = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED", "PUBLISHED"];
@@ -78,7 +79,7 @@ export default function ReelsReview() {
           )}
           {detail?.price ? (
             <View style={styles.duration} pointerEvents="none">
-              <Text style={[meta, { color: color.onPrimary }]}>{t("secondsShort", { seconds: detail.price / 2 })}</Text>
+              <Text style={[meta, { color: color.onPrimary }]}>{t("secondsShort", { seconds: reelSeconds(detail.price) })}</Text>
             </View>
           ) : null}
         </View>

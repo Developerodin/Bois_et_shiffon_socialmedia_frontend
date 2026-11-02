@@ -2,7 +2,6 @@
   "viewPlans": "View plans",
   "credits_one": "{{n}} credit",
   "credits_other": "{{n}} credits",
-  "tableAlt": "{{product}} dining table",
   "plans": {
     "professional": "Professional",
     "starter": "Starter",
@@ -39,7 +38,8 @@
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "lead": "Scale your retail studio with automated video reels, staged shoots, and social publishing.",
-    "planA11y": "{{name}} plan, {{price}}"
+    "planA11y": "{{name}} plan, {{price}}",
+    "current": "Your current plan: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Continue making reel ({{n}} credit)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}} reel",
     "scenesReady_one": "{{n}} scene ready for creation",
     "scenesReady_other": "{{n}} scenes ready for creation",
-    "noDeduction": "No credits have been deducted yet. Generation begins only when you confirm."
-  },
-  "billing": {
-    "title": "Settings",
-    "tabs": {
-      "business": "My Business",
-      "billing": "Billing",
-      "postsPlanner": "Posts planner"
-    },
-    "status": "No active subscription",
-    "plan": "Free Workspace",
-    "balance": "Balance",
-    "note": "Drafts, store catalog sync, and business settings remain available.",
-    "recentUsage": "Recent credit usage",
-    "creditActivity": "Credit activity",
-    "empty": "No credits used yet. Choose a plan to begin rendering reels and automated staging.",
-    "restore": "Restore subscription purchases",
-    "appLanguage": "App interface language",
-    "languages": {
-      "englishUS": "English US",
-      "frenchFR": "French FR"
-    },
-    "push": "Push notifications",
-    "pushHint": "Render alerts and batch completions",
-    "terms": "Terms of Service",
-    "privacy": "Privacy Policy"
+    "noDeduction": "No credits have been deducted yet. Generation begins only when you confirm.",
+    "makeReel": "Make a reel"
   },
   "gate": {
     "sheetLabel": "Subscription required",
     "subscriberGeneration": "Subscriber generation",
     "title": "Ready to make this reel?",
-    "body": "An active plan is required to render video reels with French voiceover and audio. Your storyboard is saved and waiting.",
+    "body": "An active plan is required to render video reels with voiceover and audio. Your storyboard is saved and waiting.",
     "saved": "Saved",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertical · {{count}} scene · French voiceover",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertical · {{count}} scenes · French voiceover",
+    "reelFacts_one": "{{seconds}}s · 9:16 vertical · {{count}} scene",
+    "reelFacts_other": "{{seconds}}s · 9:16 vertical · {{count}} scenes",
     "creditsPerReel_one": "{{n}} credit per reel",
     "creditsPerReel_other": "{{n}} credits per reel",
     "keepEditing": "Keep editing storyboard",
@@ -109,12 +85,30 @@
     "professional": "Professional",
     "configure": "Configure",
     "tools": {
-      "customers": { "title": "Customers", "subtitle": "Inbox & AI replies" },
-      "google": { "title": "Google Growth", "subtitle": "Local maps & reviews" },
-      "website": { "title": "Website Studio", "subtitle": "Landing pages & draft" },
-      "business": { "title": "My Business", "subtitle": "Brand details & answers" },
-      "connections": { "title": "Connections", "subtitle": "Social & website sync" },
-      "automations": { "title": "Automations", "subtitle": "Publishing preferences" }
+      "customers": {
+        "title": "Customers",
+        "subtitle": "Inbox & AI replies"
+      },
+      "google": {
+        "title": "Google Growth",
+        "subtitle": "Local maps & reviews"
+      },
+      "website": {
+        "title": "Website Studio",
+        "subtitle": "Landing pages & draft"
+      },
+      "business": {
+        "title": "My Business",
+        "subtitle": "Brand details & answers"
+      },
+      "connections": {
+        "title": "Connections",
+        "subtitle": "Social & website sync"
+      },
+      "automations": {
+        "title": "Automations",
+        "subtitle": "Publishing preferences"
+      }
     }
   },
   "posts": {
@@ -136,7 +130,6 @@
     "subtitle": "Create studio video reels from your store catalog",
     "notice_one": "Your ideas are still here. Explore {{n}} idea and review storyboards anytime. Active plan unlocks video rendering.",
     "notice_other": "Your ideas are still here. Explore {{n}} ideas and review storyboards anytime. Active plan unlocks video rendering.",
-    "heroAlt": "{{product}} dining collection, staged",
     "creativePrompt": "Creative prompt",
     "yourAssistant": "Your assistant",
     "question": "What would you like to show?",

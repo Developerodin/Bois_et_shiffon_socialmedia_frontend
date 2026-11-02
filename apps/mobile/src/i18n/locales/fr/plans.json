@@ -2,7 +2,6 @@
   "viewPlans": "Voir les plans",
   "credits_one": "{{n}} crédit",
   "credits_other": "{{n}} crédits",
-  "tableAlt": "Table à manger {{product}}",
   "plans": {
     "professional": "Professionnel",
     "starter": "Débutant",
@@ -39,7 +38,8 @@
     "terms": "Conditions d'utilisation",
     "privacy": "Politique de confidentialité",
     "lead": "Développez votre studio de vente au détail avec des bobines vidéo automatisées, des shootings mis en scène et des publications sociales.",
-    "planA11y": "Plan {{name}}, {{price}}"
+    "planA11y": "Plan {{name}}, {{price}}",
+    "current": "Ton abonnement actuel : {{plan}}"
   },
   "activated": {
     "continueReel_one": "Continuer la bobine ({{n}} crédit)",
@@ -57,41 +57,17 @@
     "reelTitle": "Bobine {{title}}",
     "scenesReady_one": "{{n}} scène prête à être créée",
     "scenesReady_other": "{{n}} scènes prêtes à être créées",
-    "noDeduction": "Aucun crédit n'a encore été déduit. La génération commence uniquement lorsque vous confirmez."
-  },
-  "billing": {
-    "title": "Paramètres",
-    "tabs": {
-      "business": "Mon entreprise",
-      "billing": "Facturation",
-      "postsPlanner": "Planificateur de publications"
-    },
-    "status": "Aucun abonnement actif",
-    "plan": "Espace de travail gratuit",
-    "balance": "Solde",
-    "note": "Les brouillons, la synchronisation du catalogue de la boutique et les paramètres d'entreprise restent disponibles.",
-    "recentUsage": "Utilisation récente des crédits",
-    "creditActivity": "Activité des crédits",
-    "empty": "Aucun crédit utilisé pour le moment. Choisissez un plan pour commencer à rendre des bobines et des mises en scène automatisées.",
-    "restore": "Restaurer les achats d'abonnement",
-    "appLanguage": "Langue de l'interface de l'application",
-    "languages": {
-      "englishUS": "Anglais US",
-      "frenchFR": "Français FR"
-    },
-    "push": "Notifications push",
-    "pushHint": "Alertes de rendu et achèvements par lots",
-    "terms": "Conditions d'utilisation",
-    "privacy": "Politique de confidentialité"
+    "noDeduction": "Aucun crédit n'a encore été déduit. La génération commence uniquement lorsque vous confirmez.",
+    "makeReel": "Créer un reel"
   },
   "gate": {
     "sheetLabel": "Abonnement requis",
     "subscriberGeneration": "Génération d'abonnés",
     "title": "Prêt à créer cette bobine ?",
-    "body": "Un plan actif est requis pour rendre des bobines vidéo avec voix off et audio en français. Votre storyboard est enregistré et en attente.",
+    "body": "Un abonnement actif est nécessaire pour générer des reels vidéo avec voix off et audio. Ton storyboard est enregistré et t’attend.",
     "saved": "Enregistré",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertical · {{count}} scène · Voix off en français",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertical · {{count}} scènes · Voix off en français",
+    "reelFacts_one": "{{seconds}} s · 9:16 vertical · {{count}} scène",
+    "reelFacts_other": "{{seconds}} s · 9:16 vertical · {{count}} scènes",
     "creditsPerReel_one": "{{n}} crédit par bobine",
     "creditsPerReel_other": "{{n}} crédits par bobine",
     "keepEditing": "Continuer à éditer le storyboard",
@@ -154,7 +130,6 @@
     "subtitle": "Créez des bobines vidéo studio à partir de votre catalogue de boutique",
     "notice_one": "Vos idées sont toujours là. Explorez {{n}} idée et passez en revue les storyboards à tout moment. Un plan actif débloque le rendu vidéo.",
     "notice_other": "Vos idées sont toujours là. Explorez {{n}} idées et passez en revue les storyboards à tout moment. Un plan actif débloque le rendu vidéo.",
-    "heroAlt": "Collection de salle à manger {{product}}, mise en scène",
     "creativePrompt": "Suggestion créative",
     "yourAssistant": "Votre assistant",
     "question": "Que souhaitez-vous montrer ?",

@@ -5,9 +5,11 @@ import { forgetPosts } from "@/ui/posts/use-posts";
 import { disablePush } from "@/ui/push";
 import { openReel } from "@/ui/reels/use-reel";
 import { forgetCurrentBrand, siteLabel } from "@/ui/use-current-brand";
+import { forgetPlan } from "@/ui/plans/use-plan";
 
 /** Everything the app keeps about the business it's working on: dropped on sign-out and on switching business. */
 function forgetBusinessState() {
+  forgetPlan();
   forgetCurrentBrand();
   forgetPosts();
   openReel(null);

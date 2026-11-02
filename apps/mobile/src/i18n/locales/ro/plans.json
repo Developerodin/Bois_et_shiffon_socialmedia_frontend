@@ -2,7 +2,6 @@
   "viewPlans": "Vezi planurile",
   "credits_one": "{{n}} credit",
   "credits_other": "{{n}} credite",
-  "tableAlt": "{{product}} masă de dining",
   "plans": {
     "professional": "Profesional",
     "starter": "Start",
@@ -39,7 +38,8 @@
     "terms": "Termeni de serviciu",
     "privacy": "Politica de confidențialitate",
     "lead": "Dezvoltă-ți studioul de retail cu video reels automate, ședințe foto pregătite și publicare socială.",
-    "planA11y": "Plan {{name}}, {{price}}"
+    "planA11y": "Plan {{name}}, {{price}}",
+    "current": "Planul tău actual: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Continuă realizarea reel-ului ({{n}} credit)",
@@ -57,41 +57,17 @@
     "reelTitle": "Reel {{title}}",
     "scenesReady_one": "{{n}} scenă gata de creare",
     "scenesReady_other": "{{n}} scene gata de creare",
-    "noDeduction": "Nu s-au dedus credite încă. Generarea începe doar când confirmi."
-  },
-  "billing": {
-    "title": "Setări",
-    "tabs": {
-      "business": "Afacerea mea",
-      "billing": "Facturare",
-      "postsPlanner": "Planificator postări"
-    },
-    "status": "Nicio abonament activ",
-    "plan": "Spațiu de lucru gratuit",
-    "balance": "Sold",
-    "note": "Schițele, sincronizarea catalogului magazinului și setările afacerii rămân disponibile.",
-    "recentUsage": "Utilizare recentă a creditelor",
-    "creditActivity": "Activitate credite",
-    "empty": "Nu s-au folosit credite încă. Alege un plan pentru a începe redarea reels și pregătirea automată.",
-    "restore": "Restabilește achizițiile de abonamente",
-    "appLanguage": "Limba interfeței aplicației",
-    "languages": {
-      "englishUS": "Engleză US",
-      "frenchFR": "Franceză FR"
-    },
-    "push": "Notificări push",
-    "pushHint": "Alerte de redare și finalizări în lot",
-    "terms": "Termeni de serviciu",
-    "privacy": "Politica de confidențialitate"
+    "noDeduction": "Nu s-au dedus credite încă. Generarea începe doar când confirmi.",
+    "makeReel": "Creează un reel"
   },
   "gate": {
     "sheetLabel": "Abonament necesar",
     "subscriberGeneration": "Generare abonat",
     "title": "Ești gata să faci acest reel?",
-    "body": "Un plan activ este necesar pentru a reda video reels cu voiceover și audio în franceză. Storyboard-ul tău este salvat și așteaptă.",
+    "body": "Ai nevoie de un plan activ pentru a genera reeluri video cu voce din off și sunet. Storyboardul tău este salvat și te așteaptă.",
     "saved": "Salvat",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertical · {{count}} scenă · Voiceover franceză",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertical · {{count}} scene · Voiceover franceză",
+    "reelFacts_one": "{{seconds}}s · 9:16 vertical · {{count}} scenă",
+    "reelFacts_other": "{{seconds}}s · 9:16 vertical · {{count}} scene",
     "creditsPerReel_one": "{{n}} credit per reel",
     "creditsPerReel_other": "{{n}} credite per reel",
     "keepEditing": "Continuă editarea storyboard-ului",
@@ -154,7 +130,6 @@
     "subtitle": "Creează reels video studio din catalogul magazinului tău",
     "notice_one": "Ideile tale sunt încă aici. Explorează {{n}} idee și revizuiește storyboard-urile oricând. Planul activ deblochează redarea video.",
     "notice_other": "Ideile tale sunt încă aici. Explorează {{n}} idei și revizuiește storyboard-urile oricând. Planul activ deblochează redarea video.",
-    "heroAlt": "{{product}} colecție de dining, pregătită",
     "creativePrompt": "Sugestie creativă",
     "yourAssistant": "Asistentul tău",
     "question": "Ce ai dori să arăți?",

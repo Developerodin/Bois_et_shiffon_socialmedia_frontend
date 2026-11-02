@@ -1,16 +1,9 @@
 import type { Href } from "expo-router";
 
 /**
- * Sample content for "06 No subscription". There is no subscriptions or payments backend:
- * screens read this static data, and purchase actions only navigate through the designed flow.
+ * "06 No subscription" presentation: each plan's features and the marketing tools list. The plans' credits and the
+ * workspace's own plan come from the server (ui/plans/use-plan.ts).
  */
-export const photos = {
-  diningInterior: require("../../../assets/figma/plans/dining-interior.jpg"),
-  tableStaged: require("../../../assets/figma/plans/table-staged.jpg"),
-  table: require("../../../assets/figma/plans/table.jpg"),
-  catalogBlur: require("../../../assets/figma/plans/catalog-blur.jpg"),
-  tvUnit: require("../../../assets/figma/plans/tv-unit.jpg"),
-} as const;
 
 /**
  * Store pricing isn't configured yet, so the design ships "Continue" disabled with
@@ -29,58 +22,31 @@ export type PlanFeature =
   | "googleSync"
   | "contentExports"
   | "reelsStaging";
-/** No price field yet: every plan shows "Price to be confirmed" until store pricing exists. */
-export type Plan = { id: "professional" | "starter"; recommended?: boolean; credits: number; features: PlanFeature[] };
+/** No price field yet: every plan shows "Price to be confirmed" until store pricing exists. Its credits come from the server. */
+export type Plan = { id: "professional" | "starter"; recommended?: boolean; features: PlanFeature[] };
 
 export const plans: Plan[] = [
   {
     id: "professional",
     recommended: true,
-    credits: 200,
     features: ["monthlyCredits", "postsStories", "photoshoots", "websiteStudio", "replyAssistant", "googleSync", "contentExports"],
   },
-  { id: "starter", credits: 60, features: ["monthlyCredits", "postsStories", "photoshoots", "reelsStaging"] },
+  { id: "starter", features: ["monthlyCredits", "postsStories", "photoshoots", "reelsStaging"] },
 ];
-
-/** Product shown in the sample photos (business content, not translated). */
-export const product = "Acacia Bunting";
-
-/** The storyboard waiting behind the generation gate (L02) and on activation return (L04). */
-export const pendingReel = {
-  title: "Bunting spotlight",
-  seconds: 20,
-  credits: 40,
-  scenes: 3,
-} as const;
-
-export const activePlan = { id: "professional", credits: 200 } as const;
-
-/** L05 calendar preview. */
-export const draftSchedule = {
-  month: new Date(2026, 9, 1),
-  days: [
-    { date: new Date(2026, 9, 15), on: false },
-    { date: new Date(2026, 9, 16), on: true },
-    { date: new Date(2026, 9, 17), on: false },
-    { date: new Date(2026, 9, 18), on: false },
-  ],
-  post: { title: "Meuble TV 2 portes", at: new Date(2026, 9, 16, 18, 0) },
-} as const;
 
 export type Tool = {
   id: "customers" | "google" | "website" | "business" | "connections" | "automations";
+  /** Needs the Professional plan (its features list them; Starter's doesn't). */
   locked: boolean;
-  /** Where "Configure" goes for tools that are available without a plan. */
+  /** Where "Configure" goes once the tool is open to this workspace. */
   href?: Href;
 };
 
 export const tools: Tool[] = [
-  { id: "customers", locked: true },
-  { id: "google", locked: true },
-  { id: "website", locked: true },
+  { id: "customers", locked: true, href: "/marketing/inbox" },
+  { id: "google", locked: true, href: "/marketing/google" },
+  { id: "website", locked: true, href: "/marketing/website" },
   { id: "business", locked: false, href: "/business" },
   { id: "connections", locked: false, href: "/business/connections" },
   { id: "automations", locked: false, href: "/business/automations" },
 ];
-
-export const billing = { balance: 0 } as const;

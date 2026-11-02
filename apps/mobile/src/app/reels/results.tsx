@@ -13,6 +13,7 @@ import { ActionButton, BottomNav, Chip, ICON, ModuleHeader, Panel, ReelsScreen, 
 import { startRender } from "@/ui/reels/render-watch";
 import { openReel } from "@/ui/reels/use-reel";
 import { openLowCredits } from "@/ui/recovery/open";
+import { isPlanRequired } from "@/ui/plans/use-plan";
 
 /** Progress shown per render step; Higgsfield reports no percentage, so this moves by step. */
 const STEP_PERCENT = { VOICE: 0.15, CLIPS: 0.6, JOIN: 0.9 } as const;
@@ -37,14 +38,15 @@ export default function ReelsResults() {
 
   const counts = { all: list?.length ?? 0, ready: list?.filter((r) => r.videoUrl).length ?? 0, processing: list?.filter(isRunning).length ?? 0 };
   const shown = (list ?? []).filter((r) => filter === "all" || (filter === "ready" ? !!r.videoUrl : isRunning(r)));
-  const open = (r: ReelSummary, to: "/reels/review" | "/reels/generating" | "/reels/storyboard" | "/recovery/video-failed") => (openReel(r.id), router.push(to));
+  const open = (r: ReelSummary, to: "/reels/review" | "/reels/generating" | "/reels/storyboard" | "/recovery/video-failed" | "/plans/gate") => (openReel(r.id), router.push(to));
   const retry = async (r: ReelSummary) => {
     setRetrying(r.id);
     try {
       await startRender(r.id, r.version);
       open(r, "/reels/generating");
     } catch (e) {
-      if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: r.price ?? 0, title: r.title });
+      if (isPlanRequired(e)) open(r, "/plans/gate");
+      else if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: r.price ?? 0, title: r.title });
       else setError(e instanceof Error ? e.message : String(e));
     } finally {
       setRetrying(null);

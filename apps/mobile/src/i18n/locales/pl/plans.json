@@ -2,7 +2,6 @@
   "viewPlans": "Zobacz plany",
   "credits_one": "{{n}} kredyt",
   "credits_other": "{{n}} kredytów",
-  "tableAlt": "{{product}} stół jadalny",
   "plans": {
     "professional": "Profesjonalny",
     "starter": "Startowy",
@@ -39,7 +38,8 @@
     "terms": "Warunki korzystania z usługi",
     "privacy": "Polityka prywatności",
     "lead": "Rozwijaj swoje studio detaliczne dzięki automatycznym wideo, inscenizowanym sesjom i publikacjom w mediach społecznościowych.",
-    "planA11y": "Plan {{name}}, {{price}}"
+    "planA11y": "Plan {{name}}, {{price}}",
+    "current": "Twój obecny plan: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Kontynuuj tworzenie wideo ({{n}} kredyt)",
@@ -57,41 +57,17 @@
     "reelTitle": "Wideo {{title}}",
     "scenesReady_one": "{{n}} scena gotowa do stworzenia",
     "scenesReady_other": "{{n}} scen gotowych do stworzenia",
-    "noDeduction": "Nie pobrano jeszcze żadnych kredytów. Generowanie rozpocznie się dopiero po potwierdzeniu."
-  },
-  "billing": {
-    "title": "Ustawienia",
-    "tabs": {
-      "business": "Moja firma",
-      "billing": "Płatności",
-      "postsPlanner": "Planer postów"
-    },
-    "status": "Brak aktywnej subskrypcji",
-    "plan": "Darmowa przestrzeń robocza",
-    "balance": "Saldo",
-    "note": "Szkice, synchronizacja katalogu sklepu i ustawienia biznesowe pozostają dostępne.",
-    "recentUsage": "Ostatnie użycie kredytów",
-    "creditActivity": "Aktywność kredytowa",
-    "empty": "Nie użyto jeszcze żadnych kredytów. Wybierz plan, aby rozpocząć renderowanie wideo i automatyczną inscenizację.",
-    "restore": "Przywróć zakupy subskrypcji",
-    "appLanguage": "Język interfejsu aplikacji",
-    "languages": {
-      "englishUS": "Angielski US",
-      "frenchFR": "Francuski FR"
-    },
-    "push": "Powiadomienia push",
-    "pushHint": "Alerty renderowania i zakończenia partii",
-    "terms": "Warunki korzystania z usługi",
-    "privacy": "Polityka prywatności"
+    "noDeduction": "Nie pobrano jeszcze żadnych kredytów. Generowanie rozpocznie się dopiero po potwierdzeniu.",
+    "makeReel": "Utwórz rolkę"
   },
   "gate": {
     "sheetLabel": "Wymagana subskrypcja",
     "subscriberGeneration": "Generacja subskrybentów",
     "title": "Gotowy na stworzenie tego wideo?",
-    "body": "Aktywny plan jest wymagany do renderowania wideo z francuskim lektorem i dźwiękiem. Twój scenariusz jest zapisany i czeka.",
+    "body": "Aby tworzyć rolki z lektorem i dźwiękiem, potrzebujesz aktywnego planu. Twój scenorys został zapisany i czeka na Ciebie.",
     "saved": "Zapisano",
-    "reelFacts_one": "{{seconds}}s · 9:16 pionowo · {{count}} scena · Francuski lektor",
-    "reelFacts_other": "{{seconds}}s · 9:16 pionowo · {{count}} sceny · Francuski lektor",
+    "reelFacts_one": "{{seconds}} s · pionowo 9:16 · {{count}} scena",
+    "reelFacts_other": "{{seconds}} s · pionowo 9:16 · sceny: {{count}}",
     "creditsPerReel_one": "{{n}} kredyt za wideo",
     "creditsPerReel_other": "{{n}} kredytów za wideo",
     "keepEditing": "Kontynuuj edycję scenariusza",
@@ -154,7 +130,6 @@
     "subtitle": "Twórz studio wideo z katalogu sklepu",
     "notice_one": "Twoje pomysły są nadal tutaj. Przeglądaj {{n}} pomysł i przeglądaj scenariusze w dowolnym momencie. Aktywny plan odblokowuje renderowanie wideo.",
     "notice_other": "Twoje pomysły są nadal tutaj. Przeglądaj {{n}} pomysły i przeglądaj scenariusze w dowolnym momencie. Aktywny plan odblokowuje renderowanie wideo.",
-    "heroAlt": "{{product}} kolekcja jadalna, inscenizowana",
     "creativePrompt": "Kreatywna podpowiedź",
     "yourAssistant": "Twój asystent",
     "question": "Co chciałbyś pokazać?",

@@ -39,7 +39,8 @@
     "audit:ui": "tsx --env-file=.env scripts/audit-ui.ts",
     "worker:dev": "tsx --env-file=.env scripts/worker-dev.ts",
     "postinstall": "prisma generate",
-    "smoke:publishing": "tsx --env-file=.env scripts/smoke-publishing.ts"
+    "smoke:publishing": "tsx --env-file=.env scripts/smoke-publishing.ts",
+    "set-plan": "tsx --env-file=.env scripts/set-plan.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

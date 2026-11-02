@@ -7,16 +7,27 @@ import { formatNumber } from "@/i18n";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { BusinessSwitcher } from "@/ui/posts/chrome";
 import { PlansModuleHeader } from "@/ui/plans/kit";
-import { photos, product } from "@/ui/plans/sample";
+import { opportunities } from "@/api/endpoints";
+import { usePlan } from "@/ui/plans/use-plan";
+import { libraryPhotos, useCurrentBrand } from "@/ui/use-current-brand";
 import { ActionButton, BottomNav, ICON, Panel, ReelsScreen, Tag, meta, metaInk } from "@/ui/reels/kit";
+import { useEffect, useState } from "react";
 
 /** L01 · No subscription / Reels home. Ideas and storyboards stay open; rendering needs a plan. */
-/** Sample idea count shown in the notice and the "ideas ready" row. */
-const IDEAS = 21;
-
 export default function ReelsNoPlan() {
   const { t } = useTranslation("plans");
-  const ideas = { count: IDEAS, n: formatNumber(IDEAS) };
+  const brand = useCurrentBrand();
+  const hero = libraryPhotos(brand?.view)[0];
+  // Scout's reel ideas, as on the Reels home.
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    opportunities().then((r) => setCount(r.opportunities.filter((o) => o.channels.includes("INSTAGRAM_REEL") && o.decision !== "REJECT").length), () => {});
+  }, []);
+  const ideas = { count, n: formatNumber(count) };
+  const { planned } = usePlan();
+  useEffect(() => {
+    if (planned) router.replace("/reels");
+  }, [planned]);
   return (
     <ReelsScreen bg="#FBFBFE" header={<PlansModuleHeader active="reels" />} footer={<BottomNav active="create" />}>
       <View style={styles.topRow}>
@@ -46,7 +57,7 @@ export default function ReelsNoPlan() {
       </Panel>
 
       <Panel style={styles.assistant}>
-        <Image source={photos.diningInterior} style={styles.hero} contentFit="cover" accessibilityLabel={t("reels.heroAlt", { product })} />
+        <Image source={hero ? { uri: hero.url } : undefined} style={styles.hero} contentFit="cover" accessibilityLabel={hero?.title} />
         <View style={styles.promptHead}>
           <Text style={meta}>{t("reels.creativePrompt")}</Text>
           <Tag label={t("reels.yourAssistant")} style={{ backgroundColor: "#F4F2FD", paddingVertical: 4, paddingHorizontal: space[8] }} />

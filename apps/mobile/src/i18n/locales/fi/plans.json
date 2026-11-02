@@ -2,7 +2,6 @@
   "viewPlans": "Näytä suunnitelmat",
   "credits_one": "{{n}} krediitti",
   "credits_other": "{{n}} krediittiä",
-  "tableAlt": "{{product}} ruokapöytä",
   "plans": {
     "professional": "Ammattilainen",
     "starter": "Aloittelija",
@@ -39,7 +38,8 @@
     "terms": "Käyttöehdot",
     "privacy": "Tietosuojakäytäntö",
     "lead": "Laajenna vähittäiskauppastudiotasi automatisoiduilla videorullilla, lavastetuilla kuvauksilla ja sosiaalijulkaisuilla.",
-    "planA11y": "{{name}} suunnitelma, {{price}}"
+    "planA11y": "{{name}} suunnitelma, {{price}}",
+    "current": "Nykyinen tilauksesi: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Jatka videorullan tekemistä ({{n}} krediitti)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}} videorulla",
     "scenesReady_one": "{{n}} kohtaus valmis luotavaksi",
     "scenesReady_other": "{{n}} kohtausta valmiina luotavaksi",
-    "noDeduction": "Krediittejä ei ole vielä vähennetty. Generointi alkaa vasta, kun vahvistat."
-  },
-  "billing": {
-    "title": "Asetukset",
-    "tabs": {
-      "business": "Yritykseni",
-      "billing": "Laskutus",
-      "postsPlanner": "Julkaisusuunnittelija"
-    },
-    "status": "Ei aktiivista tilausta",
-    "plan": "Ilmainen työtila",
-    "balance": "Saldo",
-    "note": "Luonnokset, kauppakatalogin synkronointi ja yritysasetukset pysyvät saatavilla.",
-    "recentUsage": "Viimeaikainen krediittikäyttö",
-    "creditActivity": "Krediittiaktiivisuus",
-    "empty": "Krediittejä ei ole vielä käytetty. Valitse suunnitelma aloittaaksesi videorullien ja automaattisen lavastuksen luomisen.",
-    "restore": "Palauta tilausostot",
-    "appLanguage": "Sovelluksen käyttöliittymän kieli",
-    "languages": {
-      "englishUS": "Englanti US",
-      "frenchFR": "Ranska FR"
-    },
-    "push": "Push-ilmoitukset",
-    "pushHint": "Renderöintihälytykset ja erien valmistumiset",
-    "terms": "Käyttöehdot",
-    "privacy": "Tietosuojakäytäntö"
+    "noDeduction": "Krediittejä ei ole vielä vähennetty. Generointi alkaa vasta, kun vahvistat.",
+    "makeReel": "Tee Reels-video"
   },
   "gate": {
     "sheetLabel": "Tilaus vaaditaan",
     "subscriberGeneration": "Tilaajagenerointi",
     "title": "Valmis tekemään tämä videorulla?",
-    "body": "Aktiivinen suunnitelma vaaditaan videorullien renderöintiin ranskalaisella ääniraidalla ja äänellä. Käsikirjoituksesi on tallennettu ja odottaa.",
+    "body": "Aktiivinen tilaus vaaditaan selostuksella ja äänellä varustettujen Reels-videoiden luomiseen. Kuvakäsikirjoituksesi on tallessa ja odottaa.",
     "saved": "Tallennettu",
-    "reelFacts_one": "{{seconds}}s · 9:16 pystysuora · {{count}} kohtaus · Ranskalainen ääniraita",
-    "reelFacts_other": "{{seconds}}s · 9:16 pystysuora · {{count}} kohtausta · Ranskalainen ääniraita",
+    "reelFacts_one": "{{seconds}} s · 9:16 pysty · {{count}} kohtaus",
+    "reelFacts_other": "{{seconds}} s · 9:16 pysty · {{count}} kohtausta",
     "creditsPerReel_one": "{{n}} krediitti per videorulla",
     "creditsPerReel_other": "{{n}} krediittiä per videorulla",
     "keepEditing": "Jatka käsikirjoituksen muokkaamista",
@@ -154,7 +130,6 @@
     "subtitle": "Luo studiovideorullia kauppakatalogistasi",
     "notice_one": "Ideasi ovat yhä täällä. Tutki {{n}} ideaa ja tarkista käsikirjoitukset milloin tahansa. Aktiivinen suunnitelma avaa videon renderöinnin.",
     "notice_other": "Ideasi ovat yhä täällä. Tutki {{n}} ideaa ja tarkista käsikirjoitukset milloin tahansa. Aktiivinen suunnitelma avaa videon renderöinnin.",
-    "heroAlt": "{{product}} ruokailukokoelma, lavastettu",
     "creativePrompt": "Luova kehotus",
     "yourAssistant": "Sinun avustajasi",
     "question": "Mitä haluaisit näyttää?",

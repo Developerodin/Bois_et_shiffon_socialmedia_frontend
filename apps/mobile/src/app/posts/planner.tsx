@@ -14,6 +14,7 @@ import { Badge, CardTitle, SegmentedTabs, tint } from "@/ui/posts/controls";
 import { dayKey } from "@/ui/posts/sample";
 import { usePosts } from "@/ui/posts/use-posts";
 import { openLowCredits } from "@/ui/recovery/open";
+import { isPlanRequired } from "@/ui/plans/use-plan";
 
 const SECTIONS = ["business", "billing", "planner"] as const;
 const SECTION_HREF = { business: "/business", billing: "/business/billing" } as const;
@@ -61,7 +62,8 @@ export default function Planner() {
       await posts.generate();
       setStarted(true);
     } catch (e) {
-      if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: GENERATE_CREDITS, title: t("planner.generate"), backdrop: t("planner.title") });
+      if (isPlanRequired(e)) router.push("/plans/posts");
+      else if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: GENERATE_CREDITS, title: t("planner.generate"), backdrop: t("planner.title") });
       else setError(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);

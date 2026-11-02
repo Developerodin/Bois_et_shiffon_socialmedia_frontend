@@ -3,6 +3,7 @@ import { startAgentRun } from "@/server/agents/engine";
 import { prisma } from "@/server/db/prisma";
 import { CREDIT_COSTS, InsufficientCreditsError, refundCharge, spendCredits } from "@/server/services/credits";
 import { publishRequirements, schedulePublication } from "@/server/services/publishing";
+import { requirePlan } from "@/server/services/subscriptions";
 
 /**
  * The owner's automations (mobile Business M10), on BrandProfile.automations:
@@ -42,10 +43,14 @@ export async function runMonthlyPlans(now = new Date()) {
     where: { automations: { path: ["monthlyPlan"], equals: true }, brand: { status: "ACTIVE" } },
     select: { workspaceId: true, brandId: true },
   });
+  const planned = new Map<string, boolean>();
   const monthStart = new Date(`${month}-01T00:00:00Z`);
   for (const b of brands) {
     // Once a month: a retried sweep finds this month's run and leaves it (the charge's refId alone can't tell,
     // since a refunded charge is found again without charging).
+    // Generating the calendar needs a plan: a workspace without one skips the month.
+    if (!planned.has(b.workspaceId)) planned.set(b.workspaceId, await requirePlan(b.workspaceId).then(() => true, () => false));
+    if (!planned.get(b.workspaceId)) continue;
     const already = await prisma.agentRun.count({ where: { brandId: b.brandId, agentKey: "planner", trigger: "schedule", createdAt: { gte: monthStart } } });
     if (already) continue;
     let chargeId: string | undefined;

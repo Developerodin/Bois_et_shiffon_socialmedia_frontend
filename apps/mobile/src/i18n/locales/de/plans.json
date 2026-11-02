@@ -2,7 +2,6 @@
   "viewPlans": "Pläne anzeigen",
   "credits_one": "{{n}} Guthaben",
   "credits_other": "{{n}} Guthaben",
-  "tableAlt": "{{product}} Esstisch",
   "plans": {
     "professional": "Professional",
     "starter": "Starter",
@@ -39,7 +38,8 @@
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutzrichtlinie",
     "lead": "Skaliere dein Einzelhandelsstudio mit automatisierten Video-Reels, inszenierten Shootings und sozialem Publishing.",
-    "planA11y": "{{name}}-Plan, {{price}}"
+    "planA11y": "{{name}}-Plan, {{price}}",
+    "current": "Dein aktueller Tarif: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Reel fortsetzen ({{n}} Guthaben)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}}-Reel",
     "scenesReady_one": "{{n}} Szene bereit zur Erstellung",
     "scenesReady_other": "{{n}} Szenen bereit zur Erstellung",
-    "noDeduction": "Noch keine Guthaben abgezogen. Die Erstellung beginnt erst nach deiner Bestätigung."
-  },
-  "billing": {
-    "title": "Einstellungen",
-    "tabs": {
-      "business": "Mein Geschäft",
-      "billing": "Abrechnung",
-      "postsPlanner": "Beitragsplaner"
-    },
-    "status": "Kein aktives Abonnement",
-    "plan": "Kostenloser Arbeitsbereich",
-    "balance": "Guthaben",
-    "note": "Entwürfe, Katalog-Synchronisation und Geschäftseinstellungen bleiben verfügbar.",
-    "recentUsage": "Letzte Guthabenverwendung",
-    "creditActivity": "Guthabenaktivität",
-    "empty": "Noch keine Guthaben verwendet. Wähle einen Plan, um mit der Erstellung von Reels und automatisierter Inszenierung zu beginnen.",
-    "restore": "Abonnementkäufe wiederherstellen",
-    "appLanguage": "App-Sprache",
-    "languages": {
-      "englishUS": "Englisch US",
-      "frenchFR": "Französisch FR"
-    },
-    "push": "Push-Benachrichtigungen",
-    "pushHint": "Render-Benachrichtigungen und Batch-Abschlüsse",
-    "terms": "Nutzungsbedingungen",
-    "privacy": "Datenschutzrichtlinie"
+    "noDeduction": "Noch keine Guthaben abgezogen. Die Erstellung beginnt erst nach deiner Bestätigung.",
+    "makeReel": "Reel erstellen"
   },
   "gate": {
     "sheetLabel": "Abonnement erforderlich",
     "subscriberGeneration": "Abonnentenerstellung",
     "title": "Bereit, dieses Reel zu erstellen?",
-    "body": "Ein aktiver Plan ist erforderlich, um Video-Reels mit französischem Voiceover und Audio zu rendern. Dein Storyboard ist gespeichert und wartet.",
+    "body": "Du benötigst einen aktiven Tarif, um Video-Reels mit Voiceover und Ton zu erstellen. Dein Storyboard ist gespeichert und wartet auf dich.",
     "saved": "Gespeichert",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertikal · {{count}} Szene · Französisches Voiceover",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertikal · {{count}} Szenen · Französisches Voiceover",
+    "reelFacts_one": "{{seconds}} Sek. · 9:16 Hochformat · {{count}} Szene",
+    "reelFacts_other": "{{seconds}} Sek. · 9:16 Hochformat · {{count}} Szenen",
     "creditsPerReel_one": "{{n}} Guthaben pro Reel",
     "creditsPerReel_other": "{{n}} Guthaben pro Reel",
     "keepEditing": "Storyboard weiter bearbeiten",
@@ -154,7 +130,6 @@
     "subtitle": "Erstelle Studio-Video-Reels aus deinem Katalog",
     "notice_one": "Deine Ideen sind noch hier. Erkunde {{n}} Idee und überprüfe Storyboards jederzeit. Aktiver Plan schaltet Video-Rendering frei.",
     "notice_other": "Deine Ideen sind noch hier. Erkunde {{n}} Ideen und überprüfe Storyboards jederzeit. Aktiver Plan schaltet Video-Rendering frei.",
-    "heroAlt": "{{product}} Esskollektion, inszeniert",
     "creativePrompt": "Kreativer Impuls",
     "yourAssistant": "Dein Assistent",
     "question": "Was möchtest du zeigen?",

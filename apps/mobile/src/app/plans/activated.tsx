@@ -7,25 +7,32 @@ import { formatNumber } from "@/i18n";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Footer } from "@/ui/layout";
 import { CloseButton, IconDisc } from "@/ui/plans/kit";
-import { activePlan, pendingReel, photos, product } from "@/ui/plans/sample";
+import { usePlan } from "@/ui/plans/use-plan";
+import { useReel } from "@/ui/reels/use-reel";
 import { ActionButton, BrandPill, ICON, PageHeader, Panel, ReelsScreen, Tag, eyebrow, metaInk, strong14 } from "@/ui/reels/kit";
 
 /** L04 · No subscription / Activation return — back from the store with a live plan. */
 export default function ActivationReturn() {
   const { t } = useTranslation("plans");
   const home = () => router.replace("/reels");
-  const plan = t(`plans.${activePlan.id}`);
-  const credits = { count: activePlan.credits, n: formatNumber(activePlan.credits) };
+  const { plan: active } = usePlan();
+  const plan = active ? t(`plans.${active.id}`) : "";
+  const credits = { count: active?.credits ?? 0, n: formatNumber(active?.credits ?? 0) };
+  // The open reel still waiting for its video, if any.
+  const { detail } = useReel();
+  const pending = detail?.plan && !detail.videoUrl ? detail : null;
+  const price = pending?.price ?? 0;
+  const cover = pending?.plan ? pending.photoUrls[pending.plan.scenes[0]?.photoKey] : undefined;
   return (
     <ReelsScreen
       header={<PageHeader left={<BrandPill tone="white" />} right={<CloseButton onPress={home} />} />}
       footer={
         <Footer>
-          <ActionButton
-            label={t("activated.continueReel", { count: pendingReel.credits, n: formatNumber(pendingReel.credits) })}
-            trailing={ArrowRight}
-            onPress={() => router.replace("/reels/storyboard")}
-          />
+          {pending ? (
+            <ActionButton label={t("activated.continueReel", { count: price, n: formatNumber(price) })} trailing={ArrowRight} onPress={() => router.replace("/reels/storyboard")} />
+          ) : (
+            <ActionButton label={t("activated.makeReel")} trailing={ArrowRight} onPress={() => router.replace("/reels/chat")} />
+          )}
           <ActionButton label={t("activated.backToWorkspace")} variant="outline" onPress={home} />
         </Footer>
       }
@@ -67,18 +74,19 @@ export default function ActivationReturn() {
         </View>
       </Panel>
 
+      {pending?.plan ? (
       <Panel style={{ marginTop: space[16], padding: space[16] }}>
         <View style={[styles.row, { justifyContent: "space-between" }]}>
           <Text style={eyebrow}>{t("activated.resumeProject")}</Text>
           <Tag label={t("activated.inProgress")} tone="grey" style={{ borderWidth: 0, paddingVertical: 4 }} textStyle={{ color: color.ink }} />
         </View>
         <View style={styles.project}>
-          <Image source={photos.table} style={styles.thumb} contentFit="cover" accessibilityLabel={t("tableAlt", { product })} />
+          <Image source={cover ? { uri: cover } : undefined} style={styles.thumb} contentFit="cover" accessibilityLabel={pending.plan.scenes[0]?.shot} />
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={strong14}>{t("activated.reelTitle", { title: pendingReel.title })}</Text>
+            <Text style={strong14}>{t("activated.reelTitle", { title: pending.plan.title })}</Text>
             <View style={[styles.row, { gap: space[8] }]}>
               <Clapperboard size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
-              <Text style={type.meta}>{t("activated.scenesReady", { count: pendingReel.scenes, n: formatNumber(pendingReel.scenes) })}</Text>
+              <Text style={type.meta}>{t("activated.scenesReady", { count: pending.plan.scenes.length, n: formatNumber(pending.plan.scenes.length) })}</Text>
             </View>
           </View>
         </View>
@@ -87,6 +95,7 @@ export default function ActivationReturn() {
           <Text style={[type.body, { flex: 1, color: color.inkSecondary }]}>{t("activated.noDeduction")}</Text>
         </View>
       </Panel>
+      ) : null}
     </ReelsScreen>
   );
 }

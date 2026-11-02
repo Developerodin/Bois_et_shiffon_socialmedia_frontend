@@ -9,6 +9,7 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, ICON, ModuleHeader, Panel, ReelsScreen, Tag, ActionButton, meta, metaInk, strong14 } from "@/ui/reels/kit";
 import { photos } from "@/ui/reels/sample";
 import { openReel } from "@/ui/reels/use-reel";
+import { usePlan } from "@/ui/plans/use-plan";
 
 const statusOf = (r: ReelSummary) => (r.render && r.render.step !== "DONE" && r.render.step !== "FAILED" ? "processing" : r.videoUrl ? "ready" : "draft");
 
@@ -18,6 +19,12 @@ export default function ReelsCreate() {
   const [name, setName] = useState("");
   const [ideas, setIdeas] = useState(0);
   const [recent, setRecent] = useState<ReelSummary[]>([]);
+  // No plan: making videos is locked, so the No-subscription Reels home (L01) shows instead.
+  const { loaded, planned } = usePlan();
+  useEffect(() => {
+    if (!loaded) return;
+    if (!planned) router.replace("/plans/reels");
+  }, [loaded, planned]);
   useEffect(() => {
     currentBrand().then((b) => setName(b.name), () => {});
     opportunities().then((r) => setIdeas(r.opportunities.filter((o) => o.channels.includes("INSTAGRAM_REEL") && o.decision !== "REJECT").length), () => {});

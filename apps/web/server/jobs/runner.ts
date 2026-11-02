@@ -16,6 +16,7 @@ import { advanceRender, failRender, REEL_RENDER_JOB } from "@/server/reels/rende
 import { refreshExpiringTokens } from "@/server/services/connections";
 import { executePublication, onPublishJobLost, PUBLISH_JOB } from "@/server/services/publishing";
 import { runMonthlyPlans } from "@/server/services/automations";
+import { renewDuePlans } from "@/server/services/subscriptions";
 
 type Handler = {
   run: (payload: unknown) => Promise<void>;
@@ -98,6 +99,7 @@ export async function kickIfDue() {
 async function dailySweep() {
   await refreshExpiringTokens();
   await pruneOldRows();
+  await renewDuePlans();
   await runMonthlyPlans();
   const scheduled = AGENTS.filter((a) => a.schedule === "daily");
   if (scheduled.length === 0) return;

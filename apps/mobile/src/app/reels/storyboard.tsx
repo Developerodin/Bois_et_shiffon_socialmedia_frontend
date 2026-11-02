@@ -11,6 +11,7 @@ import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, T
 import { startRender } from "@/ui/reels/render-watch";
 import { useReel } from "@/ui/reels/use-reel";
 import { openLowCredits } from "@/ui/recovery/open";
+import { isPlanRequired } from "@/ui/plans/use-plan";
 
 /** Which video model the director routed each scene to (apps/web/server/reels/router.ts). */
 const MODEL_NAMES: Record<string, string> = { "kling-3-std": "Kling 3.0", "seedance-2.5": "Seedance 2.5", "hailuo-2.3": "Hailuo 2.3" };
@@ -37,7 +38,8 @@ export default function ReelsStoryboard() {
       await startRender(id, detail.version);
       router.push("/reels/generating");
     } catch (e) {
-      if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: detail.price ?? 0, title: plan?.title ?? "", backdrop: t("storyboard.title") });
+      if (isPlanRequired(e)) router.push("/plans/gate");
+      else if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: detail.price ?? 0, title: plan?.title ?? "", backdrop: t("storyboard.title") });
       else setError(e instanceof Error ? e.message : String(e));
     } finally {
       setStarting(false);

@@ -10,11 +10,18 @@ import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/pos
 import { Badge } from "@/ui/posts/controls";
 import { CHANNEL_LABEL, STATUS_KEY, isLockedIn, relativeSlot, upcomingThisWeek } from "@/ui/posts/sample";
 import { coverSource, coverUrl, openPost, usePosts } from "@/ui/posts/use-posts";
+import { usePlan } from "@/ui/plans/use-plan";
+import { useEffect } from "react";
 
 /** P01 · Posts / Today: the post waiting for approval and this week's agenda. */
 export default function PostsToday() {
   const { t } = useTranslation("posts");
   const { items, error, loading, reload } = usePosts();
+  // No plan: the calendar is locked, so the No-subscription Posts home (L05) shows instead.
+  const { loaded, planned } = usePlan();
+  useEffect(() => {
+    if (loaded && !planned) router.replace("/plans/posts");
+  }, [loaded, planned]);
   // Studio reels are approved in Reels (R07); this card is for the agents' posts.
   const pending = items?.find((p) => p.status === "AWAITING_APPROVAL" && !p.studio);
   const agenda = upcomingThisWeek(items ?? []).slice(0, 2);

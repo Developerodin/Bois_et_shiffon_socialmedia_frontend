@@ -9,6 +9,7 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { BrandPill, ICON, PageHeader, ReelsScreen, Tag, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { photos } from "@/ui/reels/sample";
 import { useReel } from "@/ui/reels/use-reel";
+import { reelSeconds } from "@/api/endpoints";
 
 const ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
 
@@ -98,7 +99,7 @@ export default function ReelsGenerating() {
           <View style={{ flex: 1 }}>
             {detail ? (
               <>
-                <Text style={strong14}>{t("generating.summary", { title, seconds: detail.price ? detail.price / 2 : 0 })}</Text>
+                <Text style={strong14}>{t("generating.summary", { title, seconds: reelSeconds(detail.price) })}</Text>
                 <Text style={[meta, { paddingTop: 2 }]}>{t("storyboard.voiceover", { lang: (plan?.language ?? "fr").toUpperCase() })}</Text>
               </>
             ) : (

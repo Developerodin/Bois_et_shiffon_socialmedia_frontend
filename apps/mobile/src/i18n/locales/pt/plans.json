@@ -2,7 +2,6 @@
   "viewPlans": "Ver planos",
   "credits_one": "{{n}} crédito",
   "credits_other": "{{n}} créditos",
-  "tableAlt": "Mesa de jantar {{product}}",
   "plans": {
     "professional": "Profissional",
     "starter": "Inicial",
@@ -39,7 +38,8 @@
     "terms": "Termos de Serviço",
     "privacy": "Política de Privacidade",
     "lead": "Expanda o seu estúdio de retalho com reels de vídeo automatizados, sessões encenadas e publicação social.",
-    "planA11y": "Plano {{name}}, {{price}}"
+    "planA11y": "Plano {{name}}, {{price}}",
+    "current": "O teu plano atual: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Continuar a fazer reel ({{n}} crédito)",
@@ -57,41 +57,17 @@
     "reelTitle": "Reel {{title}}",
     "scenesReady_one": "{{n}} cena pronta para criação",
     "scenesReady_other": "{{n}} cenas prontas para criação",
-    "noDeduction": "Nenhum crédito foi deduzido ainda. A geração começa apenas quando você confirmar."
-  },
-  "billing": {
-    "title": "Configurações",
-    "tabs": {
-      "business": "O Meu Negócio",
-      "billing": "Faturação",
-      "postsPlanner": "Planeador de publicações"
-    },
-    "status": "Sem subscrição ativa",
-    "plan": "Espaço de Trabalho Gratuito",
-    "balance": "Saldo",
-    "note": "Rascunhos, sincronização de catálogo da loja e configurações de negócios permanecem disponíveis.",
-    "recentUsage": "Uso recente de créditos",
-    "creditActivity": "Atividade de créditos",
-    "empty": "Nenhum crédito usado ainda. Escolha um plano para começar a renderizar reels e encenação automatizada.",
-    "restore": "Restaurar compras de subscrição",
-    "appLanguage": "Idioma da interface da app",
-    "languages": {
-      "englishUS": "Inglês US",
-      "frenchFR": "Francês FR"
-    },
-    "push": "Notificações push",
-    "pushHint": "Alertas de renderização e conclusões em lote",
-    "terms": "Termos de Serviço",
-    "privacy": "Política de Privacidade"
+    "noDeduction": "Nenhum crédito foi deduzido ainda. A geração começa apenas quando você confirmar.",
+    "makeReel": "Criar um reel"
   },
   "gate": {
     "sheetLabel": "Subscrição necessária",
     "subscriberGeneration": "Geração de assinantes",
     "title": "Pronto para fazer este reel?",
-    "body": "É necessário um plano ativo para renderizar reels de vídeo com narração e áudio em francês. O seu storyboard está guardado e à espera.",
+    "body": "Precisas de um plano ativo para gerar reels de vídeo com locução e áudio. O teu storyboard está guardado e à tua espera.",
     "saved": "Guardado",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertical · {{count}} cena · Narração em francês",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertical · {{count}} cenas · Narração em francês",
+    "reelFacts_one": "{{seconds}}s · 9:16 vertical · {{count}} cena",
+    "reelFacts_other": "{{seconds}}s · 9:16 vertical · {{count}} cenas",
     "creditsPerReel_one": "{{n}} crédito por reel",
     "creditsPerReel_other": "{{n}} créditos por reel",
     "keepEditing": "Continuar a editar storyboard",
@@ -154,7 +130,6 @@
     "subtitle": "Crie reels de vídeo de estúdio a partir do catálogo da sua loja",
     "notice_one": "As suas ideias ainda estão aqui. Explore {{n}} ideia e reveja storyboards a qualquer momento. Plano ativo desbloqueia a renderização de vídeo.",
     "notice_other": "As suas ideias ainda estão aqui. Explore {{n}} ideias e reveja storyboards a qualquer momento. Plano ativo desbloqueia a renderização de vídeo.",
-    "heroAlt": "Coleção de jantar {{product}}, encenada",
     "creativePrompt": "Sugestão criativa",
     "yourAssistant": "O seu assistente",
     "question": "O que gostaria de mostrar?",

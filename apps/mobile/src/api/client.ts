@@ -28,6 +28,8 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** The answer's JSON body, when it had one (e.g. { planRequired: true } on a 402). */
+    readonly data?: unknown,
   ) {
     super(message);
   }
@@ -146,7 +148,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
       await store.clear();
       signedOutListeners.forEach((fn) => fn());
     }
-    throw new ApiError(res.status, data?.detail ?? data?.title ?? i18n.t("common:net.failed"));
+    throw new ApiError(res.status, data?.detail ?? data?.title ?? i18n.t("common:net.failed"), data);
   }
   return data as T;
 }

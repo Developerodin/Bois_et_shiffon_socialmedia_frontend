@@ -120,6 +120,30 @@ model Workspace {
   roles       Role[]
   invitations Invitation[]
   credits     CreditEntry[]
+  subscription Subscription?
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+}
+
+/// The workspace's plan (mobile "06 No subscription"; server/services/subscriptions.ts). One per workspace.
+model Subscription {
+  id          String             @id @default(cuid())
+  workspaceId String             @unique
+  /// starter | professional (PLANS)
+  planId      String
+  status      SubscriptionStatus @default(ACTIVE)
+  /// The current 30-day period; its credits were granted at periodStart
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([status, periodEnd])
 }
 
 model WorkspaceMember {
@@ -933,7 +957,7 @@ model CreditEntry {
   id          String   @id @default(cuid())
   workspaceId String
   delta       Int
-  reason      String // initial-grant | site-audit | refund | top-up
+  reason      String // initial-grant | plan-credits | site-audit | reel-render | agent-run:<agent> | refund | top-up
   refId       String? // AgentRun id for spends/refunds
   userId      String?
   createdAt   DateTime @default(now())

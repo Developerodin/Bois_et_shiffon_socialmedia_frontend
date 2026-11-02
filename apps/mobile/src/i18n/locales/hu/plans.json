@@ -2,7 +2,6 @@
   "viewPlans": "Tervek megtekintése",
   "credits_one": "{{n}} kredit",
   "credits_other": "{{n}} kredit",
-  "tableAlt": "{{product}} étkezőasztal",
   "plans": {
     "professional": "Profi",
     "starter": "Kezdő",
@@ -39,7 +38,8 @@
     "terms": "Szolgáltatási feltételek",
     "privacy": "Adatvédelmi irányelvek",
     "lead": "Növeld kiskereskedelmi stúdiódat automatizált videó tekercsekkel, színpadra állított fotózásokkal és közösségi publikálással.",
-    "planA11y": "{{name}} terv, {{price}}"
+    "planA11y": "{{name}} terv, {{price}}",
+    "current": "Jelenlegi csomagod: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Tekercs folytatása ({{n}} kredit)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}} tekercs",
     "scenesReady_one": "{{n}} jelenet készen áll a létrehozásra",
     "scenesReady_other": "{{n}} jelenet készen áll a létrehozásra",
-    "noDeduction": "Még nem vontunk le krediteket. A generálás csak akkor kezdődik, amikor megerősíted."
-  },
-  "billing": {
-    "title": "Beállítások",
-    "tabs": {
-      "business": "Saját vállalkozásom",
-      "billing": "Számlázás",
-      "postsPlanner": "Bejegyzés tervező"
-    },
-    "status": "Nincs aktív előfizetés",
-    "plan": "Ingyenes Munkaterület",
-    "balance": "Egyenleg",
-    "note": "A vázlatok, az áruház katalógus szinkronizálása és az üzleti beállítások elérhetők maradnak.",
-    "recentUsage": "Legutóbbi kredit felhasználás",
-    "creditActivity": "Kredit tevékenység",
-    "empty": "Még nem használtál krediteket. Válassz egy tervet a tekercsek renderelésének és az automatizált színpadra állítás megkezdéséhez.",
-    "restore": "Előfizetések visszaállítása",
-    "appLanguage": "App felület nyelve",
-    "languages": {
-      "englishUS": "Angol US",
-      "frenchFR": "Francia FR"
-    },
-    "push": "Push értesítések",
-    "pushHint": "Renderelési figyelmeztetések és kötegelt befejezések",
-    "terms": "Szolgáltatási feltételek",
-    "privacy": "Adatvédelmi irányelvek"
+    "noDeduction": "Még nem vontunk le krediteket. A generálás csak akkor kezdődik, amikor megerősíted.",
+    "makeReel": "Reel készítése"
   },
   "gate": {
     "sheetLabel": "Előfizetés szükséges",
     "subscriberGeneration": "Előfizetői generálás",
     "title": "Készen állsz a tekercs elkészítésére?",
-    "body": "Aktív terv szükséges a videó tekercsek rendereléséhez francia hangalámondással és hanggal. A storyboardod elmentve és várakozik.",
+    "body": "Narrációval és hanggal ellátott reelek elkészítéséhez aktív előfizetés szükséges. A forgatókönyvedet elmentettük, és vár rád.",
     "saved": "Elmentve",
-    "reelFacts_one": "{{seconds}}s · 9:16 függőleges · {{count}} jelenet · Francia hangalámondás",
-    "reelFacts_other": "{{seconds}}s · 9:16 függőleges · {{count}} jelenet · Francia hangalámondás",
+    "reelFacts_one": "{{seconds}} mp · 9:16-os álló · {{count}} jelenet",
+    "reelFacts_other": "{{seconds}} mp · 9:16-os álló · {{count}} jelenet",
     "creditsPerReel_one": "{{n}} kredit tekercsenként",
     "creditsPerReel_other": "{{n}} kredit tekercsenként",
     "keepEditing": "Storyboard szerkesztés folytatása",
@@ -154,7 +130,6 @@
     "subtitle": "Készíts stúdió videó tekercseket az áruház katalógusából",
     "notice_one": "Az ötleteid még mindig itt vannak. Fedezd fel {{n}} ötletet és tekintsd át a storyboardokat bármikor. Aktív terv feloldja a videó renderelést.",
     "notice_other": "Az ötleteid még mindig itt vannak. Fedezd fel {{n}} ötletet és tekintsd át a storyboardokat bármikor. Aktív terv feloldja a videó renderelést.",
-    "heroAlt": "{{product}} étkező kollekció, színpadra állítva",
     "creativePrompt": "Kreatív ötlet",
     "yourAssistant": "Az asszisztensed",
     "question": "Mit szeretnél megmutatni?",

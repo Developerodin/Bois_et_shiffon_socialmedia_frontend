@@ -14,6 +14,8 @@ import { startRender } from "@/ui/reels/render-watch";
 import { useReel } from "@/ui/reels/use-reel";
 import { ErrorHero, RecoveryTopBar, rx } from "@/ui/recovery/parts";
 import { openLowCredits } from "@/ui/recovery/open";
+import { isPlanRequired } from "@/ui/plans/use-plan";
+import { reelSeconds } from "@/api/endpoints";
 
 /**
  * X01 · Recovery / Video failed: the open reel's last render stopped. Says why in plain words (never the provider's
@@ -64,7 +66,8 @@ export default function VideoFailed() {
       await startRender(id, detail.version);
       router.replace("/reels/generating");
     } catch (e) {
-      if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: price, title: plan?.title ?? "", meta: t("lowCredits.backdropMeta", { seconds: formatNumber(price / 2) }) });
+      if (isPlanRequired(e)) router.push("/plans/gate");
+      else if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: price, title: plan?.title ?? "", meta: t("lowCredits.backdropMeta", { seconds: formatNumber(reelSeconds(price)) }) });
       else setError(e instanceof Error ? e.message : String(e));
     } finally {
       setRetrying(false);
@@ -95,7 +98,7 @@ export default function VideoFailed() {
                   </Text>
                   <Tag label={t("videoFailed.failed")} tone="grey" />
                 </View>
-                <Text style={meta}>{t("videoFailed.facts", { seconds: formatNumber(price / 2), count: plan?.scenes.length ?? 0 })}</Text>
+                <Text style={meta}>{t("videoFailed.facts", { seconds: formatNumber(reelSeconds(price)), count: plan?.scenes.length ?? 0 })}</Text>
                 <View style={[styles.row, { gap: space[8], paddingTop: 4 }]}>
                   <CircleCheck size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
                   <Text style={meta}>{t("videoFailed.released", credits)}</Text>

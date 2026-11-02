@@ -2,7 +2,6 @@
   "viewPlans": "Zobrazit plány",
   "credits_one": "{{n}} kredit",
   "credits_other": "{{n}} kredity",
-  "tableAlt": "{{product}} jídelní stůl",
   "plans": {
     "professional": "Profesionální",
     "starter": "Startovací",
@@ -39,7 +38,8 @@
     "terms": "Podmínky služby",
     "privacy": "Zásady ochrany osobních údajů",
     "lead": "Rozšiřte své maloobchodní studio s automatizovanými video kotouči, inscenovanými foceními a publikováním na sociálních sítích.",
-    "planA11y": "Plán {{name}}, {{price}}"
+    "planA11y": "Plán {{name}}, {{price}}",
+    "current": "Tvůj aktuální tarif: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Pokračovat ve vytváření kotouče ({{n}} kredit)",
@@ -57,41 +57,17 @@
     "reelTitle": "Kotouč {{title}}",
     "scenesReady_one": "{{n}} scéna připravena k vytvoření",
     "scenesReady_other": "{{n}} scén připraveno k vytvoření",
-    "noDeduction": "Žádné kredity zatím nebyly odečteny. Generování začne až po vašem potvrzení."
-  },
-  "billing": {
-    "title": "Nastavení",
-    "tabs": {
-      "business": "Moje firma",
-      "billing": "Fakturace",
-      "postsPlanner": "Plánovač příspěvků"
-    },
-    "status": "Žádné aktivní předplatné",
-    "plan": "Bezplatný pracovní prostor",
-    "balance": "Zůstatek",
-    "note": "Návrhy, synchronizace katalogu obchodu a nastavení firmy zůstávají dostupné.",
-    "recentUsage": "Nedávné využití kreditů",
-    "creditActivity": "Aktivita kreditů",
-    "empty": "Zatím nebyly použity žádné kredity. Vyberte si plán a začněte vytvářet kotouče a automatizované inscenace.",
-    "restore": "Obnovit nákupy předplatného",
-    "appLanguage": "Jazyk rozhraní aplikace",
-    "languages": {
-      "englishUS": "Angličtina US",
-      "frenchFR": "Francouzština FR"
-    },
-    "push": "Push notifikace",
-    "pushHint": "Upozornění na vykreslení a dokončení dávky",
-    "terms": "Podmínky služby",
-    "privacy": "Zásady ochrany osobních údajů"
+    "noDeduction": "Žádné kredity zatím nebyly odečteny. Generování začne až po vašem potvrzení.",
+    "makeReel": "Vytvořit reel"
   },
   "gate": {
     "sheetLabel": "Vyžadováno předplatné",
     "subscriberGeneration": "Generování pro předplatitele",
     "title": "Připraveno k vytvoření tohoto kotouče?",
-    "body": "Pro vykreslení video kotoučů s francouzským voiceoverem a zvukem je vyžadován aktivní plán. Váš storyboard je uložen a čeká.",
+    "body": "K vytvoření video reelů s mluveným komentářem a zvukem potřebuješ aktivní tarif. Tvůj scénář je uložený a čeká na tebe.",
     "saved": "Uloženo",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertikální · {{count}} scéna · Francouzský voiceover",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertikální · {{count}} scén · Francouzský voiceover",
+    "reelFacts_one": "{{seconds}} s · 9:16 na výšku · {{count}} scéna",
+    "reelFacts_other": "{{seconds}} s · 9:16 na výšku · počet scén: {{count}}",
     "creditsPerReel_one": "{{n}} kredit za kotouč",
     "creditsPerReel_other": "{{n}} kredity za kotouč",
     "keepEditing": "Pokračovat v úpravách storyboardu",
@@ -154,7 +130,6 @@
     "subtitle": "Vytvářejte video kotouče ve studiu z katalogu vašeho obchodu",
     "notice_one": "Vaše nápady jsou stále zde. Prozkoumejte {{n}} nápad a kdykoli zkontrolujte storyboardy. Aktivní plán odemkne vykreslování videa.",
     "notice_other": "Vaše nápady jsou stále zde. Prozkoumejte {{n}} nápady a kdykoli zkontrolujte storyboardy. Aktivní plán odemkne vykreslování videa.",
-    "heroAlt": "{{product}} jídelní kolekce, inscenováno",
     "creativePrompt": "Kreativní podnět",
     "yourAssistant": "Váš asistent",
     "question": "Co byste chtěli ukázat?",

@@ -2,7 +2,6 @@
   "viewPlans": "Se planer",
   "credits_one": "{{n}} kreditt",
   "credits_other": "{{n}} kreditter",
-  "tableAlt": "{{product}} spisebord",
   "plans": {
     "professional": "Profesjonell",
     "starter": "Start",
@@ -39,7 +38,8 @@
     "terms": "Vilkår for bruk",
     "privacy": "Personvernregler",
     "lead": "Skaler ditt detaljhandelsstudio med automatiserte videoruller, iscenesatte opptak og sosial publisering.",
-    "planA11y": "{{name}} plan, {{price}}"
+    "planA11y": "{{name}} plan, {{price}}",
+    "current": "Ditt nåværende abonnement: {{plan}}"
   },
   "activated": {
     "continueReel_one": "Fortsett å lage rull ({{n}} kreditt)",
@@ -57,41 +57,17 @@
     "reelTitle": "{{title}} rull",
     "scenesReady_one": "{{n}} scene klar for opprettelse",
     "scenesReady_other": "{{n}} scener klare for opprettelse",
-    "noDeduction": "Ingen kreditter er trukket ennå. Generering begynner først når du bekrefter."
-  },
-  "billing": {
-    "title": "Innstillinger",
-    "tabs": {
-      "business": "Min bedrift",
-      "billing": "Fakturering",
-      "postsPlanner": "Innleggsplanlegger"
-    },
-    "status": "Ingen aktivt abonnement",
-    "plan": "Gratis arbeidsområde",
-    "balance": "Saldo",
-    "note": "Utkast, butikkatalogsynkronisering og bedriftsinnstillinger forblir tilgjengelige.",
-    "recentUsage": "Nylig kredittbruk",
-    "creditActivity": "Kredittaktivitet",
-    "empty": "Ingen kreditter brukt ennå. Velg en plan for å begynne å gjengi ruller og automatisert iscenesettelse.",
-    "restore": "Gjenopprett abonnementskjøp",
-    "appLanguage": "Appspråk",
-    "languages": {
-      "englishUS": "Engelsk US",
-      "frenchFR": "Fransk FR"
-    },
-    "push": "Push-varsler",
-    "pushHint": "Gjengivelsesvarsler og batch fullføringer",
-    "terms": "Vilkår for bruk",
-    "privacy": "Personvernregler"
+    "noDeduction": "Ingen kreditter er trukket ennå. Generering begynner først når du bekrefter.",
+    "makeReel": "Lag en reel"
   },
   "gate": {
     "sheetLabel": "Abonnement kreves",
     "subscriberGeneration": "Abonnentgenerering",
     "title": "Klar til å lage denne rullen?",
-    "body": "En aktiv plan er nødvendig for å gjengi videoruller med fransk voiceover og lyd. Ditt storyboard er lagret og venter.",
+    "body": "Du trenger et aktivt abonnement for å lage reels med fortellerstemme og lyd. Storyboardet ditt er lagret og venter på deg.",
     "saved": "Lagret",
-    "reelFacts_one": "{{seconds}}s · 9:16 vertikal · {{count}} scene · Fransk voiceover",
-    "reelFacts_other": "{{seconds}}s · 9:16 vertikal · {{count}} scener · Fransk voiceover",
+    "reelFacts_one": "{{seconds}} s · 9:16 stående · {{count}} scene",
+    "reelFacts_other": "{{seconds}} s · 9:16 stående · {{count}} scener",
     "creditsPerReel_one": "{{n}} kreditt per rull",
     "creditsPerReel_other": "{{n}} kreditter per rull",
     "keepEditing": "Fortsett å redigere storyboard",
@@ -154,7 +130,6 @@
     "subtitle": "Lag studio videoruller fra din butikkatalog",
     "notice_one": "Dine ideer er fortsatt her. Utforsk {{n}} idé og gjennomgå storyboards når som helst. Aktiv plan låser opp videorendering.",
     "notice_other": "Dine ideer er fortsatt her. Utforsk {{n}} ideer og gjennomgå storyboards når som helst. Aktiv plan låser opp videorendering.",
-    "heroAlt": "{{product}} spisebordkolleksjon, iscenesatt",
     "creativePrompt": "Kreativt forslag",
     "yourAssistant": "Din assistent",
     "question": "Hva vil du vise?",

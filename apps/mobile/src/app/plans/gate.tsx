@@ -7,15 +7,23 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { formatNumber } from "@/i18n";
 import { color, radius, space, type } from "@/theme/tokens";
 import { CloseButton } from "@/ui/plans/kit";
-import { pendingReel as reel, photos, product } from "@/ui/plans/sample";
+import { useReel } from "@/ui/reels/use-reel";
+import { libraryPhotos, useCurrentBrand } from "@/ui/use-current-brand";
 import { ActionButton, ICON, Tag } from "@/ui/reels/kit";
 import { Sheet } from "@/ui/recovery/sheet";
+import { reelSeconds } from "@/api/endpoints";
 
 /** L02 · No subscription / Generation gate — sheet over the (blurred) studio. */
 export default function GenerationGate() {
   const { t } = useTranslation("plans");
   const { top } = useSafeAreaInsets();
   const close = () => (router.canGoBack() ? router.back() : router.replace("/reels/storyboard"));
+  // The reel that asked for a video (the open one), and the brand's photos for the faded studio behind.
+  const { detail } = useReel();
+  const plan = detail?.plan;
+  const price = detail?.price ?? 0;
+  const cover = plan ? detail?.photoUrls[plan.scenes[0]?.photoKey] : undefined;
+  const backdrop = libraryPhotos(useCurrentBrand()?.view).slice(0, 2);
   return (
     <View style={{ flex: 1, backgroundColor: "#F6F5F9" }}>
       <View style={[styles.bar, { paddingTop: top + space[12] }]}>
@@ -23,9 +31,9 @@ export default function GenerationGate() {
         <Text style={[type.label, { flex: 1 }]}>Espanda Studio</Text>
       </View>
       <View importantForAccessibility="no-hide-descendants" accessibilityElementsHidden style={{ gap: space[16], padding: space[20] }}>
-        {[photos.tableStaged, photos.catalogBlur].map((src, i) => (
+        {[0, 1].map((i) => (
           <View key={i} style={styles.ghost}>
-            <Image source={src} blurRadius={8} style={styles.ghostThumb} contentFit="cover" />
+            <Image source={backdrop[i] ? { uri: backdrop[i].url } : undefined} blurRadius={8} style={styles.ghostThumb} contentFit="cover" />
             <View style={{ flex: 1, gap: space[12] }}>
               <View style={[styles.ghostLine, { width: "60%" }]} />
               <View style={[styles.ghostLine, { width: "90%", height: 12 }]} />
@@ -52,21 +60,21 @@ export default function GenerationGate() {
 
         <View style={styles.draft}>
           <View style={styles.thumbFrame}>
-            <Image source={photos.table} style={styles.thumb} contentFit="cover" accessibilityLabel={t("tableAlt", { product })} />
+            <Image source={cover ? { uri: cover } : undefined} style={styles.thumb} contentFit="cover" accessibilityLabel={plan?.scenes[0]?.shot} />
           </View>
           <View style={{ flex: 1, gap: 4 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
               <Text style={[type.cardTitle, { flex: 1 }]} numberOfLines={1}>
-                {reel.title}
+                {plan?.title ?? ""}
               </Text>
               <Tag label={t("gate.saved")} tone="white" />
             </View>
             <Text style={[type.body, { color: color.inkSecondary }]} numberOfLines={1}>
-              {t("gate.reelFacts", { seconds: formatNumber(reel.seconds), count: reel.scenes })}
+              {t("gate.reelFacts", { seconds: formatNumber(reelSeconds(price)), count: plan?.scenes.length ?? 0 })}
             </Text>
             <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
               <Coins size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
-              <Text style={[type.meta, { color: color.ink }]}>{t("gate.creditsPerReel", { count: reel.credits, n: formatNumber(reel.credits) })}</Text>
+              <Text style={[type.meta, { color: color.ink }]}>{t("gate.creditsPerReel", { count: price, n: formatNumber(price) })}</Text>
             </View>
           </View>
         </View>

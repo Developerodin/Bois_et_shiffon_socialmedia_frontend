@@ -7,6 +7,7 @@ import { BusinessSwitcher } from "@/ui/posts/chrome";
 import { IconDisc, LockTag, PlansModuleHeader } from "@/ui/plans/kit";
 import { tools, type Tool } from "@/ui/plans/sample";
 import { ICON, ReelsScreen, Tag, rc } from "@/ui/reels/kit";
+import { usePlan } from "@/ui/plans/use-plan";
 
 const ICONS: Record<Tool["id"], LucideIcon> = {
   customers: MessagesSquare,
@@ -20,6 +21,8 @@ const ICONS: Record<Tool["id"], LucideIcon> = {
 /** L06 · No subscription / Marketing tools. */
 export default function MarketingTools() {
   const { t } = useTranslation("plans");
+  const { plan, unlimited } = usePlan();
+  const professional = unlimited || plan?.id === "professional";
   return (
     <ReelsScreen header={<PlansModuleHeader active="marketing" />}>
       <View style={styles.topRow}>
@@ -36,8 +39,8 @@ export default function MarketingTools() {
       </View>
 
       <View style={styles.grid}>
-        {tools.map((t) => (
-          <ToolCard key={t.id} tool={t} />
+        {tools.map((tool) => (
+          <ToolCard key={tool.id} tool={{ ...tool, locked: tool.locked && !professional }} />
         ))}
       </View>
     </ReelsScreen>
