@@ -5,7 +5,8 @@ const m = vi.hoisted(() => {
   const fn = () => vi.fn();
   const tx = {
     $executeRaw: vi.fn(async () => 0),
-    contentItem: { findFirst: fn(), update: fn() },
+    contentItem: { findFirst: fn(), update: fn(), findUnique: fn() },
+    creditEntry: { findFirst: fn() },
     contentVersion: { create: fn(), findFirst: fn() },
     reelRender: { create: fn(), findFirst: fn(), update: fn(), updateMany: fn(), findUnique: fn(), findUniqueOrThrow: fn(), aggregate: fn() },
     auditEvent: { create: fn() },
@@ -21,6 +22,7 @@ const m = vi.hoisted(() => {
     startAgentRun: fn(),
     joinReel: vi.fn(async () => undefined),
     seam: vi.fn(async () => ({ fits: true, note: "" })),
+    notify: vi.fn(async () => undefined),
   };
 });
 vi.mock("@/server/db/prisma", () => ({ prisma: m.prisma }));
@@ -31,6 +33,7 @@ vi.mock("@/server/agents/engine", () => ({ startAgentRun: m.startAgentRun }));
 vi.mock("@/server/storage/media", async (orig) => ({ ...(await orig<object>()), putMedia: vi.fn(), signedMediaUrl: vi.fn(async (k: string) => `https://s3/${k}`) }));
 vi.mock("@/server/reels/join", () => ({ joinReel: m.joinReel, frameOf: vi.fn(async () => undefined) }));
 vi.mock("@/server/reels/agents", () => ({ checkSeam: m.seam }));
+vi.mock("@/server/notifications/push", () => ({ notifyReelFinished: m.notify }));
 vi.mock("node:fs/promises", async (orig) => ({ ...(await orig<object>()), readFile: vi.fn(async () => Buffer.alloc(8)) }));
 
 import { advanceRender, nextStep, renderFailure, startRender } from "@/server/reels/render";
@@ -105,8 +108,12 @@ describe("advanceRender", () => {
     m.tx.reelRender.findUnique.mockResolvedValue(render({ requests: { CLIPS: ["ra"] }, outputs: { ...outputs, backups: [0] } }));
     m.status.mockResolvedValue({ state: "failed", error: "nope" });
     m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
+    m.tx.creditEntry.findFirst.mockResolvedValue({ userId: "u1" });
+    m.tx.contentItem.findUnique.mockResolvedValue({ title: "Dimona" });
     await advanceRender({ renderId: "r1" });
     expect(m.refund).toHaveBeenCalledWith("w1", "v1:1", m.tx);
+    // The person who started it (the one on the charge) hears it couldn't be made.
+    expect(m.notify).toHaveBeenCalledWith("u1", { itemId: "i1", title: "Dimona", ok: false });
   });
 
   it("joining starts the quality check for that reel", async () => {

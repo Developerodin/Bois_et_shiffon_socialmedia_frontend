@@ -7,6 +7,7 @@ import sharp from "sharp";
 import { startAgentRun } from "@/server/agents/engine";
 import { prisma } from "@/server/db/prisma";
 import { enqueueJob } from "@/server/jobs/queue";
+import { notifyReelFinished } from "@/server/notifications/push";
 import { fetchResult, type HfStatus, higgsfield } from "@/server/reels/higgsfield";
 import { checkSeam } from "@/server/reels/agents";
 import { frameOf, joinReel } from "@/server/reels/join";
@@ -263,6 +264,7 @@ async function join(r: ReelRender, urls: string[]) {
     await rm(dir, { recursive: true, force: true });
   }
   await startAgentRun({ ...scope, agentKey: "quality", trigger: "event", input: { itemId: r.contentItemId } }).catch(() => null); // the app's next poll shows "checking"; a missed run is retried from R07
+  await notifyStarter(r, true);
 }
 
 async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { workspaceId: string; brandId: string }, dir: string) {
@@ -322,13 +324,28 @@ export async function failRender(payload: unknown, error: unknown, exhausted: bo
   const message = error instanceof Error ? error.message : String(error);
   // One transaction: a render is never FAILED without its refund (a crash in between would lose it for good,
   // since a retry finds the render already failed).
-  await prisma.$transaction(async (tx) => {
+  const failed = await prisma.$transaction(async (tx) => {
     const moved = await tx.reelRender.updateMany({ where: { id: renderId, step: { in: [...ACTIVE] } }, data: { step: "FAILED", error: message.slice(0, 500), claimedAt: null } });
-    if (moved.count !== 1) return;
+    if (moved.count !== 1) return null;
     const r = await tx.reelRender.findUniqueOrThrow({ where: { id: renderId } });
     await refundCharge(r.workspaceId, r.chargeId, tx);
     await tx.auditEvent.create({ data: { workspaceId: r.workspaceId, brandId: r.brandId, action: "reel.render.failed", entityType: "ReelRender", entityId: r.id, metadata: { error: message.slice(0, 500), attempt: r.attempt } } });
+    return r;
   }, TX);
+  if (failed) await notifyStarter(failed, false);
+}
+
+/** Push to the phones of whoever started the render (the person on its charge), once it's done or has failed. */
+async function notifyStarter(r: Pick<ReelRender, "workspaceId" | "chargeId" | "contentItemId">, ok: boolean) {
+  try {
+    const [charge, item] = await Promise.all([
+      prisma.creditEntry.findFirst({ where: { workspaceId: r.workspaceId, reason: "reel-render", refId: r.chargeId }, select: { userId: true } }),
+      prisma.contentItem.findUnique({ where: { id: r.contentItemId }, select: { title: true } }),
+    ]);
+    if (charge?.userId) await notifyReelFinished(charge.userId, { itemId: r.contentItemId, title: item?.title ?? "", ok });
+  } catch (e) {
+    console.warn("[push] couldn't find who to notify:", e instanceof Error ? e.message : e); // the reel itself is fine
+  }
 }
 
 /**
