@@ -7,6 +7,7 @@ import { enqueueTick, startRender } from "@/server/reels/render";
 import { editPlan, reelDetail, registerPostLink, sendReel, toReelProblem as toProblem } from "@/server/reels/service";
 import { InsufficientCreditsError } from "@/server/services/credits";
 import { prisma } from "@/server/db/prisma";
+import { PlanRequiredError } from "@/server/services/subscriptions";
 
 // Directing an edited plan is an AI call; render steps run after the response.
 export const maxDuration = 300;
@@ -65,7 +66,9 @@ export async function POST(request: Request, context: Params) {
         kickRunner();
         return Response.json({ render: { id: r.id, step: r.step, attempt: r.attempt } }, { status: 202 });
       } catch (e) {
-        if (e instanceof InsufficientCreditsError) return Response.json({ needsPlan: true, balance: e.balance, needed: e.needed }, { status: 402 });
+        if (e instanceof InsufficientCreditsError) return Response.json({ insufficientCredits: true, balance: e.balance, needed: e.needed }, { status: 402 });
+        // No plan: 402 with planRequired, so the app opens the plan gate (L02) rather than "not enough credits".
+        if (e instanceof PlanRequiredError) return Response.json({ planRequired: true, title: e.message }, { status: 402 });
         throw e;
       }
     }

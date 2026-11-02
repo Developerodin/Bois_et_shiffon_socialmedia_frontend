@@ -3,6 +3,7 @@ import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-r
 import { AgentStartError, startAgentRun } from "@/server/agents/engine";
 import { getAgent } from "@/server/agents/registry";
 import { kickRunner } from "@/server/jobs/runner";
+import { PlanRequiredError, requirePlan } from "@/server/services/subscriptions";
 
 // Queued work runs after the response (kickRunner); give it room to finish.
 export const maxDuration = 300;
@@ -18,6 +19,15 @@ export async function POST(request: Request, context: { params: Promise<Params> 
       return problemResponse({ type: "https://api.brandpilot/errors/agent-start", title: "Agent could not start", status: 403, detail: "This agent is started from its own feature." });
     }
     const body = await request.json().catch(() => ({}));
+    // Generating the calendar needs a plan (mobile L05).
+    if (agentKey === "planner") {
+      try {
+        await requirePlan(scope.workspaceId);
+      } catch (e) {
+        if (e instanceof PlanRequiredError) return Response.json({ planRequired: true, title: e.message }, { status: 402 });
+        throw e;
+      }
+    }
 
     const run = await startAgentRun({
       workspaceId: scope.workspaceId,

@@ -11,6 +11,8 @@ const refund = vi.hoisted(() => vi.fn());
 const start = vi.hoisted(() => vi.fn());
 const schedule = vi.hoisted(() => vi.fn());
 
+// Plans are tested in subscriptions.test.ts; here every workspace has one.
+vi.mock("@/server/services/subscriptions", () => ({ requirePlan: vi.fn(async () => undefined), PlanRequiredError: class extends Error {} }));
 vi.mock("@/server/db/prisma", () => ({ prisma: db }));
 vi.mock("@/server/agents/engine", () => ({ startAgentRun: start }));
 vi.mock("@/server/services/credits", () => ({

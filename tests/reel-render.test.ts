@@ -25,6 +25,8 @@ const m = vi.hoisted(() => {
     notify: vi.fn(async () => undefined),
   };
 });
+// Plans are tested in subscriptions.test.ts; here every workspace has one.
+vi.mock("@/server/services/subscriptions", () => ({ requirePlan: vi.fn(async () => undefined), PlanRequiredError: class extends Error {} }));
 vi.mock("@/server/db/prisma", () => ({ prisma: m.prisma }));
 vi.mock("@/server/reels/higgsfield", () => ({ higgsfield: { animate: m.animate, status: m.status }, fetchResult: vi.fn(async () => new Uint8Array(4)) }));
 vi.mock("@/server/services/credits", async (orig) => ({ ...(await orig<object>()), spendCredits: m.spend, refundCharge: m.refund }));

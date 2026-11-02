@@ -3,16 +3,19 @@ import { prisma } from "@/server/db/prisma";
 
 /**
  * Workspace credits: an append-only ledger (grants +, spends −, refunds +). Balance = sum.
- * ponytail: one starter grant per workspace; plans, monthly allowances and Stripe top-ups come later
- * as more "grant"/"top-up" rows, no schema change needed.
+ * A starter grant per workspace, then a plan's monthly credits as "plan-credits" rows (server/services/subscriptions.ts).
+ * ponytail: purchases and top-ups will be more rows of the same kind.
  */
 export const CREDIT_COSTS = { siteAudit: 10, manualRun: 5, reelPerSecond: 2 } as const;
 export const STARTER_CREDITS = 20;
 /** The quality check is the required gate before approval: never charge for it on top of the draft it checks. */
 export const FREE_MANUAL_AGENTS: ReadonlySet<string> = new Set(["quality"]);
 
-/** ponytail: testing override via env (comma-separated workspace ids); becomes a plan flag on Workspace with billing. */
-const hasUnlimitedCredits = (workspaceId: string) =>
+/**
+ * Testing override via env (comma-separated workspace ids): never charged, and counted as having a plan
+ * (subscriptions.ts requirePlan). ponytail: a flag on Workspace if testing workspaces need managing from the app.
+ */
+export const hasUnlimitedCredits = (workspaceId: string) =>
   (process.env.UNLIMITED_CREDIT_WORKSPACES ?? "").split(",").map((s) => s.trim()).includes(workspaceId);
 export const AUDIT_FRESH_DAYS = 30;
 

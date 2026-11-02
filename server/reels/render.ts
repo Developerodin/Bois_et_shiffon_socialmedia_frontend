@@ -19,6 +19,7 @@ import { padAndJoinWav, wavSeconds } from "@/server/reels/wav";
 import { refundCharge, spendCredits } from "@/server/services/credits";
 import { lock, PublishingError, TX } from "@/server/services/publishing";
 import { mediaKey, putMedia, signedMediaUrl } from "@/server/storage/media";
+import { requirePlan } from "@/server/services/subscriptions";
 
 /**
  * Turns a studio reel's plan version into a video, one step per job:
@@ -90,6 +91,7 @@ const ACTIVE = ["VOICE", "CLIPS", "JOIN"] as const;
 
 /** "Make video" / "Try again": validates the latest plan version, charges once per attempt, queues the render. */
 export async function startRender(input: { workspaceId: string; brandId: string; userId: string; itemId: string; version: number }) {
+  await requirePlan(input.workspaceId); // making a video needs a plan (mobile L02 gate)
   const scope = { workspaceId: input.workspaceId, brandId: input.brandId };
   const loaded = await prisma.$transaction(async (tx) => {
     await lock(tx, input.itemId);
