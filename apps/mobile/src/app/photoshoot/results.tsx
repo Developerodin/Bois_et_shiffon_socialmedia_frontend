@@ -1,22 +1,51 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Images, Plus } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { photoshoots, type Shoot } from "@/api/endpoints";
 import { BottomNav, BusinessSwitch, Glow, ModuleHeader, ps, STROKE } from "@/ui/photoshoot/chrome";
 import { Badge, FilterChips, IconLabelButton, Page } from "@/ui/photoshoot/controls";
-import { say, shoots, type Shoot } from "@/ui/photoshoot/sample";
+import { shootMeta, shootTitle } from "@/ui/photoshoot/describe";
 import { color, font, radius, space, type } from "@/theme/tokens";
 
 type Filter = "all" | Shoot["kind"];
+const POLL_MS = 10_000;
 
-/** F06 · Photoshoot / Results. Credits shown after the sample shoot has been charged. */
+/** F06 · Photoshoot / Results: this business's shoots, newest first; read again every POLL_MS while one is running. */
 export default function Results() {
   const { t } = useTranslation("photoshoot");
-  const [filter, setFilter] = useState<Filter>("product");
-  const count = (k: Filter) => shoots.filter((s) => k === "all" || s.kind === k).length;
-  const list = shoots.filter((s) => filter === "all" || s.kind === filter);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [shoots, setShoots] = useState<Shoot[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      const ctrl = new AbortController();
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const load = () =>
+        photoshoots.list(ctrl.signal).then(
+          (r) => {
+            setShoots(r.shoots);
+            setError(null);
+            if (r.shoots.some((s) => s.status === "RUNNING")) timer = setTimeout(load, POLL_MS);
+          },
+          (e: unknown) => {
+            if (ctrl.signal.aborted) return;
+            setError(e instanceof Error ? e.message : String(e));
+            timer = setTimeout(load, POLL_MS);
+          },
+        );
+      void load();
+      return () => {
+        ctrl.abort();
+        clearTimeout(timer);
+      };
+    }, []),
+  );
+  const all = shoots ?? [];
+  const count = (k: Filter) => all.filter((s) => k === "all" || s.kind === k).length;
+  const list = all.filter((s) => filter === "all" || s.kind === filter);
 
   return (
     <Page
@@ -56,49 +85,58 @@ export default function Results() {
       />
 
       <View style={styles.list}>
-        {list.length === 0 ? <Text style={[type.body, { color: color.inkSecondary, textAlign: "center", paddingVertical: space[24] }]}>{t("results.empty")}</Text> : null}
-        {list.map((s) => (s.status === "processing" ? <ProcessingCard key={s.id} shoot={s} /> : <PreviewCard key={s.id} shoot={s} />))}
+        {error ? <Text style={[type.meta, { color: color.error }]}>{error}</Text> : null}
+        {shoots === null && !error ? <ActivityIndicator color={color.ink} style={{ paddingVertical: space[24] }} /> : null}
+        {shoots && list.length === 0 ? <Text style={[type.body, { color: color.inkSecondary, textAlign: "center", paddingVertical: space[24] }]}>{t("results.empty")}</Text> : null}
+        {list.map((s) => (s.status === "DONE" ? <PreviewCard key={s.id} shoot={s} /> : <PendingCard key={s.id} shoot={s} />))}
       </View>
     </Page>
   );
 }
 
-function ProcessingCard({ shoot }: { shoot: Shoot }) {
+/** Running (opens F05) or failed (credits refunded). */
+function PendingCard({ shoot }: { shoot: Shoot }) {
   const { t } = useTranslation("photoshoot");
-  const title = say(t, shoot.title);
-  const pct = Math.round((shoot.progress ?? 0) * 100);
+  const title = shootTitle(t, shoot);
+  const failed = shoot.status === "FAILED";
+  const badge = failed ? t("results.failedBadge") : t("results.processingBadge", { count: shoot.credits });
   return (
-    <View style={styles.article} accessible accessibilityLabel={t("results.processingLabel", { title, percent: pct })}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${badge}`}
+      onPress={() => router.push({ pathname: "/photoshoot/generating", params: { id: shoot.id } })}
+      style={({ pressed }) => [styles.article, pressed && { opacity: 0.85 }]}
+    >
       <View style={[styles.thumb, styles.pending]}>
         <View style={styles.pendingRing} />
         <Images size={20} color={ps.navIdle} strokeWidth={STROKE} />
       </View>
       <View style={styles.body}>
-        <Badge dot>{t("results.processingBadge", { count: shoot.cost })}</Badge>
+        <Badge dot={!failed}>{badge}</Badge>
         <Text style={styles.title}>{title}</Text>
-        <Text style={[type.meta, { paddingTop: 2 }]}>{say(t, shoot.meta)}</Text>
-        <View style={styles.track} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: 100, now: pct }}>
-          <View style={[styles.fill, { width: `${pct}%` }]} />
-        </View>
+        <Text style={[type.meta, { paddingTop: 2 }]} numberOfLines={2}>
+          {failed ? t("results.refunded", { count: shoot.credits }) : shootMeta(t, shoot).join(" · ")}
+        </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 function PreviewCard({ shoot }: { shoot: Shoot }) {
   const { t } = useTranslation("photoshoot");
-  const title = say(t, shoot.title);
+  const title = shootTitle(t, shoot);
+  const cover = shoot.shots[0];
   return (
     <View style={[styles.article, { minHeight: 154 }]}>
       <View style={[styles.thumb, styles.photoThumb]}>
-        {shoot.image ? <Image source={shoot.image} style={{ flex: 1 }} contentFit="contain" accessibilityLabel={title} /> : null}
+        {cover ? <Image source={{ uri: cover.url, cacheKey: cover.key }} style={{ flex: 1 }} contentFit="contain" accessibilityLabel={title} /> : null}
       </View>
       <View style={styles.body}>
-        <Badge tone="outline">{t("results.preview")}</Badge>
+        <Badge tone="outline">{t("results.ready")}</Badge>
         <Text style={styles.title} numberOfLines={2}>
           {title}
         </Text>
-        <Text style={[type.meta, { paddingTop: 2 }]}>{say(t, shoot.meta)}</Text>
+        <Text style={[type.meta, { paddingTop: 2 }]}>{shootMeta(t, shoot).join(" · ")}</Text>
         <Pressable
           accessibilityRole="link"
           accessibilityLabel={t("results.reviewPhotoLabel", { title })}
@@ -136,7 +174,5 @@ const styles = StyleSheet.create({
   photoThumb: { backgroundColor: color.canvasAlt, borderWidth: 1, borderColor: "rgba(232,231,237,0.5)", padding: space[4] },
   body: { flex: 1, paddingRight: space[4] },
   title: { ...type.label, fontFamily: font.semibold, paddingTop: space[4] },
-  track: { height: 6, marginTop: space[8], borderRadius: radius.control, backgroundColor: ps.chip, overflow: "hidden" },
-  fill: { height: 6, borderRadius: radius.control, backgroundColor: ps.black },
   link: { alignSelf: "flex-start", minHeight: 44, flexDirection: "row", alignItems: "center", gap: space[4], marginTop: space[8] },
 });

@@ -6,23 +6,43 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Button } from "@/ui/button";
 import { BackButton, BrandChip, ps, STROKE, TopBar } from "@/ui/photoshoot/chrome";
-import { Page, SectionLabel, Segmented } from "@/ui/photoshoot/controls";
-import { backgrounds, findAsset, garmentRequirements, models, outputFormats, poses, say } from "@/ui/photoshoot/sample";
+import { Page, SectionLabel, Segmented, TierPicker } from "@/ui/photoshoot/controls";
+import { backgrounds, garmentRequirements, models, outputFormats, poses } from "@/ui/photoshoot/options";
+import { startShoot } from "@/ui/photoshoot/start";
+import { libraryPhotos, useCurrentBrand } from "@/ui/use-current-brand";
+import { SHOOT_TIERS, type ShootTier } from "@/api/endpoints";
 import { color, font, radius, space, type } from "@/theme/tokens";
 
 type Pose = (typeof poses)[number];
 type Format = (typeof outputFormats)[number]["ratio"];
 type Background = (typeof backgrounds)[number];
 
-/** F03 · Photoshoot / Fashion setup. `garment` comes back from the source picker (F04). */
+/** F03 · Photoshoot / Fashion setup. `garment` (a media key from the brand's library) comes back from the source picker (F04). */
 export default function FashionSetup() {
   const { t } = useTranslation("photoshoot");
   const { garment } = useLocalSearchParams<{ garment?: string }>();
-  const photo = garment ? findAsset(garment) : undefined;
+  const library = libraryPhotos(useCurrentBrand()?.view);
+  const photo = garment ? library.find((p) => p.key === garment) : undefined;
   const [model, setModel] = useState(0);
   const [pose, setPose] = useState<Pose>("fullBody");
   const [format, setFormat] = useState<Format>("4:5");
   const [background, setBackground] = useState<Background>("studioMinimal");
+  const [tier, setTier] = useState<ShootTier>("base");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const modelLabel = (i: number) => (models[i].id ? t(`fashion.models.${models[i].id}`, { name: models[i].name }) : t("fashion.models.choose"));
+  const generate = async () => {
+    if (!photo || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await startShoot({ kind: "fashion", tier, sourceKey: photo.key, ratio: format, model: models[model].id, pose, background }, t("fashion.title"));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <Page
@@ -30,7 +50,12 @@ export default function FashionSetup() {
       contentStyle={{ paddingTop: space[20] }}
       footer={
         <>
-          <Button label={t("fashion.generate")} disabled={!photo} onPress={() => router.push("/photoshoot/generating")} />
+          {error ? <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
+          <Button
+            label={photo ? t("fashion.generateFor", { price: t("tiers.price", { count: SHOOT_TIERS.find((x) => x.id === tier)!.credits }) }) : t("fashion.generate")}
+            disabled={!photo || busy}
+            onPress={() => void generate()}
+          />
           {photo ? null : <Text style={[type.body, { color: color.inkSecondary, textAlign: "center", marginTop: -4 }]}>{t("fashion.uploadToEnable")}</Text>}
         </>
       }
@@ -46,13 +71,13 @@ export default function FashionSetup() {
         </SectionLabel>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={photo ? t("fashion.garmentSelected", { label: photo.label }) : t("fashion.addGarment")}
+          accessibilityLabel={photo ? t("fashion.garmentSelected", { label: photo.title }) : t("fashion.addGarment")}
           accessibilityHint={t("fashion.garmentHint")}
-          onPress={() => router.push({ pathname: "/photoshoot/source", params: { for: "fashion" } })}
+          onPress={() => router.push({ pathname: "/photoshoot/source", params: { for: "fashion", selected: photo?.key ?? "" } })}
           style={({ pressed }) => [styles.upload, pressed && { opacity: 0.85 }]}
         >
           {photo ? (
-            <Image source={photo.image} style={styles.garment} contentFit="contain" />
+            <Image source={{ uri: photo.url, cacheKey: photo.key }} style={styles.garment} contentFit="contain" />
           ) : (
             <View style={styles.uploadIcon}>
               <Shirt size={24} color={color.ink} strokeWidth={STROKE} />
@@ -65,14 +90,14 @@ export default function FashionSetup() {
 
       <View style={styles.section}>
         <SectionLabel ink>{t("fashion.modelStyling")}</SectionLabel>
-        {/* No model picker is designed yet: each tap moves to the next sample model. */}
+        {/* No model picker is designed yet: each tap moves to the next model. */}
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t("fashion.modelSelected", { model: say(t, models[model]) })}
+          accessibilityLabel={t("fashion.modelSelected", { model: modelLabel(model) })}
           onPress={() => setModel((m) => (m + 1) % models.length)}
           style={styles.dropdown}
         >
-          <Text style={styles.dropdownText}>{say(t, models[model])}</Text>
+          <Text style={styles.dropdownText}>{modelLabel(model)}</Text>
           <ChevronDown size={16} color={color.ink} strokeWidth={STROKE} />
         </Pressable>
       </View>
@@ -90,6 +115,11 @@ export default function FashionSetup() {
       <View style={styles.section}>
         <SectionLabel ink>{t("fashion.background")}</SectionLabel>
         <Segmented label={t("fashion.background")} options={backgrounds.map((b) => ({ value: b, label: t(`fashion.backgrounds.${b}`) }))} value={background} onChange={setBackground} />
+      </View>
+
+      <View style={styles.section}>
+        <SectionLabel ink>{t("tiers.label")}</SectionLabel>
+        <TierPicker value={tier} onChange={setTier} />
       </View>
 
       <View style={styles.requirements}>

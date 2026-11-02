@@ -58,7 +58,11 @@
     "briefHint": "लाइटिंग, माहौल या विशिष्ट डेकोर संकेतों को परिष्कृत करें",
     "sourcePreview": "सोर्स प्रीव्यू",
     "fullPreview": "{{product}}, फुल प्रीव्यू",
-    "sourceImage": "सोर्स इमेज"
+    "sourceImage": "सोर्स इमेज",
+    "noPhoto": "फ़ोटो चुनें",
+    "noPhotoHint": "आपकी वेबसाइट की प्रोडक्ट फ़ोटो और अपलोड यहाँ दिखेंगे। फ़ोटो अपलोड करने के लिए एसेट बदलें पर टैप करें।",
+    "briefPlaceholder": "सीन का विवरण दें",
+    "briefRequired": "कस्टम इस्तेमाल करने के लिए सीन का विवरण दें।"
   },
   "fashion": {
     "title": "फैशन फोटोशूट",
@@ -102,7 +106,8 @@
       "contrast": "बैकग्राउंड के खिलाफ उच्च कंट्रास्ट",
       "wrinkles": "कोई भारी सिलवटें नहीं",
       "frontFacing": "फ्रंट-फेसिंग एंगल"
-    }
+    },
+    "generateFor": "फ़ोटोशूट बनाएँ · {{price}}"
   },
   "source": {
     "title": "सोर्स एसेट चुनें",
@@ -119,15 +124,11 @@
       "uploads": "अपलोड्स"
     },
     "businessWebsite": "{{name}} · वेबसाइट",
-    "fromWebsite": "वेबसाइट से",
-    "filterCatalog": "कैटलॉग फ़िल्टर करें",
-    "filters": {
-      "all": "सभी आइटम्स",
-      "tables": "टेबल्स",
-      "storage": "स्टोरेज"
-    },
     "addPhoto": "फोटो जोड़ें",
-    "tip": "स्वच्छ प्रोडक्ट कटआउट्स इष्टतम फोटोशूट परिणाम देते हैं। Espanda Studio मूल अकासिया लकड़ी की बनावट को संरक्षित करेगा।"
+    "untitled": "फ़ोटो",
+    "emptyWebsite": "आपकी वेबसाइट से अभी कोई प्रोडक्ट फ़ोटो नहीं है। इसकी जगह एक फ़ोटो अपलोड करें।",
+    "emptyUploads": "अभी कोई अपलोड नहीं है। फ़ोन से फ़ोटो अपलोड करने के लिए फ़ोटो जोड़ें पर टैप करें।",
+    "cutoutTip": "सादे बैकग्राउंड पर साफ़ प्रोडक्ट फ़ोटो से सबसे अच्छे नतीजे मिलते हैं। Espanda प्रोडक्ट को बिल्कुल वैसा ही रखता है।"
   },
   "generating": {
     "backToWorkspace": "वर्कस्पेस पर वापस",
@@ -141,17 +142,20 @@
       "queued": "कतारबद्ध"
     },
     "progress": "जनरेट हो रहा है",
-    "sample": {
-      "title": "{{name}} डाइनिंग फोटोशूट",
-      "description": "आर्किटेक्चरल डे लाइट इंटीरियर में {{product}} का स्टेजिंग।",
-      "variations_one": "{{count}} वेरिएशन",
-      "variations_other": "{{count}} वेरिएशन्स"
-    },
     "steps": {
       "catalog": "कैटलॉग एसेट प्रोसेसिंग",
       "compose": "सीन और लाइटिंग कंपोज़िंग",
       "finish": "फिनिशिंग और कलर कैलिब्रेशन"
-    }
+    },
+    "backToResults": "फ़ोटोशूट पर वापस जाएँ",
+    "failedTitle": "यह फ़ोटोशूट नहीं बन पाया",
+    "failedBody_one": "आपका {{count}} क्रेडिट वापस आ गया है। फिर से कोशिश करें या दूसरी क्वालिटी चुनें।",
+    "failedBody_other": "आपके {{count}} क्रेडिट वापस आ गए हैं। फिर से कोशिश करें या दूसरी क्वालिटी चुनें।",
+    "wait": {
+      "short": "चार फ़ोटो, आमतौर पर करीब एक मिनट में तैयार।",
+      "long": "अल्ट्रा क्वालिटी में चार फ़ोटो, आमतौर पर कुछ मिनटों में तैयार।"
+    },
+    "refundNote": "आखिर में कुछ भी चार्ज नहीं हुआ: क्रेडिट आपके बैलेंस में वापस आ गए।"
   },
   "results": {
     "title": "फोटोशूट्स",
@@ -164,41 +168,58 @@
       "fashion": "फैशन ({{count}})"
     },
     "empty": "अभी तक कोई फोटोशूट नहीं।",
-    "processingLabel": "{{title}}. प्रोसेसिंग, {{percent}}%",
     "processingBadge_one": "प्रोसेसिंग · {{count}} क्रेडिट",
     "processingBadge_other": "प्रोसेसिंग · {{count}} क्रेडिट्स",
-    "preview": "पूर्वावलोकन",
     "reviewPhotoLabel": "फोटो की समीक्षा करें, {{title}}",
     "reviewPhoto": "फोटो की समीक्षा करें",
-    "sample": {
-      "studioStaging": "{{product}} · स्टूडियो स्टेजिंग",
-      "rendering": "रेंडरिंग स्टेज · {{percent}}%",
-      "interiorReady_one": "इंटीरियर · {{ratio}} · {{count}} फोटो तैयार",
-      "interiorReady_other": "इंटीरियर · {{ratio}} · {{count}} फोटोज़ तैयार",
-      "studioDaylight": "स्टूडियो डे लाइट · {{ratio}}"
-    }
+    "failedBadge": "असफल",
+    "refunded_one": "नहीं बन पाया · {{count}} क्रेडिट वापस",
+    "refunded_other": "नहीं बन पाया · {{count}} क्रेडिट वापस",
+    "ready": "तैयार"
   },
   "detail": {
-    "moreOptions": "अधिक विकल्प",
     "downloadPhoto": "फोटो डाउनलोड करें",
     "variation": "विविधता",
     "share": "फोटोशूट साझा करें",
-    "samplePreview": "नमूना पूर्वावलोकन",
     "compareOriginal": "मूल की तुलना करें",
-    "expandView": "व्यू विस्तृत करें",
     "stagingSummary": "स्टेजिंग सारांश",
     "format": "प्रारूप",
     "creationCost": "निर्माण लागत",
     "credits_one": "{{count}} क्रेडिट",
     "credits_other": "{{count}} क्रेडिट्स",
-    "sample": {
-      "headerTitle": "{{name}} फोटोशूट",
-      "vertical": "{{ratio}} वर्टिकल",
-      "architecturalInterior": "आर्किटेक्चरल इंटीरियर",
-      "studioDaylight": "स्टूडियो डे लाइट",
-      "formatBadge": "{{ratio}} प्रारूप",
-      "naturalStudio": "प्राकृतिक स्टूडियो",
-      "portraitPhoto": "पोर्ट्रेट फोटो"
+    "original": "ओरिजिनल फ़ोटो",
+    "photoOf": "फ़ोटो {{index}} / {{count}}",
+    "showResult": "नतीजा दिखाएँ",
+    "photos": "फ़ोटो",
+    "noBrief": "कोई आर्ट डायरेक्शन नहीं: सीन स्टाइल के अनुसार तैयार किया गया।",
+    "anyModel": "इस कपड़े के लिए चुना गया मॉडल",
+    "formatBadge": "{{ratio}} फ़ॉर्मैट"
+  },
+  "tiers": {
+    "label": "क्वालिटी",
+    "price_one": "{{count}} क्रेडिट",
+    "price_other": "{{count}} क्रेडिट",
+    "base": {
+      "name": "बेसिक",
+      "desc": "आइडिया आज़माने के लिए झटपट ड्राफ़्ट"
+    },
+    "moderate": {
+      "name": "मीडियम",
+      "desc": "बेहतर डिटेल और लाइटिंग"
+    },
+    "higher": {
+      "name": "हाई",
+      "desc": "कैंपेन के लिए तैयार क्वालिटी"
+    },
+    "ultra": {
+      "name": "अल्ट्रा",
+      "desc": "प्रिंट और विज्ञापनों के लिए हमारी सबसे अच्छी क्वालिटी"
     }
+  },
+  "describe": {
+    "product": "प्रोडक्ट · {{style}}",
+    "fashion": "फ़ैशन · {{style}}",
+    "photos_one": "{{count}} फ़ोटो",
+    "photos_other": "{{count}} फ़ोटो"
   }
 }

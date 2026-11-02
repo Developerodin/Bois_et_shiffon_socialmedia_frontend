@@ -58,7 +58,11 @@
     "briefHint": "Finomítsd a világítást, hangulatot vagy konkrét dekorációs elemeket",
     "sourcePreview": "Forrás előnézet",
     "fullPreview": "{{product}}, teljes előnézet",
-    "sourceImage": "Forrás kép"
+    "sourceImage": "Forrás kép",
+    "noPhoto": "Válassz egy fotót",
+    "noPhotoHint": "Itt jelennek meg a weboldalad termékfotói és a feltöltéseid. Új fotó feltöltéséhez koppints a Média cseréje gombra.",
+    "briefPlaceholder": "Írd le a jelenetet",
+    "briefRequired": "Az Egyéni beállításhoz írd le a jelenetet."
   },
   "fashion": {
     "title": "Divatfotózás",
@@ -102,7 +106,8 @@
       "contrast": "Magas kontraszt a háttérrel szemben",
       "wrinkles": "Nincs erős gyűrődés",
       "frontFacing": "Előrenéző szög"
-    }
+    },
+    "generateFor": "Fotózás generálása · {{price}}"
   },
   "source": {
     "title": "Válassz forrás elemet",
@@ -119,15 +124,11 @@
       "uploads": "Feltöltések"
     },
     "businessWebsite": "{{name}} · Weboldal",
-    "fromWebsite": "Weboldalról",
-    "filterCatalog": "Katalógus szűrése",
-    "filters": {
-      "all": "Összes elem",
-      "tables": "Asztalok",
-      "storage": "Tárolás"
-    },
     "addPhoto": "Fotó hozzáadása",
-    "tip": "Tiszta termékkivágások optimális fotózási eredményeket hoznak. Az Espanda Studio megőrzi az eredeti akácfa textúrát."
+    "untitled": "Fotó",
+    "emptyWebsite": "Még nincsenek termékfotók a weboldaladról. Tölts fel egyet.",
+    "emptyUploads": "Még nincs feltöltésed. Koppints a Fotó hozzáadása gombra, és tölts fel egyet a telefonodról.",
+    "cutoutTip": "A legjobb eredményt az egyszerű háttér előtt készült, tiszta termékfotók adják. Az Espanda változatlanul hagyja a terméket."
   },
   "generating": {
     "backToWorkspace": "Vissza a munkaterületre",
@@ -141,17 +142,20 @@
       "queued": "Sorban áll"
     },
     "progress": "Generálás",
-    "sample": {
-      "title": "{{name}} étkező fotózás",
-      "description": "{{product}} elhelyezése építészeti nappali belső térben.",
-      "variations_one": "{{count}} variáció",
-      "variations_other": "{{count}} variáció"
-    },
     "steps": {
       "catalog": "Katalógus elem feldolgozása",
       "compose": "Jelenet és világítás összeállítása",
       "finish": "Befejezés és színkalibráció"
-    }
+    },
+    "backToResults": "Vissza a fotózásokhoz",
+    "failedTitle": "Ez a fotózás nem sikerült",
+    "failedBody_one": "Visszakaptál {{count}} kreditet. Próbáld újra, vagy válassz másik minőséget.",
+    "failedBody_other": "Visszakaptál {{count}} kreditet. Próbáld újra, vagy válassz másik minőséget.",
+    "wait": {
+      "short": "Négy fotó, általában egy perc alatt.",
+      "long": "Négy fotó Ultra minőségben, általában néhány perc alatt."
+    },
+    "refundNote": "Nem számoltunk fel semmit: a krediteket visszaírtuk az egyenlegedre."
   },
   "results": {
     "title": "Fotózások",
@@ -164,41 +168,58 @@
       "fashion": "Divat ({{count}})"
     },
     "empty": "Még nincsenek fotózások.",
-    "processingLabel": "{{title}}. Feldolgozás, {{percent}}%",
     "processingBadge_one": "Feldolgozás · {{count}} kredit",
     "processingBadge_other": "Feldolgozás · {{count}} kredit",
-    "preview": "Előnézet",
     "reviewPhotoLabel": "Fotó ellenőrzése, {{title}}",
     "reviewPhoto": "Fotó ellenőrzése",
-    "sample": {
-      "studioStaging": "{{product}} · Stúdió beállítás",
-      "rendering": "Renderelési szakasz · {{percent}}%",
-      "interiorReady_one": "Belső tér · {{ratio}} · {{count}} fotó kész",
-      "interiorReady_other": "Belső tér · {{ratio}} · {{count}} fotó kész",
-      "studioDaylight": "Stúdió nappali fény · {{ratio}}"
-    }
+    "failedBadge": "Sikertelen",
+    "refunded_one": "Nem sikerült · {{count}} kredit visszaadva",
+    "refunded_other": "Nem sikerült · {{count}} kredit visszaadva",
+    "ready": "Kész"
   },
   "detail": {
-    "moreOptions": "További lehetőségek",
     "downloadPhoto": "Fotó letöltése",
     "variation": "Variáció",
     "share": "Fotózás megosztása",
-    "samplePreview": "Minta előnézet",
     "compareOriginal": "Eredeti összehasonlítása",
-    "expandView": "Nézet kibővítése",
     "stagingSummary": "Beállítás összegzése",
     "format": "Formátum",
     "creationCost": "Létrehozási költség",
     "credits_one": "{{count}} kredit",
     "credits_other": "{{count}} kredit",
-    "sample": {
-      "headerTitle": "{{name}} fotózás",
-      "vertical": "{{ratio}} Függőleges",
-      "architecturalInterior": "Építészeti belső tér",
-      "studioDaylight": "Stúdió nappali fény",
-      "formatBadge": "{{ratio}} formátum",
-      "naturalStudio": "Természetes stúdió",
-      "portraitPhoto": "Portré fotó"
+    "original": "Eredeti fotó",
+    "photoOf": "{{index}}. fotó / {{count}}",
+    "showResult": "Eredmény megjelenítése",
+    "photos": "Fotók",
+    "noBrief": "Külön művészeti iránymutatás nélkül, a jelenet stílusa alapján beállítva.",
+    "anyModel": "A ruhadarabhoz választott modell",
+    "formatBadge": "{{ratio}} formátum"
+  },
+  "tiers": {
+    "label": "Minőség",
+    "price_one": "{{count}} kredit",
+    "price_other": "{{count}} kredit",
+    "base": {
+      "name": "Alap",
+      "desc": "Gyors vázlatok ötletek kipróbálásához"
+    },
+    "moderate": {
+      "name": "Közepes",
+      "desc": "Élesebb részletek és fények"
+    },
+    "higher": {
+      "name": "Magas",
+      "desc": "Kampányra kész minőség"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "A legjobb minőségünk nyomtatáshoz és hirdetésekhez"
     }
+  },
+  "describe": {
+    "product": "Termék · {{style}}",
+    "fashion": "Divat · {{style}}",
+    "photos_one": "{{count}} fotó",
+    "photos_other": "{{count}} fotó"
   }
 }

@@ -58,7 +58,11 @@
     "briefHint": "Upřesněte osvětlení, atmosféru nebo konkrétní dekorativní prvky",
     "sourcePreview": "Náhled zdroje",
     "fullPreview": "{{product}}, úplný náhled",
-    "sourceImage": "Zdrojový obrázek"
+    "sourceImage": "Zdrojový obrázek",
+    "noPhoto": "Vyberte fotku",
+    "noPhotoHint": "Tady najdete fotky produktů z webu i své nahrané fotky. Klepnutím na Změnit obrázek nahrajete novou.",
+    "briefPlaceholder": "Popište scénu",
+    "briefRequired": "Pro vlastní scénu zadejte její popis."
   },
   "fashion": {
     "title": "Módní focení",
@@ -102,7 +106,8 @@
       "contrast": "Vysoký kontrast vůči pozadí",
       "wrinkles": "Žádné výrazné záhyby",
       "frontFacing": "Čelní úhel"
-    }
+    },
+    "generateFor": "Vytvořit focení · {{price}}"
   },
   "source": {
     "title": "Vyberte zdrojový prvek",
@@ -119,15 +124,11 @@
       "uploads": "Nahrávky"
     },
     "businessWebsite": "{{name}} · Webová stránka",
-    "fromWebsite": "Z webové stránky",
-    "filterCatalog": "Filtrovat katalog",
-    "filters": {
-      "all": "Všechny položky",
-      "tables": "Stoly",
-      "storage": "Úložné prostory"
-    },
     "addPhoto": "Přidat fotku",
-    "tip": "Čisté výřezy produktů přinášejí optimální výsledky focení. Espanda Studio zachová původní texturu akáciového dřeva."
+    "untitled": "Fotka",
+    "emptyWebsite": "Na vašem webu zatím nejsou žádné fotky produktů. Nahrajte vlastní.",
+    "emptyUploads": "Zatím jste nenahráli žádné fotky. Klepnutím na Přidat fotku nahrajete fotku z telefonu.",
+    "cutoutTip": "Nejlepších výsledků dosáhnete s čistými fotkami produktu na jednobarevném pozadí. Espanda zachová produkt přesně tak, jak je."
   },
   "generating": {
     "backToWorkspace": "Zpět do pracovního prostoru",
@@ -141,17 +142,20 @@
       "queued": "Ve frontě"
     },
     "progress": "Generování",
-    "sample": {
-      "title": "{{name}} focení jídel",
-      "description": "Staging {{product}} v architektonickém denním světle interiéru.",
-      "variations_one": "{{count}} varianta",
-      "variations_other": "{{count}} varianty"
-    },
     "steps": {
       "catalog": "Zpracování katalogového prvku",
       "compose": "Kompozice scény a osvětlení",
       "finish": "Dokončení a kalibrace barev"
-    }
+    },
+    "backToResults": "Zpět na focení",
+    "failedTitle": "Focení se nepodařilo",
+    "failedBody_one": "Vrátili jsme vám {{count}} kredit. Zkuste to znovu nebo vyberte jinou kvalitu.",
+    "failedBody_other": "Vrácené kredity: {{count}}. Zkuste to znovu nebo vyberte jinou kvalitu.",
+    "wait": {
+      "short": "Čtyři fotky budou obvykle hotové asi za minutu.",
+      "long": "Čtyři fotky v kvalitě Ultra budou obvykle hotové za pár minut."
+    },
+    "refundNote": "Nakonec jsme vám nic nestrhli. Kredity jsme vrátili na váš účet."
   },
   "results": {
     "title": "Focení",
@@ -164,41 +168,58 @@
       "fashion": "Móda ({{count}})"
     },
     "empty": "Zatím žádné focení.",
-    "processingLabel": "{{title}}. Zpracovává se, {{percent}}%",
     "processingBadge_one": "Zpracovává se · {{count}} kredit",
     "processingBadge_other": "Zpracovává se · {{count}} kreditů",
-    "preview": "Náhled",
     "reviewPhotoLabel": "Zkontrolovat fotku, {{title}}",
     "reviewPhoto": "Zkontrolovat fotku",
-    "sample": {
-      "studioStaging": "{{product}} · Studiové aranžmá",
-      "rendering": "Fáze renderování · {{percent}}%",
-      "interiorReady_one": "Interiér · {{ratio}} · {{count}} fotka připravena",
-      "interiorReady_other": "Interiér · {{ratio}} · {{count}} fotek připraveno",
-      "studioDaylight": "Studiové denní světlo · {{ratio}}"
-    }
+    "failedBadge": "Nezdařilo se",
+    "refunded_one": "Nezdařilo se · vrácen {{count}} kredit",
+    "refunded_other": "Nezdařilo se · vrácené kredity: {{count}}",
+    "ready": "Hotovo"
   },
   "detail": {
-    "moreOptions": "Další možnosti",
     "downloadPhoto": "Stáhnout fotku",
     "variation": "Varianta",
     "share": "Sdílet focení",
-    "samplePreview": "Ukázkový náhled",
     "compareOriginal": "Porovnat s originálem",
-    "expandView": "Rozšířit zobrazení",
     "stagingSummary": "Souhrn aranžmá",
     "format": "Formát",
     "creationCost": "Náklady na vytvoření",
     "credits_one": "{{count}} kredit",
     "credits_other": "{{count}} kreditů",
-    "sample": {
-      "headerTitle": "Focení {{name}}",
-      "vertical": "{{ratio}} Vertikální",
-      "architecturalInterior": "Architektonický interiér",
-      "studioDaylight": "Studiové denní světlo",
-      "formatBadge": "Formát {{ratio}}",
-      "naturalStudio": "Přirozené studio",
-      "portraitPhoto": "Portrétní fotka"
+    "original": "Původní fotka",
+    "photoOf": "Fotka {{index}} z {{count}}",
+    "showResult": "Zobrazit výsledek",
+    "photos": "Fotky",
+    "noBrief": "Bez vlastního zadání: scéna odpovídá popisu vybraného stylu.",
+    "anyModel": "Model nebo modelka podle oblečení",
+    "formatBadge": "Formát {{ratio}}"
+  },
+  "tiers": {
+    "label": "Kvalita",
+    "price_one": "{{count}} kredit",
+    "price_other": "Kredity: {{count}}",
+    "base": {
+      "name": "Základní",
+      "desc": "Rychlé návrhy na vyzkoušení nápadů"
+    },
+    "moderate": {
+      "name": "Střední",
+      "desc": "Lepší detaily a světlo"
+    },
+    "higher": {
+      "name": "Vyšší",
+      "desc": "Kvalita vhodná pro kampaně"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Naše nejlepší kvalita pro tisk a reklamu"
     }
+  },
+  "describe": {
+    "product": "Produkt · {{style}}",
+    "fashion": "Móda · {{style}}",
+    "photos_one": "{{count}} fotka",
+    "photos_other": "Fotky: {{count}}"
   }
 }

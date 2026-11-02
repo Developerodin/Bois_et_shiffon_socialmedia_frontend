@@ -58,7 +58,11 @@
     "briefHint": "Raffina illuminazione, atmosfera o dettagli decorativi specifici",
     "sourcePreview": "Anteprima sorgente",
     "fullPreview": "{{product}}, anteprima completa",
-    "sourceImage": "Immagine sorgente"
+    "sourceImage": "Immagine sorgente",
+    "noPhoto": "Scegli una foto",
+    "noPhotoHint": "Qui trovi le foto dei prodotti del tuo sito e quelle che hai caricato. Tocca Cambia risorsa per caricarne una.",
+    "briefPlaceholder": "Descrivi la scena",
+    "briefRequired": "Descrivi la scena per usare la modalità Personalizzata."
   },
   "fashion": {
     "title": "Servizio fotografico moda",
@@ -102,7 +106,8 @@
       "contrast": "Alto contrasto con lo sfondo",
       "wrinkles": "Nessuna piega pesante",
       "frontFacing": "Angolo frontale"
-    }
+    },
+    "generateFor": "Genera servizio fotografico · {{price}}"
   },
   "source": {
     "title": "Scegli risorsa sorgente",
@@ -119,15 +124,11 @@
       "uploads": "Caricamenti"
     },
     "businessWebsite": "{{name}} · Sito web",
-    "fromWebsite": "Dal sito web",
-    "filterCatalog": "Filtra catalogo",
-    "filters": {
-      "all": "Tutti gli articoli",
-      "tables": "Tavoli",
-      "storage": "Stoccaggio"
-    },
     "addPhoto": "Aggiungi foto",
-    "tip": "Ritagli puliti del prodotto offrono risultati ottimali per il servizio fotografico. Espanda Studio preserverà la texture originale del legno di acacia."
+    "untitled": "Foto",
+    "emptyWebsite": "Non ci sono ancora foto dei prodotti dal tuo sito. Caricane una.",
+    "emptyUploads": "Non hai ancora caricato foto. Tocca Aggiungi foto per caricarne una dal telefono.",
+    "cutoutTip": "Le foto di prodotto nitide su sfondo uniforme danno i risultati migliori. Espanda mantiene il prodotto esattamente com'è."
   },
   "generating": {
     "backToWorkspace": "Torna allo spazio di lavoro",
@@ -141,17 +142,20 @@
       "queued": "In coda"
     },
     "progress": "Generazione",
-    "sample": {
-      "title": "{{name}} servizio fotografico pranzo",
-      "description": "Messa in scena di {{product}} in un interno architettonico con luce diurna.",
-      "variations_one": "{{count}} variazione",
-      "variations_other": "{{count}} variazioni"
-    },
     "steps": {
       "catalog": "Elaborazione risorsa catalogo",
       "compose": "Composizione scena e illuminazione",
       "finish": "Finitura e calibrazione colore"
-    }
+    },
+    "backToResults": "Torna ai servizi fotografici",
+    "failedTitle": "Questo servizio fotografico non è riuscito",
+    "failedBody_one": "Il tuo credito è stato rimborsato: {{count}} credito. Riprova o scegli un'altra qualità.",
+    "failedBody_other": "I tuoi {{count}} crediti sono stati rimborsati. Riprova o scegli un'altra qualità.",
+    "wait": {
+      "short": "Quattro foto, di solito pronte in circa un minuto.",
+      "long": "Quattro foto in qualità Ultra, di solito pronte in pochi minuti."
+    },
+    "refundNote": "Non ti è stato addebitato nulla: i crediti sono tornati nel tuo saldo."
   },
   "results": {
     "title": "Servizi fotografici",
@@ -164,41 +168,58 @@
       "fashion": "Moda ({{count}})"
     },
     "empty": "Nessun servizio fotografico ancora.",
-    "processingLabel": "{{title}}. Elaborazione, {{percent}}%",
     "processingBadge_one": "Elaborazione · {{count}} credito",
     "processingBadge_other": "Elaborazione · {{count}} crediti",
-    "preview": "Anteprima",
     "reviewPhotoLabel": "Rivedi foto, {{title}}",
     "reviewPhoto": "Rivedi foto",
-    "sample": {
-      "studioStaging": "{{product}} · Allestimento studio",
-      "rendering": "Fase di rendering · {{percent}}%",
-      "interiorReady_one": "Interno · {{ratio}} · {{count}} foto pronta",
-      "interiorReady_other": "Interno · {{ratio}} · {{count}} foto pronte",
-      "studioDaylight": "Luce diurna studio · {{ratio}}"
-    }
+    "failedBadge": "Non riuscito",
+    "refunded_one": "Non riuscito · {{count}} credito rimborsato",
+    "refunded_other": "Non riuscito · {{count}} crediti rimborsati",
+    "ready": "Pronto"
   },
   "detail": {
-    "moreOptions": "Altre opzioni",
     "downloadPhoto": "Scarica foto",
     "variation": "Variante",
     "share": "Condividi servizio fotografico",
-    "samplePreview": "Anteprima campione",
     "compareOriginal": "Confronta originale",
-    "expandView": "Espandi vista",
     "stagingSummary": "Riepilogo allestimento",
     "format": "Formato",
     "creationCost": "Costo di creazione",
     "credits_one": "{{count}} credito",
     "credits_other": "{{count}} crediti",
-    "sample": {
-      "headerTitle": "Servizio fotografico {{name}}",
-      "vertical": "{{ratio}} Verticale",
-      "architecturalInterior": "Interno architettonico",
-      "studioDaylight": "Luce diurna studio",
-      "formatBadge": "Formato {{ratio}}",
-      "naturalStudio": "Studio naturale",
-      "portraitPhoto": "Foto ritratto"
+    "original": "Foto originale",
+    "photoOf": "Foto {{index}} di {{count}}",
+    "showResult": "Mostra risultato",
+    "photos": "Foto",
+    "noBrief": "Nessuna indicazione creativa: ambientazione basata sullo stile della scena.",
+    "anyModel": "Una modella o un modello scelto per il capo",
+    "formatBadge": "Formato {{ratio}}"
+  },
+  "tiers": {
+    "label": "Qualità",
+    "price_one": "{{count}} credito",
+    "price_other": "{{count}} crediti",
+    "base": {
+      "name": "Base",
+      "desc": "Bozze rapide per provare le tue idee"
+    },
+    "moderate": {
+      "name": "Intermedia",
+      "desc": "Dettagli e luce più definiti"
+    },
+    "higher": {
+      "name": "Alta",
+      "desc": "Qualità pronta per le campagne"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Il meglio per stampa e pubblicità"
     }
+  },
+  "describe": {
+    "product": "Prodotto · {{style}}",
+    "fashion": "Moda · {{style}}",
+    "photos_one": "{{count}} foto",
+    "photos_other": "{{count}} foto"
   }
 }

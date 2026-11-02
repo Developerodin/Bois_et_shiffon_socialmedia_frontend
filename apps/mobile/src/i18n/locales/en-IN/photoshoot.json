@@ -58,7 +58,11 @@
     "briefHint": "Refine lighting, ambiance or specific decor cues",
     "sourcePreview": "Source preview",
     "fullPreview": "{{product}}, full preview",
-    "sourceImage": "Source image"
+    "sourceImage": "Source image",
+    "noPhoto": "Choose a photo",
+    "noPhotoHint": "Your website's product photos and your uploads appear here. Tap Change asset to upload one.",
+    "briefPlaceholder": "Describe the scene",
+    "briefRequired": "Describe the scene to use Custom."
   },
   "fashion": {
     "title": "Fashion photoshoot",
@@ -102,7 +106,8 @@
       "contrast": "High contrast against background",
       "wrinkles": "No heavy wrinkles",
       "frontFacing": "Front-facing angle"
-    }
+    },
+    "generateFor": "Generate photoshoot · {{price}}"
   },
   "source": {
     "title": "Choose source asset",
@@ -119,15 +124,11 @@
       "uploads": "Uploads"
     },
     "businessWebsite": "{{name}} · Website",
-    "fromWebsite": "From website",
-    "filterCatalog": "Filter catalogue",
-    "filters": {
-      "all": "All items",
-      "tables": "Tables",
-      "storage": "Storage"
-    },
     "addPhoto": "Add photo",
-    "tip": "Clean product cutouts yield optimal photoshoot results. Espanda Studio will preserve original acacia wood texture."
+    "untitled": "Photo",
+    "emptyWebsite": "No product photos from your website yet. Upload one instead.",
+    "emptyUploads": "No uploads yet. Tap Add photo to upload one from your phone.",
+    "cutoutTip": "Clean product photos on a plain background give the best results. Espanda keeps the product exactly as it is."
   },
   "generating": {
     "backToWorkspace": "Back to workspace",
@@ -141,17 +142,20 @@
       "queued": "Queued"
     },
     "progress": "Generating",
-    "sample": {
-      "title": "{{name}} dining photoshoot",
-      "description": "Staging {{product}} in architectural daylight interior.",
-      "variations_one": "{{count}} variation",
-      "variations_other": "{{count}} variations"
-    },
     "steps": {
       "catalog": "Processing catalogue asset",
       "compose": "Composing scene & lighting",
       "finish": "Finishing & colour calibration"
-    }
+    },
+    "backToResults": "Back to photoshoots",
+    "failedTitle": "This photoshoot didn't work",
+    "failedBody_one": "Your {{count}} credit is back. Try again, or pick another quality.",
+    "failedBody_other": "Your {{count}} credits are back. Try again, or pick another quality.",
+    "wait": {
+      "short": "Four photos, usually ready in about a minute.",
+      "long": "Four photos at Ultra quality, usually ready in a few minutes."
+    },
+    "refundNote": "Nothing was charged in the end: the credits went back to your balance."
   },
   "results": {
     "title": "Photoshoots",
@@ -164,41 +168,58 @@
       "fashion": "Fashion ({{count}})"
     },
     "empty": "No photoshoots yet.",
-    "processingLabel": "{{title}}. Processing, {{percent}}%",
     "processingBadge_one": "Processing · {{count}} credit",
     "processingBadge_other": "Processing · {{count}} credits",
-    "preview": "Preview",
     "reviewPhotoLabel": "Review photo, {{title}}",
     "reviewPhoto": "Review photo",
-    "sample": {
-      "studioStaging": "{{product}} · Studio staging",
-      "rendering": "Rendering stage · {{percent}}%",
-      "interiorReady_one": "Interior · {{ratio}} · {{count}} photo ready",
-      "interiorReady_other": "Interior · {{ratio}} · {{count}} photos ready",
-      "studioDaylight": "Studio daylight · {{ratio}}"
-    }
+    "failedBadge": "Failed",
+    "refunded_one": "Didn't work · {{count}} credit refunded",
+    "refunded_other": "Didn't work · {{count}} credits refunded",
+    "ready": "Ready"
   },
   "detail": {
-    "moreOptions": "More options",
     "downloadPhoto": "Download photo",
     "variation": "Variation",
     "share": "Share photoshoot",
-    "samplePreview": "Sample preview",
     "compareOriginal": "Compare original",
-    "expandView": "Expand view",
     "stagingSummary": "Staging summary",
     "format": "Format",
     "creationCost": "Creation cost",
     "credits_one": "{{count}} credit",
     "credits_other": "{{count}} credits",
-    "sample": {
-      "headerTitle": "{{name}} photoshoot",
-      "vertical": "{{ratio}} Vertical",
-      "architecturalInterior": "Architectural Interior",
-      "studioDaylight": "Studio daylight",
-      "formatBadge": "{{ratio}} format",
-      "naturalStudio": "Natural studio",
-      "portraitPhoto": "Portrait photo"
+    "original": "Original photo",
+    "photoOf": "Photo {{index}} of {{count}}",
+    "showResult": "Show result",
+    "photos": "Photos",
+    "noBrief": "No art direction: staged as the scene style describes.",
+    "anyModel": "A model chosen for the garment",
+    "formatBadge": "{{ratio}} format"
+  },
+  "tiers": {
+    "label": "Quality",
+    "price_one": "{{count}} credit",
+    "price_other": "{{count}} credits",
+    "base": {
+      "name": "Base",
+      "desc": "Quick drafts to try ideas"
+    },
+    "moderate": {
+      "name": "Moderate",
+      "desc": "Sharper detail and light"
+    },
+    "higher": {
+      "name": "Higher",
+      "desc": "Campaign-ready quality"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Our best, for print and ads"
     }
+  },
+  "describe": {
+    "product": "Product · {{style}}",
+    "fashion": "Fashion · {{style}}",
+    "photos_one": "{{count}} photo",
+    "photos_other": "{{count}} photos"
   }
 }

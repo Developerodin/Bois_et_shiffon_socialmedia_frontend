@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SHOOT_TIERS, type ShootTier } from "@/api/endpoints";
 import { Footer } from "@/ui/layout";
 import { color, font, layout, radius, space, type } from "@/theme/tokens";
 import { ps, STROKE } from "./chrome";
@@ -179,6 +180,7 @@ export function IconLabelButton({
   style,
   height = layout.buttonHeight,
   bold,
+  disabled,
 }: {
   label: string;
   icon: LucideIcon;
@@ -188,6 +190,7 @@ export function IconLabelButton({
   style?: StyleProp<ViewStyle>;
   height?: number;
   bold?: boolean;
+  disabled?: boolean;
 }) {
   const ink = variant === "outline" ? color.ink : color.onPrimary;
   const icon = <Icon size={20} color={ink} strokeWidth={STROKE} />;
@@ -195,8 +198,10 @@ export function IconLabelButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{ disabled: !!disabled }}
+      disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.btn, { minHeight: height }, styles[variant], pressed && { opacity: 0.85 }, style]}
+      style={({ pressed }) => [styles.btn, { minHeight: height }, styles[variant], pressed && { opacity: 0.85 }, disabled && { opacity: 0.4 }, style]}
     >
       {trailing ? null : icon}
       <Text style={[type.label, { color: ink }, bold && { fontFamily: font.semibold }]} numberOfLines={1}>
@@ -207,7 +212,44 @@ export function IconLabelButton({
   );
 }
 
+/** Quality tiers (Base → Ultra) with their price for the shoot; Base is the default. */
+export function TierPicker({ value, onChange }: { value: ShootTier; onChange: (t: ShootTier) => void }) {
+  const { t } = useTranslation("photoshoot");
+  return (
+    <View accessibilityRole="radiogroup" accessibilityLabel={t("tiers.label")} style={styles.tiers}>
+      {SHOOT_TIERS.map((tier, i) => {
+        const on = tier.id === value;
+        const price = t("tiers.price", { count: tier.credits });
+        return (
+          <Pressable
+            key={tier.id}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: on }}
+            accessibilityLabel={`${t(`tiers.${tier.id}.name`)}, ${price}. ${t(`tiers.${tier.id}.desc`)}`}
+            onPress={() => onChange(tier.id)}
+            style={[styles.tier, i > 0 && styles.tierRule, on && styles.tierOn]}
+          >
+            <View style={[styles.radio, on && styles.radioOn]}>{on ? <View style={styles.radioDot} /> : null}</View>
+            <View style={{ flex: 1 }}>
+              <Text style={[type.label, { fontFamily: font.semibold }]}>{t(`tiers.${tier.id}.name`)}</Text>
+              <Text style={type.meta}>{t(`tiers.${tier.id}.desc`)}</Text>
+            </View>
+            <Text style={[type.meta, { color: color.ink }]}>{price}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  tiers: { backgroundColor: color.surface, borderWidth: 1, borderColor: ps.border, borderRadius: radius.control, overflow: "hidden" },
+  tier: { minHeight: 56, flexDirection: "row", alignItems: "center", gap: space[12], paddingVertical: space[8], paddingHorizontal: space[12] },
+  tierRule: { borderTopWidth: 1, borderTopColor: ps.hairline },
+  tierOn: { backgroundColor: "#F4F2FD" },
+  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: color.controlOutline, alignItems: "center", justifyContent: "center" },
+  radioOn: { borderColor: color.primary },
+  radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: color.primary },
   page: { flex: 1, backgroundColor: color.canvasAlt },
   body: { paddingHorizontal: space[20], paddingTop: space[24], paddingBottom: space[32] },
   sectionLabel: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 2, paddingBottom: space[8], minHeight: 29 },

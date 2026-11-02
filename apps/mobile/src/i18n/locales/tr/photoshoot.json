@@ -58,7 +58,11 @@
     "briefHint": "Aydınlatma, ambiyans veya belirli dekor ipuçlarını iyileştirin",
     "sourcePreview": "Kaynak önizleme",
     "fullPreview": "{{product}}, tam önizleme",
-    "sourceImage": "Kaynak görüntü"
+    "sourceImage": "Kaynak görüntü",
+    "noPhoto": "Fotoğraf seç",
+    "noPhotoHint": "Web sitendeki ürün fotoğrafları ve yüklediklerin burada görünür. Fotoğraf yüklemek için Görseli değiştir'e dokun.",
+    "briefPlaceholder": "Sahneyi açıkla",
+    "briefRequired": "Özel seçeneğini kullanmak için sahneyi açıkla."
   },
   "fashion": {
     "title": "Moda fotoğraf çekimi",
@@ -102,7 +106,8 @@
       "contrast": "Arka plana karşı yüksek kontrast",
       "wrinkles": "Ağır kırışıklık yok",
       "frontFacing": "Önden bakış açısı"
-    }
+    },
+    "generateFor": "Fotoğraf çekimi oluştur · {{price}}"
   },
   "source": {
     "title": "Kaynak varlığı seçin",
@@ -119,15 +124,11 @@
       "uploads": "Yüklemeler"
     },
     "businessWebsite": "{{name}} · Web sitesi",
-    "fromWebsite": "Web sitesinden",
-    "filterCatalog": "Katalogu filtrele",
-    "filters": {
-      "all": "Tüm öğeler",
-      "tables": "Masalar",
-      "storage": "Depolama"
-    },
     "addPhoto": "Fotoğraf ekle",
-    "tip": "Temiz ürün kesitleri, optimal fotoğraf çekimi sonuçları verir. Espanda Studio orijinal akasya ahşap dokusunu koruyacaktır."
+    "untitled": "Fotoğraf",
+    "emptyWebsite": "Web sitenden henüz ürün fotoğrafı yok. Bunun yerine bir fotoğraf yükle.",
+    "emptyUploads": "Henüz yükleme yok. Telefonundan fotoğraf yüklemek için Fotoğraf ekle'ye dokun.",
+    "cutoutTip": "Düz bir arka planda çekilmiş net ürün fotoğrafları en iyi sonucu verir. Espanda ürünü olduğu gibi korur."
   },
   "generating": {
     "backToWorkspace": "Çalışma alanına geri dön",
@@ -141,17 +142,20 @@
       "queued": "Sırada"
     },
     "progress": "Oluşturuluyor",
-    "sample": {
-      "title": "{{name}} yemek fotoğraf çekimi",
-      "description": "{{product}} mimari gün ışığı iç mekanında sahneleniyor.",
-      "variations_one": "{{count}} varyasyon",
-      "variations_other": "{{count}} varyasyon"
-    },
     "steps": {
       "catalog": "Katalog varlığı işleniyor",
       "compose": "Sahne ve aydınlatma oluşturuluyor",
       "finish": "Tamamlama ve renk kalibrasyonu"
-    }
+    },
+    "backToResults": "Fotoğraf çekimlerine dön",
+    "failedTitle": "Bu fotoğraf çekimi başarısız oldu",
+    "failedBody_one": "{{count}} kredin iade edildi. Tekrar dene veya başka bir kalite seç.",
+    "failedBody_other": "{{count}} kredin iade edildi. Tekrar dene veya başka bir kalite seç.",
+    "wait": {
+      "short": "Dört fotoğraf genellikle bir dakika içinde hazır olur.",
+      "long": "Ultra kalitede dört fotoğraf genellikle birkaç dakika içinde hazır olur."
+    },
+    "refundNote": "Herhangi bir ücret alınmadı: Krediler bakiyene iade edildi."
   },
   "results": {
     "title": "Fotoğraf çekimleri",
@@ -164,41 +168,58 @@
       "fashion": "Moda ({{count}})"
     },
     "empty": "Henüz fotoğraf çekimi yok.",
-    "processingLabel": "{{title}}. İşleniyor, {{percent}}%",
     "processingBadge_one": "İşleniyor · {{count}} kredi",
     "processingBadge_other": "İşleniyor · {{count}} kredi",
-    "preview": "Önizleme",
     "reviewPhotoLabel": "Fotoğrafı incele, {{title}}",
     "reviewPhoto": "Fotoğrafı incele",
-    "sample": {
-      "studioStaging": "{{product}} · Stüdyo sahneleme",
-      "rendering": "Render aşaması · {{percent}}%",
-      "interiorReady_one": "İç mekan · {{ratio}} · {{count}} fotoğraf hazır",
-      "interiorReady_other": "İç mekan · {{ratio}} · {{count}} fotoğraf hazır",
-      "studioDaylight": "Stüdyo gün ışığı · {{ratio}}"
-    }
+    "failedBadge": "Başarısız",
+    "refunded_one": "Başarısız · {{count}} kredi iade edildi",
+    "refunded_other": "Başarısız · {{count}} kredi iade edildi",
+    "ready": "Hazır"
   },
   "detail": {
-    "moreOptions": "Daha fazla seçenek",
     "downloadPhoto": "Fotoğraf indir",
     "variation": "Varyasyon",
     "share": "Fotoğraf çekimini paylaş",
-    "samplePreview": "Örnek önizleme",
     "compareOriginal": "Orijinali karşılaştır",
-    "expandView": "Genişlet",
     "stagingSummary": "Sahneleme özeti",
     "format": "Format",
     "creationCost": "Oluşturma maliyeti",
     "credits_one": "{{count}} kredi",
     "credits_other": "{{count}} kredi",
-    "sample": {
-      "headerTitle": "{{name}} fotoğraf çekimi",
-      "vertical": "{{ratio}} Dikey",
-      "architecturalInterior": "Mimari İç Mekan",
-      "studioDaylight": "Stüdyo gün ışığı",
-      "formatBadge": "{{ratio}} format",
-      "naturalStudio": "Doğal stüdyo",
-      "portraitPhoto": "Portre fotoğrafı"
+    "original": "Orijinal fotoğraf",
+    "photoOf": "{{index}} / {{count}} fotoğraf",
+    "showResult": "Sonucu göster",
+    "photos": "Fotoğraflar",
+    "noBrief": "Sanat yönetimi yok: Sahne, stil açıklamasına göre düzenlenir.",
+    "anyModel": "Kıyafete uygun seçilen bir model",
+    "formatBadge": "{{ratio}} formatı"
+  },
+  "tiers": {
+    "label": "Kalite",
+    "price_one": "{{count}} kredi",
+    "price_other": "{{count}} kredi",
+    "base": {
+      "name": "Temel",
+      "desc": "Fikirleri denemek için hızlı taslaklar"
+    },
+    "moderate": {
+      "name": "Orta",
+      "desc": "Daha net detaylar ve ışık"
+    },
+    "higher": {
+      "name": "Yüksek",
+      "desc": "Kampanyaya hazır kalite"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Baskı ve reklamlar için en yüksek kalitemiz"
     }
+  },
+  "describe": {
+    "product": "Ürün · {{style}}",
+    "fashion": "Moda · {{style}}",
+    "photos_one": "{{count}} fotoğraf",
+    "photos_other": "{{count}} fotoğraf"
   }
 }

@@ -7,8 +7,8 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 import { images } from "@/ui/icons";
 import { color, font, layout, radius, space, type } from "@/theme/tokens";
-import { business } from "./sample";
 import { useCredits } from "@/ui/use-credits";
+import { useCurrentBrand } from "@/ui/use-current-brand";
 
 /** Colours the Photoshoot frames use that the token set doesn't name. */
 export const ps = {
@@ -138,10 +138,12 @@ export function BackButton({ label, icon = ArrowLeft }: { label?: string; icon?:
 
 /** Business favicon chip; with `label` it also names the business. */
 export function BrandChip({ label }: { label?: boolean }) {
+  const brand = useCurrentBrand();
+  const name = brand?.name ?? "";
   return (
-    <View accessible accessibilityLabel={business.name} style={[styles.brandChip, label ? styles.brandChipWide : styles.brandChipIcon]}>
-      <Image source={business.favicon} style={{ width: 16, height: 16 }} contentFit="contain" />
-      {label ? <Text style={[type.meta, { color: color.ink }]}>{business.name}</Text> : null}
+    <View accessible accessibilityLabel={name} style={[styles.brandChip, label ? styles.brandChipWide : styles.brandChipIcon]}>
+      <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={{ width: 16, height: 16 }} contentFit="contain" />
+      {label ? <Text style={[type.meta, { color: color.ink }]}>{name}</Text> : null}
     </View>
   );
 }
@@ -149,10 +151,12 @@ export function BrandChip({ label }: { label?: boolean }) {
 /** "Bois & Chiffons ⌄" business switcher (44 tall, outline). */
 export function BusinessSwitch({ chevron = 20 }: { chevron?: number }) {
   const { t } = useTranslation("photoshoot");
+  const brand = useCurrentBrand();
+  const name = brand?.name ?? "";
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={t("chrome.switchBusiness", { name: business.name })} onPress={() => router.push("/business/menu")} style={styles.switch}>
-      <Image source={business.favicon} style={{ width: 20, height: 20, borderRadius: 4 }} contentFit="contain" />
-      <Text style={type.label}>{business.name}</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel={t("chrome.switchBusiness", { name })} onPress={() => router.push("/business/menu")} style={styles.switch}>
+      <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={{ width: 20, height: 20, borderRadius: 4 }} contentFit="contain" />
+      <Text style={type.label}>{name}</Text>
       <ChevronDown size={chevron} color={color.ink} strokeWidth={STROKE} />
     </Pressable>
   );

@@ -58,7 +58,11 @@
     "briefHint": "Förfina belysning, atmosfär eller specifika dekorativa inslag",
     "sourcePreview": "Förhandsvisning av källa",
     "fullPreview": "{{product}}, full förhandsvisning",
-    "sourceImage": "Källbild"
+    "sourceImage": "Källbild",
+    "noPhoto": "Välj ett foto",
+    "noPhotoHint": "Här visas produktfoton från din webbplats och bilder du laddat upp. Tryck på Byt bild för att ladda upp en.",
+    "briefPlaceholder": "Beskriv scenen",
+    "briefRequired": "Beskriv scenen för att använda Anpassad."
   },
   "fashion": {
     "title": "Modefotosession",
@@ -102,7 +106,8 @@
       "contrast": "Hög kontrast mot bakgrund",
       "wrinkles": "Inga kraftiga veck",
       "frontFacing": "Framåtvänd vinkel"
-    }
+    },
+    "generateFor": "Skapa fotografering · {{price}}"
   },
   "source": {
     "title": "Välj källobjekt",
@@ -119,15 +124,11 @@
       "uploads": "Uppladdningar"
     },
     "businessWebsite": "{{name}} · Webbplats",
-    "fromWebsite": "Från webbplats",
-    "filterCatalog": "Filtrera katalog",
-    "filters": {
-      "all": "Alla objekt",
-      "tables": "Bord",
-      "storage": "Förvaring"
-    },
     "addPhoto": "Lägg till foto",
-    "tip": "Rena produktutskärningar ger optimala fotosessionsresultat. Espanda Studio bevarar originalets akaciaträstruktur."
+    "untitled": "Foto",
+    "emptyWebsite": "Inga produktfoton från din webbplats ännu. Ladda upp ett i stället.",
+    "emptyUploads": "Inga uppladdningar ännu. Tryck på Lägg till foto för att ladda upp ett från mobilen.",
+    "cutoutTip": "Tydliga produktfoton mot en enfärgad bakgrund ger bäst resultat. Espanda behåller produkten precis som den är."
   },
   "generating": {
     "backToWorkspace": "Tillbaka till arbetsyta",
@@ -141,17 +142,20 @@
       "queued": "I kö"
     },
     "progress": "Genererar",
-    "sample": {
-      "title": "{{name}} matfotosession",
-      "description": "Scenerar {{product}} i arkitektonisk dagsljusinteriör.",
-      "variations_one": "{{count}} variation",
-      "variations_other": "{{count}} variationer"
-    },
     "steps": {
       "catalog": "Bearbetar katalogobjekt",
       "compose": "Komponerar scen & belysning",
       "finish": "Avslutar & färgkalibrering"
-    }
+    },
+    "backToResults": "Tillbaka till fotograferingar",
+    "failedTitle": "Fotograferingen misslyckades",
+    "failedBody_one": "Din {{count}} kredit har återbetalats. Försök igen eller välj en annan kvalitet.",
+    "failedBody_other": "Dina {{count}} krediter har återbetalats. Försök igen eller välj en annan kvalitet.",
+    "wait": {
+      "short": "Fyra foton, oftast klara på ungefär en minut.",
+      "long": "Fyra foton i Ultra-kvalitet, oftast klara på några minuter."
+    },
+    "refundNote": "Ingenting debiterades till slut: krediterna återfördes till ditt saldo."
   },
   "results": {
     "title": "Fotosessioner",
@@ -164,41 +168,58 @@
       "fashion": "Mode ({{count}})"
     },
     "empty": "Inga fotosessioner ännu.",
-    "processingLabel": "{{title}}. Bearbetar, {{percent}}%",
     "processingBadge_one": "Bearbetar · {{count}} kredit",
     "processingBadge_other": "Bearbetar · {{count}} krediter",
-    "preview": "Förhandsvisning",
     "reviewPhotoLabel": "Granska foto, {{title}}",
     "reviewPhoto": "Granska foto",
-    "sample": {
-      "studioStaging": "{{product}} · Studiouppsättning",
-      "rendering": "Renderingsstadium · {{percent}}%",
-      "interiorReady_one": "Interiör · {{ratio}} · {{count}} foto klart",
-      "interiorReady_other": "Interiör · {{ratio}} · {{count}} foton klara",
-      "studioDaylight": "Studioljus · {{ratio}}"
-    }
+    "failedBadge": "Misslyckades",
+    "refunded_one": "Misslyckades · {{count}} kredit återbetald",
+    "refunded_other": "Misslyckades · {{count}} krediter återbetalda",
+    "ready": "Klar"
   },
   "detail": {
-    "moreOptions": "Fler alternativ",
     "downloadPhoto": "Ladda ner foto",
     "variation": "Variation",
     "share": "Dela fotosession",
-    "samplePreview": "Exempelförhandsvisning",
     "compareOriginal": "Jämför original",
-    "expandView": "Expandera vy",
     "stagingSummary": "Sammanfattning av uppsättning",
     "format": "Format",
     "creationCost": "Skapandekostnad",
     "credits_one": "{{count}} kredit",
     "credits_other": "{{count}} krediter",
-    "sample": {
-      "headerTitle": "{{name}} fotosession",
-      "vertical": "{{ratio}} Vertikal",
-      "architecturalInterior": "Arkitektonisk interiör",
-      "studioDaylight": "Studioljus",
-      "formatBadge": "{{ratio}} format",
-      "naturalStudio": "Naturlig studio",
-      "portraitPhoto": "Porträttfoto"
+    "original": "Originalfoto",
+    "photoOf": "Foto {{index}} av {{count}}",
+    "showResult": "Visa resultat",
+    "photos": "Foton",
+    "noBrief": "Ingen bildbeskrivning: arrangerad enligt scenstilen.",
+    "anyModel": "En modell vald för plagget",
+    "formatBadge": "{{ratio}}-format"
+  },
+  "tiers": {
+    "label": "Kvalitet",
+    "price_one": "{{count}} kredit",
+    "price_other": "{{count}} krediter",
+    "base": {
+      "name": "Bas",
+      "desc": "Snabba utkast för att testa idéer"
+    },
+    "moderate": {
+      "name": "Mellan",
+      "desc": "Skarpare detaljer och ljus"
+    },
+    "higher": {
+      "name": "Hög",
+      "desc": "Kvalitet för kampanjer"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Vår bästa kvalitet för tryck och annonser"
     }
+  },
+  "describe": {
+    "product": "Produkt · {{style}}",
+    "fashion": "Mode · {{style}}",
+    "photos_one": "{{count}} foto",
+    "photos_other": "{{count}} foton"
   }
 }

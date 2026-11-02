@@ -1,14 +1,21 @@
 import { useState } from "react";
 import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
-import { Armchair, Camera, RectangleVertical, SlidersHorizontal, Smartphone, Sparkles, Square, Zap } from "lucide-react-native";
+import { Armchair, Camera, ImageOff, RectangleVertical, SlidersHorizontal, Smartphone, Sparkles, Square, Zap } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { Button } from "@/ui/button";
 import { BackButton, BrandChip, Glow, ps, STROKE, TopBar } from "@/ui/photoshoot/chrome";
-import { IconLabelButton, Page, PhotoPill, SectionLabel, Segmented, type SegmentOption } from "@/ui/photoshoot/controls";
-import { credits, defaultBrief, findAsset, type AspectRatio, type SceneStyle } from "@/ui/photoshoot/sample";
+import { IconLabelButton, Page, PhotoPill, SectionLabel, Segmented, TierPicker, type SegmentOption } from "@/ui/photoshoot/controls";
+import type { aspectRatios, sceneStyles } from "@/ui/photoshoot/options";
+import { startShoot } from "@/ui/photoshoot/start";
+import { useCredits } from "@/ui/use-credits";
+import { libraryPhotos, siteLabel, useCurrentBrand } from "@/ui/use-current-brand";
+import { SHOOT_TIERS, type ShootTier } from "@/api/endpoints";
 import { color, font, radius, space, type } from "@/theme/tokens";
+
+type AspectRatio = (typeof aspectRatios)[number];
+type SceneStyle = (typeof sceneStyles)[number];
 
 const RATIOS: SegmentOption<AspectRatio>[] = [
   { value: "1:1", label: "1:1", icon: Square },
@@ -22,14 +29,37 @@ const SCENES: SegmentOption<SceneStyle>[] = [
   { value: "custom", label: "product.scenes.custom", icon: SlidersHorizontal },
 ];
 
-/** F02 · Photoshoot / Product setup. `asset` comes back from the source picker (F04). */
+/**
+ * F02 · Photoshoot / Product setup, on the brand's photo library. `asset` (a media key) comes back from the source
+ * picker (F04); without one, the library's first photo.
+ */
 export default function ProductSetup() {
   const { t } = useTranslation("photoshoot");
-  const { asset: assetId } = useLocalSearchParams<{ asset?: string }>();
-  const asset = findAsset(assetId);
+  const { asset: assetKey } = useLocalSearchParams<{ asset?: string }>();
+  const brand = useCurrentBrand();
+  const photos = libraryPhotos(brand?.view);
+  const asset = photos.find((p) => p.key === assetKey) ?? photos[0];
+  const available = useCredits();
   const [ratio, setRatio] = useState<AspectRatio>("4:5");
   const [scene, setScene] = useState<SceneStyle>("interior");
-  const [brief, setBrief] = useState(defaultBrief);
+  const [brief, setBrief] = useState("");
+  const [tier, setTier] = useState<ShootTier>("base");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const cost = SHOOT_TIERS.find((x) => x.id === tier)!.credits;
+  const needsBrief = scene === "custom" && !brief.trim();
+  const generate = async () => {
+    if (!asset || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await startShoot({ kind: "product", tier, sourceKey: asset.key, ratio, scene, brief: brief.trim() }, t("product.title"));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <Page
@@ -41,26 +71,38 @@ export default function ProductSetup() {
           <View style={styles.estimate}>
             <View style={styles.estimateLeft}>
               <Zap size={16} color={color.inkSecondary} strokeWidth={STROKE} />
-              <Text style={type.meta}>{t("product.estimate", { count: credits.shootCost })}</Text>
+              <Text style={type.meta}>{t("product.estimate", { count: cost })}</Text>
             </View>
-            <Text style={type.meta}>{t("product.available", { count: credits.available })}</Text>
+            {available === null ? null : <Text style={type.meta}>{t("product.available", { count: available })}</Text>}
           </View>
-          <IconLabelButton label={t("product.generate")} icon={Sparkles} trailing onPress={() => router.push("/photoshoot/generating")} />
+          {error ? <Text style={[type.meta, { color: color.error }]}>{error}</Text> : needsBrief ? <Text style={type.meta}>{t("product.briefRequired")}</Text> : null}
+          <IconLabelButton label={t("product.generate")} icon={Sparkles} trailing disabled={!asset || busy || needsBrief} onPress={() => void generate()} />
         </>
       }
     >
       <SectionLabel>{t("product.selectedAsset")}</SectionLabel>
       <View style={[styles.card, styles.assetCard]}>
-        <Image source={asset.image} style={styles.assetThumb} contentFit="cover" accessibilityLabel={asset.product} />
+        {asset ? (
+          <Image source={{ uri: asset.url, cacheKey: asset.key }} style={styles.assetThumb} contentFit="cover" accessibilityLabel={asset.title} />
+        ) : (
+          <View style={[styles.assetThumb, styles.noPhoto]}>
+            <ImageOff size={20} color={color.inkSecondary} strokeWidth={STROKE} />
+          </View>
+        )}
         <View style={{ flex: 1 }}>
           <Text style={styles.assetTitle} numberOfLines={2}>
-            {asset.name}
+            {asset?.title ?? t("product.noPhoto")}
           </Text>
-          <Text style={[type.meta, { paddingTop: 2 }]} numberOfLines={1}>
-            {`${asset.collection} · boisetchiffons.fr`}
+          <Text style={[type.meta, { paddingTop: 2 }]} numberOfLines={asset ? 1 : 3}>
+            {asset ? (asset.kind ?? siteLabel(brand?.view?.website) ?? "") : t("product.noPhotoHint")}
           </Text>
         </View>
-        <Button label={t("product.changeAsset")} variant="outline" height={44} onPress={() => router.push("/photoshoot/source")} />
+        <Button label={t("product.changeAsset")} variant="outline" height={44} onPress={() => router.push({ pathname: "/photoshoot/source", params: { selected: asset?.key ?? "" } })} />
+      </View>
+
+      <View style={styles.section}>
+        <SectionLabel>{t("tiers.label")}</SectionLabel>
+        <TierPicker value={tier} onChange={setTier} />
       </View>
 
       <View style={styles.section}>
@@ -81,7 +123,7 @@ export default function ProductSetup() {
             onChangeText={setBrief}
             multiline
             accessibilityLabel={t("product.creativeBrief")}
-            placeholder="Décrivez la scène"
+            placeholder={t("product.briefPlaceholder")}
             placeholderTextColor={color.inkMuted}
             style={styles.brief}
           />
@@ -91,20 +133,19 @@ export default function ProductSetup() {
         </View>
       </View>
 
-      <View style={styles.section}>
-        <SectionLabel>{t("product.sourcePreview")}</SectionLabel>
-        <View style={[styles.card, { padding: space[12] }]}>
-          <View style={styles.preview}>
-            <Image source={asset.image} style={styles.previewImage} contentFit="contain" accessibilityLabel={t("product.fullPreview", { product: asset.product })} />
-            <PhotoPill dot={ps.black} style={{ top: 10, left: 10 }}>
-              {t("product.sourceImage")}
-            </PhotoPill>
-            <View style={styles.sizeBadge}>
-              <Text style={type.meta}>{asset.size}</Text>
+      {asset ? (
+        <View style={styles.section}>
+          <SectionLabel>{t("product.sourcePreview")}</SectionLabel>
+          <View style={[styles.card, { padding: space[12] }]}>
+            <View style={styles.preview}>
+              <Image source={{ uri: asset.url, cacheKey: asset.key }} style={styles.previewImage} contentFit="contain" accessibilityLabel={t("product.fullPreview", { product: asset.title })} />
+              <PhotoPill dot={ps.black} style={{ top: 10, left: 10 }}>
+                {t("product.sourceImage")}
+              </PhotoPill>
             </View>
           </View>
         </View>
-      </View>
+      ) : null}
       <View style={{ height: 32 }} />
     </Page>
   );
@@ -149,9 +190,9 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   briefHint: { marginTop: space[8], paddingTop: space[4], borderTopWidth: 1, borderTopColor: "#F0EFF4" },
+  noPhoto: { alignItems: "center", justifyContent: "center" },
   preview: { height: 142, borderRadius: radius.control, backgroundColor: "#FBF9FD", padding: space[8], overflow: "hidden" },
   previewImage: { flex: 1 },
-  sizeBadge: { position: "absolute", right: 8, bottom: 10, paddingVertical: 2, paddingHorizontal: space[8], borderRadius: 6, backgroundColor: "rgba(16,16,20,0.05)" },
   estimate: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: space[4] },
   estimateLeft: { flexDirection: "row", alignItems: "center", gap: space[8] },
 });

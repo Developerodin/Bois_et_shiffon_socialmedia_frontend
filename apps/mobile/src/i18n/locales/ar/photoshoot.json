@@ -58,7 +58,11 @@
     "briefHint": "تحسين الإضاءة أو الأجواء أو إشارات الديكور المحددة",
     "sourcePreview": "معاينة المصدر",
     "fullPreview": "{{product}}، معاينة كاملة",
-    "sourceImage": "صورة المصدر"
+    "sourceImage": "صورة المصدر",
+    "noPhoto": "اختر صورة",
+    "noPhotoHint": "تظهر هنا صور منتجات موقعك والصور التي رفعتها. اضغط على «تغيير الصورة» لرفع صورة.",
+    "briefPlaceholder": "صف المشهد",
+    "briefRequired": "صف المشهد لاستخدام النمط المخصص."
   },
   "fashion": {
     "title": "جلسة تصوير أزياء",
@@ -102,7 +106,8 @@
       "contrast": "تباين عالي مع الخلفية",
       "wrinkles": "بدون تجاعيد ثقيلة",
       "frontFacing": "زاوية مواجهة للأمام"
-    }
+    },
+    "generateFor": "إنشاء جلسة تصوير · {{price}}"
   },
   "source": {
     "title": "اختر العنصر المصدر",
@@ -119,15 +124,11 @@
       "uploads": "التحميلات"
     },
     "businessWebsite": "{{name}} · الموقع الإلكتروني",
-    "fromWebsite": "من الموقع الإلكتروني",
-    "filterCatalog": "تصفية الكتالوج",
-    "filters": {
-      "all": "جميع العناصر",
-      "tables": "طاولات",
-      "storage": "تخزين"
-    },
     "addPhoto": "إضافة صورة",
-    "tip": "القصاصات النظيفة للمنتجات تعطي نتائج جلسة تصوير مثالية. Espanda Studio سيحافظ على نسيج خشب الأكاسيا الأصلي."
+    "untitled": "صورة",
+    "emptyWebsite": "لا توجد صور منتجات من موقعك بعد. ارفع صورة بدلاً من ذلك.",
+    "emptyUploads": "لم ترفع أي صور بعد. اضغط على «إضافة صورة» لرفع صورة من هاتفك.",
+    "cutoutTip": "صور المنتجات الواضحة على خلفية بسيطة تعطي أفضل النتائج. يحافظ Espanda على المنتج كما هو تمامًا."
   },
   "generating": {
     "backToWorkspace": "العودة إلى مساحة العمل",
@@ -141,17 +142,20 @@
       "queued": "في الانتظار"
     },
     "progress": "جاري التوليد",
-    "sample": {
-      "title": "{{name}} جلسة تصوير طعام",
-      "description": "تجهيز {{product}} في ضوء داخلي معماري.",
-      "variations_one": "{{count}} تنويع",
-      "variations_other": "{{count}} تنويعات"
-    },
     "steps": {
       "catalog": "معالجة عنصر الكتالوج",
       "compose": "تكوين المشهد والإضاءة",
       "finish": "التشطيب ومعايرة الألوان"
-    }
+    },
+    "backToResults": "العودة إلى جلسات التصوير",
+    "failedTitle": "لم تنجح جلسة التصوير",
+    "failedBody_one": "تمت إعادة {{count}} من نقاطك. حاول مجددًا أو اختر جودة أخرى.",
+    "failedBody_other": "تمت إعادة {{count}} من نقاطك. حاول مجددًا أو اختر جودة أخرى.",
+    "wait": {
+      "short": "أربع صور، تجهز عادةً في حوالي دقيقة.",
+      "long": "أربع صور بجودة فائقة، تجهز عادةً في بضع دقائق."
+    },
+    "refundNote": "لم يُخصم منك شيء في النهاية: أُعيدت النقاط إلى رصيدك."
   },
   "results": {
     "title": "جلسات التصوير",
@@ -164,41 +168,58 @@
       "fashion": "الأزياء ({{count}})"
     },
     "empty": "لا توجد جلسات تصوير بعد.",
-    "processingLabel": "{{title}}. جاري المعالجة، {{percent}}%",
     "processingBadge_one": "جاري المعالجة · {{count}} رصيد",
     "processingBadge_other": "جاري المعالجة · {{count}} أرصدة",
-    "preview": "معاينة",
     "reviewPhotoLabel": "مراجعة الصورة، {{title}}",
     "reviewPhoto": "مراجعة الصورة",
-    "sample": {
-      "studioStaging": "{{product}} · إعداد الاستوديو",
-      "rendering": "مرحلة التصيير · {{percent}}%",
-      "interiorReady_one": "الداخلية · {{ratio}} · {{count}} صورة جاهزة",
-      "interiorReady_other": "الداخلية · {{ratio}} · {{count}} صور جاهزة",
-      "studioDaylight": "إضاءة نهارية في الاستوديو · {{ratio}}"
-    }
+    "failedBadge": "فشل",
+    "refunded_one": "لم تنجح · أُعيدت {{count}} نقطة",
+    "refunded_other": "لم تنجح · أُعيدت {{count}} نقطة",
+    "ready": "جاهز"
   },
   "detail": {
-    "moreOptions": "خيارات إضافية",
     "downloadPhoto": "تحميل الصورة",
     "variation": "تنويع",
     "share": "مشاركة جلسة التصوير",
-    "samplePreview": "معاينة العينة",
     "compareOriginal": "مقارنة الأصل",
-    "expandView": "توسيع العرض",
     "stagingSummary": "ملخص الإعداد",
     "format": "التنسيق",
     "creationCost": "تكلفة الإنشاء",
     "credits_one": "{{count}} رصيد",
     "credits_other": "{{count}} أرصدة",
-    "sample": {
-      "headerTitle": "جلسة تصوير {{name}}",
-      "vertical": "{{ratio}} عمودي",
-      "architecturalInterior": "الداخلية المعمارية",
-      "studioDaylight": "إضاءة نهارية في الاستوديو",
-      "formatBadge": "تنسيق {{ratio}}",
-      "naturalStudio": "استوديو طبيعي",
-      "portraitPhoto": "صورة شخصية"
+    "original": "الصورة الأصلية",
+    "photoOf": "الصورة {{index}} من {{count}}",
+    "showResult": "عرض النتيجة",
+    "photos": "الصور",
+    "noBrief": "بدون توجيه فني: يُنسّق المشهد حسب النمط المختار.",
+    "anyModel": "عارض يُختار حسب قطعة الملابس",
+    "formatBadge": "مقاس {{ratio}}"
+  },
+  "tiers": {
+    "label": "الجودة",
+    "price_one": "{{count}} نقطة",
+    "price_other": "{{count}} نقطة",
+    "base": {
+      "name": "أساسية",
+      "desc": "نماذج سريعة لتجربة الأفكار"
+    },
+    "moderate": {
+      "name": "متوسطة",
+      "desc": "تفاصيل وإضاءة أوضح"
+    },
+    "higher": {
+      "name": "عالية",
+      "desc": "جودة جاهزة للحملات"
+    },
+    "ultra": {
+      "name": "فائقة",
+      "desc": "أفضل جودة للطباعة والإعلانات"
     }
+  },
+  "describe": {
+    "product": "منتج · {{style}}",
+    "fashion": "أزياء · {{style}}",
+    "photos_one": "{{count}} صورة",
+    "photos_other": "{{count}} صورة"
   }
 }

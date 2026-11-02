@@ -358,6 +358,40 @@ export async function uploadPhoto(uri: string, library?: { title: string }, to?:
   return api<{ key: string; previewUrl: string }>(`${base}/media`, { form, workspaceId: ws, timeoutMs: 60_000 });
 }
 
+/**
+ * Photoshoot tiers and their price for a shoot of four (apps/web server/photoshoot/tiers.ts, which charges; keep in
+ * step). Base is preselected.
+ */
+export const SHOOT_TIERS = [
+  { id: "base", credits: 4 },
+  { id: "moderate", credits: 6 },
+  { id: "higher", credits: 12 },
+  { id: "ultra", credits: 24 },
+] as const;
+export type ShootTier = (typeof SHOOT_TIERS)[number]["id"];
+export type ShootRequest =
+  | { kind: "product"; tier: ShootTier; sourceKey: string; ratio: "1:1" | "4:5" | "9:16"; scene: "studio" | "interior" | "custom"; brief: string }
+  | { kind: "fashion"; tier: ShootTier; sourceKey: string; ratio: "4:5" | "9:16"; model?: "natural" | "editorial" | "casual"; pose: "fullBody" | "threeQuarter" | "closeUp"; background: "studioMinimal" | "urbanStreet" | "naturalInterior" };
+/** One photoshoot (apps/web shoot.ts shootView): links are signed for an hour. */
+export type Shoot = {
+  id: string; kind: "product" | "fashion"; tier: ShootTier; status: "RUNNING" | "DONE" | "FAILED"; input: ShootRequest;
+  credits: number; failed: boolean; createdAt: string; sourceUrl: string; shots: { key: string; url: string }[];
+};
+export const photoshoots = {
+  async list(signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<{ shoots: Shoot[] }>(`${base}/photoshoots`, { workspaceId: ws, signal });
+  },
+  async get(id: string, signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<{ shoot: Shoot }>(`${base}/photoshoots/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
+  },
+  async create(request: ShootRequest) {
+    const { ws, base } = await reelBase();
+    return api<{ shoot: Shoot }>(`${base}/photoshoots`, { method: "POST", body: request, workspaceId: ws });
+  },
+};
+
 /** A post's text (apps/web ContentVersion.body); photoKeys are the brand photos it shows, the first is the cover. */
 export type PostBody = { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; photoKeys?: string[] };
 export type PostChannel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL" | "INSTAGRAM_REEL" | "FACEBOOK_POST" | "PINTEREST_PIN" | "THREADS_POST";

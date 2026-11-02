@@ -58,7 +58,11 @@
     "briefHint": "Forfin belysning, stemning eller specifikke dekorelementer",
     "sourcePreview": "Kildevisning",
     "fullPreview": "{{product}}, fuld visning",
-    "sourceImage": "Kildebillede"
+    "sourceImage": "Kildebillede",
+    "noPhoto": "Vælg et foto",
+    "noPhotoHint": "Produktbilleder fra din hjemmeside og dine uploads vises her. Tryk på Skift medie for at uploade et billede.",
+    "briefPlaceholder": "Beskriv motivet",
+    "briefRequired": "Beskriv motivet for at bruge Brugerdefineret."
   },
   "fashion": {
     "title": "Modefotoshoot",
@@ -102,7 +106,8 @@
       "contrast": "Høj kontrast mod baggrund",
       "wrinkles": "Ingen kraftige folder",
       "frontFacing": "Frontvendt vinkel"
-    }
+    },
+    "generateFor": "Generer fotoserie · {{price}}"
   },
   "source": {
     "title": "Vælg kildevare",
@@ -119,15 +124,11 @@
       "uploads": "Uploads"
     },
     "businessWebsite": "{{name}} · Websted",
-    "fromWebsite": "Fra websted",
-    "filterCatalog": "Filtrer katalog",
-    "filters": {
-      "all": "Alle varer",
-      "tables": "Borde",
-      "storage": "Opbevaring"
-    },
     "addPhoto": "Tilføj billede",
-    "tip": "Rene produktudskæringer giver optimale fotoshoot-resultater. Espanda Studio vil bevare den originale akacietræstruktur."
+    "untitled": "Foto",
+    "emptyWebsite": "Ingen produktbilleder fra din hjemmeside endnu. Upload et i stedet.",
+    "emptyUploads": "Ingen uploads endnu. Tryk på Tilføj foto for at uploade et fra din telefon.",
+    "cutoutTip": "Tydelige produktbilleder med ensfarvet baggrund giver de bedste resultater. Espanda bevarer produktet præcis, som det er."
   },
   "generating": {
     "backToWorkspace": "Tilbage til arbejdsområde",
@@ -141,17 +142,20 @@
       "queued": "I kø"
     },
     "progress": "Genererer",
-    "sample": {
-      "title": "{{name}} spisebordsfotoshoot",
-      "description": "Opsætning af {{product}} i arkitektonisk dagslysinteriør.",
-      "variations_one": "{{count}} variation",
-      "variations_other": "{{count}} variationer"
-    },
     "steps": {
       "catalog": "Behandler katalogvare",
       "compose": "Komponerer scene & belysning",
       "finish": "Afslutter & farvekalibrering"
-    }
+    },
+    "backToResults": "Tilbage til fotoserier",
+    "failedTitle": "Denne fotoserie lykkedes ikke",
+    "failedBody_one": "Din {{count}} kredit er tilbage på din saldo. Prøv igen, eller vælg en anden kvalitet.",
+    "failedBody_other": "Dine {{count}} kreditter er tilbage på din saldo. Prøv igen, eller vælg en anden kvalitet.",
+    "wait": {
+      "short": "Fire fotos, som normalt er klar på omkring et minut.",
+      "long": "Fire fotos i Ultra-kvalitet, som normalt er klar på få minutter."
+    },
+    "refundNote": "Du blev ikke opkrævet noget: Kreditterne er tilbage på din saldo."
   },
   "results": {
     "title": "Fotoshoots",
@@ -164,41 +168,58 @@
       "fashion": "Mode ({{count}})"
     },
     "empty": "Ingen fotoshoots endnu.",
-    "processingLabel": "{{title}}. Behandler, {{percent}}%",
     "processingBadge_one": "Behandler · {{count}} kredit",
     "processingBadge_other": "Behandler · {{count}} kreditter",
-    "preview": "Forhåndsvisning",
     "reviewPhotoLabel": "Gennemgå foto, {{title}}",
     "reviewPhoto": "Gennemgå foto",
-    "sample": {
-      "studioStaging": "{{product}} · Studiostaging",
-      "rendering": "Rendering trin · {{percent}}%",
-      "interiorReady_one": "Interiør · {{ratio}} · {{count}} foto klar",
-      "interiorReady_other": "Interiør · {{ratio}} · {{count}} fotos klar",
-      "studioDaylight": "Studiobelysning · {{ratio}}"
-    }
+    "failedBadge": "Mislykkedes",
+    "refunded_one": "Mislykkedes · {{count}} kredit tilbageført",
+    "refunded_other": "Mislykkedes · {{count}} kreditter tilbageført",
+    "ready": "Klar"
   },
   "detail": {
-    "moreOptions": "Flere muligheder",
     "downloadPhoto": "Download foto",
     "variation": "Variation",
     "share": "Del fotoshoot",
-    "samplePreview": "Eksempel forhåndsvisning",
     "compareOriginal": "Sammenlign original",
-    "expandView": "Udvid visning",
     "stagingSummary": "Staging oversigt",
     "format": "Format",
     "creationCost": "Oprettelsesomkostning",
     "credits_one": "{{count}} kredit",
     "credits_other": "{{count}} kreditter",
-    "sample": {
-      "headerTitle": "{{name}} fotoshoot",
-      "vertical": "{{ratio}} Vertikal",
-      "architecturalInterior": "Arkitektonisk interiør",
-      "studioDaylight": "Studiobelysning",
-      "formatBadge": "{{ratio}} format",
-      "naturalStudio": "Naturligt studie",
-      "portraitPhoto": "Portrætfoto"
+    "original": "Originalt foto",
+    "photoOf": "Foto {{index}} af {{count}}",
+    "showResult": "Vis resultat",
+    "photos": "Fotos",
+    "noBrief": "Ingen kreativ instruktion: opsat efter stilbeskrivelsen.",
+    "anyModel": "En model valgt til tøjet",
+    "formatBadge": "{{ratio}}-format"
+  },
+  "tiers": {
+    "label": "Kvalitet",
+    "price_one": "{{count}} kredit",
+    "price_other": "{{count}} kreditter",
+    "base": {
+      "name": "Basis",
+      "desc": "Hurtige udkast til at afprøve idéer"
+    },
+    "moderate": {
+      "name": "Mellem",
+      "desc": "Skarpere detaljer og lys"
+    },
+    "higher": {
+      "name": "Høj",
+      "desc": "Kvalitet klar til kampagner"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Vores bedste kvalitet til tryk og annoncer"
     }
+  },
+  "describe": {
+    "product": "Produkt · {{style}}",
+    "fashion": "Mode · {{style}}",
+    "photos_one": "{{count}} foto",
+    "photos_other": "{{count}} fotos"
   }
 }

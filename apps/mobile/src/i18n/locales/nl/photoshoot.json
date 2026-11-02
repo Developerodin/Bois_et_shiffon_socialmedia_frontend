@@ -58,7 +58,11 @@
     "briefHint": "Verfijn verlichting, sfeer of specifieke decor cues",
     "sourcePreview": "Bronvoorbeeld",
     "fullPreview": "{{product}}, volledig voorbeeld",
-    "sourceImage": "Bronafbeelding"
+    "sourceImage": "Bronafbeelding",
+    "noPhoto": "Kies een foto",
+    "noPhotoHint": "Hier vind je productfoto's van je website en je uploads. Tik op Bestand wijzigen om er een te uploaden.",
+    "briefPlaceholder": "Beschrijf de scène",
+    "briefRequired": "Beschrijf de scène om Aangepast te gebruiken."
   },
   "fashion": {
     "title": "Modefotoshoot",
@@ -102,7 +106,8 @@
       "contrast": "Hoge contrast tegen achtergrond",
       "wrinkles": "Geen zware kreukels",
       "frontFacing": "Voorwaartse hoek"
-    }
+    },
+    "generateFor": "Fotoshoot maken · {{price}}"
   },
   "source": {
     "title": "Kies bronitem",
@@ -119,15 +124,11 @@
       "uploads": "Uploads"
     },
     "businessWebsite": "{{name}} · Website",
-    "fromWebsite": "Van website",
-    "filterCatalog": "Filter catalogus",
-    "filters": {
-      "all": "Alle items",
-      "tables": "Tafels",
-      "storage": "Opslag"
-    },
     "addPhoto": "Foto toevoegen",
-    "tip": "Schoon productuitsnedes leveren optimale fotoshootresultaten. Espanda Studio behoudt de originele acaciahouttextuur."
+    "untitled": "Foto",
+    "emptyWebsite": "Nog geen productfoto's van je website. Upload er zelf een.",
+    "emptyUploads": "Nog geen uploads. Tik op Foto toevoegen om een foto van je telefoon te uploaden.",
+    "cutoutTip": "Duidelijke productfoto's met een egale achtergrond geven het beste resultaat. Espanda laat het product precies zoals het is."
   },
   "generating": {
     "backToWorkspace": "Terug naar werkruimte",
@@ -141,17 +142,20 @@
       "queued": "In wachtrij"
     },
     "progress": "Genereren",
-    "sample": {
-      "title": "{{name}} eetfotoshoot",
-      "description": "{{product}} opstellen in architecturale daglichtinterieur.",
-      "variations_one": "{{count}} variatie",
-      "variations_other": "{{count}} variaties"
-    },
     "steps": {
       "catalog": "Catalogusitem verwerken",
       "compose": "Scène & verlichting samenstellen",
       "finish": "Afwerking & kleurkalibratie"
-    }
+    },
+    "backToResults": "Terug naar fotoshoots",
+    "failedTitle": "Deze fotoshoot is niet gelukt",
+    "failedBody_one": "Je {{count}} credit is teruggestort. Probeer het opnieuw of kies een andere kwaliteit.",
+    "failedBody_other": "Je {{count}} credits zijn teruggestort. Probeer het opnieuw of kies een andere kwaliteit.",
+    "wait": {
+      "short": "Vier foto's, meestal klaar in ongeveer een minuut.",
+      "long": "Vier foto's in Ultra-kwaliteit, meestal klaar in een paar minuten."
+    },
+    "refundNote": "Er is uiteindelijk niets afgeschreven: de credits zijn teruggezet op je saldo."
   },
   "results": {
     "title": "Fotoshoots",
@@ -164,41 +168,58 @@
       "fashion": "Mode ({{count}})"
     },
     "empty": "Nog geen fotoshoots.",
-    "processingLabel": "{{title}}. Verwerken, {{percent}}%",
     "processingBadge_one": "Verwerken · {{count}} credit",
     "processingBadge_other": "Verwerken · {{count}} credits",
-    "preview": "Voorbeeld",
     "reviewPhotoLabel": "Foto beoordelen, {{title}}",
     "reviewPhoto": "Foto beoordelen",
-    "sample": {
-      "studioStaging": "{{product}} · Studio opstelling",
-      "rendering": "Renderen · {{percent}}%",
-      "interiorReady_one": "Interieur · {{ratio}} · {{count}} foto klaar",
-      "interiorReady_other": "Interieur · {{ratio}} · {{count}} foto's klaar",
-      "studioDaylight": "Studio daglicht · {{ratio}}"
-    }
+    "failedBadge": "Mislukt",
+    "refunded_one": "Niet gelukt · {{count}} credit teruggestort",
+    "refunded_other": "Niet gelukt · {{count}} credits teruggestort",
+    "ready": "Klaar"
   },
   "detail": {
-    "moreOptions": "Meer opties",
     "downloadPhoto": "Foto downloaden",
     "variation": "Variatie",
     "share": "Fotoshoot delen",
-    "samplePreview": "Voorbeeldweergave",
     "compareOriginal": "Vergelijk origineel",
-    "expandView": "Vergroot weergave",
     "stagingSummary": "Opstellingssamenvatting",
     "format": "Formaat",
     "creationCost": "Creatiekosten",
     "credits_one": "{{count}} credit",
     "credits_other": "{{count}} credits",
-    "sample": {
-      "headerTitle": "{{name}} fotoshoot",
-      "vertical": "{{ratio}} Verticaal",
-      "architecturalInterior": "Architectonisch interieur",
-      "studioDaylight": "Studio daglicht",
-      "formatBadge": "{{ratio}} formaat",
-      "naturalStudio": "Natuurlijk studio",
-      "portraitPhoto": "Portretfoto"
+    "original": "Originele foto",
+    "photoOf": "Foto {{index}} van {{count}}",
+    "showResult": "Toon resultaat",
+    "photos": "Foto's",
+    "noBrief": "Geen artdirection: de scène is ingericht volgens de gekozen stijl.",
+    "anyModel": "Een model gekozen voor het kledingstuk",
+    "formatBadge": "{{ratio}}-formaat"
+  },
+  "tiers": {
+    "label": "Kwaliteit",
+    "price_one": "{{count}} credit",
+    "price_other": "{{count}} credits",
+    "base": {
+      "name": "Basis",
+      "desc": "Snelle schetsen om ideeën uit te proberen"
+    },
+    "moderate": {
+      "name": "Gemiddeld",
+      "desc": "Scherpere details en beter licht"
+    },
+    "higher": {
+      "name": "Hoog",
+      "desc": "Kwaliteit voor campagnes"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Onze beste kwaliteit, voor drukwerk en advertenties"
     }
+  },
+  "describe": {
+    "product": "Product · {{style}}",
+    "fashion": "Mode · {{style}}",
+    "photos_one": "{{count}} foto",
+    "photos_other": "{{count}} foto's"
   }
 }

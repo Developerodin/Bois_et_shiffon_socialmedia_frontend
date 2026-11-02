@@ -1,22 +1,61 @@
-import { Fragment } from "react";
+import { Fragment, useCallback, useState } from "react";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Check, Info } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
+import { photoshoots, type Shoot } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { BrandChip, Glow, ps, STROKE, TopBar } from "@/ui/photoshoot/chrome";
 import { Page } from "@/ui/photoshoot/controls";
-import { generation, photoshootImages, say } from "@/ui/photoshoot/sample";
+import { photoshootImages } from "@/ui/photoshoot/options";
+import { shootMeta, shootTitle } from "@/ui/photoshoot/describe";
 import { color, font, radius, space, type } from "@/theme/tokens";
 
+const POLL_MS = 5_000;
+
 /**
- * F05 · Photoshoot / Generating. Static progress from sample data: there is no generation job to poll yet.
- * "Back to workspace" returns to Create; "Return to workspace" opens Results, where the job is listed.
+ * F05 · Photoshoot / Generating: polls the shoot until it's done (then opens F07) or failed (credits are back).
+ * "Back to workspace" returns to Create; "Return to workspace" opens Results, where the shoot keeps going.
  */
 export default function Generating() {
   const { t } = useTranslation("photoshoot");
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [shoot, setShoot] = useState<Shoot | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      const ctrl = new AbortController();
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const poll = () =>
+        photoshoots.get(id, ctrl.signal).then(
+          ({ shoot: s }) => {
+            setShoot(s);
+            setError(null);
+            if (s.status === "DONE") router.replace({ pathname: "/photoshoot/[id]", params: { id: s.id } });
+            else if (s.status === "RUNNING") timer = setTimeout(poll, POLL_MS);
+          },
+          (e: unknown) => {
+            if (ctrl.signal.aborted) return;
+            setError(e instanceof Error ? e.message : String(e));
+            timer = setTimeout(poll, POLL_MS * 2);
+          },
+        );
+      void poll();
+      return () => {
+        ctrl.abort();
+        clearTimeout(timer);
+      };
+    }, [id]),
+  );
+  const failed = shoot?.status === "FAILED";
+  const steps: { label: "catalog" | "compose" | "finish"; status: keyof typeof STATUS }[] = [
+    { label: "catalog", status: shoot ? "done" : "active" },
+    { label: "compose", status: shoot ? "active" : "queued" },
+    { label: "finish", status: "queued" },
+  ];
+
   return (
     <Page
       background={
@@ -40,54 +79,62 @@ export default function Generating() {
         />
       }
       contentStyle={styles.content}
-      footer={<Button label={t("generating.returnToWorkspace")} onPress={() => router.replace("/photoshoot/results")} />}
+      footer={<Button label={failed ? t("generating.backToResults") : t("generating.returnToWorkspace")} onPress={() => router.replace("/photoshoot/results")} />}
     >
       <View style={styles.hero}>
         <Spinner />
         <Text style={[type.pageTitle, { textAlign: "center", paddingTop: space[4] }]} accessibilityRole="header">
-          {t("generating.title")}
+          {failed ? t("generating.failedTitle") : t("generating.title")}
         </Text>
-        <Text style={[type.body, styles.heroBody]}>{say(t, generation.description)}</Text>
+        <Text style={[type.body, styles.heroBody]}>
+          {failed && shoot ? t("generating.failedBody", { count: shoot.credits }) : shoot ? t(`generating.wait.${shoot.tier === "ultra" ? "long" : "short"}`) : ""}
+        </Text>
       </View>
 
-      <View style={styles.card}>
-        <View style={styles.cardHead}>
-          <Image source={generation.image} style={styles.thumb} contentFit="cover" accessibilityLabel="Table à manger rectangulaire 240cm Acacia Bunting" />
-          <View style={{ flex: 1 }}>
-            <Text style={[type.label, { fontFamily: font.semibold }]}>{say(t, generation.title)}</Text>
-            <View style={styles.metaRow}>
-              {generation.meta.map((m, i) => (
-                <Fragment key={i}>
-                  {i > 0 ? <View style={styles.metaDot} /> : null}
-                  <Text style={type.meta}>{say(t, m)}</Text>
-                </Fragment>
-              ))}
+      {shoot ? (
+        <View style={styles.card}>
+          <View style={styles.cardHead}>
+            <Image source={{ uri: shoot.sourceUrl, cacheKey: shoot.input.sourceKey }} style={styles.thumb} contentFit="cover" accessibilityLabel={t("detail.original")} />
+            <View style={{ flex: 1 }}>
+              <Text style={[type.label, { fontFamily: font.semibold }]}>{shootTitle(t, shoot)}</Text>
+              <View style={styles.metaRow}>
+                {shootMeta(t, shoot).map((m, i) => (
+                  <Fragment key={i}>
+                    {i > 0 ? <View style={styles.metaDot} /> : null}
+                    <Text style={type.meta}>{m}</Text>
+                  </Fragment>
+                ))}
+              </View>
             </View>
           </View>
-        </View>
 
-        <View accessibilityRole="list">
-          {generation.steps.map((s, i) => (
-            <View
-              key={s.label}
-              style={[styles.step, i > 0 && { paddingTop: space[12] }]}
-              accessible
-              accessibilityLabel={t("generating.stepStatus", { step: t(`generating.steps.${s.label}`), status: t(STATUS[s.status]) })}
-            >
-              <View style={styles.stepLeft}>
-                <StepMark status={s.status} />
-                <Text style={[type.meta, s.status !== "queued" && { color: color.ink }]}>{t(`generating.steps.${s.label}`)}</Text>
-              </View>
-              <Text style={[type.meta, s.status === "active" && { color: color.ink }]}>{t(STATUS[s.status])}</Text>
+          {failed ? null : (
+            <View accessibilityRole="list">
+              {steps.map((s, i) => (
+                <View
+                  key={s.label}
+                  style={[styles.step, i > 0 && { paddingTop: space[12] }]}
+                  accessible
+                  accessibilityLabel={t("generating.stepStatus", { step: t(`generating.steps.${s.label}`), status: t(STATUS[s.status]) })}
+                >
+                  <View style={styles.stepLeft}>
+                    <StepMark status={s.status} />
+                    <Text style={[type.meta, s.status !== "queued" && { color: color.ink }]}>{t(`generating.steps.${s.label}`)}</Text>
+                  </View>
+                  <Text style={[type.meta, s.status === "active" && { color: color.ink }]}>{t(STATUS[s.status])}</Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
+          )}
 
-        <View style={styles.note}>
-          <Info size={16} color={color.inkSecondary} strokeWidth={STROKE} style={{ marginTop: 2 }} />
-          <Text style={[type.body, { color: color.inkSecondary, flex: 1 }]}>{t("generating.note")}</Text>
+          <View style={styles.note}>
+            <Info size={16} color={color.inkSecondary} strokeWidth={STROKE} style={{ marginTop: 2 }} />
+            <Text style={[type.body, { color: color.inkSecondary, flex: 1 }]}>{failed ? t("generating.refundNote") : t("generating.note")}</Text>
+          </View>
         </View>
-      </View>
+      ) : error ? (
+        <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{error}</Text>
+      ) : null}
     </Page>
   );
 }

@@ -6,7 +6,7 @@ import { Button } from "@/ui/button";
 import { Card } from "@/ui/layout";
 import { BottomNav, BusinessSwitch, Glow, ModuleHeader } from "@/ui/photoshoot/chrome";
 import { Page, PhotoPill } from "@/ui/photoshoot/controls";
-import { photoshootImages } from "@/ui/photoshoot/sample";
+import { photoshootImages } from "@/ui/photoshoot/options";
 import { color, space, type } from "@/theme/tokens";
 
 /** F01 · Photoshoot / Create. */

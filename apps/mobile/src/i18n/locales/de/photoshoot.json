@@ -58,7 +58,11 @@
     "briefHint": "Beleuchtung, Ambiente oder spezifische Dekorhinweise verfeinern",
     "sourcePreview": "Quellvorschau",
     "fullPreview": "{{product}}, vollständige Vorschau",
-    "sourceImage": "Quellbild"
+    "sourceImage": "Quellbild",
+    "noPhoto": "Foto auswählen",
+    "noPhotoHint": "Hier findest du Produktfotos von deiner Website und deine Uploads. Tippe auf „Medium ändern“, um eines hochzuladen.",
+    "briefPlaceholder": "Beschreibe die Szene",
+    "briefRequired": "Beschreibe die Szene, um „Benutzerdefiniert“ zu verwenden."
   },
   "fashion": {
     "title": "Modefotoshooting",
@@ -102,7 +106,8 @@
       "contrast": "Hoher Kontrast zum Hintergrund",
       "wrinkles": "Keine starken Falten",
       "frontFacing": "Frontalansicht"
-    }
+    },
+    "generateFor": "Fotoshooting erstellen · {{price}}"
   },
   "source": {
     "title": "Quell-Element wählen",
@@ -119,15 +124,11 @@
       "uploads": "Uploads"
     },
     "businessWebsite": "{{name}} · Website",
-    "fromWebsite": "Von Website",
-    "filterCatalog": "Katalog filtern",
-    "filters": {
-      "all": "Alle Elemente",
-      "tables": "Tische",
-      "storage": "Lagerung"
-    },
     "addPhoto": "Foto hinzufügen",
-    "tip": "Saubere Produktfreisteller liefern optimale Fotoshooting-Ergebnisse. Espanda Studio bewahrt die ursprüngliche Akazienholzstruktur."
+    "untitled": "Foto",
+    "emptyWebsite": "Noch keine Produktfotos von deiner Website. Lade stattdessen eines hoch.",
+    "emptyUploads": "Noch keine Uploads. Tippe auf „Foto hinzufügen“, um eines von deinem Handy hochzuladen.",
+    "cutoutTip": "Klare Produktfotos vor einem einfarbigen Hintergrund liefern die besten Ergebnisse. Espanda übernimmt das Produkt unverändert."
   },
   "generating": {
     "backToWorkspace": "Zurück zum Arbeitsbereich",
@@ -141,17 +142,20 @@
       "queued": "Warteschlange"
     },
     "progress": "Generierung",
-    "sample": {
-      "title": "{{name}} Essensfotoshooting",
-      "description": "Inszenierung von {{product}} im architektonischen Tageslicht-Innenraum.",
-      "variations_one": "{{count}} Variante",
-      "variations_other": "{{count}} Varianten"
-    },
     "steps": {
       "catalog": "Katalogelement verarbeiten",
       "compose": "Szene & Beleuchtung komponieren",
       "finish": "Abschluss & Farbkalibrierung"
-    }
+    },
+    "backToResults": "Zurück zu den Fotoshootings",
+    "failedTitle": "Dieses Fotoshooting hat nicht geklappt",
+    "failedBody_one": "Dein {{count}} Credit wurde dir zurückerstattet. Versuche es erneut oder wähle eine andere Qualität.",
+    "failedBody_other": "Deine {{count}} Credits wurden dir zurückerstattet. Versuche es erneut oder wähle eine andere Qualität.",
+    "wait": {
+      "short": "Vier Fotos, meist in etwa einer Minute fertig.",
+      "long": "Vier Fotos in Ultra-Qualität, meist in wenigen Minuten fertig."
+    },
+    "refundNote": "Es wurde nichts berechnet: Die Credits wurden deinem Guthaben wieder gutgeschrieben."
   },
   "results": {
     "title": "Fotoshootings",
@@ -164,41 +168,58 @@
       "fashion": "Mode ({{count}})"
     },
     "empty": "Noch keine Fotoshootings.",
-    "processingLabel": "{{title}}. Verarbeitung, {{percent}}%",
     "processingBadge_one": "Verarbeitung · {{count}} Guthaben",
     "processingBadge_other": "Verarbeitung · {{count}} Guthaben",
-    "preview": "Vorschau",
     "reviewPhotoLabel": "Foto überprüfen, {{title}}",
     "reviewPhoto": "Foto überprüfen",
-    "sample": {
-      "studioStaging": "{{product}} · Studio-Inszenierung",
-      "rendering": "Rendering-Stufe · {{percent}}%",
-      "interiorReady_one": "Innenraum · {{ratio}} · {{count}} Foto bereit",
-      "interiorReady_other": "Innenraum · {{ratio}} · {{count}} Fotos bereit",
-      "studioDaylight": "Studio-Tageslicht · {{ratio}}"
-    }
+    "failedBadge": "Fehlgeschlagen",
+    "refunded_one": "Hat nicht geklappt · {{count}} Credit zurückerstattet",
+    "refunded_other": "Hat nicht geklappt · {{count}} Credits zurückerstattet",
+    "ready": "Fertig"
   },
   "detail": {
-    "moreOptions": "Mehr Optionen",
     "downloadPhoto": "Foto herunterladen",
     "variation": "Variation",
     "share": "Fotoshooting teilen",
-    "samplePreview": "Beispielvorschau",
     "compareOriginal": "Original vergleichen",
-    "expandView": "Ansicht vergrößern",
     "stagingSummary": "Inszenierungsübersicht",
     "format": "Format",
     "creationCost": "Erstellungskosten",
     "credits_one": "{{count}} Guthaben",
     "credits_other": "{{count}} Guthaben",
-    "sample": {
-      "headerTitle": "{{name}} Fotoshooting",
-      "vertical": "{{ratio}} Vertikal",
-      "architecturalInterior": "Architektonischer Innenraum",
-      "studioDaylight": "Studio-Tageslicht",
-      "formatBadge": "{{ratio}} Format",
-      "naturalStudio": "Natürliches Studio",
-      "portraitPhoto": "Porträtfoto"
+    "original": "Originalfoto",
+    "photoOf": "Foto {{index}} von {{count}}",
+    "showResult": "Ergebnis anzeigen",
+    "photos": "Fotos",
+    "noBrief": "Keine Bildvorgabe: Die Inszenierung folgt dem Szenenstil.",
+    "anyModel": "Ein zum Kleidungsstück passendes Model",
+    "formatBadge": "Format {{ratio}}"
+  },
+  "tiers": {
+    "label": "Qualität",
+    "price_one": "{{count}} Credit",
+    "price_other": "{{count}} Credits",
+    "base": {
+      "name": "Basis",
+      "desc": "Schnelle Entwürfe zum Ausprobieren"
+    },
+    "moderate": {
+      "name": "Mittel",
+      "desc": "Schärfere Details und besseres Licht"
+    },
+    "higher": {
+      "name": "Hoch",
+      "desc": "Qualität für Kampagnen"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Unsere beste Qualität für Druck und Werbung"
     }
+  },
+  "describe": {
+    "product": "Produkt · {{style}}",
+    "fashion": "Mode · {{style}}",
+    "photos_one": "{{count}} Foto",
+    "photos_other": "{{count}} Fotos"
   }
 }

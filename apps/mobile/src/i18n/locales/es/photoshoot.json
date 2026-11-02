@@ -58,7 +58,11 @@
     "briefHint": "Refina la iluminación, el ambiente o detalles específicos de decoración",
     "sourcePreview": "Vista previa de origen",
     "fullPreview": "{{product}}, vista previa completa",
-    "sourceImage": "Imagen de origen"
+    "sourceImage": "Imagen de origen",
+    "noPhoto": "Elige una foto",
+    "noPhotoHint": "Aquí aparecen las fotos de productos de tu web y las que subas. Toca Cambiar recurso para subir una.",
+    "briefPlaceholder": "Describe la escena",
+    "briefRequired": "Describe la escena para usar la opción personalizada."
   },
   "fashion": {
     "title": "Sesión de fotos de moda",
@@ -102,7 +106,8 @@
       "contrast": "Alto contraste con el fondo",
       "wrinkles": "Sin arrugas marcadas",
       "frontFacing": "Ángulo frontal"
-    }
+    },
+    "generateFor": "Crear sesión · {{price}}"
   },
   "source": {
     "title": "Elegir recurso de origen",
@@ -119,15 +124,11 @@
       "uploads": "Subidas"
     },
     "businessWebsite": "{{name}} · Sitio web",
-    "fromWebsite": "Desde el sitio web",
-    "filterCatalog": "Filtrar catálogo",
-    "filters": {
-      "all": "Todos los artículos",
-      "tables": "Mesas",
-      "storage": "Almacenamiento"
-    },
     "addPhoto": "Agregar foto",
-    "tip": "Recortes de producto limpios producen resultados óptimos en la sesión de fotos. Espanda Studio preservará la textura original de la madera de acacia."
+    "untitled": "Foto",
+    "emptyWebsite": "Aún no hay fotos de productos de tu web. Sube una.",
+    "emptyUploads": "Aún no has subido fotos. Toca Añadir foto para subir una desde tu móvil.",
+    "cutoutTip": "Las fotos de producto nítidas sobre un fondo liso dan los mejores resultados. Espanda mantiene el producto tal como es."
   },
   "generating": {
     "backToWorkspace": "Volver al espacio de trabajo",
@@ -141,17 +142,20 @@
       "queued": "En cola"
     },
     "progress": "Generando",
-    "sample": {
-      "title": "{{name}} sesión de fotos de comedor",
-      "description": "Escenificando {{product}} en interior arquitectónico con luz diurna.",
-      "variations_one": "{{count}} variación",
-      "variations_other": "{{count}} variaciones"
-    },
     "steps": {
       "catalog": "Procesando recurso del catálogo",
       "compose": "Componiendo escena e iluminación",
       "finish": "Finalizando y calibrando color"
-    }
+    },
+    "backToResults": "Volver a las sesiones",
+    "failedTitle": "Esta sesión no ha funcionado",
+    "failedBody_one": "Te hemos devuelto {{count}} crédito. Inténtalo de nuevo o elige otra calidad.",
+    "failedBody_other": "Te hemos devuelto {{count}} créditos. Inténtalo de nuevo o elige otra calidad.",
+    "wait": {
+      "short": "Cuatro fotos, listas normalmente en un minuto.",
+      "long": "Cuatro fotos en calidad Ultra, listas normalmente en unos minutos."
+    },
+    "refundNote": "No se ha cobrado nada: los créditos han vuelto a tu saldo."
   },
   "results": {
     "title": "Sesiones de fotos",
@@ -164,41 +168,58 @@
       "fashion": "Moda ({{count}})"
     },
     "empty": "Aún no hay sesiones de fotos.",
-    "processingLabel": "{{title}}. Procesando, {{percent}}%",
     "processingBadge_one": "Procesando · {{count}} crédito",
     "processingBadge_other": "Procesando · {{count}} créditos",
-    "preview": "Vista previa",
     "reviewPhotoLabel": "Revisar foto, {{title}}",
     "reviewPhoto": "Revisar foto",
-    "sample": {
-      "studioStaging": "{{product}} · Escenografía de estudio",
-      "rendering": "Etapa de renderizado · {{percent}}%",
-      "interiorReady_one": "Interior · {{ratio}} · {{count}} foto lista",
-      "interiorReady_other": "Interior · {{ratio}} · {{count}} fotos listas",
-      "studioDaylight": "Luz de día en estudio · {{ratio}}"
-    }
+    "failedBadge": "Fallida",
+    "refunded_one": "No ha funcionado · {{count}} crédito devuelto",
+    "refunded_other": "No ha funcionado · {{count}} créditos devueltos",
+    "ready": "Lista"
   },
   "detail": {
-    "moreOptions": "Más opciones",
     "downloadPhoto": "Descargar foto",
     "variation": "Variación",
     "share": "Compartir sesión",
-    "samplePreview": "Vista previa de muestra",
     "compareOriginal": "Comparar original",
-    "expandView": "Expandir vista",
     "stagingSummary": "Resumen de escenografía",
     "format": "Formato",
     "creationCost": "Costo de creación",
     "credits_one": "{{count}} crédito",
     "credits_other": "{{count}} créditos",
-    "sample": {
-      "headerTitle": "Sesión de {{name}}",
-      "vertical": "{{ratio}} Vertical",
-      "architecturalInterior": "Interior arquitectónico",
-      "studioDaylight": "Luz de día en estudio",
-      "formatBadge": "Formato {{ratio}}",
-      "naturalStudio": "Estudio natural",
-      "portraitPhoto": "Foto de retrato"
+    "original": "Foto original",
+    "photoOf": "Foto {{index}} de {{count}}",
+    "showResult": "Ver resultado",
+    "photos": "Fotos",
+    "noBrief": "Sin dirección artística: escena creada según el estilo elegido.",
+    "anyModel": "Un modelo elegido para la prenda",
+    "formatBadge": "Formato {{ratio}}"
+  },
+  "tiers": {
+    "label": "Calidad",
+    "price_one": "{{count}} crédito",
+    "price_other": "{{count}} créditos",
+    "base": {
+      "name": "Base",
+      "desc": "Borradores rápidos para probar ideas"
+    },
+    "moderate": {
+      "name": "Media",
+      "desc": "Más detalle y mejor iluminación"
+    },
+    "higher": {
+      "name": "Alta",
+      "desc": "Calidad lista para campañas"
+    },
+    "ultra": {
+      "name": "Ultra",
+      "desc": "Nuestra mejor calidad, para impresión y anuncios"
     }
+  },
+  "describe": {
+    "product": "Producto · {{style}}",
+    "fashion": "Moda · {{style}}",
+    "photos_one": "{{count}} foto",
+    "photos_other": "{{count}} fotos"
   }
 }

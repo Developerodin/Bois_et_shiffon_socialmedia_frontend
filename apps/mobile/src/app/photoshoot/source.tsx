@@ -1,39 +1,65 @@
 import { useState } from "react";
 import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { Check, Plus, Sparkles, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { uploadPhoto } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { BackButton, ps, STROKE, TopBar } from "@/ui/photoshoot/chrome";
-import { FilterChips, Page, Segmented } from "@/ui/photoshoot/controls";
-import { business, say, sourceAssets, sourceFilters, type Group, type SourceAsset } from "@/ui/photoshoot/sample";
+import { Page, Segmented } from "@/ui/photoshoot/controls";
+import { reloadCurrentBrand, siteLabel, useCurrentBrand, type LibraryPhoto } from "@/ui/use-current-brand";
 import { color, font, radius, space, type } from "@/theme/tokens";
 
 type Tab = "website" | "uploads";
 
 /**
- * F04 · Photoshoot / Source picker. Opened from product setup ("Change asset") or fashion setup
- * (`?for=fashion`); "Use photo" hands the chosen id back to whichever screen opened it.
+ * F04 · Photoshoot / Source picker, on the brand's photo library: the website's product photos and the owner's uploads.
+ * Opened from product setup ("Change asset") or fashion setup (`?for=fashion`); "Use photo" hands the chosen key back
+ * to whichever screen opened it. "Upload new" adds a photo from the phone to the library and selects it.
  */
 export default function SourcePicker() {
   const { t } = useTranslation("photoshoot");
-  const { for: target } = useLocalSearchParams<{ for?: string }>();
-  const [tab, setTab] = useState<Tab>("website");
-  const [filter, setFilter] = useState<"all" | Group>("all");
-  const [selected, setSelected] = useState<string>(sourceAssets[0].id);
+  const { for: target, selected: initial } = useLocalSearchParams<{ for?: string; selected?: string }>();
+  const brand = useCurrentBrand();
+  const view = brand?.view;
+  const website: LibraryPhoto[] = (view?.assets?.products ?? []).flatMap((p) => (p.image ? [{ key: p.image.key, url: p.image.url, title: p.title, kind: p.kind }] : []));
+  const uploads: LibraryPhoto[] = (view?.uploads ?? []).flatMap((u) => (u.image ? [{ key: u.image.key, url: u.image.url, title: u.title, kind: null }] : []));
+  const [tab, setTab] = useState<Tab>(() => (uploads.some((u) => u.key === initial) || (!website.length && uploads.length) ? "uploads" : "website"));
+  const [selected, setSelected] = useState<string | undefined>(initial || undefined);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const items = tab === "uploads" ? [] : sourceAssets.filter((a) => filter === "all" || a.groups.includes(filter));
-  const chosen = sourceAssets.find((a) => a.id === selected);
+  const items = tab === "uploads" ? uploads : website;
+  const chosen = [...website, ...uploads].find((a) => a.key === selected);
   const use = () => {
     if (!chosen) return;
-    if (target === "fashion") router.dismissTo({ pathname: "/photoshoot/fashion", params: { garment: chosen.id } });
-    else router.dismissTo({ pathname: "/photoshoot/product", params: { asset: chosen.id } });
+    if (target === "fashion") router.dismissTo({ pathname: "/photoshoot/fashion", params: { garment: chosen.key } });
+    else router.dismissTo({ pathname: "/photoshoot/product", params: { asset: chosen.key } });
+  };
+  const upload = async () => {
+    if (busy || !brand) return;
+    setError(null);
+    const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.85 });
+    if (r.canceled) return;
+    setBusy(true);
+    try {
+      // ponytail: one plain title, as Business › Photos does; file names ("IMG_2026…") make poor product names.
+      const { key } = await uploadPhoto(r.assets[0].uri, { title: t("source.untitled") }, { workspaceId: brand.workspaceId, brandId: brand.id });
+      await reloadCurrentBrand();
+      setTab("uploads");
+      setSelected(key);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
   };
 
   // Rows of three so every tile keeps the same width; the "Add photo" tile closes the grid.
-  const tiles: (SourceAsset | "add")[] = [...items, "add"];
-  const rows: (SourceAsset | "add")[][] = [];
+  const tiles: (LibraryPhoto | "add")[] = [...items, "add"];
+  const rows: (LibraryPhoto | "add")[][] = [];
   for (let i = 0; i < tiles.length; i += 3) rows.push(tiles.slice(i, i + 3));
 
   return (
@@ -43,8 +69,8 @@ export default function SourcePicker() {
           leading={<BackButton label={t("close", { ns: "common" })} icon={X} />}
           title={t("source.title")}
           trailing={
-            <Pressable accessibilityRole="button" accessibilityLabel={t("source.uploadNewLabel")} style={styles.textButton}>
-              <Text style={type.label}>{t("source.uploadNew")}</Text>
+            <Pressable accessibilityRole="button" accessibilityLabel={t("source.uploadNewLabel")} onPress={() => void upload()} disabled={busy} style={styles.textButton}>
+              {busy ? <ActivityIndicator color={color.ink} /> : <Text style={type.label}>{t("source.uploadNew")}</Text>}
             </Pressable>
           }
         />
@@ -54,7 +80,7 @@ export default function SourcePicker() {
         <View style={styles.footerRow}>
           <View style={{ flex: 1 }}>
             <Text style={styles.footerTitle} numberOfLines={1}>
-              {chosen?.product ?? t("source.noPhotoSelected")}
+              {chosen?.title ?? t("source.noPhotoSelected")}
             </Text>
             <Text style={type.meta}>{chosen ? t("source.photosSelected", { count: 1 }) : t("source.selectPhoto")}</Text>
           </View>
@@ -66,38 +92,44 @@ export default function SourcePicker() {
         label={t("source.source")}
         boldSelected={false}
         options={[
-          { value: "website", label: t("source.tabs.website"), count: sourceAssets.length },
-          { value: "uploads", label: t("source.tabs.uploads"), count: 0 },
+          { value: "website", label: t("source.tabs.website"), count: website.length },
+          { value: "uploads", label: t("source.tabs.uploads"), count: uploads.length },
         ]}
         value={tab}
         onChange={setTab}
       />
 
-      <View style={styles.sourceRow}>
-        <View style={styles.sourceName}>
-          <Image source={business.favicon} style={{ width: 16, height: 16 }} contentFit="contain" />
-          <Text style={[type.meta, { color: color.ink }]}>{t("source.businessWebsite", { name: business.name })}</Text>
+      {tab === "website" && view?.website ? (
+        <View style={styles.sourceRow}>
+          <View style={styles.sourceName}>
+            <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={{ width: 16, height: 16 }} contentFit="contain" />
+            <Text style={[type.meta, { color: color.ink, flexShrink: 1 }]} numberOfLines={1}>
+              {t("source.businessWebsite", { name: brand?.name ?? "" })}
+            </Text>
+          </View>
+          <View style={styles.fromBadge}>
+            <Text style={type.meta}>{siteLabel(view.website)}</Text>
+          </View>
         </View>
-        <View style={styles.fromBadge}>
-          <Text style={type.meta}>{t("source.fromWebsite")}</Text>
-        </View>
-      </View>
+      ) : null}
 
-      <FilterChips label={t("source.filterCatalog")} options={sourceFilters.map((f) => ({ value: f.value, label: say(t, f.label) }))} value={filter} onChange={setFilter} />
+      {error ? <Text style={[type.meta, { color: color.error, paddingTop: space[12] }]}>{error}</Text> : null}
+      {!view ? <ActivityIndicator color={color.ink} style={{ paddingTop: space[24] }} /> : null}
+      {view && !items.length ? <Text style={[type.body, { color: color.inkSecondary, paddingTop: space[16] }]}>{t(tab === "website" ? "source.emptyWebsite" : "source.emptyUploads")}</Text> : null}
 
       <View style={styles.grid}>
         {rows.map((row, r) => (
           <View key={r} style={styles.gridRow}>
             {row.map((tile) =>
               tile === "add" ? (
-                <Pressable key="add" accessibilityRole="button" accessibilityLabel={t("source.addPhoto")} style={[styles.tile, styles.addTile]}>
+                <Pressable key="add" accessibilityRole="button" accessibilityLabel={t("source.addPhoto")} onPress={() => void upload()} disabled={busy} style={[styles.tile, styles.addTile]}>
                   <View style={styles.addIcon}>
                     <Plus size={16} color={color.ink} strokeWidth={STROKE} />
                   </View>
                   <Text style={type.label}>{t("source.addPhoto")}</Text>
                 </Pressable>
               ) : (
-                <AssetTile key={tile.id} asset={tile} selected={tile.id === selected} onPress={() => setSelected(tile.id)} />
+                <AssetTile key={tile.key} asset={tile} selected={tile.key === selected} onPress={() => setSelected(tile.key)} />
               ),
             )}
             {Array.from({ length: 3 - row.length }, (_, i) => (
@@ -111,24 +143,22 @@ export default function SourcePicker() {
         <View style={styles.tipIcon}>
           <Sparkles size={16} color={color.inkSecondary} strokeWidth={STROKE} />
         </View>
-        <Text style={[type.body, { color: color.inkSecondary, flex: 1 }]}>
-          {t("source.tip")}
-        </Text>
+        <Text style={[type.body, { color: color.inkSecondary, flex: 1 }]}>{t("source.cutoutTip")}</Text>
       </View>
     </Page>
   );
 }
 
-function AssetTile({ asset, selected, onPress }: { asset: SourceAsset; selected: boolean; onPress: () => void }) {
+function AssetTile({ asset, selected, onPress }: { asset: LibraryPhoto; selected: boolean; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
-      accessibilityLabel={asset.label}
+      accessibilityLabel={asset.title}
       onPress={onPress}
       style={[styles.tile, selected ? styles.tileOn : styles.tileOff]}
     >
-      <Image source={asset.image} style={styles.tileImage} contentFit="cover" />
+      <Image source={{ uri: asset.url, cacheKey: asset.key }} style={styles.tileImage} contentFit="cover" />
       {selected ? (
         <View style={styles.check}>
           <Check size={14} color={color.onPrimary} strokeWidth={2.5} />
@@ -136,7 +166,7 @@ function AssetTile({ asset, selected, onPress }: { asset: SourceAsset; selected:
       ) : null}
       <View style={[styles.tileLabel, selected && { backgroundColor: "rgba(255,255,255,0.9)" }]}>
         <Text style={[type.meta, selected && { color: color.ink }]} numberOfLines={1}>
-          {asset.label}
+          {asset.title}
         </Text>
       </View>
     </Pressable>
