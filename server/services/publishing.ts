@@ -13,7 +13,7 @@ import { signedMediaUrl } from "@/server/storage/media";
  * Approval → publishing (design §6 "sealed package", DEC-015/016). Rules:
  * - An approval binds to one ContentVersion and the sha256 of exactly what will be posted.
  *   A newer draft voids it; publishing re-checks at the moment of posting.
- * - Decisions are append-only. Creator ≠ approver.
+ * - Decisions are append-only. The author of a draft can't approve it, unless nobody else in the workspace can (decide).
  * - One live attempt per (version, account). A platform refusal is FAILED (retry allowed); a
  *   timeout or 5xx is PENDING_VERIFY and is never retried blindly: a person checks the account.
  */
@@ -129,7 +129,7 @@ const EDITABLE = ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL",
 
 /**
  * A person saves a draft: always a new immutable version (any approval of the old one stops
- * holding), back to draft review for the Quality check. The editor can't approve it themselves.
+ * holding), back to draft review for the Quality check. The editor can't approve it themselves when someone else can.
  * `version` is the one they edited (0 when writing the first draft); a newer one means they'd overwrite it.
  */
 export async function saveDraft(input: { workspaceId: string; brandId: string; userId: string; itemId: string; version: number; body: DraftInput }) {
@@ -256,6 +256,9 @@ export async function schedulePublication(input: {
     if (links.some((l) => !l)) throw new PublishingError("Image links must be public https:// addresses", 400);
     const media = input.mediaKeys ?? [];
     if (media.some((k) => !ownMediaKey(input, k))) throw new PublishingError("Unknown image", 400);
+    // A draft that names its pictures (photoKeys) posts those: the approval covered them, not other files.
+    const approvedPhotos = (latest.body as { photoKeys?: string[] }).photoKeys;
+    if (approvedPhotos && media.some((k) => !approvedPhotos.includes(k))) throw new PublishingError("Post the photos on the approved draft, or edit the post first", 400);
     const count = media.length + links.length;
     if (count < req.minImages) throw new PublishingError(req.minImages === 1 ? "This channel needs an image" : `A carousel needs at least ${req.minImages} images`, 400);
     if (count > req.maxImages) throw new PublishingError(req.maxImages === 0 ? "Reels take a video, not images" : `This channel takes at most ${req.maxImages} image${req.maxImages === 1 ? "" : "s"}`, 400);

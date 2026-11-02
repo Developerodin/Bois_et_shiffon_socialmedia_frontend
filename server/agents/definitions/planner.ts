@@ -7,7 +7,8 @@ import { nextSlot, takenKey } from "@/server/content/calendar";
 import { brandKnowledge } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
 
-const CHANNELS = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "FACEBOOK_POST", "PINTEREST_PIN", "THREADS_POST"] as const;
+// No INSTAGRAM_REEL: a planned reel would have a script but no video to post. Reels are made in the app's Studio.
+const CHANNELS = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "FACEBOOK_POST", "PINTEREST_PIN", "THREADS_POST"] as const;
 const Plan = z.object({
   posts: z.array(z.object({ opportunityId: z.string(), title: z.string(), channel: z.enum(CHANNELS), pillar: z.string(), angle: z.string() })),
 });

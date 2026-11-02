@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { CHAIN_ROUNDS } from "@/server/agents/chain";
 import { NothingToDoError, startAgentRun } from "@/server/agents/engine";
 import { CONTENT_PROMPT_VERSION, CREATOR_SYSTEM } from "@/server/agents/prompts/content";
 import type { AgentDefinition } from "@/server/agents/types";
@@ -7,7 +8,7 @@ import { answeredBy } from "@/server/ai/provider";
 import { brandKnowledge, productPhotos } from "@/server/content/knowledge";
 import { checkDraft } from "@/server/content/rules";
 import { prisma } from "@/server/db/prisma";
-import { lock, TX } from "@/server/services/publishing";
+import { lock, postAiAllowed, TX } from "@/server/services/publishing";
 
 export const Draft = z.object({
   hook: z.string(),
@@ -33,10 +34,10 @@ export const creatorAgent: AgentDefinition = {
   description: "Writes captions, hooks, carousel slides, Reel scripts and Pin titles from each brief.",
   // itemId: write just that post (sent back from the app's "Re-generate caption"), as its own run.
   // chain: start the next agent of the posts chain when done (Planner → Brief writer → Creator → Quality), the app's "Generate calendar".
-  inputSchema: z.object({ itemId: z.string().min(1).max(100).optional(), chain: z.boolean().optional() }).strict(),
+  inputSchema: z.object({ itemId: z.string().min(1).max(100).optional(), chain: z.boolean().optional(), round: z.number().int().min(0).max(CHAIN_ROUNDS).optional() }).strict(),
   async run(ctx, input) {
     const { brand } = ctx;
-    const { itemId, chain } = input as { itemId?: string; chain?: boolean }; // parsed by the engine against inputSchema
+    const { itemId, chain, round = 0 } = input as { itemId?: string; chain?: boolean; round?: number }; // parsed by the engine against inputSchema
     const items = await prisma.contentItem.findMany({
       // studio reels are written in the app
       where: { brandId: brand.brandId, status: { in: ["BRIEF_READY", "DRAFT_REVIEW"] }, studio: false, ...(itemId ? { id: itemId } : {}) },
@@ -51,8 +52,10 @@ export const creatorAgent: AgentDefinition = {
       i.decisions[0]?.verdict === "CHANGES_REQUESTED" && i.decisions[0].contentVersionId === i.versions[0]?.id ? i.decisions[0].note : null;
     // Fresh briefs, drafts whose latest check found blockers, and drafts an approver sent back.
     // A person's own edit waiting for its check is left alone.
+    // New briefs first, so drafts the check keeps blocking can't take every slot and starve the new posts.
     const todo = items
       .filter((i) => i.status === "BRIEF_READY" || i.versions[0]?.checks[0]?.overall === "BLOCKER" || sentBack(i))
+      .sort((a, b) => Number(b.status === "BRIEF_READY") - Number(a.status === "BRIEF_READY"))
       .slice(0, PER_RUN);
     if (!todo.length) throw new NothingToDoError("Nothing to write: run the Brief writer first (or there are no blocked drafts to fix)");
     const [knowledge, photos] = await Promise.all([brandKnowledge(brand.workspaceId, brand.brandId, 3500), productPhotos(brand.workspaceId, brand.brandId)]);
@@ -122,8 +125,14 @@ export const creatorAgent: AgentDefinition = {
         { type: "ContentItem", id: item.id },
       );
     }
-    // ponytail: the chain checks this run's drafts (Creator does 5 per run); the rest wait for the next run.
-    if (chain && drafted) await startAgentRun({ workspaceId: brand.workspaceId, brandId: brand.brandId, agentKey: "quality", trigger: "event" }).catch(() => null);
+    if (chain) {
+      // Check this round's drafts, then write the next batch while briefs are waiting (see CHAIN_ROUNDS).
+      const start = (agentKey: string, next: number) =>
+        startAgentRun({ workspaceId: brand.workspaceId, brandId: brand.brandId, agentKey, trigger: "event", input: agentKey === "quality" ? { round: next } : { chain: true, round: next } }).catch(() => null);
+      if (drafted) await start("quality", round);
+      const waiting = await prisma.contentItem.count({ where: { brandId: brand.brandId, status: "BRIEF_READY", studio: false } });
+      if (waiting > 0 && round + 1 < CHAIN_ROUNDS && (await postAiAllowed(brand.workspaceId))) await start("creator", round + 1);
+    }
     return { drafted };
   },
 };

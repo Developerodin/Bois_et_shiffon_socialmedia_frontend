@@ -369,7 +369,13 @@ export function renderFailure(r: Pick<ReelRender, "step" | "error" | "requests" 
 /** For the app: each version's latest render. */
 export async function renderView(itemId: string) {
   const renders = await prisma.reelRender.findMany({ where: { contentItemId: itemId }, orderBy: { createdAt: "desc" }, take: 20 });
+  // What each attempt was charged (its charge entry; 0 in a workspace with unlimited credits).
+  const charges = await prisma.creditEntry.findMany({ where: { refId: { in: renders.map((r) => r.chargeId) }, delta: { lte: 0 } }, select: { refId: true, delta: true } });
+  const charged = (r: ReelRender) => {
+    const c = charges.find((e) => e.refId === r.chargeId);
+    return c ? -c.delta : null;
+  };
   // Joins the seam check softened, so R07 can say so (its reason stays here: it's the model's English note).
   const softened = (r: ReelRender) => ((r.outputs as Partial<Outputs> | null)?.seams ?? []).filter((s) => s.used !== s.planned).map((s) => s.after);
-  return renders.map((r) => ({ id: r.id, versionId: r.contentVersionId, attempt: r.attempt, step: r.step, failure: renderFailure(r), softened: softened(r), videoKey: r.videoKey, createdAt: r.createdAt }));
+  return renders.map((r) => ({ id: r.id, versionId: r.contentVersionId, attempt: r.attempt, step: r.step, failure: renderFailure(r), softened: softened(r), videoKey: r.videoKey, credits: charged(r), createdAt: r.createdAt }));
 }

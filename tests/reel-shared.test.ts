@@ -114,6 +114,21 @@ describe("studio reels in the publishing flow", () => {
   });
 });
 
+describe("posts publish their approved photos", () => {
+  it("refuses other files of the brand than the draft's photoKeys", async () => {
+    const v = version({ createdBy: "agent", body: { caption: "a", hashtags: [], photoKeys: ["w1/b1/product-1.jpg"] } });
+    withLatest(item({ channel: "INSTAGRAM_POST", status: "APPROVED", studio: false }), v);
+    const { packageHash } = await import("@/server/services/publishing");
+    db.tx.approvalDecision.findFirst.mockResolvedValue({ verdict: "APPROVED", contentVersionId: "v1", packageHash: packageHash({ id: "i1", channel: "INSTAGRAM_POST" }, v) });
+    db.tx.integrationConnection.findFirst.mockResolvedValue({ id: "c1", provider: "INSTAGRAM" });
+    db.tx.publicationAttempt.findFirst.mockResolvedValue(null);
+    db.tx.publicationAttempt.create.mockImplementation(async (a: { data: object }) => ({ ...a.data, runAt: new Date() }));
+    await expect(schedulePublication({ ...scope, userId: "u1", itemId: "i1", version: 3, connectionId: "c1", mediaKeys: ["w1/b1/other.jpg"] })).rejects.toThrow(/approved draft/);
+    await schedulePublication({ ...scope, userId: "u1", itemId: "i1", version: 3, connectionId: "c1", mediaKeys: ["w1/b1/product-1.jpg"] });
+    expect(db.tx.publicationAttempt.create.mock.calls[0][0].data.target).toMatchObject({ media: ["w1/b1/product-1.jpg"] });
+  });
+});
+
 describe("reel checks and agents", () => {
   it("rendered reel carries an unresolved visual check", () => {
     const r = checkDraft("INSTAGRAM_REEL", { hook: "h", caption: "Une table en acacia.", hashtags: ["#bois"], script: ["a", "b"], videoKey: "k" });

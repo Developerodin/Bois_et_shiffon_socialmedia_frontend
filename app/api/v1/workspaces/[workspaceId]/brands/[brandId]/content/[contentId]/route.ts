@@ -35,8 +35,9 @@ const Action = z.discriminatedUnion("action", [
     runAt: z.string().datetime({ offset: true }).optional(),
   }),
   z.object({ action: z.enum(["cancel", "posted", "not-posted"]), attemptId: z.string().min(1), url: z.string().max(2000).optional() }),
-  // The check blocked the draft: the Creator rewrites it now with the check's report (the app's "Fix it").
-  z.object({ action: z.literal("rewrite"), version: z.number().int() }),
+  // The app's "Fix it" / "Try again": the writer (re)writes a post that's waiting for a draft, blocked or sent back,
+  // or the check runs again on a draft that never got one.
+  z.object({ action: z.literal("rewrite"), version: z.number().int().min(0) }),
 ]);
 
 const PERMISSION = { rewrite: "content.create", edit: "content.create", decide: "content.approve", publish: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
@@ -91,8 +92,12 @@ export async function POST(request: Request, context: Params) {
         select: { status: true, versions: { orderBy: { version: "desc" }, take: 1, select: { version: true, checks: { orderBy: { createdAt: "desc" }, take: 1, select: { overall: true } } } } },
       });
       const latest = item?.versions[0];
-      if (!item || item.status !== "DRAFT_REVIEW" || latest?.version !== body.version || latest.checks[0]?.overall !== "BLOCKER") throw new PublishingError("Only a draft the check blocked can be sent back this way", 409);
-      await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: "creator", trigger: "event", input: { itemId } });
+      if (!item || !["BRIEF_READY", "DRAFT_REVIEW"].includes(item.status) || (latest?.version ?? 0) !== body.version) {
+        throw new PublishingError("This post isn't waiting for the writer any more. Reload it.", 409);
+      }
+      // A draft with no check yet needs the check, not a new draft (the writer leaves people's edits alone).
+      const unchecked = item.status === "DRAFT_REVIEW" && latest && !latest.checks[0];
+      await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: unchecked ? "quality" : "creator", trigger: "event", input: unchecked ? { itemId, version: latest.version } : { itemId } });
       kickRunner();
     } else if (body.action === "decide") {
       await decide({ ...scope, itemId, version: body.version, verdict: body.verdict, note: body.note });

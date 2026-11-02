@@ -45,7 +45,8 @@ export const qualityAgent: AgentDefinition = {
   description: "Checks each draft for brand voice, product accuracy, French quality and platform rules before approval.",
   // itemId: check just that item (a studio reel after its render or a caption edit), as its own run.
   // version: only so the engine doesn't fold a check of a newer edit into a run still checking the older one.
-  inputSchema: z.object({ itemId: z.string().min(1).max(100).optional(), version: z.number().int().min(1).optional() }).strict(),
+  // round: the posts chain's batch (agents/engine.ts CHAIN_ROUNDS), for the same reason.
+  inputSchema: z.object({ itemId: z.string().min(1).max(100).optional(), version: z.number().int().min(1).optional(), round: z.number().int().min(0).max(10).optional() }).strict(),
   async run(ctx, input) {
     const { brand } = ctx;
     const { itemId } = input as { itemId?: string }; // parsed by the engine against inputSchema
