@@ -17,36 +17,29 @@
       "location": "Místo",
       "audience": "Publikum",
       "category": "Kategorie",
-      "subcategory": "Podkategorie",
-      "storeType": "Typ obchodu",
-      "website": "Webová stránka"
+      "website": "Webová stránka",
+      "tags": "Čím je podnik známý"
     },
     "brandPreferences": "Preference značky",
     "brandPreferencesHint": "Barvy, tón, jazyk",
     "photoAssets": "Fotografie",
     "photoAssetsHint": "Fotky Bunting stolu a TV jednotky",
     "connections": "Připojení",
-    "connectionsHint": "Sociální kanály & Google profil"
+    "connectionsHint": "Sociální kanály & Google profil",
+    "noAttributes": "Zatím tu nic není. Přidej web nebo zápis na Google Maps v úvodním nastavení, nebo vyplň nastavení značky."
   },
   "brand": {
     "title": "Nastavení značky",
     "save": "Uložit změny",
     "paletteTitle": "Barevná paleta značky",
-    "editHex": "Upravit hex",
     "watermarkTitle": "Logo vodoznaku na konci",
     "watermarkBody": "Používá se na konci videí a okrajích fotek",
-    "change": "Změnit",
     "toneTitle": "Kreativní tón",
-    "tones": {
-      "modern": "Moderní",
-      "luxurious": "Luxusní",
-      "elegant": "Elegantní",
-      "premium": "Prémiový",
-      "natural": "Přírodní",
-      "minimalist": "Minimalistický"
-    },
-    "cuesTitle": "Charakteristické prvky značky",
-    "addCue": "Přidat prvek"
+    "saving": "Ukládání...",
+    "addColor": "Přidat barvu",
+    "editColor": "Upravit barvu {{hex}}",
+    "noColors": "Barvy tvé značky se zobrazí po načtení webu. Přidej svůj web v úvodním nastavení.",
+    "pickOneTone": "Vyber alespoň jeden tón komunikace."
   },
   "photos": {
     "title": "Fotografie",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} fotek",
     "emptyTitle": "Zatím žádné nahrávky",
     "emptyBody": "Fotky ze studia, které nahrajete, se objeví zde.",
-    "upload": "Nahrát vlastní fotky ze studia"
+    "upload": "Nahrát vlastní fotky ze studia",
+    "untitled": "Fotka",
+    "remove": "Odebrat {{name}}",
+    "uploading": "Nahrávání...",
+    "emptyWebsiteTitle": "Žádné fotky z webu",
+    "emptyWebsiteBody": "Tady se zobrazí produktové fotky načtené z tvého webu. Přidej web v úvodním nastavení nebo nahraj vlastní fotky."
   },
   "connections": {
     "title": "Připojení",
@@ -72,7 +70,6 @@
     "sourceBody": "Fotky produktů a detaily firmy",
     "channelsTitle": "Publikační kanály",
     "accounts": "Účty",
-    "connected": "Připojeno",
     "notConnected": "Nepřipojeno",
     "connect": "Připojit",
     "disconnect": "Odpojit",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Google Business profil",
       "shopify": "Shopify Direct Sync"
-    }
+    },
+    "noSite": "Zatím bez webu",
+    "comingSoon": "Zatím nedostupné",
+    "expired": "Přihlášení vypršelo",
+    "reconnect": "Znovu připojit"
   },
   "automations": {
     "title": "Automatizace",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Návrhy odpovědí na dotazy v showroomu",
-        "body": "Předvyplňte propracované odpovědi francouzských řemeslníků ve vaší frontě zpráv.",
-        "requires": "Vyžaduje komunikační kanál",
-        "active": "Aktivní · návrhy přidány do vaší schránky"
+        "body": "Předvyplňte propracované odpovědi francouzských řemeslníků ve vaší frontě zpráv."
       }
     },
     "adsTitle": "Placené sociální reklamy",
     "comingSoon": "Již brzy",
-    "adsBody": "Automatizované testování kreativ Meta reklam a rozpočtování."
+    "adsBody": "Automatizované testování kreativ Meta reklam a rozpočtování.",
+    "notAvailable": "Zatím nedostupné"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} kredit k dispozici",
     "creditsAvailable_other": "{{n}} kreditů k dispozici",
-    "planName": "{{tier}} plán",
-    "statusActive": "Aktivní",
-    "planBlurb": "Vaše nástroje pro tvorbu a podnikání",
-    "cycleTitle": "Fakturační cyklus",
-    "renewsMonthly": "Obnovuje se měsíčně",
     "balanceTitle": "Zůstatek kreditů",
-    "monthlyAllowance": "{{amount}} měsíční příspěvek",
-    "balanceLabel_one": "{{balance}} z {{n}} kreditu k dispozici",
-    "balanceLabel_other": "{{balance}} z {{n}} kreditů k dispozici",
-    "balanceOf_one": " / {{n}} kredit k dispozici",
-    "balanceOf_other": " / {{n}} kreditů k dispozici",
-    "note_one": "{{n}} kredit použit · {{reserved}} rezervováno pro {{item}}. Příspěvek se obnovuje měsíčně.",
-    "note_other": "{{n}} kreditů použito · {{reserved}} rezervováno pro {{item}}. Příspěvek se obnovuje měsíčně.",
     "usageTitle": "Nedávné použití kreditů",
     "usageAside": "Aktivita pracovního prostoru",
     "today": "Dnes",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} video",
-        "detail": "Rezervováno pro generování"
-      },
-      "plan": {
-        "title": "Měsíční plán obsahu",
-        "detail_one": "{{n}} návrh příspěvku",
-        "detail_other": "{{n}} návrhů příspěvků"
-      },
-      "renewal": {
-        "title": "Obnovení měsíčního plánu",
-        "detail": "Reset kreditního cyklu"
-      }
-    },
     "spent_one": "-{{n}} kredit",
     "spent_other": "-{{n}} kreditů",
     "added_one": "+{{n}} kredit",
     "added_other": "+{{n}} kreditů",
-    "included": "Zahrnuto",
     "help": {
-      "missingCredits": "Chybějící kredity nebo selhání vykreslení",
-      "restore": "Obnovit nákupy předplatného",
-      "history": "Historie fakturace a faktury"
+      "missingCredits": "Chybějící kredity nebo selhání vykreslení"
+    },
+    "noPlan": "Zatím bez tarifu",
+    "noPlanBlurb": "Platíš průběžně kredity. Tarify se chystají.",
+    "seePlans": "Zobrazit tarify",
+    "creditsWord_one": "kredit",
+    "creditsWord_other": "kreditů",
+    "howCredits": "Kredity se spotřebují při tvorbě reelu nebo plánování kalendáře. Pokud se reel nepodaří vytvořit, kredity se vrátí.",
+    "noUsage": "Zatím žádné použité kredity.",
+    "kinds": {
+      "reel": "Reel {{name}}",
+      "calendar": "Obsahový kalendář",
+      "agent": "Spuštění agenta",
+      "audit": "Audit webu",
+      "refund": "Vrácení kreditů: {{name}}",
+      "added": "Přidané kredity",
+      "reelPlain": "Reel",
+      "refundPlain": "Vrácení platby"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Zásady ochrany osobních údajů",
     "restore": "Obnovit nákupy",
     "signOut": "Odhlásit se z Espanda",
-    "signOutNote": "Vaše aktivní předplatné a rozpracované katalogové položky zůstávají bezpečně uloženy."
+    "signOutNote": "Vaše aktivní předplatné a rozpracované katalogové položky zůstávají bezpečně uloženy.",
+    "memberCount_one": "{{count}} člen",
+    "memberCount_other": "{{count}} členů",
+    "pushUnavailable": "V této verzi aplikace zatím nedostupné. Místo toho uvidíš banner v aplikaci."
   },
   "drawer": {
     "closeMenu": "Zavřít menu",
     "switchLabel": "Pracovní prostor {{name}}. Přepnout podnikání",
-    "balanceLabel_one": "Aktuální zůstatek {{credits}} kredit, plán {{plan}}",
-    "balanceLabel_other": "Aktuální zůstatek {{credits}} kreditů, plán {{plan}}",
     "balanceTitle": "Aktuální zůstatek",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredit zbývá</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> kreditů zbývá</rest>",
@@ -210,6 +197,10 @@
       "billing": "Plány & Fakturace",
       "account": "Nastavení účtu"
     },
-    "signOut": "Odhlásit se"
+    "signOut": "Odhlásit se",
+    "loadingBusinesses": "Načítání tvých podniků...",
+    "balanceLabelNoPlan_one": "Zůstatek kreditů: {{credits}}",
+    "balanceLabelNoPlan_other": "Zůstatek kreditů: {{credits}}",
+    "added": "Přidáno {{date}}"
   }
 }

@@ -17,36 +17,29 @@
       "location": "स्थान",
       "audience": "दर्शक",
       "category": "श्रेणी",
-      "subcategory": "उपश्रेणी",
-      "storeType": "स्टोर प्रकार",
-      "website": "वेबसाइट"
+      "website": "वेबसाइट",
+      "tags": "पहचान"
     },
     "brandPreferences": "ब्रांड प्राथमिकताएँ",
     "brandPreferencesHint": "रंग, टोन, भाषा",
     "photoAssets": "फोटो संसाधन",
     "photoAssetsHint": "Bunting टेबल और टीवी यूनिट फोटो",
     "connections": "कनेक्शन",
-    "connectionsHint": "सोशल चैनल और Google प्रोफाइल"
+    "connectionsHint": "सोशल चैनल और Google प्रोफाइल",
+    "noAttributes": "अभी कोई जानकारी नहीं है। ऑनबोर्डिंग में अपनी वेबसाइट या Google Maps लिस्टिंग जोड़ें या ब्रांड प्राथमिकताएँ भरें।"
   },
   "brand": {
     "title": "ब्रांड सेटिंग्स",
     "save": "परिवर्तन सहेजें",
     "paletteTitle": "ब्रांड रंग पैलेट",
-    "editHex": "हेक्स संपादित करें",
     "watermarkTitle": "आउट्रो वॉटरमार्क लोगो",
     "watermarkBody": "वीडियो रील अंत और फोटो बॉर्डर पर लागू",
-    "change": "बदलें",
     "toneTitle": "क्रिएटिव टोन",
-    "tones": {
-      "modern": "आधुनिक",
-      "luxurious": "शानदार",
-      "elegant": "शालीन",
-      "premium": "प्रीमियम",
-      "natural": "प्राकृतिक",
-      "minimalist": "मिनिमलिस्ट"
-    },
-    "cuesTitle": "ब्रांड सिग्नेचर संकेत",
-    "addCue": "संकेत जोड़ें"
+    "saving": "सेव हो रहा है...",
+    "addColor": "रंग जोड़ें",
+    "editColor": "रंग {{hex}} बदलें",
+    "noColors": "आपकी वेबसाइट पढ़ने के बाद ब्रांड के रंग यहाँ दिखेंगे। इन्हें पाने के लिए ऑनबोर्डिंग में अपनी वेबसाइट जोड़ें।",
+    "pickOneTone": "कम से कम एक टोन चुनें।"
   },
   "photos": {
     "title": "फोटो संसाधन",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} फोटो",
     "emptyTitle": "अभी तक कोई अपलोड नहीं",
     "emptyBody": "स्टूडियो फोटो जो आप अपलोड करते हैं, यहाँ दिखाई देंगे।",
-    "upload": "कस्टम स्टूडियो फोटो अपलोड करें"
+    "upload": "कस्टम स्टूडियो फोटो अपलोड करें",
+    "untitled": "फ़ोटो",
+    "remove": "{{name}} हटाएँ",
+    "uploading": "अपलोड हो रहा है...",
+    "emptyWebsiteTitle": "वेबसाइट की कोई फ़ोटो नहीं",
+    "emptyWebsiteBody": "आपकी वेबसाइट से ली गई प्रोडक्ट फ़ोटो यहाँ दिखेंगी। ऑनबोर्डिंग में अपनी वेबसाइट जोड़ें या अपनी फ़ोटो अपलोड करें।"
   },
   "connections": {
     "title": "कनेक्शन",
@@ -72,7 +70,6 @@
     "sourceBody": "उत्पाद फोटो और व्यवसाय विवरण",
     "channelsTitle": "प्रकाशन चैनल",
     "accounts": "अकाउंट्स",
-    "connected": "कनेक्टेड",
     "notConnected": "कनेक्टेड नहीं",
     "connect": "कनेक्ट करें",
     "disconnect": "डिस्कनेक्ट करें",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp बिजनेस",
       "google": "Google बिजनेस प्रोफाइल",
       "shopify": "Shopify डायरेक्ट सिंक"
-    }
+    },
+    "noSite": "अभी कोई वेबसाइट नहीं",
+    "comingSoon": "अभी उपलब्ध नहीं",
+    "expired": "साइन-इन की अवधि खत्म हो गई",
+    "reconnect": "फिर से कनेक्ट करें"
   },
   "automations": {
     "title": "ऑटोमेशन",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "शोरूम पूछताछ के उत्तर का मसौदा तैयार करें",
-        "body": "आपके इनबॉक्स कतार में परिष्कृत फ्रेंच कारीगर उत्तरों को पूर्व-जनसंख्या करें।",
-        "requires": "मैसेजिंग चैनल आवश्यक",
-        "active": "सक्रिय · ड्राफ्ट आपके इनबॉक्स में जोड़े गए"
+        "body": "आपके इनबॉक्स कतार में परिष्कृत फ्रेंच कारीगर उत्तरों को पूर्व-जनसंख्या करें।"
       }
     },
     "adsTitle": "पेड सोशल विज्ञापन",
     "comingSoon": "जल्द आ रहा है",
-    "adsBody": "स्वचालित मेटा विज्ञापन क्रिएटिव परीक्षण और बजट पेसिंग।"
+    "adsBody": "स्वचालित मेटा विज्ञापन क्रिएटिव परीक्षण और बजट पेसिंग।",
+    "notAvailable": "अभी उपलब्ध नहीं"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} क्रेडिट उपलब्ध",
     "creditsAvailable_other": "{{n}} क्रेडिट उपलब्ध",
-    "planName": "{{tier}} योजना",
-    "statusActive": "सक्रिय",
-    "planBlurb": "आपके निर्माण और व्यवसाय उपकरण",
-    "cycleTitle": "बिलिंग चक्र",
-    "renewsMonthly": "मासिक नवीनीकरण",
     "balanceTitle": "क्रेडिट बैलेंस",
-    "monthlyAllowance": "{{amount}} मासिक भत्ता",
-    "balanceLabel_one": "{{balance}} में से {{n}} क्रेडिट उपलब्ध",
-    "balanceLabel_other": "{{balance}} में से {{n}} क्रेडिट उपलब्ध",
-    "balanceOf_one": " / {{n}} क्रेडिट उपलब्ध",
-    "balanceOf_other": " / {{n}} क्रेडिट उपलब्ध",
-    "note_one": "{{n}} क्रेडिट उपयोग किया गया · {{item}} के लिए {{reserved}} आरक्षित। भत्ता मासिक नवीनीकरण होता है।",
-    "note_other": "{{n}} क्रेडिट उपयोग किए गए · {{item}} के लिए {{reserved}} आरक्षित। भत्ता मासिक नवीनीकरण होता है।",
     "usageTitle": "हाल की क्रेडिट उपयोग",
     "usageAside": "वर्कस्पेस गतिविधि",
     "today": "आज",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} रील",
-        "detail": "उत्पादन के लिए आरक्षित"
-      },
-      "plan": {
-        "title": "मासिक सामग्री योजना",
-        "detail_one": "{{n}} ड्राफ्ट पोस्ट",
-        "detail_other": "{{n}} ड्राफ्ट पोस्ट"
-      },
-      "renewal": {
-        "title": "मासिक योजना नवीनीकरण",
-        "detail": "चक्र क्रेडिट रीसेट"
-      }
-    },
     "spent_one": "-{{n}} क्रेडिट",
     "spent_other": "-{{n}} क्रेडिट",
     "added_one": "+{{n}} क्रेडिट",
     "added_other": "+{{n}} क्रेडिट",
-    "included": "शामिल",
     "help": {
-      "missingCredits": "क्रेडिट गायब या रेंडर विफल",
-      "restore": "सदस्यता खरीदारी पुनर्स्थापित करें",
-      "history": "बिलिंग इतिहास और चालान"
+      "missingCredits": "क्रेडिट गायब या रेंडर विफल"
+    },
+    "noPlan": "अभी कोई प्लान नहीं",
+    "noPlanBlurb": "आप इस्तेमाल के हिसाब से क्रेडिट से भुगतान करते हैं। प्लान जल्द आ रहे हैं।",
+    "seePlans": "प्लान देखें",
+    "creditsWord_one": "क्रेडिट",
+    "creditsWord_other": "क्रेडिट",
+    "howCredits": "रील बनाने या कंटेंट कैलेंडर प्लान करने पर क्रेडिट खर्च होते हैं। अगर रील नहीं बन पाती, तो उसके क्रेडिट वापस मिल जाते हैं।",
+    "noUsage": "अभी तक कोई क्रेडिट इस्तेमाल नहीं हुआ।",
+    "kinds": {
+      "reel": "{{name}} रील",
+      "calendar": "कंटेंट कैलेंडर",
+      "agent": "एजेंट रन",
+      "audit": "साइट ऑडिट",
+      "refund": "रिफंड: {{name}}",
+      "added": "क्रेडिट जोड़े गए",
+      "reelPlain": "रील",
+      "refundPlain": "रिफंड"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "गोपनीयता नीति",
     "restore": "खरीदारी पुनर्स्थापित करें",
     "signOut": "Espanda से साइन आउट करें",
-    "signOutNote": "आपकी सक्रिय सदस्यता और ड्राफ्ट की गई कैटलॉग संपत्तियाँ सुरक्षित रूप से सहेजी जाती हैं।"
+    "signOutNote": "आपकी सक्रिय सदस्यता और ड्राफ्ट की गई कैटलॉग संपत्तियाँ सुरक्षित रूप से सहेजी जाती हैं।",
+    "memberCount_one": "{{count}} सदस्य",
+    "memberCount_other": "{{count}} सदस्य",
+    "pushUnavailable": "ऐप के इस वर्शन में अभी उपलब्ध नहीं है। इसकी जगह आपको ऐप में एक बैनर दिखेगा।"
   },
   "drawer": {
     "closeMenu": "मेनू बंद करें",
     "switchLabel": "वर्कस्पेस {{name}}. व्यवसाय बदलें",
-    "balanceLabel_one": "वर्तमान शेष {{credits}} क्रेडिट बचे हैं, {{plan}} योजना",
-    "balanceLabel_other": "वर्तमान शेष {{credits}} क्रेडिट्स बचे हैं, {{plan}} योजना",
     "balanceTitle": "वर्तमान शेष",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> क्रेडिट बचे हैं</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> क्रेडिट्स बचे हैं</rest>",
@@ -210,6 +197,10 @@
       "billing": "योजनाएँ और बिलिंग",
       "account": "खाता सेटिंग्स"
     },
-    "signOut": "साइन आउट करें"
+    "signOut": "साइन आउट करें",
+    "loadingBusinesses": "आपके कारोबार लोड हो रहे हैं...",
+    "balanceLabelNoPlan_one": "बैलेंस: {{credits}} क्रेडिट बचा है",
+    "balanceLabelNoPlan_other": "बैलेंस: {{credits}} क्रेडिट बचे हैं",
+    "added": "{{date}} को जोड़ा गया"
   }
 }

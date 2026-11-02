@@ -6,6 +6,7 @@ import { prisma } from "@/server/db/prisma";
 import { pinterestBoards } from "@/server/integrations/publishers";
 import { kickRunner } from "@/server/jobs/runner";
 import { accessToken } from "@/server/services/connections";
+import { autoPublish } from "@/server/services/automations";
 import { decide, postAiAllowed, PublishingError, releaseState, saveDraft, schedulePublication, settlePublication } from "@/server/services/publishing";
 
 // Queued work runs after the response (kickRunner); give it room to finish.
@@ -22,7 +23,8 @@ const Action = z.discriminatedUnion("action", [
     version: z.number().int().min(0),
     body: z.object({ hook: text(500), caption: z.string().min(1).max(5000), hashtags: list(30, 100), slides: list(20, 1000), script: list(30, 1000), pinTitle: text(200), altText: text(1000), photoKeys: z.array(z.string().max(300)).max(10).optional() }),
   }),
-  z.object({ action: z.literal("decide"), version: z.number().int(), verdict: z.enum(["APPROVED", "CHANGES_REQUESTED", "REJECTED"]), note: z.string().max(2000).optional() }),
+  // noAutoPublish: the app's Schedule approves and then schedules itself, so auto-publish stays out of its way.
+  z.object({ action: z.literal("decide"), version: z.number().int(), verdict: z.enum(["APPROVED", "CHANGES_REQUESTED", "REJECTED"]), note: z.string().max(2000).optional(), noAutoPublish: z.boolean().optional() }),
   z.object({
     action: z.literal("publish"),
     version: z.number().int(),
@@ -101,6 +103,10 @@ export async function POST(request: Request, context: Params) {
       kickRunner();
     } else if (body.action === "decide") {
       await decide({ ...scope, itemId, version: body.version, verdict: body.verdict, note: body.note });
+      if (body.verdict === "APPROVED" && !body.noAutoPublish) {
+        await autoPublish(scope, itemId);
+        kickRunner();
+      }
       // Sent back: the Creator rewrites this post now (studio reels are rewritten in the app's chat instead).
       if (startsAi) {
         await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: "creator", trigger: "event", input: { itemId } }).catch(() => null);

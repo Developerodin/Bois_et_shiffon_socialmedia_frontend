@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Check } from "lucide-react-native";
 import { Image } from "expo-image";
 import { router, type Href } from "expo-router";
 import {
@@ -20,11 +21,12 @@ import {
 import { Trans, useTranslation } from "react-i18next";
 import { Animated, Easing, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { session } from "@/api/client";
-import { formatNumber } from "@/i18n";
+import { formatDate, formatNumber } from "@/i18n";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { bc, strong14 } from "@/ui/business/kit";
-import { business, drawerAccount, media } from "@/ui/business/sample";
+import { myBusinesses, signOut, switchBusiness, type Business } from "@/ui/account-actions";
+import { useCredits } from "@/ui/use-credits";
+import { useCurrentBrand } from "@/ui/use-current-brand";
 import { ICON, eyebrow, meta } from "@/ui/reels/kit";
 import { photos } from "@/ui/reels/sample";
 
@@ -68,8 +70,24 @@ const SECTIONS: { title: string; items: Item[] }[] = [
 export function BusinessDrawer({ visible, onClose, onSelect }: { visible: boolean; onClose: () => void; onSelect?: (href: Href) => void }) {
   const { t } = useTranslation("business");
   const { top, bottom } = useSafeAreaInsets();
-  const credits = formatNumber(drawerAccount.credits);
+  const brand = useCurrentBrand();
+  const balance = useCredits();
+  const credits = formatNumber(balance ?? 0);
   const [x] = useState(() => new Animated.Value(-WIDTH));
+  // The switcher's list: loaded when opened.
+  const [list, setList] = useState<Business[] | null>(null);
+  const [picking, setPicking] = useState(false);
+  const togglePicking = () => {
+    if (!picking && !list) myBusinesses().then(setList, () => setList([]));
+    setPicking(!picking);
+  };
+  const pick = (b: Business) => {
+    setPicking(false);
+    if (b.brandId === brand?.id) return;
+    switchBusiness(b);
+    onClose();
+    router.replace("/posts");
+  };
 
   useEffect(() => {
     if (!visible) return;
@@ -96,15 +114,44 @@ export function BusinessDrawer({ visible, onClose, onSelect }: { visible: boolea
               </Pressable>
             </View>
 
-            <Pressable accessibilityRole="button" accessibilityLabel={t("drawer.switchLabel", { name: business.name })} style={styles.switcher}>
-              <Image source={media.favicon} style={styles.favicon} contentFit="contain" />
-              <Text style={[strong14, { flex: 1 }]}>{business.name}</Text>
-              <ChevronDown size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: picking }}
+              accessibilityLabel={t("drawer.switchLabel", { name: brand?.name ?? "" })}
+              onPress={togglePicking}
+              style={styles.switcher}
+            >
+              <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={styles.favicon} contentFit="contain" />
+              <Text style={[strong14, { flex: 1 }]} numberOfLines={1}>
+                {brand?.name ?? ""}
+              </Text>
+              <ChevronDown size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} style={picking ? { transform: [{ rotate: "180deg" }] } : undefined} />
             </Pressable>
+            {picking ? (
+              <View style={styles.picker}>
+                {!list ? (
+                  <Text style={[meta, { padding: space[8] }]}>{t("drawer.loadingBusinesses")}</Text>
+                ) : (
+                  list.map((b) => (
+                    <Pressable key={b.brandId} accessibilityRole="button" accessibilityState={{ selected: b.brandId === brand?.id }} onPress={() => pick(b)} style={styles.pickRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={type.label} numberOfLines={1}>
+                          {b.name}
+                        </Text>
+                        <Text style={meta} numberOfLines={1}>
+                          {b.site ?? t("drawer.added", { date: formatDate(b.createdAt, { day: "numeric", month: "short", year: "numeric" }) })}
+                        </Text>
+                      </View>
+                      {b.brandId === brand?.id ? <Check size={16} color={color.primary} strokeWidth={ICON.strokeWidth} /> : null}
+                    </Pressable>
+                  ))
+                )}
+              </View>
+            ) : null}
 
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t("drawer.balanceLabel", { count: drawerAccount.credits, credits, plan: drawerAccount.plan })}
+              accessibilityLabel={t("drawer.balanceLabelNoPlan", { count: balance ?? 0, credits })}
               onPress={() => go("/business/billing")}
               style={styles.balance}
             >
@@ -114,14 +161,11 @@ export function BusinessDrawer({ visible, onClose, onSelect }: { visible: boolea
                   <Trans t={t}
                     ns="business"
                     i18nKey="drawer.creditsLeft"
-                    count={drawerAccount.credits}
+                    count={balance ?? 0}
                     values={{ credits }}
                     components={{ amount: <Text style={type.cardTitle} />, rest: <Text style={meta} /> }}
                   />
                 </Text>
-              </View>
-              <View style={styles.planTag}>
-                <Text style={strong14}>{drawerAccount.plan}</Text>
               </View>
             </Pressable>
           </View>
@@ -149,7 +193,7 @@ export function BusinessDrawer({ visible, onClose, onSelect }: { visible: boolea
           </ScrollView>
 
           <View style={[styles.foot, { paddingBottom: bottom + space[12] }]}>
-            <Pressable accessibilityRole="button" accessibilityLabel={t("drawer.signOut")} onPress={() => void session.signOut().then(() => go("/onboarding/sign-in"))} style={styles.signOut}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t("drawer.signOut")} onPress={() => void signOut().then(() => (onClose(), router.replace("/onboarding/sign-in")))} style={styles.signOut}>
               <LogOut size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
               <Text style={strong14}>{t("drawer.signOut")}</Text>
             </Pressable>
@@ -206,7 +250,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.divider,
   },
-  planTag: { height: 26, justifyContent: "center", paddingHorizontal: space[8], borderRadius: radius.badge, backgroundColor: bc.tile, borderWidth: 1, borderColor: color.divider },
+  picker: { marginTop: -4, paddingVertical: 4, borderRadius: radius.control, backgroundColor: color.surface, borderWidth: 1, borderColor: color.divider },
+  pickRow: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: space[8], paddingHorizontal: space[12] },
   list: { paddingHorizontal: space[20], paddingBottom: space[16] },
   sectionTitle: { paddingBottom: 4 },
   item: { minHeight: 46, flexDirection: "row", alignItems: "center", gap: space[12], paddingHorizontal: 4, borderRadius: radius.nested },

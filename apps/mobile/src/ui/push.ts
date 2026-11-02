@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
 import { useEffect } from "react";
+import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import { api } from "@/api/client";
 import i18n from "@/i18n";
@@ -14,6 +15,12 @@ import i18n from "@/i18n";
  */
 type Notifications = typeof import("expo-notifications");
 let token: string | null = null;
+// The registered token is kept on the phone, so after a restart Account shows push as on and can turn it off.
+const TOKEN_KEY = "espanda.pushToken";
+const remember = (t: string | null) => void (t ? SecureStore.setItemAsync(TOKEN_KEY, t) : SecureStore.deleteItemAsync(TOKEN_KEY)).catch(() => {});
+/** Resolves once the token saved on this phone (if any) is back in memory. */
+export const pushRestored: Promise<void> =
+  Platform.OS === "web" ? Promise.resolve() : SecureStore.getItemAsync(TOKEN_KEY).then((t) => void (token = token ?? t), () => {});
 
 const projectId = () => (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId;
 function load(): Notifications | null {
@@ -25,6 +32,9 @@ function load(): Notifications | null {
     return null; // a build without the native module
   }
 }
+
+/** False in a build without notifications set up (no EAS project or native module): Account says so. */
+export const pushAvailable = () => load() !== null;
 
 /** True once this phone gets push notifications: the in-app banner then stays quiet so nothing shows twice. */
 export const pushActive = () => token !== null;
@@ -45,6 +55,7 @@ export async function enablePush() {
       body: { token: t, platform: Platform.OS, messages: { ready: { title: text("readyTitle"), body: text("readyBody") }, failed: { title: text("failedTitle"), body: text("failedBody") } } },
     });
     token = t;
+    remember(t);
   } catch {
     // Push is a bonus: it never stops a video from being made.
   }
@@ -52,9 +63,11 @@ export async function enablePush() {
 
 /** Signing out: this phone stops getting that person's notifications. */
 export async function disablePush() {
+  await pushRestored;
   if (!token) return;
   const t = token;
   token = null;
+  remember(null);
   await api("/mobile/push-device", { method: "DELETE", body: { token: t } }).catch(() => undefined);
 }
 

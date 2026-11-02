@@ -2,15 +2,26 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Images, Palette, Unplug } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
-import { space, type } from "@/theme/tokens";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { color, space, type } from "@/theme/tokens";
 import { BizScreen, NavRow, SettingsCard, SettingsTabs, SimpleHeader, TextAction, bc, body12, strong14 } from "@/ui/business/kit";
-import { attributes, business, media } from "@/ui/business/sample";
+import { siteLabel, useCurrentBrand } from "@/ui/use-current-brand";
 import { eyebrow, meta } from "@/ui/reels/kit";
 
-/** M06 · Business / My Business: workspace identity, business attributes and settings links. */
+/** M06 · Business / My Business: the business's identity, what Research and onboarding know about it, and settings links. */
 export default function MyBusiness() {
   const { t } = useTranslation("business");
+  const brand = useCurrentBrand();
+  const view = brand?.view;
+  const site = siteLabel(view?.website);
+  // Only what's known: a business without a website or Maps listing shows fewer rows.
+  const attributes = [
+    { id: "location", value: view?.location, strong: false },
+    { id: "audience", value: view?.summary?.audience, strong: true },
+    { id: "category", value: view?.category, strong: true },
+    { id: "tags", value: view?.summary?.tags.join(", "), strong: true },
+    { id: "website", value: site, strong: true },
+  ].filter((a): a is { id: string; value: string; strong: boolean } => !!a.value);
   return (
     <BizScreen
       gutter={space[20]}
@@ -26,11 +37,11 @@ export default function MyBusiness() {
     >
       <SettingsCard style={styles.identity}>
         <View style={styles.logoTile}>
-          <Image source={media.favicon} style={{ width: 32, height: 32 }} contentFit="contain" accessibilityLabel={t("kit.logoLabel", { name: business.name })} />
+          <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={{ width: 32, height: 32 }} contentFit="contain" accessibilityLabel={t("kit.logoLabel", { name: brand?.name ?? "" })} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={type.cardTitle}>{business.name}</Text>
-          <Text style={meta}>{business.tagline}</Text>
+          <Text style={type.cardTitle}>{brand?.name ?? ""}</Text>
+          {view?.summary?.tagline ? <Text style={meta}>{view.summary.tagline}</Text> : null}
         </View>
         <View style={{ marginRight: space[8] }}>
           <TextAction label={t("kit.edit")} onPress={() => router.push("/business/brand")} />
@@ -41,6 +52,8 @@ export default function MyBusiness() {
         <Text style={[eyebrow, { paddingBottom: 2 }]} accessibilityRole="header">
           {t("myBusiness.attributesTitle")}
         </Text>
+        {!view ? <ActivityIndicator color={color.primary} style={{ marginTop: space[12] }} /> : null}
+        {view && attributes.length === 0 ? <Text style={[meta, { paddingTop: space[12] }]}>{t("myBusiness.noAttributes")}</Text> : null}
         {attributes.map((a, i) => (
           <View key={a.id} style={[styles.attr, i < attributes.length - 1 && styles.attrRule]}>
             <Text style={meta}>{t(`myBusiness.attributes.${a.id}`)}</Text>

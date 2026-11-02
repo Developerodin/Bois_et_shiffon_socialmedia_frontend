@@ -17,36 +17,29 @@
       "location": "Posizione",
       "audience": "Pubblico",
       "category": "Categoria",
-      "subcategory": "Sottocategoria",
-      "storeType": "Tipo di negozio",
-      "website": "Sito web"
+      "website": "Sito web",
+      "tags": "Cosa ti distingue"
     },
     "brandPreferences": "Preferenze del brand",
     "brandPreferencesHint": "Colori, tono, lingua",
     "photoAssets": "Risorse fotografiche",
     "photoAssetsHint": "Foto di tavolo e unità TV Bunting",
     "connections": "Connessioni",
-    "connectionsHint": "Canali social & profilo Google"
+    "connectionsHint": "Canali social & profilo Google",
+    "noAttributes": "Non sappiamo ancora nulla della tua attività. Aggiungi il tuo sito web o la tua scheda Google Maps durante la configurazione iniziale, oppure compila le preferenze del brand."
   },
   "brand": {
     "title": "Impostazioni del brand",
     "save": "Salva modifiche",
     "paletteTitle": "Palette colori del brand",
-    "editHex": "Modifica hex",
     "watermarkTitle": "Logo filigrana finale",
     "watermarkBody": "Applicato a fine video e bordi foto",
-    "change": "Cambia",
     "toneTitle": "Tono creativo",
-    "tones": {
-      "modern": "Moderno",
-      "luxurious": "Lussuoso",
-      "elegant": "Elegante",
-      "premium": "Premium",
-      "natural": "Naturale",
-      "minimalist": "Minimalista"
-    },
-    "cuesTitle": "Segni distintivi del brand",
-    "addCue": "Aggiungi segno"
+    "saving": "Salvataggio...",
+    "addColor": "Aggiungi colore",
+    "editColor": "Modifica colore {{hex}}",
+    "noColors": "I colori del tuo brand appariranno dopo l'analisi del tuo sito web. Aggiungi il tuo sito durante la configurazione iniziale per visualizzarli.",
+    "pickOneTone": "Scegli almeno un tono."
   },
   "photos": {
     "title": "Risorse fotografiche",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} foto",
     "emptyTitle": "Nessun caricamento",
     "emptyBody": "Le foto dello studio che carichi appariranno qui.",
-    "upload": "Carica foto personalizzate dello studio"
+    "upload": "Carica foto personalizzate dello studio",
+    "untitled": "Foto",
+    "remove": "Rimuovi {{name}}",
+    "uploading": "Caricamento...",
+    "emptyWebsiteTitle": "Nessuna foto dal sito",
+    "emptyWebsiteBody": "Le foto dei prodotti trovate sul tuo sito appariranno qui. Aggiungi il tuo sito durante la configurazione iniziale o carica le tue foto."
   },
   "connections": {
     "title": "Connessioni",
@@ -72,7 +70,6 @@
     "sourceBody": "Foto dei prodotti e dettagli dell'attività",
     "channelsTitle": "Canali di pubblicazione",
     "accounts": "Account",
-    "connected": "Connesso",
     "notConnected": "Non connesso",
     "connect": "Connetti",
     "disconnect": "Disconnetti",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Profilo Google Business",
       "shopify": "Sincronizzazione diretta Shopify"
-    }
+    },
+    "noSite": "Nessun sito web per ora",
+    "comingSoon": "Non ancora disponibile",
+    "expired": "Accesso scaduto",
+    "reconnect": "Riconnetti"
   },
   "automations": {
     "title": "Automazioni",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Bozza di risposte alle richieste in showroom",
-        "body": "Pre-compila risposte raffinate di artigiani francesi nella tua coda di posta.",
-        "requires": "Richiede canale di messaggistica",
-        "active": "Attivo · bozze aggiunte alla tua posta in arrivo"
+        "body": "Pre-compila risposte raffinate di artigiani francesi nella tua coda di posta."
       }
     },
     "adsTitle": "Annunci social a pagamento",
     "comingSoon": "Prossimamente",
-    "adsBody": "Test creativi automatizzati per annunci Meta e gestione del budget."
+    "adsBody": "Test creativi automatizzati per annunci Meta e gestione del budget.",
+    "notAvailable": "Non ancora disponibile"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} credito disponibile",
     "creditsAvailable_other": "{{n}} crediti disponibili",
-    "planName": "Piano {{tier}}",
-    "statusActive": "Attivo",
-    "planBlurb": "I tuoi strumenti di creazione e business",
-    "cycleTitle": "Ciclo di fatturazione",
-    "renewsMonthly": "Rinnova mensilmente",
     "balanceTitle": "Saldo crediti",
-    "monthlyAllowance": "{{amount}} mensile disponibile",
-    "balanceLabel_one": "{{balance}} di {{n}} credito disponibile",
-    "balanceLabel_other": "{{balance}} di {{n}} crediti disponibili",
-    "balanceOf_one": " / {{n}} credito disponibile",
-    "balanceOf_other": " / {{n}} crediti disponibili",
-    "note_one": "{{n}} credito usato · {{reserved}} riservato per {{item}}. Disponibilità rinnova mensilmente.",
-    "note_other": "{{n}} crediti usati · {{reserved}} riservati per {{item}}. Disponibilità rinnova mensilmente.",
     "usageTitle": "Uso recente dei crediti",
     "usageAside": "Attività del workspace",
     "today": "Oggi",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "Reel {{name}}",
-        "detail": "Riservato per generazione"
-      },
-      "plan": {
-        "title": "Piano contenuti mensile",
-        "detail_one": "{{n}} post in bozza",
-        "detail_other": "{{n}} post in bozza"
-      },
-      "renewal": {
-        "title": "Rinnovo piano mensile",
-        "detail": "Reset crediti ciclo"
-      }
-    },
     "spent_one": "-{{n}} credito",
     "spent_other": "-{{n}} crediti",
     "added_one": "+{{n}} credito",
     "added_other": "+{{n}} crediti",
-    "included": "Incluso",
     "help": {
-      "missingCredits": "Crediti mancanti o rendering fallito",
-      "restore": "Ripristina acquisti abbonamento",
-      "history": "Storico fatturazione e fatture"
+      "missingCredits": "Crediti mancanti o rendering fallito"
+    },
+    "noPlan": "Nessun piano per ora",
+    "noPlanBlurb": "Paghi a consumo con i crediti. I piani sono in arrivo.",
+    "seePlans": "Vedi piani",
+    "creditsWord_one": "credito",
+    "creditsWord_other": "crediti",
+    "howCredits": "I crediti vengono usati quando crei un reel o pianifichi il calendario. Se non è possibile creare un reel, i crediti ti vengono restituiti.",
+    "noUsage": "Non hai ancora usato crediti.",
+    "kinds": {
+      "reel": "Reel di {{name}}",
+      "calendar": "Calendario dei contenuti",
+      "agent": "Esecuzione agente",
+      "audit": "Analisi del sito",
+      "refund": "Rimborso: {{name}}",
+      "added": "Crediti aggiunti",
+      "reelPlain": "Reel",
+      "refundPlain": "Rimborso"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Informativa sulla privacy",
     "restore": "Ripristina acquisti",
     "signOut": "Esci da Espanda",
-    "signOutNote": "Il tuo abbonamento attivo e le risorse del catalogo salvate rimangono al sicuro."
+    "signOutNote": "Il tuo abbonamento attivo e le risorse del catalogo salvate rimangono al sicuro.",
+    "memberCount_one": "{{count}} membro",
+    "memberCount_other": "{{count}} membri",
+    "pushUnavailable": "Non ancora disponibile in questa versione dell'app. Vedrai invece un banner nell'app."
   },
   "drawer": {
     "closeMenu": "Chiudi menu",
     "switchLabel": "Spazio di lavoro {{name}}. Cambia attività",
-    "balanceLabel_one": "Saldo attuale {{credits}} credito rimasto, piano {{plan}}",
-    "balanceLabel_other": "Saldo attuale {{credits}} crediti rimasti, piano {{plan}}",
     "balanceTitle": "Saldo attuale",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> credito rimasto</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> crediti rimasti</rest>",
@@ -210,6 +197,10 @@
       "billing": "Piani & Fatturazione",
       "account": "Impostazioni account"
     },
-    "signOut": "Esci"
+    "signOut": "Esci",
+    "loadingBusinesses": "Caricamento delle tue attività...",
+    "balanceLabelNoPlan_one": "Saldo: {{credits}} credito rimanente",
+    "balanceLabelNoPlan_other": "Saldo: {{credits}} crediti rimanenti",
+    "added": "Data di aggiunta: {{date}}"
   }
 }

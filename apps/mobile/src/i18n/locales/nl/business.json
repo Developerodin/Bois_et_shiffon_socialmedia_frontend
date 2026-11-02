@@ -17,36 +17,29 @@
       "location": "Locatie",
       "audience": "Doelgroep",
       "category": "Categorie",
-      "subcategory": "Subcategorie",
-      "storeType": "Winkeltype",
-      "website": "Website"
+      "website": "Website",
+      "tags": "Bekend om"
     },
     "brandPreferences": "Merkvoorkeuren",
     "brandPreferencesHint": "Kleuren, toon, taal",
     "photoAssets": "Foto-assets",
     "photoAssetsHint": "Bunting tafel en tv-meubel foto's",
     "connections": "Verbindingen",
-    "connectionsHint": "Sociale kanalen & Google-profiel"
+    "connectionsHint": "Sociale kanalen & Google-profiel",
+    "noAttributes": "Nog niets bekend. Voeg je website of Google Maps-vermelding toe bij het instellen, of vul je merkvoorkeuren in."
   },
   "brand": {
     "title": "Merkinstellingen",
     "save": "Wijzigingen opslaan",
     "paletteTitle": "Merk kleurenpalet",
-    "editHex": "Hex bewerken",
     "watermarkTitle": "Outro watermerk logo",
     "watermarkBody": "Toegepast op video-eindes en fotokaders",
-    "change": "Wijzigen",
     "toneTitle": "Creatieve toon",
-    "tones": {
-      "modern": "Modern",
-      "luxurious": "Luxueus",
-      "elegant": "Elegant",
-      "premium": "Premium",
-      "natural": "Natuurlijk",
-      "minimalist": "Minimalistisch"
-    },
-    "cuesTitle": "Merkhandtekening cues",
-    "addCue": "Cue toevoegen"
+    "saving": "Opslaan...",
+    "addColor": "Kleur toevoegen",
+    "editColor": "Kleur {{hex}} bewerken",
+    "noColors": "Je merkkleuren verschijnen zodra je website is uitgelezen. Voeg je website toe bij het instellen.",
+    "pickOneTone": "Kies minstens één toon."
   },
   "photos": {
     "title": "Foto-assets",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} foto's",
     "emptyTitle": "Nog geen uploads",
     "emptyBody": "Studiofoto's die je uploadt verschijnen hier.",
-    "upload": "Aangepaste studiofoto's uploaden"
+    "upload": "Aangepaste studiofoto's uploaden",
+    "untitled": "Foto",
+    "remove": "{{name}} verwijderen",
+    "uploading": "Uploaden...",
+    "emptyWebsiteTitle": "Geen websitefoto's",
+    "emptyWebsiteBody": "Productfoto's van je website verschijnen hier. Voeg je website toe bij het instellen, of upload zelf foto's."
   },
   "connections": {
     "title": "Verbindingen",
@@ -72,7 +70,6 @@
     "sourceBody": "Productfoto's en bedrijfsgegevens",
     "channelsTitle": "Publicatiekanalen",
     "accounts": "Accounts",
-    "connected": "Verbonden",
     "notConnected": "Niet verbonden",
     "connect": "Verbinden",
     "disconnect": "Verbreken",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Google Bedrijfsprofiel",
       "shopify": "Shopify Direct Sync"
-    }
+    },
+    "noSite": "Nog geen website",
+    "comingSoon": "Nog niet beschikbaar",
+    "expired": "Sessie verlopen",
+    "reconnect": "Opnieuw verbinden"
   },
   "automations": {
     "title": "Automatiseringen",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Conceptantwoorden op showroomvragen",
-        "body": "Vooraf ingevulde verfijnde Franse ambachtsantwoorden in je inboxwachtrij.",
-        "requires": "Vereist berichtenkanaal",
-        "active": "Actief · concepten toegevoegd aan je inbox"
+        "body": "Vooraf ingevulde verfijnde Franse ambachtsantwoorden in je inboxwachtrij."
       }
     },
     "adsTitle": "Betaalde Sociale Advertenties",
     "comingSoon": "Binnenkort beschikbaar",
-    "adsBody": "Geautomatiseerde Meta-advertentiecreatieve tests & budgetbeheer."
+    "adsBody": "Geautomatiseerde Meta-advertentiecreatieve tests & budgetbeheer.",
+    "notAvailable": "Nog niet beschikbaar"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} tegoed beschikbaar",
     "creditsAvailable_other": "{{n}} tegoeden beschikbaar",
-    "planName": "{{tier}} plan",
-    "statusActive": "Actief",
-    "planBlurb": "Jouw creatie- en bedrijfstools",
-    "cycleTitle": "Factureringscyclus",
-    "renewsMonthly": "Maandelijks verlengen",
     "balanceTitle": "Tegoedsaldo",
-    "monthlyAllowance": "{{amount}} maandelijkse toelage",
-    "balanceLabel_one": "{{balance}} van {{n}} tegoed beschikbaar",
-    "balanceLabel_other": "{{balance}} van {{n}} tegoeden beschikbaar",
-    "balanceOf_one": " / {{n}} tegoed beschikbaar",
-    "balanceOf_other": " / {{n}} tegoeden beschikbaar",
-    "note_one": "{{n}} tegoed gebruikt · {{reserved}} gereserveerd voor {{item}}. Toelage vernieuwt maandelijks.",
-    "note_other": "{{n}} tegoeden gebruikt · {{reserved}} gereserveerd voor {{item}}. Toelage vernieuwt maandelijks.",
     "usageTitle": "Recent tegoedgebruik",
     "usageAside": "Werkruimte-activiteit",
     "today": "Vandaag",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} reel",
-        "detail": "Gereserveerd voor generatie"
-      },
-      "plan": {
-        "title": "Maandelijks inhoudsplan",
-        "detail_one": "{{n}} conceptpost",
-        "detail_other": "{{n}} conceptposts"
-      },
-      "renewal": {
-        "title": "Maandelijkse planvernieuwing",
-        "detail": "Tegoedcyclus reset"
-      }
-    },
     "spent_one": "-{{n}} tegoed",
     "spent_other": "-{{n}} tegoeden",
     "added_one": "+{{n}} tegoed",
     "added_other": "+{{n}} tegoeden",
-    "included": "Inbegrepen",
     "help": {
-      "missingCredits": "Ontbrekende credits of mislukte weergave",
-      "restore": "Aankopen herstellen",
-      "history": "Factuurgeschiedenis & facturen"
+      "missingCredits": "Ontbrekende credits of mislukte weergave"
+    },
+    "noPlan": "Nog geen abonnement",
+    "noPlanBlurb": "Je betaalt per gebruik met credits. Abonnementen komen eraan.",
+    "seePlans": "Bekijk abonnementen",
+    "creditsWord_one": "credit",
+    "creditsWord_other": "credits",
+    "howCredits": "Je gebruikt credits als je een reel maakt of je kalender plant. Als een reel niet kan worden gemaakt, krijg je de credits terug.",
+    "noUsage": "Nog geen credits gebruikt.",
+    "kinds": {
+      "reel": "Reel van {{name}}",
+      "calendar": "Contentkalender",
+      "agent": "Agenttaak",
+      "audit": "Website-audit",
+      "refund": "Terugbetaling: {{name}}",
+      "added": "Credits toegevoegd",
+      "reelPlain": "Reel",
+      "refundPlain": "Terugbetaling"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Privacybeleid",
     "restore": "Aankopen herstellen",
     "signOut": "Uitloggen bij Espanda",
-    "signOutNote": "Je actieve abonnement en conceptcatalogus blijven veilig opgeslagen."
+    "signOutNote": "Je actieve abonnement en conceptcatalogus blijven veilig opgeslagen.",
+    "memberCount_one": "{{count}} lid",
+    "memberCount_other": "{{count}} leden",
+    "pushUnavailable": "Nog niet beschikbaar in deze versie van de app. Je ziet in plaats daarvan een banner in de app."
   },
   "drawer": {
     "closeMenu": "Menu sluiten",
     "switchLabel": "Werkruimte {{name}}. Wissel van bedrijf",
-    "balanceLabel_one": "Huidig saldo {{credits}} credit over, {{plan}} plan",
-    "balanceLabel_other": "Huidig saldo {{credits}} credits over, {{plan}} plan",
     "balanceTitle": "Huidig saldo",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> credit over</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> credits over</rest>",
@@ -210,6 +197,10 @@
       "billing": "Plannen & Facturering",
       "account": "Accountinstellingen"
     },
-    "signOut": "Uitloggen"
+    "signOut": "Uitloggen",
+    "loadingBusinesses": "Je bedrijven laden...",
+    "balanceLabelNoPlan_one": "Tegoed: {{credits}} credit over",
+    "balanceLabelNoPlan_other": "Tegoed: {{credits}} credits over",
+    "added": "Toegevoegd op {{date}}"
   }
 }

@@ -1,17 +1,17 @@
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { brandAssets, currentBrand, posts, uploadPhoto, type PostBody } from "@/api/endpoints";
+import { posts, uploadPhoto, type PostBody } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, CardTitle, SegmentedTabs, tint } from "@/ui/posts/controls";
 import { coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
-import { useCurrentBrand } from "@/ui/use-current-brand";
+import { libraryPhotos, useCurrentBrand } from "@/ui/use-current-brand";
 import { usePermissions } from "@/ui/use-permissions";
 
 const TABS = ["image", "caption", "brand"] as const;
@@ -39,19 +39,13 @@ export default function EditPost() {
   const [newTag, setNewTag] = useState<string | null>(null);
   // The chosen pictures in order (first = cover); null = the draft's own.
   const [picked, setPicked] = useState<string[] | null>(null);
-  const [library, setLibrary] = useState<Photo[]>([]);
-  const [language, setLanguage] = useState<string | null>(null);
+  // Photos uploaded here; the rest of the library (website products and uploads) comes from the shared brand view.
+  const [mine, setMine] = useState<Photo[]>([]);
+  const library: Photo[] = [...mine, ...libraryPhotos(brand?.view)];
+  const language = brand?.view?.preferences.contentLanguage ?? null;
   const [busy, setBusy] = useState<"save" | "rewrite" | "upload" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    currentBrand()
-      .then((b) => brandAssets(b.workspaceId, b.brandId))
-      .then((a) => {
-        setLibrary((a.assets?.products ?? []).flatMap((p) => (p.image ? [{ key: p.image.key, url: p.image.url, title: p.title }] : [])));
-        setLanguage(a.preferences.contentLanguage);
-      }, () => {});
-  }, []);
 
   if (!post || !post.latest || !body) {
     return (
@@ -108,9 +102,9 @@ export default function EditPost() {
     setError(null);
     try {
       const up = await uploadPhoto(a.uri);
-      const mine = { key: up.key, url: up.previewUrl, title: a.fileName ?? t("edit.yourPhoto") };
-      setLibrary((l) => [mine, ...l]);
-      togglePhoto(mine.key);
+      const added = { key: up.key, url: up.previewUrl, title: t("edit.yourPhoto"), kind: null };
+      setMine((l) => [added, ...l]);
+      togglePhoto(added.key);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {

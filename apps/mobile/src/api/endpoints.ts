@@ -98,6 +98,13 @@ export type BrandAssetsView = {
 export type BrandDetailsEdit = { colors?: string[]; tagline?: string; audience?: string; tones?: string[]; contentLanguage?: "fr" | "en"; removeUpload?: string };
 
 /** Logo, colours, fonts and product photos Research read from the website, its summary and the owner's choices. Image URLs last an hour. */
+/** One credit ledger line (apps/web credits route ?history=1); name: the reel a render charge or refund was for. */
+export type CreditLine = { id: string; kind: "reel" | "calendar" | "agent" | "audit" | "refund" | "added"; delta: number; at: string; name: string | null };
+/** Balance and the last 20 ledger lines (Business M11). */
+export const creditHistory = async () => {
+  const b = await currentBrand();
+  return api<{ credits: number; history: CreditLine[] }>(`/workspaces/${encodeURIComponent(b.workspaceId)}/credits?history=1`, { workspaceId: b.workspaceId });
+};
 /** The workspace's credit balance (module header). */
 export const workspaceCredits = async (signal?: AbortSignal) => {
   const b = await currentBrand();
@@ -282,7 +289,8 @@ export const reels = {
 async function publishContent(id: string, version: number, o: { connectionId: string; runAt?: Date; approve: boolean; mediaKeys?: string[]; boardId?: string }) {
   const { ws, base } = await reelBase();
   const path = `${base}/content/${encodeURIComponent(id)}`;
-  if (o.approve) await api(path, { body: { action: "decide", version, verdict: "APPROVED" }, workspaceId: ws });
+  // noAutoPublish: this call schedules it itself, at the time the person picked (apps/web automations.ts).
+  if (o.approve) await api(path, { body: { action: "decide", version, verdict: "APPROVED", noAutoPublish: true }, workspaceId: ws });
   return api<{ attempts?: { id: string; runAt: string; status: string }[] }>(path, {
     body: { action: "publish", version, connectionId: o.connectionId, runAt: o.runAt?.toISOString(), mediaKeys: o.mediaKeys, boardId: o.boardId },
     workspaceId: ws,
@@ -293,6 +301,31 @@ export async function opportunities(signal?: AbortSignal) {
   const { ws, base } = await reelBase();
   return api<{ opportunities: Opportunity[] }>(`${base}/opportunities`, { workspaceId: ws, signal });
 }
+/** How many people are in the current business's workspace (Account M12). */
+export async function workspaceMemberCount() {
+  const b = await currentBrand();
+  const r = await api<{ members: unknown[] }>(`/workspaces/${encodeURIComponent(b.workspaceId)}/members`, { workspaceId: b.workspaceId });
+  return r.members.length;
+}
+
+/** The business's automations (Business M10); see apps/web server/services/automations.ts. */
+export type Automations = { monthlyPlan: boolean; autoPublish: boolean };
+export const automations = {
+  async get() {
+    const { ws, base } = await reelBase();
+    return api<Automations>(`${base}/automations`, { workspaceId: ws });
+  },
+  async set(change: Partial<Automations>) {
+    const { ws, base } = await reelBase();
+    return api<Automations>(`${base}/automations`, { method: "PATCH", body: change, workspaceId: ws });
+  },
+};
+
+/** Disconnect a linked account (Business M09): the server forgets its sign-in. */
+export async function disconnectAccount(connectionId: string) {
+  const { ws, base } = await reelBase();
+  return api<unknown>(`${base}/connections/${encodeURIComponent(connectionId)}`, { method: "DELETE", workspaceId: ws });
+}
 export async function connections() {
   const { ws, base } = await reelBase();
   return api<{ connections: Connection[] }>(`${base}/connections`, { workspaceId: ws });
@@ -301,8 +334,8 @@ export async function connections() {
  * R13 / P04 / M08 "Upload": a JPG/PNG up to 4 MB into this brand's media; returns its storage key.
  * `library`: also add it to the brand's photo library (Business M08) under `title`.
  */
-export async function uploadPhoto(uri: string, library?: { title: string }) {
-  const { ws, base } = await reelBase();
+export async function uploadPhoto(uri: string, library?: { title: string }, to?: { workspaceId: string; brandId: string }) {
+  const { ws, base } = to ? { ws: to.workspaceId, base: brandBase(to.workspaceId, to.brandId) } : await reelBase();
   const form = new FormData();
   // An expo-file-system File (Expo's documented upload with expo/fetch); the server reads the type from its bytes.
   form.append("file", new File(uri) as unknown as Blob);

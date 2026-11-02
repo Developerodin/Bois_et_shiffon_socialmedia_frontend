@@ -18,11 +18,18 @@ export async function brandKnowledge(workspaceId: string, brandId: string, maxPe
   return { text };
 }
 
-/** The brand's product photos Research stored (mobile A09 "Products"): what posts and reels are made from. */
+/** One photo the owner added to the brand's library (BrandProfile.uploads). */
+export const BrandUpload = z.object({ key: z.string(), title: z.string(), addedAt: z.string() });
+export const brandUploads = (json: unknown) => z.array(BrandUpload).safeParse(json).data ?? [];
+
+/**
+ * The brand's photo library: the product photos Research stored (mobile A09 "Products"), then the ones the owner
+ * uploaded (Business M08). What posts and reels are made from.
+ */
 export async function productPhotos(workspaceId: string, brandId: string) {
-  const profile = await prisma.brandProfile.findFirst({ where: { brandId, workspaceId }, select: { assets: true } });
+  const profile = await prisma.brandProfile.findFirst({ where: { brandId, workspaceId }, select: { assets: true, uploads: true } });
   const products = (profile?.assets as { products?: { title: string; imageKey: string | null }[] } | null)?.products ?? [];
-  return products.flatMap((p) => (p.imageKey ? [{ key: p.imageKey, title: p.title }] : []));
+  return [...products.flatMap((p) => (p.imageKey ? [{ key: p.imageKey, title: p.title }] : [])), ...brandUploads(profile?.uploads).map((u) => ({ key: u.key, title: u.title }))];
 }
 
 /**

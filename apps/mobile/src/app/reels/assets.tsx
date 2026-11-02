@@ -2,15 +2,16 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ImagePlus } from "lucide-react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { brandAssets, currentBrand, uploadPhoto } from "@/api/endpoints";
+import { uploadPhoto } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Footer } from "@/ui/layout";
 import { ActionButton, BackTitle, BrandPill, PageHeader, Panel, ReelsScreen, Tag, eyebrow, meta, rc, strong14 } from "@/ui/reels/kit";
 import { useReel } from "@/ui/reels/use-reel";
+import { libraryPhotos, siteLabel, useCurrentBrand } from "@/ui/use-current-brand";
 
 type Asset = { key: string; url: string; title: string };
 
@@ -18,19 +19,13 @@ type Asset = { key: string; url: string; title: string };
 export default function ReelsAssets() {
   const { t } = useTranslation("reels");
   const { id, detail, busy, error, save, setError } = useReel();
-  const [site, setSite] = useState("");
-  const [library, setLibrary] = useState<Asset[]>([]);
   const [uploads, setUploads] = useState<Asset[]>([]);
   const [chosen, setChosen] = useState<string[] | null>(null);
   const [uploading, setUploading] = useState(false);
-  useEffect(() => {
-    currentBrand()
-      .then((b) => brandAssets(b.workspaceId, b.brandId))
-      .then((a) => {
-        setSite(a.website?.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") ?? "");
-        setLibrary((a.assets?.products ?? []).flatMap((p) => (p.image ? [{ key: p.image.key, url: p.image.url, title: p.title }] : [])));
-      }, () => {});
-  }, []);
+  // The brand's library (website products and the owner's uploads), shared with every picker.
+  const brand = useCurrentBrand();
+  const site = siteLabel(brand?.view?.website) ?? "";
+  const library: Asset[] = libraryPhotos(brand?.view);
   const plan = detail?.plan;
   // Everything selectable: uploads first, then photos already in the plan, then the website's product photos.
   const inPlan: Asset[] = (plan?.scenes ?? []).map((sc) => ({ key: sc.photoKey, url: detail?.photoUrls[sc.photoKey] ?? "", title: sc.shot }));

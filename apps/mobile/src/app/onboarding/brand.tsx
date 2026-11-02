@@ -9,17 +9,11 @@ import { Chip } from "@/ui/chip";
 import { Screen, StepHeader, Title } from "@/ui/layout";
 import { BrandLogo } from "@/ui/onboarding/brand-logo";
 import { ColorSheet } from "@/ui/onboarding/color-sheet";
+import { TONE_GROUPS } from "@/ui/onboarding/tones";
 import { onboarding } from "@/ui/onboarding/state";
 import { imageSource, madeWithoutWebsite, saveBrandPreferences, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
-// Tone values stay English (stored in onboarding state); labels come from onboarding:brand.tones.<lowercase>.
-// Grouped so every kind of business finds itself, not only upscale ones; group titles: onboarding:brand.toneGroups.<key>.
-const TONE_GROUPS = [
-  { key: "feel", tones: ["Warm", "Playful", "Bold", "Calm", "Romantic", "Edgy"] },
-  { key: "style", tones: ["Modern", "Minimalist", "Rustic", "Vintage", "Bohemian", "Industrial", "Scandinavian", "Coastal"] },
-  { key: "positioning", tones: ["Luxurious", "Premium", "Elegant", "Affordable", "Artisanal", "Sustainable", "Natural", "Family-friendly"] },
-];
 // Stored value → label key under onboarding:brand.languages.
 const LANGUAGES: { value: string; key: "fr" | "en" }[] = [
   { value: "French (FR)", key: "fr" },

@@ -4,10 +4,11 @@ import { ChevronRight, Video } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { brandAssets, currentBrand, type Opportunity, opportunities, reels } from "@/api/endpoints";
+import { type Opportunity, opportunities, reels } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { ActionButton, BottomNav, Chip, ChipRow, ICON, ModuleHeader, ReelsScreen, Tag, bodyMuted, meta } from "@/ui/reels/kit";
 import { openReel } from "@/ui/reels/use-reel";
+import { libraryPhotos, useCurrentBrand } from "@/ui/use-current-brand";
 
 /** Scout writes reel angles as "[hook · pillar] angle"; split them for the chips and the card. */
 function parseAngle(o: Opportunity) {
@@ -20,7 +21,8 @@ export default function ReelsIdeas() {
   const { t } = useTranslation("reels");
   const [filter, setFilter] = useState<string>("all");
   const [ideas, setIdeas] = useState<Opportunity[] | null>(null);
-  const [images, setImages] = useState<string[]>([]);
+  const brand = useCurrentBrand();
+  const images = libraryPhotos(brand?.view).map((p) => p.url);
   const [making, setMaking] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -28,7 +30,6 @@ export default function ReelsIdeas() {
       (r) => setIdeas(r.opportunities.filter((o) => o.channels.includes("INSTAGRAM_REEL") && o.decision !== "REJECT")),
       (e: unknown) => (setIdeas([]), setError(e instanceof Error ? e.message : String(e))),
     );
-    currentBrand().then((b) => brandAssets(b.workspaceId, b.brandId)).then((a) => setImages((a.assets?.products ?? []).flatMap((p) => (p.image ? [p.image.url] : []))), () => {});
   }, []);
   const pillars = [...new Set((ideas ?? []).map((o) => parseAngle(o).pillar).filter((p): p is string => !!p))];
   const shown = (ideas ?? []).filter((o) => filter === "all" || parseAngle(o).pillar === filter);

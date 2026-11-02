@@ -17,36 +17,29 @@
       "location": "Location",
       "audience": "Audience",
       "category": "Category",
-      "subcategory": "Subcategory",
-      "storeType": "Store Type",
-      "website": "Website"
+      "website": "Website",
+      "tags": "Known for"
     },
     "brandPreferences": "Brand preferences",
     "brandPreferencesHint": "Colours, tone, language",
     "photoAssets": "Photo assets",
     "photoAssetsHint": "Bunting table and TV unit photos",
     "connections": "Connections",
-    "connectionsHint": "Social channels & Google profile"
+    "connectionsHint": "Social channels & Google profile",
+    "noAttributes": "Nothing known yet. Add your website or Google Maps listing in onboarding, or fill in Brand preferences."
   },
   "brand": {
     "title": "Brand settings",
     "save": "Save changes",
     "paletteTitle": "Brand colour palette",
-    "editHex": "Edit hex",
     "watermarkTitle": "Outro watermark logo",
     "watermarkBody": "Applied to video reel endings and photo borders",
-    "change": "Change",
     "toneTitle": "Creative tone",
-    "tones": {
-      "modern": "Modern",
-      "luxurious": "Luxurious",
-      "elegant": "Elegant",
-      "premium": "Premium",
-      "natural": "Natural",
-      "minimalist": "Minimalist"
-    },
-    "cuesTitle": "Brand signature cues",
-    "addCue": "Add cue"
+    "saving": "Saving...",
+    "addColor": "Add colour",
+    "editColor": "Edit colour {{hex}}",
+    "noColors": "Your brand colours appear once your website has been read. Add your website in onboarding to get them.",
+    "pickOneTone": "Pick at least one tone."
   },
   "photos": {
     "title": "Photo assets",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} photos",
     "emptyTitle": "No uploads yet",
     "emptyBody": "Studio photos you upload appear here.",
-    "upload": "Upload custom studio photos"
+    "upload": "Upload custom studio photos",
+    "untitled": "Photo",
+    "remove": "Remove {{name}}",
+    "uploading": "Uploading...",
+    "emptyWebsiteTitle": "No website photos",
+    "emptyWebsiteBody": "Product photos read from your website appear here. Add your website in onboarding, or upload your own."
   },
   "connections": {
     "title": "Connections",
@@ -72,7 +70,6 @@
     "sourceBody": "Product photos and business details",
     "channelsTitle": "Publishing channels",
     "accounts": "Accounts",
-    "connected": "Connected",
     "notConnected": "Not connected",
     "connect": "Connect",
     "disconnect": "Disconnect",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Google Business Profile",
       "shopify": "Shopify Direct Sync"
-    }
+    },
+    "noSite": "No website yet",
+    "comingSoon": "Not available yet",
+    "expired": "Sign-in expired",
+    "reconnect": "Reconnect"
   },
   "automations": {
     "title": "Automations",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Draft showroom inquiry replies",
-        "body": "Pre-populate refined French artisan replies in your inbox queue.",
-        "requires": "Requires messaging channel",
-        "active": "Active · drafts added to your inbox"
+        "body": "Pre-populate refined French artisan replies in your inbox queue."
       }
     },
     "adsTitle": "Paid Social Ads",
     "comingSoon": "Coming soon",
-    "adsBody": "Automated Meta ad creative testing & budget pacing."
+    "adsBody": "Automated Meta ad creative testing & budget pacing.",
+    "notAvailable": "Not available yet"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} credit available",
     "creditsAvailable_other": "{{n}} credits available",
-    "planName": "{{tier}} plan",
-    "statusActive": "Active",
-    "planBlurb": "Your creation and business tools",
-    "cycleTitle": "Billing cycle",
-    "renewsMonthly": "Renews monthly",
     "balanceTitle": "Credit balance",
-    "monthlyAllowance": "{{amount}} monthly allowance",
-    "balanceLabel_one": "{{balance}} of {{n}} credit available",
-    "balanceLabel_other": "{{balance}} of {{n}} credits available",
-    "balanceOf_one": " / {{n}} credit available",
-    "balanceOf_other": " / {{n}} credits available",
-    "note_one": "{{n}} credit used · {{reserved}} reserved for {{item}}. Allowance renews monthly.",
-    "note_other": "{{n}} credits used · {{reserved}} reserved for {{item}}. Allowance renews monthly.",
     "usageTitle": "Recent credit usage",
     "usageAside": "Workspace activity",
     "today": "Today",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} reel",
-        "detail": "Reserved for generation"
-      },
-      "plan": {
-        "title": "Monthly content plan",
-        "detail_one": "{{n}} drafted post",
-        "detail_other": "{{n}} drafted posts"
-      },
-      "renewal": {
-        "title": "Monthly plan renewal",
-        "detail": "Cycle credit reset"
-      }
-    },
     "spent_one": "-{{n}} credit",
     "spent_other": "-{{n}} credits",
     "added_one": "+{{n}} credit",
     "added_other": "+{{n}} credits",
-    "included": "Included",
     "help": {
-      "missingCredits": "Missing credits or failed render",
-      "restore": "Restore subscription purchases",
-      "history": "Billing history & invoices"
+      "missingCredits": "Missing credits or failed render"
+    },
+    "noPlan": "No plan yet",
+    "noPlanBlurb": "You pay with credits as you go. Plans are coming.",
+    "seePlans": "See plans",
+    "creditsWord_one": "credit",
+    "creditsWord_other": "credits",
+    "howCredits": "Credits are spent when you make a reel or plan your calendar. A reel that can't be made gives its credits back.",
+    "noUsage": "No credits used yet.",
+    "kinds": {
+      "reel": "{{name}} reel",
+      "calendar": "Content calendar",
+      "agent": "Agent run",
+      "audit": "Site audit",
+      "refund": "Refund: {{name}}",
+      "added": "Credits added",
+      "reelPlain": "Reel",
+      "refundPlain": "Refund"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Privacy Policy",
     "restore": "Restore purchases",
     "signOut": "Sign out of Espanda",
-    "signOutNote": "Your active subscription and drafted catalogue assets remain securely saved."
+    "signOutNote": "Your active subscription and drafted catalogue assets remain securely saved.",
+    "memberCount_one": "{{count}} member",
+    "memberCount_other": "{{count}} members",
+    "pushUnavailable": "Not available in this version of the app yet. You'll see a banner in the app instead."
   },
   "drawer": {
     "closeMenu": "Close menu",
     "switchLabel": "Workspace {{name}}. Switch business",
-    "balanceLabel_one": "Current balance {{credits}} credit left, {{plan}} plan",
-    "balanceLabel_other": "Current balance {{credits}} credits left, {{plan}} plan",
     "balanceTitle": "Current balance",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> credit left</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> credits left</rest>",
@@ -210,6 +197,10 @@
       "billing": "Plans & Billing",
       "account": "Account settings"
     },
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "loadingBusinesses": "Loading your businesses...",
+    "balanceLabelNoPlan_one": "Balance: {{credits}} credit left",
+    "balanceLabelNoPlan_other": "Balance: {{credits}} credits left",
+    "added": "Added {{date}}"
   }
 }

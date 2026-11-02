@@ -1,24 +1,49 @@
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { CircleCheck, Megaphone, ShieldCheck, Unplug } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { automations as api, connections, type Automations as Saved } from "@/api/endpoints";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { BizScreen, BrandHeader, SectionHead, SettingsCard, Toggle, bc, strong14 } from "@/ui/business/kit";
-import { automations } from "@/ui/business/sample";
+
 import { ICON, Tag, bodyMuted, meta } from "@/ui/reels/kit";
 
-type AutomationId = (typeof automations)[number]["id"];
+/** The design's three switches; `key` is the server setting (replies has none yet). */
+const ITEMS = [
+  { id: "monthly", key: "monthlyPlan" },
+  { id: "autopublish", key: "autoPublish" },
+  { id: "replies", key: null },
+] as const;
 
 /**
- * M10 · Business / Automations. There's no automations backend yet: toggles live in local state.
- * Review-before-publishing is fixed on, so nothing here can publish without approval.
+ * M10 · Business / Automations: the monthly content plan (the server runs Generate calendar on the 1st, 5 credits)
+ * and auto-publish (an approved post with a date is scheduled on the connected account). Review before publishing
+ * stays on, so nothing here posts a draft nobody approved. Inbox replies have no backend yet.
  */
 export default function Automations() {
   const { t } = useTranslation("business");
-  const [on, setOn] = useState<Record<AutomationId, boolean>>(
-    () => Object.fromEntries(automations.map((a) => [a.id, a.on])) as Record<AutomationId, boolean>,
+  const [saved, setSaved] = useState<Saved | null>(null);
+  const [linked, setLinked] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      api.get().then(setSaved, (e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+      connections().then((r) => setLinked(r.connections.some((c) => c.status === "ACTIVE")), () => {});
+    }, []),
   );
+  const toggle = async (key: keyof Saved, value: boolean) => {
+    setBusy(key);
+    setError(null);
+    try {
+      setSaved(await api.set({ [key]: value }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <BizScreen top={space[20]} header={<BrandHeader title={t("automations.title")} />}>
@@ -40,10 +65,14 @@ export default function Automations() {
 
       <SectionHead title={t("automations.queueTitle")} aside={t("automations.manageConnections")} onAside={() => router.push("/business/connections")} style={{ marginTop: space[24], paddingBottom: space[20] }} />
 
+      {error ? <Text style={[meta, { color: color.error, paddingBottom: space[8] }]}>{error}</Text> : null}
+      {!saved && !error ? <ActivityIndicator color={color.primary} /> : null}
       <View style={{ gap: space[12] }}>
-        {automations.map((a) => {
-          const active = on[a.id];
+        {ITEMS.map((a) => {
+          const active = a.key ? !!saved?.[a.key] : false;
           const title = t(`automations.items.${a.id}.title`);
+          // What the switch needs and doesn't have: a backend (replies), or a connected account (auto-publish).
+          const note = !a.key ? t("automations.notAvailable") : active ? t(`automations.items.${a.id}.active`) : a.id === "autopublish" && !linked ? t(`automations.items.${a.id}.requires`) : null;
           return (
             <SettingsCard key={a.id} style={styles.card}>
               <View style={styles.cardTop}>
@@ -51,7 +80,11 @@ export default function Automations() {
                   <Text style={strong14}>{title}</Text>
                   <Text style={[bodyMuted, { paddingTop: space[4] }]}>{t(`automations.items.${a.id}.body`)}</Text>
                 </View>
-                <Toggle label={title} value={active} onValueChange={(v) => setOn((s) => ({ ...s, [a.id]: v }))} />
+                {a.key && busy === a.key ? (
+                  <ActivityIndicator color={color.primary} />
+                ) : (
+                  <Toggle label={title} value={active} disabled={!a.key || !saved} onValueChange={(v) => a.key && void toggle(a.key, v)} />
+                )}
               </View>
               <View style={styles.note}>
                 {active ? (
@@ -59,7 +92,7 @@ export default function Automations() {
                 ) : (
                   <Unplug size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
                 )}
-                <Text style={meta}>{active ? t(`automations.items.${a.id}.active`) : a.requires ? t(`automations.items.${a.id}.requires`) : null}</Text>
+                <Text style={[meta, { flex: 1 }]}>{note}</Text>
               </View>
             </SettingsCard>
           );

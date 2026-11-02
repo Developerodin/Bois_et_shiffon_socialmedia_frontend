@@ -17,36 +17,29 @@
       "location": "Konum",
       "audience": "Hedef Kitle",
       "category": "Kategori",
-      "subcategory": "Alt Kategori",
-      "storeType": "Mağaza Türü",
-      "website": "Web Sitesi"
+      "website": "Web Sitesi",
+      "tags": "Öne çıkan özellikler"
     },
     "brandPreferences": "Marka Tercihleri",
     "brandPreferencesHint": "Renkler, ton, dil",
     "photoAssets": "Fotoğraf Varlıkları",
     "photoAssetsHint": "Bunting masa ve TV ünitesi fotoğrafları",
     "connections": "Bağlantılar",
-    "connectionsHint": "Sosyal kanallar & Google profili"
+    "connectionsHint": "Sosyal kanallar & Google profili",
+    "noAttributes": "Henüz bir bilgi yok. İlk kurulumda web siteni veya Google Maps kaydını ekle ya da Marka tercihlerini doldur."
   },
   "brand": {
     "title": "Marka Ayarları",
     "save": "Değişiklikleri Kaydet",
     "paletteTitle": "Marka Renk Paleti",
-    "editHex": "Hex Düzenle",
     "watermarkTitle": "Outro Filigran Logosu",
     "watermarkBody": "Video sonlarına ve fotoğraf kenarlarına uygulanır",
-    "change": "Değiştir",
     "toneTitle": "Yaratıcı Ton",
-    "tones": {
-      "modern": "Modern",
-      "luxurious": "Lüks",
-      "elegant": "Zarif",
-      "premium": "Premium",
-      "natural": "Doğal",
-      "minimalist": "Minimalist"
-    },
-    "cuesTitle": "Marka İmza İpuçları",
-    "addCue": "İpucu Ekle"
+    "saving": "Kaydediliyor...",
+    "addColor": "Renk ekle",
+    "editColor": "{{hex}} rengini düzenle",
+    "noColors": "Web siten tarandıktan sonra marka renklerin burada görünür. Bunları almak için ilk kurulumda web siteni ekle.",
+    "pickOneTone": "En az bir üslup seç."
   },
   "photos": {
     "title": "Fotoğraf Varlıkları",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} fotoğraf",
     "emptyTitle": "Henüz yükleme yok",
     "emptyBody": "Yüklediğiniz stüdyo fotoğrafları burada görünür.",
-    "upload": "Özel stüdyo fotoğrafları yükle"
+    "upload": "Özel stüdyo fotoğrafları yükle",
+    "untitled": "Fotoğraf",
+    "remove": "{{name}} öğesini kaldır",
+    "uploading": "Yükleniyor...",
+    "emptyWebsiteTitle": "Web sitesi fotoğrafı yok",
+    "emptyWebsiteBody": "Web sitenden alınan ürün fotoğrafları burada görünür. İlk kurulumda web siteni ekle veya kendi fotoğraflarını yükle."
   },
   "connections": {
     "title": "Bağlantılar",
@@ -72,7 +70,6 @@
     "sourceBody": "Ürün fotoğrafları ve işletme detayları",
     "channelsTitle": "Yayın Kanalları",
     "accounts": "Hesaplar",
-    "connected": "Bağlı",
     "notConnected": "Bağlı değil",
     "connect": "Bağla",
     "disconnect": "Bağlantıyı kes",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Google İşletme Profili",
       "shopify": "Shopify Direct Sync"
-    }
+    },
+    "noSite": "Henüz web sitesi yok",
+    "comingSoon": "Henüz kullanılamıyor",
+    "expired": "Oturumun süresi doldu",
+    "reconnect": "Yeniden bağlan"
   },
   "automations": {
     "title": "Otomasyonlar",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Showroom Sorgu Yanıtları Taslağı",
-        "body": "Gelen kutusu sıranıza rafine Fransız zanaatkar yanıtlarını önceden doldurun.",
-        "requires": "Mesajlaşma kanalı gerektirir",
-        "active": "Aktif · taslaklar gelen kutunuza eklendi"
+        "body": "Gelen kutusu sıranıza rafine Fransız zanaatkar yanıtlarını önceden doldurun."
       }
     },
     "adsTitle": "Ücretli Sosyal Reklamlar",
     "comingSoon": "Yakında",
-    "adsBody": "Otomatik Meta reklam yaratıcı testi ve bütçe ayarlaması."
+    "adsBody": "Otomatik Meta reklam yaratıcı testi ve bütçe ayarlaması.",
+    "notAvailable": "Henüz kullanılamıyor"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} kredi mevcut",
     "creditsAvailable_other": "{{n}} kredi mevcut",
-    "planName": "{{tier}} planı",
-    "statusActive": "Aktif",
-    "planBlurb": "Yaratım ve işletme araçlarınız",
-    "cycleTitle": "Fatura Döngüsü",
-    "renewsMonthly": "Aylık yenilenir",
     "balanceTitle": "Kredi Bakiyesi",
-    "monthlyAllowance": "{{amount}} aylık ödenek",
-    "balanceLabel_one": "{{balance}} / {{n}} kredi mevcut",
-    "balanceLabel_other": "{{balance}} / {{n}} kredi mevcut",
-    "balanceOf_one": " / {{n}} kredi mevcut",
-    "balanceOf_other": " / {{n}} kredi mevcut",
-    "note_one": "{{n}} kredi kullanıldı · {{reserved}} {{item}} için ayrıldı. Ödenek aylık yenilenir.",
-    "note_other": "{{n}} kredi kullanıldı · {{reserved}} {{item}} için ayrıldı. Ödenek aylık yenilenir.",
     "usageTitle": "Son Kredi Kullanımı",
     "usageAside": "Çalışma Alanı Etkinliği",
     "today": "Bugün",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} makarası",
-        "detail": "Oluşturma için ayrıldı"
-      },
-      "plan": {
-        "title": "Aylık İçerik Planı",
-        "detail_one": "{{n}} taslak gönderi",
-        "detail_other": "{{n}} taslak gönderi"
-      },
-      "renewal": {
-        "title": "Aylık Plan Yenileme",
-        "detail": "Döngü kredi sıfırlama"
-      }
-    },
     "spent_one": "-{{n}} kredi",
     "spent_other": "-{{n}} kredi",
     "added_one": "+{{n}} kredi",
     "added_other": "+{{n}} kredi",
-    "included": "Dahil",
     "help": {
-      "missingCredits": "Eksik krediler veya başarısız oluşturma",
-      "restore": "Abonelik satın alımlarını geri yükle",
-      "history": "Fatura geçmişi ve faturalar"
+      "missingCredits": "Eksik krediler veya başarısız oluşturma"
+    },
+    "noPlan": "Henüz planın yok",
+    "noPlanBlurb": "Kullandıkça krediyle ödersin. Planlar yakında.",
+    "seePlans": "Planları gör",
+    "creditsWord_one": "kredi",
+    "creditsWord_other": "kredi",
+    "howCredits": "Reel oluşturduğunda veya içerik takvimini planladığında kredi harcanır. Oluşturulamayan bir reel için krediler iade edilir.",
+    "noUsage": "Henüz kredi kullanılmadı.",
+    "kinds": {
+      "reel": "{{name}} reel",
+      "calendar": "İçerik takvimi",
+      "agent": "Ajan çalıştırma",
+      "audit": "Site denetimi",
+      "refund": "İade: {{name}}",
+      "added": "Eklenen krediler",
+      "reelPlain": "Reel",
+      "refundPlain": "İade"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Gizlilik Politikası",
     "restore": "Satın alımları geri yükle",
     "signOut": "Espanda'dan çıkış yap",
-    "signOutNote": "Aktif aboneliğiniz ve taslak katalog varlıklarınız güvenli bir şekilde kaydedilir."
+    "signOutNote": "Aktif aboneliğiniz ve taslak katalog varlıklarınız güvenli bir şekilde kaydedilir.",
+    "memberCount_one": "{{count}} üye",
+    "memberCount_other": "{{count}} üye",
+    "pushUnavailable": "Uygulamanın bu sürümünde henüz kullanılamıyor. Bunun yerine uygulamada bir bildirim bandı görürsün."
   },
   "drawer": {
     "closeMenu": "Menüyü kapat",
     "switchLabel": "Çalışma alanı {{name}}. İşletme değiştir",
-    "balanceLabel_one": "Mevcut bakiye {{credits}} kredi kaldı, {{plan}} planı",
-    "balanceLabel_other": "Mevcut bakiye {{credits}} kredi kaldı, {{plan}} planı",
     "balanceTitle": "Mevcut bakiye",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredi kaldı</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> kredi kaldı</rest>",
@@ -210,6 +197,10 @@
       "billing": "Planlar ve Faturalama",
       "account": "Hesap ayarları"
     },
-    "signOut": "Çıkış yap"
+    "signOut": "Çıkış yap",
+    "loadingBusinesses": "İşletmelerin yükleniyor...",
+    "balanceLabelNoPlan_one": "Bakiye: {{credits}} kredi kaldı",
+    "balanceLabelNoPlan_other": "Bakiye: {{credits}} kredi kaldı",
+    "added": "{{date}} tarihinde eklendi"
   }
 }

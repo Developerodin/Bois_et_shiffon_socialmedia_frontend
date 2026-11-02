@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Switch, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { BackButton, ICON, PageHeader, ReelsScreen, SegmentedTabs, eyebrow, meta } from "@/ui/reels/kit";
-import { business, media } from "@/ui/business/sample";
+import { useCurrentBrand } from "@/ui/use-current-brand";
 
 /**
  * Shared pieces of the Business screens (Figma "05 Marketing & Business", M06–M13).
@@ -62,6 +62,7 @@ export function BizScreen({
 /** "← Settings · (Bois & Chiffons)": plain back, 17pt title and a text-only workspace pill (M06, M07). */
 export function SimpleHeader({ title }: { title: string }) {
   const { t } = useTranslation("business");
+  const brand = useCurrentBrand();
   return (
     <PageHeader
       left={
@@ -73,8 +74,8 @@ export function SimpleHeader({ title }: { title: string }) {
         </View>
       }
       right={
-        <View style={styles.namePill} accessibilityLabel={t("kit.workspaceLabel", { name: business.name })}>
-          <Text style={[meta, { color: color.ink }]}>{business.name}</Text>
+        <View style={styles.namePill} accessibilityLabel={t("kit.workspaceLabel", { name: brand?.name ?? "" })}>
+          <Text style={[meta, { color: color.ink }]}>{brand?.name ?? ""}</Text>
         </View>
       }
     />
@@ -84,6 +85,7 @@ export function SimpleHeader({ title }: { title: string }) {
 /** Boxed back button + title over a favicon/workspace subtitle (M08–M12). */
 export function BrandHeader({ title, right, fallback }: { title: string; right?: ReactNode; fallback?: Href }) {
   const { t } = useTranslation();
+  const brand = useCurrentBrand();
   return (
     <PageHeader
       left={
@@ -101,8 +103,8 @@ export function BrandHeader({ title, right, fallback }: { title: string; right?:
               {title}
             </Text>
             <View style={styles.subRow}>
-              <Image source={media.favicon} style={styles.favicon} contentFit="contain" />
-              <Text style={meta}>{business.name}</Text>
+              <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={styles.favicon} contentFit="contain" />
+              <Text style={meta}>{brand?.name ?? ""}</Text>
             </View>
           </View>
         </View>
@@ -190,10 +192,11 @@ export function NavRow({
 }
 
 /** React Native's Switch in the indigo track the designs use. */
-export function Toggle({ value, onValueChange, label }: { value: boolean; onValueChange: (v: boolean) => void; label: string }) {
+export function Toggle({ value, onValueChange, label, disabled }: { value: boolean; onValueChange: (v: boolean) => void; label: string; disabled?: boolean }) {
   return (
     <Switch
       accessibilityLabel={label}
+      disabled={disabled}
       value={value}
       onValueChange={onValueChange}
       trackColor={{ true: color.primary, false: bc.track }}

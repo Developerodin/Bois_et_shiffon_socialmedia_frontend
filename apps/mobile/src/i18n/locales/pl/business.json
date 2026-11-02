@@ -17,36 +17,29 @@
       "location": "Lokalizacja",
       "audience": "Odbiorcy",
       "category": "Kategoria",
-      "subcategory": "Podkategoria",
-      "storeType": "Typ sklepu",
-      "website": "Strona internetowa"
+      "website": "Strona internetowa",
+      "tags": "Z czego słynie"
     },
     "brandPreferences": "Preferencje marki",
     "brandPreferencesHint": "Kolory, ton, język",
     "photoAssets": "Zasoby zdjęciowe",
     "photoAssetsHint": "Zdjęcia stołu Bunting i jednostki TV",
     "connections": "Połączenia",
-    "connectionsHint": "Kanały społecznościowe i profil Google"
+    "connectionsHint": "Kanały społecznościowe i profil Google",
+    "noAttributes": "Nie dodano jeszcze informacji. Dodaj stronę internetową lub wizytówkę Google Maps podczas konfiguracji albo uzupełnij preferencje marki."
   },
   "brand": {
     "title": "Ustawienia marki",
     "save": "Zapisz zmiany",
     "paletteTitle": "Paleta kolorów marki",
-    "editHex": "Edytuj hex",
     "watermarkTitle": "Logo znaku wodnego na zakończenie",
     "watermarkBody": "Stosowane na końcach rolek wideo i na obrzeżach zdjęć",
-    "change": "Zmień",
     "toneTitle": "Kreatywny ton",
-    "tones": {
-      "modern": "Nowoczesny",
-      "luxurious": "Luksusowy",
-      "elegant": "Elegancki",
-      "premium": "Premium",
-      "natural": "Naturalny",
-      "minimalist": "Minimalistyczny"
-    },
-    "cuesTitle": "Charakterystyczne cechy marki",
-    "addCue": "Dodaj cechę"
+    "saving": "Zapisywanie...",
+    "addColor": "Dodaj kolor",
+    "editColor": "Edytuj kolor {{hex}}",
+    "noColors": "Kolory Twojej marki pojawią się po odczytaniu strony internetowej. Dodaj stronę podczas konfiguracji.",
+    "pickOneTone": "Wybierz co najmniej jeden ton komunikacji."
   },
   "photos": {
     "title": "Zasoby zdjęciowe",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} zdjęć",
     "emptyTitle": "Brak przesłanych",
     "emptyBody": "Przesłane zdjęcia studyjne pojawią się tutaj.",
-    "upload": "Prześlij własne zdjęcia studyjne"
+    "upload": "Prześlij własne zdjęcia studyjne",
+    "untitled": "Zdjęcie",
+    "remove": "Usuń {{name}}",
+    "uploading": "Przesyłanie...",
+    "emptyWebsiteTitle": "Brak zdjęć ze strony",
+    "emptyWebsiteBody": "Tutaj pojawią się zdjęcia produktów pobrane z Twojej strony. Dodaj stronę podczas konfiguracji lub prześlij własne zdjęcia."
   },
   "connections": {
     "title": "Połączenia",
@@ -72,7 +70,6 @@
     "sourceBody": "Zdjęcia produktów i szczegóły firmy",
     "channelsTitle": "Kanały publikacji",
     "accounts": "Konta",
-    "connected": "Połączone",
     "notConnected": "Niepołączone",
     "connect": "Połącz",
     "disconnect": "Odłącz",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Profil Google Moja Firma",
       "shopify": "Bezpośrednia synchronizacja Shopify"
-    }
+    },
+    "noSite": "Nie masz jeszcze strony internetowej",
+    "comingSoon": "Jeszcze niedostępne",
+    "expired": "Sesja wygasła",
+    "reconnect": "Połącz ponownie"
   },
   "automations": {
     "title": "Automatyzacje",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Szkic odpowiedzi na zapytania showroomowe",
-        "body": "Wstępnie wypełnij dopracowane odpowiedzi francuskich rzemieślników w swojej kolejce wiadomości.",
-        "requires": "Wymaga kanału wiadomości",
-        "active": "Aktywne · szkice dodane do Twojej skrzynki odbiorczej"
+        "body": "Wstępnie wypełnij dopracowane odpowiedzi francuskich rzemieślników w swojej kolejce wiadomości."
       }
     },
     "adsTitle": "Płatne reklamy społecznościowe",
     "comingSoon": "Wkrótce",
-    "adsBody": "Automatyczne testowanie kreatywności reklam Meta i planowanie budżetu."
+    "adsBody": "Automatyczne testowanie kreatywności reklam Meta i planowanie budżetu.",
+    "notAvailable": "Jeszcze niedostępne"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} kredyt dostępny",
     "creditsAvailable_other": "{{n}} kredytów dostępnych",
-    "planName": "Plan {{tier}}",
-    "statusActive": "Aktywny",
-    "planBlurb": "Twoje narzędzia do tworzenia i zarządzania firmą",
-    "cycleTitle": "Cykl rozliczeniowy",
-    "renewsMonthly": "Odnawia się co miesiąc",
     "balanceTitle": "Saldo kredytowe",
-    "monthlyAllowance": "{{amount}} miesięczny limit",
-    "balanceLabel_one": "{{balance}} z {{n}} kredytu dostępnego",
-    "balanceLabel_other": "{{balance}} z {{n}} kredytów dostępnych",
-    "balanceOf_one": " / {{n}} kredyt dostępny",
-    "balanceOf_other": " / {{n}} kredytów dostępnych",
-    "note_one": "{{n}} kredyt użyty · {{reserved}} zarezerwowane dla {{item}}. Limit odnawia się co miesiąc.",
-    "note_other": "{{n}} kredytów użytych · {{reserved}} zarezerwowane dla {{item}}. Limit odnawia się co miesiąc.",
     "usageTitle": "Ostatnie użycie kredytów",
     "usageAside": "Aktywność w przestrzeni roboczej",
     "today": "Dziś",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "Rolka {{name}}",
-        "detail": "Zarezerwowane do generacji"
-      },
-      "plan": {
-        "title": "Miesięczny plan treści",
-        "detail_one": "{{n}} szkic postu",
-        "detail_other": "{{n}} szkiców postów"
-      },
-      "renewal": {
-        "title": "Odnawianie miesięcznego planu",
-        "detail": "Reset kredytu cyklu"
-      }
-    },
     "spent_one": "-{{n}} kredyt",
     "spent_other": "-{{n}} kredytów",
     "added_one": "+{{n}} kredyt",
     "added_other": "+{{n}} kredytów",
-    "included": "Wliczone",
     "help": {
-      "missingCredits": "Brakujące kredyty lub nieudane renderowanie",
-      "restore": "Przywróć zakupy subskrypcji",
-      "history": "Historia rozliczeń i faktury"
+      "missingCredits": "Brakujące kredyty lub nieudane renderowanie"
+    },
+    "noPlan": "Nie masz jeszcze planu",
+    "noPlanBlurb": "Płacisz kredytami na bieżąco. Plany już wkrótce.",
+    "seePlans": "Zobacz plany",
+    "creditsWord_one": "kredyt",
+    "creditsWord_other": "kredytów",
+    "howCredits": "Kredyty są pobierane, gdy tworzysz rolkę lub planujesz kalendarz. Jeśli nie uda się utworzyć rolki, zwrócimy Ci kredyty.",
+    "noUsage": "Nie wykorzystano jeszcze żadnych kredytów.",
+    "kinds": {
+      "reel": "Rolka: {{name}}",
+      "calendar": "Kalendarz treści",
+      "agent": "Uruchomienie agenta",
+      "audit": "Audyt strony",
+      "refund": "Zwrot: {{name}}",
+      "added": "Dodane kredyty",
+      "reelPlain": "Rolka",
+      "refundPlain": "Zwrot"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Polityka prywatności",
     "restore": "Przywróć zakupy",
     "signOut": "Wyloguj się z Espanda",
-    "signOutNote": "Twoja aktywna subskrypcja i zapisane szkice katalogu pozostają bezpieczne."
+    "signOutNote": "Twoja aktywna subskrypcja i zapisane szkice katalogu pozostają bezpieczne.",
+    "memberCount_one": "{{count}} członek",
+    "memberCount_other": "{{count}} członków",
+    "pushUnavailable": "Ta funkcja nie jest jeszcze dostępna w tej wersji aplikacji. Zamiast tego zobaczysz baner w aplikacji."
   },
   "drawer": {
     "closeMenu": "Zamknij menu",
     "switchLabel": "Obszar roboczy {{name}}. Zmień firmę",
-    "balanceLabel_one": "Bieżący stan {{credits}} kredyt pozostał, plan {{plan}}",
-    "balanceLabel_other": "Bieżący stan {{credits}} kredytów pozostało, plan {{plan}}",
     "balanceTitle": "Bieżący stan",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredyt pozostał</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> kredytów pozostało</rest>",
@@ -210,6 +197,10 @@
       "billing": "Plany i rozliczenia",
       "account": "Ustawienia konta"
     },
-    "signOut": "Wyloguj się"
+    "signOut": "Wyloguj się",
+    "loadingBusinesses": "Ładowanie Twoich firm...",
+    "balanceLabelNoPlan_one": "Pozostał {{credits}} kredyt",
+    "balanceLabelNoPlan_other": "Pozostałe kredyty: {{credits}}",
+    "added": "Dodano {{date}}"
   }
 }

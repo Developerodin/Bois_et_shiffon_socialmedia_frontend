@@ -17,36 +17,29 @@
       "location": "Sijainti",
       "audience": "Kohderyhmä",
       "category": "Kategoria",
-      "subcategory": "Alakategoria",
-      "storeType": "Myymälätyyppi",
-      "website": "Verkkosivusto"
+      "website": "Verkkosivusto",
+      "tags": "Tunnettu näistä"
     },
     "brandPreferences": "Brändin mieltymykset",
     "brandPreferencesHint": "Värit, sävy, kieli",
     "photoAssets": "Kuvavarastot",
     "photoAssetsHint": "Bunting-pöytä ja TV-yksikkökuvat",
     "connections": "Yhteydet",
-    "connectionsHint": "Sosiaalikanavat & Google-profiili"
+    "connectionsHint": "Sosiaalikanavat & Google-profiili",
+    "noAttributes": "Tietoja ei vielä ole. Lisää verkkosivustosi tai Google Maps -yritysprofiilisi käyttöönotossa tai täytä brändiasetukset."
   },
   "brand": {
     "title": "Brändin asetukset",
     "save": "Tallenna muutokset",
     "paletteTitle": "Brändin väripaletti",
-    "editHex": "Muokkaa hex",
     "watermarkTitle": "Outro-vesileimalogo",
     "watermarkBody": "Lisätään videon loppuihin ja kuvien reunoihin",
-    "change": "Vaihda",
     "toneTitle": "Luova sävy",
-    "tones": {
-      "modern": "Moderni",
-      "luxurious": "Ylellinen",
-      "elegant": "Elegantti",
-      "premium": "Premium",
-      "natural": "Luonnollinen",
-      "minimalist": "Minimalistinen"
-    },
-    "cuesTitle": "Brändin tunnusmerkit",
-    "addCue": "Lisää merkki"
+    "saving": "Tallennetaan...",
+    "addColor": "Lisää väri",
+    "editColor": "Muokkaa väriä {{hex}}",
+    "noColors": "Brändivärisi näkyvät, kun verkkosivustosi on analysoitu. Lisää verkkosivustosi käyttöönotossa.",
+    "pickOneTone": "Valitse vähintään yksi äänensävy."
   },
   "photos": {
     "title": "Kuvavarastot",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} kuvaa",
     "emptyTitle": "Ei vielä latauksia",
     "emptyBody": "Studiokuvat, jotka lataat, näkyvät täällä.",
-    "upload": "Lataa omia studiokuvia"
+    "upload": "Lataa omia studiokuvia",
+    "untitled": "Kuva",
+    "remove": "Poista {{name}}",
+    "uploading": "Ladataan...",
+    "emptyWebsiteTitle": "Ei verkkosivuston kuvia",
+    "emptyWebsiteBody": "Verkkosivustoltasi haetut tuotekuvat näkyvät täällä. Lisää verkkosivustosi käyttöönotossa tai lataa omia kuviasi."
   },
   "connections": {
     "title": "Yhteydet",
@@ -72,7 +70,6 @@
     "sourceBody": "Tuotekuvat ja yritystiedot",
     "channelsTitle": "Julkaisukanavat",
     "accounts": "Tilit",
-    "connected": "Yhdistetty",
     "notConnected": "Ei yhdistetty",
     "connect": "Yhdistä",
     "disconnect": "Katkaise yhteys",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Google Business -profiili",
       "shopify": "Shopify Direct Sync"
-    }
+    },
+    "noSite": "Ei vielä verkkosivustoa",
+    "comingSoon": "Ei vielä saatavilla",
+    "expired": "Kirjautuminen vanhentui",
+    "reconnect": "Yhdistä uudelleen"
   },
   "automations": {
     "title": "Automatisoinnit",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Luonnostele showroom-kyselyvastaukset",
-        "body": "Esitäytä hienostuneet ranskalaiset käsityöläisvastaukset postilaatikkojonoosi.",
-        "requires": "Vaatii viestintäkanavan",
-        "active": "Aktiivinen · luonnokset lisätty postilaatikkoosi"
+        "body": "Esitäytä hienostuneet ranskalaiset käsityöläisvastaukset postilaatikkojonoosi."
       }
     },
     "adsTitle": "Maksetut sosiaalimainokset",
     "comingSoon": "Tulossa pian",
-    "adsBody": "Automaattinen Meta-mainosten luovuustestaus ja budjetin hallinta."
+    "adsBody": "Automaattinen Meta-mainosten luovuustestaus ja budjetin hallinta.",
+    "notAvailable": "Ei vielä saatavilla"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} krediitti käytettävissä",
     "creditsAvailable_other": "{{n}} krediittiä käytettävissä",
-    "planName": "{{tier}} suunnitelma",
-    "statusActive": "Aktiivinen",
-    "planBlurb": "Luomis- ja yritystyökalusi",
-    "cycleTitle": "Laskutusjakso",
-    "renewsMonthly": "Uusiutuu kuukausittain",
     "balanceTitle": "Kredittisaldo",
-    "monthlyAllowance": "{{amount}} kuukausittainen sallittu määrä",
-    "balanceLabel_one": "{{balance}} / {{n}} krediitti käytettävissä",
-    "balanceLabel_other": "{{balance}} / {{n}} krediittiä käytettävissä",
-    "balanceOf_one": " / {{n}} krediitti käytettävissä",
-    "balanceOf_other": " / {{n}} krediittiä käytettävissä",
-    "note_one": "{{n}} krediitti käytetty · {{reserved}} varattu kohteelle {{item}}. Sallittu määrä uusiutuu kuukausittain.",
-    "note_other": "{{n}} krediittiä käytetty · {{reserved}} varattu kohteelle {{item}}. Sallittu määrä uusiutuu kuukausittain.",
     "usageTitle": "Viimeaikainen kreditin käyttö",
     "usageAside": "Työtilan toiminta",
     "today": "Tänään",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} rulla",
-        "detail": "Varattu luomiseen"
-      },
-      "plan": {
-        "title": "Kuukausittainen sisältösuunnitelma",
-        "detail_one": "{{n}} luonnosjulkaisu",
-        "detail_other": "{{n}} luonnosjulkaisua"
-      },
-      "renewal": {
-        "title": "Kuukausittaisen suunnitelman uusiminen",
-        "detail": "Jakson kreditin nollaus"
-      }
-    },
     "spent_one": "-{{n}} krediitti",
     "spent_other": "-{{n}} krediittiä",
     "added_one": "+{{n}} krediitti",
     "added_other": "+{{n}} krediittiä",
-    "included": "Sisältyy",
     "help": {
-      "missingCredits": "Puuttuvat krediitit tai epäonnistunut renderointi",
-      "restore": "Palauta tilausostot",
-      "history": "Laskutushistoria ja laskut"
+      "missingCredits": "Puuttuvat krediitit tai epäonnistunut renderointi"
+    },
+    "noPlan": "Ei vielä tilausta",
+    "noPlanBlurb": "Maksat käytön mukaan krediiteillä. Tilaukset ovat tulossa.",
+    "seePlans": "Katso tilaukset",
+    "creditsWord_one": "krediitti",
+    "creditsWord_other": "krediittiä",
+    "howCredits": "Krediittejä kuluu, kun luot reels-videon tai suunnittelet sisältökalenteria. Jos videon luonti epäonnistuu, saat krediitit takaisin.",
+    "noUsage": "Et ole vielä käyttänyt krediittejä.",
+    "kinds": {
+      "reel": "{{name}}-reels-video",
+      "calendar": "Sisältökalenteri",
+      "agent": "Agentin suoritus",
+      "audit": "Sivuston auditointi",
+      "refund": "Palautus: {{name}}",
+      "added": "Krediittejä lisätty",
+      "reelPlain": "Reels-video",
+      "refundPlain": "Hyvitys"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Tietosuojakäytäntö",
     "restore": "Palauta ostot",
     "signOut": "Kirjaudu ulos Espandasta",
-    "signOutNote": "Aktiivinen tilauksesi ja luonnostellut katalogiresurssit säilyvät turvallisesti tallennettuina."
+    "signOutNote": "Aktiivinen tilauksesi ja luonnostellut katalogiresurssit säilyvät turvallisesti tallennettuina.",
+    "memberCount_one": "{{count}} jäsen",
+    "memberCount_other": "{{count}} jäsentä",
+    "pushUnavailable": "Ei vielä saatavilla tässä sovellusversiossa. Näet sen sijaan ilmoitusbannerin sovelluksessa."
   },
   "drawer": {
     "closeMenu": "Sulje valikko",
     "switchLabel": "Työtila {{name}}. Vaihda yritystä",
-    "balanceLabel_one": "Nykyinen saldo {{credits}} krediitti jäljellä, {{plan}} suunnitelma",
-    "balanceLabel_other": "Nykyinen saldo {{credits}} krediittiä jäljellä, {{plan}} suunnitelma",
     "balanceTitle": "Nykyinen saldo",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> krediitti jäljellä</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> krediittiä jäljellä</rest>",
@@ -210,6 +197,10 @@
       "billing": "Suunnitelmat & Laskutus",
       "account": "Tiliasetukset"
     },
-    "signOut": "Kirjaudu ulos"
+    "signOut": "Kirjaudu ulos",
+    "loadingBusinesses": "Ladataan yrityksiäsi...",
+    "balanceLabelNoPlan_one": "Saldo: {{credits}} krediitti jäljellä",
+    "balanceLabelNoPlan_other": "Saldo: {{credits}} krediittiä jäljellä",
+    "added": "Lisätty {{date}}"
   }
 }

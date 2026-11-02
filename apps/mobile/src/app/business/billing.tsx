@@ -1,34 +1,35 @@
-import { CalendarDays, Clapperboard, Coins, RefreshCw, Sparkles, type LucideIcon } from "lucide-react-native";
+import { router, useFocusEffect } from "expo-router";
+import { CalendarDays, Clapperboard, Coins, Plus, RotateCcw, Sparkles, Wrench, type LucideIcon } from "lucide-react-native";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { creditHistory, type CreditLine } from "@/api/endpoints";
 import { formatDate, formatNumber } from "@/i18n";
 import { color, font, space } from "@/theme/tokens";
 import { BizScreen, BrandHeader, NavRow, SectionHead, SettingsCard, SettingsTabs, SmallButton, bc, body12, label14, strong14 } from "@/ui/business/kit";
-import { billingHelp, creditUsage, plan } from "@/ui/business/sample";
-import { ICON, Tag, bodyMuted, meta } from "@/ui/reels/kit";
+import { ICON, bodyMuted, meta } from "@/ui/reels/kit";
 
-const USAGE_ICON: Record<(typeof creditUsage)[number]["icon"], LucideIcon> = { reel: Clapperboard, calendar: CalendarDays, renew: RefreshCw };
+const ICON_OF: Record<CreditLine["kind"], LucideIcon> = { reel: Clapperboard, calendar: CalendarDays, agent: Wrench, audit: Wrench, refund: RotateCcw, added: Plus };
 
 /**
- * M11 · Business / Billing & credits (subscriber). Sample figures until the credits ledger is
- * wired into the mobile client; there's no subscription backend, so Manage is a no-op.
+ * M11 · Business / Billing & credits: the workspace's real balance and its recent ledger. ponytail: there's no
+ * subscription or payments backend yet, so the plan card says so and Manage opens the Plans screens; the design's
+ * monthly allowance bar and "restore purchases" / invoices rows wait for billing.
  */
 export default function Billing() {
   const { t } = useTranslation("business");
-  const used = plan.balance / plan.allowance;
-  const balance = formatNumber(plan.balance);
-  const allowance = formatNumber(plan.allowance);
-  // "{{day}} {{month}}" keeps the sample's "26 Oct" in English while letting each language reorder it.
-  const when = (date: string | null) =>
-    date ? t("billing.shortDate", { day: formatDate(date, { day: "numeric" }), month: formatDate(date, { month: "short" }) }) : t("billing.today");
-  const usage = creditUsage.map((u) => {
-    const detail =
-      u.id === "plan" ? t("billing.usage.plan.detail", { count: u.posts, n: formatNumber(u.posts ?? 0) }) : t(`billing.usage.${u.id}.detail`);
-    const n = formatNumber(Math.abs(u.credits));
-    const amount =
-      u.credits < 0 ? t("billing.spent", { count: -u.credits, n }) : u.credits > 0 ? t("billing.added", { count: u.credits, n }) : t("billing.included");
-    return { ...u, title: t(`billing.usage.${u.id}.title`, { name: u.name }), meta: t("billing.usageMeta", { when: when(u.date), detail }), amount };
-  });
+  const [data, setData] = useState<{ credits: number; history: CreditLine[] } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      creditHistory().then(setData, (e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+    }, []),
+  );
+  const balance = formatNumber(data?.credits ?? 0);
+  const when = (iso: string) => {
+    const d = new Date(iso);
+    return d.toDateString() === new Date().toDateString() ? t("billing.today") : t("billing.shortDate", { day: formatDate(d, { day: "numeric" }), month: formatDate(d, { month: "short" }) });
+  };
 
   return (
     <BizScreen
@@ -38,10 +39,12 @@ export default function Billing() {
         <BrandHeader
           title={t("kit.settingsTitle")}
           right={
-            <View style={styles.credits} accessibilityLabel={t("billing.creditsAvailable", { count: plan.balance, n: balance })}>
-              <Sparkles size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
-              <Text style={body12}>{balance}</Text>
-            </View>
+            data ? (
+              <View style={styles.credits} accessibilityLabel={t("billing.creditsAvailable", { count: data.credits, n: balance })}>
+                <Sparkles size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
+                <Text style={body12}>{balance}</Text>
+              </View>
+            ) : undefined
           }
         />
       }
@@ -51,17 +54,10 @@ export default function Billing() {
       <SettingsCard style={{ marginTop: space[16] }}>
         <View style={styles.planTop}>
           <View style={{ flex: 1 }}>
-            <View style={styles.inline}>
-              <Text style={[strong14, { fontSize: 16, lineHeight: 22 }]}>{t("billing.planName", { tier: plan.tier })}</Text>
-              <Tag label={t("billing.statusActive")} tone="grey" />
-            </View>
-            <Text style={[meta, { paddingTop: 4 }]}>{t("billing.planBlurb")}</Text>
+            <Text style={[strong14, { fontSize: 16, lineHeight: 22 }]}>{t("billing.noPlan")}</Text>
+            <Text style={[meta, { paddingTop: 4 }]}>{t("billing.noPlanBlurb")}</Text>
           </View>
-          <SmallButton label={t("kit.manage")} style={{ borderColor: color.divider }} />
-        </View>
-        <View style={styles.cycle}>
-          <Text style={meta}>{t("billing.cycleTitle")}</Text>
-          <Text style={body12}>{t("billing.renewsMonthly")}</Text>
+          <SmallButton label={t("billing.seePlans")} style={{ borderColor: color.divider }} onPress={() => router.push("/plans")} />
         </View>
       </SettingsCard>
 
@@ -71,43 +67,47 @@ export default function Billing() {
             <Coins size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
           </View>
           <Text style={[strong14, { flex: 1 }]}>{t("billing.balanceTitle")}</Text>
-          <Text style={meta}>{t("billing.monthlyAllowance", { amount: allowance })}</Text>
         </View>
-        <View style={styles.balance} accessibilityLabel={t("billing.balanceLabel", { count: plan.allowance, balance, n: allowance })}>
-          <Text style={styles.big}>{balance}</Text>
-          <Text style={meta}>{t("billing.balanceOf", { count: plan.allowance, n: allowance })}</Text>
-        </View>
-        <View style={styles.track} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: plan.allowance, now: plan.balance }}>
-          <View style={[styles.fill, { width: `${used * 100}%` }]} />
-        </View>
-        <Text style={[bodyMuted, { paddingTop: space[12] }]}>
-          {t("billing.note", { count: plan.used, n: formatNumber(plan.used), reserved: formatNumber(plan.reserved), item: plan.reservedFor })}
-        </Text>
+        {data ? (
+          <View style={styles.balance} accessibilityLabel={t("billing.creditsAvailable", { count: data.credits, n: balance })}>
+            <Text style={styles.big}>{balance}</Text>
+            <Text style={meta}>{t("billing.creditsWord", { count: data.credits })}</Text>
+          </View>
+        ) : error ? (
+          <Text style={[meta, { color: color.error, paddingTop: space[8] }]}>{error}</Text>
+        ) : (
+          <ActivityIndicator color={color.primary} style={{ marginTop: space[12] }} />
+        )}
+        <Text style={[bodyMuted, { paddingTop: space[12] }]}>{t("billing.howCredits")}</Text>
       </SettingsCard>
 
       <SectionHead title={t("billing.usageTitle")} aside={t("billing.usageAside")} style={{ marginTop: space[24], paddingHorizontal: space[4], paddingBottom: space[8] }} />
       <SettingsCard style={styles.list}>
-        {usage.map((u, i) => {
-          const Icon = USAGE_ICON[u.icon];
+        {data && data.history.length === 0 ? <Text style={[meta, { padding: space[16] }]}>{t("billing.noUsage")}</Text> : null}
+        {(data?.history ?? []).map((u, i) => {
+          const Icon = ICON_OF[u.kind];
+          const n = formatNumber(Math.abs(u.delta));
+          const title = (u.kind === "reel" || u.kind === "refund") && !u.name ? t(`billing.kinds.${u.kind}Plain`) : t(`billing.kinds.${u.kind}`, { name: u.name });
+          const amount = u.delta < 0 ? t("billing.spent", { count: -u.delta, n }) : t("billing.added", { count: u.delta, n });
           return (
-            <View key={u.id} style={[styles.usage, i > 0 && styles.rule]} accessibilityLabel={`${u.title}, ${u.meta}, ${u.amount}`}>
+            <View key={u.id} style={[styles.usage, i > 0 && styles.rule]} accessibilityLabel={`${title}, ${when(u.at)}, ${amount}`}>
               <View style={styles.usageIcon}>
                 <Icon size={16} color={bc.black} strokeWidth={ICON.strokeWidth} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={strong14}>{u.title}</Text>
-                <Text style={meta}>{u.meta}</Text>
+                <Text style={strong14} numberOfLines={1}>
+                  {title}
+                </Text>
+                <Text style={meta}>{when(u.at)}</Text>
               </View>
-              <Text style={[strong14, { color: color.inkSecondary }]}>{u.amount}</Text>
+              <Text style={[strong14, { color: color.inkSecondary }]}>{amount}</Text>
             </View>
           );
         })}
       </SettingsCard>
 
       <SettingsCard style={[styles.list, { marginTop: space[24] }]}>
-        {billingHelp.map((h, i) => (
-          <NavRow key={h} first={i === 0} title={t(`billing.help.${h}`)} titleStyle={label14} style={styles.help} />
-        ))}
+        <NavRow first title={t("billing.help.missingCredits")} titleStyle={label14} style={styles.help} onPress={() => router.push("/reels/results")} />
       </SettingsCard>
     </BizScreen>
   );
@@ -127,12 +127,9 @@ const styles = StyleSheet.create({
   },
   inline: { flexDirection: "row", alignItems: "center", gap: space[8], flexWrap: "wrap" },
   planTop: { flexDirection: "row", alignItems: "center", gap: space[12] },
-  cycle: { flexDirection: "row", justifyContent: "space-between", marginTop: space[16], paddingTop: space[16], borderTopWidth: 1, borderTopColor: "#F0F0F3" },
   coin: { width: 28, height: 28, alignItems: "center", justifyContent: "center", borderRadius: 14, backgroundColor: "rgba(240,239,244,0.5)" },
-  balance: { flexDirection: "row", alignItems: "baseline", paddingTop: space[8] },
+  balance: { flexDirection: "row", alignItems: "baseline", gap: 6, paddingTop: space[8] },
   big: { fontFamily: font.semibold, fontSize: 24, lineHeight: 30, letterSpacing: -0.6, color: color.ink },
-  track: { height: 8, borderRadius: 4, backgroundColor: "#EBEBEF", marginTop: space[12], overflow: "hidden" },
-  fill: { height: 8, borderRadius: 4, backgroundColor: bc.black },
   list: { padding: 0, overflow: "hidden" },
   usage: { flexDirection: "row", alignItems: "center", gap: space[12], minHeight: 63, paddingHorizontal: space[12], paddingVertical: space[8] },
   usageIcon: { width: 32, height: 32, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: bc.tileSoft },

@@ -1,25 +1,40 @@
 import { router } from "expo-router";
-import { session } from "@/api/client";
 import { Bell, ChevronDown, CircleQuestionMark, FileText, Languages, LogOut, RotateCcw, ShieldCheck, Users } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { color, font, radius, space } from "@/theme/tokens";
-import { BizScreen, BrandHeader, NavRow, SectionHead, SettingsCard, SmallButton, Toggle, bc, body12, label14, strong14 } from "@/ui/business/kit";
-import { business } from "@/ui/business/sample";
+import { BizScreen, BrandHeader, NavRow, SectionHead, SettingsCard, Toggle, bc, body12, label14, strong14 } from "@/ui/business/kit";
+import { me, workspaceMemberCount } from "@/api/endpoints";
+import { useCurrentBrand } from "@/ui/use-current-brand";
+import { disablePush, enablePush, pushActive, pushAvailable, pushRestored } from "@/ui/push";
 import { useAppLanguage } from "@/ui/language/languages";
 import { ActionButton, ICON, bodyMuted, meta } from "@/ui/reels/kit";
-import { forgetBrand } from "@/api/endpoints";
-import { clearOnboarding } from "@/ui/onboarding/state";
-import { disablePush } from "@/ui/push";
-import { forgetPosts } from "@/ui/posts/use-posts";
-import { forgetCurrentBrand } from "@/ui/use-current-brand";
+import { signOut } from "@/ui/account-actions";
 
 /** M12 · Business / Account settings: workspace, preferences, support and sign-out. */
 export default function AccountSettings() {
   const { t } = useTranslation("business");
   const lang = useAppLanguage();
-  const [push, setPush] = useState(true);
+  const brand = useCurrentBrand();
+  const [workspace, setWorkspace] = useState<{ name: string; members: number | null } | null>(null);
+  useEffect(() => {
+    if (!brand) return;
+    let live = true;
+    Promise.all([me(), workspaceMemberCount().catch(() => null)]).then(
+      ([m, members]) => live && setWorkspace({ name: m.workspaces.find((w) => w.id === brand.workspaceId)?.name ?? "", members }),
+      () => {},
+    );
+    return () => void (live = false);
+  }, [brand?.workspaceId]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Push is on once this phone registered (enablePush asks the system first); a build without it can't turn it on.
+  const [push, setPush] = useState(pushActive);
+  useEffect(() => void pushRestored.then(() => setPush(pushActive())), []);
+  const togglePush = async (on: boolean) => {
+    if (on) await enablePush();
+    else await disablePush();
+    setPush(pushActive());
+  };
 
   return (
     <BizScreen top={space[24]} header={<BrandHeader title={t("account.title")} />}>
@@ -28,16 +43,15 @@ export default function AccountSettings() {
         <View style={styles.between}>
           <View style={{ flex: 1 }}>
             <Text style={meta}>{t("account.workspaceName")}</Text>
-            <Text style={[strong14, { paddingTop: 2 }]}>{business.workspace}</Text>
+            <Text style={[strong14, { paddingTop: 2 }]}>{workspace?.name ?? ""}</Text>
           </View>
-          <SmallButton label={t("kit.edit")} style={{ borderColor: color.divider }} />
         </View>
         <View style={[styles.between, styles.team]}>
           <View style={styles.inline}>
             <Users size={20} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
             <Text style={body12}>{t("account.teamTitle")}</Text>
           </View>
-          <Text style={meta}>{t("account.teamMembers")}</Text>
+          <Text style={meta}>{workspace?.members != null ? t("account.memberCount", { count: workspace.members }) : t("account.teamMembers")}</Text>
         </View>
       </SettingsCard>
 
@@ -64,9 +78,9 @@ export default function AccountSettings() {
           <Bell size={20} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
           <View style={{ flex: 1 }}>
             <Text style={body12}>{t("account.pushTitle")}</Text>
-            <Text style={meta}>{t("account.pushBody")}</Text>
+            <Text style={meta}>{pushAvailable() ? t("account.pushBody") : t("account.pushUnavailable")}</Text>
           </View>
-          <Toggle label={t("account.pushTitle")} value={push} onValueChange={setPush} />
+          <Toggle label={t("account.pushTitle")} value={push} onValueChange={(v) => void togglePush(v)} disabled={!pushAvailable()} />
         </View>
       </SettingsCard>
 
@@ -85,7 +99,7 @@ export default function AccountSettings() {
         height={44}
         labelStyle={{ fontFamily: font.semibold }}
         style={{ marginTop: space[20] }}
-        onPress={() => void disablePush().then(() => session.signOut()).then(() => { clearOnboarding(); forgetBrand(); forgetCurrentBrand(); forgetPosts(); router.replace("/onboarding/sign-in"); })}
+        onPress={() => void signOut().then(() => router.replace("/onboarding/sign-in"))}
       />
       <Text style={[bodyMuted, { textAlign: "center", paddingTop: space[12], paddingHorizontal: space[8] }]}>
         {t("account.signOutNote")}

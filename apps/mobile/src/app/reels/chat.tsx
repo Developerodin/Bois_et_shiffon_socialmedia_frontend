@@ -10,6 +10,7 @@ import { color, font, radius, space, type } from "@/theme/tokens";
 import { ActionButton, BackButton, Chip, ICON, PageHeader, ReelsScreen, bodyMuted, eyebrow, meta, metaInk, rc } from "@/ui/reels/kit";
 import { photos } from "@/ui/reels/sample";
 import { useReel } from "@/ui/reels/use-reel";
+import { libraryPhotos } from "@/ui/use-current-brand";
 
 const DURATIONS = [20, 30] as const;
 /** Labels: reels:noPresenter / reels:aiActor. */
@@ -46,7 +47,7 @@ export default function ReelsChat() {
     if (!fresh) return;
     Promise.all([
       opportunities().then((r) => r.opportunities.filter((o) => o.channels.includes("INSTAGRAM_REEL") && o.decision !== "REJECT"), () => []),
-      currentBrand().then((b) => brandAssets(b.workspaceId, b.brandId)).then((a) => a.assets?.products ?? [], () => []),
+      currentBrand().then((b) => brandAssets(b.workspaceId, b.brandId)).then((a) => libraryPhotos(a), () => []),
     ]).then(([ideas, products]) => {
       const fromIdeas: Starter[] = ideas.slice(0, 3).map((o) => ({ label: o.title, message: o.title, opportunityId: o.id }));
       const fromProducts: Starter[] = products.map((p) => ({ label: t("chat.starterProduct", { product: p.title }), message: t("chat.starterProduct", { product: p.title }) }));

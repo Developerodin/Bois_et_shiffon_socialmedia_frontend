@@ -83,7 +83,8 @@ function nearestHue(hex: string | null) {
  * A10 palette editor: change, remove or add one colour (`index: "new"`). Saves the whole palette; Research
  * keeps people's colours from then on. Stays open with a message if saving fails, so nothing is lost silently.
  */
-export function ColorSheet({ colors, index, onClose }: { colors: string[]; index: number | "new" | null; onClose: () => void }) {
+/** onSave: where the palette goes (default: the onboarding brand, A10); Business M07 saves to the current business. */
+export function ColorSheet({ colors, index, onClose, onSave = saveBrandColors }: { colors: string[]; index: number | "new" | null; onClose: () => void; onSave?: (hexes: string[]) => Promise<void> }) {
   const { t } = useTranslation("onboarding");
   const insets = useSafeAreaInsets();
   const [busy, setBusy] = useState(false);
@@ -99,14 +100,14 @@ export function ColorSheet({ colors, index, onClose }: { colors: string[]; index
         <View style={[styles.sheet, { paddingBottom: space[24] + insets.bottom }]}>
           <View style={styles.grabber} />
           {/* keyed: a fresh editor (and starting value) for each swatch opened */}
-          {index !== null ? <Editor key={String(index)} colors={colors} index={index} onClose={onClose} onBusy={setBusy} /> : null}
+          {index !== null ? <Editor key={String(index)} colors={colors} index={index} onClose={onClose} onBusy={setBusy} onSave={onSave} /> : null}
         </View>
       </KeyboardAvoidingView>
     </Modal>
   );
 }
 
-function Editor({ colors, index, onClose, onBusy }: { colors: string[]; index: number | "new"; onClose: () => void; onBusy: (busy: boolean) => void }) {
+function Editor({ colors, index, onClose, onBusy, onSave }: { colors: string[]; index: number | "new"; onClose: () => void; onBusy: (busy: boolean) => void; onSave: (hexes: string[]) => Promise<void> }) {
   const { t } = useTranslation("onboarding");
   const [text, setText] = useState(index === "new" ? "#" : colors[index]);
   const [hue, setHue] = useState(() => nearestHue(normalizeHex(text)));
@@ -125,7 +126,7 @@ function Editor({ colors, index, onClose, onBusy }: { colors: string[]; index: n
     setSaving(true);
     setError(null);
     try {
-      await saveBrandColors(next);
+      await onSave(next);
       onClose();
     } catch {
       setError(t("brand.saveFailed"));

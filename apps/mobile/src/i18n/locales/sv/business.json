@@ -17,36 +17,29 @@
       "location": "Plats",
       "audience": "Publik",
       "category": "Kategori",
-      "subcategory": "Underkategori",
-      "storeType": "Butikstyp",
-      "website": "Webbplats"
+      "website": "Webbplats",
+      "tags": "Känt för"
     },
     "brandPreferences": "Varumärkespreferenser",
     "brandPreferencesHint": "Färger, ton, språk",
     "photoAssets": "Fotoresurser",
     "photoAssetsHint": "Bunting bord och TV-enhet foton",
     "connections": "Anslutningar",
-    "connectionsHint": "Sociala kanaler & Google-profil"
+    "connectionsHint": "Sociala kanaler & Google-profil",
+    "noAttributes": "Inget känt ännu. Lägg till din webbplats eller din Google Maps-listning när du kommer igång, eller fyll i dina varumärkesinställningar."
   },
   "brand": {
     "title": "Varumärkesinställningar",
     "save": "Spara ändringar",
     "paletteTitle": "Varumärkets färgpalett",
-    "editHex": "Redigera hex",
     "watermarkTitle": "Outro vattenstämpellogo",
     "watermarkBody": "Tillämpas på videoreelavslut och fotogränser",
-    "change": "Ändra",
     "toneTitle": "Kreativ ton",
-    "tones": {
-      "modern": "Modern",
-      "luxurious": "Lyxig",
-      "elegant": "Elegant",
-      "premium": "Premium",
-      "natural": "Naturlig",
-      "minimalist": "Minimalistisk"
-    },
-    "cuesTitle": "Varumärkets signaturdrag",
-    "addCue": "Lägg till drag"
+    "saving": "Sparar...",
+    "addColor": "Lägg till färg",
+    "editColor": "Redigera färgen {{hex}}",
+    "noColors": "Dina varumärkesfärger visas när din webbplats har lästs in. Lägg till din webbplats när du kommer igång för att se dem.",
+    "pickOneTone": "Välj minst en ton."
   },
   "photos": {
     "title": "Fotoresurser",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} foton",
     "emptyTitle": "Inga uppladdningar ännu",
     "emptyBody": "Studiobilder du laddar upp visas här.",
-    "upload": "Ladda upp egna studiobilder"
+    "upload": "Ladda upp egna studiobilder",
+    "untitled": "Foto",
+    "remove": "Ta bort {{name}}",
+    "uploading": "Laddar upp...",
+    "emptyWebsiteTitle": "Inga foton från webbplatsen",
+    "emptyWebsiteBody": "Produktfoton från din webbplats visas här. Lägg till din webbplats när du kommer igång eller ladda upp egna foton."
   },
   "connections": {
     "title": "Anslutningar",
@@ -72,7 +70,6 @@
     "sourceBody": "Produktbilder och företagsdetaljer",
     "channelsTitle": "Publiceringskanaler",
     "accounts": "Konton",
-    "connected": "Ansluten",
     "notConnected": "Inte ansluten",
     "connect": "Anslut",
     "disconnect": "Koppla från",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Google Business-profil",
       "shopify": "Shopify direkt synk"
-    }
+    },
+    "noSite": "Ingen webbplats ännu",
+    "comingSoon": "Inte tillgängligt ännu",
+    "expired": "Inloggningen har gått ut",
+    "reconnect": "Anslut igen"
   },
   "automations": {
     "title": "Automatiseringar",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Utkast till showroom-förfrågningar",
-        "body": "Förfyll raffinerade franska hantverkssvar i din inkorgskö.",
-        "requires": "Kräver meddelandekanal",
-        "active": "Aktiv · utkast tillagda i din inkorg"
+        "body": "Förfyll raffinerade franska hantverkssvar i din inkorgskö."
       }
     },
     "adsTitle": "Betalda sociala annonser",
     "comingSoon": "Kommer snart",
-    "adsBody": "Automatiserad Meta-annonskreativ testning & budgethantering."
+    "adsBody": "Automatiserad Meta-annonskreativ testning & budgethantering.",
+    "notAvailable": "Inte tillgängligt ännu"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} kredit tillgänglig",
     "creditsAvailable_other": "{{n}} krediter tillgängliga",
-    "planName": "{{tier}} plan",
-    "statusActive": "Aktiv",
-    "planBlurb": "Dina skapande- och affärsverktyg",
-    "cycleTitle": "Faktureringscykel",
-    "renewsMonthly": "Förnyas månadsvis",
     "balanceTitle": "Kreditsaldo",
-    "monthlyAllowance": "{{amount}} månatlig tilldelning",
-    "balanceLabel_one": "{{balance}} av {{n}} kredit tillgänglig",
-    "balanceLabel_other": "{{balance}} av {{n}} krediter tillgängliga",
-    "balanceOf_one": " / {{n}} kredit tillgänglig",
-    "balanceOf_other": " / {{n}} krediter tillgängliga",
-    "note_one": "{{n}} kredit använd · {{reserved}} reserverad för {{item}}. Tilldelning förnyas månadsvis.",
-    "note_other": "{{n}} krediter använda · {{reserved}} reserverade för {{item}}. Tilldelning förnyas månadsvis.",
     "usageTitle": "Senaste kreditanvändning",
     "usageAside": "Arbetsyta aktivitet",
     "today": "Idag",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} reel",
-        "detail": "Reserverad för generering"
-      },
-      "plan": {
-        "title": "Månadsinnehållsplan",
-        "detail_one": "{{n}} utkast till inlägg",
-        "detail_other": "{{n}} utkast till inlägg"
-      },
-      "renewal": {
-        "title": "Månadsplanförnyelse",
-        "detail": "Kreditcykel återställs"
-      }
-    },
     "spent_one": "-{{n}} kredit",
     "spent_other": "-{{n}} krediter",
     "added_one": "+{{n}} kredit",
     "added_other": "+{{n}} krediter",
-    "included": "Inkluderad",
     "help": {
-      "missingCredits": "Saknade krediter eller misslyckad rendering",
-      "restore": "Återställ prenumerationsköp",
-      "history": "Fakturahistorik & fakturor"
+      "missingCredits": "Saknade krediter eller misslyckad rendering"
+    },
+    "noPlan": "Inget abonnemang ännu",
+    "noPlanBlurb": "Du betalar med krediter efter hand. Abonnemang kommer snart.",
+    "seePlans": "Visa abonnemang",
+    "creditsWord_one": "kredit",
+    "creditsWord_other": "krediter",
+    "howCredits": "Krediter används när du skapar en reel eller planerar din innehållskalender. Om en reel inte kan skapas får du tillbaka krediterna.",
+    "noUsage": "Inga krediter använda ännu.",
+    "kinds": {
+      "reel": "{{name}}-reel",
+      "calendar": "Innehållskalender",
+      "agent": "Agentkörning",
+      "audit": "Webbplatsgranskning",
+      "refund": "Återbetalning: {{name}}",
+      "added": "Krediter tillagda",
+      "reelPlain": "Reel",
+      "refundPlain": "Återbetalning"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Integritetspolicy",
     "restore": "Återställ köp",
     "signOut": "Logga ut från Espanda",
-    "signOutNote": "Din aktiva prenumeration och utkastade katalogtillgångar är säkert sparade."
+    "signOutNote": "Din aktiva prenumeration och utkastade katalogtillgångar är säkert sparade.",
+    "memberCount_one": "{{count}} medlem",
+    "memberCount_other": "{{count}} medlemmar",
+    "pushUnavailable": "Inte tillgängligt i den här versionen av appen ännu. Du ser en banner i appen istället."
   },
   "drawer": {
     "closeMenu": "Stäng menyn",
     "switchLabel": "Arbetsyta {{name}}. Byt företag",
-    "balanceLabel_one": "Nuvarande saldo {{credits}} kredit kvar, {{plan}} plan",
-    "balanceLabel_other": "Nuvarande saldo {{credits}} krediter kvar, {{plan}} plan",
     "balanceTitle": "Nuvarande saldo",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredit kvar</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> krediter kvar</rest>",
@@ -210,6 +197,10 @@
       "billing": "Planer & Fakturering",
       "account": "Kontoinställningar"
     },
-    "signOut": "Logga ut"
+    "signOut": "Logga ut",
+    "loadingBusinesses": "Laddar dina företag...",
+    "balanceLabelNoPlan_one": "Saldo: {{credits}} kredit kvar",
+    "balanceLabelNoPlan_other": "Saldo: {{credits}} krediter kvar",
+    "added": "Tillagd {{date}}"
   }
 }

@@ -17,36 +17,29 @@
       "location": "Placering",
       "audience": "Publikum",
       "category": "Kategori",
-      "subcategory": "Underkategori",
-      "storeType": "Butikstype",
-      "website": "Websted"
+      "website": "Websted",
+      "tags": "Kendt for"
     },
     "brandPreferences": "Brandpræferencer",
     "brandPreferencesHint": "Farver, tone, sprog",
     "photoAssets": "Fotoaktiver",
     "photoAssetsHint": "Bunting bord og TV-enhed fotos",
     "connections": "Forbindelser",
-    "connectionsHint": "Sociale kanaler & Google-profil"
+    "connectionsHint": "Sociale kanaler & Google-profil",
+    "noAttributes": "Ikke kendt endnu. Tilføj din hjemmeside eller virksomhedsprofil på Google Maps under opsætningen, eller udfyld dine brandpræferencer."
   },
   "brand": {
     "title": "Brandindstillinger",
     "save": "Gem ændringer",
     "paletteTitle": "Brandfarvepalet",
-    "editHex": "Rediger hex",
     "watermarkTitle": "Outro vandmærkelogo",
     "watermarkBody": "Anvendes på videoafslutninger og fotokanter",
-    "change": "Skift",
     "toneTitle": "Kreativ tone",
-    "tones": {
-      "modern": "Moderne",
-      "luxurious": "Luksuriøs",
-      "elegant": "Elegant",
-      "premium": "Premium",
-      "natural": "Naturlig",
-      "minimalist": "Minimalistisk"
-    },
-    "cuesTitle": "Brand signaturtræk",
-    "addCue": "Tilføj træk"
+    "saving": "Gemmer...",
+    "addColor": "Tilføj farve",
+    "editColor": "Rediger farven {{hex}}",
+    "noColors": "Dine brandfarver vises, når din hjemmeside er blevet læst. Tilføj din hjemmeside under opsætningen for at få dem.",
+    "pickOneTone": "Vælg mindst én tone."
   },
   "photos": {
     "title": "Fotoaktiver",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} fotos",
     "emptyTitle": "Ingen uploads endnu",
     "emptyBody": "Studiobilleder, du uploader, vises her.",
-    "upload": "Upload tilpassede studiobilleder"
+    "upload": "Upload tilpassede studiobilleder",
+    "untitled": "Foto",
+    "remove": "Fjern {{name}}",
+    "uploading": "Uploader...",
+    "emptyWebsiteTitle": "Ingen billeder fra hjemmesiden",
+    "emptyWebsiteBody": "Produktbilleder fra din hjemmeside vises her. Tilføj din hjemmeside under opsætningen, eller upload dine egne."
   },
   "connections": {
     "title": "Forbindelser",
@@ -72,7 +70,6 @@
     "sourceBody": "Produktfotos og virksomhedsdetaljer",
     "channelsTitle": "Udgivelseskanaler",
     "accounts": "Konti",
-    "connected": "Forbundet",
     "notConnected": "Ikke forbundet",
     "connect": "Forbind",
     "disconnect": "Afbryd",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Google Business-profil",
       "shopify": "Shopify Direct Sync"
-    }
+    },
+    "noSite": "Intet website endnu",
+    "comingSoon": "Ikke tilgængelig endnu",
+    "expired": "Login udløbet",
+    "reconnect": "Forbind igen"
   },
   "automations": {
     "title": "Automatiseringer",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Kladde showroom forespørgselsbesvarelser",
-        "body": "Forudfyld raffinerede franske håndværkerbesvarelser i din indbakke-kø.",
-        "requires": "Kræver beskedkanal",
-        "active": "Aktiv · kladder tilføjet til din indbakke"
+        "body": "Forudfyld raffinerede franske håndværkerbesvarelser i din indbakke-kø."
       }
     },
     "adsTitle": "Betalte sociale annoncer",
     "comingSoon": "Kommer snart",
-    "adsBody": "Automatiseret Meta-annoncekreativ test & budgetstyring."
+    "adsBody": "Automatiseret Meta-annoncekreativ test & budgetstyring.",
+    "notAvailable": "Ikke tilgængelig endnu"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} kredit tilgængelig",
     "creditsAvailable_other": "{{n}} kreditter tilgængelige",
-    "planName": "{{tier}} plan",
-    "statusActive": "Aktiv",
-    "planBlurb": "Dine skabelses- og virksomhedsværktøjer",
-    "cycleTitle": "Faktureringscyklus",
-    "renewsMonthly": "Fornyes månedligt",
     "balanceTitle": "Kreditsaldo",
-    "monthlyAllowance": "{{amount}} månedlig tillæg",
-    "balanceLabel_one": "{{balance}} af {{n}} kredit tilgængelig",
-    "balanceLabel_other": "{{balance}} af {{n}} kreditter tilgængelige",
-    "balanceOf_one": " / {{n}} kredit tilgængelig",
-    "balanceOf_other": " / {{n}} kreditter tilgængelige",
-    "note_one": "{{n}} kredit brugt · {{reserved}} reserveret til {{item}}. Tillæg fornyes månedligt.",
-    "note_other": "{{n}} kreditter brugt · {{reserved}} reserveret til {{item}}. Tillæg fornyes månedligt.",
     "usageTitle": "Seneste kreditforbrug",
     "usageAside": "Arbejdsområdeaktivitet",
     "today": "I dag",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} reel",
-        "detail": "Reserveret til generering"
-      },
-      "plan": {
-        "title": "Månedlig indholdsplan",
-        "detail_one": "{{n}} kladdeindlæg",
-        "detail_other": "{{n}} kladdeindlæg"
-      },
-      "renewal": {
-        "title": "Månedlig planfornyelse",
-        "detail": "Cyklus kredit nulstillet"
-      }
-    },
     "spent_one": "-{{n}} kredit",
     "spent_other": "-{{n}} kreditter",
     "added_one": "+{{n}} kredit",
     "added_other": "+{{n}} kreditter",
-    "included": "Inkluderet",
     "help": {
-      "missingCredits": "Manglende kreditter eller mislykket gengivelse",
-      "restore": "Gendan abonnementskøb",
-      "history": "Fakturahistorik & fakturaer"
+      "missingCredits": "Manglende kreditter eller mislykket gengivelse"
+    },
+    "noPlan": "Intet abonnement endnu",
+    "noPlanBlurb": "Du betaler med kreditter efter behov. Abonnementer er på vej.",
+    "seePlans": "Se abonnementer",
+    "creditsWord_one": "kredit",
+    "creditsWord_other": "kreditter",
+    "howCredits": "Du bruger kreditter, når du laver en reel eller planlægger din kalender. Hvis en reel ikke kan oprettes, får du kreditterne tilbage.",
+    "noUsage": "Ingen kreditter brugt endnu.",
+    "kinds": {
+      "reel": "{{name}} reel",
+      "calendar": "Indholdskalender",
+      "agent": "Agentkørsel",
+      "audit": "Websiteanalyse",
+      "refund": "Tilbagebetaling: {{name}}",
+      "added": "Kreditter tilføjet",
+      "reelPlain": "Reel",
+      "refundPlain": "Tilbagebetaling"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Privatlivspolitik",
     "restore": "Gendan køb",
     "signOut": "Log ud af Espanda",
-    "signOutNote": "Dit aktive abonnement og kladde-katalogaktiver forbliver sikkert gemt."
+    "signOutNote": "Dit aktive abonnement og kladde-katalogaktiver forbliver sikkert gemt.",
+    "memberCount_one": "{{count}} medlem",
+    "memberCount_other": "{{count}} medlemmer",
+    "pushUnavailable": "Ikke tilgængelig i denne version af appen endnu. Du får vist et banner i appen i stedet."
   },
   "drawer": {
     "closeMenu": "Luk menu",
     "switchLabel": "Arbejdsområde {{name}}. Skift virksomhed",
-    "balanceLabel_one": "Nuværende saldo {{credits}} kredit tilbage, {{plan}} plan",
-    "balanceLabel_other": "Nuværende saldo {{credits}} kreditter tilbage, {{plan}} plan",
     "balanceTitle": "Nuværende saldo",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> kredit tilbage</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> kreditter tilbage</rest>",
@@ -210,6 +197,10 @@
       "billing": "Planer & Fakturering",
       "account": "Kontoinstillinger"
     },
-    "signOut": "Log ud"
+    "signOut": "Log ud",
+    "loadingBusinesses": "Indlæser dine virksomheder...",
+    "balanceLabelNoPlan_one": "Saldo: {{credits}} kredit tilbage",
+    "balanceLabelNoPlan_other": "Saldo: {{credits}} kreditter tilbage",
+    "added": "Tilføjet {{date}}"
   }
 }

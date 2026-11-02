@@ -17,36 +17,29 @@
       "location": "Locație",
       "audience": "Public",
       "category": "Categorie",
-      "subcategory": "Subcategorie",
-      "storeType": "Tip magazin",
-      "website": "Website"
+      "website": "Website",
+      "tags": "Cunoscut pentru"
     },
     "brandPreferences": "Preferințe brand",
     "brandPreferencesHint": "Culori, ton, limbaj",
     "photoAssets": "Resurse foto",
     "photoAssetsHint": "Fotografii Bunting masă și unitate TV",
     "connections": "Conexiuni",
-    "connectionsHint": "Canale sociale & profil Google"
+    "connectionsHint": "Canale sociale & profil Google",
+    "noAttributes": "Încă nu avem informații. Adaugă site-ul sau profilul Google Maps la configurarea inițială ori completează Preferințele de brand."
   },
   "brand": {
     "title": "Setări brand",
     "save": "Salvează modificările",
     "paletteTitle": "Paletă culori brand",
-    "editHex": "Editează hex",
     "watermarkTitle": "Logo filigran final",
     "watermarkBody": "Aplicat la finalul videoclipurilor și pe marginea fotografiilor",
-    "change": "Schimbă",
     "toneTitle": "Ton creativ",
-    "tones": {
-      "modern": "Modern",
-      "luxurious": "Luxos",
-      "elegant": "Elegant",
-      "premium": "Premium",
-      "natural": "Natural",
-      "minimalist": "Minimalist"
-    },
-    "cuesTitle": "Indicii semnătură brand",
-    "addCue": "Adaugă indiciu"
+    "saving": "Se salvează...",
+    "addColor": "Adaugă culoare",
+    "editColor": "Editează culoarea {{hex}}",
+    "noColors": "Culorile brandului apar după analizarea site-ului. Adaugă site-ul la configurarea inițială pentru a le obține.",
+    "pickOneTone": "Alege cel puțin un ton."
   },
   "photos": {
     "title": "Resurse foto",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} fotografii",
     "emptyTitle": "Nicio încărcare încă",
     "emptyBody": "Fotografiile de studio încărcate de tine apar aici.",
-    "upload": "Încarcă fotografii de studio personalizate"
+    "upload": "Încarcă fotografii de studio personalizate",
+    "untitled": "Fotografie",
+    "remove": "Elimină {{name}}",
+    "uploading": "Se încarcă...",
+    "emptyWebsiteTitle": "Nu există fotografii de pe site",
+    "emptyWebsiteBody": "Fotografiile produselor preluate de pe site apar aici. Adaugă site-ul la configurarea inițială sau încarcă propriile fotografii."
   },
   "connections": {
     "title": "Conexiuni",
@@ -72,7 +70,6 @@
     "sourceBody": "Fotografii de produs și detalii afacere",
     "channelsTitle": "Canale de publicare",
     "accounts": "Conturi",
-    "connected": "Conectat",
     "notConnected": "Neconectat",
     "connect": "Conectează",
     "disconnect": "Deconectează",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "Profil Google Business",
       "shopify": "Sincronizare directă Shopify"
-    }
+    },
+    "noSite": "Nu ai încă un site",
+    "comingSoon": "Nu este încă disponibil",
+    "expired": "Sesiunea a expirat",
+    "reconnect": "Reconectează"
   },
   "automations": {
     "title": "Automatizări",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "Redactează răspunsuri la întrebările showroom-ului",
-        "body": "Completează automat răspunsuri rafinate de artizan francez în coada ta de mesaje.",
-        "requires": "Necesită canal de mesagerie",
-        "active": "Activ · schițe adăugate în inboxul tău"
+        "body": "Completează automat răspunsuri rafinate de artizan francez în coada ta de mesaje."
       }
     },
     "adsTitle": "Reclame sociale plătite",
     "comingSoon": "În curând",
-    "adsBody": "Testare automată a creativității reclamelor Meta & gestionarea bugetului."
+    "adsBody": "Testare automată a creativității reclamelor Meta & gestionarea bugetului.",
+    "notAvailable": "Nu este încă disponibil"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} credit disponibil",
     "creditsAvailable_other": "{{n}} credite disponibile",
-    "planName": "Plan {{tier}}",
-    "statusActive": "Activ",
-    "planBlurb": "Instrumentele tale de creație și afacere",
-    "cycleTitle": "Ciclul de facturare",
-    "renewsMonthly": "Se reînnoiește lunar",
     "balanceTitle": "Sold credite",
-    "monthlyAllowance": "{{amount}} alocație lunară",
-    "balanceLabel_one": "{{balance}} din {{n}} credit disponibil",
-    "balanceLabel_other": "{{balance}} din {{n}} credite disponibile",
-    "balanceOf_one": " / {{n}} credit disponibil",
-    "balanceOf_other": " / {{n}} credite disponibile",
-    "note_one": "{{n}} credit utilizat · {{reserved}} rezervat pentru {{item}}. Alocația se reînnoiește lunar.",
-    "note_other": "{{n}} credite utilizate · {{reserved}} rezervat pentru {{item}}. Alocația se reînnoiește lunar.",
     "usageTitle": "Utilizare recentă a creditelor",
     "usageAside": "Activitate spațiu de lucru",
     "today": "Astăzi",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "Rolă {{name}}",
-        "detail": "Rezervat pentru generare"
-      },
-      "plan": {
-        "title": "Plan de conținut lunar",
-        "detail_one": "{{n}} postare de schiță",
-        "detail_other": "{{n}} postări de schiță"
-      },
-      "renewal": {
-        "title": "Reînnoire plan lunar",
-        "detail": "Resetare credit ciclu"
-      }
-    },
     "spent_one": "-{{n}} credit",
     "spent_other": "-{{n}} credite",
     "added_one": "+{{n}} credit",
     "added_other": "+{{n}} credite",
-    "included": "Inclus",
     "help": {
-      "missingCredits": "Credite lipsă sau redare eșuată",
-      "restore": "Restaurează achizițiile abonamentului",
-      "history": "Istoric facturare & facturi"
+      "missingCredits": "Credite lipsă sau redare eșuată"
+    },
+    "noPlan": "Nu ai încă un abonament",
+    "noPlanBlurb": "Plătești cu credite, pe măsură ce folosești serviciul. Abonamentele vor fi disponibile în curând.",
+    "seePlans": "Vezi abonamentele",
+    "creditsWord_one": "credit",
+    "creditsWord_other": "credite",
+    "howCredits": "Creditele sunt folosite când creezi un reel sau îți planifici calendarul. Dacă un reel nu poate fi creat, primești creditele înapoi.",
+    "noUsage": "Nu ai folosit încă niciun credit.",
+    "kinds": {
+      "reel": "Reel {{name}}",
+      "calendar": "Calendar de conținut",
+      "agent": "Rulare agent",
+      "audit": "Audit site",
+      "refund": "Rambursare: {{name}}",
+      "added": "Credite adăugate",
+      "reelPlain": "Reel",
+      "refundPlain": "Rambursare"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "Politica de confidențialitate",
     "restore": "Restaurează achizițiile",
     "signOut": "Deconectează-te de la Espanda",
-    "signOutNote": "Abonamentul tău activ și resursele de catalog salvate rămân în siguranță."
+    "signOutNote": "Abonamentul tău activ și resursele de catalog salvate rămân în siguranță.",
+    "memberCount_one": "{{count}} membru",
+    "memberCount_other": "{{count}} membri",
+    "pushUnavailable": "Funcția nu este încă disponibilă în această versiune a aplicației. În schimb, vei vedea un banner în aplicație."
   },
   "drawer": {
     "closeMenu": "Închide meniul",
     "switchLabel": "Spațiu de lucru {{name}}. Schimbă afacerea",
-    "balanceLabel_one": "Sold curent {{credits}} credit rămas, plan {{plan}}",
-    "balanceLabel_other": "Sold curent {{credits}} credite rămase, plan {{plan}}",
     "balanceTitle": "Sold curent",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> credit rămas</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> credite rămase</rest>",
@@ -210,6 +197,10 @@
       "billing": "Planuri & Facturare",
       "account": "Setări cont"
     },
-    "signOut": "Deconectează-te"
+    "signOut": "Deconectează-te",
+    "loadingBusinesses": "Se încarcă afacerile tale...",
+    "balanceLabelNoPlan_one": "Sold: {{credits}} credit rămas",
+    "balanceLabelNoPlan_other": "Sold: {{credits}} credite rămase",
+    "added": "Adăugat la {{date}}"
   }
 }

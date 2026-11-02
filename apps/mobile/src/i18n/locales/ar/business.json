@@ -17,36 +17,29 @@
       "location": "الموقع",
       "audience": "الجمهور",
       "category": "الفئة",
-      "subcategory": "الفئة الفرعية",
-      "storeType": "نوع المتجر",
-      "website": "الموقع الإلكتروني"
+      "website": "الموقع الإلكتروني",
+      "tags": "تشتهر بـ"
     },
     "brandPreferences": "تفضيلات العلامة التجارية",
     "brandPreferencesHint": "الألوان، النغمة، اللغة",
     "photoAssets": "أصول الصور",
     "photoAssetsHint": "صور طاولة Bunting ووحدة التلفاز",
     "connections": "الاتصالات",
-    "connectionsHint": "القنوات الاجتماعية وملف Google الشخصي"
+    "connectionsHint": "القنوات الاجتماعية وملف Google الشخصي",
+    "noAttributes": "لا توجد معلومات بعد. أضف موقعك الإلكتروني أو بطاقة نشاطك على Google Maps أثناء الإعداد، أو أكمل تفضيلات العلامة التجارية."
   },
   "brand": {
     "title": "إعدادات العلامة التجارية",
     "save": "حفظ التغييرات",
     "paletteTitle": "لوحة ألوان العلامة التجارية",
-    "editHex": "تعديل الكود السداسي",
     "watermarkTitle": "شعار العلامة المائية الختامي",
     "watermarkBody": "يُطبق على نهايات الفيديوهات وإطارات الصور",
-    "change": "تغيير",
     "toneTitle": "نغمة الإبداع",
-    "tones": {
-      "modern": "حديث",
-      "luxurious": "فاخر",
-      "elegant": "أنيق",
-      "premium": "متميز",
-      "natural": "طبيعي",
-      "minimalist": "بسيط"
-    },
-    "cuesTitle": "إشارات توقيع العلامة التجارية",
-    "addCue": "إضافة إشارة"
+    "saving": "جارٍ الحفظ...",
+    "addColor": "إضافة لون",
+    "editColor": "تعديل اللون {{hex}}",
+    "noColors": "تظهر ألوان علامتك التجارية بعد فحص موقعك الإلكتروني. أضف موقعك أثناء الإعداد لعرضها.",
+    "pickOneTone": "اختر نبرة واحدة على الأقل."
   },
   "photos": {
     "title": "أصول الصور",
@@ -63,7 +56,12 @@
     "photoCount_other": "{{n}} صور",
     "emptyTitle": "لا توجد تحميلات بعد",
     "emptyBody": "ستظهر هنا الصور الاستوديو التي تقوم بتحميلها.",
-    "upload": "تحميل صور استوديو مخصصة"
+    "upload": "تحميل صور استوديو مخصصة",
+    "untitled": "صورة",
+    "remove": "إزالة {{name}}",
+    "uploading": "جارٍ الرفع...",
+    "emptyWebsiteTitle": "لا توجد صور من الموقع",
+    "emptyWebsiteBody": "تظهر هنا صور المنتجات من موقعك الإلكتروني. أضف موقعك أثناء الإعداد، أو ارفع صورك الخاصة."
   },
   "connections": {
     "title": "الاتصالات",
@@ -72,7 +70,6 @@
     "sourceBody": "صور المنتجات وتفاصيل العمل",
     "channelsTitle": "قنوات النشر",
     "accounts": "الحسابات",
-    "connected": "متصل",
     "notConnected": "غير متصل",
     "connect": "اتصال",
     "disconnect": "قطع الاتصال",
@@ -82,7 +79,11 @@
       "whatsapp": "WhatsApp Business",
       "google": "ملف Google للأعمال",
       "shopify": "مزامنة Shopify المباشرة"
-    }
+    },
+    "noSite": "لا يوجد موقع إلكتروني بعد",
+    "comingSoon": "غير متاح بعد",
+    "expired": "انتهت صلاحية تسجيل الدخول",
+    "reconnect": "إعادة الاتصال"
   },
   "automations": {
     "title": "الأتمتة",
@@ -108,60 +109,45 @@
       },
       "replies": {
         "title": "صياغة ردود استفسارات صالة العرض",
-        "body": "ملء مسبق لردود الحرفيين الفرنسيين المكررة في قائمة الانتظار الخاصة بك.",
-        "requires": "يتطلب قناة مراسلة",
-        "active": "نشط · المسودات مضافة إلى صندوق الوارد الخاص بك"
+        "body": "ملء مسبق لردود الحرفيين الفرنسيين المكررة في قائمة الانتظار الخاصة بك."
       }
     },
     "adsTitle": "إعلانات وسائل التواصل المدفوعة",
     "comingSoon": "قريبًا",
-    "adsBody": "اختبار إبداعي تلقائي لإعلانات Meta وتحديد الميزانية."
+    "adsBody": "اختبار إبداعي تلقائي لإعلانات Meta وتحديد الميزانية.",
+    "notAvailable": "غير متاح بعد"
   },
   "billing": {
     "creditsAvailable_one": "{{n}} رصيد متاح",
     "creditsAvailable_other": "{{n}} أرصدة متاحة",
-    "planName": "خطة {{tier}}",
-    "statusActive": "نشط",
-    "planBlurb": "أدوات الإنشاء والعمل الخاصة بك",
-    "cycleTitle": "دورة الفوترة",
-    "renewsMonthly": "تجدد شهريًا",
     "balanceTitle": "رصيد الائتمان",
-    "monthlyAllowance": "{{amount}} مخصص شهري",
-    "balanceLabel_one": "{{balance}} من {{n}} رصيد متاح",
-    "balanceLabel_other": "{{balance}} من {{n}} أرصدة متاحة",
-    "balanceOf_one": " / {{n}} رصيد متاح",
-    "balanceOf_other": " / {{n}} أرصدة متاحة",
-    "note_one": "{{n}} رصيد مستخدم · {{reserved}} محجوز لـ {{item}}. يتجدد المخصص شهريًا.",
-    "note_other": "{{n}} أرصدة مستخدمة · {{reserved}} محجوزة لـ {{item}}. يتجدد المخصص شهريًا.",
     "usageTitle": "استخدام الرصيد الأخير",
     "usageAside": "نشاط مساحة العمل",
     "today": "اليوم",
     "shortDate": "{{day}} {{month}}",
-    "usageMeta": "{{when}} · {{detail}}",
-    "usage": {
-      "reel": {
-        "title": "{{name}} فيديو",
-        "detail": "محجوز للتوليد"
-      },
-      "plan": {
-        "title": "خطة المحتوى الشهرية",
-        "detail_one": "{{n}} منشور مسودة",
-        "detail_other": "{{n}} منشورات مسودة"
-      },
-      "renewal": {
-        "title": "تجديد الخطة الشهرية",
-        "detail": "إعادة تعيين رصيد الدورة"
-      }
-    },
     "spent_one": "-{{n}} رصيد",
     "spent_other": "-{{n}} أرصدة",
     "added_one": "+{{n}} رصيد",
     "added_other": "+{{n}} أرصدة",
-    "included": "مشمول",
     "help": {
-      "missingCredits": "الأرصدة المفقودة أو الفشل في العرض",
-      "restore": "استعادة عمليات الشراء للاشتراك",
-      "history": "تاريخ الفواتير والفواتير"
+      "missingCredits": "الأرصدة المفقودة أو الفشل في العرض"
+    },
+    "noPlan": "لا توجد باقة بعد",
+    "noPlanBlurb": "تدفع بوحدات الرصيد حسب استخدامك. الباقات قريبًا.",
+    "seePlans": "عرض الباقات",
+    "creditsWord_one": "وحدة رصيد",
+    "creditsWord_other": "وحدات رصيد",
+    "howCredits": "تُستخدم وحدات الرصيد عند إنشاء ريل أو تخطيط تقويم المحتوى. إذا تعذّر إنشاء الريل، نعيد إليك وحدات الرصيد.",
+    "noUsage": "لم تستخدم أي وحدات رصيد بعد.",
+    "kinds": {
+      "reel": "ريل {{name}}",
+      "calendar": "تقويم المحتوى",
+      "agent": "تشغيل الوكيل",
+      "audit": "تدقيق الموقع",
+      "refund": "استرداد: {{name}}",
+      "added": "وحدات رصيد مضافة",
+      "reelPlain": "ريلز",
+      "refundPlain": "استرداد"
     }
   },
   "account": {
@@ -183,13 +169,14 @@
     "privacy": "سياسة الخصوصية",
     "restore": "استعادة المشتريات",
     "signOut": "تسجيل الخروج من Espanda",
-    "signOutNote": "يظل اشتراكك النشط وأصول الكتالوج المسودة محفوظة بأمان."
+    "signOutNote": "يظل اشتراكك النشط وأصول الكتالوج المسودة محفوظة بأمان.",
+    "memberCount_one": "{{count}} عضو",
+    "memberCount_other": "{{count}} أعضاء",
+    "pushUnavailable": "غير متاح بعد في هذا الإصدار من التطبيق. ستظهر لك لافتة في التطبيق بدلًا من ذلك."
   },
   "drawer": {
     "closeMenu": "إغلاق القائمة",
     "switchLabel": "مساحة العمل {{name}}. تبديل العمل",
-    "balanceLabel_one": "الرصيد الحالي {{credits}} رصيد متبقي، خطة {{plan}}",
-    "balanceLabel_other": "الرصيد الحالي {{credits}} أرصدة متبقية، خطة {{plan}}",
     "balanceTitle": "الرصيد الحالي",
     "creditsLeft_one": "<amount>{{credits}}</amount><rest> رصيد متبقي</rest>",
     "creditsLeft_other": "<amount>{{credits}}</amount><rest> أرصدة متبقية</rest>",
@@ -210,6 +197,10 @@
       "billing": "الخطط والفواتير",
       "account": "إعدادات الحساب"
     },
-    "signOut": "تسجيل الخروج"
+    "signOut": "تسجيل الخروج",
+    "loadingBusinesses": "جارٍ تحميل أنشطتك التجارية...",
+    "balanceLabelNoPlan_one": "الرصيد: {{credits}} نقطة متبقية",
+    "balanceLabelNoPlan_other": "الرصيد: {{credits}} نقطة متبقية",
+    "added": "أُضيف في {{date}}"
   }
 }

@@ -2,10 +2,10 @@ import type { ReactNode } from "react";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { GalleryHorizontalEnd, Image as ImageIcon } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { brandAssets, currentBrand, posts } from "@/api/endpoints";
+import { posts } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { Card } from "@/ui/layout";
@@ -13,6 +13,7 @@ import { color, font, radius, space, type } from "@/theme/tokens";
 import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/posts/chrome";
 import { CardTitle, Pill, tint } from "@/ui/posts/controls";
 import { reloadPosts } from "@/ui/posts/use-posts";
+import { libraryPhotos, useCurrentBrand } from "@/ui/use-current-brand";
 
 const GOALS = ["newArrival", "productFeature", "specialOffer"] as const;
 type Product = { title: string; kind: string | null; key: string; url: string };
@@ -25,23 +26,14 @@ export default function CreateBrief() {
   const [goal, setGoal] = useState<(typeof GOALS)[number]>("newArrival");
   const [direction, setDirection] = useState("");
   // Research's product photos: what the post is made from.
-  const [products, setProducts] = useState<Product[] | null>(null);
-  const [language, setLanguage] = useState<string | null>(null);
+  // The brand's library: website products, then the owner's uploads (Business M08).
+  const brand = useCurrentBrand();
+  const products: Product[] | null = brand?.view ? libraryPhotos(brand.view) : null;
+  const language = brand?.view?.preferences.contentLanguage ?? null;
   const [chosen, setChosen] = useState(0);
   const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    currentBrand()
-      .then((b) => brandAssets(b.workspaceId, b.brandId))
-      .then(
-        (a) => {
-          setProducts((a.assets?.products ?? []).flatMap((p) => (p.image ? [{ title: p.title, kind: p.kind, key: p.image.key, url: p.image.url }] : [])));
-          setLanguage(a.preferences.contentLanguage);
-        },
-        () => setProducts([]),
-      );
-  }, []);
   const product = products?.[chosen];
   const draft = async () => {
     if (!product) return;

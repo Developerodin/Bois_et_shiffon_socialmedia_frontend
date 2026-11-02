@@ -1,30 +1,62 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Camera, Globe, MessageCircle, ShoppingBag, Store, type LucideIcon } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { connections, disconnectAccount, type Connection, type SocialProvider } from "@/api/endpoints";
 import { color, radius, space } from "@/theme/tokens";
 import { BizScreen, BrandHeader, IconTile, SectionHead, SettingsCard, SmallButton, TextAction, bc, strong14 } from "@/ui/business/kit";
-import { business, channels, type ChannelId } from "@/ui/business/sample";
+import { connectSocial } from "@/ui/connect-social";
+import { siteLabel, useCurrentBrand } from "@/ui/use-current-brand";
 import { ICON, Tag, meta } from "@/ui/reels/kit";
 
-const ICONS: Record<(typeof channels)[number]["icon"], LucideIcon> = {
-  instagram: Camera,
-  facebook: Globe,
-  whatsapp: MessageCircle,
-  google: Store,
-  shopify: ShoppingBag,
-};
+/**
+ * The design's channels. `provider`: the server's account type the app can sign in to (onboarding A12's flow);
+ * the others have no connector yet and say so. ponytail: Pinterest/Threads connect from the web app for now.
+ */
+const CHANNELS: { id: "instagram" | "facebook" | "whatsapp" | "google" | "shopify"; Icon: LucideIcon; provider?: SocialProvider; primary?: boolean }[] = [
+  { id: "instagram", Icon: Camera, provider: "INSTAGRAM", primary: true },
+  { id: "facebook", Icon: Globe, provider: "META" },
+  { id: "whatsapp", Icon: MessageCircle },
+  { id: "google", Icon: Store },
+  { id: "shopify", Icon: ShoppingBag },
+];
 const GREY = color.disabledInk;
 
 /**
- * M09 · Business / Connections. There's no OAuth flow on mobile yet, so Connect only flips the
- * channel's local state; the real hand-off belongs to the connections API once the client is wired.
+ * M09 · Business / Connections: the website Research reads, and the accounts posts and reels go out to. Connect and
+ * Reconnect run the same sign-in as onboarding A12; Disconnect makes the server forget the account.
  */
 export default function Connections() {
   const { t } = useTranslation("business");
-  const [linked, setLinked] = useState<Partial<Record<ChannelId, boolean>>>({});
+  const brand = useCurrentBrand();
+  const [list, setList] = useState<Connection[] | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const load = useCallback(() => {
+    connections().then((r) => setList(r.connections), (e: unknown) => setError(e instanceof Error ? e.message : String(e)));
+  }, []);
+  useFocusEffect(load);
+  const site = siteLabel(brand?.view?.website);
+
+  const run = async (key: string, call: () => Promise<unknown>) => {
+    setBusy(key);
+    setError(null);
+    try {
+      await call();
+      load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  };
+  const connect = (provider: SocialProvider) => run(provider, async () => brand && (await connectSocial(brand.workspaceId, brand.id, provider)));
+  const disconnectAll = (accounts: Connection[]) =>
+    run(accounts[0].id, async () => {
+      for (const a of accounts) await disconnectAccount(a.id);
+    });
 
   return (
     <BizScreen top={space[24]} header={<BrandHeader title={t("connections.title")} />}>
@@ -33,8 +65,8 @@ export default function Connections() {
         <IconTile icon={Globe} tint={GREY} style={styles.siteTile} />
         <View style={{ flex: 1 }}>
           <View style={styles.titleRow}>
-            <Text style={strong14}>{business.site}</Text>
-            <Tag label={t("connections.linked")} tone="grey" />
+            <Text style={strong14}>{site ?? t("connections.noSite")}</Text>
+            {site ? <Tag label={t("connections.linked")} tone="grey" /> : null}
           </View>
           <Text style={[meta, { paddingTop: 2 }]}>{t("connections.sourceBody")}</Text>
         </View>
@@ -44,13 +76,18 @@ export default function Connections() {
       </SettingsCard>
 
       <SectionHead title={t("connections.channelsTitle")} aside={t("connections.accounts")} style={{ marginTop: space[20], paddingBottom: space[8] }} />
+      {error ? <Text style={[meta, { color: color.error, paddingBottom: space[8] }]}>{error}</Text> : null}
+      {!list && !error ? <ActivityIndicator color={color.primary} /> : null}
       <View style={{ gap: space[12] }}>
-        {channels.map((c) => {
-          const on = !!linked[c.id];
-          const Icon = ICONS[c.icon];
+        {CHANNELS.map((c) => {
+          // Linked accounts of this type (a person can link more than one Page); ERROR = its sign-in expired.
+          const accounts = (list ?? []).filter((a) => a.provider === c.provider && a.status !== "REVOKED");
+          const on = accounts.some((a) => a.status === "ACTIVE");
+          const expired = !on && accounts.some((a) => a.status === "ERROR");
+          const { Icon } = c;
           return (
             <SettingsCard key={c.id} style={[styles.row, styles.channel, c.primary && { minHeight: 106 }]}>
-              {c.icon === "instagram" ? (
+              {c.id === "instagram" ? (
                 <LinearGradient
                   colors={["rgba(253,29,29,0.1)", "rgba(225,48,108,0.1)", "rgba(64,93,230,0.1)"]}
                   start={{ x: 0, y: 1 }}
@@ -65,15 +102,29 @@ export default function Connections() {
               <View style={{ flex: 1 }}>
                 <Text style={strong14}>{t(`connections.channels.${c.id}`)}</Text>
                 <View style={styles.status}>
-                  <View style={[styles.dot, on && { backgroundColor: "#12B76A" }]} />
-                  <Text style={meta}>{on ? t("connections.connected") : t("connections.notConnected")}</Text>
+                  <View style={[styles.dot, on && { backgroundColor: "#12B76A" }, expired && { backgroundColor: color.error }]} />
+                  <Text style={meta} numberOfLines={1}>
+                    {!c.provider
+                      ? t("connections.comingSoon")
+                      : on
+                        ? accounts.map((a) => a.displayName).join(", ")
+                        : expired
+                          ? t("connections.expired")
+                          : t("connections.notConnected")}
+                  </Text>
                 </View>
               </View>
-              <SmallButton
-                label={on ? t("connections.disconnect") : t("connections.connect")}
-                primary={c.primary && !on}
-                onPress={() => setLinked((l) => ({ ...l, [c.id]: !on }))}
-              />
+              {c.provider ? (
+                busy === c.provider || accounts.some((a) => busy === a.id) ? (
+                  <ActivityIndicator color={color.primary} />
+                ) : (
+                  <SmallButton
+                    label={on ? t("connections.disconnect") : expired ? t("connections.reconnect") : t("connections.connect")}
+                    primary={(c.primary && !on) || expired}
+                    onPress={() => void (on ? disconnectAll(accounts) : connect(c.provider!))}
+                  />
+                )
+              ) : null}
             </SettingsCard>
           );
         })}
