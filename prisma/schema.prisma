@@ -191,6 +191,10 @@ model BrandProfile {
   preferences  Json?
   /// The Google Maps listing the owner picked in onboarding (server/integrations/places.ts PlaceListing)
   place        Json?
+  /// Photos the owner added to the brand's library (mobile Business M08): [{ key, title, addedAt }]; Research never touches it
+  uploads      Json?
+  /// The owner's automations (mobile Business M10): { monthlyPlan, autoPublish } (server/services/automations.ts)
+  automations  Json?
   voiceSummary String?
   pillars      Json?
   locales      Json?

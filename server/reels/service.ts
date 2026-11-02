@@ -49,7 +49,8 @@ export function toReelProblem(error: unknown) {
 async function brandPhotos(scope: Scope, current?: ReelPlan): Promise<ReelPhoto[]> {
   const products = (await productPhotos(scope.workspaceId, scope.brandId)).map((p) => ({ ...p, product: p.title }));
   const inPlan = (current?.scenes ?? []).filter((s) => !products.some((p) => p.key === s.photoKey)).map((s) => ({ key: s.photoKey, title: s.shot }));
-  return [...products, ...inPlan].slice(0, 30);
+  // ponytail: 12 products + 60 uploads at most (brand-assets MAX_PRODUCTS, media LIBRARY_MAX), plus the plan's own.
+  return [...products, ...inPlan].slice(0, 80);
 }
 
 async function loadReel(scope: Scope, itemId: string, db: Prisma.TransactionClient | typeof prisma = prisma) {

@@ -8,6 +8,7 @@ export type BrandListItem = {
   displayName: string;
   status: BrandStatus;
   createdAt: Date; // the mobile app falls back to the newest business
+  websiteUrl: string | null;
 };
 
 /**
@@ -31,10 +32,12 @@ export async function listAccessibleBrands(
       displayName: true,
       status: true,
       createdAt: true,
+      // The app's business switcher tells two businesses with the same name apart by their website.
+      profile: { select: { websiteUrl: true } },
     },
   });
 
-  return brands;
+  return brands.map(({ profile, ...b }) => ({ ...b, websiteUrl: profile?.websiteUrl ?? null }));
 }
 
 export async function listUserWorkspaces(userId: string) {
