@@ -1,7 +1,14 @@
 # Handover: Phases 2 + 4, mobile reels (and the reels server)
 
-Status: implemented. Review and emulator check: pending.
-Branch `audit-fixes`. Commit: `6d5726c`. Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 2 items 1-5, 11
+Status: implemented and 4-lens reviewed; review fixes in `540be54` and `feb98b7`. Emulator check: pending.
+Branch `audit-fixes`. Commits: `6d5726c`, `540be54`, `feb98b7`.
+
+Review fixes applied: the reel GET no longer starts AI runs (read roles could trigger paid Quality runs); the app calls
+the `recheck` POST (`content.create`) once after 90 s and on "Check again", capped at 1 per 15 s per reel and 10 an hour
+per brand; render starts Quality with `{itemId, version}` so duplicate runs dedupe; a dropped first chat stream only
+adopts a single reel created after the send and missing from the earlier list; cancel treats 409 as done and is hidden
+without `publish.execute`; "Already checking" feedback; settling a publication attempt now requires it to belong to the
+post in the URL (`settlePublication` `itemId`). Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 2 items 1-5, 11
 and the reels part of 10; Phase 4 items 1, 2, 4 and the reels copy.
 
 ## What changed
