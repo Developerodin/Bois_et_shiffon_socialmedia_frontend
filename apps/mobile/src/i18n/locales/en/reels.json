@@ -239,6 +239,7 @@
     "captionA11y_lang": "Video caption in {{language}}",
     "checkSlow": "The checks are taking longer than usual. Check again, or come back in a few minutes.",
     "checkAgain": "Check again",
+    "alreadyChecking": "Already checking. The result will appear here.",
     "checkingAgain": "Checking…",
     "viewSchedule": "View schedule",
     "alreadyPublished": "This reel is already published.",

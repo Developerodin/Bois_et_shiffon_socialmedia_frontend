@@ -24,8 +24,6 @@ export async function GET(request: Request, context: Params) {
     const running = await prisma.reelRender.findFirst({ where: { contentItemId: contentId, step: { in: ["VOICE", "CLIPS", "JOIN"] } } });
     if (running && Date.now() - running.updatedAt.getTime() > 60_000) await enqueueTick(running);
     await kickIfDue();
-    // A finished render whose Quality check never started: start it again rather than leave the review waiting.
-    if (!detail.checks && detail.item.status === "DRAFT_REVIEW") await recheckQuality(scope, contentId).catch(() => false);
     return Response.json(detail);
   } catch (error) {
     return toProblem(error);
@@ -75,7 +73,7 @@ export async function POST(request: Request, context: Params) {
         throw e;
       }
     }
-    if (body.action === "recheck") return Response.json({ started: await recheckQuality(scope, itemId, true) }, { status: 202 });
+    if (body.action === "recheck") return Response.json({ status: await recheckQuality(scope, itemId) }, { status: 202 });
     if (body.action === "send") return Response.json(await sendReel(scope, itemId, body.version));
     await registerPostLink(scope, itemId, body.url);
     return Response.json({ ok: true });

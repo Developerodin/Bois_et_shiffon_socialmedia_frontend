@@ -25,6 +25,7 @@ const setInflight = (next: Inflight | null) => {
 };
 const EMPTY: DraftSoFar = { reply: "", title: "", scenes: [] };
 const REPLY_WAIT_MS = 3 * 60_000;
+const CLOCK_SKEW_MS = 60_000;
 
 /** A dropped stream (the app went to the background, the network blinked): the server carries on, so wait for its reply. */
 async function waitForReply(id: string, turnsBefore: number) {
@@ -40,13 +41,15 @@ async function waitForReply(id: string, turnsBefore: number) {
  * A dropped create stream: the server carries on and saves the reel, so find the one that wasn't in the list before
  * (sending the first message again would make a second reel), then wait for its reply.
  */
-async function adoptCreated(known: Set<string>) {
+async function adoptCreated(known: Set<string>, sentAt: number) {
   for (const until = Date.now() + REPLY_WAIT_MS; Date.now() < until; ) {
     await new Promise((r) => setTimeout(r, 3000));
-    const found = (await reels.list().catch(() => null))?.reels.find((r) => !known.has(r.id));
-    if (found) {
-      currentId = found.id;
-      return waitForReply(found.id, 0);
+    // Only a reel made after the message was sent (phone and server clocks may differ a little); two candidates = unsure, so don't guess.
+    const fresh = (await reels.list().catch(() => null))?.reels.filter((r) => !known.has(r.id) && Date.parse(r.createdAt) >= sentAt - CLOCK_SKEW_MS) ?? [];
+    if (fresh.length > 1) break;
+    if (fresh.length === 1) {
+      currentId = fresh[0].id;
+      return waitForReply(fresh[0].id, 0);
     }
   }
   throw new ApiError(0, "The reply is taking too long. Check back in a moment.");
@@ -55,7 +58,7 @@ async function adoptCreated(known: Set<string>) {
 /** R07 "Check again": starts the Quality check a finished render never got (reels route, action recheck). */
 export async function recheckReel(id: string) {
   const b = await currentBrand();
-  return api<{ started: boolean }>(`/workspaces/${encodeURIComponent(b.workspaceId)}/brands/${encodeURIComponent(b.brandId)}/reels/${encodeURIComponent(id)}`, { body: { action: "recheck" }, workspaceId: b.workspaceId });
+  return api<{ status: "started" | "checking" | "none" }>(`/workspaces/${encodeURIComponent(b.workspaceId)}/brands/${encodeURIComponent(b.brandId)}/reels/${encodeURIComponent(id)}`, { body: { action: "recheck" }, workspaceId: b.workspaceId });
 }
 
 /** Loads the current reel; poll > 0 refreshes it (R05 progress, R07 checks). */
@@ -152,12 +155,15 @@ export function useReel(poll = 0) {
     const turnsBefore = detail?.chat.length ?? 0;
     try {
       if (!currentId) {
-        const known = new Set((await reels.list().catch(() => ({ reels: [] }))).reels.map((r) => r.id));
+        const before = await reels.list().catch(() => null);
+        const known = new Set(before?.reels.map((r) => r.id));
+        const sentAt = Date.now();
         try {
           currentId = (await reels.create({ prompt: message, opportunityId }, onEvent)).id;
         } catch (e) {
-          if (!(e instanceof ApiError && e.status === 0)) throw e;
-          await adoptCreated(known);
+          // Without the earlier list there is nothing to tell the new reel from the old ones: report the original error.
+          if (!before || !(e instanceof ApiError && e.status === 0)) throw e;
+          await adoptCreated(known, sentAt);
         }
       } else {
         const id = currentId;

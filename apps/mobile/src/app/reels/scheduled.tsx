@@ -10,7 +10,9 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Footer } from "@/ui/layout";
 import { BrandPill, ICON, PageHeader, Panel, ReelsScreen, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
+import { ApiError } from "@/api/client";
 import { currentBrand, postRelease, posts } from "@/api/endpoints";
+import { usePermissions } from "@/ui/use-permissions";
 import { useReel } from "@/ui/reels/use-reel";
 
 const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -21,6 +23,7 @@ export default function ReelsScheduled() {
   const { id, detail } = useReel(5000); // Publishing now → Published without leaving the screen
   const [brandName, setBrandName] = useState("");
   const [attemptId, setAttemptId] = useState<string | null>(null);
+  const { can } = usePermissions();
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -44,7 +47,9 @@ export default function ReelsScheduled() {
       await posts.settle(id, attemptId, "cancel");
       router.replace("/reels/review"); // back where Schedule is open again
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      // Already cancelled (or posted) elsewhere: the review screen shows where the reel stands now.
+      if (e instanceof ApiError && e.status === 409) router.replace("/reels/review");
+      else setError(e instanceof Error ? e.message : String(e));
     } finally {
       setCancelling(false);
     }
@@ -76,7 +81,7 @@ export default function ReelsScheduled() {
         <Footer>
           {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
           <Button label={t("scheduled.viewReel")} arrow onPress={() => router.push("/reels/review")} />
-          {attemptId ? <Button label={cancelling ? t("scheduled.cancelling") : t("scheduled.cancelSchedule")} variant="outline" height={44} disabled={cancelling} onPress={() => void cancel()} /> : null}
+          {attemptId && can("publish.execute") ? <Button label={cancelling ? t("scheduled.cancelling") : t("scheduled.cancelSchedule")} variant="outline" height={44} disabled={cancelling} onPress={() => void cancel()} /> : null}
           <Button label={t("scheduled.backToResults")} variant="ghost" height={44} onPress={() => router.replace("/reels/results")} />
         </Footer>
       }
@@ -120,7 +125,7 @@ export default function ReelsScheduled() {
         </View>
       </Panel>
 
-      {attemptId ? <Text style={[meta, { textAlign: "center", paddingTop: space[24] }]}>{t("scheduled.editInCalendar")}</Text> : null}
+      {attemptId && can("publish.execute") ? <Text style={[meta, { textAlign: "center", paddingTop: space[24] }]}>{t("scheduled.editInCalendar")}</Text> : null}
     </ReelsScreen>
   );
 }

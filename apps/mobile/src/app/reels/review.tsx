@@ -19,6 +19,8 @@ const SENDABLE = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED", "PUBLISHED"];
 const SCHEDULABLE = ["AWAITING_APPROVAL", "APPROVED"];
 /** The check normally lands within a minute; past this the screen says so and offers to run it again. */
 const CHECK_SLOW_MS = 150_000;
+/** No checks yet after this: ask the server to start them once (the render's own start may have been missed). */
+const CHECK_AUTO_MS = 90_000;
 const CHECK_ICON: Record<CheckResult["status"], LucideIcon> = { pass: CircleCheck, warn: TriangleAlert, blocker: CircleAlert };
 
 /** R07 · Reels / Result review. Plays the reel; Download or Schedule is the approval of exactly this version. */
@@ -30,6 +32,7 @@ export default function ReelsReview() {
   const [rechecks, setRechecks] = useState(0);
   const [slow, setSlow] = useState(false);
   const [rechecking, setRechecking] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const player = useVideoPlayer(detail?.videoUrl ?? null);
   const plan = detail?.plan;
   const status = detail?.item.status;
@@ -43,25 +46,30 @@ export default function ReelsReview() {
   const context = language ? "lang" : undefined;
   // The Quality check never landed (the server retries it while this polls): say so after a while, with a way to run it again.
   const waiting = !!detail && !detail.checks && status === "DRAFT_REVIEW";
-  useEffect(() => {
-    setSlow(false);
-    if (!waiting) return;
-    const timer = setTimeout(() => setSlow(true), CHECK_SLOW_MS);
-    return () => clearTimeout(timer);
-  }, [waiting, rechecks]);
-  const recheck = async () => {
+  // auto: the one try the screen makes by itself; a failure there (e.g. a viewer without the right) stays quiet.
+  const recheck = async (auto = false) => {
     if (!id) return;
     setRechecking(true);
+    setNotice(null);
     try {
-      await recheckReel(id);
+      const r = await recheckReel(id);
+      if (r.status === "checking" && !auto) setNotice(t("review.alreadyChecking"));
       await load();
       setRechecks((n) => n + 1);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (!auto) setError(e instanceof Error ? e.message : String(e));
     } finally {
       setRechecking(false);
     }
   };
+  useEffect(() => {
+    setSlow(false);
+    if (!waiting) return setNotice(null);
+    const slowTimer = setTimeout(() => setSlow(true), CHECK_SLOW_MS);
+    const autoTimer = rechecks === 0 ? setTimeout(() => void recheck(true), CHECK_AUTO_MS) : undefined;
+    return () => (clearTimeout(slowTimer), clearTimeout(autoTimer));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recheck only reads the reel id
+  }, [waiting, rechecks]);
 
   // The typed caption stays in the box when the save fails, so it can be sent again.
   const saveCaption = () => {
@@ -176,6 +184,7 @@ export default function ReelsReview() {
           ) : (
             <Text style={meta}>{t("review.checking")}</Text>
           )}
+          {notice && !detail?.checks ? <Text style={meta}>{notice}</Text> : null}
           {/* Joins the seam check softened while rendering: the person sees why the cut became a blend. */}
           {(detail?.renders.find((r) => r.step === "DONE")?.softened ?? []).map((n) => (
             <Spec key={`join${n}`} Icon={CHECK_ICON.warn} label={t("review.joinSoftened", { n, next: n + 1 })} value={t("review.joinSoftenedNote")} tone="warn" />

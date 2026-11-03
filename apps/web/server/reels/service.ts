@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
+import { hitRateLimit } from "@/server/auth/rate-limit";
 import { startAgentRun } from "@/server/agents/engine";
 import { kickRunner } from "@/server/jobs/runner";
 import { brandKnowledge, productPhotos } from "@/server/content/knowledge";
@@ -153,35 +154,33 @@ export async function sendReel(scope: Scope, itemId: string, version: number) {
   return { videoUrl: await signedMediaUrl(body.videoKey, 3600) };
 }
 
-const CHECK_WAIT_MS = 90_000;
-const CHECK_TRIES = 3;
 const CHECK_IN_FLIGHT_MS = 5 * 60_000;
 
 /**
  * The Quality check a finished render should get (render.ts starts it, but a missed start is not retried there).
- * Called from the app's poll (waits until the last try is CHECK_WAIT_MS old, at most CHECK_TRIES tries an hour) and
- * from its "Check again" button (`manual`: no wait, no cap). Never starts a second run while one is in flight.
- * ponytail: the history is read from agent runs; a column on the render would be cheaper if this gets hot.
+ * Called only by the app, from the reel route's recheck action (content.create): once automatically after a while with
+ * no checks, and from its "Check again" button. "checking" = a run is already in flight; "none" = nothing to check.
+ * Capped at one per 15 s per reel and 10 an hour per brand.
+ * ponytail: the in-flight test reads agent runs; a column on the render would be cheaper if this gets hot.
  */
-export async function recheckQuality(scope: Omit<Scope, "userId">, itemId: string, manual = false) {
+export async function recheckQuality(scope: Omit<Scope, "userId">, itemId: string): Promise<"started" | "checking" | "none"> {
   const item = await prisma.contentItem.findFirst({
     where: { id: itemId, workspaceId: scope.workspaceId, brandId: scope.brandId, studio: true },
     include: { versions: { orderBy: { version: "desc" }, take: 1, include: { checks: { select: { id: true }, take: 1 } } } },
   });
   const latest = item?.versions[0];
-  if (!item || !latest || item.status !== "DRAFT_REVIEW" || latest.checks.length > 0) return false;
-  const now = Date.now();
-  const runs = await prisma.agentRun.findMany({
-    where: { brandId: scope.brandId, agentKey: "quality", createdAt: { gt: new Date(now - 3600_000) }, input: { path: ["itemId"], equals: itemId } },
-    orderBy: { createdAt: "desc" },
-    select: { status: true, createdAt: true },
+  if (!item || !latest || item.status !== "DRAFT_REVIEW" || latest.checks.length > 0) return "none";
+  const since = new Date(Date.now() - CHECK_IN_FLIGHT_MS);
+  const inFlight = await prisma.agentRun.findFirst({
+    where: { brandId: scope.brandId, agentKey: "quality", status: { in: ["QUEUED", "RUNNING"] }, createdAt: { gt: since }, input: { path: ["itemId"], equals: itemId } },
+    select: { id: true },
   });
-  const last = runs[0]?.createdAt.getTime() ?? latest.createdAt.getTime();
-  if (runs.some((r) => ["QUEUED", "RUNNING"].includes(r.status) && now - r.createdAt.getTime() < CHECK_IN_FLIGHT_MS)) return false;
-  if (!manual && (now - last < CHECK_WAIT_MS || runs.length >= CHECK_TRIES)) return false;
+  if (inFlight) return "checking";
+  const [perReel, perBrand] = await Promise.all([hitRateLimit(`reel-recheck:${itemId}`, 1, 15_000), hitRateLimit(`reel-recheck-brand:${scope.brandId}`, 10, 3600_000)]);
+  if (!perReel.allowed || !perBrand.allowed) throw new PublishingError("Too many checks just now. Try again in a moment.", 429);
   await startAgentRun({ ...scope, agentKey: "quality", trigger: "event", input: { itemId, version: latest.version } });
   kickRunner();
-  return true;
+  return "started";
 }
 
 const INSTAGRAM_POST = /^https:\/\/(www\.)?instagram\.com\/(reel|reels|p)\/[A-Za-z0-9_-]+\/?(\?.*)?$/;
