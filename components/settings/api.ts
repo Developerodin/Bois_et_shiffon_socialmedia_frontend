@@ -191,7 +191,7 @@ export type ProjectPeople = {
   roles: { id: string; name: string; description: string | null }[];
 };
 
-export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "REDDIT" | "PINTEREST";
+export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "GOOGLE_BUSINESS" | "REDDIT" | "PINTEREST";
 export type ProviderInfo = { provider: Provider; label: string; configured: boolean };
 export type Connection = {
   id: string;

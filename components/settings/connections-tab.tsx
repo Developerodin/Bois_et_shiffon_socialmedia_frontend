@@ -25,6 +25,7 @@ const PURPOSE: Record<Provider, string> = {
   INSTAGRAM: "Publish to your Instagram professional account and read its insights.",
   THREADS: "Publish to Threads and read post insights.",
   GOOGLE: "Read website traffic (Analytics) and search queries (Search Console).",
+  GOOGLE_BUSINESS: "Read and reply to Google reviews, and post updates to your Google Business Profile.",
   REDDIT: "Find relevant conversations and post approved replies.",
   PINTEREST: "Publish approved Pins to your boards and read saves and clicks.",
 };
