@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -138,9 +138,16 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
         onEnd: async ({ messages: all }) => {
           const data = { messages: all.slice(-STORED_HISTORY) as unknown as Prisma.InputJsonValue, title };
           // Never an upsert on the id alone: it would overwrite another person's thread that has the same id.
-          const mine = await prisma.chatThread.updateMany({ where: { id: body.data.id, userId: scope.userId, brandId: scope.brandId }, data });
+          const where = { id: body.data.id, userId: scope.userId, brandId: scope.brandId };
+          const mine = await prisma.chatThread.updateMany({ where, data });
           if (mine.count === 0) {
-            await prisma.chatThread.create({ data: { id: body.data.id, workspaceId: scope.workspaceId, brandId: scope.brandId, userId: scope.userId, ...data } });
+            try {
+              await prisma.chatThread.create({ data: { id: body.data.id, workspaceId: scope.workspaceId, brandId: scope.brandId, userId: scope.userId, ...data } });
+            } catch (e) {
+              // Two first saves raced: the other create won. Update ours if the thread is ours; someone else's id is dropped.
+              if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) throw e;
+              await prisma.chatThread.updateMany({ where, data });
+            }
           }
         },
         onError: (error) => {
