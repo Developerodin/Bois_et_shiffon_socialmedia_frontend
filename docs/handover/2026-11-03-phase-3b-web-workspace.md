@@ -1,7 +1,11 @@
 # Handover: Phase 3b + 5, web workspace content and polish
 
-Status: implemented. Review and browser test: pending.
-Branch `audit-fixes`. Commit: `5a93f94`. Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 3 items 1, 6-12,
+Status: implemented and 4-lens reviewed (no critical); the chat create race (P2002) fixed in `357da74`. Browser test: pending.
+Branch `audit-fixes`. Commits: `5a93f94`, `357da74`.
+
+Review findings left open: Owner-only buttons pop in after `/my-permissions` loads (perms null → hidden); `usePerms`
+fetches once per panel; IdeasPanel re-fetches the agents list the Workspace already has; "Re-read it now" starts a paid
+Research run with no confirm; coming-soon agent rows lost their per-agent icons (all use a lock). Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 3 items 1, 6-12,
 the chat thread race, and the Phase 5 workspace items.
 
 ## What changed

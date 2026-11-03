@@ -1,7 +1,13 @@
 # Handover: Phase 3a, web shell, navigation, settings and auth
 
-Status: implemented. Review and browser test: pending (run together with the other parallel tasks).
-Branch `audit-fixes`. Commit: `19b5183`. Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 3 items 2-5, 8
+Status: implemented and 4-lens reviewed; review fixes in `357da74`. Browser test: pending.
+Branch `audit-fixes`. Commits: `19b5183`, `357da74`.
+
+Review fixes applied: `/login?next=` open redirect via control characters (made reachable by the new signed-in
+redirect) closed, repeated query params no longer 500, assistant drawer closes on Escape from anywhere.
+Review findings left open: the settings board doesn't re-sync its tab when the sidebar "Settings" link drops `?tab`;
+the `login_email` cookie isn't cleared after a successful sign-in (expires in 120 s) and has no `secure` flag;
+role dialog `rememberFocus` can record an element inside the dialog when switching roles. Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 3 items 2-5, 8
 (business switch), 13-15, and four Phase 5 items.
 
 ## What changed
