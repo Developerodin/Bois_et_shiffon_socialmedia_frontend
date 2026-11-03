@@ -66,6 +66,7 @@ function useFirstIdeas() {
   return {
     run,
     waiting,
+    noBrand: !ws || !brandId,
     failed: !ws || !brandId ? i18n.t("onboarding:preparing.errors.noBrand") : failed,
     retry: () => {
       setFailed(null);
@@ -77,7 +78,7 @@ function useFirstIdeas() {
 /** A11 · Onboarding / Preparing content (Figma 408:809). Follows the brand's first Scout run. */
 export default function Preparing() {
   const { t } = useTranslation("onboarding");
-  const { run, waiting, failed, retry } = useFirstIdeas();
+  const { run, waiting, failed, noBrand, retry } = useFirstIdeas();
   const ready = run?.status === "SUCCEEDED";
   const { data: brand } = useBrandAssets();
   const photos = brand?.assets?.products.filter((p) => p.image) ?? [];
@@ -108,8 +109,15 @@ export default function Preparing() {
               <Text accessibilityRole="alert" style={[type.meta, { color: color.error, textAlign: "center" }]}>
                 {failed}
               </Text>
-              <Button label={t("learning.tryAgain")} onPress={retry} />
-              <Button label={t("preparing.continueWithout")} variant="ghost" onPress={next} />
+              {noBrand ? (
+                // No brand was made (the app restarted, or an earlier step was skipped): retrying or going on can't work.
+                <Button label={t("preparing.startOver")} onPress={() => router.replace("/onboarding/goal")} />
+              ) : (
+                <>
+                  <Button label={t("learning.tryAgain")} onPress={retry} />
+                  <Button label={t("preparing.continueWithout")} variant="ghost" onPress={next} />
+                </>
+              )}
             </>
           ) : (
             <Button label={ready ? t("common:continue") : t("preparing.loadingButton")} arrow={ready} loading={!ready} disabled={!ready} onPress={next} />

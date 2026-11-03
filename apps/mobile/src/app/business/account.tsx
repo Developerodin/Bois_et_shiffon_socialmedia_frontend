@@ -11,6 +11,7 @@ import { disablePush, enablePush, pushActive, pushAvailable, pushRestored } from
 import { useAppLanguage } from "@/ui/language/languages";
 import { ActionButton, ICON, bodyMuted, meta } from "@/ui/reels/kit";
 import { signOut } from "@/ui/account-actions";
+import { resetTo } from "@/ui/reset-stack";
 
 /** M12 · Business / Account settings: workspace, preferences, support and sign-out. */
 export default function AccountSettings() {
@@ -86,10 +87,10 @@ export default function AccountSettings() {
 
       <SectionHead title={t("account.supportTitle")} style={{ marginTop: space[20], paddingBottom: space[8] }} />
       <SettingsCard style={styles.list}>
-        <NavRow first icon={CircleQuestionMark} title={t("account.help")} titleStyle={styles.supportLabel} style={styles.support} />
-        <NavRow icon={FileText} title={t("account.terms")} titleStyle={styles.supportLabel} style={styles.support} />
-        <NavRow icon={ShieldCheck} title={t("account.privacy")} titleStyle={styles.supportLabel} style={styles.support} />
-        <NavRow icon={RotateCcw} title={t("account.restore")} titleStyle={styles.supportLabel} style={styles.support} />
+        <NavRow first icon={CircleQuestionMark} title={t("account.help")} soon={t("account.comingSoon")} titleStyle={styles.supportLabel} style={styles.support} />
+        <NavRow icon={FileText} title={t("account.terms")} soon={t("account.comingSoon")} titleStyle={styles.supportLabel} style={styles.support} />
+        <NavRow icon={ShieldCheck} title={t("account.privacy")} soon={t("account.comingSoon")} titleStyle={styles.supportLabel} style={styles.support} />
+        <NavRow icon={RotateCcw} title={t("account.restore")} soon={t("account.comingSoon")} titleStyle={styles.supportLabel} style={styles.support} />
       </SettingsCard>
 
       <ActionButton
@@ -99,7 +100,7 @@ export default function AccountSettings() {
         height={44}
         labelStyle={{ fontFamily: font.semibold }}
         style={{ marginTop: space[20] }}
-        onPress={() => void signOut().then(() => router.replace("/onboarding/sign-in"))}
+        onPress={() => void signOut().then(() => resetTo("/onboarding/sign-in"))}
       />
       <Text style={[bodyMuted, { textAlign: "center", paddingTop: space[12], paddingHorizontal: space[8] }]}>
         {t("account.signOutNote")}

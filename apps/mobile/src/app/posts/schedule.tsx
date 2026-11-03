@@ -13,6 +13,7 @@ import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { CardTitle, Pill, tint } from "@/ui/posts/controls";
 import { BUSINESS_TZ_LABEL, dayKey, shortDate, time24, ymd } from "@/ui/posts/sample";
 import { coverSource, reloadPosts, usePost } from "@/ui/posts/use-posts";
+import { openReel } from "@/ui/reels/use-reel";
 
 const icons = {
   link: require("../../../assets/figma/posts/btn-link.svg"),
@@ -49,6 +50,9 @@ export default function SchedulePost() {
   // When the screen opened; the server refuses a slot that has passed by the time Schedule is tapped.
   const [now] = useState(Date.now);
   const [error, setError] = useState<string | null>(null);
+  // The release read failed (not a scheduling error): the destination card offers a retry instead of spinning.
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const back = () => (router.canGoBack() ? router.back() : router.navigate("/posts"));
 
   // Read again on every focus: coming back from X03 Reconnect (or Connections) unlocks Schedule.
@@ -56,17 +60,17 @@ export default function SchedulePost() {
     useCallback(() => {
       if (!id) return;
       const ctrl = new AbortController();
-      setError(null);
+      setLoadError(false);
       postRelease(id, ctrl.signal).then(
         (r) => {
           setRelease(r);
           // Only when no account can post: is one linked but signed out?
           if (r.accounts.length === 0) connections().then((c) => !ctrl.signal.aborted && setLinked(c.connections), () => {});
         },
-        (e: unknown) => !ctrl.signal.aborted && setError(e instanceof Error ? e.message : String(e)),
+        () => !ctrl.signal.aborted && setLoadError(true),
       );
       return () => ctrl.abort();
-    }, [id]),
+    }, [id, attempt]), // eslint-disable-line react-hooks/exhaustive-deps -- Try again bumps attempt
   );
 
   if (!post || !post.latest) {
@@ -161,7 +165,12 @@ export default function SchedulePost() {
             </View>
           ) : null}
         </View>
-        {!release ? (
+        {!release && loadError ? (
+          <View style={{ paddingTop: space[8], gap: space[8] }}>
+            <Text style={[type.meta, { color: color.error }]}>{t("schedule.loadFailed")}</Text>
+            <Button label={t("schedule.retry")} variant="outline" height={44} onPress={() => setAttempt((n) => n + 1)} />
+          </View>
+        ) : !release ? (
           <ActivityIndicator color={color.primary} style={{ marginTop: space[12] }} />
         ) : connected ? (
           <View style={{ paddingTop: space[8], gap: space[8] }}>
@@ -260,7 +269,14 @@ export default function SchedulePost() {
 
       <View style={{ paddingTop: space[20], gap: space[8] }}>
         {imageProblem ? (
-          <Pressable accessibilityRole="link" onPress={() => router.push({ pathname: "/posts/edit", params: { id: post.id } })}>
+          <Pressable
+            accessibilityRole="link"
+            onPress={() => {
+              if (post.channel !== "INSTAGRAM_REEL") return router.push({ pathname: "/posts/edit", params: { id: post.id } });
+              openReel(post.id);
+              router.push("/reels/review");
+            }}
+          >
             <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{imageProblem}</Text>
           </Pressable>
         ) : null}

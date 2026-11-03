@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { ArrowRight, Coins } from "lucide-react-native";
+import { Coins } from "lucide-react-native";
 import { Trans, useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { formatNumber } from "@/i18n";
@@ -12,7 +12,8 @@ import { useCredits } from "@/ui/use-credits";
 /**
  * X02 · Recovery / Low credits: sheet over the screen whose paid action was refused (402). Shows what it needs against
  * the workspace's real balance. ponytail: no plans or billing backend yet, so the design's monthly-plan bar shows the
- * balance against what's needed instead of a plan allowance; "Manage credits" opens the Plans screens.
+ * balance against what's needed instead of a plan allowance. Plans can't be bought yet, so the sheet says how credits
+ * are added today instead of sending people to the Plans screens.
  */
 export default function LowCredits() {
   const { t } = useTranslation("recovery");
@@ -58,8 +59,8 @@ export default function LowCredits() {
         </View>
 
         <View style={{ gap: space[12], paddingTop: space[24] }}>
-          <ActionButton label={t("lowCredits.manage")} trailing={ArrowRight} onPress={() => router.push("/plans")} />
-          <ActionButton label={t("lowCredits.keepEditing")} variant="outline" onPress={close} />
+          <Text style={[meta, { textAlign: "center" }]}>{t("lowCredits.howToGet")}</Text>
+          <ActionButton label={t("lowCredits.keepEditing")} onPress={close} />
         </View>
       </Sheet>
     </View>

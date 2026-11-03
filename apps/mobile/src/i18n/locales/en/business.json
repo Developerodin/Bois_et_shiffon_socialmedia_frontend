@@ -21,7 +21,7 @@
       "tags": "Known for"
     },
     "brandPreferences": "Brand preferences",
-    "brandPreferencesHint": "Colors, tone, language",
+    "brandPreferencesHint": "Colors and tone",
     "photoAssets": "Photo assets",
     "photoAssetsHint": "Product photos and your uploads",
     "connections": "Connections",
@@ -67,6 +67,7 @@
     "title": "Connections",
     "sourceTitle": "Source website",
     "linked": "Linked",
+    "viewPhotos": "View photos",
     "sourceBody": "Product photos and business details",
     "channelsTitle": "Publishing channels",
     "accounts": "Accounts",
@@ -118,6 +119,11 @@
     "notAvailable": "Not available yet"
   },
   "billing": {
+    "planName": "{{plan}} plan",
+    "planBlurb_one": "{{n}} credit renews every month.",
+    "planBlurb_other": "{{n}} credits renew every month.",
+    "unlimited": "Testing workspace",
+    "unlimitedBlurb": "This workspace has no credit limit.",
     "creditsAvailable_one": "{{n}} credit available",
     "creditsAvailable_other": "{{n}} credits available",
     "balanceTitle": "Credit balance",
@@ -168,8 +174,9 @@
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "restore": "Restore purchases",
+    "comingSoon": "Coming soon",
     "signOut": "Sign out of Espanda",
-    "signOutNote": "Your active subscription and drafted catalog assets remain securely saved.",
+    "signOutNote": "Your drafts and catalog assets stay saved in this workspace.",
     "memberCount_one": "{{count}} member",
     "memberCount_other": "{{count}} members",
     "pushUnavailable": "Not available in this version of the app yet. You'll see a banner in the app instead."

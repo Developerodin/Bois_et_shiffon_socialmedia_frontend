@@ -31,16 +31,8 @@ export default function Plans() {
       footer={
         <Footer>
           {pricing.available ? null : <Text style={[type.body, { color: color.inkSecondary, textAlign: "center" }]}>{t("choose.pricingUnavailable")}</Text>}
-          {/* No purchase happens here: with pricing live this only moves to the activation-return screen. */}
+          {/* No purchase happens here: with pricing live this only moves to the activation-return screen. Restore purchases, Terms and Privacy return with the store and legal pages. */}
           <Button label={t("choose.continue")} disabled={!pricing.available} onPress={() => router.push("/plans/activated")} />
-          <View style={styles.links}>
-            {/* Restore / Terms / Privacy have no store or legal pages yet. */}
-            <LinkText label={t("choose.restorePurchases")} />
-            <Text style={styles.dot}>•</Text>
-            <LinkText label={t("choose.terms")} />
-            <Text style={styles.dot}>•</Text>
-            <LinkText label={t("choose.privacy")} />
-          </View>
         </Footer>
       }
     >
@@ -90,14 +82,6 @@ function PlanCard({ plan, selected, onPress }: { plan: Plan & { credits: number 
   );
 }
 
-function LinkText({ label, onPress }: { label: string; onPress?: () => void }) {
-  return (
-    <Pressable accessibilityRole="link" onPress={onPress} hitSlop={8} style={{ minHeight: 44, justifyContent: "center" }}>
-      <Text style={[type.label, { fontSize: 12, lineHeight: 18 }]}>{label}</Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   lead: { color: color.inkSecondary, textAlign: "center", lineHeight: 21 },
   card: { padding: space[20], borderRadius: radius.card, borderWidth: 1, borderColor: color.controlOutline, backgroundColor: color.surface },
@@ -107,6 +91,4 @@ const styles = StyleSheet.create({
   radio: { width: 22, height: 22, marginTop: 4, borderRadius: 11, borderWidth: 1.5, borderColor: color.controlOutline, alignItems: "center", justifyContent: "center" },
   radioDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: color.primary },
   rule: { height: 1, backgroundColor: "#E2E1EB", marginVertical: space[20] },
-  links: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: space[8], flexWrap: "wrap" },
-  dot: { ...type.meta, color: color.inkSecondary },
 });

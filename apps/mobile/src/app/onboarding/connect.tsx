@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { Check, CircleCheck, Download, Hash, Lock, SlidersHorizontal, Star, Video } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,6 +9,7 @@ import { Screen, StepHeader, Title } from "@/ui/layout";
 import { BrandLogo } from "@/ui/onboarding/brand-logo";
 import { clearOnboarding, GOAL_HOME, onboarding } from "@/ui/onboarding/state";
 import { useBrandAssets } from "@/ui/onboarding/use-brand-assets";
+import { resetTo } from "@/ui/reset-stack";
 import { color, radius, space, type } from "@/theme/tokens";
 
 /** A12 · Onboarding / Connect Instagram (Figma 408:896) with A13 "Connect later?" sheet (408:981). */
@@ -21,12 +21,13 @@ export default function Connect() {
     // The rest of the app works on the business just set up.
     if (onboarding.workspaceId && onboarding.brandId) rememberBrand({ workspaceId: onboarding.workspaceId, brandId: onboarding.brandId });
     clearOnboarding();
-    router.replace(home);
+    resetTo(home);
   };
   const { data: brand } = useBrandAssets();
   const [busy, setBusy] = useState<SocialProvider | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
   const [connected, setConnected] = useState<string[]>([]);
+  const [done, setDone] = useState<SocialProvider[]>([]);
   const connect = async (provider: SocialProvider) => {
     setSkipSheet(false);
     setFailed(null);
@@ -36,6 +37,7 @@ export default function Connect() {
       if (!ws || !brandId) throw new Error(t("connect.errors.noBrand"));
       const names = await connectSocial(ws, brandId, provider);
       setConnected((c) => [...new Set([...c, ...names])]);
+      if (names.length) setDone((d) => [...new Set([...d, provider])]);
     } catch (e) {
       setFailed((e as Error).message);
     } finally {
@@ -65,19 +67,19 @@ export default function Connect() {
             </>
           ) : null}
           <Button
-            label={t("connect.connectInstagram")}
+            label={done.includes("INSTAGRAM") ? t("connect.instagramConnected") : t("connect.connectInstagram")}
             variant={connected.length ? "outline" : "primary"}
             icon={require("../../../assets/figma/onboarding/logo-instagram.png")}
             loading={busy === "INSTAGRAM"}
-            disabled={busy !== null}
+            disabled={busy !== null || done.includes("INSTAGRAM")}
             onPress={() => void connect("INSTAGRAM")}
           />
           <Button
-            label={t("connect.connectFacebook")}
+            label={done.includes("META") ? t("connect.facebookConnected") : t("connect.connectFacebook")}
             variant="outline"
             icon={require("../../../assets/figma/onboarding/logo-facebook.png")}
             loading={busy === "META"}
-            disabled={busy !== null}
+            disabled={busy !== null || done.includes("META")}
             onPress={() => void connect("META")}
           />
           {connected.length ? null : <Button label={t("connect.skip")} variant="ghost" height={56} onPress={() => setSkipSheet(true)} />}

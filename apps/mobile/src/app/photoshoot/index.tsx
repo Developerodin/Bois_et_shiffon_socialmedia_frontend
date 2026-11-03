@@ -29,7 +29,7 @@ export default function PhotoshootCreate() {
       <ShootCard
         style={{ marginTop: space[20] }}
         image={photoshootImages.diningTable}
-        imageLabel={t("create.product.imageLabel", { name: "Bois & Chiffons Bunting Acacia" })}
+        imageLabel={t("create.product.imageLabel")}
         pill={t("create.product.pill")}
         title={t("create.product.title")}
         body={t("create.product.body")}

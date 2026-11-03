@@ -165,6 +165,7 @@ export function NavRow({
   first,
   titleStyle,
   style,
+  soon,
 }: {
   icon?: LucideIcon;
   title: string;
@@ -173,20 +174,24 @@ export function NavRow({
   first?: boolean;
   titleStyle?: StyleProp<TextStyle>;
   style?: StyleProp<ViewStyle>;
+  /** A feature with nothing behind it yet: the row is disabled and says so (pass the "Coming soon" label). */
+  soon?: string;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
+      accessibilityLabel={soon ? `${title}, ${soon}` : subtitle ? `${title}, ${subtitle}` : title}
+      accessibilityState={{ disabled: !!soon }}
+      disabled={!!soon}
       onPress={onPress}
-      style={({ pressed }) => [styles.navRow, !first && styles.rowRule, pressed && { backgroundColor: "rgba(16,16,20,0.03)" }, style]}
+      style={({ pressed }) => [styles.navRow, !first && styles.rowRule, pressed && { backgroundColor: "rgba(16,16,20,0.03)" }, soon && { opacity: 0.6 }, style]}
     >
       {Icon ? <Icon size={20} color={bc.black} strokeWidth={ICON.strokeWidth} /> : null}
       <View style={{ flex: 1 }}>
         <Text style={[body12, titleStyle]}>{title}</Text>
         {subtitle ? <Text style={meta}>{subtitle}</Text> : null}
       </View>
-      <ChevronRight size={16} color={color.disabledInk} strokeWidth={ICON.strokeWidth} />
+      {soon ? <Text style={meta}>{soon}</Text> : <ChevronRight size={16} color={color.disabledInk} strokeWidth={ICON.strokeWidth} />}
     </Pressable>
   );
 }

@@ -59,7 +59,7 @@ export default function MarketingTools() {
               <X size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
             </Pressable>
           </View>
-          <View style={styles.cueBody}>
+          <Pressable accessibilityRole="button" onPress={() => router.push("/business/photos" as Href)} style={styles.cueBody}>
             <View style={styles.cueIcon}>
               <ImagePlus size={16} color={color.onPrimary} strokeWidth={ICON.strokeWidth} />
             </View>
@@ -68,7 +68,7 @@ export default function MarketingTools() {
               <Text style={[type.cardTitle, { paddingTop: 2 }]}>{t("tools.cue.title")}</Text>
               <Text style={[bodyMuted, { paddingTop: 2 }]}>{t("tools.cue.body")}</Text>
             </View>
-          </View>
+          </Pressable>
         </Panel>
       ) : null}
 

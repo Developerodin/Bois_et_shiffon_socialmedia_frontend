@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Button } from "@/ui/button";
 import { Card } from "@/ui/layout";
 import { color, space, type } from "@/theme/tokens";
 import { MonthCalendar } from "@/ui/posts/calendar";
@@ -16,7 +17,7 @@ const VIEWS = ["month", "list"] as const;
 /** P02 · Posts / Calendar: month grid with a dot per posting day, then the selected day's posts. */
 export default function PostsCalendar() {
   const { t } = useTranslation("posts");
-  const { items } = usePosts();
+  const { items, error, reload } = usePosts();
   const all = useMemo(() => items ?? [], [items]);
   const rows = useMemo(() => new Map(all.map((p) => [p.id, asPost(p)])), [all]);
   const [now] = useState(() => new Date());
@@ -65,6 +66,13 @@ export default function PostsCalendar() {
         </View>
         <SegmentedTabs label={t("calendar.viewLabel")} options={VIEWS.map((value) => ({ value, label: t(`calendar.views.${value}`) }))} value={view} onChange={setView} />
       </View>
+
+      {error && !items ? (
+        <View style={{ gap: space[12], paddingTop: space[16] }}>
+          <Text style={type.body}>{t("today.loadFailed")}</Text>
+          <Button label={t("today.retry")} variant="outline" onPress={() => void reload()} />
+        </View>
+      ) : null}
 
       {view === "month" ? (
         <Card style={{ marginTop: space[24] }}>

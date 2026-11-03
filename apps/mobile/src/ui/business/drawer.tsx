@@ -25,6 +25,7 @@ import { formatDate, formatNumber } from "@/i18n";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { bc, strong14 } from "@/ui/business/kit";
 import { myBusinesses, signOut, switchBusiness, type Business } from "@/ui/account-actions";
+import { resetTo } from "@/ui/reset-stack";
 import { useCredits } from "@/ui/use-credits";
 import { useCurrentBrand } from "@/ui/use-current-brand";
 import { ICON, eyebrow, meta } from "@/ui/reels/kit";
@@ -193,7 +194,7 @@ export function BusinessDrawer({ visible, onClose, onSelect }: { visible: boolea
           </ScrollView>
 
           <View style={[styles.foot, { paddingBottom: bottom + space[12] }]}>
-            <Pressable accessibilityRole="button" accessibilityLabel={t("drawer.signOut")} onPress={() => void signOut().then(() => (onClose(), router.replace("/onboarding/sign-in")))} style={styles.signOut}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t("drawer.signOut")} onPress={() => void signOut().then(() => (onClose(), resetTo("/onboarding/sign-in")))} style={styles.signOut}>
               <LogOut size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
               <Text style={strong14}>{t("drawer.signOut")}</Text>
             </Pressable>

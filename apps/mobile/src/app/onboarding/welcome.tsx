@@ -26,7 +26,7 @@ export default function Welcome() {
       <View style={styles.top}>
         <Image source={images.logo} style={{ width: 96, height: 28 }} contentFit="contain" accessibilityLabel="Espanda" />
         {/* Two catalog shots, slightly tilted as in the design. */}
-        <View style={styles.photos} accessibilityLabel={t("welcome.photosLabel", { brand: "Bois & Chiffons" })}>
+        <View style={styles.photos} accessibilityLabel={t("welcome.photosLabel")}>
           <Image source={require("../../../assets/figma/onboarding/bunting-dining-room.png")} style={styles.photo} contentFit="cover" />
           <Image source={require("../../../assets/figma/onboarding/bunting-living-room.png")} style={[styles.photo, { marginTop: 10 }]} contentFit="cover" />
         </View>

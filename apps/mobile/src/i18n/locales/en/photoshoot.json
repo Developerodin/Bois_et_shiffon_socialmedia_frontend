@@ -25,7 +25,7 @@
     "title": "Create photoshoot",
     "subtitle": "Create product photos and style apparel on models.",
     "product": {
-      "imageLabel": "{{name}} dining table",
+      "imageLabel": "Example of a product photoshoot: a dining table in a styled interior",
       "pill": "Catalog item",
       "title": "Product photoshoot",
       "body": "Place catalog items into architectural interior and studio settings with natural lighting.",

@@ -8,6 +8,7 @@ import { formatDate, formatNumber } from "@/i18n";
 import { color, font, space } from "@/theme/tokens";
 import { BizScreen, BrandHeader, NavRow, SectionHead, SettingsCard, SettingsTabs, SmallButton, bc, body12, label14, strong14 } from "@/ui/business/kit";
 import { ICON, bodyMuted, meta } from "@/ui/reels/kit";
+import { usePlan } from "@/ui/plans/use-plan";
 
 const ICON_OF: Record<CreditLine["kind"], LucideIcon> = { reel: Clapperboard, calendar: CalendarDays, agent: Wrench, audit: Wrench, refund: RotateCcw, added: Plus };
 
@@ -18,6 +19,8 @@ const ICON_OF: Record<CreditLine["kind"], LucideIcon> = { reel: Clapperboard, ca
  */
 export default function Billing() {
   const { t } = useTranslation("business");
+  const { t: tp } = useTranslation("plans");
+  const { loaded, plan, unlimited } = usePlan();
   const [data, setData] = useState<{ credits: number; history: CreditLine[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   useFocusEffect(
@@ -54,10 +57,14 @@ export default function Billing() {
       <SettingsCard style={{ marginTop: space[16] }}>
         <View style={styles.planTop}>
           <View style={{ flex: 1 }}>
-            <Text style={[strong14, { fontSize: 16, lineHeight: 22 }]}>{t("billing.noPlan")}</Text>
-            <Text style={[meta, { paddingTop: 4 }]}>{t("billing.noPlanBlurb")}</Text>
+            <Text style={[strong14, { fontSize: 16, lineHeight: 22 }]}>
+              {plan ? t("billing.planName", { plan: tp(`plans.${plan.id}`) }) : unlimited ? t("billing.unlimited") : loaded ? t("billing.noPlan") : ""}
+            </Text>
+            <Text style={[meta, { paddingTop: 4 }]}>
+              {plan ? t("billing.planBlurb", { count: plan.credits, n: formatNumber(plan.credits) }) : unlimited ? t("billing.unlimitedBlurb") : loaded ? t("billing.noPlanBlurb") : ""}
+            </Text>
           </View>
-          <SmallButton label={t("billing.seePlans")} style={{ borderColor: color.divider }} onPress={() => router.push("/plans")} />
+          {loaded && !plan && !unlimited ? <SmallButton label={t("billing.seePlans")} style={{ borderColor: color.divider }} onPress={() => router.push("/plans")} /> : null}
         </View>
       </SettingsCard>
 

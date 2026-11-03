@@ -41,7 +41,7 @@
     "body_other": "You currently have <b>{{n}} credits available</b> in this workspace. Your work is saved.",
     "remaining": "{{available}} / {{needed}} needed",
     "remainingA11y": "Credits available against what's needed",
-    "manage": "Manage credits",
+    "howToGet": "Credits are added to your workspace by the Espanda team for now. Ask them for a top-up, then come back to finish.",
     "keepEditing": "Keep editing",
     "balance": "Credit balance",
     "neededLabel": "Available for this"

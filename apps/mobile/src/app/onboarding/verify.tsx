@@ -9,6 +9,7 @@ import { clearRegistration, registrationFor } from "@/ui/onboarding/registration
 import { onboarding } from "@/ui/onboarding/state";
 import { Glow } from "@/ui/aura";
 import { Button } from "@/ui/button";
+import { resetTo } from "@/ui/reset-stack";
 import { images } from "@/ui/icons";
 import { Screen, StepHeader, Title } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
@@ -48,7 +49,7 @@ export default function Verify() {
           return router.replace({ pathname: "/onboarding/email", params: { linkPhone: "1" } });
         }
       }
-      router.replace("/onboarding/welcome");
+      resetTo("/onboarding/welcome");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("verify.checkFailed"));
       setCode("");

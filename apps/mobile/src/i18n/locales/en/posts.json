@@ -179,7 +179,9 @@
     "jpegOnly": "Instagram only takes JPEG photos. Tap to pick a .jpg instead.",
     "expired": "{{channel}} needs you to sign in again",
     "reconnect": "Reconnect {{channel}}",
-    "reelInStudio": "Reels are made and posted from the Reels studio, not from here."
+    "reelInStudio": "Reels are made and posted from the Reels studio. Tap to open this one there.",
+    "loadFailed": "Couldn't check where this post can go. Check your connection.",
+    "retry": "Try again"
   },
   "brief": {
     "title": "Create a post",
@@ -220,7 +222,9 @@
     "scheduled_other": "Scheduled ({{count}})",
     "samplePreview": "Sample preview",
     "moreOptions": "More options for {{title}}",
-    "editStory": "Edit story"
+    "editStory": "Edit story",
+    "comingSoon": "Coming soon",
+    "comingSoonBody": "Stories are not available yet. Posts, carousels and reels are ready to schedule now."
   },
   "editStory": {
     "back": "Back",

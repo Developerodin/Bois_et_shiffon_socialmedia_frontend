@@ -33,7 +33,7 @@ function cycles(now: Date) {
 /** P09 · Posts / Planner: what's planned per month (feed posts, reels, pillars), then plan the next 30 days. */
 export default function Planner() {
   const { t } = useTranslation("posts");
-  const { items } = usePosts();
+  const { items, error: loadError, reload } = usePosts();
   const [now] = useState(() => new Date());
   const months = cycles(now);
   const [cycle, setCycle] = useState(months[0]);
@@ -93,6 +93,13 @@ export default function Planner() {
       }
       contentStyle={{ paddingHorizontal: space[16], paddingTop: space[12], paddingBottom: space[24] }}
     >
+      {loadError && !items ? (
+        <View style={{ gap: space[12], paddingTop: space[16] }}>
+          <Text style={type.body}>{t("today.loadFailed")}</Text>
+          <Button label={t("today.retry")} variant="outline" onPress={() => void reload()} />
+        </View>
+      ) : null}
+
       <Card style={{ padding: space[12] }}>
         <CardTitle>{t("planner.cycle")}</CardTitle>
         <SegmentedTabs label={t("planner.cycle")} options={options} value={cycle} onChange={setCycle} fill style={{ marginTop: space[8] }} />

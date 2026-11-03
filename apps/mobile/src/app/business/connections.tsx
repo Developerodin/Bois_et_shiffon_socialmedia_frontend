@@ -71,7 +71,7 @@ export default function Connections() {
           <Text style={[meta, { paddingTop: 2 }]}>{t("connections.sourceBody")}</Text>
         </View>
         <View style={{ marginRight: space[8] }}>
-          <TextAction label={t("kit.manage")} onPress={() => router.push("/business/photos")} />
+          <TextAction label={t("connections.viewPhotos")} onPress={() => router.push("/business/photos")} />
         </View>
       </SettingsCard>
 

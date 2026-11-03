@@ -1,7 +1,7 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Camera, Pencil } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
@@ -34,12 +34,16 @@ export default function PostDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { post, loading, error } = usePost(id);
   const [release, setRelease] = useState<PostRelease | null>(null);
-  useEffect(() => {
-    if (!id) return;
-    const ctrl = new AbortController();
-    postRelease(id, ctrl.signal).then(setRelease, () => {});
-    return () => ctrl.abort();
-  }, [id, post?.latest?.version]);
+  // On every focus too: scheduling from the next screen changes the release without a new version.
+  const version = post?.latest?.version;
+  useFocusEffect(
+    useCallback(() => {
+      if (!id) return;
+      const ctrl = new AbortController();
+      postRelease(id, ctrl.signal).then(setRelease, () => {});
+      return () => ctrl.abort();
+    }, [id, version]), // eslint-disable-line react-hooks/exhaustive-deps -- a new version re-reads where it can go
+  );
   const edit = () => router.push({ pathname: "/posts/edit", params: { id } });
   const { can } = usePermissions();
   const [settling, setSettling] = useState(false);
