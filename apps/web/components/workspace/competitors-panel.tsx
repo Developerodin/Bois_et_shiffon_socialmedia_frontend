@@ -297,7 +297,7 @@ export function CompetitorView({ base, id, onBack }: { base: string; id: string;
               <ul className="mt-2 flex flex-col gap-1.5 text-sm">
                 {a.findings.map((f) => (
                   <li key={f.id}>
-                    <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-[11px] uppercase text-muted-foreground">{f.severity}</span>
+                    <span className="mr-2 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{f.severity}</span>
                     {f.title}
                   </li>
                 ))}

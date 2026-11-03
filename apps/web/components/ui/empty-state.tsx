@@ -40,7 +40,7 @@ export function EmptyState({
         <Icon className={hero ? "size-5" : "size-4"} />
       </span>
       {eyebrow ? (
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+        <p className="text-xs font-medium text-primary">
           {eyebrow}
         </p>
       ) : null}

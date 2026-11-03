@@ -108,7 +108,7 @@ export function AgentLog({ workspaceId, brandId, compact = false }: Props) {
 
       {status === "error" ? <ServiceUnavailable /> : null}
 
-      <div className={cn("overflow-hidden bg-[hsl(30_10%_4%)] text-[hsl(40_22%_90%)]", compact ? "rounded-lg" : "rounded-2xl border border-border")}>
+      <div className={cn("overflow-hidden bg-terminal text-terminal-foreground", compact ? "rounded-lg" : "rounded-2xl border border-border")}>
         <div className={cn("flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5", compact && "hidden")} aria-hidden="true">
           <span className="size-2.5 rounded-full bg-white/15" />
           <span className="size-2.5 rounded-full bg-white/15" />
@@ -157,7 +157,7 @@ export function AgentLog({ workspaceId, brandId, compact = false }: Props) {
               ))}
             </ol>
           )}
-          <p className="text-[hsl(40_52%_62%)]" aria-hidden="true">
+          <p className="text-terminal-accent" aria-hidden="true">
             <span className="typing-cursor">$</span>
           </p>
         </div>

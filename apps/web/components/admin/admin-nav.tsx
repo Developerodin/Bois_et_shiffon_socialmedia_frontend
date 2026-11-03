@@ -26,7 +26,7 @@ export function AdminNav() {
   const { ref, style, shown, pick } = useIndicator<HTMLDivElement>(active, "box");
   return (
     <nav aria-label="Platform admin" className="lg:sticky lg:top-20">
-      <p className="mb-2 hidden px-3 font-mono text-[11px] uppercase tracking-[0.14em] text-primary lg:block">Platform admin</p>
+      <p className="mb-2 hidden px-3 text-xs font-medium text-primary lg:block">Platform admin</p>
       <div ref={ref} className="relative flex flex-wrap gap-1 lg:flex-col">
         <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-lg bg-muted" style={style} />
         {ITEMS.map(({ href, label, icon: Icon }) => {

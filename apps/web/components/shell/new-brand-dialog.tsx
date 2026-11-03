@@ -97,7 +97,7 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+          <p className="text-xs font-medium text-primary">
             New brand
           </p>
           <DialogTitle>Add a brand</DialogTitle>

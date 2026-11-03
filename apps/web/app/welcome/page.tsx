@@ -4,7 +4,6 @@ import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
 import { SignOutButton } from "@/components/workspace/sign-out-item";
 import { auth } from "@/auth";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { WelcomeFlow } from "@/components/welcome/welcome-flow";
 import { effectivePermissions } from "@/server/auth/permissions";
 import { loadShellContext } from "@/server/shell/load-shell-context";
@@ -38,11 +37,10 @@ export default async function WelcomePage({
       : null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <header className="flex items-center justify-between px-6 py-5 sm:px-10">
         <EspandaLogo height={28} priority />
         <nav className="flex flex-wrap items-center justify-end gap-x-5 text-sm text-muted-foreground">
-          <ThemeToggle />
           {shell.brands.length > 0 || resume ? (
             <Link href="/" className="inline-block py-2 hover:text-foreground">
               Go to the app

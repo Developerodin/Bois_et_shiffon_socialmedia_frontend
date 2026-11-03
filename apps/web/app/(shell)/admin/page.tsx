@@ -54,13 +54,13 @@ export default async function AdminOverview() {
             ])}
           />
           <Link href="/admin/workspaces" className={more}>
-            All {o.workspaces.length.toLocaleString("en")} workspaces →
+            All {o.workspaces.length.toLocaleString("en")} workspaces
           </Link>
         </Section>
         <Section id="activity" title="Latest activity" description="Sign-ins, role changes, approvals and admin visits, across the platform.">
           <LogTable kind="audit" rows={activity.rows.slice(0, 8)} fx={fx} platform />
           <Link href="/admin/logs" className={more}>
-            All logs →
+            All logs
           </Link>
         </Section>
       </div>

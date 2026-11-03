@@ -149,13 +149,15 @@ export function DocPane({
           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <DocStateBadge entry={entry} />
             {latest ? (
-              <span className="font-mono">
-                v{latest.version} ·{" "}
-                {latest.createdBy === "agent"
-                  ? "Research agent"
-                  : "Edited by your team"}{" "}
-                · {formatDate(latest.createdAt)}
-              </span>
+              <>
+                <span className="tabular-nums">v{latest.version}</span>
+                <span>
+                  {latest.createdBy === "agent"
+                    ? "Research agent"
+                    : "Edited by your team"}
+                </span>
+                <span>{formatDate(latest.createdAt)}</span>
+              </>
             ) : null}
           </div>
         </div>
@@ -256,7 +258,7 @@ export function DocPane({
         >
           <h4
             id="doc-sources"
-            className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground"
+            className="text-xs font-medium text-muted-foreground"
           >
             Sources ({latest.sources.length})
           </h4>

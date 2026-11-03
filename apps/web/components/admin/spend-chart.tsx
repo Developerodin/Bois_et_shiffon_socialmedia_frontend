@@ -44,7 +44,7 @@ function Plot({ days, totals, fx, W, ariaLabel, className }: { days: Day[]; tota
     <svg viewBox={`0 0 ${W} ${H}`} className={className} role="img" aria-label={ariaLabel}>
       {[0, top / 2, top].map((t) => (
         <g key={t}>
-          <line x1={M.left} x2={W - M.right} y1={y(t)} y2={y(t)} stroke="hsl(var(--border))" strokeWidth={1} strokeDasharray={t === 0 ? undefined : "2 4"} />
+          <line x1={M.left} x2={W - M.right} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth={1} strokeDasharray={t === 0 ? undefined : "2 4"} />
           <text x={M.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="fill-muted-foreground text-[10px] tabular-nums">
             {usd(t)}
           </text>

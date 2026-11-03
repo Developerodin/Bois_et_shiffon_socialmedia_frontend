@@ -83,7 +83,7 @@ export function Markdown({ source }: { source: string }) {
           return (
             <h4
               key={i}
-              className="mt-1 font-mono text-xs uppercase tracking-[0.16em] text-primary"
+              className="mt-1 text-xs font-medium text-primary"
             >
               {inline(block.text)}
             </h4>

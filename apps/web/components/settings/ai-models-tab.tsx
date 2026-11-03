@@ -63,8 +63,10 @@ export function AiModelsTab() {
                 <li key={m.name} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                   <div className="min-w-0">
                     <p className="truncate font-mono text-sm text-foreground">{m.name}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      ${m.inputUsdPerM} in · ${m.cachedUsdPerM} cached · ${m.outputUsdPerM} out
+                    <p className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+                      <span>${m.inputUsdPerM} in</span>
+                      <span>${m.cachedUsdPerM} cached</span>
+                      <span>${m.outputUsdPerM} out</span>
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">

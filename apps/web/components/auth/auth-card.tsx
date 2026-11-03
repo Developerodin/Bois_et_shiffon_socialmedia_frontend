@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Input } from "@/components/ui/input";
 
 /** Centered card under the logo, for the account pages (reset password, invitation). */
@@ -14,8 +13,7 @@ export function AuthCard({
   children: React.ReactNode;
 }) {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center gap-8 bg-background px-6 py-12">
-      <ThemeToggle className="absolute right-4 top-4 sm:right-6 sm:top-6" />
+    <main className="relative flex min-h-dvh flex-col items-center justify-center gap-8 bg-background px-6 py-12">
       <EspandaLogo height={28} priority />
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
         <h1 className="font-display text-2xl font-semibold text-foreground">{title}</h1>

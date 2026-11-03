@@ -1,7 +1,6 @@
 import { signIn } from "@/auth";
 import { PendingButton } from "@/components/auth/pending-button";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { AuthError, CredentialsSignin } from "next-auth";
 import Link from "next/link";
@@ -59,7 +58,6 @@ export default async function LoginPage({
         : null;
   return (
     <main className="surface-glow relative min-h-dvh bg-background text-foreground">
-      <ThemeToggle className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6" />
       <div className="mx-auto grid min-h-dvh max-w-6xl lg:grid-cols-[1.1fr_1fr]">
         {/* The form comes first in the page order: on a phone it's what you see; on a wide screen it sits right. */}
         <section aria-labelledby="signin-h" className="flex flex-col justify-center px-6 py-12 sm:px-12 lg:order-2 lg:py-20">
@@ -194,7 +192,7 @@ const MORNING: { at: string; agent: string; text: string; tone?: "warn" | "you" 
 function MorningLog() {
   return (
     <aside aria-labelledby="morning-h" className="flex flex-col justify-center border-t border-border px-6 py-12 sm:px-12 lg:order-1 lg:border-r lg:border-t-0 lg:py-20">
-      <p id="morning-h" className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+      <p id="morning-h" className="text-xs text-muted-foreground">
         An example morning
       </p>
       <ol className="mt-6 max-w-lg border-l border-border">
@@ -211,7 +209,7 @@ function MorningLog() {
             />
             <time className="pt-0.5 font-mono text-xs tabular-nums text-muted-foreground">{l.at}</time>
             <p className={`text-sm ${l.tone === "you" ? "font-medium text-primary" : "text-foreground"}`}>
-              <span className={`mr-2 font-mono text-[11px] uppercase tracking-[0.12em] ${l.tone === "warn" ? "text-warning" : "text-muted-foreground"}`}>{l.agent}</span>
+              <span className={`mr-2 text-xs font-medium ${l.tone === "warn" ? "text-warning" : "text-muted-foreground"}`}>{l.agent}</span>
               {l.text}
             </p>
           </li>

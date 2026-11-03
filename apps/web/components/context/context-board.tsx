@@ -144,7 +144,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
         aria-labelledby="context-heading"
         className="flex flex-col gap-2"
       >
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+        <p className="text-xs text-primary">
           Strategy documents
         </p>
         <h1
@@ -195,7 +195,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
                   ? RESEARCH_LABEL[researchStatus]
                   : "Research has not run yet"}
               </span>
-              <span className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 <span className="text-foreground">{confirmedCount}</span> of{" "}
                 {docs.length || 5} reviewed
               </span>
