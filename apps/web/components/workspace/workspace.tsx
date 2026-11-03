@@ -57,10 +57,10 @@ const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
   brief: { icon: FileText, tint: "text-primary" },
   creator: { icon: PenLine, tint: "text-primary" },
   quality: { icon: ShieldCheck, tint: "text-success" },
-  analyst: { icon: LineChart, tint: "text-accent" },
+  analyst: { icon: LineChart, tint: "text-primary-strong" },
   seo: { icon: Gauge, tint: "text-success" },
-  geo: { icon: MessageSquareQuote, tint: "text-accent" },
-  competitors: { icon: Users, tint: "text-accent" },
+  geo: { icon: MessageSquareQuote, tint: "text-primary-strong" },
+  competitors: { icon: Users, tint: "text-primary-strong" },
 };
 const PLANNED: { key: string; name: string; icon: LucideIcon; does: string }[] = [
   { key: "reddit", name: "Reddit", icon: MessagesSquare, does: "Finds threads and drafts helpful replies" },
