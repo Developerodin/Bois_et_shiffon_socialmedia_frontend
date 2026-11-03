@@ -25,7 +25,8 @@ const TABS: { key: TabKey; label: string; needs: string }[] = [
 type Props = {
   workspaceId: string;
   brandId: string | null;
-  initialTab?: TabKey;
+  /** From ?tab=; anything that is not a tab is ignored. */
+  initialTab?: string;
   notice: { kind: "ok" | "error"; text: string; names?: string[] } | null;
 };
 
@@ -51,7 +52,14 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
   const visible = can
     ? TABS.filter((t) => can.has(t.needs) && ((t.key !== "connections" && t.key !== "project") || brandId))
     : [];
-  const [active, setActive] = useState<TabKey | null>(initialTab ?? null);
+  const [active, setActiveState] = useState<TabKey | null>(TABS.find((t) => t.key === initialTab)?.key ?? null);
+  // The tab lives in the URL (replace, not push) so a reload or a shared link lands on the same one.
+  function setActive(key: TabKey) {
+    setActiveState(key);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", key);
+    window.history.replaceState(window.history.state, "", url);
+  }
   const current = visible.find((t) => t.key === active) ?? visible[0];
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 

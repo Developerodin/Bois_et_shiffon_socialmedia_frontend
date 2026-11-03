@@ -34,6 +34,9 @@ describe("navFor", () => {
   it("resolves deep admin paths to Admin, not brand scoped", () => {
     expect(navFor("/admin/people/abc")).toEqual({ activeId: "admin", title: "Admin", brandScoped: false });
   });
+  it("does not call an unknown agent the Agent log", () => {
+    expect(navFor("/agents/nope")).toEqual({ activeId: null, title: "Page not found", brandScoped: true });
+  });
   it("falls back to Overview for unknown paths", () => {
     expect(navFor("/totally/unknown")).toEqual({ activeId: null, title: "Overview", brandScoped: true });
   });

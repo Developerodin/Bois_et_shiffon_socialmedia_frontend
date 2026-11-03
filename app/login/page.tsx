@@ -1,9 +1,10 @@
-import { signIn } from "@/auth";
+import { auth, signIn } from "@/auth";
 import { PendingButton } from "@/components/auth/pending-button";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
 import { Input } from "@/components/ui/input";
 import { AuthError, CredentialsSignin } from "next-auth";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const ERRORS: Record<string, string> = {
@@ -47,6 +48,13 @@ export default async function LoginPage({
 }) {
   const { error, reset, invited, expired, next: nextParam, callbackUrl } = await searchParams;
   const next = safeNext(nextParam, callbackUrl);
+  // Already signed in: go where they were headed. Not after an "expired" bounce, so a half-valid session can't loop.
+  if (!expired) {
+    const session = await auth().catch(() => null);
+    if (session?.user?.id) redirect(next);
+  }
+  // A failed sign-in leaves the email in a two-minute cookie (never the password, never the URL) to refill the field.
+  const retryEmail = error ? ((await cookies()).get("login_email")?.value ?? "") : "";
   const keepNext = next === "/" ? "" : `&next=${encodeURIComponent(next)}`;
   const message = error ? (ERRORS[error] ?? ERRORS.invalid) : null;
   const notice = reset
@@ -122,6 +130,10 @@ export default async function LoginPage({
                       : error.code === "rate_limited"
                         ? "rate_limited"
                         : "invalid";
+                    const typed = formData.get("email");
+                    if (typeof typed === "string" && typed.length <= 254) {
+                      (await cookies()).set("login_email", typed, { httpOnly: true, sameSite: "lax", path: "/login", maxAge: 120 });
+                    }
                     redirect(`/login?error=${code}${keepNext}`);
                   }
                   throw error;
@@ -135,6 +147,7 @@ export default async function LoginPage({
                   type="email"
                   required
                   autoComplete="email"
+                  defaultValue={retryEmail}
                   className="mt-1.5 h-11"
                   placeholder="you@yourbrand.com"
                 />

@@ -18,11 +18,16 @@ export default async function AdminPeople({ searchParams }: { searchParams: Prom
         {p.total.toLocaleString("en")} {q.q ? `matching “${q.q}”` : "accounts"}, newest first. Open someone for every workspace and project they’re in, their roles and what those allow.
       </PageHeader>
       <SearchBox placeholder="Search by name or email" value={q.q} />
+      {page > 1 && p.rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          <Link href={withQuery("/admin/people", current, { page: undefined })} className="underline underline-offset-4">Go to page 1</Link>
+        </p>
+      ) : null}
       <Table
         wide
         head={["Person", "Workspaces", "Project roles", "Account", "Last sign-in", "Joined"]}
         numeric={[2]}
-        empty={q.q ? "Nobody matches that search." : "No accounts yet."}
+        empty={page > 1 ? "No results on this page." : q.q ? "Nobody matches that search." : "No accounts yet."}
         rows={p.rows.map((u) => [
           <div key="p" className="min-w-0 max-w-xs">
             <Link href={`/admin/people/${u.id}`} className="font-medium underline-offset-4 hover:underline">

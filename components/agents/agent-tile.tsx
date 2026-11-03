@@ -102,6 +102,11 @@ export function AgentTile({ agent, workspaceId, brandId, onRunStarted }: Props) 
           {pending ? "Starting…" : "Run now"}
         </Button>
       </div>
+      {status === "FAILED" && agent.lastRun?.error ? (
+        <p className="line-clamp-2 text-xs text-destructive" title={agent.lastRun.error}>
+          Last run failed: {agent.lastRun.error}
+        </p>
+      ) : null}
       {error ? (
         <p role="alert" className="text-xs text-destructive">
           {error}

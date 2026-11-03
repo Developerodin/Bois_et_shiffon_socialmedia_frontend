@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import { setActiveBrand } from "@/app/(shell)/actions/shell-context";
 import { okToDiscard } from "@/components/context/unsaved";
@@ -35,6 +36,9 @@ const SIDEBAR_BOX =
 
 function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit<Props, "workspaceId"> & { workspaceId: string }) {
   const active = brands.find((b) => b.id === activeBrandId) ?? brands[0];
+  // The switch round-trips to the server and re-renders the shell; say so instead of looking idle.
+  const [switching, startSwitch] = useTransition();
+  const [target, setTarget] = useState<string | null>(null);
 
   if (!active) {
     return canCreate ? (
@@ -58,12 +62,16 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
         <button
           type="button"
           aria-label="Select business"
+          aria-busy={switching}
+          disabled={switching}
           className={`${SIDEBAR_BOX} cursor-pointer active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
         >
           <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-accent text-xs font-semibold text-primary-strong" aria-hidden="true">
             {active.displayName.charAt(0).toUpperCase()}
           </span>
-          <span className="min-w-0 flex-1 truncate text-left">{active.displayName}</span>
+          <span className="min-w-0 flex-1 truncate text-left">
+            {switching ? `Switching to ${brands.find((b) => b.id === target)?.displayName ?? "business"}…` : active.displayName}
+          </span>
           <ChevronDown className="size-4 shrink-0 text-disabled" strokeWidth={SHELL_STROKE} aria-hidden="true" />
         </button>
       </DropdownMenuTrigger>
@@ -75,7 +83,10 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
             key={brand.id}
             onSelect={() => {
               if (!okToDiscard()) return;
-              void setActiveBrand(workspaceId, brand.id);
+              setTarget(brand.id);
+              startSwitch(async () => {
+                await setActiveBrand(workspaceId, brand.id);
+              });
             }}
           >
             <span className="flex w-full items-center justify-between gap-2">

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { rememberFocus } from "@/components/settings/return-focus";
 import { Check, Copy, Mail, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +55,7 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
   );
   const { state, reload } = useLoad(fetcher);
   const [inviting, setInviting] = useState(false);
+  const restoreFocus = useRef<(() => void) | null>(null);
   const [revoking, setRevoking] = useState<Invitation | null>(null);
 
   let body: React.ReactNode;
@@ -112,7 +114,12 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
         title="Invitations"
         description="People you've asked to join the workspace or one of its projects. Pending links can be revoked at any time. To invite someone to one project only, use Project access."
         action={
-          <Button onClick={() => setInviting(true)}>
+          <Button
+            onClick={() => {
+              restoreFocus.current = rememberFocus("settings-panel-invitations");
+              setInviting(true);
+            }}
+          >
             <UserPlus /> Invite
           </Button>
         }
@@ -122,7 +129,10 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
         <InviteDialog
           workspaceId={workspaceId}
           roles={roles}
-          onClose={() => setInviting(false)}
+          onClose={() => {
+            setInviting(false);
+            restoreFocus.current?.();
+          }}
           onInvited={reload}
         />
       ) : null}

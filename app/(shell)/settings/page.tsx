@@ -43,7 +43,7 @@ export default async function SettingsPage({
       key={shell.activeWorkspaceId}
       workspaceId={shell.activeWorkspaceId}
       brandId={shell.activeBrandId ?? null}
-      initialTab={q.tab === "connections" ? "connections" : undefined}
+      initialTab={q.tab}
       notice={notice}
     />
   );
