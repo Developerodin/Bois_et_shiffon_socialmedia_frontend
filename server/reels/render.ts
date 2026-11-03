@@ -265,7 +265,9 @@ async function join(r: ReelRender, urls: string[]) {
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
-  await startAgentRun({ ...scope, agentKey: "quality", trigger: "event", input: { itemId: r.contentItemId } }).catch(() => null); // the app's next poll shows "checking"; a missed run is retried from R07
+  // Same input shape as recheckQuality (itemId + the new version), so its in-flight test sees this run. A missed start is retried by the app's recheck.
+  const made = await prisma.contentVersion.findFirst({ where: { contentItemId: r.contentItemId }, orderBy: { version: "desc" }, select: { version: true } });
+  await startAgentRun({ ...scope, agentKey: "quality", trigger: "event", input: { itemId: r.contentItemId, version: made?.version } }).catch(() => null);
   await notifyStarter(r, true);
 }
 
