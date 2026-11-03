@@ -6,7 +6,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // One worker: login is rate-limited per email and IP, and the signed-in specs share accounts.
+  workers: 1,
   reporter: "list",
   // Traces, videos and screenshots land here (git-ignored); signed-in sessions live in e2e/.auth/ (git-ignored).
   outputDir: "test-results",

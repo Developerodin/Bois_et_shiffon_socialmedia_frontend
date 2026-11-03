@@ -47,7 +47,6 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
       </div>
       <div className="mt-6 px-5">
         <BrandSwitcher
-          variant="sidebar"
           workspaceId={activeWorkspaceId}
           brands={brands}
           activeBrandId={activeBrandId}
@@ -106,7 +105,6 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
       {/* No Help and support row: the repo has no help page and no support address in its environment. */}
       <div className="mx-5 border-t border-border py-3">
         <AccountMenu
-          variant="sidebar"
           name={user.name}
           email={user.email}
           image={user.image}

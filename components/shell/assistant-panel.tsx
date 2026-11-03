@@ -63,7 +63,6 @@ function Body({ workspaceId, brandId, brandName, inSheet }: Props & { inSheet: b
   }
 
   const slots: ChatSlots = {
-    variant: "panel",
     header: ({ busy, empty, onNew }) => (
       <div className="flex h-30 shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-6">
         <div className="flex min-w-0 flex-col gap-0.5">
@@ -120,7 +119,7 @@ function Body({ workspaceId, brandId, brandName, inSheet }: Props & { inSheet: b
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <ChatPane key={`${workspaceId}:${brandId}`} workspaceId={workspaceId} brandId={brandId} website={null} {...slots} />
+      <ChatPane key={`${workspaceId}:${brandId}`} workspaceId={workspaceId} brandId={brandId} {...slots} />
     </div>
   );
 }

@@ -3,14 +3,12 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { ArrowUp, Check, Globe, Loader2, Play, Plus, Square, TriangleAlert, Wrench } from "lucide-react";
+import { Check, Globe, Loader2, Play, Square, TriangleAlert, Wrench } from "lucide-react";
 import { startRun } from "@/components/agents/api";
 import { isOffline, NET_MESSAGE, send } from "@/lib/net";
 import { Markdown } from "@/components/context/markdown";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-const STARTERS = ["Plan the next 30 days of posts", "Who is my customer?", "Compare me with my competitors", "What should I fix first on my website?"];
 
 const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) => string> = {
   listDocuments: () => "Checked your strategy documents",
@@ -21,17 +19,16 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
   webSearch: () => "Searched the web",
 };
 
-type Props = { workspaceId: string; brandId: string; website: string | null };
+type Props = { workspaceId: string; brandId: string };
 
 type Thread = { id: string; messages: UIMessage[] };
 
-/** What a host can swap: the header, the empty state and the look of the body and composer. Defaults are the Workspace column. */
+/** What the host supplies: the header, the intro above the conversation and the empty state. */
 export type ChatSlots = {
-  header?: (s: { busy: boolean; empty: boolean; onNew: () => void }) => ReactNode;
+  header: (s: { busy: boolean; empty: boolean; onNew: () => void }) => ReactNode;
   /** Rendered at the top of the scrolling body, above the conversation. */
-  intro?: ReactNode;
-  empty?: (send: (text: string) => void) => ReactNode;
-  variant?: "column" | "panel";
+  intro: ReactNode;
+  empty: (send: (text: string) => void) => ReactNode;
 };
 
 /** The AI SDK uses a failed response's body as the error message: show the problem+json detail, not the JSON. */
@@ -63,7 +60,7 @@ function chatError(error: Error) {
 }
 
 /** Loads the person's latest conversation for this brand, then hands over to the live session. */
-export function ChatPane({ header, intro, empty, variant, ...props }: Props & ChatSlots) {
+export function ChatPane({ header, intro, empty, ...props }: Props & ChatSlots) {
   // The thread remembers which business it was loaded for, so a switch can never show or send into the old one,
   // not even for a render while the new fetch is slow or failing.
   const [loaded, setLoaded] = useState<{ base: string; thread: Thread } | null>(null);
@@ -96,10 +93,9 @@ export function ChatPane({ header, intro, empty, variant, ...props }: Props & Ch
 
   const initial = loaded?.base === base ? loaded.thread : null;
   if (!initial) {
-    if (variant !== "panel") return <p className="p-4 text-sm text-muted-foreground">Loading chat…</p>;
     return (
       <div className="flex h-full min-h-0 flex-col">
-        {header?.({ busy: false, empty: true, onNew: () => {} })}
+        {header({ busy: false, empty: true, onNew: () => {} })}
         <div className="flex flex-1 flex-col gap-4 bg-background p-6" role="status" aria-label="Loading chat">
           {intro}
           <div className="h-4 w-3/4 animate-pulse rounded-lg bg-muted motion-reduce:animate-none" />
@@ -115,7 +111,7 @@ export function ChatPane({ header, intro, empty, variant, ...props }: Props & Ch
       api={base}
       initial={initial}
       onNew={() => setLoaded({ base, thread: { id: crypto.randomUUID(), messages: [] } })}
-      slots={{ header, intro, empty, variant }}
+      slots={{ header, intro, empty }}
     />
   );
 }
@@ -164,7 +160,6 @@ function ChatSession({
   api,
   workspaceId,
   brandId,
-  website,
   initial,
   onNew,
   slots,
@@ -174,7 +169,6 @@ function ChatSession({
   onNew: () => void;
   slots: ChatSlots;
 }) {
-  const panel = slots.variant === "panel";
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
   const { messages, sendMessage, status, error, stop, regenerate, clearError } = useChat({
@@ -190,13 +184,6 @@ function ChatSession({
   });
   const busy = status === "submitted" || status === "streaming";
   const failure = error ? chatError(error) : null;
-  const host = (() => {
-    try {
-      return website ? new URL(website).hostname.replace(/^www\./, "") : null;
-    } catch {
-      return null;
-    }
-  })();
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
@@ -222,45 +209,16 @@ function ChatSession({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {slots.header ? (
-        slots.header({ busy, empty: messages.length === 0, onNew })
-      ) : (
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-1.5">
-          <span className="text-xs text-muted-foreground">Your CMO reads your documents and reports, and can offer to start agents. It never publishes.</span>
-          <Button variant="ghost" size="sm" onClick={onNew} disabled={busy || messages.length === 0} aria-label="New chat">
-            <Plus aria-hidden="true" /> New
-          </Button>
-        </div>
-      )}
+      {slots.header({ busy, empty: messages.length === 0, onNew })}
 
-      <div className={cn("min-h-0 flex-1 overflow-y-auto", panel ? "flex flex-col gap-4 bg-background p-6" : "px-4 py-4")}>
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-background p-6">
         {slots.intro}
         {/* Announce the finished reply once, not every streamed token. */}
         <p role="status" className="sr-only">
           {status === "ready" && messages.at(-1)?.role === "assistant" ? "Reply finished" : ""}
         </p>
-        {messages.length === 0 && slots.empty ? (
+        {messages.length === 0 ? (
           slots.empty(send)
-        ) : messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-            <span className="grid size-12 place-items-center rounded-2xl bg-muted font-display text-lg" aria-hidden="true">
-              P+
-            </span>
-            <p className="max-w-[30ch] text-sm text-muted-foreground">Ask your CMO anything about {host ?? "your brand"}: plans, customers, competitors, what to fix.</p>
-            <ul className="flex flex-wrap justify-center gap-2">
-              {STARTERS.map((s) => (
-                <li key={s}>
-                  <button
-                    type="button"
-                    onClick={() => send(s)}
-                    className="rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {s}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
         ) : (
           <ol className="flex flex-col gap-5">
             {messages.map((m) => (
@@ -330,56 +288,28 @@ function ChatSession({
         <div ref={endRef} />
       </div>
 
-      {panel ? (
-        <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-4 border-t border-border bg-card p-6">
-          <label htmlFor="chat-input" className="sr-only">
-            Message Espanda
-          </label>
-          <textarea
-            id="chat-input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={onKey}
-            placeholder="Ask Espanda anything…"
-            className="h-34 w-full resize-none rounded-2xl border border-input bg-card p-4 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-          />
-          {busy ? (
-            <Button type="button" variant="secondary" onClick={() => void stop()} className="h-12 w-full rounded-2xl active:translate-y-px">
-              <Square aria-hidden="true" /> Stop
-            </Button>
-          ) : (
-            <Button type="submit" disabled={!input.trim()} className="h-12 w-full rounded-2xl active:translate-y-px">
-              Send message
-            </Button>
-          )}
-        </form>
-      ) : (
-        <form onSubmit={onSubmit} className="shrink-0 border-t border-border p-3">
-          <div className="flex items-end gap-2 rounded-xl border border-input bg-card p-2 focus-within:ring-2 focus-within:ring-ring">
-            <label htmlFor="chat-input" className="sr-only">
-              Message your CMO
-            </label>
-            <textarea
-              id="chat-input"
-              rows={2}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKey}
-              placeholder="Ask your CMO… (Enter to send, Shift+Enter for a new line)"
-              className="min-h-10 flex-1 resize-none bg-transparent px-1.5 py-1 text-sm outline-none placeholder:text-muted-foreground"
-            />
-            {busy ? (
-              <Button type="button" size="icon" variant="secondary" onClick={() => void stop()} aria-label="Stop">
-                <Square aria-hidden="true" />
-              </Button>
-            ) : (
-              <Button type="submit" size="icon" disabled={!input.trim()} aria-label="Send">
-                <ArrowUp aria-hidden="true" />
-              </Button>
-            )}
-          </div>
-        </form>
-      )}
+      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-4 border-t border-border bg-card p-6">
+        <label htmlFor="chat-input" className="sr-only">
+          Message Espanda
+        </label>
+        <textarea
+          id="chat-input"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={onKey}
+          placeholder="Ask Espanda anything…"
+          className="h-34 w-full resize-none rounded-2xl border border-input bg-card p-4 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        />
+        {busy ? (
+          <Button type="button" variant="secondary" onClick={() => void stop()} className="h-12 w-full rounded-2xl active:translate-y-px">
+            <Square aria-hidden="true" /> Stop
+          </Button>
+        ) : (
+          <Button type="submit" disabled={!input.trim()} className="h-12 w-full rounded-2xl active:translate-y-px">
+            Send message
+          </Button>
+        )}
+      </form>
     </div>
   );
 }
