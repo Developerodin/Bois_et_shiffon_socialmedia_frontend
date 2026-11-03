@@ -8,7 +8,6 @@ import {
   CalendarDays,
   Check,
   ChevronRight,
-  Clapperboard,
   Compass,
   ExternalLink,
   FileText,
@@ -18,7 +17,6 @@ import {
   Loader2,
   Lock,
   MessageSquareQuote,
-  MessagesSquare,
   PenLine,
   RotateCw,
   ScanSearch,
@@ -37,9 +35,10 @@ import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
-import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
+import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, usePerms, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
+import { NAV } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { readable } from "@/lib/agent-message";
 import { safeHttpUrl } from "@/lib/website";
@@ -61,11 +60,20 @@ const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
   geo: { icon: MessageSquareQuote, tint: "text-primary-strong" },
   competitors: { icon: Users, tint: "text-primary-strong" },
 };
-const PLANNED: { key: string; name: string; icon: LucideIcon; does: string }[] = [
-  { key: "reddit", name: "Reddit", icon: MessagesSquare, does: "Finds threads and drafts helpful replies" },
-  { key: "influencer", name: "Influencer", icon: Users, does: "Finds creators who fit your brand" },
-  { key: "ugc", name: "UGC video", icon: Clapperboard, does: "Short product videos" },
-];
+/** The agents the sidebar marks "Soon": one list, so the Overview counts match it. */
+const PLANNED: { key: string; name: string; icon: LucideIcon; does: string }[] = NAV.filter((e) => e.group === "agent" && e.soon).map((e) => ({
+  key: e.id,
+  name: e.label,
+  icon: Lock,
+  does: e.role ?? "Coming soon",
+}));
+
+/** "Platform Admin" and the like are role names, not a first name to greet. */
+const NOT_A_FIRST_NAME = new Set(["platform", "admin", "administrator", "user", "owner", "test", "demo", "team", "support"]);
+function firstNameOf(name: string | null | undefined) {
+  const first = name?.trim().split(/\s+/)[0];
+  return first && !first.includes("@") && !NOT_A_FIRST_NAME.has(first.toLowerCase()) ? first : null;
+}
 
 const POLL_MS = 5000;
 
@@ -110,6 +118,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   const mark = useCallback((k: keyof typeof NONE_FAILED, v: boolean) => setFailed((f) => (f[k] === v ? f : { ...f, [k]: v })), []);
   const viewNow = useRef(view);
   viewNow.current = view;
+  // The panel ?panel= last brought into view, so a later URL change (opening a post) doesn't bring it back.
+  const shownPanel = useRef<string | null>(null);
+  // Set when a view is dropped for being unknown: its URL replaces the bad one instead of adding a history entry.
+  const replaceUrl = useRef(false);
 
   // Open what the URL names: on load (deep link, refresh), on Back/Forward, and on links to "/" while a view is open
   // (the sidebar's Overview). Next.js updates the search params for all of these, and for our own pushState below,
@@ -126,14 +138,11 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
       setView(v);
       if (v.kind !== "home") setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
     }
-    // ?panel= is a one-time "show this panel" (e.g. Menu → Content calendar): use it, then drop it.
-    const q = new URLSearchParams(window.location.search);
-    const panel = q.get("panel");
-    if (panel) {
-      if ((PANEL_IDS as readonly string[]).includes(panel)) setFocus((f) => ({ id: panel as PanelId, n: (f?.n ?? 0) + 1 }));
-      q.delete("panel");
-      window.history.replaceState(null, "", q.size ? `?${q}` : window.location.pathname);
-    }
+    // ?panel= shows that panel (e.g. Menu → Content calendar) once, and stays in the URL: the sidebar reads it to
+    // keep Wave and Drift selected.
+    const panel = new URLSearchParams(window.location.search).get("panel");
+    if (panel && panel !== shownPanel.current && (PANEL_IDS as readonly string[]).includes(panel)) setFocus((f) => ({ id: panel as PanelId, n: (f?.n ?? 0) + 1 }));
+    shownPanel.current = panel;
     setUrlRead(true);
   }, [query]);
   useEffect(() => {
@@ -141,10 +150,25 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
     if (!urlRead) return;
     const next = viewSearch(view);
     const now = window.location.search || window.location.pathname;
-    if (next !== now) window.history.pushState(null, "", next);
+    if (next === now) return;
+    if (replaceUrl.current) window.history.replaceState(null, "", next);
+    else window.history.pushState(null, "", next);
+    replaceUrl.current = false;
   }, [view, urlRead]);
+  // A ?doc= or ?agent= that names nothing shows home and drops the bad parameter, once the lists have loaded.
+  useEffect(() => {
+    const unknown = (view.kind === "doc" && !!docs && !docs.docs.some((d) => d.kind === view.doc)) || (view.kind === "agent" && !!agents && !agents.some((a) => a.key === view.key));
+    if (!unknown) return;
+    replaceUrl.current = true;
+    setView({ kind: "home" });
+  }, [view, docs, agents]);
 
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
+  // What the person's role may do; null until known. Write controls show only for roles the API would accept.
+  const perms = usePerms(base);
+  const canRun = !!perms?.includes("agents.run");
+  const canEditDocs = !!perms?.includes("context.edit");
+  const canConfirmDocs = !!perms?.includes("context.confirm");
   // A failed load keeps what was already shown; a block shows its error only while it has nothing to show.
   const loadReports = useCallback(
     () =>
@@ -210,12 +234,14 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   const pickOpps = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "NEW" && o.decision === "RECOMMEND").length, []);
   const pickItems = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "AWAITING_APPROVAL").length, []);
   const pickToWrite = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "PLANNED" || i.status === "BRIEF_READY" || i.status === "DRAFT_REVIEW").length, []);
+  const pickShortlisted = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "SHORTLISTED").length, []);
   const ideas = useBrandData(base, "opportunities", pickOpps as (d: never) => number);
+  const shortlistedQ = useBrandData(base, "opportunities", pickShortlisted as (d: never) => number);
   const awaitingQ = useBrandData(base, "content", pickItems as (d: never) => number);
   const toWriteQ = useBrandData(base, "content", pickToWrite as (d: never) => number);
-  const ideasToDecide = ideas.data, awaiting = awaitingQ.data, toWrite = toWriteQ.data;
-  const pipeline = ideasToDecide == null || awaiting == null || toWrite == null ? null : { ideasToDecide, awaiting, toWrite };
-  const pipelineFailed = [ideas, awaitingQ, toWriteQ].some((q) => q.data == null && q.failed);
+  const ideasToDecide = ideas.data, awaiting = awaitingQ.data, toWrite = toWriteQ.data, shortlisted = shortlistedQ.data;
+  const pipeline = ideasToDecide == null || awaiting == null || toWrite == null || shortlisted == null ? null : { ideasToDecide, awaiting, toWrite, shortlisted };
+  const pipelineFailed = [ideas, awaitingQ, toWriteQ, shortlistedQ].some((q) => q.data == null && q.failed);
   // Today is built from the reports, the connections and the pipeline counts.
   const today = {
     failed: (!reports && failed.reports) || (!connections && failed.connections) || pipelineFailed,
@@ -261,7 +287,9 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
           connections={connections}
           connectionsFailed={failed.connections}
           onOpenDoc={(doc) => open({ kind: "doc", doc })}
-          onOpenResearch={() => open({ kind: "agent", key: "research" })}
+          onOpenResearch={() => open({ kind: "agent", key: "research", run: true })}
+          canEdit={canEditDocs}
+          canRun={canRun}
         />
       ),
     },
@@ -277,6 +305,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             brandId={brandId}
             researchActive={docs.research?.status === "QUEUED" || docs.research?.status === "RUNNING"}
             onBack={back}
+            canEdit={canEditDocs}
+            canConfirm={canConfirmDocs}
             onChanged={(entry) => setDocs((d) => d && { ...d, docs: d.docs.map((x) => (x.kind === entry.kind ? entry : x)) })}
             onStale={() => fetchContextDocs(workspaceId, brandId).then(setDocs)}
           />
@@ -287,7 +317,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
         ) : view.kind === "agent" ? (
           <AgentView
             agentKey={view.key}
-            autoRun={view.run}
+            autoRun={view.run && canRun}
+            canRun={canRun}
             agent={agents?.find((a) => a.key === view.key) ?? null}
             report={view.key === "seo" ? reports?.seo ?? null : view.key === "geo" ? reports?.geo ?? null : null}
             docs={docs}
@@ -297,9 +328,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             onOpenDoc={(doc) => open({ kind: "doc", doc })}
             onRan={refreshAgents}
             onOpenPosts={() => showPanel("content")}
+            onShowPanel={showPanel}
           />
         ) : (
-          <Home user={user} agents={agents} agentsFailed={failed.agents} today={today} reports={reports} connections={connections} pipeline={pipeline} onOpen={open} onShowPanel={showPanel} onRetry={retry} />
+          <Home user={user} agents={agents} agentsFailed={failed.agents} today={today} reports={reports} connections={connections} pipeline={pipeline} canRun={canRun} onOpen={open} onShowPanel={showPanel} onRetry={retry} />
         ),
     },
     {
@@ -312,7 +344,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
       id: "feed",
       title: "Agents feed",
       icon: <ListChecks />,
-      render: () => <AgentsFeed agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} onRan={refreshAgents} onOpen={open} />,
+      render: () => <AgentsFeed agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} canRun={canRun} onRan={refreshAgents} onOpen={open} />,
     },
     {
       id: "ideas",
@@ -480,9 +512,14 @@ function ContextPane({
   connectionsFailed,
   onOpenDoc,
   onOpenResearch,
+  canEdit,
+  canRun,
 }: {
   base: string;
   onOpenResearch: () => void;
+  /** Editing the brand needs context.edit; re-reading the site starts an agent run (agents.run). */
+  canEdit: boolean;
+  canRun: boolean;
   brandName: string;
   website: string | null;
   docs: ContextDocsResponse | null;
@@ -513,14 +550,23 @@ function ContextPane({
           <>
           <div className="flex items-baseline justify-between gap-2">
             <h2 className="font-display text-lg font-medium">{brandName}</h2>
-            <button type="button" onClick={() => setEditing(true)} className="inline-block py-1 text-xs text-muted-foreground hover:text-foreground">
-              Edit
-            </button>
+            {canEdit && (
+              <button type="button" onClick={() => { setSiteSaved(false); setEditing(true); }} className="inline-block py-1 text-xs text-muted-foreground hover:text-foreground">
+                Edit
+              </button>
+            )}
           </div>
           {siteSaved && (
             <p role="status" className="mt-2 text-xs">
-              Website saved. Agents use it from their next run.{" "}
-              <button type="button" onClick={onOpenResearch} className="font-medium underline underline-offset-2">Re-read it now</button> to redraft the documents.
+              Website saved. Agents use it from their next run.
+              {canRun ? (
+                <>
+                  {" "}
+                  <button type="button" onClick={() => { setSiteSaved(false); onOpenResearch(); }} className="font-medium underline underline-offset-2">Re-read it now</button> to redraft the documents.
+                </>
+              ) : null}
+              {" "}
+              <button type="button" onClick={() => setSiteSaved(false)} className="text-muted-foreground underline underline-offset-2">Dismiss</button>
             </p>
           )}
           {site && (
@@ -647,6 +693,7 @@ function Home({
   reports,
   connections,
   pipeline,
+  canRun,
   onOpen,
   onShowPanel,
   onRetry,
@@ -659,11 +706,12 @@ function Home({
   onRetry: () => void;
   reports: { seo: Report; geo: Report } | null;
   connections: Connection[] | null;
-  pipeline: { ideasToDecide: number; awaiting: number; toWrite: number } | null;
+  pipeline: { ideasToDecide: number; awaiting: number; toWrite: number; shortlisted: number } | null;
+  canRun: boolean;
   onOpen: (v: View) => void;
   onShowPanel: (id: PanelId) => void;
 }) {
-  const first = user.name?.trim().split(/\s+/)[0];
+  const first = firstNameOf(user.name);
   const tasks = useMemo(() => {
     const list: { id: string; done: boolean; label: string; detail?: string; action: React.ReactNode }[] = [];
     const run = (key: string, label: string, done: boolean) =>
@@ -672,7 +720,7 @@ function Home({
       run("seo", "Check your website's SEO health", !!reports.seo);
       run("geo", "See if AI assistants recommend you", !!reports.geo);
     }
-    if (pipeline && !pipeline.ideasToDecide && !pipeline.awaiting && !pipeline.toWrite) {
+    if (pipeline && !pipeline.ideasToDecide && !pipeline.awaiting && !pipeline.toWrite && !pipeline.shortlisted && canRun) {
       list.push({
         id: "scout",
         done: false,
@@ -681,6 +729,19 @@ function Home({
         action: (
           <Button size="sm" onClick={() => onOpen({ kind: "agent", key: "scout", run: true })}>
             Get ideas
+          </Button>
+        ),
+      });
+    }
+    if (pipeline?.shortlisted) {
+      list.push({
+        id: "plan",
+        done: false,
+        label: "Plan your shortlisted ideas into posts",
+        detail: `${pipeline.shortlisted} shortlisted`,
+        action: (
+          <Button size="sm" variant="secondary" onClick={() => onShowPanel("ideas")}>
+            See ideas
           </Button>
         ),
       });
@@ -738,7 +799,7 @@ function Home({
       });
     }
     return list;
-  }, [reports, connections, pipeline, onOpen, onShowPanel]);
+  }, [reports, connections, pipeline, canRun, onOpen, onShowPanel]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done);
@@ -915,17 +976,30 @@ function DocView(p: {
   onBack: () => void;
   onChanged: (e: ContextDocEntry) => void;
   onStale: () => void;
+  canEdit: boolean;
+  canConfirm: boolean;
 }) {
   return (
     <div>
       <BackBar onBack={p.onBack} title={p.entry.title} />
       <div className="px-6 py-6">
         {/* Keyed by document: switching documents must never carry one document's edit into another. */}
-        <DocPane key={p.entry.kind} entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} />
+        <DocPane key={p.entry.kind} entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} canEdit={p.canEdit} canConfirm={p.canConfirm} />
       </div>
     </div>
   );
 }
+
+/** Where an agent's result lands, shown once its run has finished. */
+const AGENT_NEXT: Record<string, { text: string; label: string; panel?: PanelId; href?: string }> = {
+  planner: { text: "The Planner has filled your calendar.", label: "Open the calendar", panel: "content" },
+  brief: { text: "Briefs are written on your posts.", label: "Open posts", panel: "content" },
+  creator: { text: "Drafts are written on your posts.", label: "Open posts", panel: "content" },
+  quality: { text: "Quality checks are on your drafts.", label: "Open posts", panel: "content" },
+  seo: { text: "The SEO report is updated.", label: "See it in Performance", href: "/performance" },
+  geo: { text: "The AI visibility report is updated.", label: "See it in Performance", href: "/performance" },
+  competitors: { text: "Competitors it found are in the Competitors panel.", label: "Open competitors", panel: "competitors" },
+};
 
 function AgentView({
   agentKey,
@@ -939,8 +1013,13 @@ function AgentView({
   onRan,
   autoRun,
   onOpenPosts,
+  onShowPanel,
+  canRun,
 }: {
   agentKey: string;
+  onShowPanel: (id: PanelId) => void;
+  /** The role may run agents; without it the Run button is hidden. */
+  canRun: boolean;
   /** Start a run on open (one-click "Get ideas" from Today). */
   autoRun?: boolean;
   onOpenPosts: () => void;
@@ -992,13 +1071,27 @@ function AgentView({
               <p className={cn("mt-1 max-w-[60ch] text-sm", nothingToDo(agent) ? "text-muted-foreground" : "text-destructive")}>{readable(agent.lastRun.error)}</p>
             )}
           </div>
-          <Button onClick={run} disabled={pending || running}>
-            {pending || running ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
-            {running ? "Running…" : agent?.lastRun ? "Run again" : "Run"}
-          </Button>
+          {canRun && (
+            <Button onClick={run} disabled={pending || running}>
+              {pending || running ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
+              {running ? "Running…" : agent?.lastRun ? "Run again" : "Run"}
+            </Button>
+          )}
         </div>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {running && <p className="text-sm text-muted-foreground">Open Logs in the top bar to watch each step live.</p>}
+        {!running && agent?.lastRun?.status === "SUCCEEDED" && AGENT_NEXT[agentKey] && (
+          <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
+            <span>{AGENT_NEXT[agentKey].text}</span>
+            {AGENT_NEXT[agentKey].href ? (
+              <Button size="sm" asChild>
+                <Link href={AGENT_NEXT[agentKey].href!}>{AGENT_NEXT[agentKey].label}</Link>
+              </Button>
+            ) : (
+              <Button size="sm" onClick={() => onShowPanel(AGENT_NEXT[agentKey].panel!)}>{AGENT_NEXT[agentKey].label}</Button>
+            )}
+          </div>
+        )}
 
         {report && (
           <section aria-labelledby="report-h" className="flex flex-col gap-4">
@@ -1159,9 +1252,11 @@ function AgentsFeed({
   docs,
   workspaceId,
   brandId,
+  canRun,
   onRan,
   onOpen,
 }: {
+  canRun: boolean;
   agents: AgentSummary[] | null;
   agentsFailed: boolean;
   onRetry: () => void;
@@ -1213,9 +1308,11 @@ function AgentsFeed({
               <span className="block text-xs font-semibold">{a.name} agent</span>
               <span className="block truncate text-sm text-muted-foreground">{feedLine(a.key, a, reports, docs)}</span>
             </button>
-            <Button size="sm" variant="ghost" disabled={running || busy === a.key} onClick={() => run(a.key)} aria-label={`Run ${a.name}`}>
-              {running || busy === a.key ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
-            </Button>
+            {(canRun || running) && (
+              <Button size="sm" variant="ghost" disabled={!canRun || running || busy === a.key} onClick={() => run(a.key)} aria-label={`Run ${a.name}`}>
+                {running || busy === a.key ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
+              </Button>
+            )}
           </li>
         );
       })}

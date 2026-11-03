@@ -206,6 +206,14 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
   const canDecide = perms?.includes("content.create");
   const [planning, setPlanning] = useState<string | null>(null);
   const [planned, setPlanned] = useState(false);
+  // The idea being updated and the status it is moving to, so its button can say so.
+  const [deciding, setDeciding] = useState<{ id: string; status: Opportunity["status"] } | null>(null);
+  // The Planner may already be running (started here before a reload, or from another panel): read it from the agents list.
+  const pickPlanner = useCallback((d: { agents: { key: string; lastRun: { status: string } | null }[] }) => {
+    const s = d.agents.find((a) => a.key === "planner")?.lastRun?.status;
+    return s === "RUNNING" || s === "QUEUED";
+  }, []);
+  const plannerRunning = useBrandData(base, "agents", pickPlanner as (d: never) => boolean).data === true;
   const planFailed = useCallback((why: string) => {
     setPlanning(null);
     setError(why);
@@ -229,11 +237,15 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
 
   async function set(id: string, status: Opportunity["status"]) {
     setError(null);
+    setPlanned(false);
+    setDeciding({ id, status });
     try {
       await request(`${base}/opportunities/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status }) });
       await reload();
     } catch {
       setError("Couldn't update that idea. Your role may not allow it.");
+    } finally {
+      setDeciding(null);
     }
   }
 
@@ -247,9 +259,9 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
         <span className="flex flex-wrap items-center gap-2 text-muted-foreground">
           {shortlisted} shortlisted
           {shortlisted > 0 && perms?.includes("agents.run") ? (
-            <Button size="sm" onClick={() => void plan()} disabled={!!planning}>
-              {planning ? <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> : null}
-              {planning ? "Planning posts…" : `Plan posts from ${shortlisted === 1 ? "this idea" : `these ${shortlisted} ideas`}`}
+            <Button size="sm" onClick={() => void plan()} disabled={!!planning || plannerRunning}>
+              {planning || plannerRunning ? <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> : null}
+              {planning || plannerRunning ? "Planning posts…" : `Plan posts from ${shortlisted === 1 ? "this idea" : `these ${shortlisted} ideas`}`}
             </Button>
           ) : (
             <span>· shortlist the ideas you like, then plan them into posts</span>
@@ -268,19 +280,26 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
       {planned && (
         <div role="status" className="flex flex-wrap items-center justify-between gap-3 px-4 pt-3 text-sm">
           <span>Posts planned. Open one to write its brief and draft.</span>
-          {onOpenPosts && (
-            <Button size="sm" onClick={onOpenPosts}>
-              Open posts
+          <span className="flex gap-2">
+            {onOpenPosts && (
+              <Button size="sm" onClick={() => { setPlanned(false); onOpenPosts(); }}>
+                Open posts
+              </Button>
+            )}
+            <Button size="sm" variant="ghost" onClick={() => setPlanned(false)}>
+              Dismiss
             </Button>
-          )}
+          </span>
         </div>
       )}
       {shown.length === 0 ? (
         <div className="flex flex-col items-start gap-3 p-4">
           <p className="text-sm text-muted-foreground">{data.length ? "No open ideas. Switch to All to see past ones." : "No ideas yet. The Opportunities agent finds what to post about."}</p>
-          <Button size="sm" variant="secondary" onClick={onRunScout}>
-            Find ideas
-          </Button>
+          {perms?.includes("agents.run") && (
+            <Button size="sm" variant="secondary" onClick={onRunScout}>
+              Find ideas
+            </Button>
+          )}
         </div>
       ) : (
         <ul className="divide-y divide-border">
@@ -312,20 +331,22 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
               {o.status !== "PLANNED" && canDecide && (
                 <div className="flex gap-2 pt-1">
                   {o.status === "SHORTLISTED" ? (
-                    <Button size="sm" variant="secondary" onClick={() => set(o.id, "NEW")}>
-                      Remove from shortlist
+                    <Button size="sm" variant="secondary" onClick={() => set(o.id, "NEW")} disabled={!!deciding}>
+                      {deciding?.id === o.id ? "Removing…" : "Remove from shortlist"}
                     </Button>
                   ) : o.status === "DISMISSED" ? (
-                    <Button size="sm" variant="ghost" onClick={() => set(o.id, "NEW")}>
-                      Undo dismiss
+                    <Button size="sm" variant="ghost" onClick={() => set(o.id, "NEW")} disabled={!!deciding}>
+                      {deciding?.id === o.id ? "Restoring…" : "Undo dismiss"}
                     </Button>
                   ) : (
                     <>
-                      <Button size="sm" onClick={() => set(o.id, "SHORTLISTED")}>
-                        <Check aria-hidden="true" /> Shortlist
+                      <Button size="sm" onClick={() => set(o.id, "SHORTLISTED")} disabled={!!deciding}>
+                        {deciding?.id === o.id && deciding.status === "SHORTLISTED" ? <LoaderCircle aria-hidden className="animate-spin motion-reduce:animate-none" /> : <Check aria-hidden="true" />}
+                        {deciding?.id === o.id && deciding.status === "SHORTLISTED" ? "Shortlisting…" : "Shortlist"}
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => set(o.id, "DISMISSED")}>
-                        <X aria-hidden="true" /> Dismiss
+                      <Button size="sm" variant="ghost" onClick={() => set(o.id, "DISMISSED")} disabled={!!deciding}>
+                        {deciding?.id === o.id && deciding.status === "DISMISSED" ? <LoaderCircle aria-hidden className="animate-spin motion-reduce:animate-none" /> : <X aria-hidden="true" />}
+                        {deciding?.id === o.id && deciding.status === "DISMISSED" ? "Dismissing…" : "Dismiss"}
                       </Button>
                     </>
                   )}
@@ -570,7 +591,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
                 ) : null}
               </dl>
             ) : (
-              <p className="mt-2 text-sm text-muted-foreground">Angle: {brief.angle ?? "-"}. The Brief writer hasn&rsquo;t written the brief yet.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Angle: {brief.angle?.trim().replace(/[.\s]+$/, "") || "-"}. The Brief writer hasn&rsquo;t written the brief yet.</p>
             )}
           </section>
 

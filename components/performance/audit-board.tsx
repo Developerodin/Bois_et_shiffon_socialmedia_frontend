@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Gauge, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { fetchAgents } from "@/components/agents/api";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, StatusPill, formatDate, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
@@ -102,6 +103,29 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
     [workspaceId, brandId],
   );
   const { state, reload } = useLoad(fetcher);
+
+  // A finished SEO or GEO run means a new report: watch the two agents' latest runs and reload when one changes.
+  const runs = useRef<string | null>(null);
+  useEffect(() => {
+    const ctrl = new AbortController();
+    const check = () => {
+      if (document.visibilityState !== "visible") return;
+      fetchAgents(workspaceId, brandId, ctrl.signal).then(
+        ({ agents }) => {
+          const now = agents.filter((a) => a.key === "seo" || a.key === "geo").map((a) => `${a.lastRun?.id}:${a.lastRun?.status}`).join();
+          if (runs.current !== null && runs.current !== now) reload();
+          runs.current = now;
+        },
+        () => {},
+      );
+    };
+    check();
+    const t = setInterval(check, 6000);
+    return () => {
+      ctrl.abort();
+      clearInterval(t);
+    };
+  }, [workspaceId, brandId, reload]);
 
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading reports" />;

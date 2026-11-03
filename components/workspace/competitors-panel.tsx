@@ -86,6 +86,7 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
   const canRun = usePerms(base)?.includes("agents.run");
   const { data, failed, reload } = useCompetitors(base);
   const [adding, setAdding] = useState(false);
+  const [addPending, setAddPending] = useState(false);
   const [name, setName] = useState("");
   const [site, setSite] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -94,6 +95,7 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
   async function add(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setAddPending(true);
     try {
       await request(`${base}/competitors`, { method: "POST", body: JSON.stringify({ name, website: site }) });
       setName("");
@@ -102,6 +104,8 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
       await reload();
     } catch (err) {
       setError(errorMessage(err));
+    } finally {
+      setAddPending(false);
     }
   }
   async function remove(c: Competitor) {
@@ -129,9 +133,11 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
               <Plus aria-hidden="true" /> Add
             </Button>
           )}
-          <Button size="sm" variant="ghost" onClick={onFind}>
-            Find
-          </Button>
+          {canRun && (
+            <Button size="sm" variant="ghost" onClick={onFind}>
+              Find
+            </Button>
+          )}
         </span>
       </div>
       {adding && canRun && (
@@ -144,7 +150,7 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
             <span className="text-muted-foreground">Website</span>
             <input required value={site} onChange={(e) => setSite(e.target.value)} placeholder="tikamoon.com" className="h-9 w-44 rounded-md border border-input bg-card px-2 text-sm" />
           </label>
-          <Button size="sm" type="submit">Add competitor</Button>
+          <Button size="sm" type="submit" disabled={addPending}>{addPending ? "Adding…" : "Add competitor"}</Button>
           {error && <p role="alert" className="w-full text-xs text-destructive">{error}</p>}
         </form>
       )}

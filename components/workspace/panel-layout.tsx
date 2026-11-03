@@ -362,7 +362,7 @@ export function PanelLayout<Id extends string>({
                 tabIndex={0}
                 onPointerDown={(e) => startResize(ci, e)}
                 onKeyDown={(e) => nudge(ci, e)}
-                className="w-px shrink-0 cursor-col-resize bg-border outline-none transition-colors hover:bg-primary focus-visible:bg-primary [box-shadow:0_0_0_3px_transparent] hover:[box-shadow:0_0_0_2px_color-mix(in_srgb,var(--primary)_30%,transparent)]"
+                className="relative w-px shrink-0 cursor-col-resize before:absolute before:inset-y-0 before:-inset-x-1 before:z-10 before:content-[''] bg-border outline-none transition-colors hover:bg-primary focus-visible:bg-primary [box-shadow:0_0_0_3px_transparent] hover:[box-shadow:0_0_0_2px_color-mix(in_srgb,var(--primary)_30%,transparent)]"
               />
             )}
           </div>
