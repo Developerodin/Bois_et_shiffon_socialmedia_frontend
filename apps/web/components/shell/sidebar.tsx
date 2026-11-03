@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { FileText, LayoutDashboard, Plug, type LucideIcon } from "lucide-react";
+import { FileText, LayoutDashboard, Plug, ShieldCheck, type LucideIcon } from "lucide-react";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
@@ -43,7 +43,7 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
     <aside aria-label="Workspace" className="flex h-full w-[232px] shrink-0 flex-col bg-card">
       <div className="px-5 pt-8">
         <Link href="/" aria-label="Espanda, Overview" className="inline-block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <EspandaLogo height={33} />
+          <EspandaLogo height={33} priority />
         </Link>
       </div>
       <div className="mt-6 px-5">
@@ -55,6 +55,24 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
         />
       </div>
 
+      {/* No workspace (a platform-only account): the business pages have nothing to show, so offer the one place that works. */}
+      {!activeWorkspaceId ? (
+        <nav aria-label="Workspace" className="mt-6 min-h-0 flex-1 overflow-y-auto px-5 pb-4">
+          <p className="px-3 text-sm text-muted-foreground">
+            You aren&apos;t in a workspace yet. {platformAdmin ? "Platform admin is available below." : "Ask a workspace owner to invite you."}
+          </p>
+          {platformAdmin ? (
+            <Link
+              href="/admin"
+              aria-current={pathname.startsWith("/admin") ? "page" : undefined}
+              className={cn(row, "mt-3 h-12 px-3", pathname.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+            >
+              <ShieldCheck className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" />
+              Platform admin
+            </Link>
+          ) : null}
+        </nav>
+      ) : (
       <nav aria-label="Workspace" className="mt-6 min-h-0 flex-1 overflow-y-auto pb-4">
         <ul className="mr-7 ml-5">
           {NAV.filter((e) => e.group === "main").map((e) => {
@@ -102,6 +120,7 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
           })}
         </ul>
       </nav>
+      )}
 
       {/* No Help and support row: the repo has no help page and no support address in its environment. */}
       <div className="mx-5 border-t border-border py-3">

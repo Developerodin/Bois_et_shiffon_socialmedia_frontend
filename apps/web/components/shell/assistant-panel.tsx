@@ -1,11 +1,11 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import { MessageCircle, SquarePen } from "lucide-react";
-import { useAssistant } from "@/components/shell/assistant-state";
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import { MessageCircle, SquarePen, X } from "lucide-react";
+import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { ChatPane, type ChatSlots } from "@/components/workspace/chat-pane";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = ["What should I focus on this week?", "Summarise what my agents did recently."];
 
@@ -22,32 +22,69 @@ function useWide() {
 
 type Props = { workspaceId: string; brandId: string | null; brandName: string | null; canCreateBrand: boolean };
 
-/** The Espanda chat: a 320 px column from 1280 px up, a right-hand sheet (opened from the top bar) below. */
+/**
+ * The Espanda chat: a 320 px column from 1280 px up, a right-hand drawer (opened from the top bar) below.
+ * One element serves both, so the conversation, a typed draft and an in-flight reply survive crossing 1280 px.
+ * Narrow and closed, the drawer is off-screen and inert. Open, it takes focus, Escape or the scrim closes it and
+ * focus goes back to the toggle. No focus trap: the page behind stays reachable, which the scrim only discourages.
+ */
 export function AssistantPanel(p: Props) {
   const wide = useWide();
   const { open, setOpen } = useAssistant();
-  // ponytail: crossing 1280px remounts the conversation, dropping an unsent draft and any in-flight reply.
-  // Upgrade path: lift the draft state into AssistantProvider.
-  // One mounted conversation at a time: the column and the sheet never both run the same thread.
-  if (wide) {
-    return (
-      <aside aria-label="Espanda" className="hidden h-full w-80 shrink-0 flex-col xl:flex">
-        <Body {...p} inSheet={false} />
-      </aside>
-    );
-  }
+  const ref = useRef<HTMLElement>(null);
+  const wasOpen = useRef(false);
+  const shown = wide || open;
+
+  // Going wide closes the drawer, so it doesn't reappear on its own when the window narrows again.
+  useEffect(() => {
+    if (wide && open) setOpen(false);
+  }, [wide, open, setOpen]);
+
+  useEffect(() => {
+    ref.current?.toggleAttribute("inert", !shown);
+  }, [shown]);
+
+  useEffect(() => {
+    if (open && !wide) ref.current?.focus();
+    else if (wasOpen.current && !open && !wide) document.getElementById(ASSISTANT_TOGGLE_ID)?.focus();
+    wasOpen.current = open;
+  }, [open, wide]);
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" aria-describedby={undefined} className="flex w-80 flex-col gap-0 p-0 sm:max-w-80">
-        <Body {...p} inSheet />
-      </SheetContent>
-    </Sheet>
+    <>
+      {open && !wide ? (
+        <div aria-hidden="true" className="fixed inset-0 z-40 bg-black/50 xl:hidden" onClick={() => setOpen(false)} />
+      ) : null}
+      <aside
+        ref={ref}
+        tabIndex={-1}
+        aria-label="Espanda"
+        role={wide ? undefined : "dialog"}
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && !wide) setOpen(false);
+        }}
+        className={cn(
+          "fixed inset-y-0 right-0 z-50 flex h-full w-80 shrink-0 flex-col border-l border-border bg-background outline-none transition-transform motion-reduce:transition-none",
+          "xl:static xl:z-auto xl:translate-x-0 xl:border-l-0",
+          open ? "translate-x-0" : "translate-x-full",
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="absolute top-4 right-4 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring xl:hidden"
+        >
+          <X className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
+          <span className="sr-only">Close</span>
+        </button>
+        <Body {...p} />
+      </aside>
+    </>
   );
 }
 
-function Body({ workspaceId, brandId, brandName, canCreateBrand, inSheet }: Props & { inSheet: boolean }) {
-  const Title = inSheet ? SheetTitle : "h2";
-  const title = <Title className="text-xl/[26px] font-semibold text-foreground">Espanda</Title>;
+function Body({ workspaceId, brandId, brandName, canCreateBrand }: Props) {
+  const title = <h2 className="text-xl/[26px] font-semibold text-foreground">Espanda</h2>;
   const subtitle = <p className="text-sm text-muted-foreground">Your team, one conversation</p>;
 
   if (!brandId) {
@@ -77,7 +114,7 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, inSheet }: Prop
           disabled={busy || empty}
           aria-label="New conversation"
           title="New conversation"
-          className={`grid size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px disabled:opacity-50 disabled:hover:bg-transparent ${inSheet ? "mr-8" : ""}`}
+          className={`grid size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px disabled:opacity-50 disabled:hover:bg-transparent mr-8 xl:mr-0`}
         >
           <SquarePen className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
         </button>

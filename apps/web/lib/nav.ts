@@ -57,6 +57,9 @@ export function navFor(pathname: string): { activeId: string | null; title: stri
       bestLen = p.length;
     }
   }
+  // /agents/<anything> that isn't an agent is no page: don't call it the Agent log.
+  if (best?.id === "agent-log" && path !== "/agents" && path !== "/agents/")
+    return { activeId: null, title: "Page not found", brandScoped: true };
   if (!best) return { activeId: null, title: "Overview", brandScoped: !path.startsWith("/admin") };
   return { activeId: best.id, title: best.label, brandScoped: best.group !== "admin" };
 }

@@ -26,7 +26,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       await authApi.reset(token, password);
       setDone(true);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 400) setInvalid(true);
+      if (err instanceof ApiError && (err.status === 400 || err.status === 422)) setInvalid(true);
       else setError("Couldn't reset your password. Try again.");
     } finally {
       setBusy(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Pencil, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -15,6 +15,7 @@ import {
   type Load,
 } from "@/components/settings/shared";
 import { RoleDialog } from "@/components/settings/role-dialog";
+import { rememberFocus } from "@/components/settings/return-focus";
 
 type Props = {
   workspaceId: string;
@@ -31,7 +32,13 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
     [],
   );
   const catalog = useLoad(manage ? catalogFetcher : null);
-  const [editing, setEditing] = useState<Role | "new" | null>(null);
+  const [editing, setEditingState] = useState<Role | "new" | null>(null);
+  const restoreFocus = useRef<(() => void) | null>(null);
+  function setEditing(v: Role | "new" | null) {
+    if (v) restoreFocus.current = rememberFocus("settings-panel-roles");
+    setEditingState(v);
+    if (!v) restoreFocus.current?.();
+  }
   const [deleting, setDeleting] = useState<Role | null>(null);
   const { state, reload } = roles;
 

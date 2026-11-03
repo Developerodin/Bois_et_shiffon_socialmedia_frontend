@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronRight, ChevronUp, MessageCircle, SquareTerminal } from "lucide-react";
 import { AgentLog } from "@/components/agents/agent-log";
-import { useAssistant } from "@/components/shell/assistant-state";
+import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
@@ -59,7 +59,7 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
 
         <div className="flex shrink-0 items-center gap-1">
           {brandId && (
-            <button type="button" onClick={toggleLogs} aria-expanded={logsOpen} aria-controls="agent-log-drawer" className={cn(tool, logsOpen && "bg-accent text-primary-strong")}>
+            <button type="button" id="logs-toggle" onClick={toggleLogs} aria-expanded={logsOpen} aria-controls="agent-log-drawer" className={cn(tool, logsOpen && "bg-accent text-primary-strong")}>
               <SquareTerminal className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               Logs
               <ChevronUp className={cn("size-4 transition-transform motion-reduce:transition-none", !logsOpen && "rotate-180")} strokeWidth={SHELL_STROKE} aria-hidden="true" />
@@ -67,7 +67,7 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
           )}
           {/* Same condition as the layout's AssistantPanel: no workspace, no panel to open. */}
           {workspaceId && (
-            <button type="button" onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, "xl:hidden")}>
+            <button type="button" id={ASSISTANT_TOGGLE_ID} onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, "xl:hidden")}>
               <MessageCircle className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               Espanda
             </button>
@@ -76,7 +76,15 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
       </header>
 
       {workspaceId && brandId && (
-        <div id="agent-log-drawer" className={cn("border-t border-border bg-background", logsOpen ? "block" : "hidden")}>
+        <div
+          id="agent-log-drawer"
+          onKeyDown={(e) => {
+            if (e.key === "Escape" && logsOpen) {
+              toggleLogs();
+              document.getElementById("logs-toggle")?.focus();
+            }
+          }}
+          className={cn("border-t border-border bg-background", logsOpen ? "block" : "hidden")}>
           <div className="max-h-[38vh] overflow-hidden px-8 py-2">{logsOpen && <AgentLog key={brandId} workspaceId={workspaceId} brandId={brandId} compact />}</div>
         </div>
       )}

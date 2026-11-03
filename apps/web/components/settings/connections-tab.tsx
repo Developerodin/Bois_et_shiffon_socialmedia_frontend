@@ -49,6 +49,17 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
   const [gone, setGone] = useState<Set<string>>(new Set());
   const fresh = new Set(shown?.kind === "ok" ? shown.names : []);
 
+  // A "Connected X" banner is only true if the list agrees: wait for the list, and say so when an account isn't there.
+  let banner: { kind: "ok" | "error"; text: string } | null = error ? { kind: "error", text: error } : shown;
+  if (!error && shown?.kind === "ok" && shown.names) {
+    if (state.kind === "loading") banner = null;
+    else if (state.kind === "ready") {
+      const missing = shown.names.filter((n) => !state.data.connections.some((c) => c.displayName === n && c.status === "ACTIVE"));
+      if (missing.length)
+        banner = { kind: "error", text: `${missing.join(", ")} did not show up as connected. Press Connect to try again.` };
+    }
+  }
+
   // The OAuth result arrives as one-time URL params; drop them so a refresh or a shared link
   // doesn't replay the message.
   useEffect(() => {
@@ -151,23 +162,23 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
         title="Connected accounts"
         description="This brand's own channel accounts. Tokens are stored encrypted and never shown."
       />
-      {(shown || error) && (
+      {banner && (
         <div
-          role={error || shown?.kind === "error" ? "alert" : "status"}
+          role={banner.kind === "error" ? "alert" : "status"}
           className={
-            shown?.kind === "ok" && !error
+            banner.kind === "ok"
               ? "flex items-start gap-3 rounded-xl border border-success/40 bg-success/10 px-4 py-3 text-sm"
               : "flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm"
           }
         >
-          {shown?.kind === "ok" && !error ? (
+          {banner.kind === "ok" ? (
             <CircleCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-success" />
           ) : (
             <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-destructive" />
           )}
           <p className="flex-1">
-            {error ?? shown?.text}
-            {shown?.kind === "ok" && !error && shown.names && " Agents can now use this account for this brand."}
+            {banner.text}
+            {banner.kind === "ok" && shown?.names && " Agents can now use this account for this brand."}
           </p>
           <button
             type="button"
