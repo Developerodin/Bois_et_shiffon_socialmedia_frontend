@@ -17,6 +17,9 @@ export default async function ConnectionsPage({
 
   const shell = await loadShellContext(session.user.id);
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
+    const canCreateBrand = shell.activeWorkspaceId
+      ? (await effectivePermissions(shell.activeWorkspaceId, session.user.id)).has("brand.create")
+      : false;
     return (
       <div className="mx-auto max-w-5xl">
         <EmptyState
@@ -24,7 +27,11 @@ export default async function ConnectionsPage({
           icon={Plug}
           headingLevel="h1"
           title="Connections"
-          description="Connections belong to a business. Create or pick one from the sidebar, then connect its accounts here."
+          description={
+            canCreateBrand
+              ? "Connections belong to a business. Create or pick one from the sidebar, then connect its accounts here."
+              : "Connections belong to a business. Ask a workspace admin to add a business."
+          }
         />
       </div>
     );
@@ -55,7 +62,7 @@ export default async function ConnectionsPage({
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
       <div>
-        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Connections</h1>
+        <h1 className="font-display text-2xl leading-[30px] font-semibold tracking-tight">Connections</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           The accounts this business has connected, and what each one lets the agents do.
         </p>

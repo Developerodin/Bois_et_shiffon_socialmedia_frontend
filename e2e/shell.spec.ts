@@ -7,6 +7,7 @@ const MAIN = ["Overview", "Business context", "Connections"];
 const AGENTS = ["Spark", "Beat", "Wave", "Echo", "Pulse", "Hum", "Surge", "Drift"];
 // lib/nav.ts: the four placeholder agents, plus Echo (no web inbox yet).
 const SOON = ["Spark", "Beat", "Echo", "Pulse", "Hum"];
+const CONNECT_BUTTON = /^(re)?connect\b|^disconnect\b/i;
 const MORE = ["Calendar", "Performance", "Agent log", "Settings"];
 
 const sidebar = (page: Page) => page.getByRole("navigation", { name: "Workspace" });
@@ -108,17 +109,33 @@ test.describe("owner", () => {
     await expect(page.getByRole("menuitem", { name: "Admin", exact: true })).toHaveCount(0);
     await page.keyboard.press("Escape");
     await page.goto("/admin");
+    // Streamed responses can send 200 before the layout calls notFound(), so assert the page itself.
+    await expect(page.getByRole("heading", { name: "This page doesn’t exist." })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Platform admin" })).toHaveCount(0);
+  });
+});
+
+test.describe("owner connections", () => {
+  test.use({ storageState: authFile("owner"), viewport: { width: 1440, height: 900 } });
+
+  test("/connections offers Connect or Reconnect", async ({ page }) => {
+    await page.goto("/connections");
+    await expect(page.getByRole("status", { name: "Loading connections" })).toHaveCount(0);
+    await expect(page.getByRole("main").getByRole("listitem").first()).toBeVisible();
+    await expect(page.getByRole("button", { name: CONNECT_BUTTON }).first()).toBeVisible();
   });
 });
 
 test.describe("viewer", () => {
   test.use({ storageState: authFile("viewer"), viewport: { width: 1440, height: 900 } });
 
-  test("/connections offers no Connect or Disconnect", async ({ page }) => {
+  test("/connections offers no Connect, Reconnect or Disconnect", async ({ page }) => {
     await page.goto("/connections");
     await expect(page.getByRole("heading", { name: "Connections", level: 1 })).toBeVisible();
-    await expect(page.getByRole("button", { name: /^(connect|disconnect)\b/i })).toHaveCount(0);
+    // Wait for the list itself, or an empty button count proves nothing.
+    await expect(page.getByRole("status", { name: "Loading connections" })).toHaveCount(0);
+    await expect(page.getByRole("main").getByRole("listitem").first()).toBeVisible();
+    await expect(page.getByRole("button", { name: CONNECT_BUTTON })).toHaveCount(0);
   });
 });
 

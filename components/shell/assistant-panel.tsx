@@ -20,12 +20,14 @@ function useWide() {
   return useSyncExternalStore(subscribe, () => window.matchMedia(XL).matches, () => true);
 }
 
-type Props = { workspaceId: string; brandId: string | null; brandName: string | null };
+type Props = { workspaceId: string; brandId: string | null; brandName: string | null; canCreateBrand: boolean };
 
 /** The Espanda chat: a 320 px column from 1280 px up, a right-hand sheet (opened from the top bar) below. */
 export function AssistantPanel(p: Props) {
   const wide = useWide();
   const { open, setOpen } = useAssistant();
+  // ponytail: crossing 1280px remounts the conversation, dropping an unsent draft and any in-flight reply.
+  // Upgrade path: lift the draft state into AssistantProvider.
   // One mounted conversation at a time: the column and the sheet never both run the same thread.
   if (wide) {
     return (
@@ -36,14 +38,14 @@ export function AssistantPanel(p: Props) {
   }
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="right" className="flex w-80 flex-col gap-0 p-0 sm:max-w-80">
+      <SheetContent side="right" aria-describedby={undefined} className="flex w-80 flex-col gap-0 p-0 sm:max-w-80">
         <Body {...p} inSheet />
       </SheetContent>
     </Sheet>
   );
 }
 
-function Body({ workspaceId, brandId, brandName, inSheet }: Props & { inSheet: boolean }) {
+function Body({ workspaceId, brandId, brandName, canCreateBrand, inSheet }: Props & { inSheet: boolean }) {
   const Title = inSheet ? SheetTitle : "h2";
   const title = <Title className="text-xl/[26px] font-semibold text-foreground">Espanda</Title>;
   const subtitle = <p className="text-sm text-muted-foreground">Your team, one conversation</p>;
@@ -56,7 +58,7 @@ function Body({ workspaceId, brandId, brandName, inSheet }: Props & { inSheet: b
           {subtitle}
         </div>
         <div className="min-h-0 flex-1 bg-background p-6">
-          <p className="text-sm text-muted-foreground">Create a business to start a conversation.</p>
+          <p className="text-sm text-muted-foreground">{canCreateBrand ? "Create a business to start a conversation." : "Ask a workspace admin to add a business."}</p>
         </div>
       </div>
     );

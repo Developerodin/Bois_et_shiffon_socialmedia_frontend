@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { SHELL_STROKE } from "@/components/shell/icon";
 import { EmptyState } from "@/components/ui/empty-state";
 
 type Props = {
@@ -22,7 +23,7 @@ export function ComingSoon({ icon, title, description, mark, backHref, backLabel
           href={backHref}
           className="inline-flex min-h-11 w-fit items-center gap-2 rounded-xl text-sm font-medium text-link hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <ArrowLeft className="size-4" aria-hidden="true" />
+          <ArrowLeft className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
           {backLabel ?? "Back"}
         </Link>
       ) : null}
@@ -30,7 +31,6 @@ export function ComingSoon({ icon, title, description, mark, backHref, backLabel
       <EmptyState
         size="hero"
         icon={icon}
-        eyebrow="Coming soon"
         headingLevel="h1"
         title={title}
         description={description}
