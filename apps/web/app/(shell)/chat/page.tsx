@@ -1,12 +1,6 @@
-import { MessageSquare } from "lucide-react";
-import { ComingSoon } from "@/components/shell/coming-soon";
+import { redirect } from "next/navigation";
 
+/** The chat lives in the panel beside every page, so this route just goes to the Overview. */
 export default function Page() {
-  return (
-    <ComingSoon
-      icon={MessageSquare}
-      title="Talk to your CMO."
-      description="Ask about the active brand. It will explain, search and start agents on your behalf."
-    />
-  );
+  redirect("/");
 }

@@ -10,6 +10,8 @@ type Props = {
   className?: string;
   /** h1 when the empty state is the whole page. */
   headingLevel?: "h1" | "h2";
+  /** Leave out the icon tile when the page shows its own artwork. */
+  hideIcon?: boolean;
 };
 
 export function EmptyState({
@@ -20,6 +22,7 @@ export function EmptyState({
   size = "default",
   className,
   headingLevel: Heading = "h2",
+  hideIcon = false,
 }: Props) {
   const hero = size === "hero";
   return (
@@ -30,15 +33,17 @@ export function EmptyState({
         className,
       )}
     >
-      <span
-        className={cn(
-          "inline-flex items-center justify-center rounded-full border border-border bg-muted text-primary",
-          hero ? "size-12" : "size-10",
-        )}
-        aria-hidden="true"
-      >
-        <Icon className={hero ? "size-5" : "size-4"} />
-      </span>
+      {hideIcon ? null : (
+        <span
+          className={cn(
+            "inline-flex items-center justify-center rounded-full border border-border bg-muted text-primary",
+            hero ? "size-12" : "size-10",
+          )}
+          aria-hidden="true"
+        >
+          <Icon className={hero ? "size-5" : "size-4"} />
+        </span>
+      )}
       {eyebrow ? (
         <p className="text-xs font-medium text-primary">
           {eyebrow}
