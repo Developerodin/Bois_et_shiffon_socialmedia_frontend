@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
+  generateId,
   isStepCount,
   streamText,
   toUIMessageStream,
@@ -132,6 +133,8 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
       stream: toUIMessageStream({
         stream: result.stream,
         originalMessages: messages,
+        // Without this the saved reply has an empty id, and two such replies share a React key.
+        generateMessageId: generateId,
         onEnd: async ({ messages: all }) => {
           const data = { messages: all.slice(-STORED_HISTORY) as unknown as Prisma.InputJsonValue, title };
           await prisma.chatThread.upsert({

@@ -10,6 +10,7 @@ import {
 } from "@/components/context/api";
 import { DocStateBadge } from "@/components/context/doc-state";
 import { Markdown } from "@/components/context/markdown";
+import { okToDiscard, setUnsaved } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -75,22 +76,49 @@ export function DocPane({
   const { latest } = entry;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
+  // The version the edit started from (as DraftEditor does): a newer one saved meanwhile must hit the 409, not be
+  // overwritten. After a 409 the next save builds on the newest version, as the message promises.
+  const [base, setBase] = useState<{ version: number | null; markdown: string; rebase: boolean }>({ version: null, markdown: "", rebase: false });
   const [busy, setBusy] = useState<"save" | "confirm" | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const dirty = editing && draft !== (latest?.markdown ?? "");
+  const dirty = editing && draft !== base.markdown;
 
-  // Closing or reloading the tab with unsaved text asks first.
+  // Unsaved text: closing or reloading the tab asks first, and so does anything in the app that would close the
+  // editor (okToDiscard). In-app links are caught here before Next.js handles them.
   useEffect(() => {
     if (!dirty) return;
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    const onLink = (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
+      if (!a || a.target === "_blank" || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const to = new URL(a.href, window.location.href);
+      if (to.origin !== window.location.origin) return; // a full page load: beforeunload asks
+      if (to.href === window.location.href) return; // goes nowhere: the editor stays open
+      if (!okToDiscard()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    setUnsaved(true);
     window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
+    document.addEventListener("click", onLink, true);
+    return () => {
+      setUnsaved(false);
+      window.removeEventListener("beforeunload", warn);
+      document.removeEventListener("click", onLink, true);
+    };
   }, [dirty]);
 
   function startEdit() {
     setDraft(latest?.markdown ?? "");
+    setBase({ version: latest?.version ?? null, markdown: latest?.markdown ?? "", rebase: false });
     setError(null);
     setEditing(true);
+  }
+
+  function cancelEdit() {
+    if (!okToDiscard()) return;
+    setEditing(false);
   }
 
   async function onSave() {
@@ -99,13 +127,16 @@ export function DocPane({
     try {
       const { doc } = await saveContextDoc(workspaceId, brandId, entry.kind, {
         markdown: draft,
-        baseVersion: latest?.version ?? null,
+        baseVersion: base.rebase ? (latest?.version ?? null) : base.version,
       });
       onChanged({ ...entry, latest: doc });
       setEditing(false);
     } catch (err) {
       setError(errorMessage(err, "save"));
-      if (err instanceof ProblemError && err.status === 409) onStale();
+      if (err instanceof ProblemError && err.status === 409) {
+        setBase((b) => ({ ...b, rebase: true }));
+        onStale();
+      }
     } finally {
       setBusy(null);
     }
@@ -204,7 +235,7 @@ export function DocPane({
         <div className="flex flex-col gap-3">
           <label htmlFor="doc-editor" className="text-xs text-muted-foreground">
             Markdown. Saving creates a new draft version
-            {latest ? ` based on v${latest.version}` : ""}; it does not change
+            {base.version !== null ? ` based on v${base.rebase ? (latest?.version ?? base.version) : base.version}` : ""}; it does not change
             what agents use until you confirm it.
           </label>
           <Textarea
@@ -218,7 +249,7 @@ export function DocPane({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setEditing(false)}
+              onClick={cancelEdit}
               disabled={busy === "save"}
             >
               Cancel
@@ -227,7 +258,7 @@ export function DocPane({
               size="sm"
               onClick={() => void onSave()}
               disabled={
-                busy === "save" || !draft.trim() || draft === latest?.markdown
+                busy === "save" || !draft.trim() || !dirty
               }
             >
               {busy === "save" ? (

@@ -14,11 +14,14 @@ import {
 } from "@/components/context/api";
 import { DocPane } from "@/components/context/doc-pane";
 import { docState, DocStateBadge } from "@/components/context/doc-state";
+import { okToDiscard } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 // Poll only while research is in flight; one manager per brand makes 3s cheap.
 const RESEARCH_POLL_MS = 3000;
+// The first load failed: try again on this interval (the banner says it retries automatically).
+const RETRY_MS = 15_000;
 
 type LoadState =
   | { kind: "loading" }
@@ -72,6 +75,13 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
     void load(controller.signal);
     return () => controller.abort();
   }, [load]);
+
+  const failed = state.kind === "error";
+  useEffect(() => {
+    if (!failed) return;
+    const timer = setInterval(() => void load(), RETRY_MS);
+    return () => clearInterval(timer);
+  }, [failed, load]);
 
   useEffect(() => {
     if (!researchActive) return;
@@ -244,7 +254,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
               <span className="text-xs text-muted-foreground">Document</span>
               <select
                 value={current?.kind}
-                onChange={(e) => setSelected(e.target.value as ContextDocKind)}
+                onChange={(e) => okToDiscard() && setSelected(e.target.value as ContextDocKind)}
                 className="h-10 rounded-md border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {docs.map((d) => (
@@ -264,7 +274,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
                     <li key={d.kind}>
                       <button
                         type="button"
-                        onClick={() => setSelected(d.kind)}
+                        onClick={() => d.kind !== current?.kind && okToDiscard() && setSelected(d.kind)}
                         aria-current={active ? "true" : undefined}
                         className={cn(
                           "flex w-full flex-col items-start gap-1.5 rounded-xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

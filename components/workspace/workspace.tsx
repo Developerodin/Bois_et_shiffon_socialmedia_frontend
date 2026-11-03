@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
@@ -31,11 +31,13 @@ import { AgentLog } from "@/components/agents/agent-log";
 import { fetchAgents, startRun, type AgentSummary } from "@/components/agents/api";
 import { DocPane } from "@/components/context/doc-pane";
 import { fetchContextDocs, type ContextDocEntry, type ContextDocKind, type ContextDocsResponse } from "@/components/context/api";
+import { okToDiscard } from "@/components/context/unsaved";
 import { ApiError, errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
+import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
-import { ContentPanel, ContentView, IdeasPanel, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
+import { ContentPanel, ContentView, IdeasPanel, LoadFailed, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { cn } from "@/lib/utils";
@@ -104,27 +106,36 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   const [view, setView] = useState<View>({ kind: "home" });
   const [focus, setFocus] = useState<{ id: PanelId; n: number } | undefined>();
   const [urlRead, setUrlRead] = useState(false);
+  const [failed, setFailed] = useState(NONE_FAILED);
+  const mark = useCallback((k: keyof typeof NONE_FAILED, v: boolean) => setFailed((f) => (f[k] === v ? f : { ...f, [k]: v })), []);
+  const viewNow = useRef(view);
+  viewNow.current = view;
 
-  // Open what the URL names (deep link, refresh); Back/Forward move between views.
+  // Open what the URL names: on load (deep link, refresh), on Back/Forward, and on links to "/" while a view is open
+  // (the sidebar's Overview). Next.js updates the search params for all of these, and for our own pushState below,
+  // which already matches the open view and so changes nothing.
+  const query = useSearchParams().toString();
   useEffect(() => {
-    const sync = () => {
-      const v = viewFromUrl();
+    const v = viewFromUrl();
+    if (viewSearch(v) !== viewSearch(viewNow.current)) {
+      // An open document with unsaved edits asks first; staying puts its URL back.
+      if (!okToDiscard()) {
+        window.history.pushState(null, "", viewSearch(viewNow.current));
+        return;
+      }
       setView(v);
       if (v.kind !== "home") setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
-      // ?panel= is a one-time "show this panel" (e.g. Menu → Content calendar): use it, then drop it.
-      const q = new URLSearchParams(window.location.search);
-      const panel = q.get("panel");
-      if (panel) {
-        if ((PANEL_IDS as readonly string[]).includes(panel)) setFocus((f) => ({ id: panel as PanelId, n: (f?.n ?? 0) + 1 }));
-        q.delete("panel");
-        window.history.replaceState(null, "", q.size ? `?${q}` : window.location.pathname);
-      }
-    };
-    sync();
+    }
+    // ?panel= is a one-time "show this panel" (e.g. Menu → Content calendar): use it, then drop it.
+    const q = new URLSearchParams(window.location.search);
+    const panel = q.get("panel");
+    if (panel) {
+      if ((PANEL_IDS as readonly string[]).includes(panel)) setFocus((f) => ({ id: panel as PanelId, n: (f?.n ?? 0) + 1 }));
+      q.delete("panel");
+      window.history.replaceState(null, "", q.size ? `?${q}` : window.location.pathname);
+    }
     setUrlRead(true);
-    window.addEventListener("popstate", sync);
-    return () => window.removeEventListener("popstate", sync);
-  }, []);
+  }, [query]);
   useEffect(() => {
     // Until the URL has been read, writing it would erase a deep link.
     if (!urlRead) return;
@@ -134,26 +145,48 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   }, [view, urlRead]);
 
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
-  const loadReports = useCallback(() => request<{ seo: Report; geo: Report }>(`${base}/audit-reports`).then(setReports).catch(() => setReports({ seo: null, geo: null })), [base]);
+  // A failed load keeps what was already shown; a block shows its error only while it has nothing to show.
+  const loadReports = useCallback(
+    () =>
+      request<{ seo: Report; geo: Report }>(`${base}/audit-reports`).then(
+        (r) => {
+          setReports(r);
+          mark("reports", false);
+        },
+        () => mark("reports", true),
+      ),
+    [base, mark],
+  );
   const refreshAgents = useCallback(() => fetchAgents(workspaceId, brandId).then((a) => setAgents(a.agents)), [workspaceId, brandId]);
+  const [retries, setRetries] = useState(0);
 
+  // The poll carries on through failures. Each request gives up after 30 s (lib/net.ts), so a hung one can't stall it.
   useEffect(() => {
     const ctrl = new AbortController();
     let timer: ReturnType<typeof setTimeout>;
     const tick = async () => {
       const [d, a] = await Promise.allSettled([fetchContextDocs(workspaceId, brandId, ctrl.signal), fetchAgents(workspaceId, brandId, ctrl.signal)]);
+      if (ctrl.signal.aborted) return;
       if (d.status === "fulfilled") setDocs(d.value);
       if (a.status === "fulfilled") setAgents(a.value.agents);
-      if (!ctrl.signal.aborted) timer = setTimeout(tick, POLL_MS);
+      mark("docs", d.status === "rejected");
+      mark("agents", a.status === "rejected");
+      timer = setTimeout(tick, POLL_MS);
     };
     void tick();
     void loadReports();
-    settingsApi.connections(workspaceId, brandId).then((c) => setConnections(c.connections), () => setConnections([]));
+    settingsApi.connections(workspaceId, brandId).then(
+      (c) => {
+        setConnections(c.connections);
+        mark("connections", false);
+      },
+      () => mark("connections", true),
+    );
     return () => {
       ctrl.abort();
       clearTimeout(timer);
     };
-  }, [workspaceId, brandId, loadReports]);
+  }, [workspaceId, brandId, loadReports, mark, retries]);
 
   // A finished SEO/GEO run means a new report: refresh it.
   const reportRuns = agents?.filter((a) => a.key === "seo" || a.key === "geo").map((a) => `${a.lastRun?.id}:${a.lastRun?.status}`).join();
@@ -164,15 +197,35 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   const pickOpps = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "NEW" && o.decision === "RECOMMEND").length, []);
   const pickItems = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "AWAITING_APPROVAL").length, []);
   const pickToWrite = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "PLANNED" || i.status === "BRIEF_READY" || i.status === "DRAFT_REVIEW").length, []);
-  const ideasToDecide = useBrandData(base, "opportunities", pickOpps as (d: never) => number).data;
-  const awaiting = useBrandData(base, "content", pickItems as (d: never) => number).data;
-  const toWrite = useBrandData(base, "content", pickToWrite as (d: never) => number).data;
+  const ideas = useBrandData(base, "opportunities", pickOpps as (d: never) => number);
+  const awaitingQ = useBrandData(base, "content", pickItems as (d: never) => number);
+  const toWriteQ = useBrandData(base, "content", pickToWrite as (d: never) => number);
+  const ideasToDecide = ideas.data, awaiting = awaitingQ.data, toWrite = toWriteQ.data;
   const pipeline = ideasToDecide == null || awaiting == null || toWrite == null ? null : { ideasToDecide, awaiting, toWrite };
+  const pipelineFailed = [ideas, awaitingQ, toWriteQ].some((q) => q.data == null && q.failed);
+  // Today is built from the reports, the connections and the pipeline counts.
+  const today = {
+    failed: (!reports && failed.reports) || (!connections && failed.connections) || pipelineFailed,
+    loading: (!reports && !failed.reports) || (!connections && !failed.connections) || (!pipeline && !pipelineFailed),
+  };
+  const reloadIdeas = ideas.reload, reloadContent = awaitingQ.reload;
+  const retry = useCallback(() => {
+    setFailed(NONE_FAILED);
+    setRetries((n) => n + 1);
+    void reloadIdeas();
+    void reloadContent();
+  }, [reloadIdeas, reloadContent]);
 
+  // Every view change in the workspace comes here: leaving a document with unsaved edits asks first.
+  const go = (v: View) => {
+    if (viewSearch(v) !== viewSearch(view) && !okToDiscard()) return false;
+    setView(v);
+    return true;
+  };
+  const back = () => void go({ kind: "home" });
   // Docs and agents open in the "Today & agents" panel (it's re-shown by the layout if hidden).
   const open = (v: View) => {
-    setView(v);
-    setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
+    if (go(v)) setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
   };
   // Brings a panel into view, adding it to the layout if it's hidden.
   const showPanel = (id: PanelId) => setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }));
@@ -188,6 +241,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
           brandName={brandName}
           website={website}
           docs={docs}
+          docsFailed={failed.docs}
+          onRetry={retry}
           geo={reports?.geo ?? null}
           connections={connections}
           onOpenDoc={(doc) => open({ kind: "doc", doc })}
@@ -206,14 +261,14 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             workspaceId={workspaceId}
             brandId={brandId}
             researchActive={docs.research?.status === "QUEUED" || docs.research?.status === "RUNNING"}
-            onBack={() => setView({ kind: "home" })}
+            onBack={back}
             onChanged={(entry) => setDocs((d) => d && { ...d, docs: d.docs.map((x) => (x.kind === entry.kind ? entry : x)) })}
             onStale={() => fetchContextDocs(workspaceId, brandId).then(setDocs)}
           />
         ) : view.kind === "competitor" ? (
-          <CompetitorView base={base} id={view.id} onBack={() => setView({ kind: "home" })} />
+          <CompetitorView base={base} id={view.id} onBack={back} />
         ) : view.kind === "content" ? (
-          <ContentView base={base} id={view.id} onBack={() => setView({ kind: "home" })} />
+          <ContentView base={base} id={view.id} onBack={back} />
         ) : view.kind === "agent" ? (
           <AgentView
             agentKey={view.key}
@@ -223,26 +278,26 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             docs={docs}
             workspaceId={workspaceId}
             brandId={brandId}
-            onBack={() => setView({ kind: "home" })}
+            onBack={back}
             onOpenDoc={(doc) => open({ kind: "doc", doc })}
             onRan={refreshAgents}
             onOpenPosts={() => showPanel("content")}
           />
         ) : (
-          <Home user={user} agents={agents} reports={reports} connections={connections} pipeline={pipeline} onOpen={open} onShowPanel={showPanel} />
+          <Home user={user} agents={agents} agentsFailed={failed.agents} today={today} reports={reports} connections={connections} pipeline={pipeline} onOpen={open} onShowPanel={showPanel} onRetry={retry} />
         ),
     },
     {
       id: "analytics",
       title: "Analytics",
       icon: <Gauge />,
-      render: () => <AnalyticsPanel reports={reports} onOpenAgent={(key) => open({ kind: "agent", key })} />,
+      render: () => <AnalyticsPanel reports={reports} failed={failed.reports} onRetry={retry} onOpenAgent={(key) => open({ kind: "agent", key })} />,
     },
     {
       id: "feed",
       title: "Agents feed",
       icon: <ListChecks />,
-      render: () => <AgentsFeed agents={agents} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} onRan={refreshAgents} onOpen={open} />,
+      render: () => <AgentsFeed agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} onRan={refreshAgents} onOpen={open} />,
     },
     {
       id: "ideas",
@@ -279,6 +334,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
     </div>
   );
 }
+
+const NONE_FAILED = { docs: false, agents: false, reports: false, connections: false };
 
 const PANEL_IDS = ["context", "home", "ideas", "content", "competitors", "analytics", "feed", "log"] as const;
 type PanelId = (typeof PANEL_IDS)[number];
@@ -357,8 +414,10 @@ function BrandEditor({ base, brandName, website, onDone }: { base: string; brand
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    const url = /^https?:\/\//i.test(site.trim()) ? site.trim() : `https://${site.trim()}`;
-    const siteChanged = url !== website;
+    // A business with no website can stay without one; the API can't clear a website, so one that exists stays required.
+    const typed = site.trim();
+    const url = !typed ? null : /^https?:\/\//i.test(typed) ? typed : `https://${typed}`;
+    const siteChanged = url !== null && url !== website;
     setPending(true);
     setError(null);
     try {
@@ -379,12 +438,12 @@ function BrandEditor({ base, brandName, website, onDone }: { base: string; brand
         <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} className="h-10 rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
       </label>
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Website</span>
-        <input value={site} onChange={(e) => setSite(e.target.value)} required inputMode="url" placeholder="yourbrand.com" className="h-10 rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+        <span className="font-medium">Website{website ? "" : " (optional)"}</span>
+        <input value={site} onChange={(e) => setSite(e.target.value)} required={!!website} inputMode="url" placeholder="yourbrand.com" className="h-10 rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
       </label>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={pending || !name.trim() || !site.trim()}>{pending ? "Saving…" : "Save"}</Button>
+        <Button type="submit" size="sm" disabled={pending || !name.trim() || (!!website && !site.trim())}>{pending ? "Saving…" : "Save"}</Button>
         <Button type="button" size="sm" variant="ghost" onClick={() => onDone(false)} disabled={pending}>Cancel</Button>
       </div>
     </form>
@@ -396,6 +455,8 @@ function ContextPane({
   brandName,
   website,
   docs,
+  docsFailed,
+  onRetry,
   geo,
   connections,
   onOpenDoc,
@@ -406,6 +467,8 @@ function ContextPane({
   brandName: string;
   website: string | null;
   docs: ContextDocsResponse | null;
+  docsFailed: boolean;
+  onRetry: () => void;
   geo: Report;
   connections: Connection[] | null;
   onOpenDoc: (k: ContextDocKind) => void;
@@ -477,7 +540,19 @@ function ContextPane({
                 </button>
               </li>
             ))}
-            {!docs && <li className="px-2 py-2 text-sm text-muted-foreground">Loading…</li>}
+            {!docs ? (
+              docsFailed ? (
+                <li>
+                  <LoadFailed what="your documents" onRetry={onRetry} />
+                </li>
+              ) : (
+                <li className="px-2 py-2">
+                  <ListSkeleton label="Loading your documents" />
+                </li>
+              )
+            ) : docs.docs.length === 0 ? (
+              <li className="px-2 py-2 text-sm text-muted-foreground">No documents yet. Research drafts them from your website.</li>
+            ) : null}
           </ul>
         </section>
 
@@ -549,14 +624,21 @@ function agentStatus(a: AgentSummary | undefined) {
 function Home({
   user,
   agents,
+  agentsFailed,
+  today,
   reports,
   connections,
   pipeline,
   onOpen,
   onShowPanel,
+  onRetry,
 }: {
   user: Props["user"];
   agents: AgentSummary[] | null;
+  agentsFailed: boolean;
+  /** Whether Today's sources are still loading, or one failed with nothing to show. */
+  today: { loading: boolean; failed: boolean };
+  onRetry: () => void;
   reports: { seo: Report; geo: Report } | null;
   connections: Connection[] | null;
   pipeline: { ideasToDecide: number; awaiting: number; toWrite: number } | null;
@@ -679,8 +761,17 @@ function Home({
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="mt-4 text-sm text-muted-foreground">{tasks.length ? "All done for today." : "Loading your tasks…"}</p>
+        ) : today.loading ? (
+          <div className="mt-4">
+            <ListSkeleton label="Loading your tasks" />
+          </div>
+        ) : today.failed ? null : (
+          <p className="mt-4 text-sm text-muted-foreground">{tasks.length ? "All done for today." : "Nothing to do today."}</p>
+        )}
+        {today.failed && !(today.loading && open.length === 0) && (
+          <div className="mt-2">
+            <LoadFailed what={tasks.length ? "all of today’s tasks" : "today’s tasks"} onRetry={onRetry} />
+          </div>
         )}
       </section>
 
@@ -693,6 +784,17 @@ function Home({
             {built.length} active · {PLANNED.length} coming
           </span>
         </div>
+        {!agents ? (
+          agentsFailed ? (
+            <LoadFailed what="your agents" onRetry={onRetry} />
+          ) : (
+            <div className="mt-4">
+              <ListSkeleton label="Loading agents" />
+            </div>
+          )
+        ) : built.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">No agents are set up for this business yet.</p>
+        ) : (
         <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-x-3 gap-y-5">
           {built.map((a) => {
             const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
@@ -710,8 +812,8 @@ function Home({
               </li>
             );
           })}
-          {!agents && <li className="col-span-full text-sm text-muted-foreground">Loading agents…</li>}
         </ul>
+        )}
         <details className="group mt-6">
           <summary className="flex cursor-pointer list-none items-center gap-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">
             <ChevronRight className="size-3.5 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true" />
@@ -945,7 +1047,7 @@ function AgentView({
 
 type PageSpeed = { performance: number; seo: number; accessibility: number; bestPractices: number; lcpMs: number | null; cls: number | null };
 
-function AnalyticsPanel({ reports, onOpenAgent }: { reports: { seo: Report; geo: Report } | null; onOpenAgent: (key: string) => void }) {
+function AnalyticsPanel({ reports, failed, onRetry, onOpenAgent }: { reports: { seo: Report; geo: Report } | null; failed: boolean; onRetry: () => void; onOpenAgent: (key: string) => void }) {
   const [tab, setTab] = useState<"seo" | "geo">("seo");
   const report = reports?.[tab] ?? null;
   const ps = tab === "seo" ? ((report?.metrics.pageSpeed as PageSpeed | null) ?? null) : null;
@@ -967,7 +1069,7 @@ function AnalyticsPanel({ reports, onOpenAgent }: { reports: { seo: Report; geo:
         ))}
       </div>
       {!reports ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        failed ? <LoadFailed what="your reports" onRetry={onRetry} /> : <ListSkeleton label="Loading reports" />
       ) : !report ? (
         <div className="flex flex-col items-start gap-3">
           <p className="text-sm text-muted-foreground">No {tab === "seo" ? "SEO" : "GEO"} report yet.</p>
@@ -1039,6 +1141,8 @@ function feedLine(key: string, a: AgentSummary | undefined, reports: { seo: Repo
 
 function AgentsFeed({
   agents,
+  agentsFailed,
+  onRetry,
   reports,
   docs,
   workspaceId,
@@ -1047,6 +1151,8 @@ function AgentsFeed({
   onOpen,
 }: {
   agents: AgentSummary[] | null;
+  agentsFailed: boolean;
+  onRetry: () => void;
   reports: { seo: Report; geo: Report } | null;
   docs: ContextDocsResponse | null;
   workspaceId: string;
@@ -1076,6 +1182,19 @@ function AgentsFeed({
           {error}
         </li>
       )}
+      {!agents ? (
+        agentsFailed ? (
+          <li>
+            <LoadFailed what="your agents" onRetry={onRetry} />
+          </li>
+        ) : (
+          <li className="p-4">
+            <ListSkeleton label="Loading agents" />
+          </li>
+        )
+      ) : built.length === 0 ? (
+        <li className="px-4 py-3 text-sm text-muted-foreground">No agents are set up for this business yet.</li>
+      ) : null}
       {built.map((a) => {
         const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
         const Icon = meta.icon;
@@ -1109,7 +1228,6 @@ function AgentsFeed({
           </span>
         </li>
       ))}
-      {!agents && <li className="px-4 py-3 text-sm text-muted-foreground">Loading agents…</li>}
     </ul>
   );
 }
