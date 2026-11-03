@@ -8,9 +8,12 @@ export type CheckState = "waiting" | "running" | "done" | "failed" | "late";
 
 export const CHECKS_BOUND_S = 10 * 60;
 export const POLL_LIMIT_S = 20 * 60;
+/** Once research has finished, a check that still hasn't logged anything gets this long before it shows as late. */
+export const AFTER_FINISH_S = 2 * 60;
 
-export function settleCheck(state: CheckState, elapsedS: number): CheckState {
-  return (state === "waiting" || state === "running") && elapsedS >= CHECKS_BOUND_S ? "late" : state;
+export function settleCheck(state: CheckState, elapsedS: number, sinceFinishedS = 0): CheckState {
+  const open = state === "waiting" || state === "running";
+  return open && (elapsedS >= CHECKS_BOUND_S || sinceFinishedS >= AFTER_FINISH_S) ? "late" : state;
 }
 
 const settled = (s: CheckState) => s === "done" || s === "failed" || s === "late";
