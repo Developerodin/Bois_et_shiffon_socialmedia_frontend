@@ -15,6 +15,7 @@ import {
 import { DocPane } from "@/components/context/doc-pane";
 import { docState, DocStateBadge } from "@/components/context/doc-state";
 import { okToDiscard } from "@/components/context/unsaved";
+import { usePerms } from "@/components/workspace/content-panels";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,9 @@ const RESEARCH_LABEL = {
 type Props = { workspaceId: string; brandId: string };
 
 export function ContextBoard({ workspaceId, brandId }: Props) {
+  // Hide what this role can't do (the server refuses it anyway); null while loading counts as no.
+  const perms = usePerms(`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`);
+  const can = (p: string) => !!perms?.includes(p);
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [selected, setSelected] = useState<ContextDocKind>(
     "product-information",
@@ -221,6 +225,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
               </span>
             </div>
             <div className="flex flex-col items-end gap-1">
+              {can("agents.run") ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -234,6 +239,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
                 />
                 Re-run research
               </Button>
+              ) : null}
               {rerun.error ? (
                 <span role="alert" className="text-xs text-destructive">
                   {rerun.error}
@@ -311,6 +317,8 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
                 workspaceId={workspaceId}
                 brandId={brandId}
                 researchActive={researchActive}
+                canEdit={can("context.edit")}
+                canConfirm={can("context.confirm")}
                 onChanged={onDocChanged}
                 onStale={() => void load()}
               />

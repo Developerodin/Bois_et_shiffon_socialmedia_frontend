@@ -59,7 +59,7 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
 
         <div className="flex shrink-0 items-center gap-1">
           {brandId && (
-            <button type="button" id="logs-toggle" onClick={toggleLogs} aria-expanded={logsOpen} aria-controls="agent-log-drawer" className={cn(tool, logsOpen && "bg-accent text-primary-strong")}>
+            <button type="button" id="logs-toggle" onClick={toggleLogs} onKeyDown={(e) => e.key === "Escape" && logsOpen && toggleLogs()} aria-expanded={logsOpen} aria-controls="agent-log-drawer" className={cn(tool, logsOpen && "bg-accent text-primary-strong")}>
               <SquareTerminal className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               Logs
               <ChevronUp className={cn("size-4 transition-transform motion-reduce:transition-none", !logsOpen && "rotate-180")} strokeWidth={SHELL_STROKE} aria-hidden="true" />
