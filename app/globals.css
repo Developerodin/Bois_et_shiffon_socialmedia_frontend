@@ -33,10 +33,10 @@
   --warning: #9a5b00;
   --ring: #5b50d6;
   --chart-1: #5b50d6;
-  /* Scrim behind dialogs and sheets: the ink colour, never pure black. */
   --terminal: #191620;
   --terminal-foreground: #e8e6ee;
   --terminal-accent: #b7aef5;
+  /* Scrim behind dialogs and sheets: the ink colour, never pure black. */
   --overlay: color-mix(in srgb, var(--foreground) 45%, transparent);
   --radius: 1rem;
 }
