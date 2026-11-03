@@ -1,7 +1,12 @@
 # Handover: Phases 2 + 4, mobile posts, business, plans, onboarding, marketing
 
-Status: implemented. Review and emulator check: pending.
-Branch `audit-fixes`. Commit: `6f298ac`. Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 2 items 6-10
+Status: implemented and 4-lens reviewed (no critical); review fixes in `9a51628`. Emulator check: pending.
+Branch `audit-fixes`. Commits: `6f298ac`, `9a51628`.
+
+Review fixes applied: `/plans/activated` no longer blank when the plan read fails (spinner + close, redirect after a
+failure or 10 s); Billing plan card shows loading and "Couldn't load your plan" with retry (`usePlan` returns `failed`
+and `reload`); session-expired sign-out resets the stack; plan blurb no longer claims a monthly renewal; Calendar and
+Planner retries show progress and a second failure. i18next falls back to English. Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 2 items 6-10
 (non-reels) and 12, Phase 4 items 3, 5 (non-reels copy) and 6.
 
 ## What changed (apps/mobile/src)
