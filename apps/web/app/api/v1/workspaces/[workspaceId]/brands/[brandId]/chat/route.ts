@@ -137,11 +137,11 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
         generateMessageId: generateId,
         onEnd: async ({ messages: all }) => {
           const data = { messages: all.slice(-STORED_HISTORY) as unknown as Prisma.InputJsonValue, title };
-          await prisma.chatThread.upsert({
-            where: { id: body.data.id },
-            create: { id: body.data.id, workspaceId: scope.workspaceId, brandId: scope.brandId, userId: scope.userId, ...data },
-            update: data,
-          });
+          // Never an upsert on the id alone: it would overwrite another person's thread that has the same id.
+          const mine = await prisma.chatThread.updateMany({ where: { id: body.data.id, userId: scope.userId, brandId: scope.brandId }, data });
+          if (mine.count === 0) {
+            await prisma.chatThread.create({ data: { id: body.data.id, workspaceId: scope.workspaceId, brandId: scope.brandId, userId: scope.userId, ...data } });
+          }
         },
         onError: (error) => {
           const text = error instanceof Error ? error.message : String(error);

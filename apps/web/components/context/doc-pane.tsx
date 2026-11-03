@@ -22,6 +22,9 @@ type Props = {
   onChanged: (entry: ContextDocEntry) => void;
   /** Called after a 409 so the board refetches the newest versions. */
   onStale: () => void;
+  /** Hide the write controls from people whose role can't use them (default: shown). */
+  canEdit?: boolean;
+  canConfirm?: boolean;
 };
 
 function formatDate(iso: string) {
@@ -72,6 +75,8 @@ export function DocPane({
   researchActive,
   onChanged,
   onStale,
+  canEdit = true,
+  canConfirm: mayConfirm = true,
 }: Props) {
   const { latest } = entry;
   const [editing, setEditing] = useState(false);
@@ -174,7 +179,7 @@ export function DocPane({
     }
   }
 
-  const canConfirm = latest?.status === "DRAFT" && !editing;
+  const canConfirm = mayConfirm && latest?.status === "DRAFT" && !editing;
 
   return (
     <article
@@ -206,6 +211,7 @@ export function DocPane({
         </div>
         {!editing ? (
           <div className="flex flex-wrap gap-2">
+            {canEdit ? (
             <Button
               variant="outline"
               size="sm"
@@ -215,6 +221,7 @@ export function DocPane({
               <Pencil />
               {latest ? "Edit" : "Write it yourself"}
             </Button>
+            ) : null}
             {canConfirm ? (
               <Button
                 variant="outline"
@@ -227,7 +234,7 @@ export function DocPane({
                 ) : (
                   <Check />
                 )}
-                Mark reviewed
+                {busy === "confirm" ? "Marking…" : "Mark reviewed"}
               </Button>
             ) : null}
           </div>

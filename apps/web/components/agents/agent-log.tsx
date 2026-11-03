@@ -14,12 +14,14 @@ const MAX_LINES = 500;
 function formatTime(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "--:--:--";
-  return d.toLocaleTimeString(undefined, {
+  const time = d.toLocaleTimeString(undefined, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     hour12: false,
   });
+  // A line from another day says which.
+  return d.toDateString() === new Date().toDateString() ? time : `${d.toLocaleDateString(undefined, { day: "numeric", month: "short" })} ${time}`;
 }
 
 type Props = {
