@@ -115,7 +115,7 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
     }
   }
 
-  if (!data) return failed ? <LoadFailed what="competitors" onRetry={() => void reload()} /> : <p className="p-4 text-sm text-muted-foreground">Loading competitors…</p>;
+  if (!data) return failed ? <LoadFailed what="competitors" onRetry={() => void reload()} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading competitors…</p>;
   return (
     <div className="flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 text-xs">
@@ -213,7 +213,7 @@ export function CompetitorView({ base, id, onBack }: { base: string; id: string;
         <span className="truncate text-sm text-muted-foreground">/ {c?.name ?? "Competitor"}</span>
       </div>
       {!data ? (
-        failed ? <LoadFailed what="competitors" onRetry={() => void reload()} /> : <p className="p-6 text-sm text-muted-foreground">Loading…</p>
+        failed ? <LoadFailed what="competitors" onRetry={() => void reload()} className="p-6" /> : <p className="p-6 text-sm text-muted-foreground">Loading…</p>
       ) : !c ? (
         <p className="p-6 text-sm text-muted-foreground">This competitor isn&rsquo;t tracked any more.</p>
       ) : !a ? (

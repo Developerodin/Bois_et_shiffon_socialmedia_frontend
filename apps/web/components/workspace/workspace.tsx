@@ -37,7 +37,7 @@ import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
-import { ContentPanel, ContentView, IdeasPanel, LoadFailed, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
+import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { cn } from "@/lib/utils";
@@ -158,35 +158,48 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
     [base, mark],
   );
   const refreshAgents = useCallback(() => fetchAgents(workspaceId, brandId).then((a) => setAgents(a.agents)), [workspaceId, brandId]);
-  const [retries, setRetries] = useState(0);
 
-  // The poll carries on through failures. Each request gives up after 30 s (lib/net.ts), so a hung one can't stall it.
-  useEffect(() => {
-    const ctrl = new AbortController();
-    let timer: ReturnType<typeof setTimeout>;
-    const tick = async () => {
-      const [d, a] = await Promise.allSettled([fetchContextDocs(workspaceId, brandId, ctrl.signal), fetchAgents(workspaceId, brandId, ctrl.signal)]);
-      if (ctrl.signal.aborted) return;
+  // Each request gives up after 30 s (lib/net.ts), so a hung one can't stall the poll.
+  const loadDocsAndAgents = useCallback(
+    async (signal?: AbortSignal) => {
+      const [d, a] = await Promise.allSettled([fetchContextDocs(workspaceId, brandId, signal), fetchAgents(workspaceId, brandId, signal)]);
+      if (signal?.aborted) return;
       if (d.status === "fulfilled") setDocs(d.value);
       if (a.status === "fulfilled") setAgents(a.value.agents);
       mark("docs", d.status === "rejected");
       mark("agents", a.status === "rejected");
-      timer = setTimeout(tick, POLL_MS);
+    },
+    [workspaceId, brandId, mark],
+  );
+  // Everything the Overview loads up front; Retry calls it again.
+  const loadAll = useCallback(
+    (signal?: AbortSignal) => {
+      void loadReports();
+      settingsApi.connections(workspaceId, brandId).then(
+        (c) => {
+          setConnections(c.connections);
+          mark("connections", false);
+        },
+        () => mark("connections", true),
+      );
+      return loadDocsAndAgents(signal);
+    },
+    [workspaceId, brandId, loadReports, loadDocsAndAgents, mark],
+  );
+
+  // Docs and agents are polled; the poll carries on through failures.
+  useEffect(() => {
+    const ctrl = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    const next = () => {
+      if (!ctrl.signal.aborted) timer = setTimeout(() => void loadDocsAndAgents(ctrl.signal).then(next), POLL_MS);
     };
-    void tick();
-    void loadReports();
-    settingsApi.connections(workspaceId, brandId).then(
-      (c) => {
-        setConnections(c.connections);
-        mark("connections", false);
-      },
-      () => mark("connections", true),
-    );
+    void loadAll(ctrl.signal).then(next);
     return () => {
       ctrl.abort();
       clearTimeout(timer);
     };
-  }, [workspaceId, brandId, loadReports, mark, retries]);
+  }, [loadAll, loadDocsAndAgents]);
 
   // A finished SEO/GEO run means a new report: refresh it.
   const reportRuns = agents?.filter((a) => a.key === "seo" || a.key === "geo").map((a) => `${a.lastRun?.id}:${a.lastRun?.status}`).join();
@@ -211,21 +224,20 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   const reloadIdeas = ideas.reload, reloadContent = awaitingQ.reload;
   const retry = useCallback(() => {
     setFailed(NONE_FAILED);
-    setRetries((n) => n + 1);
+    void loadAll();
     void reloadIdeas();
     void reloadContent();
-  }, [reloadIdeas, reloadContent]);
+  }, [loadAll, reloadIdeas, reloadContent]);
 
-  // Every view change in the workspace comes here: leaving a document with unsaved edits asks first.
-  const go = (v: View) => {
-    if (viewSearch(v) !== viewSearch(view) && !okToDiscard()) return false;
-    setView(v);
-    return true;
+  // Leaving a document with unsaved edits asks first (okToDiscard), for every view change in the workspace.
+  const back = () => {
+    if (okToDiscard()) setView({ kind: "home" });
   };
-  const back = () => void go({ kind: "home" });
   // Docs and agents open in the "Today & agents" panel (it's re-shown by the layout if hidden).
   const open = (v: View) => {
-    if (go(v)) setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
+    if (!okToDiscard()) return;
+    setView(v);
+    setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
   };
   // Brings a panel into view, adding it to the layout if it's hidden.
   const showPanel = (id: PanelId) => setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }));
@@ -244,7 +256,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
           docsFailed={failed.docs}
           onRetry={retry}
           geo={reports?.geo ?? null}
+          reportsReady={!!reports}
+          reportsFailed={failed.reports}
           connections={connections}
+          connectionsFailed={failed.connections}
           onOpenDoc={(doc) => open({ kind: "doc", doc })}
           onOpenResearch={() => open({ kind: "agent", key: "research" })}
         />
@@ -409,12 +424,13 @@ function BrandEditor({ base, brandName, website, onDone }: { base: string; brand
   const router = useRouter();
   const [name, setName] = useState(brandName);
   const [site, setSite] = useState(website ?? "");
+  // A business with no website can stay without one; the API can't clear a website, so one that exists stays required.
+  const needsSite = !!website;
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    // A business with no website can stay without one; the API can't clear a website, so one that exists stays required.
     const typed = site.trim();
     const url = !typed ? null : /^https?:\/\//i.test(typed) ? typed : `https://${typed}`;
     const siteChanged = url !== null && url !== website;
@@ -438,12 +454,12 @@ function BrandEditor({ base, brandName, website, onDone }: { base: string; brand
         <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} className="h-10 rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
       </label>
       <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">Website{website ? "" : " (optional)"}</span>
-        <input value={site} onChange={(e) => setSite(e.target.value)} required={!!website} inputMode="url" placeholder="yourbrand.com" className="h-10 rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
+        <span className="font-medium">Website{needsSite ? "" : " (optional)"}</span>
+        <input value={site} onChange={(e) => setSite(e.target.value)} required={needsSite} inputMode="url" placeholder="yourbrand.com" className="h-10 rounded-md border border-input bg-background px-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
       </label>
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
       <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={pending || !name.trim() || (!!website && !site.trim())}>{pending ? "Saving…" : "Save"}</Button>
+        <Button type="submit" size="sm" disabled={pending || !name.trim() || (needsSite && !site.trim())}>{pending ? "Saving…" : "Save"}</Button>
         <Button type="button" size="sm" variant="ghost" onClick={() => onDone(false)} disabled={pending}>Cancel</Button>
       </div>
     </form>
@@ -458,7 +474,10 @@ function ContextPane({
   docsFailed,
   onRetry,
   geo,
+  reportsReady,
+  reportsFailed,
   connections,
+  connectionsFailed,
   onOpenDoc,
   onOpenResearch,
 }: {
@@ -470,7 +489,10 @@ function ContextPane({
   docsFailed: boolean;
   onRetry: () => void;
   geo: Report;
+  reportsReady: boolean;
+  reportsFailed: boolean;
   connections: Connection[] | null;
+  connectionsFailed: boolean;
   onOpenDoc: (k: ContextDocKind) => void;
 }) {
   const product = docs?.docs.find((d) => d.kind === "product-information");
@@ -524,6 +546,7 @@ function ContextPane({
           <h2 id="docs-h" className="flex items-center gap-2 px-2 text-sm font-semibold">
             Documents <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{docs?.docs.filter((d) => d.latest).length ?? 0}</span>
           </h2>
+          <LoadGate ready={!!docs} failed={docsFailed} what="your documents" onRetry={onRetry} rows={2} className="mt-2 px-2">
           <ul className="mt-2">
             {(docs?.docs ?? []).map((d) => (
               <li key={d.kind}>
@@ -540,26 +563,18 @@ function ContextPane({
                 </button>
               </li>
             ))}
-            {!docs ? (
-              docsFailed ? (
-                <li>
-                  <LoadFailed what="your documents" onRetry={onRetry} />
-                </li>
-              ) : (
-                <li className="px-2 py-2">
-                  <ListSkeleton label="Loading your documents" />
-                </li>
-              )
-            ) : docs.docs.length === 0 ? (
+            {docs?.docs.length === 0 && (
               <li className="px-2 py-2 text-sm text-muted-foreground">No documents yet. Research drafts them from your website.</li>
-            ) : null}
+            )}
           </ul>
+          </LoadGate>
         </section>
 
         <section aria-labelledby="comp-h" className="border-b border-border px-5 py-4">
           <h2 id="comp-h" className="flex items-center gap-2 text-sm font-semibold">
-            Competitors <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{competitors.length}</span>
+            Competitors {reportsReady && <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{competitors.length}</span>}
           </h2>
+          <LoadGate ready={reportsReady} failed={reportsFailed} what="competitors" onRetry={onRetry} rows={1} className="mt-2">
           {competitors.length ? (
             <>
               <p className="mt-1 text-xs text-muted-foreground">Brands AI assistants recommend instead of you. Audit them in the Competitors panel.</p>
@@ -575,12 +590,14 @@ function ContextPane({
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">Run the GEO agent to see who AI recommends in your market.</p>
           )}
+          </LoadGate>
         </section>
 
         <section aria-labelledby="conn-h" className="px-5 py-4">
           <h2 id="conn-h" className="text-sm font-semibold">
             Accounts
           </h2>
+          <LoadGate ready={!!connections} failed={connectionsFailed} what="your accounts" onRetry={onRetry} rows={1} className="mt-2">
           {connections?.length ? (
             <ul className="mt-2 flex flex-wrap gap-1.5">
               {connections.map((c) => (
@@ -594,6 +611,7 @@ function ContextPane({
               Connect Instagram, Facebook, Google…
             </Link>
           )}
+          </LoadGate>
         </section>
       </div>
     </div>
@@ -763,14 +781,14 @@ function Home({
           </ul>
         ) : today.loading ? (
           <div className="mt-4">
-            <ListSkeleton label="Loading your tasks" />
+            <ListSkeleton label="Loading your tasks" rows={2} />
           </div>
         ) : today.failed ? null : (
           <p className="mt-4 text-sm text-muted-foreground">{tasks.length ? "All done for today." : "Nothing to do today."}</p>
         )}
         {today.failed && !(today.loading && open.length === 0) && (
           <div className="mt-2">
-            <LoadFailed what={tasks.length ? "all of today’s tasks" : "today’s tasks"} onRetry={onRetry} />
+            <LoadFailed what="today’s tasks" message={tasks.length ? "Some of today’s tasks didn’t load." : undefined} onRetry={onRetry} />
           </div>
         )}
       </section>
@@ -784,15 +802,8 @@ function Home({
             {built.length} active · {PLANNED.length} coming
           </span>
         </div>
-        {!agents ? (
-          agentsFailed ? (
-            <LoadFailed what="your agents" onRetry={onRetry} />
-          ) : (
-            <div className="mt-4">
-              <ListSkeleton label="Loading agents" />
-            </div>
-          )
-        ) : built.length === 0 ? (
+        <LoadGate ready={!!agents} failed={agentsFailed} what="your agents" onRetry={onRetry} rows={1} className="mt-4">
+        {built.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">No agents are set up for this business yet.</p>
         ) : (
         <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-x-3 gap-y-5">
@@ -814,6 +825,7 @@ function Home({
           })}
         </ul>
         )}
+        </LoadGate>
         <details className="group mt-6">
           <summary className="flex cursor-pointer list-none items-center gap-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">
             <ChevronRight className="size-3.5 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true" />
@@ -1068,9 +1080,8 @@ function AnalyticsPanel({ reports, failed, onRetry, onOpenAgent }: { reports: { 
           </button>
         ))}
       </div>
-      {!reports ? (
-        failed ? <LoadFailed what="your reports" onRetry={onRetry} /> : <ListSkeleton label="Loading reports" />
-      ) : !report ? (
+      <LoadGate ready={!!reports} failed={failed} what="your reports" onRetry={onRetry} rows={2}>
+      {!report ? (
         <div className="flex flex-col items-start gap-3">
           <p className="text-sm text-muted-foreground">No {tab === "seo" ? "SEO" : "GEO"} report yet.</p>
           <Button size="sm" variant="secondary" onClick={() => onOpenAgent(tab)}>
@@ -1117,6 +1128,7 @@ function AnalyticsPanel({ reports, failed, onRetry, onOpenAgent }: { reports: { 
           <Findings findings={report.findings as Parameters<typeof Findings>[0]["findings"]} />
         </>
       )}
+      </LoadGate>
     </div>
   );
 }
@@ -1182,19 +1194,12 @@ function AgentsFeed({
           {error}
         </li>
       )}
-      {!agents ? (
-        agentsFailed ? (
-          <li>
-            <LoadFailed what="your agents" onRetry={onRetry} />
-          </li>
-        ) : (
-          <li className="p-4">
-            <ListSkeleton label="Loading agents" />
-          </li>
-        )
-      ) : built.length === 0 ? (
-        <li className="px-4 py-3 text-sm text-muted-foreground">No agents are set up for this business yet.</li>
-      ) : null}
+      {(!agents || agentsFailed) && (
+        <li className="px-4 py-3">
+          <LoadGate ready={!!agents} failed={agentsFailed} what="your agents" onRetry={onRetry} rows={2} />
+        </li>
+      )}
+      {agents && built.length === 0 && <li className="px-4 py-3 text-sm text-muted-foreground">No agents are set up for this business yet.</li>}
       {built.map((a) => {
         const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
         const Icon = meta.icon;

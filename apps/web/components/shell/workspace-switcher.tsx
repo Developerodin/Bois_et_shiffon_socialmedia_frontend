@@ -1,6 +1,7 @@
 "use client";
 
 import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
+import { okToDiscard } from "@/components/context/unsaved";
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 
 export type WorkspaceOption = {
@@ -21,6 +22,7 @@ export function WorkspaceItems({
     <DropdownMenuRadioGroup
       value={activeWorkspaceId ?? ""}
       onValueChange={(id) => {
+        if (!okToDiscard()) return;
         void setActiveWorkspace(id);
       }}
     >

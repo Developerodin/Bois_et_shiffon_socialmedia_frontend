@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Loader2, RefreshCw } from "lucide-react";
 import { ServiceUnavailable } from "@/components/agents/service-unavailable";
@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 // Poll only while research is in flight; one manager per brand makes 3s cheap.
 const RESEARCH_POLL_MS = 3000;
-// The first load failed: try again on this interval (the banner says it retries automatically).
+// No docs could be loaded: try again on this interval (the banner says it retries automatically).
 const RETRY_MS = 15_000;
 
 type LoadState =
@@ -76,28 +76,38 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
     return () => controller.abort();
   }, [load]);
 
-  const failed = state.kind === "error";
-  useEffect(() => {
-    if (!failed) return;
-    const timer = setInterval(() => void load(), RETRY_MS);
-    return () => clearInterval(timer);
-  }, [failed, load]);
+  // One load at a time from the poll and Retry now: a tick is skipped while one is still running.
+  const inFlight = useRef(false);
+  const loadOnce = useCallback(
+    async (signal?: AbortSignal) => {
+      if (inFlight.current) return;
+      inFlight.current = true;
+      try {
+        await load(signal);
+      } finally {
+        inFlight.current = false;
+      }
+    },
+    [load],
+  );
 
+  // Poll while research runs, and keep retrying while the docs couldn't be loaded at all.
+  const pollMs = researchActive ? RESEARCH_POLL_MS : state.kind === "error" ? RETRY_MS : null;
   useEffect(() => {
-    if (!researchActive) return;
+    if (!pollMs) return;
     const controller = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
     const tick = async () => {
-      await load(controller.signal);
+      await loadOnce(controller.signal);
       if (!controller.signal.aborted)
-        timer = setTimeout(tick, RESEARCH_POLL_MS);
+        timer = setTimeout(tick, pollMs);
     };
-    timer = setTimeout(tick, RESEARCH_POLL_MS);
+    timer = setTimeout(tick, pollMs);
     return () => {
       controller.abort();
       if (timer) clearTimeout(timer);
     };
-  }, [researchActive, load]);
+  }, [pollMs, loadOnce]);
 
   async function onRerun() {
     setRerun({ pending: true, error: null });
@@ -177,7 +187,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
           <span className="sr-only">Loading brand context</span>
         </div>
       ) : state.kind === "error" ? (
-        <ServiceUnavailable onRetry={() => void load()} />
+        <ServiceUnavailable onRetry={() => void loadOnce()} />
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card px-5 py-4">

@@ -2,6 +2,7 @@
 
 import { ChevronDown, Plus } from "lucide-react";
 import { setActiveBrand } from "@/app/(shell)/actions/shell-context";
+import { okToDiscard } from "@/components/context/unsaved";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -73,6 +74,7 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
           <DropdownMenuItem
             key={brand.id}
             onSelect={() => {
+              if (!okToDiscard()) return;
               void setActiveBrand(workspaceId, brand.id);
             }}
           >

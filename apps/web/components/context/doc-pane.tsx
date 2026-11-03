@@ -77,11 +77,18 @@ export function DocPane({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   // The version the edit started from (as DraftEditor does): a newer one saved meanwhile must hit the 409, not be
-  // overwritten. After a 409 the next save builds on the newest version, as the message promises.
-  const [base, setBase] = useState<{ version: number | null; markdown: string; rebase: boolean }>({ version: null, markdown: "", rebase: false });
+  // overwritten. After a 409 the board refetches; once the newer version lands, saving builds on it.
+  const [base, setBase] = useState<{ version: number | null; markdown: string }>({ version: null, markdown: "" });
+  const [conflict, setConflict] = useState(false);
   const [busy, setBusy] = useState<"save" | "confirm" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dirty = editing && draft !== base.markdown;
+  const newest = latest?.version ?? null;
+  useEffect(() => {
+    if (!conflict || newest === base.version) return;
+    setBase((b) => ({ ...b, version: newest }));
+    setConflict(false);
+  }, [conflict, newest, base.version]);
 
   // Unsaved text: closing or reloading the tab asks first, and so does anything in the app that would close the
   // editor (okToDiscard). In-app links are caught here before Next.js handles them.
@@ -89,11 +96,15 @@ export function DocPane({
     if (!dirty) return;
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
     const onLink = (e: MouseEvent) => {
-      const a = (e.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
-      if (!a || a.target === "_blank" || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element | null)?.closest("a[href]");
+      // SVG links (no string href), downloads and "#" links don't leave the page.
+      if (!(a instanceof HTMLAnchorElement) || a.hasAttribute("download") || a.getAttribute("href") === "#") return;
+      if (a.target === "_blank" || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const to = new URL(a.href, window.location.href);
       if (to.origin !== window.location.origin) return; // a full page load: beforeunload asks
-      if (to.href === window.location.href) return; // goes nowhere: the editor stays open
+      // Same page (a #hash, or another view of the workspace): the page stays mounted, and the workspace asks
+      // itself when its view changes, so asking here too would ask twice.
+      if (to.pathname === window.location.pathname) return;
       if (!okToDiscard()) {
         e.preventDefault();
         e.stopPropagation();
@@ -111,7 +122,8 @@ export function DocPane({
 
   function startEdit() {
     setDraft(latest?.markdown ?? "");
-    setBase({ version: latest?.version ?? null, markdown: latest?.markdown ?? "", rebase: false });
+    setBase({ version: latest?.version ?? null, markdown: latest?.markdown ?? "" });
+    setConflict(false);
     setError(null);
     setEditing(true);
   }
@@ -127,14 +139,14 @@ export function DocPane({
     try {
       const { doc } = await saveContextDoc(workspaceId, brandId, entry.kind, {
         markdown: draft,
-        baseVersion: base.rebase ? (latest?.version ?? null) : base.version,
+        baseVersion: base.version,
       });
       onChanged({ ...entry, latest: doc });
       setEditing(false);
     } catch (err) {
       setError(errorMessage(err, "save"));
       if (err instanceof ProblemError && err.status === 409) {
-        setBase((b) => ({ ...b, rebase: true }));
+        setConflict(true);
         onStale();
       }
     } finally {
@@ -234,9 +246,8 @@ export function DocPane({
       {editing ? (
         <div className="flex flex-col gap-3">
           <label htmlFor="doc-editor" className="text-xs text-muted-foreground">
-            Markdown. Saving creates a new draft version
-            {base.version !== null ? ` based on v${base.rebase ? (latest?.version ?? base.version) : base.version}` : ""}; it does not change
-            what agents use until you confirm it.
+            Markdown. Saving creates a new draft version; it does not change what agents use until you confirm it.
+            {base.version !== null ? ` Saving will build on v${base.version}.` : ""}
           </label>
           <Textarea
             id="doc-editor"

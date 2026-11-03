@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
+import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
@@ -106,14 +107,52 @@ export function usePerms(base: string) {
   return perms;
 }
 
-export function LoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
+/** A load failed with nothing to show. No padding of its own: callers place it. `message` replaces the default line. */
+export function LoadFailed({ what, onRetry, message, className }: { what: string; onRetry: () => void; message?: string; className?: string }) {
   return (
-    <div role="alert" className="flex flex-wrap items-center gap-2 p-4 text-sm text-muted-foreground">
-      Couldn&rsquo;t load {what}. Check your connection.
+    <div role="alert" className={cn("flex flex-wrap items-center gap-2 text-sm text-muted-foreground", className)}>
+      {message ?? <>Couldn&rsquo;t load {what}. Try again.</>}
       <Button size="sm" variant="outline" onClick={onRetry}>
         Try again
       </Button>
     </div>
+  );
+}
+
+/**
+ * A polled block: a skeleton until the first load, LoadFailed if that failed, then the content. A refresh that fails
+ * after a load keeps the content and says so, until a refresh works again. Without children (a list row of its own)
+ * it renders only those states.
+ */
+export function LoadGate({
+  ready,
+  failed,
+  what,
+  onRetry,
+  rows,
+  className,
+  children,
+}: {
+  ready: boolean;
+  failed: boolean;
+  what: string;
+  onRetry: () => void;
+  rows?: number;
+  className?: string;
+  children?: React.ReactNode;
+}) {
+  if (!ready) {
+    return <div className={className}>{failed ? <LoadFailed what={what} onRetry={onRetry} /> : <ListSkeleton label={`Loading ${what}`} rows={rows} />}</div>;
+  }
+  return (
+    <>
+      {children}
+      {failed && (
+        <p role="status" className={cn("text-xs text-muted-foreground", className)}>
+          Couldn&rsquo;t refresh. Showing the last update.
+        </p>
+      )}
+    </>
   );
 }
 
@@ -198,7 +237,7 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
     }
   }
 
-  if (!data) return failed ? <LoadFailed what="ideas" onRetry={reload} /> : <p className="p-4 text-sm text-muted-foreground">Loading ideas…</p>;
+  if (!data) return failed ? <LoadFailed what="ideas" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading ideas…</p>;
   const shown = data.filter((o) => (filter === "all" ? true : o.status === "NEW" || o.status === "SHORTLISTED"));
   const shortlisted = data.filter((o) => o.status === "SHORTLISTED").length;
 
@@ -305,7 +344,7 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
 export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onOpen: (id: string) => void; onRunPlanner: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
-  if (!data) return failed ? <LoadFailed what="the calendar" onRetry={reload} /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
+  if (!data) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
   if (!data.length) {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
@@ -376,16 +415,22 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
   const [started, setStarted] = useState<{ key: string; runId: string } | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The run finished and the post may look the same: say so, until the post changes or another run starts.
+  const [ranOut, setRanOut] = useState(false);
   useEffect(() => {
     setStarted(null);
     setError(null);
+    setRanOut(false);
   }, [at]);
   const stopped = useCallback((why: string) => {
     setStarted(null);
     setError(why);
   }, []);
   // Finished: drop the spinner even if the post looks the same (the next poll brings any change).
-  const finished = useCallback(() => setStarted(null), []);
+  const finished = useCallback(() => {
+    setStarted(null);
+    setRanOut(true);
+  }, []);
   if (!step) return null;
   const canRun = perms?.includes("agents.run");
   const canEdit = perms?.includes("content.create");
@@ -393,6 +438,7 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
   async function run(key: string) {
     setPending(true);
     setError(null);
+    setRanOut(false);
     try {
       const { run } = await request<{ run: { id: string } }>(`${base}/agents/${encodeURIComponent(key)}/runs`, { method: "POST", body: "{}" });
       setStarted({ key, runId: run.id });
@@ -429,6 +475,7 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
           )}
         </div>
       )}
+      {ranOut && <p role="status" className="text-sm text-muted-foreground">The agent finished.</p>}
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
     </section>
   );
@@ -471,7 +518,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
         data ? (
           <p className="p-6 text-sm text-muted-foreground">This post no longer exists.</p>
         ) : failed ? (
-          <LoadFailed what="this post" onRetry={reload} />
+          <LoadFailed what="this post" onRetry={reload} className="p-6" />
         ) : (
           <p className="p-6 text-sm text-muted-foreground">Loading…</p>
         )
