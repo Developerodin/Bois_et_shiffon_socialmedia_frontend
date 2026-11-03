@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CHECKS_BOUND_S, keepPolling, POLL_LIMIT_S, settleCheck } from "@/components/welcome/reading-state";
+import { AFTER_FINISH_S, CHECKS_BOUND_S, keepPolling, POLL_LIMIT_S, settleCheck } from "@/components/welcome/reading-state";
 
 describe("settleCheck", () => {
   it("leaves a check alone before the bound", () => {
@@ -9,6 +9,10 @@ describe("settleCheck", () => {
   it("marks an unfinished check late at the bound", () => {
     expect(settleCheck("waiting", CHECKS_BOUND_S)).toBe("late");
     expect(settleCheck("running", CHECKS_BOUND_S + 60)).toBe("late");
+  });
+  it("marks a silent check late shortly after research finished", () => {
+    expect(settleCheck("waiting", 60, AFTER_FINISH_S - 1)).toBe("waiting");
+    expect(settleCheck("waiting", 60, AFTER_FINISH_S)).toBe("late");
   });
   it("never changes a finished check", () => {
     expect(settleCheck("done", POLL_LIMIT_S)).toBe("done");

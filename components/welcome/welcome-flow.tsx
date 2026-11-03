@@ -35,7 +35,13 @@ export function WelcomeFlow({ workspaceId, canCreate, resume }: Props) {
   const [reading, setReading] = useState(resume);
   return reading ? (
     // Keyed by run: a retry starts the screen afresh (clock, log, checks, documents).
-    <ReadingRoom key={reading.runId} workspaceId={workspaceId} {...reading} onRetry={(runId) => setReading({ ...reading, runId })} />
+    <ReadingRoom key={reading.runId} workspaceId={workspaceId} {...reading} onRetry={(runId) => {
+        // Keep the URL on the run being shown, so a refresh doesn't fall back to the old one.
+        const q = new URLSearchParams(window.location.search);
+        q.set("run", runId);
+        window.history.replaceState(window.history.state, "", `?${q}`);
+        setReading({ ...reading, runId });
+      }} />
   ) : (
     <AddressStep workspaceId={workspaceId} canCreate={canCreate} onStarted={setReading} />
   );
@@ -213,7 +219,13 @@ function ReadingRoom({
   const status = docs?.research?.runId === runId ? docs.research.status : "QUEUED";
   const finished = status === "SUCCEEDED" || status === "FAILED";
   const elapsed = Math.max(0, Math.round((now - startedAt) / 1000));
-  const shown = Object.fromEntries(CHECKS.map((c) => [c.key, settleCheck(checks[c.key], elapsed)]));
+  // A brand with no website never logs site checks: once research is done, give them a short grace, not 10 minutes.
+  const [finishedAt, setFinishedAt] = useState<number | null>(null);
+  useEffect(() => {
+    if (finished && finishedAt === null) setFinishedAt(Date.now());
+  }, [finished, finishedAt]);
+  const sinceFinished = finishedAt === null ? 0 : Math.max(0, Math.round((now - finishedAt) / 1000));
+  const shown = Object.fromEntries(CHECKS.map((c) => [c.key, settleCheck(checks[c.key], elapsed, sinceFinished)]));
   const polling = !mismatch && keepPolling({ finished, checks: CHECKS.map((c) => shown[c.key]), elapsedS: elapsed });
   const active = !finished && polling;
 
