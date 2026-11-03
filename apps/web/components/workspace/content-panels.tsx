@@ -384,6 +384,8 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
     setStarted(null);
     setError(why);
   }, []);
+  // Finished: drop the spinner even if the post looks the same (the next poll brings any change).
+  const finished = useCallback(() => setStarted(null), []);
   if (!step) return null;
   const canRun = perms?.includes("agents.run");
   const canEdit = perms?.includes("content.create");
@@ -408,7 +410,7 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
         <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
           <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" />
           Working on it. This post updates by itself; follow along in the Agents feed.
-          <RunWatch base={base} runId={started.runId} onFailed={stopped} />
+          <RunWatch base={base} runId={started.runId} onFailed={stopped} onDone={finished} />
         </p>
       ) : (
         <div className="flex flex-wrap gap-2">

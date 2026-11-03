@@ -222,8 +222,9 @@ function ChatSession({
           slots.empty(send)
         ) : (
           <ol className="flex flex-col gap-5">
-            {messages.map((m) => (
-              <li key={m.id} className={cn("flex flex-col gap-2", m.role === "user" && "items-end")}>
+            {/* Replies saved before ids were generated have an empty id: fall back to the position. */}
+            {messages.map((m, n) => (
+              <li key={m.id || `msg-${n}`} className={cn("flex flex-col gap-2", m.role === "user" && "items-end")}>
                 {m.parts.map((part, i) => {
                   if (part.type === "text") {
                     return m.role === "user" ? (

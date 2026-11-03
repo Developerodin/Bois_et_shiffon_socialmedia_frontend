@@ -14,6 +14,7 @@ import {
   type ContextDocsResponse,
 } from "@/components/context/api";
 import { Button } from "@/components/ui/button";
+import { keepPolling, settleCheck, type CheckState } from "@/components/welcome/reading-state";
 import { readable } from "@/lib/agent-message";
 import { brandNameFromWebsite, normalizeWebsite } from "@/lib/website";
 import { cn } from "@/lib/utils";
@@ -202,17 +203,23 @@ function ReadingRoom({
   const cursor = useRef<string | null>(null);
   const logEnd = useRef<HTMLLIElement>(null);
 
+  // The brand's research run isn't the one in the URL (an old link, or someone started another reading).
+  const mismatch = !!docs && docs.research?.runId !== runId;
   const status = docs?.research?.runId === runId ? docs.research.status : "QUEUED";
   const finished = status === "SUCCEEDED" || status === "FAILED";
-  const checksDone = CHECKS.every((c) => checks[c.key] === "done" || checks[c.key] === "failed");
+  const elapsed = Math.max(0, Math.round((now - startedAt) / 1000));
+  const shown = Object.fromEntries(CHECKS.map((c) => [c.key, settleCheck(checks[c.key], elapsed)]));
+  const polling = !mismatch && keepPolling({ finished, checks: CHECKS.map((c) => shown[c.key]), elapsedS: elapsed });
 
   useEffect(() => {
     cursor.current = null;
     setEvents([]);
+    // Drop the previous run's state so a retry isn't read as a mismatch before the next poll.
+    setDocs(null);
   }, [runId]);
 
   useEffect(() => {
-    if (finished && checksDone) return;
+    if (!polling) return;
     const ctrl = new AbortController();
     const tick = async () => {
       try {
@@ -246,7 +253,7 @@ function ReadingRoom({
       clearInterval(timer);
       ctrl.abort();
     };
-  }, [workspaceId, brandId, runId, finished, checksDone]);
+  }, [workspaceId, brandId, runId, polling]);
 
   useEffect(() => {
     logEnd.current?.scrollIntoView({ block: "nearest" });
@@ -263,7 +270,6 @@ function ReadingRoom({
     return drafted.map((d, i) => (d ? "drafted" : status === "RUNNING" && i === firstOpen ? "drafting" : "waiting"));
   }, [docs, runStart, status]);
 
-  const elapsed = Math.max(0, Math.round((now - startedAt) / 1000));
   const failure = [...events].reverse().find((e) => e.level === "ERROR");
   const host = new URL(website).hostname.replace(/^www\./, "");
 
@@ -285,9 +291,21 @@ function ReadingRoom({
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
         <h1 className="font-display text-4xl font-medium tracking-tight break-all sm:text-5xl">{host}</h1>
         <p aria-live="polite" className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
-          {finished ? null : <span className="size-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" />}
-          {status === "SUCCEEDED" ? "Read" : status === "FAILED" ? "Stopped" : status === "RUNNING" ? "Reading" : events.length ? "Waiting to retry" : "Starting"}
-          {finished ? null : ` · ${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`}
+          {finished || !polling ? null : <span className="size-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" />}
+          {mismatch
+            ? "Not found"
+            : status === "SUCCEEDED"
+              ? "Read"
+              : status === "FAILED"
+                ? "Stopped"
+                : !polling
+                  ? "Still reading in the background"
+                  : status === "RUNNING"
+                    ? "Reading"
+                    : events.length
+                      ? "Waiting to retry"
+                      : "Starting"}
+          {finished || !polling ? null : ` · ${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`}
         </p>
       </header>
 
@@ -338,8 +356,8 @@ function ReadingRoom({
           <ul aria-labelledby="checks-heading" className="mt-4 divide-y divide-border border-y border-border">
             {CHECKS.map((c) => (
               <li key={c.key} className="flex items-center justify-between gap-4 py-3.5">
-                <span className={cn("text-base", checks[c.key] === "waiting" && "text-muted-foreground")}>{c.title}</span>
-                <CheckStatus state={checks[c.key]} />
+                <span className={cn("text-base", shown[c.key] === "waiting" && "text-muted-foreground")}>{c.title}</span>
+                <CheckStatus state={shown[c.key]} />
               </li>
             ))}
           </ul>
@@ -363,7 +381,29 @@ function ReadingRoom({
           </div>
         </div>
       )}
-      {!finished && elapsed >= SLOW_AFTER_S && (
+      {mismatch && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p role="alert" className="max-w-[60ch]">
+            {retryError ??
+              (docs?.research
+                ? "This link is for an earlier reading of your website. A newer one has started since."
+                : "We couldn’t find this reading of your website. Read it again, or go to your workspace.")}
+          </p>
+          <div className="flex gap-3">
+            <Button variant="outline" asChild>
+              <Link href="/">Go to workspace</Link>
+            </Button>
+            {docs?.research ? (
+              <Button onClick={() => onRetry(docs.research!.runId)}>Follow the latest reading</Button>
+            ) : (
+              <Button onClick={retry} disabled={retrying}>
+                {retrying ? "Starting…" : "Read it again"}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+      {!mismatch && !finished && elapsed >= SLOW_AFTER_S && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-[60ch]">
             This is taking longer than usual. You don&rsquo;t need to wait here: reading carries on, and the drafts appear
@@ -417,7 +457,6 @@ const CHECKS = [
   { key: "geo", title: "AI search visibility (GEO)" },
 ];
 const CHECK_KEYS = Object.fromEntries(CHECKS.map((c) => [c.key, true]));
-type CheckState = "waiting" | "running" | "done" | "failed";
 
 function CheckStatus({ state }: { state: CheckState }) {
   if (state === "done") {
@@ -435,5 +474,6 @@ function CheckStatus({ state }: { state: CheckState }) {
     );
   }
   if (state === "failed") return <span className="text-sm text-destructive">Stopped</span>;
+  if (state === "late") return <span className="text-sm text-muted-foreground">Still running, check Analytics later</span>;
   return <span className="text-sm text-muted-foreground">Waiting</span>;
 }
