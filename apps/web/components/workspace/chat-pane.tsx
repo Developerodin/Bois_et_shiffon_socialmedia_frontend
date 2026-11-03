@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { ArrowUp, Check, Globe, Loader2, Play, Plus, Square, TriangleAlert, Wrench } from "lucide-react";
@@ -23,37 +23,101 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
 
 type Props = { workspaceId: string; brandId: string; website: string | null };
 
+type Thread = { id: string; messages: UIMessage[] };
+
+/** What a host can swap: the header, the empty state and the look of the body and composer. Defaults are the Workspace column. */
+export type ChatSlots = {
+  header?: (s: { busy: boolean; empty: boolean; onNew: () => void }) => ReactNode;
+  /** Rendered at the top of the scrolling body, above the conversation. */
+  intro?: ReactNode;
+  empty?: (send: (text: string) => void) => ReactNode;
+  variant?: "column" | "panel";
+};
+
 /** The AI SDK uses a failed response's body as the error message: show the problem+json detail, not the JSON. */
 function chatError(error: Error) {
   // No response at all (fetch's TypeError): say why, and keep the retry. The message stays in the thread.
-  if (isOffline()) return { text: "You’re offline, so that message wasn’t sent. Press Try again once you’re back.", retry: true };
-  if (error.name === "TypeError") return { text: `${NET_MESSAGE.unreachable} Your message wasn't sent.`, retry: true };
+  if (isOffline())
+    return {
+      text: "You’re offline, so that message wasn’t sent. Press Try again once you’re back.",
+      retry: true,
+    };
+  if (error.name === "TypeError")
+    return {
+      text: `${NET_MESSAGE.unreachable} Your message wasn't sent.`,
+      retry: true,
+    };
   try {
-    const p = JSON.parse(error.message) as { detail?: string; title?: string; status?: number };
-    return { text: p.detail || p.title || "Something went wrong.", retry: !(p.status && p.status >= 400 && p.status < 500) };
+    const p = JSON.parse(error.message) as {
+      detail?: string;
+      title?: string;
+      status?: number;
+    };
+    return {
+      text: p.detail || p.title || "Something went wrong.",
+      retry: !(p.status && p.status >= 400 && p.status < 500),
+    };
   } catch {
     return { text: error.message || "Something went wrong.", retry: true };
   }
 }
 
 /** Loads the person's latest conversation for this brand, then hands over to the live session. */
-export function ChatPane(props: Props) {
-  const [initial, setInitial] = useState<{ id: string; messages: UIMessage[] } | null>(null);
+export function ChatPane({ header, intro, empty, variant, ...props }: Props & ChatSlots) {
+  // The thread remembers which business it was loaded for, so a switch can never show or send into the old one,
+  // not even for a render while the new fetch is slow or failing.
+  const [loaded, setLoaded] = useState<{ base: string; thread: Thread } | null>(null);
   const base = `/api/v1/workspaces/${encodeURIComponent(props.workspaceId)}/brands/${encodeURIComponent(props.brandId)}/chat`;
   useEffect(() => {
     let cancelled = false;
     // Offline: wait for the connection rather than open an empty chat and start a second conversation.
     send(base, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : { thread: null }))
-      .then((d: { thread: { id: string; messages: UIMessage[] } | null }) => !cancelled && setInitial(d.thread ?? { id: crypto.randomUUID(), messages: [] }))
-      .catch(() => !cancelled && setInitial({ id: crypto.randomUUID(), messages: [] }));
+      .then(
+        (d: { thread: Thread | null }) =>
+          !cancelled &&
+          setLoaded({
+            base,
+            thread: d.thread ?? { id: crypto.randomUUID(), messages: [] },
+          }),
+      )
+      .catch(
+        () =>
+          !cancelled &&
+          setLoaded({
+            base,
+            thread: { id: crypto.randomUUID(), messages: [] },
+          }),
+      );
     return () => {
       cancelled = true;
     };
   }, [base]);
 
-  if (!initial) return <p className="p-4 text-sm text-muted-foreground">Loading chat…</p>;
-  return <ChatSession key={initial.id} {...props} api={base} initial={initial} onNew={() => setInitial({ id: crypto.randomUUID(), messages: [] })} />;
+  const initial = loaded?.base === base ? loaded.thread : null;
+  if (!initial) {
+    if (variant !== "panel") return <p className="p-4 text-sm text-muted-foreground">Loading chat…</p>;
+    return (
+      <div className="flex h-full min-h-0 flex-col">
+        {header?.({ busy: false, empty: true, onNew: () => {} })}
+        <div className="flex flex-1 flex-col gap-4 bg-background p-6" role="status" aria-label="Loading chat">
+          {intro}
+          <div className="h-4 w-3/4 animate-pulse rounded-lg bg-muted motion-reduce:animate-none" />
+          <div className="h-4 w-1/2 animate-pulse rounded-lg bg-muted motion-reduce:animate-none" />
+        </div>
+      </div>
+    );
+  }
+  return (
+    <ChatSession
+      key={`${base}:${initial.id}`}
+      {...props}
+      api={base}
+      initial={initial}
+      onNew={() => setLoaded({ base, thread: { id: crypto.randomUUID(), messages: [] } })}
+      slots={{ header, intro, empty, variant }}
+    />
+  );
 }
 
 /**
@@ -69,7 +133,9 @@ function StartAgent({ workspaceId, brandId, agentKey }: { workspaceId: string; b
       await startRun(workspaceId, brandId, agentKey);
       setState("started");
     } catch (e) {
-      setState({ error: e instanceof Error ? e.message : "Could not start the agent." });
+      setState({
+        error: e instanceof Error ? e.message : "Could not start the agent.",
+      });
     }
   };
   if (state === "started") {
@@ -101,7 +167,14 @@ function ChatSession({
   website,
   initial,
   onNew,
-}: Props & { api: string; initial: { id: string; messages: UIMessage[] }; onNew: () => void }) {
+  slots,
+}: Props & {
+  api: string;
+  initial: Thread;
+  onNew: () => void;
+  slots: ChatSlots;
+}) {
+  const panel = slots.variant === "panel";
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
   const { messages, sendMessage, status, error, stop, regenerate, clearError } = useChat({
@@ -110,7 +183,9 @@ function ChatSession({
     transport: new DefaultChatTransport({
       api,
       // The server keeps the history; send only the newest message.
-      prepareSendMessagesRequest: ({ messages: all, id }) => ({ body: { id, message: all[all.length - 1] } }),
+      prepareSendMessagesRequest: ({ messages: all, id }) => ({
+        body: { id, message: all[all.length - 1] },
+      }),
     }),
   });
   const busy = status === "submitted" || status === "streaming";
@@ -147,26 +222,31 @@ function ChatSession({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-1.5">
-        <span className="text-xs text-muted-foreground">Your CMO reads your documents and reports, and can offer to start agents. It never publishes.</span>
-        <Button variant="ghost" size="sm" onClick={onNew} disabled={busy || messages.length === 0} aria-label="New chat">
-          <Plus aria-hidden="true" /> New
-        </Button>
-      </div>
+      {slots.header ? (
+        slots.header({ busy, empty: messages.length === 0, onNew })
+      ) : (
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-1.5">
+          <span className="text-xs text-muted-foreground">Your CMO reads your documents and reports, and can offer to start agents. It never publishes.</span>
+          <Button variant="ghost" size="sm" onClick={onNew} disabled={busy || messages.length === 0} aria-label="New chat">
+            <Plus aria-hidden="true" /> New
+          </Button>
+        </div>
+      )}
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+      <div className={cn("min-h-0 flex-1 overflow-y-auto", panel ? "flex flex-col gap-4 bg-background p-6" : "px-4 py-4")}>
+        {slots.intro}
         {/* Announce the finished reply once, not every streamed token. */}
         <p role="status" className="sr-only">
           {status === "ready" && messages.at(-1)?.role === "assistant" ? "Reply finished" : ""}
         </p>
-        {messages.length === 0 ? (
+        {messages.length === 0 && slots.empty ? (
+          slots.empty(send)
+        ) : messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
             <span className="grid size-12 place-items-center rounded-2xl bg-muted font-display text-lg" aria-hidden="true">
               P+
             </span>
-            <p className="max-w-[30ch] text-sm text-muted-foreground">
-              Ask your CMO anything about {host ?? "your brand"}: plans, customers, competitors, what to fix.
-            </p>
+            <p className="max-w-[30ch] text-sm text-muted-foreground">Ask your CMO anything about {host ?? "your brand"}: plans, customers, competitors, what to fix.</p>
             <ul className="flex flex-wrap justify-center gap-2">
               {STARTERS.map((s) => (
                 <li key={s}>
@@ -199,7 +279,11 @@ function ChatSession({
                   }
                   if (part.type.startsWith("tool-")) {
                     const name = part.type.slice(5);
-                    const p = part as { state: string; input?: Record<string, unknown>; output?: { proposed?: boolean; agentKey?: string } };
+                    const p = part as {
+                      state: string;
+                      input?: Record<string, unknown>;
+                      output?: { proposed?: boolean; agentKey?: string };
+                    };
                     if (name === "startAgent" && p.output?.proposed && p.output.agentKey) {
                       return <StartAgent key={i} workspaceId={workspaceId} brandId={brandId} agentKey={p.output.agentKey} />;
                     }
@@ -246,31 +330,56 @@ function ChatSession({
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={onSubmit} className="shrink-0 border-t border-border p-3">
-        <div className="flex items-end gap-2 rounded-xl border border-input bg-card p-2 focus-within:ring-2 focus-within:ring-ring">
+      {panel ? (
+        <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-4 border-t border-border bg-card p-6">
           <label htmlFor="chat-input" className="sr-only">
-            Message your CMO
+            Message Espanda
           </label>
           <textarea
             id="chat-input"
-            rows={2}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Ask your CMO… (Enter to send, Shift+Enter for a new line)"
-            className="min-h-10 flex-1 resize-none bg-transparent px-1.5 py-1 text-sm outline-none placeholder:text-muted-foreground"
+            placeholder="Ask Espanda anything…"
+            className="h-34 w-full resize-none rounded-2xl border border-input bg-card p-4 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
           />
           {busy ? (
-            <Button type="button" size="icon" variant="secondary" onClick={() => void stop()} aria-label="Stop">
-              <Square aria-hidden="true" />
+            <Button type="button" variant="secondary" onClick={() => void stop()} className="h-12 w-full rounded-2xl active:translate-y-px">
+              <Square aria-hidden="true" /> Stop
             </Button>
           ) : (
-            <Button type="submit" size="icon" disabled={!input.trim()} aria-label="Send">
-              <ArrowUp aria-hidden="true" />
+            <Button type="submit" disabled={!input.trim()} className="h-12 w-full rounded-2xl active:translate-y-px">
+              Send message
             </Button>
           )}
-        </div>
-      </form>
+        </form>
+      ) : (
+        <form onSubmit={onSubmit} className="shrink-0 border-t border-border p-3">
+          <div className="flex items-end gap-2 rounded-xl border border-input bg-card p-2 focus-within:ring-2 focus-within:ring-ring">
+            <label htmlFor="chat-input" className="sr-only">
+              Message your CMO
+            </label>
+            <textarea
+              id="chat-input"
+              rows={2}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={onKey}
+              placeholder="Ask your CMO… (Enter to send, Shift+Enter for a new line)"
+              className="min-h-10 flex-1 resize-none bg-transparent px-1.5 py-1 text-sm outline-none placeholder:text-muted-foreground"
+            />
+            {busy ? (
+              <Button type="button" size="icon" variant="secondary" onClick={() => void stop()} aria-label="Stop">
+                <Square aria-hidden="true" />
+              </Button>
+            ) : (
+              <Button type="submit" size="icon" disabled={!input.trim()} aria-label="Send">
+                <ArrowUp aria-hidden="true" />
+              </Button>
+            )}
+          </div>
+        </form>
+      )}
     </div>
   );
 }
