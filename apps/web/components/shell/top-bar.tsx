@@ -65,10 +65,13 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
               <ChevronUp className={cn("size-4 transition-transform motion-reduce:transition-none", !logsOpen && "rotate-180")} strokeWidth={SHELL_STROKE} aria-hidden="true" />
             </button>
           )}
-          <button type="button" onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, "xl:hidden")}>
-            <MessageCircle className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
-            Espanda
-          </button>
+          {/* Same condition as the layout's AssistantPanel: no workspace, no panel to open. */}
+          {workspaceId && (
+            <button type="button" onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, "xl:hidden")}>
+              <MessageCircle className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
+              Espanda
+            </button>
+          )}
         </div>
       </header>
 

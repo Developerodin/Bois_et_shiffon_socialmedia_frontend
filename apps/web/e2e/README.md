@@ -2,15 +2,17 @@
 
 `shell.spec.ts` signs in as three accounts against a **local** dev server (`npm run dev`, http://localhost:3100).
 `global-setup.ts` refuses any other host, signs each account in once through `/login` and keeps the session in
-`e2e/.auth/<role>.json` (git-ignored). Login is rate-limited per email and IP, so run with one worker:
+`e2e/.auth/<role>.json` (git-ignored). Login is rate-limited per email and IP, so the config runs one worker:
 
 ```sh
-npx playwright test e2e/shell.spec.ts --workers=1
+npx playwright test e2e/shell.spec.ts
 # no downloaded Playwright browsers? use the installed Edge:
-PLAYWRIGHT_CHANNEL=msedge npx playwright test e2e/shell.spec.ts --workers=1
+PLAYWRIGHT_CHANNEL=msedge npx playwright test e2e/shell.spec.ts
 ```
 
 ## Accounts
+
+Every spec in this folder needs these, `shell-smoke.spec.ts` included, because the global setup signs in before any spec runs.
 
 Put these six values in `apps/web/.env` (git-ignored; global-setup loads it). There are no defaults: a missing value
 stops the run. Never commit them.
