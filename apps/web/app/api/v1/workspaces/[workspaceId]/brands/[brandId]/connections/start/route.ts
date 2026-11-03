@@ -4,7 +4,7 @@ import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-r
 import { ConnectionError, startConnect } from "@/server/services/connections";
 
 const Body = z.object({
-  provider: z.enum(["META", "INSTAGRAM", "THREADS", "GOOGLE", "REDDIT", "PINTEREST"]),
+  provider: z.enum(["META", "INSTAGRAM", "THREADS", "GOOGLE", "GOOGLE_BUSINESS", "REDDIT", "PINTEREST"]),
   client: z.enum(["web", "mobile"]).optional(),
 });
 

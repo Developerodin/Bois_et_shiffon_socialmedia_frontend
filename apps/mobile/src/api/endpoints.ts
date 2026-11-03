@@ -136,7 +136,7 @@ export const startFirstIdeas = (ws: string, brandId: string) => api<FirstIdeas>(
 export const firstIdeas = (ws: string, brandId: string, signal?: AbortSignal) => api<FirstIdeas>(`${brandBase(ws, brandId)}/first-ideas`, { workspaceId: ws, signal });
 
 /** Instagram (Instagram Login) and Facebook Pages, the two A12 offers. */
-export type SocialProvider = "INSTAGRAM" | "META";
+export type SocialProvider = "INSTAGRAM" | "META" | "GOOGLE_BUSINESS";
 /** The consent page to open in the in-app browser; it comes back to espanda://connect with state + code. */
 export const startSocialConnect = (ws: string, brandId: string, provider: SocialProvider) =>
   api<{ url: string }>(`${brandBase(ws, brandId)}/connections/start`, { method: "POST", body: { provider, client: "mobile" }, workspaceId: ws });
@@ -468,3 +468,62 @@ export async function postRelease(id: string, signal?: AbortSignal) {
   const { ws, base } = await reelBase();
   return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
 }
+
+/** Google Growth (G13/G14) and Reviews: the brand's Business Profile, read live from Google. */
+export type GoogleProfile =
+  | { connected: false }
+  | { connected: true; name: string; address: string | null; website: string | null; hasHours: boolean; reviewUrl: string | null; verified: boolean };
+export type GooglePost = { id: string; summary: string; state: string; createdAt: string; photoUrl: string | null };
+export type GoogleReview = { id: string; author: string | null; rating: number | null; comment: string; createdAt: string; reply: { comment: string; updatedAt: string } | null };
+export const google = {
+  async get() {
+    const { ws, base } = await reelBase();
+    return api<{ profile: GoogleProfile; posts: GooglePost[] }>(`${base}/google`, { workspaceId: ws });
+  },
+  async reviews() {
+    const { ws, base } = await reelBase();
+    return api<{ connected: boolean; average?: number | null; total?: number; reviewUrl?: string | null; reviews: GoogleReview[] }>(`${base}/google/reviews`, { workspaceId: ws });
+  },
+  async reply(reviewId: string, comment: string) {
+    const { ws, base } = await reelBase();
+    return api<{ reply: NonNullable<GoogleReview["reply"]> }>(`${base}/google/reviews/${encodeURIComponent(reviewId)}/reply`, { method: "PUT", body: { comment }, workspaceId: ws });
+  },
+  async post(summary: string, photoKey?: string) {
+    const { ws, base } = await reelBase();
+    return api<null>(`${base}/google/posts`, { method: "POST", body: { summary, photoKey }, workspaceId: ws });
+  },
+};
+
+/** An AI suggestion the person edits before sending; nothing is sent by this call. */
+export type DraftKind = "review" | "message" | "googlePost";
+export async function aiDraft(req: { kind: DraftKind; text?: string; rating?: number; author?: string; topic?: string }) {
+  const { ws, base } = await reelBase();
+  return (await api<{ draft: string }>(`${base}/customers/draft`, { method: "POST", body: req, workspaceId: ws })).draft;
+}
+
+/** Customers inbox (M02/M03/M17): Instagram Direct and Messenger, read live from Meta. Sending needs the person's tap. */
+export type InboxChannel = "INSTAGRAM" | "META";
+export type InboxAccount = { connectionId: string; channel: InboxChannel; name: string; canRead: boolean; error: string | null };
+export type Conversation = {
+  id: string;
+  connectionId: string;
+  channel: InboxChannel;
+  person: { id: string; name: string | null };
+  updatedAt: string;
+  last: { text: string; at: string; fromCustomer: boolean } | null;
+};
+export type Thread = { channel: InboxChannel; account: string; person: Conversation["person"]; messages: { id: string; text: string; at: string; fromCustomer: boolean }[] };
+export const inbox = {
+  async list() {
+    const { ws, base } = await reelBase();
+    return api<{ accounts: InboxAccount[]; conversations: Conversation[] }>(`${base}/customers/inbox`, { workspaceId: ws });
+  },
+  async thread(connectionId: string, conversationId: string) {
+    const { ws, base } = await reelBase();
+    return api<Thread>(`${base}/customers/inbox/${encodeURIComponent(connectionId)}/${encodeURIComponent(conversationId)}`, { workspaceId: ws });
+  },
+  async send(connectionId: string, conversationId: string, text: string) {
+    const { ws, base } = await reelBase();
+    return api<null>(`${base}/customers/inbox/${encodeURIComponent(connectionId)}/${encodeURIComponent(conversationId)}`, { method: "POST", body: { text }, workspaceId: ws });
+  },
+};

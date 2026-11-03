@@ -31,7 +31,7 @@ const REDDIT_UA = "web:ai-cmo-platform:0.1";
 const qs = (o: Record<string, string>) => new URLSearchParams(o).toString();
 const expiry = (seconds?: number) => (seconds ? new Date(Date.now() + seconds * 1000) : null);
 
-async function call<T>(url: string, init?: RequestInit): Promise<T> {
+export async function call<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, signal: AbortSignal.timeout(15_000) });
   const body = (await res.json().catch(() => ({}))) as T & {
     error?: { message?: string } | string;
@@ -51,6 +51,24 @@ const form = (o: Record<string, string>): RequestInit => ({
   headers: { "content-type": "application/x-www-form-urlencoded" },
   body: qs(o),
 });
+
+/** Google's code → tokens, shared by Analytics (GOOGLE) and Business Profile (GOOGLE_BUSINESS). */
+async function googleToken({ code, clientId, secret, redirectUri }: { code: string; clientId: string; secret: string; redirectUri: string }) {
+  const tok = await call<{ access_token: string; refresh_token?: string; expires_in: number; scope: string }>(
+    "https://oauth2.googleapis.com/token",
+    form({ client_id: clientId, client_secret: secret, grant_type: "authorization_code", redirect_uri: redirectUri, code }),
+  );
+  return { credentials: { accessToken: tok.access_token, refreshToken: tok.refresh_token }, tokenExpiresAt: expiry(tok.expires_in), scopes: tok.scope.split(" ") };
+}
+
+async function googleRefresh({ credentials, clientId, secret }: { credentials: ConnectedAccount["credentials"]; clientId: string; secret: string }) {
+  if (!credentials.refreshToken) throw new ProviderError("400 No refresh token");
+  const t = await call<{ access_token: string; expires_in: number }>(
+    "https://oauth2.googleapis.com/token",
+    form({ client_id: clientId, client_secret: secret, grant_type: "refresh_token", refresh_token: credentials.refreshToken }),
+  );
+  return { credentials: { ...credentials, accessToken: t.access_token }, tokenExpiresAt: expiry(t.expires_in) };
+}
 
 const PINTEREST_SCOPES = ["user_accounts:read", "boards:read", "boards:write", "pins:read", "pins:write"];
 
@@ -105,7 +123,7 @@ export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
     label: "Facebook Pages",
     envId: "META_APP_ID",
     envSecret: "META_APP_SECRET",
-    scopes: ["pages_show_list", "pages_manage_posts", "pages_read_engagement", "read_insights", "business_management"],
+    scopes: ["pages_show_list", "pages_manage_posts", "pages_read_engagement", "read_insights", "business_management", "pages_messaging"],
     authorizeUrl: ({ clientId, redirectUri, state, scope }) =>
       `https://www.facebook.com/v23.0/dialog/oauth?${qs({ client_id: clientId, redirect_uri: redirectUri, state, scope, response_type: "code" })}`,
     async exchange({ code, clientId, secret, redirectUri }) {
@@ -134,7 +152,7 @@ export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
     label: "Instagram",
     envId: "INSTAGRAM_APP_ID",
     envSecret: "INSTAGRAM_APP_SECRET",
-    scopes: ["instagram_business_basic", "instagram_business_content_publish", "instagram_business_manage_insights"],
+    scopes: ["instagram_business_basic", "instagram_business_content_publish", "instagram_business_manage_insights", "instagram_business_manage_messages"],
     authorizeUrl: ({ clientId, redirectUri, state, scope }) =>
       `https://www.instagram.com/oauth/authorize?${qs({ client_id: clientId, redirect_uri: redirectUri, state, scope, response_type: "code" })}`,
     async exchange({ code, clientId, secret, redirectUri }) {
@@ -212,22 +230,41 @@ export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
         client_id: clientId, redirect_uri: redirectUri, state, scope: scope.replaceAll(",", " "),
         response_type: "code", access_type: "offline", prompt: "consent", include_granted_scopes: "true",
       })}`,
-    async exchange({ code, clientId, secret, redirectUri }) {
-      const tok = await call<{ access_token: string; refresh_token?: string; expires_in: number; scope: string }>(
-        "https://oauth2.googleapis.com/token",
-        form({ client_id: clientId, client_secret: secret, grant_type: "authorization_code", redirect_uri: redirectUri, code }),
-      );
+    async exchange(p) {
+      const tok = await googleToken(p);
       const me = await call<{ sub: string; email: string }>("https://openidconnect.googleapis.com/v1/userinfo", {
-        headers: { authorization: `Bearer ${tok.access_token}` },
+        headers: { authorization: `Bearer ${tok.credentials.accessToken}` },
       });
-      return [{
-        externalAccountId: me.sub,
-        displayName: me.email,
-        credentials: { accessToken: tok.access_token, refreshToken: tok.refresh_token },
-        tokenExpiresAt: expiry(tok.expires_in),
-        scopes: tok.scope.split(" "),
-      }];
+      return [{ ...tok, externalAccountId: me.sub, displayName: me.email }];
     },
+    refresh: googleRefresh,
+  },
+  GOOGLE_BUSINESS: {
+    label: "Google Business Profile",
+    envId: "GOOGLE_CLIENT_ID",
+    envSecret: "GOOGLE_CLIENT_SECRET",
+    scopes: ["openid", "email", "https://www.googleapis.com/auth/business.manage"],
+    authorizeUrl: (p) => PROVIDERS.GOOGLE.authorizeUrl(p),
+    // One connection per location the Google account manages, like Facebook Pages. They share the account's tokens.
+    async exchange(p) {
+      const tok = await googleToken(p);
+      const auth = { headers: { authorization: `Bearer ${tok.credentials.accessToken}` } };
+      const accounts = await call<{ accounts?: { name: string }[] }>("https://mybusinessaccountmanagement.googleapis.com/v1/accounts", auth);
+      const out: ConnectedAccount[] = [];
+      // ponytail: first page of accounts and of each account's locations (100); paginate if someone manages more.
+      for (const a of accounts.accounts ?? []) {
+        // One account Google refuses (a personal account, a location group, quota) mustn't lose the others.
+        const locs = await call<{ locations?: { name: string; title: string }[] }>(
+          `https://mybusinessbusinessinformation.googleapis.com/v1/${a.name}/locations?${qs({ readMask: "name,title", pageSize: "100" })}`,
+          auth,
+        ).catch((e: unknown) => (console.warn("[integrations] google_business locations", a.name, e), {} as { locations?: undefined }));
+        for (const l of locs.locations ?? []) out.push({ ...tok, externalAccountId: `${a.name}/${l.name}`, displayName: l.title }); // accounts/1/locations/2: the v4 path
+      }
+      // No "400 " prefix: the connect routes show prefix-less provider messages as they are.
+      if (!out.length) throw new ProviderError("This Google account doesn't manage a Business Profile. Sign in with the account that does.");
+      return out;
+    },
+    refresh: googleRefresh,
   },
   REDDIT: {
     label: "Reddit",
@@ -272,12 +309,14 @@ export const PROVIDER_SLUGS: Record<string, IntegrationProvider> = {
   instagram: "INSTAGRAM",
   threads: "THREADS",
   google: "GOOGLE",
+  google_business: "GOOGLE_BUSINESS",
   reddit: "REDDIT",
   pinterest: "PINTEREST",
 };
 export const providerSlug = (p: IntegrationProvider) => p.toLowerCase();
 
-const envPrefix = (p: IntegrationProvider) => PROVIDERS[p].envId.split("_")[0];
+// META_REDIRECT_URI, GOOGLE_BUSINESS_REDIRECT_URI, …: by provider name, since GOOGLE and GOOGLE_BUSINESS share app keys.
+const envPrefix = (p: IntegrationProvider) => p;
 
 export function providerConfig(p: IntegrationProvider) {
   const a = PROVIDERS[p];

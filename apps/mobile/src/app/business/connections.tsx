@@ -19,7 +19,7 @@ const CHANNELS: { id: "instagram" | "facebook" | "whatsapp" | "google" | "shopif
   { id: "instagram", Icon: Camera, provider: "INSTAGRAM", primary: true },
   { id: "facebook", Icon: Globe, provider: "META" },
   { id: "whatsapp", Icon: MessageCircle },
-  { id: "google", Icon: Store },
+  { id: "google", Icon: Store, provider: "GOOGLE_BUSINESS" },
   { id: "shopify", Icon: ShoppingBag },
 ];
 const GREY = color.disabledInk;

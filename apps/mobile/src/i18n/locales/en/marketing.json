@@ -14,7 +14,7 @@
     "googleGrowth": "Google Growth",
     "websiteStudio": "Website Studio",
     "editContent": "Edit content",
-    "diningTableImage": "Acacia Bunting dining table",
+    "diningTableImage": "Product photo",
     "pages": {
       "home": "Home",
       "product": "Product",
@@ -26,52 +26,73 @@
     "title": "Marketing",
     "subtitle": "Manage your shop visibility, conversations, and brand profile",
     "cue": {
-      "imageLabel": "Acacia TV unit staged in a living room",
+      "imageLabel": "One of your product photos",
       "dismiss": "Dismiss today's cue",
       "eyebrow": "Today's cue",
       "title": "Add fresh catalog photos",
-      "body": "Adding new photos keeps your automated reels and website draft tuned."
+      "body": "New photos give your reels, posts and Google updates more to work with."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Coming soon",
     "cards": {
       "customers": { "title": "Customers", "body": "Inbox, reviews and people", "cta": "Open inbox" },
-      "google": { "title": "Google Growth", "body": "Profile, posts and reviews", "cta": "Configure" },
+      "google": { "title": "Google Growth", "body": "Profile, posts and reviews", "cta": "Open" },
       "website": { "title": "Website Studio", "body": "Draft, edit and publish your site", "cta": "Open draft" },
       "business": { "title": "Business", "body": "Brand, assets and connections", "cta": "Manage" }
     }
   },
   "inbox": {
     "emptyTitle": "No messages yet",
-    "emptyBody": "Connect your customer channels to receive direct product questions and review AI suggested drafts safely before sending.",
+    "emptyBody": "Connect Instagram or Facebook to see customer messages here and answer them with AI drafts you check before sending.",
     "connectChannel": "Connect your channel",
-    "emptyFootnote": "New messages become available automatically once connected.",
+    "emptyFootnote": "Messages show up here once an account is connected.",
     "channelsTitle": "Supported messaging channels",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Connect an account to receive messages."
+    "lockNote": "Connect an account to receive messages.",
+    "noConversations": "No messages yet. New Instagram and Messenger conversations show up here.",
+    "reconnect": "Reconnect to read messages",
+    "openConnections": "Open connections",
+    "customer": "Customer",
+    "you": "You: {{text}}"
   },
   "reply": {
     "title": "Reply assistant",
-    "referencedProduct": "Referenced product",
     "suggestionTitle": "Espanda reply suggestion",
     "draftLabel": "Reply draft",
-    "tone": "Tone: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Polished & artisan"
-    },
-    "done": "Done",
-    "editReply": "Edit reply",
     "approvalTitle": "Manual approval required",
     "approvalBody": "No message is ever sent without your explicit click.",
-    "exampleTitle": "Example conversation mode",
-    "exampleBody": "Connecting your Instagram or Facebook account replaces this example with real customer questions."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(photo or attachment)",
+    "writeOwn": "Write my own",
+    "send": "Send",
+    "sent": "Sent."
   },
   "reviews": {
     "emptyTitle": "No reviews yet",
-    "emptyBody": "Connect your Google Business profile to automatically collect and reply to verified customer feedback.",
+    "emptyBody": "Connect your Google Business Profile to see your Google reviews and reply to them.",
     "connectGoogle": "Connect Google Business",
-    "automatedTitle": "Automated review requests",
+    "automatedTitle": "Ask for reviews",
     "connectFirst": "Connect first",
-    "automatedBody": "Requires Google Business connection to send personalized review invitations."
+    "automatedBody": "Once your Google Business Profile is connected and verified, you get a link to send customers.",
+    "count_one": "{{count}} review",
+    "count_other": "{{count}} reviews",
+    "connectedEmptyBody": "New Google reviews will show up here for you to reply to.",
+    "waitingGoogle": "Waiting for Google",
+    "linkBody": "Send customers this link after a visit or purchase. It opens Google's review form for your business.",
+    "shareLink": "Share review link",
+    "anonymous": "Google user",
+    "yourReply": "Your reply",
+    "replyDraft": "Reply draft",
+    "cancel": "Cancel",
+    "postReply": "Post reply",
+    "editReply": "Edit reply",
+    "draftReply": "Draft reply",
+    "replied": "Reply posted on Google.",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars"
   },
   "people": {
     "emptyTitle": "No customer records yet",
@@ -83,50 +104,85 @@
   },
   "google": {
     "presenceTitle": "Your Google presence",
-    "presenceBody": "Keep your local French showroom visible on Google Maps and Search automatically.",
+    "presenceBody": "Keep your business visible on Google Maps and Search.",
     "profileTitle": "Google Business Profile",
-    "profileBody": "Sync your official store address, opening hours, and new catalog photos directly to Google Maps.",
+    "profileBody": "Reply to your Google reviews and post updates to Google Search and Maps.",
     "connectProfile": "Connect Google Business Profile",
-    "capabilitiesTitle": "Automatic sync capabilities",
+    "capabilitiesTitle": "What you can do",
     "capabilities": {
       "catalog": {
         "title": "Profile & catalog updates",
-        "body": "Sync newly staged photos and furniture drops to your local Google post updates."
+        "body": "Post updates with your product photos to your Google profile."
       },
       "reviews": {
-        "title": "Review requests",
-        "body": "Generate polite French review invitations after showroom visits or purchases."
+        "title": "Review link",
+        "body": "Share your Google review link with customers after a visit or purchase."
       },
       "replies": {
-        "title": "Curated reply drafts",
-        "body": "Espanda crafts thoughtful draft replies to all incoming customer reviews for your review."
+        "title": "Reply drafts",
+        "body": "Espanda drafts a reply to each review. You edit it and post it yourself."
       }
     },
     "controlTitle": "You stay in control",
-    "controlBody": "Nothing is posted or replied to on Google until you approve it."
+    "controlBody": "Nothing is posted or replied to on Google until you approve it.",
+    "connectNote": "You can disconnect any time in Business → Connections.",
+    "retry": "Try again"
   },
   "googleWorkspace": {
     "newPost": "New Google post",
-    "subtitle": "Preview how product drops and showroom reviews sync directly to Google.",
+    "subtitle": "Post updates and keep your profile complete on Google Search and Maps.",
     "tabs": {
       "profile": "Profile",
       "posts": "Posts",
       "reviews": "Reviews"
     },
-    "draftPostTitle": "Draft google post",
+    "draftPostTitle": "Draft Google post",
     "actionButton": "Action button: <value>{{action}}</value>",
     "postActions": {
       "learnMore": "Learn more"
     },
     "reviewPost": "Review post",
-    "reviewsTitle": "Showroom reviews",
+    "reviewsTitle": "Google reviews",
     "reviewsBody": "Reviews and reply drafts are collected with your customer conversations.",
     "openReviews": "Open reviews",
     "checklistTitle": "Profile setup checklist",
     "checklist": {
-      "profile": { "label": "Google profile connected", "value": "Found" },
-      "reviewLink": { "label": "Direct review request link", "value": "Set up" }
-    }
+      "profile": {
+        "label": "Google profile connected"
+      },
+      "verified": {
+        "label": "Verified by Google",
+        "yes": "Verified",
+        "no": "Not yet"
+      },
+      "reviewLink": {
+        "label": "Direct review request link",
+        "share": "Share",
+        "waiting": "After verification"
+      },
+      "hours": {
+        "label": "Opening hours",
+        "yes": "Set",
+        "no": "Add on Google"
+      },
+      "website": {
+        "label": "Website",
+        "no": "Add on Google"
+      }
+    },
+    "postText": "Post text",
+    "discard": "Discard",
+    "publishPost": "Publish post",
+    "postState": {
+      "live": "Live",
+      "processing": "Processing",
+      "rejected": "Rejected by Google"
+    },
+    "noPostsTitle": "No Google posts yet",
+    "noPostsBody": "Tap New Google post to draft one from your photos. Nothing is posted until you publish it.",
+    "posted": "Sent to Google. It can take a few minutes to appear.",
+    "unverifiedTitle": "Google hasn't verified this business yet",
+    "unverifiedBody": "Posts and the review link only work once Google verifies your business. Verify it in Google Business Profile."
   },
   "website": {
     "draftPreview": "Draft preview",

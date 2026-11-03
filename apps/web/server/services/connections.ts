@@ -32,7 +32,9 @@ export async function accessToken(conn: IntegrationConnection): Promise<string> 
   if (conn.status !== "ACTIVE" || !conn.encryptedCredentials) throw new ReconnectNeeded(`${conn.displayName} isn't connected`);
   const creds = decryptCredentials<ConnectedAccount["credentials"]>(conn.encryptedCredentials);
   const expiresAt = conn.tokenExpiresAt?.getTime();
-  if (!expiresAt || expiresAt - Date.now() > REFRESH_AHEAD_MS) return creds.accessToken;
+  // Google access tokens live an hour: refresh just before, not 3 days ahead (that would refresh on every call).
+  const ahead = conn.provider === "GOOGLE" || conn.provider === "GOOGLE_BUSINESS" ? 5 * 60_000 : REFRESH_AHEAD_MS;
+  if (!expiresAt || expiresAt - Date.now() > ahead) return creds.accessToken;
   const adapter = PROVIDERS[conn.provider];
   const cfg = providerConfig(conn.provider);
   const expired = expiresAt <= Date.now();
@@ -47,7 +49,8 @@ export async function accessToken(conn: IntegrationConnection): Promise<string> 
     return next.credentials.accessToken;
   } catch (e) {
     const refused = e instanceof ProviderError && /^4\d\d /.test(e.message);
-    if (refused || expired) {
+    // An expired token with a refresh token isn't lost on a network blip: the next call refreshes again.
+    if (refused || (expired && !creds.refreshToken)) {
       await markReconnect(conn.id, `Access expired. Reconnect ${conn.displayName}.`);
       throw new ReconnectNeeded(`${conn.displayName}'s access expired`);
     }

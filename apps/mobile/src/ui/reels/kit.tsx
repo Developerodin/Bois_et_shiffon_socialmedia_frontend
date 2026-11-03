@@ -19,7 +19,8 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { formatNumber } from "@/i18n";
 import { Glow } from "@/ui/aura";
 import { color, font, layout, radius, space, type } from "@/theme/tokens";
-import { brand, photos } from "@/ui/reels/sample";
+import { photos } from "@/ui/reels/sample";
+import { useCurrentBrand } from "@/ui/use-current-brand";
 import { useCredits } from "@/ui/use-credits";
 
 /**
@@ -245,13 +246,14 @@ export function BackTitle({ title }: { title: string }) {
   );
 }
 
-/** "Bois & Chiffons" workspace pill (favicon + name). */
+/** The current business as a pill (logo + name). */
 export function BrandPill({ tone = "grey" }: { tone?: "grey" | "white" }) {
   const { t } = useTranslation();
+  const brand = useCurrentBrand();
   return (
-    <View style={[styles.brandPill, tone === "white" && styles.brandPillWhite]} accessibilityLabel={t("module.workspace", { name: brand.name })}>
-      <Image source={photos.bcFavicon} style={{ width: 16, height: 16, borderRadius: 3 }} contentFit="contain" />
-      <Text style={metaInk}>{brand.name}</Text>
+    <View style={[styles.brandPill, tone === "white" && styles.brandPillWhite]} accessibilityLabel={t("module.workspace", { name: brand?.name ?? "" })}>
+      <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={{ width: 16, height: 16, borderRadius: 3 }} contentFit="contain" />
+      <Text style={metaInk}>{brand?.name}</Text>
     </View>
   );
 }

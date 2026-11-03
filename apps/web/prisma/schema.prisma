@@ -643,6 +643,7 @@ enum IntegrationProvider {
   INSTAGRAM
   THREADS
   GOOGLE // Analytics + Search Console
+  GOOGLE_BUSINESS // Business Profile: one connection per location (reviews, local posts)
   REDDIT
   PINTEREST
 }

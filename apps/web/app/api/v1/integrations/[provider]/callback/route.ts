@@ -29,6 +29,8 @@ export async function GET(request: Request, context: { params: Promise<{ provide
     return Response.redirect(`${MOBILE_RETURN}?${new URLSearchParams({ provider: slug, ...(ok ? { state: state!, code } : { error: "cancelled" }) })}`, 303);
   }
   if (url.searchParams.get("error") || !code || !state) {
+    // The provider's reason (access_denied, invalid_scope, …) is only in the URL; keep it for whoever debugs a failed connect.
+    console.warn(`[integrations] ${slug} connect refused:`, url.searchParams.get("error"), url.searchParams.get("error_description") ?? "");
     return back({ connectError: "Connection was cancelled or denied" });
   }
 

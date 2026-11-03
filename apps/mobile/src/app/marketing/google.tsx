@@ -1,24 +1,56 @@
-import { router } from "expo-router";
+import { useCallback, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
 import { Lock, MapPinPlus, RefreshCw, SquarePen, Star, Store, type LucideIcon } from "lucide-react-native";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { google } from "@/api/endpoints";
+import { connectSocial } from "@/ui/connect-social";
+import { useCurrentBrand } from "@/ui/use-current-brand";
 import { useTranslation } from "react-i18next";
 import { color, space, type } from "@/theme/tokens";
-import { Divider, TitleHeader, mc, title16 } from "@/ui/marketing/kit";
-import { googleCapabilities } from "@/ui/marketing/sample";
+import { Divider, TextButton, TitleHeader, mc, title16 } from "@/ui/marketing/kit";
 import { ActionButton, BrandPill, ICON, Panel, ReelsScreen, bodyMuted, eyebrow, meta, rc, strong14 } from "@/ui/reels/kit";
 
-const CAPABILITY_ICON: Record<(typeof googleCapabilities)[number]["id"], LucideIcon> = {
+const CAPABILITIES = ["catalog", "reviews", "replies"] as const;
+const CAPABILITY_ICON: Record<(typeof CAPABILITIES)[number], LucideIcon> = {
   catalog: Store,
   reviews: Star,
   replies: SquarePen,
 };
 
 /**
- * M04 · Google Growth / Setup. There is no Google Business integration: "Connect" continues
- * to the workspace preview (M14) without a network call.
+ * M04 · Google Growth / Setup. "Connect" signs in to Google (Business Profile access) and lands on the workspace (M14);
+ * a brand that's already connected goes straight there.
  */
 export default function GoogleSetup() {
   const { t } = useTranslation("marketing");
+  const brand = useCurrentBrand();
+  const [checking, setChecking] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const check = useCallback(() => {
+    setChecking(true);
+    setError(null);
+    google.get().then(
+      (r) => (r.profile.connected ? router.replace("/marketing/google-workspace") : setChecking(false)),
+      (e: unknown) => {
+        setChecking(false);
+        setError(e instanceof Error ? e.message : String(e));
+      },
+    );
+  }, []);
+  useFocusEffect(check);
+  const connect = async () => {
+    if (!brand) return;
+    setBusy(true);
+    setError(null);
+    try {
+      if ((await connectSocial(brand.workspaceId, brand.id, "GOOGLE_BUSINESS")).length) router.replace("/marketing/google-workspace");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <ReelsScreen
       bg={color.canvas}
@@ -41,22 +73,33 @@ export default function GoogleSetup() {
           </View>
         </View>
         <Divider style={{ marginVertical: space[16] }} />
-        <ActionButton label={t("google.connectProfile")} leading={RefreshCw} onPress={() => router.push("/marketing/google-workspace")} />
+        {error ? (
+          <View style={{ paddingBottom: space[12] }}>
+            <Text style={[meta, { color: color.error }]}>{error}</Text>
+            <TextButton label={t("google.retry")} onPress={check} style={{ alignSelf: "flex-start" }} />
+          </View>
+        ) : null}
+        {checking ? (
+          <ActivityIndicator color={color.primary} />
+        ) : (
+          <ActionButton label={t("google.connectProfile")} leading={RefreshCw} disabled={busy || !brand} onPress={() => void connect()} />
+        )}
+        <Text style={[meta, { textAlign: "center", paddingTop: space[12] }]}>{t("google.connectNote")}</Text>
       </Panel>
 
       <Panel style={{ marginTop: space[24] }}>
         <Text style={eyebrow}>{t("google.capabilitiesTitle")}</Text>
         <View style={{ gap: space[16], paddingTop: space[16] }}>
-          {googleCapabilities.map((c) => {
-            const Icon = CAPABILITY_ICON[c.id];
+          {CAPABILITIES.map((id) => {
+            const Icon = CAPABILITY_ICON[id];
             return (
-              <View key={c.id} style={{ flexDirection: "row", gap: space[12] }}>
+              <View key={id} style={{ flexDirection: "row", gap: space[12] }}>
                 <View style={styles.capIcon}>
                   <Icon size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={strong14}>{t(`google.capabilities.${c.id}.title`)}</Text>
-                  <Text style={[bodyMuted, { paddingTop: 2 }]}>{t(`google.capabilities.${c.id}.body`)}</Text>
+                  <Text style={strong14}>{t(`google.capabilities.${id}.title`)}</Text>
+                  <Text style={[bodyMuted, { paddingTop: 2 }]}>{t(`google.capabilities.${id}.body`)}</Text>
                 </View>
               </View>
             );

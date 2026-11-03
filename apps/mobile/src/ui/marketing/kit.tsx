@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, Panel, SegmentedTabs, bodyMuted, metaInk, rc } from "@/ui/reels/kit";
-import { brand, photos } from "@/ui/marketing/sample";
+import { useCurrentBrand } from "@/ui/use-current-brand";
 
 /**
  * Marketing-specific pieces (Figma "05 Marketing & Business"). Module header, page header,
@@ -53,10 +53,11 @@ export function TitleHeader({ title, right, fallback = "/marketing" as Href }: {
 /** Favicon + name without a pill (Customers header right, Publish review header centre). */
 export function BrandInline() {
   const { t } = useTranslation("marketing");
+  const brand = useCurrentBrand();
   return (
-    <View style={styles.brandInline} accessibilityLabel={t("shared.workspace", { name: brand.name })}>
-      <Image source={photos.bcFavicon} style={styles.favicon} contentFit="contain" />
-      <Text style={[metaInk, { fontSize: 13 }]}>{brand.name}</Text>
+    <View style={styles.brandInline} accessibilityLabel={t("shared.workspace", { name: brand?.name ?? "" })}>
+      <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={styles.favicon} contentFit="contain" />
+      <Text style={[metaInk, { fontSize: 13 }]}>{brand?.name}</Text>
     </View>
   );
 }
@@ -67,13 +68,14 @@ export function BrandInline() {
  */
 export function FloatingHeader({ label, right, fallback }: { label: string; right?: ReactNode; fallback: Href }) {
   const { top } = useSafeAreaInsets();
+  const brand = useCurrentBrand();
   return (
     <View style={[styles.floating, { paddingTop: top + space[8] }]}>
       <View style={styles.floatingSide}>
         <BackButton onPress={() => goBack(fallback)} />
       </View>
       <View style={styles.sitePill} accessibilityLabel={label}>
-        <Image source={photos.bcFavicon} style={styles.favicon} contentFit="contain" />
+        <Image source={brand?.logoUrl ? { uri: brand.logoUrl } : undefined} style={styles.favicon} contentFit="contain" />
         <Text style={[metaInk, { fontSize: 13 }]} numberOfLines={1}>
           {label}
         </Text>
@@ -145,9 +147,11 @@ export function TextButton({
   style,
   labelStyle,
   trailing,
+  disabled,
 }: {
   label: string;
   onPress?: () => void;
+  disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
   trailing?: LucideIcon;
@@ -157,9 +161,11 @@ export function TextButton({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityState={{ disabled: !!disabled }}
+      disabled={disabled}
       onPress={onPress}
       hitSlop={4}
-      style={({ pressed }) => [styles.textButton, pressed && { opacity: 0.6 }, style]}
+      style={({ pressed }) => [styles.textButton, (pressed || disabled) && { opacity: 0.5 }, style]}
     >
       <Text style={[styles.textButtonLabel, labelStyle]}>{label}</Text>
       {Trail ? <Trail size={16} color={color.ink} strokeWidth={2} /> : null}
