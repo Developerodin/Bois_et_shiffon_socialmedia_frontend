@@ -70,10 +70,10 @@ export function SectionHeader({
   );
 }
 
-export function ListSkeleton({ label }: { label: string }) {
+export function ListSkeleton({ label, rows = 3 }: { label: string; rows?: number }) {
   return (
-    <div className="flex flex-col gap-3" aria-busy="true">
-      {[0, 1, 2].map((i) => (
+    <div role="status" className="flex flex-col gap-3" aria-busy="true">
+      {Array.from({ length: rows }, (_, i) => (
         <div
           key={i}
           className="h-16 animate-pulse rounded-2xl border border-border bg-card motion-reduce:animate-none"

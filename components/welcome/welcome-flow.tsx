@@ -34,7 +34,8 @@ type Props = {
 export function WelcomeFlow({ workspaceId, canCreate, resume }: Props) {
   const [reading, setReading] = useState(resume);
   return reading ? (
-    <ReadingRoom workspaceId={workspaceId} {...reading} onRetry={(runId) => setReading({ ...reading, runId })} />
+    // Keyed by run: a retry starts the screen afresh (clock, log, checks, documents).
+    <ReadingRoom key={reading.runId} workspaceId={workspaceId} {...reading} onRetry={(runId) => setReading({ ...reading, runId })} />
   ) : (
     <AddressStep workspaceId={workspaceId} canCreate={canCreate} onStarted={setReading} />
   );
@@ -200,23 +201,21 @@ function ReadingRoom({
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
   const [checks, setChecks] = useState<Record<string, CheckState>>({ seo: "waiting", geo: "waiting" });
+  // Polls in a row where the brand's research run wasn't this one, and polls in a row that failed.
+  const [misses, setMisses] = useState(0);
+  const [fails, setFails] = useState(0);
   const cursor = useRef<string | null>(null);
   const logEnd = useRef<HTMLLIElement>(null);
 
   // The brand's research run isn't the one in the URL (an old link, or someone started another reading).
-  const mismatch = !!docs && docs.research?.runId !== runId;
+  // Two polls in a row, so one odd response doesn't stop the screen.
+  const mismatch = misses >= 2;
   const status = docs?.research?.runId === runId ? docs.research.status : "QUEUED";
   const finished = status === "SUCCEEDED" || status === "FAILED";
   const elapsed = Math.max(0, Math.round((now - startedAt) / 1000));
   const shown = Object.fromEntries(CHECKS.map((c) => [c.key, settleCheck(checks[c.key], elapsed)]));
   const polling = !mismatch && keepPolling({ finished, checks: CHECKS.map((c) => shown[c.key]), elapsedS: elapsed });
-
-  useEffect(() => {
-    cursor.current = null;
-    setEvents([]);
-    // Drop the previous run's state so a retry isn't read as a mismatch before the next poll.
-    setDocs(null);
-  }, [runId]);
+  const active = !finished && polling;
 
   useEffect(() => {
     if (!polling) return;
@@ -240,8 +239,11 @@ function ReadingRoom({
           });
         }
         setDocs(d);
+        setMisses((m) => (d.research?.runId === runId ? 0 : m + 1));
+        setFails(0);
       } catch {
-        // Transient network error: the next tick tries again.
+        // Network error: the next tick tries again; a few in a row say so on screen.
+        if (!ctrl.signal.aborted) setFails((n) => n + 1);
       }
     };
     void tick();
@@ -291,21 +293,9 @@ function ReadingRoom({
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
         <h1 className="font-display text-4xl font-medium tracking-tight break-all sm:text-5xl">{host}</h1>
         <p aria-live="polite" className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
-          {finished || !polling ? null : <span className="size-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" />}
-          {mismatch
-            ? "Not found"
-            : status === "SUCCEEDED"
-              ? "Read"
-              : status === "FAILED"
-                ? "Stopped"
-                : !polling
-                  ? "Still reading in the background"
-                  : status === "RUNNING"
-                    ? "Reading"
-                    : events.length
-                      ? "Waiting to retry"
-                      : "Starting"}
-          {finished || !polling ? null : ` · ${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`}
+          {active ? <span className="size-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" /> : null}
+          {statusLabel({ mismatch, status, polling, unreachable: fails >= 3, started: events.length > 0 })}
+          {active ? ` · ${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}` : null}
         </p>
       </header>
 
@@ -433,6 +423,16 @@ function ReadingRoom({
   );
 }
 
+function statusLabel(r: { mismatch: boolean; status: string; polling: boolean; unreachable: boolean; started: boolean }) {
+  if (r.mismatch) return "Not found";
+  if (r.status === "SUCCEEDED") return "Read";
+  if (r.status === "FAILED") return "Stopped";
+  if (!r.polling) return "Still reading in the background";
+  if (r.unreachable) return "Can’t reach the server. Retrying.";
+  if (r.status === "RUNNING") return "Reading";
+  return r.started ? "Waiting to retry" : "Starting";
+}
+
 function DocStatus({ state }: { state: DocState }) {
   if (state === "drafted") {
     return (
@@ -474,6 +474,6 @@ function CheckStatus({ state }: { state: CheckState }) {
     );
   }
   if (state === "failed") return <span className="text-sm text-destructive">Stopped</span>;
-  if (state === "late") return <span className="text-sm text-muted-foreground">Still running, check Analytics later</span>;
+  if (state === "late") return <span className="text-sm text-muted-foreground">Still running. Check Analytics later.</span>;
   return <span className="text-sm text-muted-foreground">Waiting</span>;
 }
