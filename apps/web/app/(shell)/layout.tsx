@@ -47,7 +47,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
           <MainArea>{children}</MainArea>
         </div>
         {/* A platform-only account has no workspace, so no conversation to hold. */}
-        {workspaceId ? <AssistantPanel workspaceId={workspaceId} brandId={shell.activeBrandId} brandName={brandName} /> : null}
+        {workspaceId ? <AssistantPanel workspaceId={workspaceId} brandId={shell.activeBrandId} brandName={brandName} canCreateBrand={canCreateBrand} /> : null}
       </AssistantProvider>
       <PageViewTracker workspaceId={workspaceId} brandId={shell.activeBrandId} />
     </div>

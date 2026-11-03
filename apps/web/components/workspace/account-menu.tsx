@@ -26,10 +26,11 @@ type Props = {
   platformAdmin?: boolean;
   /** The workspaces to switch between. */
   workspaces?: WorkspaceOption[];
+  activeWorkspaceId?: string | null;
 };
 
 /** The sidebar's account row and its menu: the "more" pages, Admin, the workspaces, sign out. */
-export function AccountMenu({ name, email, image, roleLabel, platformAdmin, workspaces = [] }: Props) {
+export function AccountMenu({ name, email, image, roleLabel, platformAdmin, workspaces = [], activeWorkspaceId = null }: Props) {
   const initial = (name ?? email ?? "?").trim().charAt(0).toUpperCase();
   return (
     <DropdownMenu>
@@ -64,11 +65,11 @@ export function AccountMenu({ name, email, image, roleLabel, platformAdmin, work
             <Link href="/admin">Admin</Link>
           </DropdownMenuItem>
         ) : null}
-        {workspaces.length ? (
+        {workspaces.length > 1 ? (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
-            <WorkspaceItems workspaces={workspaces} />
+            <WorkspaceItems workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />
           </>
         ) : null}
         <DropdownMenuSeparator />

@@ -1,7 +1,7 @@
 "use client";
 
 import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 
 export type WorkspaceOption = {
   id: string;
@@ -9,16 +9,26 @@ export type WorkspaceOption = {
   slug: string;
 };
 
-/** The workspace choices of a dropdown menu; choosing one makes it the active workspace. */
-export function WorkspaceItems({ workspaces }: { workspaces: WorkspaceOption[] }) {
-  return workspaces.map((ws) => (
-    <DropdownMenuItem
-      key={ws.id}
-      onSelect={() => {
-        void setActiveWorkspace(ws.id);
+/** The workspace choices of a dropdown menu, the active one marked; choosing one makes it the active workspace. */
+export function WorkspaceItems({
+  workspaces,
+  activeWorkspaceId,
+}: {
+  workspaces: WorkspaceOption[];
+  activeWorkspaceId: string | null;
+}) {
+  return (
+    <DropdownMenuRadioGroup
+      value={activeWorkspaceId ?? ""}
+      onValueChange={(id) => {
+        void setActiveWorkspace(id);
       }}
     >
-      {ws.name}
-    </DropdownMenuItem>
-  ));
+      {workspaces.map((ws) => (
+        <DropdownMenuRadioItem key={ws.id} value={ws.id}>
+          {ws.name}
+        </DropdownMenuRadioItem>
+      ))}
+    </DropdownMenuRadioGroup>
+  );
 }

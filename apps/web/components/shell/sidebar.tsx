@@ -36,10 +36,11 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
   let activeId = navFor(pathname).activeId;
   if (pathname === "/" && panel === "content") activeId = "wave";
   if (pathname === "/" && panel === "competitors") activeId = "drift";
+  if (pathname === "/performance") activeId = "surge";
   const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));
 
   return (
-    <aside className="flex h-full w-[232px] shrink-0 flex-col bg-card">
+    <aside aria-label="Workspace" className="flex h-full w-[232px] shrink-0 flex-col bg-card">
       <div className="px-5 pt-8">
         <Link href="/" aria-label="Espanda, Overview" className="inline-block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <EspandaLogo height={33} />
@@ -90,7 +91,7 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
                     <span className="flex items-center gap-2">
                       <span className="truncate font-medium text-foreground">{e.label}</span>
                       {e.soon ? (
-                        <span className="shrink-0 rounded-lg bg-muted px-2 text-xs text-primary-strong">Soon</span>
+                        <span className="shrink-0 rounded-[8px] bg-muted px-2 text-xs text-primary-strong">Soon</span>
                       ) : null}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">{e.role}</span>
@@ -111,6 +112,7 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
           roleLabel={user.roleLabel}
           platformAdmin={platformAdmin}
           workspaces={workspaces}
+          activeWorkspaceId={activeWorkspaceId}
         />
       </div>
     </aside>

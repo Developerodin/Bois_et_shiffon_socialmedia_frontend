@@ -37,6 +37,9 @@ describe("navFor", () => {
   it("falls back to Overview for unknown paths", () => {
     expect(navFor("/totally/unknown")).toEqual({ activeId: null, title: "Overview", brandScoped: true });
   });
+  it("keeps the Performance page over Surge", () => {
+    expect(navFor("/performance").activeId).toBe("performance");
+  });
   it("ignores the query string", () => {
     expect(navFor("/performance?x=1").title).toBe("Performance");
   });

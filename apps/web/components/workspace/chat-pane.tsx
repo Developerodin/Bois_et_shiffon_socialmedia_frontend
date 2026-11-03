@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
+import { SHELL_STROKE } from "@/components/shell/icon";
 import { Check, Globe, Loader2, Play, Square, TriangleAlert, Wrench } from "lucide-react";
 import { startRun } from "@/components/agents/api";
 import { isOffline, NET_MESSAGE, send } from "@/lib/net";
@@ -137,7 +138,7 @@ function StartAgent({ workspaceId, brandId, agentKey }: { workspaceId: string; b
   if (state === "started") {
     return (
       <p role="status" className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Check className="size-3.5 text-success" aria-hidden="true" /> Started the {agentKey} agent. Progress shows in Logs.
+        <Check className="size-3.5 text-success" strokeWidth={SHELL_STROKE} aria-hidden="true" /> Started the {agentKey} agent. Progress shows in Logs.
       </p>
     );
   }
@@ -251,13 +252,13 @@ function ChatSession({
                     return (
                       <p key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         {failed ? (
-                          <TriangleAlert className="size-3.5 text-destructive" aria-hidden="true" />
+                          <TriangleAlert className="size-3.5 text-destructive" strokeWidth={SHELL_STROKE} aria-hidden="true" />
                         ) : done ? (
-                          <Check className="size-3.5 text-success" aria-hidden="true" />
+                          <Check className="size-3.5 text-success" strokeWidth={SHELL_STROKE} aria-hidden="true" />
                         ) : name === "webSearch" ? (
-                          <Globe className="size-3.5 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+                          <Globe className="size-3.5 animate-pulse motion-reduce:animate-none" strokeWidth={SHELL_STROKE} aria-hidden="true" />
                         ) : (
-                          <Wrench className="size-3.5 animate-pulse motion-reduce:animate-none" aria-hidden="true" />
+                          <Wrench className="size-3.5 animate-pulse motion-reduce:animate-none" strokeWidth={SHELL_STROKE} aria-hidden="true" />
                         )}
                         {label}
                         {failed ? " (failed)" : done ? "" : "…"}
@@ -270,7 +271,7 @@ function ChatSession({
             ))}
             {status === "submitted" && (
               <li className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Thinking…
+                <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" strokeWidth={SHELL_STROKE} aria-hidden="true" /> Thinking…
               </li>
             )}
           </ol>
