@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronUp, Plug, Settings, Users } from "lucide-react";
+import { Check, ChevronUp, Plug, Settings, Users } from "lucide-react";
+import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
+import { NAV } from "@/lib/nav";
+import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,10 +21,29 @@ type Props = {
   email?: string | null;
   image?: string | null;
   /** "card": full-width footer of the Context pane (Okara). "avatar": compact, for the top bar. */
-  variant: "card" | "avatar";
+  variant: "card" | "avatar" | "sidebar";
+  /** Sidebar only: the member's role name under their name. */
+  roleLabel?: string | null;
+  /** Sidebar only: shows Admin. Visibility only; /admin is gated by its own layout. */
+  platformAdmin?: boolean;
+  /** Sidebar only: the workspaces to switch between (listed when there is more than one). */
+  workspaces?: WorkspaceOption[];
+  activeWorkspaceId?: string | null;
 };
 
-export function AccountMenu({ name, email, image, variant }: Props) {
+export function AccountMenu({ name, email, image, variant, roleLabel, platformAdmin, workspaces, activeWorkspaceId }: Props) {
+  if (variant === "sidebar") {
+    return (
+      <SidebarAccountMenu
+        name={name}
+        email={email}
+        roleLabel={roleLabel}
+        platformAdmin={platformAdmin}
+        workspaces={workspaces}
+        activeWorkspaceId={activeWorkspaceId}
+      />
+    );
+  }
   const initials = (name ?? email ?? "?").split(/[\s@]/).map((s) => s[0]).join("").slice(0, 2).toUpperCase();
   const avatar = (
     <Avatar className="h-8 w-8">
@@ -72,6 +94,71 @@ export function AccountMenu({ name, email, image, variant }: Props) {
             <Settings aria-hidden="true" /> Settings
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <SignOutItem />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** The sidebar's account row and its menu: the "more" pages, Admin, the workspaces, sign out. */
+function SidebarAccountMenu({
+  name,
+  email,
+  roleLabel,
+  platformAdmin,
+  workspaces = [],
+  activeWorkspaceId,
+}: Pick<Props, "name" | "email" | "roleLabel" | "platformAdmin" | "workspaces" | "activeWorkspaceId">) {
+  const initial = (name ?? email ?? "?").trim().charAt(0).toUpperCase();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label="Account menu"
+        className="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-2xl py-2 text-left hover:bg-muted active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-primary-strong" aria-hidden="true">
+          {initial}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold text-foreground">{name ?? email}</span>
+          {roleLabel ? <span className="block truncate text-xs text-muted-foreground">{roleLabel}</span> : null}
+        </span>
+        <ChevronUp className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="top" className="w-60">
+        <DropdownMenuLabel className="font-normal">
+          <span className="block truncate font-medium">{name ?? "Signed in"}</span>
+          {email && <span className="block truncate text-xs text-muted-foreground">{email}</span>}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {NAV.filter((e) => e.group === "more").map((e) => (
+          <DropdownMenuItem key={e.id} asChild>
+            <Link href={e.href}>{e.label}</Link>
+          </DropdownMenuItem>
+        ))}
+        {platformAdmin ? (
+          <DropdownMenuItem asChild>
+            <Link href="/admin">Admin</Link>
+          </DropdownMenuItem>
+        ) : null}
+        {workspaces.length > 1 ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+            {workspaces.map((ws) => (
+              <DropdownMenuItem
+                key={ws.id}
+                onSelect={() => {
+                  void setActiveWorkspace(ws.id);
+                }}
+              >
+                <span className="flex-1 truncate">{ws.name}</span>
+                {ws.id === activeWorkspaceId ? <Check className="size-4" aria-hidden="true" /> : null}
+              </DropdownMenuItem>
+            ))}
+          </>
+        ) : null}
         <DropdownMenuSeparator />
         <SignOutItem />
       </DropdownMenuContent>

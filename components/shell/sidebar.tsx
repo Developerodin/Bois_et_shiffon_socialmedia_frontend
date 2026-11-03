@@ -1,0 +1,122 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname, useSearchParams } from "next/navigation";
+import { FileText, LayoutDashboard, Plug, type LucideIcon } from "lucide-react";
+import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
+import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
+import { AccountMenu } from "@/components/workspace/account-menu";
+import { NAV, navFor, type NavEntry } from "@/lib/nav";
+import { cn } from "@/lib/utils";
+
+const MAIN_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, connections: Plug };
+/** One stroke width for every icon in the shell. */
+const STROKE = 1.75;
+
+type Props = {
+  brands: BrandOption[];
+  workspaces: WorkspaceOption[];
+  activeWorkspaceId: string | null;
+  activeBrandId: string | null;
+  canCreateBrand: boolean;
+  /** Visibility only: /admin is gated by its own layout, so hiding the link is never the access check. */
+  platformAdmin: boolean;
+  user: { name?: string | null; email?: string | null; image?: string | null; roleLabel?: string | null };
+};
+
+const row =
+  "flex items-center gap-3 rounded-2xl text-sm transition-colors active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, user }: Props) {
+  const pathname = usePathname();
+  const panel = useSearchParams().get("panel");
+
+  // Agents that point at a page or panel are selected by where you are; Echo's stand-in destination never is.
+  let activeId = navFor(pathname).activeId;
+  if (pathname === "/" && panel === "content") activeId = "wave";
+  if (pathname === "/" && panel === "competitors") activeId = "drift";
+  const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));
+
+  return (
+    <aside className="flex h-full w-[232px] shrink-0 flex-col bg-card">
+      <div className="px-5 pt-8">
+        <Link href="/" aria-label="Espanda, Overview" className="inline-block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <EspandaLogo height={33} />
+        </Link>
+      </div>
+      <div className="mt-6 px-5">
+        <BrandSwitcher
+          variant="sidebar"
+          workspaceId={activeWorkspaceId}
+          brands={brands}
+          activeBrandId={activeBrandId}
+          canCreate={canCreateBrand}
+        />
+      </div>
+
+      <nav aria-label="Workspace" className="mt-6 min-h-0 flex-1 overflow-y-auto pb-4">
+        <ul className="mr-7 ml-5">
+          {NAV.filter((e) => e.group === "main").map((e) => {
+            const Icon = MAIN_ICONS[e.id];
+            const on = isActive(e);
+            return (
+              <li key={e.id}>
+                <Link
+                  href={e.href}
+                  aria-current={on ? "page" : undefined}
+                  className={cn(row, "h-12 px-3", on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+                >
+                  {Icon ? <Icon className="size-5 shrink-0" strokeWidth={STROKE} aria-hidden="true" /> : null}
+                  {e.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <p className="mt-6 mb-2 px-5 text-xs text-muted-foreground">Your agents</p>
+        <ul className="mx-5">
+          {NAV.filter((e) => e.group === "agent").map((e) => {
+            const on = isActive(e);
+            return (
+              <li key={e.id}>
+                <Link
+                  href={e.href}
+                  aria-current={on ? "page" : undefined}
+                  className={cn(row, "h-[52px] px-2", on ? "bg-accent" : "hover:bg-muted")}
+                >
+                  <Image src={`/agents/${e.id}.svg`} alt="" width={36} height={36} className="size-9 shrink-0" />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate font-medium text-foreground">{e.label}</span>
+                      {e.soon ? (
+                        <span className="shrink-0 rounded-lg bg-muted px-2 text-xs text-primary-strong">Soon</span>
+                      ) : null}
+                    </span>
+                    <span className="block truncate text-xs text-muted-foreground">{e.role}</span>
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* No Help and support row: the repo has no help page and no support address in its environment. */}
+      <div className="mx-5 border-t border-border py-3">
+        <AccountMenu
+          variant="sidebar"
+          name={user.name}
+          email={user.email}
+          image={user.image}
+          roleLabel={user.roleLabel}
+          platformAdmin={platformAdmin}
+          workspaces={workspaces}
+          activeWorkspaceId={activeWorkspaceId}
+        />
+      </div>
+    </aside>
+  );
+}
