@@ -5,7 +5,7 @@ import { isPlatformAdmin } from "@/server/auth/platform-admin";
 import { prisma } from "@/server/db/prisma";
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
-/** The workspace: one screen with Context, Today + Agents and Chat (Okara pattern). */
+/** The workspace: one screen with Context, Today and Agents (Okara pattern); the chat is the shell's Espanda panel. */
 export default async function WorkspacePage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
@@ -16,7 +16,7 @@ export default async function WorkspacePage() {
   // First run: no brand yet → the website step.
   if (shell.activeWorkspaceId && shell.brands.length === 0) redirect("/welcome");
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
-    return <p className="p-10 text-muted-foreground">Pick a brand from the switcher above.</p>;
+    return <p className="p-10 text-muted-foreground">Pick a business from the switcher in the sidebar.</p>;
   }
 
   const brand = await prisma.brand.findFirstOrThrow({

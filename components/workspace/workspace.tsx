@@ -17,7 +17,6 @@ import {
   ListChecks,
   Loader2,
   Lock,
-  MessageCircle,
   MessageSquareQuote,
   MessagesSquare,
   PenLine,
@@ -35,8 +34,6 @@ import { fetchContextDocs, type ContextDocEntry, type ContextDocKind, type Conte
 import { ApiError, errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
-import { AccountMenu } from "@/components/workspace/account-menu";
-import { ChatPane } from "@/components/workspace/chat-pane";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
 import { ContentPanel, ContentView, IdeasPanel, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { Markdown } from "@/components/context/markdown";
@@ -193,7 +190,6 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
           docs={docs}
           geo={reports?.geo ?? null}
           connections={connections}
-          user={user}
           onOpenDoc={(doc) => open({ kind: "doc", doc })}
           onOpenResearch={() => open({ kind: "agent", key: "research" })}
         />
@@ -266,7 +262,6 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
       icon: <Users />,
       render: () => <CompetitorsPanel base={base} onOpen={(id) => open({ kind: "competitor", id })} onFind={() => open({ kind: "agent", key: "competitors" })} />,
     },
-    { id: "chat", title: "Chat", icon: <MessageCircle />, render: () => <ChatPane workspaceId={workspaceId} brandId={brandId} website={website} /> },
     { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> },
   ];
 
@@ -285,29 +280,29 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
   );
 }
 
-const PANEL_IDS = ["context", "home", "ideas", "content", "competitors", "analytics", "feed", "chat", "log"] as const;
+const PANEL_IDS = ["context", "home", "ideas", "content", "competitors", "analytics", "feed", "log"] as const;
 type PanelId = (typeof PANEL_IDS)[number];
 
 const PRESETS: Preset<PanelId>[] = [
   {
     name: "Focus",
-    description: "Context, today and agents, chat",
-    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 2.2, panels: ["home"] }, { id: "c", size: 1.3, panels: ["chat", "feed"] }], collapsed: ["feed"] },
+    description: "Context, today and agents, agents feed",
+    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 2.2, panels: ["home"] }, { id: "c", size: 1.3, panels: ["feed"] }], collapsed: [] },
   },
   {
     name: "Content team",
-    description: "Ideas, today and agents, content calendar, chat",
-    layout: { columns: [{ id: "a", size: 1.1, panels: ["ideas"] }, { id: "b", size: 1.8, panels: ["home"] }, { id: "c", size: 1.1, panels: ["content"] }, { id: "d", size: 1.1, panels: ["chat"] }], collapsed: [] },
+    description: "Ideas, today and agents, content calendar",
+    layout: { columns: [{ id: "a", size: 1.1, panels: ["ideas"] }, { id: "b", size: 1.8, panels: ["home"] }, { id: "c", size: 1.1, panels: ["content"] }], collapsed: [] },
   },
   {
     name: "Market",
     description: "Your scores next to your competitors'",
-    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.3, panels: ["analytics"] }, { id: "c", size: 1.3, panels: ["competitors"] }, { id: "d", size: 1.1, panels: ["chat"] }], collapsed: [] },
+    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.3, panels: ["analytics"] }, { id: "c", size: 1.3, panels: ["competitors"] }], collapsed: [] },
   },
   {
     name: "Classic",
-    description: "Context, analytics, agents feed, chat",
-    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.15, panels: ["analytics"] }, { id: "c", size: 1.15, panels: ["feed"] }, { id: "d", size: 1.1, panels: ["chat"] }], collapsed: [] },
+    description: "Context, analytics, agents feed",
+    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.15, panels: ["analytics"] }, { id: "c", size: 1.15, panels: ["feed"] }], collapsed: [] },
   },
   {
     name: "Operator",
@@ -403,7 +398,6 @@ function ContextPane({
   docs,
   geo,
   connections,
-  user,
   onOpenDoc,
   onOpenResearch,
 }: {
@@ -414,7 +408,6 @@ function ContextPane({
   docs: ContextDocsResponse | null;
   geo: Report;
   connections: Connection[] | null;
-  user: Props["user"];
   onOpenDoc: (k: ContextDocKind) => void;
 }) {
   const product = docs?.docs.find((d) => d.kind === "product-information");
@@ -527,9 +520,6 @@ function ContextPane({
             </Link>
           )}
         </section>
-      </div>
-      <div className="border-t border-border p-2">
-        <AccountMenu variant="card" name={user.name} email={user.email} image={user.image} />
       </div>
     </div>
   );
