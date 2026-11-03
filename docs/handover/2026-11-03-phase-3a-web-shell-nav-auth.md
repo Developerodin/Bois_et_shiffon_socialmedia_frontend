@@ -1,6 +1,6 @@
 # Handover: Phase 3a, web shell, navigation, settings and auth
 
-Status: implemented and 4-lens reviewed; review fixes in `357da74`. Browser test: pending.
+Status: DONE. Implemented, 4-lens reviewed, review fixes in `357da74`, browser-tested 22/22 after `519850a` (Logs Escape now also works from the Logs button).
 Branch `audit-fixes`. Commits: `19b5183`, `357da74`.
 
 Review fixes applied: `/login?next=` open redirect via control characters (made reachable by the new signed-in

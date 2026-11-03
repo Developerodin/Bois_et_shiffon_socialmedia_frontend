@@ -1,6 +1,6 @@
 # Handover: Phase 3b + 5, web workspace content and polish
 
-Status: implemented and 4-lens reviewed (no critical); the chat create race (P2002) fixed in `357da74`. Browser test: pending.
+Status: DONE. Implemented, 4-lens reviewed (no critical), chat create race fixed in `357da74`, browser-tested; the one failure (viewer saw write buttons on /context) fixed in `519850a` and re-checked.
 Branch `audit-fixes`. Commits: `5a93f94`, `357da74`.
 
 Review findings left open: Owner-only buttons pop in after `/my-permissions` loads (perms null → hidden); `usePerms`
