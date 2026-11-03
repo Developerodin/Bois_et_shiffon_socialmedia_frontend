@@ -373,10 +373,14 @@ export async function settlePublication(input: {
   attemptId: string;
   action: "cancel" | "posted" | "not-posted";
   url?: string;
+  /** When given, the attempt must belong to this content item (the one in the URL). */
+  itemId?: string;
 }) {
   const from = input.action === "cancel" ? "SCHEDULED" : "PENDING_VERIFY";
   const to = input.action === "posted" ? "PUBLISHED" : input.action === "cancel" ? "CANCELLED" : "FAILED";
-  const a = await prisma.publicationAttempt.findFirst({ where: { id: input.attemptId, workspaceId: input.workspaceId, brandId: input.brandId } });
+  const a = await prisma.publicationAttempt.findFirst({
+    where: { id: input.attemptId, workspaceId: input.workspaceId, brandId: input.brandId, ...(input.itemId ? { contentItemId: input.itemId } : {}) },
+  });
   if (!a) throw new PublishingError("Not found", 404);
   const externalUrl = input.url ? safeHttpUrl(input.url)?.href ?? null : null;
   const { count } = await prisma.publicationAttempt.updateMany({

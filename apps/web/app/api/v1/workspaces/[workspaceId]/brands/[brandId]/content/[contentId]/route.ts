@@ -116,7 +116,7 @@ export async function POST(request: Request, context: Params) {
       const a = await schedulePublication({ ...scope, itemId, version: body.version, connectionId: body.connectionId, boardId: body.boardId, imageUrl: body.imageUrl, imageLinks: body.imageLinks, mediaKeys: body.mediaKeys, videoUrl: body.videoUrl, runAt: body.runAt ? new Date(body.runAt) : undefined });
       if (a.runAt.getTime() <= Date.now() + 5_000) kickRunner();
     } else {
-      await settlePublication({ ...scope, attemptId: body.attemptId, action: body.action, url: body.url });
+      await settlePublication({ ...scope, itemId, attemptId: body.attemptId, action: body.action, url: body.url });
     }
     return Response.json(await releaseState(scope, itemId));
   } catch (error) {
