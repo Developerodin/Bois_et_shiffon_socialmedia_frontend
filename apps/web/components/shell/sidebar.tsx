@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { FileText, LayoutDashboard, Plug, type LucideIcon } from "lucide-react";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { SHELL_STROKE } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
 import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
 import { AccountMenu } from "@/components/workspace/account-menu";
@@ -12,8 +13,6 @@ import { NAV, navFor, type NavEntry } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 const MAIN_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, connections: Plug };
-/** One stroke width for every icon in the shell. */
-const STROKE = 1.75;
 
 type Props = {
   brands: BrandOption[];
@@ -68,7 +67,7 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
                   aria-current={on ? "page" : undefined}
                   className={cn(row, "h-12 px-3", on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
                 >
-                  {Icon ? <Icon className="size-5 shrink-0" strokeWidth={STROKE} aria-hidden="true" /> : null}
+                  {Icon ? <Icon className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : null}
                   {e.label}
                 </Link>
               </li>
@@ -114,7 +113,6 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
           roleLabel={user.roleLabel}
           platformAdmin={platformAdmin}
           workspaces={workspaces}
-          activeWorkspaceId={activeWorkspaceId}
         />
       </div>
     </aside>

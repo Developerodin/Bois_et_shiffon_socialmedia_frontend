@@ -23,6 +23,20 @@ type Props = {
   activeWorkspaceId: string | null;
 };
 
+/** The workspace choices of a dropdown menu; choosing one makes it the active workspace. */
+export function WorkspaceItems({ workspaces }: { workspaces: WorkspaceOption[] }) {
+  return workspaces.map((ws) => (
+    <DropdownMenuItem
+      key={ws.id}
+      onSelect={() => {
+        void setActiveWorkspace(ws.id);
+      }}
+    >
+      {ws.name}
+    </DropdownMenuItem>
+  ));
+}
+
 export function WorkspaceSwitcher({ workspaces, activeWorkspaceId }: Props) {
   const active =
     workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0];
@@ -50,16 +64,7 @@ export function WorkspaceSwitcher({ workspaces, activeWorkspaceId }: Props) {
         <DropdownMenuContent align="end" className="min-w-[12rem]">
           <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {workspaces.map((ws) => (
-            <DropdownMenuItem
-              key={ws.id}
-              onSelect={() => {
-                void setActiveWorkspace(ws.id);
-              }}
-            >
-              {ws.name}
-            </DropdownMenuItem>
-          ))}
+          <WorkspaceItems workspaces={workspaces} />
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
