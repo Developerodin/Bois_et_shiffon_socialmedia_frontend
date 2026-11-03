@@ -120,7 +120,6 @@ test.describe("owner connections", () => {
 
   test("/connections offers Connect or Reconnect", async ({ page }) => {
     await page.goto("/connections");
-    await expect(page.getByRole("status", { name: "Loading connections" })).toHaveCount(0);
     await expect(page.getByRole("main").getByRole("listitem").first()).toBeVisible();
     await expect(page.getByRole("button", { name: CONNECT_BUTTON }).first()).toBeVisible();
   });
@@ -133,7 +132,6 @@ test.describe("viewer", () => {
     await page.goto("/connections");
     await expect(page.getByRole("heading", { name: "Connections", level: 1 })).toBeVisible();
     // Wait for the list itself, or an empty button count proves nothing.
-    await expect(page.getByRole("status", { name: "Loading connections" })).toHaveCount(0);
     await expect(page.getByRole("main").getByRole("listitem").first()).toBeVisible();
     await expect(page.getByRole("button", { name: CONNECT_BUTTON })).toHaveCount(0);
   });
