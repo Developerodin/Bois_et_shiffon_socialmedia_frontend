@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SHELL_STROKE } from "@/components/shell/icon";
 import { NewBrandDialog } from "@/components/shell/new-brand-dialog";
 
 export type BrandOption = {
@@ -43,7 +44,7 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
         workspaceId={workspaceId}
         trigger={
           <button type="button" className={`${SIDEBAR_BOX} cursor-pointer active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}>
-            <Plus className="size-4 text-disabled" aria-hidden="true" />
+            <Plus className="size-4 text-disabled" strokeWidth={SHELL_STROKE} aria-hidden="true" />
             <span className="truncate">Create a business</span>
           </button>
         }
@@ -65,7 +66,7 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
             {active.displayName.charAt(0).toUpperCase()}
           </span>
           <span className="min-w-0 flex-1 truncate text-left">{active.displayName}</span>
-          <ChevronDown className="size-4 shrink-0 text-disabled" aria-hidden="true" />
+          <ChevronDown className="size-4 shrink-0 text-disabled" strokeWidth={SHELL_STROKE} aria-hidden="true" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[12rem]">
@@ -91,7 +92,7 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
               workspaceId={workspaceId}
               trigger={
                 <button type="button" className="flex min-h-9 w-full items-center gap-2 rounded-lg px-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <Plus className="size-4" aria-hidden="true" /> Create a business
+                  <Plus className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" /> Create a business
                 </button>
               }
             />

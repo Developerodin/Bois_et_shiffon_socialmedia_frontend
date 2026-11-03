@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ChevronUp, Plug, Settings, Users } from "lucide-react";
-import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
+import { ChevronUp, Plug, Settings, Users } from "lucide-react";
+import { SHELL_STROKE } from "@/components/shell/icon";
 import { NAV } from "@/lib/nav";
-import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
+import { WorkspaceItems, type WorkspaceOption } from "@/components/shell/workspace-switcher";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -28,10 +28,9 @@ type Props = {
   platformAdmin?: boolean;
   /** Sidebar only: the workspaces to switch between (listed when there is more than one). */
   workspaces?: WorkspaceOption[];
-  activeWorkspaceId?: string | null;
 };
 
-export function AccountMenu({ name, email, image, variant, roleLabel, platformAdmin, workspaces, activeWorkspaceId }: Props) {
+export function AccountMenu({ name, email, image, variant, roleLabel, platformAdmin, workspaces }: Props) {
   if (variant === "sidebar") {
     return (
       <SidebarAccountMenu
@@ -40,7 +39,6 @@ export function AccountMenu({ name, email, image, variant, roleLabel, platformAd
         roleLabel={roleLabel}
         platformAdmin={platformAdmin}
         workspaces={workspaces}
-        activeWorkspaceId={activeWorkspaceId}
       />
     );
   }
@@ -108,8 +106,7 @@ function SidebarAccountMenu({
   roleLabel,
   platformAdmin,
   workspaces = [],
-  activeWorkspaceId,
-}: Pick<Props, "name" | "email" | "roleLabel" | "platformAdmin" | "workspaces" | "activeWorkspaceId">) {
+}: Pick<Props, "name" | "email" | "roleLabel" | "platformAdmin" | "workspaces">) {
   const initial = (name ?? email ?? "?").trim().charAt(0).toUpperCase();
   return (
     <DropdownMenu>
@@ -124,7 +121,7 @@ function SidebarAccountMenu({
           <span className="block truncate text-sm font-semibold text-foreground">{name ?? email}</span>
           {roleLabel ? <span className="block truncate text-xs text-muted-foreground">{roleLabel}</span> : null}
         </span>
-        <ChevronUp className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <ChevronUp className="size-4 shrink-0 text-muted-foreground" strokeWidth={SHELL_STROKE} aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" side="top" className="w-60">
         <DropdownMenuLabel className="font-normal">
@@ -142,21 +139,11 @@ function SidebarAccountMenu({
             <Link href="/admin">Admin</Link>
           </DropdownMenuItem>
         ) : null}
-        {workspaces.length > 1 ? (
+        {workspaces.length ? (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
-            {workspaces.map((ws) => (
-              <DropdownMenuItem
-                key={ws.id}
-                onSelect={() => {
-                  void setActiveWorkspace(ws.id);
-                }}
-              >
-                <span className="flex-1 truncate">{ws.name}</span>
-                {ws.id === activeWorkspaceId ? <Check className="size-4" aria-hidden="true" /> : null}
-              </DropdownMenuItem>
-            ))}
+            <WorkspaceItems workspaces={workspaces} />
           </>
         ) : null}
         <DropdownMenuSeparator />
