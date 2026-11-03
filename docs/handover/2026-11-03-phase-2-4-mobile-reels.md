@@ -1,6 +1,6 @@
 # Handover: Phases 2 + 4, mobile reels (and the reels server)
 
-Status: implemented and 4-lens reviewed; review fixes in `540be54` and `feb98b7`. Emulator check: pending.
+Status: DONE. Implemented, 4-lens reviewed, review fixes in `540be54` and `feb98b7`, emulator-checked (all checks pass).
 Branch `audit-fixes`. Commits: `6d5726c`, `540be54`, `feb98b7`.
 
 Review fixes applied: the reel GET no longer starts AI runs (read roles could trigger paid Quality runs); the app calls

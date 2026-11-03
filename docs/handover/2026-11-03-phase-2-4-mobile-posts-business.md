@@ -1,6 +1,6 @@
 # Handover: Phases 2 + 4, mobile posts, business, plans, onboarding, marketing
 
-Status: implemented and 4-lens reviewed (no critical); review fixes in `9a51628`. Emulator check: pending.
+Status: DONE. Implemented, 4-lens reviewed (no critical), review fixes in `9a51628`, emulator-checked (all checks pass).
 Branch `audit-fixes`. Commits: `6f298ac`, `9a51628`.
 
 Review fixes applied: `/plans/activated` no longer blank when the plan read fails (spinner + close, redirect after a
