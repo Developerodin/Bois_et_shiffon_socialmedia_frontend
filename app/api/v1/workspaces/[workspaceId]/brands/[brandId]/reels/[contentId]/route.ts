@@ -4,7 +4,7 @@ import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-r
 import { kickIfDue, kickRunner } from "@/server/jobs/runner";
 import { ReelPlan } from "@/server/reels/plan";
 import { enqueueTick, startRender } from "@/server/reels/render";
-import { editPlan, reelDetail, registerPostLink, sendReel, toReelProblem as toProblem } from "@/server/reels/service";
+import { editPlan, recheckQuality, reelDetail, registerPostLink, sendReel, toReelProblem as toProblem } from "@/server/reels/service";
 import { InsufficientCreditsError } from "@/server/services/credits";
 import { prisma } from "@/server/db/prisma";
 import { PlanRequiredError } from "@/server/services/subscriptions";
@@ -24,6 +24,8 @@ export async function GET(request: Request, context: Params) {
     const running = await prisma.reelRender.findFirst({ where: { contentItemId: contentId, step: { in: ["VOICE", "CLIPS", "JOIN"] } } });
     if (running && Date.now() - running.updatedAt.getTime() > 60_000) await enqueueTick(running);
     await kickIfDue();
+    // A finished render whose Quality check never started: start it again rather than leave the review waiting.
+    if (!detail.checks && detail.item.status === "DRAFT_REVIEW") await recheckQuality(scope, contentId).catch(() => false);
     return Response.json(detail);
   } catch (error) {
     return toProblem(error);
@@ -47,9 +49,10 @@ export async function PATCH(request: Request, context: Params) {
 const Action = z.discriminatedUnion("action", [
   z.object({ action: z.literal("render"), version: z.number().int().min(1) }),
   z.object({ action: z.literal("send"), version: z.number().int().min(1), how: z.literal("download") }),
+  z.object({ action: z.literal("recheck") }),
   z.object({ action: z.literal("register-link"), url: z.string().min(1).max(500) }),
 ]);
-const PERMISSION = { render: "content.create", send: "content.approve", "register-link": "publish.execute" } as const;
+const PERMISSION = { render: "content.create", send: "content.approve", recheck: "content.create", "register-link": "publish.execute" } as const;
 
 /** Make video / Try again (render), Download (send: the approval act), Posted it? Add link (register-link). */
 export async function POST(request: Request, context: Params) {
@@ -72,6 +75,7 @@ export async function POST(request: Request, context: Params) {
         throw e;
       }
     }
+    if (body.action === "recheck") return Response.json({ started: await recheckQuality(scope, itemId, true) }, { status: 202 });
     if (body.action === "send") return Response.json(await sendReel(scope, itemId, body.version));
     await registerPostLink(scope, itemId, body.url);
     return Response.json({ ok: true });

@@ -1,5 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
+import { startAgentRun } from "@/server/agents/engine";
+import { kickRunner } from "@/server/jobs/runner";
 import { brandKnowledge, productPhotos } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
 import { directScenes, type DraftSoFar, type ReelPhoto, writePlan } from "@/server/reels/agents";
@@ -149,6 +151,37 @@ export async function sendReel(scope: Scope, itemId: string, version: number) {
   if (item.status === "AWAITING_APPROVAL") await decide({ ...scope, itemId, version, verdict: "APPROVED" });
   else if (!["APPROVED", "SCHEDULED", "PUBLISHED"].includes(item.status)) throw new PublishingError("The checks are still running. Try again in a moment.", 409);
   return { videoUrl: await signedMediaUrl(body.videoKey, 3600) };
+}
+
+const CHECK_WAIT_MS = 90_000;
+const CHECK_TRIES = 3;
+const CHECK_IN_FLIGHT_MS = 5 * 60_000;
+
+/**
+ * The Quality check a finished render should get (render.ts starts it, but a missed start is not retried there).
+ * Called from the app's poll (waits until the last try is CHECK_WAIT_MS old, at most CHECK_TRIES tries an hour) and
+ * from its "Check again" button (`manual`: no wait, no cap). Never starts a second run while one is in flight.
+ * ponytail: the history is read from agent runs; a column on the render would be cheaper if this gets hot.
+ */
+export async function recheckQuality(scope: Omit<Scope, "userId">, itemId: string, manual = false) {
+  const item = await prisma.contentItem.findFirst({
+    where: { id: itemId, workspaceId: scope.workspaceId, brandId: scope.brandId, studio: true },
+    include: { versions: { orderBy: { version: "desc" }, take: 1, include: { checks: { select: { id: true }, take: 1 } } } },
+  });
+  const latest = item?.versions[0];
+  if (!item || !latest || item.status !== "DRAFT_REVIEW" || latest.checks.length > 0) return false;
+  const now = Date.now();
+  const runs = await prisma.agentRun.findMany({
+    where: { brandId: scope.brandId, agentKey: "quality", createdAt: { gt: new Date(now - 3600_000) }, input: { path: ["itemId"], equals: itemId } },
+    orderBy: { createdAt: "desc" },
+    select: { status: true, createdAt: true },
+  });
+  const last = runs[0]?.createdAt.getTime() ?? latest.createdAt.getTime();
+  if (runs.some((r) => ["QUEUED", "RUNNING"].includes(r.status) && now - r.createdAt.getTime() < CHECK_IN_FLIGHT_MS)) return false;
+  if (!manual && (now - last < CHECK_WAIT_MS || runs.length >= CHECK_TRIES)) return false;
+  await startAgentRun({ ...scope, agentKey: "quality", trigger: "event", input: { itemId, version: latest.version } });
+  kickRunner();
+  return true;
 }
 
 const INSTAGRAM_POST = /^https:\/\/(www\.)?instagram\.com\/(reel|reels|p)\/[A-Za-z0-9_-]+\/?(\?.*)?$/;
