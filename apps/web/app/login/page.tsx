@@ -25,9 +25,12 @@ const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE
 const rise = (n: number) => ({ animationDelay: `${n * 40}ms` });
 
 /** Where to go after sign-in: a same-site path only ("/x", never "//host" or "https://…"). */
-function safeNext(next?: string, callbackUrl?: string): string {
-  const path = next ?? (callbackUrl ? pathOf(callbackUrl) : "/");
-  const ok = path.startsWith("/") && !path.startsWith("//") && !path.startsWith("/\\") && !path.startsWith("/login");
+function safeNext(next?: string | string[], callbackUrl?: string | string[]): string {
+  const raw = typeof next === "string" ? next : typeof callbackUrl === "string" ? pathOf(callbackUrl) : "/";
+  // Browsers drop tabs/newlines in Location, so "/\t/evil.com" would become "//evil.com": reject control chars and backslashes.
+  if (!raw.startsWith("/") || /[\x00-\x1f\\]/.test(raw)) return "/";
+  const path = pathOf(raw);
+  const ok = !path.startsWith("//") && !path.startsWith("/login");
   return ok ? path : "/";
 }
 

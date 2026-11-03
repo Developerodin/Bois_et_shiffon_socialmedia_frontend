@@ -44,6 +44,16 @@ export function AssistantPanel(p: Props) {
     ref.current?.toggleAttribute("inert", !shown);
   }, [shown]);
 
+  // Escape closes the drawer even when focus has moved to the page behind it.
+  useEffect(() => {
+    if (!open || wide) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !e.defaultPrevented) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, wide, setOpen]);
+
   useEffect(() => {
     if (open && !wide) ref.current?.focus();
     else if (wasOpen.current && !open && !wide) document.getElementById(ASSISTANT_TOGGLE_ID)?.focus();
