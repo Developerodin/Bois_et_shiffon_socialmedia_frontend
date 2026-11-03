@@ -23,11 +23,11 @@ export function ErrorScreen({
         <span className="inline-flex size-12 items-center justify-center rounded-full border border-border bg-muted text-primary" aria-hidden="true">
           <Icon className="size-5" />
         </span>
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">{code}</p>
+        <p className="text-xs text-primary">{code}</p>
         <h1 className="font-display text-4xl font-medium tracking-tight text-balance">{title}</h1>
         <p className="text-muted-foreground text-pretty">{description}</p>
         <div className="flex flex-wrap gap-3">{children}</div>
-        {reference ? <p className="font-mono text-xs text-muted-foreground">Reference: {reference}</p> : null}
+        {reference ? <p className="text-xs text-muted-foreground">Reference: {reference}</p> : null}
       </div>
     </main>
   );

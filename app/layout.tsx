@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { Suspense } from "react";
 import { ConnectionBanner } from "@/components/net/connection-banner";
 import { NavProgress } from "@/components/nav/nav-progress";
-import { THEME_SCRIPT } from "@/components/theme/theme-script";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
   subsets: ["latin"],
 });
 
@@ -32,16 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // suppressHydrationWarning: the theme script below may add .light / .dark to <html> before React loads.
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* Apply a saved theme choice before the first paint (no flash of the other theme). Without one, the
-            system setting decides (globals.css). components/theme/theme-toggle.tsx writes the choice. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-      </head>
-      <body
-        className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} antialiased`}
-      >
+    <html lang="en">
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}>
         {/* Suspense: it reads the URL's query, which would otherwise stop static pages being prerendered. */}
         <Suspense fallback={null}>
           <NavProgress />

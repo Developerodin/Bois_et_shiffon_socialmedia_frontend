@@ -498,7 +498,7 @@ function ContextPane({
               <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
                 {competitors.map((c) => (
                   <li key={c.name} className="flex min-w-0 items-center gap-2 text-sm">
-                    <span className="grid size-5 shrink-0 place-items-center rounded bg-muted text-[10px] font-semibold uppercase">{c.name[0]}</span>
+                    <span className="grid size-5 shrink-0 place-items-center rounded bg-muted text-xs font-semibold">{c.name[0]?.toUpperCase()}</span>
                     <span className="truncate">{c.name}</span>
                   </li>
                 ))}
@@ -523,7 +523,7 @@ function ContextPane({
             </ul>
           ) : (
             <Link href="/settings?tab=connections" className="mt-2 inline-block text-sm text-muted-foreground hover:text-foreground">
-              Connect Instagram, Facebook, Google… →
+              Connect Instagram, Facebook, Google…
             </Link>
           )}
         </section>
@@ -903,7 +903,7 @@ function AgentView({
                 Latest report · <span className="tabular-nums">{report.score}/100</span>
               </h2>
               <Link href="/performance" className="text-sm text-muted-foreground hover:text-foreground">
-                Full report →
+                Full report
               </Link>
             </div>
             <p className="max-w-[70ch] text-sm leading-relaxed">{report.summary}</p>
@@ -993,7 +993,7 @@ function AnalyticsPanel({ reports, onOpenAgent }: { reports: { seo: Report; geo:
           </div>
           {ps && (
             <div className="rounded-xl border border-border p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">PageSpeed · mobile</p>
+              <p className="text-xs font-medium text-muted-foreground">PageSpeed on mobile</p>
               <div className="mt-3 grid grid-cols-4 gap-2">
                 <Score label="Performance" value={ps.performance} />
                 <Score label="Accessibility" value={ps.accessibility} />
@@ -1096,7 +1096,7 @@ function AgentsFeed({
               <Icon className={cn("size-4", meta.tint)} aria-hidden="true" />
             </span>
             <button type="button" onClick={() => onOpen({ kind: "agent", key: a.key })} className="min-w-0 flex-1 text-left">
-              <span className="block text-xs font-semibold uppercase tracking-wide">{a.name} agent</span>
+              <span className="block text-xs font-semibold">{a.name} agent</span>
               <span className="block truncate text-sm text-muted-foreground">{feedLine(a.key, a, reports, docs)}</span>
             </button>
             <Button size="sm" variant="ghost" disabled={running || busy === a.key} onClick={() => run(a.key)} aria-label={`Run ${a.name}`}>
@@ -1111,7 +1111,7 @@ function AgentsFeed({
             <p.icon className="size-4 text-muted-foreground" aria-hidden="true" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-xs font-semibold uppercase tracking-wide">{p.name} agent</span>
+            <span className="block text-xs font-semibold">{p.name} agent</span>
             <span className="block truncate text-sm text-muted-foreground">{p.does}</span>
           </span>
           <span className="flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">

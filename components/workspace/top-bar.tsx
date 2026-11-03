@@ -19,7 +19,6 @@ import {
 import { AccountMenu } from "@/components/workspace/account-menu";
 import { ScoreRing } from "@/components/workspace/score-ring";
 import { SignOutItem } from "@/components/workspace/sign-out-item";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 
 export type TopBarScores = {
@@ -153,7 +152,6 @@ export function TopBar(p: Props) {
               <SignOutItem />
             </DropdownMenuContent>
           </DropdownMenu>
-          <ThemeToggle />
           {/* On phones Settings is in the avatar's menu, to leave the project name room. */}
           <Button variant="ghost" size="icon" className={cn("size-10 sm:size-9", !onWorkspace && "hidden sm:inline-flex")} asChild>
             <Link href="/settings" aria-label="Settings">

@@ -313,7 +313,7 @@ export function PanelLayout<Id extends string>({
                       }}
                       className={cn(
                         "group flex h-10 shrink-0 cursor-grab items-center gap-2 border-b border-border px-2 active:cursor-grabbing",
-                        dropHint === hint && "shadow-[inset_0_2px_0_0_hsl(var(--primary))]",
+                        dropHint === hint && "shadow-[inset_0_2px_0_0_var(--primary)]",
                       )}
                     >
                       <GripVertical className="size-4 text-muted-foreground/50 group-hover:text-muted-foreground" aria-hidden="true" />
@@ -362,7 +362,7 @@ export function PanelLayout<Id extends string>({
                 tabIndex={0}
                 onPointerDown={(e) => startResize(ci, e)}
                 onKeyDown={(e) => nudge(ci, e)}
-                className="w-px shrink-0 cursor-col-resize bg-border outline-none transition-colors hover:bg-primary focus-visible:bg-primary [box-shadow:0_0_0_3px_transparent] hover:[box-shadow:0_0_0_2px_hsl(var(--primary)/0.3)]"
+                className="w-px shrink-0 cursor-col-resize bg-border outline-none transition-colors hover:bg-primary focus-visible:bg-primary [box-shadow:0_0_0_3px_transparent] hover:[box-shadow:0_0_0_2px_color-mix(in_srgb,var(--primary)_30%,transparent)]"
               />
             )}
           </div>
@@ -372,7 +372,7 @@ export function PanelLayout<Id extends string>({
           onDragOver={allow("new-column")}
           onDragLeave={() => setDropHint(null)}
           onDrop={onDrop("new-column")}
-          className={cn("w-3 shrink-0 transition-[width] duration-150", dropHint === "new-column" && "w-24 bg-primary/10")}
+          className={cn("w-3 shrink-0", dropHint === "new-column" && "w-24 bg-primary/10")}
           aria-hidden="true"
         />
       </div>

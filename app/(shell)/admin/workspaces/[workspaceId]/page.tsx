@@ -44,13 +44,13 @@ export default async function AdminWorkspaceOverview({ params }: { params: Promi
         <Section id="activity" title="Latest activity">
           <LogTable kind="audit" rows={activity.rows.slice(0, 8)} fx={fx} />
           <Link href={`${base}/logs`} className={more}>
-            Audit log →
+            Audit log
           </Link>
         </Section>
         <Section id="runs" title="Recent agent runs">
           <LogTable kind="runs" rows={runs.rows.slice(0, 8)} fx={fx} />
           <Link href={`${base}/logs?log=runs`} className={more}>
-            All agent runs →
+            All agent runs
           </Link>
         </Section>
       </div>

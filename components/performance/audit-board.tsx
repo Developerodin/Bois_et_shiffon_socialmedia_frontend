@@ -159,7 +159,7 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
     <div className="mx-auto flex max-w-6xl flex-col gap-8">
       <div>
         <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Performance</h1>
-        <p className="mt-1 text-sm text-muted-foreground">How findable the brand is — in search engines and in AI assistants — and what to fix first.</p>
+        <p className="mt-1 text-sm text-muted-foreground">How findable the brand is, in search engines and in AI assistants, and what to fix first.</p>
       </div>
       {body}
     </div>

@@ -31,7 +31,7 @@ export function Ago({ at }: { at: Date | string | null | undefined }) {
 /** An empty cell: a quiet dash, read out as "none". */
 export const Empty = () => (
   <span className="text-muted-foreground/60" aria-label="none">
-    –
+    -
   </span>
 );
 
@@ -152,12 +152,12 @@ export function Pager({ page, hasMore, href, pages }: { page: number; hasMore: b
   return (
     <nav aria-label="Pages" className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
       {/* Plain links, like the filters: see components/admin/segmented-links.tsx. */}
-      {page > 1 ? <a className={link} href={href(page - 1)}>← Previous</a> : <span />}
+      {page > 1 ? <a className={link} href={href(page - 1)}>Previous</a> : <span />}
       <span>
         Page {page}
         {pages ? ` of ${pages.toLocaleString("en")}` : ""}
       </span>
-      {hasMore ? <a className={link} href={href(page + 1)}>Next →</a> : <span />}
+      {hasMore ? <a className={link} href={href(page + 1)}>Next</a> : <span />}
     </nav>
   );
 }
@@ -167,8 +167,8 @@ export function CursorPager({ newest, older }: { newest?: string; older?: string
   if (!newest && !older) return null;
   return (
     <nav aria-label="Pages" className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-      {newest ? <a className={pillButton} href={newest}>← Newest</a> : <span />}
-      {older ? <a className={pillButton} href={older}>Older →</a> : <span />}
+      {newest ? <a className={pillButton} href={newest}>Newest</a> : <span />}
+      {older ? <a className={pillButton} href={older}>Older</a> : <span />}
     </nav>
   );
 }
@@ -189,7 +189,7 @@ export function period(v?: string) {
 export function PageHeader({ eyebrow, title, children, crumbs }: { eyebrow?: string; title: string; children?: React.ReactNode; crumbs?: { href?: string; label: string }[] }) {
   return (
     <header className="flex flex-col gap-2">
-      {crumbs ? <Crumbs items={crumbs} /> : eyebrow ? <p className="font-mono text-xs uppercase tracking-[0.14em] text-primary">{eyebrow}</p> : null}
+      {crumbs ? <Crumbs items={crumbs} /> : eyebrow ? <p className="text-xs text-primary">{eyebrow}</p> : null}
       <h1 className="font-display text-3xl font-medium tracking-tight text-balance">{title}</h1>
       {children ? <div className="max-w-prose text-sm text-muted-foreground">{children}</div> : null}
     </header>

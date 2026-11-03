@@ -1,118 +1,81 @@
+/* Hallmark · checked: 2026-11-03 · genre: modern-minimal · scope: app · built: the project · redesign: restyle */
 @import "tailwindcss";
 
 /*
- * Dark-first tokens (HSL triplets). Light theme follows system preference,
- * and can be forced with `.light` / `.dark` on <html> once a user toggle exists.
- * Accent family: brass (primary) + olive (accent). Contrast pairs checked for
- * WCAG AA: foreground/muted-foreground on background and card, primary-foreground
- * on primary, status colours used as text on background.
+ * Espanda light theme. One token set, hex values. Contrast pairs: ink on canvas and surface, primary-foreground on
+ * primary, primary-strong and the status colours as text on surface.
  */
 :root {
-  color-scheme: dark;
-  --background: 30 8% 6%;
-  --foreground: 40 22% 93%;
-  --card: 30 7% 9%;
-  --card-foreground: 40 22% 93%;
-  --popover: 30 7% 10%;
-  --popover-foreground: 40 22% 93%;
-  --muted: 30 6% 14%;
-  --muted-foreground: 36 10% 66%;
-  --border: 32 7% 19%;
-  --input: 32 7% 22%;
-  --primary: 40 52% 60%;
-  --primary-foreground: 30 20% 8%;
-  --secondary: 30 6% 15%;
-  --secondary-foreground: 40 22% 93%;
-  --accent: 72 24% 54%;
-  --accent-foreground: 30 20% 8%;
-  --destructive: 4 72% 63%;
-  --destructive-foreground: 30 20% 8%;
-  --success: 120 30% 60%;
-  --warning: 38 88% 62%;
-  --ring: 40 52% 60%;
+  color-scheme: light;
+  --background: #f6f5f9;
+  --foreground: #191620;
+  --card: #ffffff;
+  --card-foreground: #191620;
+  --popover: #ffffff;
+  --popover-foreground: #191620;
+  --muted: #f2f0f7;
+  --muted-foreground: #5e596b;
+  --border: #ded9e6;
+  --input: #ded9e6;
+  --control: #8e879b;
+  --disabled: #64646f;
+  --primary: #5b50d6;
+  --primary-strong: #4c40bb;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f0f7;
+  --secondary-foreground: #191620;
+  --accent: #eeeafc;
+  --accent-foreground: #4c40bb;
+  --link: #4a50f9;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --success: #1a7f4b;
+  --warning: #9a5b00;
+  --ring: #5b50d6;
+  --chart-1: #5b50d6;
+  /* Scrim behind dialogs and sheets: the ink colour, never pure black. */
+  --terminal: #191620;
+  --terminal-foreground: #e8e6ee;
+  --terminal-accent: #b7aef5;
+  --overlay: color-mix(in srgb, var(--foreground) 45%, transparent);
   --radius: 1rem;
 }
 
-@media (prefers-color-scheme: light) {
-  :root:not(.dark) {
-    color-scheme: light;
-    --background: 40 25% 97%;
-    --foreground: 30 12% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 30 12% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 30 12% 10%;
-    --muted: 40 16% 92%;
-    --muted-foreground: 30 8% 35%;
-    --border: 35 14% 84%;
-    --input: 35 14% 80%;
-    --primary: 36 52% 28%;
-    --primary-foreground: 40 25% 97%;
-    --secondary: 40 16% 92%;
-    --secondary-foreground: 30 12% 10%;
-    --accent: 75 28% 30%;
-    --accent-foreground: 40 25% 97%;
-    --destructive: 0 70% 40%;
-    --destructive-foreground: 40 25% 97%;
-    --success: 140 45% 26%;
-    --warning: 30 90% 30%;
-    --ring: 36 52% 28%;
-  }
-}
-
-:root.light {
-  color-scheme: light;
-  --background: 40 25% 97%;
-  --foreground: 30 12% 10%;
-  --card: 0 0% 100%;
-  --card-foreground: 30 12% 10%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 30 12% 10%;
-  --muted: 40 16% 92%;
-  --muted-foreground: 30 8% 35%;
-  --border: 35 14% 84%;
-  --input: 35 14% 80%;
-  --primary: 36 52% 28%;
-  --primary-foreground: 40 25% 97%;
-  --secondary: 40 16% 92%;
-  --secondary-foreground: 30 12% 10%;
-  --accent: 75 28% 30%;
-  --accent-foreground: 40 25% 97%;
-  --destructive: 0 70% 40%;
-  --destructive-foreground: 40 25% 97%;
-  --success: 140 45% 26%;
-  --warning: 30 90% 30%;
-  --ring: 36 52% 28%;
-}
-
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-success: hsl(var(--success));
-  --color-warning: hsl(var(--warning));
-  --color-ring: hsl(var(--ring));
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-control: var(--control);
+  --color-disabled: var(--disabled);
+  --color-primary: var(--primary);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-link: var(--link);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
+  --color-terminal: var(--terminal);
+  --color-terminal-foreground: var(--terminal-foreground);
+  --color-terminal-accent: var(--terminal-accent);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --font-sans: var(--font-inter);
-  --font-display: var(--font-fraunces);
   --font-mono: var(--font-mono);
 }
 
@@ -120,58 +83,40 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body {
+    overflow-x: clip;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter), system-ui, sans-serif;
   }
+  ::selection {
+    background: var(--accent);
+    color: var(--foreground);
+  }
+  html {
+    scrollbar-color: var(--control) var(--background);
+  }
 }
 
 .font-display {
-  font-family: var(--font-fraunces), Georgia, serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
 }
 
-/* Theme switch (components/theme/theme-toggle.tsx). With View Transitions the new theme is revealed in a circle
-   from the button: the browser's default cross-fade is turned off so only that reveal plays. Without them, colours
-   ease for 300 ms while .theme-fade is on. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-.theme-fade,
-.theme-fade *,
-.theme-fade *::before,
-.theme-fade *::after {
-  transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease, fill 300ms ease !important;
-}
+/* The Espanda logo (components/brand/espanda-logo.tsx): its lettering is black, so the light artwork is the one shown. */
+.logo-on-dark { display: none; }
+.logo-on-light { display: block; }
 
-/* Chart marks (admin spend chart). A more saturated step of the brass than --primary: the brand brass reads
-   gray-ish as a data mark. Both values pass the dataviz validator (lightness band, chroma floor, >= 3:1 on card). */
-:root { --chart-1: #b8842a; }
-@media (prefers-color-scheme: light) { :root:not(.dark) { --chart-1: #8a5c12; } }
-:root.light { --chart-1: #8a5c12; }
-
-/* The Espanda logo (components/brand/espanda-logo.tsx): its lettering is black, so dark surfaces get a copy with
-   light lettering. Switched by the same rules as the colour tokens above. */
-.logo-on-light { display: none; }
-@media (prefers-color-scheme: light) {
-  :root:not(.dark) .logo-on-light { display: block; }
-  :root:not(.dark) .logo-on-dark { display: none; }
-}
-:root.light .logo-on-light { display: block; }
-:root.light .logo-on-dark { display: none; }
-
-/* Soft warm glow behind page heroes (decorative only). */
+/* Page heroes sit flat on the canvas (no glow); the class stays so existing markup keeps working. */
 .surface-glow {
-  background-image:
-    radial-gradient(60rem 24rem at 10% -10%, hsl(var(--primary) / 0.12), transparent 60%),
-    radial-gradient(40rem 20rem at 90% 0%, hsl(var(--accent) / 0.08), transparent 60%);
+  background-color: transparent;
 }
 
 /* "Alive" utilities. Disabled under prefers-reduced-motion. */
 @keyframes status-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 hsl(var(--primary) / 0.5); }
-  50% { opacity: 0.7; box-shadow: 0 0 0 6px hsl(var(--primary) / 0); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 0%, transparent); }
 }
 .status-pulse {
   animation: status-pulse 1.6s ease-in-out infinite;
@@ -211,7 +156,7 @@
 
 /* Admin console motion. The sliding highlight under tabs, sidebar and filters (components/admin/use-indicator.ts). */
 .slide-indicator {
-  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1), width 250ms cubic-bezier(0.22, 1, 0.36, 1), height 250ms cubic-bezier(0.22, 1, 0.36, 1), opacity 150ms;
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1), opacity 150ms;
 }
 /* Data arriving: chart columns grow from the baseline, share bars from the left (both scale, no layout change). */
 @keyframes grow-y { from { transform: scaleY(0); } to { transform: none; } }
@@ -232,20 +177,18 @@
   inset: 0 0 auto 0;
   z-index: 100;
   height: 2px;
-  background: hsl(var(--primary));
+  background: var(--primary);
   transform-origin: left;
   transform: scaleX(0);
-  opacity: 0;
   pointer-events: none;
 }
 .nav-progress[data-state="loading"] {
-  opacity: 1;
   transform: scaleX(0.8);
   transition: transform 8s cubic-bezier(0.1, 0.8, 0.2, 1);
 }
 .nav-progress[data-state="done"] {
   transform: scaleX(1);
-  transition: transform 150ms ease-out, opacity 250ms ease 150ms;
+  transition: transform 150ms ease-out;
 }
 /* An opened <details> eases its content in instead of popping. */
 details[open] > :not(summary) {

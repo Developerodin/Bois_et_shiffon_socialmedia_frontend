@@ -416,7 +416,7 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
 
   return (
     <div className="border-t border-border pt-4">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">History</h3>
+      <h3 className="text-xs font-semibold text-muted-foreground">History</h3>
       {error && <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>}
       <ol className="mt-2 flex flex-col divide-y divide-border">
         {rows.map(({ key, d, a }) => {
@@ -445,7 +445,7 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
                 )}
               </span>
               {a.error && a.status !== "PUBLISHED" && <span className="text-muted-foreground">{a.error}</span>}
-              {overdue && <span className="text-muted-foreground">Overdue — waiting for the job runner to post it.</span>}
+              {overdue && <span className="text-muted-foreground">Overdue: waiting for the job runner to post it.</span>}
               {!canPublish && a.status === "PENDING_VERIFY" && <span className="text-muted-foreground">Waiting for someone who can publish to confirm whether it posted.</span>}
               {canPublish && a.status === "SCHEDULED" && (
                 <span>

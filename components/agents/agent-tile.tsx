@@ -74,7 +74,7 @@ export function AgentTile({ agent, workspaceId, brandId, onRunStarted }: Props) 
         <h3 className="font-display text-lg font-medium leading-tight tracking-tight">
           {agent.name}
         </h3>
-        <span className="flex shrink-0 items-center gap-2 rounded-full border border-border px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+        <span className="flex shrink-0 items-center gap-2 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
           <span
             className={cn(
               "size-1.5 rounded-full",

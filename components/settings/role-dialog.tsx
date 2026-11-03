@@ -144,7 +144,7 @@ export function RoleDialog({ workspaceId, role, catalog, onRetryCatalog, onClose
             ) : catalog.kind === "ready" ? (
               [...groups.entries()].map(([category, perms]) => (
                 <div key={category} className="rounded-xl border border-border p-4">
-                  <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-primary">
+                  <p className="mb-3 text-xs font-medium text-primary">
                     {category}
                   </p>
                   <div className="grid gap-3 sm:grid-cols-2">

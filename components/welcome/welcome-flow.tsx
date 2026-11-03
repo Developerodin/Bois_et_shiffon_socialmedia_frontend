@@ -296,7 +296,7 @@ function ReadingRoom({
           <h2 id="log-heading" className="text-sm font-medium text-muted-foreground">
             What the agent is doing
           </h2>
-          <ol className="mt-4 flex max-h-[26rem] flex-col gap-1.5 overflow-y-auto font-mono text-[13px] leading-relaxed">
+          <ol className="mt-4 flex max-h-[26rem] flex-col gap-1.5 overflow-y-auto text-sm leading-relaxed">
             {events.length === 0 && <li className="text-muted-foreground">Waiting for the first page…</li>}
             {events.map((e) => (
               <li key={e.id} className="flex gap-3">
