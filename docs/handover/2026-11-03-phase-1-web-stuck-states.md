@@ -1,7 +1,21 @@
 # Handover: Phase 1, web stuck states and lost work
 
-Status: implemented, 4-lens reviewed, review fixes applied. Browser test: in progress.
-Branch `audit-fixes` (worktree `.claude/worktrees/audit-fixes`). Commits: `db2b11e`, `ca2316e`.
+Status: DONE. Implemented, 4-lens reviewed, review fixes applied, browser-tested (10/11 pass, the 11th fixed in
+`0264142`), shell e2e 9/9.
+Branch `audit-fixes` (worktree `.claude/worktrees/audit-fixes`). Commits: `db2b11e`, `ca2316e`, `0264142`.
+
+## Browser test (2026-11-03)
+
+Passed: Overview loads clean (no duplicate-key errors); 500s show errors with Try again and recover; a hung request
+errors at ~35 s; failed refresh shows and clears; Accounts/Competitors never claim "connect"/0 while loading or failed;
+unsaved-edit confirm on all seven exits (one prompt each, none when clean or after save); 409 keeps text and updates the
+label; sidebar Overview returns home; `/context` retries every 15 s without overlap; no-website business saves; post
+spinner clears with "The agent finished."; viewer pages clean.
+Fixed after the test (`0264142`): welcome kept polling ~10 min on a brand with no website (silent checks now settle 2 min
+after research ends); "Follow the latest reading" now updates `?run=`.
+Seen, not fixed: clicking the already-open doc row while editing asks to discard; a hydration attribute mismatch on
+`/?post=<id>` (likely a date/locale string; may predate this work); `/context` banner title says "Agent service
+unavailable" when only documents failed.
 Plan: `docs/superpowers/plans/2026-11-03-audit-fixes.md`, Phase 1.
 
 ## What changed
