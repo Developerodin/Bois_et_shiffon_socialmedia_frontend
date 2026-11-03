@@ -14,6 +14,13 @@ type State = Subscription & { workspaceId: string; readAt: number };
 const FRESH_MS = 30_000;
 let state: State | null = null;
 let inflight: Promise<void> | null = null;
+/** The last read failed (nothing is known about the plan): screens can say so and offer a retry. */
+let failed = false;
+const setFailed = (f: boolean) => {
+  if (failed === f) return;
+  failed = f;
+  listeners.forEach((l) => l());
+};
 const listeners = new Set<() => void>();
 const set = (s: State | null) => {
   state = s;
@@ -31,20 +38,22 @@ export function reloadPlan(force = false) {
   inflight ??= subscription()
     .then(async (s) => {
       if ((await currentBrand()).workspaceId !== s.workspaceId) return;
+      setFailed(false);
       if (same(state, s)) state = { ...state!, readAt: Date.now() };
       else set({ ...s, readAt: Date.now() });
       void showActivationOnce(s);
-    }, () => {})
+    }, () => setFailed(true))
     .finally(() => void (inflight = null));
   return inflight;
 }
 /** Switching business or signing out: the next screen reads the new workspace's plan. */
-export const forgetPlan = () => set(null);
+export const forgetPlan = () => (setFailed(false), set(null));
 
 export function usePlan() {
   const s = useSyncExternalStore(subscribe, () => state);
+  const failedRead = useSyncExternalStore(subscribe, () => failed);
   useFocusEffect(useCallback(() => void reloadPlan(), []));
-  return { loaded: s !== null, planned: !!s && (!!s.plan || s.unlimited), plan: s?.plan ?? null, unlimited: !!s?.unlimited, plans: s?.plans ?? [] };
+  return { loaded: s !== null, failed: failedRead && s === null, reload: () => reloadPlan(true), planned: !!s && (!!s.plan || s.unlimited), plan: s?.plan ?? null, unlimited: !!s?.unlimited, plans: s?.plans ?? [] };
 }
 
 /** A paid action refused for lack of a plan (402 with planRequired, as opposed to not enough credits). */

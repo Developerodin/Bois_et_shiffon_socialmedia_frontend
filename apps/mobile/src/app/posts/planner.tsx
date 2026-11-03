@@ -34,6 +34,11 @@ function cycles(now: Date) {
 export default function Planner() {
   const { t } = useTranslation("posts");
   const { items, error: loadError, reload } = usePosts();
+  const [retry, setRetry] = useState<"idle" | "busy" | "failed">("idle");
+  const tryAgain = () => {
+    setRetry("busy");
+    void reload().then(() => setRetry("failed"));
+  };
   const [now] = useState(() => new Date());
   const months = cycles(now);
   const [cycle, setCycle] = useState(months[0]);
@@ -95,8 +100,8 @@ export default function Planner() {
     >
       {loadError && !items ? (
         <View style={{ gap: space[12], paddingTop: space[16] }}>
-          <Text style={type.body}>{t("today.loadFailed")}</Text>
-          <Button label={t("today.retry")} variant="outline" onPress={() => void reload()} />
+          <Text style={type.body}>{retry === "failed" ? t("today.stillFailed") : t("today.loadFailed")}</Text>
+          <Button label={retry === "busy" ? t("today.retrying") : t("today.retry")} variant="outline" disabled={retry === "busy"} onPress={tryAgain} />
         </View>
       ) : null}
 

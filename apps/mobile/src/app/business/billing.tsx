@@ -20,7 +20,7 @@ const ICON_OF: Record<CreditLine["kind"], LucideIcon> = { reel: Clapperboard, ca
 export default function Billing() {
   const { t } = useTranslation("business");
   const { t: tp } = useTranslation("plans");
-  const { loaded, plan, unlimited } = usePlan();
+  const { loaded, failed, reload, plan, unlimited } = usePlan();
   const [data, setData] = useState<{ credits: number; history: CreditLine[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   useFocusEffect(
@@ -58,12 +58,19 @@ export default function Billing() {
         <View style={styles.planTop}>
           <View style={{ flex: 1 }}>
             <Text style={[strong14, { fontSize: 16, lineHeight: 22 }]}>
-              {plan ? t("billing.planName", { plan: tp(`plans.${plan.id}`) }) : unlimited ? t("billing.unlimited") : loaded ? t("billing.noPlan") : ""}
+              {plan ? t("billing.planName", { plan: tp(`plans.${plan.id}`) }) : unlimited ? t("billing.unlimited") : loaded ? t("billing.noPlan") : failed ? t("billing.planFailed") : t("billing.planLoading")}
             </Text>
             <Text style={[meta, { paddingTop: 4 }]}>
-              {plan ? t("billing.planBlurb", { count: plan.credits, n: formatNumber(plan.credits) }) : unlimited ? t("billing.unlimitedBlurb") : loaded ? t("billing.noPlanBlurb") : ""}
+              {plan
+                ? t("billing.planBlurb", { count: plan.credits, n: formatNumber(plan.credits), date: plan.renewsAt ? formatDate(plan.renewsAt, { day: "numeric", month: "short" }) : "" })
+                : unlimited
+                  ? t("billing.unlimitedBlurb")
+                  : loaded
+                    ? t("billing.noPlanBlurb")
+                    : ""}
             </Text>
           </View>
+          {failed ? <SmallButton label={t("billing.planRetry")} style={{ borderColor: color.divider }} onPress={() => void reload()} /> : null}
           {loaded && !plan && !unlimited ? <SmallButton label={t("billing.seePlans")} style={{ borderColor: color.divider }} onPress={() => router.push("/plans")} /> : null}
         </View>
       </SettingsCard>

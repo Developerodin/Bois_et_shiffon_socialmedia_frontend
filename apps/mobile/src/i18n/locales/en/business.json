@@ -120,8 +120,11 @@
   },
   "billing": {
     "planName": "{{plan}} plan",
-    "planBlurb_one": "{{n}} credit renews every month.",
-    "planBlurb_other": "{{n}} credits renew every month.",
+    "planBlurb_one": "{{n}} credit included, renews {{date}}.",
+    "planBlurb_other": "{{n}} credits included, renews {{date}}.",
+    "planLoading": "Checking your plan...",
+    "planFailed": "Couldn't load your plan",
+    "planRetry": "Try again",
     "unlimited": "Testing workspace",
     "unlimitedBlurb": "This workspace has no credit limit.",
     "creditsAvailable_one": "{{n}} credit available",

@@ -58,6 +58,8 @@
     "viewCalendar": "View calendar",
     "loadFailed": "Couldn't load your posts. Check your connection.",
     "retry": "Try again",
+    "retrying": "Trying again...",
+    "stillFailed": "Still couldn't load your posts. Check your connection and try again.",
     "empty": "No posts this week yet. Plan some from the Planner.",
     "slides": "Carousel · {{count}} slides"
   },

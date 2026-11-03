@@ -1,8 +1,9 @@
 import { Image } from "expo-image";
+import { useEffect, useState } from "react";
 import { Redirect, router } from "expo-router";
 import { ArrowRight, BadgeCheck, Check, Clapperboard, Coins, Info } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { formatNumber } from "@/i18n";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Footer } from "@/ui/layout";
@@ -15,7 +16,13 @@ import { ActionButton, BrandPill, ICON, PageHeader, Panel, ReelsScreen, Tag, eye
 export default function ActivationReturn() {
   const { t } = useTranslation("plans");
   const home = () => router.replace("/reels");
-  const { loaded, plan: active } = usePlan();
+  const { loaded, failed, plan: active } = usePlan();
+  // The plan read can fail silently: after a few seconds, give up and leave.
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setTimedOut(true), 10_000);
+    return () => clearTimeout(timer);
+  }, []);
   const plan = active ? t(`plans.${active.id}`) : "";
   const credits = { count: active?.credits ?? 0, n: formatNumber(active?.credits ?? 0) };
   // The open reel still waiting for its video, if any.
@@ -24,7 +31,14 @@ export default function ActivationReturn() {
   const price = pending?.price ?? 0;
   const cover = pending?.plan ? pending.photoUrls[pending.plan.scenes[0]?.photoKey] : undefined;
   // Opened with no plan behind it (a stale link, or Continue on Plans before purchases exist): nothing was activated.
-  if (!loaded) return null;
+  if (!loaded && (failed || timedOut)) return <Redirect href="/reels" />;
+  if (!loaded) {
+    return (
+      <ReelsScreen header={<PageHeader left={<BrandPill tone="white" />} right={<CloseButton onPress={home} />} />}>
+        <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} />
+      </ReelsScreen>
+    );
+  }
   if (!active) return <Redirect href="/reels" />;
   return (
     <ReelsScreen
