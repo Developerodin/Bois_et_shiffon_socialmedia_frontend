@@ -29,9 +29,13 @@ export default function ReelsStoryboard() {
   // The server refuses to render a stand-in photo (another product); send the person to R13 instead.
   const standIns = plan?.scenes.filter((s) => s.standIn).length ?? 0;
 
+  // An edit drops the video from the plan, so a plan that still has one has already been paid for: show it, don't charge again.
+  const finished = !!detail?.videoUrl && !rendering;
+
   const make = async () => {
     if (!id || !detail) return;
     if (rendering) return router.push("/reels/generating");
+    if (finished) return router.push("/reels/review");
     if (standIns) return router.push("/reels/assets");
     setStarting(true);
     try {
@@ -78,11 +82,13 @@ export default function ReelsStoryboard() {
             <ActionButton
               style={{ flex: 1 }}
               disabled={starting}
-              accessibilityLabel={standIns && !rendering ? t("storyboard.pickPhotos") : t("storyboard.makeVideoA11y", { count: price })}
+              accessibilityLabel={finished ? t("storyboard.viewVideo") : standIns && !rendering ? t("storyboard.pickPhotos") : t("storyboard.makeVideoA11y", { count: price })}
               onPress={() => void make()}
               label={
                 starting ? (
                   <ActivityIndicator color={color.onPrimary} />
+                ) : finished ? (
+                  <Text style={[type.label, { color: color.onPrimary }]}>{t("storyboard.viewVideo")}</Text>
                 ) : standIns && !rendering ? (
                   <Text style={[type.label, { color: color.onPrimary }]}>{t("storyboard.pickPhotos")}</Text>
                 ) : (

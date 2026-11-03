@@ -29,7 +29,7 @@ export default function ReelsResults() {
   const [linkFor, setLinkFor] = useState<ReelSummary | null>(null);
   const [retrying, setRetrying] = useState<string | null>(null);
 
-  const refresh = useCallback(() => reels.list().then((r) => setList(r.reels), (e: unknown) => setError(e instanceof Error ? e.message : String(e))), []);
+  const refresh = useCallback(() => reels.list().then((r) => (setList(r.reels), setError(null)), (e: unknown) => setError(e instanceof Error ? e.message : String(e))), []);
   useEffect(() => {
     refresh();
     const timer = setInterval(refresh, 5000); // processing cards move on their own

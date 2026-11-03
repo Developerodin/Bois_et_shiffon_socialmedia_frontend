@@ -51,6 +51,16 @@ export const rc = {
 export const ICON = { strokeWidth: 1.75 } as const;
 
 /** 12/18 semibold secondary eyebrow ("Scene direction", "Timing"…). */
+/** "fr" → "French" in the app's language; "" when the plan has no language or the runtime can't name it. */
+export function languageName(code: string | undefined, locale: string) {
+  if (!code) return "";
+  try {
+    return new Intl.DisplayNames([locale], { type: "language" }).of(code) ?? code.toUpperCase();
+  } catch {
+    return code.toUpperCase();
+  }
+}
+
 export const eyebrow: TextStyle = { ...type.meta, fontFamily: font.semibold, letterSpacing: 0.18 };
 export const meta: TextStyle = type.meta;
 export const metaInk: TextStyle = { ...type.meta, color: color.ink };

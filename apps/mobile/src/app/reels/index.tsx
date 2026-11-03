@@ -1,13 +1,12 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
-import { ChevronDown, LayoutTemplate, Sparkle, UserRound, WandSparkles, type LucideIcon } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { ChevronDown, LayoutTemplate, Sparkle, Store, UserRound, WandSparkles, type LucideIcon } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { currentBrand, opportunities, type ReelSummary, reels } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, ICON, ModuleHeader, Panel, ReelsScreen, Tag, ActionButton, meta, metaInk, strong14 } from "@/ui/reels/kit";
-import { photos } from "@/ui/reels/sample";
 import { openReel } from "@/ui/reels/use-reel";
 import { usePlan } from "@/ui/plans/use-plan";
 
@@ -25,15 +24,18 @@ export default function ReelsCreate() {
     if (!loaded) return;
     if (!planned) router.replace("/plans/reels");
   }, [loaded, planned]);
-  useEffect(() => {
-    currentBrand().then((b) => setName(b.name), () => {});
-    opportunities().then((r) => setIdeas(r.opportunities.filter((o) => o.channels.includes("INSTAGRAM_REEL") && o.decision !== "REJECT").length), () => {});
-    reels.list().then((r) => setRecent(r.reels.slice(0, 2)), () => {});
-  }, []);
+  // On every visit, not just the first: a reel made or finished since shows up when the person comes back.
+  useFocusEffect(
+    useCallback(() => {
+      currentBrand().then((b) => setName(b.name), () => {});
+      opportunities().then((r) => setIdeas(r.opportunities.filter((o) => o.channels.includes("INSTAGRAM_REEL") && o.decision !== "REJECT").length), () => {});
+      reels.list().then((r) => setRecent(r.reels.slice(0, 2)), () => {});
+    }, []),
+  );
   return (
     <ReelsScreen bg="#FBFBFE" header={<ModuleHeader />} footer={<BottomNav active="create" />}>
       <Pressable accessibilityRole="button" accessibilityLabel={t("create.switchBusiness", { name })} onPress={() => router.push("/business/menu")} style={styles.switcher}>
-        <Image source={photos.bcFavicon} style={{ width: 20, height: 20, borderRadius: 4 }} contentFit="contain" />
+        <Store size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
         <Text style={type.label}>{name}</Text>
         <ChevronDown size={16} color="#64646F" strokeWidth={ICON.strokeWidth} />
       </Pressable>
@@ -44,13 +46,7 @@ export default function ReelsCreate() {
       </View>
 
       <Panel style={styles.assistant}>
-        <Image
-          source={photos.diningInterior}
-          style={styles.hero}
-          contentFit="cover"
-          accessibilityLabel={t("create.heroImage", { product: "Acacia Bunting" })}
-        />
-        <View style={{ flexDirection: "row", alignItems: "center", gap: space[8], paddingTop: space[20] }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
           <View style={styles.sparkle}>
             <Sparkle size={20} color="#4C40BB" strokeWidth={ICON.strokeWidth} />
           </View>
@@ -76,8 +72,8 @@ export default function ReelsCreate() {
       </Panel>
 
       <View style={styles.shortcuts}>
-        <Shortcut Icon={UserRound} title={t("aiActor")} subtitle={t("create.actorSubtitle")} onPress={() => router.push("/reels/actor")} />
-        <Shortcut Icon={LayoutTemplate} title={t("create.templates")} subtitle={t("create.templatesSubtitle")} onPress={() => router.push("/reels/templates")} />
+        <Shortcut Icon={UserRound} title={t("aiActor")} subtitle={t("create.actorSubtitle")} onPress={() => (openReel(null), router.push("/reels/actor"))} />
+        <Shortcut Icon={LayoutTemplate} title={t("create.templates")} subtitle={t("create.templatesSubtitle")} onPress={() => (openReel(null), router.push("/reels/templates"))} />
       </View>
 
       <View style={{ paddingTop: 28 }}>
@@ -145,7 +141,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.control,
   },
   assistant: { marginTop: space[24], overflow: "hidden" },
-  hero: { height: 184, marginTop: -20, marginHorizontal: -20, backgroundColor: "#E8E4DC" },
   sparkle: { width: 28, height: 28, borderRadius: 14, backgroundColor: color.selection, alignItems: "center", justifyContent: "center" },
   plan: {
     marginTop: space[12],

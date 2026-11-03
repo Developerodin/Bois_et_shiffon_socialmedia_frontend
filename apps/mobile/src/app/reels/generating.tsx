@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ArrowLeft, Check, Clock, Coins, Info, LoaderCircle } from "lucide-react-native";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { Button } from "@/ui/button";
@@ -12,6 +12,8 @@ import { useReel } from "@/ui/reels/use-reel";
 import { reelSeconds } from "@/api/endpoints";
 
 const ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
+const NO_RENDER_MS = 30_000;
+const LONG_MS = 15 * 60_000;
 
 /**
  * R05 · Reels / Generating. Polls the render; the three designed rows are its voice, clips and join steps.
@@ -19,8 +21,16 @@ const ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
  */
 export default function ReelsGenerating() {
   const { t } = useTranslation("reels");
-  const { id, detail } = useReel(3000);
+  const { id, detail, error } = useReel(3000);
   const render = detail?.renders[0];
+  // Polling alone never ends: say so when the server can't be reached, when no render exists, or when it runs long.
+  const opened = useRef(Date.now());
+  const [waited, setWaited] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setWaited(Date.now() - opened.current), 10_000);
+    return () => clearInterval(timer);
+  }, []);
+  const note = error ? t("generating.offline") : detail && !render && waited > NO_RENDER_MS ? t("generating.noRender") : render && waited > LONG_MS ? t("generating.long") : null;
   const plan = detail?.plan;
   const title = plan?.title ?? "";
   const at = !render || render.step === "FAILED" ? 0 : render.step === "DONE" ? 3 : ORDER.indexOf(render.step);
@@ -126,6 +136,7 @@ export default function ReelsGenerating() {
             <Text style={meta}>{t("generating.remaining", { count: detail.credits })}</Text>
           </View>
         ) : null}
+        {note ? <Text style={[bodyMuted, { color: color.error, textAlign: "center" }]} accessibilityLiveRegion="polite">{note}</Text> : null}
         <View style={{ flexDirection: "row", gap: space[8], paddingHorizontal: space[8] }}>
           <Info size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} style={{ marginTop: 2 }} />
           <Text style={[bodyMuted, { flex: 1 }]}>{t("generating.safeToLeave")}</Text>

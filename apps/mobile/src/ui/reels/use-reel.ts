@@ -1,6 +1,7 @@
+import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { ApiError } from "@/api/client";
-import { type DraftSoFar, type PlanEvent, type PlanResult, type PlanStage, type ReelDetail, type ReelPlan, reels } from "@/api/endpoints";
+import { api, ApiError } from "@/api/client";
+import { currentBrand, type DraftSoFar, type PlanEvent, type PlanResult, type PlanStage, type ReelDetail, type ReelPlan, reels } from "@/api/endpoints";
 
 /**
  * The reel the Reels screens are working on (R04 → R10–R13 → R03 → R05 → R07 → R08), shared across screens
@@ -33,6 +34,28 @@ async function waitForReply(id: string, turnsBefore: number) {
     if (d && d.chat.length > turnsBefore) return;
   }
   throw new ApiError(0, "The reply is taking too long. Check back in a moment.");
+}
+
+/**
+ * A dropped create stream: the server carries on and saves the reel, so find the one that wasn't in the list before
+ * (sending the first message again would make a second reel), then wait for its reply.
+ */
+async function adoptCreated(known: Set<string>) {
+  for (const until = Date.now() + REPLY_WAIT_MS; Date.now() < until; ) {
+    await new Promise((r) => setTimeout(r, 3000));
+    const found = (await reels.list().catch(() => null))?.reels.find((r) => !known.has(r.id));
+    if (found) {
+      currentId = found.id;
+      return waitForReply(found.id, 0);
+    }
+  }
+  throw new ApiError(0, "The reply is taking too long. Check back in a moment.");
+}
+
+/** R07 "Check again": starts the Quality check a finished render never got (reels route, action recheck). */
+export async function recheckReel(id: string) {
+  const b = await currentBrand();
+  return api<{ started: boolean }>(`/workspaces/${encodeURIComponent(b.workspaceId)}/brands/${encodeURIComponent(b.brandId)}/reels/${encodeURIComponent(id)}`, { body: { action: "recheck" }, workspaceId: b.workspaceId });
 }
 
 /** Loads the current reel; poll > 0 refreshes it (R05 progress, R07 checks). */
@@ -73,6 +96,15 @@ export function useReel(poll = 0) {
       if (timer) clearInterval(timer);
     };
   }, [poll]);
+
+  // Back on this screen (Back from a later one, or the reel changed elsewhere): show the reel as it is now.
+  const focused = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (focused.current) void load();
+      focused.current = true;
+    }, [load]),
+  );
 
   // Follow the in-flight message; when it lands, show the new plan.
   useEffect(() => {
@@ -119,8 +151,15 @@ export function useReel(poll = 0) {
     };
     const turnsBefore = detail?.chat.length ?? 0;
     try {
-      if (!currentId) currentId = (await reels.create({ prompt: message, opportunityId }, onEvent)).id;
-      else {
+      if (!currentId) {
+        const known = new Set((await reels.list().catch(() => ({ reels: [] }))).reels.map((r) => r.id));
+        try {
+          currentId = (await reels.create({ prompt: message, opportunityId }, onEvent)).id;
+        } catch (e) {
+          if (!(e instanceof ApiError && e.status === 0)) throw e;
+          await adoptCreated(known);
+        }
+      } else {
         const id = currentId;
         await reels.chat(id, detail?.version ?? 0, message, onEvent).catch((e: unknown) => {
           if (e instanceof ApiError && e.status === 0) return waitForReply(id, turnsBefore);

@@ -7,6 +7,7 @@ import { color, radius, space } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Footer } from "@/ui/layout";
 import { BackTitle, BrandPill, ICON, PageHeader, ReelsScreen, bodyMuted, eyebrow, meta, rc, strong14, Tag } from "@/ui/reels/kit";
+import { reelId } from "@/ui/reels/use-reel";
 
 /** Title/subtitle live at reels:actor.style.<id>. */
 const STYLES = ["calm", "expressive"] as const;
@@ -14,6 +15,7 @@ const STYLES = ["calm", "expressive"] as const;
 /** R10 · Reels / AI Actor. */
 export default function ReelsActor() {
   const { t } = useTranslation("reels");
+  const id = reelId(); // the reel being made, if any: without one there is no script to open yet
   const [choice, setChoice] = useState<string>("none");
   // Presenters who speak on camera need lip-synced video: a later step. Until then a reel is product-only.
   const [soon, setSoon] = useState(false);
@@ -26,7 +28,7 @@ export default function ReelsActor() {
       footer={
         <Footer>
           {soon ? <Text style={[meta, { textAlign: "center" }]}>{t("actor.comingSoon")}</Text> : null}
-          <Button label={t("common:continue")} arrow onPress={() => router.push("/reels/script")} />
+          <Button label={t("common:continue")} arrow onPress={() => router.push(id ? "/reels/script" : "/reels/chat")} />
         </Footer>
       }
     >
@@ -76,10 +78,11 @@ export default function ReelsActor() {
                 <Text style={[meta, { textAlign: "center" }]}>{s.subtitle}</Text>
               </View>
               <View>
-                <Pressable accessibilityRole="button" accessibilityLabel={t("actor.sampleVoiceA11y", { title: s.title })} style={styles.sample}>
-                  <Volume2 size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
-                  <Text style={[strong14, { fontFamily: "Inter_500Medium" }]}>{t("actor.sampleVoice")}</Text>
-                </Pressable>
+                {/* No sample audio yet: shown as coming soon rather than as a button that does nothing. */}
+                <View accessible accessibilityLabel={`${t("actor.sampleVoiceA11y", { title: s.title })}, ${t("comingSoon")}`} style={styles.sample}>
+                  <Volume2 size={20} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
+                  <Text style={meta}>{t("actor.sampleVoice")} · {t("comingSoon")}</Text>
+                </View>
                 <View style={styles.voiceTag}>
                   <Text style={[meta, { textAlign: "center" }]}>{t("actor.voiceLed")}</Text>
                 </View>

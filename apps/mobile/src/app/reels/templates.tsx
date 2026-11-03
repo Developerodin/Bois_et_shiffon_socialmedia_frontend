@@ -1,23 +1,20 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Check, Search, SlidersHorizontal } from "lucide-react-native";
+import { Check } from "lucide-react-native";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { color, font, radius, space } from "@/theme/tokens";
+import { color, radius, space } from "@/theme/tokens";
 import { Button } from "@/ui/button";
-import { Field } from "@/ui/field";
 import { Footer } from "@/ui/layout";
-import { BackTitle, BrandPill, Chip, ChipRow, ICON, PageHeader, ReelsScreen, Tag, meta, rc, strong14 } from "@/ui/reels/kit";
-import { templateFilters, templates } from "@/ui/reels/sample";
+import { BackTitle, BrandPill, PageHeader, ReelsScreen, Tag, meta, rc, strong14 } from "@/ui/reels/kit";
+import { templates } from "@/ui/reels/sample";
 import { useReel } from "@/ui/reels/use-reel";
 
 /** R12 · Reels / Templates. */
 export default function ReelsTemplates() {
   const { t } = useTranslation("reels");
-  const [filter, setFilter] = useState<string>(templateFilters[0]);
   const [selected, setSelected] = useState<string>(templates[0].id);
-  const [query, setQuery] = useState("");
   const { id, busy, error, chat } = useReel();
   // A template is an instruction to the scriptwriter: it reshapes the open plan, or starts a new one.
   const use = async () => {
@@ -39,28 +36,8 @@ export default function ReelsTemplates() {
         </Footer>
       }
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
-        <View style={{ flex: 1 }}>
-          <Field
-            height={48}
-            value={query}
-            onChangeText={setQuery}
-            placeholder={t("templates.searchPlaceholder")}
-            accessibilityLabel={t("templates.searchA11y")}
-            leading={<Search size={20} color={color.inkMuted} strokeWidth={ICON.strokeWidth} />}
-            style={{ flex: 1, fontFamily: font.regular, fontSize: 16, lineHeight: 19, color: color.ink, paddingVertical: 10 }}
-          />
-        </View>
-        <Pressable accessibilityRole="button" accessibilityLabel={t("templates.tune")} style={styles.tune}>
-          <SlidersHorizontal size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
-        </Pressable>
-      </View>
-
-      <ChipRow bleed={16} style={{ marginTop: 26, marginBottom: 4 }}>
-        {templateFilters.map((f) => (
-          <Chip key={f} label={t(`templates.filter.${f}`)} selected={f === filter} onPress={() => setFilter(f)} />
-        ))}
-      </ChipRow>
+      {/* Search and filters have no backend yet: said once, instead of controls that do nothing. */}
+      <Text style={meta}>{t("templates.searchSoon")}</Text>
 
       <View style={styles.grid}>
         {templates.map((tpl) => {
@@ -97,17 +74,7 @@ export default function ReelsTemplates() {
 }
 
 const styles = StyleSheet.create({
-  tune: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: color.surface,
-    borderWidth: 1,
-    borderColor: color.controlOutline,
-    borderRadius: radius.control,
-  },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: space[16], paddingTop: space[24] },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: space[16], paddingTop: space[16] },
   card: {
     width: "47.5%",
     flexGrow: 1,

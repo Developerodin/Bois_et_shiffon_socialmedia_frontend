@@ -10,8 +10,7 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Footer } from "@/ui/layout";
 import { BrandPill, ICON, PageHeader, Panel, ReelsScreen, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
-import { currentBrand } from "@/api/endpoints";
-import { photos } from "@/ui/reels/sample";
+import { currentBrand, postRelease, posts } from "@/api/endpoints";
 import { useReel } from "@/ui/reels/use-reel";
 
 const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -19,12 +18,37 @@ const TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 /** R09 · Reels / Schedule confirmation, from the reel's real slot. */
 export default function ReelsScheduled() {
   const { t } = useTranslation("reels");
-  const { detail } = useReel();
+  const { id, detail } = useReel(5000); // Publishing now → Published without leaving the screen
   const [brandName, setBrandName] = useState("");
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     currentBrand().then((b) => setBrandName(b.name), () => {});
   }, []);
+  const status = detail?.item.status;
   const at = detail?.item.scheduledFor ? new Date(detail.item.scheduledFor) : new Date();
+  // "Publish now" also lands here: only a slot still ahead is a schedule; the same screen says what is happening otherwise.
+  const later = status === "SCHEDULED" && at.getTime() > Date.now() + 60_000;
+  const published = status === "PUBLISHED";
+  // Reels share the posts' release path: the scheduled attempt is what Cancel settles (same as a post's detail screen).
+  useEffect(() => {
+    if (!id || !later) return setAttemptId(null);
+    postRelease(id).then((r) => setAttemptId(r.attempts.find((a) => a.status === "SCHEDULED")?.id ?? null), () => setAttemptId(null));
+  }, [id, later]);
+  const cancel = async () => {
+    if (!id || !attemptId) return;
+    setCancelling(true);
+    setError(null);
+    try {
+      await posts.settle(id, attemptId, "cancel");
+      router.replace("/reels/review"); // back where Schedule is open again
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setCancelling(false);
+    }
+  };
   const plan = detail?.plan;
   const thumb = plan ? detail?.photoUrls[plan.scenes[0].photoKey] : undefined;
   const date = t("publish.dateValue", {
@@ -50,7 +74,9 @@ export default function ReelsScheduled() {
       contentStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center" }}
       footer={
         <Footer>
+          {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
           <Button label={t("scheduled.viewReel")} arrow onPress={() => router.push("/reels/review")} />
+          {attemptId ? <Button label={cancelling ? t("scheduled.cancelling") : t("scheduled.cancelSchedule")} variant="outline" height={44} disabled={cancelling} onPress={() => void cancel()} /> : null}
           <Button label={t("scheduled.backToResults")} variant="ghost" height={44} onPress={() => router.replace("/reels/results")} />
         </Footer>
       }
@@ -65,20 +91,20 @@ export default function ReelsScheduled() {
         <View style={styles.badge}>
           <Check size={28} color={color.onPrimary} strokeWidth={ICON.strokeWidth} />
         </View>
-        <Text style={[type.pageTitle, { textAlign: "center", paddingTop: space[12] }]}>{t("scheduled.title")}</Text>
-        <Text style={[bodyMuted, { textAlign: "center", paddingTop: 4 }]}>{t("scheduled.body")}</Text>
+        <Text style={[type.pageTitle, { textAlign: "center", paddingTop: space[12] }]}>{published ? t("scheduled.publishedTitle") : later ? t("scheduled.title") : t("scheduled.publishingTitle")}</Text>
+        <Text style={[bodyMuted, { textAlign: "center", paddingTop: 4 }]}>{published ? t("scheduled.publishedBody") : later ? t("scheduled.body") : t("scheduled.publishingBody")}</Text>
       </View>
 
       <Panel style={{ alignSelf: "stretch", marginTop: space[24] }}>
         <View style={styles.product}>
-          <Image source={thumb ? { uri: thumb } : photos.table} style={styles.thumb} contentFit="cover" />
+          <Image source={thumb ? { uri: thumb } : undefined} style={[styles.thumb, { backgroundColor: rc.tagGrey }]} contentFit="cover" />
           <View style={{ flex: 1 }}>
             <Text style={strong14}>{plan?.title ?? ""}</Text>
             <Text style={meta}>{t("scheduled.meta", { seconds: (detail?.price ?? 0) / 2 })}</Text>
           </View>
         </View>
         <View style={{ paddingTop: space[16], gap: space[12] }}>
-          <Row Icon={Clock} label={t("scheduled.publishDate")} value={<Text style={metaInk}>{t("scheduled.dateTime", { date, time })}</Text>} />
+          <Row Icon={Clock} label={later ? t("scheduled.publishDate") : t("scheduled.publishDateNow")} value={<Text style={metaInk}>{t("scheduled.dateTime", { date, time })}</Text>} />
           <Row Icon={Globe} label={t("timezone")} value={<Text style={metaInk}>{TIME_ZONE}</Text>} />
           <Row Icon={Store} label={t("scheduled.brandWorkspace")} value={<Text style={metaInk}>{brandName}</Text>} />
           <Row
@@ -94,7 +120,7 @@ export default function ReelsScheduled() {
         </View>
       </Panel>
 
-      <Text style={[meta, { textAlign: "center", paddingTop: space[24] }]}>{t("scheduled.editInCalendar")}</Text>
+      {attemptId ? <Text style={[meta, { textAlign: "center", paddingTop: space[24] }]}>{t("scheduled.editInCalendar")}</Text> : null}
     </ReelsScreen>
   );
 }

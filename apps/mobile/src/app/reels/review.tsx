@@ -1,39 +1,72 @@
 import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { ArrowRight, AudioLines, CircleAlert, CircleCheck, Download, MessageSquareText, MonitorPlay, Smartphone, TriangleAlert, type LucideIcon } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { reels, type CheckResult } from "@/api/endpoints";
 import { color, font, radius, space } from "@/theme/tokens";
 import { Field } from "@/ui/field";
 import { Footer } from "@/ui/layout";
-import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
+import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag, eyebrow, languageName, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { downloadReel } from "@/ui/reels/download";
-import { useReel } from "@/ui/reels/use-reel";
+import { recheckReel, useReel } from "@/ui/reels/use-reel";
 import { reelSeconds } from "@/api/endpoints";
 
-/** Statuses from which the reel may be sent: the checks have run (studio reels: the maker approves by sending). */
+/** Statuses from which the reel may be downloaded: the checks have run (studio reels: the maker approves by sending). */
 const SENDABLE = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED", "PUBLISHED"];
+/** Only these can still be scheduled; a scheduled reel is changed by cancelling its schedule (R09). */
+const SCHEDULABLE = ["AWAITING_APPROVAL", "APPROVED"];
+/** The check normally lands within a minute; past this the screen says so and offers to run it again. */
+const CHECK_SLOW_MS = 150_000;
 const CHECK_ICON: Record<CheckResult["status"], LucideIcon> = { pass: CircleCheck, warn: TriangleAlert, blocker: CircleAlert };
 
 /** R07 · Reels / Result review. Plays the reel; Download or Schedule is the approval of exactly this version. */
 export default function ReelsReview() {
-  const { t } = useTranslation("reels");
-  const { id, detail, error, setError, change } = useReelWithChange();
+  const { t, i18n } = useTranslation("reels");
+  const { id, detail, error, setError, change, load } = useReelWithChange();
   const [caption, setCaption] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [rechecks, setRechecks] = useState(0);
+  const [slow, setSlow] = useState(false);
+  const [rechecking, setRechecking] = useState(false);
   const player = useVideoPlayer(detail?.videoUrl ?? null);
   const plan = detail?.plan;
   const status = detail?.item.status;
   const blocked = detail?.checks?.overall === "BLOCKER";
   const sendable = !!status && SENDABLE.includes(status) && !blocked;
+  const schedulable = !!status && SCHEDULABLE.includes(status);
+  const scheduled = status === "SCHEDULED";
   const shownCaption = caption ?? detail?.caption?.caption ?? "";
   const hashtags = detail?.caption?.hashtags ?? [];
+  const language = languageName(plan?.language, i18n.language);
+  const context = language ? "lang" : undefined;
+  // The Quality check never landed (the server retries it while this polls): say so after a while, with a way to run it again.
+  const waiting = !!detail && !detail.checks && status === "DRAFT_REVIEW";
+  useEffect(() => {
+    setSlow(false);
+    if (!waiting) return;
+    const timer = setTimeout(() => setSlow(true), CHECK_SLOW_MS);
+    return () => clearTimeout(timer);
+  }, [waiting, rechecks]);
+  const recheck = async () => {
+    if (!id) return;
+    setRechecking(true);
+    try {
+      await recheckReel(id);
+      await load();
+      setRechecks((n) => n + 1);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRechecking(false);
+    }
+  };
 
+  // The typed caption stays in the box when the save fails, so it can be sent again.
   const saveCaption = () => {
     if (!id || !detail || !plan || caption === null || caption === detail.caption?.caption) return;
-    void change(() => reels.editCaption(id, detail.version, plan, caption, hashtags)).then(() => setCaption(null));
+    void change(() => reels.editCaption(id, detail.version, plan, caption, hashtags)).then((saved) => saved && setCaption(null));
   };
   const download = async () => {
     if (!id || !detail) return;
@@ -64,9 +97,17 @@ export default function ReelsReview() {
               label={downloading ? <ActivityIndicator color={color.ink} /> : t("review.downloadVideo")}
               onPress={() => void download()}
             />
-            <ActionButton style={{ flex: 1, paddingHorizontal: 0 }} trailing={ArrowRight} disabled={!sendable} label={t("schedule")} onPress={() => router.push("/reels/publish")} />
+            <ActionButton
+              style={{ flex: 1, paddingHorizontal: 0 }}
+              trailing={ArrowRight}
+              disabled={!(sendable && (schedulable || scheduled))}
+              label={scheduled ? t("review.viewSchedule") : t("schedule")}
+              onPress={() => router.push(scheduled ? "/reels/scheduled" : "/reels/publish")}
+            />
           </View>
-          <Text style={[meta, { textAlign: "center" }]}>{sendable ? t("review.connectFirst") : blocked ? t("review.blocked") : t("review.checking")}</Text>
+          <Text style={[meta, { textAlign: "center" }]}>
+            {sendable ? (scheduled ? t("review.scheduledNote") : status === "PUBLISHED" ? t("review.alreadyPublished") : t("review.connectFirst")) : blocked ? t("review.blocked") : slow ? t("review.checkSlow") : t("review.checking")}
+          </Text>
         </Footer>
       }
     >
@@ -100,7 +141,7 @@ export default function ReelsReview() {
       <View style={[styles.section, { marginTop: space[16] }]}>
         <View style={styles.rowBetween}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
-            <Text style={strong14}>{t("review.captionFrench")}</Text>
+            <Text style={strong14}>{t("review.caption", { context, language })}</Text>
             <Text style={meta}>{t("review.defaultSource")}</Text>
           </View>
           <Tag label={t("review.editable")} />
@@ -111,7 +152,7 @@ export default function ReelsReview() {
             value={shownCaption}
             onChangeText={setCaption}
             onBlur={saveCaption}
-            accessibilityLabel={t("review.captionA11y")}
+            accessibilityLabel={t("review.captionA11y", { context, language })}
             style={{ flex: 1, fontFamily: font.regular, fontSize: 16, lineHeight: 24, color: color.ink, minHeight: 96, textAlignVertical: "top" }}
           />
         </View>
@@ -127,6 +168,11 @@ export default function ReelsReview() {
         <View style={{ paddingTop: space[16], gap: space[12] }}>
           {detail?.checks ? (
             detail.checks.results.map((c, i) => <Spec key={i} Icon={CHECK_ICON[c.status]} label={c.check} value={c.note} tone={c.status} />)
+          ) : slow ? (
+            <>
+              <Text style={meta}>{t("review.checkSlow")}</Text>
+              <ActionButton variant="outline" disabled={rechecking} label={rechecking ? t("review.checkingAgain") : t("review.checkAgain")} onPress={() => void recheck()} />
+            </>
           ) : (
             <Text style={meta}>{t("review.checking")}</Text>
           )}
@@ -140,7 +186,7 @@ export default function ReelsReview() {
       <View style={[styles.section, { marginTop: space[24] }]}>
         <Text style={eyebrow}>{t("review.specifications")}</Text>
         <View style={{ paddingTop: space[16], gap: space[8] }}>
-          <Spec Icon={AudioLines} label={t("review.audioTrack")} value={t("review.audioVoiceOnly")} />
+          <Spec Icon={AudioLines} label={t("review.audioTrack")} value={t("review.audioVoiceOnly", { context, language })} />
           <Spec Icon={MonitorPlay} label={t("review.resolution")} value={t("review.resolutionValue")} />
         </View>
       </View>
@@ -151,7 +197,19 @@ export default function ReelsReview() {
 /** useReel polls every 5 s here, so the checks appear as soon as the Quality run finishes. */
 function useReelWithChange() {
   const r = useReel(5000);
-  return { ...r, change: (run: () => Promise<unknown>) => r.load().then(run).then(r.load, (e: unknown) => r.setError(e instanceof Error ? e.message : String(e))) };
+  // Resolves true once `run` went through, false (with the error shown) when it didn't.
+  const change = async (run: () => Promise<unknown>) => {
+    try {
+      await r.load();
+      await run();
+      await r.load();
+      return true;
+    } catch (e) {
+      r.setError(e instanceof Error ? e.message : String(e));
+      return false;
+    }
+  };
+  return { ...r, change };
 }
 
 function Spec({ Icon, label, value, tone }: { Icon: LucideIcon; label: string; value: string; tone?: CheckResult["status"] }) {

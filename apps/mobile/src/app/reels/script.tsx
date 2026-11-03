@@ -3,13 +3,12 @@ import { router } from "expo-router";
 import { Mic, Play, RefreshCw } from "lucide-react-native";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { color, font, radius, space, type } from "@/theme/tokens";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { color, font, radius, space } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { Footer } from "@/ui/layout";
-import { ActionButton, BackTitle, BrandPill, ICON, PageHeader, Panel, ReelsScreen, Tag, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
-import { photos } from "@/ui/reels/sample";
+import { ActionButton, BackTitle, BrandPill, ICON, PageHeader, Panel, ReelsScreen, Tag, eyebrow, languageName, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { useReel } from "@/ui/reels/use-reel";
 
 /** OpenAI voices the server accepts (apps/web/server/reels/voice.ts). */
@@ -18,9 +17,10 @@ const words = (text: string) => text.split(/\s+/).filter((w) => /\w/.test(w)).le
 
 /** R11 · Reels / Script and voice. One paragraph per scene (blank line between), so the box stays as designed. */
 export default function ReelsScript() {
-  const { t } = useTranslation("reels");
+  const { t, i18n } = useTranslation("reels");
   const { detail, busy, error, save, chat } = useReel();
   const plan = detail?.plan;
+  const language = languageName(plan?.language, i18n.language);
   const [edited, setEdited] = useState<string | null>(null);
   const [voice, setVoice] = useState<string | null>(null);
   const script = edited ?? plan?.scenes.map((s) => s.voiceText).join("\n\n") ?? "";
@@ -54,13 +54,12 @@ export default function ReelsScript() {
       }
     >
       <Panel style={styles.product}>
-        <Image source={thumb ? { uri: thumb } : photos.table} style={styles.thumb} contentFit="cover" />
+        <Image source={thumb ? { uri: thumb } : undefined} style={[styles.thumb, { backgroundColor: rc.tagGrey }]} contentFit="cover" />
         <View style={{ flex: 1 }}>
           <Text style={eyebrow}>{t("script.targetProduct")}</Text>
           <Text style={strong14} numberOfLines={1}>
             {plan?.title ?? ""}
           </Text>
-          <Text style={meta}>{t("script.productMeta")}</Text>
         </View>
       </Panel>
 
@@ -68,7 +67,7 @@ export default function ReelsScript() {
         <View style={styles.rowBetween}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
             <Text style={eyebrow}>{t("script.voiceoverScript")}</Text>
-            <Tag label={t("script.frenchFr")} tone="grey" style={{ borderWidth: 0 }} textStyle={{ color: color.ink }} />
+            {language ? <Tag label={t("script.languageTag", { language, code: plan?.language?.toUpperCase() })} tone="grey" style={{ borderWidth: 0 }} textStyle={{ color: color.ink }} /> : null}
           </View>
           <Text style={meta}>{t("script.wordCount", { count: total, seconds: Math.round(total / 2) })}</Text>
         </View>
@@ -77,7 +76,7 @@ export default function ReelsScript() {
             multiline
             value={script}
             onChangeText={setEdited}
-            accessibilityLabel={t("script.scriptA11y")}
+            accessibilityLabel={t("script.scriptA11y", { context: language ? "lang" : undefined, language })}
             style={{ flex: 1, fontFamily: font.regular, fontSize: 16, lineHeight: 24, color: color.ink, height: 120, textAlignVertical: "top" }}
           />
         </View>
@@ -124,9 +123,8 @@ export default function ReelsScript() {
               <Text style={meta}>{t("script.recordOwnMeta")}</Text>
             </View>
           </View>
-          <Pressable accessibilityRole="button" accessibilityLabel={t("script.record")} style={styles.recordBtn}>
-            <Text style={type.label}>{t("script.record")}</Text>
-          </Pressable>
+          {/* No recording backend yet: shown as coming soon rather than as a button that does nothing. */}
+          <Tag label={t("comingSoon")} tone="grey" />
         </View>
       </Panel>
     </ReelsScreen>
@@ -159,14 +157,4 @@ const styles = StyleSheet.create({
     borderRadius: radius.control,
   },
   micRound: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.surface, borderWidth: 1, borderColor: rc.fieldBorder, alignItems: "center", justifyContent: "center" },
-  recordBtn: {
-    minHeight: 44,
-    paddingHorizontal: space[12],
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: color.surface,
-    borderWidth: 1,
-    borderColor: color.controlOutline,
-    borderRadius: radius.control,
-  },
 });
