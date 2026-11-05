@@ -831,6 +831,10 @@ model ContentItem {
   scheduledFor  DateTime?
   pillar        String?
   brief         Json? // { goal, audience, keyMessage, products, cta, references, notes }
+  // Catalogue Product ids the post features (Brief writer / app). ponytail: an id array, not a join table; a deleted
+  // MANUAL product leaves a dangling id that the checks read as "no longer in the catalogue". Join table if posts
+  // need querying by product at scale.
+  productIds    String[]       @default([])
   studio        Boolean        @default(false) // made in the mobile Reels studio: the writing agents leave it alone
   postUrl       String? // posted by hand after a download; the link the person pasted back
   createdAt     DateTime       @default(now())
@@ -1085,6 +1089,8 @@ model ApprovalDecision {
   packageHash      String // sha256 of the exact channel + version body approved
   verdict          ApprovalVerdict
   note             String?
+  productOverride  Json? // { productIds, states }: availability issues approved anyway
+  switchProducts   Boolean         @default(false) // CHANGES_REQUESTED: the Creator may pick another product
   userId           String
   createdAt        DateTime        @default(now())
 

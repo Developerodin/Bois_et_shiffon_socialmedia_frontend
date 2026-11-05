@@ -24,7 +24,8 @@ const Action = z.discriminatedUnion("action", [
     body: z.object({ hook: text(500), caption: z.string().min(1).max(5000), hashtags: list(30, 100), slides: list(20, 1000), script: list(30, 1000), pinTitle: text(200), altText: text(1000), photoKeys: z.array(z.string().max(300)).max(10).optional() }),
   }),
   // noAutoPublish: the app's Schedule approves and then schedules itself, so auto-publish stays out of its way.
-  z.object({ action: z.literal("decide"), version: z.number().int(), verdict: z.enum(["APPROVED", "CHANGES_REQUESTED", "REJECTED"]), note: z.string().max(2000).optional(), noAutoPublish: z.boolean().optional() }),
+  // override: "Approve anyway" past product availability issues; switchProducts: a send-back asking for another product.
+  z.object({ action: z.literal("decide"), version: z.number().int(), verdict: z.enum(["APPROVED", "CHANGES_REQUESTED", "REJECTED"]), note: z.string().max(2000).optional(), noAutoPublish: z.boolean().optional(), override: z.boolean().optional(), switchProducts: z.boolean().optional() }),
   z.object({
     action: z.literal("publish"),
     version: z.number().int(),
@@ -102,8 +103,9 @@ export async function POST(request: Request, context: Params) {
       await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: unchecked ? "quality" : "creator", trigger: "event", input: unchecked ? { itemId, version: latest.version } : { itemId } });
       kickRunner();
     } else if (body.action === "decide") {
-      await decide({ ...scope, itemId, version: body.version, verdict: body.verdict, note: body.note });
-      if (body.verdict === "APPROVED" && !body.noAutoPublish) {
+      await decide({ ...scope, itemId, version: body.version, verdict: body.verdict, note: body.note, override: body.override, switchProducts: body.switchProducts });
+      // After an override the person schedules: auto-publish would re-book the first account after a cancelled schedule.
+      if (body.verdict === "APPROVED" && !body.noAutoPublish && !body.override) {
         await autoPublish(scope, itemId);
         kickRunner();
       }

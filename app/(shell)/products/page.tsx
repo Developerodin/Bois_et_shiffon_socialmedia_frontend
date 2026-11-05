@@ -48,6 +48,7 @@ export default async function ProductsPage() {
       workspaceId={shell.activeWorkspaceId}
       brandId={shell.activeBrandId}
       canEdit={perms.has("context.edit")}
+      canVouch={perms.has("rules.approve")}
     />
   );
 }

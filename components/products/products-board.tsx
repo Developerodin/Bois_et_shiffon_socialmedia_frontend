@@ -27,11 +27,12 @@ function price(p: Product) {
   }
 }
 
-type Props = { workspaceId: string; brandId: string; canEdit: boolean };
+/** `canVouch` (rules.approve): may set stock, prices and product facts; the server refuses them otherwise. */
+type Props = { workspaceId: string; brandId: string; canEdit: boolean; canVouch: boolean };
 // ponytail: the whole catalogue loads once and is searched here, 50 rows drawn at a time; page on the server past a few thousand.
 const PAGE = 50;
 
-export function ProductsBoard({ workspaceId, brandId, canEdit }: Props) {
+export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch }: Props) {
   const fetcher = useCallback(() => productsApi.list(workspaceId, brandId), [workspaceId, brandId]);
   const { state, reload } = useLoad(fetcher);
   const [editing, setEditing] = useState<FullProduct | "new" | null>(null);
@@ -226,6 +227,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit }: Props) {
           workspaceId={workspaceId}
           brandId={brandId}
           product={editing === "new" ? null : editing}
+          canVouch={canVouch}
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);
@@ -267,12 +269,14 @@ function ProductDialog({
   workspaceId,
   brandId,
   product,
+  canVouch,
   onClose,
   onSaved,
 }: {
   workspaceId: string;
   brandId: string;
   product: FullProduct | null;
+  canVouch: boolean;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -298,16 +302,19 @@ function ProductDialog({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const body: Record<string, unknown> = Object.fromEntries(PERSON.map(([k]) => [k, form[k]]));
+    // Stock, price and facts are left out without rules.approve: the server refuses them, even unchanged.
+    const body: Record<string, unknown> = canVouch ? Object.fromEntries(PERSON.map(([k]) => [k, form[k]])) : {};
     if (manual) {
       for (const [k] of STORE_TEXT) body[k] = form[k];
       body.description = form.description;
       body.currency = form.currency.trim() || null;
-      body.price = form.price.trim() ? Number(form.price.replace(",", ".")) : null;
-      if (body.price !== null && !Number.isFinite(body.price)) return setError("Enter the price as a number, like 29.90.");
-      // Sent only when changed: saving stock stamps "checked just now".
-      const inStock = form.stock === "" ? null : form.stock === "yes";
-      if (inStock !== (product?.inStock ?? null)) body.inStock = inStock;
+      if (canVouch) {
+        body.price = form.price.trim() ? Number(form.price.replace(",", ".")) : null;
+        if (body.price !== null && !Number.isFinite(body.price)) return setError("Enter the price as a number, like 29.90.");
+        // Sent only when changed: saving stock stamps "checked just now".
+        const inStock = form.stock === "" ? null : form.stock === "yes";
+        if (inStock !== (product?.inStock ?? null)) body.inStock = inStock;
+      }
     }
     setBusy(true);
     setError(null);
@@ -346,12 +353,12 @@ function ProductDialog({
               <div className="grid gap-4 sm:grid-cols-2">
                 {field("sku", "SKU", { maxLength: 100 })}
                 {field("category", "Category", { maxLength: 120 })}
-                {field("price", "Price", { inputMode: "decimal", placeholder: "29.90" })}
+                {field("price", "Price", { inputMode: "decimal", placeholder: "29.90", disabled: !canVouch })}
                 {field("currency", "Currency", { maxLength: 3, placeholder: "EUR" })}
               </div>
               <label className="flex flex-col gap-1.5 text-sm">
                 <span className="text-muted-foreground">Stock</span>
-                <select value={form.stock} onChange={set("stock")} className={selectClass}>
+                <select value={form.stock} onChange={set("stock")} disabled={!canVouch} className={selectClass}>
                   <option value="">Unknown</option>
                   <option value="yes">In stock</option>
                   <option value="no">Out of stock</option>
@@ -365,11 +372,14 @@ function ProductDialog({
               </label>
             </>
           ) : null}
-          {PERSON.map(([k, label]) => field(k, label, { maxLength: 1000 }))}
+          {PERSON.map(([k, label]) => field(k, label, { maxLength: 1000, disabled: !canVouch }))}
+          {canVouch ? null : (
+            <p className="text-sm text-muted-foreground">Stock, price and product facts can only be changed by someone who can approve product claims.</p>
+          )}
           <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={busy}>Cancel</Button>
-            <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
+            <Button type="submit" disabled={busy || (!manual && !canVouch)}>{busy ? "Saving…" : "Save"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

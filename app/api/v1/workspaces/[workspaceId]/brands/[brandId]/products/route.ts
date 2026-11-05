@@ -1,7 +1,8 @@
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
-import { ProductInput, productData, toProductDto, toProductListDto } from "@/server/catalog/products";
+import { ProductInput, cannotVouch, productData, toProductDto, toProductListDto, vouchedIn } from "@/server/catalog/products";
 import { catalogSource, catalogSyncRunning } from "@/server/catalog/sync";
+import { effectivePermissions } from "@/server/auth/permissions";
 import { prisma } from "@/server/db/prisma";
 import { kickIfDue } from "@/server/jobs/runner";
 
@@ -35,7 +36,7 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
   }
 }
 
-/** Add a product by hand (MANUAL). */
+/** Add a product by hand (MANUAL). Stock, prices and facts need rules.approve (VOUCHED_FIELDS). */
 export async function POST(request: Request, context: { params: Promise<BrandRouteParams> }) {
   try {
     const scope = await authorizeBrandRoute(request, context.params, "context.edit");
@@ -49,6 +50,7 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
         detail: body.success ? "Give the product a name." : body.error.issues[0]?.message,
       });
     }
+    if (vouchedIn(body.data).length && !(await effectivePermissions(scope.workspaceId, scope.userId, scope.brandId)).has("rules.approve")) return cannotVouch();
     const product = await prisma.product.create({
       data: { ...productData(body.data), title: body.data.title, workspaceId: scope.workspaceId, brandId: scope.brandId, source: "MANUAL" },
     });
