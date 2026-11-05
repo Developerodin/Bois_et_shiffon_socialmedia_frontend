@@ -23,7 +23,7 @@ test("a sold-out product stops approval until someone approves anyway", async ({
   const panel = page.getByRole("region", { name: "Approval and publishing" });
   await expect(panel).toBeVisible({ timeout: 60_000 });
 
-  await expect(panel.getByRole("list", { name: "Product issues" }).getByText('Chaise "Julia" is out of stock')).toBeVisible();
+  await expect(panel.getByRole("list", { name: "Issues" }).getByText('Chaise "Julia" is out of stock')).toBeVisible();
   await expect(panel.getByRole("button", { name: "Approve anyway" })).toBeVisible();
   await expect(panel.getByLabel(/^Note/)).toBeVisible();
   await expect(panel.getByRole("button", { name: "Ask for changes" })).toBeVisible();

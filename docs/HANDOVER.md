@@ -76,8 +76,13 @@ Next steps on it, in order:
    Checked: tsc + full vitest; 4-lens code review (2 medium, 7 low, all fixed); real run on Bois & Chiffons with the
    real AI (-20 % flash sale + code → draft → Quality pass → offer really ended → approve refused → approve anyway;
    terms changed to -15 % → refused, not overridable).
-   **Not yet checked:** the web campaigns screen in a browser (`e2e/campaigns.spec.ts` was being written when the
-   session ended — run it, or check by hand) and the phone's post screen with an offer. Known limits: "réduction de
+   Browser: `e2e/campaigns.spec.ts` passes in Chrome (create/edit/withdraw an offer, viewer read-only, a post whose
+   offer ended → Approve anyway; seed with `scripts/_tmp/seed-offer.ts`, clean up with `unseed-offer.ts`).
+   **Not yet checked:** the phone's post screen with an offer.
+   UI follow-ups found in the browser check (not done): the "Campaigns and offers" section sits below the whole
+   product table (move it up or give it a tab); the offer text and the discount % can contradict each other with no
+   warning ("-20 % sur …" vs -25 %); the dialog's time inputs follow the browser locale (01:06 PM) while lists use
+   24 h; the timezone shows as a raw id ("Europe/Paris"); the product picker has no search. Known limits: "réduction de
    30 %" is always read as a discount; a standing priority starting later today can get a 09:00 UTC post a few hours
    early. Seed helpers for e2e live in the git-ignored `apps/web/scripts/_tmp/`.
 3. Test Shopify Admin live: a custom app with `read_products` + `read_inventory` on a real store, connect on the web
