@@ -37,6 +37,9 @@ it, test it on the emulator, fix it, commit it.
    start if any tier drops under the 70% margin floor.
 9. **Push and merge** `desktop-shell` when the owner says so (`main` is still at `08e5fb1`, 2026-10-30).
 
+**Brief gap audit:** `docs/handover/2026-11-05-brief-gap-audit.md` lists every acceptance criterion of the B&C
+functional brief against the code (built, partial or missing). Use it to pick the base work.
+
 ### Done on 2026-11-05
 
 - **Planner "Generate calendar" shows the outcome.** New `GET …/agents/:agentKey/runs?id=` (`agents.read`) returns
@@ -47,6 +50,11 @@ it, test it on the emulator, fix it, commit it.
   custom scene and "Optional" otherwise. The orphan key is removed from all locales.
 - **`ui/posts/sample.ts` → `ui/posts/format.ts`.** The unused `POSTS`, `POST_COPY` and `getPost` and the
   `bunting-tv-unit.jpg` they used are deleted.
+- **Checked on the emulator (Pixel_10, test account, Bois & Chiffons):** Marketing home, drawer and Plans tools
+  without Website Studio; photoshoot brief note "Optional"/"Required"; planner "nothing to plan" outcome with
+  refund and Try again. Two fixes came out of it (`f6ea36d`): a duplicate `briefRequired` key, and the run status
+  route now starts a stalled job queue (a run sat QUEUED for minutes). The planner's success message was not seen
+  on screen: the account has no ideas left to plan.
 - Already fixed before today, so dropped from the list: the Reels home's Bois & Chiffons logo and photo, and the
   `photos.table` fallback in `reels/publish`, `scheduled` and `script`.
 
