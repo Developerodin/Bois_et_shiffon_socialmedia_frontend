@@ -4,6 +4,18 @@ Branch `ai-reels` (not pushed, not merged). Today moved the app's Figma screens 
 one module at a time. Each module was given a review for correctness, security, performance and maintainability,
 tested on the emulator, fixed, and committed.
 
+## Session of 2026-11-05 in short
+
+Branch `desktop-shell` (not pushed; `main` still at `08e5fb1`). Owner's priority: the B&C brief's base work first.
+Done today, each planned → reviewed → built → code-reviewed → run on real Bois & Chiffons data → committed:
+- Product catalogue (`d51b285`), products in briefs, drafts, checks, approval and publishing (`9355d8a`),
+  offers, campaigns and standing priorities (`bb64cd0`, `84ce85c`). Details under "Product catalogue" below.
+- Phone post status label and connect wording (`10e98ed`); all phone strings translated into 23 languages
+  (`08189c8`, machine translation: review before release).
+Open, in order: phone check of a post with an offer; the five campaigns-screen follow-ups listed below; Shopify
+live test (needs the owner's store); CSV import. Dev environment: web on :3100 (`npm run dev` in `apps/web`; stop it
+before `prisma generate`), Metro on :8081, emulator Pixel_10 (screenshots with `adb emu screenrecord screenshot`).
+
 ## Start here next time (checked against the code on 2026-11-05)
 
 Branch `desktop-shell` now holds everything: it contains `ai-reels` (with Marketing, `ab830c2`) and `audit-fixes`
