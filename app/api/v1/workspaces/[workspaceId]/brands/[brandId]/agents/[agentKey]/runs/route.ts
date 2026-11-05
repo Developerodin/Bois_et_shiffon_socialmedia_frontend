@@ -3,7 +3,7 @@ import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-r
 import { AgentStartError, startAgentRun } from "@/server/agents/engine";
 import { getAgent } from "@/server/agents/registry";
 import { prisma } from "@/server/db/prisma";
-import { kickRunner } from "@/server/jobs/runner";
+import { kickIfDue, kickRunner } from "@/server/jobs/runner";
 import { PlanRequiredError, requirePlan } from "@/server/services/subscriptions";
 
 // Queued work runs after the response (kickRunner); give it room to finish.
@@ -13,8 +13,8 @@ type Params = BrandRouteParams & { agentKey: string };
 
 /**
  * One run's status, polled with ?id=<run id> (mobile P09 shows when "Generate calendar" is done).
- * Failure text stays in the server log; only a "nothing to do" reason (an INFO event, written for the
- * person) is passed on.
+ * Failure text stays in the server log; the app only learns whether the run had nothing to do
+ * (its last event is INFO), so it can say so in the person's language.
  */
 export async function GET(request: Request, context: { params: Promise<Params> }) {
   try {
@@ -27,10 +27,12 @@ export async function GET(request: Request, context: { params: Promise<Params> }
       select: { id: true, status: true, output: true },
     });
     if (!run) return problemResponse({ type: "https://api.brandpilot/errors/not-found", title: "Run not found", status: 404 });
-    let reason: string | null = null;
+    // The app polls this while the run waits: start the queue if it stalled (as the other polled routes do).
+    if (run.status === "QUEUED" || run.status === "RUNNING") await kickIfDue().catch(() => {});
+    let reason: "nothing-to-do" | null = null;
     if (run.status === "FAILED") {
-      const last = await prisma.agentEvent.findFirst({ where: { runId: run.id }, orderBy: { id: "desc" }, select: { level: true, message: true } });
-      if (last?.level === "INFO") reason = last.message;
+      const last = await prisma.agentEvent.findFirst({ where: { runId: run.id }, orderBy: { id: "desc" }, select: { level: true } });
+      if (last?.level === "INFO") reason = "nothing-to-do";
     }
     return Response.json({ run: { id: run.id, status: run.status, output: run.status === "SUCCEEDED" ? run.output : null, reason } });
   } catch (error) {
