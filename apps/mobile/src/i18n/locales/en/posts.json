@@ -270,6 +270,7 @@
     "unscheduled_one": "{{count}} had no free slot in the next 30 days.",
     "unscheduled_other": "{{count}} had no free slot in the next 30 days.",
     "failed": "Planning didn't finish.",
+    "nothingToDo": "No new ideas to plan yet. Fresh ideas arrive each morning.",
     "refunded": "{{n}} credits refunded.",
     "tryAgain": "Try again",
     "cost": "Costs {{n}} credits."

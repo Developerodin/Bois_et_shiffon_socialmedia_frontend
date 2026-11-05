@@ -45,7 +45,7 @@ export default function Planner() {
   const [cycle, setCycle] = useState(months[0]);
   const [busy, setBusy] = useState(false);
   // The started Planner run, polled until it's done: then the calendar is reloaded and the outcome shown.
-  const [run, setRun] = useState<{ id: string; status: RunStatus; planned?: number; unscheduled?: number; reason?: string | null } | null>(null);
+  const [run, setRun] = useState<{ id: string; status: RunStatus; planned?: number; unscheduled?: number; nothingToDo?: boolean } | null>(null);
   const started = run !== null;
   const runId = run?.id;
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function Planner() {
       posts.plannerRun(runId, ctrl.signal).then(
         ({ run: r }) => {
           if (r.status === "SUCCEEDED" || r.status === "FAILED") {
-            setRun({ id: r.id, status: r.status, planned: r.output?.planned, unscheduled: r.output?.unscheduled, reason: r.reason });
+            setRun({ id: r.id, status: r.status, planned: r.output?.planned, unscheduled: r.output?.unscheduled, nothingToDo: r.reason === "nothing-to-do" });
             void reload();
           } else timer = setTimeout(poll, POLL_MS);
         },
@@ -75,7 +75,7 @@ export default function Planner() {
     run?.status === "SUCCEEDED"
       ? [t("planner.done", { count: run.planned ?? 0 }), run.unscheduled ? t("planner.unscheduled", { count: run.unscheduled }) : ""].filter(Boolean).join(" ")
       : run?.status === "FAILED"
-        ? [run.reason ?? t("planner.failed"), t("planner.refunded", { n: GENERATE_CREDITS })].join(" ")
+        ? [t(run.nothingToDo ? "planner.nothingToDo" : "planner.failed"), t("planner.refunded", { n: GENERATE_CREDITS })].join(" ")
         : t("planner.started");
   const [error, setError] = useState<string | null>(null);
   const options = months.map((value) => ({ value, label: formatDate(`${value}-01T12:00:00Z`, { month: "long", year: "numeric", timeZone: "UTC" }) }));

@@ -116,7 +116,7 @@ export default function ProductSetup() {
       </View>
 
       <View style={styles.section}>
-        <SectionLabel note={t(scene === "custom" ? "product.briefRequired" : "product.briefOptional")}>{t("product.creativeBrief")}</SectionLabel>
+        <SectionLabel note={t(scene === "custom" ? "product.briefNeeded" : "product.briefOptional")}>{t("product.creativeBrief")}</SectionLabel>
         <View style={styles.briefCard}>
           <TextInput
             value={brief}

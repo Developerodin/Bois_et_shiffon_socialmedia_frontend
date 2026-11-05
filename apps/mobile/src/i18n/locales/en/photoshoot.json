@@ -54,7 +54,7 @@
       "custom": "Custom"
     },
     "briefOptional": "Optional",
-    "briefRequired": "Required",
+    "briefNeeded": "Required",
     "creativeBrief": "Creative brief",
     "briefHint": "Refine lighting, ambiance or specific decor cues",
     "sourcePreview": "Source preview",

@@ -418,10 +418,10 @@ export const posts = {
     const { ws, base } = await reelBase();
     return api<{ run: { id: string; status: string } }>(`${base}/agents/planner/runs`, { body: { input: { chain: true } }, workspaceId: ws });
   },
-  /** The "Generate calendar" run: SUCCEEDED carries how many posts were planned; FAILED may carry a reason written for the person. */
+  /** The "Generate calendar" run: SUCCEEDED carries how many posts were planned; FAILED says whether there was nothing to plan. */
   async plannerRun(id: string, signal?: AbortSignal) {
     const { ws, base } = await reelBase();
-    return api<{ run: { id: string; status: RunStatus; output: { planned?: number; unscheduled?: number } | null; reason: string | null } }>(
+    return api<{ run: { id: string; status: RunStatus; output: { planned?: number; unscheduled?: number } | null; reason: "nothing-to-do" | null } }>(
       `${base}/agents/planner/runs?id=${encodeURIComponent(id)}`,
       { workspaceId: ws, signal },
     );
