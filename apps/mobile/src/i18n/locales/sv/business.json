@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Varumärkespreferenser",
     "brandPreferencesHint": "Färger, ton, språk",
+    "products": "Produkter",
+    "productsHint": "Priser, lager och produktfakta",
     "photoAssets": "Fotoresurser",
     "photoAssetsHint": "Bunting bord och TV-enhet foton",
     "connections": "Anslutningar",
@@ -67,6 +69,7 @@
     "title": "Anslutningar",
     "sourceTitle": "Källwebbplats",
     "linked": "Länkad",
+    "viewPhotos": "Visa foton",
     "sourceBody": "Produktbilder och företagsdetaljer",
     "channelsTitle": "Publiceringskanaler",
     "accounts": "Konton",
@@ -83,7 +86,9 @@
     "noSite": "Ingen webbplats ännu",
     "comingSoon": "Inte tillgängligt ännu",
     "expired": "Inloggningen har gått ut",
-    "reconnect": "Anslut igen"
+    "reconnect": "Anslut igen",
+    "connectOnWeb": "Inte ansluten · anslut på webben",
+    "reconnectOnWeb": "Behöver återanslutas på webben"
   },
   "automations": {
     "title": "Automatiseringar",
@@ -118,6 +123,14 @@
     "notAvailable": "Inte tillgängligt ännu"
   },
   "billing": {
+    "planName": "{{plan}}-abonnemang",
+    "planBlurb_one": "{{n}} kredit ingår, förnyas {{date}}.",
+    "planBlurb_other": "{{n}} krediter ingår, förnyas {{date}}.",
+    "planLoading": "Kontrollerar ditt abonnemang...",
+    "planFailed": "Kunde inte läsa in ditt abonnemang",
+    "planRetry": "Försök igen",
+    "unlimited": "Testarbetsyta",
+    "unlimitedBlurb": "Den här arbetsytan har ingen kreditgräns.",
     "creditsAvailable_one": "{{n}} kredit tillgänglig",
     "creditsAvailable_other": "{{n}} krediter tillgängliga",
     "balanceTitle": "Kreditsaldo",
@@ -168,6 +181,7 @@
     "terms": "Användarvillkor",
     "privacy": "Integritetspolicy",
     "restore": "Återställ köp",
+    "comingSoon": "Kommer snart",
     "signOut": "Logga ut från Espanda",
     "signOutNote": "Din aktiva prenumeration och utkastade katalogtillgångar är säkert sparade.",
     "memberCount_one": "{{count}} medlem",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Saldo: {{credits}} kredit kvar",
     "balanceLabelNoPlan_other": "Saldo: {{credits}} krediter kvar",
     "added": "Tillagd {{date}}"
+  },
+  "products": {
+    "title": "Produkter",
+    "detailTitle": "Produkt",
+    "syncNow": "Synka nu",
+    "syncing": "Synkar…",
+    "syncRunning": "Läser in dina produkter. Det tar upp till en minut.",
+    "source": {
+      "SHOPIFY": "Från din Shopify-butik",
+      "WEBSITE": "Från din webbplats produktflöde",
+      "none": "Ingen butik ansluten"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Webbplatsens produktflöde",
+      "MANUAL": "Manuellt tillagd"
+    },
+    "lastSync_one": "{{n}} produkt · synkades {{ago}}",
+    "lastSync_other": "{{n}} produkter · synkades {{ago}}",
+    "neverSynced": "Inte synkad än. Tryck på Synka nu.",
+    "reason": {
+      "not-a-feed": "Din webbplats har inget produktflöde som vi kan läsa. Anslut Shopify på webben eller lägg till produkter där.",
+      "partial": "Bara en del av katalogen kunde läsas in, så inget arkiverades.",
+      "failed": "Den senaste synkningen kunde inte läsa in dina produkter. Tryck på Synka nu för att försöka igen.",
+      "shopify-refused": "Shopify avvisade åtkomsttoken. Återanslut Shopify på webben."
+    },
+    "emptyTitle": "Inga produkter än",
+    "emptyBody": "Tryck på Synka nu för att läsa in produkter från din butik, eller lägg till dem på webben.",
+    "search": "Sök på namn eller artikelnummer",
+    "count_one": "{{n}} produkt",
+    "count_other": "{{n}} produkter",
+    "showMore": "Visa fler",
+    "noPrice": "Inget pris",
+    "notFound": "Den här produkten finns inte längre i katalogen.",
+    "stock": {
+      "in": "I lager",
+      "out": "Slut i lager",
+      "unknown": "Lagerstatus okänd",
+      "count": "{{n}} i lager"
+    },
+    "checked": "kontrollerad {{ago}}",
+    "ago": {
+      "now": "nyss",
+      "min": "för {{n}} min sedan",
+      "hours": "för {{n}} tim sedan",
+      "days": "för {{n}} dagar sedan"
+    },
+    "fields": {
+      "sku": "Artikelnummer",
+      "category": "Kategori",
+      "source": "Källa",
+      "materials": "Material",
+      "dimensions": "Mått",
+      "certifications": "Certifieringar"
+    },
+    "placeholders": {
+      "materials": "t.ex. massiv akacia, svart lack",
+      "dimensions": "t.ex. 120 × 40 × 75 cm",
+      "certifications": "t.ex. FSC-certifierat trä"
+    },
+    "openPage": "Öppna produktsida",
+    "factsTitle": "Produktfakta",
+    "factsHint": "Skribenterna och kvalitetskontrollen använder dessa uppgifter. Synkning ändrar dem aldrig.",
+    "factsLocked": "Skribenterna och kvalitetskontrollen använder dessa uppgifter. Bara personer som får godkänna produktpåståenden kan ändra dem.",
+    "save": "Spara fakta",
+    "saving": "Sparar…",
+    "saved": "Sparat"
   }
 }

@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Merkvoorkeuren",
     "brandPreferencesHint": "Kleuren, toon, taal",
+    "products": "Producten",
+    "productsHint": "Prijzen, voorraad en productinformatie",
     "photoAssets": "Foto-assets",
     "photoAssetsHint": "Bunting tafel en tv-meubel foto's",
     "connections": "Verbindingen",
@@ -67,6 +69,7 @@
     "title": "Verbindingen",
     "sourceTitle": "Bronwebsite",
     "linked": "Gekoppeld",
+    "viewPhotos": "Foto's bekijken",
     "sourceBody": "Productfoto's en bedrijfsgegevens",
     "channelsTitle": "Publicatiekanalen",
     "accounts": "Accounts",
@@ -83,7 +86,9 @@
     "noSite": "Nog geen website",
     "comingSoon": "Nog niet beschikbaar",
     "expired": "Sessie verlopen",
-    "reconnect": "Opnieuw verbinden"
+    "reconnect": "Opnieuw verbinden",
+    "connectOnWeb": "Niet gekoppeld · koppel via de website",
+    "reconnectOnWeb": "Opnieuw koppelen via de website"
   },
   "automations": {
     "title": "Automatiseringen",
@@ -118,6 +123,14 @@
     "notAvailable": "Nog niet beschikbaar"
   },
   "billing": {
+    "planName": "{{plan}}-abonnement",
+    "planBlurb_one": "{{n}} credit inbegrepen, wordt verlengd op {{date}}.",
+    "planBlurb_other": "{{n}} credits inbegrepen, wordt verlengd op {{date}}.",
+    "planLoading": "Je abonnement controleren...",
+    "planFailed": "Je abonnement kon niet worden geladen",
+    "planRetry": "Opnieuw proberen",
+    "unlimited": "Testwerkruimte",
+    "unlimitedBlurb": "Deze werkruimte heeft geen creditlimiet.",
     "creditsAvailable_one": "{{n}} tegoed beschikbaar",
     "creditsAvailable_other": "{{n}} tegoeden beschikbaar",
     "balanceTitle": "Tegoedsaldo",
@@ -168,6 +181,7 @@
     "terms": "Servicevoorwaarden",
     "privacy": "Privacybeleid",
     "restore": "Aankopen herstellen",
+    "comingSoon": "Binnenkort beschikbaar",
     "signOut": "Uitloggen bij Espanda",
     "signOutNote": "Je actieve abonnement en conceptcatalogus blijven veilig opgeslagen.",
     "memberCount_one": "{{count}} lid",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Tegoed: {{credits}} credit over",
     "balanceLabelNoPlan_other": "Tegoed: {{credits}} credits over",
     "added": "Toegevoegd op {{date}}"
+  },
+  "products": {
+    "title": "Producten",
+    "detailTitle": "Product",
+    "syncNow": "Nu synchroniseren",
+    "syncing": "Synchroniseren…",
+    "syncRunning": "Je producten worden ingelezen. Dit duurt maximaal een minuut.",
+    "source": {
+      "SHOPIFY": "Uit je Shopify-winkel",
+      "WEBSITE": "Uit de productfeed van je website",
+      "none": "Geen winkel gekoppeld"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Websitefeed",
+      "MANUAL": "Handmatig toegevoegd"
+    },
+    "lastSync_one": "{{n}} product · {{ago}} gesynchroniseerd",
+    "lastSync_other": "{{n}} producten · {{ago}} gesynchroniseerd",
+    "neverSynced": "Nog niet gesynchroniseerd. Tik op Nu synchroniseren.",
+    "reason": {
+      "not-a-feed": "Je website heeft geen productfeed die we kunnen lezen. Koppel Shopify via de website of voeg daar producten toe.",
+      "partial": "Slechts een deel van de catalogus kon worden ingelezen. Daarom is er niets gearchiveerd.",
+      "failed": "Bij de laatste synchronisatie konden je producten niet worden ingelezen. Tik op Nu synchroniseren om het opnieuw te proberen.",
+      "shopify-refused": "Shopify heeft het toegangstoken geweigerd. Koppel Shopify opnieuw via de website."
+    },
+    "emptyTitle": "Nog geen producten",
+    "emptyBody": "Tik op Nu synchroniseren om ze uit je winkel in te lezen, of voeg ze toe via de website.",
+    "search": "Zoek op naam of SKU",
+    "count_one": "{{n}} product",
+    "count_other": "{{n}} producten",
+    "showMore": "Meer tonen",
+    "noPrice": "Geen prijs",
+    "notFound": "Dit product staat niet meer in de catalogus.",
+    "stock": {
+      "in": "Op voorraad",
+      "out": "Niet op voorraad",
+      "unknown": "Voorraad onbekend",
+      "count": "{{n}} op voorraad"
+    },
+    "checked": "{{ago}} gecontroleerd",
+    "ago": {
+      "now": "zojuist",
+      "min": "{{n}} min geleden",
+      "hours": "{{n}} uur geleden",
+      "days": "{{n}} dagen geleden"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Categorie",
+      "source": "Bron",
+      "materials": "Materialen",
+      "dimensions": "Afmetingen",
+      "certifications": "Certificeringen"
+    },
+    "placeholders": {
+      "materials": "bijv. massief acaciahout, zwarte lak",
+      "dimensions": "bijv. 120 × 40 × 75 cm",
+      "certifications": "bijv. FSC-gecertificeerd hout"
+    },
+    "openPage": "Productpagina openen",
+    "factsTitle": "Productinformatie",
+    "factsHint": "De tekstschrijvers en de kwaliteitscontrole gebruiken deze informatie. Synchroniseren verandert deze nooit.",
+    "factsLocked": "De tekstschrijvers en de kwaliteitscontrole gebruiken deze informatie. Alleen mensen die productclaims mogen goedkeuren, kunnen deze aanpassen.",
+    "save": "Gegevens opslaan",
+    "saving": "Opslaan…",
+    "saved": "Opgeslagen"
   }
 }

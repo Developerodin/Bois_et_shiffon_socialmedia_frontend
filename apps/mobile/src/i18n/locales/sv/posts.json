@@ -58,6 +58,8 @@
     "viewCalendar": "Visa kalender",
     "loadFailed": "Kunde inte ladda dina inlägg. Kontrollera din anslutning.",
     "retry": "Försök igen",
+    "retrying": "Försöker igen...",
+    "stillFailed": "Kunde fortfarande inte läsa in dina inlägg. Kontrollera anslutningen och försök igen.",
     "empty": "Inga inlägg den här veckan än. Planera några i Planeraren.",
     "slides": "Karusell · {{count}} bilder"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Det är inte publicerat",
     "cancelSchedule": "Avbryt schemaläggning",
     "cancelling": "Avbryter...",
-    "noPermission": "Någon med behörighet att godkänna och publicera i den här arbetsytan måste schemalägga det."
+    "noPermission": "Någon med behörighet att godkänna och publicera i den här arbetsytan måste schemalägga det.",
+    "productIssues": "Produktkontroll",
+    "askNote": "Vad behöver ändras?",
+    "noteNeeded": "Ange vad som behöver ändras.",
+    "suggestProduct": "Föreslå en annan produkt",
+    "productStays": "Produkten förblir kopplad, så inlägget kommer fortfarande att avvisas",
+    "askChanges": "Be om ändringar",
+    "sending": "Skickar...",
+    "nextAskChanges": "Be om ändringar",
+    "approverNeeded": "Någon som kan godkänna behöver granska detta"
   },
   "edit": {
     "title": "Redigera inlägg",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram tar bara JPEG-foton. Tryck för att välja en .jpg-fil i stället.",
     "expired": "{{channel}} kräver att du loggar in igen",
     "reconnect": "Anslut {{channel}} igen",
-    "reelInStudio": "Reels skapas och publiceras i Reels-studion, inte här."
+    "reelInStudio": "Reels skapas och publiceras i Reels-studion, inte här.",
+    "loadFailed": "Kunde inte kontrollera var inlägget kan publiceras. Kontrollera anslutningen.",
+    "retry": "Försök igen"
   },
   "brief": {
     "title": "Skapa ett inlägg",
@@ -220,7 +233,9 @@
     "scheduled_other": "Schemalagt ({{count}})",
     "samplePreview": "Exempelförhandsvisning",
     "moreOptions": "Fler alternativ för {{title}}",
-    "editStory": "Redigera story"
+    "editStory": "Redigera story",
+    "comingSoon": "Kommer snart",
+    "comingSoonBody": "Stories är inte tillgängliga än. Inlägg, karuseller och reels kan schemaläggas redan nu."
   },
   "editStory": {
     "back": "Tillbaka",
@@ -259,6 +274,14 @@
     "noPillars": "Inga inlägg planerade för den här månaden än.",
     "started": "Planerar dina kommande 30 dagar. De första utkasten visas i kalendern om några minuter, redo att godkännas. Resten kommer allt eftersom de skrivs.",
     "generating": "Startar...",
+    "done_one": "Planerade {{count}} inlägg. Utkastet visas i kalendern när det är skrivet, redo för ditt godkännande.",
+    "done_other": "Planerade {{count}} inlägg. Utkasten visas i kalendern efter hand som de skrivs, redo för ditt godkännande.",
+    "unscheduled_one": "Det fanns ingen ledig tid för {{count}} under de kommande 30 dagarna.",
+    "unscheduled_other": "Det fanns ingen ledig tid för {{count}} under de kommande 30 dagarna.",
+    "failed": "Planeringen kunde inte slutföras.",
+    "nothingToDo": "Inga nya idéer att planera än. Nya idéer kommer varje morgon.",
+    "refunded": "{{n}} krediter återbetalda.",
+    "tryAgain": "Försök igen",
     "cost": "Kostar {{n}} krediter."
   }
 }

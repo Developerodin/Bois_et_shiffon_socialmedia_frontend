@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Marka Tercihleri",
     "brandPreferencesHint": "Renkler, ton, dil",
+    "products": "Ürünler",
+    "productsHint": "Fiyatlar, stok ve ürün bilgileri",
     "photoAssets": "Fotoğraf Varlıkları",
     "photoAssetsHint": "Bunting masa ve TV ünitesi fotoğrafları",
     "connections": "Bağlantılar",
@@ -67,6 +69,7 @@
     "title": "Bağlantılar",
     "sourceTitle": "Kaynak Web Sitesi",
     "linked": "Bağlı",
+    "viewPhotos": "Fotoğrafları gör",
     "sourceBody": "Ürün fotoğrafları ve işletme detayları",
     "channelsTitle": "Yayın Kanalları",
     "accounts": "Hesaplar",
@@ -83,7 +86,9 @@
     "noSite": "Henüz web sitesi yok",
     "comingSoon": "Henüz kullanılamıyor",
     "expired": "Oturumun süresi doldu",
-    "reconnect": "Yeniden bağlan"
+    "reconnect": "Yeniden bağlan",
+    "connectOnWeb": "Bağlı değil · web üzerinden bağla",
+    "reconnectOnWeb": "Web üzerinden yeniden bağlanmalı"
   },
   "automations": {
     "title": "Otomasyonlar",
@@ -118,6 +123,14 @@
     "notAvailable": "Henüz kullanılamıyor"
   },
   "billing": {
+    "planName": "{{plan}} planı",
+    "planBlurb_one": "{{n}} kredi dahil, {{date}} tarihinde yenilenir.",
+    "planBlurb_other": "{{n}} kredi dahil, {{date}} tarihinde yenilenir.",
+    "planLoading": "Planın kontrol ediliyor...",
+    "planFailed": "Planın yüklenemedi",
+    "planRetry": "Tekrar dene",
+    "unlimited": "Test çalışma alanı",
+    "unlimitedBlurb": "Bu çalışma alanında kredi sınırı yok.",
     "creditsAvailable_one": "{{n}} kredi mevcut",
     "creditsAvailable_other": "{{n}} kredi mevcut",
     "balanceTitle": "Kredi Bakiyesi",
@@ -168,6 +181,7 @@
     "terms": "Hizmet Şartları",
     "privacy": "Gizlilik Politikası",
     "restore": "Satın alımları geri yükle",
+    "comingSoon": "Yakında",
     "signOut": "Espanda'dan çıkış yap",
     "signOutNote": "Aktif aboneliğiniz ve taslak katalog varlıklarınız güvenli bir şekilde kaydedilir.",
     "memberCount_one": "{{count}} üye",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Bakiye: {{credits}} kredi kaldı",
     "balanceLabelNoPlan_other": "Bakiye: {{credits}} kredi kaldı",
     "added": "{{date}} tarihinde eklendi"
+  },
+  "products": {
+    "title": "Ürünler",
+    "detailTitle": "Ürün",
+    "syncNow": "Şimdi eşitle",
+    "syncing": "Eşitleniyor…",
+    "syncRunning": "Ürünlerin okunuyor. Bu işlem bir dakika kadar sürebilir.",
+    "source": {
+      "SHOPIFY": "Shopify mağazandan",
+      "WEBSITE": "Web sitenin ürün akışından",
+      "none": "Bağlı mağaza yok"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Web sitesi akışı",
+      "MANUAL": "Elle eklendi"
+    },
+    "lastSync_one": "{{n}} ürün · {{ago}} eşitlendi",
+    "lastSync_other": "{{n}} ürün · {{ago}} eşitlendi",
+    "neverSynced": "Henüz eşitlenmedi. Şimdi eşitle'ye dokun.",
+    "reason": {
+      "not-a-feed": "Web siten, okuyabileceğimiz bir ürün akışı yayınlamıyor. Shopify'ı web üzerinden bağla veya ürünlerini oradan ekle.",
+      "partial": "Kataloğun yalnızca bir kısmı okunabildiği için hiçbir ürün arşivlenmedi.",
+      "failed": "Son eşitlemede ürünlerin okunamadı. Tekrar denemek için Şimdi eşitle'ye dokun.",
+      "shopify-refused": "Shopify erişim belirtecini reddetti. Shopify'ı web üzerinden yeniden bağla."
+    },
+    "emptyTitle": "Henüz ürün yok",
+    "emptyBody": "Ürünlerini mağazandan okumak için Şimdi eşitle'ye dokun veya web üzerinden ekle.",
+    "search": "Ada veya SKU'ya göre ara",
+    "count_one": "{{n}} ürün",
+    "count_other": "{{n}} ürün",
+    "showMore": "Daha fazla göster",
+    "noPrice": "Fiyat yok",
+    "notFound": "Bu ürün artık katalogda yok.",
+    "stock": {
+      "in": "Stokta var",
+      "out": "Stokta yok",
+      "unknown": "Stok bilgisi yok",
+      "count": "Stokta {{n}} adet"
+    },
+    "checked": "{{ago}} kontrol edildi",
+    "ago": {
+      "now": "az önce",
+      "min": "{{n}} dk önce",
+      "hours": "{{n}} sa önce",
+      "days": "{{n}} gün önce"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Kategori",
+      "source": "Kaynak",
+      "materials": "Malzemeler",
+      "dimensions": "Ölçüler",
+      "certifications": "Sertifikalar"
+    },
+    "placeholders": {
+      "materials": "Örn. masif akasya, siyah lake",
+      "dimensions": "Örn. 120 × 40 × 75 cm",
+      "certifications": "Örn. FSC sertifikalı ahşap"
+    },
+    "openPage": "Ürün sayfasını aç",
+    "factsTitle": "Ürün bilgileri",
+    "factsHint": "Yazarlar ve kalite kontrol bu bilgileri kullanır. Eşitleme bu bilgileri değiştirmez.",
+    "factsLocked": "Yazarlar ve kalite kontrol bu bilgileri kullanır. Yalnızca ürünle ilgili iddiaları onaylama yetkisi olan kişiler bunları değiştirebilir.",
+    "save": "Bilgileri kaydet",
+    "saving": "Kaydediliyor…",
+    "saved": "Kaydedildi"
   }
 }

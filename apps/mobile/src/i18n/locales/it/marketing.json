@@ -25,6 +25,7 @@
       "body": "Aggiungere nuove foto mantiene aggiornati i tuoi reel automatici e la bozza del sito web."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Prossimamente",
     "cards": {
       "customers": {
         "title": "Clienti",
@@ -50,23 +51,27 @@
     "emptyFootnote": "I nuovi messaggi diventano disponibili automaticamente una volta connessi.",
     "channelsTitle": "Canali di messaggistica supportati",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Connetti un account per ricevere messaggi."
+    "lockNote": "Connetti un account per ricevere messaggi.",
+    "noConversations": "Nessun messaggio per ora. Le nuove conversazioni di Instagram e Messenger appariranno qui.",
+    "reconnect": "Riconnetti per leggere i messaggi",
+    "openConnections": "Apri connessioni",
+    "customer": "Cliente",
+    "you": "Tu: {{text}}"
   },
   "reply": {
     "title": "Assistente di risposta",
-    "referencedProduct": "Prodotto di riferimento",
     "suggestionTitle": "Suggerimento di risposta Espanda",
     "draftLabel": "Bozza di risposta",
-    "tone": "Tono: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Raffinato & artigianale"
-    },
-    "done": "Fatto",
-    "editReply": "Modifica risposta",
     "approvalTitle": "Approvazione manuale richiesta",
     "approvalBody": "Nessun messaggio viene mai inviato senza il tuo esplicito clic.",
-    "exampleTitle": "Modalità conversazione di esempio",
-    "exampleBody": "Collegando il tuo account Instagram o Facebook, questo esempio viene sostituito con domande reali dei clienti."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(foto o allegato)",
+    "writeOwn": "Scrivi tu",
+    "send": "Invia",
+    "sent": "Inviato."
   },
   "reviews": {
     "emptyTitle": "Nessuna recensione ancora",
@@ -74,7 +79,23 @@
     "connectGoogle": "Connetti Google Business",
     "automatedTitle": "Richieste di recensione automatizzate",
     "connectFirst": "Connetti prima",
-    "automatedBody": "Richiede la connessione a Google Business per inviare inviti personalizzati alle recensioni."
+    "automatedBody": "Richiede la connessione a Google Business per inviare inviti personalizzati alle recensioni.",
+    "count_one": "{{count}} recensione",
+    "count_other": "{{count}} recensioni",
+    "connectedEmptyBody": "Le nuove recensioni su Google appariranno qui, così potrai rispondere.",
+    "waitingGoogle": "In attesa di Google",
+    "linkBody": "Invia questo link ai clienti dopo una visita o un acquisto. Apre il modulo per recensire la tua attività su Google.",
+    "shareLink": "Condividi link recensioni",
+    "anonymous": "Utente Google",
+    "yourReply": "La tua risposta",
+    "replyDraft": "Bozza di risposta",
+    "cancel": "Annulla",
+    "postReply": "Pubblica risposta",
+    "editReply": "Modifica risposta",
+    "draftReply": "Scrivi una bozza",
+    "replied": "Risposta pubblicata su Google.",
+    "stars_one": "{{count}} stella",
+    "stars_other": "{{count}} stelle"
   },
   "people": {
     "emptyTitle": "Nessun record cliente ancora",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Tu resti in controllo",
-    "controlBody": "Niente viene pubblicato o risposto su Google finché non lo approvi."
+    "controlBody": "Niente viene pubblicato o risposto su Google finché non lo approvi.",
+    "connectNote": "Puoi disconnetterti in qualsiasi momento in Attività → Connessioni.",
+    "retry": "Riprova"
   },
   "googleWorkspace": {
     "newPost": "Nuovo post su Google",
@@ -128,13 +151,40 @@
     "checklistTitle": "Lista di controllo configurazione profilo",
     "checklist": {
       "profile": {
-        "label": "Profilo Google connesso",
-        "value": "Trovato"
+        "label": "Profilo Google connesso"
+      },
+      "verified": {
+        "label": "Verifica Google",
+        "yes": "Verificata",
+        "no": "Non ancora"
       },
       "reviewLink": {
         "label": "Link diretto per richiesta recensione",
-        "value": "Imposta"
+        "share": "Condividi",
+        "waiting": "Dopo la verifica"
+      },
+      "hours": {
+        "label": "Orari di apertura",
+        "yes": "Impostati",
+        "no": "Aggiungi su Google"
+      },
+      "website": {
+        "label": "Sito web",
+        "no": "Aggiungi su Google"
       }
-    }
+    },
+    "postText": "Testo del post",
+    "discard": "Elimina",
+    "publishPost": "Pubblica post",
+    "postState": {
+      "live": "Pubblicato",
+      "processing": "In elaborazione",
+      "rejected": "Rifiutato da Google"
+    },
+    "noPostsTitle": "Nessun post su Google per ora",
+    "noPostsBody": "Tocca Nuovo post Google per crearne uno dalle tue foto. Non verrà pubblicato nulla finché non lo confermi.",
+    "posted": "Inviato a Google. Potrebbero volerci alcuni minuti prima che appaia.",
+    "unverifiedTitle": "Google non ha ancora verificato questa attività",
+    "unverifiedBody": "I post e il link per le recensioni funzionano solo dopo che Google ha verificato la tua attività. Verificala su Google Business Profile."
   }
 }

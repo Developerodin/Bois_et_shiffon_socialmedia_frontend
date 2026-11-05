@@ -53,6 +53,8 @@
       "interior": "Interior",
       "custom": "Custom"
     },
+    "briefOptional": "Optional",
+    "briefNeeded": "Required",
     "creativeBrief": "Creative brief",
     "briefHint": "Refine lighting, ambiance or specific décor cues",
     "sourcePreview": "Source preview",

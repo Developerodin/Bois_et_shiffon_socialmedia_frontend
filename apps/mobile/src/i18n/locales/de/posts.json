@@ -58,6 +58,8 @@
     "viewCalendar": "Kalender ansehen",
     "loadFailed": "Deine Beiträge konnten nicht geladen werden. Prüfe deine Verbindung.",
     "retry": "Erneut versuchen",
+    "retrying": "Erneuter Versuch...",
+    "stillFailed": "Deine Beiträge konnten immer noch nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
     "empty": "Diese Woche gibt es noch keine Beiträge. Plane welche im Planer.",
     "slides": "Karussell · {{count}} Slides"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Nicht veröffentlicht",
     "cancelSchedule": "Planung abbrechen",
     "cancelling": "Wird abgebrochen...",
-    "noPermission": "Jemand mit Freigabe- und Veröffentlichungsrechten in diesem Arbeitsbereich muss es einplanen."
+    "noPermission": "Jemand mit Freigabe- und Veröffentlichungsrechten in diesem Arbeitsbereich muss es einplanen.",
+    "productIssues": "Produktprüfung",
+    "askNote": "Was soll geändert werden?",
+    "noteNeeded": "Gib an, was geändert werden soll.",
+    "suggestProduct": "Anderes Produkt vorschlagen",
+    "productStays": "Das Produkt bleibt verknüpft, daher wird der Beitrag weiterhin abgelehnt.",
+    "askChanges": "Änderungen anfordern",
+    "sending": "Wird gesendet...",
+    "nextAskChanges": "Änderungen anfordern",
+    "approverNeeded": "Eine freigabeberechtigte Person muss sich das ansehen."
   },
   "edit": {
     "title": "Beitrag bearbeiten",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram akzeptiert nur JPEG-Fotos. Tippe, um stattdessen eine .jpg-Datei auszuwählen.",
     "expired": "{{channel}}: Bitte melde dich erneut an",
     "reconnect": "{{channel}} erneut verbinden",
-    "reelInStudio": "Reels werden im Reels-Studio erstellt und veröffentlicht, nicht hier."
+    "reelInStudio": "Reels werden im Reels-Studio erstellt und veröffentlicht, nicht hier.",
+    "loadFailed": "Es konnte nicht geprüft werden, wo dieser Beitrag veröffentlicht werden kann. Prüfe deine Verbindung.",
+    "retry": "Erneut versuchen"
   },
   "brief": {
     "title": "Beitrag erstellen",
@@ -220,7 +233,9 @@
     "scheduled_other": "Geplant ({{count}})",
     "samplePreview": "Beispielvorschau",
     "moreOptions": "Weitere Optionen für {{title}}",
-    "editStory": "Story bearbeiten"
+    "editStory": "Story bearbeiten",
+    "comingSoon": "Bald verfügbar",
+    "comingSoonBody": "Stories sind noch nicht verfügbar. Beiträge, Karussells und Reels kannst du schon jetzt einplanen."
   },
   "editStory": {
     "back": "Zurück",
@@ -259,6 +274,14 @@
     "noPillars": "Für diesen Monat sind noch keine Beiträge geplant.",
     "started": "Deine nächsten 30 Tage werden geplant. Die ersten Entwürfe erscheinen in wenigen Minuten im Kalender und warten auf deine Freigabe. Die übrigen folgen, sobald sie fertig sind.",
     "generating": "Wird gestartet...",
+    "done_one": "{{count}} Beitrag eingeplant. Der Entwurf erscheint im Kalender, sobald er erstellt ist, und kann dann von dir freigegeben werden.",
+    "done_other": "{{count}} Beiträge eingeplant. Die Entwürfe erscheinen im Kalender, sobald sie erstellt sind, und können dann von dir freigegeben werden.",
+    "unscheduled_one": "Für {{count}} gab es in den nächsten 30 Tagen keinen freien Termin.",
+    "unscheduled_other": "Für {{count}} gab es in den nächsten 30 Tagen keinen freien Termin.",
+    "failed": "Die Planung konnte nicht abgeschlossen werden.",
+    "nothingToDo": "Noch keine neuen Ideen zum Einplanen. Jeden Morgen kommen neue Ideen dazu.",
+    "refunded": "{{n}} Credits erstattet.",
+    "tryAgain": "Erneut versuchen",
     "cost": "Kostet {{n}} Credits."
   }
 }

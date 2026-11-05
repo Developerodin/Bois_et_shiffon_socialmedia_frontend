@@ -25,6 +25,7 @@
       "body": "Añadir fotos nuevas mantiene tus reels automáticos y el borrador del sitio web actualizados."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Próximamente",
     "cards": {
       "customers": {
         "title": "Clientes",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Los nuevos mensajes estarán disponibles automáticamente una vez conectados.",
     "channelsTitle": "Canales de mensajería compatibles",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Conecta una cuenta para recibir mensajes."
+    "lockNote": "Conecta una cuenta para recibir mensajes.",
+    "noConversations": "Aún no hay mensajes. Las nuevas conversaciones de Instagram y Messenger aparecerán aquí.",
+    "reconnect": "Vuelve a conectar para leer los mensajes",
+    "openConnections": "Abrir conexiones",
+    "customer": "Cliente",
+    "you": "Tú: {{text}}"
   },
   "reply": {
     "title": "Asistente de respuestas",
-    "referencedProduct": "Producto referenciado",
     "suggestionTitle": "Sugerencia de respuesta de Espanda",
     "draftLabel": "Borrador de respuesta",
-    "tone": "Tono: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Pulido y artesanal"
-    },
-    "done": "Hecho",
-    "editReply": "Editar respuesta",
     "approvalTitle": "Aprobación manual requerida",
     "approvalBody": "Ningún mensaje se envía sin tu clic explícito.",
-    "exampleTitle": "Modo de conversación de ejemplo",
-    "exampleBody": "Conectar tu cuenta de Instagram o Facebook reemplaza este ejemplo con preguntas reales de clientes."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(foto o archivo adjunto)",
+    "writeOwn": "Escribir mi respuesta",
+    "send": "Enviar",
+    "sent": "Enviado."
   },
   "reviews": {
     "emptyTitle": "Aún no hay reseñas",
@@ -74,7 +79,23 @@
     "connectGoogle": "Conectar Google Business",
     "automatedTitle": "Solicitudes de reseñas automatizadas",
     "connectFirst": "Conectar primero",
-    "automatedBody": "Requiere conexión con Google Business para enviar invitaciones personalizadas de reseñas."
+    "automatedBody": "Requiere conexión con Google Business para enviar invitaciones personalizadas de reseñas.",
+    "count_one": "{{count}} reseña",
+    "count_other": "{{count}} reseñas",
+    "connectedEmptyBody": "Las nuevas reseñas de Google aparecerán aquí para que puedas responderlas.",
+    "waitingGoogle": "Esperando a Google",
+    "linkBody": "Envía este enlace a tus clientes después de una visita o compra. Abre el formulario de reseñas de Google para tu negocio.",
+    "shareLink": "Compartir enlace de reseñas",
+    "anonymous": "Usuario de Google",
+    "yourReply": "Tu respuesta",
+    "replyDraft": "Borrador de respuesta",
+    "cancel": "Cancelar",
+    "postReply": "Publicar respuesta",
+    "editReply": "Editar respuesta",
+    "draftReply": "Redactar respuesta",
+    "replied": "Respuesta publicada en Google.",
+    "stars_one": "{{count}} estrella",
+    "stars_other": "{{count}} estrellas"
   },
   "people": {
     "emptyTitle": "Aún no hay registros de clientes",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Tú tienes el control",
-    "controlBody": "Nada se publica o responde en Google hasta que lo apruebes."
+    "controlBody": "Nada se publica o responde en Google hasta que lo apruebes.",
+    "connectNote": "Puedes desconectar la cuenta cuando quieras en Negocio → Conexiones.",
+    "retry": "Reintentar"
   },
   "googleWorkspace": {
     "newPost": "Nueva publicación en Google",
@@ -128,13 +151,40 @@
     "checklistTitle": "Lista de verificación de configuración de perfil",
     "checklist": {
       "profile": {
-        "label": "Perfil de Google conectado",
-        "value": "Encontrado"
+        "label": "Perfil de Google conectado"
+      },
+      "verified": {
+        "label": "Verificado por Google",
+        "yes": "Verificado",
+        "no": "Aún no"
       },
       "reviewLink": {
         "label": "Enlace directo para solicitud de reseña",
-        "value": "Configurar"
+        "share": "Compartir",
+        "waiting": "Después de la verificación"
+      },
+      "hours": {
+        "label": "Horario",
+        "yes": "Configurado",
+        "no": "Añadir en Google"
+      },
+      "website": {
+        "label": "Sitio web",
+        "no": "Añadir en Google"
       }
-    }
+    },
+    "postText": "Texto de la publicación",
+    "discard": "Descartar",
+    "publishPost": "Publicar",
+    "postState": {
+      "live": "Publicado",
+      "processing": "Procesando",
+      "rejected": "Rechazado por Google"
+    },
+    "noPostsTitle": "Aún no hay publicaciones en Google",
+    "noPostsBody": "Toca Nueva publicación en Google para crear un borrador con tus fotos. No se publicará nada hasta que lo confirmes.",
+    "posted": "Enviado a Google. Puede tardar unos minutos en aparecer.",
+    "unverifiedTitle": "Google aún no ha verificado este negocio",
+    "unverifiedBody": "Las publicaciones y el enlace de reseñas solo funcionan cuando Google verifica tu negocio. Verifícalo en Google Business Profile."
   }
 }

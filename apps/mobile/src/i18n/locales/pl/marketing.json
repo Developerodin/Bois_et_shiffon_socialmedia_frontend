@@ -25,6 +25,7 @@
       "body": "Dodawanie nowych zdjęć utrzymuje automatyczne rolki i szkic strony na bieżąco."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Wkrótce",
     "cards": {
       "customers": {
         "title": "Klienci",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Nowe wiadomości będą dostępne automatycznie po połączeniu.",
     "channelsTitle": "Obsługiwane kanały wiadomości",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Połącz konto, aby otrzymywać wiadomości."
+    "lockNote": "Połącz konto, aby otrzymywać wiadomości.",
+    "noConversations": "Nie masz jeszcze wiadomości. Nowe rozmowy z Instagram i Messengera pojawią się tutaj.",
+    "reconnect": "Połącz ponownie, aby czytać wiadomości",
+    "openConnections": "Otwórz połączenia",
+    "customer": "Klient",
+    "you": "Ty: {{text}}"
   },
   "reply": {
     "title": "Asystent odpowiedzi",
-    "referencedProduct": "Wspomniany produkt",
     "suggestionTitle": "Sugestia odpowiedzi Espanda",
     "draftLabel": "Szkic odpowiedzi",
-    "tone": "Ton: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Dopracowany i rzemieślniczy"
-    },
-    "done": "Gotowe",
-    "editReply": "Edytuj odpowiedź",
     "approvalTitle": "Wymagana ręczna akceptacja",
     "approvalBody": "Żadna wiadomość nie jest wysyłana bez Twojego wyraźnego kliknięcia.",
-    "exampleTitle": "Tryb przykładowej rozmowy",
-    "exampleBody": "Połączenie konta Instagram lub Facebook zastępuje ten przykład prawdziwymi pytaniami klientów."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(zdjęcie lub załącznik)",
+    "writeOwn": "Napisz własną",
+    "send": "Wyślij",
+    "sent": "Wysłano."
   },
   "reviews": {
     "emptyTitle": "Brak opinii",
@@ -74,7 +79,23 @@
     "connectGoogle": "Połącz Google Business",
     "automatedTitle": "Automatyczne prośby o opinie",
     "connectFirst": "Najpierw połącz",
-    "automatedBody": "Wymaga połączenia z Google Business, aby wysyłać spersonalizowane zaproszenia do opinii."
+    "automatedBody": "Wymaga połączenia z Google Business, aby wysyłać spersonalizowane zaproszenia do opinii.",
+    "count_one": "{{count}} opinia",
+    "count_other": "Opinie: {{count}}",
+    "connectedEmptyBody": "Nowe opinie w Google pojawią się tutaj, abyś mógł na nie odpowiedzieć.",
+    "waitingGoogle": "Oczekiwanie na Google",
+    "linkBody": "Wyślij klientom ten link po wizycie lub zakupie. Otwiera formularz wystawiania opinii o Twojej firmie w Google.",
+    "shareLink": "Udostępnij link do opinii",
+    "anonymous": "Użytkownik Google",
+    "yourReply": "Twoja odpowiedź",
+    "replyDraft": "Szkic odpowiedzi",
+    "cancel": "Anuluj",
+    "postReply": "Opublikuj odpowiedź",
+    "editReply": "Edytuj odpowiedź",
+    "draftReply": "Przygotuj odpowiedź",
+    "replied": "Odpowiedź opublikowana w Google.",
+    "stars_one": "{{count}} gwiazdka",
+    "stars_other": "Gwiazdki: {{count}}"
   },
   "people": {
     "emptyTitle": "Brak zapisów klientów",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Ty masz kontrolę",
-    "controlBody": "Nic nie jest publikowane ani odpowiadane w Google, dopóki tego nie zatwierdzisz."
+    "controlBody": "Nic nie jest publikowane ani odpowiadane w Google, dopóki tego nie zatwierdzisz.",
+    "connectNote": "Możesz rozłączyć konto w dowolnym momencie w sekcji Firma → Połączenia.",
+    "retry": "Spróbuj ponownie"
   },
   "googleWorkspace": {
     "newPost": "Nowy post Google",
@@ -128,13 +151,40 @@
     "checklistTitle": "Lista kontrolna konfiguracji profilu",
     "checklist": {
       "profile": {
-        "label": "Profil Google połączony",
-        "value": "Znaleziono"
+        "label": "Profil Google połączony"
+      },
+      "verified": {
+        "label": "Weryfikacja Google",
+        "yes": "Zweryfikowano",
+        "no": "Jeszcze nie"
       },
       "reviewLink": {
         "label": "Bezpośredni link do prośby o opinię",
-        "value": "Ustaw"
+        "share": "Udostępnij",
+        "waiting": "Po weryfikacji"
+      },
+      "hours": {
+        "label": "Godziny otwarcia",
+        "yes": "Ustawiono",
+        "no": "Dodaj w Google"
+      },
+      "website": {
+        "label": "Strona internetowa",
+        "no": "Dodaj w Google"
       }
-    }
+    },
+    "postText": "Treść posta",
+    "discard": "Odrzuć",
+    "publishPost": "Opublikuj post",
+    "postState": {
+      "live": "Opublikowany",
+      "processing": "Przetwarzanie",
+      "rejected": "Odrzucony przez Google"
+    },
+    "noPostsTitle": "Nie masz jeszcze postów w Google",
+    "noPostsBody": "Wybierz „Nowy post Google”, aby przygotować go ze swoich zdjęć. Nic nie zostanie opublikowane bez Twojej zgody.",
+    "posted": "Wysłano do Google. Post może pojawić się po kilku minutach.",
+    "unverifiedTitle": "Google nie zweryfikowało jeszcze tej firmy",
+    "unverifiedBody": "Posty i link do opinii będą działać dopiero po weryfikacji firmy przez Google. Zweryfikuj ją w Profilu Firmy w Google."
   }
 }

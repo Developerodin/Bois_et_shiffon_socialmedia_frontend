@@ -58,6 +58,8 @@
     "viewCalendar": "Visualizza calendario",
     "loadFailed": "Impossibile caricare i tuoi post. Controlla la connessione.",
     "retry": "Riprova",
+    "retrying": "Nuovo tentativo...",
+    "stillFailed": "Impossibile caricare i tuoi post. Controlla la connessione e riprova.",
     "empty": "Nessun post per questa settimana. Pianificali dal calendario.",
     "slides": "Carosello · {{count}} slide"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Non è stato pubblicato",
     "cancelSchedule": "Annulla programmazione",
     "cancelling": "Annullamento...",
-    "noPermission": "Deve programmarlo qualcuno con i permessi di approvazione e pubblicazione in questo spazio di lavoro."
+    "noPermission": "Deve programmarlo qualcuno con i permessi di approvazione e pubblicazione in questo spazio di lavoro.",
+    "productIssues": "Verifica prodotto",
+    "askNote": "Cosa bisogna cambiare",
+    "noteNeeded": "Indica cosa bisogna cambiare.",
+    "suggestProduct": "Suggerisci un altro prodotto",
+    "productStays": "Il prodotto resta collegato, quindi il post verrà comunque rifiutato",
+    "askChanges": "Chiedi modifiche",
+    "sending": "Invio in corso...",
+    "nextAskChanges": "Chiedi modifiche",
+    "approverNeeded": "Serve la revisione di chi approva"
   },
   "edit": {
     "title": "Modifica post",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram accetta solo foto JPEG. Tocca per scegliere un file .jpg.",
     "expired": "Devi accedere di nuovo a {{channel}}",
     "reconnect": "Ricollega {{channel}}",
-    "reelInStudio": "I reel si creano e si pubblicano nello studio Reels, non da qui."
+    "reelInStudio": "I reel si creano e si pubblicano nello studio Reels, non da qui.",
+    "loadFailed": "Impossibile verificare dove pubblicare questo post. Controlla la connessione.",
+    "retry": "Riprova"
   },
   "brief": {
     "title": "Crea un post",
@@ -220,7 +233,9 @@
     "scheduled_other": "Programmate ({{count}})",
     "samplePreview": "Anteprima campione",
     "moreOptions": "Altre opzioni per {{title}}",
-    "editStory": "Modifica storia"
+    "editStory": "Modifica storia",
+    "comingSoon": "In arrivo",
+    "comingSoonBody": "Le storie non sono ancora disponibili. Puoi già programmare post, caroselli e reel."
   },
   "editStory": {
     "back": "Indietro",
@@ -259,6 +274,14 @@
     "noPillars": "Nessun post pianificato per questo mese.",
     "started": "Stiamo pianificando i tuoi prossimi 30 giorni. Le prime bozze appariranno nel calendario tra pochi minuti, pronte per la tua approvazione; le altre seguiranno man mano che saranno pronte.",
     "generating": "Avvio...",
+    "done_one": "Pianificato {{count}} post. La bozza apparirà sul calendario appena sarà pronta, così potrai approvarla.",
+    "done_other": "Pianificati {{count}} post. Le bozze appariranno sul calendario man mano che saranno pronte, così potrai approvarle.",
+    "unscheduled_one": "Nessuno spazio libero nei prossimi 30 giorni per {{count}} post.",
+    "unscheduled_other": "Nessuno spazio libero nei prossimi 30 giorni per {{count}} post.",
+    "failed": "La pianificazione non è stata completata.",
+    "nothingToDo": "Nessuna nuova idea da pianificare per ora. Ogni mattina arrivano nuove idee.",
+    "refunded": "{{n}} crediti rimborsati.",
+    "tryAgain": "Riprova",
     "cost": "Costa {{n}} crediti."
   }
 }

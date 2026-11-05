@@ -58,6 +58,8 @@
     "viewCalendar": "Ver calendário",
     "loadFailed": "Não foi possível carregar as tuas publicações. Verifica a ligação.",
     "retry": "Tentar novamente",
+    "retrying": "A tentar novamente...",
+    "stillFailed": "Ainda não foi possível carregar as tuas publicações. Verifica a ligação e tenta novamente.",
     "empty": "Ainda não há publicações esta semana. Planeia algumas no Planeador.",
     "slides": "Carrossel · {{count}} diapositivos"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Não está",
     "cancelSchedule": "Cancelar agendamento",
     "cancelling": "A cancelar...",
-    "noPermission": "Uma pessoa com permissões de aprovação e publicação neste espaço de trabalho tem de fazer o agendamento."
+    "noPermission": "Uma pessoa com permissões de aprovação e publicação neste espaço de trabalho tem de fazer o agendamento.",
+    "productIssues": "Verificação do produto",
+    "askNote": "O que precisa de ser alterado",
+    "noteNeeded": "Indica o que precisa de ser alterado.",
+    "suggestProduct": "Sugerir outro produto",
+    "productStays": "O produto continua associado, por isso a publicação continuará a ser recusada",
+    "askChanges": "Pedir alterações",
+    "sending": "A enviar...",
+    "nextAskChanges": "Pedir alterações",
+    "approverNeeded": "Alguém responsável pela aprovação precisa de rever isto"
   },
   "edit": {
     "title": "Editar publicação",
@@ -179,7 +190,9 @@
     "jpegOnly": "O Instagram só aceita fotos JPEG. Toca para escolher um ficheiro .jpg.",
     "expired": "Tens de voltar a iniciar sessão em {{channel}}",
     "reconnect": "Voltar a ligar {{channel}}",
-    "reelInStudio": "Os Reels são criados e publicados no estúdio de Reels, não aqui."
+    "reelInStudio": "Os Reels são criados e publicados no estúdio de Reels, não aqui.",
+    "loadFailed": "Não foi possível verificar onde esta publicação pode ser agendada. Verifica a ligação.",
+    "retry": "Tentar novamente"
   },
   "brief": {
     "title": "Criar uma publicação",
@@ -220,7 +233,9 @@
     "scheduled_other": "Agendadas ({{count}})",
     "samplePreview": "Pré-visualização de exemplo",
     "moreOptions": "Mais opções para {{title}}",
-    "editStory": "Editar story"
+    "editStory": "Editar story",
+    "comingSoon": "Disponível em breve",
+    "comingSoonBody": "As stories ainda não estão disponíveis. Já podes agendar publicações, carrosséis e reels."
   },
   "editStory": {
     "back": "Voltar",
@@ -259,6 +274,14 @@
     "noPillars": "Ainda não há publicações planeadas para este mês.",
     "started": "A planear os próximos 30 dias. Os primeiros rascunhos aparecem no calendário dentro de alguns minutos, prontos para aprovares. Os restantes aparecem à medida que forem criados.",
     "generating": "A iniciar...",
+    "done_one": "{{count}} publicação planeada. O rascunho aparece no calendário assim que estiver escrito, pronto para aprovação.",
+    "done_other": "{{count}} publicações planeadas. Os rascunhos aparecem no calendário à medida que são escritos, prontos para aprovação.",
+    "unscheduled_one": "Não havia vaga nos próximos 30 dias para {{count}} publicação.",
+    "unscheduled_other": "Não havia vagas nos próximos 30 dias para {{count}} publicações.",
+    "failed": "O planeamento não foi concluído.",
+    "nothingToDo": "Ainda não há novas ideias para planear. Há ideias novas todas as manhãs.",
+    "refunded": "Créditos devolvidos: {{n}}.",
+    "tryAgain": "Tentar novamente",
     "cost": "Custa {{n}} créditos."
   }
 }

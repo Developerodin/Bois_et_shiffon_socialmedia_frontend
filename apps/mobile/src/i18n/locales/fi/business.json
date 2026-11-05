@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Brändin mieltymykset",
     "brandPreferencesHint": "Värit, sävy, kieli",
+    "products": "Tuotteet",
+    "productsHint": "Hinnat, varastot ja tuotetiedot",
     "photoAssets": "Kuvavarastot",
     "photoAssetsHint": "Bunting-pöytä ja TV-yksikkökuvat",
     "connections": "Yhteydet",
@@ -67,6 +69,7 @@
     "title": "Yhteydet",
     "sourceTitle": "Lähde verkkosivusto",
     "linked": "Linkitetty",
+    "viewPhotos": "Näytä kuvat",
     "sourceBody": "Tuotekuvat ja yritystiedot",
     "channelsTitle": "Julkaisukanavat",
     "accounts": "Tilit",
@@ -83,7 +86,9 @@
     "noSite": "Ei vielä verkkosivustoa",
     "comingSoon": "Ei vielä saatavilla",
     "expired": "Kirjautuminen vanhentui",
-    "reconnect": "Yhdistä uudelleen"
+    "reconnect": "Yhdistä uudelleen",
+    "connectOnWeb": "Ei yhdistetty · yhdistä verkkopalvelussa",
+    "reconnectOnWeb": "Yhdistä uudelleen verkkopalvelussa"
   },
   "automations": {
     "title": "Automatisoinnit",
@@ -118,6 +123,14 @@
     "notAvailable": "Ei vielä saatavilla"
   },
   "billing": {
+    "planName": "{{plan}}-tilaus",
+    "planBlurb_one": "Sisältää {{n}} krediitin, uusiutuu {{date}}.",
+    "planBlurb_other": "Sisältää {{n}} krediittiä, uusiutuu {{date}}.",
+    "planLoading": "Tarkistetaan tilaustasi...",
+    "planFailed": "Tilausta ei voitu ladata",
+    "planRetry": "Yritä uudelleen",
+    "unlimited": "Testityötila",
+    "unlimitedBlurb": "Tässä työtilassa ei ole krediittirajaa.",
     "creditsAvailable_one": "{{n}} krediitti käytettävissä",
     "creditsAvailable_other": "{{n}} krediittiä käytettävissä",
     "balanceTitle": "Kredittisaldo",
@@ -168,6 +181,7 @@
     "terms": "Käyttöehdot",
     "privacy": "Tietosuojakäytäntö",
     "restore": "Palauta ostot",
+    "comingSoon": "Tulossa pian",
     "signOut": "Kirjaudu ulos Espandasta",
     "signOutNote": "Aktiivinen tilauksesi ja luonnostellut katalogiresurssit säilyvät turvallisesti tallennettuina.",
     "memberCount_one": "{{count}} jäsen",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Saldo: {{credits}} krediitti jäljellä",
     "balanceLabelNoPlan_other": "Saldo: {{credits}} krediittiä jäljellä",
     "added": "Lisätty {{date}}"
+  },
+  "products": {
+    "title": "Tuotteet",
+    "detailTitle": "Tuote",
+    "syncNow": "Synkronoi nyt",
+    "syncing": "Synkronoidaan…",
+    "syncRunning": "Luetaan tuotteitasi. Tämä kestää enintään minuutin.",
+    "source": {
+      "SHOPIFY": "Shopify-kaupastasi",
+      "WEBSITE": "Verkkosivustosi tuotesyötteestä",
+      "none": "Kauppaa ei ole yhdistetty"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Verkkosivuston tuotesyöte",
+      "MANUAL": "Lisätty käsin"
+    },
+    "lastSync_one": "{{n}} tuote · synkronoitu {{ago}}",
+    "lastSync_other": "{{n}} tuotetta · synkronoitu {{ago}}",
+    "neverSynced": "Ei vielä synkronoitu. Napauta Synkronoi nyt.",
+    "reason": {
+      "not-a-feed": "Verkkosivustosi ei julkaise tuotesyötettä, jota voimme lukea. Yhdistä Shopify verkkopalvelussa tai lisää tuotteet siellä.",
+      "partial": "Vain osa tuoteluettelosta voitiin lukea, joten mitään ei arkistoitu.",
+      "failed": "Tuotteitasi ei voitu lukea viime synkronoinnissa. Yritä uudelleen napauttamalla Synkronoi nyt.",
+      "shopify-refused": "Shopify hylkäsi käyttöoikeustunnuksen. Yhdistä Shopify uudelleen verkkopalvelussa."
+    },
+    "emptyTitle": "Ei vielä tuotteita",
+    "emptyBody": "Lue tuotteet kaupastasi napauttamalla Synkronoi nyt tai lisää ne verkkopalvelussa.",
+    "search": "Hae nimellä tai tuotenumerolla",
+    "count_one": "{{n}} tuote",
+    "count_other": "{{n}} tuotetta",
+    "showMore": "Näytä lisää",
+    "noPrice": "Ei hintaa",
+    "notFound": "Tätä tuotetta ei enää ole tuoteluettelossa.",
+    "stock": {
+      "in": "Varastossa",
+      "out": "Loppu varastosta",
+      "unknown": "Varastosaldo tuntematon",
+      "count": "{{n}} varastossa"
+    },
+    "checked": "tarkistettu {{ago}}",
+    "ago": {
+      "now": "juuri nyt",
+      "min": "{{n}} min sitten",
+      "hours": "{{n}} h sitten",
+      "days": "{{n}} päivää sitten"
+    },
+    "fields": {
+      "sku": "Tuotenumero",
+      "category": "Kategoria",
+      "source": "Lähde",
+      "materials": "Materiaalit",
+      "dimensions": "Mitat",
+      "certifications": "Sertifikaatit"
+    },
+    "placeholders": {
+      "materials": "esim. massiiviakasia, musta lakka",
+      "dimensions": "esim. 120 × 40 × 75 cm",
+      "certifications": "esim. FSC-sertifioitu puu"
+    },
+    "openPage": "Avaa tuotesivu",
+    "factsTitle": "Tuotetiedot",
+    "factsHint": "Sisällöntuottajat ja laaduntarkistus käyttävät näitä tietoja. Synkronointi ei muuta niitä.",
+    "factsLocked": "Sisällöntuottajat ja laaduntarkistus käyttävät näitä tietoja. Vain henkilöt, joilla on oikeus hyväksyä tuoteväittämiä, voivat muuttaa niitä.",
+    "save": "Tallenna tiedot",
+    "saving": "Tallennetaan…",
+    "saved": "Tallennettu"
   }
 }

@@ -22,6 +22,8 @@
     },
     "brandPreferences": "تفضيلات العلامة التجارية",
     "brandPreferencesHint": "الألوان، النغمة، اللغة",
+    "products": "المنتجات",
+    "productsHint": "الأسعار والمخزون ومعلومات المنتجات",
     "photoAssets": "أصول الصور",
     "photoAssetsHint": "صور طاولة Bunting ووحدة التلفاز",
     "connections": "الاتصالات",
@@ -67,6 +69,7 @@
     "title": "الاتصالات",
     "sourceTitle": "الموقع المصدر",
     "linked": "مرتبط",
+    "viewPhotos": "عرض الصور",
     "sourceBody": "صور المنتجات وتفاصيل العمل",
     "channelsTitle": "قنوات النشر",
     "accounts": "الحسابات",
@@ -83,7 +86,9 @@
     "noSite": "لا يوجد موقع إلكتروني بعد",
     "comingSoon": "غير متاح بعد",
     "expired": "انتهت صلاحية تسجيل الدخول",
-    "reconnect": "إعادة الاتصال"
+    "reconnect": "إعادة الاتصال",
+    "connectOnWeb": "غير متصل · اربطه عبر الويب",
+    "reconnectOnWeb": "يحتاج إلى إعادة الربط عبر الويب"
   },
   "automations": {
     "title": "الأتمتة",
@@ -118,6 +123,14 @@
     "notAvailable": "غير متاح بعد"
   },
   "billing": {
+    "planName": "خطة {{plan}}",
+    "planBlurb_one": "تتضمن {{n}} رصيد، وتتجدد في {{date}}.",
+    "planBlurb_other": "تتضمن {{n}} من الأرصدة، وتتجدد في {{date}}.",
+    "planLoading": "جارٍ التحقق من خطتك...",
+    "planFailed": "تعذر تحميل خطتك",
+    "planRetry": "حاول مجددًا",
+    "unlimited": "مساحة عمل تجريبية",
+    "unlimitedBlurb": "مساحة العمل هذه بلا حد للأرصدة.",
     "creditsAvailable_one": "{{n}} رصيد متاح",
     "creditsAvailable_other": "{{n}} أرصدة متاحة",
     "balanceTitle": "رصيد الائتمان",
@@ -168,6 +181,7 @@
     "terms": "شروط الخدمة",
     "privacy": "سياسة الخصوصية",
     "restore": "استعادة المشتريات",
+    "comingSoon": "قريبًا",
     "signOut": "تسجيل الخروج من Espanda",
     "signOutNote": "يظل اشتراكك النشط وأصول الكتالوج المسودة محفوظة بأمان.",
     "memberCount_one": "{{count}} عضو",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "الرصيد: {{credits}} نقطة متبقية",
     "balanceLabelNoPlan_other": "الرصيد: {{credits}} نقطة متبقية",
     "added": "أُضيف في {{date}}"
+  },
+  "products": {
+    "title": "المنتجات",
+    "detailTitle": "المنتج",
+    "syncNow": "زامن الآن",
+    "syncing": "جارٍ المزامنة…",
+    "syncRunning": "جارٍ قراءة منتجاتك. قد يستغرق ذلك دقيقة.",
+    "source": {
+      "SHOPIFY": "من متجرك على Shopify",
+      "WEBSITE": "من خلاصة منتجات موقعك",
+      "none": "لا يوجد متجر مرتبط"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "خلاصة الموقع",
+      "MANUAL": "أُضيف يدويًا"
+    },
+    "lastSync_one": "{{n}} منتج · تمت المزامنة {{ago}}",
+    "lastSync_other": "المنتجات: {{n}} · تمت المزامنة {{ago}}",
+    "neverSynced": "لم تتم المزامنة بعد. اضغط على «زامن الآن».",
+    "reason": {
+      "not-a-feed": "لا ينشر موقعك خلاصة منتجات يمكننا قراءتها. اربط Shopify عبر الويب أو أضف المنتجات هناك.",
+      "partial": "تعذرت قراءة الكتالوج كاملًا، لذا لم تتم أرشفة أي منتجات.",
+      "failed": "تعذرت قراءة منتجاتك في آخر مزامنة. اضغط على «زامن الآن» للمحاولة مجددًا.",
+      "shopify-refused": "رفض Shopify رمز الوصول. أعد ربط Shopify عبر الويب."
+    },
+    "emptyTitle": "لا توجد منتجات بعد",
+    "emptyBody": "اضغط على «زامن الآن» لقراءة منتجات متجرك، أو أضفها عبر الويب.",
+    "search": "ابحث بالاسم أو رمز المنتج",
+    "count_one": "{{n}} منتج",
+    "count_other": "المنتجات: {{n}}",
+    "showMore": "عرض المزيد",
+    "noPrice": "بدون سعر",
+    "notFound": "هذا المنتج لم يعد موجودًا في الكتالوج.",
+    "stock": {
+      "in": "متوفر",
+      "out": "نفد من المخزون",
+      "unknown": "المخزون غير معروف",
+      "count": "المتوفر: {{n}}"
+    },
+    "checked": "تم التحقق {{ago}}",
+    "ago": {
+      "now": "الآن",
+      "min": "منذ {{n}} دقيقة",
+      "hours": "منذ {{n}} ساعة",
+      "days": "منذ {{n}} يوم"
+    },
+    "fields": {
+      "sku": "رمز المنتج",
+      "category": "الفئة",
+      "source": "المصدر",
+      "materials": "المواد",
+      "dimensions": "الأبعاد",
+      "certifications": "الشهادات"
+    },
+    "placeholders": {
+      "materials": "مثلًا: خشب أكاسيا صلب، طلاء أسود",
+      "dimensions": "مثلًا: 120 × 40 × 75 سم",
+      "certifications": "مثلًا: خشب معتمد من FSC"
+    },
+    "openPage": "فتح صفحة المنتج",
+    "factsTitle": "معلومات المنتج",
+    "factsHint": "يستخدم الكتّاب وفحص الجودة هذه المعلومات. المزامنة لا تغيّرها أبدًا.",
+    "factsLocked": "يستخدم الكتّاب وفحص الجودة هذه المعلومات. لا يمكن تعديلها إلا لمن لديهم صلاحية اعتماد معلومات المنتج.",
+    "save": "حفظ المعلومات",
+    "saving": "جارٍ الحفظ…",
+    "saved": "تم الحفظ"
   }
 }

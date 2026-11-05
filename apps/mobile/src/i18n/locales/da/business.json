@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Brandpræferencer",
     "brandPreferencesHint": "Farver, tone, sprog",
+    "products": "Produkter",
+    "productsHint": "Priser, lager og produktoplysninger",
     "photoAssets": "Fotoaktiver",
     "photoAssetsHint": "Bunting bord og TV-enhed fotos",
     "connections": "Forbindelser",
@@ -67,6 +69,7 @@
     "title": "Forbindelser",
     "sourceTitle": "Kildewebsted",
     "linked": "Forbundet",
+    "viewPhotos": "Se billeder",
     "sourceBody": "Produktfotos og virksomhedsdetaljer",
     "channelsTitle": "Udgivelseskanaler",
     "accounts": "Konti",
@@ -83,7 +86,9 @@
     "noSite": "Intet website endnu",
     "comingSoon": "Ikke tilgængelig endnu",
     "expired": "Login udløbet",
-    "reconnect": "Forbind igen"
+    "reconnect": "Forbind igen",
+    "connectOnWeb": "Ikke forbundet · forbind på web",
+    "reconnectOnWeb": "Skal forbindes igen på web"
   },
   "automations": {
     "title": "Automatiseringer",
@@ -118,6 +123,14 @@
     "notAvailable": "Ikke tilgængelig endnu"
   },
   "billing": {
+    "planName": "{{plan}}-abonnement",
+    "planBlurb_one": "{{n}} kredit inkluderet, fornyes {{date}}.",
+    "planBlurb_other": "{{n}} kreditter inkluderet, fornyes {{date}}.",
+    "planLoading": "Tjekker dit abonnement...",
+    "planFailed": "Kunne ikke indlæse dit abonnement",
+    "planRetry": "Prøv igen",
+    "unlimited": "Testarbejdsområde",
+    "unlimitedBlurb": "Dette arbejdsområde har ingen kreditgrænse.",
     "creditsAvailable_one": "{{n}} kredit tilgængelig",
     "creditsAvailable_other": "{{n}} kreditter tilgængelige",
     "balanceTitle": "Kreditsaldo",
@@ -168,6 +181,7 @@
     "terms": "Servicevilkår",
     "privacy": "Privatlivspolitik",
     "restore": "Gendan køb",
+    "comingSoon": "Kommer snart",
     "signOut": "Log ud af Espanda",
     "signOutNote": "Dit aktive abonnement og kladde-katalogaktiver forbliver sikkert gemt.",
     "memberCount_one": "{{count}} medlem",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Saldo: {{credits}} kredit tilbage",
     "balanceLabelNoPlan_other": "Saldo: {{credits}} kreditter tilbage",
     "added": "Tilføjet {{date}}"
+  },
+  "products": {
+    "title": "Produkter",
+    "detailTitle": "Produkt",
+    "syncNow": "Synkroniser nu",
+    "syncing": "Synkroniserer…",
+    "syncRunning": "Henter dine produkter. Det tager op til et minut.",
+    "source": {
+      "SHOPIFY": "Fra din Shopify-butik",
+      "WEBSITE": "Fra din hjemmesides produktfeed",
+      "none": "Ingen butik forbundet"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Hjemmesidens feed",
+      "MANUAL": "Tilføjet manuelt"
+    },
+    "lastSync_one": "{{n}} produkt · synkroniseret {{ago}}",
+    "lastSync_other": "{{n}} produkter · synkroniseret {{ago}}",
+    "neverSynced": "Ikke synkroniseret endnu. Tryk på Synkroniser nu.",
+    "reason": {
+      "not-a-feed": "Din hjemmeside har ikke et produktfeed, vi kan læse. Forbind Shopify på web, eller tilføj produkter der.",
+      "partial": "Kun en del af kataloget kunne læses, så intet blev arkiveret.",
+      "failed": "Den seneste synkronisering kunne ikke læse dine produkter. Tryk på Synkroniser nu for at prøve igen.",
+      "shopify-refused": "Shopify afviste adgangstokenet. Forbind Shopify igen på web."
+    },
+    "emptyTitle": "Ingen produkter endnu",
+    "emptyBody": "Tryk på Synkroniser nu for at hente dem fra din butik, eller tilføj dem på web.",
+    "search": "Søg efter navn eller SKU",
+    "count_one": "{{n}} produkt",
+    "count_other": "{{n}} produkter",
+    "showMore": "Vis mere",
+    "noPrice": "Ingen pris",
+    "notFound": "Dette produkt er ikke længere i kataloget.",
+    "stock": {
+      "in": "På lager",
+      "out": "Ikke på lager",
+      "unknown": "Lagerstatus ukendt",
+      "count": "{{n}} på lager"
+    },
+    "checked": "tjekket {{ago}}",
+    "ago": {
+      "now": "lige nu",
+      "min": "for {{n}} min. siden",
+      "hours": "for {{n}} timer siden",
+      "days": "for {{n}} dage siden"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Kategori",
+      "source": "Kilde",
+      "materials": "Materialer",
+      "dimensions": "Mål",
+      "certifications": "Certificeringer"
+    },
+    "placeholders": {
+      "materials": "F.eks. massiv akacie, sort lak",
+      "dimensions": "F.eks. 120 × 40 × 75 cm",
+      "certifications": "F.eks. FSC-certificeret træ"
+    },
+    "openPage": "Åbn produktside",
+    "factsTitle": "Produktoplysninger",
+    "factsHint": "Tekstforfatterne og kvalitetstjekket bruger disse oplysninger. Synkronisering ændrer dem aldrig.",
+    "factsLocked": "Tekstforfatterne og kvalitetstjekket bruger disse oplysninger. Kun personer, der kan godkende produktpåstande, kan ændre dem.",
+    "save": "Gem oplysninger",
+    "saving": "Gemmer…",
+    "saved": "Gemt"
   }
 }

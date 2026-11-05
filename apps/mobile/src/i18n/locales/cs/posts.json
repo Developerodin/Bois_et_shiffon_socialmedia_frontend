@@ -58,6 +58,8 @@
     "viewCalendar": "Zobrazit kalendář",
     "loadFailed": "Příspěvky se nepodařilo načíst. Zkontroluj připojení.",
     "retry": "Zkusit znovu",
+    "retrying": "Zkoušíme to znovu...",
+    "stillFailed": "Příspěvky se stále nepodařilo načíst. Zkontroluj připojení a zkus to znovu.",
     "empty": "Na tento týden zatím nemáš žádné příspěvky. Naplánuj je v Plánovači.",
     "slides": "Karusel · počet snímků: {{count}}"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Není zveřejněný",
     "cancelSchedule": "Zrušit naplánování",
     "cancelling": "Ruší se...",
-    "noPermission": "Naplánovat to může jen někdo, kdo má v tomto pracovním prostoru práva ke schvalování a zveřejňování."
+    "noPermission": "Naplánovat to může jen někdo, kdo má v tomto pracovním prostoru práva ke schvalování a zveřejňování.",
+    "productIssues": "Kontrola produktu",
+    "askNote": "Co je potřeba změnit",
+    "noteNeeded": "Napiš, co je potřeba změnit.",
+    "suggestProduct": "Navrhnout jiný produkt",
+    "productStays": "Produkt zůstane propojený, takže příspěvek bude i nadále zamítnut.",
+    "askChanges": "Požádat o úpravy",
+    "sending": "Odesílání...",
+    "nextAskChanges": "Požádat o úpravy",
+    "approverNeeded": "Tohle musí posoudit schvalovatel."
   },
   "edit": {
     "title": "Upravit příspěvek",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram přijímá pouze fotky ve formátu JPEG. Klepnutím vyber fotku ve formátu .jpg.",
     "expired": "Pro {{channel}} je potřeba se znovu přihlásit",
     "reconnect": "Znovu připojit {{channel}}",
-    "reelInStudio": "Reels se vytvářejí a zveřejňují ve studiu Reels, ne tady."
+    "reelInStudio": "Reels se vytvářejí a zveřejňují ve studiu Reels, ne tady.",
+    "loadFailed": "Nepodařilo se zjistit, kam lze příspěvek naplánovat. Zkontroluj připojení.",
+    "retry": "Zkusit znovu"
   },
   "brief": {
     "title": "Vytvořit příspěvek",
@@ -220,7 +233,9 @@
     "scheduled_other": "Naplánováno ({{count}})",
     "samplePreview": "Ukázkový náhled",
     "moreOptions": "Další možnosti pro {{title}}",
-    "editStory": "Upravit příběh"
+    "editStory": "Upravit příběh",
+    "comingSoon": "Již brzy",
+    "comingSoonBody": "Stories zatím nejsou dostupné. Příspěvky, karusely a reels už můžeš plánovat."
   },
   "editStory": {
     "back": "Zpět",
@@ -259,6 +274,14 @@
     "noPillars": "Na tento měsíc zatím nemáš naplánované žádné příspěvky.",
     "started": "Plánujeme tvých dalších 30 dní. První návrhy se za pár minut objeví v kalendáři ke schválení. Ostatní budou přibývat postupně.",
     "generating": "Spouštění...",
+    "done_one": "Naplánován {{count}} příspěvek. Jakmile bude návrh hotový, objeví se v kalendáři ke schválení.",
+    "done_other": "Naplánované příspěvky: {{count}}. Hotové návrhy se průběžně objeví v kalendáři ke schválení.",
+    "unscheduled_one": "Pro {{count}} příspěvek nebyl v následujících 30 dnech volný termín.",
+    "unscheduled_other": "Počet příspěvků bez volného termínu v následujících 30 dnech: {{count}}.",
+    "failed": "Plánování se nepodařilo dokončit.",
+    "nothingToDo": "Zatím nejsou žádné nové nápady k naplánování. Nové nápady přicházejí každé ráno.",
+    "refunded": "Vrácené kredity: {{n}}.",
+    "tryAgain": "Zkusit znovu",
     "cost": "Cena: {{n}} kreditů."
   }
 }

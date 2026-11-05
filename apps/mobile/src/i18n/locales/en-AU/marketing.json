@@ -25,6 +25,7 @@
       "body": "Adding new photos keeps your automated reels and website draft tuned."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Coming soon",
     "cards": {
       "customers": {
         "title": "Customers",
@@ -50,23 +51,27 @@
     "emptyFootnote": "New messages become available automatically once connected.",
     "channelsTitle": "Supported messaging channels",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Connect an account to receive messages."
+    "lockNote": "Connect an account to receive messages.",
+    "noConversations": "No messages yet. New Instagram and Messenger conversations show up here.",
+    "reconnect": "Reconnect to read messages",
+    "openConnections": "Open connections",
+    "customer": "Customer",
+    "you": "You: {{text}}"
   },
   "reply": {
     "title": "Reply assistant",
-    "referencedProduct": "Referenced product",
     "suggestionTitle": "Espanda reply suggestion",
     "draftLabel": "Reply draft",
-    "tone": "Tone: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Polished & artisan"
-    },
-    "done": "Done",
-    "editReply": "Edit reply",
     "approvalTitle": "Manual approval required",
     "approvalBody": "No message is ever sent without your explicit click.",
-    "exampleTitle": "Example conversation mode",
-    "exampleBody": "Connecting your Instagram or Facebook account replaces this example with real customer questions."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(photo or attachment)",
+    "writeOwn": "Write my own",
+    "send": "Send",
+    "sent": "Sent."
   },
   "reviews": {
     "emptyTitle": "No reviews yet",
@@ -74,7 +79,23 @@
     "connectGoogle": "Connect Google Business",
     "automatedTitle": "Automated review requests",
     "connectFirst": "Connect first",
-    "automatedBody": "Requires Google Business connection to send personalised review invitations."
+    "automatedBody": "Requires Google Business connection to send personalised review invitations.",
+    "count_one": "{{count}} review",
+    "count_other": "{{count}} reviews",
+    "connectedEmptyBody": "New Google reviews will show up here for you to reply to.",
+    "waitingGoogle": "Waiting for Google",
+    "linkBody": "Send customers this link after a visit or purchase. It opens Google's review form for your business.",
+    "shareLink": "Share review link",
+    "anonymous": "Google user",
+    "yourReply": "Your reply",
+    "replyDraft": "Reply draft",
+    "cancel": "Cancel",
+    "postReply": "Post reply",
+    "editReply": "Edit reply",
+    "draftReply": "Draft reply",
+    "replied": "Reply posted on Google.",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars"
   },
   "people": {
     "emptyTitle": "No customer records yet",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "You stay in control",
-    "controlBody": "Nothing is posted or replied to on Google until you approve it."
+    "controlBody": "Nothing is posted or replied to on Google until you approve it.",
+    "connectNote": "You can disconnect any time in Business → Connections.",
+    "retry": "Try again"
   },
   "googleWorkspace": {
     "newPost": "New Google post",
@@ -128,13 +151,40 @@
     "checklistTitle": "Profile setup checklist",
     "checklist": {
       "profile": {
-        "label": "Google profile connected",
-        "value": "Found"
+        "label": "Google profile connected"
+      },
+      "verified": {
+        "label": "Verified by Google",
+        "yes": "Verified",
+        "no": "Not yet"
       },
       "reviewLink": {
         "label": "Direct review request link",
-        "value": "Set up"
+        "share": "Share",
+        "waiting": "After verification"
+      },
+      "hours": {
+        "label": "Opening hours",
+        "yes": "Set",
+        "no": "Add on Google"
+      },
+      "website": {
+        "label": "Website",
+        "no": "Add on Google"
       }
-    }
+    },
+    "postText": "Post text",
+    "discard": "Discard",
+    "publishPost": "Publish post",
+    "postState": {
+      "live": "Live",
+      "processing": "Processing",
+      "rejected": "Rejected by Google"
+    },
+    "noPostsTitle": "No Google posts yet",
+    "noPostsBody": "Tap New Google post to draft one from your photos. Nothing is posted until you publish it.",
+    "posted": "Sent to Google. It can take a few minutes to appear.",
+    "unverifiedTitle": "Google hasn't verified this business yet",
+    "unverifiedBody": "Posts and the review link only work once Google verifies your business. Verify it in Google Business Profile."
   }
 }

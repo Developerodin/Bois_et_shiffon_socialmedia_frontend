@@ -41,7 +41,7 @@
     "body_other": "Bu çalışma alanında şu anda <b>{{n}} kullanılabilir kredin</b> var. Çalışman kaydedildi.",
     "remaining": "{{available}} / {{needed}} gerekli",
     "remainingA11y": "Kullanılabilir ve gerekli kredi miktarı",
-    "manage": "Kredileri yönet",
+    "howToGet": "Şimdilik çalışma alanına kredileri Espanda ekibi ekliyor. Onlardan ek kredi iste, ardından işlemi tamamlamak için geri dön.",
     "keepEditing": "Düzenlemeye devam et",
     "balance": "Kredi bakiyesi",
     "neededLabel": "Bunun için kullanılabilir"

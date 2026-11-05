@@ -53,6 +53,8 @@
       "interior": "Interiér",
       "custom": "Vlastní"
     },
+    "briefOptional": "Volitelné",
+    "briefNeeded": "Povinné",
     "creativeBrief": "Kreativní zadání",
     "briefHint": "Upřesněte osvětlení, atmosféru nebo konkrétní dekorativní prvky",
     "sourcePreview": "Náhled zdroje",

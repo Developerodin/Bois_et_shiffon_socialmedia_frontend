@@ -25,6 +25,7 @@
       "body": "Ajouter de nouvelles photos maintient vos bobines automatisées et le brouillon de votre site à jour."
     },
     "cardLabel": "{{title}} : {{body}}. {{cta}}",
+    "comingSoon": "Bientôt disponible",
     "cards": {
       "customers": {
         "title": "Clients",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Les nouveaux messages deviennent disponibles automatiquement une fois connectés.",
     "channelsTitle": "Canaux de messagerie pris en charge",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Connectez un compte pour recevoir des messages."
+    "lockNote": "Connectez un compte pour recevoir des messages.",
+    "noConversations": "Aucun message pour le moment. Les nouvelles conversations Instagram et Messenger apparaîtront ici.",
+    "reconnect": "Reconnecter pour lire les messages",
+    "openConnections": "Ouvrir les connexions",
+    "customer": "Client",
+    "you": "Vous : {{text}}"
   },
   "reply": {
     "title": "Assistant de réponse",
-    "referencedProduct": "Produit référencé",
     "suggestionTitle": "Suggestion de réponse Espanda",
     "draftLabel": "Brouillon de réponse",
-    "tone": "Ton : {{tone}}",
-    "tones": {
-      "polishedArtisan": "Élégant & artisanal"
-    },
-    "done": "Terminé",
-    "editReply": "Modifier la réponse",
     "approvalTitle": "Approbation manuelle requise",
     "approvalBody": "Aucun message n'est jamais envoyé sans votre clic explicite.",
-    "exampleTitle": "Mode de conversation exemple",
-    "exampleBody": "Connecter votre compte Instagram ou Facebook remplace cet exemple par de vraies questions de clients."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(photo ou pièce jointe)",
+    "writeOwn": "Écrire ma réponse",
+    "send": "Envoyer",
+    "sent": "Envoyé."
   },
   "reviews": {
     "emptyTitle": "Pas encore d'avis",
@@ -74,7 +79,23 @@
     "connectGoogle": "Connecter Google Business",
     "automatedTitle": "Demandes d'avis automatisées",
     "connectFirst": "Connectez d'abord",
-    "automatedBody": "Nécessite une connexion Google Business pour envoyer des invitations d'avis personnalisées."
+    "automatedBody": "Nécessite une connexion Google Business pour envoyer des invitations d'avis personnalisées.",
+    "count_one": "{{count}} avis",
+    "count_other": "{{count}} avis",
+    "connectedEmptyBody": "Les nouveaux avis Google apparaîtront ici pour que vous puissiez y répondre.",
+    "waitingGoogle": "En attente de Google",
+    "linkBody": "Envoyez ce lien à vos clients après une visite ou un achat. Il ouvre le formulaire d’avis Google de votre établissement.",
+    "shareLink": "Partager le lien d’avis",
+    "anonymous": "Utilisateur Google",
+    "yourReply": "Votre réponse",
+    "replyDraft": "Brouillon de réponse",
+    "cancel": "Annuler",
+    "postReply": "Publier la réponse",
+    "editReply": "Modifier la réponse",
+    "draftReply": "Rédiger une réponse",
+    "replied": "Réponse publiée sur Google.",
+    "stars_one": "{{count}} étoile",
+    "stars_other": "{{count}} étoiles"
   },
   "people": {
     "emptyTitle": "Pas encore d'enregistrements clients",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Vous gardez le contrôle",
-    "controlBody": "Rien n'est publié ou répondu sur Google sans votre approbation."
+    "controlBody": "Rien n'est publié ou répondu sur Google sans votre approbation.",
+    "connectNote": "Vous pouvez vous déconnecter à tout moment dans Entreprise → Connexions.",
+    "retry": "Réessayer"
   },
   "googleWorkspace": {
     "newPost": "Nouvelle publication Google",
@@ -128,13 +151,40 @@
     "checklistTitle": "Liste de vérification de la configuration du profil",
     "checklist": {
       "profile": {
-        "label": "Profil Google connecté",
-        "value": "Trouvé"
+        "label": "Profil Google connecté"
+      },
+      "verified": {
+        "label": "Vérifié par Google",
+        "yes": "Vérifié",
+        "no": "Pas encore"
       },
       "reviewLink": {
         "label": "Lien direct de demande d'avis",
-        "value": "Configurer"
+        "share": "Partager",
+        "waiting": "Après vérification"
+      },
+      "hours": {
+        "label": "Horaires d’ouverture",
+        "yes": "Renseignés",
+        "no": "Ajouter sur Google"
+      },
+      "website": {
+        "label": "Site web",
+        "no": "Ajouter sur Google"
       }
-    }
+    },
+    "postText": "Texte de la publication",
+    "discard": "Abandonner",
+    "publishPost": "Publier",
+    "postState": {
+      "live": "En ligne",
+      "processing": "En cours de traitement",
+      "rejected": "Rejeté par Google"
+    },
+    "noPostsTitle": "Aucune publication Google pour le moment",
+    "noPostsBody": "Appuyez sur Nouvelle publication Google pour en créer une à partir de vos photos. Rien ne sera publié avant votre confirmation.",
+    "posted": "Envoyé à Google. L’affichage peut prendre quelques minutes.",
+    "unverifiedTitle": "Google n’a pas encore vérifié cet établissement",
+    "unverifiedBody": "Les publications et le lien d’avis ne fonctionnent qu’une fois votre établissement vérifié par Google. Vérifiez-le dans Google Business Profile."
   }
 }

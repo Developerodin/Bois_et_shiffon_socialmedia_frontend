@@ -58,6 +58,8 @@
     "viewCalendar": "Se kalender",
     "loadFailed": "Kunne ikke laste innleggene dine. Sjekk tilkoblingen.",
     "retry": "Prøv igjen",
+    "retrying": "Prøver igjen...",
+    "stillFailed": "Kunne fortsatt ikke laste inn innleggene dine. Sjekk tilkoblingen og prøv igjen.",
     "empty": "Ingen innlegg denne uken ennå. Planlegg noen i planleggeren.",
     "slides": "Karusell · {{count}} bilder"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Det er ikke publisert",
     "cancelSchedule": "Avbryt planlagt publisering",
     "cancelling": "Avbryter...",
-    "noPermission": "Noen med rettigheter til å godkjenne og publisere i dette arbeidsområdet må planlegge publiseringen."
+    "noPermission": "Noen med rettigheter til å godkjenne og publisere i dette arbeidsområdet må planlegge publiseringen.",
+    "productIssues": "Produktsjekk",
+    "askNote": "Hva må endres",
+    "noteNeeded": "Fortell hva som må endres.",
+    "suggestProduct": "Foreslå et annet produkt",
+    "productStays": "Produktet forblir tilknyttet, så innlegget vil fortsatt bli avvist",
+    "askChanges": "Be om endringer",
+    "sending": "Sender...",
+    "nextAskChanges": "Be om endringer",
+    "approverNeeded": "En godkjenner må se på dette"
   },
   "edit": {
     "title": "Rediger innlegg",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram godtar bare JPEG-bilder. Trykk for å velge en .jpg-fil i stedet.",
     "expired": "Du må logge inn på {{channel}} på nytt",
     "reconnect": "Koble til {{channel}} på nytt",
-    "reelInStudio": "Reels opprettes og publiseres i Reels-studioet, ikke herfra."
+    "reelInStudio": "Reels opprettes og publiseres i Reels-studioet, ikke herfra.",
+    "loadFailed": "Kunne ikke sjekke hvor innlegget kan publiseres. Sjekk tilkoblingen.",
+    "retry": "Prøv igjen"
   },
   "brief": {
     "title": "Opprett et innlegg",
@@ -220,7 +233,9 @@
     "scheduled_other": "Planlagt ({{count}})",
     "samplePreview": "Eksempelvisning",
     "moreOptions": "Flere alternativer for {{title}}",
-    "editStory": "Rediger story"
+    "editStory": "Rediger story",
+    "comingSoon": "Kommer snart",
+    "comingSoonBody": "Stories er ikke tilgjengelig ennå. Innlegg, karuseller og reels kan planlegges nå."
   },
   "editStory": {
     "back": "Tilbake",
@@ -259,6 +274,14 @@
     "noPillars": "Ingen innlegg planlagt for denne måneden ennå.",
     "started": "Planlegger de neste 30 dagene. De første utkastene vises i kalenderen om noen minutter, klare til godkjenning. Resten kommer etter hvert som de blir skrevet.",
     "generating": "Starter...",
+    "done_one": "Planla {{count}} innlegg. Utkastet vises i kalenderen når det er skrevet, klart til godkjenning.",
+    "done_other": "Planla {{count}} innlegg. Utkastene vises i kalenderen etter hvert som de skrives, klare til godkjenning.",
+    "unscheduled_one": "Det var ingen ledig plass til {{count}} innlegg de neste 30 dagene.",
+    "unscheduled_other": "Det var ingen ledig plass til {{count}} innlegg de neste 30 dagene.",
+    "failed": "Planleggingen ble ikke fullført.",
+    "nothingToDo": "Ingen nye ideer å planlegge ennå. Nye ideer kommer hver morgen.",
+    "refunded": "{{n}} kreditter tilbakeført.",
+    "tryAgain": "Prøv igjen",
     "cost": "Koster {{n}} kreditter."
   }
 }

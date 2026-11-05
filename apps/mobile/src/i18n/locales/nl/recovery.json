@@ -41,7 +41,7 @@
     "body_other": "Je hebt momenteel <b>{{n}} credits beschikbaar</b> in deze werkruimte. Je werk is opgeslagen.",
     "remaining": "{{available}} / {{needed}} nodig",
     "remainingA11y": "Beschikbare en benodigde credits",
-    "manage": "Beheer credits",
+    "howToGet": "Voorlopig voegt het Espanda-team credits toe aan je werkruimte. Vraag om extra credits en kom daarna terug om af te ronden.",
     "keepEditing": "Verder bewerken",
     "balance": "Creditsaldo",
     "neededLabel": "Hiervoor beschikbaar"

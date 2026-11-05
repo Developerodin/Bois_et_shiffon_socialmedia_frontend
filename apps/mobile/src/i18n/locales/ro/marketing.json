@@ -25,6 +25,7 @@
       "body": "Adăugarea de fotografii noi menține rolele automate și ciorna site-ului actualizate."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "În curând",
     "cards": {
       "customers": {
         "title": "Clienți",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Mesajele noi devin disponibile automat odată ce sunt conectate.",
     "channelsTitle": "Canale de mesagerie suportate",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Conectează un cont pentru a primi mesaje."
+    "lockNote": "Conectează un cont pentru a primi mesaje.",
+    "noConversations": "Niciun mesaj încă. Conversațiile noi de pe Instagram și Messenger vor apărea aici.",
+    "reconnect": "Reconectează-te pentru a citi mesajele",
+    "openConnections": "Deschide conexiunile",
+    "customer": "Client",
+    "you": "Tu: {{text}}"
   },
   "reply": {
     "title": "Asistent de răspuns",
-    "referencedProduct": "Produs referit",
     "suggestionTitle": "Sugestie de răspuns Espanda",
     "draftLabel": "Ciornă de răspuns",
-    "tone": "Ton: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Rafinat & artizanal"
-    },
-    "done": "Gata",
-    "editReply": "Editează răspunsul",
     "approvalTitle": "Aprobarea manuală necesară",
     "approvalBody": "Niciun mesaj nu este trimis fără clicul tău explicit.",
-    "exampleTitle": "Mod de conversație exemplu",
-    "exampleBody": "Conectarea contului tău de Instagram sau Facebook înlocuiește acest exemplu cu întrebări reale ale clienților."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(fotografie sau atașament)",
+    "writeOwn": "Scrie propriul răspuns",
+    "send": "Trimite",
+    "sent": "Trimis."
   },
   "reviews": {
     "emptyTitle": "Nicio recenzie încă",
@@ -74,7 +79,23 @@
     "connectGoogle": "Conectează Google Business",
     "automatedTitle": "Cereri automate de recenzie",
     "connectFirst": "Conectează mai întâi",
-    "automatedBody": "Necesită conexiunea Google Business pentru a trimite invitații personalizate de recenzie."
+    "automatedBody": "Necesită conexiunea Google Business pentru a trimite invitații personalizate de recenzie.",
+    "count_one": "{{count}} recenzie",
+    "count_other": "{{count}} recenzii",
+    "connectedEmptyBody": "Recenziile noi de pe Google vor apărea aici, ca să le poți răspunde.",
+    "waitingGoogle": "În așteptarea Google",
+    "linkBody": "Trimite clienților acest link după o vizită sau o achiziție. Deschide formularul Google de recenzii pentru afacerea ta.",
+    "shareLink": "Distribuie linkul de recenzie",
+    "anonymous": "Utilizator Google",
+    "yourReply": "Răspunsul tău",
+    "replyDraft": "Ciornă de răspuns",
+    "cancel": "Anulează",
+    "postReply": "Publică răspunsul",
+    "editReply": "Editează răspunsul",
+    "draftReply": "Scrie un răspuns",
+    "replied": "Răspuns publicat pe Google.",
+    "stars_one": "{{count}} stea",
+    "stars_other": "{{count}} stele"
   },
   "people": {
     "emptyTitle": "Niciun registru de clienți încă",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Tu rămâi în control",
-    "controlBody": "Nimic nu este postat sau răspuns pe Google până nu aprobi tu."
+    "controlBody": "Nimic nu este postat sau răspuns pe Google până nu aprobi tu.",
+    "connectNote": "Te poți deconecta oricând din Afacere → Conexiuni.",
+    "retry": "Încearcă din nou"
   },
   "googleWorkspace": {
     "newPost": "Postare nouă pe Google",
@@ -128,13 +151,40 @@
     "checklistTitle": "Listă de verificare configurare profil",
     "checklist": {
       "profile": {
-        "label": "Profil Google conectat",
-        "value": "Găsit"
+        "label": "Profil Google conectat"
+      },
+      "verified": {
+        "label": "Verificat de Google",
+        "yes": "Verificat",
+        "no": "Nu încă"
       },
       "reviewLink": {
         "label": "Link direct cerere recenzie",
-        "value": "Configurează"
+        "share": "Distribuie",
+        "waiting": "După verificare"
+      },
+      "hours": {
+        "label": "Program",
+        "yes": "Setat",
+        "no": "Adaugă pe Google"
+      },
+      "website": {
+        "label": "Site web",
+        "no": "Adaugă pe Google"
       }
-    }
+    },
+    "postText": "Textul postării",
+    "discard": "Renunță",
+    "publishPost": "Publică postarea",
+    "postState": {
+      "live": "Publicată",
+      "processing": "În curs de procesare",
+      "rejected": "Respinsă de Google"
+    },
+    "noPostsTitle": "Nicio postare pe Google încă",
+    "noPostsBody": "Apasă pe Postare Google nouă pentru a crea o ciornă din fotografiile tale. Nimic nu este postat până nu publici.",
+    "posted": "Trimisă către Google. Poate dura câteva minute până apare.",
+    "unverifiedTitle": "Google nu a verificat încă această afacere",
+    "unverifiedBody": "Postările și linkul de recenzie funcționează doar după ce Google îți verifică afacerea. Verific-o în Google Business Profile."
   }
 }

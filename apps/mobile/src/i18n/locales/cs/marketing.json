@@ -25,6 +25,7 @@
       "body": "Přidávání nových fotek udržuje vaše automatické rolety a koncept webu aktuální."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Již brzy",
     "cards": {
       "customers": {
         "title": "Zákazníci",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Nové zprávy se automaticky objeví po připojení.",
     "channelsTitle": "Podporované kanály zpráv",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Připojte účet pro přijímání zpráv."
+    "lockNote": "Připojte účet pro přijímání zpráv.",
+    "noConversations": "Zatím žádné zprávy. Nové konverzace z Instagramu a Messengeru se zobrazí tady.",
+    "reconnect": "Pro čtení zpráv obnovte propojení",
+    "openConnections": "Otevřít propojení",
+    "customer": "Zákazník",
+    "you": "Vy: {{text}}"
   },
   "reply": {
     "title": "Asistent odpovědí",
-    "referencedProduct": "Odkazovaný produkt",
     "suggestionTitle": "Návrh odpovědi Espanda",
     "draftLabel": "Koncept odpovědi",
-    "tone": "Tón: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Vyleštěný & řemeslný"
-    },
-    "done": "Hotovo",
-    "editReply": "Upravit odpověď",
     "approvalTitle": "Vyžadováno ruční schválení",
     "approvalBody": "Žádná zpráva není odeslána bez vašeho výslovného kliknutí.",
-    "exampleTitle": "Ukázkový režim konverzace",
-    "exampleBody": "Připojení vašeho účtu Instagram nebo Facebook nahradí tento příklad skutečnými dotazy zákazníků."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(fotka nebo příloha)",
+    "writeOwn": "Napsat vlastní",
+    "send": "Odeslat",
+    "sent": "Odesláno."
   },
   "reviews": {
     "emptyTitle": "Zatím žádné recenze",
@@ -74,7 +79,23 @@
     "connectGoogle": "Připojit Google Business",
     "automatedTitle": "Automatické žádosti o recenze",
     "connectFirst": "Nejprve připojte",
-    "automatedBody": "Vyžaduje připojení Google Business pro odesílání personalizovaných pozvánek k recenzím."
+    "automatedBody": "Vyžaduje připojení Google Business pro odesílání personalizovaných pozvánek k recenzím.",
+    "count_one": "{{count}} recenze",
+    "count_other": "{{count}} recenzí",
+    "connectedEmptyBody": "Nové recenze na Googlu se zobrazí tady a budete na ně moct odpovědět.",
+    "waitingGoogle": "Čeká se na Google",
+    "linkBody": "Po návštěvě nebo nákupu pošlete zákazníkům tento odkaz. Otevře formulář pro napsání recenze vaší firmy na Googlu.",
+    "shareLink": "Sdílet odkaz na recenze",
+    "anonymous": "Uživatel Googlu",
+    "yourReply": "Vaše odpověď",
+    "replyDraft": "Návrh odpovědi",
+    "cancel": "Zrušit",
+    "postReply": "Zveřejnit odpověď",
+    "editReply": "Upravit odpověď",
+    "draftReply": "Navrhnout odpověď",
+    "replied": "Odpověď zveřejněna na Googlu.",
+    "stars_one": "{{count}} hvězda",
+    "stars_other": "{{count}} hvězd"
   },
   "people": {
     "emptyTitle": "Zatím žádné záznamy zákazníků",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Vy máte kontrolu",
-    "controlBody": "Nic není zveřejněno ani odpovězeno na Google, dokud to neschválíte."
+    "controlBody": "Nic není zveřejněno ani odpovězeno na Google, dokud to neschválíte.",
+    "connectNote": "Odpojit se můžete kdykoli v sekci Firma → Propojení.",
+    "retry": "Zkusit znovu"
   },
   "googleWorkspace": {
     "newPost": "Nový příspěvek na Google",
@@ -128,13 +151,40 @@
     "checklistTitle": "Kontrolní seznam nastavení profilu",
     "checklist": {
       "profile": {
-        "label": "Profil Google připojen",
-        "value": "Nalezeno"
+        "label": "Profil Google připojen"
+      },
+      "verified": {
+        "label": "Ověření Googlem",
+        "yes": "Ověřeno",
+        "no": "Zatím ne"
       },
       "reviewLink": {
         "label": "Přímý odkaz na žádost o recenzi",
-        "value": "Nastavit"
+        "share": "Sdílet",
+        "waiting": "Po ověření"
+      },
+      "hours": {
+        "label": "Otevírací doba",
+        "yes": "Nastaveno",
+        "no": "Přidat na Googlu"
+      },
+      "website": {
+        "label": "Webové stránky",
+        "no": "Přidat na Googlu"
       }
-    }
+    },
+    "postText": "Text příspěvku",
+    "discard": "Zahodit",
+    "publishPost": "Zveřejnit příspěvek",
+    "postState": {
+      "live": "Zveřejněno",
+      "processing": "Zpracovává se",
+      "rejected": "Zamítnuto Googlem"
+    },
+    "noPostsTitle": "Zatím žádné příspěvky na Googlu",
+    "noPostsBody": "Klepněte na Nový příspěvek na Googlu a vytvořte návrh ze svých fotek. Nic se nezobrazí, dokud příspěvek nezveřejníte.",
+    "posted": "Odesláno na Google. Zobrazení může trvat několik minut.",
+    "unverifiedTitle": "Google zatím tuto firmu neověřil",
+    "unverifiedBody": "Příspěvky a odkaz na recenze budou fungovat až po ověření firmy Googlem. Ověřte ji v Google Business Profile."
   }
 }

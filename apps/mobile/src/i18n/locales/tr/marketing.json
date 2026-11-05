@@ -25,6 +25,7 @@
       "body": "Yeni fotoğraflar eklemek, otomatik makaralarınızı ve web sitesi taslağınızı güncel tutar."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Yakında",
     "cards": {
       "customers": {
         "title": "Müşteriler",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Yeni mesajlar bağlandıktan sonra otomatik olarak kullanılabilir hale gelir.",
     "channelsTitle": "Desteklenen mesajlaşma kanalları",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Mesaj almak için bir hesap bağlayın."
+    "lockNote": "Mesaj almak için bir hesap bağlayın.",
+    "noConversations": "Henüz mesaj yok. Yeni Instagram ve Messenger sohbetleri burada görünür.",
+    "reconnect": "Mesajları okumak için yeniden bağlan",
+    "openConnections": "Bağlantıları aç",
+    "customer": "Müşteri",
+    "you": "Sen: {{text}}"
   },
   "reply": {
     "title": "Yanıt asistanı",
-    "referencedProduct": "Referans verilen ürün",
     "suggestionTitle": "Espanda yanıt önerisi",
     "draftLabel": "Yanıt taslağı",
-    "tone": "Ton: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Parlatılmış & zanaatkar"
-    },
-    "done": "Tamam",
-    "editReply": "Yanıtı düzenle",
     "approvalTitle": "Manuel onay gerekli",
     "approvalBody": "Hiçbir mesaj sizin açık onayınız olmadan gönderilmez.",
-    "exampleTitle": "Örnek konuşma modu",
-    "exampleBody": "Instagram veya Facebook hesabınızı bağlamak, bu örneği gerçek müşteri sorularıyla değiştirir."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(fotoğraf veya ek)",
+    "writeOwn": "Kendim yazacağım",
+    "send": "Gönder",
+    "sent": "Gönderildi."
   },
   "reviews": {
     "emptyTitle": "Henüz yorum yok",
@@ -74,7 +79,23 @@
     "connectGoogle": "Google İşletme'yi Bağla",
     "automatedTitle": "Otomatik yorum talepleri",
     "connectFirst": "Önce bağlanın",
-    "automatedBody": "Kişiselleştirilmiş yorum davetleri göndermek için Google İşletme bağlantısı gereklidir."
+    "automatedBody": "Kişiselleştirilmiş yorum davetleri göndermek için Google İşletme bağlantısı gereklidir.",
+    "count_one": "{{count}} yorum",
+    "count_other": "{{count}} yorum",
+    "connectedEmptyBody": "Yeni Google yorumları, yanıtlaman için burada görünür.",
+    "waitingGoogle": "Google bekleniyor",
+    "linkBody": "Ziyaret veya satın alma sonrasında bu bağlantıyı müşterilerine gönder. Bağlantı, işletmen için Google yorum formunu açar.",
+    "shareLink": "Yorum bağlantısını paylaş",
+    "anonymous": "Google kullanıcısı",
+    "yourReply": "Yanıtın",
+    "replyDraft": "Yanıt taslağı",
+    "cancel": "İptal",
+    "postReply": "Yanıtı yayınla",
+    "editReply": "Yanıtı düzenle",
+    "draftReply": "Yanıt taslağı oluştur",
+    "replied": "Yanıt Google'da yayınlandı.",
+    "stars_one": "{{count}} yıldız",
+    "stars_other": "{{count}} yıldız"
   },
   "people": {
     "emptyTitle": "Henüz müşteri kaydı yok",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Kontrol sizde kalır",
-    "controlBody": "Google'da hiçbir şey sizin onayınız olmadan yayınlanmaz veya yanıtlanmaz."
+    "controlBody": "Google'da hiçbir şey sizin onayınız olmadan yayınlanmaz veya yanıtlanmaz.",
+    "connectNote": "İşletme → Bağlantılar bölümünden istediğin zaman bağlantıyı kesebilirsin.",
+    "retry": "Tekrar dene"
   },
   "googleWorkspace": {
     "newPost": "Yeni Google gönderisi",
@@ -128,13 +151,40 @@
     "checklistTitle": "Profil ayar kontrol listesi",
     "checklist": {
       "profile": {
-        "label": "Google profili bağlı",
-        "value": "Bulundu"
+        "label": "Google profili bağlı"
+      },
+      "verified": {
+        "label": "Google tarafından doğrulandı",
+        "yes": "Doğrulandı",
+        "no": "Henüz değil"
       },
       "reviewLink": {
         "label": "Doğrudan yorum talep bağlantısı",
-        "value": "Kuruldu"
+        "share": "Paylaş",
+        "waiting": "Doğrulamadan sonra"
+      },
+      "hours": {
+        "label": "Çalışma saatleri",
+        "yes": "Ayarlandı",
+        "no": "Google'da ekle"
+      },
+      "website": {
+        "label": "Web sitesi",
+        "no": "Google'da ekle"
       }
-    }
+    },
+    "postText": "Gönderi metni",
+    "discard": "Vazgeç",
+    "publishPost": "Gönderiyi yayınla",
+    "postState": {
+      "live": "Yayında",
+      "processing": "İşleniyor",
+      "rejected": "Google tarafından reddedildi"
+    },
+    "noPostsTitle": "Henüz Google gönderisi yok",
+    "noPostsBody": "Fotoğraflarından bir taslak oluşturmak için Yeni Google gönderisi'ne dokun. Sen yayınlayana kadar hiçbir şey paylaşılmaz.",
+    "posted": "Google'a gönderildi. Görünmesi birkaç dakika sürebilir.",
+    "unverifiedTitle": "Google bu işletmeyi henüz doğrulamadı",
+    "unverifiedBody": "Gönderiler ve yorum bağlantısı yalnızca Google işletmeni doğruladıktan sonra çalışır. İşletmeni Google Business Profile üzerinden doğrula."
   }
 }

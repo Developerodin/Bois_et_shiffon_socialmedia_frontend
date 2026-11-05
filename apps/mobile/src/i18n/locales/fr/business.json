@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Préférences de marque",
     "brandPreferencesHint": "Couleurs, ton, langue",
+    "products": "Produits",
+    "productsHint": "Prix, stock et informations produit",
     "photoAssets": "Ressources photo",
     "photoAssetsHint": "Photos de table et meuble TV Bunting",
     "connections": "Connexions",
@@ -67,6 +69,7 @@
     "title": "Connexions",
     "sourceTitle": "Site source",
     "linked": "Lié",
+    "viewPhotos": "Voir les photos",
     "sourceBody": "Photos de produits et détails de l'entreprise",
     "channelsTitle": "Canaux de publication",
     "accounts": "Comptes",
@@ -83,7 +86,9 @@
     "noSite": "Pas encore de site web",
     "comingSoon": "Pas encore disponible",
     "expired": "Connexion expirée",
-    "reconnect": "Reconnecter"
+    "reconnect": "Reconnecter",
+    "connectOnWeb": "Non connecté · à connecter sur le web",
+    "reconnectOnWeb": "À reconnecter sur le web"
   },
   "automations": {
     "title": "Automatisations",
@@ -118,6 +123,14 @@
     "notAvailable": "Pas encore disponible"
   },
   "billing": {
+    "planName": "Formule {{plan}}",
+    "planBlurb_one": "{{n}} crédit inclus, renouvellement le {{date}}.",
+    "planBlurb_other": "{{n}} crédits inclus, renouvellement le {{date}}.",
+    "planLoading": "Vérification de votre formule...",
+    "planFailed": "Impossible de charger votre formule",
+    "planRetry": "Réessayer",
+    "unlimited": "Espace de test",
+    "unlimitedBlurb": "Cet espace n’a pas de limite de crédits.",
     "creditsAvailable_one": "{{n}} crédit disponible",
     "creditsAvailable_other": "{{n}} crédits disponibles",
     "balanceTitle": "Solde de crédits",
@@ -168,6 +181,7 @@
     "terms": "Conditions d'utilisation",
     "privacy": "Politique de confidentialité",
     "restore": "Restaurer les achats",
+    "comingSoon": "Bientôt disponible",
     "signOut": "Se déconnecter d'Espanda",
     "signOutNote": "Votre abonnement actif et vos ressources de catalogue en cours de rédaction restent sauvegardés en toute sécurité.",
     "memberCount_one": "{{count}} membre",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Solde : {{credits}} crédit restant",
     "balanceLabelNoPlan_other": "Solde : {{credits}} crédits restants",
     "added": "Ajouté le {{date}}"
+  },
+  "products": {
+    "title": "Produits",
+    "detailTitle": "Produit",
+    "syncNow": "Synchroniser",
+    "syncing": "Synchronisation…",
+    "syncRunning": "Lecture de vos produits. Cela peut prendre une minute.",
+    "source": {
+      "SHOPIFY": "Depuis votre boutique Shopify",
+      "WEBSITE": "Depuis le flux de produits de votre site web",
+      "none": "Aucune boutique connectée"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Flux du site web",
+      "MANUAL": "Ajouté manuellement"
+    },
+    "lastSync_one": "{{n}} produit · synchronisé {{ago}}",
+    "lastSync_other": "{{n}} produits · synchronisés {{ago}}",
+    "neverSynced": "Pas encore synchronisé. Appuyez sur Synchroniser.",
+    "reason": {
+      "not-a-feed": "Votre site web ne publie pas de flux de produits que nous pouvons lire. Connectez Shopify sur le web ou ajoutez-y des produits.",
+      "partial": "Seule une partie du catalogue a pu être lue, donc rien n’a été archivé.",
+      "failed": "La dernière synchronisation n’a pas pu lire vos produits. Appuyez sur Synchroniser pour réessayer.",
+      "shopify-refused": "Shopify a refusé le jeton d’accès. Reconnectez Shopify sur le web."
+    },
+    "emptyTitle": "Aucun produit pour le moment",
+    "emptyBody": "Appuyez sur Synchroniser pour importer les produits de votre boutique, ou ajoutez-les sur le web.",
+    "search": "Rechercher par nom ou SKU",
+    "count_one": "{{n}} produit",
+    "count_other": "{{n}} produits",
+    "showMore": "Voir plus",
+    "noPrice": "Sans prix",
+    "notFound": "Ce produit n’est plus dans le catalogue.",
+    "stock": {
+      "in": "En stock",
+      "out": "Rupture de stock",
+      "unknown": "Stock inconnu",
+      "count": "{{n}} en stock"
+    },
+    "checked": "vérifié {{ago}}",
+    "ago": {
+      "now": "à l’instant",
+      "min": "il y a {{n}} min",
+      "hours": "il y a {{n}} h",
+      "days": "il y a {{n}} j"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Catégorie",
+      "source": "Source",
+      "materials": "Matériaux",
+      "dimensions": "Dimensions",
+      "certifications": "Certifications"
+    },
+    "placeholders": {
+      "materials": "Ex. : acacia massif, laque noire",
+      "dimensions": "Ex. : 120 × 40 × 75 cm",
+      "certifications": "Ex. : bois certifié FSC"
+    },
+    "openPage": "Voir la fiche produit",
+    "factsTitle": "Informations produit",
+    "factsHint": "Ces informations servent à la rédaction et au contrôle qualité. La synchronisation ne les modifie jamais.",
+    "factsLocked": "Ces informations servent à la rédaction et au contrôle qualité. Seules les personnes autorisées à approuver les affirmations sur les produits peuvent les modifier.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré"
   }
 }

@@ -25,6 +25,7 @@
       "body": "Új fotók hozzáadása segít az automatikus tekercsek és a weboldal piszkozatának finomhangolásában."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Hamarosan",
     "cards": {
       "customers": {
         "title": "Ügyfelek",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Az új üzenetek automatikusan elérhetővé válnak csatlakoztatás után.",
     "channelsTitle": "Támogatott üzenetküldő csatornák",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Csatlakoztass egy fiókot az üzenetek fogadásához."
+    "lockNote": "Csatlakoztass egy fiókot az üzenetek fogadásához.",
+    "noConversations": "Még nincsenek üzenetek. Az új Instagram- és Messenger-beszélgetések itt jelennek meg.",
+    "reconnect": "Csatlakozz újra az üzenetek olvasásához",
+    "openConnections": "Kapcsolatok megnyitása",
+    "customer": "Ügyfél",
+    "you": "Te: {{text}}"
   },
   "reply": {
     "title": "Válasz asszisztens",
-    "referencedProduct": "Hivatkozott termék",
     "suggestionTitle": "Espanda válaszjavaslat",
     "draftLabel": "Válasz piszkozat",
-    "tone": "Hangnem: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Finomított & kézműves"
-    },
-    "done": "Kész",
-    "editReply": "Válasz szerkesztése",
     "approvalTitle": "Kézi jóváhagyás szükséges",
     "approvalBody": "Egyetlen üzenet sem kerül elküldésre a kifejezett kattintásod nélkül.",
-    "exampleTitle": "Példa beszélgetési mód",
-    "exampleBody": "Instagram vagy Facebook fiókod csatlakoztatása helyettesíti ezt a példát valódi ügyfélkérdésekkel."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(fotó vagy csatolmány)",
+    "writeOwn": "Saját válasz írása",
+    "send": "Küldés",
+    "sent": "Elküldve."
   },
   "reviews": {
     "emptyTitle": "Még nincsenek értékelések",
@@ -74,7 +79,23 @@
     "connectGoogle": "Google Business csatlakoztatása",
     "automatedTitle": "Automatizált értékelés kérések",
     "connectFirst": "Először csatlakoztass",
-    "automatedBody": "Személyre szabott értékelés meghívók küldéséhez Google Business kapcsolat szükséges."
+    "automatedBody": "Személyre szabott értékelés meghívók küldéséhez Google Business kapcsolat szükséges.",
+    "count_one": "{{count}} értékelés",
+    "count_other": "{{count}} értékelés",
+    "connectedEmptyBody": "Az új Google-értékelések itt jelennek meg, hogy válaszolhass rájuk.",
+    "waitingGoogle": "Várakozás a Google-re",
+    "linkBody": "Küldd el ezt a linket a vásárlóidnak látogatás vagy vásárlás után. A vállalkozásod Google-értékelési űrlapját nyitja meg.",
+    "shareLink": "Értékelési link megosztása",
+    "anonymous": "Google-felhasználó",
+    "yourReply": "Válaszod",
+    "replyDraft": "Választervezet",
+    "cancel": "Mégse",
+    "postReply": "Válasz közzététele",
+    "editReply": "Válasz szerkesztése",
+    "draftReply": "Válasz írása",
+    "replied": "A válasz megjelent a Google-ön.",
+    "stars_one": "{{count}} csillag",
+    "stars_other": "{{count}} csillag"
   },
   "people": {
     "emptyTitle": "Még nincsenek ügyfélrekordok",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Te maradsz az irányításban",
-    "controlBody": "Semmi sem kerül közzétételre vagy válaszra a Google-on, amíg nem hagyod jóvá."
+    "controlBody": "Semmi sem kerül közzétételre vagy válaszra a Google-on, amíg nem hagyod jóvá.",
+    "connectNote": "Bármikor leválaszthatod a Vállalkozás → Kapcsolatok menüpontban.",
+    "retry": "Újrapróbálás"
   },
   "googleWorkspace": {
     "newPost": "Új Google bejegyzés",
@@ -128,13 +151,40 @@
     "checklistTitle": "Profil beállítás ellenőrzőlista",
     "checklist": {
       "profile": {
-        "label": "Google profil csatlakoztatva",
-        "value": "Megtalálva"
+        "label": "Google profil csatlakoztatva"
+      },
+      "verified": {
+        "label": "Google általi ellenőrzés",
+        "yes": "Ellenőrizve",
+        "no": "Még nem"
       },
       "reviewLink": {
         "label": "Közvetlen értékelés kérés link",
-        "value": "Beállítva"
+        "share": "Megosztás",
+        "waiting": "Ellenőrzés után"
+      },
+      "hours": {
+        "label": "Nyitvatartás",
+        "yes": "Beállítva",
+        "no": "Hozzáadás a Google-ön"
+      },
+      "website": {
+        "label": "Weboldal",
+        "no": "Hozzáadás a Google-ön"
       }
-    }
+    },
+    "postText": "Bejegyzés szövege",
+    "discard": "Elvetés",
+    "publishPost": "Bejegyzés közzététele",
+    "postState": {
+      "live": "Közzétéve",
+      "processing": "Feldolgozás alatt",
+      "rejected": "A Google elutasította"
+    },
+    "noPostsTitle": "Még nincsenek Google-bejegyzések",
+    "noPostsBody": "Koppints az Új Google-bejegyzés gombra, és készíts tervezetet a fotóidból. Semmi sem jelenik meg, amíg közzé nem teszed.",
+    "posted": "Elküldve a Google-nek. A megjelenés néhány percet igénybe vehet.",
+    "unverifiedTitle": "A Google még nem ellenőrizte ezt a vállalkozást",
+    "unverifiedBody": "A bejegyzések és az értékelési link csak azután működnek, hogy a Google ellenőrizte a vállalkozásodat. Végeztesd el az ellenőrzést a Google Business Profile felületén."
   }
 }

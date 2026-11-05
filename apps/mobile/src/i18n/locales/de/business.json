@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Markenpräferenzen",
     "brandPreferencesHint": "Farben, Ton, Sprache",
+    "products": "Produkte",
+    "productsHint": "Preise, Bestand und Produktangaben",
     "photoAssets": "Fotoressourcen",
     "photoAssetsHint": "Bunting Tisch- und TV-Einheit Fotos",
     "connections": "Verbindungen",
@@ -67,6 +69,7 @@
     "title": "Verbindungen",
     "sourceTitle": "Quellwebseite",
     "linked": "Verknüpft",
+    "viewPhotos": "Fotos ansehen",
     "sourceBody": "Produktfotos und Geschäftsdaten",
     "channelsTitle": "Veröffentlichungskanäle",
     "accounts": "Konten",
@@ -83,7 +86,9 @@
     "noSite": "Noch keine Website",
     "comingSoon": "Noch nicht verfügbar",
     "expired": "Anmeldung abgelaufen",
-    "reconnect": "Erneut verbinden"
+    "reconnect": "Erneut verbinden",
+    "connectOnWeb": "Nicht verbunden · im Web verbinden",
+    "reconnectOnWeb": "Muss im Web erneut verbunden werden"
   },
   "automations": {
     "title": "Automatisierungen",
@@ -118,6 +123,14 @@
     "notAvailable": "Noch nicht verfügbar"
   },
   "billing": {
+    "planName": "{{plan}}-Tarif",
+    "planBlurb_one": "{{n}} Credit enthalten, verlängert sich am {{date}}.",
+    "planBlurb_other": "{{n}} Credits enthalten, verlängert sich am {{date}}.",
+    "planLoading": "Dein Tarif wird geprüft...",
+    "planFailed": "Dein Tarif konnte nicht geladen werden",
+    "planRetry": "Erneut versuchen",
+    "unlimited": "Test-Arbeitsbereich",
+    "unlimitedBlurb": "Dieser Arbeitsbereich hat kein Credit-Limit.",
     "creditsAvailable_one": "{{n}} Guthaben verfügbar",
     "creditsAvailable_other": "{{n}} Guthaben verfügbar",
     "balanceTitle": "Guthabenstand",
@@ -168,6 +181,7 @@
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutzrichtlinie",
     "restore": "Käufe wiederherstellen",
+    "comingSoon": "Demnächst verfügbar",
     "signOut": "Von Espanda abmelden",
     "signOutNote": "Ihr aktives Abonnement und entworfene Katalogressourcen bleiben sicher gespeichert.",
     "memberCount_one": "{{count}} Mitglied",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Guthaben: noch {{credits}} Credit",
     "balanceLabelNoPlan_other": "Guthaben: noch {{credits}} Credits",
     "added": "Hinzugefügt am {{date}}"
+  },
+  "products": {
+    "title": "Produkte",
+    "detailTitle": "Produkt",
+    "syncNow": "Jetzt synchronisieren",
+    "syncing": "Synchronisierung läuft…",
+    "syncRunning": "Deine Produkte werden eingelesen. Das dauert bis zu einer Minute.",
+    "source": {
+      "SHOPIFY": "Aus deinem Shopify-Shop",
+      "WEBSITE": "Aus dem Produkt-Feed deiner Website",
+      "none": "Kein Shop verbunden"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Website-Feed",
+      "MANUAL": "Manuell hinzugefügt"
+    },
+    "lastSync_one": "{{n}} Produkt · synchronisiert {{ago}}",
+    "lastSync_other": "{{n}} Produkte · synchronisiert {{ago}}",
+    "neverSynced": "Noch nicht synchronisiert. Tippe auf „Jetzt synchronisieren“.",
+    "reason": {
+      "not-a-feed": "Deine Website veröffentlicht keinen lesbaren Produkt-Feed. Verbinde Shopify im Web oder füge dort Produkte hinzu.",
+      "partial": "Nur ein Teil des Katalogs konnte eingelesen werden. Deshalb wurde nichts archiviert.",
+      "failed": "Beim letzten Abgleich konnten deine Produkte nicht eingelesen werden. Tippe auf „Jetzt synchronisieren“, um es erneut zu versuchen.",
+      "shopify-refused": "Shopify hat das Zugriffstoken abgelehnt. Verbinde Shopify im Web erneut."
+    },
+    "emptyTitle": "Noch keine Produkte",
+    "emptyBody": "Tippe auf „Jetzt synchronisieren“, um Produkte aus deinem Shop einzulesen, oder füge sie im Web hinzu.",
+    "search": "Nach Name oder SKU suchen",
+    "count_one": "{{n}} Produkt",
+    "count_other": "{{n}} Produkte",
+    "showMore": "Mehr anzeigen",
+    "noPrice": "Kein Preis",
+    "notFound": "Dieses Produkt ist nicht mehr im Katalog.",
+    "stock": {
+      "in": "Auf Lager",
+      "out": "Nicht auf Lager",
+      "unknown": "Bestand unbekannt",
+      "count": "{{n}} auf Lager"
+    },
+    "checked": "geprüft {{ago}}",
+    "ago": {
+      "now": "gerade eben",
+      "min": "vor {{n}} Min.",
+      "hours": "vor {{n}} Std.",
+      "days": "vor {{n}} Tagen"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Kategorie",
+      "source": "Quelle",
+      "materials": "Materialien",
+      "dimensions": "Maße",
+      "certifications": "Zertifizierungen"
+    },
+    "placeholders": {
+      "materials": "z. B. massive Akazie, schwarzer Lack",
+      "dimensions": "z. B. 120 × 40 × 75 cm",
+      "certifications": "z. B. FSC-zertifiziertes Holz"
+    },
+    "openPage": "Produktseite öffnen",
+    "factsTitle": "Produktangaben",
+    "factsHint": "Diese Angaben werden für die Texterstellung und Qualitätsprüfung verwendet. Die Synchronisierung ändert sie nicht.",
+    "factsLocked": "Diese Angaben werden für die Texterstellung und Qualitätsprüfung verwendet. Nur Personen, die Produktaussagen freigeben dürfen, können sie ändern.",
+    "save": "Angaben speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "Gespeichert"
   }
 }

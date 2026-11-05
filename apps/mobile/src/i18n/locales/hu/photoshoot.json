@@ -53,6 +53,8 @@
       "interior": "Belső tér",
       "custom": "Egyedi"
     },
+    "briefOptional": "Nem kötelező",
+    "briefNeeded": "Kötelező",
     "creativeBrief": "Kreatív brief",
     "briefHint": "Finomítsd a világítást, hangulatot vagy konkrét dekorációs elemeket",
     "sourcePreview": "Forrás előnézet",

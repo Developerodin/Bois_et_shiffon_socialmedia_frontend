@@ -25,6 +25,7 @@
       "body": "Å legge til nye bilder holder de automatiske rullene og nettstudioutkastet oppdatert."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Kommer snart",
     "cards": {
       "customers": {
         "title": "Kunder",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Nye meldinger blir tilgjengelige automatisk når de er tilkoblet.",
     "channelsTitle": "Støttede meldingskanaler",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Koble til en konto for å motta meldinger."
+    "lockNote": "Koble til en konto for å motta meldinger.",
+    "noConversations": "Ingen meldinger ennå. Nye samtaler fra Instagram og Messenger vises her.",
+    "reconnect": "Koble til på nytt for å lese meldinger",
+    "openConnections": "Åpne tilkoblinger",
+    "customer": "Kunde",
+    "you": "Du: {{text}}"
   },
   "reply": {
     "title": "Svarassistent",
-    "referencedProduct": "Referert produkt",
     "suggestionTitle": "Espanda svarforslag",
     "draftLabel": "Svarutkast",
-    "tone": "Tone: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Polert & håndverker"
-    },
-    "done": "Ferdig",
-    "editReply": "Rediger svar",
     "approvalTitle": "Manuell godkjenning kreves",
     "approvalBody": "Ingen melding sendes uten ditt eksplisitte klikk.",
-    "exampleTitle": "Eksempel på samtalemodus",
-    "exampleBody": "Å koble til Instagram- eller Facebook-kontoen din erstatter dette eksempelet med ekte kundespørsmål."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(bilde eller vedlegg)",
+    "writeOwn": "Skriv selv",
+    "send": "Send",
+    "sent": "Sendt."
   },
   "reviews": {
     "emptyTitle": "Ingen anmeldelser ennå",
@@ -74,7 +79,23 @@
     "connectGoogle": "Koble til Google Business",
     "automatedTitle": "Automatiserte anmeldelsesforespørsler",
     "connectFirst": "Koble til først",
-    "automatedBody": "Krever Google Business-tilkobling for å sende personlige anmeldelsesinvitasjoner."
+    "automatedBody": "Krever Google Business-tilkobling for å sende personlige anmeldelsesinvitasjoner.",
+    "count_one": "{{count}} anmeldelse",
+    "count_other": "{{count}} anmeldelser",
+    "connectedEmptyBody": "Nye Google-anmeldelser vises her, slik at du kan svare på dem.",
+    "waitingGoogle": "Venter på Google",
+    "linkBody": "Send kundene denne lenken etter et besøk eller kjøp. Den åpner Googles anmeldelsesskjema for bedriften din.",
+    "shareLink": "Del anmeldelseslenke",
+    "anonymous": "Google-bruker",
+    "yourReply": "Svaret ditt",
+    "replyDraft": "Utkast til svar",
+    "cancel": "Avbryt",
+    "postReply": "Publiser svar",
+    "editReply": "Rediger svar",
+    "draftReply": "Skriv utkast til svar",
+    "replied": "Svaret er publisert på Google.",
+    "stars_one": "{{count}} stjerne",
+    "stars_other": "{{count}} stjerner"
   },
   "people": {
     "emptyTitle": "Ingen kunderegistreringer ennå",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Du beholder kontrollen",
-    "controlBody": "Ingenting blir postet eller svart på Google før du godkjenner det."
+    "controlBody": "Ingenting blir postet eller svart på Google før du godkjenner det.",
+    "connectNote": "Du kan koble fra når som helst under Bedrift → Tilkoblinger.",
+    "retry": "Prøv igjen"
   },
   "googleWorkspace": {
     "newPost": "Nytt Google-innlegg",
@@ -128,13 +151,40 @@
     "checklistTitle": "Sjekkliste for profiloppsett",
     "checklist": {
       "profile": {
-        "label": "Google-profil tilkoblet",
-        "value": "Funnet"
+        "label": "Google-profil tilkoblet"
+      },
+      "verified": {
+        "label": "Verifisert av Google",
+        "yes": "Verifisert",
+        "no": "Ikke ennå"
       },
       "reviewLink": {
         "label": "Direkte anmeldelsesforespørselslenke",
-        "value": "Sett opp"
+        "share": "Del",
+        "waiting": "Etter verifisering"
+      },
+      "hours": {
+        "label": "Åpningstider",
+        "yes": "Lagt til",
+        "no": "Legg til på Google"
+      },
+      "website": {
+        "label": "Nettsted",
+        "no": "Legg til på Google"
       }
-    }
+    },
+    "postText": "Innleggstekst",
+    "discard": "Forkast",
+    "publishPost": "Publiser innlegg",
+    "postState": {
+      "live": "Publisert",
+      "processing": "Behandles",
+      "rejected": "Avvist av Google"
+    },
+    "noPostsTitle": "Ingen Google-innlegg ennå",
+    "noPostsBody": "Trykk på Nytt Google-innlegg for å lage et utkast med bildene dine. Ingenting legges ut før du publiserer det.",
+    "posted": "Sendt til Google. Det kan ta noen minutter før innlegget vises.",
+    "unverifiedTitle": "Google har ikke verifisert denne bedriften ennå",
+    "unverifiedBody": "Innlegg og anmeldelseslenken fungerer først når Google har verifisert bedriften din. Verifiser den i Google Business Profile."
   }
 }

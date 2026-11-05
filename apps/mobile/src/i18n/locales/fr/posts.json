@@ -58,6 +58,8 @@
     "viewCalendar": "Voir le calendrier",
     "loadFailed": "Impossible de charger tes publications. Vérifie ta connexion.",
     "retry": "Réessayer",
+    "retrying": "Nouvelle tentative...",
+    "stillFailed": "Impossible de charger tes publications. Vérifie ta connexion et réessaie.",
     "empty": "Aucune publication cette semaine. Planifies-en depuis le planning.",
     "slides": "Carrousel · {{count}} diapositives"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Ce n’est pas publié",
     "cancelSchedule": "Annuler la programmation",
     "cancelling": "Annulation...",
-    "noPermission": "Une personne ayant les droits d’approbation et de publication dans cet espace de travail doit le programmer."
+    "noPermission": "Une personne ayant les droits d’approbation et de publication dans cet espace de travail doit le programmer.",
+    "productIssues": "Vérification du produit",
+    "askNote": "Ce qu’il faut modifier",
+    "noteNeeded": "Indique ce qu’il faut modifier.",
+    "suggestProduct": "Proposer un autre produit",
+    "productStays": "Le produit reste associé, donc la publication sera toujours refusée",
+    "askChanges": "Demander des modifications",
+    "sending": "Envoi...",
+    "nextAskChanges": "Demander des modifications",
+    "approverNeeded": "Une personne chargée de la validation doit examiner cette publication"
   },
   "edit": {
     "title": "Modifier la publication",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram accepte uniquement les photos JPEG. Appuie pour choisir un fichier .jpg.",
     "expired": "Tu dois te reconnecter à {{channel}}",
     "reconnect": "Reconnecter {{channel}}",
-    "reelInStudio": "Les Reels se créent et se publient dans le studio Reels, pas ici."
+    "reelInStudio": "Les Reels se créent et se publient dans le studio Reels, pas ici.",
+    "loadFailed": "Impossible de vérifier où publier ce post. Vérifie ta connexion.",
+    "retry": "Réessayer"
   },
   "brief": {
     "title": "Créer une publication",
@@ -220,7 +233,9 @@
     "scheduled_other": "Planifiées ({{count}})",
     "samplePreview": "Aperçu d'exemple",
     "moreOptions": "Plus d'options pour {{title}}",
-    "editStory": "Modifier la story"
+    "editStory": "Modifier la story",
+    "comingSoon": "Bientôt disponible",
+    "comingSoonBody": "Les stories ne sont pas encore disponibles. Tu peux déjà programmer des publications, des carrousels et des reels."
   },
   "editStory": {
     "back": "Retour",
@@ -259,6 +274,14 @@
     "noPillars": "Aucune publication prévue pour ce mois.",
     "started": "Planification de tes 30 prochains jours. Les premiers brouillons apparaîtront dans le calendrier dans quelques minutes, prêts à être approuvés ; les autres suivront au fur et à mesure de leur rédaction.",
     "generating": "Démarrage...",
+    "done_one": "{{count}} publication planifiée. Son brouillon apparaît dans le calendrier dès qu’il est rédigé, prêt à être validé.",
+    "done_other": "{{count}} publications planifiées. Leurs brouillons apparaissent dans le calendrier dès qu’ils sont rédigés, prêts à être validés.",
+    "unscheduled_one": "Aucun créneau disponible pour {{count}} dans les 30 prochains jours.",
+    "unscheduled_other": "Aucun créneau disponible pour {{count}} dans les 30 prochains jours.",
+    "failed": "La planification n’a pas abouti.",
+    "nothingToDo": "Pas encore de nouvelles idées à planifier. De nouvelles idées arrivent chaque matin.",
+    "refunded": "{{n}} crédits remboursés.",
+    "tryAgain": "Réessayer",
     "cost": "Coûte {{n}} crédits."
   }
 }

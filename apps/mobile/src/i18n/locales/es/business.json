@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Preferencias de marca",
     "brandPreferencesHint": "Colores, tono, idioma",
+    "products": "Productos",
+    "productsHint": "Precios, stock y datos de productos",
     "photoAssets": "Recursos fotográficos",
     "photoAssetsHint": "Fotos de mesa y unidad de TV de Bunting",
     "connections": "Conexiones",
@@ -67,6 +69,7 @@
     "title": "Conexiones",
     "sourceTitle": "Sitio web de origen",
     "linked": "Vinculado",
+    "viewPhotos": "Ver fotos",
     "sourceBody": "Fotos de productos y detalles del negocio",
     "channelsTitle": "Canales de publicación",
     "accounts": "Cuentas",
@@ -83,7 +86,9 @@
     "noSite": "Aún no tienes sitio web",
     "comingSoon": "Aún no disponible",
     "expired": "Sesión caducada",
-    "reconnect": "Volver a conectar"
+    "reconnect": "Volver a conectar",
+    "connectOnWeb": "Sin conectar · conéctalo en la web",
+    "reconnectOnWeb": "Necesita reconectarse en la web"
   },
   "automations": {
     "title": "Automatizaciones",
@@ -118,6 +123,14 @@
     "notAvailable": "Aún no disponible"
   },
   "billing": {
+    "planName": "Plan {{plan}}",
+    "planBlurb_one": "{{n}} crédito incluido, se renueva el {{date}}.",
+    "planBlurb_other": "{{n}} créditos incluidos, se renueva el {{date}}.",
+    "planLoading": "Comprobando tu plan...",
+    "planFailed": "No se pudo cargar tu plan",
+    "planRetry": "Reintentar",
+    "unlimited": "Espacio de pruebas",
+    "unlimitedBlurb": "Este espacio no tiene límite de créditos.",
     "creditsAvailable_one": "{{n}} crédito disponible",
     "creditsAvailable_other": "{{n}} créditos disponibles",
     "balanceTitle": "Saldo de créditos",
@@ -168,6 +181,7 @@
     "terms": "Términos del servicio",
     "privacy": "Política de privacidad",
     "restore": "Restaurar compras",
+    "comingSoon": "Próximamente",
     "signOut": "Cerrar sesión de Espanda",
     "signOutNote": "Tu suscripción activa y los activos del catálogo en borrador permanecen guardados de forma segura.",
     "memberCount_one": "{{count}} miembro",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Saldo: queda {{credits}} crédito",
     "balanceLabelNoPlan_other": "Saldo: quedan {{credits}} créditos",
     "added": "Añadido el {{date}}"
+  },
+  "products": {
+    "title": "Productos",
+    "detailTitle": "Producto",
+    "syncNow": "Sincronizar ahora",
+    "syncing": "Sincronizando…",
+    "syncRunning": "Leyendo tus productos. Puede tardar hasta un minuto.",
+    "source": {
+      "SHOPIFY": "De tu tienda Shopify",
+      "WEBSITE": "Del feed de productos de tu sitio web",
+      "none": "Sin tienda conectada"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Feed del sitio web",
+      "MANUAL": "Añadido manualmente"
+    },
+    "lastSync_one": "{{n}} producto · sincronizado {{ago}}",
+    "lastSync_other": "{{n}} productos · sincronizados {{ago}}",
+    "neverSynced": "Aún no se ha sincronizado. Pulsa Sincronizar ahora.",
+    "reason": {
+      "not-a-feed": "Tu sitio web no publica un feed de productos que podamos leer. Conecta Shopify en la web o añade productos allí.",
+      "partial": "Solo se pudo leer parte del catálogo, así que no se archivó nada.",
+      "failed": "No se pudieron leer tus productos en la última sincronización. Pulsa Sincronizar ahora para volver a intentarlo.",
+      "shopify-refused": "Shopify rechazó el token de acceso. Vuelve a conectar Shopify en la web."
+    },
+    "emptyTitle": "Aún no hay productos",
+    "emptyBody": "Pulsa Sincronizar ahora para leerlos de tu tienda o añádelos en la web.",
+    "search": "Buscar por nombre o SKU",
+    "count_one": "{{n}} producto",
+    "count_other": "{{n}} productos",
+    "showMore": "Mostrar más",
+    "noPrice": "Sin precio",
+    "notFound": "Este producto ya no está en el catálogo.",
+    "stock": {
+      "in": "En stock",
+      "out": "Sin stock",
+      "unknown": "Stock desconocido",
+      "count": "{{n}} en stock"
+    },
+    "checked": "comprobado {{ago}}",
+    "ago": {
+      "now": "ahora mismo",
+      "min": "hace {{n}} min",
+      "hours": "hace {{n}} h",
+      "days": "hace {{n}} días"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Categoría",
+      "source": "Origen",
+      "materials": "Materiales",
+      "dimensions": "Dimensiones",
+      "certifications": "Certificaciones"
+    },
+    "placeholders": {
+      "materials": "P. ej., acacia maciza, laca negra",
+      "dimensions": "P. ej., 120 × 40 × 75 cm",
+      "certifications": "P. ej., madera certificada FSC"
+    },
+    "openPage": "Abrir página del producto",
+    "factsTitle": "Datos del producto",
+    "factsHint": "Los redactores y el control de calidad usan estos datos. La sincronización nunca los modifica.",
+    "factsLocked": "Los redactores y el control de calidad usan estos datos. Solo pueden modificarlos las personas autorizadas para aprobar afirmaciones sobre productos.",
+    "save": "Guardar datos",
+    "saving": "Guardando…",
+    "saved": "Guardado"
   }
 }

@@ -41,7 +41,7 @@
     "body_other": "Dir stehen in diesem Arbeitsbereich derzeit <b>{{n}} Credits zur Verfügung</b>. Deine Arbeit ist gespeichert.",
     "remaining": "{{available}} / {{needed}} benötigt",
     "remainingA11y": "Verfügbare Credits im Verhältnis zum Bedarf",
-    "manage": "Guthaben verwalten",
+    "howToGet": "Aktuell fügt das Espanda-Team deinem Arbeitsbereich Credits hinzu. Bitte das Team um eine Aufladung und komm danach zurück, um den Vorgang abzuschließen.",
     "keepEditing": "Weiter bearbeiten",
     "balance": "Credit-Guthaben",
     "neededLabel": "Dafür verfügbar"

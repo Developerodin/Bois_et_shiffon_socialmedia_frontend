@@ -41,7 +41,7 @@
     "body_other": "Du har just nu <b>{{n}} krediter tillgängliga</b> i den här arbetsytan. Ditt arbete är sparat.",
     "remaining": "{{available}} / {{needed}} behövs",
     "remainingA11y": "Tillgängliga krediter jämfört med antalet som behövs",
-    "manage": "Hantera krediter",
+    "howToGet": "Just nu är det Espanda-teamet som lägger till krediter i din arbetsyta. Be dem fylla på och kom sedan tillbaka för att slutföra.",
     "keepEditing": "Fortsätt redigera",
     "balance": "Kreditsaldo",
     "neededLabel": "Tillgängligt för detta"

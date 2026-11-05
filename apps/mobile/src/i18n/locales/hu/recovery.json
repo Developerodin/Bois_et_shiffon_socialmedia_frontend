@@ -41,7 +41,7 @@
     "body_other": "Jelenleg <b>{{n}} kredited érhető el</b> ezen a munkaterületen. A munkádat elmentettük.",
     "remaining": "{{available}} / {{needed}} szükséges",
     "remainingA11y": "Elérhető kreditek a szükséges mennyiséghez képest",
-    "manage": "Kreditek kezelése",
+    "howToGet": "Egyelőre az Espanda csapata ad krediteket a munkaterületedhez. Kérj tőlük feltöltést, majd térj vissza a befejezéshez.",
     "keepEditing": "Szerkesztés folytatása",
     "balance": "Kreditegyenleg",
     "neededLabel": "Ehhez elérhető"

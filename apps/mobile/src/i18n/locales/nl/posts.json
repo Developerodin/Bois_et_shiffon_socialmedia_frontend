@@ -58,6 +58,8 @@
     "viewCalendar": "Bekijk kalender",
     "loadFailed": "Je berichten konden niet worden geladen. Controleer je verbinding.",
     "retry": "Opnieuw proberen",
+    "retrying": "Opnieuw proberen...",
+    "stillFailed": "Je posts konden nog steeds niet worden geladen. Controleer je verbinding en probeer opnieuw.",
     "empty": "Nog geen berichten deze week. Plan er een paar in via de Planner.",
     "slides": "Carrousel · {{count}} slides"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Niet geplaatst",
     "cancelSchedule": "Planning annuleren",
     "cancelling": "Annuleren...",
-    "noPermission": "Iemand met goedkeurings- en publicatierechten in deze werkruimte moet dit inplannen."
+    "noPermission": "Iemand met goedkeurings- en publicatierechten in deze werkruimte moet dit inplannen.",
+    "productIssues": "Productcontrole",
+    "askNote": "Wat moet er veranderen?",
+    "noteNeeded": "Geef aan wat er moet veranderen.",
+    "suggestProduct": "Ander product voorstellen",
+    "productStays": "Het product blijft gekoppeld, dus de post wordt nog steeds afgekeurd.",
+    "askChanges": "Wijzigingen aanvragen",
+    "sending": "Verzenden...",
+    "nextAskChanges": "Wijzigingen aanvragen",
+    "approverNeeded": "Iemand moet dit beoordelen"
   },
   "edit": {
     "title": "Bericht bewerken",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram accepteert alleen JPEG-foto's. Tik om een .jpg te kiezen.",
     "expired": "Log opnieuw in bij {{channel}}",
     "reconnect": "Koppel {{channel}} opnieuw",
-    "reelInStudio": "Reels maak en plaats je vanuit de Reels-studio, niet hier."
+    "reelInStudio": "Reels maak en plaats je vanuit de Reels-studio, niet hier.",
+    "loadFailed": "Kon niet controleren waar deze post kan worden geplaatst. Controleer je verbinding.",
+    "retry": "Opnieuw proberen"
   },
   "brief": {
     "title": "Maak een bericht",
@@ -220,7 +233,9 @@
     "scheduled_other": "Gepland ({{count}})",
     "samplePreview": "Voorbeeldweergave",
     "moreOptions": "Meer opties voor {{title}}",
-    "editStory": "Verhaal bewerken"
+    "editStory": "Verhaal bewerken",
+    "comingSoon": "Binnenkort beschikbaar",
+    "comingSoonBody": "Stories zijn nog niet beschikbaar. Posts, carrousels en reels kun je nu al inplannen."
   },
   "editStory": {
     "back": "Terug",
@@ -259,6 +274,14 @@
     "noPillars": "Nog geen berichten gepland voor deze maand.",
     "started": "Je komende 30 dagen worden gepland. De eerste concepten verschijnen over een paar minuten op de kalender, klaar om goed te keuren. De rest volgt zodra ze geschreven zijn.",
     "generating": "Starten...",
+    "done_one": "{{count}} post ingepland. Het concept verschijnt op de kalender zodra het is geschreven, klaar voor jouw goedkeuring.",
+    "done_other": "{{count}} posts ingepland. De concepten verschijnen op de kalender zodra ze zijn geschreven, klaar voor jouw goedkeuring.",
+    "unscheduled_one": "Voor {{count}} post was er geen vrij moment in de komende 30 dagen.",
+    "unscheduled_other": "Voor {{count}} posts was er geen vrij moment in de komende 30 dagen.",
+    "failed": "Het inplannen is niet gelukt.",
+    "nothingToDo": "Er zijn nog geen nieuwe ideeën om in te plannen. Elke ochtend komen er nieuwe ideeën bij.",
+    "refunded": "{{n}} credits teruggestort.",
+    "tryAgain": "Opnieuw proberen",
     "cost": "Kost {{n}} credits."
   }
 }

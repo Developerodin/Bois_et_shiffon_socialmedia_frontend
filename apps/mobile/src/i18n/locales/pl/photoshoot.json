@@ -53,6 +53,8 @@
       "interior": "Wnętrze",
       "custom": "Niestandardowy"
     },
+    "briefOptional": "Opcjonalne",
+    "briefNeeded": "Wymagane",
     "creativeBrief": "Kreatywny brief",
     "briefHint": "Doprecyzuj oświetlenie, atmosferę lub konkretne wskazówki dotyczące dekoracji",
     "sourcePreview": "Podgląd źródła",

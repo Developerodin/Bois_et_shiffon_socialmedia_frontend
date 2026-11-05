@@ -25,6 +25,7 @@
       "body": "إضافة صور جديدة تبقي مسودات الموقع والبكرات التلقائية محدثة."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "قريبًا",
     "cards": {
       "customers": {
         "title": "العملاء",
@@ -50,23 +51,27 @@
     "emptyFootnote": "تصبح الرسائل الجديدة متاحة تلقائيًا بمجرد الاتصال.",
     "channelsTitle": "قنوات المراسلة المدعومة",
     "channelLabel": "{{name}}، {{status}}",
-    "lockNote": "قم بتوصيل حساب لتلقي الرسائل."
+    "lockNote": "قم بتوصيل حساب لتلقي الرسائل.",
+    "noConversations": "لا توجد رسائل بعد. ستظهر هنا محادثات Instagram وMessenger الجديدة.",
+    "reconnect": "أعد الاتصال لقراءة الرسائل",
+    "openConnections": "فتح الاتصالات",
+    "customer": "العميل",
+    "you": "أنت: {{text}}"
   },
   "reply": {
     "title": "مساعد الرد",
-    "referencedProduct": "المنتج المشار إليه",
     "suggestionTitle": "اقتراح رد Espanda",
     "draftLabel": "مسودة الرد",
-    "tone": "النغمة: {{tone}}",
-    "tones": {
-      "polishedArtisan": "مصقول وحرفي"
-    },
-    "done": "تم",
-    "editReply": "تعديل الرد",
     "approvalTitle": "يتطلب الموافقة اليدوية",
     "approvalBody": "لا يتم إرسال أي رسالة دون نقرك الصريح.",
-    "exampleTitle": "وضع محادثة مثال",
-    "exampleBody": "توصيل حسابك على Instagram أو Facebook يستبدل هذا المثال بأسئلة العملاء الحقيقية."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(صورة أو مرفق)",
+    "writeOwn": "كتابة ردي",
+    "send": "إرسال",
+    "sent": "تم الإرسال."
   },
   "reviews": {
     "emptyTitle": "لا توجد تقييمات بعد",
@@ -74,7 +79,23 @@
     "connectGoogle": "توصيل Google Business",
     "automatedTitle": "طلبات التقييم التلقائية",
     "connectFirst": "توصيل أولاً",
-    "automatedBody": "يتطلب اتصال Google Business لإرسال دعوات تقييم مخصصة."
+    "automatedBody": "يتطلب اتصال Google Business لإرسال دعوات تقييم مخصصة.",
+    "count_one": "{{count}} مراجعة",
+    "count_other": "{{count}} مراجعات",
+    "connectedEmptyBody": "ستظهر هنا مراجعات Google الجديدة لترد عليها.",
+    "waitingGoogle": "بانتظار Google",
+    "linkBody": "أرسل هذا الرابط للعملاء بعد الزيارة أو الشراء. يفتح الرابط نموذج مراجعة نشاطك التجاري على Google.",
+    "shareLink": "مشاركة رابط المراجعة",
+    "anonymous": "مستخدم Google",
+    "yourReply": "ردك",
+    "replyDraft": "مسودة الرد",
+    "cancel": "إلغاء",
+    "postReply": "نشر الرد",
+    "editReply": "تعديل الرد",
+    "draftReply": "كتابة رد",
+    "replied": "تم نشر الرد على Google.",
+    "stars_one": "{{count}} نجمة",
+    "stars_other": "{{count}} نجوم"
   },
   "people": {
     "emptyTitle": "لا توجد سجلات عملاء بعد",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "أنت تبقى في التحكم",
-    "controlBody": "لا يتم نشر أو الرد على أي شيء على Google حتى توافق عليه."
+    "controlBody": "لا يتم نشر أو الرد على أي شيء على Google حتى توافق عليه.",
+    "connectNote": "يمكنك قطع الاتصال في أي وقت من النشاط التجاري ← الاتصالات.",
+    "retry": "إعادة المحاولة"
   },
   "googleWorkspace": {
     "newPost": "منشور Google جديد",
@@ -128,13 +151,40 @@
     "checklistTitle": "قائمة إعداد الملف الشخصي",
     "checklist": {
       "profile": {
-        "label": "ملف Google متصل",
-        "value": "تم العثور"
+        "label": "ملف Google متصل"
+      },
+      "verified": {
+        "label": "تم التحقق من قبل Google",
+        "yes": "تم التحقق",
+        "no": "ليس بعد"
       },
       "reviewLink": {
         "label": "رابط طلب التقييم المباشر",
-        "value": "إعداد"
+        "share": "مشاركة",
+        "waiting": "بعد التحقق"
+      },
+      "hours": {
+        "label": "ساعات العمل",
+        "yes": "تم الإعداد",
+        "no": "إضافة على Google"
+      },
+      "website": {
+        "label": "الموقع الإلكتروني",
+        "no": "إضافة على Google"
       }
-    }
+    },
+    "postText": "نص المنشور",
+    "discard": "تجاهل",
+    "publishPost": "نشر المنشور",
+    "postState": {
+      "live": "منشور",
+      "processing": "قيد المعالجة",
+      "rejected": "رفضه Google"
+    },
+    "noPostsTitle": "لا توجد منشورات على Google بعد",
+    "noPostsBody": "اضغط على «منشور Google جديد» لإنشاء مسودة من صورك. لن يُنشر شيء حتى تضغط على نشر.",
+    "posted": "تم الإرسال إلى Google. قد يستغرق ظهوره بضع دقائق.",
+    "unverifiedTitle": "لم يتحقق Google من هذا النشاط التجاري بعد",
+    "unverifiedBody": "لن تعمل المنشورات ورابط المراجعة إلا بعد أن يتحقق Google من نشاطك التجاري. أكمل التحقق في Google Business Profile."
   }
 }

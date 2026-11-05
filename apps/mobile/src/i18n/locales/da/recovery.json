@@ -41,7 +41,7 @@
     "body_other": "Du har lige nu <b>{{n}} kreditter til rådighed</b> i dette arbejdsområde. Dit arbejde er gemt.",
     "remaining": "{{available}} / {{needed}} påkrævet",
     "remainingA11y": "Tilgængelige kreditter i forhold til det påkrævede",
-    "manage": "Administrer kreditter",
+    "howToGet": "Indtil videre er det Espanda-teamet, der tilføjer kreditter til dit arbejdsområde. Bed dem om flere, og kom så tilbage og gør det færdigt.",
     "keepEditing": "Fortsæt redigering",
     "balance": "Kreditsaldo",
     "neededLabel": "Tilgængelige til dette"

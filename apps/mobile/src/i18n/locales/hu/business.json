@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Márka preferenciák",
     "brandPreferencesHint": "Színek, hangnem, nyelv",
+    "products": "Termékek",
+    "productsHint": "Árak, készlet és termékadatok",
     "photoAssets": "Fotó eszközök",
     "photoAssetsHint": "Bunting asztal és TV egység fotók",
     "connections": "Kapcsolatok",
@@ -67,6 +69,7 @@
     "title": "Kapcsolatok",
     "sourceTitle": "Forrás weboldal",
     "linked": "Összekapcsolva",
+    "viewPhotos": "Fotók megtekintése",
     "sourceBody": "Termékfotók és üzleti adatok",
     "channelsTitle": "Közzétételi csatornák",
     "accounts": "Fiókok",
@@ -83,7 +86,9 @@
     "noSite": "Még nincs weboldalad",
     "comingSoon": "Még nem érhető el",
     "expired": "A bejelentkezés lejárt",
-    "reconnect": "Újracsatlakozás"
+    "reconnect": "Újracsatlakozás",
+    "connectOnWeb": "Nincs összekapcsolva · Kapcsold össze a weben",
+    "reconnectOnWeb": "Újra össze kell kapcsolni a weben"
   },
   "automations": {
     "title": "Automatizálások",
@@ -118,6 +123,14 @@
     "notAvailable": "Még nem érhető el"
   },
   "billing": {
+    "planName": "{{plan}} csomag",
+    "planBlurb_one": "{{n}} kreditet tartalmaz, megújul: {{date}}.",
+    "planBlurb_other": "{{n}} kreditet tartalmaz, megújul: {{date}}.",
+    "planLoading": "Csomag ellenőrzése...",
+    "planFailed": "Nem sikerült betölteni a csomagodat",
+    "planRetry": "Újra",
+    "unlimited": "Tesztmunkaterület",
+    "unlimitedBlurb": "Ezen a munkaterületen nincs kreditkorlát.",
     "creditsAvailable_one": "{{n}} elérhető kredit",
     "creditsAvailable_other": "{{n}} elérhető kredit",
     "balanceTitle": "Kredit egyenleg",
@@ -168,6 +181,7 @@
     "terms": "Szolgáltatási feltételek",
     "privacy": "Adatvédelmi irányelvek",
     "restore": "Vásárlások visszaállítása",
+    "comingSoon": "Hamarosan",
     "signOut": "Kijelentkezés az Espandából",
     "signOutNote": "Az aktív előfizetésed és a tervezett katalógus elemek biztonságosan mentve maradnak.",
     "memberCount_one": "{{count}} tag",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Egyenleg: {{credits}} kredit maradt",
     "balanceLabelNoPlan_other": "Egyenleg: {{credits}} kredit maradt",
     "added": "Hozzáadva: {{date}}"
+  },
+  "products": {
+    "title": "Termékek",
+    "detailTitle": "Termék",
+    "syncNow": "Szinkronizálás",
+    "syncing": "Szinkronizálás…",
+    "syncRunning": "Termékek beolvasása. Ez akár egy percig is eltarthat.",
+    "source": {
+      "SHOPIFY": "A Shopify áruházadból",
+      "WEBSITE": "A weboldalad termékfeedjéből",
+      "none": "Nincs áruház összekapcsolva"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Weboldal feedje",
+      "MANUAL": "Kézzel hozzáadva"
+    },
+    "lastSync_one": "{{n}} termék · szinkronizálva: {{ago}}",
+    "lastSync_other": "{{n}} termék · szinkronizálva: {{ago}}",
+    "neverSynced": "Még nincs szinkronizálva. Koppints a Szinkronizálás gombra.",
+    "reason": {
+      "not-a-feed": "A weboldalad nem tesz közzé számunkra olvasható termékfeedet. Kapcsold össze a Shopify-t a weben, vagy add hozzá ott a termékeket.",
+      "partial": "A katalógusnak csak egy részét sikerült beolvasni, ezért semmit sem archiváltunk.",
+      "failed": "A legutóbbi szinkronizáláskor nem sikerült beolvasni a termékeket. Próbáld újra a Szinkronizálás gombbal.",
+      "shopify-refused": "A Shopify elutasította a hozzáférési tokent. Kapcsold össze újra a Shopify-t a weben."
+    },
+    "emptyTitle": "Még nincsenek termékek",
+    "emptyBody": "A Szinkronizálás gombbal beolvashatod a termékeket az áruházadból, vagy hozzáadhatod őket a weben.",
+    "search": "Keresés név vagy SKU alapján",
+    "count_one": "{{n}} termék",
+    "count_other": "{{n}} termék",
+    "showMore": "Több megjelenítése",
+    "noPrice": "Nincs ár",
+    "notFound": "Ez a termék már nincs a katalógusban.",
+    "stock": {
+      "in": "Készleten",
+      "out": "Nincs készleten",
+      "unknown": "A készlet ismeretlen",
+      "count": "{{n}} db készleten"
+    },
+    "checked": "ellenőrizve: {{ago}}",
+    "ago": {
+      "now": "épp most",
+      "min": "{{n}} perce",
+      "hours": "{{n}} órája",
+      "days": "{{n}} napja"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Kategória",
+      "source": "Forrás",
+      "materials": "Anyagok",
+      "dimensions": "Méretek",
+      "certifications": "Tanúsítványok"
+    },
+    "placeholders": {
+      "materials": "pl. tömör akácfa, fekete lakk",
+      "dimensions": "pl. 120 × 40 × 75 cm",
+      "certifications": "pl. FSC-tanúsítvánnyal rendelkező fa"
+    },
+    "openPage": "Termékoldal megnyitása",
+    "factsTitle": "Termékadatok",
+    "factsHint": "A szövegírók és a minőségellenőrzés ezeket használják. A szinkronizálás soha nem módosítja őket.",
+    "factsLocked": "A szövegírók és a minőségellenőrzés ezeket használják. Csak a termékállítások jóváhagyására jogosult személyek módosíthatják őket.",
+    "save": "Adatok mentése",
+    "saving": "Mentés…",
+    "saved": "Mentve"
   }
 }

@@ -41,7 +41,7 @@
     "body_other": "Dostępne kredyty w tej przestrzeni roboczej: <b>{{n}}</b>. Twoja praca jest zapisana.",
     "remaining": "{{available}} / {{needed}} wymaganych",
     "remainingA11y": "Dostępne kredyty w stosunku do wymaganych",
-    "manage": "Zarządzaj kredytami",
+    "howToGet": "Na razie kredyty do Twojej przestrzeni roboczej dodaje zespół Espanda. Poproś o doładowanie, a potem wróć, by dokończyć.",
     "keepEditing": "Edytuj dalej",
     "balance": "Saldo kredytów",
     "neededLabel": "Dostępne na ten cel"

@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Preference značky",
     "brandPreferencesHint": "Barvy, tón, jazyk",
+    "products": "Produkty",
+    "productsHint": "Ceny, zásoby a informace o produktech",
     "photoAssets": "Fotografie",
     "photoAssetsHint": "Fotky Bunting stolu a TV jednotky",
     "connections": "Připojení",
@@ -67,6 +69,7 @@
     "title": "Připojení",
     "sourceTitle": "Zdrojová webová stránka",
     "linked": "Propojeno",
+    "viewPhotos": "Zobrazit fotky",
     "sourceBody": "Fotky produktů a detaily firmy",
     "channelsTitle": "Publikační kanály",
     "accounts": "Účty",
@@ -83,7 +86,9 @@
     "noSite": "Zatím bez webu",
     "comingSoon": "Zatím nedostupné",
     "expired": "Přihlášení vypršelo",
-    "reconnect": "Znovu připojit"
+    "reconnect": "Znovu připojit",
+    "connectOnWeb": "Nepřipojeno · připoj na webu",
+    "reconnectOnWeb": "Je potřeba znovu připojit na webu"
   },
   "automations": {
     "title": "Automatizace",
@@ -118,6 +123,14 @@
     "notAvailable": "Zatím nedostupné"
   },
   "billing": {
+    "planName": "Plán {{plan}}",
+    "planBlurb_one": "Včetně {{n}} kreditu. Obnova {{date}}.",
+    "planBlurb_other": "Kredity v ceně: {{n}}. Obnova {{date}}.",
+    "planLoading": "Kontrolujeme tvůj plán...",
+    "planFailed": "Plán se nepodařilo načíst",
+    "planRetry": "Zkusit znovu",
+    "unlimited": "Testovací prostor",
+    "unlimitedBlurb": "Tento pracovní prostor nemá limit kreditů.",
     "creditsAvailable_one": "{{n}} kredit k dispozici",
     "creditsAvailable_other": "{{n}} kreditů k dispozici",
     "balanceTitle": "Zůstatek kreditů",
@@ -168,6 +181,7 @@
     "terms": "Podmínky služby",
     "privacy": "Zásady ochrany osobních údajů",
     "restore": "Obnovit nákupy",
+    "comingSoon": "Již brzy",
     "signOut": "Odhlásit se z Espanda",
     "signOutNote": "Vaše aktivní předplatné a rozpracované katalogové položky zůstávají bezpečně uloženy.",
     "memberCount_one": "{{count}} člen",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Zůstatek kreditů: {{credits}}",
     "balanceLabelNoPlan_other": "Zůstatek kreditů: {{credits}}",
     "added": "Přidáno {{date}}"
+  },
+  "products": {
+    "title": "Produkty",
+    "detailTitle": "Produkt",
+    "syncNow": "Synchronizovat",
+    "syncing": "Synchronizace…",
+    "syncRunning": "Načítáme produkty. Může to trvat až minutu.",
+    "source": {
+      "SHOPIFY": "Z tvého obchodu na Shopify",
+      "WEBSITE": "Z produktového feedu tvého webu",
+      "none": "Žádný obchod není připojen"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Feed webu",
+      "MANUAL": "Přidáno ručně"
+    },
+    "lastSync_one": "{{n}} produkt · synchronizováno {{ago}}",
+    "lastSync_other": "Počet produktů: {{n}} · synchronizováno {{ago}}",
+    "neverSynced": "Zatím nesynchronizováno. Klepni na Synchronizovat.",
+    "reason": {
+      "not-a-feed": "Tvůj web neposkytuje produktový feed, který bychom mohli načíst. Připoj Shopify na webu nebo tam přidej produkty.",
+      "partial": "Podařilo se načíst jen část katalogu, takže se nic nearchivovalo.",
+      "failed": "Při poslední synchronizaci se produkty nepodařilo načíst. Klepni na Synchronizovat a zkus to znovu.",
+      "shopify-refused": "Shopify odmítl přístupový token. Připoj Shopify znovu na webu."
+    },
+    "emptyTitle": "Zatím žádné produkty",
+    "emptyBody": "Klepni na Synchronizovat a načti produkty ze svého obchodu, nebo je přidej na webu.",
+    "search": "Hledat podle názvu nebo SKU",
+    "count_one": "{{n}} produkt",
+    "count_other": "Počet produktů: {{n}}",
+    "showMore": "Zobrazit více",
+    "noPrice": "Bez ceny",
+    "notFound": "Tento produkt už v katalogu není.",
+    "stock": {
+      "in": "Skladem",
+      "out": "Není skladem",
+      "unknown": "Dostupnost neznámá",
+      "count": "{{n}} ks skladem"
+    },
+    "checked": "zkontrolováno {{ago}}",
+    "ago": {
+      "now": "právě teď",
+      "min": "před {{n}} min",
+      "hours": "před {{n}} h",
+      "days": "před {{n}} d"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Kategorie",
+      "source": "Zdroj",
+      "materials": "Materiály",
+      "dimensions": "Rozměry",
+      "certifications": "Certifikace"
+    },
+    "placeholders": {
+      "materials": "např. masivní akácie, černý lak",
+      "dimensions": "např. 120 × 40 × 75 cm",
+      "certifications": "např. dřevo s certifikací FSC"
+    },
+    "openPage": "Otevřít stránku produktu",
+    "factsTitle": "Informace o produktu",
+    "factsHint": "Používají je autoři textů a kontrola kvality. Synchronizace je nikdy nemění.",
+    "factsLocked": "Používají je autoři textů a kontrola kvality. Měnit je mohou jen lidé oprávnění schvalovat tvrzení o produktech.",
+    "save": "Uložit informace",
+    "saving": "Ukládání…",
+    "saved": "Uloženo"
   }
 }

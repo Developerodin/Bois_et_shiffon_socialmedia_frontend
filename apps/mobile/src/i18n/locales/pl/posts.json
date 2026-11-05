@@ -58,6 +58,8 @@
     "viewCalendar": "Zobacz kalendarz",
     "loadFailed": "Nie udało się wczytać Twoich postów. Sprawdź połączenie.",
     "retry": "Spróbuj ponownie",
+    "retrying": "Ponawianie...",
+    "stillFailed": "Nadal nie udało się wczytać postów. Sprawdź połączenie i spróbuj ponownie.",
     "empty": "Nie ma jeszcze postów na ten tydzień. Zaplanuj je w planerze.",
     "slides": "Karuzela · {{count}} slajdów"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Nie opublikowano",
     "cancelSchedule": "Anuluj zaplanowaną publikację",
     "cancelling": "Anulowanie...",
-    "noPermission": "Publikację musi zaplanować osoba z uprawnieniami do zatwierdzania i publikowania w tej przestrzeni roboczej."
+    "noPermission": "Publikację musi zaplanować osoba z uprawnieniami do zatwierdzania i publikowania w tej przestrzeni roboczej.",
+    "productIssues": "Sprawdzenie produktu",
+    "askNote": "Co trzeba zmienić",
+    "noteNeeded": "Napisz, co trzeba zmienić.",
+    "suggestProduct": "Zaproponuj inny produkt",
+    "productStays": "Produkt pozostanie powiązany, więc post nadal zostanie odrzucony",
+    "askChanges": "Poproś o zmiany",
+    "sending": "Wysyłanie...",
+    "nextAskChanges": "Poproś o zmiany",
+    "approverNeeded": "Ten post musi sprawdzić osoba zatwierdzająca"
   },
   "edit": {
     "title": "Edytuj post",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram przyjmuje tylko zdjęcia JPEG. Naciśnij, aby wybrać plik .jpg.",
     "expired": "{{channel}}: zaloguj się ponownie",
     "reconnect": "Połącz ponownie {{channel}}",
-    "reelInStudio": "Rolki tworzy się i publikuje w studiu rolek, a nie tutaj."
+    "reelInStudio": "Rolki tworzy się i publikuje w studiu rolek, a nie tutaj.",
+    "loadFailed": "Nie udało się sprawdzić, gdzie można opublikować ten post. Sprawdź połączenie.",
+    "retry": "Spróbuj ponownie"
   },
   "brief": {
     "title": "Utwórz post",
@@ -220,7 +233,9 @@
     "scheduled_other": "Zaplanowane ({{count}})",
     "samplePreview": "Podgląd próbki",
     "moreOptions": "Więcej opcji dla {{title}}",
-    "editStory": "Edytuj relację"
+    "editStory": "Edytuj relację",
+    "comingSoon": "Już wkrótce",
+    "comingSoonBody": "Relacje nie są jeszcze dostępne. Posty, karuzele i rolki możesz już zaplanować."
   },
   "editStory": {
     "back": "Wstecz",
@@ -259,6 +274,14 @@
     "noPillars": "Nie ma jeszcze zaplanowanych postów na ten miesiąc.",
     "started": "Planujemy Twoje posty na kolejne 30 dni. Pierwsze wersje robocze pojawią się w kalendarzu za kilka minut, gotowe do zatwierdzenia. Kolejne będą pojawiać się na bieżąco.",
     "generating": "Uruchamianie...",
+    "done_one": "Zaplanowano {{count}} post. Jego wersja robocza pojawi się w kalendarzu po napisaniu, gotowa do zatwierdzenia.",
+    "done_other": "Zaplanowano posty ({{count}}). Ich wersje robocze będą pojawiać się w kalendarzu po napisaniu, gotowe do zatwierdzenia.",
+    "unscheduled_one": "Dla {{count}} nie znaleziono wolnego terminu w ciągu najbliższych 30 dni.",
+    "unscheduled_other": "Dla {{count}} nie znaleziono wolnego terminu w ciągu najbliższych 30 dni.",
+    "failed": "Nie udało się zakończyć planowania.",
+    "nothingToDo": "Nie ma jeszcze nowych pomysłów do zaplanowania. Nowe pomysły pojawiają się każdego ranka.",
+    "refunded": "Zwrócono kredyty: {{n}}.",
+    "tryAgain": "Spróbuj ponownie",
     "cost": "Koszt: {{n}} kredytów."
   }
 }

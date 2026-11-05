@@ -53,6 +53,8 @@
       "interior": "Interior",
       "custom": "Personalizat"
     },
+    "briefOptional": "Opțional",
+    "briefNeeded": "Obligatoriu",
     "creativeBrief": "Brief creativ",
     "briefHint": "Rafinează iluminarea, ambianța sau indicii specifice de decor",
     "sourcePreview": "Previzualizare sursă",

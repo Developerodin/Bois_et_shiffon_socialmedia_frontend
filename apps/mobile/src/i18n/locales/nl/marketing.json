@@ -25,6 +25,7 @@
       "body": "Nieuwe foto's houden je automatische reels en websiteconcept up-to-date."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Binnenkort beschikbaar",
     "cards": {
       "customers": {
         "title": "Klanten",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Nieuwe berichten worden automatisch beschikbaar zodra verbonden.",
     "channelsTitle": "Ondersteunde berichtenkanalen",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Verbind een account om berichten te ontvangen."
+    "lockNote": "Verbind een account om berichten te ontvangen.",
+    "noConversations": "Nog geen berichten. Nieuwe gesprekken op Instagram en Messenger verschijnen hier.",
+    "reconnect": "Maak opnieuw verbinding om berichten te lezen",
+    "openConnections": "Open koppelingen",
+    "customer": "Klant",
+    "you": "Jij: {{text}}"
   },
   "reply": {
     "title": "Antwoordassistent",
-    "referencedProduct": "Genoemd product",
     "suggestionTitle": "Espanda antwoordsuggestie",
     "draftLabel": "Antwoordconcept",
-    "tone": "Toon: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Verfijnd & ambachtelijk"
-    },
-    "done": "Klaar",
-    "editReply": "Bewerk antwoord",
     "approvalTitle": "Handmatige goedkeuring vereist",
     "approvalBody": "Er wordt nooit een bericht verzonden zonder jouw expliciete klik.",
-    "exampleTitle": "Voorbeeldgespreksmodus",
-    "exampleBody": "Het verbinden van je Instagram- of Facebook-account vervangt dit voorbeeld door echte klantvragen."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(foto of bijlage)",
+    "writeOwn": "Zelf schrijven",
+    "send": "Versturen",
+    "sent": "Verstuurd."
   },
   "reviews": {
     "emptyTitle": "Nog geen beoordelingen",
@@ -74,7 +79,23 @@
     "connectGoogle": "Verbind Google Bedrijf",
     "automatedTitle": "Automatische beoordelingsverzoeken",
     "connectFirst": "Eerst verbinden",
-    "automatedBody": "Vereist Google Bedrijfsverbinding om gepersonaliseerde beoordelingsuitnodigingen te verzenden."
+    "automatedBody": "Vereist Google Bedrijfsverbinding om gepersonaliseerde beoordelingsuitnodigingen te verzenden.",
+    "count_one": "{{count}} review",
+    "count_other": "{{count}} reviews",
+    "connectedEmptyBody": "Nieuwe Google-reviews verschijnen hier, zodat je erop kunt reageren.",
+    "waitingGoogle": "Wachten op Google",
+    "linkBody": "Stuur klanten deze link na een bezoek of aankoop. De link opent het reviewformulier van Google voor je bedrijf.",
+    "shareLink": "Reviewlink delen",
+    "anonymous": "Google-gebruiker",
+    "yourReply": "Je reactie",
+    "replyDraft": "Conceptreactie",
+    "cancel": "Annuleren",
+    "postReply": "Reactie plaatsen",
+    "editReply": "Reactie bewerken",
+    "draftReply": "Reactie opstellen",
+    "replied": "Reactie geplaatst op Google.",
+    "stars_one": "{{count}} ster",
+    "stars_other": "{{count}} sterren"
   },
   "people": {
     "emptyTitle": "Nog geen klantgegevens",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Jij blijft in controle",
-    "controlBody": "Niets wordt gepost of beantwoord op Google totdat je het goedkeurt."
+    "controlBody": "Niets wordt gepost of beantwoord op Google totdat je het goedkeurt.",
+    "connectNote": "Je kunt de verbinding altijd verbreken via Bedrijf → Koppelingen.",
+    "retry": "Opnieuw proberen"
   },
   "googleWorkspace": {
     "newPost": "Nieuwe Google-bericht",
@@ -128,13 +151,40 @@
     "checklistTitle": "Profielinstellingen checklist",
     "checklist": {
       "profile": {
-        "label": "Google-profiel verbonden",
-        "value": "Gevonden"
+        "label": "Google-profiel verbonden"
+      },
+      "verified": {
+        "label": "Geverifieerd door Google",
+        "yes": "Geverifieerd",
+        "no": "Nog niet"
       },
       "reviewLink": {
         "label": "Directe beoordelingsverzoeklink",
-        "value": "Ingesteld"
+        "share": "Delen",
+        "waiting": "Na verificatie"
+      },
+      "hours": {
+        "label": "Openingstijden",
+        "yes": "Ingesteld",
+        "no": "Toevoegen op Google"
+      },
+      "website": {
+        "label": "Website",
+        "no": "Toevoegen op Google"
       }
-    }
+    },
+    "postText": "Berichttekst",
+    "discard": "Verwerpen",
+    "publishPost": "Bericht publiceren",
+    "postState": {
+      "live": "Gepubliceerd",
+      "processing": "Wordt verwerkt",
+      "rejected": "Afgewezen door Google"
+    },
+    "noPostsTitle": "Nog geen Google-berichten",
+    "noPostsBody": "Tik op Nieuw Google-bericht om een bericht te maken met je foto's. Er wordt niets geplaatst totdat je het publiceert.",
+    "posted": "Verstuurd naar Google. Het kan een paar minuten duren voordat het bericht verschijnt.",
+    "unverifiedTitle": "Google heeft dit bedrijf nog niet geverifieerd",
+    "unverifiedBody": "Berichten en de reviewlink werken pas als Google je bedrijf heeft geverifieerd. Verifieer je bedrijf in Google Business Profile."
   }
 }

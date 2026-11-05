@@ -41,7 +41,7 @@
     "body_other": "Ai <b>{{n}} credite disponibile</b> în acest spațiu de lucru. Munca ta este salvată.",
     "remaining": "{{available}} / {{needed}} necesare",
     "remainingA11y": "Credite disponibile din totalul necesar",
-    "manage": "Gestionează creditele",
+    "howToGet": "Deocamdată, creditele sunt adăugate în spațiul tău de lucru de echipa Espanda. Cere-le să-ți suplimenteze creditele, apoi revino pentru a finaliza.",
     "keepEditing": "Continuă editarea",
     "balance": "Sold credite",
     "neededLabel": "Disponibile pentru asta"

@@ -53,6 +53,8 @@
       "interior": "Interieur",
       "custom": "Aangepast"
     },
+    "briefOptional": "Optioneel",
+    "briefNeeded": "Verplicht",
     "creativeBrief": "Creatieve briefing",
     "briefHint": "Verfijn verlichting, sfeer of specifieke decor cues",
     "sourcePreview": "Bronvoorbeeld",

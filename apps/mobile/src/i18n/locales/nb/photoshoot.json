@@ -53,6 +53,8 @@
       "interior": "Interiør",
       "custom": "Tilpasset"
     },
+    "briefOptional": "Valgfritt",
+    "briefNeeded": "Påkrevd",
     "creativeBrief": "Kreativ brief",
     "briefHint": "Forbedre lys, atmosfære eller spesifikke dekorhint",
     "sourcePreview": "Kildevisning",

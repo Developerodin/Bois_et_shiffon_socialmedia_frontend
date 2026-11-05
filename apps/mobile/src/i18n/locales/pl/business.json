@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Preferencje marki",
     "brandPreferencesHint": "Kolory, ton, język",
+    "products": "Produkty",
+    "productsHint": "Ceny, stany i informacje o produktach",
     "photoAssets": "Zasoby zdjęciowe",
     "photoAssetsHint": "Zdjęcia stołu Bunting i jednostki TV",
     "connections": "Połączenia",
@@ -67,6 +69,7 @@
     "title": "Połączenia",
     "sourceTitle": "Źródło strony",
     "linked": "Połączone",
+    "viewPhotos": "Zobacz zdjęcia",
     "sourceBody": "Zdjęcia produktów i szczegóły firmy",
     "channelsTitle": "Kanały publikacji",
     "accounts": "Konta",
@@ -83,7 +86,9 @@
     "noSite": "Nie masz jeszcze strony internetowej",
     "comingSoon": "Jeszcze niedostępne",
     "expired": "Sesja wygasła",
-    "reconnect": "Połącz ponownie"
+    "reconnect": "Połącz ponownie",
+    "connectOnWeb": "Nie połączono · połącz w wersji internetowej",
+    "reconnectOnWeb": "Połącz ponownie w wersji internetowej"
   },
   "automations": {
     "title": "Automatyzacje",
@@ -118,6 +123,14 @@
     "notAvailable": "Jeszcze niedostępne"
   },
   "billing": {
+    "planName": "Plan {{plan}}",
+    "planBlurb_one": "W pakiecie {{n}} kredyt. Odnowienie: {{date}}.",
+    "planBlurb_other": "Kredyty w pakiecie: {{n}}. Odnowienie: {{date}}.",
+    "planLoading": "Sprawdzanie planu...",
+    "planFailed": "Nie udało się wczytać planu",
+    "planRetry": "Spróbuj ponownie",
+    "unlimited": "Obszar testowy",
+    "unlimitedBlurb": "Ten obszar nie ma limitu kredytów.",
     "creditsAvailable_one": "{{n}} kredyt dostępny",
     "creditsAvailable_other": "{{n}} kredytów dostępnych",
     "balanceTitle": "Saldo kredytowe",
@@ -168,6 +181,7 @@
     "terms": "Warunki korzystania z usługi",
     "privacy": "Polityka prywatności",
     "restore": "Przywróć zakupy",
+    "comingSoon": "Już wkrótce",
     "signOut": "Wyloguj się z Espanda",
     "signOutNote": "Twoja aktywna subskrypcja i zapisane szkice katalogu pozostają bezpieczne.",
     "memberCount_one": "{{count}} członek",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Pozostał {{credits}} kredyt",
     "balanceLabelNoPlan_other": "Pozostałe kredyty: {{credits}}",
     "added": "Dodano {{date}}"
+  },
+  "products": {
+    "title": "Produkty",
+    "detailTitle": "Produkt",
+    "syncNow": "Synchronizuj",
+    "syncing": "Synchronizowanie…",
+    "syncRunning": "Pobieramy produkty. Może to potrwać do minuty.",
+    "source": {
+      "SHOPIFY": "Ze sklepu Shopify",
+      "WEBSITE": "Z pliku produktowego Twojej strony",
+      "none": "Nie połączono sklepu"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Plik produktowy",
+      "MANUAL": "Dodano ręcznie"
+    },
+    "lastSync_one": "{{n}} produkt · synchronizacja: {{ago}}",
+    "lastSync_other": "Produkty: {{n}} · synchronizacja: {{ago}}",
+    "neverSynced": "Jeszcze nie zsynchronizowano. Kliknij Synchronizuj.",
+    "reason": {
+      "not-a-feed": "Twoja strona nie udostępnia pliku produktowego, który możemy odczytać. Połącz Shopify w wersji internetowej lub dodaj tam produkty.",
+      "partial": "Udało się odczytać tylko część katalogu, więc niczego nie zarchiwizowano.",
+      "failed": "Podczas ostatniej synchronizacji nie udało się odczytać produktów. Kliknij Synchronizuj, aby spróbować ponownie.",
+      "shopify-refused": "Shopify odrzucił token dostępu. Połącz Shopify ponownie w wersji internetowej."
+    },
+    "emptyTitle": "Nie masz jeszcze produktów",
+    "emptyBody": "Kliknij Synchronizuj, aby pobrać produkty ze sklepu, lub dodaj je w wersji internetowej.",
+    "search": "Szukaj po nazwie lub SKU",
+    "count_one": "{{n}} produkt",
+    "count_other": "Produkty: {{n}}",
+    "showMore": "Pokaż więcej",
+    "noPrice": "Brak ceny",
+    "notFound": "Tego produktu nie ma już w katalogu.",
+    "stock": {
+      "in": "Dostępny",
+      "out": "Niedostępny",
+      "unknown": "Stan nieznany",
+      "count": "Na stanie: {{n}}"
+    },
+    "checked": "sprawdzono {{ago}}",
+    "ago": {
+      "now": "przed chwilą",
+      "min": "{{n}} min temu",
+      "hours": "{{n}} godz. temu",
+      "days": "{{n}} dni temu"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Kategoria",
+      "source": "Źródło",
+      "materials": "Materiały",
+      "dimensions": "Wymiary",
+      "certifications": "Certyfikaty"
+    },
+    "placeholders": {
+      "materials": "np. lite drewno akacjowe, czarny lakier",
+      "dimensions": "np. 120 × 40 × 75 cm",
+      "certifications": "np. drewno z certyfikatem FSC"
+    },
+    "openPage": "Otwórz stronę produktu",
+    "factsTitle": "Informacje o produkcie",
+    "factsHint": "Korzystają z nich twórcy treści i system kontroli jakości. Synchronizacja ich nie zmienia.",
+    "factsLocked": "Korzystają z nich twórcy treści i system kontroli jakości. Zmieniać je mogą tylko osoby uprawnione do zatwierdzania informacji o produktach.",
+    "save": "Zapisz informacje",
+    "saving": "Zapisywanie…",
+    "saved": "Zapisano"
   }
 }

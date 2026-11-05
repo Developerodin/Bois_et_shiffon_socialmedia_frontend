@@ -58,6 +58,8 @@
     "viewCalendar": "Vezi calendarul",
     "loadFailed": "Nu am putut încărca postările. Verifică-ți conexiunea.",
     "retry": "Încearcă din nou",
+    "retrying": "Se reîncearcă...",
+    "stillFailed": "Postările tot nu au putut fi încărcate. Verifică conexiunea și încearcă din nou.",
     "empty": "Nicio postare săptămâna aceasta. Planifică unele din Planificator.",
     "slides": "Carusel · {{count}} slide-uri"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Nu s-a publicat",
     "cancelSchedule": "Anulează programarea",
     "cancelling": "Se anulează...",
-    "noPermission": "Cineva cu drepturi de aprobare și publicare în acest spațiu de lucru trebuie să programeze postarea."
+    "noPermission": "Cineva cu drepturi de aprobare și publicare în acest spațiu de lucru trebuie să programeze postarea.",
+    "productIssues": "Verificarea produsului",
+    "askNote": "Ce trebuie schimbat",
+    "noteNeeded": "Spune ce trebuie schimbat.",
+    "suggestProduct": "Sugerează alt produs",
+    "productStays": "Produsul rămâne asociat, așa că postarea va fi în continuare respinsă",
+    "askChanges": "Solicită modificări",
+    "sending": "Se trimite...",
+    "nextAskChanges": "Solicită modificări",
+    "approverNeeded": "Cineva cu drept de aprobare trebuie să verifice asta"
   },
   "edit": {
     "title": "Editează postarea",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram acceptă doar fotografii JPEG. Apasă pentru a alege un fișier .jpg.",
     "expired": "Trebuie să te autentifici din nou pe {{channel}}",
     "reconnect": "Reconectează {{channel}}",
-    "reelInStudio": "Reels se creează și se publică din studioul Reels, nu de aici."
+    "reelInStudio": "Reels se creează și se publică din studioul Reels, nu de aici.",
+    "loadFailed": "Nu am putut verifica unde poate fi publicată această postare. Verifică conexiunea.",
+    "retry": "Încearcă din nou"
   },
   "brief": {
     "title": "Creează o postare",
@@ -220,7 +233,9 @@
     "scheduled_other": "Programate ({{count}})",
     "samplePreview": "Previzualizare exemplu",
     "moreOptions": "Mai multe opțiuni pentru {{title}}",
-    "editStory": "Editează povestea"
+    "editStory": "Editează povestea",
+    "comingSoon": "În curând",
+    "comingSoonBody": "Story-urile nu sunt încă disponibile. Poți programa deja postări, carusele și reeluri."
   },
   "editStory": {
     "back": "Înapoi",
@@ -259,6 +274,14 @@
     "noPillars": "Nu ai încă postări planificate pentru luna aceasta.",
     "started": "Planificăm următoarele 30 de zile. Primele ciorne vor apărea în calendar în câteva minute, gata de aprobare; restul vor apărea pe măsură ce sunt scrise.",
     "generating": "Se pornește...",
+    "done_one": "Am planificat {{count}} postare. Ciorna apare în calendar după ce este scrisă, gata de aprobare.",
+    "done_other": "Am planificat {{count}} postări. Ciornele apar în calendar pe măsură ce sunt scrise, gata de aprobare.",
+    "unscheduled_one": "Pentru {{count}} nu s-a găsit niciun interval liber în următoarele 30 de zile.",
+    "unscheduled_other": "Pentru {{count}} nu s-a găsit niciun interval liber în următoarele 30 de zile.",
+    "failed": "Planificarea nu s-a încheiat.",
+    "nothingToDo": "Nu există încă idei noi de planificat. Idei noi apar în fiecare dimineață.",
+    "refunded": "{{n}} credite rambursate.",
+    "tryAgain": "Încearcă din nou",
     "cost": "Costă {{n}} credite."
   }
 }

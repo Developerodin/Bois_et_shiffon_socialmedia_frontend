@@ -41,7 +41,7 @@
     "body_other": "V tomto pracovním prostoru je <b>počet dostupných kreditů: {{n}}</b>. Tvá práce je uložená.",
     "remaining": "{{available}} / {{needed}} potřebných",
     "remainingA11y": "Dostupné kredity oproti potřebnému počtu",
-    "manage": "Spravovat kredity",
+    "howToGet": "Kredity ti zatím do pracovního prostoru přidává tým Espanda. Požádej ho o doplnění, pak se vrať a dokonči to.",
     "keepEditing": "Pokračovat v úpravách",
     "balance": "Stav kreditů",
     "neededLabel": "K dispozici pro tuto akci"

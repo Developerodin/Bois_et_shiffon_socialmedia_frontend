@@ -58,6 +58,8 @@
     "viewCalendar": "Ver calendario",
     "loadFailed": "No se pudieron cargar tus publicaciones. Comprueba tu conexión.",
     "retry": "Reintentar",
+    "retrying": "Reintentando...",
+    "stillFailed": "No se han podido cargar tus publicaciones. Comprueba tu conexión y vuelve a intentarlo.",
     "empty": "Aún no hay publicaciones esta semana. Planifica algunas en el planificador.",
     "slides": "Carrusel · {{count}} diapositivas"
   },
@@ -113,7 +115,16 @@
     "notPosted": "No se publicó",
     "cancelSchedule": "Cancelar programación",
     "cancelling": "Cancelando...",
-    "noPermission": "Alguien con permisos de aprobación y publicación en este espacio de trabajo debe programarlo."
+    "noPermission": "Alguien con permisos de aprobación y publicación en este espacio de trabajo debe programarlo.",
+    "productIssues": "Revisión del producto",
+    "askNote": "Qué hay que cambiar",
+    "noteNeeded": "Indica qué hay que cambiar.",
+    "suggestProduct": "Sugerir otro producto",
+    "productStays": "El producto seguirá vinculado, así que la publicación seguirá siendo rechazada.",
+    "askChanges": "Pedir cambios",
+    "sending": "Enviando...",
+    "nextAskChanges": "Pedir cambios",
+    "approverNeeded": "Alguien debe revisar y aprobar esto"
   },
   "edit": {
     "title": "Editar publicación",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram solo acepta fotos JPEG. Toca para elegir un archivo .jpg.",
     "expired": "{{channel}} necesita que vuelvas a iniciar sesión",
     "reconnect": "Volver a conectar {{channel}}",
-    "reelInStudio": "Los Reels se crean y publican desde el estudio de Reels, no desde aquí."
+    "reelInStudio": "Los Reels se crean y publican desde el estudio de Reels, no desde aquí.",
+    "loadFailed": "No se ha podido comprobar dónde se puede publicar. Comprueba tu conexión.",
+    "retry": "Reintentar"
   },
   "brief": {
     "title": "Crear una publicación",
@@ -220,7 +233,9 @@
     "scheduled_other": "Programadas ({{count}})",
     "samplePreview": "Vista previa de muestra",
     "moreOptions": "Más opciones para {{title}}",
-    "editStory": "Editar historia"
+    "editStory": "Editar historia",
+    "comingSoon": "Próximamente",
+    "comingSoonBody": "Las historias aún no están disponibles. Ya puedes programar publicaciones, carruseles y reels."
   },
   "editStory": {
     "back": "Atrás",
@@ -259,6 +274,14 @@
     "noPillars": "Aún no hay publicaciones planificadas para este mes.",
     "started": "Estamos planificando tus próximos 30 días. Los primeros borradores aparecerán en el calendario en unos minutos para que los apruebes; el resto irá apareciendo a medida que esté listo.",
     "generating": "Iniciando...",
+    "done_one": "Se ha planificado {{count}} publicación. Su borrador aparecerá en el calendario cuando esté escrito, listo para que lo apruebes.",
+    "done_other": "Se han planificado {{count}} publicaciones. Los borradores aparecerán en el calendario a medida que se escriban, listos para que los apruebes.",
+    "unscheduled_one": "No había ningún hueco libre para {{count}} en los próximos 30 días.",
+    "unscheduled_other": "No había ningún hueco libre para {{count}} en los próximos 30 días.",
+    "failed": "No se ha podido completar la planificación.",
+    "nothingToDo": "Aún no hay ideas nuevas para planificar. Llegan ideas nuevas cada mañana.",
+    "refunded": "Se han devuelto {{n}} créditos.",
+    "tryAgain": "Reintentar",
     "cost": "Cuesta {{n}} créditos."
   }
 }

@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Brand preferences",
     "brandPreferencesHint": "Colours, tone, language",
+    "products": "Products",
+    "productsHint": "Prices, stock and product facts",
     "photoAssets": "Photo assets",
     "photoAssetsHint": "Bunting table and TV unit photos",
     "connections": "Connections",
@@ -67,6 +69,7 @@
     "title": "Connections",
     "sourceTitle": "Source website",
     "linked": "Linked",
+    "viewPhotos": "View photos",
     "sourceBody": "Product photos and business details",
     "channelsTitle": "Publishing channels",
     "accounts": "Accounts",
@@ -83,7 +86,9 @@
     "noSite": "No website yet",
     "comingSoon": "Not available yet",
     "expired": "Sign-in expired",
-    "reconnect": "Reconnect"
+    "reconnect": "Reconnect",
+    "connectOnWeb": "Not connected · connect it on the web",
+    "reconnectOnWeb": "Needs reconnecting on the web"
   },
   "automations": {
     "title": "Automations",
@@ -118,6 +123,14 @@
     "notAvailable": "Not available yet"
   },
   "billing": {
+    "planName": "{{plan}} plan",
+    "planBlurb_one": "{{n}} credit included, renews {{date}}.",
+    "planBlurb_other": "{{n}} credits included, renews {{date}}.",
+    "planLoading": "Checking your plan...",
+    "planFailed": "Couldn't load your plan",
+    "planRetry": "Try again",
+    "unlimited": "Testing workspace",
+    "unlimitedBlurb": "This workspace has no credit limit.",
     "creditsAvailable_one": "{{n}} credit available",
     "creditsAvailable_other": "{{n}} credits available",
     "balanceTitle": "Credit balance",
@@ -168,6 +181,7 @@
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "restore": "Restore purchases",
+    "comingSoon": "Coming soon",
     "signOut": "Sign out of Espanda",
     "signOutNote": "Your active subscription and drafted catalogue assets remain securely saved.",
     "memberCount_one": "{{count}} member",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Balance: {{credits}} credit left",
     "balanceLabelNoPlan_other": "Balance: {{credits}} credits left",
     "added": "Added {{date}}"
+  },
+  "products": {
+    "title": "Products",
+    "detailTitle": "Product",
+    "syncNow": "Sync now",
+    "syncing": "Syncing…",
+    "syncRunning": "Reading your products. This takes up to a minute.",
+    "source": {
+      "SHOPIFY": "From your Shopify store",
+      "WEBSITE": "From your website's product feed",
+      "none": "No store connected"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Website feed",
+      "MANUAL": "Added by hand"
+    },
+    "lastSync_one": "{{n}} product · synced {{ago}}",
+    "lastSync_other": "{{n}} products · synced {{ago}}",
+    "neverSynced": "Not synced yet. Tap Sync now.",
+    "reason": {
+      "not-a-feed": "Your website doesn't publish a product feed we can read. Connect Shopify on the web, or add products there.",
+      "partial": "Only part of the catalogue could be read, so nothing was archived.",
+      "failed": "The last sync couldn't read your products. Tap Sync now to try again.",
+      "shopify-refused": "Shopify refused the access token. Reconnect Shopify on the web."
+    },
+    "emptyTitle": "No products yet",
+    "emptyBody": "Tap Sync now to read them from your store, or add them on the web.",
+    "search": "Search by name or SKU",
+    "count_one": "{{n}} product",
+    "count_other": "{{n}} products",
+    "showMore": "Show more",
+    "noPrice": "No price",
+    "notFound": "This product isn't in the catalogue any more.",
+    "stock": {
+      "in": "In stock",
+      "out": "Out of stock",
+      "unknown": "Stock unknown",
+      "count": "{{n}} in stock"
+    },
+    "checked": "checked {{ago}}",
+    "ago": {
+      "now": "just now",
+      "min": "{{n}} min ago",
+      "hours": "{{n}} h ago",
+      "days": "{{n}} days ago"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Category",
+      "source": "Source",
+      "materials": "Materials",
+      "dimensions": "Dimensions",
+      "certifications": "Certifications"
+    },
+    "placeholders": {
+      "materials": "e.g. Solid acacia, black lacquer",
+      "dimensions": "e.g. 120 × 40 × 75 cm",
+      "certifications": "e.g. FSC certified wood"
+    },
+    "openPage": "Open product page",
+    "factsTitle": "Product facts",
+    "factsHint": "The writers and the quality check use these. Syncing never changes them.",
+    "factsLocked": "The writers and the quality check use these. Only people who can approve product claims can change them.",
+    "save": "Save facts",
+    "saving": "Saving…",
+    "saved": "Saved"
   }
 }

@@ -25,6 +25,7 @@
       "body": "Uusien kuvien lisääminen pitää automaattiset kelat ja verkkosivustoluonnoksen ajan tasalla."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Tulossa pian",
     "cards": {
       "customers": {
         "title": "Asiakkaat",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Uudet viestit tulevat automaattisesti saataville, kun yhteys on muodostettu.",
     "channelsTitle": "Tuetut viestintäkanavat",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Yhdistä tili vastaanottaaksesi viestejä."
+    "lockNote": "Yhdistä tili vastaanottaaksesi viestejä.",
+    "noConversations": "Ei vielä viestejä. Uudet Instagram- ja Messenger-keskustelut näkyvät täällä.",
+    "reconnect": "Yhdistä uudelleen lukeaksesi viestit",
+    "openConnections": "Avaa yhteydet",
+    "customer": "Asiakas",
+    "you": "Sinä: {{text}}"
   },
   "reply": {
     "title": "Vastausavustaja",
-    "referencedProduct": "Viitattu tuote",
     "suggestionTitle": "Espanda vastaussuositus",
     "draftLabel": "Vastausluonnos",
-    "tone": "Sävy: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Viimeistelty & käsityöläinen"
-    },
-    "done": "Valmis",
-    "editReply": "Muokkaa vastausta",
     "approvalTitle": "Manuaalinen hyväksyntä vaaditaan",
     "approvalBody": "Yhtään viestiä ei lähetetä ilman nimenomaista klikkaustasi.",
-    "exampleTitle": "Esimerkkikeskustelutila",
-    "exampleBody": "Yhdistämällä Instagram- tai Facebook-tilisi tämä esimerkki korvataan oikeilla asiakaskysymyksillä."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(kuva tai liite)",
+    "writeOwn": "Kirjoita itse",
+    "send": "Lähetä",
+    "sent": "Lähetetty."
   },
   "reviews": {
     "emptyTitle": "Ei arvosteluja vielä",
@@ -74,7 +79,23 @@
     "connectGoogle": "Yhdistä Google Business",
     "automatedTitle": "Automaattiset arvostelupyynnöt",
     "connectFirst": "Yhdistä ensin",
-    "automatedBody": "Vaatii Google Business -yhteyden lähettääkseen henkilökohtaisia arvostelukutsuja."
+    "automatedBody": "Vaatii Google Business -yhteyden lähettääkseen henkilökohtaisia arvostelukutsuja.",
+    "count_one": "{{count}} arvostelu",
+    "count_other": "{{count}} arvostelua",
+    "connectedEmptyBody": "Uudet Google-arvostelut näkyvät täällä, jotta voit vastata niihin.",
+    "waitingGoogle": "Odotetaan Googlea",
+    "linkBody": "Lähetä tämä linkki asiakkaillesi käynnin tai ostoksen jälkeen. Se avaa yrityksesi Google-arvostelulomakkeen.",
+    "shareLink": "Jaa arvostelulinkki",
+    "anonymous": "Google-käyttäjä",
+    "yourReply": "Vastauksesi",
+    "replyDraft": "Vastausluonnos",
+    "cancel": "Peruuta",
+    "postReply": "Julkaise vastaus",
+    "editReply": "Muokkaa vastausta",
+    "draftReply": "Laadi vastaus",
+    "replied": "Vastaus julkaistu Googlessa.",
+    "stars_one": "{{count}} tähti",
+    "stars_other": "{{count}} tähteä"
   },
   "people": {
     "emptyTitle": "Ei asiakastietoja vielä",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Sinä pysyt hallinnassa",
-    "controlBody": "Mitään ei julkaista tai vastata Googlessa ennen kuin hyväksyt sen."
+    "controlBody": "Mitään ei julkaista tai vastata Googlessa ennen kuin hyväksyt sen.",
+    "connectNote": "Voit katkaista yhteyden milloin tahansa kohdassa Yritys → Yhteydet.",
+    "retry": "Yritä uudelleen"
   },
   "googleWorkspace": {
     "newPost": "Uusi Google-julkaisu",
@@ -128,13 +151,40 @@
     "checklistTitle": "Profiilin asennuslista",
     "checklist": {
       "profile": {
-        "label": "Google-profiili yhdistetty",
-        "value": "Löydetty"
+        "label": "Google-profiili yhdistetty"
+      },
+      "verified": {
+        "label": "Googlen vahvistama",
+        "yes": "Vahvistettu",
+        "no": "Ei vielä"
       },
       "reviewLink": {
         "label": "Suora arvostelupyyntölomake",
-        "value": "Aseta"
+        "share": "Jaa",
+        "waiting": "Vahvistuksen jälkeen"
+      },
+      "hours": {
+        "label": "Aukioloajat",
+        "yes": "Asetettu",
+        "no": "Lisää Googleen"
+      },
+      "website": {
+        "label": "Verkkosivusto",
+        "no": "Lisää Googleen"
       }
-    }
+    },
+    "postText": "Julkaisun teksti",
+    "discard": "Hylkää",
+    "publishPost": "Julkaise",
+    "postState": {
+      "live": "Julkaistu",
+      "processing": "Käsitellään",
+      "rejected": "Google hylkäsi"
+    },
+    "noPostsTitle": "Ei vielä Google-julkaisuja",
+    "noPostsBody": "Luo julkaisu kuvistasi valitsemalla Uusi Google-julkaisu. Mitään ei julkaista ennen kuin julkaiset sen.",
+    "posted": "Lähetetty Googleen. Julkaisun näkyminen voi kestää muutaman minuutin.",
+    "unverifiedTitle": "Google ei ole vielä vahvistanut tätä yritystä",
+    "unverifiedBody": "Julkaisut ja arvostelulinkki toimivat vasta, kun Google on vahvistanut yrityksesi. Vahvista yrityksesi Google Business Profile -palvelussa."
   }
 }

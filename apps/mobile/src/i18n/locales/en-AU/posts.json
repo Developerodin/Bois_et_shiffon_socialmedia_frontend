@@ -58,6 +58,8 @@
     "viewCalendar": "View calendar",
     "loadFailed": "Couldn't load your posts. Check your connection.",
     "retry": "Try again",
+    "retrying": "Trying again...",
+    "stillFailed": "Still couldn't load your posts. Check your connection and try again.",
     "empty": "No posts this week yet. Plan some from the Planner.",
     "slides": "Carousel · {{count}} slides"
   },
@@ -113,7 +115,16 @@
     "notPosted": "It isn't",
     "cancelSchedule": "Cancel schedule",
     "cancelling": "Cancelling...",
-    "noPermission": "Someone with approval and publishing rights in this workspace has to schedule it."
+    "noPermission": "Someone with approval and publishing rights in this workspace has to schedule it.",
+    "productIssues": "Product check",
+    "askNote": "What needs to change",
+    "noteNeeded": "Say what needs to change.",
+    "suggestProduct": "Suggest another product",
+    "productStays": "The product stays linked, so the post will still be refused",
+    "askChanges": "Ask for changes",
+    "sending": "Sending...",
+    "nextAskChanges": "Ask for changes",
+    "approverNeeded": "An approver needs to look at this"
   },
   "edit": {
     "title": "Edit post",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram only takes JPEG photos. Tap to pick a .jpg instead.",
     "expired": "{{channel}} needs you to sign in again",
     "reconnect": "Reconnect {{channel}}",
-    "reelInStudio": "Reels are made and posted from the Reels studio, not from here."
+    "reelInStudio": "Reels are made and posted from the Reels studio, not from here.",
+    "loadFailed": "Couldn't check where this post can go. Check your connection.",
+    "retry": "Try again"
   },
   "brief": {
     "title": "Create a post",
@@ -220,7 +233,9 @@
     "scheduled_other": "Scheduled ({{count}})",
     "samplePreview": "Sample preview",
     "moreOptions": "More options for {{title}}",
-    "editStory": "Edit story"
+    "editStory": "Edit story",
+    "comingSoon": "Coming soon",
+    "comingSoonBody": "Stories are not available yet. Posts, carousels and reels are ready to schedule now."
   },
   "editStory": {
     "back": "Back",
@@ -259,6 +274,14 @@
     "noPillars": "No posts planned for this month yet.",
     "started": "Planning your next 30 days. The first drafts appear on the calendar in a few minutes, ready for you to approve; the rest follow as they're written.",
     "generating": "Starting...",
+    "done_one": "Planned {{count}} post. Its draft appears on the calendar once it's written, ready for you to approve.",
+    "done_other": "Planned {{count}} posts. Drafts appear on the calendar as they're written, ready for you to approve.",
+    "unscheduled_one": "{{count}} had no free slot in the next 30 days.",
+    "unscheduled_other": "{{count}} had no free slot in the next 30 days.",
+    "failed": "Planning didn't finish.",
+    "nothingToDo": "No new ideas to plan yet. Fresh ideas arrive each morning.",
+    "refunded": "{{n}} credits refunded.",
+    "tryAgain": "Try again",
     "cost": "Costs {{n}} credits."
   }
 }

@@ -53,6 +53,8 @@
       "interior": "Sisätila",
       "custom": "Mukautettu"
     },
+    "briefOptional": "Valinnainen",
+    "briefNeeded": "Pakollinen",
     "creativeBrief": "Luova briiffi",
     "briefHint": "Tarkenna valaistusta, tunnelmaa tai tiettyjä sisustusvihjeitä",
     "sourcePreview": "Lähde-esikatselu",

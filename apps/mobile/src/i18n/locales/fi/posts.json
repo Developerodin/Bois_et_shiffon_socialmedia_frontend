@@ -58,6 +58,8 @@
     "viewCalendar": "Näytä kalenteri",
     "loadFailed": "Julkaisuja ei voitu ladata. Tarkista yhteytesi.",
     "retry": "Yritä uudelleen",
+    "retrying": "Yritetään uudelleen...",
+    "stillFailed": "Julkaisujasi ei vieläkään voitu ladata. Tarkista yhteys ja yritä uudelleen.",
     "empty": "Tällä viikolla ei ole vielä julkaisuja. Suunnittele niitä Suunnittelussa.",
     "slides": "Karuselli · {{count}} kuvaa"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Ei julkaistu",
     "cancelSchedule": "Peru ajastus",
     "cancelling": "Perutaan...",
-    "noPermission": "Jonkun, jolla on tässä työtilassa hyväksymis- ja julkaisuoikeudet, täytyy ajastaa se."
+    "noPermission": "Jonkun, jolla on tässä työtilassa hyväksymis- ja julkaisuoikeudet, täytyy ajastaa se.",
+    "productIssues": "Tuotteen tarkistus",
+    "askNote": "Mitä pitää muuttaa",
+    "noteNeeded": "Kerro, mitä pitää muuttaa.",
+    "suggestProduct": "Ehdota toista tuotetta",
+    "productStays": "Tuote pysyy liitettynä, joten julkaisu hylätään edelleen",
+    "askChanges": "Pyydä muutoksia",
+    "sending": "Lähetetään...",
+    "nextAskChanges": "Pyydä muutoksia",
+    "approverNeeded": "Hyväksyjän on tarkistettava tämä"
   },
   "edit": {
     "title": "Muokkaa julkaisua",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram hyväksyy vain JPEG-kuvat. Valitse .jpg-kuva napauttamalla.",
     "expired": "{{channel}} edellyttää, että kirjaudut uudelleen sisään",
     "reconnect": "Yhdistä {{channel}} uudelleen",
-    "reelInStudio": "Reels-videot luodaan ja julkaistaan Reels-studiossa, ei täällä."
+    "reelInStudio": "Reels-videot luodaan ja julkaistaan Reels-studiossa, ei täällä.",
+    "loadFailed": "Ei voitu tarkistaa, mihin julkaisun voi ajoittaa. Tarkista yhteys.",
+    "retry": "Yritä uudelleen"
   },
   "brief": {
     "title": "Luo julkaisu",
@@ -220,7 +233,9 @@
     "scheduled_other": "Ajastettu ({{count}})",
     "samplePreview": "Näyte-esikatselu",
     "moreOptions": "Lisää vaihtoehtoja {{title}}",
-    "editStory": "Muokkaa tarinaa"
+    "editStory": "Muokkaa tarinaa",
+    "comingSoon": "Tulossa pian",
+    "comingSoonBody": "Tarinat eivät ole vielä saatavilla. Julkaisuja, karuselleja ja Reels-videoita voi jo ajoittaa."
   },
   "editStory": {
     "back": "Takaisin",
@@ -259,6 +274,14 @@
     "noPillars": "Tälle kuukaudelle ei ole vielä suunniteltu julkaisuja.",
     "started": "Suunnitellaan seuraavia 30 päivääsi. Ensimmäiset luonnokset ilmestyvät kalenteriin muutaman minuutin kuluttua hyväksyttäviksi. Loput ilmestyvät sitä mukaa kuin ne valmistuvat.",
     "generating": "Aloitetaan...",
+    "done_one": "Suunniteltiin {{count}} julkaisu. Sen luonnos ilmestyy kalenteriin, kun se on valmis hyväksyttäväksi.",
+    "done_other": "Suunniteltiin {{count}} julkaisua. Luonnokset ilmestyvät kalenteriin sitä mukaa, kun ne ovat valmiita hyväksyttäviksi.",
+    "unscheduled_one": "{{count}} julkaisulle ei löytynyt vapaata aikaa seuraavan 30 päivän aikana.",
+    "unscheduled_other": "{{count}} julkaisulle ei löytynyt vapaata aikaa seuraavan 30 päivän aikana.",
+    "failed": "Suunnittelu ei valmistunut.",
+    "nothingToDo": "Ei vielä uusia ideoita suunniteltavaksi. Uusia ideoita saapuu joka aamu.",
+    "refunded": "Krediittejä hyvitetty: {{n}}.",
+    "tryAgain": "Yritä uudelleen",
     "cost": "Maksaa {{n}} krediittiä."
   }
 }

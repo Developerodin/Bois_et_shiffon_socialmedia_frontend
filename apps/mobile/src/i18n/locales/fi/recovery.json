@@ -41,7 +41,7 @@
     "body_other": "Tässä työtilassa on nyt <b>{{n}} krediittiä käytettävissä</b>. Työsi on tallennettu.",
     "remaining": "{{available}} / {{needed}} tarvittavaa krediittiä",
     "remainingA11y": "Käytettävissä olevat ja tarvittavat krediitit",
-    "manage": "Hallitse krediittejä",
+    "howToGet": "Espanda-tiimi lisää toistaiseksi krediittejä työtilaasi. Pyydä heiltä lisää krediittejä ja palaa sitten viimeistelemään.",
     "keepEditing": "Jatka muokkaamista",
     "balance": "Krediittisaldo",
     "neededLabel": "Käytettävissä tähän"

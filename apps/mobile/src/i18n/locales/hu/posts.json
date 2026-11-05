@@ -58,6 +58,8 @@
     "viewCalendar": "Naptár megtekintése",
     "loadFailed": "Nem sikerült betölteni a bejegyzéseidet. Ellenőrizd a kapcsolatot.",
     "retry": "Újra",
+    "retrying": "Újrapróbálás...",
+    "stillFailed": "Továbbra sem sikerült betölteni a bejegyzéseidet. Ellenőrizd a kapcsolatot, és próbáld újra.",
     "empty": "Erre a hétre még nincs bejegyzés. Tervezz néhányat a Tervezőben.",
     "slides": "Lapozós poszt · {{count}} dia"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Nem jelent meg",
     "cancelSchedule": "Ütemezés törlése",
     "cancelling": "Törlés...",
-    "noPermission": "A munkaterületen jóváhagyási és közzétételi jogosultsággal rendelkező személynek kell ütemeznie."
+    "noPermission": "A munkaterületen jóváhagyási és közzétételi jogosultsággal rendelkező személynek kell ütemeznie.",
+    "productIssues": "Termék ellenőrzése",
+    "askNote": "Min kell változtatni?",
+    "noteNeeded": "Írd le, min kell változtatni.",
+    "suggestProduct": "Másik termék javaslata",
+    "productStays": "A termék továbbra is kapcsolódik a bejegyzéshez, ezért azt továbbra is elutasítják.",
+    "askChanges": "Módosítás kérése",
+    "sending": "Küldés...",
+    "nextAskChanges": "Módosítás kérése",
+    "approverNeeded": "Ezt egy jóváhagyónak kell átnéznie."
   },
   "edit": {
     "title": "Bejegyzés szerkesztése",
@@ -179,7 +190,9 @@
     "jpegOnly": "Az Instagram csak JPEG-fotókat fogad el. Koppints egy .jpg-fájl kiválasztásához.",
     "expired": "{{channel}}: jelentkezz be újra",
     "reconnect": "Csatlakoztasd újra: {{channel}}",
-    "reelInStudio": "A Reels-videókat a Reels-stúdióban készítheted el és teheted közzé, nem itt."
+    "reelInStudio": "A Reels-videókat a Reels-stúdióban készítheted el és teheted közzé, nem itt.",
+    "loadFailed": "Nem sikerült ellenőrizni, hová kerülhet ez a bejegyzés. Ellenőrizd a kapcsolatot.",
+    "retry": "Próbáld újra"
   },
   "brief": {
     "title": "Bejegyzés létrehozása",
@@ -220,7 +233,9 @@
     "scheduled_other": "Ütemezett ({{count}})",
     "samplePreview": "Minta előnézet",
     "moreOptions": "További lehetőségek: {{title}}",
-    "editStory": "Történet szerkesztése"
+    "editStory": "Történet szerkesztése",
+    "comingSoon": "Hamarosan",
+    "comingSoonBody": "A sztorik még nem érhetők el. Bejegyzéseket, lapozós bejegyzéseket és reeleket már most időzíthetsz."
   },
   "editStory": {
     "back": "Vissza",
@@ -259,6 +274,14 @@
     "noPillars": "Erre a hónapra még nincs tervezett bejegyzés.",
     "started": "Tervezzük a következő 30 napodat. Az első piszkozatok néhány percen belül megjelennek a naptárban, ahol jóváhagyhatod őket. A többi is megjelenik, amint elkészül.",
     "generating": "Indítás...",
+    "done_one": "{{count}} bejegyzést megterveztünk. A piszkozata elkészülés után megjelenik a naptárban, készen a jóváhagyásodra.",
+    "done_other": "{{count}} bejegyzést megterveztünk. A piszkozatok elkészülésük után megjelennek a naptárban, készen a jóváhagyásodra.",
+    "unscheduled_one": "{{count}} számára nem volt szabad időpont a következő 30 napban.",
+    "unscheduled_other": "{{count}} számára nem volt szabad időpont a következő 30 napban.",
+    "failed": "A tervezés nem fejeződött be.",
+    "nothingToDo": "Még nincs új ötlet, amit megtervezhetnél. Minden reggel érkeznek friss ötletek.",
+    "refunded": "{{n}} kreditet visszatérítettünk.",
+    "tryAgain": "Próbáld újra",
     "cost": "Ára: {{n}} kredit."
   }
 }

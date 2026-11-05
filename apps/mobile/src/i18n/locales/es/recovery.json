@@ -41,7 +41,7 @@
     "body_other": "Actualmente tienes <b>{{n}} créditos disponibles</b> en este espacio de trabajo. Tu trabajo está guardado.",
     "remaining": "{{available}} / {{needed}} necesarios",
     "remainingA11y": "Créditos disponibles frente a los necesarios",
-    "manage": "Gestionar créditos",
+    "howToGet": "Por ahora, el equipo de Espanda añade créditos a tu espacio de trabajo. Pídeles una recarga y vuelve para terminar.",
     "keepEditing": "Seguir editando",
     "balance": "Saldo de créditos",
     "neededLabel": "Disponible para esto"

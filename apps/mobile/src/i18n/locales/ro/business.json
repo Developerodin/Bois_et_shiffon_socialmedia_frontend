@@ -22,6 +22,8 @@
     },
     "brandPreferences": "Preferințe brand",
     "brandPreferencesHint": "Culori, ton, limbaj",
+    "products": "Produse",
+    "productsHint": "Prețuri, stoc și detalii despre produse",
     "photoAssets": "Resurse foto",
     "photoAssetsHint": "Fotografii Bunting masă și unitate TV",
     "connections": "Conexiuni",
@@ -67,6 +69,7 @@
     "title": "Conexiuni",
     "sourceTitle": "Website sursă",
     "linked": "Conectat",
+    "viewPhotos": "Vezi fotografiile",
     "sourceBody": "Fotografii de produs și detalii afacere",
     "channelsTitle": "Canale de publicare",
     "accounts": "Conturi",
@@ -83,7 +86,9 @@
     "noSite": "Nu ai încă un site",
     "comingSoon": "Nu este încă disponibil",
     "expired": "Sesiunea a expirat",
-    "reconnect": "Reconectează"
+    "reconnect": "Reconectează",
+    "connectOnWeb": "Neconectat · conectează-l pe web",
+    "reconnectOnWeb": "Necesită reconectare pe web"
   },
   "automations": {
     "title": "Automatizări",
@@ -118,6 +123,14 @@
     "notAvailable": "Nu este încă disponibil"
   },
   "billing": {
+    "planName": "Planul {{plan}}",
+    "planBlurb_one": "{{n}} credit inclus, se reînnoiește la {{date}}.",
+    "planBlurb_other": "Credite incluse: {{n}}. Se reînnoiesc la {{date}}.",
+    "planLoading": "Se verifică planul...",
+    "planFailed": "Planul nu a putut fi încărcat",
+    "planRetry": "Încearcă din nou",
+    "unlimited": "Spațiu de test",
+    "unlimitedBlurb": "Acest spațiu nu are limită de credite.",
     "creditsAvailable_one": "{{n}} credit disponibil",
     "creditsAvailable_other": "{{n}} credite disponibile",
     "balanceTitle": "Sold credite",
@@ -168,6 +181,7 @@
     "terms": "Termeni de serviciu",
     "privacy": "Politica de confidențialitate",
     "restore": "Restaurează achizițiile",
+    "comingSoon": "În curând",
     "signOut": "Deconectează-te de la Espanda",
     "signOutNote": "Abonamentul tău activ și resursele de catalog salvate rămân în siguranță.",
     "memberCount_one": "{{count}} membru",
@@ -201,5 +215,72 @@
     "balanceLabelNoPlan_one": "Sold: {{credits}} credit rămas",
     "balanceLabelNoPlan_other": "Sold: {{credits}} credite rămase",
     "added": "Adăugat la {{date}}"
+  },
+  "products": {
+    "title": "Produse",
+    "detailTitle": "Produs",
+    "syncNow": "Sincronizează acum",
+    "syncing": "Se sincronizează…",
+    "syncRunning": "Se citesc produsele. Poate dura până la un minut.",
+    "source": {
+      "SHOPIFY": "Din magazinul tău Shopify",
+      "WEBSITE": "Din feedul de produse al site-ului tău",
+      "none": "Niciun magazin conectat"
+    },
+    "sourceShort": {
+      "SHOPIFY": "Shopify",
+      "WEBSITE": "Feed de pe site",
+      "MANUAL": "Adăugat manual"
+    },
+    "lastSync_one": "{{n}} produs · sincronizat {{ago}}",
+    "lastSync_other": "Produse: {{n}} · sincronizate {{ago}}",
+    "neverSynced": "Nesincronizat încă. Apasă Sincronizează acum.",
+    "reason": {
+      "not-a-feed": "Site-ul tău nu publică un feed de produse pe care îl putem citi. Conectează Shopify pe web sau adaugă produse acolo.",
+      "partial": "A putut fi citită doar o parte a catalogului, așa că nu a fost arhivat nimic.",
+      "failed": "La ultima sincronizare, produsele nu au putut fi citite. Apasă Sincronizează acum pentru a reîncerca.",
+      "shopify-refused": "Shopify a respins tokenul de acces. Reconectează Shopify pe web."
+    },
+    "emptyTitle": "Niciun produs încă",
+    "emptyBody": "Apasă Sincronizează acum pentru a prelua produsele din magazin sau adaugă-le pe web.",
+    "search": "Caută după nume sau SKU",
+    "count_one": "{{n}} produs",
+    "count_other": "Produse: {{n}}",
+    "showMore": "Arată mai multe",
+    "noPrice": "Fără preț",
+    "notFound": "Acest produs nu mai este în catalog.",
+    "stock": {
+      "in": "În stoc",
+      "out": "Stoc epuizat",
+      "unknown": "Stoc necunoscut",
+      "count": "În stoc: {{n}}"
+    },
+    "checked": "verificat {{ago}}",
+    "ago": {
+      "now": "chiar acum",
+      "min": "acum {{n}} min",
+      "hours": "acum {{n}} h",
+      "days": "acum {{n}} zile"
+    },
+    "fields": {
+      "sku": "SKU",
+      "category": "Categorie",
+      "source": "Sursă",
+      "materials": "Materiale",
+      "dimensions": "Dimensiuni",
+      "certifications": "Certificări"
+    },
+    "placeholders": {
+      "materials": "ex. lemn masiv de salcâm, lac negru",
+      "dimensions": "ex. 120 × 40 × 75 cm",
+      "certifications": "ex. lemn certificat FSC"
+    },
+    "openPage": "Deschide pagina produsului",
+    "factsTitle": "Detalii despre produs",
+    "factsHint": "Redactorii și verificarea calității folosesc aceste detalii. Sincronizarea nu le modifică.",
+    "factsLocked": "Redactorii și verificarea calității folosesc aceste detalii. Doar persoanele care pot aproba afirmațiile despre produse le pot modifica.",
+    "save": "Salvează detaliile",
+    "saving": "Se salvează…",
+    "saved": "Salvat"
   }
 }

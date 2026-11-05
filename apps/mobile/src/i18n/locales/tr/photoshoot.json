@@ -53,6 +53,8 @@
       "interior": "İç mekan",
       "custom": "Özel"
     },
+    "briefOptional": "İsteğe bağlı",
+    "briefNeeded": "Zorunlu",
     "creativeBrief": "Yaratıcı özet",
     "briefHint": "Aydınlatma, ambiyans veya belirli dekor ipuçlarını iyileştirin",
     "sourcePreview": "Kaynak önizleme",

@@ -53,6 +53,8 @@
       "interior": "Innenraum",
       "custom": "Benutzerdefiniert"
     },
+    "briefOptional": "Optional",
+    "briefNeeded": "Erforderlich",
     "creativeBrief": "Kreativbrief",
     "briefHint": "Beleuchtung, Ambiente oder spezifische Dekorhinweise verfeinern",
     "sourcePreview": "Quellvorschau",

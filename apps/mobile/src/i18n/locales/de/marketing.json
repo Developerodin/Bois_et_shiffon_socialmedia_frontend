@@ -25,6 +25,7 @@
       "body": "Neue Fotos halten deine automatisierten Reels und den Website-Entwurf aktuell."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Demnächst",
     "cards": {
       "customers": {
         "title": "Kunden",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Neue Nachrichten werden automatisch verfügbar, sobald verbunden.",
     "channelsTitle": "Unterstützte Nachrichtendienste",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Verbinde ein Konto, um Nachrichten zu empfangen."
+    "lockNote": "Verbinde ein Konto, um Nachrichten zu empfangen.",
+    "noConversations": "Noch keine Nachrichten. Neue Unterhaltungen auf Instagram und Messenger erscheinen hier.",
+    "reconnect": "Erneut verbinden, um Nachrichten zu lesen",
+    "openConnections": "Verbindungen öffnen",
+    "customer": "Kunde",
+    "you": "Du: {{text}}"
   },
   "reply": {
     "title": "Antwortassistent",
-    "referencedProduct": "Referenziertes Produkt",
     "suggestionTitle": "Espanda Antwortvorschlag",
     "draftLabel": "Antwortentwurf",
-    "tone": "Ton: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Poliert & handwerklich"
-    },
-    "done": "Fertig",
-    "editReply": "Antwort bearbeiten",
     "approvalTitle": "Manuelle Genehmigung erforderlich",
     "approvalBody": "Keine Nachricht wird ohne deinen ausdrücklichen Klick gesendet.",
-    "exampleTitle": "Beispielgesprächsmodus",
-    "exampleBody": "Das Verbinden deines Instagram- oder Facebook-Kontos ersetzt dieses Beispiel durch echte Kundenanfragen."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(Foto oder Anhang)",
+    "writeOwn": "Selbst schreiben",
+    "send": "Senden",
+    "sent": "Gesendet."
   },
   "reviews": {
     "emptyTitle": "Noch keine Bewertungen",
@@ -74,7 +79,23 @@
     "connectGoogle": "Google Business verbinden",
     "automatedTitle": "Automatisierte Bewertungsanfragen",
     "connectFirst": "Zuerst verbinden",
-    "automatedBody": "Erfordert eine Verbindung zu Google Business, um personalisierte Bewertungsanfragen zu senden."
+    "automatedBody": "Erfordert eine Verbindung zu Google Business, um personalisierte Bewertungsanfragen zu senden.",
+    "count_one": "{{count}} Bewertung",
+    "count_other": "{{count}} Bewertungen",
+    "connectedEmptyBody": "Neue Google-Bewertungen erscheinen hier, damit du darauf antworten kannst.",
+    "waitingGoogle": "Warten auf Google",
+    "linkBody": "Sende Kunden diesen Link nach einem Besuch oder Kauf. Er öffnet das Google-Bewertungsformular für dein Unternehmen.",
+    "shareLink": "Bewertungslink teilen",
+    "anonymous": "Google-Nutzer",
+    "yourReply": "Deine Antwort",
+    "replyDraft": "Antwortentwurf",
+    "cancel": "Abbrechen",
+    "postReply": "Antwort veröffentlichen",
+    "editReply": "Antwort bearbeiten",
+    "draftReply": "Antwort entwerfen",
+    "replied": "Antwort auf Google veröffentlicht.",
+    "stars_one": "{{count}} Stern",
+    "stars_other": "{{count}} Sterne"
   },
   "people": {
     "emptyTitle": "Noch keine Kundendaten",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Du behältst die Kontrolle",
-    "controlBody": "Nichts wird auf Google gepostet oder beantwortet, bis du es genehmigst."
+    "controlBody": "Nichts wird auf Google gepostet oder beantwortet, bis du es genehmigst.",
+    "connectNote": "Du kannst die Verbindung jederzeit unter Unternehmen → Verbindungen trennen.",
+    "retry": "Erneut versuchen"
   },
   "googleWorkspace": {
     "newPost": "Neuer Google-Post",
@@ -128,13 +151,40 @@
     "checklistTitle": "Profil-Setup-Checkliste",
     "checklist": {
       "profile": {
-        "label": "Google-Profil verbunden",
-        "value": "Gefunden"
+        "label": "Google-Profil verbunden"
+      },
+      "verified": {
+        "label": "Von Google bestätigt",
+        "yes": "Bestätigt",
+        "no": "Noch nicht"
       },
       "reviewLink": {
         "label": "Direkter Bewertungsanfragelink",
-        "value": "Einrichten"
+        "share": "Teilen",
+        "waiting": "Nach Bestätigung"
+      },
+      "hours": {
+        "label": "Öffnungszeiten",
+        "yes": "Eingetragen",
+        "no": "Auf Google hinzufügen"
+      },
+      "website": {
+        "label": "Website",
+        "no": "Auf Google hinzufügen"
       }
-    }
+    },
+    "postText": "Beitragstext",
+    "discard": "Verwerfen",
+    "publishPost": "Beitrag veröffentlichen",
+    "postState": {
+      "live": "Veröffentlicht",
+      "processing": "Wird verarbeitet",
+      "rejected": "Von Google abgelehnt"
+    },
+    "noPostsTitle": "Noch keine Google-Beiträge",
+    "noPostsBody": "Tippe auf „Neuer Google-Beitrag“, um einen Beitrag aus deinen Fotos zu erstellen. Er wird erst veröffentlicht, wenn du ihn freigibst.",
+    "posted": "An Google gesendet. Es kann ein paar Minuten dauern, bis der Beitrag erscheint.",
+    "unverifiedTitle": "Google hat dieses Unternehmen noch nicht bestätigt",
+    "unverifiedBody": "Beiträge und der Bewertungslink funktionieren erst, wenn Google dein Unternehmen bestätigt hat. Bestätige es in Google Business Profile."
   }
 }

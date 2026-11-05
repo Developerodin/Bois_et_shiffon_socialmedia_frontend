@@ -53,6 +53,8 @@
       "interior": "Interiör",
       "custom": "Anpassad"
     },
+    "briefOptional": "Valfritt",
+    "briefNeeded": "Obligatoriskt",
     "creativeBrief": "Kreativ brief",
     "briefHint": "Förfina belysning, atmosfär eller specifika dekorativa inslag",
     "sourcePreview": "Förhandsvisning av källa",

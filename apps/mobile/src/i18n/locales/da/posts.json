@@ -58,6 +58,8 @@
     "viewCalendar": "Se kalender",
     "loadFailed": "Kunne ikke indlæse dine opslag. Tjek din forbindelse.",
     "retry": "Prøv igen",
+    "retrying": "Prøver igen...",
+    "stillFailed": "Kunne stadig ikke indlæse dine opslag. Tjek din forbindelse, og prøv igen.",
     "empty": "Ingen opslag i denne uge endnu. Planlæg nogle i Planlæggeren.",
     "slides": "Karrusel · {{count}} slides"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Det er ikke slået op",
     "cancelSchedule": "Annuller planlægning",
     "cancelling": "Annullerer...",
-    "noPermission": "En person med godkendelses- og udgivelsesrettigheder i dette arbejdsområde skal planlægge det."
+    "noPermission": "En person med godkendelses- og udgivelsesrettigheder i dette arbejdsområde skal planlægge det.",
+    "productIssues": "Produkttjek",
+    "askNote": "Hvad skal ændres?",
+    "noteNeeded": "Beskriv, hvad der skal ændres.",
+    "suggestProduct": "Foreslå et andet produkt",
+    "productStays": "Produktet forbliver tilknyttet, så opslaget vil stadig blive afvist",
+    "askChanges": "Bed om ændringer",
+    "sending": "Sender...",
+    "nextAskChanges": "Bed om ændringer",
+    "approverNeeded": "En godkender skal se på dette"
   },
   "edit": {
     "title": "Rediger indlæg",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram tillader kun JPEG-billeder. Tryk for at vælge en .jpg-fil i stedet.",
     "expired": "{{channel}} kræver, at du logger ind igen",
     "reconnect": "Forbind {{channel}} igen",
-    "reelInStudio": "Reels oprettes og udgives i Reels-studiet, ikke herfra."
+    "reelInStudio": "Reels oprettes og udgives i Reels-studiet, ikke herfra.",
+    "loadFailed": "Kunne ikke tjekke, hvor dette opslag kan udgives. Tjek din forbindelse.",
+    "retry": "Prøv igen"
   },
   "brief": {
     "title": "Opret et indlæg",
@@ -220,7 +233,9 @@
     "scheduled_other": "Planlagt ({{count}})",
     "samplePreview": "Eksempelvisning",
     "moreOptions": "Flere muligheder for {{title}}",
-    "editStory": "Rediger story"
+    "editStory": "Rediger story",
+    "comingSoon": "Kommer snart",
+    "comingSoonBody": "Stories er ikke tilgængelige endnu. Du kan allerede planlægge opslag, karruseller og reels."
   },
   "editStory": {
     "back": "Tilbage",
@@ -259,6 +274,14 @@
     "noPillars": "Ingen opslag planlagt for denne måned endnu.",
     "started": "Planlægger dine næste 30 dage. De første udkast vises i kalenderen om et par minutter, klar til din godkendelse. Resten følger, efterhånden som de bliver skrevet.",
     "generating": "Starter...",
+    "done_one": "Der er planlagt {{count}} opslag. Udkastet vises i kalenderen, når det er skrevet, klar til din godkendelse.",
+    "done_other": "Der er planlagt {{count}} opslag. Udkastene vises i kalenderen, efterhånden som de bliver skrevet, klar til din godkendelse.",
+    "unscheduled_one": "Der var ingen ledig tid til {{count}} opslag inden for de næste 30 dage.",
+    "unscheduled_other": "Der var ingen ledig tid til {{count}} opslag inden for de næste 30 dage.",
+    "failed": "Planlægningen blev ikke fuldført.",
+    "nothingToDo": "Ingen nye idéer at planlægge endnu. Der kommer nye idéer hver morgen.",
+    "refunded": "{{n}} kreditter er refunderet.",
+    "tryAgain": "Prøv igen",
     "cost": "Koster {{n}} kreditter."
   }
 }

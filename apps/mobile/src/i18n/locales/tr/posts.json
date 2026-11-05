@@ -58,6 +58,8 @@
     "viewCalendar": "Takvimi görüntüle",
     "loadFailed": "Gönderilerin yüklenemedi. Bağlantını kontrol et.",
     "retry": "Tekrar dene",
+    "retrying": "Tekrar deneniyor...",
+    "stillFailed": "Gönderilerin hâlâ yüklenemedi. Bağlantını kontrol edip tekrar dene.",
     "empty": "Bu hafta henüz gönderi yok. Planlayıcı'dan gönderi planlayabilirsin.",
     "slides": "Karusel · {{count}} slayt"
   },
@@ -113,7 +115,16 @@
     "notPosted": "Paylaşılmamış",
     "cancelSchedule": "Planlamayı iptal et",
     "cancelling": "İptal ediliyor...",
-    "noPermission": "Bunu, bu çalışma alanında onaylama ve paylaşma yetkisi olan biri planlamalı."
+    "noPermission": "Bunu, bu çalışma alanında onaylama ve paylaşma yetkisi olan biri planlamalı.",
+    "productIssues": "Ürün kontrolü",
+    "askNote": "Neler değişmeli?",
+    "noteNeeded": "Nelerin değişmesi gerektiğini belirt.",
+    "suggestProduct": "Başka bir ürün öner",
+    "productStays": "Ürün bağlı kalır, bu yüzden gönderi yine reddedilir",
+    "askChanges": "Değişiklik iste",
+    "sending": "Gönderiliyor...",
+    "nextAskChanges": "Değişiklik iste",
+    "approverNeeded": "Bunu bir onaylayıcının incelemesi gerekiyor"
   },
   "edit": {
     "title": "Gönderiyi düzenle",
@@ -179,7 +190,9 @@
     "jpegOnly": "Instagram yalnızca JPEG fotoğrafları kabul eder. Bir .jpg seçmek için dokun.",
     "expired": "{{channel}} için yeniden giriş yapman gerekiyor",
     "reconnect": "{{channel}} bağlantısını yenile",
-    "reelInStudio": "Reels videoları burada değil, Reels stüdyosunda oluşturulup paylaşılır."
+    "reelInStudio": "Reels videoları burada değil, Reels stüdyosunda oluşturulup paylaşılır.",
+    "loadFailed": "Bu gönderinin nerede paylaşılabileceği kontrol edilemedi. Bağlantını kontrol et.",
+    "retry": "Tekrar dene"
   },
   "brief": {
     "title": "Gönderi oluştur",
@@ -220,7 +233,9 @@
     "scheduled_other": "Planlanmış ({{count}})",
     "samplePreview": "Örnek önizleme",
     "moreOptions": "{{title}} için daha fazla seçenek",
-    "editStory": "Hikayeyi düzenle"
+    "editStory": "Hikayeyi düzenle",
+    "comingSoon": "Çok yakında",
+    "comingSoonBody": "Hikâyeler henüz kullanılamıyor. Gönderileri, karuselleri ve Reels videolarını şimdi planlayabilirsin."
   },
   "editStory": {
     "back": "Geri",
@@ -259,6 +274,14 @@
     "noPillars": "Bu ay için henüz gönderi planlanmadı.",
     "started": "Önümüzdeki 30 gün planlanıyor. İlk taslaklar birkaç dakika içinde onaylaman için takvimde görünür; diğerleri hazırlandıkça eklenir.",
     "generating": "Başlatılıyor...",
+    "done_one": "{{count}} gönderi planlandı. Taslağı hazırlandığında onaylaman için takvimde görünür.",
+    "done_other": "{{count}} gönderi planlandı. Taslakları hazırlandıkça onaylaman için takvimde görünür.",
+    "unscheduled_one": "{{count}} gönderi için önümüzdeki 30 günde boş bir zaman bulunamadı.",
+    "unscheduled_other": "{{count}} gönderi için önümüzdeki 30 günde boş zaman bulunamadı.",
+    "failed": "Planlama tamamlanamadı.",
+    "nothingToDo": "Henüz planlanacak yeni fikir yok. Her sabah yeni fikirler gelir.",
+    "refunded": "{{n}} kredi iade edildi.",
+    "tryAgain": "Tekrar dene",
     "cost": "{{n}} kredi tutar."
   }
 }

@@ -25,6 +25,7 @@
       "body": "Genom att lägga till nya bilder hålls dina automatiska rullar och webbplatsutkast uppdaterade."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Kommer snart",
     "cards": {
       "customers": {
         "title": "Kunder",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Nya meddelanden blir tillgängliga automatiskt när de är anslutna.",
     "channelsTitle": "Stödda meddelandekanaler",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Anslut ett konto för att ta emot meddelanden."
+    "lockNote": "Anslut ett konto för att ta emot meddelanden.",
+    "noConversations": "Inga meddelanden än. Nya konversationer från Instagram och Messenger visas här.",
+    "reconnect": "Anslut igen för att läsa meddelanden",
+    "openConnections": "Öppna anslutningar",
+    "customer": "Kund",
+    "you": "Du: {{text}}"
   },
   "reply": {
     "title": "Svarshjälp",
-    "referencedProduct": "Refererad produkt",
     "suggestionTitle": "Espanda svarsförslag",
     "draftLabel": "Svarsutkast",
-    "tone": "Ton: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Polerad & hantverk"
-    },
-    "done": "Klar",
-    "editReply": "Redigera svar",
     "approvalTitle": "Manuell godkännande krävs",
     "approvalBody": "Inget meddelande skickas utan ditt uttryckliga klick.",
-    "exampleTitle": "Exempel på konversationsläge",
-    "exampleBody": "Genom att ansluta ditt Instagram- eller Facebook-konto ersätts detta exempel med riktiga kundfrågor."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(foto eller bilaga)",
+    "writeOwn": "Skriv eget svar",
+    "send": "Skicka",
+    "sent": "Skickat."
   },
   "reviews": {
     "emptyTitle": "Inga recensioner än",
@@ -74,7 +79,23 @@
     "connectGoogle": "Anslut Google Business",
     "automatedTitle": "Automatiska recensionsförfrågningar",
     "connectFirst": "Anslut först",
-    "automatedBody": "Kräver Google Business-anslutning för att skicka personliga recensionsinbjudningar."
+    "automatedBody": "Kräver Google Business-anslutning för att skicka personliga recensionsinbjudningar.",
+    "count_one": "{{count}} recension",
+    "count_other": "{{count}} recensioner",
+    "connectedEmptyBody": "Nya Google-recensioner visas här så att du kan svara på dem.",
+    "waitingGoogle": "Väntar på Google",
+    "linkBody": "Skicka den här länken till kunder efter ett besök eller köp. Den öppnar Googles recensionsformulär för ditt företag.",
+    "shareLink": "Dela recensionslänk",
+    "anonymous": "Google-användare",
+    "yourReply": "Ditt svar",
+    "replyDraft": "Svarsutkast",
+    "cancel": "Avbryt",
+    "postReply": "Publicera svar",
+    "editReply": "Redigera svar",
+    "draftReply": "Skriv svarsutkast",
+    "replied": "Svaret har publicerats på Google.",
+    "stars_one": "{{count}} stjärna",
+    "stars_other": "{{count}} stjärnor"
   },
   "people": {
     "emptyTitle": "Inga kundregister än",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Du har kontrollen",
-    "controlBody": "Inget publiceras eller besvaras på Google förrän du godkänner det."
+    "controlBody": "Inget publiceras eller besvaras på Google förrän du godkänner det.",
+    "connectNote": "Du kan koppla från när som helst under Företag → Anslutningar.",
+    "retry": "Försök igen"
   },
   "googleWorkspace": {
     "newPost": "Nytt Google-inlägg",
@@ -128,13 +151,40 @@
     "checklistTitle": "Checklista för profilsättning",
     "checklist": {
       "profile": {
-        "label": "Google-profil ansluten",
-        "value": "Hittad"
+        "label": "Google-profil ansluten"
+      },
+      "verified": {
+        "label": "Verifierad av Google",
+        "yes": "Verifierad",
+        "no": "Inte än"
       },
       "reviewLink": {
         "label": "Direktlänk för recensionsförfrågan",
-        "value": "Konfigurerad"
+        "share": "Dela",
+        "waiting": "Efter verifiering"
+      },
+      "hours": {
+        "label": "Öppettider",
+        "yes": "Angivna",
+        "no": "Lägg till på Google"
+      },
+      "website": {
+        "label": "Webbplats",
+        "no": "Lägg till på Google"
       }
-    }
+    },
+    "postText": "Inläggstext",
+    "discard": "Kasta",
+    "publishPost": "Publicera inlägg",
+    "postState": {
+      "live": "Publicerat",
+      "processing": "Bearbetas",
+      "rejected": "Avvisat av Google"
+    },
+    "noPostsTitle": "Inga Google-inlägg än",
+    "noPostsBody": "Tryck på Nytt Google-inlägg för att skapa ett utkast från dina foton. Inget publiceras förrän du väljer att publicera.",
+    "posted": "Skickat till Google. Det kan ta några minuter innan det visas.",
+    "unverifiedTitle": "Google har inte verifierat företaget än",
+    "unverifiedBody": "Inlägg och recensionslänken fungerar först när Google har verifierat ditt företag. Verifiera det i Google Business Profile."
   }
 }

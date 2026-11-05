@@ -25,6 +25,7 @@
       "body": "Tilføjelse af nye billeder holder dine automatiske reels og website kladde opdateret."
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "Kommer snart",
     "cards": {
       "customers": {
         "title": "Kunder",
@@ -50,23 +51,27 @@
     "emptyFootnote": "Nye beskeder bliver tilgængelige automatisk, når de er forbundet.",
     "channelsTitle": "Understøttede beskedkanaler",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "Forbind en konto for at modtage beskeder."
+    "lockNote": "Forbind en konto for at modtage beskeder.",
+    "noConversations": "Ingen beskeder endnu. Nye samtaler fra Instagram og Messenger vises her.",
+    "reconnect": "Opret forbindelse igen for at læse beskeder",
+    "openConnections": "Åbn forbindelser",
+    "customer": "Kunde",
+    "you": "Dig: {{text}}"
   },
   "reply": {
     "title": "Svarassistent",
-    "referencedProduct": "Refereret produkt",
     "suggestionTitle": "Espanda svarforslag",
     "draftLabel": "Svarkladde",
-    "tone": "Tone: {{tone}}",
-    "tones": {
-      "polishedArtisan": "Poleret & håndværk"
-    },
-    "done": "Færdig",
-    "editReply": "Rediger svar",
     "approvalTitle": "Manuel godkendelse krævet",
     "approvalBody": "Ingen besked sendes uden din eksplicitte klik.",
-    "exampleTitle": "Eksempel på samtaletilstand",
-    "exampleBody": "Forbindelse af din Instagram- eller Facebook-konto erstatter dette eksempel med rigtige kundespørgsmål."
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(foto eller vedhæftning)",
+    "writeOwn": "Skriv selv",
+    "send": "Send",
+    "sent": "Sendt."
   },
   "reviews": {
     "emptyTitle": "Ingen anmeldelser endnu",
@@ -74,7 +79,23 @@
     "connectGoogle": "Forbind Google Business",
     "automatedTitle": "Automatiserede anmeldelsesanmodninger",
     "connectFirst": "Forbind først",
-    "automatedBody": "Kræver Google Business-forbindelse for at sende personlige anmeldelsesanmodninger."
+    "automatedBody": "Kræver Google Business-forbindelse for at sende personlige anmeldelsesanmodninger.",
+    "count_one": "{{count}} anmeldelse",
+    "count_other": "{{count}} anmeldelser",
+    "connectedEmptyBody": "Nye Google-anmeldelser vises her, så du kan svare på dem.",
+    "waitingGoogle": "Venter på Google",
+    "linkBody": "Send dette link til kunder efter et besøg eller køb. Det åbner Googles anmeldelsesformular for din virksomhed.",
+    "shareLink": "Del anmeldelseslink",
+    "anonymous": "Google-bruger",
+    "yourReply": "Dit svar",
+    "replyDraft": "Udkast til svar",
+    "cancel": "Annuller",
+    "postReply": "Offentliggør svar",
+    "editReply": "Rediger svar",
+    "draftReply": "Skriv svar",
+    "replied": "Svar offentliggjort på Google.",
+    "stars_one": "{{count}} stjerne",
+    "stars_other": "{{count}} stjerner"
   },
   "people": {
     "emptyTitle": "Ingen kunderegistreringer endnu",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "Du har kontrollen",
-    "controlBody": "Intet postes eller besvares på Google, før du godkender det."
+    "controlBody": "Intet postes eller besvares på Google, før du godkender det.",
+    "connectNote": "Du kan til enhver tid afbryde forbindelsen under Virksomhed → Forbindelser.",
+    "retry": "Prøv igen"
   },
   "googleWorkspace": {
     "newPost": "Nyt Google-opslag",
@@ -128,13 +151,40 @@
     "checklistTitle": "Profilopsætningscheckliste",
     "checklist": {
       "profile": {
-        "label": "Google-profil forbundet",
-        "value": "Fundet"
+        "label": "Google-profil forbundet"
+      },
+      "verified": {
+        "label": "Bekræftet af Google",
+        "yes": "Bekræftet",
+        "no": "Ikke endnu"
       },
       "reviewLink": {
         "label": "Direkte anmeldelsesanmodningslink",
-        "value": "Opsæt"
+        "share": "Del",
+        "waiting": "Efter bekræftelse"
+      },
+      "hours": {
+        "label": "Åbningstider",
+        "yes": "Tilføjet",
+        "no": "Tilføj på Google"
+      },
+      "website": {
+        "label": "Hjemmeside",
+        "no": "Tilføj på Google"
       }
-    }
+    },
+    "postText": "Opslagstekst",
+    "discard": "Kassér",
+    "publishPost": "Udgiv opslag",
+    "postState": {
+      "live": "Udgivet",
+      "processing": "Behandles",
+      "rejected": "Afvist af Google"
+    },
+    "noPostsTitle": "Ingen Google-opslag endnu",
+    "noPostsBody": "Tryk på Nyt Google-opslag for at lave et udkast med dine billeder. Intet bliver slået op, før du udgiver det.",
+    "posted": "Sendt til Google. Det kan tage et par minutter, før det vises.",
+    "unverifiedTitle": "Google har ikke bekræftet denne virksomhed endnu",
+    "unverifiedBody": "Opslag og anmeldelseslinket virker først, når Google har bekræftet din virksomhed. Bekræft den i Google Business Profile."
   }
 }

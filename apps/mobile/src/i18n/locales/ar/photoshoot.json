@@ -53,6 +53,8 @@
       "interior": "داخلي",
       "custom": "مخصص"
     },
+    "briefOptional": "اختياري",
+    "briefNeeded": "مطلوب",
     "creativeBrief": "موجز إبداعي",
     "briefHint": "تحسين الإضاءة أو الأجواء أو إشارات الديكور المحددة",
     "sourcePreview": "معاينة المصدر",

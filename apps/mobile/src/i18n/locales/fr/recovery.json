@@ -41,7 +41,7 @@
     "body_other": "Vous avez actuellement <b>{{n}} crédits disponibles</b> dans cet espace de travail. Votre travail est enregistré.",
     "remaining": "{{available}} / {{needed}} nécessaires",
     "remainingA11y": "Crédits disponibles par rapport aux crédits nécessaires",
-    "manage": "Gérer les crédits",
+    "howToGet": "Pour l’instant, l’équipe Espanda ajoute les crédits à ton espace de travail. Demande-lui de recharger ton solde, puis reviens pour terminer.",
     "keepEditing": "Continuer à modifier",
     "balance": "Solde de crédits",
     "neededLabel": "Disponibles pour cette action"

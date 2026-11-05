@@ -25,6 +25,7 @@
       "body": "नए फोटो जोड़ने से आपके ऑटोमेटेड रील्स और वेबसाइट ड्राफ्ट को ट्यून किया जाता है।"
     },
     "cardLabel": "{{title}}: {{body}}. {{cta}}",
+    "comingSoon": "जल्द आ रहा है",
     "cards": {
       "customers": {
         "title": "ग्राहक",
@@ -50,23 +51,27 @@
     "emptyFootnote": "नए संदेश स्वचालित रूप से उपलब्ध हो जाते हैं जब कनेक्ट होते हैं।",
     "channelsTitle": "समर्थित मैसेजिंग चैनल",
     "channelLabel": "{{name}}, {{status}}",
-    "lockNote": "संदेश प्राप्त करने के लिए एक खाता कनेक्ट करें।"
+    "lockNote": "संदेश प्राप्त करने के लिए एक खाता कनेक्ट करें।",
+    "noConversations": "अभी कोई संदेश नहीं है। Instagram और Messenger की नई बातचीत यहाँ दिखेंगी।",
+    "reconnect": "संदेश पढ़ने के लिए फिर से कनेक्ट करें",
+    "openConnections": "कनेक्शन खोलें",
+    "customer": "ग्राहक",
+    "you": "आप: {{text}}"
   },
   "reply": {
     "title": "उत्तर सहायक",
-    "referencedProduct": "संदर्भित उत्पाद",
     "suggestionTitle": "Espanda उत्तर सुझाव",
     "draftLabel": "उत्तर ड्राफ्ट",
-    "tone": "स्वर: {{tone}}",
-    "tones": {
-      "polishedArtisan": "पॉलिश्ड और आर्टिसन"
-    },
-    "done": "हो गया",
-    "editReply": "उत्तर संपादित करें",
     "approvalTitle": "मैन्युअल अनुमोदन आवश्यक",
     "approvalBody": "आपके स्पष्ट क्लिक के बिना कोई संदेश कभी नहीं भेजा जाता।",
-    "exampleTitle": "उदाहरण वार्तालाप मोड",
-    "exampleBody": "अपने Instagram या Facebook खाते को कनेक्ट करने से यह उदाहरण वास्तविक ग्राहक प्रश्नों से बदल जाता है।"
+    "via": {
+      "INSTAGRAM": "Instagram Direct · {{account}}",
+      "META": "Messenger · {{account}}"
+    },
+    "attachment": "(फ़ोटो या अटैचमेंट)",
+    "writeOwn": "खुद लिखें",
+    "send": "भेजें",
+    "sent": "भेज दिया गया।"
   },
   "reviews": {
     "emptyTitle": "अभी तक कोई रिव्यू नहीं",
@@ -74,7 +79,23 @@
     "connectGoogle": "Google Business कनेक्ट करें",
     "automatedTitle": "स्वचालित रिव्यू अनुरोध",
     "connectFirst": "पहले कनेक्ट करें",
-    "automatedBody": "व्यक्तिगत रिव्यू निमंत्रण भेजने के लिए Google Business कनेक्शन की आवश्यकता है।"
+    "automatedBody": "व्यक्तिगत रिव्यू निमंत्रण भेजने के लिए Google Business कनेक्शन की आवश्यकता है।",
+    "count_one": "{{count}} समीक्षा",
+    "count_other": "{{count}} समीक्षाएँ",
+    "connectedEmptyBody": "Google की नई समीक्षाएँ यहाँ दिखेंगी, ताकि आप उनका जवाब दे सकें।",
+    "waitingGoogle": "Google का इंतज़ार है",
+    "linkBody": "ग्राहकों को विज़िट या खरीदारी के बाद यह लिंक भेजें। इससे आपके व्यवसाय का Google समीक्षा फ़ॉर्म खुलेगा।",
+    "shareLink": "समीक्षा लिंक शेयर करें",
+    "anonymous": "Google उपयोगकर्ता",
+    "yourReply": "आपका जवाब",
+    "replyDraft": "जवाब का ड्राफ़्ट",
+    "cancel": "रद्द करें",
+    "postReply": "जवाब पोस्ट करें",
+    "editReply": "जवाब बदलें",
+    "draftReply": "जवाब लिखें",
+    "replied": "जवाब Google पर पोस्ट हो गया।",
+    "stars_one": "{{count}} स्टार",
+    "stars_other": "{{count}} स्टार"
   },
   "people": {
     "emptyTitle": "अभी तक कोई ग्राहक रिकॉर्ड नहीं",
@@ -106,7 +127,9 @@
       }
     },
     "controlTitle": "आप नियंत्रण में रहते हैं",
-    "controlBody": "Google पर कुछ भी पोस्ट या उत्तर नहीं दिया जाता जब तक आप इसे अनुमोदित नहीं करते।"
+    "controlBody": "Google पर कुछ भी पोस्ट या उत्तर नहीं दिया जाता जब तक आप इसे अनुमोदित नहीं करते।",
+    "connectNote": "आप व्यवसाय → कनेक्शन में कभी भी डिस्कनेक्ट कर सकते हैं।",
+    "retry": "फिर से कोशिश करें"
   },
   "googleWorkspace": {
     "newPost": "नया Google पोस्ट",
@@ -128,13 +151,40 @@
     "checklistTitle": "प्रोफाइल सेटअप चेकलिस्ट",
     "checklist": {
       "profile": {
-        "label": "Google प्रोफाइल कनेक्टेड",
-        "value": "मिल गया"
+        "label": "Google प्रोफाइल कनेक्टेड"
+      },
+      "verified": {
+        "label": "Google से सत्यापित",
+        "yes": "सत्यापित",
+        "no": "अभी नहीं"
       },
       "reviewLink": {
         "label": "प्रत्यक्ष रिव्यू अनुरोध लिंक",
-        "value": "सेट अप करें"
+        "share": "शेयर करें",
+        "waiting": "सत्यापन के बाद"
+      },
+      "hours": {
+        "label": "खुलने का समय",
+        "yes": "सेट है",
+        "no": "Google पर जोड़ें"
+      },
+      "website": {
+        "label": "वेबसाइट",
+        "no": "Google पर जोड़ें"
       }
-    }
+    },
+    "postText": "पोस्ट का टेक्स्ट",
+    "discard": "हटाएँ",
+    "publishPost": "पोस्ट प्रकाशित करें",
+    "postState": {
+      "live": "लाइव",
+      "processing": "प्रोसेस हो रहा है",
+      "rejected": "Google ने अस्वीकार किया"
+    },
+    "noPostsTitle": "अभी कोई Google पोस्ट नहीं है",
+    "noPostsBody": "अपनी फ़ोटो से ड्राफ़्ट बनाने के लिए नई Google पोस्ट पर टैप करें। प्रकाशित करने तक कुछ भी पोस्ट नहीं होगा।",
+    "posted": "Google को भेज दिया गया। दिखने में कुछ मिनट लग सकते हैं।",
+    "unverifiedTitle": "Google ने अभी इस व्यवसाय को सत्यापित नहीं किया है",
+    "unverifiedBody": "Google से व्यवसाय सत्यापित होने के बाद ही पोस्ट और समीक्षा लिंक काम करेंगे। Google Business Profile में इसे सत्यापित करें।"
   }
 }
