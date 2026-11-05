@@ -9,12 +9,13 @@ import {
 } from "@/server/agents/engine";
 import { AGENTS } from "@/server/agents/registry";
 import { AiProviderError } from "@/server/ai/provider";
+import { CATALOG_SYNC_JOB, enqueueDailyCatalogSyncs, runCatalogSync } from "@/server/catalog/sync";
 import { prisma } from "@/server/db/prisma";
 import { EMAIL_SEND_JOB, sendOutboxEmail } from "@/server/email/outbox";
 import { claimNextJob, completeJob, enqueueJob, failJob, holdLease } from "@/server/jobs/queue";
 import { onShootFailure, PHOTOSHOOT_JOB, runShoot } from "@/server/photoshoot/shoot";
 import { advanceRender, failRender, REEL_RENDER_JOB } from "@/server/reels/render";
-import { refreshExpiringTokens } from "@/server/services/connections";
+import { ReconnectNeeded, refreshExpiringTokens } from "@/server/services/connections";
 import { executePublication, onPublishJobLost, PUBLISH_JOB } from "@/server/services/publishing";
 import { runMonthlyPlans } from "@/server/services/automations";
 import { renewDuePlans } from "@/server/services/subscriptions";
@@ -28,6 +29,7 @@ export const DAILY_SWEEP_JOB = "system.daily-sweep";
 
 const HANDLERS: Record<string, Handler> = {
   [AGENT_RUN_JOB]: { run: executeAgentRun, onFailure: onAgentRunFailure },
+  [CATALOG_SYNC_JOB]: { run: runCatalogSync },
   [DAILY_SWEEP_JOB]: { run: dailySweep },
   [EMAIL_SEND_JOB]: { run: sendOutboxEmail },
   [PHOTOSHOOT_JOB]: { run: runShoot, onFailure: onShootFailure },
@@ -62,7 +64,9 @@ export async function runDueJobs({ budgetMs = 45_000 } = {}) {
       await handler.run(job.payload);
       await completeJob(job);
     } catch (error) {
-      const retryable = error instanceof AiProviderError ? error.retryable : !(error instanceof NothingToDoError);
+      // A catalogue sync whose Shopify token was refused waits for a person to reconnect; retrying can't help.
+      const refused = job.type === CATALOG_SYNC_JOB && error instanceof ReconnectNeeded;
+      const retryable = error instanceof AiProviderError ? error.retryable : !(error instanceof NothingToDoError || refused);
       const exhausted = await failJob(job, error, retryable && Boolean(handler));
       await handler?.onFailure?.(job.payload, error, exhausted).catch(() => {});
     } finally {
@@ -94,7 +98,7 @@ export async function kickIfDue() {
 }
 
 /**
- * Daily cron entry: start every scheduled agent for every active brand.
+ * Daily cron entry: start every scheduled agent for every active brand, and queue each brand's catalogue sync.
  * The sweep job is unique per day (idempotency key), so a double cron delivery
  * runs it once; a retried sweep skips agents already started today.
  */
@@ -103,6 +107,7 @@ async function dailySweep() {
   await pruneOldRows();
   await renewDuePlans();
   await runMonthlyPlans();
+  await enqueueDailyCatalogSyncs();
   const scheduled = AGENTS.filter((a) => a.schedule === "daily");
   if (scheduled.length === 0) return;
   const startOfDay = new Date(new Date().toISOString().slice(0, 10));

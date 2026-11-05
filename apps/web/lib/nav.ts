@@ -15,6 +15,7 @@ export type NavEntry = {
 export const NAV: readonly NavEntry[] = [
   { id: "overview", label: "Overview", href: "/", group: "main" },
   { id: "context", label: "Business context", href: "/context", group: "main" },
+  { id: "products", label: "Products", href: "/products", group: "main" },
   { id: "connections", label: "Connections", href: "/connections", group: "main" },
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },

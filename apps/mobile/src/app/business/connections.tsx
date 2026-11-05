@@ -13,14 +13,15 @@ import { ICON, Tag, meta } from "@/ui/reels/kit";
 
 /**
  * The design's channels. `provider`: the server's account type the app can sign in to (onboarding A12's flow);
- * the others have no connector yet and say so. ponytail: Pinterest/Threads connect from the web app for now.
+ * Shopify connects with an Admin API token on the web, so here it only shows its status. The others have no
+ * connector yet and say so. ponytail: Pinterest/Threads connect from the web app for now.
  */
-const CHANNELS: { id: "instagram" | "facebook" | "whatsapp" | "google" | "shopify"; Icon: LucideIcon; provider?: SocialProvider; primary?: boolean }[] = [
+const CHANNELS: { id: "instagram" | "facebook" | "whatsapp" | "google" | "shopify"; Icon: LucideIcon; provider?: SocialProvider | "SHOPIFY"; primary?: boolean }[] = [
   { id: "instagram", Icon: Camera, provider: "INSTAGRAM", primary: true },
   { id: "facebook", Icon: Globe, provider: "META" },
   { id: "whatsapp", Icon: MessageCircle },
   { id: "google", Icon: Store, provider: "GOOGLE_BUSINESS" },
-  { id: "shopify", Icon: ShoppingBag },
+  { id: "shopify", Icon: ShoppingBag, provider: "SHOPIFY" },
 ];
 const GREY = color.disabledInk;
 
@@ -84,6 +85,8 @@ export default function Connections() {
           const accounts = (list ?? []).filter((a) => a.provider === c.provider && a.status !== "REVOKED");
           const on = accounts.some((a) => a.status === "ACTIVE");
           const expired = !on && accounts.some((a) => a.status === "ERROR");
+          const webOnly = c.provider === "SHOPIFY";
+          const social = c.provider === "SHOPIFY" ? undefined : c.provider;
           const { Icon } = c;
           return (
             <SettingsCard key={c.id} style={[styles.row, styles.channel, c.primary && { minHeight: 106 }]}>
@@ -109,19 +112,19 @@ export default function Connections() {
                       : on
                         ? accounts.map((a) => a.displayName).join(", ")
                         : expired
-                          ? t("connections.expired")
-                          : t("connections.notConnected")}
+                          ? t(webOnly ? "connections.reconnectOnWeb" : "connections.expired")
+                          : t(webOnly ? "connections.connectOnWeb" : "connections.notConnected")}
                   </Text>
                 </View>
               </View>
-              {c.provider ? (
-                busy === c.provider || accounts.some((a) => busy === a.id) ? (
+              {social ? (
+                busy === social || accounts.some((a) => busy === a.id) ? (
                   <ActivityIndicator color={color.primary} />
                 ) : (
                   <SmallButton
                     label={on ? t("connections.disconnect") : expired ? t("connections.reconnect") : t("connections.connect")}
                     primary={(c.primary && !on) || expired}
-                    onPress={() => void (on ? disconnectAll(accounts) : connect(c.provider!))}
+                    onPress={() => void (on ? disconnectAll(accounts) : connect(social))}
                   />
                 )
               ) : null}

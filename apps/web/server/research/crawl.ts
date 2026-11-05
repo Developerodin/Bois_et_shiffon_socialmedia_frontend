@@ -155,10 +155,9 @@ const decode = (s: string) =>
       return cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : "";
     });
 
-export function extractPage(html: string, base: URL) {
-  const title = decode(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1]?.trim() ?? "") || null;
-  const description = tagAttrs(html, "meta").find((m) => m.name?.toLowerCase() === "description")?.content || null;
-  const text = decode(
+/** Readable text of an HTML page or fragment: scripts and styles dropped, entities decoded, blank lines collapsed. */
+export function htmlText(html: string) {
+  return decode(
     html
       .replace(/<(script|style|noscript|svg|template)[\s\S]*?<\/\1>/gi, " ")
       .replace(/<br\s*\/?>|<\/(p|div|li|h[1-6]|section|article)>/gi, "\n")
@@ -166,8 +165,13 @@ export function extractPage(html: string, base: URL) {
   )
     .replace(/[ \t]+/g, " ")
     .replace(/\n\s*\n+/g, "\n")
-    .trim()
-    .slice(0, MAX_TEXT);
+    .trim();
+}
+
+export function extractPage(html: string, base: URL) {
+  const title = decode(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1]?.trim() ?? "") || null;
+  const description = tagAttrs(html, "meta").find((m) => m.name?.toLowerCase() === "description")?.content || null;
+  const text = htmlText(html).slice(0, MAX_TEXT);
   const links = new Set<string>();
   for (const m of html.matchAll(/<a[^>]+href=["']([^"'#]+)/gi)) {
     try {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { FileText, LayoutDashboard, Plug, ShieldCheck, type LucideIcon } from "lucide-react";
+import { FileText, LayoutDashboard, Package, Plug, ShieldCheck, type LucideIcon } from "lucide-react";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
@@ -12,7 +12,7 @@ import { AccountMenu } from "@/components/workspace/account-menu";
 import { NAV, navFor, type NavEntry } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-const MAIN_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, connections: Plug };
+const MAIN_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, products: Package, connections: Plug };
 
 type Props = {
   brands: BrandOption[];

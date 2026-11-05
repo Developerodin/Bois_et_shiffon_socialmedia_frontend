@@ -408,6 +408,33 @@ export type PostItem = {
   } | null;
 };
 
+/** A catalogue product (Business → Products). Prices are strings ("665.83"); stock null = unknown. The list leaves `description` out. */
+export type Product = {
+  id: string; source: "WEBSITE" | "SHOPIFY" | "MANUAL"; sku: string | null; title: string; url: string | null; category: string | null;
+  materials: string | null; dimensions: string | null; certifications: string | null;
+  price: string | null; compareAtPrice: string | null; currency: string | null; inStock: boolean | null; stockQuantity: number | null;
+  stockCheckedAt: string | null; imageUrl: string | null;
+};
+export type FullProduct = Product & { description: string | null };
+export type CatalogSync = { at: string; source: "WEBSITE" | "SHOPIFY" | null; count: number; error: string | null; reason?: "not-a-feed" | "partial" | "failed" | "shopify-refused" | null };
+/** `running`: a sync is queued or running for the business. */
+export type CatalogStatus = { source: "WEBSITE" | "SHOPIFY" | null; catalogSync: CatalogSync | null; running: boolean };
+/** People fill these in on every product; a sync never changes them. */
+export type ProductFacts = Pick<Product, "materials" | "dimensions" | "certifications">;
+
+export const catalog = {
+  list: (ws: string, brandId: string, signal?: AbortSignal) =>
+    api<CatalogStatus & { products: Product[] }>(`${brandBase(ws, brandId)}/products`, { workspaceId: ws, signal }),
+  /** The sync status without the products: polled while a sync runs. */
+  status: (ws: string, brandId: string) => api<CatalogStatus>(`${brandBase(ws, brandId)}/products?status=1`, { workspaceId: ws }),
+  get: (ws: string, brandId: string, id: string, signal?: AbortSignal) =>
+    api<{ product: FullProduct }>(`${brandBase(ws, brandId)}/products/${encodeURIComponent(id)}`, { workspaceId: ws, signal }),
+  update: (ws: string, brandId: string, id: string, facts: ProductFacts) =>
+    api<{ product: FullProduct }>(`${brandBase(ws, brandId)}/products/${encodeURIComponent(id)}`, { method: "PATCH", body: facts, workspaceId: ws }),
+  /** Starts a sync in the background (202), or finds the one already queued or running (`queued: false`). */
+  sync: (ws: string, brandId: string) => api<{ queued: boolean }>(`${brandBase(ws, brandId)}/products/sync`, { method: "POST", body: {}, workspaceId: ws }),
+};
+
 export const posts = {
   async list(signal?: AbortSignal) {
     const { ws, base } = await reelBase();

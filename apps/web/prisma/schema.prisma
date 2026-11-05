@@ -191,6 +191,7 @@ model Brand {
   competitors   Competitor[]
   invitations   Invitation[]
   photoShoots   PhotoShoot[]
+  products      Product[]
 
   // target for composite tenant FKs (AT-021): children reference (id, workspaceId)
   @@unique([id, workspaceId])
@@ -220,6 +221,8 @@ model BrandProfile {
   uploads      Json?
   /// The owner's automations (mobile Business M10): { monthlyPlan, autoPublish } (server/services/automations.ts)
   automations  Json?
+  /// Last product catalogue sync: { at, source, count, error } (server/catalog/sync.ts)
+  catalogSync  Json?
   voiceSummary String?
   pillars      Json?
   locales      Json?
@@ -646,6 +649,7 @@ enum IntegrationProvider {
   GOOGLE_BUSINESS // Business Profile: one connection per location (reviews, local posts)
   REDDIT
   PINTEREST
+  SHOPIFY // Admin API custom-app token, not OAuth: connected from its own form (server/catalog/shopify.ts)
 }
 
 enum ConnectionStatus {
@@ -978,6 +982,47 @@ model Competitor {
   brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
 
   @@unique([brandId, domain])
+  @@index([workspaceId, brandId])
+}
+
+enum ProductSource {
+  WEBSITE // the public /products.json feed of BrandProfile.websiteUrl
+  SHOPIFY // Admin API through the brand's SHOPIFY connection
+  MANUAL // added by a person
+}
+
+/**
+ * One sellable variant in the brand's catalogue. A sync writes only the fields it owns (sku through imageUrl,
+ * archivedAt); materials, dimensions and certifications are always the person's (server/catalog/sync.ts).
+ */
+model Product {
+  id             String        @id @default(cuid())
+  workspaceId    String
+  brandId        String
+  source         ProductSource
+  externalId     String? // variant id from the feed / Admin GID; null for MANUAL
+  sku            String?
+  title          String // "Product — Variant" when the variant has its own title
+  url            String?
+  category       String?
+  description    String? // plain text (HTML stripped), ≤ 5,000 chars
+  materials      String? // person-entered
+  dimensions     String? // person-entered
+  certifications String? // person-entered
+  price          Decimal?      @db.Decimal(12, 2)
+  compareAtPrice Decimal?      @db.Decimal(12, 2)
+  currency       String?
+  inStock        Boolean? // null = unknown
+  stockQuantity  Int? // Shopify Admin only
+  stockCheckedAt DateTime? // when the source last told us about stock: "stock freshness"
+  imageUrl       String?
+  archivedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  brand Brand @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+
+  @@unique([brandId, source, externalId])
   @@index([workspaceId, brandId])
 }
 

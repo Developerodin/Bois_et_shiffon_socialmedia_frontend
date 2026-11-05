@@ -16,6 +16,9 @@ export const color = {
   disabledBg: "#E5E4EA",
   disabledInk: "#64646F",
   error: "#B42318",
+  errorSoft: "#FDECEC",
+  success: "#1B7A46",
+  successSoft: "#E8F6EE",
   onPrimary: "#FFFFFF",
 } as const;
 

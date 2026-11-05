@@ -159,6 +159,8 @@ export const settingsApi = {
     request<{ url: string }>(`${brand(w, b)}/connections/start`, json("POST", { provider })),
   disconnect: (w: string, b: string, id: string) =>
     request<{ cancelled: number }>(`${brand(w, b)}/connections/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  connectShopify: (w: string, b: string, body: { shop: string; accessToken: string }) =>
+    request<{ connection: Connection }>(`${brand(w, b)}/integrations/shopify`, json("POST", body)),
 
   // Platform admins only (Platform admin → AI models); not per workspace.
   aiModels: () => request<AiModelSettings>("/api/v1/ai-models"),
@@ -191,8 +193,9 @@ export type ProjectPeople = {
   roles: { id: string; name: string; description: string | null }[];
 };
 
-export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "GOOGLE_BUSINESS" | "REDDIT" | "PINTEREST";
-export type ProviderInfo = { provider: Provider; label: string; configured: boolean };
+export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "GOOGLE_BUSINESS" | "REDDIT" | "PINTEREST" | "SHOPIFY";
+/** `kind`: "oauth" signs in on the platform; "token" (Shopify) takes a pasted Admin API token in a dialog. */
+export type ProviderInfo = { provider: Provider; label: string; configured: boolean; kind: "oauth" | "token" };
 export type Connection = {
   id: string;
   provider: Provider;

@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Images, Palette, Unplug } from "lucide-react-native";
+import { Images, Package, Palette, Unplug } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { color, space, type } from "@/theme/tokens";
@@ -64,6 +64,7 @@ export default function MyBusiness() {
 
       <SettingsCard style={styles.links}>
         <NavRow first icon={Palette} title={t("myBusiness.brandPreferences")} subtitle={t("myBusiness.brandPreferencesHint")} onPress={() => router.push("/business/brand")} />
+        <NavRow icon={Package} title={t("myBusiness.products")} subtitle={t("myBusiness.productsHint")} onPress={() => router.push("/business/products")} />
         <NavRow icon={Images} title={t("myBusiness.photoAssets")} subtitle={t("myBusiness.photoAssetsHint")} onPress={() => router.push("/business/photos")} />
         <NavRow icon={Unplug} title={t("myBusiness.connections")} subtitle={t("myBusiness.connectionsHint")} onPress={() => router.push("/business/connections")} />
       </SettingsCard>

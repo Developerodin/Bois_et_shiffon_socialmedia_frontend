@@ -4,7 +4,7 @@ import { requirePermission } from "@/server/auth/permissions";
 import { hashToken, newToken } from "@/server/auth/tokens";
 import { currentKeyVersion, decryptCredentials, encryptCredentials } from "@/server/crypto/credentials";
 import { prisma } from "@/server/db/prisma";
-import { PROVIDERS, ProviderError, providerConfig, type ConnectedAccount } from "@/server/integrations/providers";
+import { PROVIDERS, ProviderError, providerConfig, type ConnectedAccount, type OAuthProvider } from "@/server/integrations/providers";
 
 const STATE_TTL_MS = 10 * 60_000; // DEC-017: ≤10 min
 
@@ -34,7 +34,8 @@ export async function accessToken(conn: IntegrationConnection): Promise<string> 
   const expiresAt = conn.tokenExpiresAt?.getTime();
   // Google access tokens live an hour: refresh just before, not 3 days ahead (that would refresh on every call).
   const ahead = conn.provider === "GOOGLE" || conn.provider === "GOOGLE_BUSINESS" ? 5 * 60_000 : REFRESH_AHEAD_MS;
-  if (!expiresAt || expiresAt - Date.now() > ahead) return creds.accessToken;
+  // Shopify Admin tokens don't expire and have no refresh.
+  if (!expiresAt || expiresAt - Date.now() > ahead || conn.provider === "SHOPIFY") return creds.accessToken;
   const adapter = PROVIDERS[conn.provider];
   const cfg = providerConfig(conn.provider);
   const expired = expiresAt <= Date.now();
@@ -66,12 +67,12 @@ export async function refreshExpiringTokens() {
   for (const c of soon) await accessToken(c).catch(() => {});
 }
 
+/** OAuth providers sign in through the platform; Shopify is connected with a pasted Admin API token ("token"). */
 export function listProviders() {
-  return (Object.keys(PROVIDERS) as IntegrationProvider[]).map((p) => ({
-    provider: p,
-    label: PROVIDERS[p].label,
-    configured: providerConfig(p) !== null,
-  }));
+  return [
+    ...(Object.keys(PROVIDERS) as OAuthProvider[]).map((p) => ({ provider: p, label: PROVIDERS[p].label, configured: providerConfig(p) !== null, kind: "oauth" as const })),
+    { provider: "SHOPIFY" as const, label: "Shopify", configured: true, kind: "token" as const },
+  ];
 }
 
 export const toConnectionDto = (c: IntegrationConnection) => ({
@@ -95,7 +96,7 @@ export async function startConnect(input: {
   workspaceId: string;
   brandId: string;
   userId: string;
-  provider: IntegrationProvider;
+  provider: OAuthProvider;
   /** "mobile": the callback sends the code back to the app instead of connecting (see the callback route). */
   client?: "web" | "mobile";
 }) {
@@ -119,7 +120,7 @@ export async function startConnect(input: {
  * mid-flow must not still connect.
  */
 export async function completeConnect(input: {
-  provider: IntegrationProvider;
+  provider: OAuthProvider;
   state: string;
   code: string;
   userId: string;
@@ -149,10 +150,19 @@ export async function completeConnect(input: {
   if (!cfg) throw new ConnectionError("Provider keys were removed during connect");
   const accounts = await PROVIDERS[input.provider].exchange({ code: input.code, ...cfg });
 
+  const saved = await saveConnections({ workspaceId: st.workspaceId, brandId: st.brandId, provider: input.provider, userId: input.userId, accounts });
+  return { workspaceId: st.workspaceId, brandId: st.brandId, connections: saved };
+}
+
+/**
+ * Save connected accounts (tokens encrypted; a reconnect replaces them in place) and the `integration.connected`
+ * audit event in one transaction. Used by the OAuth callback and by Shopify's token connect.
+ */
+export async function saveConnections(input: { workspaceId: string; brandId: string; provider: IntegrationProvider; userId: string; accounts: ConnectedAccount[] }) {
   const keyVersion = currentKeyVersion();
-  const saved = await prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     const rows = [];
-    for (const a of accounts) {
+    for (const a of input.accounts) {
       const data = {
         displayName: a.displayName,
         scopes: a.scopes,
@@ -167,20 +177,20 @@ export async function completeConnect(input: {
         await tx.integrationConnection.upsert({
           where: {
             brandId_provider_externalAccountId: {
-              brandId: st.brandId,
+              brandId: input.brandId,
               provider: input.provider,
               externalAccountId: a.externalAccountId,
             },
           },
-          create: { ...data, workspaceId: st.workspaceId, brandId: st.brandId, provider: input.provider, externalAccountId: a.externalAccountId },
+          create: { ...data, workspaceId: input.workspaceId, brandId: input.brandId, provider: input.provider, externalAccountId: a.externalAccountId },
           update: data, // reconnect refreshes tokens in place
         }),
       );
     }
     await tx.auditEvent.create({
       data: {
-        workspaceId: st.workspaceId,
-        brandId: st.brandId,
+        workspaceId: input.workspaceId,
+        brandId: input.brandId,
         actorUserId: input.userId,
         action: "integration.connected",
         entityType: "IntegrationConnection",
@@ -190,7 +200,6 @@ export async function completeConnect(input: {
     });
     return rows;
   });
-  return { workspaceId: st.workspaceId, brandId: st.brandId, connections: saved };
 }
 
 /**
@@ -199,7 +208,7 @@ export async function completeConnect(input: {
  * same success, not "already used". Only the same user, the same state, within 2 minutes, and it
  * never issues or touches tokens. Waits briefly in case the first request is still exchanging.
  */
-async function replayedConnect(stateHash: string, input: { provider: IntegrationProvider; userId: string }) {
+async function replayedConnect(stateHash: string, input: { provider: OAuthProvider; userId: string }) {
   const st = await prisma.oAuthStateTransaction.findUnique({ where: { stateHash } });
   if (!st?.consumedAt || st.userId !== input.userId || st.provider !== input.provider) return null;
   if (Date.now() - st.consumedAt.getTime() > 2 * 60_000) return null;

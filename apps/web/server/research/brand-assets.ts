@@ -84,7 +84,7 @@ export async function shopifyProducts(origin: string, signal?: AbortSignal): Pro
 }
 
 /** Ask Shopify's CDN for a 1200px rendition instead of the 4000px original. */
-function shopifySized(src: string) {
+export function shopifySized(src: string) {
   try {
     const u = new URL(src, "https://cdn.shopify.com");
     if (u.hostname === "cdn.shopify.com" || u.pathname.includes("/cdn/shop/")) u.searchParams.set("width", "1200");
