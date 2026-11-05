@@ -11,7 +11,7 @@ import { Card } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, tint } from "@/ui/posts/controls";
-import { STATUS_KEY, isLockedIn } from "@/ui/posts/sample";
+import { STATUS_KEY, isLockedIn } from "@/ui/posts/format";
 import { coverSource, coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
 import { usePermissions } from "@/ui/use-permissions";
 

@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import { color, radius, space, type } from "@/theme/tokens";
-import { STATUS_KEY, isLockedIn, time24, type Post } from "@/ui/posts/sample";
+import { STATUS_KEY, isLockedIn, time24, type Post } from "@/ui/posts/format";
 
 /** Neutral surfaces used inside cards (Figma #FAFAFA / #F5F5F5 / #F0EFF4 fills). */
 export const tint = { well: "#FAFAFA", hair: "#F5F5F5", badge: "#F0EFF4", segBg: "#EFECF5", segRule: "#DED9E6" } as const;

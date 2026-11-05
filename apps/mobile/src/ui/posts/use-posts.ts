@@ -1,7 +1,7 @@
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useSyncExternalStore } from "react";
 import { posts, type PostItem } from "@/api/endpoints";
-import type { Post } from "@/ui/posts/sample";
+import type { Post } from "@/ui/posts/format";
 import { openReel } from "@/ui/reels/use-reel";
 
 /**

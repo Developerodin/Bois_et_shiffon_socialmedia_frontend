@@ -265,6 +265,13 @@
     "noPillars": "No posts planned for this month yet.",
     "started": "Planning your next 30 days. The first drafts appear on the calendar in a few minutes, ready for you to approve; the rest follow as they're written.",
     "generating": "Starting...",
+    "done_one": "Planned {{count}} post. Its draft appears on the calendar once it's written, ready for you to approve.",
+    "done_other": "Planned {{count}} posts. Drafts appear on the calendar as they're written, ready for you to approve.",
+    "unscheduled_one": "{{count}} had no free slot in the next 30 days.",
+    "unscheduled_other": "{{count}} had no free slot in the next 30 days.",
+    "failed": "Planning didn't finish.",
+    "refunded": "{{n}} credits refunded.",
+    "tryAgain": "Try again",
     "cost": "Costs {{n}} credits."
   }
 }

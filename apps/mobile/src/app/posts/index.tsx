@@ -8,7 +8,7 @@ import { Button } from "@/ui/button";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge } from "@/ui/posts/controls";
-import { CHANNEL_LABEL, STATUS_KEY, isLockedIn, relativeSlot, upcomingThisWeek } from "@/ui/posts/sample";
+import { CHANNEL_LABEL, STATUS_KEY, isLockedIn, relativeSlot, upcomingThisWeek } from "@/ui/posts/format";
 import { coverSource, coverUrl, openPost, usePosts } from "@/ui/posts/use-posts";
 import { usePlan } from "@/ui/plans/use-plan";
 import { useEffect } from "react";

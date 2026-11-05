@@ -1,17 +1,17 @@
 import { router } from "expo-router";
 import { Layers, ShieldCheck, Sofa, Store } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { ApiError } from "@/api/client";
-import { posts } from "@/api/endpoints";
+import { posts, type RunStatus } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Card } from "@/ui/layout";
 import { formatDate, formatNumber } from "@/i18n";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, CardTitle, SegmentedTabs, tint } from "@/ui/posts/controls";
-import { dayKey } from "@/ui/posts/sample";
+import { dayKey } from "@/ui/posts/format";
 import { usePosts } from "@/ui/posts/use-posts";
 import { openLowCredits } from "@/ui/recovery/open";
 import { isPlanRequired } from "@/ui/plans/use-plan";
@@ -21,6 +21,7 @@ const SECTION_HREF = { business: "/business", billing: "/business/billing" } as 
 const PILLAR_ICONS = [Sofa, Layers, Store];
 // The Planner run "Generate calendar" starts (apps/web CREDIT_COSTS.manualRun).
 const GENERATE_CREDITS = 5;
+const POLL_MS = 5000;
 
 const sparkles = require("../../../assets/figma/posts/btn-sparkles-white.svg");
 
@@ -43,7 +44,39 @@ export default function Planner() {
   const months = cycles(now);
   const [cycle, setCycle] = useState(months[0]);
   const [busy, setBusy] = useState(false);
-  const [started, setStarted] = useState(false);
+  // The started Planner run, polled until it's done: then the calendar is reloaded and the outcome shown.
+  const [run, setRun] = useState<{ id: string; status: RunStatus; planned?: number; unscheduled?: number; reason?: string | null } | null>(null);
+  const started = run !== null;
+  const runId = run?.id;
+  useEffect(() => {
+    if (!runId) return;
+    const ctrl = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const poll = () =>
+      posts.plannerRun(runId, ctrl.signal).then(
+        ({ run: r }) => {
+          if (r.status === "SUCCEEDED" || r.status === "FAILED") {
+            setRun({ id: r.id, status: r.status, planned: r.output?.planned, unscheduled: r.output?.unscheduled, reason: r.reason });
+            void reload();
+          } else timer = setTimeout(poll, POLL_MS);
+        },
+        // A failed read is a hiccup: keep the "planning" message and ask again a little later.
+        () => {
+          if (!ctrl.signal.aborted) timer = setTimeout(poll, POLL_MS * 2);
+        },
+      );
+    timer = setTimeout(poll, POLL_MS);
+    return () => {
+      ctrl.abort();
+      clearTimeout(timer);
+    };
+  }, [runId, reload]);
+  const outcome =
+    run?.status === "SUCCEEDED"
+      ? [t("planner.done", { count: run.planned ?? 0 }), run.unscheduled ? t("planner.unscheduled", { count: run.unscheduled }) : ""].filter(Boolean).join(" ")
+      : run?.status === "FAILED"
+        ? [run.reason ?? t("planner.failed"), t("planner.refunded", { n: GENERATE_CREDITS })].join(" ")
+        : t("planner.started");
   const [error, setError] = useState<string | null>(null);
   const options = months.map((value) => ({ value, label: formatDate(`${value}-01T12:00:00Z`, { month: "long", year: "numeric", timeZone: "UTC" }) }));
 
@@ -64,8 +97,8 @@ export default function Planner() {
     setBusy(true);
     setError(null);
     try {
-      await posts.generate();
-      setStarted(true);
+      const { run: r } = await posts.generate();
+      setRun({ id: r.id, status: r.status as RunStatus });
     } catch (e) {
       if (isPlanRequired(e)) router.push("/plans/posts");
       else if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: GENERATE_CREDITS, title: t("planner.generate"), backdrop: t("planner.title") });
@@ -160,9 +193,10 @@ export default function Planner() {
       {started ? (
         <View style={{ gap: space[8], marginTop: space[16] }}>
           <Text style={[type.body, { textAlign: "center" }]} accessibilityLiveRegion="polite">
-            {t("planner.started")}
+            {outcome}
           </Text>
           <Button label={t("today.viewCalendar")} variant="outline" onPress={() => router.navigate("/posts/calendar")} />
+          {run?.status === "FAILED" ? <Button label={t("planner.tryAgain")} variant="outline" onPress={() => setRun(null)} /> : null}
         </View>
       ) : (
         <Button label={busy ? t("planner.generating") : t("planner.generate")} icon={sparkles} disabled={busy} style={{ marginTop: space[16] }} onPress={() => void generate()} />

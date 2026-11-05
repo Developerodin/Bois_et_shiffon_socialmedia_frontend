@@ -418,6 +418,14 @@ export const posts = {
     const { ws, base } = await reelBase();
     return api<{ run: { id: string; status: string } }>(`${base}/agents/planner/runs`, { body: { input: { chain: true } }, workspaceId: ws });
   },
+  /** The "Generate calendar" run: SUCCEEDED carries how many posts were planned; FAILED may carry a reason written for the person. */
+  async plannerRun(id: string, signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<{ run: { id: string; status: RunStatus; output: { planned?: number; unscheduled?: number } | null; reason: string | null } }>(
+      `${base}/agents/planner/runs?id=${encodeURIComponent(id)}`,
+      { workspaceId: ws, signal },
+    );
+  },
   /** P06: a new post from a product photo; the writer drafts it now and the check follows (about a minute). */
   async create(input: { channel: "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL"; goal: "newArrival" | "productFeature" | "specialOffer"; product: { title: string; photoKey: string }; direction?: string }) {
     const { ws, base } = await reelBase();

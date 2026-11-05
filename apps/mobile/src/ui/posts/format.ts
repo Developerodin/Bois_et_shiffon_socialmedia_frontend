@@ -1,11 +1,8 @@
 import type { PostChannel as ApiChannel, PostStatus as ApiStatus } from "@/api/endpoints";
 import i18n, { formatDate } from "@/i18n";
 
-/**
- * Posts module helpers: statuses, channels and dates (read in the phone's timezone). The constants below
- * (POSTS, POST_COPY) are still sample data, for the Stories screens, which have no backend channel yet.
- */
-// Stories have no backend channel yet: they stay sample data on P04/P08.
+/** Posts module helpers: statuses, channels and dates (read in the phone's timezone). */
+// INSTAGRAM_STORY is the design's story channel; the server has none yet (P07 Stories is "coming soon").
 export type PostChannel = ApiChannel | "INSTAGRAM_STORY";
 export type PostStatus = ApiStatus;
 
@@ -19,111 +16,12 @@ export type Post = {
   image?: number /* require() */ | { uri: string; cacheKey?: string };
 };
 
-const TV = require("../../../assets/figma/posts/bunting-tv-unit.jpg");
-const DINING = require("../../../assets/figma/onboarding/bunting-dining-room.png");
-
 /**
  * Days and times read in the phone's timezone, which is what the person picks a slot in (as on the reels R09 screen).
  * ponytail: a brand has no timezone field yet; store one on the brand if teams post from other timezones.
  */
 export const BUSINESS_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 export const BUSINESS_TZ_LABEL = BUSINESS_TZ.replace(/_/g, " ").replace("/", " / ");
-
-export const POSTS: Post[] = [
-  {
-    id: "meuble-tv-bunting",
-    title: "Meuble TV 2 portes Acacia Bunting",
-    channel: "INSTAGRAM_POST",
-    status: "AWAITING_APPROVAL",
-    scheduledFor: null,
-    caption:
-      "« Sublimez votre salon avec le meuble TV 2 portes de la collection Acacia Bunting. L'authenticité brute du bois d'acacia massif alliée à des lignes contemporaines pensées pour durer. Découvrez la collection sur notre boutique. »\n\n#boisetchiffons #meubletv #acaciabunting #decorationinterieur",
-    image: TV,
-  },
-  {
-    id: "acacia-craft",
-    title: "Atelier · Acacia craft",
-    channel: "INSTAGRAM_POST",
-    status: "PUBLISHED",
-    scheduledFor: "2026-10-09T18:00:00+02:00",
-    caption: "« Le geste de l'artisan, du bois brut à la pièce finie. »",
-    image: DINING,
-  },
-  {
-    id: "bunting-living",
-    title: "Bunting living room",
-    channel: "INSTAGRAM_CAROUSEL",
-    status: "PUBLISHED",
-    scheduledFor: "2026-10-16T18:00:00+02:00",
-    caption: "« Un salon tout en acacia massif. »",
-    image: TV,
-  },
-  {
-    id: "bunting-tv-launch",
-    title: "Bunting collection · Meuble TV",
-    channel: "INSTAGRAM_POST",
-    status: "SCHEDULED",
-    scheduledFor: "2026-10-26T18:00:00+01:00",
-    caption: "« Élégance épurée et acacia massif pour votre salon. »",
-    image: TV,
-  },
-  {
-    id: "table-bunting",
-    title: "Table à manger 240cm Bunting",
-    channel: "INSTAGRAM_POST",
-    status: "DRAFT_REVIEW",
-    scheduledFor: "2026-10-26T20:00:00+01:00",
-    caption: "« Sublimez votre intérieur avec l'authenticité du bois d'acacia massif. »\n\n#boisetchiffons #acaciabunting #tableamanger",
-    image: DINING,
-  },
-  {
-    id: "collection-detail",
-    title: "Collection detail",
-    channel: "INSTAGRAM_CAROUSEL",
-    status: "SCHEDULED",
-    scheduledFor: "2026-10-27T10:30:00+01:00",
-    caption: "« Les détails qui font la différence. »",
-    image: DINING,
-  },
-  {
-    id: "atelier-story",
-    title: "Atelier story",
-    channel: "INSTAGRAM_STORY",
-    status: "DRAFT_REVIEW",
-    scheduledFor: "2026-10-30T18:00:00+01:00",
-    caption: "« Dans les coulisses de l'atelier. »",
-    image: DINING,
-  },
-  {
-    id: "story-bunting-collection",
-    title: "New Bunting collection",
-    channel: "INSTAGRAM_STORY",
-    status: "DRAFT_REVIEW",
-    scheduledFor: null,
-    caption: "« Retrouvez la table Bunting en acacia massif sur notre boutique officielle. »",
-    image: DINING,
-  },
-  {
-    id: "story-meuble-tv",
-    title: "Meuble TV Acacia",
-    channel: "INSTAGRAM_STORY",
-    status: "DRAFT_REVIEW",
-    scheduledFor: null,
-    caption: "« Le meuble TV Bunting, en acacia massif. »",
-    image: TV,
-  },
-];
-
-/**
- * Presentational copy the design shows around a post that the pipeline doesn't model yet
- * (story overlay text, the product line under a highlight). Keyed by post id.
- */
-export const POST_COPY: Record<string, { collection?: string; product?: string; format?: string; kicker?: string; headline?: string; tagline?: string }> = {
-  "meuble-tv-bunting": { collection: "Bunting collection", product: "Meuble TV 2 portes · Acacia massif", format: "1 photo · Story & Feed" },
-  "story-bunting-collection": { kicker: "COLLECTION BUNTING", headline: "L'acacia, tout naturellement.", tagline: "L'artisanat français" },
-  "story-meuble-tv": { kicker: "COLLECTION BUNTING", headline: "Le meuble TV, en acacia massif.", tagline: "Design contemporain" },
-  "atelier-story": { kicker: "L'ATELIER", headline: "Fait main, en France.", tagline: "Dans les coulisses" },
-};
 
 /** Translation keys (posts namespace) for each status: t(STATUS_KEY[post.status]). */
 export const STATUS_KEY: Record<PostStatus, string> = {
@@ -151,8 +49,6 @@ export const CHANNEL_LABEL: Record<PostChannel, string> = {
 
 /** A slot is locked in once the post is scheduled or out; everything before is still a draft. */
 export const isLockedIn = (s: PostStatus) => s === "SCHEDULED" || s === "PUBLISHED" || s === "REVIEWED";
-
-export const getPost = (id: string | string[] | undefined) => POSTS.find((p) => p.id === id);
 
 // ── dates, always read in the business timezone ──────────────────────────────
 

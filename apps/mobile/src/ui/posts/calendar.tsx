@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { color, radius, space, type } from "@/theme/tokens";
-import { longDay, monthYear, weekday, weekdayHeads } from "@/ui/posts/sample";
+import { longDay, monthYear, weekday, weekdayHeads } from "@/ui/posts/format";
 
 const key = (y: number, m: number, d: number) => `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 const daysIn = (y: number, m: number) => new Date(Date.UTC(y, m, 0)).getUTCDate();

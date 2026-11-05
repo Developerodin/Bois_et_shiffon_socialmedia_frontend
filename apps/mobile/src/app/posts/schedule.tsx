@@ -11,7 +11,7 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { MonthCalendar } from "@/ui/posts/calendar";
 import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { CardTitle, Pill, tint } from "@/ui/posts/controls";
-import { BUSINESS_TZ_LABEL, dayKey, shortDate, time24, ymd } from "@/ui/posts/sample";
+import { BUSINESS_TZ_LABEL, dayKey, shortDate, time24, ymd } from "@/ui/posts/format";
 import { coverSource, reloadPosts, usePost } from "@/ui/posts/use-posts";
 import { openReel } from "@/ui/reels/use-reel";
 

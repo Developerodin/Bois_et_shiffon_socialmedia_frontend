@@ -9,7 +9,7 @@ import { color, space, type } from "@/theme/tokens";
 import { MonthCalendar } from "@/ui/posts/calendar";
 import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/posts/chrome";
 import { PostRow, SegmentedTabs } from "@/ui/posts/controls";
-import { dayKey, isLockedIn, longDay, monthYear, postsOnDay, ymd } from "@/ui/posts/sample";
+import { dayKey, isLockedIn, longDay, monthYear, postsOnDay, ymd } from "@/ui/posts/format";
 import { asPost, openPost, usePosts } from "@/ui/posts/use-posts";
 
 const VIEWS = ["month", "list"] as const;
