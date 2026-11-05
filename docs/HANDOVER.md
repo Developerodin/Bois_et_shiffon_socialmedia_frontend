@@ -58,11 +58,10 @@ Next steps on it, in order:
    with a note); web `e2e/product-gate.spec.ts` in Chrome; on the emulator the phone showed the issue, the
    prefilled note and "Suggest another product", and "Ask for changes" made the Creator swap to an in-stock sibling
    chair with its own price and photo, after which Schedule was enabled.
-   Not checked live: scheduling and publish-time refusals (covered by tests; no connected account), the 50 h
-   unconfirmed state on real data. `e2e/product-gate.spec.ts` needs a seeded post: the seed/unseed helpers live
-   in the git-ignored `apps/web/scripts/_tmp/` (copy `run-products.ts`'s setup if they're gone).
-   Left as is: the mobile status pill reads "Draft" on a post awaiting approval; "Connect a Instagram account"
-   wording in the release panel (both older than this work). New strings are English only.
+   Also checked live: stock confirmed 60 h ago shows "hasn't been confirmed for over two days" and refuses
+   scheduling of an approved post. Publish-time refusal is covered by tests only (no connected account).
+   `e2e/product-gate.spec.ts` needs a seeded post: the seed/unseed helpers live in the git-ignored
+   `apps/web/scripts/_tmp/` (copy `run-products.ts`'s setup if they're gone). New strings are English only.
 2. Test Shopify Admin live: a custom app with `read_products` + `read_inventory` on a real store, connect on the web
    Connections page, Sync now. The query cost and throttle handling follow Shopify's documented rules but have
    never met a real store.
