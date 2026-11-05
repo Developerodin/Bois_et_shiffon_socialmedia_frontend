@@ -12,7 +12,7 @@ import { Card } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, tint } from "@/ui/posts/controls";
-import { STATUS_KEY, isLockedIn } from "@/ui/posts/format";
+import { STATUS_KEY } from "@/ui/posts/format";
 import { coverSource, coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
 import { usePermissions } from "@/ui/use-permissions";
 
@@ -145,7 +145,7 @@ export default function PostDetail() {
         <PageHeader
           title={t("detail.title")}
           right={
-            <Badge style={{ borderColor: "#E5E5E5" }}>{isLockedIn(post.status) ? t(STATUS_KEY[post.status]) : t("status.draft")}</Badge>
+            <Badge style={{ borderColor: "#E5E5E5" }}>{t(STATUS_KEY[post.status])}</Badge>
           }
         />
       }

@@ -280,7 +280,7 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
   if (!accounts.length) {
     return (
       <p className="text-sm">
-        Approved. Connect a {name} account to publish it.{" "}
+        Approved. Connect an account for {name} to publish it.{" "}
         <Link href="/settings?tab=connections" className="font-medium underline underline-offset-2">Open Connections</Link>
       </p>
     );
