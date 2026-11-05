@@ -116,7 +116,13 @@
     "cancelSchedule": "Annulla programmazione",
     "cancelling": "Annullamento...",
     "noPermission": "Deve programmarlo qualcuno con i permessi di approvazione e pubblicazione in questo spazio di lavoro.",
-    "productIssues": "Verifica prodotto",
+    "issues": "Problemi",
+    "campaignKind": {
+      "offer": "Offerta",
+      "campaign": "Campagna",
+      "priority": "Priorità"
+    },
+    "withdrawn": "ritirato",
     "askNote": "Cosa bisogna cambiare",
     "noteNeeded": "Indica cosa bisogna cambiare.",
     "suggestProduct": "Suggerisci un altro prodotto",

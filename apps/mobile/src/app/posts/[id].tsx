@@ -5,7 +5,7 @@ import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Camera, Check, Pencil } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { postRelease, posts, type PostChannel, type PostRelease } from "@/api/endpoints";
+import { postRelease, posts, type PostCampaign, type PostChannel, type PostRelease } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { Card } from "@/ui/layout";
@@ -28,6 +28,15 @@ const CHANNEL_NAME: Record<PostChannel, string> = {
   PINTEREST_PIN: "detail.pinterest",
   THREADS_POST: "detail.threads",
 };
+
+/** "Offer: Black Friday · -20 % · 2026-11-27 08:00 – 2026-11-30 20:00 (Paris)", "Priority: Oak dining". Times are the brand's, numeric. */
+function campaignLine(c: PostCampaign, t: (key: string) => string) {
+  const head = `${t(`detail.campaignKind.${c.kind}`)}: ${c.name}`;
+  if (c.withdrawn) return `${head} (${t("detail.withdrawn")})`;
+  const zone = c.timeZone.split("/").pop()!.replace(/_/g, " ");
+  const parts = [c.discountPercent ? `-${c.discountPercent} %` : null, c.code, c.ends ? `${c.starts} – ${c.ends} (${zone})` : null];
+  return [head, ...parts.filter(Boolean)].join(" · ");
+}
 
 /** P03 · Posts / Post detail: the 4:5 visual, its caption and where it will publish. */
 export default function PostDetail() {
@@ -103,7 +112,7 @@ export default function PostDetail() {
   // The live publish attempt: a scheduled one can be cancelled; an uncertain one (CHECK) needs the person to look.
   const scheduled = release?.attempts.find((a) => a.status === "SCHEDULED");
   const uncertain = release?.attempts.find((a) => a.status === "PENDING_VERIFY");
-  // Product issues (sold out, removed, a changed price) on a post that is waiting, approved or scheduled. A refusing
+  // Issues (a product sold out, removed or repriced; the offer ended or changed) on a post that is waiting, approved or scheduled. A refusing
   // one blocks Schedule; approvers can send it back here ("Approve anyway" is a web action).
   const issues = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED"].includes(post.status) ? (release?.productIssues ?? []) : [];
   const refused = issues.some((i) => i.refuses);
@@ -209,24 +218,33 @@ export default function PostDetail() {
           </View>
         </Card>
       ) : null}
+      {release?.campaign ? (
+        <Card style={{ marginTop: space[12] }}>
+          <Text style={type.body}>{campaignLine(release.campaign, t)}</Text>
+        </Card>
+      ) : null}
       {issues.length ? (
         <Card style={{ marginTop: space[12], gap: space[8] }}>
-          <Text style={styles.eyebrow}>{t("detail.productIssues")}</Text>
+          <Text style={styles.eyebrow}>{t("detail.issues")}</Text>
           {issues.map((i) => (
-            <Text key={i.productId + i.kind + i.message} style={[type.body, i.refuses && { color: color.error }]}>
+            <Text key={(i.productId ?? i.campaignId) + i.kind + i.message} style={[type.body, i.refuses && { color: color.error }]}>
               {i.message}
             </Text>
           ))}
           {canAsk ? (
             <>
               <Field label={t("detail.askNote")} multiline value={note} onChangeText={setAskNote} maxLength={2000} error={askError} />
-              <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: switchProducts }} onPress={() => setSwitchPick(!switchProducts)} style={[styles.row8, { minHeight: 44 }]}>
-                <View style={[styles.box, switchProducts && { backgroundColor: color.primary, borderColor: color.primary }]}>
-                  {switchProducts ? <Check size={14} color={color.onPrimary} strokeWidth={2.5} /> : null}
-                </View>
-                <Text style={type.body}>{t("detail.suggestProduct")}</Text>
-              </Pressable>
-              {!switchProducts && unavailable ? <Text style={type.meta}>{t("detail.productStays")}</Text> : null}
+              {issues.some((i) => i.kind !== "offer") ? (
+                <>
+                  <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: switchProducts }} onPress={() => setSwitchPick(!switchProducts)} style={[styles.row8, { minHeight: 44 }]}>
+                    <View style={[styles.box, switchProducts && { backgroundColor: color.primary, borderColor: color.primary }]}>
+                      {switchProducts ? <Check size={14} color={color.onPrimary} strokeWidth={2.5} /> : null}
+                    </View>
+                    <Text style={type.body}>{t("detail.suggestProduct")}</Text>
+                  </Pressable>
+                  {!switchProducts && unavailable ? <Text style={type.meta}>{t("detail.productStays")}</Text> : null}
+                </>
+              ) : null}
               <Button label={asking ? t("detail.sending") : t("detail.askChanges")} variant="outline" height={44} disabled={asking} onPress={() => void askChanges()} />
             </>
           ) : null}

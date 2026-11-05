@@ -192,6 +192,7 @@ model Brand {
   invitations   Invitation[]
   photoShoots   PhotoShoot[]
   products      Product[]
+  campaigns     Campaign[]
 
   // target for composite tenant FKs (AT-021): children reference (id, workspaceId)
   @@unique([id, workspaceId])
@@ -223,6 +224,8 @@ model BrandProfile {
   automations  Json?
   /// Last product catalogue sync: { at, source, count, error } (server/catalog/sync.ts)
   catalogSync  Json?
+  /// IANA zone every campaign time is entered and shown in (server/content/offer-checks.ts zonedInstant/wallTime)
+  timeZone     String?
   voiceSummary String?
   pillars      Json?
   locales      Json?
@@ -835,6 +838,9 @@ model ContentItem {
   // MANUAL product leaves a dangling id that the checks read as "no longer in the catalogue". Join table if posts
   // need querying by product at scale.
   productIds    String[]       @default([])
+  // Campaign the post was planned for (Planner, createPost); never changed after. ponytail: not in the version body
+  // because nothing changes it after planning; move it there like productIds when an "unlink" control comes.
+  campaignId    String?
   studio        Boolean        @default(false) // made in the mobile Reels studio: the writing agents leave it alone
   postUrl       String? // posted by hand after a download; the link the person pasted back
   createdAt     DateTime       @default(now())
@@ -842,6 +848,7 @@ model ContentItem {
 
   brand        Brand                @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
   opportunity  Opportunity?         @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  campaign     Campaign?            @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   versions     ContentVersion[]
   decisions    ApprovalDecision[]
   publications PublicationAttempt[]
@@ -849,6 +856,7 @@ model ContentItem {
 
   @@index([workspaceId, brandId, status])
   @@index([brandId, scheduledFor])
+  @@index([campaignId])
 }
 
 enum ReelRenderStep {
@@ -1028,6 +1036,34 @@ model Product {
 
   @@unique([brandId, source, externalId])
   @@index([workspaceId, brandId])
+}
+
+/**
+ * A commercial push set by the commercial owner (brief B7): an offer (has `offer`, needs `endsAt`), a dated campaign
+ * (`endsAt`, no `offer`) or a standing priority (no `endsAt`). Times are instants entered in the brand's timeZone;
+ * the window is half-open (startsAt <= t < endsAt). Archived, never deleted (posts and audit keep reading it).
+ * ponytail: one offer per campaign; two discounts in one sale are two campaigns.
+ */
+model Campaign {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  brandId         String
+  name            String
+  startsAt        DateTime
+  endsAt          DateTime?
+  productIds      String[]  @default([]) // catalogue link ids as posts store them; empty + no categories = whole catalogue
+  categories      String[]  @default([]) // Product.category values, matched exactly
+  offer           String? // what customers get and its conditions, as the team writes it
+  discountPercent Int?
+  code            String?
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  brand Brand         @relation(fields: [brandId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  items ContentItem[]
+
+  @@index([brandId, endsAt])
 }
 
 /**

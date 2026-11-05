@@ -116,7 +116,13 @@
     "cancelSchedule": "Annuller planlægning",
     "cancelling": "Annullerer...",
     "noPermission": "En person med godkendelses- og udgivelsesrettigheder i dette arbejdsområde skal planlægge det.",
-    "productIssues": "Produkttjek",
+    "issues": "Problemer",
+    "campaignKind": {
+      "offer": "Tilbud",
+      "campaign": "Kampagne",
+      "priority": "Prioritet"
+    },
+    "withdrawn": "trukket tilbage",
     "askNote": "Hvad skal ændres?",
     "noteNeeded": "Beskriv, hvad der skal ændres.",
     "suggestProduct": "Foreslå et andet produkt",

@@ -116,7 +116,13 @@
     "cancelSchedule": "Anulează programarea",
     "cancelling": "Se anulează...",
     "noPermission": "Cineva cu drepturi de aprobare și publicare în acest spațiu de lucru trebuie să programeze postarea.",
-    "productIssues": "Verificarea produsului",
+    "issues": "Probleme",
+    "campaignKind": {
+      "offer": "Ofertă",
+      "campaign": "Campanie",
+      "priority": "Prioritate"
+    },
+    "withdrawn": "retrasă",
     "askNote": "Ce trebuie schimbat",
     "noteNeeded": "Spune ce trebuie schimbat.",
     "suggestProduct": "Sugerează alt produs",

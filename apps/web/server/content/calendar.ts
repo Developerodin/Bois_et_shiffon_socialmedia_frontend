@@ -17,16 +17,21 @@ export const WEEKDAYS_BY_CHANNEL: Record<ContentChannel, number[]> = {
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
 
-/** Next free day for `channel` on/after `from` (UTC dates), within `horizonDays`. Null if none. */
-export function nextSlot(channel: ContentChannel, from: Date, taken: Set<string>, horizonDays = 30): Date | null {
+/**
+ * Next free day for `channel` on/after `from` (UTC dates), within `horizonDays`. Null if none.
+ * `until` (a dated campaign's window): any weekday, the slot is the later of 09:00 UTC and `from`, and before `until`.
+ */
+export function nextSlot(channel: ContentChannel, from: Date, taken: Set<string>, horizonDays = 30, until?: Date): Date | null {
   const start = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate()));
   for (let i = 0; i <= horizonDays; i++) {
     const d = new Date(start.getTime() + i * 86_400_000);
-    if (!WEEKDAYS_BY_CHANNEL[channel].includes(d.getUTCDay())) continue;
+    if (!until && !WEEKDAYS_BY_CHANNEL[channel].includes(d.getUTCDay())) continue;
+    const slot = new Date(Math.max(d.getTime() + 9 * 3_600_000, until ? from.getTime() : 0)); // 09:00 UTC (~10:00–11:00 in France)
+    if (until && slot >= until) return null;
     const key = `${channel}:${dayKey(d)}`;
     if (taken.has(key)) continue;
     taken.add(key);
-    return new Date(d.getTime() + 9 * 3_600_000); // 09:00 UTC (~10:00–11:00 in France)
+    return slot;
   }
   return null;
 }

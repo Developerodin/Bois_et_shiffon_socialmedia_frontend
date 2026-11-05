@@ -116,7 +116,13 @@
     "cancelSchedule": "Planung abbrechen",
     "cancelling": "Wird abgebrochen...",
     "noPermission": "Jemand mit Freigabe- und Veröffentlichungsrechten in diesem Arbeitsbereich muss es einplanen.",
-    "productIssues": "Produktprüfung",
+    "issues": "Probleme",
+    "campaignKind": {
+      "offer": "Angebot",
+      "campaign": "Kampagne",
+      "priority": "Priorität"
+    },
+    "withdrawn": "zurückgezogen",
     "askNote": "Was soll geändert werden?",
     "noteNeeded": "Gib an, was geändert werden soll.",
     "suggestProduct": "Anderes Produkt vorschlagen",

@@ -499,10 +499,14 @@ export type PostRelease = {
   /** Pinterest boards per account; null = couldn't load them. */
   boards: Record<string, { id: string; name: string }[] | null>;
   attempts: { id: string; status: string; account: string; runAt: string; publishedAt: string | null; externalUrl: string | null; error: string | null }[];
-  /** Linked products that stop (refuses) or warn about this post: sold out, removed, a price that changed. */
+  /** What stops (refuses) or warns about this post: a linked product sold out, removed or repriced; its offer ended or changed. */
   productIssues: ProductIssue[];
+  /** The campaign the post was planned for; times are brand wall-clock strings ("2026-11-30 20:00"), ends null = ongoing. */
+  campaign: PostCampaign | null;
 };
-export type ProductIssue = { productId: string; name: string; kind: "availability" | "price"; message: string; refuses: boolean };
+/** overridable: an approver may approve past it on the web ("Approve anyway"). state: the offer's (ended / withdrawn / changed / early) or the product's stock. */
+export type ProductIssue = { productId?: string; campaignId?: string; name?: string; kind: "availability" | "price" | "offer"; state?: string; message: string; refuses: boolean; overridable: boolean };
+export type PostCampaign = { kind: "offer" | "campaign" | "priority"; name: string; offer: string | null; discountPercent: number | null; code: string | null; starts: string; ends: string | null; timeZone: string; withdrawn: boolean };
 export async function postRelease(id: string, signal?: AbortSignal) {
   const { ws, base } = await reelBase();
   return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { workspaceId: ws, signal });

@@ -24,6 +24,13 @@ describe("permission catalog + system roles", () => {
     expect(role("viewer").has("content.create")).toBe(false);
   });
 
+  it("Commercial owner holds commercial.manage and READ only; Approver and Manager don't (brief B7)", () => {
+    expect([...role("commercial-owner")].sort()).toEqual(["agents.read", "analytics.read", "brand.read", "commercial.manage"]);
+    expect(role("approver").has("commercial.manage")).toBe(false);
+    expect(role("manager").has("commercial.manage")).toBe(false);
+    expect(role("project-admin").has("commercial.manage")).toBe(true);
+  });
+
   it("project roles hold only project permissions; Member reaches no project by itself", () => {
     for (const r of SYSTEM_ROLES.filter((r) => r.scope === "PROJECT")) {
       for (const p of r.permissions) expect(permissionScope(p)).toBe("PROJECT");

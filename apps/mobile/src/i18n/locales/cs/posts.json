@@ -116,7 +116,13 @@
     "cancelSchedule": "Zrušit naplánování",
     "cancelling": "Ruší se...",
     "noPermission": "Naplánovat to může jen někdo, kdo má v tomto pracovním prostoru práva ke schvalování a zveřejňování.",
-    "productIssues": "Kontrola produktu",
+    "issues": "Problémy",
+    "campaignKind": {
+      "offer": "Nabídka",
+      "campaign": "Kampaň",
+      "priority": "Priorita"
+    },
+    "withdrawn": "staženo",
     "askNote": "Co je potřeba změnit",
     "noteNeeded": "Napiš, co je potřeba změnit.",
     "suggestProduct": "Navrhnout jiný produkt",

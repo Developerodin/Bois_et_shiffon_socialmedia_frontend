@@ -116,7 +116,13 @@
     "cancelSchedule": "Cancelar agendamento",
     "cancelling": "A cancelar...",
     "noPermission": "Uma pessoa com permissões de aprovação e publicação neste espaço de trabalho tem de fazer o agendamento.",
-    "productIssues": "Verificação do produto",
+    "issues": "Problemas",
+    "campaignKind": {
+      "offer": "Oferta",
+      "campaign": "Campanha",
+      "priority": "Prioridade"
+    },
+    "withdrawn": "retirada",
     "askNote": "O que precisa de ser alterado",
     "noteNeeded": "Indica o que precisa de ser alterado.",
     "suggestProduct": "Sugerir outro produto",

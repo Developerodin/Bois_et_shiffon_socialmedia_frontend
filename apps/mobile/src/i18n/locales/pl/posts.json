@@ -116,7 +116,13 @@
     "cancelSchedule": "Anuluj zaplanowaną publikację",
     "cancelling": "Anulowanie...",
     "noPermission": "Publikację musi zaplanować osoba z uprawnieniami do zatwierdzania i publikowania w tej przestrzeni roboczej.",
-    "productIssues": "Sprawdzenie produktu",
+    "issues": "Problemy",
+    "campaignKind": {
+      "offer": "Oferta",
+      "campaign": "Kampania",
+      "priority": "Priorytet"
+    },
+    "withdrawn": "wycofano",
     "askNote": "Co trzeba zmienić",
     "noteNeeded": "Napisz, co trzeba zmienić.",
     "suggestProduct": "Zaproponuj inny produkt",

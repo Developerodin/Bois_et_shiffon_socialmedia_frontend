@@ -116,7 +116,13 @@
     "cancelSchedule": "Planning annuleren",
     "cancelling": "Annuleren...",
     "noPermission": "Iemand met goedkeurings- en publicatierechten in deze werkruimte moet dit inplannen.",
-    "productIssues": "Productcontrole",
+    "issues": "Problemen",
+    "campaignKind": {
+      "offer": "Aanbieding",
+      "campaign": "Campagne",
+      "priority": "Prioriteit"
+    },
+    "withdrawn": "ingetrokken",
     "askNote": "Wat moet er veranderen?",
     "noteNeeded": "Geef aan wat er moet veranderen.",
     "suggestProduct": "Ander product voorstellen",

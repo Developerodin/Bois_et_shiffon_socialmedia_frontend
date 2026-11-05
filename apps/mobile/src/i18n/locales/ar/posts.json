@@ -116,7 +116,13 @@
     "cancelSchedule": "إلغاء الجدولة",
     "cancelling": "جارٍ الإلغاء...",
     "noPermission": "يجب أن يجدوله شخص لديه صلاحيات الموافقة والنشر في مساحة العمل هذه.",
-    "productIssues": "مراجعة المنتج",
+    "issues": "المشكلات",
+    "campaignKind": {
+      "offer": "عرض",
+      "campaign": "حملة",
+      "priority": "أولوية"
+    },
+    "withdrawn": "مسحوب",
     "askNote": "ما الذي يحتاج إلى تعديل",
     "noteNeeded": "اذكر ما يحتاج إلى تعديل.",
     "suggestProduct": "اقتراح منتج آخر",

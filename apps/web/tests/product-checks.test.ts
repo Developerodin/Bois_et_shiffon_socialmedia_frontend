@@ -219,8 +219,8 @@ describe("gateIssues", () => {
     const snapshot: Snapshot = [{ productId: "a1", field: "compareAtPrice", amount: 15 }, { productId: "d1", field: "price", amount: 9 }];
     const override = { productIds: ["a1", "d1"], states: { a1: "gone", d1: "gone" } as const };
     expect(gateIssues([archived, deleted], snapshot, override)).toEqual([
-      { productId: "a1", kind: "availability", message: "Old Lamp is no longer in the catalogue", refuses: false },
-      { productId: "d1", kind: "availability", message: "a removed product is no longer in the catalogue", refuses: false },
+      { productId: "a1", kind: "availability", message: "Old Lamp is no longer in the catalogue", refuses: false, overridable: true },
+      { productId: "d1", kind: "availability", message: "a removed product is no longer in the catalogue", refuses: false, overridable: true },
     ]);
   });
 

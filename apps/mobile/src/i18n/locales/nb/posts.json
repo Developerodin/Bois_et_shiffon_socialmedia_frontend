@@ -116,7 +116,13 @@
     "cancelSchedule": "Avbryt planlagt publisering",
     "cancelling": "Avbryter...",
     "noPermission": "Noen med rettigheter til å godkjenne og publisere i dette arbeidsområdet må planlegge publiseringen.",
-    "productIssues": "Produktsjekk",
+    "issues": "Problemer",
+    "campaignKind": {
+      "offer": "Tilbud",
+      "campaign": "Kampanje",
+      "priority": "Prioritet"
+    },
+    "withdrawn": "trukket tilbake",
     "askNote": "Hva må endres",
     "noteNeeded": "Fortell hva som må endres.",
     "suggestProduct": "Foreslå et annet produkt",

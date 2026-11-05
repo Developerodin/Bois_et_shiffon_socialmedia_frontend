@@ -27,6 +27,7 @@ export const PERMISSIONS = [
   ["publish.execute", "publishing", "Publish or schedule approved content"],
   ["integrations.manage", "publishing", "Connect and disconnect channel accounts"],
   ["analytics.read", "analytics", "See performance, learning notes and reports"],
+  ["commercial.manage", "commercial", "Set product priorities, campaigns and offers"],
 ] as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[number][0];
@@ -75,6 +76,13 @@ export const SYSTEM_ROLES: ReadonlyArray<{
     scope: "PROJECT",
     description: "Reviews posts, brand rules and strategy",
     permissions: [...READ, "context.edit", "context.confirm", "rules.approve", "content.approve"],
+  },
+  {
+    slug: "commercial-owner",
+    name: "Commercial owner",
+    scope: "PROJECT",
+    description: "Sets product priorities, campaigns and offers",
+    permissions: [...READ, "commercial.manage"],
   },
   { slug: "viewer", name: "Viewer", scope: "PROJECT", description: "Read-only access to this project", permissions: READ },
 ];

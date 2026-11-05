@@ -116,7 +116,13 @@
     "cancelSchedule": "Planlamayı iptal et",
     "cancelling": "İptal ediliyor...",
     "noPermission": "Bunu, bu çalışma alanında onaylama ve paylaşma yetkisi olan biri planlamalı.",
-    "productIssues": "Ürün kontrolü",
+    "issues": "Sorunlar",
+    "campaignKind": {
+      "offer": "Teklif",
+      "campaign": "Kampanya",
+      "priority": "Öncelik"
+    },
+    "withdrawn": "Geri çekildi",
     "askNote": "Neler değişmeli?",
     "noteNeeded": "Nelerin değişmesi gerektiğini belirt.",
     "suggestProduct": "Başka bir ürün öner",

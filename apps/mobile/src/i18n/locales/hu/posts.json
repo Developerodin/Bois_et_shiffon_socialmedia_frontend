@@ -116,7 +116,13 @@
     "cancelSchedule": "Ütemezés törlése",
     "cancelling": "Törlés...",
     "noPermission": "A munkaterületen jóváhagyási és közzétételi jogosultsággal rendelkező személynek kell ütemeznie.",
-    "productIssues": "Termék ellenőrzése",
+    "issues": "Problémák",
+    "campaignKind": {
+      "offer": "Ajánlat",
+      "campaign": "Kampány",
+      "priority": "Prioritás"
+    },
+    "withdrawn": "visszavonva",
     "askNote": "Min kell változtatni?",
     "noteNeeded": "Írd le, min kell változtatni.",
     "suggestProduct": "Másik termék javaslata",

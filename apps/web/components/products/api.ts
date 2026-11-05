@@ -9,6 +9,7 @@ export type Source = "WEBSITE" | "SHOPIFY" | "MANUAL";
 export type Product = {
   id: string;
   source: Source;
+  externalId: string | null;
   sku: string | null;
   title: string;
   url: string | null;
@@ -67,3 +68,35 @@ export function thumbUrl(url: string, px: number) {
     return url;
   }
 }
+
+/** A campaign as GET …/campaigns returns it (server/catalog/campaigns.ts toCampaignDto); `starts`/`ends` are brand wall-clock times. */
+export type CampaignKind = "offer" | "campaign" | "priority";
+export type Campaign = {
+  id: string;
+  kind: CampaignKind;
+  name: string;
+  startsAt: string;
+  endsAt: string | null;
+  starts: string;
+  ends: string | null;
+  productIds: string[];
+  categories: string[];
+  offer: string | null;
+  discountPercent: number | null;
+  code: string | null;
+  /** Posts awaiting approval, approved or scheduled that link it: an edit that narrows it, or withdrawing it, holds them. */
+  affectedPosts: { id: string; title: string; status: string; scheduledFor: string | null }[];
+};
+/** What the form sends: times as `YYYY-MM-DDTHH:mm` in the brand timezone. */
+export type CampaignBody = Pick<Campaign, "name" | "productIds" | "categories" | "offer" | "discountPercent" | "code"> & { startsAt: string; endsAt: string | null };
+
+const campaigns = (w: string, b: string) => `/api/v1/workspaces/${encodeURIComponent(w)}/brands/${encodeURIComponent(b)}/campaigns`;
+export const campaignsApi = {
+  /** `timeZone` null: not set yet (the first save asks for it). */
+  list: (w: string, b: string) => request<{ timeZone: string | null; campaigns: Campaign[] }>(campaigns(w, b)),
+  create: (w: string, b: string, body: CampaignBody) => request<{ campaign: Campaign }>(campaigns(w, b), json("POST", body)),
+  update: (w: string, b: string, id: string, body: CampaignBody) => request<{ campaign: Campaign }>(`${campaigns(w, b)}/${encodeURIComponent(id)}`, json("PATCH", body)),
+  /** Withdraw (archive); returns the posts it holds. */
+  withdraw: (w: string, b: string, id: string) => request<{ campaign: Campaign }>(`${campaigns(w, b)}/${encodeURIComponent(id)}`, { method: "DELETE" }),
+  setTimeZone: (w: string, b: string, timeZone: string) => request<{ timeZone: string }>(`${campaigns(w, b)}/time-zone`, json("PUT", { timeZone })),
+};

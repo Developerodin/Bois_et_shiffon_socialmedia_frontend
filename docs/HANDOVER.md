@@ -62,10 +62,28 @@ Next steps on it, in order:
    scheduling of an approved post. Publish-time refusal is covered by tests only (no connected account).
    `e2e/product-gate.spec.ts` needs a seeded post: the seed/unseed helpers live in the git-ignored
    `apps/web/scripts/_tmp/` (copy `run-products.ts`'s setup if they're gone). New strings are English only.
-2. Test Shopify Admin live: a custom app with `read_products` + `read_inventory` on a real store, connect on the web
+2. **Done (2026-11-05): offers, campaigns and priorities** — brief A7 (rest), B2/B6 "expired offer", B7 commercial
+   owner. Plan: `docs/superpowers/specs/2026-11-05-offers-campaigns-design.md` (fifth draft: adversarial review +
+   two 4-lens reviews). One `Campaign` table: offer (has terms, needs an end), dated campaign, standing priority (no
+   end). Times have hours and follow `BrandProfile.timeZone` (`zonedInstant`/`wallTime` in
+   `server/content/offer-checks.ts`: a spring-forward gap time is refused, a fall-back overlap takes the first one).
+   New `commercial.manage` permission + "Commercial owner" role. Planner gives each campaign/priority up to 2 posts
+   per 30 days (inside a dated campaign's window); Brief/Creator/Quality/Scout get the campaign facts; Quality checks
+   every discount % in the text against the linked offer or a compare-at price. The gate holds a post when its offer
+   ended (overridable with "Approve anyway"), was withdrawn, changed terms or products, or would go out before it
+   starts (all three: ask for changes). Web: "Campaigns and offers" on /products (timezone control, affected-posts
+   warning on edit/withdraw); posts show a campaign line and the offer issues (web and phone).
+   Checked: tsc + full vitest; 4-lens code review (2 medium, 7 low, all fixed); real run on Bois & Chiffons with the
+   real AI (-20 % flash sale + code → draft → Quality pass → offer really ended → approve refused → approve anyway;
+   terms changed to -15 % → refused, not overridable).
+   **Not yet checked:** the web campaigns screen in a browser (`e2e/campaigns.spec.ts` was being written when the
+   session ended — run it, or check by hand) and the phone's post screen with an offer. Known limits: "réduction de
+   30 %" is always read as a discount; a standing priority starting later today can get a 09:00 UTC post a few hours
+   early. Seed helpers for e2e live in the git-ignored `apps/web/scripts/_tmp/`.
+3. Test Shopify Admin live: a custom app with `read_products` + `read_inventory` on a real store, connect on the web
    Connections page, Sync now. The query cost and throttle handling follow Shopify's documented rules but have
    never met a real store.
-3. Offers, campaigns and priorities (the rest of the brief's commercial context); CSV import.
+4. CSV import of products.
 
 **Brief gap audit:** `docs/handover/2026-11-05-brief-gap-audit.md` lists every acceptance criterion of the B&C
 functional brief against the code (built, partial or missing). Use it to pick the base work.

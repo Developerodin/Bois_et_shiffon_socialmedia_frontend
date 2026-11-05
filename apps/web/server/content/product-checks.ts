@@ -33,8 +33,11 @@ export const snapshotOf = (results: unknown): PriceEntry[] =>
 export type PriceEntry = z.infer<typeof PriceEntry>;
 export type Snapshot = PriceEntry[];
 
-/** `ApprovalDecision.productOverride`: the products approved anyway and the state each was in then. */
-export const ProductOverride = z.object({ productIds: z.array(z.string()), states: z.record(z.string(), z.enum(BAD_STATES)) });
+/**
+ * `ApprovalDecision.productOverride`: the products approved anyway and the state each was in then, and `offers`, the
+ * campaign ids whose offer had ended (server/content/offer-checks.ts `offerIssues`).
+ */
+export const ProductOverride = z.object({ productIds: z.array(z.string()), states: z.record(z.string(), z.enum(BAD_STATES)), offers: z.array(z.string()).optional() });
 export type ProductOverride = z.infer<typeof ProductOverride>;
 
 /**
@@ -51,8 +54,8 @@ export type ProductCheckResult = {
   amount?: number;
 };
 
-/** A gate issue. `refuses`: approval, scheduling and publishing stop on it. */
-export type GateIssue = { productId: string; kind: "availability" | "price"; message: string; refuses: boolean };
+/** A product gate issue. `refuses`: approval, scheduling and publishing stop on it; `overridable`: "Approve anyway" can cover it. */
+export type GateIssue = { productId: string; kind: "availability" | "price"; message: string; refuses: boolean; overridable: boolean };
 
 const STALE_MS = 50 * 3_600_000; // two missed daily syncs
 /** The name of a gone link whose row was deleted (MANUAL rows are hard-deleted). */
@@ -242,15 +245,15 @@ export function gateIssues(linked: LinkedProduct[], snapshot: Snapshot, override
     if (!isBad(link.state)) continue;
     const recorded = override?.productIds.includes(link.id) ? override.states[link.id] : undefined;
     const covered = recorded !== undefined && BAD_STATES.indexOf(recorded) >= BAD_STATES.indexOf(link.state);
-    issues.push({ productId: link.id, kind: "availability", message: AVAILABILITY[link.state](link.name), refuses: !covered });
+    issues.push({ productId: link.id, kind: "availability", message: AVAILABILITY[link.state](link.name), refuses: !covered, overridable: true });
   }
   const byId = new Map(linked.map((l) => [l.id, l]));
   for (const entry of snapshot) {
     const link = byId.get(entry.productId);
     if (!link?.row) continue; // unlinked, or gone (its availability issue stands for it)
     const verdict = stillPriced(link.group, entry.field, entry.amount);
-    if (verdict === "no") issues.push({ productId: link.id, kind: "price", message: noLongerPriced(link, entry), refuses: true });
-    else if (verdict === "unknown") issues.push({ productId: link.id, kind: "price", message: `Price of ${link.name} unknown`, refuses: false });
+    if (verdict === "no") issues.push({ productId: link.id, kind: "price", message: noLongerPriced(link, entry), refuses: true, overridable: false });
+    else if (verdict === "unknown") issues.push({ productId: link.id, kind: "price", message: `Price of ${link.name} unknown`, refuses: false, overridable: false });
   }
   return issues;
 }

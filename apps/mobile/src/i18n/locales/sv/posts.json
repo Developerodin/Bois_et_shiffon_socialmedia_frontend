@@ -116,7 +116,13 @@
     "cancelSchedule": "Avbryt schemaläggning",
     "cancelling": "Avbryter...",
     "noPermission": "Någon med behörighet att godkänna och publicera i den här arbetsytan måste schemalägga det.",
-    "productIssues": "Produktkontroll",
+    "issues": "Problem",
+    "campaignKind": {
+      "offer": "Erbjudande",
+      "campaign": "Kampanj",
+      "priority": "Prioritet"
+    },
+    "withdrawn": "tillbakadragen",
     "askNote": "Vad behöver ändras?",
     "noteNeeded": "Ange vad som behöver ändras.",
     "suggestProduct": "Föreslå en annan produkt",
