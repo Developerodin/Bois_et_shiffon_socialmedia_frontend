@@ -21,7 +21,8 @@ type Attempt = {
   error: string | null;
   by: string;
 };
-type Decision = { id: string; verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null; by: string; at: string; current: boolean; version: number | null };
+type Decision = { id: string; verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null; by: string; at: string; current: boolean; version: number | null; override: string[] | null };
+type ProductIssue = { productId: string; name: string; kind: "availability" | "price"; message: string; refuses: boolean };
 type Release = {
   latestVersion: number | null;
   approvalValid: boolean;
@@ -30,6 +31,7 @@ type Release = {
   boards?: Record<string, { id: string; name: string }[] | null>;
   decisions: Decision[];
   attempts: Attempt[];
+  productIssues: ProductIssue[];
 };
 
 const PROVIDER_NAME: Record<string, string> = { META: "Facebook", INSTAGRAM: "Instagram", THREADS: "Threads", PINTEREST: "Pinterest" };
@@ -90,16 +92,44 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
   }
   const canApprove = perms.includes("content.approve");
   const canPublish = perms.includes("publish.execute");
+  // "Approve anyway" past a product issue vouches for product data too (rules.approve).
+  const canOverride = canApprove && perms.includes("rules.approve");
+  const issues = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED"].includes(status) ? data.productIssues : [];
+  const refused = issues.some((i) => i.refuses);
+  const decideProps = { version: version!, issues, canOverride, onDecide: (verdict: Decision["verdict"], note: string, extra: object) => act({ action: "decide", version, verdict, note, ...extra }) };
 
   return (
     <section aria-labelledby="release-h" className="flex flex-col gap-4 rounded-xl border border-border p-4">
       <h2 id="release-h" className="text-sm font-semibold">Approval and publishing</h2>
+      {issues.length > 0 && (
+        <ul aria-label="Product issues" className="flex flex-col gap-1 rounded-lg border border-border p-3 text-sm">
+          {issues.map((i) => (
+            <li key={i.productId + i.kind + i.message} className={cn("flex items-start gap-2", i.refuses ? "text-destructive" : "text-muted-foreground")}>
+              <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+              {i.message}
+              {!i.refuses && i.kind === "availability" && " (approved anyway)"}
+            </li>
+          ))}
+        </ul>
+      )}
       {status === "AWAITING_APPROVAL" && version !== null ? (
         canApprove ? (
-          <ApproveForm version={version} blocked={qualityBlocked} onDecide={(verdict, note) => act({ action: "decide", version, verdict, note })} />
+          <ApproveForm {...decideProps} blocked={qualityBlocked} />
         ) : (
           <p className="text-sm text-muted-foreground">Waiting for a brand approver to sign off draft v{version}.</p>
         )
+      ) : status === "APPROVED" && data.approvalValid && refused ? (
+        canApprove ? (
+          <ApproveForm {...decideProps} blocked={false} approved />
+        ) : (
+          <p className="text-sm text-muted-foreground">A product issue stops this post. An approver needs to look at it.</p>
+        )
+      ) : status === "SCHEDULED" && refused ? (
+        <p className="text-sm text-muted-foreground">
+          {canPublish && data.attempts.some((a) => a.status === "SCHEDULED")
+            ? "Cancel the schedule, then approve anyway or ask for changes."
+            : "A product issue stops this post. An approver or publisher needs to look at it."}
+        </p>
       ) : status === "APPROVED" && data.approvalValid ? (
         canPublish ? (
           <PublishForm base={base} data={data} version={version!} onPublish={(b) => act({ action: "publish", version, ...b })} />
@@ -120,16 +150,25 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
   );
 }
 
-function ApproveForm({ version, blocked, onDecide }: { version: number; blocked: boolean; onDecide: (v: Decision["verdict"], note: string) => Promise<void> }) {
+/** approved: the post is already approved but a product issue now stops it (only "Approve anyway" or "Ask for changes"). */
+function ApproveForm({ version, blocked, issues, canOverride, approved = false, onDecide }: { version: number; blocked: boolean; issues: ProductIssue[]; canOverride: boolean; approved?: boolean; onDecide: (v: Decision["verdict"], note: string, extra: object) => Promise<void> }) {
   const [note, setNote] = useState("");
-  const [pending, setPending] = useState<Decision["verdict"] | null>(null);
+  const [pending, setPending] = useState<Decision["verdict"] | "OVERRIDE" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmReject, setConfirmReject] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
+  const refused = issues.some((i) => i.refuses);
+  const unavailable = issues.some((i) => i.refuses && i.kind === "availability");
+  // A price that's no longer true can't be approved past: only the text can change (decide refuses the override).
+  const wrongPrice = issues.some((i) => i.refuses && i.kind === "price");
+  const overrideShown = canOverride && unavailable && !wrongPrice;
+  // "Suggest another product" starts ticked when a product is unavailable; null = not touched yet.
+  const [switchPick, setSwitchPick] = useState<boolean | null>(null);
+  const switchProducts = switchPick ?? unavailable;
 
-  async function run(verdict: Decision["verdict"]) {
+  async function run(verdict: Decision["verdict"] | "OVERRIDE") {
     if (verdict !== "APPROVED" && !note.trim()) {
-      setError("Write what needs to change, so the team knows what to fix.");
+      setError(verdict === "OVERRIDE" ? "Say why it can go out anyway." : "Write what needs to change, so the team knows what to fix.");
       noteRef.current?.focus();
       return;
     }
@@ -139,8 +178,10 @@ function ApproveForm({ version, blocked, onDecide }: { version: number; blocked:
     setPending(verdict);
     setError(null);
     try {
-      await onDecide(verdict, note);
+      if (verdict === "OVERRIDE") await onDecide("APPROVED", note, { override: true });
+      else await onDecide(verdict, note, verdict === "CHANGES_REQUESTED" && issues.length ? { switchProducts } : {});
       setNote("");
+      setSwitchPick(null);
     } catch (e) {
       setError(errText(e));
     } finally {
@@ -158,21 +199,41 @@ function ApproveForm({ version, blocked, onDecide }: { version: number; blocked:
       </p>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="approval-note" className="text-sm font-medium">
-          Note <span className="font-normal text-muted-foreground">(needed to request changes or reject)</span>
+          Note <span className="font-normal text-muted-foreground">({issues.length ? "needed to approve anyway, ask for changes or reject" : "needed to request changes or reject"})</span>
         </label>
-        <Textarea id="approval-note" ref={noteRef} value={note} onChange={(e) => setNote(e.target.value)} rows={2} aria-invalid={Boolean(error)} aria-describedby={error ? "approval-error" : undefined} />
+        <Textarea id="approval-note" ref={noteRef} value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={overrideShown ? 500 : 2000} aria-invalid={Boolean(error)} aria-describedby={error ? "approval-error" : undefined} />
         {error && <p id="approval-error" role="alert" className="text-sm text-destructive">{error}</p>}
       </div>
+      {issues.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <label className="flex min-h-11 w-fit items-center gap-2 text-sm">
+            <input type="checkbox" checked={switchProducts} onChange={(e) => setSwitchPick(e.target.checked)} className="size-4 accent-primary" />
+            Suggest another product when asking for changes
+          </label>
+          {wrongPrice && <p className="text-xs text-muted-foreground">A price in the text is no longer right: ask for changes to fix it</p>}
+          {!switchProducts && unavailable && <p className="text-xs text-muted-foreground">The product stays linked, so the post will still be refused</p>}
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => run("APPROVED")} disabled={pending !== null || blocked} title={blocked ? "Fix the quality blockers first" : undefined}>
-          <Check aria-hidden /> {pending === "APPROVED" ? "Approving…" : `Approve v${version}`}
-        </Button>
+        {/* With "Approve anyway" on offer, the plain approve (which would be refused) steps aside. */}
+        {!approved && !overrideShown && (
+          <Button onClick={() => run("APPROVED")} disabled={pending !== null || blocked || refused} title={blocked ? "Fix the quality blockers first" : refused ? "A product issue stops this post" : undefined}>
+            <Check aria-hidden /> {pending === "APPROVED" ? "Approving…" : `Approve v${version}`}
+          </Button>
+        )}
+        {overrideShown && (
+          <Button onClick={() => run("OVERRIDE")} disabled={pending !== null || blocked} title="Approve with the product issue; your note is recorded">
+            <Check aria-hidden /> {pending === "OVERRIDE" ? "Approving…" : "Approve anyway"}
+          </Button>
+        )}
         <Button variant="outline" onClick={() => run("CHANGES_REQUESTED")} disabled={pending !== null}>
-          <Undo2 aria-hidden /> {pending === "CHANGES_REQUESTED" ? "Sending…" : "Request changes"}
+          <Undo2 aria-hidden /> {pending === "CHANGES_REQUESTED" ? "Sending…" : issues.length ? "Ask for changes" : "Request changes"}
         </Button>
-        <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => run("REJECTED")} disabled={pending !== null}>
-          <X aria-hidden /> {pending === "REJECTED" ? "Rejecting…" : confirmReject ? "Confirm: reject this post" : "Reject"}
-        </Button>
+        {!approved && (
+          <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={() => run("REJECTED")} disabled={pending !== null}>
+            <X aria-hidden /> {pending === "REJECTED" ? "Rejecting…" : confirmReject ? "Confirm: reject this post" : "Reject"}
+          </Button>
+        )}
         {confirmReject && pending === null && (
           <Button variant="ghost" onClick={() => setConfirmReject(false)}>
             Keep it
@@ -425,6 +486,7 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
             <li key={key} className="flex flex-col gap-0.5 py-2.5 text-sm">
               <span>
                 <span className="font-medium">{d.by}</span> {VERDICT[d.verdict]} {d.version ? `v${d.version}` : "an earlier draft"}
+                {d.override && ` anyway: ${d.override.join(", ")}`}
                 <span className="text-muted-foreground"> · {when(d.at)}</span>
                 {d.verdict === "APPROVED" && !d.current && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">no longer valid</span>}
               </span>

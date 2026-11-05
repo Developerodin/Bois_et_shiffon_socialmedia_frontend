@@ -278,6 +278,7 @@
     "openPage": "Open product page",
     "factsTitle": "Product facts",
     "factsHint": "The writers and the quality check use these. Syncing never changes them.",
+    "factsLocked": "The writers and the quality check use these. Only people who can approve product claims can change them.",
     "save": "Save facts",
     "saving": "Saving…",
     "saved": "Saved"

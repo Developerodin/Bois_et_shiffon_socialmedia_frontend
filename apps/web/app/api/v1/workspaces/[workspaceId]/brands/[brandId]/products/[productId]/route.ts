@@ -1,6 +1,7 @@
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
-import { PERSON_FIELDS, ProductInput, productData, toProductDto } from "@/server/catalog/products";
+import { PERSON_FIELDS, ProductInput, cannotVouch, productData, toProductDto, vouchedChanges, vouchedIn } from "@/server/catalog/products";
+import { effectivePermissions } from "@/server/auth/permissions";
 import { prisma } from "@/server/db/prisma";
 
 type Params = BrandRouteParams & { productId: string };
@@ -21,7 +22,10 @@ export async function GET(request: Request, context: { params: Promise<Params> }
   }
 }
 
-/** Edit a product. Synced rows take only the person-owned fields (the sync owns the rest); MANUAL rows take any. */
+/**
+ * Edit a product. Synced rows take only the person-owned fields (the sync owns the rest); MANUAL rows take any.
+ * Stock, prices and facts need rules.approve (VOUCHED_FIELDS), and the audit records their before and after.
+ */
 export async function PATCH(request: Request, context: { params: Promise<Params> }) {
   try {
     const scope = await authorizeBrandRoute(request, context.params, "context.edit");
@@ -32,17 +36,23 @@ export async function PATCH(request: Request, context: { params: Promise<Params>
     const fields = Object.keys(body.data);
     if (!fields.length) return invalid();
     const where = { id: productId, workspaceId: scope.workspaceId, brandId: scope.brandId };
-    const current = await prisma.product.findFirst({ where, select: { source: true } });
+    const current = await prisma.product.findFirst({ where, omit: { description: true } });
     if (!current) return notFound();
     if (current.source !== "MANUAL" && fields.some((f) => !(PERSON_FIELDS as readonly string[]).includes(f))) {
       return invalid("This product comes from your store, so only materials, dimensions and certifications can be edited here.");
     }
+    const vouched = vouchedIn(body.data);
+    if (vouched.length && !(await effectivePermissions(scope.workspaceId, scope.userId, scope.brandId)).has("rules.approve")) return cannotVouch();
     await prisma.product.updateMany({ where, data: productData(body.data) });
-    await prisma.auditEvent.create({
-      data: { workspaceId: scope.workspaceId, brandId: scope.brandId, actorUserId: scope.userId, action: "product.updated", entityType: "Product", entityId: productId, metadata: { fields } },
-    });
     const product = await prisma.product.findFirst({ where });
-    return product ? Response.json({ product: toProductDto(product) }) : notFound();
+    if (!product) return notFound();
+    await prisma.auditEvent.create({
+      data: {
+        workspaceId: scope.workspaceId, brandId: scope.brandId, actorUserId: scope.userId, action: "product.updated", entityType: "Product", entityId: productId,
+        metadata: { fields, ...(vouched.length && { changes: vouchedChanges(vouched, current, product) }) },
+      },
+    });
+    return Response.json({ product: toProductDto(product) });
   } catch (error) {
     return fromAccessError(error);
   }

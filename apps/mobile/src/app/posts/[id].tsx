@@ -2,11 +2,12 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { Camera, Pencil } from "lucide-react-native";
+import { Camera, Check, Pencil } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { postRelease, posts, type PostChannel, type PostRelease } from "@/api/endpoints";
 import { Button } from "@/ui/button";
+import { Field } from "@/ui/field";
 import { Card } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, PageHeader, PostsScreen } from "@/ui/posts/chrome";
@@ -51,6 +52,10 @@ export default function PostDetail() {
   const [fixing, setFixing] = useState<number | null>(null);
   const [fixError, setFixError] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
+  // "Ask for changes" on a product issue: null = not touched yet (prefilled from the issues / the default below).
+  const [askNote, setAskNote] = useState<string | null>(null);
+  const [switchPick, setSwitchPick] = useState<boolean | null>(null);
+  const [askError, setAskError] = useState<string | null>(null);
   // Being written (BRIEF_READY), sent back for a rewrite, or waiting for its check: re-read every 5 s so the new
   // draft shows up on its own, for up to 3 minutes (a writer that never starts mustn't poll forever).
   const working =
@@ -98,6 +103,29 @@ export default function PostDetail() {
   // The live publish attempt: a scheduled one can be cancelled; an uncertain one (CHECK) needs the person to look.
   const scheduled = release?.attempts.find((a) => a.status === "SCHEDULED");
   const uncertain = release?.attempts.find((a) => a.status === "PENDING_VERIFY");
+  // Product issues (sold out, removed, a changed price) on a post that is waiting, approved or scheduled. A refusing
+  // one blocks Schedule; approvers can send it back here ("Approve anyway" is a web action).
+  const issues = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED"].includes(post.status) ? (release?.productIssues ?? []) : [];
+  const refused = issues.some((i) => i.refuses);
+  const canAsk = issues.length > 0 && (post.status === "AWAITING_APPROVAL" || post.status === "APPROVED") && can("content.approve");
+  const note = askNote ?? issues.map((i) => i.message).join("\n");
+  const unavailable = issues.some((i) => i.refuses && i.kind === "availability");
+  const switchProducts = switchPick ?? unavailable;
+  const askChanges = async () => {
+    if (!note.trim()) return setAskError(t("detail.noteNeeded"));
+    setAskError(null);
+    setAsking(true);
+    try {
+      setRelease(await posts.sendBack(post.id, post.latest?.version ?? 0, note.trim(), switchProducts));
+      setAskNote(null);
+      setSwitchPick(null);
+      await reloadPosts();
+    } catch (e) {
+      setAskError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setAsking(false);
+    }
+  };
   const settle = async (attemptId: string, action: "cancel" | "posted" | "not-posted") => {
     setSettling(true);
     setFixError(null);
@@ -181,6 +209,29 @@ export default function PostDetail() {
           </View>
         </Card>
       ) : null}
+      {issues.length ? (
+        <Card style={{ marginTop: space[12], gap: space[8] }}>
+          <Text style={styles.eyebrow}>{t("detail.productIssues")}</Text>
+          {issues.map((i) => (
+            <Text key={i.productId + i.kind + i.message} style={[type.body, i.refuses && { color: color.error }]}>
+              {i.message}
+            </Text>
+          ))}
+          {canAsk ? (
+            <>
+              <Field label={t("detail.askNote")} multiline value={note} onChangeText={setAskNote} maxLength={2000} error={askError} />
+              <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: switchProducts }} onPress={() => setSwitchPick(!switchProducts)} style={[styles.row8, { minHeight: 44 }]}>
+                <View style={[styles.box, switchProducts && { backgroundColor: color.primary, borderColor: color.primary }]}>
+                  {switchProducts ? <Check size={14} color={color.onPrimary} strokeWidth={2.5} /> : null}
+                </View>
+                <Text style={type.body}>{t("detail.suggestProduct")}</Text>
+              </Pressable>
+              {!switchProducts && unavailable ? <Text style={type.meta}>{t("detail.productStays")}</Text> : null}
+              <Button label={asking ? t("detail.sending") : t("detail.askChanges")} variant="outline" height={44} disabled={asking} onPress={() => void askChanges()} />
+            </>
+          ) : null}
+        </Card>
+      ) : null}
       {fixError && !blocked ? <Text style={[type.meta, { color: color.error, paddingTop: space[12] }]}>{fixError}</Text> : null}
       {working ? (
         <View style={{ paddingTop: space[16], gap: space[8] }}>
@@ -208,10 +259,14 @@ export default function PostDetail() {
       ) : (
         <View style={styles.actions}>
           <Button label={t("detail.editPost")} variant="outline" icon={editIcon} style={{ flex: 1 }} onPress={edit} />
-          <Button label={t("detail.schedule")} icon={scheduleIcon} style={{ flex: 1 }} disabled={!ready || !allowed} onPress={() => router.push({ pathname: "/posts/schedule", params: { id: post.id } })} />
+          <Button label={t("detail.schedule")} icon={scheduleIcon} style={{ flex: 1 }} disabled={!ready || !allowed || refused} onPress={() => router.push({ pathname: "/posts/schedule", params: { id: post.id } })} />
         </View>
       )}
-      {ready && !allowed ? <Text style={[type.meta, { paddingTop: space[8] }]}>{t("detail.noPermission")}</Text> : null}
+      {ready && refused ? (
+        <Text style={[type.meta, { paddingTop: space[8] }]}>{t(can("content.approve") ? "detail.nextAskChanges" : "detail.approverNeeded")}</Text>
+      ) : ready && !allowed ? (
+        <Text style={[type.meta, { paddingTop: space[8] }]}>{t("detail.noPermission")}</Text>
+      ) : null}
     </PostsScreen>
   );
 }
@@ -258,5 +313,6 @@ const styles = StyleSheet.create({
     borderColor: tint.hair,
     borderRadius: radius.control,
   },
+  box: { width: 20, height: 20, alignItems: "center", justifyContent: "center", borderRadius: 4, borderWidth: 1.5, borderColor: color.controlOutline },
   actions: { flexDirection: "row", alignItems: "center", gap: space[8], paddingTop: space[20] },
 });

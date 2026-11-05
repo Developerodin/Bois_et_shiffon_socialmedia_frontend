@@ -115,7 +115,16 @@
     "notPosted": "It isn't",
     "cancelSchedule": "Cancel schedule",
     "cancelling": "Cancelling...",
-    "noPermission": "Someone with approval and publishing rights in this workspace has to schedule it."
+    "noPermission": "Someone with approval and publishing rights in this workspace has to schedule it.",
+    "productIssues": "Product check",
+    "askNote": "What needs to change",
+    "noteNeeded": "Say what needs to change.",
+    "suggestProduct": "Suggest another product",
+    "productStays": "The product stays linked, so the post will still be refused",
+    "askChanges": "Ask for changes",
+    "sending": "Sending...",
+    "nextAskChanges": "Ask for changes",
+    "approverNeeded": "An approver needs to look at this"
   },
   "edit": {
     "title": "Edit post",

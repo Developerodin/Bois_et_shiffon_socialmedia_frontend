@@ -476,10 +476,11 @@ export const posts = {
     const { ws, base } = await reelBase();
     return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "rewrite", version }, workspaceId: ws });
   },
-  /** "Re-generate": sends the draft back to the writer with what to change; it rewrites it now. */
-  async sendBack(id: string, version: number, note: string) {
+  /** "Re-generate" / "Ask for changes": sends the draft back to the writer with what to change; it rewrites it now.
+   * switchProducts: the writer may link another product instead (a product issue). */
+  async sendBack(id: string, version: number, note: string, switchProducts?: boolean) {
     const { ws, base } = await reelBase();
-    return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "decide", version, verdict: "CHANGES_REQUESTED", note }, workspaceId: ws });
+    return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "decide", version, verdict: "CHANGES_REQUESTED", note, switchProducts }, workspaceId: ws });
   },
 };
 
@@ -498,7 +499,10 @@ export type PostRelease = {
   /** Pinterest boards per account; null = couldn't load them. */
   boards: Record<string, { id: string; name: string }[] | null>;
   attempts: { id: string; status: string; account: string; runAt: string; publishedAt: string | null; externalUrl: string | null; error: string | null }[];
+  /** Linked products that stop (refuses) or warn about this post: sold out, removed, a price that changed. */
+  productIssues: ProductIssue[];
 };
+export type ProductIssue = { productId: string; name: string; kind: "availability" | "price"; message: string; refuses: boolean };
 export async function postRelease(id: string, signal?: AbortSignal) {
   const { ws, base } = await reelBase();
   return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { workspaceId: ws, signal });

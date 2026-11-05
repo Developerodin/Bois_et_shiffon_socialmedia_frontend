@@ -12,6 +12,7 @@ import { ago, priceLabel, stockLabel, thumbUrl } from "@/ui/business/products";
 import { Field } from "@/ui/field";
 import { ActionButton, ICON, bodyMuted, meta } from "@/ui/reels/kit";
 import { useCurrentBrand } from "@/ui/use-current-brand";
+import { usePermissions } from "@/ui/use-permissions";
 
 const FACTS = ["materials", "dimensions", "certifications"] as const;
 const blank = (s: string) => (s.trim() ? s.trim() : null);
@@ -26,6 +27,8 @@ export default function ProductDetail() {
   const brand = useCurrentBrand();
   const ws = brand?.workspaceId;
   const brandId = brand?.id;
+  // Facts decide whether the quality check accepts a product claim: only rules.approve holders may change them.
+  const canVouch = usePermissions().can("rules.approve");
   const [product, setProduct] = useState<FullProduct | null>(null);
   const [facts, setFacts] = useState<Record<(typeof FACTS)[number], string>>({ materials: "", dimensions: "", certifications: "" });
   const [state, setState] = useState<"idle" | "saving" | "saved">("idle");
@@ -112,7 +115,7 @@ export default function ProductDetail() {
           </SettingsCard>
 
           <Text style={[strong14, { paddingTop: space[20] }]}>{t("products.factsTitle")}</Text>
-          <Text style={[meta, { paddingTop: space[4], paddingBottom: space[12] }]}>{t("products.factsHint")}</Text>
+          <Text style={[meta, { paddingTop: space[4], paddingBottom: space[12] }]}>{t(canVouch ? "products.factsHint" : "products.factsLocked")}</Text>
           <View style={{ gap: space[12] }}>
             {FACTS.map((k) => (
               <Field
@@ -125,6 +128,7 @@ export default function ProductDetail() {
                 }}
                 placeholder={t(`products.placeholders.${k}`)}
                 maxLength={1000}
+                editable={canVouch}
                 multiline
               />
             ))}
@@ -132,7 +136,7 @@ export default function ProductDetail() {
           {error ? <Text style={[meta, { color: color.error, paddingTop: space[12] }]}>{error}</Text> : null}
           <ActionButton
             label={state === "saving" ? t("products.saving") : state === "saved" && !changed ? t("products.saved") : t("products.save")}
-            disabled={!changed || state === "saving"}
+            disabled={!canVouch || !changed || state === "saving"}
             style={{ marginTop: space[16] }}
             onPress={() => void save()}
           />

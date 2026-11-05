@@ -39,8 +39,30 @@ it, test it on the emulator, fix it, commit it.
 
 **Product catalogue (brief A7) is in** (2026-11-05, spec `docs/superpowers/specs/2026-11-05-product-catalogue-design.md`).
 Next steps on it, in order:
-1. Feed products into the Brief, Creator and Quality agents (product facts in briefs; Quality checks claims against
-   them; an unavailable product blocks approval) — gap audit B1, B2, B6.
+1. **Done (2026-11-05): products in briefs, drafts, checks, approval and publishing** — gap audit B1, B2, B6.
+   Plan: `docs/superpowers/specs/2026-11-05-products-in-content-design.md` (ninth draft, after an adversarial
+   review and seven review → fix rounds). Posts link products at the brief stage (`ContentItem.productIds`, then
+   the version body's `productIds`); app posts link the product of their photo. Products are judged per product
+   group (same `/products/<handle>`). Quality adds stock and price rows; the price snapshot is the `kind:"price"`
+   rows in `QualityCheck.results` (`productRows` writes, `snapshotOf` reads). One gate (`productGate` in
+   `publishing.ts`) refuses approval, scheduling and publishing when a linked product is gone / out / unconfirmed
+   (synced stock older than 50 h) or a recorded price changed. "Approve anyway" (needs `content.approve` +
+   `rules.approve`, note ≤ 500) covers stock only, never prices. "Ask for changes" + "Suggest another product"
+   (web and phone) makes the Creator swap to an in-stock product. Typed stock, prices and facts need
+   `rules.approve` (Managers lose fact editing).
+   Code: `server/catalog/linked.ts`, `server/content/product-checks.ts`, the Brief/Creator/Quality agents
+   (prompt version 8), `server/content/knowledge.ts`, `publishing.ts`, the content and products routes,
+   `release-panel.tsx`, `products-board.tsx`, mobile `posts/[id].tsx` and `business/product/[id].tsx`.
+   Checked: 4-lens code review (2 medium, 8 low, all fixed); real runs on Bois & Chiffons with the real AI (post
+   linked to Chaise "Julia" → draft with its price → Quality pass → sold out → approve refused → approve anyway
+   with a note); web `e2e/product-gate.spec.ts` in Chrome; on the emulator the phone showed the issue, the
+   prefilled note and "Suggest another product", and "Ask for changes" made the Creator swap to an in-stock sibling
+   chair with its own price and photo, after which Schedule was enabled.
+   Not checked live: scheduling and publish-time refusals (covered by tests; no connected account), the 50 h
+   unconfirmed state on real data. `e2e/product-gate.spec.ts` needs a seeded post: the seed/unseed helpers live
+   in the git-ignored `apps/web/scripts/_tmp/` (copy `run-products.ts`'s setup if they're gone).
+   Left as is: the mobile status pill reads "Draft" on a post awaiting approval; "Connect a Instagram account"
+   wording in the release panel (both older than this work). New strings are English only.
 2. Test Shopify Admin live: a custom app with `read_products` + `read_inventory` on a real store, connect on the web
    Connections page, Sync now. The query cost and throttle handling follow Shopify's documented rules but have
    never met a real store.
