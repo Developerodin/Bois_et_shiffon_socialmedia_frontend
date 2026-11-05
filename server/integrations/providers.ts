@@ -26,6 +26,9 @@ type Adapter = {
 
 export class ProviderError extends Error {}
 
+/** Shopify is connected with a pasted Admin API token (server/catalog/shopify.ts), so it has no OAuth adapter. */
+export type OAuthProvider = Exclude<IntegrationProvider, "SHOPIFY">;
+
 const GRAPH = "https://graph.facebook.com/v23.0";
 const REDDIT_UA = "web:ai-cmo-platform:0.1";
 const qs = (o: Record<string, string>) => new URLSearchParams(o).toString();
@@ -117,7 +120,7 @@ const pinterest: Adapter = {
   },
 };
 
-export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
+export const PROVIDERS: Record<OAuthProvider, Adapter> = {
   PINTEREST: pinterest,
   META: {
     label: "Facebook Pages",
@@ -304,7 +307,7 @@ export const PROVIDERS: Record<IntegrationProvider, Adapter> = {
 };
 
 /** URL slug ↔ enum. Callback paths match the *_REDIRECT_URI values in .env. */
-export const PROVIDER_SLUGS: Record<string, IntegrationProvider> = {
+export const PROVIDER_SLUGS: Record<string, OAuthProvider> = {
   meta: "META",
   instagram: "INSTAGRAM",
   threads: "THREADS",
@@ -316,9 +319,9 @@ export const PROVIDER_SLUGS: Record<string, IntegrationProvider> = {
 export const providerSlug = (p: IntegrationProvider) => p.toLowerCase();
 
 // META_REDIRECT_URI, GOOGLE_BUSINESS_REDIRECT_URI, …: by provider name, since GOOGLE and GOOGLE_BUSINESS share app keys.
-const envPrefix = (p: IntegrationProvider) => p;
+const envPrefix = (p: OAuthProvider) => p;
 
-export function providerConfig(p: IntegrationProvider) {
+export function providerConfig(p: OAuthProvider) {
   const a = PROVIDERS[p];
   const clientId = process.env[a.envId];
   const secret = process.env[a.envSecret];

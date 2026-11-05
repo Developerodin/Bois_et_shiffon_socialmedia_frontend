@@ -13,7 +13,7 @@ async function main() {
   const owner = await prisma.workspaceMember.findFirstOrThrow({ where: { roleRef: { slug: "owner" } } });
   const brand = await prisma.brand.findFirstOrThrow({ where: { workspaceId: owner.workspaceId } });
   const scope = { workspaceId: owner.workspaceId, brandId: brand.id, userId: owner.userId };
-  const configured = listProviders().filter((p) => p.configured).map((p) => p.provider);
+  const configured = listProviders().flatMap((p) => (p.kind === "oauth" && p.configured ? [p.provider] : []));
   console.log("configured providers:", configured.join(", ") || "none");
   const provider = configured[0];
   assert.ok(provider, "need at least one provider with keys in .env");

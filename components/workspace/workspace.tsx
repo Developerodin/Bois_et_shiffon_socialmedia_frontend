@@ -42,6 +42,7 @@ import { NAV } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { readable } from "@/lib/agent-message";
 import { safeHttpUrl } from "@/lib/website";
+import { timeAgo } from "@/lib/time";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
@@ -665,12 +666,6 @@ function ContextPane({
 }
 
 /* ───────────── Centre: home ───────────── */
-
-function timeAgo(iso: string | null | undefined) {
-  if (!iso) return null;
-  const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-  return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`;
-}
 
 /** "No new drafts to check" and friends: the agent ran fine and found no work. Not a failure. */
 const nothingToDo = (a: AgentSummary | undefined) => a?.lastRun?.status === "FAILED" && /^(No |Nothing )/.test(a.lastRun.error ?? "");

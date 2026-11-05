@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { CircleAlert, CircleCheck, Plug, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import {
   errorMessage,
   settingsApi,
   type Connection,
   type Provider,
+  type ProviderInfo,
 } from "@/components/settings/api";
 import {
   ConfirmDialog,
@@ -28,6 +31,7 @@ const PURPOSE: Record<Provider, string> = {
   GOOGLE_BUSINESS: "Read and reply to Google reviews, and post updates to your Google Business Profile.",
   REDDIT: "Find relevant conversations and post approved replies.",
   PINTEREST: "Publish approved Pins to your boards and read saves and clicks.",
+  SHOPIFY: "Sync your products, prices and stock from your Shopify store.",
 };
 
 type Props = {
@@ -44,6 +48,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
   const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Connection | null>(null);
+  const [shopifyOpen, setShopifyOpen] = useState(false);
   const [shown, setShown] = useState(notice);
   // Hide a disconnected account at once; the list refetch from the database can take seconds.
   const [gone, setGone] = useState<Set<string>>(new Set());
@@ -70,7 +75,8 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
     window.history.replaceState(window.history.state, "", url);
   }, [notice]);
 
-  async function connect(provider: Provider) {
+  async function connect({ provider, kind }: ProviderInfo) {
+    if (kind === "token") return setShopifyOpen(true);
     setBusy(provider);
     setError(null);
     try {
@@ -105,7 +111,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                   <Button
                     size="sm"
                     variant={accounts.length ? "outline" : "default"}
-                    onClick={() => connect(p.provider)}
+                    onClick={() => connect(p)}
                     disabled={busy !== null}
                   >
                     {busy === p.provider ? "Opening…" : accounts.length ? "Reconnect" : "Connect"}
@@ -132,13 +138,14 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                   </div>
                   {c.status !== "ACTIVE" && (
                     <p className="basis-full text-xs text-muted-foreground">
-                      {c.lastError ?? "This account's access stopped working."} Posts to it fail until you press Reconnect.
+                      {c.lastError ?? "This account's access stopped working."}
+                      {c.provider === "SHOPIFY" ? "" : " Posts to it fail until you press Reconnect."}
                     </p>
                   )}
                   {canManage && (
                     <div className="flex gap-2">
                       {c.status === "ERROR" && p.configured && (
-                        <Button size="sm" onClick={() => connect(c.provider)} disabled={busy !== null}>
+                        <Button size="sm" onClick={() => connect(p)} disabled={busy !== null}>
                           {busy === c.provider ? "Opening…" : "Reconnect"}
                         </Button>
                       )}
@@ -198,7 +205,11 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
         open={removing !== null}
         onOpenChange={(open) => !open && setRemoving(null)}
         title={`Disconnect ${removing?.displayName ?? ""}?`}
-        description="Agents will stop publishing to and reading from this account, and posts scheduled to it are cancelled (they stay approved, ready to schedule again). You can reconnect any time."
+        description={
+          removing?.provider === "SHOPIFY"
+            ? "Products stop syncing from this store; the next sync reads your website's product feed instead. You can reconnect any time."
+            : "Agents will stop publishing to and reading from this account, and posts scheduled to it are cancelled (they stay approved, ready to schedule again). You can reconnect any time."
+        }
         confirmLabel="Disconnect"
         onConfirm={async () => {
           const c = removing!;
@@ -212,6 +223,85 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
           reload();
         }}
       />
+      {shopifyOpen ? (
+        <ShopifyDialog
+          workspaceId={workspaceId}
+          brandId={brandId}
+          onClose={() => setShopifyOpen(false)}
+          onConnected={(name) => {
+            setShopifyOpen(false);
+            setError(null);
+            setShown({ kind: "ok", text: `Connected ${name}. Its products sync in a minute.`, names: [name] });
+            reload();
+          }}
+        />
+      ) : null}
     </section>
+  );
+}
+
+/** Shopify custom app: the store's .myshopify.com address and its Admin API access token. */
+function ShopifyDialog({
+  workspaceId,
+  brandId,
+  onClose,
+  onConnected,
+}: {
+  workspaceId: string;
+  brandId: string;
+  onClose: () => void;
+  onConnected: (name: string) => void;
+}) {
+  const [shop, setShop] = useState("");
+  const [accessToken, setAccessToken] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      const { connection } = await settingsApi.connectShopify(workspaceId, brandId, { shop, accessToken });
+      onConnected(connection.displayName);
+    } catch (err) {
+      setError(errorMessage(err, "Couldn't connect Shopify."));
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Connect Shopify</DialogTitle>
+          <DialogDescription>
+            In Shopify, go to Settings → Apps → Develop apps, create a custom app with the read_products and
+            read_inventory Admin API scopes, install it, and paste its Admin API access token here.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={submit} className="flex flex-col gap-5">
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">Store address</span>
+            <Input required autoComplete="off" value={shop} onChange={(e) => setShop(e.target.value)} placeholder="your-store.myshopify.com" maxLength={200} />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">Admin API access token</span>
+            <Input required type="password" autoComplete="off" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} placeholder="shpat_…" maxLength={200} />
+          </label>
+          <p aria-live="polite" className="text-sm text-destructive empty:hidden">
+            {error}
+          </p>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={busy}>
+              {busy ? "Checking…" : "Connect"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
