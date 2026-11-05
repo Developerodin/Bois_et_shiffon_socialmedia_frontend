@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { productsApi, stockLabel, thumbUrl, type FullProduct, type Product } from "@/components/products/api";
+import { CampaignsSection } from "@/components/products/campaigns";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { timeAgo } from "@/lib/time";
@@ -27,12 +28,15 @@ function price(p: Product) {
   }
 }
 
-/** `canVouch` (rules.approve): may set stock, prices and product facts; the server refuses them otherwise. */
-type Props = { workspaceId: string; brandId: string; canEdit: boolean; canVouch: boolean };
+/**
+ * `canVouch` (rules.approve): may set stock, prices and product facts; the server refuses them otherwise.
+ * `canManageCommercial` (commercial.manage): may set campaigns, offers and priorities.
+ */
+type Props = { workspaceId: string; brandId: string; canEdit: boolean; canVouch: boolean; canManageCommercial: boolean };
 // ponytail: the whole catalogue loads once and is searched here, 50 rows drawn at a time; page on the server past a few thousand.
 const PAGE = 50;
 
-export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch }: Props) {
+export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canManageCommercial }: Props) {
   const fetcher = useCallback(() => productsApi.list(workspaceId, brandId), [workspaceId, brandId]);
   const { state, reload } = useLoad(fetcher);
   const [editing, setEditing] = useState<FullProduct | "new" | null>(null);
@@ -222,6 +226,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch }: Props
       ) : null}
       <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
       {body}
+      {data ? <CampaignsSection workspaceId={workspaceId} brandId={brandId} products={data.products} canManage={canManageCommercial} /> : null}
       {editing !== null ? (
         <ProductDialog
           workspaceId={workspaceId}

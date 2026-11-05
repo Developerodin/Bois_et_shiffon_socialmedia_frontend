@@ -83,6 +83,7 @@ export const toProductDto = (p: Product) => ({ ...toProductListDto(p), descripti
 export const toProductListDto = (p: Omit<Product, "description">) => ({
   id: p.id,
   source: p.source,
+  externalId: p.externalId,
   sku: p.sku,
   title: p.title,
   url: p.url,

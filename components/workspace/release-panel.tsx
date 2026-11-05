@@ -22,7 +22,10 @@ type Attempt = {
   by: string;
 };
 type Decision = { id: string; verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null; by: string; at: string; current: boolean; version: number | null; override: string[] | null };
-type ProductIssue = { productId: string; name: string; kind: "availability" | "price"; message: string; refuses: boolean };
+/** A gate issue: a linked product (availability, price) or the post's offer. `overridable`: "Approve anyway" can cover it. */
+type ProductIssue = { productId?: string; campaignId?: string; kind: "availability" | "price" | "offer"; message: string; refuses: boolean; overridable: boolean };
+/** The post's campaign; times are brand wall-clock strings, `ends` null for a standing priority. */
+type Campaign = { kind: "offer" | "campaign" | "priority"; name: string; offer: string | null; discountPercent: number | null; code: string | null; starts: string; ends: string | null; timeZone: string; withdrawn: boolean };
 type Release = {
   latestVersion: number | null;
   approvalValid: boolean;
@@ -32,10 +35,19 @@ type Release = {
   decisions: Decision[];
   attempts: Attempt[];
   productIssues: ProductIssue[];
+  campaign: Campaign | null;
 };
 
 const PROVIDER_NAME: Record<string, string> = { META: "Facebook", INSTAGRAM: "Instagram", THREADS: "Threads", PINTEREST: "Pinterest" };
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+const CAMPAIGN_KIND = { offer: "Offer", campaign: "Campaign", priority: "Priority" } as const;
+/** "Offer: Black Friday · -20 % · 2026-11-27 08:00 – 2026-11-30 20:00 (Paris)" or "Priority: Oak dining". */
+function campaignLine(c: Campaign) {
+  const head = `${CAMPAIGN_KIND[c.kind]}: ${c.name}`;
+  if (c.withdrawn) return `${head} (withdrawn)`;
+  const zone = c.timeZone.split("/").pop()!.replace(/_/g, " ");
+  return [head, c.discountPercent ? `-${c.discountPercent} %` : null, c.code, c.ends ? `${c.starts} – ${c.ends} (${zone})` : null].filter(Boolean).join(" · ");
+}
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Try again.");
 
 /** Approve the exact draft shown above, then publish or schedule it, with a full history. */
@@ -96,18 +108,20 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
   const canOverride = canApprove && perms.includes("rules.approve");
   const issues = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED"].includes(status) ? data.productIssues : [];
   const refused = issues.some((i) => i.refuses);
+  const allOverridable = issues.every((i) => !i.refuses || i.overridable);
   const decideProps = { version: version!, issues, canOverride, onDecide: (verdict: Decision["verdict"], note: string, extra: object) => act({ action: "decide", version, verdict, note, ...extra }) };
 
   return (
     <section aria-labelledby="release-h" className="flex flex-col gap-4 rounded-xl border border-border p-4">
       <h2 id="release-h" className="text-sm font-semibold">Approval and publishing</h2>
+      {data.campaign && <p className="text-sm">{campaignLine(data.campaign)}</p>}
       {issues.length > 0 && (
-        <ul aria-label="Product issues" className="flex flex-col gap-1 rounded-lg border border-border p-3 text-sm">
+        <ul aria-label="Issues" className="flex flex-col gap-1 rounded-lg border border-border p-3 text-sm">
           {issues.map((i) => (
-            <li key={i.productId + i.kind + i.message} className={cn("flex items-start gap-2", i.refuses ? "text-destructive" : "text-muted-foreground")}>
+            <li key={(i.productId ?? i.campaignId) + i.kind + i.message} className={cn("flex items-start gap-2", i.refuses ? "text-destructive" : "text-muted-foreground")}>
               <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
               {i.message}
-              {!i.refuses && i.kind === "availability" && " (approved anyway)"}
+              {!i.refuses && i.overridable && " (approved anyway)"}
             </li>
           ))}
         </ul>
@@ -122,13 +136,13 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
         canApprove ? (
           <ApproveForm {...decideProps} blocked={false} approved />
         ) : (
-          <p className="text-sm text-muted-foreground">A product issue stops this post. An approver needs to look at it.</p>
+          <p className="text-sm text-muted-foreground">An issue stops this post. An approver needs to look at it.</p>
         )
       ) : status === "SCHEDULED" && refused ? (
         <p className="text-sm text-muted-foreground">
           {canPublish && data.attempts.some((a) => a.status === "SCHEDULED")
-            ? "Cancel the schedule, then approve anyway or ask for changes."
-            : "A product issue stops this post. An approver or publisher needs to look at it."}
+            ? allOverridable ? "Cancel the schedule, then approve anyway or ask for changes." : "Cancel the schedule, then ask for changes."
+            : "An issue stops this post. An approver or publisher needs to look at it."}
         </p>
       ) : status === "APPROVED" && data.approvalValid ? (
         canPublish ? (
@@ -150,18 +164,20 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
   );
 }
 
-/** approved: the post is already approved but a product issue now stops it (only "Approve anyway" or "Ask for changes"). */
+/** approved: the post is already approved but an issue now stops it (only "Approve anyway" or "Ask for changes"). */
 function ApproveForm({ version, blocked, issues, canOverride, approved = false, onDecide }: { version: number; blocked: boolean; issues: ProductIssue[]; canOverride: boolean; approved?: boolean; onDecide: (v: Decision["verdict"], note: string, extra: object) => Promise<void> }) {
-  const [note, setNote] = useState("");
+  // An issue only a rewrite fixes (a wrong price, a changed or withdrawn offer): the note starts with what to fix.
+  const [note, setNote] = useState(() => issues.filter((i) => i.refuses && !i.overridable).map((i) => i.message).join("\n"));
   const [pending, setPending] = useState<Decision["verdict"] | "OVERRIDE" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmReject, setConfirmReject] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
   const refused = issues.some((i) => i.refuses);
   const unavailable = issues.some((i) => i.refuses && i.kind === "availability");
-  // A price that's no longer true can't be approved past: only the text can change (decide refuses the override).
   const wrongPrice = issues.some((i) => i.refuses && i.kind === "price");
-  const overrideShown = canOverride && unavailable && !wrongPrice;
+  // Only what the server marks overridable (availability, an ended offer) can be approved past; anything else needs a
+  // rewrite (decide refuses the override).
+  const overrideShown = canOverride && refused && issues.every((i) => !i.refuses || i.overridable);
   // "Suggest another product" starts ticked when a product is unavailable; null = not touched yet.
   const [switchPick, setSwitchPick] = useState<boolean | null>(null);
   const switchProducts = switchPick ?? unavailable;
@@ -204,7 +220,7 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
         <Textarea id="approval-note" ref={noteRef} value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={overrideShown ? 500 : 2000} aria-invalid={Boolean(error)} aria-describedby={error ? "approval-error" : undefined} />
         {error && <p id="approval-error" role="alert" className="text-sm text-destructive">{error}</p>}
       </div>
-      {issues.length > 0 && (
+      {issues.some((i) => i.kind !== "offer") && (
         <div className="flex flex-col gap-1">
           <label className="flex min-h-11 w-fit items-center gap-2 text-sm">
             <input type="checkbox" checked={switchProducts} onChange={(e) => setSwitchPick(e.target.checked)} className="size-4 accent-primary" />
@@ -217,12 +233,12 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
       <div className="flex flex-wrap gap-2">
         {/* With "Approve anyway" on offer, the plain approve (which would be refused) steps aside. */}
         {!approved && !overrideShown && (
-          <Button onClick={() => run("APPROVED")} disabled={pending !== null || blocked || refused} title={blocked ? "Fix the quality blockers first" : refused ? "A product issue stops this post" : undefined}>
+          <Button onClick={() => run("APPROVED")} disabled={pending !== null || blocked || refused} title={blocked ? "Fix the quality blockers first" : refused ? "An issue stops this post" : undefined}>
             <Check aria-hidden /> {pending === "APPROVED" ? "Approving…" : `Approve v${version}`}
           </Button>
         )}
         {overrideShown && (
-          <Button onClick={() => run("OVERRIDE")} disabled={pending !== null || blocked} title="Approve with the product issue; your note is recorded">
+          <Button onClick={() => run("OVERRIDE")} disabled={pending !== null || blocked} title="Approve with the issue; your note is recorded">
             <Check aria-hidden /> {pending === "OVERRIDE" ? "Approving…" : "Approve anyway"}
           </Button>
         )}

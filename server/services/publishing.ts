@@ -8,7 +8,9 @@ import { safeHttpUrl } from "@/lib/website";
 import { hasOtherApprover, requirePermission } from "@/server/auth/permissions";
 import { linkedProducts } from "@/server/catalog/linked";
 import { gateIssues, linkedIds, ProductOverride, snapshotOf } from "@/server/content/product-checks";
-import { productIdsForPhoto } from "@/server/content/knowledge";
+import { campaignsById } from "@/server/catalog/campaigns";
+import { campaignKind, isWithdrawn, offerIssues, offerSnapshotOf, wallTime } from "@/server/content/offer-checks";
+import { liveOfferFor, productIdsForPhoto } from "@/server/content/knowledge";
 import { hitRateLimit } from "@/server/auth/rate-limit";
 import { signedMediaUrl } from "@/server/storage/media";
 
@@ -83,25 +85,30 @@ async function currentApproval(itemId: string, latest: { id: string; body: unkno
   return ok ? last : null;
 }
 
-type Loaded = { latest: { body: unknown; checks: { results: unknown }[] } | null; approval: { productOverride: unknown } | null };
+/** `at`: the moment the post would go out (decide: later of now and scheduledFor; schedule: runAt; publish: now). */
+type Loaded = { latest: { body: unknown; checks: { results: unknown }[] } | null; approval: { productOverride: unknown } | null; at: Date };
 /**
- * The product gate (approval, scheduling, publishing, the post view): every issue on the version's linked products,
- * each with its name; `refuses` ones stop the post. The approval's productOverride covers availability issues.
- * The price snapshot is read from the latest check's rows (`snapshotOf`): Quality writes one row per entry.
+ * The gate (approval, scheduling, publishing, the post view): every issue on the version's linked products, each with
+ * its name, then its offer's issues; `refuses` ones stop the post. The approval's productOverride covers the
+ * `overridable` ones (availability, an ended offer). The price and offer snapshots are read from the latest check's
+ * rows (`snapshotOf`, `offerSnapshotOf`). The offer is the one that check judged; no offer row raises nothing.
  */
 export async function productGate(db: Prisma.TransactionClient, scope: { workspaceId: string; brandId: string }, loaded: Loaded) {
   return (await gateWithLinks(db, scope, loaded)).issues;
 }
-/** `productGate` plus the linked products it read (releaseState names overrides from them). */
-async function gateWithLinks(db: Prisma.TransactionClient, scope: { workspaceId: string; brandId: string }, loaded: Loaded) {
+/** `productGate` plus the linked products and campaigns it read (releaseState names overrides from them; `campaignIds`: more to read). */
+async function gateWithLinks(db: Prisma.TransactionClient, scope: { workspaceId: string; brandId: string }, loaded: Loaded, campaignIds: (string | null)[] = []) {
   const ids = linkedIds(loaded.latest?.body);
-  if (!ids.length) return { issues: [], linked: [] };
-  const linked = await linkedProducts(db, scope, ids);
-  const snapshot = snapshotOf(loaded.latest?.checks[0]?.results);
-  const override = ProductOverride.safeParse(loaded.approval?.productOverride);
+  const results = loaded.latest?.checks[0]?.results;
+  const offer = offerSnapshotOf(results);
+  const parsed = ProductOverride.safeParse(loaded.approval?.productOverride);
+  const override = parsed.success ? parsed.data : null;
+  // Offer posts often link no product (whole-catalogue and category offers): their issues don't need any.
+  const [linked, { campaigns, timeZone }] = await Promise.all([ids.length ? linkedProducts(db, scope, ids) : [], campaignsById(db, scope, [offer?.campaignId, ...campaignIds])]);
+  const offers = offer ? offerIssues(campaigns.get(offer.campaignId), offer, override, loaded.at, timeZone) : [];
   const byId = new Map(linked.map((l) => [l.id, l]));
-  const issues = gateIssues(linked, snapshot, override.success ? override.data : null).map((i) => ({ ...i, name: byId.get(i.productId)!.name, state: byId.get(i.productId)!.state }));
-  return { issues, linked };
+  const products = gateIssues(linked, snapshotOf(results), override).map((i) => ({ ...i, name: byId.get(i.productId)!.name, state: byId.get(i.productId)!.state }));
+  return { issues: [...products, ...offers], linked, campaigns, timeZone };
 }
 
 // Callers queue on the per-post lock; allow for a slow database link before giving up.
@@ -130,10 +137,12 @@ export async function createPost(input: { workspaceId: string; brandId: string; 
   if (!ownMediaKey(input, input.product.photoKey)) throw new PublishingError("Unknown image", 400);
   const direction = input.direction?.trim() || null;
   const productIds = await productIdsForPhoto(input.workspaceId, input.brandId, input.product.photoKey);
+  // A special offer links the live offer covering the photo's product, so the Creator gets its facts.
+  const campaignId = input.goal === "specialOffer" ? await liveOfferFor(input, productIds) : null;
   return prisma.$transaction(async (tx) => {
     const item = await tx.contentItem.create({
       data: {
-        workspaceId: input.workspaceId, brandId: input.brandId, title: input.product.title, channel: input.channel, status: "BRIEF_READY", productIds,
+        workspaceId: input.workspaceId, brandId: input.brandId, title: input.product.title, channel: input.channel, status: "BRIEF_READY", productIds, campaignId,
         brief: { goal: APP_GOALS[input.goal], products: [input.product.title], keyMessage: direction ?? "", angle: input.goal, photoKeys: [input.product.photoKey] },
       },
     });
@@ -201,7 +210,7 @@ export async function decide(input: {
   version: number; // the version the approver was looking at
   verdict: ApprovalVerdict;
   note?: string;
-  /** "Approve anyway": approve past the product availability issues there are now (needs rules.approve and a note). */
+  /** "Approve anyway": approve past the overridable issues there are now, product availability and ended offers (needs rules.approve and a note). */
   override?: boolean;
   /** CHANGES_REQUESTED: the Creator may link another product instead. */
   switchProducts?: boolean;
@@ -231,14 +240,19 @@ export async function decide(input: {
         throw new PublishingError("You wrote this draft, so someone else has to approve it", 403);
       }
       // Judged as if there were no override: only the latest decision counts, so an override lists every
-      // availability issue there is now (already covered or new) at its current state.
-      const issues = await productGate(tx, input, { latest, approval: null });
+      // overridable issue there is now (already covered or new) at its current state. At the post's own time: an
+      // ended override is given only once the offer has ended by then.
+      const at = new Date(Math.max(Date.now(), item.scheduledFor?.getTime() ?? 0));
+      const issues = await productGate(tx, input, { latest, approval: null, at });
       if (input.override) {
-        const covered = issues.filter((i) => i.kind === "availability");
-        if (!covered.length) throw new PublishingError("There's no product issue to approve anyway", 400);
-        productOverride = ProductOverride.parse({ productIds: covered.map((i) => i.productId), states: Object.fromEntries(covered.map((i) => [i.productId, i.state])) });
+        const products = issues.flatMap((i) => (i.overridable && i.kind !== "offer" ? [i] : []));
+        const offers = issues.flatMap((i) => (i.overridable && i.kind === "offer" ? [i.campaignId] : []));
+        if (!products.length && !offers.length) throw new PublishingError("There's nothing to approve anyway", 400);
+        productOverride = ProductOverride.parse({
+          productIds: products.map((i) => i.productId), states: Object.fromEntries(products.map((i) => [i.productId, i.state])), ...(offers.length ? { offers } : {}),
+        });
       }
-      const refused = issues.find((i) => i.refuses && !(productOverride && i.kind === "availability"));
+      const refused = issues.find((i) => i.refuses && !(productOverride && i.overridable));
       if (refused) throw new PublishingError(refused.message);
     }
     const decision = await tx.approvalDecision.create({
@@ -269,7 +283,7 @@ export async function decide(input: {
         data: {
           workspaceId: input.workspaceId, brandId: input.brandId, actorUserId: input.userId,
           action: "approval.product_override", entityType: "ContentItem", entityId: item.id,
-          metadata: { versionId: latest.id, productIds: productOverride.productIds, states: productOverride.states, note },
+          metadata: { versionId: latest.id, productIds: productOverride.productIds, states: productOverride.states, offers: productOverride.offers, note },
         },
       });
     }
@@ -301,7 +315,7 @@ export async function schedulePublication(input: {
     if (item.status === "SCHEDULED") throw new PublishingError("Already scheduled. Cancel it first to change the time or account.");
     if (item.status === "PUBLISHED") throw new PublishingError("Already published");
     if (!approval || item.status !== "APPROVED") throw new PublishingError("Only an approved version can be published");
-    const refused = (await productGate(tx, input, { latest, approval })).find((i) => i.refuses);
+    const refused = (await productGate(tx, input, { latest, approval, at: runAt })).find((i) => i.refuses);
     if (refused) throw new PublishingError(refused.message);
 
     const req = publishRequirements(item.channel);
@@ -379,12 +393,12 @@ export async function executePublication(payload: unknown) {
     return;
   }
   overrideUsed = approval.productOverride !== null;
-  // Products are checked again at the moment of posting (stock, prices). Nothing has been sent, so a refusal or an
-  // error here is a plain FAILED, never PENDING_VERIFY.
+  // Products and the offer are checked again at the moment of posting (stock, prices, an offer that ended or changed).
+  // Nothing has been sent, so a refusal or an error here is a plain FAILED, never PENDING_VERIFY.
   let refusal: string | null;
   try {
-    const refused = (await productGate(prisma, a, { latest, approval })).find((i) => i.refuses);
-    refusal = refused ? `${refused.message}. Nothing was posted.` : null;
+    const refused = (await productGate(prisma, a, { latest, approval, at: new Date() })).find((i) => i.refuses);
+    refusal = refused ? `${refused.message.replace(/\.$/, "")}. Nothing was posted.` : null;
   } catch {
     refusal = "Couldn't check the linked products. Nothing was posted. Try again.";
   }
@@ -487,22 +501,30 @@ export async function releaseState(scope: { workspaceId: string; brandId: string
       a.status = "PENDING_VERIFY";
     }
   }
-  // Product issues only matter while the post can still be approved, scheduled or published.
+  // Issues only matter while the post can still be approved, scheduled or published. Judged when it would go out:
+  // the scheduled run, else as decide does.
   const gated = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED"].includes(item.status);
-  const { issues: productIssues, linked } = gated ? await gateWithLinks(prisma, scope, { latest, approval }) : { issues: [], linked: [] };
+  const runAt = item.status === "SCHEDULED" ? attempts.find((a) => a.status === "SCHEDULED")?.runAt : undefined;
+  const at = runAt ?? new Date(Math.max(Date.now(), item.scheduledFor?.getTime() ?? 0));
+  const overrides = new Map(decisions.flatMap((d) => { const o = ProductOverride.safeParse(d.productOverride); return o.success ? [[d.id, o.data] as const] : []; }));
+  const campaignIds = [item.campaignId, ...[...overrides.values()].flatMap((o) => o.offers ?? [])];
+  const { issues: productIssues, linked, campaigns, timeZone } = gated
+    ? await gateWithLinks(prisma, scope, { latest, approval, at }, campaignIds)
+    : { issues: [], linked: [], ...(await campaignsById(prisma, scope, campaignIds)) };
   const req = publishRequirements(item.channel);
   const accounts = req.provider
     ? await prisma.integrationConnection.findMany({ where: { brandId: item.brandId, provider: req.provider, status: "ACTIVE" }, select: { id: true, displayName: true } })
     : [];
   const userIds = [...new Set([...decisions.map((d) => d.userId), ...attempts.map((a) => a.createdByUserId)])];
   const users = await prisma.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true, email: true } });
-  // "approved anyway: <names>": the products each override listed, named as linkedProducts names them.
-  const overrides = new Map(decisions.flatMap((d) => { const o = ProductOverride.safeParse(d.productOverride); return o.success ? [[d.id, o.data.productIds] as const] : []; }));
+  // "approved anyway: <names>": the products each override listed, named as linkedProducts names them, then its ended offers.
   const productNames = new Map(linked.map((l) => [l.id, l.name]));
-  const missing = [...new Set([...overrides.values()].flat())].filter((id) => !productNames.has(id));
+  const missing = [...new Set([...overrides.values()].flatMap((o) => o.productIds))].filter((id) => !productNames.has(id));
   for (const l of missing.length ? await linkedProducts(prisma, scope, missing) : []) productNames.set(l.id, l.name);
   const who = (id: string) => { const u = users.find((x) => x.id === id); return u?.name || u?.email || "Someone"; };
   const accountName = new Map(accounts.map((a) => [a.id, a.displayName]));
+  const overrideNames = (o: ProductOverride) => [...o.productIds.map((id) => productNames.get(id) ?? id), ...(o.offers ?? []).map((id) => `${campaigns.get(id)?.name ?? "an offer"} (offer ended)`)];
+  const c = item.campaignId ? campaigns.get(item.campaignId) : undefined;
   return {
     latestVersion: latest?.version ?? null,
     approvedVersionId: approval?.contentVersionId ?? null,
@@ -512,9 +534,16 @@ export async function releaseState(scope: { workspaceId: string; brandId: string
     // An earlier approval of the same package (before an "approve anyway") still holds too.
     decisions: decisions.map((d) => ({
       id: d.id, verdict: d.verdict, note: d.note, by: who(d.userId), at: d.createdAt, current: d.verdict === "APPROVED" && d.packageHash === approval?.packageHash,
-      version: d.contentVersionId === latest?.id ? latest.version : null, override: overrides.get(d.id)?.map((id) => productNames.get(id) ?? id) ?? null,
+      version: d.contentVersionId === latest?.id ? latest.version : null, override: overrides.has(d.id) ? overrideNames(overrides.get(d.id)!) : null,
     })),
     attempts: attempts.map((a) => ({ id: a.id, status: a.status, provider: a.provider, account: accountName.get(a.connectionId) ?? "Disconnected account", runAt: a.runAt, publishedAt: a.publishedAt, externalUrl: a.externalUrl, error: a.error, by: who(a.createdByUserId) })),
     productIssues,
+    // The post's campaign in brand time (`ends` null: a standing priority); null when it has none.
+    campaign: c
+      ? {
+          kind: campaignKind(c), name: c.name, offer: c.offer, discountPercent: c.discountPercent, code: c.code,
+          starts: wallTime(c.startsAt, timeZone), ends: c.endsAt ? wallTime(c.endsAt, timeZone) : null, timeZone, withdrawn: isWithdrawn(c),
+        }
+      : null,
   };
 }

@@ -1,5 +1,9 @@
+import type { Campaign } from "@prisma/client";
 import { z } from "zod";
+import { campaignsForPlanning } from "@/server/catalog/campaigns";
+import { linkedProducts } from "@/server/catalog/linked";
 import { prisma } from "@/server/db/prisma";
+import { covers, offerState } from "@/server/content/offer-checks";
 import { byExternalId, handleOf, type LinkedProduct } from "@/server/content/product-checks";
 import { BrandAssets } from "@/server/research/brand-assets";
 import { BrandSummary, Preferences } from "@/server/research/brand-summary";
@@ -51,6 +55,28 @@ export async function productIdsForPhoto(workspaceId: string, brandId: string, p
   });
   const hit = rows.filter((r) => handleOf(r.url) === handle).sort((a, b) => a.source.localeCompare(b.source) || byExternalId(a, b))[0];
   return hit ? [hit.id] : [];
+}
+
+/**
+ * The live offer an app "special offer" post links (createPost): among live offers, the ones that `cover` the photo's
+ * product (none linked → whole-catalogue ones only); one listing the product beats a category one, which beats a
+ * whole-catalogue one; then the one ending first. Null = none, and the Creator may then cite no offer discount.
+ * ponytail: no offer picker on the phone.
+ */
+export async function liveOfferFor(scope: { workspaceId: string; brandId: string }, productIds: string[], now = new Date()) {
+  const live = (await campaignsForPlanning(prisma, scope, now, new Date(now.getTime() + 1))).campaigns.filter((c) => offerState(c, now) === "live");
+  if (!live.length) return null;
+  const links = await linkedProducts(prisma, scope, [...productIds, ...live.flatMap((c) => c.productIds)]);
+  const byId = new Map(links.map((l) => [l.id, l]));
+  const link = productIds[0] ? byId.get(productIds[0]) : undefined;
+  const linksOf = (c: Campaign) => c.productIds.flatMap((id) => byId.get(id) ?? []);
+  const whole = (c: Campaign) => !c.productIds.length && !c.categories.length;
+  const rank = (c: Campaign) => (whole(c) ? 2 : link && c.productIds.length && covers({ ...c, categories: [] }, linksOf(c), link) ? 0 : 1);
+  return (
+    live
+      .filter((c) => (link ? covers(c, linksOf(c), link) : whole(c)))
+      .sort((a, b) => rank(a) - rank(b) || a.endsAt!.getTime() - b.endsAt!.getTime())[0]?.id ?? null
+  );
 }
 
 const MAX_VARIANTS = 20;
