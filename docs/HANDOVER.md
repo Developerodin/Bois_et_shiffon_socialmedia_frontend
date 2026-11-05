@@ -4,22 +4,49 @@ Branch `ai-reels` (not pushed, not merged). Today moved the app's Figma screens 
 one module at a time. Each module was given a review for correctness, security, performance and maintainability,
 tested on the emulator, fixed, and committed.
 
-## Start here next time
+## Start here next time (checked against the code on 2026-11-05)
 
-1. **Marketing (10 screens)** is the next module to wire, in the same way: wire it, review it, test it on the
-   emulator, fix it, commit it.
-2. **Still on sample data:**
-   - Stories (`posts/stories`, `edit-story`). There is no backend channel for stories yet.
-   - The AI actor screen.
-3. **Photoshoot fashion tiers are untested live.** The Higgsfield account has no credits. Before selling fashion
+Branch `desktop-shell` now holds everything: it contains `ai-reels` (with Marketing, `ab830c2`) and `audit-fixes`
+(Phases 1-4, see `docs/handover/2026-11-03-*.md`). Each module below goes through the same steps: wire it, review
+it, test it on the emulator, fix it, commit it.
+
+1. **Website Studio is the last Marketing piece on sample data.** The other Marketing screens are wired (`ab830c2`:
+   Google Growth, Reviews, Customers inbox, reply and people on real Google and Meta data).
+   - `marketing/website`, `website-edit` and `website-publish` read `ui/marketing/sample.ts`; the Marketing home shows
+     the Website card as "coming soon".
+   - There is no site backend. Decide what Website Studio should do before wiring it. Delete `sample.ts` when done.
+2. **Stories** (`posts/stories`, `posts/edit-story`) is a "coming soon" page. It needs server work first: a story
+   channel in the publish chain.
+3. **AI actor** (`reels/actor`): the sample voice is shown as "coming soon". The reel voice is OpenAI
+   gpt-4o-mini-tts, so samples could come from there.
+4. **Reels templates** (`reels/templates`) is still a fixed list of four with Bois & Chiffons photos
+   (`ui/reels/sample.ts`). Picking one does send a real request to the chat. `ui/reels/sample.ts` also holds the
+   Espanda logo and mark the chrome uses; that part is app branding, not sample data.
+5. **Plans has no payment.** That's deliberate for now: an admin turns plans on.
+6. **New strings are English only.** Other locales still hold older text; re-run `scripts/i18n-translate.mjs`
+   once the owner approves the wording.
+7. **Photoshoot fashion tiers are untested live.** The Higgsfield account has no credits. Before selling fashion
    shoots:
    - Top up Higgsfield.
    - Run one fashion shoot per tier.
    - Confirm two guesses (in `server/reels/higgsfield.ts` and `server/photoshoot/tiers.ts`): the image status
      answers with `images[].url`, and Marketing Studio Flare takes `input_images`.
-4. **Check the tier costs against real invoices.** `costUsd` in `tiers.ts` are estimates. The server refuses to
+8. **Check the tier costs against real invoices.** `costUsd` in `tiers.ts` are estimates. The server refuses to
    start if any tier drops under the 70% margin floor.
-5. **Push and merge** `ai-reels` when the owner says so.
+9. **Push and merge** `desktop-shell` when the owner says so (`main` is still at `08e5fb1`, 2026-10-30).
+
+### Done on 2026-11-05
+
+- **Planner "Generate calendar" shows the outcome.** New `GET …/agents/:agentKey/runs?id=` (`agents.read`) returns
+  the run's status, its output, and a reason only when the run had nothing to do (other failure text stays in the
+  log). P09 polls it every 5 s and then says how many posts were planned, or that planning didn't finish and the
+  5 credits are back, with Try again.
+- **Photoshoot brief note:** "French prompt" (a Figma leftover; the brief is sent as typed) is now "Required" for a
+  custom scene and "Optional" otherwise. The orphan key is removed from all locales.
+- **`ui/posts/sample.ts` → `ui/posts/format.ts`.** The unused `POSTS`, `POST_COPY` and `getPost` and the
+  `bunting-tv-unit.jpg` they used are deleted.
+- Already fixed before today, so dropped from the list: the Reels home's Bois & Chiffons logo and photo, and the
+  `photos.table` fallback in `reels/publish`, `scheduled` and `script`.
 
 ## What changed today (oldest first)
 
