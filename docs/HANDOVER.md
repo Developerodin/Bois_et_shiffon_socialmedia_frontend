@@ -37,6 +37,15 @@ it, test it on the emulator, fix it, commit it.
    start if any tier drops under the 70% margin floor.
 9. **Push and merge** `desktop-shell` when the owner says so (`main` is still at `08e5fb1`, 2026-10-30).
 
+**Product catalogue (brief A7) is in** (2026-11-05, spec `docs/superpowers/specs/2026-11-05-product-catalogue-design.md`).
+Next steps on it, in order:
+1. Feed products into the Brief, Creator and Quality agents (product facts in briefs; Quality checks claims against
+   them; an unavailable product blocks approval) — gap audit B1, B2, B6.
+2. Test Shopify Admin live: a custom app with `read_products` + `read_inventory` on a real store, connect on the web
+   Connections page, Sync now. The query cost and throttle handling follow Shopify's documented rules but have
+   never met a real store.
+3. Offers, campaigns and priorities (the rest of the brief's commercial context); CSV import.
+
 **Brief gap audit:** `docs/handover/2026-11-05-brief-gap-audit.md` lists every acceptance criterion of the B&C
 functional brief against the code (built, partial or missing). Use it to pick the base work.
 
@@ -55,6 +64,13 @@ functional brief against the code (built, partial or missing). Use it to pick th
   refund and Try again. Two fixes came out of it (`f6ea36d`): a duplicate `briefRequired` key, and the run status
   route now starts a stalled job queue (a run sat QUEUED for minutes). The planner's success message was not seen
   on screen: the account has no ideas left to plan.
+- **Product catalogue:** `Product` table, website feed sync (public Shopify `/products.json`, 1,394 Bois & Chiffons
+  variants in ~7–11 s; only changed rows are written), Shopify Admin sync code (untested live), manual products,
+  daily sync + "Sync now", web Products page (search, 50 rows at a time, facts edit, add/delete manual), Shopify
+  connect card (checks the token's scopes), phone Business → Products list + product detail (facts edit, Sync now).
+  Materials, dimensions and certifications are person-owned: no sync touches them. 4-lens review done and fixed.
+  Checked: `e2e/products.spec.ts` passes in Chrome (run with `PLAYWRIGHT_CHANNEL=chrome
+  E2E_PRODUCTS_BRAND=<workspaceId>/<brandId>`), and on the emulator (first sync from the phone, facts saved).
 - Already fixed before today, so dropped from the list: the Reels home's Bois & Chiffons logo and photo, and the
   `photos.table` fallback in `reels/publish`, `scheduled` and `script`.
 
