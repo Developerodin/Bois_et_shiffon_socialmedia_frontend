@@ -12,7 +12,8 @@ Done today, each planned → reviewed → built → code-reviewed → run on rea
   offers, campaigns and standing priorities (`bb64cd0`, `84ce85c`). Details under "Product catalogue" below.
 - Phone post status label and connect wording (`10e98ed`); all phone strings translated into 23 languages
   (`08189c8`, machine translation: review before release).
-Open, in order: phone check of a post with an offer; the five campaigns-screen follow-ups listed below; Shopify
+**Next session (owner, 2026-11-05): before starting anything, ask the owner which of the open items below to do
+first.** Open, in order: phone check of a post with an offer; the five campaigns-screen follow-ups listed below; Shopify
 live test (needs the owner's store); CSV import. Dev environment: web on :3100 (`npm run dev` in `apps/web`; stop it
 before `prisma generate`), Metro on :8081, emulator Pixel_10 (screenshots with `adb emu screenrecord screenshot`).
 
