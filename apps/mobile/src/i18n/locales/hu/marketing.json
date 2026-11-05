@@ -11,15 +11,7 @@
       "notConnected": "Nincs csatlakoztatva"
     },
     "draft": "Piszkozat",
-    "googleGrowth": "Google növekedés",
-    "websiteStudio": "Weboldal stúdió",
-    "editContent": "Tartalom szerkesztése",
-    "diningTableImage": "Acacia Bunting étkezőasztal",
-    "pages": {
-      "home": "Kezdőlap",
-      "product": "Termék",
-      "contact": "Kapcsolat"
-    }
+    "googleGrowth": "Google növekedés"
   },
   "tools": {
     "switchBusiness": "Váltás üzletre, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Google növekedés",
         "body": "Profil, bejegyzések és értékelések",
         "cta": "Beállítás"
-      },
-      "website": {
-        "title": "Weboldal stúdió",
-        "body": "Piszkozat, szerkesztés és közzététel",
-        "cta": "Piszkozat megnyitása"
       },
       "business": {
         "title": "Üzlet",
@@ -149,45 +136,5 @@
         "value": "Beállítva"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Piszkozat előnézet",
-    "catalogConnected": "Forrásbolt katalógus csatlakoztatva",
-    "connectDomain": "Domain csatlakoztatása",
-    "previewLabel": "Weboldal piszkozat előnézet",
-    "browserTitle": "Weboldal piszkozat",
-    "fullPreview": "Teljes előnézet",
-    "reviewPublish": "Piszkozat átnézése és közzététele",
-    "footnote": "Nézd át a tartalmadat és a domaint közzététel előtt."
-  },
-  "websiteEdit": {
-    "saveChanges": "Piszkozat módosítások mentése",
-    "reviewPublish": "Átnézés és közzététel",
-    "preview": "Előnézet",
-    "title": "Weboldal tartalom szerkesztése",
-    "heroTitle": "Hős szekció banner",
-    "replaceImage": "Kép cseréje",
-    "heroImageLabel": "Hős banner kép",
-    "headline": "Főcím (francia)",
-    "description": "Leírás",
-    "sectionsTitle": "Oldalszekciók",
-    "sectionCount_one": "{{count}} szekció",
-    "sectionCount_other": "{{count}} szekciók",
-    "sections": {
-      "heroBanner": "Hős banner",
-      "featuredCollection": "Kiemelt kollekció",
-      "showroomContact": "Bemutatóterem & kapcsolat"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Ellenőrizd a domaint és a tartalmat a közzétételhez.",
-    "publish": "Weboldal közzététele",
-    "keepDraft": "Mentés piszkozatként",
-    "title": "Weboldalad áttekintése",
-    "subtitle": "Ellenőrizd a tartalmat és a célhelyet, mielőtt élesíted.",
-    "heroImageLabel": "Weboldal főképe",
-    "destinationTitle": "Közzétételi célhely",
-    "destinationBody": "Csatlakoztass és ellenőrizz egy domaint a piszkozat közzétételéhez.",
-    "setUpDomain": "Domain beállítása"
   }
 }

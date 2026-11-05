@@ -11,7 +11,6 @@ import {
   LogOut,
   MapPinned,
   MessagesSquare,
-  PanelsTopLeft,
   Settings,
   SlidersHorizontal,
   Unplug,
@@ -49,7 +48,6 @@ const SECTIONS: { title: string; items: Item[] }[] = [
     items: [
       { label: "inbox", Icon: MessagesSquare, href: "/marketing/inbox" },
       { label: "google", Icon: MapPinned, href: "/marketing/google" },
-      { label: "website", Icon: PanelsTopLeft, href: "/marketing/website" },
       { label: "connections", Icon: Unplug, href: "/business/connections" },
       { label: "automations", Icon: SlidersHorizontal, href: "/business/automations" },
     ],

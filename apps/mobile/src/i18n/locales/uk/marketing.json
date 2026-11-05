@@ -11,15 +11,7 @@
       "notConnected": "Не підключено"
     },
     "draft": "Чернетка",
-    "googleGrowth": "Зростання в Google",
-    "websiteStudio": "Студія сайту",
-    "editContent": "Редагувати контент",
-    "diningTableImage": "Обідній стіл Acacia Bunting",
-    "pages": {
-      "home": "Головна",
-      "product": "Продукт",
-      "contact": "Контакт"
-    }
+    "googleGrowth": "Зростання в Google"
   },
   "tools": {
     "switchBusiness": "Змінити бізнес, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Зростання в Google",
         "body": "Профіль, пости та відгуки",
         "cta": "Налаштувати"
-      },
-      "website": {
-        "title": "Студія сайту",
-        "body": "Чернетка, редагування та публікація сайту",
-        "cta": "Відкрити чернетку"
       },
       "business": {
         "title": "Бізнес",
@@ -149,45 +136,5 @@
         "value": "Налаштовано"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Попередній перегляд чернетки",
-    "catalogConnected": "Підключено каталог магазину",
-    "connectDomain": "Підключити домен",
-    "previewLabel": "Попередній перегляд чернетки сайту",
-    "browserTitle": "Чернетка сайту",
-    "fullPreview": "Повний перегляд",
-    "reviewPublish": "Переглянути та опублікувати чернетку",
-    "footnote": "Перегляньте ваш контент та домен перед публікацією."
-  },
-  "websiteEdit": {
-    "saveChanges": "Зберегти зміни чернетки",
-    "reviewPublish": "Переглянути та опублікувати",
-    "preview": "Попередній перегляд",
-    "title": "Редагувати контент сайту",
-    "heroTitle": "Банер головного розділу",
-    "replaceImage": "Замінити зображення",
-    "heroImageLabel": "Зображення банера головного розділу",
-    "headline": "Заголовок (французькою)",
-    "description": "Опис",
-    "sectionsTitle": "Розділи сторінки",
-    "sectionCount_one": "{{count}} розділ",
-    "sectionCount_other": "{{count}} розділи",
-    "sections": {
-      "heroBanner": "Банер головного розділу",
-      "featuredCollection": "Рекомендована колекція",
-      "showroomContact": "Шоурум та контакт"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Перевірте домен і перегляньте вміст, щоб опублікувати.",
-    "publish": "Опублікувати сайт",
-    "keepDraft": "Залишити як чернетку",
-    "title": "Перегляньте ваш сайт",
-    "subtitle": "Перевірте вміст і місце призначення перед публікацією.",
-    "heroImageLabel": "Головне зображення сайту",
-    "destinationTitle": "Місце публікації",
-    "destinationBody": "Підключіть і перевірте домен, щоб опублікувати цю чернетку.",
-    "setUpDomain": "Налаштувати домен"
   }
 }

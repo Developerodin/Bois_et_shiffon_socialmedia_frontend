@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} crédits studio mensuels",
       "postsStories": "Publications, stories & programmation",
       "photoshoots": "Shooting produit & mode",
-      "websiteStudio": "Website Studio & brouillon de domaine personnalisé",
       "replyAssistant": "Assistant de réponse client IA",
       "googleSync": "Synchronisation du profil Google Growth",
       "contentExports": "Création et exportation de contenu",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Cartes locales & avis"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Pages de destination & brouillon"
       },
       "business": {
         "title": "Mon entreprise",

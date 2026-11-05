@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} měsíčních kreditů do studia",
       "postsStories": "Příspěvky, příběhy a plánování",
       "photoshoots": "Produktové a módní focení",
-      "websiteStudio": "Website Studio a návrh vlastní domény",
       "replyAssistant": "AI asistent pro odpovědi zákazníkům",
       "googleSync": "Synchronizace profilu Google Growth",
       "contentExports": "Tvorba a export obsahu",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Místní mapy a recenze"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Vstupní stránky a návrh"
       },
       "business": {
         "title": "Moje firma",

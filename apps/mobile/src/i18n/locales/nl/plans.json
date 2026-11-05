@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} maandelijkse studiocredits",
       "postsStories": "Posts, verhalen & planning",
       "photoshoots": "Product- & modefotoshoots",
-      "websiteStudio": "Website Studio & aangepast domeinontwerp",
       "replyAssistant": "AI Klantreactie-assistent",
       "googleSync": "Google Groei profiel synchronisatie",
       "contentExports": "Contentcreatie en -export",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Groei",
         "subtitle": "Lokale kaarten & beoordelingen"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Landingspagina's & ontwerp"
       },
       "business": {
         "title": "Mijn Bedrijf",

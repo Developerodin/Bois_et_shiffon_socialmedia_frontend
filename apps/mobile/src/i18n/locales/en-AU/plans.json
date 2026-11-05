@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} monthly studio credits",
       "postsStories": "Posts, stories & scheduling",
       "photoshoots": "Product & fashion photoshoots",
-      "websiteStudio": "Website Studio & custom domain draft",
       "replyAssistant": "AI Customer reply assistant",
       "googleSync": "Google Growth profile sync",
       "contentExports": "Content creation and exports",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Local maps & reviews"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Landing pages & draft"
       },
       "business": {
         "title": "My Business",

@@ -11,15 +11,7 @@
       "notConnected": "Nie połączono"
     },
     "draft": "Szkic",
-    "googleGrowth": "Wzrost Google",
-    "websiteStudio": "Studio strony",
-    "editContent": "Edytuj treść",
-    "diningTableImage": "Stół jadalny Acacia Bunting",
-    "pages": {
-      "home": "Strona główna",
-      "product": "Produkt",
-      "contact": "Kontakt"
-    }
+    "googleGrowth": "Wzrost Google"
   },
   "tools": {
     "switchBusiness": "Zmień firmę, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Wzrost Google",
         "body": "Profil, posty i opinie",
         "cta": "Skonfiguruj"
-      },
-      "website": {
-        "title": "Studio strony",
-        "body": "Szkic, edytuj i publikuj swoją stronę",
-        "cta": "Otwórz szkic"
       },
       "business": {
         "title": "Biznes",
@@ -149,45 +136,5 @@
         "value": "Ustaw"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Podgląd szkicu",
-    "catalogConnected": "Połączony katalog sklepu",
-    "connectDomain": "Połącz domenę",
-    "previewLabel": "Podgląd szkicu strony",
-    "browserTitle": "Szkic strony",
-    "fullPreview": "Pełny podgląd",
-    "reviewPublish": "Przegląd i publikacja szkicu",
-    "footnote": "Przejrzyj swoją treść i domenę przed publikacją."
-  },
-  "websiteEdit": {
-    "saveChanges": "Zapisz zmiany szkicu",
-    "reviewPublish": "Przegląd i publikacja",
-    "preview": "Podgląd",
-    "title": "Edytuj treść strony",
-    "heroTitle": "Baner sekcji głównej",
-    "replaceImage": "Zamień obraz",
-    "heroImageLabel": "Obraz banera głównego",
-    "headline": "Nagłówek (francuski)",
-    "description": "Opis",
-    "sectionsTitle": "Sekcje strony",
-    "sectionCount_one": "{{count}} sekcja",
-    "sectionCount_other": "{{count}} sekcje",
-    "sections": {
-      "heroBanner": "Baner główny",
-      "featuredCollection": "Polecana kolekcja",
-      "showroomContact": "Showroom i kontakt"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Zweryfikuj domenę i sprawdź treść przed publikacją.",
-    "publish": "Opublikuj stronę",
-    "keepDraft": "Zachowaj jako szkic",
-    "title": "Przejrzyj swoją stronę",
-    "subtitle": "Sprawdź treść i miejsce docelowe przed publikacją.",
-    "heroImageLabel": "Główne zdjęcie strony",
-    "destinationTitle": "Miejsce publikacji",
-    "destinationBody": "Połącz i zweryfikuj domenę, aby opublikować ten szkic.",
-    "setUpDomain": "Skonfiguruj domenę"
   }
 }

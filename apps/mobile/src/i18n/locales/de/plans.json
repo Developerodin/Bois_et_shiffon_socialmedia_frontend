@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} monatliche Studio-Guthaben",
       "postsStories": "Beiträge, Stories & Planung",
       "photoshoots": "Produkt- & Mode-Shootings",
-      "websiteStudio": "Website Studio & benutzerdefinierte Domain",
       "replyAssistant": "KI-Kundenantwort-Assistent",
       "googleSync": "Google Growth Profil-Synchronisation",
       "contentExports": "Inhaltserstellung und Exporte",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Lokale Karten & Bewertungen"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Landingpages & Entwurf"
       },
       "business": {
         "title": "Mein Geschäft",

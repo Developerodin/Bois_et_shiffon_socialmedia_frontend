@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} щомісячних кредитів студії",
       "postsStories": "Пости, історії та планування",
       "photoshoots": "Фотосесії продуктів та моди",
-      "websiteStudio": "Website Studio та чернетка власного домену",
       "replyAssistant": "AI асистент відповідей клієнтам",
       "googleSync": "Синхронізація профілю Google Growth",
       "contentExports": "Створення та експорт контенту",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Місцеві карти та відгуки"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Лендінг пейджі та чернетка"
       },
       "business": {
         "title": "Мій бізнес",

@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} créditos mensais de estúdio",
       "postsStories": "Publicações, histórias e agendamento",
       "photoshoots": "Sessões fotográficas de produto e moda",
-      "websiteStudio": "Website Studio e rascunho de domínio personalizado",
       "replyAssistant": "Assistente de respostas ao cliente com IA",
       "googleSync": "Sincronização de perfil de crescimento do Google",
       "contentExports": "Criação e exportação de conteúdo",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Crescimento no Google",
         "subtitle": "Mapas locais e avaliações"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Páginas de destino e rascunho"
       },
       "business": {
         "title": "O Meu Negócio",

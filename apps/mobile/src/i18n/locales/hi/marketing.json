@@ -11,15 +11,7 @@
       "notConnected": "कनेक्ट नहीं है"
     },
     "draft": "ड्राफ्ट",
-    "googleGrowth": "गूगल ग्रोथ",
-    "websiteStudio": "वेबसाइट स्टूडियो",
-    "editContent": "सामग्री संपादित करें",
-    "diningTableImage": "Acacia Bunting डाइनिंग टेबल",
-    "pages": {
-      "home": "होम",
-      "product": "प्रोडक्ट",
-      "contact": "संपर्क"
-    }
+    "googleGrowth": "गूगल ग्रोथ"
   },
   "tools": {
     "switchBusiness": "व्यवसाय बदलें, {{name}}",
@@ -43,11 +35,6 @@
         "title": "गूगल ग्रोथ",
         "body": "प्रोफाइल, पोस्ट और रिव्यू",
         "cta": "कॉन्फ़िगर करें"
-      },
-      "website": {
-        "title": "वेबसाइट स्टूडियो",
-        "body": "ड्राफ्ट, संपादित करें और अपनी साइट प्रकाशित करें",
-        "cta": "ड्राफ्ट खोलें"
       },
       "business": {
         "title": "व्यवसाय",
@@ -149,45 +136,5 @@
         "value": "सेट अप करें"
       }
     }
-  },
-  "website": {
-    "draftPreview": "ड्राफ्ट पूर्वावलोकन",
-    "catalogConnected": "स्रोत स्टोर कैटलॉग कनेक्टेड",
-    "connectDomain": "डोमेन कनेक्ट करें",
-    "previewLabel": "वेबसाइट ड्राफ्ट पूर्वावलोकन",
-    "browserTitle": "वेबसाइट ड्राफ्ट",
-    "fullPreview": "पूर्ण पूर्वावलोकन",
-    "reviewPublish": "ड्राफ्ट की समीक्षा और प्रकाशित करें",
-    "footnote": "प्रकाशित करने से पहले अपनी सामग्री और डोमेन की समीक्षा करें।"
-  },
-  "websiteEdit": {
-    "saveChanges": "ड्राफ्ट परिवर्तन सहेजें",
-    "reviewPublish": "समीक्षा और प्रकाशित करें",
-    "preview": "पूर्वावलोकन",
-    "title": "वेबसाइट सामग्री संपादित करें",
-    "heroTitle": "हीरो सेक्शन बैनर",
-    "replaceImage": "छवि बदलें",
-    "heroImageLabel": "हीरो बैनर छवि",
-    "headline": "हेडलाइन (फ्रेंच)",
-    "description": "विवरण",
-    "sectionsTitle": "पृष्ठ अनुभाग",
-    "sectionCount_one": "{{count}} अनुभाग",
-    "sectionCount_other": "{{count}} अनुभाग",
-    "sections": {
-      "heroBanner": "हीरो बैनर",
-      "featuredCollection": "विशेष संग्रह",
-      "showroomContact": "शोरूम और संपर्क"
-    }
-  },
-  "websitePublish": {
-    "footnote": "डोमेन सत्यापित करें और सामग्री की समीक्षा करें ताकि प्रकाशित कर सकें।",
-    "publish": "वेबसाइट प्रकाशित करें",
-    "keepDraft": "ड्राफ्ट रखें",
-    "title": "अपनी वेबसाइट की समीक्षा करें",
-    "subtitle": "लाइव जाने से पहले अपनी सामग्री और गंतव्य की जाँच करें।",
-    "heroImageLabel": "वेबसाइट हीरो इमेज",
-    "destinationTitle": "प्रकाशन गंतव्य",
-    "destinationBody": "इस ड्राफ्ट को प्रकाशित करने के लिए एक डोमेन कनेक्ट और सत्यापित करें।",
-    "setUpDomain": "डोमेन सेट करें"
   }
 }

@@ -11,15 +11,7 @@
       "notConnected": "Ikke tilkoblet"
     },
     "draft": "Utkast",
-    "googleGrowth": "Google-vekst",
-    "websiteStudio": "Nettstudiostudio",
-    "editContent": "Rediger innhold",
-    "diningTableImage": "Acacia Bunting spisebord",
-    "pages": {
-      "home": "Hjem",
-      "product": "Produkt",
-      "contact": "Kontakt"
-    }
+    "googleGrowth": "Google-vekst"
   },
   "tools": {
     "switchBusiness": "Bytt bedrift, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Google-vekst",
         "body": "Profil, innlegg og anmeldelser",
         "cta": "Konfigurer"
-      },
-      "website": {
-        "title": "Nettstudiostudio",
-        "body": "Utkast, rediger og publiser nettstedet ditt",
-        "cta": "Åpne utkast"
       },
       "business": {
         "title": "Bedrift",
@@ -149,45 +136,5 @@
         "value": "Sett opp"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Utkast forhåndsvisning",
-    "catalogConnected": "Kildebutikkatalog tilkoblet",
-    "connectDomain": "Koble til domene",
-    "previewLabel": "Forhåndsvisning av nettstudioutkast",
-    "browserTitle": "Nettstudioutkast",
-    "fullPreview": "Full forhåndsvisning",
-    "reviewPublish": "Gjennomgå og publiser utkast",
-    "footnote": "Gjennomgå innholdet og domenet ditt før publisering."
-  },
-  "websiteEdit": {
-    "saveChanges": "Lagre utkastendringer",
-    "reviewPublish": "Gjennomgå og publiser",
-    "preview": "Forhåndsvisning",
-    "title": "Rediger nettstedsinnhold",
-    "heroTitle": "Heltseksjon banner",
-    "replaceImage": "Erstatt bilde",
-    "heroImageLabel": "Heltbannerbilde",
-    "headline": "Overskrift (fransk)",
-    "description": "Beskrivelse",
-    "sectionsTitle": "Seksjoner på siden",
-    "sectionCount_one": "{{count}} seksjon",
-    "sectionCount_other": "{{count}} seksjoner",
-    "sections": {
-      "heroBanner": "Heltbanner",
-      "featuredCollection": "Utvalgt samling",
-      "showroomContact": "Showroom & kontakt"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Bekreft et domene og gjennomgå innholdet for å publisere.",
-    "publish": "Publiser nettsted",
-    "keepDraft": "Behold som kladd",
-    "title": "Gjennomgå nettstedet ditt",
-    "subtitle": "Sjekk innholdet og destinasjonen før du går live.",
-    "heroImageLabel": "Nettstedets hovedbilde",
-    "destinationTitle": "Publiseringsdestinasjon",
-    "destinationBody": "Koble til og bekreft et domene for å publisere denne kladden.",
-    "setUpDomain": "Sett opp et domene"
   }
 }

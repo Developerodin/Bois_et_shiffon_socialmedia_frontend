@@ -17,7 +17,6 @@ export type PlanFeature =
   | "monthlyCredits"
   | "postsStories"
   | "photoshoots"
-  | "websiteStudio"
   | "replyAssistant"
   | "googleSync"
   | "contentExports"
@@ -29,13 +28,13 @@ export const plans: Plan[] = [
   {
     id: "professional",
     recommended: true,
-    features: ["monthlyCredits", "postsStories", "photoshoots", "websiteStudio", "replyAssistant", "googleSync", "contentExports"],
+    features: ["monthlyCredits", "postsStories", "photoshoots", "replyAssistant", "googleSync", "contentExports"],
   },
   { id: "starter", features: ["monthlyCredits", "postsStories", "photoshoots", "reelsStaging"] },
 ];
 
 export type Tool = {
-  id: "customers" | "google" | "website" | "business" | "connections" | "automations";
+  id: "customers" | "google" | "business" | "connections" | "automations";
   /** Needs the Professional plan (its features list them; Starter's doesn't). */
   locked: boolean;
   /** Where "Configure" goes once the tool is open to this workspace. */
@@ -45,7 +44,6 @@ export type Tool = {
 export const tools: Tool[] = [
   { id: "customers", locked: true, href: "/marketing/inbox" },
   { id: "google", locked: true, href: "/marketing/google" },
-  { id: "website", locked: true, href: "/marketing/website" },
   { id: "business", locked: false, href: "/business" },
   { id: "connections", locked: false, href: "/business/connections" },
   { id: "automations", locked: false, href: "/business/automations" },

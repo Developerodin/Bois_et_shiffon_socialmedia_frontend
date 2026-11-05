@@ -11,15 +11,7 @@
       "notConnected": "Non connecté"
     },
     "draft": "Brouillon",
-    "googleGrowth": "Croissance Google",
-    "websiteStudio": "Studio de site web",
-    "editContent": "Modifier le contenu",
-    "diningTableImage": "Table à manger Acacia Bunting",
-    "pages": {
-      "home": "Accueil",
-      "product": "Produit",
-      "contact": "Contact"
-    }
+    "googleGrowth": "Croissance Google"
   },
   "tools": {
     "switchBusiness": "Changer d'entreprise, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Croissance Google",
         "body": "Profil, publications et avis",
         "cta": "Configurer"
-      },
-      "website": {
-        "title": "Studio de site web",
-        "body": "Brouillon, modifier et publier votre site",
-        "cta": "Ouvrir le brouillon"
       },
       "business": {
         "title": "Entreprise",
@@ -149,45 +136,5 @@
         "value": "Configurer"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Aperçu du brouillon",
-    "catalogConnected": "Catalogue de la boutique source connecté",
-    "connectDomain": "Connecter le domaine",
-    "previewLabel": "Aperçu du brouillon du site web",
-    "browserTitle": "Brouillon du site web",
-    "fullPreview": "Aperçu complet",
-    "reviewPublish": "Réviser & publier le brouillon",
-    "footnote": "Révisez votre contenu et votre domaine avant de publier."
-  },
-  "websiteEdit": {
-    "saveChanges": "Enregistrer les modifications du brouillon",
-    "reviewPublish": "Réviser & publier",
-    "preview": "Aperçu",
-    "title": "Modifier le contenu du site web",
-    "heroTitle": "Bannière de la section héros",
-    "replaceImage": "Remplacer l'image",
-    "heroImageLabel": "Image de la bannière héros",
-    "headline": "Titre (français)",
-    "description": "Description",
-    "sectionsTitle": "Sections de la page",
-    "sectionCount_one": "{{count}} section",
-    "sectionCount_other": "{{count}} sections",
-    "sections": {
-      "heroBanner": "Bannière héros",
-      "featuredCollection": "Collection en vedette",
-      "showroomContact": "Showroom & contact"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Vérifiez un domaine et examinez le contenu pour publier.",
-    "publish": "Publier le site",
-    "keepDraft": "Garder en brouillon",
-    "title": "Examinez votre site",
-    "subtitle": "Vérifiez votre contenu et destination avant de le mettre en ligne.",
-    "heroImageLabel": "Image principale du site",
-    "destinationTitle": "Destination de publication",
-    "destinationBody": "Connectez et vérifiez un domaine pour publier ce brouillon.",
-    "setUpDomain": "Configurer un domaine"
   }
 }

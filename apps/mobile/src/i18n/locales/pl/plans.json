@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} miesięcznych kredytów studia",
       "postsStories": "Posty, relacje i planowanie",
       "photoshoots": "Sesje produktowe i modowe",
-      "websiteStudio": "Website Studio i projekt niestandardowej domeny",
       "replyAssistant": "Asystent odpowiedzi AI",
       "googleSync": "Synchronizacja profilu Google Growth",
       "contentExports": "Tworzenie i eksport treści",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Lokalne mapy i recenzje"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Strony docelowe i projekt"
       },
       "business": {
         "title": "Moja firma",

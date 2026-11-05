@@ -11,15 +11,7 @@
       "notConnected": "Niet verbonden"
     },
     "draft": "Concept",
-    "googleGrowth": "Google Groei",
-    "websiteStudio": "Website Studio",
-    "editContent": "Bewerk inhoud",
-    "diningTableImage": "Acacia Bunting eettafel",
-    "pages": {
-      "home": "Home",
-      "product": "Product",
-      "contact": "Contact"
-    }
+    "googleGrowth": "Google Groei"
   },
   "tools": {
     "switchBusiness": "Wissel van bedrijf, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Google Groei",
         "body": "Profiel, berichten en beoordelingen",
         "cta": "Configureer"
-      },
-      "website": {
-        "title": "Website Studio",
-        "body": "Concept, bewerk en publiceer je site",
-        "cta": "Open concept"
       },
       "business": {
         "title": "Bedrijf",
@@ -149,45 +136,5 @@
         "value": "Ingesteld"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Conceptvoorbeeld",
-    "catalogConnected": "Bronwinkelcatalogus verbonden",
-    "connectDomain": "Verbind domein",
-    "previewLabel": "Websiteconceptvoorbeeld",
-    "browserTitle": "Websiteconcept",
-    "fullPreview": "Volledig voorbeeld",
-    "reviewPublish": "Beoordeel & publiceer concept",
-    "footnote": "Beoordeel je inhoud en domein voordat je publiceert."
-  },
-  "websiteEdit": {
-    "saveChanges": "Conceptwijzigingen opslaan",
-    "reviewPublish": "Beoordeel & publiceer",
-    "preview": "Voorbeeld",
-    "title": "Bewerk website-inhoud",
-    "heroTitle": "Hero sectie banner",
-    "replaceImage": "Vervang afbeelding",
-    "heroImageLabel": "Hero banner afbeelding",
-    "headline": "Kop (Frans)",
-    "description": "Beschrijving",
-    "sectionsTitle": "Paginasecties",
-    "sectionCount_one": "{{count}} sectie",
-    "sectionCount_other": "{{count}} secties",
-    "sections": {
-      "heroBanner": "Hero banner",
-      "featuredCollection": "Uitgelichte collectie",
-      "showroomContact": "Showroom & contact"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Verifieer een domein en controleer de inhoud om te publiceren.",
-    "publish": "Publiceer website",
-    "keepDraft": "Als concept bewaren",
-    "title": "Controleer je website",
-    "subtitle": "Controleer je inhoud en bestemming voordat je live gaat.",
-    "heroImageLabel": "Hero-afbeelding van de website",
-    "destinationTitle": "Publicatiebestemming",
-    "destinationBody": "Verbind en verifieer een domein om dit concept te publiceren.",
-    "setUpDomain": "Domein instellen"
   }
 }

@@ -1,26 +1,24 @@
 import { useState } from "react";
 import { Image } from "expo-image";
 import { router, type Href } from "expo-router";
-import { ArrowRight, Briefcase, ChevronDown, ImagePlus, LayoutTemplate, MapPinned, MessagesSquare, X, type LucideIcon } from "lucide-react-native";
+import { ArrowRight, Briefcase, ChevronDown, ImagePlus, MapPinned, MessagesSquare, X, type LucideIcon } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Divider, mc } from "@/ui/marketing/kit";
 import { useCurrentBrand } from "@/ui/use-current-brand";
-import { ICON, ModuleHeader, Panel, ReelsScreen, Tag, bodyMuted, eyebrow, rc } from "@/ui/reels/kit";
+import { ICON, ModuleHeader, Panel, ReelsScreen, bodyMuted, eyebrow, rc } from "@/ui/reels/kit";
 
 /** `id` picks the card copy: tools.cards.<id>.title / body / cta in the marketing namespace. */
-type Tool = { id: "customers" | "google" | "website" | "business"; Icon: LucideIcon; href: Href; soon?: boolean };
+type Tool = { id: "customers" | "google" | "business"; Icon: LucideIcon; href: Href };
 
 /**
- * The frame stops after Customers and Google Growth; Website Studio and Business continue the
- * grid below the fold so every Marketing flow (and the Business area) is reachable from here.
+ * The frame stops after Customers and Google Growth; Business continues the grid below the fold.
+ * Website Studio is hidden until the brief's base work is done (its screens were removed; see docs/HANDOVER.md).
  */
 const TOOLS: Tool[] = [
   { id: "customers", Icon: MessagesSquare, href: "/marketing/inbox" },
   { id: "google", Icon: MapPinned, href: "/marketing/google" },
-  // ponytail: Website Studio is shown but closed; its screens stay on sample data until the owner wants sites.
-  { id: "website", Icon: LayoutTemplate, href: "/marketing/website", soon: true },
   // "/business" is built separately; cast until its route file exists in the typed-route map.
   { id: "business", Icon: Briefcase, href: "/business" as Href },
 ];
@@ -81,7 +79,7 @@ export default function MarketingTools() {
   );
 }
 
-function ToolCard({ id, Icon, href, soon }: Tool) {
+function ToolCard({ id, Icon, href }: Tool) {
   const { t } = useTranslation("marketing");
   const title = t(`tools.cards.${id}.title`);
   const body = t(`tools.cards.${id}.body`);
@@ -89,11 +87,9 @@ function ToolCard({ id, Icon, href, soon }: Tool) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t("tools.cardLabel", { title, body, cta: soon ? t("tools.comingSoon") : cta })}
-      accessibilityState={{ disabled: !!soon }}
-      disabled={soon}
+      accessibilityLabel={t("tools.cardLabel", { title, body, cta })}
       onPress={() => router.push(href)}
-      style={({ pressed }) => [styles.tool, pressed && { opacity: 0.85 }, soon && { opacity: 0.6 }]}
+      style={({ pressed }) => [styles.tool, pressed && { opacity: 0.85 }]}
     >
       <View style={styles.toolTile}>
         <Icon size={24} color={color.primary} strokeWidth={ICON.strokeWidth} />
@@ -102,14 +98,8 @@ function ToolCard({ id, Icon, href, soon }: Tool) {
       <Text style={[styles.toolBody, { flex: 1 }]}>{body}</Text>
       <Divider style={{ marginTop: space[16] }} />
       <View style={styles.toolCta}>
-        {soon ? (
-          <Tag label={t("tools.comingSoon")} tone="grey" textStyle={{ fontFamily: type.label.fontFamily }} />
-        ) : (
-          <>
-            <Text style={[type.body, { lineHeight: 20 }]}>{cta}</Text>
-            <ArrowRight size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
-          </>
-        )}
+        <Text style={[type.body, { lineHeight: 20 }]}>{cta}</Text>
+        <ArrowRight size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
       </View>
     </Pressable>
   );

@@ -11,15 +11,7 @@
       "notConnected": "No conectado"
     },
     "draft": "Borrador",
-    "googleGrowth": "Crecimiento en Google",
-    "websiteStudio": "Estudio de sitio web",
-    "editContent": "Editar contenido",
-    "diningTableImage": "Mesa de comedor Acacia Bunting",
-    "pages": {
-      "home": "Inicio",
-      "product": "Producto",
-      "contact": "Contacto"
-    }
+    "googleGrowth": "Crecimiento en Google"
   },
   "tools": {
     "switchBusiness": "Cambiar negocio, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Crecimiento en Google",
         "body": "Perfil, publicaciones y reseñas",
         "cta": "Configurar"
-      },
-      "website": {
-        "title": "Estudio de sitio web",
-        "body": "Borrador, edita y publica tu sitio",
-        "cta": "Abrir borrador"
       },
       "business": {
         "title": "Negocio",
@@ -149,45 +136,5 @@
         "value": "Configurar"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Vista previa del borrador",
-    "catalogConnected": "Catálogo de tienda fuente conectado",
-    "connectDomain": "Conectar dominio",
-    "previewLabel": "Vista previa del borrador del sitio web",
-    "browserTitle": "Borrador del sitio web",
-    "fullPreview": "Vista previa completa",
-    "reviewPublish": "Revisar y publicar borrador",
-    "footnote": "Revisa tu contenido y dominio antes de publicar."
-  },
-  "websiteEdit": {
-    "saveChanges": "Guardar cambios del borrador",
-    "reviewPublish": "Revisar y publicar",
-    "preview": "Vista previa",
-    "title": "Editar contenido del sitio web",
-    "heroTitle": "Banner de la sección principal",
-    "replaceImage": "Reemplazar imagen",
-    "heroImageLabel": "Imagen del banner principal",
-    "headline": "Titular (francés)",
-    "description": "Descripción",
-    "sectionsTitle": "Secciones de la página",
-    "sectionCount_one": "{{count}} sección",
-    "sectionCount_other": "{{count}} secciones",
-    "sections": {
-      "heroBanner": "Banner principal",
-      "featuredCollection": "Colección destacada",
-      "showroomContact": "Showroom y contacto"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Verifica un dominio y revisa el contenido para publicar.",
-    "publish": "Publicar sitio web",
-    "keepDraft": "Guardar como borrador",
-    "title": "Revisa tu sitio web",
-    "subtitle": "Revisa tu contenido y destino antes de publicar.",
-    "heroImageLabel": "Imagen principal del sitio web",
-    "destinationTitle": "Destino de publicación",
-    "destinationBody": "Conecta y verifica un dominio para publicar este borrador.",
-    "setUpDomain": "Configurar un dominio"
   }
 }

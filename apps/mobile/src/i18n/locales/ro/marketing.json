@@ -11,15 +11,7 @@
       "notConnected": "Neconectat"
     },
     "draft": "Ciornă",
-    "googleGrowth": "Creștere Google",
-    "websiteStudio": "Studio Website",
-    "editContent": "Editează conținutul",
-    "diningTableImage": "Masa de dining Acacia Bunting",
-    "pages": {
-      "home": "Acasă",
-      "product": "Produs",
-      "contact": "Contact"
-    }
+    "googleGrowth": "Creștere Google"
   },
   "tools": {
     "switchBusiness": "Schimbă afacerea, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Creștere Google",
         "body": "Profil, postări și recenzii",
         "cta": "Configurează"
-      },
-      "website": {
-        "title": "Studio Website",
-        "body": "Ciornă, editează și publică site-ul",
-        "cta": "Deschide ciorna"
       },
       "business": {
         "title": "Afacere",
@@ -149,45 +136,5 @@
         "value": "Configurează"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Previzualizare ciornă",
-    "catalogConnected": "Catalogul magazinului sursă conectat",
-    "connectDomain": "Conectează domeniul",
-    "previewLabel": "Previzualizare ciornă site",
-    "browserTitle": "Ciornă site",
-    "fullPreview": "Previzualizare completă",
-    "reviewPublish": "Revizuiește & publică ciorna",
-    "footnote": "Revizuiește conținutul și domeniul înainte de publicare."
-  },
-  "websiteEdit": {
-    "saveChanges": "Salvează modificările ciornei",
-    "reviewPublish": "Revizuiește & publică",
-    "preview": "Previzualizare",
-    "title": "Editează conținutul site-ului",
-    "heroTitle": "Banner secțiune erou",
-    "replaceImage": "Înlocuiește imaginea",
-    "heroImageLabel": "Imagine banner erou",
-    "headline": "Titlu (franceză)",
-    "description": "Descriere",
-    "sectionsTitle": "Secțiuni pagină",
-    "sectionCount_one": "{{count}} secțiune",
-    "sectionCount_other": "{{count}} secțiuni",
-    "sections": {
-      "heroBanner": "Banner erou",
-      "featuredCollection": "Colecție prezentată",
-      "showroomContact": "Showroom & contact"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Verifică un domeniu și revizuiește conținutul pentru a publica.",
-    "publish": "Publică site-ul",
-    "keepDraft": "Păstrează ca schiță",
-    "title": "Revizuiește-ți site-ul",
-    "subtitle": "Verifică-ți conținutul și destinația înainte de a publica.",
-    "heroImageLabel": "Imagine principală a site-ului",
-    "destinationTitle": "Destinația publicării",
-    "destinationBody": "Conectează și verifică un domeniu pentru a publica această schiță.",
-    "setUpDomain": "Configurează un domeniu"
   }
 }

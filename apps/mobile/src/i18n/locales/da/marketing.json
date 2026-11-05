@@ -11,15 +11,7 @@
       "notConnected": "Ikke forbundet"
     },
     "draft": "Kladde",
-    "googleGrowth": "Google Vækst",
-    "websiteStudio": "Website Studio",
-    "editContent": "Rediger indhold",
-    "diningTableImage": "Acacia Bunting spisebord",
-    "pages": {
-      "home": "Hjem",
-      "product": "Produkt",
-      "contact": "Kontakt"
-    }
+    "googleGrowth": "Google Vækst"
   },
   "tools": {
     "switchBusiness": "Skift virksomhed, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Google Vækst",
         "body": "Profil, opslag og anmeldelser",
         "cta": "Konfigurer"
-      },
-      "website": {
-        "title": "Website Studio",
-        "body": "Kladde, rediger og udgiv dit site",
-        "cta": "Åbn kladde"
       },
       "business": {
         "title": "Forretning",
@@ -149,45 +136,5 @@
         "value": "Opsæt"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Kladdeforhåndsvisning",
-    "catalogConnected": "Kildebutikskatalog forbundet",
-    "connectDomain": "Forbind domæne",
-    "previewLabel": "Forhåndsvisning af website kladde",
-    "browserTitle": "Website kladde",
-    "fullPreview": "Fuld forhåndsvisning",
-    "reviewPublish": "Gennemgå & udgiv kladde",
-    "footnote": "Gennemgå dit indhold og domæne, før du udgiver."
-  },
-  "websiteEdit": {
-    "saveChanges": "Gem kladdeændringer",
-    "reviewPublish": "Gennemgå & udgiv",
-    "preview": "Forhåndsvisning",
-    "title": "Rediger websiteindhold",
-    "heroTitle": "Hero-sektion banner",
-    "replaceImage": "Erstat billede",
-    "heroImageLabel": "Hero-banner billede",
-    "headline": "Overskrift (fransk)",
-    "description": "Beskrivelse",
-    "sectionsTitle": "Sidens sektioner",
-    "sectionCount_one": "{{count}} sektion",
-    "sectionCount_other": "{{count}} sektioner",
-    "sections": {
-      "heroBanner": "Hero-banner",
-      "featuredCollection": "Fremhævet kollektion",
-      "showroomContact": "Showroom & kontakt"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Bekræft et domæne og gennemgå indholdet for at udgive.",
-    "publish": "Udgiv hjemmeside",
-    "keepDraft": "Gem som kladde",
-    "title": "Gennemgå din hjemmeside",
-    "subtitle": "Tjek dit indhold og din destination, før du går live.",
-    "heroImageLabel": "Hjemmesidens hero-billede",
-    "destinationTitle": "Udgivelsesdestination",
-    "destinationBody": "Forbind og bekræft et domæne for at udgive denne kladde.",
-    "setUpDomain": "Opsæt et domæne"
   }
 }

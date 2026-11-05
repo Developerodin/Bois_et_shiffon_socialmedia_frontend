@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} aylık stüdyo kredisi",
       "postsStories": "Gönderiler, hikayeler ve planlama",
       "photoshoots": "Ürün ve moda çekimleri",
-      "websiteStudio": "Website Stüdyosu & özel alan adı taslağı",
       "replyAssistant": "AI Müşteri yanıt asistanı",
       "googleSync": "Google Büyüme profili senkronizasyonu",
       "contentExports": "İçerik oluşturma ve dışa aktarma",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Büyüme",
         "subtitle": "Yerel haritalar & yorumlar"
-      },
-      "website": {
-        "title": "Website Stüdyosu",
-        "subtitle": "Açılış sayfaları & taslak"
       },
       "business": {
         "title": "İşletmem",

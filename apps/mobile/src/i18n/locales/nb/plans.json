@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} månedlige studiokreditter",
       "postsStories": "Innlegg, historier & planlegging",
       "photoshoots": "Produkt- & motefotograferinger",
-      "websiteStudio": "Nettstedstudio & tilpasset domenekladde",
       "replyAssistant": "AI kundesvarassistent",
       "googleSync": "Google Growth-profil synkronisering",
       "contentExports": "Innholdsskaping og eksport",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Lokale kart & anmeldelser"
-      },
-      "website": {
-        "title": "Nettstedstudio",
-        "subtitle": "Landingssider & kladde"
       },
       "business": {
         "title": "Min bedrift",

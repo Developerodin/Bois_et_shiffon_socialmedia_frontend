@@ -10,11 +10,13 @@ Branch `desktop-shell` now holds everything: it contains `ai-reels` (with Market
 (Phases 1-4, see `docs/handover/2026-11-03-*.md`). Each module below goes through the same steps: wire it, review
 it, test it on the emulator, fix it, commit it.
 
-1. **Website Studio is the last Marketing piece on sample data.** The other Marketing screens are wired (`ab830c2`:
-   Google Growth, Reviews, Customers inbox, reply and people on real Google and Meta data).
-   - `marketing/website`, `website-edit` and `website-publish` read `ui/marketing/sample.ts`; the Marketing home shows
-     the Website card as "coming soon".
-   - There is no site backend. Decide what Website Studio should do before wiring it. Delete `sample.ts` when done.
+1. **Website Studio is hidden until the brief's base work is done** (owner's call, 2026-11-05; the B&C functional
+   brief doesn't cover it). The Marketing card, the drawer link, the Plans tool row and the Professional plan's
+   "Website Studio & custom domain draft" line are gone, and the three Figma screens (`marketing/website`,
+   `website-edit`, `website-publish`), `ui/marketing/sample.ts` and their strings are deleted. Restore them from
+   `17b7438` if needed. The owner's direction when it comes back: show the issues on the brand's own site against
+   standards. Research's SEO agent (PageSpeed performance, SEO, accessibility and best-practice scores, on-page
+   checks), the GEO agent and the competitor site audit already produce this; the phone just doesn't show it.
 2. **Stories** (`posts/stories`, `posts/edit-story`) is a "coming soon" page. It needs server work first: a story
    channel in the publish chain.
 3. **AI actor** (`reels/actor`): the sample voice is shown as "coming soon". The reel voice is OpenAI

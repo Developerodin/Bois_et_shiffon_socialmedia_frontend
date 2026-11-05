@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} havi stúdió kredit",
       "postsStories": "Bejegyzések, történetek és ütemezés",
       "photoshoots": "Termék- és divatfotózások",
-      "websiteStudio": "Weboldal Stúdió és egyedi domain vázlat",
       "replyAssistant": "AI Vevői válasz asszisztens",
       "googleSync": "Google Növekedési profil szinkronizálás",
       "contentExports": "Tartalomkészítés és exportálás",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Növekedés",
         "subtitle": "Helyi térképek és vélemények"
-      },
-      "website": {
-        "title": "Weboldal Stúdió",
-        "subtitle": "Landing oldalak és vázlat"
       },
       "business": {
         "title": "Saját vállalkozásom",

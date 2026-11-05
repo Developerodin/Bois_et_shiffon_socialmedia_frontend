@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} μηνιαίες πιστώσεις στούντιο",
       "postsStories": "Αναρτήσεις, ιστορίες & προγραμματισμός",
       "photoshoots": "Φωτογραφήσεις προϊόντων & μόδας",
-      "websiteStudio": "Website Studio & προσαρμοσμένο πρόχειρο domain",
       "replyAssistant": "Βοηθός απαντήσεων πελατών AI",
       "googleSync": "Συγχρονισμός προφίλ Google Growth",
       "contentExports": "Δημιουργία και εξαγωγές περιεχομένου",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Τοπικοί χάρτες & κριτικές"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Σελίδες προορισμού & πρόχειρο"
       },
       "business": {
         "title": "Η Επιχείρησή μου",

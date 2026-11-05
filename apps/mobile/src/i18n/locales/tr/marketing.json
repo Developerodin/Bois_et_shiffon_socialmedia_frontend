@@ -11,15 +11,7 @@
       "notConnected": "Bağlı değil"
     },
     "draft": "Taslak",
-    "googleGrowth": "Google Büyümesi",
-    "websiteStudio": "Web Sitesi Stüdyosu",
-    "editContent": "İçeriği düzenle",
-    "diningTableImage": "Acacia Bunting yemek masası",
-    "pages": {
-      "home": "Ana Sayfa",
-      "product": "Ürün",
-      "contact": "İletişim"
-    }
+    "googleGrowth": "Google Büyümesi"
   },
   "tools": {
     "switchBusiness": "İşletme değiştir, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Google Büyümesi",
         "body": "Profil, gönderiler ve yorumlar",
         "cta": "Yapılandır"
-      },
-      "website": {
-        "title": "Web Sitesi Stüdyosu",
-        "body": "Taslak, düzenle ve sitenizi yayınla",
-        "cta": "Taslağı aç"
       },
       "business": {
         "title": "İşletme",
@@ -149,45 +136,5 @@
         "value": "Kuruldu"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Taslak önizlemesi",
-    "catalogConnected": "Kaynak mağaza kataloğu bağlı",
-    "connectDomain": "Alan adı bağla",
-    "previewLabel": "Web sitesi taslak önizlemesi",
-    "browserTitle": "Web sitesi taslağı",
-    "fullPreview": "Tam önizleme",
-    "reviewPublish": "Taslağı incele ve yayınla",
-    "footnote": "Yayınlamadan önce içeriğinizi ve alan adınızı inceleyin."
-  },
-  "websiteEdit": {
-    "saveChanges": "Taslak değişikliklerini kaydet",
-    "reviewPublish": "İncele ve yayınla",
-    "preview": "Önizleme",
-    "title": "Web sitesi içeriğini düzenle",
-    "heroTitle": "Hero bölüm afişi",
-    "replaceImage": "Görseli değiştir",
-    "heroImageLabel": "Hero afiş görseli",
-    "headline": "Başlık (Fransızca)",
-    "description": "Açıklama",
-    "sectionsTitle": "Sayfa bölümleri",
-    "sectionCount_one": "{{count}} bölüm",
-    "sectionCount_other": "{{count}} bölüm",
-    "sections": {
-      "heroBanner": "Hero afiş",
-      "featuredCollection": "Öne çıkan koleksiyon",
-      "showroomContact": "Showroom & iletişim"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Bir alan adı doğrulayın ve yayınlamak için içeriği gözden geçirin.",
-    "publish": "Yayınla",
-    "keepDraft": "Taslak olarak sakla",
-    "title": "Web sitenizi gözden geçirin",
-    "subtitle": "Yayınlamadan önce içeriğinizi ve hedefinizi kontrol edin.",
-    "heroImageLabel": "Web sitesi ana görseli",
-    "destinationTitle": "Yayınlama hedefi",
-    "destinationBody": "Bu taslağı yayınlamak için bir alan adı bağlayın ve doğrulayın.",
-    "setUpDomain": "Alan adı ayarla"
   }
 }

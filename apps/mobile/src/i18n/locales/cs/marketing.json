@@ -11,15 +11,7 @@
       "notConnected": "Nepřipojeno"
     },
     "draft": "Koncept",
-    "googleGrowth": "Růst na Google",
-    "websiteStudio": "Studio webu",
-    "editContent": "Upravit obsah",
-    "diningTableImage": "Jídelní stůl Acacia Bunting",
-    "pages": {
-      "home": "Domů",
-      "product": "Produkt",
-      "contact": "Kontakt"
-    }
+    "googleGrowth": "Růst na Google"
   },
   "tools": {
     "switchBusiness": "Přepnout podnik, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Růst na Google",
         "body": "Profil, příspěvky a recenze",
         "cta": "Nastavit"
-      },
-      "website": {
-        "title": "Studio webu",
-        "body": "Koncept, úpravy a publikace vašeho webu",
-        "cta": "Otevřít koncept"
       },
       "business": {
         "title": "Podnikání",
@@ -149,45 +136,5 @@
         "value": "Nastavit"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Náhled konceptu",
-    "catalogConnected": "Zdrojový katalog obchodu připojen",
-    "connectDomain": "Připojit doménu",
-    "previewLabel": "Náhled konceptu webu",
-    "browserTitle": "Koncept webu",
-    "fullPreview": "Úplný náhled",
-    "reviewPublish": "Zkontrolovat a publikovat koncept",
-    "footnote": "Před publikováním zkontrolujte svůj obsah a doménu."
-  },
-  "websiteEdit": {
-    "saveChanges": "Uložit změny konceptu",
-    "reviewPublish": "Zkontrolovat a publikovat",
-    "preview": "Náhled",
-    "title": "Upravit obsah webu",
-    "heroTitle": "Banner hlavní sekce",
-    "replaceImage": "Nahradit obrázek",
-    "heroImageLabel": "Obrázek banneru hlavní sekce",
-    "headline": "Nadpis (francouzsky)",
-    "description": "Popis",
-    "sectionsTitle": "Sekce stránky",
-    "sectionCount_one": "{{count}} sekce",
-    "sectionCount_other": "{{count}} sekcí",
-    "sections": {
-      "heroBanner": "Banner hlavní sekce",
-      "featuredCollection": "Doporučená kolekce",
-      "showroomContact": "Showroom & kontakt"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Ověřte doménu a zkontrolujte obsah před publikováním.",
-    "publish": "Publikovat web",
-    "keepDraft": "Ponechat jako koncept",
-    "title": "Zkontrolujte svůj web",
-    "subtitle": "Zkontrolujte obsah a cíl před spuštěním.",
-    "heroImageLabel": "Hlavní obrázek webu",
-    "destinationTitle": "Cíl publikování",
-    "destinationBody": "Pro publikování tohoto konceptu připojte a ověřte doménu.",
-    "setUpDomain": "Nastavit doménu"
   }
 }

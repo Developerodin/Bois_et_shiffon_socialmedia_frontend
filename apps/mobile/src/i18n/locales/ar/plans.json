@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} أرصدة استوديو شهرية",
       "postsStories": "المنشورات، القصص والجدولة",
       "photoshoots": "جلسات تصوير المنتجات والأزياء",
-      "websiteStudio": "استوديو الموقع ومسودة النطاق المخصص",
       "replyAssistant": "مساعد الردود الذكي",
       "googleSync": "مزامنة ملف النمو على Google",
       "contentExports": "إنشاء وتصدير المحتوى",
@@ -92,10 +91,6 @@
       "google": {
         "title": "نمو Google",
         "subtitle": "الخرائط المحلية والمراجعات"
-      },
-      "website": {
-        "title": "استوديو الموقع",
-        "subtitle": "صفحات الهبوط والمسودة"
       },
       "business": {
         "title": "عملي",

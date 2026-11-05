@@ -11,15 +11,7 @@
       "notConnected": "Not connected"
     },
     "draft": "Draft",
-    "googleGrowth": "Google Growth",
-    "websiteStudio": "Website Studio",
-    "editContent": "Edit content",
-    "diningTableImage": "Product photo",
-    "pages": {
-      "home": "Home",
-      "product": "Product",
-      "contact": "Contact"
-    }
+    "googleGrowth": "Google Growth"
   },
   "tools": {
     "switchBusiness": "Switch business, {{name}}",
@@ -37,7 +29,6 @@
     "cards": {
       "customers": { "title": "Customers", "body": "Inbox, reviews and people", "cta": "Open inbox" },
       "google": { "title": "Google Growth", "body": "Profile, posts and reviews", "cta": "Open" },
-      "website": { "title": "Website Studio", "body": "Draft, edit and publish your site", "cta": "Open draft" },
       "business": { "title": "Business", "body": "Brand, assets and connections", "cta": "Manage" }
     }
   },
@@ -183,45 +174,5 @@
     "posted": "Sent to Google. It can take a few minutes to appear.",
     "unverifiedTitle": "Google hasn't verified this business yet",
     "unverifiedBody": "Posts and the review link only work once Google verifies your business. Verify it in Google Business Profile."
-  },
-  "website": {
-    "draftPreview": "Draft preview",
-    "catalogConnected": "Source store catalog connected",
-    "connectDomain": "Connect domain",
-    "previewLabel": "Website draft preview",
-    "browserTitle": "Website draft",
-    "fullPreview": "Full preview",
-    "reviewPublish": "Review & publish draft",
-    "footnote": "Review your content and domain before publishing."
-  },
-  "websiteEdit": {
-    "saveChanges": "Save draft changes",
-    "reviewPublish": "Review & publish",
-    "preview": "Preview",
-    "title": "Edit website content",
-    "heroTitle": "Hero section banner",
-    "replaceImage": "Replace image",
-    "heroImageLabel": "Hero banner image",
-    "headline": "Headline (French)",
-    "description": "Description",
-    "sectionsTitle": "Page sections",
-    "sectionCount_one": "{{count}} section",
-    "sectionCount_other": "{{count}} sections",
-    "sections": {
-      "heroBanner": "Hero banner",
-      "featuredCollection": "Featured collection",
-      "showroomContact": "Showroom & contact"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Verify a domain and review the content to publish.",
-    "publish": "Publish website",
-    "keepDraft": "Keep as draft",
-    "title": "Review your website",
-    "subtitle": "Check your content and destination before going live.",
-    "heroImageLabel": "Website hero image",
-    "destinationTitle": "Publishing destination",
-    "destinationBody": "Connect and verify a domain to publish this draft.",
-    "setUpDomain": "Set up a domain"
   }
 }

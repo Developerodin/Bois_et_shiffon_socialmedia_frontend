@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} kuukausittaista studiokrediittiä",
       "postsStories": "Julkaisut, tarinat & ajoitus",
       "photoshoots": "Tuote- & muotikuvaukset",
-      "websiteStudio": "Website Studio & mukautettu verkkotunnusluonnos",
       "replyAssistant": "AI-asiakasvastausavustaja",
       "googleSync": "Google Growth -profiilin synkronointi",
       "contentExports": "Sisällön luonti ja vienti",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Paikalliset kartat & arvostelut"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Aloitussivut & luonnos"
       },
       "business": {
         "title": "Yritykseni",

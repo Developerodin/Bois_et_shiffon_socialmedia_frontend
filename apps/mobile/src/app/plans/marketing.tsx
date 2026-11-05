@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { ArrowRight, Building, ChevronRight, MessagesSquare, PanelsTopLeft, Store, Unplug, Zap, type LucideIcon } from "lucide-react-native";
+import { ArrowRight, Building, ChevronRight, MessagesSquare, Store, Unplug, Zap, type LucideIcon } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { color, radius, space, type } from "@/theme/tokens";
@@ -12,7 +12,6 @@ import { usePlan } from "@/ui/plans/use-plan";
 const ICONS: Record<Tool["id"], LucideIcon> = {
   customers: MessagesSquare,
   google: Store,
-  website: PanelsTopLeft,
   business: Building,
   connections: Unplug,
   automations: Zap,

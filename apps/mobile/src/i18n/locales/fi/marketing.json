@@ -11,15 +11,7 @@
       "notConnected": "Ei yhdistetty"
     },
     "draft": "Luonnos",
-    "googleGrowth": "Google Kasvu",
-    "websiteStudio": "Verkkosivustostudio",
-    "editContent": "Muokkaa sisältöä",
-    "diningTableImage": "Acacia Bunting ruokapöytä",
-    "pages": {
-      "home": "Koti",
-      "product": "Tuote",
-      "contact": "Yhteystiedot"
-    }
+    "googleGrowth": "Google Kasvu"
   },
   "tools": {
     "switchBusiness": "Vaihda yritystä, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Google Kasvu",
         "body": "Profiili, julkaisut ja arvostelut",
         "cta": "Määritä"
-      },
-      "website": {
-        "title": "Verkkosivustostudio",
-        "body": "Luonnos, muokkaa ja julkaise sivustosi",
-        "cta": "Avaa luonnos"
       },
       "business": {
         "title": "Liiketoiminta",
@@ -149,45 +136,5 @@
         "value": "Aseta"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Luonnoksen esikatselu",
-    "catalogConnected": "Lähdekaupan katalogi yhdistetty",
-    "connectDomain": "Yhdistä verkkotunnus",
-    "previewLabel": "Verkkosivustoluonnoksen esikatselu",
-    "browserTitle": "Verkkosivustoluonnos",
-    "fullPreview": "Täysi esikatselu",
-    "reviewPublish": "Tarkista & julkaise luonnos",
-    "footnote": "Tarkista sisältösi ja verkkotunnuksesi ennen julkaisua."
-  },
-  "websiteEdit": {
-    "saveChanges": "Tallenna luonnosmuutokset",
-    "reviewPublish": "Tarkista & julkaise",
-    "preview": "Esikatselu",
-    "title": "Muokkaa verkkosivuston sisältöä",
-    "heroTitle": "Hero-osion banneri",
-    "replaceImage": "Vaihda kuva",
-    "heroImageLabel": "Hero-bannerikuva",
-    "headline": "Otsikko (ranskaksi)",
-    "description": "Kuvaus",
-    "sectionsTitle": "Sivun osiot",
-    "sectionCount_one": "{{count}} osio",
-    "sectionCount_other": "{{count}} osiota",
-    "sections": {
-      "heroBanner": "Hero-banneri",
-      "featuredCollection": "Esittelykokoelma",
-      "showroomContact": "Näyttelytila & yhteystiedot"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Vahvista verkkotunnus ja tarkista sisältö ennen julkaisua.",
-    "publish": "Julkaise sivusto",
-    "keepDraft": "Pidä luonnoksena",
-    "title": "Tarkista sivustosi",
-    "subtitle": "Tarkista sisältö ja kohde ennen julkaisua.",
-    "heroImageLabel": "Sivuston pääkuva",
-    "destinationTitle": "Julkaisukohde",
-    "destinationBody": "Yhdistä ja vahvista verkkotunnus julkaistaksesi tämän luonnoksen.",
-    "setUpDomain": "Määritä verkkotunnus"
   }
 }

@@ -11,15 +11,7 @@
       "notConnected": "Não conectado"
     },
     "draft": "Rascunho",
-    "googleGrowth": "Crescimento no Google",
-    "websiteStudio": "Estúdio de Sites",
-    "editContent": "Editar conteúdo",
-    "diningTableImage": "Mesa de jantar Acacia Bunting",
-    "pages": {
-      "home": "Início",
-      "product": "Produto",
-      "contact": "Contacto"
-    }
+    "googleGrowth": "Crescimento no Google"
   },
   "tools": {
     "switchBusiness": "Mudar de negócio, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Crescimento no Google",
         "body": "Perfil, publicações e avaliações",
         "cta": "Configurar"
-      },
-      "website": {
-        "title": "Estúdio de Sites",
-        "body": "Rascunhe, edite e publique o seu site",
-        "cta": "Abrir rascunho"
       },
       "business": {
         "title": "Negócio",
@@ -149,45 +136,5 @@
         "value": "Configurar"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Pré-visualização do rascunho",
-    "catalogConnected": "Catálogo da loja de origem conectado",
-    "connectDomain": "Conectar domínio",
-    "previewLabel": "Pré-visualização do rascunho do site",
-    "browserTitle": "Rascunho do site",
-    "fullPreview": "Pré-visualização completa",
-    "reviewPublish": "Revisar e publicar rascunho",
-    "footnote": "Revise o seu conteúdo e domínio antes de publicar."
-  },
-  "websiteEdit": {
-    "saveChanges": "Salvar alterações do rascunho",
-    "reviewPublish": "Revisar e publicar",
-    "preview": "Pré-visualizar",
-    "title": "Editar conteúdo do site",
-    "heroTitle": "Banner da seção principal",
-    "replaceImage": "Substituir imagem",
-    "heroImageLabel": "Imagem do banner principal",
-    "headline": "Título (Francês)",
-    "description": "Descrição",
-    "sectionsTitle": "Seções da página",
-    "sectionCount_one": "{{count}} seção",
-    "sectionCount_other": "{{count}} seções",
-    "sections": {
-      "heroBanner": "Banner principal",
-      "featuredCollection": "Coleção em destaque",
-      "showroomContact": "Showroom & contacto"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Verifica um domínio e revê o conteúdo para publicar.",
-    "publish": "Publicar site",
-    "keepDraft": "Manter como rascunho",
-    "title": "Revê o teu site",
-    "subtitle": "Verifica o teu conteúdo e destino antes de publicar.",
-    "heroImageLabel": "Imagem principal do site",
-    "destinationTitle": "Destino de publicação",
-    "destinationBody": "Conecta e verifica um domínio para publicar este rascunho.",
-    "setUpDomain": "Configurar um domínio"
   }
 }

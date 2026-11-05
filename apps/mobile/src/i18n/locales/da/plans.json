@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} månedlige studie kreditter",
       "postsStories": "Opslag, historier & planlægning",
       "photoshoots": "Produkt- & modefotoshoots",
-      "websiteStudio": "Website Studio & tilpasset domæne kladde",
       "replyAssistant": "AI kundesvar assistent",
       "googleSync": "Google Growth profil synkronisering",
       "contentExports": "Indholdsskabelse og eksport",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Lokale kort & anmeldelser"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Landingssider & kladde"
       },
       "business": {
         "title": "Min virksomhed",

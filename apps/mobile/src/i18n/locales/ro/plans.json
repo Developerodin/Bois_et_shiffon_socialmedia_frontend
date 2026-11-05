@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} credite lunare studio",
       "postsStories": "Postări, povești & programare",
       "photoshoots": "Ședințe foto produs & modă",
-      "websiteStudio": "Website Studio & domeniu personalizat",
       "replyAssistant": "Asistent AI răspuns clienți",
       "googleSync": "Sincronizare profil Google Growth",
       "contentExports": "Creare și export de conținut",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Hărți locale & recenzii"
-      },
-      "website": {
-        "title": "Website Studio",
-        "subtitle": "Pagini de destinație & schiță"
       },
       "business": {
         "title": "Afacerea mea",

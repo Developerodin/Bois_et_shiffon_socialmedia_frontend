@@ -11,15 +11,7 @@
       "notConnected": "Non connesso"
     },
     "draft": "Bozza",
-    "googleGrowth": "Crescita su Google",
-    "websiteStudio": "Studio del sito web",
-    "editContent": "Modifica contenuto",
-    "diningTableImage": "Tavolo da pranzo Acacia Bunting",
-    "pages": {
-      "home": "Home",
-      "product": "Prodotto",
-      "contact": "Contatto"
-    }
+    "googleGrowth": "Crescita su Google"
   },
   "tools": {
     "switchBusiness": "Cambia attività, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Crescita su Google",
         "body": "Profilo, post e recensioni",
         "cta": "Configura"
-      },
-      "website": {
-        "title": "Studio del sito web",
-        "body": "Bozza, modifica e pubblica il tuo sito",
-        "cta": "Apri bozza"
       },
       "business": {
         "title": "Attività",
@@ -149,45 +136,5 @@
         "value": "Imposta"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Anteprima bozza",
-    "catalogConnected": "Catalogo del negozio sorgente connesso",
-    "connectDomain": "Connetti dominio",
-    "previewLabel": "Anteprima bozza del sito web",
-    "browserTitle": "Bozza del sito web",
-    "fullPreview": "Anteprima completa",
-    "reviewPublish": "Rivedi & pubblica bozza",
-    "footnote": "Rivedi il tuo contenuto e il dominio prima di pubblicare."
-  },
-  "websiteEdit": {
-    "saveChanges": "Salva modifiche alla bozza",
-    "reviewPublish": "Rivedi & pubblica",
-    "preview": "Anteprima",
-    "title": "Modifica contenuto del sito web",
-    "heroTitle": "Banner sezione principale",
-    "replaceImage": "Sostituisci immagine",
-    "heroImageLabel": "Immagine banner principale",
-    "headline": "Titolo (Francese)",
-    "description": "Descrizione",
-    "sectionsTitle": "Sezioni della pagina",
-    "sectionCount_one": "{{count}} sezione",
-    "sectionCount_other": "{{count}} sezioni",
-    "sections": {
-      "heroBanner": "Banner principale",
-      "featuredCollection": "Collezione in evidenza",
-      "showroomContact": "Showroom & contatto"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Verifica un dominio e controlla il contenuto per pubblicare.",
-    "publish": "Pubblica sito",
-    "keepDraft": "Mantieni bozza",
-    "title": "Rivedi il tuo sito",
-    "subtitle": "Controlla il contenuto e la destinazione prima di andare online.",
-    "heroImageLabel": "Immagine principale del sito",
-    "destinationTitle": "Destinazione di pubblicazione",
-    "destinationBody": "Collega e verifica un dominio per pubblicare questa bozza.",
-    "setUpDomain": "Configura un dominio"
   }
 }

@@ -11,15 +11,7 @@
       "notConnected": "Nicht verbunden"
     },
     "draft": "Entwurf",
-    "googleGrowth": "Google-Wachstum",
-    "websiteStudio": "Website-Studio",
-    "editContent": "Inhalt bearbeiten",
-    "diningTableImage": "Acacia Bunting Esstisch",
-    "pages": {
-      "home": "Startseite",
-      "product": "Produkt",
-      "contact": "Kontakt"
-    }
+    "googleGrowth": "Google-Wachstum"
   },
   "tools": {
     "switchBusiness": "Geschäft wechseln, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Google-Wachstum",
         "body": "Profil, Beiträge und Bewertungen",
         "cta": "Konfigurieren"
-      },
-      "website": {
-        "title": "Website-Studio",
-        "body": "Entwurf, Bearbeitung und Veröffentlichung deiner Seite",
-        "cta": "Entwurf öffnen"
       },
       "business": {
         "title": "Geschäft",
@@ -149,45 +136,5 @@
         "value": "Einrichten"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Entwurfsvorschau",
-    "catalogConnected": "Quellkatalog des Shops verbunden",
-    "connectDomain": "Domain verbinden",
-    "previewLabel": "Website-Entwurfsvorschau",
-    "browserTitle": "Website-Entwurf",
-    "fullPreview": "Vollständige Vorschau",
-    "reviewPublish": "Entwurf überprüfen & veröffentlichen",
-    "footnote": "Überprüfe deinen Inhalt und deine Domain vor der Veröffentlichung."
-  },
-  "websiteEdit": {
-    "saveChanges": "Entwurfsänderungen speichern",
-    "reviewPublish": "Überprüfen & veröffentlichen",
-    "preview": "Vorschau",
-    "title": "Website-Inhalt bearbeiten",
-    "heroTitle": "Hero-Banner",
-    "replaceImage": "Bild ersetzen",
-    "heroImageLabel": "Hero-Banner-Bild",
-    "headline": "Überschrift (Französisch)",
-    "description": "Beschreibung",
-    "sectionsTitle": "Seitensektionen",
-    "sectionCount_one": "{{count}} Sektion",
-    "sectionCount_other": "{{count}} Sektionen",
-    "sections": {
-      "heroBanner": "Hero-Banner",
-      "featuredCollection": "Vorgestellte Kollektion",
-      "showroomContact": "Showroom & Kontakt"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Verifiziere eine Domain und überprüfe den Inhalt, um zu veröffentlichen.",
-    "publish": "Website veröffentlichen",
-    "keepDraft": "Als Entwurf behalten",
-    "title": "Überprüfe deine Website",
-    "subtitle": "Überprüfe deinen Inhalt und das Ziel, bevor du live gehst.",
-    "heroImageLabel": "Website-Hauptbild",
-    "destinationTitle": "Veröffentlichungsziel",
-    "destinationBody": "Verbinde und verifiziere eine Domain, um diesen Entwurf zu veröffentlichen.",
-    "setUpDomain": "Domain einrichten"
   }
 }

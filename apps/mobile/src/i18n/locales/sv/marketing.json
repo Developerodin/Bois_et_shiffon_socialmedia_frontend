@@ -11,15 +11,7 @@
       "notConnected": "Inte ansluten"
     },
     "draft": "Utkast",
-    "googleGrowth": "Google-tillväxt",
-    "websiteStudio": "Webbplatsstudio",
-    "editContent": "Redigera innehåll",
-    "diningTableImage": "Acacia Bunting matbord",
-    "pages": {
-      "home": "Hem",
-      "product": "Produkt",
-      "contact": "Kontakt"
-    }
+    "googleGrowth": "Google-tillväxt"
   },
   "tools": {
     "switchBusiness": "Byt företag, {{name}}",
@@ -43,11 +35,6 @@
         "title": "Google-tillväxt",
         "body": "Profil, inlägg och recensioner",
         "cta": "Konfigurera"
-      },
-      "website": {
-        "title": "Webbplatsstudio",
-        "body": "Utkast, redigera och publicera din webbplats",
-        "cta": "Öppna utkast"
       },
       "business": {
         "title": "Företag",
@@ -149,45 +136,5 @@
         "value": "Konfigurerad"
       }
     }
-  },
-  "website": {
-    "draftPreview": "Utkastförhandsvisning",
-    "catalogConnected": "Källbutikskatalog ansluten",
-    "connectDomain": "Anslut domän",
-    "previewLabel": "Förhandsvisning av webbplatsutkast",
-    "browserTitle": "Webbplatsutkast",
-    "fullPreview": "Full förhandsvisning",
-    "reviewPublish": "Granska & publicera utkast",
-    "footnote": "Granska ditt innehåll och din domän innan publicering."
-  },
-  "websiteEdit": {
-    "saveChanges": "Spara utkaständringar",
-    "reviewPublish": "Granska & publicera",
-    "preview": "Förhandsvisning",
-    "title": "Redigera webbplatsinnehåll",
-    "heroTitle": "Hjältedelsbanner",
-    "replaceImage": "Byt bild",
-    "heroImageLabel": "Hjältebannerbild",
-    "headline": "Rubrik (Franska)",
-    "description": "Beskrivning",
-    "sectionsTitle": "Sidsektioner",
-    "sectionCount_one": "{{count}} sektion",
-    "sectionCount_other": "{{count}} sektioner",
-    "sections": {
-      "heroBanner": "Hjältebanner",
-      "featuredCollection": "Utvald kollektion",
-      "showroomContact": "Showroom & kontakt"
-    }
-  },
-  "websitePublish": {
-    "footnote": "Verifiera en domän och granska innehållet för att publicera.",
-    "publish": "Publicera webbplats",
-    "keepDraft": "Behåll som utkast",
-    "title": "Granska din webbplats",
-    "subtitle": "Kontrollera ditt innehåll och mål innan du går live.",
-    "heroImageLabel": "Webbplatsens hero-bild",
-    "destinationTitle": "Publiceringsmål",
-    "destinationBody": "Anslut och verifiera en domän för att publicera detta utkast.",
-    "setUpDomain": "Ställ in en domän"
   }
 }

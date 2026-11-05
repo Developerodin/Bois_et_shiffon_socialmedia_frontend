@@ -12,7 +12,6 @@
       "monthlyCredits_other": "{{n}} månatliga studiokrediter",
       "postsStories": "Inlägg, berättelser & schemaläggning",
       "photoshoots": "Produkt- & modefotograferingar",
-      "websiteStudio": "Webbplatsstudio & anpassad domänutkast",
       "replyAssistant": "AI-kundsvareassistent",
       "googleSync": "Google Growth-profil synk",
       "contentExports": "Innehållsskapande och export",
@@ -92,10 +91,6 @@
       "google": {
         "title": "Google Growth",
         "subtitle": "Lokala kartor & recensioner"
-      },
-      "website": {
-        "title": "Webbplatsstudio",
-        "subtitle": "Landningssidor & utkast"
       },
       "business": {
         "title": "Mitt företag",

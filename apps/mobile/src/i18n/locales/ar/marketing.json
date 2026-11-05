@@ -11,15 +11,7 @@
       "notConnected": "غير متصل"
     },
     "draft": "مسودة",
-    "googleGrowth": "نمو Google",
-    "websiteStudio": "استوديو الموقع",
-    "editContent": "تعديل المحتوى",
-    "diningTableImage": "طاولة طعام Acacia Bunting",
-    "pages": {
-      "home": "الرئيسية",
-      "product": "المنتج",
-      "contact": "الاتصال"
-    }
+    "googleGrowth": "نمو Google"
   },
   "tools": {
     "switchBusiness": "تبديل العمل، {{name}}",
@@ -43,11 +35,6 @@
         "title": "نمو Google",
         "body": "الملف الشخصي، المنشورات والتقييمات",
         "cta": "إعداد"
-      },
-      "website": {
-        "title": "استوديو الموقع",
-        "body": "مسودة، تعديل ونشر موقعك",
-        "cta": "افتح المسودة"
       },
       "business": {
         "title": "الأعمال",
@@ -149,45 +136,5 @@
         "value": "إعداد"
       }
     }
-  },
-  "website": {
-    "draftPreview": "معاينة المسودة",
-    "catalogConnected": "كتالوج المتجر المصدر متصل",
-    "connectDomain": "توصيل النطاق",
-    "previewLabel": "معاينة مسودة الموقع",
-    "browserTitle": "مسودة الموقع",
-    "fullPreview": "معاينة كاملة",
-    "reviewPublish": "مراجعة ونشر المسودة",
-    "footnote": "راجع المحتوى والنطاق قبل النشر."
-  },
-  "websiteEdit": {
-    "saveChanges": "حفظ تغييرات المسودة",
-    "reviewPublish": "مراجعة ونشر",
-    "preview": "معاينة",
-    "title": "تعديل محتوى الموقع",
-    "heroTitle": "لافتة قسم البطل",
-    "replaceImage": "استبدال الصورة",
-    "heroImageLabel": "صورة لافتة البطل",
-    "headline": "العنوان الرئيسي (بالفرنسية)",
-    "description": "الوصف",
-    "sectionsTitle": "أقسام الصفحة",
-    "sectionCount_one": "{{count}} قسم",
-    "sectionCount_other": "{{count}} أقسام",
-    "sections": {
-      "heroBanner": "لافتة البطل",
-      "featuredCollection": "مجموعة مميزة",
-      "showroomContact": "المعرض والاتصال"
-    }
-  },
-  "websitePublish": {
-    "footnote": "تحقق من النطاق وراجع المحتوى للنشر.",
-    "publish": "انشر الموقع",
-    "keepDraft": "احتفظ كمسودة",
-    "title": "راجع موقعك",
-    "subtitle": "تحقق من المحتوى والوجهة قبل النشر.",
-    "heroImageLabel": "صورة البطل للموقع",
-    "destinationTitle": "وجهة النشر",
-    "destinationBody": "قم بتوصيل وتحقق من النطاق لنشر هذه المسودة.",
-    "setUpDomain": "إعداد نطاق"
   }
 }
