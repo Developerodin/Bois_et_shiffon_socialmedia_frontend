@@ -194,9 +194,9 @@ describe("offerIssues", () => {
   it("ended refuses; an override listing the campaign covers it", () => {
     const end = at("2026-11-30T19:00:00Z");
     expect(offerIssues(campaign(), snap(), null, end, PARIS, checked)).toEqual([
-      { kind: "offer", campaignId: "c1", state: "ended", message: '"Black Friday" ends 2026-11-30 20:00 Europe/Paris: pick an earlier time', refuses: true, overridable: true },
+      { kind: "offer", campaignId: "c1", state: "ended", message: '"Black Friday" ends 2026-11-30 20:00 (Paris): pick an earlier time', refuses: true, overridable: true },
     ]);
-    expect(offerIssues(campaign(), snap(), null, end, PARIS, end)[0]!.message).toBe('"Black Friday" ended 2026-11-30 20:00 Europe/Paris. Approve anyway or ask for changes.');
+    expect(offerIssues(campaign(), snap(), null, end, PARIS, end)[0]!.message).toBe('"Black Friday" ended 2026-11-30 20:00 (Paris). Approve anyway or ask for changes.');
     expect(offerIssues(campaign(), snap(), { offers: ["c1"] }, end, PARIS, checked)[0]).toMatchObject({ state: "ended", refuses: false });
   });
 
@@ -237,7 +237,7 @@ describe("offerIssues", () => {
   it("a live-judged post before the start refuses; an upcoming-judged one doesn't", () => {
     const early = at("2026-11-26T12:00:00Z");
     expect(offerIssues(campaign(), snap(), null, early, PARIS)).toEqual([
-      { kind: "offer", campaignId: "c1", state: "early", message: '"Black Friday" starts 2026-11-27 08:00 Europe/Paris: pick a later time', refuses: true, overridable: false },
+      { kind: "offer", campaignId: "c1", state: "early", message: '"Black Friday" starts 2026-11-27 08:00 (Paris): pick a later time', refuses: true, overridable: false },
     ]);
     expect(offerIssues(campaign(), snap({}, at("2026-11-20T12:00:00Z")), null, early, PARIS)).toEqual([]);
   });

@@ -225,8 +225,8 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
         </p>
       ) : null}
       <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
-      {body}
       {data ? <CampaignsSection workspaceId={workspaceId} brandId={brandId} products={data.products} canManage={canManageCommercial} /> : null}
+      {body}
       {editing !== null ? (
         <ProductDialog
           workspaceId={workspaceId}
