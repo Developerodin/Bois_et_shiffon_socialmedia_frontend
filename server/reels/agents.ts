@@ -17,7 +17,7 @@ import { REEL_VOICES } from "@/server/reels/voice";
  *   (higgsfield-ai/skills higgsfield-generate, MIT; Seedance structure from dexhunter/seedance2-skill, MIT).
  * Bump REEL_PROMPT_VERSION when any text changes; it is logged with every AI call.
  */
-export const REEL_PROMPT_VERSION = "5";
+export const REEL_PROMPT_VERSION = "6";
 
 const SCRIPT_SYSTEM = `You write short vertical video reels (Instagram Reels) for one brand. Your output is a DRAFT a person reviews.
 Ground everything in the brand knowledge provided. Never invent product names, prices, materials, dimensions, stock or claims; if a fact is missing, leave it out.
@@ -30,6 +30,7 @@ Structure (viewers decide in the first 3 seconds):
 One subject per reel: every scene shows the same product, or the room it's in, so the scenes play as one continuous film; never jump to an unrelated product. collection: true only when the person asks for several products in one reel; then keep them to one collection or one room and order the scenes so each leads into the next. Otherwise false.
 - on-screen text: at most 6 words, it reinforces the voice, never repeats it word for word.
 Avoid AI tells: no "it's not X, it's Y" reveals, no "no X, no Y, no Z" lists, no sentences trailing into extra clauses, no "elevate", "unlock", "seamless", "sublimez" clichés.
+voice: on a revision, copy the current plan's voice; if they ask for another voice, say in reply that they can change it in the voice picker. Otherwise pick one.
 Pick each scene's photo from the list given (use its key exactly); prefer the product the idea is about.
 standIn: true when no given photo shows what that scene talks about (another product, another model) and you used the closest one; then say so in reply and ask for the right photo. A stand-in is never rendered. Otherwise false.
 shot: a few words for the person (e.g. "Wide, the table in the room"). direction: what moves and how the camera moves, for the person.
@@ -111,7 +112,8 @@ export const directionProblems = (scenes: { prompt: string }[], count: number) =
 export async function writePlan(scope: Scope, input: { knowledge: string; photos: ReelPhoto[]; idea?: { title: string; summary: string; angle: string }; message?: string; current?: Plan; chat?: { role: string; text: string }[]; replyLanguage?: string; onDraft?: (soFar: DraftSoFar) => void }) {
   const onDraft = input.onDraft;
   const toPlan = (d: z.infer<typeof Draft>): Plan =>
-    ReelPlan.parse({ title: d.title.slice(0, 120), presenter: "none", template: input.current?.template ?? "spotlight", voice: d.voice, language: reelLanguage(d.language), caption: d.caption.slice(0, 2200), hashtags: d.hashtags.slice(0, 5), scenes: d.scenes.slice(0, 6) });
+    // The person picks the voice and template in the app, so a chat revision keeps them; the scriptwriter's voice only seeds a new plan.
+    ReelPlan.parse({ title: d.title.slice(0, 120), presenter: "none", template: input.current?.template ?? "spotlight", voice: input.current?.voice ?? d.voice, language: reelLanguage(d.language), caption: d.caption.slice(0, 2200), hashtags: d.hashtags.slice(0, 5), scenes: d.scenes.slice(0, 6) });
   const draft = await generateObject(ctxFor(scope, "reels.script"), {
     schema: Draft,
     schemaName: "reel_plan",
