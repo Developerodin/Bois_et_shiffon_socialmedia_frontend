@@ -34,7 +34,7 @@ async function call(path: string, init: { method?: string; body?: unknown; heade
 export const higgsfield = {
   /** Submit one scene clip. The idempotency key makes a resend return the same job, uncharged. */
   /** webhook: only a public https address (Higgsfield can't call localhost); without one, polling carries the render. */
-  async animate(input: { model: ModelId; photoUrl: string; prompt: string; seconds: number; webhook?: string; idempotencyKey: string }) {
+  async animate(input: { model: ModelId; photoUrl: string; prompt: string; seconds: number; imageUrls?: string[]; audioUrl?: string; webhook?: string; idempotencyKey: string }) {
     const m = VIDEO_MODELS[input.model];
     const data = await call(`${m.path}${input.webhook ? `?hf_webhook=${encodeURIComponent(input.webhook)}` : ""}`, {
       method: "POST",

@@ -4,7 +4,7 @@ import { ArrowRight, ArrowUp, Clapperboard, ImagePlus, RotateCcw, Sparkle, Zap }
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { brandAssets, currentBrand, opportunities } from "@/api/endpoints";
+import { brandAssets, currentBrand, opportunities, reelSeconds } from "@/api/endpoints";
 import { formatNumber } from "@/i18n";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { ActionButton, BackButton, Chip, ICON, PageHeader, ReelsScreen, bodyMuted, eyebrow, meta, metaInk, rc } from "@/ui/reels/kit";
@@ -15,8 +15,6 @@ import { libraryPhotos } from "@/ui/use-current-brand";
 const DURATIONS = [20, 30] as const;
 /** Labels: reels:noPresenter / reels:aiActor. */
 const PRESENTERS = ["noPresenter", "aiActor"] as const;
-// Same rule as the server (apps/web/server/reels/plan.ts): ~2 words a second, each scene 3–15 s.
-const sceneSeconds = (voice: string) => Math.min(15, Math.max(3, Math.ceil(voice.trim().split(/\s+/).filter(Boolean).length / 2)));
 
 type Starter = { label: string; message: string; opportunityId?: string };
 
@@ -32,7 +30,7 @@ export default function ReelsChat() {
   const [lastSent, setLastSent] = useState<{ message: string; opportunityId?: string } | null>(null);
   const [starters, setStarters] = useState<Starter[]>([]);
   const plan = detail?.plan ?? null;
-  const seconds = plan ? plan.scenes.reduce((n, s) => n + sceneSeconds(s.voiceText), 0) : null;
+  const seconds = plan ? reelSeconds(detail) : null;
   const photoUrl = plan ? detail?.photoUrls[plan.scenes[0].photoKey] : undefined;
   const turns = detail?.chat ?? [];
   const fresh = !id;
@@ -169,7 +167,7 @@ export default function ReelsChat() {
                   <Text style={[meta, { paddingTop: space[12] }]}>{t("chat.presenter")}</Text>
                   <View style={styles.options}>
                     {PRESENTERS.map((p) => (
-                      <Chip key={p} label={t(p)} selected={p === "noPresenter"} onPress={() => (p === "aiActor" ? router.push("/reels/actor") : undefined)} />
+                      <Chip key={p} label={t(p)} selected={(p === "noPresenter") === (plan.presenter === "none")} onPress={() => router.push("/reels/actor")} />
                     ))}
                   </View>
 

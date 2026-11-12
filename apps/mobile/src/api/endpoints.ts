@@ -200,11 +200,15 @@ export function forgetBrand() {
 export type SceneKind = "detail" | "room" | "physics";
 /** transition: how the scene hands over to the next, set by the director (apps/web/server/reels/router.ts). */
 export type Transition = "cut" | "match" | "dissolve";
-export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string; standIn?: boolean; transition?: Transition };
+export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string; standIn?: boolean; transition?: Transition; presenter?: boolean };
 export type TemplatePreview = { videoKey: string; videoUrl: string; posterKey: string; posterUrl: string };
 export type ReelTemplateOption = { id: string; seconds: number; preview: TemplatePreview | null; own: boolean; making: boolean; failed: boolean };
-export type ReelOptions = { templates: ReelTemplateOption[]; previewCredits: number; canPreview: boolean };
-export type ReelPlan = { title: string; presenter: "none"; template: string; voice: string; language?: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
+export type Presenter = { id: string; name: string; status: "RUNNING" | "DONE" | "FAILED"; sheet: { key: string; url: string } | null };
+/** A trait group (gender, age…) and its options, id → English label (the app shows its own words when it has them). */
+export type PresenterTrait = { id: string; options: Record<string, string> };
+export type ReelOptions = { templates: ReelTemplateOption[]; previewCredits: number; canPreview: boolean; presenters: Presenter[]; traits: PresenterTrait[]; presenterCredits: number };
+/** presenter: "none", or one of the brand's presenter ids. */
+export type ReelPlan = { title: string; presenter: string; template: string; voice: string; language?: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
 export type RenderStep = "VOICE" | "CLIPS" | "JOIN" | "DONE" | "FAILED";
 /** Why a render failed, as a kind the app words itself (apps/web/server/reels/render.ts renderFailure). */
 export type RenderFailure = { kind: "unavailable" | "slow" | "scene" | "other"; scene?: number; stoppedAt: "VOICE" | "CLIPS" | "JOIN" };
@@ -219,6 +223,8 @@ export type CheckResult = { check: string; status: "pass" | "warn" | "blocker"; 
 export type ReelDetail = {
   item: { id: string; title: string; status: ContentStatus; postUrl: string | null; scheduledFor: string | null };
   version: number; plan: ReelPlan | null; price: number | null;
+  // The reel's and each scene's length in seconds, as the server prices them.
+  seconds: number | null; sceneSeconds: number[];
   caption: { caption?: string; hashtags?: string[] } | null; videoUrl: string | null;
   checks: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
   // softened: joins (scene n → n+1) the seam check turned into a dissolve because the two shots didn't match.
@@ -236,9 +242,8 @@ export type PlanEvent = { type: "stage"; stage: PlanStage } | ({ type: "draft" }
 export type Opportunity = { id: string; title: string; summary: string; angle: string; channels: string[]; decision: "RECOMMEND" | "HOLD" | "REJECT"; score: number; timing: string | null };
 export type Connection = { id: string; provider: string; displayName: string; status: "ACTIVE" | "ERROR" | "REVOKED" };
 
-/** A reel costs this many credits per second (apps/web CREDIT_COSTS.reelPerSecond), so seconds = price / this. */
-export const REEL_CREDITS_PER_SECOND = 2;
-export const reelSeconds = (price: number | null | undefined) => (price ? price / REEL_CREDITS_PER_SECOND : 0);
+/** The reel's length as the server prices it (ReelDetail.seconds). */
+export const reelSeconds = (detail: Pick<ReelDetail, "seconds"> | null | undefined) => detail?.seconds ?? 0;
 
 const AI_MS = 120_000;
 const reelBase = async () => {
@@ -260,15 +265,26 @@ export const reels = {
     const { ws, base } = await reelBase();
     return api<ReelDetail>(`${base}/reels/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
   },
-  /** templateId: a template (R12) reshapes the plan; `message` is then the template's title, shown as the person's turn. */
-  async chat(id: string, version: number, message: string, onEvent?: (e: PlanEvent) => void, templateId?: string) {
+  /**
+   * pick: a template (R12) or presenter (R10) reshapes the plan; `message` is then its name, shown as the person's turn.
+   */
+  async chat(id: string, version: number, message: string, onEvent?: (e: PlanEvent) => void, pick?: { templateId?: string; presenterId?: string }) {
     const { ws, base } = await reelBase();
-    return api<PlanResult>(`${base}/reels/${encodeURIComponent(id)}/plan`, { body: { version, message, templateId, language: i18n.language }, workspaceId: ws, timeoutMs: AI_MS, onLine: onEvent as ((l: unknown) => void) | undefined });
+    return api<PlanResult>(`${base}/reels/${encodeURIComponent(id)}/plan`, { body: { version, message, ...pick, language: i18n.language }, workspaceId: ws, timeoutMs: AI_MS, onLine: onEvent as ((l: unknown) => void) | undefined });
   },
   /** R12: the templates with their previews (the brand's own, else the generic one; null = show the cover photo). */
   async options(signal?: AbortSignal) {
     const { ws, base } = await reelBase();
     return api<ReelOptions>(`${base}/reels/options`, { workspaceId: ws, signal });
+  },
+  /** R10 "Create presenter": 402 = not enough credits or no plan. traits: group id → option id. */
+  async createPresenter(name: string, traits: Record<string, string>) {
+    const { ws, base } = await reelBase();
+    return api<{ id: string }>(`${base}/reels/presenters`, { body: { name, traits }, workspaceId: ws });
+  },
+  async removePresenter(id: string) {
+    const { ws, base } = await reelBase();
+    return api<unknown>(`${base}/reels/presenters/${encodeURIComponent(id)}`, { method: "DELETE", workspaceId: ws });
   },
   /** R12 "Preview with my photos": 402 = not enough credits or no plan. */
   async preview(templateId: string) {

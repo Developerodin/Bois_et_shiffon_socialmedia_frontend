@@ -70,7 +70,7 @@ export default function GenerationGate() {
               <Tag label={t("gate.saved")} tone="white" />
             </View>
             <Text style={[type.body, { color: color.inkSecondary }]} numberOfLines={1}>
-              {t("gate.reelFacts", { seconds: formatNumber(reelSeconds(price)), count: plan?.scenes.length ?? 0 })}
+              {t("gate.reelFacts", { seconds: formatNumber(reelSeconds(detail)), count: plan?.scenes.length ?? 0 })}
             </Text>
             <View style={{ flexDirection: "row", alignItems: "center", gap: space[8] }}>
               <Coins size={16} color={color.ink} strokeWidth={ICON.strokeWidth} />

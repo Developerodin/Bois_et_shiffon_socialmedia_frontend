@@ -133,7 +133,8 @@
     "balance_other": "Sold curent: {{balance}} credite · {{count}} credite vor fi rezervate · Ciorna salvată automat",
     "seeProgress": "Vezi progresul",
     "viewVideo": "Vezi videoclipul",
-    "onScreen": "Pe ecran: {{text}}"
+    "onScreen": "Pe ecran: {{text}}",
+    "presenterScene": "Prezentator"
   },
   "generating": {
     "backToWorkspace": "Înapoi la spațiul de lucru",
@@ -306,27 +307,76 @@
   },
   "actor": {
     "title": "Alege un prezentator",
-    "intro": "Alege un stil de prezentator sau un reel doar cu produsul.",
     "noPresenterA11y": "Fără prezentator, recomandat",
     "recommended": "Recomandat",
     "noPresenterBody": "Concentrează-te doar pe vizualurile mobilierului, texturi și audio de studio.",
-    "styles": "Stiluri de prezentator",
-    "style": {
-      "calm": {
-        "title": "Narator calm",
-        "subtitle": "Franceză · Studio Calm"
-      },
-      "expressive": {
-        "title": "Prezentator expresiv",
-        "subtitle": "Engleză / FR · Dinamic"
-      }
+    "intro": "Alege un prezentator al brandului tău să vorbească în fața camerei sau concentrează reelul pe produs.",
+    "notice": "Prezentatorii sunt persoane create cu IA. Reelurile cu un prezentator sunt etichetate ca fiind create cu IA.",
+    "needsReel": "Planifică mai întâi un reel: prezentatorul se adaugă în scenariul acestuia.",
+    "applying": "Se adaugă prezentatorul…",
+    "yours": "Prezentatorii tăi",
+    "none": "Nu ai încă prezentatori. Creează unul mai jos.",
+    "making": "Se creează, durează aproximativ un minut",
+    "failed": "Nu a funcționat. Nu ai fost taxat.",
+    "ready": "Gata",
+    "removeA11y": "Elimină {{name}}",
+    "create": "Creează un prezentator",
+    "createBody": "Dă-i un nume și alege câteva trăsături. De restul ne ocupăm noi.",
+    "name": "Nume",
+    "namePlaceholder": "ex. Léa",
+    "createButton_one": "Creează prezentator · {{count}} credit",
+    "createButton_other": "Creează prezentator · {{count}} credite",
+    "makingNote": "Se creează câte un prezentator pe rând.",
+    "trait": {
+      "gender": "Gen",
+      "age": "Vârstă",
+      "ethnicity_origin_base": "Etnie",
+      "skin_tone": "Nuanța pielii",
+      "hair": "Păr",
+      "hair_colour": "Culoarea părului",
+      "aesthetic": "Stil"
     },
-    "styleA11y": "{{title}}, {{subtitle}}",
-    "sampleVoiceA11y": "Voce de probă, {{title}}",
-    "sampleVoice": "Voce de probă",
-    "voiceLed": "Stil condus de voce",
-    "notice": "Alege un stil condus de voce sau concentrează-te pe produsul tău.",
-    "comingSoon": "Prezentatorii care vorbesc în fața camerei vor fi disponibili în curând. Deocamdată, acest reel va arăta doar produsul."
+    "option": {
+      "female": "Feminin",
+      "male": "Masculin",
+      "non_binary": "Non-binar",
+      "adult": "Adult",
+      "mature": "Matur",
+      "senior": "Senior",
+      "african": "African",
+      "east_asian": "Asiatic",
+      "european": "European",
+      "indian": "Indian",
+      "middle_eastern": "Orientul Mijlociu",
+      "latin_american": "Origine mixtă",
+      "st_porcelain": "Porțelan",
+      "st_fair": "Foarte deschisă",
+      "st_light": "Deschisă",
+      "st_olive": "Măslinie",
+      "st_tan": "Bronzată",
+      "st_brown": "Maronie",
+      "st_deep": "Maro închis",
+      "st_ebony": "Abanos",
+      "hair_short": "Păr scurt",
+      "hair_long": "Păr lung",
+      "hair_braids": "Împletituri",
+      "hair_afro": "Afro",
+      "hair_buzz": "Tuns foarte scurt",
+      "hair_bald": "Ras în cap",
+      "hc_black": "Negru intens",
+      "hc_darkbrown": "Șaten închis",
+      "hc_chestnut": "Castaniu",
+      "hc_ginger": "Roșcat",
+      "hc_blonde": "Blond",
+      "hc_grey": "Cărunt",
+      "hc_white": "Alb",
+      "casual": "Casual",
+      "suits": "Costume",
+      "retro": "Retro",
+      "sporty": "Sport",
+      "streetstyle": "Street style"
+    },
+    "createButton_few": "Creează prezentator · {{count}} credite"
   },
   "script": {
     "title": "Script & voce",
@@ -404,7 +454,8 @@
     "previewNoPhotos": "Adaugă poze cu produsele pentru a previzualiza șabloanele cu ele.",
     "ownPreview": "Realizată cu pozele tale",
     "loadFailed": "Nu am putut încărca șabloanele.",
-    "makingA11y": "Se generează previzualizarea"
+    "makingA11y": "Se generează previzualizarea",
+    "previewMine_few": "Previzualizează cu pozele mele · {{count}} credite"
   },
   "assets": {
     "title": "Selectează resurse",

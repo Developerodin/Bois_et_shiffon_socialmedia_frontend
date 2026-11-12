@@ -109,7 +109,7 @@ export default function ReelsGenerating() {
           <View style={{ flex: 1 }}>
             {detail ? (
               <>
-                <Text style={strong14}>{t("generating.summary", { title, seconds: reelSeconds(detail.price) })}</Text>
+                <Text style={strong14}>{t("generating.summary", { title, seconds: reelSeconds(detail) })}</Text>
                 <Text style={[meta, { paddingTop: 2 }]}>{t("storyboard.voiceover", { lang: (plan?.language ?? "fr").toUpperCase() })}</Text>
               </>
             ) : (

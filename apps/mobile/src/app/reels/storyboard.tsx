@@ -5,6 +5,7 @@ import { Fragment, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { ApiError } from "@/api/client";
+import { reelSeconds } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Footer } from "@/ui/layout";
 import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, Tag, bodyMuted, eyebrow, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
@@ -15,7 +16,6 @@ import { isPlanRequired } from "@/ui/plans/use-plan";
 
 /** Which video model the director routed each scene to (apps/web/server/reels/router.ts). */
 const MODEL_NAMES: Record<string, string> = { "kling-3-std": "Kling 3.0", "seedance-2.5": "Seedance 2.5", "hailuo-2.3": "Hailuo 2.3" };
-const sceneSeconds = (voice: string) => Math.min(15, Math.max(3, Math.ceil(voice.trim().split(/\s+/).filter(Boolean).length / 2)));
 
 /** R03 · Reels / Storyboard. "Make video" charges the shown price and starts the render. */
 export default function ReelsStoryboard() {
@@ -24,7 +24,7 @@ export default function ReelsStoryboard() {
   const [starting, setStarting] = useState(false);
   const plan = detail?.plan;
   const price = detail?.price ?? 0;
-  const seconds = plan ? plan.scenes.reduce((n, s) => n + sceneSeconds(s.voiceText), 0) : 0;
+  const seconds = reelSeconds(detail);
   const rendering = detail?.renders.some((r) => r.step !== "DONE" && r.step !== "FAILED");
   // The server refuses to render a stand-in photo (another product); send the person to R13 instead.
   const standIns = plan?.scenes.filter((s) => s.standIn).length ?? 0;
@@ -58,7 +58,7 @@ export default function ReelsStoryboard() {
     );
   }
 
-  const facts = [t("storyboard.durationFact", { seconds }), t("storyboard.verticalFact"), t("noPresenter"), t("scene.count", { count: plan.scenes.length })];
+  const facts = [t("storyboard.durationFact", { seconds }), t("storyboard.verticalFact"), plan.presenter === "none" ? t("noPresenter") : t("aiActor"), t("scene.count", { count: plan.scenes.length })];
   return (
     <ReelsScreen
       header={
@@ -127,8 +127,8 @@ export default function ReelsStoryboard() {
           <Fragment key={i}>
             <View style={styles.scene}>
               <View style={styles.sceneHead}>
-                <Text style={strong14}>{t("scene.label", { n: i + 1, seconds: sceneSeconds(s.voiceText) })}</Text>
-                <Tag label={s.model ? MODEL_NAMES[s.model] ?? s.model : s.shot} />
+                <Text style={strong14}>{t("scene.label", { n: i + 1, seconds: detail.sceneSeconds[i] ?? 0 })}</Text>
+                <Tag label={s.presenter ? t("storyboard.presenterScene") : s.model ? MODEL_NAMES[s.model] ?? s.model : s.shot} />
               </View>
               <View style={{ gap: space[16], paddingTop: space[12] }}>
                 <Image source={detail.photoUrls[s.photoKey] ? { uri: detail.photoUrls[s.photoKey] } : undefined} style={styles.still} contentFit="cover" accessibilityLabel={s.shot} />

@@ -6,7 +6,9 @@ import { kickRunner } from "@/server/jobs/runner";
 import { brandKnowledge, productPhotos } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
 import { directScenes, type DraftSoFar, type ReelPhoto, writePlan } from "@/server/reels/agents";
-import { carryStandIns, isStudioPlan, planProblems, ReelPlan, reelPrice, reelSeconds, toVersionBody } from "@/server/reels/plan";
+import { planOwnershipProblems } from "@/server/reels/ownership";
+import { carryStandIns, clearPresenterFlags, isStudioPlan, planProblems, presenterCuts, ReelPlan, reelPrice, reelSeconds, sceneSeconds, toVersionBody } from "@/server/reels/plan";
+import { donePresenter } from "@/server/reels/presenters";
 import { renderFailure, renderView } from "@/server/reels/render";
 import { templateById } from "@/server/reels/templates";
 import { creditBalance } from "@/server/services/credits";
@@ -119,7 +121,7 @@ export async function createReel(scope: Scope, input: { opportunityId?: string; 
   const written = await writePlan(scope, { knowledge, photos, idea: idea ?? undefined, message: ask, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
   const { reply } = written;
   const plan = template ? { ...written.plan, template } : written.plan;
-  const ready = await directed(scope, plan, undefined, emit);
+  const ready = await directed(scope, plan, undefined, emit); // a new plan has no presenter
   const now = new Date().toISOString();
   const chat: ChatTurn[] = [...(turn ? [{ role: "user" as const, text: turn.slice(0, 2000), at: now }] : []), { role: "assistant", text: reply, at: now }];
   const item = await prisma.contentItem.create({
@@ -132,19 +134,33 @@ export async function createReel(scope: Scope, input: { opportunityId?: string; 
   return { id: item.id, version: 1, plan: ready, price: reelPrice(ready), reply };
 }
 
-/** R04: the person says what they want (or what's wrong with the video); the scriptwriter revises the plan. */
-export async function chatPlan(scope: Scope, itemId: string, input: { version: number; message?: string; language?: string; templateId?: string }, emit?: Emit) {
-  const { ask, turn, template } = templateAsk(input.templateId, input.message);
+const PRESENTER_ASK = "The brand's presenter now appears in this reel: pick the scenes they speak on camera (presenter: true), keeping the script unless a line needs to suit a person speaking.";
+
+/**
+ * R04: the person says what they want (or what's wrong with the video); the scriptwriter revises the plan.
+ * A template (R12) or a presenter (R10) is sent the same way, with `message` its name in the app's language.
+ */
+export async function chatPlan(scope: Scope, itemId: string, input: { version: number; message?: string; language?: string; templateId?: string; presenterId?: string }, emit?: Emit) {
+  const picked = input.presenterId ? await donePresenter(scope, input.presenterId) : null;
+  if (input.presenterId && !picked) throw new PublishingError("Presenter not found", 404);
+  const { ask, turn, template } = picked
+    ? { ask: PRESENTER_ASK, turn: input.message ?? (picked.input as { name: string }).name, template: undefined }
+    : templateAsk(input.templateId, input.message);
   emit?.({ type: "stage", stage: "reading" });
   const { item, latest } = await loadReel(scope, itemId);
-  const current = isStudioPlan(latest?.body) ? ReelPlan.parse(latest!.body) : undefined;
+  const saved = isStudioPlan(latest?.body) ? ReelPlan.parse(latest!.body) : undefined;
+  if (picked && !saved) throw new PublishingError("Plan the reel first, then add a presenter.", 400);
+  const current = saved && picked ? { ...saved, presenter: picked.id } : saved;
+  // Before paying for the scriptwriter: a plan naming a removed presenter is refused until another is picked.
+  const owned = current ? await planOwnershipProblems(current, scope) : [];
+  if (owned.length) throw new PublishingError(owned.join(" "), 400);
   const [photos, { text: knowledge }] = await Promise.all([brandPhotos(scope, current), brandKnowledge(scope.workspaceId, scope.brandId, 3000)]);
   const chat = chatOf(item.brief);
   emit?.({ type: "stage", stage: "writing" });
   const written = await writePlan(scope, { knowledge, photos, current, chat, message: ask, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
   const { reply } = written;
   const plan = template ? { ...written.plan, template } : written.plan;
-  const ready = await directed(scope, carryStandIns(plan, current, true), current, emit);
+  const ready = presenterCuts(await directed(scope, carryStandIns(plan, current, true), current, emit));
   const now = new Date().toISOString();
   const v = await savePlan(scope, itemId, input.version, ready, [...chat, { role: "user", text: (turn ?? "").slice(0, 2000), at: now }, { role: "assistant", text: reply, at: now }]);
   return { version: v.version, plan: ready, price: reelPrice(ready), reply };
@@ -152,11 +168,12 @@ export async function chatPlan(scope: Scope, itemId: string, input: { version: n
 
 /** R10–R13 / R03 edits. */
 export async function editPlan(scope: Scope, itemId: string, input: { version: number; plan: ReelPlan }) {
-  const problems = planProblems(input.plan, scope);
+  const plan = clearPresenterFlags(input.plan);
+  const problems = [...planProblems(plan, scope), ...(await planOwnershipProblems(plan, scope))];
   if (problems.length) throw new PublishingError(problems.join(" "), 400);
   const { latest } = await loadReel(scope, itemId);
   const previous = isStudioPlan(latest?.body) ? ReelPlan.parse(latest!.body) : undefined;
-  const ready = await directed(scope, carryStandIns(input.plan, previous, false), previous);
+  const ready = presenterCuts(await directed(scope, carryStandIns(plan, previous, false), previous));
   const v = await savePlan(scope, itemId, input.version, ready);
   return { version: v.version, plan: ready, price: reelPrice(ready) };
 }
@@ -254,6 +271,9 @@ export async function reelDetail(scope: Omit<Scope, "userId">, itemId: string) {
     version: latest?.version ?? 0,
     plan: plan.success ? plan.data : null,
     price: plan.success ? reelPrice(plan.data) : null,
+    // Lengths come from here, never from a formula in the app (recorded scenes take their recording's length).
+    seconds: plan.success ? reelSeconds(plan.data) : null,
+    sceneSeconds: plan.success ? plan.data.scenes.map(sceneSeconds) : [],
     caption: (latest?.body as { caption?: string; hashtags?: string[] } | undefined) ?? null,
     videoUrl,
     checks: latest?.checks[0] ? { overall: latest.checks[0].overall, results: latest.checks[0].results } : null,

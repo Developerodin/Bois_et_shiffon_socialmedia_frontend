@@ -65,7 +65,7 @@ export default function ReelsTemplates() {
   const title = (x: string) => t(`templates.item.${x}.title`, { defaultValue: x });
   // A template is an instruction to the scriptwriter: it reshapes the open plan, or starts a new one.
   const use = async () => {
-    if (tpl && (await chat(title(tpl.id), undefined, tpl.id))) router.push(id ? "/reels/storyboard" : "/reels/chat");
+    if (tpl && (await chat(title(tpl.id), undefined, { templateId: tpl.id }))) router.push(id ? "/reels/storyboard" : "/reels/chat");
   };
   const preview = async () => {
     if (!tpl || !options) return;

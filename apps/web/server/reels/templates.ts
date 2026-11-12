@@ -1,18 +1,15 @@
-import { randomUUID } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { Prisma, type ReelAsset } from "@prisma/client";
+import type { ReelAsset } from "@prisma/client";
 import { productPhotos } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
-import { enqueueJob } from "@/server/jobs/queue";
-import { frame, refused } from "@/server/photoshoot/shoot";
+import { frame } from "@/server/photoshoot/shoot";
 import { CREDIT_USD, MARGIN_FLOOR } from "@/server/photoshoot/tiers";
+import { assetsOf, createAsset, registerAssetKind } from "@/server/reels/assets";
 import { fetchResult, higgsfield } from "@/server/reels/higgsfield";
 import { frameOf } from "@/server/reels/join";
-import { refundCharge, spendCredits } from "@/server/services/credits";
 import { ownMediaKey, PublishingError } from "@/server/services/publishing";
-import { requirePlan } from "@/server/services/subscriptions";
 import { mediaExists, mediaKey, putMedia, signedMediaUrl } from "@/server/storage/media";
 
 /**
@@ -106,15 +103,10 @@ export async function storePreview(url: string, videoKey: string) {
   }
 }
 
-// ── paid per-brand previews: ReelAsset rows of kind "template-preview" ──────────────────────────────────────────
+// ── paid per-brand previews: ReelAsset rows of kind "template-preview" (assets.ts runs them) ──────────────────────
 
-export const REEL_ASSET_JOB = "reels.asset";
-const POLL_MS = 15_000;
-const GIVE_UP_MS = 60 * 60_000;
 type Scope = { workspaceId: string; brandId: string };
 type PreviewInput = { templateId: string; photoKey: string; prompt: string; imageKey?: string; imageUrl?: string };
-
-const assetsOf = (scope: Scope, kind: string) => prisma.reelAsset.findMany({ where: { workspaceId: scope.workspaceId, brandId: scope.brandId, kind }, orderBy: { createdAt: "desc" }, take: 100 });
 
 /**
  * The photo a brand's previews start from: the one its latest finished preview used, while the brand still has it,
@@ -126,98 +118,40 @@ export async function previewPhoto(scope: Scope, assets: ReelAsset[]) {
   return photos.find((p) => p.key === last?.photoKey)?.key ?? photos[0]?.key ?? null;
 }
 
-/** "Preview with my photos": charges, records the request and queues the job. One running per template and brand. */
+/** "Preview with my photos": charges and queues one preview of one template. */
 export async function createTemplatePreview(scope: Scope & { userId: string }, templateId: string) {
   const template = templateById(templateId);
   if (!template) throw new PublishingError("Unknown template", 400);
-  await requirePlan(scope.workspaceId);
   const photoKey = await previewPhoto(scope, await assetsOf(scope, "template-preview"));
   if (!photoKey) throw new PublishingError("Add product photos first, then preview a template with them.", 400);
   if (!ownMediaKey(scope, photoKey)) throw new PublishingError("Unknown image", 400); // a bad stored key is never signed
-  // A row whose job died without failing it would hold the one-running index for good: give up on it (refunded).
-  const stale = await prisma.reelAsset.findMany({ where: { workspaceId: scope.workspaceId, brandId: scope.brandId, kind: "template-preview", status: "RUNNING", createdAt: { lt: new Date(Date.now() - GIVE_UP_MS) } } });
-  for (const a of stale) await failAsset(a.id, "The preview took more than an hour");
-  const id = randomUUID();
-  const chargeId = await spendCredits({ workspaceId: scope.workspaceId, amount: PREVIEW_CREDITS, reason: "template-preview", refId: id, userId: scope.userId });
   // The prompt is kept on the row: a resend after a deploy must send what was first sent (same Idempotency-Key).
   const input: PreviewInput = { templateId, photoKey, prompt: template.motion };
-  const asset = await prisma.reelAsset
-    .create({ data: { id, workspaceId: scope.workspaceId, brandId: scope.brandId, kind: "template-preview", input, chargeId, createdByUserId: scope.userId } })
-    .catch(async (e: unknown) => {
-      await refundCharge(scope.workspaceId, chargeId);
-      // The partial unique index (one RUNNING per brand, kind and template): a second tap while one is being made.
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") throw new PublishingError("This preview is already being made.", 409);
-      throw e;
-    });
-  await enqueueJob({ type: REEL_ASSET_JOB, workspaceId: asset.workspaceId, brandId: asset.brandId, payload: { assetId: asset.id }, maxAttempts: 3, idempotencyKey: `asset:${asset.id}:start` }).catch(async (e: unknown) => {
-    await failAsset(asset.id, e instanceof Error ? e.message : String(e));
-    throw e;
-  });
-  return asset;
+  return createAsset(scope, { kind: "template-preview", input, credits: PREVIEW_CREDITS, reason: "template-preview", busy: "This preview is already being made." });
 }
 
-async function enqueuePoll(a: Pick<ReelAsset, "id" | "workspaceId" | "brandId">) {
-  const runAt = new Date(Math.ceil((Date.now() + POLL_MS) / POLL_MS) * POLL_MS);
-  await enqueueJob({ type: REEL_ASSET_JOB, workspaceId: a.workspaceId, brandId: a.brandId, payload: { assetId: a.id }, runAt, maxAttempts: 3, idempotencyKey: `asset:${a.id}:at:${runAt.getTime() / POLL_MS}` });
-}
-
-/** Job handler: submits the clip once, then polls it until it's stored or failed. */
-export async function runAsset(payload: unknown) {
-  const { assetId } = payload as { assetId: string };
-  const asset = await prisma.reelAsset.findUnique({ where: { id: assetId } });
-  if (!asset || asset.status !== "RUNNING") return;
-  const input = asset.input as PreviewInput;
-  const template = templateById(input.templateId);
-  if (!template) return failAsset(asset.id, "Unknown template");
-  const scope = { workspaceId: asset.workspaceId, brandId: asset.brandId };
-
-  if (!asset.requestId) {
+registerAssetKind("template-preview", {
+  async submit(asset) {
+    const input = asset.input as PreviewInput;
     // The cropped photo and its link are made once and kept on the row: a resend after a crash must send the
     // identical body under the same Idempotency-Key, or Higgsfield may treat it as a new (charged) job.
     let { imageUrl } = input;
     if (!imageUrl) {
-      const imageKey = mediaKey(scope, `preview-${asset.id}-source.jpg`);
+      const imageKey = mediaKey(asset, `preview-${asset.id}-source.jpg`);
       const source = await fetch(await signedMediaUrl(input.photoKey), { signal: AbortSignal.timeout(30_000) });
-      if (!source.ok) return failAsset(asset.id, `Couldn't read the photo (${source.status})`);
+      if (!source.ok) throw new Error(`Couldn't read the photo (${source.status})`);
       await putMedia(imageKey, await frame(new Uint8Array(await source.arrayBuffer()), "9:16"), "image/jpeg");
       imageUrl = await signedMediaUrl(imageKey, 24 * 3600);
       await prisma.reelAsset.update({ where: { id: asset.id }, data: { input: { ...input, imageKey, imageUrl } } });
     }
-    try {
-      const requestId = await submitPreview(input.prompt ?? template.motion, imageUrl, `asset:${asset.id}`);
-      await prisma.reelAsset.update({ where: { id: asset.id }, data: { requestId } });
-    } catch (e) {
-      if (refused(e)) return failAsset(asset.id, (e as Error).message);
-      throw e;
-    }
-    return enqueuePoll(asset);
-  }
-  const status = await higgsfield.status(asset.requestId).catch(() => null); // a failed read is a hiccup, not a failed clip
-  if (status?.state === "failed") return failAsset(asset.id, status.error ?? "The preview failed");
-  if (status?.state === "completed") {
-    const videoKey = mediaKey(scope, `preview-${asset.id}.mp4`);
-    await storePreview(status.url!, videoKey);
-    await prisma.reelAsset.updateMany({ where: { id: asset.id, status: "RUNNING" }, data: { status: "DONE", outputKey: videoKey } });
-    return;
-  }
-  if (Date.now() - asset.createdAt.getTime() > GIVE_UP_MS) return failAsset(asset.id, "The preview took more than an hour");
-  return enqueuePoll(asset);
-}
-
-export async function onAssetFailure(payload: unknown, error: unknown, exhausted: boolean) {
-  if (!exhausted) return;
-  await failAsset((payload as { assetId: string }).assetId, error instanceof Error ? error.message : String(error));
-}
-
-/** One transaction: an asset is never FAILED without its refund. A retry is a new row (new charge, new request). */
-async function failAsset(id: string, error: string) {
-  await prisma.$transaction(async (tx) => {
-    const { count } = await tx.reelAsset.updateMany({ where: { id, status: "RUNNING" }, data: { status: "FAILED", error: error.slice(0, 500) } });
-    if (!count) return;
-    const asset = await tx.reelAsset.findUniqueOrThrow({ where: { id } });
-    await refundCharge(asset.workspaceId, asset.chargeId, tx);
-  });
-}
+    return submitPreview(input.prompt, imageUrl, `asset:${asset.id}`);
+  },
+  async store(asset, url) {
+    const videoKey = mediaKey(asset, `preview-${asset.id}.mp4`);
+    await storePreview(url, videoKey);
+    return videoKey;
+  },
+});
 
 // ── what the phone shows (GET …/reels/options) ────────────────────────────────────────────────────────────────
 

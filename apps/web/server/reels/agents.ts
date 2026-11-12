@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { parsePartialJson } from "@/server/ai/partial-json";
 import { type AiCallContext, generateObject } from "@/server/ai/provider";
-import { languageName, planProblems, ReelPlan, type ReelPlan as Plan } from "@/server/reels/plan";
+import { clearPresenterFlags, languageName, planProblems, ReelPlan, type ReelPlan as Plan } from "@/server/reels/plan";
 
 /** The scriptwriter's language code, if it's a usable one ("fr", "en", "pt-BR"); otherwise the voice's default. */
 const reelLanguage = (code: string) => (/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/.test(code.trim()) ? code.trim() : undefined);
@@ -17,7 +17,7 @@ import { REEL_VOICES } from "@/server/reels/voice";
  *   (higgsfield-ai/skills higgsfield-generate, MIT; Seedance structure from dexhunter/seedance2-skill, MIT).
  * Bump REEL_PROMPT_VERSION when any text changes; it is logged with every AI call.
  */
-export const REEL_PROMPT_VERSION = "6";
+export const REEL_PROMPT_VERSION = "7";
 
 const SCRIPT_SYSTEM = `You write short vertical video reels (Instagram Reels) for one brand. Your output is a DRAFT a person reviews.
 Ground everything in the brand knowledge provided. Never invent product names, prices, materials, dimensions, stock or claims; if a fact is missing, leave it out.
@@ -32,6 +32,7 @@ One subject per reel: every scene shows the same product, or the room it's in, s
 Avoid AI tells: no "it's not X, it's Y" reveals, no "no X, no Y, no Z" lists, no sentences trailing into extra clauses, no "elevate", "unlock", "seamless", "sublimez" clichés.
 voice: on a revision, copy the current plan's voice; if they ask for another voice, say in reply that they can change it in the voice picker. Otherwise pick one.
 Pick each scene's photo from the list given (use its key exactly); prefer the product the idea is about.
+presenter: true for a scene the brand's presenter speaks on camera, only when the current plan's presenter isn't "none": at most half the scenes (the hook and the call to action suit it best), never a standIn scene; the product stays the subject. Otherwise false.
 standIn: true when no given photo shows what that scene talks about (another product, another model) and you used the closest one; then say so in reply and ask for the right photo. A stand-in is never rendered. Otherwise false.
 shot: a few words for the person (e.g. "Wide, the table in the room"). direction: what moves and how the camera moves, for the person.
 reply: one or two sentences to the person about what you made or changed, in the language of their latest message, whatever language the reel is in. When their message has no clear language (an idea title, a product name), use their app language given below.
@@ -62,7 +63,7 @@ const Draft = z.object({
   caption: z.string(),
   hashtags: z.array(z.string()),
   collection: z.boolean(),
-  scenes: z.array(z.object({ photoKey: z.string(), shot: z.string(), direction: z.string(), onScreenText: z.string(), voiceText: z.string(), standIn: z.boolean() })),
+  scenes: z.array(z.object({ photoKey: z.string(), shot: z.string(), direction: z.string(), onScreenText: z.string(), voiceText: z.string(), standIn: z.boolean(), presenter: z.boolean() })),
 });
 const Direction = z.object({ scenes: z.array(z.object({ kind: z.enum(SCENE_KINDS), prompt: z.string(), transition: z.enum(TRANSITIONS) })) });
 
@@ -113,8 +114,8 @@ export async function writePlan(scope: Scope, input: { knowledge: string; photos
   const onDraft = input.onDraft;
   const toPlan = (d: z.infer<typeof Draft>): Plan =>
     // The person picks the voice and template in the app, so a chat revision keeps them; the scriptwriter's voice only seeds a new plan.
-    // template "": none picked (R12 sets it).
-    ReelPlan.parse({ title: d.title.slice(0, 120), presenter: "none", template: input.current?.template ?? "", voice: input.current?.voice ?? d.voice, language: reelLanguage(d.language), caption: d.caption.slice(0, 2200), hashtags: d.hashtags.slice(0, 5), scenes: d.scenes.slice(0, 6) });
+    // template "": none picked (R12 sets it). Presenter scenes only with a presenter (clearPresenterFlags).
+    clearPresenterFlags(ReelPlan.parse({ title: d.title.slice(0, 120), presenter: input.current?.presenter ?? "none", template: input.current?.template ?? "", voice: input.current?.voice ?? d.voice, language: reelLanguage(d.language), caption: d.caption.slice(0, 2200), hashtags: d.hashtags.slice(0, 5), scenes: d.scenes.slice(0, 6).map((s) => ({ ...s, presenter: s.presenter || undefined })) }));
   const draft = await generateObject(ctxFor(scope, "reels.script"), {
     schema: Draft,
     schemaName: "reel_plan",
@@ -148,7 +149,7 @@ export async function writePlan(scope: Scope, input: { knowledge: string; photos
       collection: false,
       caption: "Une table pensée pour durer.",
       hashtags: ["#boismassif"],
-      scenes: input.photos.slice(0, 2).map((p, i) => ({ photoKey: p.key, shot: i ? "Close" : "Wide", direction: "slow push in", onScreenText: i ? "Bois massif" : "Votre table idéale ?", standIn: false, voiceText: i ? "Du bois massif, fait pour durer. Découvrez la collection." : "Et si votre table racontait une histoire ?" })),
+      scenes: input.photos.slice(0, 2).map((p, i) => ({ photoKey: p.key, shot: i ? "Close" : "Wide", direction: "slow push in", onScreenText: i ? "Bois massif" : "Votre table idéale ?", standIn: false, presenter: false, voiceText: i ? "Du bois massif, fait pour durer. Découvrez la collection." : "Et si votre table racontait une histoire ?" })),
     },
   });
   return { plan: toPlan(draft), reply: draft.reply };

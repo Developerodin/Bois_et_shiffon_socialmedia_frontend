@@ -128,7 +128,7 @@ export default function ReelsReview() {
           )}
           {detail?.price ? (
             <View style={styles.duration} pointerEvents="none">
-              <Text style={[meta, { color: color.onPrimary }]}>{t("secondsShort", { seconds: reelSeconds(detail.price) })}</Text>
+              <Text style={[meta, { color: color.onPrimary }]}>{t("secondsShort", { seconds: reelSeconds(detail) })}</Text>
             </View>
           ) : null}
         </View>

@@ -67,7 +67,7 @@ export default function VideoFailed() {
       router.replace("/reels/generating");
     } catch (e) {
       if (isPlanRequired(e)) router.push("/plans/gate");
-      else if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: price, title: plan?.title ?? "", meta: t("lowCredits.backdropMeta", { seconds: formatNumber(reelSeconds(price)) }) });
+      else if (e instanceof ApiError && e.status === 402) openLowCredits({ needed: price, title: plan?.title ?? "", meta: t("lowCredits.backdropMeta", { seconds: formatNumber(reelSeconds(detail)) }) });
       else setError(e instanceof Error ? e.message : String(e));
     } finally {
       setRetrying(false);
@@ -98,7 +98,7 @@ export default function VideoFailed() {
                   </Text>
                   <Tag label={t("videoFailed.failed")} tone="grey" />
                 </View>
-                <Text style={meta}>{t("videoFailed.facts", { seconds: formatNumber(reelSeconds(price)), count: plan?.scenes.length ?? 0 })}</Text>
+                <Text style={meta}>{t("videoFailed.facts", { seconds: formatNumber(reelSeconds(detail)), count: plan?.scenes.length ?? 0 })}</Text>
                 <View style={[styles.row, { gap: space[8], paddingTop: 4 }]}>
                   <CircleCheck size={16} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
                   <Text style={meta}>{t("videoFailed.released", credits)}</Text>
