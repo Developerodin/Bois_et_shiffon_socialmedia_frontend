@@ -108,7 +108,7 @@ async function enqueuePoll(s: Pick<PhotoShoot, "id" | "workspaceId" | "brandId">
 }
 
 /** Higgsfield refused the request itself (bad input, no balance): resending won't help (as render.ts). */
-const refused = (e: unknown) => e instanceof Error && /^Higgsfield 4\d\d\b/.test(e.message) && !/^Higgsfield 429\b/.test(e.message);
+export const refused = (e: unknown) => e instanceof Error && /^Higgsfield 4\d\d\b/.test(e.message) && !/^Higgsfield 429\b/.test(e.message);
 
 /** Job handler: makes the shots (OpenAI), or submits / polls them (Higgsfield). */
 export async function runShoot(payload: unknown) {
@@ -175,7 +175,7 @@ async function finish(shoot: PhotoShoot, ratio: ShootRatio, images: Uint8Array[]
 }
 
 /** Crops to the exact ratio asked (models only offer a few) and saves as JPG, the format posts accept. */
-async function frame(bytes: Uint8Array, ratio: ShootRatio) {
+export async function frame(bytes: Uint8Array, ratio: ShootRatio) {
   const [w, h] = ratio.split(":").map(Number);
   const img = sharp(bytes);
   const { width = 0, height = 0 } = await img.metadata();
