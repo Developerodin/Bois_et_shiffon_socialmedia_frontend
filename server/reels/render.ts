@@ -18,6 +18,7 @@ import { donePresenter } from "@/server/reels/presenters";
 import { recordingKeys, recordingProblems } from "@/server/reels/recordings";
 import { promptProblems } from "@/server/reels/prompt-check";
 import { BACKUP_MODEL, type ModelId, modelSeconds, needsReencode, PRESENTER_MODEL, routeScene, type Transition, VIDEO_MODELS } from "@/server/reels/router";
+import { libraryUsable } from "@/server/reels/library";
 import { isElevenVoice, speak, voiceRefused } from "@/server/reels/voice";
 import { padAndJoinWav, wavSeconds } from "@/server/reels/wav";
 import { refundCharge, spendCredits } from "@/server/services/credits";
@@ -106,6 +107,10 @@ const ACTIVE = ["VOICE", "CLIPS", "JOIN"] as const;
 /** "Make video" / "Try again": validates the latest plan version, charges once per attempt, queues the render. */
 export async function startRender(input: { workspaceId: string; brandId: string; userId: string; itemId: string; version: number }) {
   await requirePlan(input.workspaceId); // making a video needs a plan (mobile L02 gate)
+  // A library voice can't speak on ElevenLabs' free plan: said before anything is charged. Asked outside the locked
+  // transaction below (a network call). ponytail: reads the latest plan here; the transaction re-checks the version.
+  const head = await prisma.contentVersion.findFirst({ where: { contentItemId: input.itemId, item: { workspaceId: input.workspaceId, brandId: input.brandId } }, orderBy: { version: "desc" }, select: { body: true } });
+  if ((head?.body as { voice?: string } | null)?.voice?.startsWith("library:") && !(await libraryUsable())) throw new PublishingError("This library voice can be used once our ElevenLabs plan is upgraded. Pick another voice for now.", 400);
   const scope = { workspaceId: input.workspaceId, brandId: input.brandId };
   const loaded = await prisma.$transaction(async (tx) => {
     await lock(tx, input.itemId);
