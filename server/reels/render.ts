@@ -11,9 +11,12 @@ import { notifyReelFinished } from "@/server/notifications/push";
 import { fetchResult, type HfStatus, higgsfield } from "@/server/reels/higgsfield";
 import { checkSeam } from "@/server/reels/agents";
 import { frameOf, joinReel } from "@/server/reels/join";
-import { clipSeconds, planProblems, ReelPlan, reelPrice, standInProblems } from "@/server/reels/plan";
+import { productPhotos } from "@/server/content/knowledge";
+import { planOwnershipProblems } from "@/server/reels/ownership";
+import { clipSeconds, planProblems, PRESENTER_MIN_SECONDS, ReelPlan, reelPrice, standInProblems } from "@/server/reels/plan";
+import { donePresenter } from "@/server/reels/presenters";
 import { promptProblems } from "@/server/reels/prompt-check";
-import { BACKUP_MODEL, type ModelId, modelSeconds, needsReencode, routeScene, type Transition, VIDEO_MODELS } from "@/server/reels/router";
+import { BACKUP_MODEL, type ModelId, modelSeconds, needsReencode, PRESENTER_MODEL, routeScene, type Transition, VIDEO_MODELS } from "@/server/reels/router";
 import { speak } from "@/server/reels/voice";
 import { padAndJoinWav, wavSeconds } from "@/server/reels/wav";
 import { refundCharge, spendCredits } from "@/server/services/credits";
@@ -52,6 +55,11 @@ type Outputs = {
   clipSeconds: number[]; // what each model was asked for
   backups: number[]; // scenes already retried on the backup model
   clipUrls?: string[];
+  // Presenter scenes: their references (sheet + product photo) and voice, signed once at VOICE (24 h) so a resubmit
+  // sends the identical body; null for product scenes. presenterRetried: presenter scenes already retried once.
+  refs?: ({ imageUrls: string[]; audioUrl: string } | null)[];
+  prompts?: string[]; // each clip's prompt, fixed at VOICE for the same reason (presenter prompts read photo titles)
+  presenterRetried?: number[];
 };
 
 export type Next =
@@ -59,6 +67,7 @@ export type Next =
   | { action: "submit" }
   | { action: "wait" }
   | { action: "backup"; scenes: number[] }
+  | { action: "retryPresenter"; scenes: number[] }
   | { action: "join"; urls: string[] }
   | { action: "fail"; error: string }
   | { action: "done" };
@@ -74,8 +83,12 @@ export function nextStep(r: RenderState, statuses: HfStatus[], now = Date.now())
   const ids = (r.requests as Requests).CLIPS;
   if (!ids?.length) return r.claimedAt && now - r.claimedAt.getTime() < CLAIM_STALE_MS ? { action: "wait" } : { action: "submit" };
   const failed = statuses.flatMap((s, i) => (s.state === "failed" ? [i] : []));
-  const final = failed.find((i) => out.backups.includes(i));
+  // A presenter scene gets one retry on its own model (no other model can show the presenter); a product scene one
+  // go on the backup model. A second failure of either fails the render (refunded).
+  const presenter = (i: number) => out.models[i] === PRESENTER_MODEL;
+  const final = failed.find((i) => (presenter(i) ? out.presenterRetried?.includes(i) : out.backups.includes(i)));
   if (final !== undefined) return { action: "fail", error: `Scene ${final + 1}: ${statuses[final].error ?? "the clip failed"}` };
+  if (failed.some(presenter)) return { action: "retryPresenter", scenes: failed.filter(presenter) };
   if (failed.length) return { action: "backup", scenes: failed };
   if (statuses.every((s) => s.state === "completed")) return { action: "join", urls: statuses.map((s) => s.url!) };
   return { action: "wait" };
@@ -104,7 +117,7 @@ export async function startRender(input: { workspaceId: string; brandId: string;
     if (["SCHEDULED", "PUBLISHED"].includes(item.status)) throw new PublishingError("This reel is already scheduled or posted.", 409);
     const parsed = ReelPlan.safeParse(latest.body);
     if (!parsed.success) throw new PublishingError("This plan isn't complete yet", 400);
-    const problems = [...planProblems(parsed.data, scope), ...standInProblems(parsed.data), ...parsed.data.scenes.flatMap((s, i) => promptProblems(s.prompt ?? s.direction).map((p) => `Scene ${i + 1}: ${p}`))];
+    const problems = [...planProblems(parsed.data, scope), ...(await planOwnershipProblems(parsed.data, scope, tx)), ...standInProblems(parsed.data), ...parsed.data.scenes.flatMap((s, i) => promptProblems(s.prompt ?? s.direction).map((p) => `Scene ${i + 1}: ${p}`))];
     if (problems.length) throw new PublishingError(problems.join(" "), 400);
     const { _max } = await tx.reelRender.aggregate({ where: { contentVersionId: latest.id }, _max: { attempt: true } });
     return { versionId: latest.id, plan: parsed.data, attempt: (_max.attempt ?? 0) + 1 };
@@ -159,6 +172,9 @@ export async function advanceRender(payload: unknown) {
     case "backup":
       await retryOnBackup(r, next.scenes);
       return enqueueTick(r, POLL_MS);
+    case "retryPresenter":
+      await retryPresenter(r, next.scenes);
+      return enqueueTick(r, POLL_MS);
     case "wait":
       return enqueueTick(r, POLL_MS);
     case "join":
@@ -181,6 +197,9 @@ const webhookFor = (r: ReelRender) => {
 async function prepareVoice(r: ReelRender) {
   const plan = await planOf(r);
   const scope = { workspaceId: r.workspaceId, brandId: r.brandId };
+  // Checked again here: the presenter may have been removed after the render was charged.
+  const sheet = plan.presenter === "none" ? null : (await donePresenter(scope, plan.presenter))?.outputKey;
+  if (plan.presenter !== "none" && !sheet) return failRender({ renderId: r.id }, new Error("Presenter removed: pick another."), true);
   const scenes = await Promise.all(plan.scenes.map(async (s) => {
     const wav = await speak({ text: s.voiceText, voice: plan.voice, language: plan.language });
     const voiceKey = mediaKey(scope, `${randomUUID()}.wav`);
@@ -190,18 +209,25 @@ async function prepareVoice(r: ReelRender) {
     const photoKey = mediaKey(scope, `${randomUUID()}.jpg`);
     await putMedia(photoKey, await sharp(src).resize(1080, 1920, { fit: "cover" }).jpeg({ quality: 88 }).toBuffer(), "image/jpeg");
     const seconds = wavSeconds(wav);
-    let model: ModelId = s.model ?? routeScene(s.kind ?? "detail");
-    if (Math.ceil(seconds) > VIDEO_MODELS[model].maxSeconds) model = BACKUP_MODEL; // e.g. Hailuo stops at 10 s
+    let model: ModelId = s.presenter ? PRESENTER_MODEL : (s.model ?? routeScene(s.kind ?? "detail"));
+    // e.g. Hailuo stops at 10 s. Never for a presenter scene: no other model can show the presenter.
+    if (!s.presenter && Math.ceil(seconds) > VIDEO_MODELS[model].maxSeconds) model = BACKUP_MODEL;
     return { voiceKey, photoKey, seconds, model };
   }));
+  // A presenter line over the model's 15 s is clipped at 15 s like any scene (modelSeconds, joinClips): the plan's
+  // 30-word rule keeps that rare, and failing would refuse the same text on every retry.
+  const photoUrls = await Promise.all(scenes.map((s) => signedMediaUrl(s.photoKey, 24 * 3600)));
+  const sheetUrl = sheet ? await signedMediaUrl(sheet, 24 * 3600) : null;
   const outputs: Outputs = {
     voiceKeys: scenes.map((s) => s.voiceKey),
     voiceSeconds: scenes.map((s) => s.seconds),
     photoKeys: scenes.map((s) => s.photoKey),
-    photoUrls: await Promise.all(scenes.map((s) => signedMediaUrl(s.photoKey, 24 * 3600))),
+    photoUrls,
     models: scenes.map((s) => s.model),
     clipSeconds: scenes.map((s) => modelSeconds(s.model, s.seconds)),
     backups: [],
+    prompts: await clipPrompts(r, plan),
+    refs: await Promise.all(scenes.map(async (s, i) => (s.model === PRESENTER_MODEL && sheetUrl ? { imageUrls: [sheetUrl, photoUrls[i]], audioUrl: await signedMediaUrl(s.voiceKey, 24 * 3600) } : null))),
   };
   // ponytail: a duplicate tick that lost this race wasted one set of voice calls (cents); not worth a claim.
   await prisma.reelRender.updateMany({ where: { id: r.id, step: "VOICE" }, data: { step: "CLIPS", outputs: outputs as Prisma.InputJsonValue } });
@@ -217,9 +243,10 @@ async function submitClips(r: ReelRender) {
   if (claim.count !== 1) return;
   const plan = await planOf(r);
   const out = r.outputs as Outputs & { submitErrors?: number };
+  const prompts = out.prompts ?? (await clipPrompts(r, plan));
   try {
-    const ids = await Promise.all(plan.scenes.map(async (s, i) =>
-      higgsfield.animate({ model: out.models[i], photoUrl: await photoUrl(out, i), prompt: s.prompt ?? s.direction, seconds: out.clipSeconds[i], webhook: webhookFor(r), idempotencyKey: `${r.id}:clip:${i}` }),
+    const ids = await Promise.all(plan.scenes.map(async (_, i) =>
+      higgsfield.animate({ model: out.models[i], photoUrl: await photoUrl(out, i), prompt: prompts[i], seconds: out.clipSeconds[i], ...out.refs?.[i], webhook: webhookFor(r), idempotencyKey: `${r.id}:clip:${i}` }),
     ));
     await prisma.reelRender.update({ where: { id: r.id }, data: { requests: { CLIPS: ids }, claimedAt: null } });
   } catch (e) {
@@ -228,6 +255,29 @@ async function submitClips(r: ReelRender) {
     if (refused(e) || tries >= SUBMIT_TRIES) return failRender({ renderId: r.id }, e, true);
     await prisma.reelRender.update({ where: { id: r.id }, data: { claimedAt: null, outputs: { ...out, submitErrors: tries } as Prisma.InputJsonValue } });
   }
+}
+
+/** A presenter scene's prompt names the product it stands next to (its photo's title); product scenes keep the director's. */
+async function clipPrompts(r: ReelRender, plan: ReelPlan) {
+  const photos = plan.scenes.some((s) => s.presenter) ? await productPhotos(r.workspaceId, r.brandId) : [];
+  return plan.scenes.map((s) => {
+    if (!s.presenter) return s.prompt ?? s.direction;
+    const product = photos.find((p) => p.key === s.photoKey)?.title ?? "the product";
+    return `The person in image 1 speaks to camera, warm and natural, next to ${product} shown in image 2, lips in sync with the audio. Keep the person's face and the product exactly as in the images. Vertical 9:16, soft daylight.`;
+  });
+}
+
+/** One more go for failed presenter scenes, on the same model with the same references (a new key, so a new job). */
+async function retryPresenter(r: ReelRender, scenes: number[]) {
+  const plan = await planOf(r);
+  const out = r.outputs as Outputs;
+  const prompts = out.prompts ?? (await clipPrompts(r, plan));
+  const ids = [...((r.requests as Requests).CLIPS ?? [])];
+  for (const i of scenes) {
+    ids[i] = await higgsfield.animate({ model: out.models[i], photoUrl: await photoUrl(out, i), prompt: prompts[i], seconds: out.clipSeconds[i], ...out.refs?.[i], webhook: webhookFor(r), idempotencyKey: `${r.id}:clip:${i}:retry` });
+    out.presenterRetried = [...(out.presenterRetried ?? []), i];
+  }
+  await prisma.reelRender.update({ where: { id: r.id }, data: { requests: { CLIPS: ids }, outputs: out as Prisma.InputJsonValue } });
 }
 
 async function retryOnBackup(r: ReelRender, scenes: number[]) {
@@ -273,7 +323,8 @@ async function join(r: ReelRender, urls: string[]) {
 
 async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { workspaceId: string; brandId: string }, dir: string) {
   // Each scene lasts as long as its voice (rounded up); longer clips are trimmed to it.
-  const sceneSeconds = out.voiceSeconds.map(clipSeconds);
+  // A presenter clip is at least 4 s (and priced so): its scene keeps that length.
+  const sceneSeconds = out.voiceSeconds.map((v, i) => (out.models[i] === PRESENTER_MODEL ? Math.max(PRESENTER_MIN_SECONDS, clipSeconds(v)) : clipSeconds(v)));
   const clips = await Promise.all(urls.map(async (u, i) => {
     const file = path.join(dir, `clip${i}.mp4`);
     await writeFile(file, await fetchResult(u));
@@ -281,7 +332,10 @@ async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { w
   }));
   // Look at every join before joining: a seam that doesn't read as one film is softened to a dissolve.
   const plan = await planOf(r);
-  const seams = await Promise.all(clips.slice(1).map((_, i) => checkJoin(scope, plan.scenes[i].transition ?? "cut", clips[i].file, clips[i + 1].file, dir, i)));
+  // In a reel with a presenter every join is a cut (a dissolve between a face and a product reads as a glitch).
+  const seams = plan.presenter !== "none"
+    ? clips.slice(1).map((_, i): Seam => ({ after: i + 1, planned: "cut", used: "cut", fits: null, note: "Presenter reel: cuts only" }))
+    : await Promise.all(clips.slice(1).map((_, i) => checkJoin(scope, plan.scenes[i].transition ?? "cut", clips[i].file, clips[i + 1].file, dir, i)));
   const joined = clips.map((c, i) => ({ ...c, transition: seams[i]?.used }));
   const voices = await Promise.all(out.voiceKeys.map(async (k) => new Uint8Array(await (await fetch(await signedMediaUrl(k))).arrayBuffer())));
   const wav = path.join(dir, "voice.wav");

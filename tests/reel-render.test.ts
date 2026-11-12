@@ -73,6 +73,12 @@ describe("nextStep", () => {
   });
   it("joins when every clip is done", () =>
     expect(nextStep(render({ requests: { CLIPS: ["a", "b"] } }), [{ state: "completed", url: "https://x/1" }, { state: "completed", url: "https://x/2" }], now)).toEqual({ action: "join", urls: ["https://x/1", "https://x/2"] }));
+  it("gives a failed presenter scene one retry on its own model, then fails", () => {
+    const pres = { ...outputs, models: ["seedance-2.5-ref", "kling-3-std"] };
+    const failed = [{ state: "failed" as const, error: "e" }, { state: "completed" as const, url: "u" }];
+    expect(nextStep(render({ requests: { CLIPS: ["a", "b"] }, outputs: pres }), failed, now)).toEqual({ action: "retryPresenter", scenes: [0] });
+    expect(nextStep(render({ requests: { CLIPS: ["a", "b"] }, outputs: { ...pres, presenterRetried: [0] } }), failed, now)).toEqual({ action: "fail", error: "Scene 1: e" });
+  });
   it("waits while clips are running", () => expect(nextStep(render({ requests: { CLIPS: ["a", "b"] } }), [{ state: "completed", url: "u" }, { state: "queued" }], now)).toEqual({ action: "wait" }));
   it("gives up after a day", () => expect(nextStep(render({ requests: { CLIPS: ["a"] }, createdAt: new Date(now - 25 * 3600_000) }), [{ state: "queued" }], now)).toMatchObject({ action: "fail" }));
 });

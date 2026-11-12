@@ -21,10 +21,12 @@ export const ReelScene = z.object({
   // The scriptwriter found no photo of what this scene talks about and used the closest one; it can't be rendered
   // until the scene gets another photo (R13). carryStandIns keeps it through edits and chat revisions.
   standIn: z.boolean().optional(),
+  // The presenter speaks this scene on camera (R10): rendered on the presenter model, priced per presenter second.
+  presenter: z.boolean().optional(),
 });
 export const ReelPlan = z.object({
   title: z.string().min(1).max(120),
-  presenter: z.literal("none"), // presenters that speak on camera come later
+  presenter: z.string().min(1).max(100), // "none", or the id of one of the brand's presenters (presenters.ts)
   template: z.string().max(60),
   voice: z.string().min(1).max(100),
   // The reel's own language (voiceover, on-screen text, caption): the brand's by default, or what the person asked for.
@@ -42,9 +44,16 @@ export const MAX_SCENE_WORDS = 30; // 15 s, the longest clip Kling makes
 const wordCount = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
 export const speechSeconds = (text: string) => wordCount(text) / WORDS_PER_SECOND;
 export const clipSeconds = (voiceSeconds: number) => Math.min(15, Math.max(3, Math.ceil(voiceSeconds)));
-export const sceneSeconds = (scene: Pick<ReelScene, "voiceText">) => clipSeconds(speechSeconds(scene.voiceText));
+/** The presenter model's shortest clip (Seedance): a presenter scene is never shorter, and is priced for it. */
+export const PRESENTER_MIN_SECONDS = 4;
+export const sceneSeconds = (scene: Pick<ReelScene, "voiceText" | "presenter">) => {
+  const s = clipSeconds(speechSeconds(scene.voiceText));
+  return scene.presenter ? Math.max(PRESENTER_MIN_SECONDS, s) : s;
+};
 export const reelSeconds = (plan: ReelPlan) => plan.scenes.reduce((sum, s) => sum + sceneSeconds(s), 0);
-export const reelPrice = (plan: ReelPlan) => reelSeconds(plan) * CREDIT_COSTS.reelPerSecond;
+export const reelPrice = (plan: ReelPlan) =>
+  plan.scenes.reduce((sum, s) => sum + sceneSeconds(s) * (s.presenter ? CREDIT_COSTS.presenterPerSecond : CREDIT_COSTS.reelPerSecond), 0);
+
 
 const PHOTO_FILE = /^[A-Za-z0-9][A-Za-z0-9._-]*\.(jpg|png)$/;
 
@@ -56,9 +65,27 @@ export function planProblems(plan: ReelPlan, scope: { workspaceId: string; brand
     const file = s.photoKey.slice(prefix.length);
     if (!s.photoKey.startsWith(prefix) || !PHOTO_FILE.test(file) || file.includes("..")) out.push(`Scene ${i + 1} uses a photo this brand doesn't have.`);
     if (wordCount(s.voiceText) > MAX_SCENE_WORDS) out.push(`Scene ${i + 1}'s voiceover runs ~${Math.round(speechSeconds(s.voiceText))} s; keep it under ${MAX_SCENE_WORDS} words (15 s).`);
+    if (s.presenter && s.standIn) out.push(`Scene ${i + 1} can't have the presenter: its photo doesn't show what it talks about.`);
     return out;
-  });
+  }).concat(presenterProblems(plan));
 }
+
+/** Presenter scenes only with a presenter picked, and at most half the reel (the product stays the subject). */
+function presenterProblems(plan: ReelPlan): string[] {
+  const n = plan.scenes.filter((s) => s.presenter).length;
+  if (!n) return [];
+  if (plan.presenter === "none") return ["Pick a presenter before giving scenes to one."];
+  const max = Math.floor(plan.scenes.length / 2);
+  return n > max ? [`The presenter can speak in at most ${max} of the ${plan.scenes.length} scenes.`] : [];
+}
+
+/** With no presenter, no scene is a presenter scene ("No presenter" clears the flags). */
+export const clearPresenterFlags = (plan: ReelPlan): ReelPlan =>
+  plan.presenter === "none" ? { ...plan, scenes: plan.scenes.map((s) => ({ ...s, presenter: undefined })) } : plan;
+
+/** Every join in a reel with a presenter is a cut: a dissolve between a face and a product reads as a glitch. */
+export const presenterCuts = (plan: ReelPlan): ReelPlan =>
+  plan.presenter === "none" ? plan : { ...plan, scenes: plan.scenes.map((s) => ({ ...s, transition: s.transition && "cut" })) };
 
 /** Scenes whose photo shows something else than the scene talks about: rendering them would misrepresent the product. */
 export const standInProblems = (plan: ReelPlan) =>

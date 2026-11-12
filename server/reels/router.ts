@@ -15,7 +15,8 @@ export const TRANSITIONS = ["cut", "match", "dissolve"] as const;
 export type Transition = (typeof TRANSITIONS)[number];
 export const SCENE_KINDS = ["detail", "room", "physics"] as const satisfies readonly SceneKind[];
 
-type ClipInput = { photoUrl: string; prompt: string; seconds: number };
+/** imageUrls/audioUrl: the presenter model's references (presenter sheet, product photo) and the scene's voice. */
+type ClipInput = { photoUrl: string; prompt: string; seconds: number; imageUrls?: string[]; audioUrl?: string };
 type VideoModel = { path: string; minSeconds: number; maxSeconds: number; allowed?: number[]; body: (input: ClipInput) => Record<string, unknown> };
 
 export const VIDEO_MODELS = {
@@ -38,9 +39,20 @@ export const VIDEO_MODELS = {
     allowed: [6, 10],
     body: (i: ClipInput) => ({ image_url: i.photoUrl, prompt: i.prompt, duration: i.seconds }),
   },
+  // Presenter scenes (R10): the presenter speaks the scene's voice, lip-synced, next to the product. Never routed by
+  // the director, never a backup: render.ts picks it by scene.presenter. Body beyond audio_urls is a guess until the
+  // first live run (POST {} answered "'audio_urls' is a required property", 2026-11-12).
+  "seedance-2.5-ref": {
+    path: "/bytedance/seedance-2.5/reference-to-video",
+    minSeconds: 4,
+    maxSeconds: 15,
+    body: (i: ClipInput) => ({ image_urls: i.imageUrls ?? [i.photoUrl], audio_urls: i.audioUrl ? [i.audioUrl] : [], prompt: i.prompt, duration: i.seconds, resolution: "1080p" }),
+  },
 } satisfies Record<string, VideoModel>;
 export type ModelId = keyof typeof VIDEO_MODELS;
-export const MODEL_IDS = Object.keys(VIDEO_MODELS) as [ModelId, ...ModelId[]];
+export const PRESENTER_MODEL: ModelId = "seedance-2.5-ref";
+/** The models a plan may name (the director's routes); the presenter model is the render's own choice. */
+export const MODEL_IDS = (Object.keys(VIDEO_MODELS) as ModelId[]).filter((m) => m !== PRESENTER_MODEL) as [ModelId, ...ModelId[]];
 
 const ROUTES: Record<SceneKind, ModelId> = { detail: "kling-3-std", room: "seedance-2.5", physics: "hailuo-2.3" };
 /** Used when a scene's model refuses or fails: the cheapest, most predictable one. */

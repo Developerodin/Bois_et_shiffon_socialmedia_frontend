@@ -17,7 +17,7 @@ const m = vi.hoisted(() => {
   };
 });
 vi.mock("@/server/db/prisma", () => ({ prisma: m.prisma }));
-vi.mock("@/server/services/credits", () => ({ spendCredits: m.spend, refundCharge: m.refund }));
+vi.mock("@/server/services/credits", async (orig) => ({ ...(await orig<object>()), spendCredits: m.spend, refundCharge: m.refund }));
 vi.mock("@/server/services/subscriptions", () => ({ requirePlan: vi.fn(async () => {}) }));
 vi.mock("@/server/content/knowledge", () => ({ productPhotos: m.photos }));
 vi.mock("@/server/jobs/queue", () => ({ enqueueJob: m.enqueue }));
@@ -30,7 +30,8 @@ vi.mock("@/server/storage/media", async (orig) => ({
   mediaExists: vi.fn(async (k: string) => k.includes("spotlight")),
 }));
 
-import { createTemplatePreview, runAsset, templateOptions } from "@/server/reels/templates";
+import { runAsset } from "@/server/reels/assets";
+import { createTemplatePreview, templateOptions } from "@/server/reels/templates";
 import { templateAsk } from "@/server/reels/service";
 
 const scope = { workspaceId: "w1", brandId: "b1", userId: "u1" };
