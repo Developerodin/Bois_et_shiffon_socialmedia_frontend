@@ -4,41 +4,70 @@ Branch `ai-reels` (not pushed, not merged). Today moved the app's Figma screens 
 one module at a time. Each module was given a review for correctness, security, performance and maintainability,
 tested on the emulator, fixed, and committed.
 
-## Reels templates, presenters and voices (2026-11-12, later)
+## Reels templates, presenters and voices (end of day 2026-11-12)
 
-Built from `docs/superpowers/specs/2026-11-12-reels-templates-actors-voices-design.md`, one commit per step, each
-given a four-lens review (Fable, medium) and its findings fixed before committing. Branch `desktop-shell`, not pushed.
-1. `9708b6b` chat revisions keep the voice picked on the voice screen.
-2. `34f73c8` templates (R12): six server templates, generic preview clips, paid per-brand previews (10 credits,
-   `ReelAsset` + one shared job, `server/reels/assets.ts`).
-3. `8a4f81a` presenters (R10): AI Influencer character sheets (2 credits), presenter scenes on Seedance
-   reference-to-video (4 credits/s, ≥4 s, one retry, cuts only), ownership checks at save and before charging.
-4. `e68dba3` voices: OpenAI five + six ElevenLabs stock voices, Voices screen with samples, unknown voices refused.
-5. `b739bc9` recorded voiceovers (R11): per-scene takes (expo-audio, ≤15 s), ffmpeg → 24 kHz WAV, speech-to-text
-   check with "Keep it / Record again", recordings follow their text, 30-day sweep.
-6. (this commit) voice cloning (ElevenLabs instant clone, 10 credits placeholder, 2 per workspace, `voices.manage`
-   for Owner/Admin with a data migration for existing Admin roles), consent record, delete / withdraw / member
-   removal queue the ElevenLabs delete in the same transaction, audit events, and "Made with AI" (caption line in the
-   reel's language, shown to approvers, and a corner mark burned in) for presenter or cloned-voice reels.
+Branch `desktop-shell`, everything committed, **not pushed** (`main` still at `08e5fb1`). Built from
+`docs/superpowers/specs/2026-11-12-reels-templates-actors-voices-design.md`, one commit per step; each step had a
+four-lens review (Fable, medium: correctness/money, security, phone UI + i18n, spec + simplicity) and every finding was
+fixed before its commit. Web: tsc clean, 492 vitest tests pass. Phone: tsc + lint clean on the touched screens.
 
-7. (next commit) ElevenLabs voice library on the Voices screen: filters (language, defaulting to the reel's; gender;
-   age; use) as one row of buttons opening a sheet, search, previews, picking saves `library:<id>`. Our ElevenLabs
-   free plan can't speak with library voices (402 `paid_plan_required`), so a render with one is refused before
-   charging until the upgrade. At the upgrade, check whether a library voice must first be added to our account.
-**Not yet tried live (no credits):** generic template previews (`scripts/render-template-previews.ts`), a real
-presenter, the A/B audio comparison (`scripts/compare-presenter-audio.ts`, delete after the owner decides), cloning
-(needs ElevenLabs Starter: the free plan can't clone). Guesses to confirm on the first live run are in the spec.
-**Known gaps, by design for now:** account deletion doesn't exist; when built it must archive the person's clones and
-queue `voices.delete` like `removeMember`. A recording's audio file stays in storage when its reel is deleted (only
-the row cascades; no reel-delete path exists yet). Withdrawing consent needs access to at least one brand (the routes
-are brand routes); an owner with none must ask an admin. The data migration re-adds `voices.manage` to a system Admin
-role an owner had trimmed. Delete a workspace (no path yet) would drop clone rows without deleting at ElevenLabs.
-**Phone build on this Windows machine:** the default CMake 3.22.1 (ninja 1.10) can't build `react-native-worklets`
-past the 260-character path limit; `apps/mobile/android/local.properties` points at CMake 3.31.6 (ninja 1.12). Metro
-ran on 8082 because another project's agent holds 8081; the app's dev host was set to `10.0.2.2:8082`.
-**Test data to remove:** presenter "Léa (test)" (`npx tsx --env-file=.env scripts/_tmp/fake-presenter.ts
-cmvhqkx8h0001v630qd3rb7gb cmvuozmxd0009v640auzx32f3 delete`) and the test recordings on reel
-`cmwd6rj9e0005v620hne74fvm` (the sweep removes them after 30 days).
+| Commit | What it does |
+|---|---|
+| `9708b6b` | A chat revision keeps the voice (and template) picked in the app. |
+| `34f73c8` | R12 templates: six server templates (`server/reels/templates.ts`), generic preview clips, paid per-brand previews (10 credits) as `ReelAsset` rows. |
+| `8a4f81a` | R10 presenters: AI Influencer character sheets (2 credits); presenter scenes on Seedance reference-to-video (4 credits/s, at least 4 s, one retry, cuts only); shared paid-asset job `server/reels/assets.ts`; ownership checks at save and before charging (`server/reels/ownership.ts`). The app reads reel and scene lengths from the server. |
+| `e68dba3` | Voices: OpenAI five + six ElevenLabs stock voices, Voices screen with samples; unknown voices refused; ElevenLabs spoken one scene at a time with 429 backoff (2 min cap). |
+| `b739bc9` | R11 recorded voiceovers: per-scene takes (expo-audio, up to 15 s), ffmpeg to 24 kHz WAV, speech-to-text check with Keep it / Record again, recordings follow their text, 30-day sweep (`server/reels/recordings.ts`). |
+| `1c68ab4` | Voice cloning (`server/reels/clones.ts`): `voices.manage` (Owner/Admin, workspace-only; a data migration adds it to existing Admin roles), 2 per workspace, 10 credits (placeholder), charge first, refund + ElevenLabs delete on failure, consent record; delete / withdraw / member removal queue the ElevenLabs delete in the same transaction; audit events. "Made with AI" for presenter or cloned-voice reels: caption line in the reel's language (shown to approvers, added at publishing, can't be edited out) and a corner mark burned into the video. |
+| `b13aa36` | ElevenLabs voice library (`server/reels/library.ts`): Voices > Library tab, one row of filter buttons (language = the reel's by default, gender, age, use) opening a sheet, search, previews; picking saves `library:<id>`. |
+
+**What needs money before it can be tried live**
+- Higgsfield credits (the account answers `403 not_enough_credits`): generic template previews
+  (`npx tsx --env-file=.env scripts/render-template-previews.ts <workspaceId> <demoBrandId>`; use our own demo brand
+  only, every customer sees them), a real presenter, a presenter reel, and the A/B audio comparison
+  (`scripts/compare-presenter-audio.ts`; delete it after the owner chooses A or B). Guesses to confirm on that first
+  run (AI Influencer result field, Seedance reference body) are listed in the spec.
+- ElevenLabs paid plan (Starter or above): cloning (the free plan can't), and speaking with library voices (the free
+  plan answers 402 `paid_plan_required`; until then a render with one is refused before charging). At the upgrade,
+  check whether a library voice must first be added to our account (`POST /v1/voices/add/{public_owner_id}/{voice_id}`,
+  uses a voice slot); if so, that step needs adding. Then check the 10-credit clone price and the margin estimates
+  (`PREVIEW_COST_USD` in templates.ts, `PRESENTER_COST_USD_PER_SECOND` in presenters.ts) against real invoices.
+
+**Before release**
+- About 250 new phone strings in 23 languages are machine translations (`gpt-6.1-terra`): a native speaker should review.
+- Confirm ElevenLabs' and Higgsfield's data-processing agreements and "no training" terms (cloned voices).
+
+**Known gaps (documented, not built)**
+- No account deletion exists; when built it must archive the person's clones and queue `voices.delete` as
+  `removeMember` does. Deleting a workspace (no path yet) would drop clone rows without deleting them at ElevenLabs.
+- A recording's audio stays in storage when its reel is deleted (only the row cascades; no reel-delete path yet).
+- Withdrawing consent uses brand routes: an owner with no brand access must ask an admin.
+- The data migration re-adds `voices.manage` to a system Admin role an owner had trimmed.
+- The disclosure line adds about 15 characters at publishing; a caption right at the channel limit fails then, not at review.
+- Three reel screens (`generating`, `review`, `scheduled`) have lint errors that predate this work.
+
+**Test data:** the test presenter was deleted. The test reel "Tête de lit Sculpture II"
+(`cmwd6rj9e0005v620hne74fvm`, Bois & Chiffons) still names it: pick "No presenter" on its Presenter screen (or delete
+the reel). Its test recordings are removed by the daily sweep after 30 days.
+
+**Running it on this Windows machine**
+- Web: `npm run dev` in `apps/web` (port 3100). Stop it before `npx prisma generate` (Windows locks the engine DLL);
+  ours is the node process whose command line contains `Social Media Agent`. The `Cad` node and python processes
+  belong to another project: leave them.
+- Phone build: the SDK's default CMake 3.22.1 (ninja 1.10) can't build `react-native-worklets` past the 260-character
+  path limit, even with Windows long paths on. `apps/mobile/android/local.properties` (git-ignored) sets `cmake.dir`
+  to CMake 3.31.6 (ninja 1.12). Build with `gradlew.bat app:assembleDebug -PreactNativeArchitectures=x86_64` in
+  `apps/mobile/android` (ANDROID_HOME = `C:\Users\INTEL\Android\sdk`), then `adb install -r` the APK. After changing
+  `app.json` plugins, run `npx expo prebuild --platform android --no-install` first (android/ is generated; re-add the
+  `cmake.dir` line if prebuild rewrites local.properties).
+- Metro: another project's agent holds port 8081, so run `npx expo start --dev-client --port 8082`; the installed
+  app's dev host is set to `10.0.2.2:8082` (its shared prefs `debug_http_host`). A fresh install loses that setting.
+- Memory is tight (31 GB, often about 3 GB free): the emulator, Metro, the web server and a Gradle build together got
+  processes killed once; start them one at a time.
+
+**Next, in order (to agree with the owner):** top up Higgsfield and render one presenter reel end to end; decide A or
+B for presenter audio; upgrade ElevenLabs and try cloning and a library voice; then the older open items below
+(Shopify live test, CSV import).
 
 ## Session of 2026-11-12 in short
 
