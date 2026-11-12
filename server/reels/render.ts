@@ -13,7 +13,7 @@ import { checkSeam } from "@/server/reels/agents";
 import { frameOf, joinReel } from "@/server/reels/join";
 import { productPhotos } from "@/server/content/knowledge";
 import { planOwnershipProblems } from "@/server/reels/ownership";
-import { clipSeconds, planProblems, PRESENTER_MIN_SECONDS, ReelPlan, reelPrice, standInProblems } from "@/server/reels/plan";
+import { aiDisclosureLine, clipSeconds, needsAiDisclosure, planProblems, PRESENTER_MIN_SECONDS, ReelPlan, reelPrice, standInProblems } from "@/server/reels/plan";
 import { donePresenter } from "@/server/reels/presenters";
 import { recordingKeys, recordingProblems } from "@/server/reels/recordings";
 import { promptProblems } from "@/server/reels/prompt-check";
@@ -134,9 +134,13 @@ export async function startRender(input: { workspaceId: string; brandId: string;
     // The plan may have changed while paying: render only the version that was checked and priced.
     const latest = await tx.contentVersion.findFirst({ where: { contentItemId: input.itemId }, orderBy: { version: "desc" }, select: { id: true } });
     if (latest?.id !== loaded.versionId) throw new PublishingError("A newer plan exists. Review it, then make the video.");
-    return tx.reelRender.create({
+    const made = await tx.reelRender.create({
       data: { ...scope, contentItemId: input.itemId, contentVersionId: loaded.versionId, attempt: loaded.attempt, chargeId, webhookSecret: randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "") },
     });
+    // Each render that speaks with someone's cloned voice is on the audit log, with the render itself.
+    if (loaded.plan.voice.startsWith("clone:"))
+      await tx.auditEvent.create({ data: { ...scope, actorUserId: input.userId, action: "voice.clone.used", entityType: "Voice", entityId: loaded.plan.voice.slice("clone:".length), metadata: { renderId: made.id, itemId: input.itemId } } });
+    return made;
   }, TX).catch(async (e: unknown) => {
     if ((e as { code?: string }).code === "P2002") return prisma.reelRender.findUniqueOrThrow({ where: { contentVersionId_attempt: { contentVersionId: loaded.versionId, attempt: loaded.attempt } } });
     // No render row holds this charge: give it back. ponytail: a process killed right here still keeps it; a sweep
@@ -214,7 +218,7 @@ async function prepareVoice(r: ReelRender) {
       if (!res.ok) throw new Error(`Recording missing: couldn't read it (${res.status}). Record it again.`);
       return new Uint8Array(await res.arrayBuffer());
     }
-    return speak({ text: s.voiceText, voice: plan.voice, language: plan.language, deadline });
+    return speak({ text: s.voiceText, voice: plan.voice, language: plan.language, deadline, workspaceId: r.workspaceId });
   };
   const wavs: Uint8Array[] = [];
   try {
@@ -366,7 +370,9 @@ async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { w
   await writeFile(wav, padAndJoinWav(voices, joined.map((c) => c.seconds)));
   const mp4 = path.join(dir, "reel.mp4");
   const reencode = needsReencode(joined.map((c, i) => ({ model: out.models[i], clip: out.clipSeconds[i], scene: c.seconds, transition: c.transition })));
-  await joinReel(joined, wav, mp4, { reencode });
+  const mark = needsAiDisclosure(plan) ? path.join(dir, "ai-mark.png") : undefined;
+  if (mark) await writeFile(mark, await aiMark(aiDisclosureLine(plan.language)));
+  await joinReel(joined, wav, mp4, { reencode, mark });
   const videoKey = mediaKey(scope, `${randomUUID()}.mp4`);
   await putMedia(videoKey, await readFile(mp4), "video/mp4");
 
@@ -382,6 +388,10 @@ async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { w
     await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW" } });
   }, TX);
 }
+
+/** The small "Made with AI" mark burned into presenter and cloned-voice reels (a rounded label, white on dark). */
+const aiMark = (line: string) =>
+  sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="72"><rect width="300" height="72" rx="20" fill="rgba(0,0,0,0.55)"/><text x="150" y="47" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="600" fill="#fff">${line.replace(/\.$/, "").replace(/'/g, "&#39;")}</text></svg>`)).png().toBuffer();
 
 /**
  * The seam check for one join: the last frame of a scene and the first of the next, judged by a light vision model.

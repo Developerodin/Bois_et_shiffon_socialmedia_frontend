@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { aiDisclosureLine, needsAiDisclosure } from "@/server/reels/plan";
 import type { ApprovalVerdict, ContentChannel, IntegrationProvider, Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
@@ -30,7 +31,7 @@ export class PublishingError extends Error {
   }
 }
 
-type Body = { hook?: string; caption?: string; hashtags?: string[]; pinTitle?: string; altText?: string };
+type Body = { hook?: string; caption?: string; hashtags?: string[]; pinTitle?: string; altText?: string; aiDisclosure?: boolean; presenter?: string; voice?: string; language?: string };
 
 const CHANNEL_PROVIDER: Record<ContentChannel, IntegrationProvider | null> = {
   FACEBOOK_POST: "META",
@@ -60,8 +61,13 @@ export function publishRequirements(channel: ContentChannel) {
 /** Where the post's media lives: our private uploads (signed at posting time) and/or public links. */
 type Target = { boardId: string | null; imageUrl?: string | null; media?: string[]; links?: string[]; videoUrl?: string | null; videoKey?: string | null };
 
+/**
+ * The posted text. A reel made with an AI presenter or a cloned voice always says so, in its own language (it can't be
+ * edited out). Versions saved before the flag existed are judged from their plan.
+ */
 export function postText(body: Body) {
-  return [body.caption?.trim(), body.hashtags?.length ? body.hashtags.join(" ") : ""].filter(Boolean).join("\n\n");
+  const ai = body.aiDisclosure ?? needsAiDisclosure(body);
+  return [body.caption?.trim(), ai ? aiDisclosureLine(body.language) : "", body.hashtags?.length ? body.hashtags.join(" ") : ""].filter(Boolean).join("\n\n");
 }
 
 export function packageHash(item: { id: string; channel: string }, version: { id: string; body: unknown }) {

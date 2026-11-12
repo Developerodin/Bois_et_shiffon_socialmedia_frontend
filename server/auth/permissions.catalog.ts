@@ -13,6 +13,7 @@ export const PERMISSIONS = [
   ["audit.read", "audit", "Read the audit log"],
   ["brand.create", "brands", "Create projects (brands)"],
   ["brand.archive", "brands", "Archive and restore projects"],
+  ["voices.manage", "voices", "Clone voices for the workspace, and rename or delete them"],
   // Project scope: a workspace role holding these gets them on every project;
   // a project role gets them on its one project.
   ["brand.read", "project", "Open the project and its workspace areas"],
@@ -41,6 +42,8 @@ const ALL = PERMISSION_KEYS;
 const WORKSPACE_ONLY: PermissionKey[] = [
   "workspace.manage", "members.read", "members.manage", "invitations.manage",
   "roles.read", "roles.manage", "audit.read", "brand.create", "brand.archive",
+  // A cloned voice is someone's likeness, usable across the workspace: never granted with a project.
+  "voices.manage",
 ];
 export const PROJECT_KEYS = ALL.filter((k) => !WORKSPACE_ONLY.includes(k));
 export const permissionScope = (k: PermissionKey) => (WORKSPACE_ONLY.includes(k) ? "WORKSPACE" : "PROJECT");

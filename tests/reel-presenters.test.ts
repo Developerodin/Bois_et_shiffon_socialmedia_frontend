@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const m = vi.hoisted(() => ({ findFirst: vi.fn(), createAsset: vi.fn() }));
-vi.mock("@/server/db/prisma", () => ({ prisma: { reelAsset: { findFirst: m.findFirst } } }));
+const m = vi.hoisted(() => ({ findFirst: vi.fn(), createAsset: vi.fn(), voice: vi.fn() }));
+vi.mock("@/server/db/prisma", () => ({ prisma: { reelAsset: { findFirst: m.findFirst }, voice: { findFirst: m.voice } } }));
 vi.mock("@/server/reels/assets", () => ({ createAsset: m.createAsset, registerAssetKind: vi.fn(), assetsOf: vi.fn() }));
 
 import { planOwnershipProblems } from "@/server/reels/ownership";
@@ -62,5 +62,13 @@ describe("voice ownership", () => {
   it("refuses a voice outside our list", async () => {
     expect(await planOwnershipProblems({ ...plan("none", [scene(), scene()]), voice: "eleven:someoneElse" }, scope)).toEqual(["Voice not available: pick another."]);
     expect(await planOwnershipProblems({ ...plan("none", [scene(), scene()]), voice: "eleven:EXAVITQu4vr4xnSDxMaL" }, scope)).toEqual([]);
+  });
+
+  it("refuses a cloned voice this workspace no longer has", async () => {
+    m.voice.mockResolvedValue(null); // archived, or another workspace's
+    expect(await planOwnershipProblems({ ...plan("none", [scene(), scene()]), voice: "clone:v1" }, scope)).toEqual(["Voice not available: pick another."]);
+    expect(m.voice).toHaveBeenCalledWith({ where: { id: "v1", workspaceId: "w1", archivedAt: null, providerVoiceId: { not: null } } });
+    m.voice.mockResolvedValue({ id: "v1", providerVoiceId: "el1" });
+    expect(await planOwnershipProblems({ ...plan("none", [scene(), scene()]), voice: "clone:v1" }, scope)).toEqual([]);
   });
 });

@@ -106,9 +106,19 @@ export const carryStandIns = (plan: ReelPlan, previous: ReelPlan | undefined, fr
   return { ...plan, scenes: plan.scenes.map((s) => ({ ...s, standIn: (fromScriptwriter && s.standIn) || flagged.has(s.photoKey) ? true : undefined })) };
 };
 
+/**
+ * EU AI Act transparency (Art. 50): a reel showing an AI presenter or speaking with a cloned voice says it's made
+ * with AI, in its caption (added at publishing, shown to approvers) and as a small mark in the video (render.ts).
+ */
+/** The line in the reel's own language (its viewers read it); English for the rest. */
+const AI_LINES: Record<string, string> = { en: "Made with AI.", fr: "Créé avec l'IA.", de: "Mit KI erstellt.", es: "Creado con IA.", it: "Creato con l'IA.", pt: "Criado com IA.", nl: "Gemaakt met AI." };
+export const aiDisclosureLine = (language?: string) => AI_LINES[(language ?? "en").split("-")[0]] ?? AI_LINES.en;
+export const needsAiDisclosure = (plan: { presenter?: string; voice?: string }) => (!!plan.presenter && plan.presenter !== "none") || !!plan.voice?.startsWith("clone:");
+
 /** The version body: the plan, plus the fields the shared content rules and publisher read. */
 export const toVersionBody = (plan: ReelPlan) => ({
   ...plan,
+  aiDisclosure: needsAiDisclosure(plan),
   hook: plan.scenes[0].onScreenText,
   script: plan.scenes.map((s) => s.voiceText),
   slides: [] as string[],

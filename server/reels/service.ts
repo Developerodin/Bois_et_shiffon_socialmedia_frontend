@@ -7,7 +7,7 @@ import { brandKnowledge, productPhotos } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
 import { directScenes, type DraftSoFar, type ReelPhoto, writePlan } from "@/server/reels/agents";
 import { planOwnershipProblems } from "@/server/reels/ownership";
-import { carryStandIns, clearPresenterFlags, isStudioPlan, planProblems, presenterCuts, ReelPlan, reelPrice, reelSeconds, sceneSeconds, toVersionBody } from "@/server/reels/plan";
+import { aiDisclosureLine, carryStandIns, clearPresenterFlags, needsAiDisclosure, isStudioPlan, planProblems, presenterCuts, ReelPlan, reelPrice, reelSeconds, sceneSeconds, toVersionBody } from "@/server/reels/plan";
 import { donePresenter } from "@/server/reels/presenters";
 import { settleRecordings } from "@/server/reels/recordings";
 import { renderFailure, renderView } from "@/server/reels/render";
@@ -277,6 +277,8 @@ export async function reelDetail(scope: Omit<Scope, "userId">, itemId: string) {
     price: plan.success ? reelPrice(plan.data) : null,
     // Lengths come from here, never from a formula in the app (recorded scenes take their recording's length).
     seconds: plan.success ? reelSeconds(plan.data) : null,
+    // Shown to approvers under the caption, read-only: publishing adds it (postText).
+    aiDisclosure: plan.success && needsAiDisclosure(plan.data) ? aiDisclosureLine(plan.data.language) : null,
     sceneSeconds: plan.success ? plan.data.scenes.map(sceneSeconds) : [],
     caption: (latest?.body as { caption?: string; hashtags?: string[] } | undefined) ?? null,
     videoUrl,
