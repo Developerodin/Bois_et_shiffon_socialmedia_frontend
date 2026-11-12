@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/lib/website";
+import { zoneCity } from "@/server/content/offer-checks";
 
 type Attempt = {
   id: string;
@@ -45,8 +46,7 @@ const CAMPAIGN_KIND = { offer: "Offer", campaign: "Campaign", priority: "Priorit
 function campaignLine(c: Campaign) {
   const head = `${CAMPAIGN_KIND[c.kind]}: ${c.name}`;
   if (c.withdrawn) return `${head} (withdrawn)`;
-  const zone = c.timeZone.split("/").pop()!.replace(/_/g, " ");
-  return [head, c.discountPercent ? `-${c.discountPercent} %` : null, c.code, c.ends ? `${c.starts} – ${c.ends} (${zone})` : null].filter(Boolean).join(" · ");
+  return [head, c.discountPercent ? `-${c.discountPercent} %` : null, c.code, c.ends ? `${c.starts} – ${c.ends} (${zoneCity(c.timeZone)})` : null].filter(Boolean).join(" · ");
 }
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Try again.");
 

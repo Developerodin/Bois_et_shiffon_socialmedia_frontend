@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { campaignsApi, type Campaign, type CampaignBody, type CampaignKind, type Product } from "@/components/products/api";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
+import { offerPercents, zoneCity } from "@/server/content/offer-checks";
 import { byExternalId, groupKey, productName, REMOVED_PRODUCT_NAME } from "@/server/content/product-checks";
 
 const KIND_LABEL: Record<CampaignKind, string> = { priority: "Standing priority", campaign: "Campaign", offer: "Offer" };
@@ -56,7 +57,7 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
         <div>
           <h2 id="campaigns-h" className="font-display text-lg font-semibold">Campaigns and offers</h2>
           <p className="text-sm text-muted-foreground">
-            {timeZone ? `Times are in ${timeZone}.` : "No timezone set yet: it's asked for on the first save."}{" "}
+            {timeZone ? `Times are in ${zoneLabel(timeZone)}.` : "No timezone set yet: it's asked for on the first save."}{" "}
             {canManage && timeZone ? (
               <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setZoneOpen(true)}>Change</button>
             ) : null}
@@ -138,6 +139,35 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
 
 const browserZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+/** "Europe/Paris" → "Paris (Central European Time)"; the city alone when Intl has no name for the zone. */
+function zoneLabel(timeZone: string) {
+  const city = zoneCity(timeZone);
+  let name: string | undefined;
+  try {
+    name = new Intl.DateTimeFormat("en-GB", { timeZone, timeZoneName: "longGeneric" }).formatToParts(Date.now()).find((p) => p.type === "timeZoneName")?.value;
+  } catch {
+    // An id this browser doesn't know: the city is still readable.
+  }
+  return name && name !== city ? `${city} (${name})` : city;
+}
+
+/** Every zone the browser knows, by readable name; the current one kept even when it's an alias ("Asia/Calcutta"). */
+function ZoneSelect({ value, onChange, label }: { value: string; onChange: (zone: string) => void; label?: string }) {
+  const [zones] = useState(() =>
+    [...new Set([value, ...Intl.supportedValuesOf("timeZone")])].map((id) => ({ id, label: zoneLabel(id) })).sort((a, b) => a.label.localeCompare(b.label)),
+  );
+  return (
+    <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} required className={selectClass}>
+      {zones.map((z) => (
+        <option key={z.id} value={z.id}>{z.label}</option>
+      ))}
+    </select>
+  );
+}
+
+/** Lists show 24-hour times, so the dialog takes them the same way (a native time input follows the browser's 12/24 h). */
+const timeProps = { pattern: "([01][0-9]|2[0-3]):[0-5][0-9]", placeholder: "HH:MM", maxLength: 5, title: "24-hour time, like 09:00 or 20:00" };
+
 /** "2026-11-30 20:00" → ["2026-11-30", "20:00"]. */
 const split = (wall: string | null | undefined, time: string) => (wall ? [wall.slice(0, 10), wall.slice(11, 16)] : ["", time]);
 
@@ -173,6 +203,12 @@ function CampaignDialog({
   const known = new Set(groups.map((g) => g.id));
   const rows = [...groups, ...(campaign?.productIds ?? []).filter((id) => !known.has(id)).map((id) => ({ id, name: REMOVED_PRODUCT_NAME }))];
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+  const [search, setSearch] = useState("");
+  const q = search.trim().toLowerCase();
+  const shown = q ? rows.filter((p) => p.name.toLowerCase().includes(q)) : rows;
+  // Quality accepts the discount % or any percent in the wording, so a mismatch lets posts say either one.
+  const pctValue = Number(percent);
+  const worded = kind === "offer" && percent.trim() && Number.isInteger(pctValue) ? [...new Set(offerPercents(offer))].filter((n) => n !== pctValue) : [];
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -205,7 +241,7 @@ function CampaignDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{campaign ? `Edit ${campaign.name}` : "New campaign"}</DialogTitle>
-          <DialogDescription>{timeZone ? `Times are in ${timeZone}.` : "Times are in the brand's timezone, set below."}</DialogDescription>
+          <DialogDescription>{timeZone ? `Times are in ${zoneLabel(timeZone)}.` : "Times are in the brand's timezone, set below."}</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
           {campaign?.affectedPosts.length ? (
@@ -217,7 +253,7 @@ function CampaignDialog({
           {zone !== null ? (
             <label className={label}>
               <span className="text-muted-foreground">Brand timezone (campaign times are entered and shown in it)</span>
-              <Input value={zone} onChange={(e) => setZone(e.target.value)} required maxLength={64} placeholder="Europe/Paris" />
+              <ZoneSelect value={zone} onChange={setZone} />
             </label>
           ) : null}
           <label className={label}>
@@ -235,13 +271,13 @@ function CampaignDialog({
           <fieldset className="grid gap-2 sm:grid-cols-2">
             <legend className="mb-1.5 text-sm text-muted-foreground">Starts</legend>
             <Input type="date" aria-label="Start date" value={startDate} onChange={(e) => setStart([e.target.value, startTime])} required />
-            <Input type="time" aria-label="Start time" value={startTime} onChange={(e) => setStart([startDate, e.target.value])} />
+            <Input aria-label="Start time" value={startTime} onChange={(e) => setStart([startDate, e.target.value])} {...timeProps} />
           </fieldset>
           {kind !== "priority" ? (
             <fieldset className="grid gap-2 sm:grid-cols-2">
               <legend className="mb-1.5 text-sm text-muted-foreground">Ends</legend>
               <Input type="date" aria-label="End date" value={endDate} onChange={(e) => setEnd([e.target.value, endTime])} required />
-              <Input type="time" aria-label="End time" value={endTime} onChange={(e) => setEnd([endDate, e.target.value])} />
+              <Input aria-label="End time" value={endTime} onChange={(e) => setEnd([endDate, e.target.value])} {...timeProps} />
               <p className="text-xs text-muted-foreground sm:col-span-2">Over at that minute: &ldquo;until 20:00&rdquo; ends at 20:00, and 23:59 leaves the day&rsquo;s last minute out.</p>
             </fieldset>
           ) : null}
@@ -261,6 +297,11 @@ function CampaignDialog({
                   <Input value={code} onChange={(e) => setCode(e.target.value)} maxLength={40} />
                 </label>
               </div>
+              {worded.length ? (
+                <p role="status" className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
+                  The wording says {worded.map((n) => `${n} %`).join(", ")} but the discount is {pctValue} %. Posts may use either one, so make them match.
+                </p>
+              ) : null}
             </>
           ) : null}
           <fieldset className="flex flex-col gap-1.5">
@@ -275,19 +316,22 @@ function CampaignDialog({
                 ))}
               </div>
             ) : null}
+            {rows.length > 8 ? (
+              <Input type="search" aria-label="Search products" placeholder="Search products" value={search} onChange={(e) => setSearch(e.target.value)} />
+            ) : null}
             <div className="max-h-48 overflow-y-auto rounded-lg border border-border p-2">
-              {rows.length ? (
-                rows.map((p) => (
+              {shown.length ? (
+                shown.map((p) => (
                   <label key={p.id} className="flex min-h-9 items-center gap-2 text-sm">
                     <input type="checkbox" checked={productIds.includes(p.id)} onChange={() => setProductIds((l) => toggle(l, p.id))} className="size-4 accent-primary" />
                     {p.name}
                   </label>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">No products in the catalogue yet.</p>
+                <p className="text-sm text-muted-foreground">{rows.length ? "No product matches." : "No products in the catalogue yet."}</p>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">Up to 50 products and 20 categories.</p>
+            <p className="text-xs text-muted-foreground">{productIds.length ? `${plural(productIds.length, "product")} ticked. ` : ""}Up to 50 products and 20 categories.</p>
           </fieldset>
           <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
           <DialogFooter>
@@ -327,7 +371,7 @@ function ZoneDialog({ current, onClose, onSave }: { current: string; onClose: ()
             }
           }}
         >
-          <Input aria-label="Timezone" value={zone} onChange={(e) => setZone(e.target.value)} required maxLength={64} placeholder={browserZone()} />
+          <ZoneSelect label="Timezone" value={zone} onChange={setZone} />
           <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={busy}>Cancel</Button>

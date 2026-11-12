@@ -52,6 +52,9 @@ export function isTimeZone(timeZone: string) {
   }
 }
 
+/** How a zone reads to people: "Europe/Paris" → "Paris", "America/New_York" → "New York". */
+export const zoneCity = (timeZone: string) => timeZone.split("/").pop()!.replace(/_/g, " ");
+
 /** The one time formatter: an instant as `"YYYY-MM-DD HH:mm"` wall-clock time in `timeZone`. */
 export function wallTime(instant: Date, timeZone: string) {
   const f = fieldsAt(instant.getTime(), timeZone);
@@ -325,11 +328,11 @@ export function offerIssues(
   const issues: OfferIssue[] = [];
   if (changes.length) issues.push(issue("changed", `${name} changed since this post was checked: ${changes.join("; ")}. Ask for changes.`, true, false));
   if (offerState(campaign, at) === "ended") {
-    const ends = `${tz(campaign.endsAt!)} ${timeZone}`;
+    const ends = `${tz(campaign.endsAt!)} (${zoneCity(timeZone)})`;
     const message = campaign.endsAt!.getTime() > now.getTime() ? `${name} ends ${ends}: pick an earlier time` : `${name} ended ${ends}. Approve anyway or ask for changes.`;
     issues.push(issue("ended", message, !override?.offers?.includes(id), true));
   } else if (t.state === "live" && at.getTime() < campaign.startsAt.getTime()) {
-    issues.push(issue("early", `${name} starts ${tz(campaign.startsAt)} ${timeZone}: pick a later time`, true, false));
+    issues.push(issue("early", `${name} starts ${tz(campaign.startsAt)} (${zoneCity(timeZone)}): pick a later time`, true, false));
   }
   return issues;
 }

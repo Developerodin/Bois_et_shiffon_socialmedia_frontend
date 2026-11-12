@@ -49,7 +49,7 @@ test.describe("owner", () => {
     await expect(dialog).toBeVisible();
     // First save asks for the brand timezone.
     const zone = dialog.getByLabel(/Brand timezone/);
-    if (await zone.count()) await zone.fill("Europe/Paris");
+    if (await zone.count()) await zone.selectOption("Europe/Paris");
     await dialog.getByLabel("Kind").selectOption("offer");
     await dialog.getByLabel("Name", { exact: true }).fill(NAME);
     const [sd, st] = paris(Date.now() - 5 * 60_000);
@@ -59,8 +59,16 @@ test.describe("owner", () => {
     await dialog.getByLabel("End date", { exact: true }).fill(ed);
     await dialog.getByLabel("End time", { exact: true }).fill(et);
     await dialog.getByLabel("What customers get, and its conditions").fill("-20 % sur la chaise Julia");
+    await dialog.getByLabel("Discount % (optional)").fill("25");
+    await expect(dialog.getByText("The wording says 20 % but the discount is 25 %.", { exact: false })).toBeVisible();
     await dialog.getByLabel("Discount % (optional)").fill("20");
+    await expect(dialog.getByText("The wording says", { exact: false })).toBeHidden();
     await dialog.getByLabel("Code (optional)").fill("PWFLASH20");
+    const search = dialog.getByLabel("Search products");
+    if (await search.count()) {
+      await search.fill("julia");
+      await expect(dialog.getByRole("checkbox", { name: 'Chaise "Julia"' })).toBeVisible();
+    }
     await dialog.getByRole("checkbox", { name: 'Chaise "Julia"' }).check();
     const filled = shot("campaigns-dialog");
     if (filled) await dialog.screenshot({ path: filled.path });
@@ -68,7 +76,7 @@ test.describe("owner", () => {
     await expect(dialog).toBeHidden({ timeout: 30_000 });
 
     await expect(section.getByText(`${NAME} saved.`)).toBeVisible();
-    await expect(section.getByText("Times are in Europe/Paris.")).toBeVisible();
+    await expect(section.getByText("Times are in Paris (Central European Time).")).toBeVisible();
     const r = row(section);
     await expect(r).toHaveCount(1);
     await expect(r).toContainText("· Offer");

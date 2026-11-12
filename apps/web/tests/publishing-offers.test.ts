@@ -61,7 +61,7 @@ describe("decide with offer issues", () => {
   it("a post linking no product with an ended whole-catalogue offer is refused", async () => {
     vi.useFakeTimers({ now: new Date("2026-12-01T10:00:00Z"), toFake: ["Date"] });
     db.contentItem.findFirst.mockResolvedValue(item("AWAITING_APPROVAL"));
-    await expect(approve()).rejects.toThrow('"Black Friday" ended 2026-11-30 20:00 Europe/Paris. Approve anyway or ask for changes.');
+    await expect(approve()).rejects.toThrow('"Black Friday" ended 2026-11-30 20:00 (Paris). Approve anyway or ask for changes.');
     expect(linked).not.toHaveBeenCalled();
   });
 
@@ -115,13 +115,13 @@ describe("scheduling and publishing against the offer's window", () => {
   });
 
   it("at or after a live offer's end refuses, naming the end in the brand zone", async () => {
-    await expect(schedule(ENDS)).rejects.toThrow('"Black Friday" ends 2026-11-30 20:00 Europe/Paris: pick an earlier time');
+    await expect(schedule(ENDS)).rejects.toThrow('"Black Friday" ends 2026-11-30 20:00 (Paris): pick an earlier time');
     await expect(schedule(new Date(ENDS.getTime() - 60_000))).resolves.toBeTruthy();
   });
 
   it("before the start refuses when the post was judged live, not when judged a teaser", async () => {
     vi.setSystemTime(new Date("2026-11-20T10:00:00Z"));
-    await expect(schedule(new Date("2026-11-26T10:00:00Z"))).rejects.toThrow('"Black Friday" starts 2026-11-27 08:00 Europe/Paris: pick a later time');
+    await expect(schedule(new Date("2026-11-26T10:00:00Z"))).rejects.toThrow('"Black Friday" starts 2026-11-27 08:00 (Paris): pick a later time');
     latest = version([], [offerRow({ state: "upcoming" })]);
     db.contentItem.findFirst.mockResolvedValue(item("APPROVED"));
     db.approvalDecision.findFirst.mockResolvedValue(approval());
@@ -141,7 +141,7 @@ describe("scheduling and publishing against the offer's window", () => {
     db.contentItem.findFirst.mockResolvedValue(item("SCHEDULED"));
     await executePublication({ attemptId: "a1" });
     expect(db.publicationAttempt.update).toHaveBeenCalledWith({
-      where: { id: "a1" }, data: { status: "FAILED", error: '"Black Friday" ended 2026-11-30 20:00 Europe/Paris. Approve anyway or ask for changes. Nothing was posted.' },
+      where: { id: "a1" }, data: { status: "FAILED", error: '"Black Friday" ended 2026-11-30 20:00 (Paris). Approve anyway or ask for changes. Nothing was posted.' },
     });
   });
 });
