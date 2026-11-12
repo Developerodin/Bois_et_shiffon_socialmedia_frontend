@@ -18,6 +18,7 @@ import { advanceRender, failRender, REEL_RENDER_JOB } from "@/server/reels/rende
 import { onAssetFailure, REEL_ASSET_JOB, runAsset } from "@/server/reels/assets";
 import "@/server/reels/templates"; // registers its asset kind
 import "@/server/reels/presenters"; // registers its asset kind
+import { purgeOldRecordings } from "@/server/reels/recordings";
 import { ReconnectNeeded, refreshExpiringTokens } from "@/server/services/connections";
 import { executePublication, onPublishJobLost, PUBLISH_JOB } from "@/server/services/publishing";
 import { runMonthlyPlans } from "@/server/services/automations";
@@ -112,6 +113,7 @@ async function dailySweep() {
   await renewDuePlans();
   await runMonthlyPlans();
   await enqueueDailyCatalogSyncs();
+  await purgeOldRecordings();
   const scheduled = AGENTS.filter((a) => a.schedule === "daily");
   if (scheduled.length === 0) return;
   const startOfDay = new Date(new Date().toISOString().slice(0, 10));

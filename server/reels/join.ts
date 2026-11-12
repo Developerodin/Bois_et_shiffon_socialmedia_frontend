@@ -10,7 +10,8 @@ export type JoinClip = { file: string; seconds: number; transition?: Transition 
 /** A dissolve's length. The video loses it at each dissolve, so the last frame is held that much longer (voice stays in sync). */
 export const DISSOLVE_SECONDS = 0.4;
 
-const run = (args: string[], timeout: number) =>
+/** ffmpeg with these arguments (also used for recorded voiceovers, recordings.ts). */
+export const run = (args: string[], timeout: number) =>
   new Promise<void>((resolve, reject) => {
     if (!ffmpegPath) return reject(new Error("ffmpeg isn't available on this server"));
     execFile(ffmpegPath, args, { timeout, maxBuffer: 4 * 1024 * 1024 }, (error, _out, stderr) =>

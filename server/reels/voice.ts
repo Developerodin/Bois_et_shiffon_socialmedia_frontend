@@ -44,7 +44,7 @@ export async function speak(input: { text: string; voice: string; language?: str
 }
 
 /** Errors a retry can't fix: a voice we don't have, or our provider account refusing (key, plan, quota). */
-export const voiceRefused = (e: unknown) => e instanceof Error && /^(Unknown voice |ElevenLabs (400|401|402|403|404|422)\b|Voiceover failed \((401|402|403)\))/.test(e.message);
+export const voiceRefused = (e: unknown) => e instanceof Error && /^(Unknown voice |Recording missing|ElevenLabs (400|401|402|403|404|422)\b|Voiceover failed \((401|402|403)\))/.test(e.message);
 
 async function openaiSpeak(text: string, voice: string, language?: string) {
   if (!process.env.OPENAI_API_KEY) throw new Error("Voiceover isn't set up on this server (OPENAI_API_KEY is missing).");

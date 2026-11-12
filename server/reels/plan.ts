@@ -23,6 +23,9 @@ export const ReelScene = z.object({
   standIn: z.boolean().optional(),
   // The presenter speaks this scene on camera (R10): rendered on the presenter model, priced per presenter second.
   presenter: z.boolean().optional(),
+  // A voiceover the person recorded for this scene (recordings.ts); its length, written by the server from the row.
+  recordingId: z.string().max(100).optional(),
+  recordingSeconds: z.number().min(0).max(16).optional(),
 });
 export const ReelPlan = z.object({
   title: z.string().min(1).max(120),
@@ -46,8 +49,9 @@ export const speechSeconds = (text: string) => wordCount(text) / WORDS_PER_SECON
 export const clipSeconds = (voiceSeconds: number) => Math.min(15, Math.max(3, Math.ceil(voiceSeconds)));
 /** The presenter model's shortest clip (Seedance): a presenter scene is never shorter, and is priced for it. */
 export const PRESENTER_MIN_SECONDS = 4;
-export const sceneSeconds = (scene: Pick<ReelScene, "voiceText" | "presenter">) => {
-  const s = clipSeconds(speechSeconds(scene.voiceText));
+/** A scene lasts as long as its voice: the recording's measured length, else the script read at ~2 words a second. */
+export const sceneSeconds = (scene: Pick<ReelScene, "voiceText" | "presenter" | "recordingId" | "recordingSeconds">) => {
+  const s = clipSeconds(scene.recordingId && scene.recordingSeconds !== undefined ? scene.recordingSeconds : speechSeconds(scene.voiceText));
   return scene.presenter ? Math.max(PRESENTER_MIN_SECONDS, s) : s;
 };
 export const reelSeconds = (plan: ReelPlan) => plan.scenes.reduce((sum, s) => sum + sceneSeconds(s), 0);
@@ -64,7 +68,8 @@ export function planProblems(plan: ReelPlan, scope: { workspaceId: string; brand
     const out: string[] = [];
     const file = s.photoKey.slice(prefix.length);
     if (!s.photoKey.startsWith(prefix) || !PHOTO_FILE.test(file) || file.includes("..")) out.push(`Scene ${i + 1} uses a photo this brand doesn't have.`);
-    if (wordCount(s.voiceText) > MAX_SCENE_WORDS) out.push(`Scene ${i + 1}'s voiceover runs ~${Math.round(speechSeconds(s.voiceText))} s; keep it under ${MAX_SCENE_WORDS} words (15 s).`);
+    // A recorded scene's length is measured (at most 15 s on upload), so the word rule doesn't apply to it.
+    if (!s.recordingId && wordCount(s.voiceText) > MAX_SCENE_WORDS) out.push(`Scene ${i + 1}'s voiceover runs ~${Math.round(speechSeconds(s.voiceText))} s; keep it under ${MAX_SCENE_WORDS} words (15 s).`);
     if (s.presenter && s.standIn) out.push(`Scene ${i + 1} can't have the presenter: its photo doesn't show what it talks about.`);
     return out;
   }).concat(presenterProblems(plan));

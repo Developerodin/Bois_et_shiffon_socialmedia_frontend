@@ -9,6 +9,7 @@ import { directScenes, type DraftSoFar, type ReelPhoto, writePlan } from "@/serv
 import { planOwnershipProblems } from "@/server/reels/ownership";
 import { carryStandIns, clearPresenterFlags, isStudioPlan, planProblems, presenterCuts, ReelPlan, reelPrice, reelSeconds, sceneSeconds, toVersionBody } from "@/server/reels/plan";
 import { donePresenter } from "@/server/reels/presenters";
+import { settleRecordings } from "@/server/reels/recordings";
 import { renderFailure, renderView } from "@/server/reels/render";
 import { templateById } from "@/server/reels/templates";
 import { creditBalance } from "@/server/services/credits";
@@ -159,23 +160,26 @@ export async function chatPlan(scope: Scope, itemId: string, input: { version: n
   emit?.({ type: "stage", stage: "writing" });
   const written = await writePlan(scope, { knowledge, photos, current, chat, message: ask, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
   const { reply } = written;
-  const plan = template ? { ...written.plan, template } : written.plan;
+  const settled = await settleRecordings(template ? { ...written.plan, template } : written.plan, current, itemId, true);
+  const plan = settled.plan;
   const ready = presenterCuts(await directed(scope, carryStandIns(plan, current, true), current, emit));
   const now = new Date().toISOString();
-  const v = await savePlan(scope, itemId, input.version, ready, [...chat, { role: "user", text: (turn ?? "").slice(0, 2000), at: now }, { role: "assistant", text: reply, at: now }]);
-  return { version: v.version, plan: ready, price: reelPrice(ready), reply };
+  // A recording the revision dropped is said in the reply, where the person reads the chat.
+  const said = [reply, ...settled.notices].join("\n");
+  const v = await savePlan(scope, itemId, input.version, ready, [...chat, { role: "user", text: (turn ?? "").slice(0, 2000), at: now }, { role: "assistant", text: said, at: now }]);
+  return { version: v.version, plan: ready, price: reelPrice(ready), reply, droppedRecordings: settled.dropped };
 }
 
-/** R10–R13 / R03 edits. */
+/** R10–R13 / R03 edits. `droppedRecordings`: scene numbers whose recording was dropped (their text changed). */
 export async function editPlan(scope: Scope, itemId: string, input: { version: number; plan: ReelPlan }) {
-  const plan = clearPresenterFlags(input.plan);
-  const problems = [...planProblems(plan, scope), ...(await planOwnershipProblems(plan, scope))];
-  if (problems.length) throw new PublishingError(problems.join(" "), 400);
   const { latest } = await loadReel(scope, itemId);
   const previous = isStudioPlan(latest?.body) ? ReelPlan.parse(latest!.body) : undefined;
+  const { plan, dropped } = await settleRecordings(clearPresenterFlags(input.plan), previous, itemId, false);
+  const problems = [...planProblems(plan, scope), ...(await planOwnershipProblems(plan, scope))];
+  if (problems.length) throw new PublishingError(problems.join(" "), 400);
   const ready = presenterCuts(await directed(scope, carryStandIns(plan, previous, false), previous));
   const v = await savePlan(scope, itemId, input.version, ready);
-  return { version: v.version, plan: ready, price: reelPrice(ready) };
+  return { version: v.version, plan: ready, price: reelPrice(ready), droppedRecordings: dropped };
 }
 
 /** Download = the approval act (studio reels: the maker may approve). Approves once; later sends reuse it. */

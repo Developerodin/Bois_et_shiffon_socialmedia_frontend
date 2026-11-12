@@ -15,6 +15,7 @@ import { productPhotos } from "@/server/content/knowledge";
 import { planOwnershipProblems } from "@/server/reels/ownership";
 import { clipSeconds, planProblems, PRESENTER_MIN_SECONDS, ReelPlan, reelPrice, standInProblems } from "@/server/reels/plan";
 import { donePresenter } from "@/server/reels/presenters";
+import { recordingKeys, recordingProblems } from "@/server/reels/recordings";
 import { promptProblems } from "@/server/reels/prompt-check";
 import { BACKUP_MODEL, type ModelId, modelSeconds, needsReencode, PRESENTER_MODEL, routeScene, type Transition, VIDEO_MODELS } from "@/server/reels/router";
 import { isElevenVoice, speak, voiceRefused } from "@/server/reels/voice";
@@ -117,7 +118,7 @@ export async function startRender(input: { workspaceId: string; brandId: string;
     if (["SCHEDULED", "PUBLISHED"].includes(item.status)) throw new PublishingError("This reel is already scheduled or posted.", 409);
     const parsed = ReelPlan.safeParse(latest.body);
     if (!parsed.success) throw new PublishingError("This plan isn't complete yet", 400);
-    const problems = [...planProblems(parsed.data, scope), ...(await planOwnershipProblems(parsed.data, scope, tx)), ...standInProblems(parsed.data), ...parsed.data.scenes.flatMap((s, i) => promptProblems(s.prompt ?? s.direction).map((p) => `Scene ${i + 1}: ${p}`))];
+    const problems = [...planProblems(parsed.data, scope), ...(await planOwnershipProblems(parsed.data, scope, tx)), ...(await recordingProblems(parsed.data, item.id)), ...standInProblems(parsed.data), ...parsed.data.scenes.flatMap((s, i) => promptProblems(s.prompt ?? s.direction).map((p) => `Scene ${i + 1}: ${p}`))];
     if (problems.length) throw new PublishingError(problems.join(" "), 400);
     const { _max } = await tx.reelRender.aggregate({ where: { contentVersionId: latest.id }, _max: { attempt: true } });
     return { versionId: latest.id, plan: parsed.data, attempt: (_max.attempt ?? 0) + 1 };
@@ -203,11 +204,22 @@ async function prepareVoice(r: ReelRender) {
   // ElevenLabs scenes one after another (its shared account allows few requests at once); OpenAI's together.
   // Retries for a busy provider stop after ~2 min: the job has 300 s and a cut-off attempt would speak everything again.
   const deadline = Date.now() + 120_000;
-  const say = (text: string) => speak({ text, voice: plan.voice, language: plan.language, deadline });
+  // A recorded scene uses its recording (already the render's WAV format); the others are spoken.
+  const recorded = await recordingKeys(plan, r.contentItemId);
+  const say = async (s: ReelPlan["scenes"][number]) => {
+    const key = s.recordingId ? recorded.get(s.recordingId) : undefined;
+    if (s.recordingId && !key) throw new Error("Recording missing: record it again.");
+    if (key) {
+      const res = await fetch(await signedMediaUrl(key), { signal: AbortSignal.timeout(30_000) });
+      if (!res.ok) throw new Error(`Recording missing: couldn't read it (${res.status}). Record it again.`);
+      return new Uint8Array(await res.arrayBuffer());
+    }
+    return speak({ text: s.voiceText, voice: plan.voice, language: plan.language, deadline });
+  };
   const wavs: Uint8Array[] = [];
   try {
-    if (isElevenVoice(plan.voice)) for (const s of plan.scenes) wavs.push(await say(s.voiceText));
-    else wavs.push(...(await Promise.all(plan.scenes.map((s) => say(s.voiceText)))));
+    if (isElevenVoice(plan.voice)) for (const s of plan.scenes) wavs.push(await say(s));
+    else wavs.push(...(await Promise.all(plan.scenes.map(say))));
   } catch (e) {
     if (voiceRefused(e)) return failRender({ renderId: r.id }, e, true); // refunded now, not after the queue's retries
     throw e;
