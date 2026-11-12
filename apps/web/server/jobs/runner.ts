@@ -15,6 +15,7 @@ import { EMAIL_SEND_JOB, sendOutboxEmail } from "@/server/email/outbox";
 import { claimNextJob, completeJob, enqueueJob, failJob, holdLease } from "@/server/jobs/queue";
 import { onShootFailure, PHOTOSHOOT_JOB, runShoot } from "@/server/photoshoot/shoot";
 import { advanceRender, failRender, REEL_RENDER_JOB } from "@/server/reels/render";
+import { onAssetFailure, REEL_ASSET_JOB, runAsset } from "@/server/reels/templates";
 import { ReconnectNeeded, refreshExpiringTokens } from "@/server/services/connections";
 import { executePublication, onPublishJobLost, PUBLISH_JOB } from "@/server/services/publishing";
 import { runMonthlyPlans } from "@/server/services/automations";
@@ -34,6 +35,7 @@ const HANDLERS: Record<string, Handler> = {
   [EMAIL_SEND_JOB]: { run: sendOutboxEmail },
   [PHOTOSHOOT_JOB]: { run: runShoot, onFailure: onShootFailure },
   [PUBLISH_JOB]: { run: executePublication, onFailure: onPublishJobLost },
+  [REEL_ASSET_JOB]: { run: runAsset, onFailure: onAssetFailure },
   [REEL_RENDER_JOB]: { run: advanceRender, onFailure: failRender },
 };
 

@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Új érkezés",
         "subtitle": "Bejelentés & bemutatóterem CTA"
+      },
+      "three-uses": {
+        "title": "Három felhasználási mód",
+        "subtitle": "Három környezet, egy termék"
+      },
+      "detail-to-room": {
+        "title": "A részlettől a szobáig",
+        "subtitle": "Közelképből a teljes szobáig"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Használd a(z) „{{title}}” formátumot ({{subtitle}}), körülbelül {{seconds}} másodpercesen.",
-    "applying": "Alkalmazás…"
+    "applying": "Alkalmazás…",
+    "previewMine_one": "Előnézet saját fotókkal · {{count}} kredit",
+    "previewMine_other": "Előnézet saját fotókkal · {{count}} kredit",
+    "previewMaking": "Készül az előnézet. Ez néhány percet vesz igénybe.",
+    "previewFailed": "A legutóbbi előnézet nem sikerült. Nem vontunk le érte kreditet.",
+    "previewNoPhotos": "Adj hozzá termékfotókat a sablonok előnézetéhez.",
+    "ownPreview": "Saját fotóiddal készült",
+    "loadFailed": "Nem sikerült betölteni a sablonokat.",
+    "makingA11y": "Előnézet készül"
   },
   "assets": {
     "title": "Válassz eszközöket",

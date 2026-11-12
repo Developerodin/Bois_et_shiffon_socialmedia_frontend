@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Yeni gelen",
         "subtitle": "Duyuru & showroom CTA"
+      },
+      "three-uses": {
+        "title": "Üç farklı kullanım",
+        "subtitle": "Üç farklı ortam, tek ürün"
+      },
+      "detail-to-room": {
+        "title": "Detaydan odaya",
+        "subtitle": "Yakın plandan odanın geneline"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "\"{{title}}\" biçimini kullan ({{subtitle}}), yaklaşık {{seconds}} saniye olsun.",
-    "applying": "Uygulanıyor…"
+    "applying": "Uygulanıyor…",
+    "previewMine_one": "Fotoğraflarımla önizle · {{count}} kredi",
+    "previewMine_other": "Fotoğraflarımla önizle · {{count}} kredi",
+    "previewMaking": "Önizlemen hazırlanıyor. Birkaç dakika sürebilir.",
+    "previewFailed": "Son önizlemen oluşturulamadı. Bunun için ücret alınmadı.",
+    "previewNoPhotos": "Şablonları kendi fotoğraflarınla önizlemek için ürün fotoğrafları ekle.",
+    "ownPreview": "Fotoğraflarınla oluşturuldu",
+    "loadFailed": "Şablonlar yüklenemedi.",
+    "makingA11y": "Önizleme hazırlanıyor"
   },
   "assets": {
     "title": "Varlıkları seç",

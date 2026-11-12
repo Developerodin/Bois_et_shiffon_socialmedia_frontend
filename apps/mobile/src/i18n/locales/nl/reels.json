@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Nieuwe aankomst",
         "subtitle": "Aankondiging & showroom CTA"
+      },
+      "three-uses": {
+        "title": "Drie manieren om het te gebruiken",
+        "subtitle": "Drie omgevingen, één product"
+      },
+      "detail-to-room": {
+        "title": "Van detail naar ruimte",
+        "subtitle": "Van close-up naar de hele ruimte"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Gebruik het format \"{{title}}\" ({{subtitle}}), ongeveer {{seconds}} seconden.",
-    "applying": "Toepassen…"
+    "applying": "Toepassen…",
+    "previewMine_one": "Voorbeeld met mijn foto's · {{count}} credit",
+    "previewMine_other": "Voorbeeld met mijn foto's · {{count}} credits",
+    "previewMaking": "Je voorbeeld wordt gemaakt. Dit duurt een paar minuten.",
+    "previewFailed": "Je laatste voorbeeld is niet gelukt. Hiervoor is niets in rekening gebracht.",
+    "previewNoPhotos": "Voeg productfoto's toe om voorbeelden van templates met je foto's te bekijken.",
+    "ownPreview": "Gemaakt met je foto's",
+    "loadFailed": "Kon de sjablonen niet laden.",
+    "makingA11y": "Voorbeeld wordt gemaakt"
   },
   "assets": {
     "title": "Selecteer assets",

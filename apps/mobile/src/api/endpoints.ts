@@ -201,6 +201,9 @@ export type SceneKind = "detail" | "room" | "physics";
 /** transition: how the scene hands over to the next, set by the director (apps/web/server/reels/router.ts). */
 export type Transition = "cut" | "match" | "dissolve";
 export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string; standIn?: boolean; transition?: Transition };
+export type TemplatePreview = { videoKey: string; videoUrl: string; posterKey: string; posterUrl: string };
+export type ReelTemplateOption = { id: string; seconds: number; preview: TemplatePreview | null; own: boolean; making: boolean; failed: boolean };
+export type ReelOptions = { templates: ReelTemplateOption[]; previewCredits: number; canPreview: boolean };
 export type ReelPlan = { title: string; presenter: "none"; template: string; voice: string; language?: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
 export type RenderStep = "VOICE" | "CLIPS" | "JOIN" | "DONE" | "FAILED";
 /** Why a render failed, as a kind the app words itself (apps/web/server/reels/render.ts renderFailure). */
@@ -249,7 +252,7 @@ export const reels = {
     return api<{ reels: ReelSummary[] }>(`${base}/reels`, { workspaceId: ws, signal });
   },
   /** onEvent: the plan's progress as it's written (R04 streams it). The scriptwriter replies in the app's language. */
-  async create(input: { opportunityId?: string; prompt?: string }, onEvent?: (e: PlanEvent) => void) {
+  async create(input: { opportunityId?: string; prompt?: string; templateId?: string }, onEvent?: (e: PlanEvent) => void) {
     const { ws, base } = await reelBase();
     return api<PlanResult & { id: string }>(`${base}/reels`, { body: { ...input, language: i18n.language }, workspaceId: ws, timeoutMs: AI_MS, onLine: onEvent as ((l: unknown) => void) | undefined });
   },
@@ -257,9 +260,20 @@ export const reels = {
     const { ws, base } = await reelBase();
     return api<ReelDetail>(`${base}/reels/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
   },
-  async chat(id: string, version: number, message: string, onEvent?: (e: PlanEvent) => void) {
+  /** templateId: a template (R12) reshapes the plan; `message` is then the template's title, shown as the person's turn. */
+  async chat(id: string, version: number, message: string, onEvent?: (e: PlanEvent) => void, templateId?: string) {
     const { ws, base } = await reelBase();
-    return api<PlanResult>(`${base}/reels/${encodeURIComponent(id)}/plan`, { body: { version, message, language: i18n.language }, workspaceId: ws, timeoutMs: AI_MS, onLine: onEvent as ((l: unknown) => void) | undefined });
+    return api<PlanResult>(`${base}/reels/${encodeURIComponent(id)}/plan`, { body: { version, message, templateId, language: i18n.language }, workspaceId: ws, timeoutMs: AI_MS, onLine: onEvent as ((l: unknown) => void) | undefined });
+  },
+  /** R12: the templates with their previews (the brand's own, else the generic one; null = show the cover photo). */
+  async options(signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<ReelOptions>(`${base}/reels/options`, { workspaceId: ws, signal });
+  },
+  /** R12 "Preview with my photos": 402 = not enough credits or no plan. */
+  async preview(templateId: string) {
+    const { ws, base } = await reelBase();
+    return api<{ id: string }>(`${base}/reels/previews`, { body: { templateId }, workspaceId: ws });
   },
   async save(id: string, version: number, plan: ReelPlan) {
     const { ws, base } = await reelBase();

@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Nouă sosire",
         "subtitle": "Anunț & CTA showroom"
+      },
+      "three-uses": {
+        "title": "Trei moduri de utilizare",
+        "subtitle": "Trei decoruri, un produs"
+      },
+      "detail-to-room": {
+        "title": "De la detaliu la întreaga încăpere",
+        "subtitle": "De la prim-plan la întreaga încăpere"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Folosește formatul „{{title}}” ({{subtitle}}), pentru aproximativ {{seconds}} secunde.",
-    "applying": "Se aplică…"
+    "applying": "Se aplică…",
+    "previewMine_one": "Previzualizează cu pozele mele · {{count}} credit",
+    "previewMine_other": "Previzualizează cu pozele mele · {{count}} credite",
+    "previewMaking": "Se creează previzualizarea. Durează câteva minute.",
+    "previewFailed": "Ultima previzualizare nu a reușit. Nu ți s-a debitat nimic.",
+    "previewNoPhotos": "Adaugă poze cu produsele pentru a previzualiza șabloanele cu ele.",
+    "ownPreview": "Realizată cu pozele tale",
+    "loadFailed": "Nu am putut încărca șabloanele.",
+    "makingA11y": "Se generează previzualizarea"
   },
   "assets": {
     "title": "Selectează resurse",

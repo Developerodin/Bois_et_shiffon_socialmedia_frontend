@@ -385,11 +385,26 @@
       "arrival": {
         "title": "وصول جديد",
         "subtitle": "إعلان ونداء إلى صالة العرض"
+      },
+      "three-uses": {
+        "title": "ثلاث طرق لاستخدامه",
+        "subtitle": "ثلاثة أماكن، منتج واحد"
+      },
+      "detail-to-room": {
+        "title": "من التفاصيل إلى الغرفة",
+        "subtitle": "لقطة مقرّبة تتسع لتكشف الغرفة"
       }
     },
     "itemA11y": "{{title}}، {{subtitle}}، {{duration}}",
-    "useAsk": "استخدم قالب \"{{title}}\" ({{subtitle}})، بمدة حوالي {{seconds}} ثانية.",
-    "applying": "جارٍ التطبيق…"
+    "applying": "جارٍ التطبيق…",
+    "previewMine_one": "معاينة بصوري · {{count}} نقطة",
+    "previewMine_other": "معاينة بصوري · {{count}} نقاط",
+    "previewMaking": "جارٍ إعداد المعاينة. يستغرق ذلك بضع دقائق.",
+    "previewFailed": "لم تنجح المعاينة الأخيرة. لم تُخصم منك أي نقاط.",
+    "previewNoPhotos": "أضف صور منتجاتك لمعاينة القوالب بها.",
+    "ownPreview": "أُنشئت بصورك",
+    "loadFailed": "تعذّر تحميل القوالب.",
+    "makingA11y": "جارٍ إعداد المعاينة"
   },
   "assets": {
     "title": "اختر الأصول",

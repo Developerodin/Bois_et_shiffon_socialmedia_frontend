@@ -113,7 +113,8 @@ export async function writePlan(scope: Scope, input: { knowledge: string; photos
   const onDraft = input.onDraft;
   const toPlan = (d: z.infer<typeof Draft>): Plan =>
     // The person picks the voice and template in the app, so a chat revision keeps them; the scriptwriter's voice only seeds a new plan.
-    ReelPlan.parse({ title: d.title.slice(0, 120), presenter: "none", template: input.current?.template ?? "spotlight", voice: input.current?.voice ?? d.voice, language: reelLanguage(d.language), caption: d.caption.slice(0, 2200), hashtags: d.hashtags.slice(0, 5), scenes: d.scenes.slice(0, 6) });
+    // template "": none picked (R12 sets it).
+    ReelPlan.parse({ title: d.title.slice(0, 120), presenter: "none", template: input.current?.template ?? "", voice: input.current?.voice ?? d.voice, language: reelLanguage(d.language), caption: d.caption.slice(0, 2200), hashtags: d.hashtags.slice(0, 5), scenes: d.scenes.slice(0, 6) });
   const draft = await generateObject(ctxFor(scope, "reels.script"), {
     schema: Draft,
     schemaName: "reel_plan",

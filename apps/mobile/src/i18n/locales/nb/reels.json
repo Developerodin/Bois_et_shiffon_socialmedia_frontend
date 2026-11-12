@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Ny ankomst",
         "subtitle": "Kunngjøring & showroom CTA"
+      },
+      "three-uses": {
+        "title": "Tre måter å bruke det på",
+        "subtitle": "Tre miljøer, ett produkt"
+      },
+      "detail-to-room": {
+        "title": "Fra detalj til rom",
+        "subtitle": "Fra nærbilde til hele rommet"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Bruk formatet «{{title}}» ({{subtitle}}), på omtrent {{seconds}} sekunder.",
-    "applying": "Bruker…"
+    "applying": "Bruker…",
+    "previewMine_one": "Forhåndsvis med mine bilder · {{count}} kreditt",
+    "previewMine_other": "Forhåndsvis med mine bilder · {{count}} kreditter",
+    "previewMaking": "Lager forhåndsvisningen din. Det tar noen minutter.",
+    "previewFailed": "Den siste forhåndsvisningen din feilet. Du ble ikke belastet for den.",
+    "previewNoPhotos": "Legg til produktbilder for å forhåndsvise maler med dem.",
+    "ownPreview": "Laget med bildene dine",
+    "loadFailed": "Kunne ikke laste inn malene.",
+    "makingA11y": "Forhåndsvisning opprettes"
   },
   "assets": {
     "title": "Velg ressurser",

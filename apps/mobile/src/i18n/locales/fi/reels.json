@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Uusi saapuminen",
         "subtitle": "Ilmoitus & showroom CTA"
+      },
+      "three-uses": {
+        "title": "Kolme tapaa käyttää tuotetta",
+        "subtitle": "Kolme ympäristöä, yksi tuote"
+      },
+      "detail-to-room": {
+        "title": "Yksityiskohdasta huoneeseen",
+        "subtitle": "Lähikuvasta koko huoneeseen"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Käytä muotoa \"{{title}}\" ({{subtitle}}), noin {{seconds}} sekuntia.",
-    "applying": "Otetaan käyttöön…"
+    "applying": "Otetaan käyttöön…",
+    "previewMine_one": "Esikatsele omilla kuvillasi · {{count}} krediitti",
+    "previewMine_other": "Esikatsele omilla kuvillasi · {{count}} krediittiä",
+    "previewMaking": "Esikatselua luodaan. Tämä kestää muutaman minuutin.",
+    "previewFailed": "Edellisen esikatselun luominen epäonnistui. Sinulta ei veloitettu siitä.",
+    "previewNoPhotos": "Lisää tuotekuvia, niin voit esikatsella mallipohjia omilla kuvillasi.",
+    "ownPreview": "Luotu kuvillasi",
+    "loadFailed": "Mallien lataaminen epäonnistui.",
+    "makingA11y": "Esikatselua luodaan"
   },
   "assets": {
     "title": "Valitse aineistot",

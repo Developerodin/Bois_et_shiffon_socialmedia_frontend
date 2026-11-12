@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Ny ankomst",
         "subtitle": "Annoncering & showroom CTA"
+      },
+      "three-uses": {
+        "title": "Tre måder at bruge det på",
+        "subtitle": "Tre miljøer, ét produkt"
+      },
+      "detail-to-room": {
+        "title": "Fra detalje til rum",
+        "subtitle": "Fra nærbillede til hele rummet"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Brug formatet \"{{title}}\" ({{subtitle}}), cirka {{seconds}} sekunder.",
-    "applying": "Anvender…"
+    "applying": "Anvender…",
+    "previewMine_one": "Se med mine billeder · {{count}} kredit",
+    "previewMine_other": "Se med mine billeder · {{count}} kreditter",
+    "previewMaking": "Vi laver din forhåndsvisning. Det tager et par minutter.",
+    "previewFailed": "Din seneste forhåndsvisning mislykkedes. Du blev ikke opkrævet noget.",
+    "previewNoPhotos": "Tilføj produktbilleder for at se skabeloner med dine billeder.",
+    "ownPreview": "Lavet med dine billeder",
+    "loadFailed": "Skabelonerne kunne ikke indlæses.",
+    "makingA11y": "Forhåndsvisning oprettes"
   },
   "assets": {
     "title": "Vælg aktiver",

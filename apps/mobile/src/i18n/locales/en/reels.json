@@ -385,11 +385,26 @@
       "arrival": {
         "title": "New arrival",
         "subtitle": "Announcement & showroom CTA"
+      },
+      "three-uses": {
+        "title": "Three ways to use it",
+        "subtitle": "Three settings, one product"
+      },
+      "detail-to-room": {
+        "title": "From detail to room",
+        "subtitle": "Close-up widening to the room"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Use the \"{{title}}\" format ({{subtitle}}), about {{seconds}} seconds.",
-    "applying": "Applying…"
+    "applying": "Applying…",
+    "previewMine_one": "Preview with my photos · {{count}} credit",
+    "previewMine_other": "Preview with my photos · {{count}} credits",
+    "previewMaking": "Making your preview. It takes a few minutes.",
+    "previewFailed": "Your last preview didn't work. You weren't charged for it.",
+    "previewNoPhotos": "Add product photos to preview templates with them.",
+    "ownPreview": "Made with your photos",
+    "loadFailed": "Couldn't load the templates.",
+    "makingA11y": "Preview being made"
   },
   "assets": {
     "title": "Select assets",

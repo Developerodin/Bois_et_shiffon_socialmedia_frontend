@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Neuankömmling",
         "subtitle": "Ankündigung & Showroom-CTA"
+      },
+      "three-uses": {
+        "title": "Drei Einsatzmöglichkeiten",
+        "subtitle": "Drei Szenen, ein Produkt"
+      },
+      "detail-to-room": {
+        "title": "Vom Detail zum Raum",
+        "subtitle": "Von der Nahaufnahme zur Raumansicht"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Verwende das Format „{{title}}“ ({{subtitle}}), etwa {{seconds}} Sekunden lang.",
-    "applying": "Wird angewendet…"
+    "applying": "Wird angewendet…",
+    "previewMine_one": "Vorschau mit meinen Fotos · {{count}} Credit",
+    "previewMine_other": "Vorschau mit meinen Fotos · {{count}} Credits",
+    "previewMaking": "Deine Vorschau wird erstellt. Das dauert ein paar Minuten.",
+    "previewFailed": "Deine letzte Vorschau konnte nicht erstellt werden. Dafür wurden dir keine Credits berechnet.",
+    "previewNoPhotos": "Füge Produktfotos hinzu, um Vorlagen damit anzusehen.",
+    "ownPreview": "Mit deinen Fotos erstellt",
+    "loadFailed": "Vorlagen konnten nicht geladen werden.",
+    "makingA11y": "Vorschau wird erstellt"
   },
   "assets": {
     "title": "Assets auswählen",

@@ -191,6 +191,7 @@ model Brand {
   competitors   Competitor[]
   invitations   Invitation[]
   photoShoots   PhotoShoot[]
+  reelAssets    ReelAsset[]
   products      Product[]
   campaigns     Campaign[]
 
@@ -1168,4 +1169,30 @@ model PublicationAttempt {
 
   @@index([contentItemId, createdAt])
   @@index([status, runAt])
+}
+
+/// Paid Higgsfield assets for reels (templates.ts): a brand's template preview, later its presenters.
+/// A retry is a new row (new charge, new request). One RUNNING row per brand, kind and template (raw SQL index).
+model ReelAsset {
+  id              String   @id @default(cuid())
+  workspaceId     String
+  brandId         String
+  /// template-preview | presenter
+  kind            String
+  /// RUNNING | DONE | FAILED
+  status          String   @default("RUNNING")
+  /// What was asked (template-preview: templateId, photoKey; then the cropped image and its signed link)
+  input           Json
+  requestId       String?
+  /// The finished file in our media storage (a preview's poster is the same key with .jpg)
+  outputKey       String?
+  chargeId        String
+  error           String?
+  createdByUserId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId, kind, createdAt])
 }

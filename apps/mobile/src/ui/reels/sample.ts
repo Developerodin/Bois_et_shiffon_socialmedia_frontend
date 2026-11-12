@@ -103,15 +103,6 @@ export const schedule = { at: new Date(2026, 9, 26, 18, 0), timezone: "Europe/Pa
 export const scriptFr =
   "« Sublimez votre intérieur avec l'authenticité brute du bois d'acacia massif. Taillée pour vos moments de partage, la table Bunting réinvente la convivialité au quotidien. »";
 
-export const templateFilters = ["all", "catalog", "shortCuts"] as const;
-
-export const templates = [
-  { id: "spotlight", seconds: 20, image: photos.table },
-  { id: "collection", seconds: 15, image: photos.tv },
-  { id: "material", seconds: 10, image: photos.tableDetail },
-  { id: "arrival", seconds: 15, image: photos.tableStaged },
-] as const;
-
 export const websiteAssets = [
   { id: "wide", title: "Bunting table · Wide", scene: { n: 1, seconds: 8 }, image: photos.table },
   { id: "macro", title: "Bunting table · Macro", scene: { n: 2, seconds: 6 }, image: photos.tableDetail },

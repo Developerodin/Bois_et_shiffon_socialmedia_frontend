@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Nova chegada",
         "subtitle": "Anúncio & CTA de showroom"
+      },
+      "three-uses": {
+        "title": "Três formas de o usar",
+        "subtitle": "Três ambientes, um produto"
+      },
+      "detail-to-room": {
+        "title": "Do detalhe à divisão",
+        "subtitle": "Do grande plano à divisão"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Usa o formato \"{{title}}\" ({{subtitle}}), com cerca de {{seconds}} segundos.",
-    "applying": "A aplicar…"
+    "applying": "A aplicar…",
+    "previewMine_one": "Pré-visualizar com as minhas fotos · {{count}} crédito",
+    "previewMine_other": "Pré-visualizar com as minhas fotos · {{count}} créditos",
+    "previewMaking": "A criar a pré-visualização. Demora alguns minutos.",
+    "previewFailed": "A última pré-visualização falhou. Não te foi cobrada.",
+    "previewNoPhotos": "Adiciona fotos dos produtos para pré-visualizar os modelos com elas.",
+    "ownPreview": "Criada com as tuas fotos",
+    "loadFailed": "Não foi possível carregar os modelos.",
+    "makingA11y": "A criar pré-visualização"
   },
   "assets": {
     "title": "Selecionar recursos",

@@ -8,6 +8,7 @@ import { prisma } from "@/server/db/prisma";
 import { directScenes, type DraftSoFar, type ReelPhoto, writePlan } from "@/server/reels/agents";
 import { carryStandIns, isStudioPlan, planProblems, ReelPlan, reelPrice, reelSeconds, toVersionBody } from "@/server/reels/plan";
 import { renderFailure, renderView } from "@/server/reels/render";
+import { templateById } from "@/server/reels/templates";
 import { creditBalance } from "@/server/services/credits";
 import { decide, lock, PublishingError, TX } from "@/server/services/publishing";
 import { signedMediaUrl } from "@/server/storage/media";
@@ -93,7 +94,19 @@ async function savePlan(scope: Scope, itemId: string, version: number, plan: Ree
   }, TX);
 }
 
-export async function createReel(scope: Scope, input: { opportunityId?: string; prompt?: string; language?: string }, emit?: Emit) {
+/**
+ * A template (R12) is an instruction to the scriptwriter: its `ask` is what's sent, and the person's turn in the chat
+ * is what the phone sent (the template's title in the app's language), else the English title.
+ */
+export function templateAsk(templateId: string | undefined, message: string | undefined) {
+  if (!templateId) return { ask: message, turn: message, template: undefined };
+  const template = templateById(templateId);
+  if (!template) throw new PublishingError("Unknown template", 400);
+  return { ask: template.ask, turn: message ?? template.title, template: template.id };
+}
+
+export async function createReel(scope: Scope, input: { opportunityId?: string; prompt?: string; language?: string; templateId?: string }, emit?: Emit) {
+  const { ask, turn, template } = templateAsk(input.templateId, input.prompt);
   emit?.({ type: "stage", stage: "reading" });
   const idea = input.opportunityId
     ? await prisma.opportunity.findFirst({ where: { id: input.opportunityId, workspaceId: scope.workspaceId, brandId: scope.brandId } })
@@ -103,10 +116,12 @@ export async function createReel(scope: Scope, input: { opportunityId?: string; 
   if (photos.length === 0) throw new PublishingError("Add product photos first (Select assets), then plan a reel.", 400);
   const { text: knowledge } = await brandKnowledge(scope.workspaceId, scope.brandId, 3000);
   emit?.({ type: "stage", stage: "writing" });
-  const { plan, reply } = await writePlan(scope, { knowledge, photos, idea: idea ?? undefined, message: input.prompt, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
+  const written = await writePlan(scope, { knowledge, photos, idea: idea ?? undefined, message: ask, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
+  const { reply } = written;
+  const plan = template ? { ...written.plan, template } : written.plan;
   const ready = await directed(scope, plan, undefined, emit);
   const now = new Date().toISOString();
-  const chat: ChatTurn[] = [...(input.prompt ? [{ role: "user" as const, text: input.prompt, at: now }] : []), { role: "assistant", text: reply, at: now }];
+  const chat: ChatTurn[] = [...(turn ? [{ role: "user" as const, text: turn.slice(0, 2000), at: now }] : []), { role: "assistant", text: reply, at: now }];
   const item = await prisma.contentItem.create({
     data: {
       workspaceId: scope.workspaceId, brandId: scope.brandId, opportunityId: idea?.id ?? null, title: ready.title, channel: "INSTAGRAM_REEL", studio: true, status: "PLANNED",
@@ -118,17 +133,20 @@ export async function createReel(scope: Scope, input: { opportunityId?: string; 
 }
 
 /** R04: the person says what they want (or what's wrong with the video); the scriptwriter revises the plan. */
-export async function chatPlan(scope: Scope, itemId: string, input: { version: number; message: string; language?: string }, emit?: Emit) {
+export async function chatPlan(scope: Scope, itemId: string, input: { version: number; message?: string; language?: string; templateId?: string }, emit?: Emit) {
+  const { ask, turn, template } = templateAsk(input.templateId, input.message);
   emit?.({ type: "stage", stage: "reading" });
   const { item, latest } = await loadReel(scope, itemId);
   const current = isStudioPlan(latest?.body) ? ReelPlan.parse(latest!.body) : undefined;
   const [photos, { text: knowledge }] = await Promise.all([brandPhotos(scope, current), brandKnowledge(scope.workspaceId, scope.brandId, 3000)]);
   const chat = chatOf(item.brief);
   emit?.({ type: "stage", stage: "writing" });
-  const { plan, reply } = await writePlan(scope, { knowledge, photos, current, chat, message: input.message, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
+  const written = await writePlan(scope, { knowledge, photos, current, chat, message: ask, replyLanguage: input.language, onDraft: emit && ((d) => emit({ type: "draft", ...d })) });
+  const { reply } = written;
+  const plan = template ? { ...written.plan, template } : written.plan;
   const ready = await directed(scope, carryStandIns(plan, current, true), current, emit);
   const now = new Date().toISOString();
-  const v = await savePlan(scope, itemId, input.version, ready, [...chat, { role: "user", text: input.message.slice(0, 2000), at: now }, { role: "assistant", text: reply, at: now }]);
+  const v = await savePlan(scope, itemId, input.version, ready, [...chat, { role: "user", text: (turn ?? "").slice(0, 2000), at: now }, { role: "assistant", text: reply, at: now }]);
   return { version: v.version, plan: ready, price: reelPrice(ready), reply };
 }
 

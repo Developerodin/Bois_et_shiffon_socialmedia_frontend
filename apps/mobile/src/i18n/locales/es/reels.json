@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Nueva llegada",
         "subtitle": "Anuncio y CTA de sala de exposición"
+      },
+      "three-uses": {
+        "title": "Tres formas de usarlo",
+        "subtitle": "Tres ambientes, un producto"
+      },
+      "detail-to-room": {
+        "title": "Del detalle al ambiente",
+        "subtitle": "Del primer plano al ambiente"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Usa el formato \"{{title}}\" ({{subtitle}}), de unos {{seconds}} segundos.",
-    "applying": "Aplicando…"
+    "applying": "Aplicando…",
+    "previewMine_one": "Vista previa con mis fotos · {{count}} crédito",
+    "previewMine_other": "Vista previa con mis fotos · {{count}} créditos",
+    "previewMaking": "Estamos creando tu vista previa. Tardará unos minutos.",
+    "previewFailed": "No se pudo generar tu última vista previa. No se te cobró por ella.",
+    "previewNoPhotos": "Añade fotos de tus productos para ver cómo quedan en las plantillas.",
+    "ownPreview": "Creada con tus fotos",
+    "loadFailed": "No se pudieron cargar las plantillas.",
+    "makingA11y": "Generando vista previa"
   },
   "assets": {
     "title": "Seleccionar recursos",

@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Nový přírůstek",
         "subtitle": "Oznámení & výzva k návštěvě showroomu"
+      },
+      "three-uses": {
+        "title": "Tři způsoby využití",
+        "subtitle": "Tři prostředí, jeden produkt"
+      },
+      "detail-to-room": {
+        "title": "Od detailu k celé místnosti",
+        "subtitle": "Od detailu k záběru celé místnosti"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Použij formát „{{title}}“ ({{subtitle}}), přibližně na {{seconds}} sekund.",
-    "applying": "Používáme…"
+    "applying": "Používáme…",
+    "previewMine_one": "Náhled s mými fotkami · {{count}} kredit",
+    "previewMine_other": "Náhled s mými fotkami · {{count}} kreditů",
+    "previewMaking": "Připravujeme náhled. Potrvá to pár minut.",
+    "previewFailed": "Poslední náhled se nepodařilo vytvořit. Nic jsme ti za něj nenaúčtovali.",
+    "previewNoPhotos": "Přidej fotky produktů a prohlédni si je v šablonách.",
+    "ownPreview": "Vytvořeno z tvých fotek",
+    "loadFailed": "Šablony se nepodařilo načíst.",
+    "makingA11y": "Náhled se vytváří"
   },
   "assets": {
     "title": "Vyberte materiály",

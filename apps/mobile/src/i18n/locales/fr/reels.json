@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Nouvelle arrivée",
         "subtitle": "Annonce & CTA showroom"
+      },
+      "three-uses": {
+        "title": "Trois façons de l’utiliser",
+        "subtitle": "Trois ambiances, un produit"
+      },
+      "detail-to-room": {
+        "title": "Du détail à la pièce",
+        "subtitle": "Du gros plan à la pièce entière"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Utilise le format « {{title}} » ({{subtitle}}), pour environ {{seconds}} secondes.",
-    "applying": "Application…"
+    "applying": "Application…",
+    "previewMine_one": "Aperçu avec mes photos · {{count}} crédit",
+    "previewMine_other": "Aperçu avec mes photos · {{count}} crédits",
+    "previewMaking": "Création de ton aperçu. Cela prend quelques minutes.",
+    "previewFailed": "Ton dernier aperçu n’a pas pu être créé. Tu n’as pas été débité.",
+    "previewNoPhotos": "Ajoute des photos de tes produits pour les voir dans les modèles.",
+    "ownPreview": "Créé avec tes photos",
+    "loadFailed": "Impossible de charger les modèles.",
+    "makingA11y": "Création de l’aperçu en cours"
   },
   "assets": {
     "title": "Sélectionner les ressources",

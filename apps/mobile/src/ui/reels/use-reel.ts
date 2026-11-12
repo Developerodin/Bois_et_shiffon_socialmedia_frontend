@@ -141,9 +141,10 @@ export function useReel(poll = 0) {
 
   /**
    * R04: the message shows at once, then the scriptwriter's progress streams in (reading → writing, the draft growing
-   * scene by scene → directing). An idea starts a new reel from it. Resolves true once the new plan is saved.
+   * scene by scene → directing). An idea starts a new reel from it; a template (R12) reshapes the plan or starts one,
+   * with `message` its title. Resolves true once the new plan is saved.
    */
-  const chat = async (message: string, opportunityId?: string): Promise<boolean> => {
+  const chat = async (message: string, opportunityId?: string, templateId?: string): Promise<boolean> => {
     if (inflight) return false;
     setError(null);
     setInflight({ message, live: { stage: "reading", ...EMPTY } });
@@ -159,7 +160,7 @@ export function useReel(poll = 0) {
         const known = new Set(before?.reels.map((r) => r.id));
         const sentAt = Date.now();
         try {
-          currentId = (await reels.create({ prompt: message, opportunityId }, onEvent)).id;
+          currentId = (await reels.create({ prompt: message, opportunityId, templateId }, onEvent)).id;
         } catch (e) {
           // Without the earlier list there is nothing to tell the new reel from the old ones: report the original error.
           if (!before || !(e instanceof ApiError && e.status === 0)) throw e;
@@ -167,7 +168,7 @@ export function useReel(poll = 0) {
         }
       } else {
         const id = currentId;
-        await reels.chat(id, detail?.version ?? 0, message, onEvent).catch((e: unknown) => {
+        await reels.chat(id, detail?.version ?? 0, message, onEvent, templateId).catch((e: unknown) => {
           if (e instanceof ApiError && e.status === 0) return waitForReply(id, turnsBefore);
           throw e;
         });

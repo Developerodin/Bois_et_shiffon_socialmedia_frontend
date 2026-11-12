@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Ny ankomst",
         "subtitle": "Tillkännagivande & showroom CTA"
+      },
+      "three-uses": {
+        "title": "Tre sätt att använda den",
+        "subtitle": "Tre miljöer, en produkt"
+      },
+      "detail-to-room": {
+        "title": "Från detalj till rum",
+        "subtitle": "Närbild som vidgas till hela rummet"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Använd formatet \"{{title}}\" ({{subtitle}}), cirka {{seconds}} sekunder.",
-    "applying": "Tillämpar…"
+    "applying": "Tillämpar…",
+    "previewMine_one": "Förhandsvisa med mina bilder · {{count}} kredit",
+    "previewMine_other": "Förhandsvisa med mina bilder · {{count}} krediter",
+    "previewMaking": "Skapar din förhandsvisning. Det tar några minuter.",
+    "previewFailed": "Din senaste förhandsvisning misslyckades. Du debiterades inte.",
+    "previewNoPhotos": "Lägg till produktbilder för att förhandsvisa mallar med dem.",
+    "ownPreview": "Skapad med dina bilder",
+    "loadFailed": "Det gick inte att läsa in mallarna.",
+    "makingA11y": "Förhandsvisningen skapas"
   },
   "assets": {
     "title": "Välj tillgångar",

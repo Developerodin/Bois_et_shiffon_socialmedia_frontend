@@ -1,6 +1,7 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -60,4 +61,15 @@ export function signedMediaUrl(key: string, expiresInSeconds = 3600) {
 
 export async function deleteMedia(key: string) {
   await s3.send(new DeleteObjectCommand({ Bucket: MEDIA_BUCKET, Key: key }));
+}
+
+/** Whether an object is stored (false on 404; other errors throw). */
+export async function mediaExists(key: string) {
+  try {
+    await s3.send(new HeadObjectCommand({ Bucket: MEDIA_BUCKET, Key: key }));
+    return true;
+  } catch (e) {
+    if ((e as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode === 404) return false;
+    throw e;
+  }
 }

@@ -385,11 +385,26 @@
       "arrival": {
         "title": "Nowość",
         "subtitle": "Ogłoszenie i CTA showroom"
+      },
+      "three-uses": {
+        "title": "Trzy sposoby na wykorzystanie",
+        "subtitle": "Trzy aranżacje, jeden produkt"
+      },
+      "detail-to-room": {
+        "title": "Od detalu do wnętrza",
+        "subtitle": "Od zbliżenia do całego wnętrza"
       }
     },
     "itemA11y": "{{title}}, {{subtitle}}, {{duration}}",
-    "useAsk": "Użyj formatu „{{title}}” ({{subtitle}}), około {{seconds}} sekund.",
-    "applying": "Stosowanie…"
+    "applying": "Stosowanie…",
+    "previewMine_one": "Podgląd z moimi zdjęciami · {{count}} kred.",
+    "previewMine_other": "Podgląd z moimi zdjęciami · {{count}} kred.",
+    "previewMaking": "Tworzymy podgląd. To potrwa kilka minut.",
+    "previewFailed": "Nie udało się utworzyć ostatniego podglądu. Nie pobraliśmy za niego opłaty.",
+    "previewNoPhotos": "Dodaj zdjęcia produktów, aby zobaczyć je w szablonach.",
+    "ownPreview": "Utworzono z Twoich zdjęć",
+    "loadFailed": "Nie udało się załadować szablonów.",
+    "makingA11y": "Trwa tworzenie podglądu"
   },
   "assets": {
     "title": "Wybierz zasoby",
