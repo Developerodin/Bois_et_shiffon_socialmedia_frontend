@@ -31,6 +31,14 @@ describe("reel scriptwriter checks", () => {
     expect(p.scenes).toHaveLength(2);
     expect(reply).toBeTruthy();
   });
+
+  it("keeps the person's voice when revising", async () => {
+    const current = { ...plan([scene("Une question ?"), scene("Oui.")]), voice: "sage", template: "material" };
+    const { plan: p } = await writePlan(scope, { knowledge: "k", photos, current, message: "plus court" });
+    expect([p.voice, p.template]).toEqual(["sage", "material"]);
+    const { plan: fresh } = await writePlan(scope, { knowledge: "k", photos });
+    expect(fresh.voice).toBe("coral");
+  });
 });
 
 describe("reel director", () => {
