@@ -1,212 +1,228 @@
 # Reels: real templates, AI actors, recorded and cloned voices (phone R10, R11, R12)
 
-Draft 2, 2026-11-12 (after a 4-lens review and the owner's answers). Not in the B&C brief: the phone app is our
-addition. Build order: templates (R12) → AI actor (R10) → script and voice (R11). Each step: build → code review →
-emulator check → commit.
+Draft 3, 2026-11-12 (after two review rounds: one 4-lens review of draft 1, four single-lens reviews of draft 2, and
+the owner's answers). Not in the B&C brief: the phone app is our addition.
 
 ## What the owner asked (2026-11-12)
 
 - **Templates (R12):** replace the four fixed sample cards. Everyone first sees generic previews; a brand that wants
-  more can pay for previews rendered from its own photos.
+  more pays for previews rendered from its own photos.
 - **AI actor (R10):** brand-made presenters made with Higgsfield AI Influencer; a reel can show its presenter speaking.
-  The voice is picked per reel (no default voice per presenter).
+  The voice is picked per reel.
 - **Voices:** "test both and decide": (A) our voice track lip-synced by Higgsfield, against (B) Higgsfield models that
   generate the speech themselves.
-- **Script (R11) "Record your own voice":** record a voiceover for this reel, and clone the voice. Cloned voices go
-  into a voice catalogue for later reels, **usable by the whole workspace**.
-- Providers: Higgsfield for video and presenters; ElevenLabs for voices, cloning and the catalogue
-  (`ELEVENLABS_API_KEY`). ElevenLabs stays on the free plan for testing; the owner upgrades it before launch, so build
-  everything. Don't check or spend Higgsfield credits during the build.
+- **Script (R11):** record a voiceover for this reel, and clone a voice. Clones go into a voice catalogue usable by
+  the whole workspace. Only workspace owners/admins clone, at most 2 live clones per workspace.
+- **Recordings that don't match the script:** transcribe on upload; if it differs, the person chooses to keep it (the
+  scene's text becomes what was said) or record again.
+- **EU AI Act disclosure:** reels with an AI presenter or a cloned voice get a caption line and a small on-screen mark.
+- **Presenter scene price:** 4 credits/s until a real invoice is known.
+- Providers: Higgsfield (video, presenters); ElevenLabs (voices, cloning; `ELEVENLABS_API_KEY`, free plan for
+  testing, upgraded before launch, so build everything). Don't check or spend Higgsfield credits during the build.
 
 ## Facts this design rests on (checked 2026-11-12)
 
-- Higgsfield's key-auth API (`api.higgsfield.ai`) has 95 models, video and image only: no speech, voice or lip-sync.
-  Its voices exist only behind a personal login (CLI), which a server can't hold.
-- `POST /bytedance/seedance-2.5/reference-to-video` `{}` → `400 'audio_urls' is a required property`. Rest of the body
-  unconfirmed (see "Guesses").
-- `POST /higgsfield/ai-influencer` `{}` → `403 not_enough_credits`: **the API account has no credits now.**
-- ElevenLabs key: free tier, 10,000 characters a month, no instant cloning, 3 voice slots, no commercial licence. TTS
-  works now; cloning and customer use need the paid plan (owner will upgrade).
-- Phone uploads: `POST …/media`, 4 MB cap. No audio package in the app yet (`expo-audio` → new dev build).
-- Reel internals that constrain this design (file:line from the review, verified):
-  - `agents.ts` `toPlan` hard-codes `presenter: "none"` and takes `voice` from the scriptwriter (`z.enum(REEL_VOICES)`),
-    and rebuilds scenes from the draft: a chat revision or "Use template" would wipe a presenter, an ElevenLabs voice
-    and recordings. `plan.template` is never set from the chosen template.
-  - `join.ts` dissolves start the next clip 0.4 s early while the voice is padded per scene (`render.ts` ~288); the
-    seam check can turn cuts into dissolves (`render.ts` ~318).
-  - `prepareVoice` switches a too-long scene to `BACKUP_MODEL`, and `retryOnBackup` re-runs failed scenes on Kling
-    from the product photo.
-  - `padAndJoinWav` needs every scene WAV in the same format (`wav.ts` ~34); OpenAI's WAV is 24 kHz mono 16-bit.
-  - `reelPrice` counts words, not recorded seconds.
-  - Stored product photos come from `productPhotos()` (`knowledge.ts`), not `Product.imageUrl` (a shop hotlink).
-  - Long jobs use the job queue (`photoshoot/shoot.ts`, `enqueueJob` with timed follow-ups).
+- Higgsfield's key-auth API: 95 models, video and image only; no speech, voice or lip-sync. Voices exist only behind
+  a personal login.
+- `POST /bytedance/seedance-2.5/reference-to-video` `{}` → `400 'audio_urls' is a required property`.
+- `POST /higgsfield/ai-influencer` `{}` → `403 not_enough_credits`: **no Higgsfield credits now.**
+- ElevenLabs: free tier (10,000 characters/month, no cloning, 3 voice slots, no commercial licence, about 2
+  concurrent requests). One account is shared by every customer.
+- Code facts that shape this design (verified by the reviews):
+  - `agents.ts` `toPlan` hard-codes `presenter: "none"`, takes `voice` from the scriptwriter and rebuilds scenes
+    (no scene ids); `validate` forces `presenter: "none"`; `plan.template` is never set from the chosen template.
+  - `planProblems` is synchronous and also runs inside the scriptwriter's `validate`.
+  - `join.ts` dissolves start the next clip 0.4 s early and only pad at the very end, while the voice is padded per
+    scene: every earlier dissolve shifts later scenes 0.4 s against their voice. The seam check can turn cuts into
+    dissolves.
+  - `nextStep` sends any failed scene to the Kling backup; `prepareVoice` moves too-long scenes to the backup;
+    `higgsfield.animate` and `Outputs.models` expect `VIDEO_MODELS` keys.
+  - `spendCredits` with a known `refId` returns the existing (possibly refunded) charge: a retry must use a new refId.
+  - `padAndJoinWav` needs one WAV format (OpenAI: 24 kHz mono 16-bit).
+  - Stored product photos: `productPhotos()`; the media route needs `publish.execute`, 4 MB cap.
+  - Jobs run when an open app pokes the runner or from a once-a-day cron (`vercel.json`).
+  - No account deletion exists in the code; member removal is one DB transaction (`removeMember`).
+  - Seedance's shortest clip is 4 s; `clipSeconds` bills a 3 s minimum.
 
-## 1. Templates (R12)
+## Build order (one reviewable commit each)
 
-### The list
-`server/reels/templates.ts`, a code table like `router.ts`: `{ id, seconds, ask }` (`ask` = the instruction given to
-the scriptwriter, moved from the phone's `templates.useAsk`). Six: spotlight, collection, material, arrival,
-three-uses, detail-to-room. Titles and subtitles stay phone strings (`templates.item.<id>`); the server list is the
-one source of ids (the phone renders what `GET …/reels/templates` returns, a missing string falls back to the id).
-Applying a template sets `plan.template` to its id.
+1. **Carry-over fix** (agents.ts, plan.ts): chat and templates stop wiping plan choices. Needed by everything after.
+2. **Templates** (R12).
+3. **Presenters** (R10) and presenter scenes in the render.
+4. **Voices**: ElevenLabs stock voices, voice picker, Voices screen; deletes the phone's duplicate `VOICES` list.
+5. **Recording voiceovers** (`expo-audio`, new dev build).
+6. **Cloning**, consent, removal hooks, AI disclosure.
 
-### First view: generic previews for everyone
-Each template has one generic preview clip we render once with Higgsfield (`scripts/render-template-previews.ts`,
-run by us when credits exist) and store in our media bucket under `templates/<id>.mp4` plus a poster frame
-`templates/<id>.jpg`. `GET …/reels/templates` returns each template with signed URLs for its generic preview (if
-rendered yet; until then the card shows the brand's cover photo, below). No user charge, no table.
+## 1. Carry-over (commit 1)
 
-### "Make it with my photos": per-brand paid previews
-On a card: **"Preview with my photos · 10 credits"**. Renders one 5 s clip of that template's opening shot from the
-card's cover photo (the brand's own: first of `productPhotos()` assigned per template in a stable order; once a
-preview exists, that preview's photo stays the cover). Cheapest model (`kling-3-std`), charged 5 s ×
-`reelPerSecond`, refunded on failure. Stored in `ReelTemplatePreview { id, workspaceId, brandId, templateId,
-photoKey, status (MAKING|READY|FAILED), requestId?, videoKey?, chargeId, error?, createdAt }`, unique
-`[brandId, templateId, photoKey]`; a second tap while MAKING returns the same row (no second charge). Runs as a job
-(the `shoot.ts` pattern). Needs `content.create`. A brand preview, when READY, replaces the generic one on that card.
+- `toPlan` keeps `presenter`, `voice` and the template from `current`. The scriptwriter's `voice` is used only for a
+  brand-new plan; its prompt says the voice is set in the voice picker, not the chat. `Draft` gains per-scene
+  `presenter` (bool), and `validate` stops forcing `presenter: "none"`.
+- Recordings move with their text, not their position: a new scene whose `voiceText` equals an old scene's recorded
+  text keeps that recording; others are dropped. `editPlan` does the same, so a script edit on R11 drops the recording
+  of a changed scene (shown as "Recording removed: the text changed") instead of blocking the render later.
+- Ownership checks (presenter of this brand, voice of this workspace, recording of this reel) live in a new async
+  `planOwnershipProblems(plan, scope, tx)`, called in `editPlan`, before `savePlan` in chat, and in `startRender`;
+  never in the scriptwriter's `validate`. `planProblems` adds the pure rules: presenter scenes only when
+  `plan.presenter !== "none"`, at most half the scenes, not on stand-ins.
+- Old plans parse unchanged (bare voice names, `presenter: "none"`): no data migration; in-flight renders finish as is.
 
-## 2. AI actor (R10)
+## 2. Templates (commit 2)
 
-### Brand presenters
-`BrandPresenter { id, workspaceId, brandId, name, traits Json, status (MAKING|READY|FAILED), requestId?, sheetKey?,
-chargeId, error?, createdByUserId, createdAt, archivedAt? }`. Up to 5 live per brand; one MAKING at a time per brand
-(a second "make" while one is MAKING is refused: no double charge).
+- `server/reels/templates.ts`: `{ id, seconds, ask }` for six templates (spotlight, collection, material, arrival,
+  three-uses, detail-to-room). The phone renders what the server returns; titles and subtitles stay phone strings
+  (`templates.item.<id>`, the id if missing). The phone's sample template list and `templates.useAsk` are deleted.
+- Applying a template: `templateId` is added to the create and chat routes; the server builds the scriptwriter
+  instruction from `ask` and sets `plan.template`.
+- `GET …/reels/options` returns templates (with cover and preview URLs) and presenters, one call for R10 and R12.
+- **Generic previews (first view):** one 5 s clip per template, `kling-3-std`, rendered once by
+  `scripts/render-template-previews.ts` (skips templates already rendered; Idempotency-Key `template:<id>`; a few
+  dollars in all) using the same preview function as the paid path. Stored as public objects `templates/<id>.mp4`
+  and `templates/<id>.jpg`. Until rendered, a card shows its cover photo.
+- **Grid loads posters only;** a video plays when a card is tapped. Signed URLs are rounded to a fixed expiry window
+  so the phone's cache hits.
+- **Paid per-brand preview:** "Preview with my photos · 10 credits" on a card. Cover = the brand preview's photo if
+  one exists and still exists in `productPhotos()`, else `productPhotos()[0]`; no photos → the button is disabled.
+  The server picks the photo (never the client), crops it to 9:16 as `prepareVoice` does, and runs it as a
+  **`PhotoShoot` row of kind `template-preview`** (input: templateId, photoKey; output key: the clip), reusing the
+  photoshoot job, charge, poll and refund code rather than a new table. Retry is a new attempt (refId and
+  Idempotency-Key `<id>:<attempt>`). A MAKING preview for the same brand and template blocks a second one.
 
-- **Make one:** a name and a short trait picker from AI Influencer's options (gender, age, ethnicity, skin tone, hair,
-  hair colour, style; tier `normal`; ids validated against a code list). A job submits `POST /higgsfield/ai-influencer`
-  (Idempotency-Key = row id), polls, copies the sheet into our storage (`sheetKey`). Charge **2 credits** (cost $0.05;
-  1 credit would sit under the 70 % margin floor), refunded on failure.
-- **Pick one:** R10 lists "No presenter" (default) and READY presenters with their sheet. Choosing sets
-  `plan.presenter` to the id (saved through the existing plan PATCH). MAKING: spinner; FAILED: "Couldn't make this
-  presenter" with Try again (new charge) / Remove.
-- **Remove:** archives; reels already planned with it keep rendering from the stored sheet.
-- **Play sample:** plays the reel's current voice saying a fixed line in the reel language (see §3 samples).
+## 3. Presenters (commit 3)
 
-### Plan and scriptwriter
-- `ReelPlan.presenter`: `"none" | <presenter id>`; `ReelScene.presenter?: true` marks a presenter-to-camera scene.
-- The scriptwriter, given a presenter, marks presenter scenes: at most half, never a stand-in scene, and the product
-  photo still names the product shown.
-- **Carry-over (fixes the wipe):** `toPlan` keeps `presenter`, `voice` and per-scene recordings from `current`, like
-  `carryStandIns`: recordings stay on a scene only while its `voiceText` is unchanged. The voice changes only through
-  the voice picker (R11/Voices), not the chat; the scriptwriter's `voice` is used only for a brand-new plan.
-- `planProblems` (save and render) checks: presenter is a READY or archived presenter **of this brand**; presenter
-  scenes ≤ half and not stand-ins.
+- A presenter is a **`PhotoShoot` row of kind `presenter`** (input: name, traits; output key: the character sheet),
+  reusing the photoshoot job code. Listing filters by kind. Charge 2 credits (AI Influencer's $0.05 is unverified;
+  covered by the margin check below). One MAKING presenter per brand, enforced by a partial unique index (raw SQL
+  migration), not a read-then-insert. Removing deletes the row.
+- Traits: AI Influencer's options (gender, age, ethnicity, skin tone, hair, hair colour, style; tier `normal`), one
+  code list on the server, returned by `GET …/reels/options` so the phone has no copy.
+- **Picking a presenter** saves `plan.presenter` (the presenter id) and `plan.presenterSheetKey` (so later removal
+  doesn't break the reel), then runs a scriptwriter revision that marks presenter scenes. Choosing "No presenter"
+  clears the flags.
+- **Presenter scenes in the render:**
+  - `VIDEO_MODELS` gains `seedance-2.5-ref` (reference-to-video), excluded from the zod `MODEL_IDS` so a PATCH can't
+    put it on a scene; render picks it by `scene.presenter`.
+  - Body: `image_urls: [sheet, product photo]`, `audio_urls: [scene voice]`, prompt naming the product (title from
+    `productPhotos`). `ClipInput` gains `imageUrls` and `audioUrl`, signed at VOICE and stored in `outputs` so a
+    resend is identical.
+  - No backup model: at VOICE the presenter scenes are listed in `outputs.presenterScenes` and seeded into
+    `out.backups`, so a failure doesn't go to Kling. A failed presenter scene is retried once on the same model with
+    a new key (`:clip:i:retry`); a second failure fails the render (refunded). Presenter scenes over the model's
+    maximum are refused at plan time.
+  - **Every join in a reel with a presenter is a cut** (director output and seam check), so no dissolve shifts a
+    presenter against its voice.
+  - Priced at **4 credits/s** (`CREDIT_COSTS.presenterPerSecond`), using the model's own minimum (4 s).
+- **Margin check at server start**, like the photoshoot tiers: `costUsd` estimates for the preview clip, the
+  presenter sheet and presenter seconds; the server refuses to start if any price falls under the 70 % floor. Update
+  the estimates after the first invoice.
+- **Comparison script (A vs B):** `scripts/compare-presenter-audio.ts <presenterId> "<line>"` renders one line both
+  ways and prints links and costs. Header: "delete after the owner decides". Option B is not wired into the render.
 
-### Render, presenter scenes
-- Model chosen **by `scene.presenter`** in render, not by `scene.model`: a separate `PRESENTER_MODEL` entry (path
-  `/bytedance/seedance-2.5/reference-to-video`), **not** in `MODEL_IDS`, so a plan PATCH can't put it on another scene.
-- Body: `image_urls: [presenter sheet, scene's product photo]` (so the product shown is the real one), `audio_urls:
-  [scene voice WAV]`, prompt "the presenter speaks to camera next to <product>". `ClipInput` gains `imageUrls` and
-  `audioUrl`; both URLs are signed once at VOICE and stored in `outputs` (like `photoUrls`), so a resend sends the
-  identical body under the same Idempotency-Key.
-- No fallback model: a too-long or failed presenter scene **fails the render** (refunded), never silently becomes a
-  Kling product clip. Presenter scenes are capped at the model's max length in `planProblems`.
-- **Lip-sync stays aligned:** transitions into and out of a presenter scene are forced to `cut`, and the seam check
-  skips those joins.
+## 4. Voices (commit 4)
 
-### The voice comparison ("test both")
-Option A (above) is what the render does. Option B (a native-audio model speaking the line: Kling 2.6 Pro or
-Seedance 2.5 image-to-video with `generate_audio: true`) is **not** in the render: it needs a different JOIN and gives
-no control over wording or voice. `scripts/compare-presenter-audio.ts <presenterId> "<line>"` renders the same line
-both ways and prints both links and costs. Run once credits exist; the owner picks; if B wins, a follow-up wires it.
+- Voice ids: bare names stay OpenAI (no `openai:` prefix); ElevenLabs voices are `eleven:<voiceId>`. `speak()`
+  throws on an unknown voice instead of silently using coral. ElevenLabs TTS: `POST
+  /v1/text-to-speech/{voiceId}?output_format=pcm_24000`, model `eleven_multilingual_v2`, wrapped as 24 kHz mono WAV.
+- ElevenLabs calls run **two at a time** with retry and backoff on 429 (the plan's concurrency limit is
+  account-wide).
+- A "Try again" render reuses the previous attempt's speech for the same version when voice and text are unchanged;
+  the VOICE step is claimed with compare-and-set (as clips are), so a duplicate tick doesn't pay twice. No separate
+  speech cache.
+- Stock voices: one server list (OpenAI five + a few ElevenLabs premade). `GET …/voices` returns stock + this
+  workspace's live clones. The phone's `VOICES` list is deleted; R11's voice row opens a **Voices** screen.
+- Samples: stock ElevenLabs voices use their `preview_url`; OpenAI voices and clones have one sample each, made once
+  (a clone's at clone time), stored under `<workspace>/voices/<voiceId>/`. `GET …/voices` never generates audio.
+- ElevenLabs errors: quota or plan limits → `unavailable` (refunded); a deleted voice → new failure kind
+  `voiceDeleted` ("This reel's voice was deleted: pick another"), checked in `startRender` before charging.
 
-## 3. Voices: catalogue, recording, cloning (R11)
+## 5. Recording voiceovers (commit 5)
 
-### Voice ids and speech
-- `ReelPlan.voice`: `"openai:<name>" | "eleven:<voiceId>"`; a bare name (old plans) = `openai:<name>`.
-- `speak()` dispatches on the prefix. ElevenLabs: `POST /v1/text-to-speech/{voiceId}?output_format=pcm_24000`, model
-  `eleven_multilingual_v2` (a constant; it detects the language from the text), PCM wrapped as 24 kHz mono 16-bit WAV
-  so `padAndJoinWav` sees one format.
-- **Speech cache:** each scene's WAV is stored under a hash of (voice, text, language); a "Try again" render reuses it
-  instead of paying for the same speech again.
-- Errors: quota used up / plan limits → VOICE fails as `unavailable` and is refunded (extend `renderFailure`'s
-  pattern); a deleted voice → "This reel's voice was deleted: pick another" (refunded).
+- R11 → **Record voiceover**: one recording per scene, the scene's text on screen (`expo-audio`, AAC 128 kbps mono;
+  15 s ≈ 250 KB). A new Android dev build.
+- Upload `POST …/reels/{id}/recordings` (`content.create`; the reel is loaded scoped to workspace, brand and studio
+  first; per-user rate limit). Bytes checked (`ftyp` at offset 4, M4A/isom brand), length read from the container
+  before converting, then ffmpeg in a unique temp dir deleted in `finally`: `-nostdin -protocol_whitelist file -f mp4
+  -i in.m4a -t 16 -vn -map 0:a:0 -ar 24000 -ac 1 -c:a pcm_s16le`, 20 s timeout. Over 15 s (measured on the output) →
+  "Keep it under 15 seconds".
+- The server writes a `ReelRecording { id, workspaceId, contentItemId, key ("rec-<uuid>.wav"), seconds, transcript,
+  uploadedByUserId, createdAt }` row. **Seconds are measured by the server** and used for pricing; the plan stores
+  only `recordingId`. `planOwnershipProblems` checks the row belongs to this reel.
+- **Transcript check:** the recording is transcribed (OpenAI speech-to-text). If it clearly differs from the scene's
+  text (word-level similarity below a threshold), the app shows what was heard and asks: **"Keep it"** (the scene's
+  `voiceText` becomes the transcript, so approvers and Quality see what is actually said) or **"Record again"**.
+- **Remove recording** per scene. Retention: recordings of a reel are deleted when the reel is deleted, and unused
+  ones after 30 days.
+- Scenes are priced from the recording's seconds.
 
-### Voice catalogue
-- Stock voices: a code list (OpenAI's five + a few ElevenLabs premade voices).
-- Cloned voices: `Voice { id, workspaceId, ownerUserId, name, providerVoiceId?, status (CREATING|READY|FAILED),
-  consentAt, consentText, createdAt, archivedAt? }`. **Usable by everyone in the workspace**; only the owner renames or
-  deletes. **One clone per person per workspace**; the ElevenLabs account's slot limit is the hard ceiling (shared by
-  all customers: a known limit, written in the handover).
-- `GET …/voices` (`brand.read`): stock + the workspace's READY clones, each with a sample URL.
-- `planProblems` checks the voice: a stock voice, or a READY/archived `Voice` of **this workspace** (so a client can't
-  name another workspace's clone on our shared ElevenLabs account).
-- Phone **Voices** screen (under Reels, opened from R11's voice row): stock voices and "Workspace voices", play each,
-  pick one for the reel; the owner of a clone can rename or delete it.
-- Delete: archive the row and delete the ElevenLabs voice (frees the slot). Also on **removal from the workspace** and
-  **account deletion**: the person's clones are deleted at ElevenLabs and archived.
+## 6. Cloning, consent, removal, disclosure (commit 6)
 
-### Samples
-One sample per (voice, language) for the brand's own locales only, generated on first play and cached in storage
-(`voice-samples/<voice>-<lang>.wav`); ElevenLabs premade voices use their free `preview_url` for English.
-
-### Record your own voiceover (this reel only)
-- R11 → **Record voiceover**: one recording per scene with the scene's text on screen (`expo-audio`, m4a/AAC, mic
-  permission).
-- Upload: `POST …/reels/{id}/recordings` (`content.create`; m4a sniffed by bytes; ≤ 4 MB). The server converts with
-  ffmpeg (`-f mp4` input, audio only, `-ar 24000 -ac 1 -c:a pcm_s16le`, a timeout), refuses over 15 s ("Keep it under
-  15 seconds"), stores the WAV and returns `{ key, seconds }`. It does **not** change the plan.
-- The app saves `recordingKey`, `recordingSeconds` and `recordingText` (the text recorded against) on the scene
-  through the existing plan PATCH, so the version check and unsaved edits work as today.
-- `planProblems` checks a recording key is under this brand's media prefix and ends in `.wav`.
-- Render: a scene whose `recordingText` equals its `voiceText` uses the recording instead of speech; if the text
-  changed, the render is refused with "Re-record scene N: the text changed" (no silent AI fallback).
-- **Price follows the recording:** `reelPrice` uses `recordingSeconds` for recorded scenes.
-
-### Clone my voice
-- R11 → **Clone my voice** (`content.create`): read a passage shown on screen (60–90 s, reel language), tick
-  **"This is my own voice. I agree to it being used in videos made by this workspace."**, upload (m4a, same checks,
-  ≤ 4 MB).
-- Server: refuses if the person already has a clone here, or one is CREATING; checks the ElevenLabs plan
-  (`can_use_instant_voice_cloning`, else "Voice cloning isn't available yet"); `POST /v1/voices/add` (`name`,
-  `files[]`, `remove_background_noise: true`) → READY with `providerVoiceId`.
-- **The raw recording is not kept** (biometric data): it's sent to ElevenLabs and discarded; samples come from TTS.
-- The new voice is selected for the current reel.
-
-## Permissions
-Templates, previews, presenters, recordings, cloning: `content.create`. Listing voices and presenters: `brand.read`.
-Renaming/deleting a clone: its owner only.
+- **Who and how many:** workspace owners/admins only (a new `voices.manage` permission on those roles); at most 2
+  live clones per workspace (partial unique count enforced in a transaction with an advisory lock); 10 credits per
+  clone (slot cost; adjust). `requirePlan` like other paid actions.
+- **Flow:** read a passage (60–90 s, reel language), tick the consent box, upload (same audio checks; ≤ 4 MB at
+  128 kbps). The server checks the ElevenLabs plan (`can_use_instant_voice_cloning`, else "Voice cloning isn't
+  available yet"), calls `POST /v1/voices/add` (`remove_background_noise: true`, 30 s timeout) and inserts the
+  `Voice` row only on success (no CREATING state).
+- `Voice { id, workspaceId, ownerUserId, name, providerVoiceId, sampleKey, consent Json, createdAt, archivedAt? }`.
+  `consent`: userId, time, consent text version, app version, SHA-256 of the audio sent.
+- **Consent text** names the recipients: "This is my own voice. I agree to it being used in videos made by this
+  workspace. It is processed by ElevenLabs (USA) to create the voice and by Higgsfield to make presenter videos."
+- The audio is held in memory only, never written to our storage or logs. ElevenLabs keeps it with the voice until
+  the voice is deleted.
+- **Deleting a voice** (its owner, or a workspace owner/admin), **withdrawing consent** (its owner), or **removing
+  the member** from the workspace: the row is archived at once (archived voices are refused in planning and in
+  `speak()`), then a queued job deletes it at ElevenLabs with retries, and purges `<workspace>/voices/<voiceId>/`.
+  The member-removal hook enqueues that job after `removeMember`'s transaction. **Account deletion doesn't exist in
+  the app yet**: when it's built, it must call the same job (noted in the handover).
+- **Audit events** (`auditEvent.create`): clone created, renamed, deleted, consent withdrawn, and each render that
+  uses a clone. The Voices screen shows a clone's owner where it was used.
+- **EU AI Act disclosure:** a version whose plan has a presenter or a clone voice is flagged; at publish the caption
+  gets a "Made with AI" line, and the JOIN step burns a small corner mark into the video. Neither can be removed for
+  those reels.
 
 ## Failure modes (handled)
-- Higgsfield out of credits → presenter/preview FAILED "Making videos isn't available right now", refunded; raw error
-  kept for admins (as `renderFailure`).
-- ElevenLabs quota/plan → "Voices are at their monthly limit" / "Voice cloning isn't available yet"; renders refunded.
-- Double taps: preview unique row; one presenter MAKING per brand; one clone CREATING per person.
-- Presenter archived after planning → still renders from the stored sheet. Voice deleted → render refused, refunded.
-- Recording text drift → `recordingText` check. Format mismatch → fixed 24 kHz mono output.
-- Lip-sync drift → forced cuts around presenter scenes.
-- Not handled: cloning someone else's voice despite the consent box (the consent record is our evidence); ElevenLabs
-  outages beyond the job retry; the shared voice-slot ceiling (documented).
+- Out of Higgsfield credits → FAILED with "Making videos isn't available right now", refunded; raw error kept for
+  admins.
+- ElevenLabs quota, plan or 429 → backoff, then `unavailable`, refunded.
+- Double taps and races → partial unique indexes and advisory locks; retries are new attempts with new keys.
+- A removed presenter → the plan's stored sheet still renders. A deleted voice → refused before charging.
+- Recording mismatch → the person decides; recording drift on edits → dropped with a notice.
+- Jobs only advance when an app is open or on the daily cron: the phone polls every 10 s while something is MAKING;
+  a presenter started and abandoned finishes on the next run (documented).
 
-## Guesses to confirm on the first live run (credits needed)
-- AI Influencer request body and the field holding the sheet URL.
-- Seedance 2.5 reference-to-video body beyond `audio_urls` (`image_urls`, `prompt`, `duration`, `resolution`), and
-  whether it holds lip-sync with two image references.
-- ElevenLabs Starter slot count and licence (confirm when upgrading).
+## Not handled (documented)
+- Someone cloning another person's voice despite the consent box (the consent record is our evidence).
+- The shared ElevenLabs account's voice-slot and character ceilings across all customers (watch quota; alert at
+  80 %).
+- ElevenLabs/Higgsfield data-processing agreements and "no training" terms: confirm before launch.
 
-## Cost check
-Presenter 2 credits ($0.05 cost). Presenter scenes and previews use `reelPerSecond` until the real Higgsfield cost is
-known: add `costUsd` to the presenter model and apply the photoshoot tiers' 70 % margin floor check.
-
-## Phone build
-`expo-audio` (config plugin, `RECORD_AUDIO`) → new Android dev build. Strings English first, then
-`scripts/i18n-translate.mjs`.
+## Guesses to confirm on the first live run
+- AI Influencer request body and the field with the sheet URL; its real cost.
+- Seedance reference-to-video body beyond `audio_urls`; WAV accepted; speech starts at 0 and follows the audio; lip
+  sync holds with two image references; real cost per second.
+- ElevenLabs Starter slot count, concurrency and licence.
 
 ## Tests
-Unit (vitest): template list and covers (no photos, stable order, preview photo sticks); carry-over of presenter,
-voice and recordings through chat and template; voice id parsing and `speak()` dispatch (bare names); speech cache key;
-`planProblems` (foreign presenter, foreign/unknown voice, bad recording key, presenter scene limits, recording text
-drift); recording upload (m4a sniff, 15 s cap, WAV format); pricing with recordings; clone guards (one per person,
-CREATING lock, plan can't clone, consent required); render picks the presenter model only by `scene.presenter`, forces
-cuts around it, no backup fallback; failure mapping. Emulator: templates grid; record a scene; Voices screen; R10 list.
-Live Higgsfield runs and ElevenLabs cloning wait for credits / the paid plan.
+Unit (vitest): carry-over (presenter, voice, template, recordings by text); pure plan rules; ownership checks
+(foreign presenter, foreign/archived voice, foreign recording); template list, covers, previews as PhotoShoot kinds
+with attempts; presenter render path (model by flag, forced cuts, no backup, one retry, 4 s minimum, pricing);
+margin check; voice ids and `speak()` (unknown voice throws, ElevenLabs concurrency and 429 retry); speech reuse on
+retry; recording upload (sniffing, length, format, server seconds, transcript decision); clone guards (role, 2 per
+workspace, plan can't clone, consent record); deletion and member-removal jobs; disclosure flag in caption and mark.
+Emulator: R12 grid, R10 list and making state, R11 recording and transcript prompt, Voices screen.
 
 ## Review history
-- Draft 1 (2026-11-12): written.
-- 4-lens review (2026-11-12): 4 high correctness (chat/template wipe, dissolve lip-sync drift, presenter render path,
-  plus pricing), 3 high security/privacy (client-trusted ids, clone ownership, ElevenLabs licence), 1 high cost (shared
-  slots); mediums on WAV format, plan saving, covers, polling, locks; cuts suggested.
-- Owner (2026-11-12): generic previews first then per-brand paid; clones usable by the workspace; free ElevenLabs for
-  testing, upgrade before launch, build everything; no default voice per presenter.
-- Draft 2 (2026-11-12): all review findings addressed as above; templates cut to six (before/after and offer
-  countdown dropped: no data for them); presenter charge 2 credits; raw clone samples not stored.
+- Draft 1: written; 4-lens review (chat wipe, dissolve drift, presenter path, pricing, client-trusted ids, clone
+  ownership, licence, shared slots).
+- Draft 2: those fixed; owner: generic then paid previews, workspace clones, free ElevenLabs for testing, no voice
+  per presenter.
+- Four single-lens reviews of draft 2:
+  - correctness: drift from any earlier dissolve, free retries, sync `planProblems`, presenter pick changes nothing;
+  - security: client-set recording seconds, recordings bypassing review, missing deletion paths, shared-quota abuse,
+    consent record, AI Act;
+  - cost: retries, presenter price, ElevenLabs concurrency, network video;
+  - maintainability: reuse the photoshoot job, cut CREATING states, the speech cache and the `openai:` prefix, split
+    commits.
+- Owner: transcribe and let the person keep or re-record; owners/admins clone, 2 per workspace; caption line and
+  on-screen mark; presenter scenes 4 credits/s.
+- Draft 3: all of the above.
