@@ -4,6 +4,22 @@ Branch `ai-reels` (not pushed, not merged). Today moved the app's Figma screens 
 one module at a time. Each module was given a review for correctness, security, performance and maintainability,
 tested on the emulator, fixed, and committed.
 
+## Session of 2026-11-12 in short
+
+Branch `desktop-shell` (still not pushed). Owner picked the phone offer check and the campaigns-screen follow-ups.
+- Campaigns screen (`1f6f308`): the section sits above the product table; 24-hour HH:MM time fields; timezone is a
+  list of readable names ("Paris (Central European Time)"); a warning when the offer wording and discount % disagree;
+  product picker search with a ticked count. Offer issues now say "(Paris)", not "Europe/Paris" (web and phone).
+- Phone (`7ad85a0`): "Approve anyway" on the post screen for people with `content.approve` + `rules.approve` when
+  every refusing issue is overridable (same rule as the web); approved issues read "(approved anyway)"; a waiting post
+  reads "Waiting for approval", not "Draft ready". 7 new strings machine-translated (`gpt-6.1-terra`): review first.
+- Checked: web tsc + full vitest; `e2e/campaigns.spec.ts` in Chrome, 3 of 4 pass. The fourth ("post with an ended
+  offer") fails only because the catalogue was last synced 7 days ago: Julia's stock is unconfirmed, so the post also
+  shows "Suggest another product". Sync the catalogue before running it. Phone: tsc + lint, and on the emulator a
+  seeded ended-offer post → empty-note error → Approve anyway → Approved, Schedule unlocked.
+- Host IP is now 192.168.0.14 (`apps/mobile/.env.local` updated).
+**Open, in order:** Shopify live test (needs the owner's store); CSV import.
+
 ## Session of 2026-11-05 in short
 
 Branch `desktop-shell` (not pushed; `main` still at `08e5fb1`). Owner's priority: the B&C brief's base work first.
@@ -91,11 +107,9 @@ Next steps on it, in order:
    terms changed to -15 % → refused, not overridable).
    Browser: `e2e/campaigns.spec.ts` passes in Chrome (create/edit/withdraw an offer, viewer read-only, a post whose
    offer ended → Approve anyway; seed with `scripts/_tmp/seed-offer.ts`, clean up with `unseed-offer.ts`).
-   **Not yet checked:** the phone's post screen with an offer.
-   UI follow-ups found in the browser check (not done): the "Campaigns and offers" section sits below the whole
-   product table (move it up or give it a tab); the offer text and the discount % can contradict each other with no
-   warning ("-20 % sur …" vs -25 %); the dialog's time inputs follow the browser locale (01:06 PM) while lists use
-   24 h; the timezone shows as a raw id ("Europe/Paris"); the product picker has no search. Known limits: "réduction de
+   Phone post screen with an offer: checked on the emulator 2026-11-12, with "Approve anyway" now on the phone
+   (`7ad85a0`). The five UI follow-ups from the browser check are done (`1f6f308`, see the 2026-11-12 summary at the
+   top). Known limits: "réduction de
    30 %" is always read as a discount; a standing priority starting later today can get a 09:00 UTC post a few hours
    early. Seed helpers for e2e live in the git-ignored `apps/web/scripts/_tmp/`.
 3. Test Shopify Admin live: a custom app with `read_products` + `read_inventory` on a real store, connect on the web
