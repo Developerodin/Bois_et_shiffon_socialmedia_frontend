@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} sekund",
   "seconds_other": "{{count}} sekunder",
   "noPresenter": "Ingen præsentator",
-  "comingSoon": "Kommer snart",
   "aiActor": "AI-skuespiller",
   "assistant": "Din videoassistent",
   "sourceWebsite": "Kildewebsite",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Omskriv åbning",
     "narratorAudio": "Fortæller audio",
     "recordOwn": "Optag din egen stemme",
-    "recordOwnMeta": "Valgfri tilpasset brandfortælling",
+    "recordOwnMeta": "Indtal selv en scene, højst 15 sekunder pr. scene. En indtalt scene bruger din stemme.",
     "record": "Optag",
     "saving": "Gemmer…",
     "sceneTooLong": "Scene {{n}} er på over 30 ord (15 sek.). Gør den kortere.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Behold {{count}} afsnit, ét pr. scene, med en tom linje imellem.",
     "rewriteOpeningAsk": "Omskriv åbningen i scene 1, så den er kortere og mere overraskende.",
     "voiceName": "Stemme: {{name}}",
-    "changeVoice": "Skift stemme"
+    "changeVoice": "Skift stemme",
+    "sceneLine": "Scene {{n}} · {{text}}",
+    "recorded": "Indtalt · {{seconds}} sek.",
+    "notRecorded": "Bruger stemmen ovenfor",
+    "removeRecording": "Fjern",
+    "recordAgain": "Indtal igen",
+    "saveBeforeRecording": "Gem dine ændringer i manuskriptet (Fortsæt), før du indtaler.",
+    "recordingDropped": "Optagelsen af scene {{n}} blev fjernet, fordi teksten blev ændret. Optag den igen, hvis du vil."
   },
   "templates": {
     "title": "Reel skabeloner",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Afspil en stemmeprøve med {{name}}",
     "stopA11y": "Stop stemmeprøven med {{name}}"
+  },
+  "record": {
+    "title": "Indtal scene {{n}}",
+    "intro": "Læs teksten nedenfor op med din egen stemme, højst {{seconds}} sekunder.",
+    "read": "Læs dette op",
+    "noMic": "Giv adgang til mikrofonen i telefonens indstillinger for at optage.",
+    "checking": "Tjekker din optagelse…",
+    "startA11y": "Start optagelse",
+    "stopA11y": "Stop optagelse",
+    "tap": "Tryk for at optage",
+    "timer": "{{seconds}} / {{max}} sek.",
+    "length": "Din optagelse: {{seconds}} sek.",
+    "use": "Brug optagelsen",
+    "keep": "Behold den",
+    "again": "Indtal igen",
+    "heardMatches": "Vi hørte",
+    "heardDiffers": "Vi hørte noget andet",
+    "keepNote": "Hvis du beholder optagelsen, ændres scenens tekst til det, du sagde, så dem, der godkender, læser det, der bliver sagt. Du kan også indtale igen.",
+    "nothingHeard": "Ingen lyd. Tjek din mikrofon, og optag igen lidt tættere på."
   }
 }

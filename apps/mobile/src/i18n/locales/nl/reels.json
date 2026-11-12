@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} seconde",
   "seconds_other": "{{count}} seconden",
   "noPresenter": "Geen presentator",
-  "comingSoon": "Binnenkort beschikbaar",
   "aiActor": "AI Acteur",
   "assistant": "Je video-assistent",
   "sourceWebsite": "Bronwebsite",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Herschrijf opening",
     "narratorAudio": "Verteller audio",
     "recordOwn": "Neem je eigen stem op",
-    "recordOwnMeta": "Optionele aangepaste merkvertelling",
+    "recordOwnMeta": "Spreek zelf een scène in, maximaal 15 seconden per scène. Een ingesproken scène gebruikt je eigen stem.",
     "record": "Opnemen",
     "saving": "Opslaan…",
     "sceneTooLong": "Scène {{n}} bevat meer dan 30 woorden (15 s). Maak de tekst korter.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Houd {{count}} alinea's aan, één per scène, met een witregel ertussen.",
     "rewriteOpeningAsk": "Herschrijf de opening van scène 1: korter en verrassender.",
     "voiceName": "Stem: {{name}}",
-    "changeVoice": "Stem wijzigen"
+    "changeVoice": "Stem wijzigen",
+    "sceneLine": "Scène {{n}} · {{text}}",
+    "recorded": "Opgenomen · {{seconds}} s",
+    "notRecorded": "Gebruikt de stem hierboven",
+    "removeRecording": "Verwijderen",
+    "recordAgain": "Opnieuw opnemen",
+    "saveBeforeRecording": "Sla je scriptwijzigingen op (Doorgaan) voordat je opneemt.",
+    "recordingDropped": "De opname van scène {{n}} is verwijderd omdat de tekst is gewijzigd. Neem de scène opnieuw op als je wilt."
   },
   "templates": {
     "title": "Reel sjablonen",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Luistervoorbeeld van {{name}} afspelen",
     "stopA11y": "Luistervoorbeeld van {{name}} stoppen"
+  },
+  "record": {
+    "title": "Scène {{n}} opnemen",
+    "intro": "Lees de tekst hieronder voor in je eigen stem, maximaal {{seconds}} seconden.",
+    "read": "Lees dit voor",
+    "noMic": "Geef toegang tot de microfoon in de instellingen van je telefoon om op te nemen.",
+    "checking": "Je opname wordt gecontroleerd…",
+    "startA11y": "Opname starten",
+    "stopA11y": "Opname stoppen",
+    "tap": "Tik om op te nemen",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Je opname: {{seconds}} s",
+    "use": "Deze opname gebruiken",
+    "keep": "Behouden",
+    "again": "Opnieuw opnemen",
+    "heardMatches": "Dit hoorden we",
+    "heardDiffers": "We hoorden iets anders",
+    "keepNote": "Als je deze opname behoudt, wordt de scènetekst aangepast aan wat je hebt gezegd. Zo lezen beoordelaars wat er wordt uitgesproken. Of neem opnieuw op.",
+    "nothingHeard": "Niets gehoord. Controleer je microfoon en neem opnieuw op, iets dichter bij de microfoon."
   }
 }

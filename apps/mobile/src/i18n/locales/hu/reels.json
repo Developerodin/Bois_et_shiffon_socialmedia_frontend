@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} másodperc",
   "seconds_other": "{{count}} másodperc",
   "noPresenter": "Nincs előadó",
-  "comingSoon": "Hamarosan",
   "aiActor": "AI Szereplő",
   "assistant": "A videó asszisztensed",
   "sourceWebsite": "Forrás weboldal",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Nyitás újraírása",
     "narratorAudio": "Narrátor hang",
     "recordOwn": "Vedd fel saját hangodat",
-    "recordOwnMeta": "Opcionális egyedi márka narráció",
+    "recordOwnMeta": "Olvasd fel magad a jeleneteket, jelenetenként legfeljebb 15 másodpercben. A felvett jelenetben a saját hangod szól.",
     "record": "Felvétel",
     "saving": "Mentés…",
     "sceneTooLong": "A(z) {{n}}. jelenet több mint 30 szó (15 mp). Rövidítsd le.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Maradjon {{count}} bekezdés, jelenetenként egy, köztük üres sorral.",
     "rewriteOpeningAsk": "Írd át az 1. jelenet nyitását: legyen rövidebb és meglepőbb.",
     "voiceName": "Hang: {{name}}",
-    "changeVoice": "Hang módosítása"
+    "changeVoice": "Hang módosítása",
+    "sceneLine": "{{n}}. jelenet · {{text}}",
+    "recorded": "Felvéve · {{seconds}} mp",
+    "notRecorded": "A fenti hangot használja",
+    "removeRecording": "Eltávolítás",
+    "recordAgain": "Újrafelvétel",
+    "saveBeforeRecording": "Felvétel előtt mentsd a forgatókönyv módosításait a Folytatás gombbal.",
+    "recordingDropped": "A(z) {{n}}. jelenet felvételét eltávolítottuk, mert megváltozott a szövege. Ha szeretnéd, vedd fel újra."
   },
   "templates": {
     "title": "Reel sablonok",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Hangminta lejátszása: {{name}}",
     "stopA11y": "Hangminta leállítása: {{name}}"
+  },
+  "record": {
+    "title": "{{n}}. jelenet felvétele",
+    "intro": "Olvasd fel az alábbi szöveget a saját hangodon, legfeljebb {{seconds}} másodpercben.",
+    "read": "Ezt olvasd fel",
+    "noMic": "A felvételhez engedélyezd a mikrofont a telefonod beállításaiban.",
+    "checking": "Felvétel ellenőrzése…",
+    "startA11y": "Felvétel indítása",
+    "stopA11y": "Felvétel leállítása",
+    "tap": "Koppints a felvételhez",
+    "timer": "{{seconds}} / {{max}} mp",
+    "length": "A felvételed: {{seconds}} mp",
+    "use": "Felvétel használata",
+    "keep": "Megtartás",
+    "again": "Újrafelvétel",
+    "heardMatches": "Ezt hallottuk",
+    "heardDiffers": "Mást hallottunk",
+    "keepNote": "Ha megtartod, a jelenet szövege arra változik, amit mondtál, így a jóváhagyók azt olvassák, ami elhangzik. Vagy készíts új felvételt.",
+    "nothingHeard": "Nem hallottunk semmit. Ellenőrizd a mikrofonodat, és készítsd el újra a felvételt, kicsit közelebbről."
   }
 }

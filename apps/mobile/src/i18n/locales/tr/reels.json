@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} saniye",
   "seconds_other": "{{count}} saniye",
   "noPresenter": "Sunucu yok",
-  "comingSoon": "Yakında",
   "aiActor": "AI Oyuncu",
   "assistant": "Video asistanınız",
   "sourceWebsite": "Kaynak web sitesi",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Açılışı yeniden yaz",
     "narratorAudio": "Anlatıcı sesi",
     "recordOwn": "Kendi sesinizi kaydedin",
-    "recordOwnMeta": "Opsiyonel özel marka anlatımı",
+    "recordOwnMeta": "Sahneleri kendin oku, her biri en fazla 15 saniye olsun. Kaydedilen sahnelerde senin sesin kullanılır.",
     "record": "Kaydet",
     "saving": "Kaydediliyor…",
     "sceneTooLong": "{{n}}. sahne 30 kelimeyi (15 sn) aşıyor. Kısalt.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Her sahne için bir tane olmak üzere {{count}} paragraf kullan ve aralarında birer boş satır bırak.",
     "rewriteOpeningAsk": "1. sahnenin açılışını daha kısa ve şaşırtıcı olacak şekilde yeniden yaz.",
     "voiceName": "Ses: {{name}}",
-    "changeVoice": "Sesi değiştir"
+    "changeVoice": "Sesi değiştir",
+    "sceneLine": "Sahne {{n}} · {{text}}",
+    "recorded": "Kaydedildi · {{seconds}} sn",
+    "notRecorded": "Yukarıdaki ses kullanılır",
+    "removeRecording": "Kaldır",
+    "recordAgain": "Yeniden kaydet",
+    "saveBeforeRecording": "Kaydetmeden önce senaryo değişikliklerini kaydet (Devam).",
+    "recordingDropped": "Sahne {{n}} kaydı, metin değiştiği için kaldırıldı. İstersen tekrar kaydet."
   },
   "templates": {
     "title": "Reel şablonları",
@@ -489,5 +495,24 @@
     },
     "playA11y": "{{name}} ses örneğini oynat",
     "stopA11y": "{{name}} ses örneğini durdur"
+  },
+  "record": {
+    "title": "Sahne {{n}} kaydı",
+    "intro": "Aşağıdaki metni kendi sesinle oku. En fazla {{seconds}} saniye.",
+    "read": "Bu metni oku",
+    "noMic": "Kayıt yapmak için telefonunun ayarlarından mikrofon izni ver.",
+    "checking": "Kaydın kontrol ediliyor…",
+    "startA11y": "Kaydı başlat",
+    "stopA11y": "Kaydı durdur",
+    "tap": "Kaydetmek için dokun",
+    "timer": "{{seconds}} / {{max}} sn",
+    "length": "Kaydın: {{seconds}} sn",
+    "use": "Bu kaydı kullan",
+    "keep": "Bunu kullan",
+    "again": "Yeniden kaydet",
+    "heardMatches": "Şunu duyduk",
+    "heardDiffers": "Farklı bir şey duyduk",
+    "keepNote": "Bu kaydı kullanırsan sahne metni söylediklerinle değiştirilir. Böylece onaylayanlar seslendirilen metni okur. İstersen yeniden kaydedebilirsin.",
+    "nothingHeard": "Ses duyulmadı. Mikrofonunu kontrol et ve biraz daha yakından tekrar kaydet."
   }
 }

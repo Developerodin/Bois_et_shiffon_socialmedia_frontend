@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} segundo",
   "seconds_other": "{{count}} segundos",
   "noPresenter": "Sin presentador",
-  "comingSoon": "Próximamente",
   "aiActor": "Actor AI",
   "assistant": "Tu asistente de video",
   "sourceWebsite": "Sitio web fuente",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Reescribir apertura",
     "narratorAudio": "Audio del narrador",
     "recordOwn": "Graba tu propia voz",
-    "recordOwnMeta": "Narración de marca personalizada opcional",
+    "recordOwnMeta": "Lee una escena con tu propia voz, hasta 15 segundos por escena. La escena grabada usa tu voz.",
     "record": "Grabar",
     "saving": "Guardando…",
     "sceneTooLong": "La escena {{n}} supera las 30 palabras (15 s). Acórtala.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Mantén {{count}} párrafos, uno por escena, con una línea en blanco entre ellos.",
     "rewriteOpeningAsk": "Reescribe el gancho inicial de la escena 1: más corto y sorprendente.",
     "voiceName": "Voz: {{name}}",
-    "changeVoice": "Cambiar voz"
+    "changeVoice": "Cambiar voz",
+    "sceneLine": "Escena {{n}} · {{text}}",
+    "recorded": "Grabada · {{seconds}} s",
+    "notRecorded": "Usa la voz de arriba",
+    "removeRecording": "Eliminar",
+    "recordAgain": "Grabar de nuevo",
+    "saveBeforeRecording": "Guarda los cambios del guion (Continuar) antes de grabar.",
+    "recordingDropped": "Se eliminó la grabación de la escena {{n}} porque cambió el texto. Vuelve a grabarla si quieres."
   },
   "templates": {
     "title": "Plantillas de reel",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Reproducir una muestra de {{name}}",
     "stopA11y": "Detener la muestra de {{name}}"
+  },
+  "record": {
+    "title": "Grabar escena {{n}}",
+    "intro": "Lee el texto de abajo con tu propia voz, hasta {{seconds}} segundos.",
+    "read": "Lee esto",
+    "noMic": "Permite el acceso al micrófono en los ajustes de tu teléfono para grabar.",
+    "checking": "Comprobando tu grabación…",
+    "startA11y": "Iniciar grabación",
+    "stopA11y": "Detener grabación",
+    "tap": "Toca para grabar",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Tu grabación: {{seconds}} s",
+    "use": "Usar esta grabación",
+    "keep": "Conservar",
+    "again": "Grabar de nuevo",
+    "heardMatches": "Hemos oído",
+    "heardDiffers": "Hemos oído algo diferente",
+    "keepNote": "Si conservas la grabación, el texto de la escena cambiará a lo que dijiste para que quienes la aprueben lean lo que se escucha. También puedes grabar de nuevo.",
+    "nothingHeard": "No se oye nada. Revisa tu micrófono y vuelve a grabar un poco más cerca."
   }
 }

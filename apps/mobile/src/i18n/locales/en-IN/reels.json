@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} second",
   "seconds_other": "{{count}} seconds",
   "noPresenter": "No presenter",
-  "comingSoon": "Coming soon",
   "aiActor": "AI Actor",
   "assistant": "Your video assistant",
   "sourceWebsite": "Source website",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Rewrite opening",
     "narratorAudio": "Narrator audio",
     "recordOwn": "Record your own voice",
-    "recordOwnMeta": "Optional custom brand narration",
+    "recordOwnMeta": "Read a scene yourself, up to 15 seconds each. A recorded scene uses your voice.",
     "record": "Record",
     "saving": "Saving…",
     "sceneTooLong": "Scene {{n}} is over 30 words (15 s). Shorten it.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Keep {{count}} paragraphs, one per scene, with a blank line between.",
     "rewriteOpeningAsk": "Rewrite the opening hook of scene 1: shorter and more surprising.",
     "voiceName": "Voice: {{name}}",
-    "changeVoice": "Change voice"
+    "changeVoice": "Change voice",
+    "sceneLine": "Scene {{n}} · {{text}}",
+    "recorded": "Recorded · {{seconds}} s",
+    "notRecorded": "Uses the voice above",
+    "removeRecording": "Remove",
+    "recordAgain": "Record again",
+    "saveBeforeRecording": "Save your script changes (Continue) before recording.",
+    "recordingDropped": "Scene {{n}}'s recording was removed: its text changed. Record it again if you want."
   },
   "templates": {
     "title": "Reel templates",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Play a sample of {{name}}",
     "stopA11y": "Stop the sample of {{name}}"
+  },
+  "record": {
+    "title": "Record scene {{n}}",
+    "intro": "Read the text below in your own voice, up to {{seconds}} seconds.",
+    "read": "Read this",
+    "noMic": "Allow the microphone in your phone's settings to record.",
+    "checking": "Checking your recording…",
+    "startA11y": "Start recording",
+    "stopA11y": "Stop recording",
+    "tap": "Tap to record",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Your take: {{seconds}} s",
+    "use": "Use this recording",
+    "keep": "Keep it",
+    "again": "Record again",
+    "heardMatches": "We heard",
+    "heardDiffers": "We heard something different",
+    "keepNote": "Keep it, and the scene's text becomes what you said, so approvers read what is spoken. Or record again.",
+    "nothingHeard": "Nothing. Check your microphone and record again, a little closer."
   }
 }

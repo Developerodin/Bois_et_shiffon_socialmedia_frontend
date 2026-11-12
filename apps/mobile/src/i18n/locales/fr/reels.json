@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} seconde",
   "seconds_other": "{{count}} secondes",
   "noPresenter": "Pas de présentateur",
-  "comingSoon": "Bientôt disponible",
   "aiActor": "Acteur IA",
   "assistant": "Votre assistant vidéo",
   "sourceWebsite": "Site source",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Réécrire l'ouverture",
     "narratorAudio": "Audio du narrateur",
     "recordOwn": "Enregistrez votre propre voix",
-    "recordOwnMeta": "Narration de marque personnalisée optionnelle",
+    "recordOwnMeta": "Lis toi-même chaque scène, jusqu’à 15 secondes par scène. Une scène enregistrée utilise ta voix.",
     "record": "Enregistrer",
     "saving": "Enregistrement…",
     "sceneTooLong": "La scène {{n}} dépasse 30 mots (15 s). Raccourcis-la.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Garde {{count}} paragraphes, un par scène, avec une ligne vide entre chaque.",
     "rewriteOpeningAsk": "Réécris l’accroche de la scène 1 : plus courte et plus surprenante.",
     "voiceName": "Voix : {{name}}",
-    "changeVoice": "Changer de voix"
+    "changeVoice": "Changer de voix",
+    "sceneLine": "Scène {{n}} · {{text}}",
+    "recorded": "Enregistré · {{seconds}} s",
+    "notRecorded": "Utilise la voix ci-dessus",
+    "removeRecording": "Supprimer",
+    "recordAgain": "Réenregistrer",
+    "saveBeforeRecording": "Enregistre les modifications de ton script (Continuer) avant d’enregistrer ta voix.",
+    "recordingDropped": "L’enregistrement de la scène {{n}} a été supprimé car son texte a changé. Réenregistrez-le si vous le souhaitez."
   },
   "templates": {
     "title": "Modèles de reel",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Écouter un extrait de la voix de {{name}}",
     "stopA11y": "Arrêter l’extrait de {{name}}"
+  },
+  "record": {
+    "title": "Enregistrer la scène {{n}}",
+    "intro": "Lis le texte ci-dessous avec ta voix, en {{seconds}} secondes maximum.",
+    "read": "À lire",
+    "noMic": "Autorise l’accès au micro dans les réglages de ton téléphone pour enregistrer.",
+    "checking": "Vérification de ton enregistrement…",
+    "startA11y": "Démarrer l’enregistrement",
+    "stopA11y": "Arrêter l’enregistrement",
+    "tap": "Appuie pour enregistrer",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Ton enregistrement : {{seconds}} s",
+    "use": "Utiliser cet enregistrement",
+    "keep": "Garder",
+    "again": "Réenregistrer",
+    "heardMatches": "Nous avons entendu",
+    "heardDiffers": "Nous avons entendu autre chose",
+    "keepNote": "Si tu le gardes, le texte de la scène sera remplacé par ce que tu as dit, pour que les personnes qui valident lisent ce qui est prononcé. Tu peux aussi réenregistrer.",
+    "nothingHeard": "Aucun son détecté. Vérifie ton micro et enregistre à nouveau en te rapprochant un peu."
   }
 }

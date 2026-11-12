@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} sekunti",
   "seconds_other": "{{count}} sekuntia",
   "noPresenter": "Ei esittäjää",
-  "comingSoon": "Tulossa pian",
   "aiActor": "AI-näyttelijä",
   "assistant": "Videon assistenttisi",
   "sourceWebsite": "Lähdesivusto",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Kirjoita aloitus uudelleen",
     "narratorAudio": "Kertojaääni",
     "recordOwn": "Tallenna oma äänesi",
-    "recordOwnMeta": "Valinnainen mukautettu brändikerronta",
+    "recordOwnMeta": "Lue kohtaus itse ääneen, enintään 15 sekuntia per kohtaus. Tallennetussa kohtauksessa käytetään ääntäsi.",
     "record": "Tallenna",
     "saving": "Tallennetaan…",
     "sceneTooLong": "Kohtauksessa {{n}} on yli 30 sanaa (15 s). Lyhennä sitä.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Säilytä {{count}} kappaletta, yksi per kohtaus. Jätä kappaleiden väliin tyhjä rivi.",
     "rewriteOpeningAsk": "Kirjoita ensimmäisen kohtauksen aloituskoukku uudelleen: lyhyemmäksi ja yllättävämmäksi.",
     "voiceName": "Ääni: {{name}}",
-    "changeVoice": "Vaihda ääni"
+    "changeVoice": "Vaihda ääni",
+    "sceneLine": "Kohtaus {{n}} · {{text}}",
+    "recorded": "Äänitetty · {{seconds}} s",
+    "notRecorded": "Käyttää yllä olevaa ääntä",
+    "removeRecording": "Poista",
+    "recordAgain": "Äänitä uudelleen",
+    "saveBeforeRecording": "Tallenna käsikirjoituksen muutokset (Jatka) ennen äänittämistä.",
+    "recordingDropped": "Kohtauksen {{n}} tallenne poistettiin, koska sen teksti muuttui. Nauhoita se halutessasi uudelleen."
   },
   "templates": {
     "title": "Rullapohjat",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Toista ääninäyte: {{name}}",
     "stopA11y": "Pysäytä ääninäyte: {{name}}"
+  },
+  "record": {
+    "title": "Äänitä kohtaus {{n}}",
+    "intro": "Lue alla oleva teksti omalla äänelläsi. Enimmäiskesto on {{seconds}} sekuntia.",
+    "read": "Lue tämä",
+    "noMic": "Salli mikrofonin käyttö puhelimen asetuksissa, jotta voit äänittää.",
+    "checking": "Tarkistetaan äänitettäsi…",
+    "startA11y": "Aloita äänitys",
+    "stopA11y": "Lopeta äänitys",
+    "tap": "Aloita äänitys napauttamalla",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Äänitteesi: {{seconds}} s",
+    "use": "Käytä tätä äänitettä",
+    "keep": "Säilytä",
+    "again": "Äänitä uudelleen",
+    "heardMatches": "Kuulimme näin",
+    "heardDiffers": "Kuulimme jotain muuta",
+    "keepNote": "Jos säilytät äänitteen, kohtauksen tekstiksi tulee sanomasi, jotta hyväksyjät näkevät, mitä äänitteellä sanotaan. Voit myös äänittää uudelleen.",
+    "nothingHeard": "Ei kuulunut mitään. Tarkista mikrofonisi ja äänitä uudelleen hieman lähempää."
   }
 }

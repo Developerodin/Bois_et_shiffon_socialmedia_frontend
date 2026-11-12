@@ -127,7 +127,7 @@ export default function ReelsStoryboard() {
           <Fragment key={i}>
             <View style={styles.scene}>
               <View style={styles.sceneHead}>
-                <Text style={strong14}>{t("scene.label", { n: i + 1, seconds: detail.sceneSeconds[i] ?? 0 })}</Text>
+                <Text style={strong14}>{t("scene.label", { n: i + 1, seconds: detail.sceneSeconds?.[i] ?? 0 })}</Text>
                 <Tag label={s.presenter ? t("storyboard.presenterScene") : s.model ? MODEL_NAMES[s.model] ?? s.model : s.shot} />
               </View>
               <View style={{ gap: space[16], paddingTop: space[12] }}>

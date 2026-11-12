@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} segundo",
   "seconds_other": "{{count}} segundos",
   "noPresenter": "Sem apresentador",
-  "comingSoon": "Em breve",
   "aiActor": "Ator AI",
   "assistant": "O seu assistente de vídeo",
   "sourceWebsite": "Website de origem",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Reescrever abertura",
     "narratorAudio": "Áudio do narrador",
     "recordOwn": "Grave a sua própria voz",
-    "recordOwnMeta": "Narração personalizada opcional da marca",
+    "recordOwnMeta": "Lê cada cena com a tua voz, até 15 segundos por cena. Uma cena gravada usa a tua voz.",
     "record": "Gravar",
     "saving": "A guardar…",
     "sceneTooLong": "A cena {{n}} tem mais de 30 palavras (15 s). Encurta-a.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Mantém {{count}} parágrafos, um por cena, com uma linha em branco entre eles.",
     "rewriteOpeningAsk": "Reescreve a frase inicial da cena 1: mais curta e surpreendente.",
     "voiceName": "Voz: {{name}}",
-    "changeVoice": "Alterar voz"
+    "changeVoice": "Alterar voz",
+    "sceneLine": "Cena {{n}} · {{text}}",
+    "recorded": "Gravada · {{seconds}} s",
+    "notRecorded": "Usa a voz acima",
+    "removeRecording": "Remover",
+    "recordAgain": "Gravar novamente",
+    "saveBeforeRecording": "Guarda as alterações ao guião (Continuar) antes de gravares.",
+    "recordingDropped": "A gravação da cena {{n}} foi removida porque o texto mudou. Se quiseres, grava-a novamente."
   },
   "templates": {
     "title": "Modelos de reel",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Ouvir uma amostra de {{name}}",
     "stopA11y": "Parar a amostra de {{name}}"
+  },
+  "record": {
+    "title": "Gravar cena {{n}}",
+    "intro": "Lê o texto abaixo com a tua voz, até {{seconds}} segundos.",
+    "read": "Lê isto",
+    "noMic": "Permite o acesso ao microfone nas definições do telemóvel para gravares.",
+    "checking": "A verificar a tua gravação…",
+    "startA11y": "Iniciar gravação",
+    "stopA11y": "Parar gravação",
+    "tap": "Toca para gravar",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "A tua gravação: {{seconds}} s",
+    "use": "Usar esta gravação",
+    "keep": "Manter",
+    "again": "Gravar novamente",
+    "heardMatches": "Ouvimos",
+    "heardDiffers": "Ouvimos algo diferente",
+    "keepNote": "Se mantiveres a gravação, o texto da cena passa a ser o que disseste, para que quem aprova leia o que é dito. Ou podes gravar novamente.",
+    "nothingHeard": "Não se ouviu nada. Verifica o microfone e grava de novo, um pouco mais perto."
   }
 }

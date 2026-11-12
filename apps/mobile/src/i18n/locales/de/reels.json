@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} Sekunde",
   "seconds_other": "{{count}} Sekunden",
   "noPresenter": "Kein Moderator",
-  "comingSoon": "Bald verfügbar",
   "aiActor": "KI-Darsteller",
   "assistant": "Dein Video-Assistent",
   "sourceWebsite": "Quell-Website",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Eröffnung umschreiben",
     "narratorAudio": "Erzähler-Audio",
     "recordOwn": "Eigene Stimme aufnehmen",
-    "recordOwnMeta": "Optionale benutzerdefinierte Marken-Narration",
+    "recordOwnMeta": "Sprich eine Szene selbst ein, jeweils bis zu 15 Sekunden. Eine aufgenommene Szene verwendet deine Stimme.",
     "record": "Aufnehmen",
     "saving": "Wird gespeichert…",
     "sceneTooLong": "Szene {{n}} hat mehr als 30 Wörter (15 s). Kürze sie.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Behalte {{count}} Absätze bei, einen pro Szene, mit einer Leerzeile dazwischen.",
     "rewriteOpeningAsk": "Schreibe den Einstieg von Szene 1 um: kürzer und überraschender.",
     "voiceName": "Stimme: {{name}}",
-    "changeVoice": "Stimme ändern"
+    "changeVoice": "Stimme ändern",
+    "sceneLine": "Szene {{n}} · {{text}}",
+    "recorded": "Aufgenommen · {{seconds}} s",
+    "notRecorded": "Verwendet die Stimme oben",
+    "removeRecording": "Entfernen",
+    "recordAgain": "Erneut aufnehmen",
+    "saveBeforeRecording": "Speichere deine Skriptänderungen (Weiter), bevor du aufnimmst.",
+    "recordingDropped": "Die Aufnahme von Szene {{n}} wurde entfernt, weil sich der Text geändert hat. Nimm sie bei Bedarf erneut auf."
   },
   "templates": {
     "title": "Reel-Vorlagen",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Hörprobe von {{name}} abspielen",
     "stopA11y": "Hörprobe von {{name}} stoppen"
+  },
+  "record": {
+    "title": "Szene {{n}} aufnehmen",
+    "intro": "Lies den Text unten mit deiner eigenen Stimme vor, bis zu {{seconds}} Sekunden lang.",
+    "read": "Lies diesen Text",
+    "noMic": "Erlaube den Mikrofonzugriff in den Einstellungen deines Smartphones, um aufzunehmen.",
+    "checking": "Deine Aufnahme wird überprüft…",
+    "startA11y": "Aufnahme starten",
+    "stopA11y": "Aufnahme stoppen",
+    "tap": "Zum Aufnehmen tippen",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Deine Aufnahme: {{seconds}} s",
+    "use": "Aufnahme verwenden",
+    "keep": "Behalten",
+    "again": "Erneut aufnehmen",
+    "heardMatches": "Wir haben Folgendes gehört",
+    "heardDiffers": "Wir haben etwas anderes gehört",
+    "keepNote": "Wenn du die Aufnahme behältst, wird der Szenentext durch das Gesagte ersetzt. So lesen die Personen, die die Aufnahme freigeben, genau das, was gesprochen wird. Du kannst auch erneut aufnehmen.",
+    "nothingHeard": "Nichts gehört. Prüfe dein Mikrofon und nimm noch einmal aus etwas geringerer Entfernung auf."
   }
 }

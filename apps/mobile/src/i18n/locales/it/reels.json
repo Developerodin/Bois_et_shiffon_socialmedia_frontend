@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} secondo",
   "seconds_other": "{{count}} secondi",
   "noPresenter": "Nessun presentatore",
-  "comingSoon": "In arrivo",
   "aiActor": "Attore AI",
   "assistant": "Il tuo assistente video",
   "sourceWebsite": "Sito web di origine",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Riscrivi apertura",
     "narratorAudio": "Audio narratore",
     "recordOwn": "Registra la tua voce",
-    "recordOwnMeta": "Narrazione personalizzata opzionale del brand",
+    "recordOwnMeta": "Leggi tu una scena, per un massimo di 15 secondi ciascuna. La scena registrata userà la tua voce.",
     "record": "Registra",
     "saving": "Salvataggio…",
     "sceneTooLong": "La scena {{n}} supera le 30 parole (15 s). Accorciala.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Mantieni {{count}} paragrafi, uno per scena, con una riga vuota tra loro.",
     "rewriteOpeningAsk": "Riscrivi l'apertura della scena 1: più breve e sorprendente.",
     "voiceName": "Voce: {{name}}",
-    "changeVoice": "Cambia voce"
+    "changeVoice": "Cambia voce",
+    "sceneLine": "Scena {{n}} · {{text}}",
+    "recorded": "Registrata · {{seconds}} s",
+    "notRecorded": "Usa la voce sopra",
+    "removeRecording": "Rimuovi",
+    "recordAgain": "Registra di nuovo",
+    "saveBeforeRecording": "Salva le modifiche al copione (Continua) prima di registrare.",
+    "recordingDropped": "La registrazione della scena {{n}} è stata rimossa perché il testo è cambiato. Se vuoi, registrala di nuovo."
   },
   "templates": {
     "title": "Template reel",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Ascolta un'anteprima di {{name}}",
     "stopA11y": "Interrompi l'anteprima di {{name}}"
+  },
+  "record": {
+    "title": "Registra la scena {{n}}",
+    "intro": "Leggi il testo qui sotto con la tua voce, per un massimo di {{seconds}} secondi.",
+    "read": "Leggi questo",
+    "noMic": "Per registrare, consenti l'accesso al microfono nelle impostazioni del telefono.",
+    "checking": "Controllo della registrazione…",
+    "startA11y": "Avvia registrazione",
+    "stopA11y": "Ferma registrazione",
+    "tap": "Tocca per registrare",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "La tua registrazione: {{seconds}} s",
+    "use": "Usa questa registrazione",
+    "keep": "Mantieni",
+    "again": "Registra di nuovo",
+    "heardMatches": "Abbiamo sentito",
+    "heardDiffers": "Abbiamo sentito qualcosa di diverso",
+    "keepNote": "Se mantieni la registrazione, il testo della scena verrà aggiornato con ciò che hai detto, così chi approva leggerà le parole pronunciate. Altrimenti, registra di nuovo.",
+    "nothingHeard": "Non si sente nulla. Controlla il microfono e registra di nuovo, avvicinandoti un po’."
   }
 }

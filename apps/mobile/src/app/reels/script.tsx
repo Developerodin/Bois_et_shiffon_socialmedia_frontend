@@ -4,7 +4,7 @@ import { Mic, Play, RefreshCw } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { reels, type ReelVoiceOption } from "@/api/endpoints";
+import { type PlanResult, reels, type ReelVoiceOption } from "@/api/endpoints";
 import { color, font, radius, space } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
@@ -35,13 +35,22 @@ export default function ReelsScript() {
   }, []);
   const voice = voices?.find((v) => v.id === plan?.voice);
   const thumb = plan ? detail?.photoUrls[plan.scenes[0].photoKey] : undefined;
+  // Recordings follow their text: an edited scene loses its take, and the server says so before moving on.
+  const [dropped, setDropped] = useState<number[]>([]);
   const onContinue = async () => {
     if (!plan) return;
     if (edited !== null) {
       const next = { ...plan, scenes: plan.scenes.map((s, i) => ({ ...s, voiceText: parts[i] ?? s.voiceText })) };
-      if (!(await save(next))) return;
+      const saved = (await save(next)) as PlanResult | null;
+      if (!saved) return;
+      setEdited(null);
+      if (saved.droppedRecordings?.length) return setDropped(saved.droppedRecordings);
     }
     router.push("/reels/storyboard");
+  };
+  const removeRecording = async (i: number) => {
+    if (!plan) return;
+    await save({ ...plan, scenes: plan.scenes.map((s, n) => (n === i ? { ...s, recordingId: undefined, recordingSeconds: undefined } : s)) });
   };
 
   return (
@@ -53,6 +62,11 @@ export default function ReelsScript() {
       footer={
         <Footer>
           {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
+          {dropped.map((n) => (
+            <Text key={n} style={[meta, { textAlign: "center" }]}>
+              {t("script.recordingDropped", { n })}
+            </Text>
+          ))}
           <Button label={busy ? t("script.saving") : t("script.continue")} arrow onPress={() => void onContinue()} disabled={busy || !plan || tooLong >= 0 || countMismatch} />
           <Text style={[meta, { textAlign: "center", marginTop: -4 }]}>{t("script.costNote")}</Text>
         </Footer>
@@ -118,19 +132,31 @@ export default function ReelsScript() {
             onPress={() => router.push("/reels/voices")}
           />
         </View>
-        <View style={[styles.record, { marginTop: space[12] }]}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1 }}>
+        <Text style={[metaInk, { paddingTop: space[16] }]}>{t("script.recordOwn")}</Text>
+        <Text style={meta}>{t("script.recordOwnMeta")}</Text>
+        {/* One take per scene; a recorded scene uses it instead of the voice above. */}
+        {plan?.scenes.map((s, i) => (
+          <View key={i} style={[styles.record, { marginTop: space[8] }]}>
             <View style={styles.micRound}>
-              <Mic size={20} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />
+              <Mic size={20} color={s.recordingId ? color.primary : color.inkSecondary} strokeWidth={ICON.strokeWidth} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={metaInk}>{t("script.recordOwn")}</Text>
-              <Text style={meta}>{t("script.recordOwnMeta")}</Text>
+              <Text style={metaInk} numberOfLines={1}>{t("script.sceneLine", { n: i + 1, text: s.voiceText })}</Text>
+              <Text style={meta}>{s.recordingId ? t("script.recorded", { seconds: (s.recordingSeconds ?? 0).toFixed(1) }) : t("script.notRecorded")}</Text>
             </View>
+            {s.recordingId ? (
+              <ActionButton label={t("script.removeRecording")} variant="ghost" height={44} disabled={busy || edited !== null} onPress={() => void removeRecording(i)} />
+            ) : null}
+            <ActionButton
+              label={s.recordingId ? t("script.recordAgain") : t("script.record")}
+              variant="ghost"
+              height={44}
+              disabled={busy || edited !== null}
+              onPress={() => router.push({ pathname: "/reels/record", params: { scene: String(i) } })}
+            />
           </View>
-          {/* No recording backend yet: shown as coming soon rather than as a button that does nothing. */}
-          <Tag label={t("comingSoon")} tone="grey" />
-        </View>
+        ))}
+        {edited !== null ? <Text style={[meta, { paddingTop: space[8] }]}>{t("script.saveBeforeRecording")}</Text> : null}
       </Panel>
     </ReelsScreen>
   );

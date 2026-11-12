@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} sekund",
   "seconds_other": "{{count}} sekunder",
   "noPresenter": "Ingen presentatör",
-  "comingSoon": "Kommer snart",
   "aiActor": "AI-skådespelare",
   "assistant": "Din videoassistent",
   "sourceWebsite": "Källwebbplats",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Skriv om inledning",
     "narratorAudio": "Berättarröst",
     "recordOwn": "Spela in din egen röst",
-    "recordOwnMeta": "Valfri anpassad varumärkesberättelse",
+    "recordOwnMeta": "Läs in en scen själv, högst 15 sekunder per scen. En inspelad scen använder din röst.",
     "record": "Spela in",
     "saving": "Sparar…",
     "sceneTooLong": "Scen {{n}} är längre än 30 ord (15 s). Korta ner den.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Behåll {{count}} stycken, ett per scen, med en tom rad mellan dem.",
     "rewriteOpeningAsk": "Skriv om inledningen i scen 1 så att den blir kortare och mer överraskande.",
     "voiceName": "Röst: {{name}}",
-    "changeVoice": "Byt röst"
+    "changeVoice": "Byt röst",
+    "sceneLine": "Scen {{n}} · {{text}}",
+    "recorded": "Inspelad · {{seconds}} s",
+    "notRecorded": "Använder rösten ovan",
+    "removeRecording": "Ta bort",
+    "recordAgain": "Spela in igen",
+    "saveBeforeRecording": "Spara ändringarna i manuset (Fortsätt) innan du spelar in.",
+    "recordingDropped": "Inspelningen för scen {{n}} togs bort eftersom texten ändrades. Spela in den igen om du vill."
   },
   "templates": {
     "title": "Reel-mallar",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Spela upp röstprovet för {{name}}",
     "stopA11y": "Stoppa röstprovet för {{name}}"
+  },
+  "record": {
+    "title": "Spela in scen {{n}}",
+    "intro": "Läs texten nedan med din egen röst, högst {{seconds}} sekunder.",
+    "read": "Läs detta",
+    "noMic": "Ge appen tillgång till mikrofonen i telefonens inställningar för att spela in.",
+    "checking": "Kontrollerar din inspelning…",
+    "startA11y": "Starta inspelning",
+    "stopA11y": "Stoppa inspelning",
+    "tap": "Tryck för att spela in",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Din inspelning: {{seconds}} s",
+    "use": "Använd inspelningen",
+    "keep": "Behåll",
+    "again": "Spela in igen",
+    "heardMatches": "Vi hörde",
+    "heardDiffers": "Vi hörde något annat",
+    "keepNote": "Behåll inspelningen så ändras scenens text till det du sa. Då kan de som godkänner läsa det som sägs. Eller spela in igen.",
+    "nothingHeard": "Inget ljud hördes. Kontrollera mikrofonen och spela in igen, lite närmare."
   }
 }

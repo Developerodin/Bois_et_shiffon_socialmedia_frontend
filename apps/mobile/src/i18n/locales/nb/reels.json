@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} sekund",
   "seconds_other": "{{count}} sekunder",
   "noPresenter": "Ingen presentatør",
-  "comingSoon": "Kommer snart",
   "aiActor": "AI-skuespiller",
   "assistant": "Din videoassistent",
   "sourceWebsite": "Kilde nettsted",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Omskriv åpning",
     "narratorAudio": "Fortellerlyd",
     "recordOwn": "Ta opp din egen stemme",
-    "recordOwnMeta": "Valgfri tilpasset merkevarefortelling",
+    "recordOwnMeta": "Les inn en scene selv, maks 15 sekunder per scene. En innspilt scene bruker stemmen din.",
     "record": "Ta opp",
     "saving": "Lagrer…",
     "sceneTooLong": "Scene {{n}} har over 30 ord (15 s). Kort den ned.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Behold {{count}} avsnitt, ett per scene, med en tom linje mellom.",
     "rewriteOpeningAsk": "Skriv om åpningsreplikken i scene 1: kortere og mer overraskende.",
     "voiceName": "Stemme: {{name}}",
-    "changeVoice": "Endre stemme"
+    "changeVoice": "Endre stemme",
+    "sceneLine": "Scene {{n}} · {{text}}",
+    "recorded": "Spilt inn · {{seconds}} s",
+    "notRecorded": "Bruker stemmen over",
+    "removeRecording": "Fjern",
+    "recordAgain": "Spill inn på nytt",
+    "saveBeforeRecording": "Lagre endringene i manuset (Fortsett) før du spiller inn.",
+    "recordingDropped": "Opptaket av scene {{n}} ble fjernet fordi teksten ble endret. Ta det opp på nytt hvis du vil."
   },
   "templates": {
     "title": "Reel-maler",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Spill av en stemmeprøve med {{name}}",
     "stopA11y": "Stopp stemmeprøven med {{name}}"
+  },
+  "record": {
+    "title": "Spill inn scene {{n}}",
+    "intro": "Les inn teksten under med din egen stemme. Du har opptil {{seconds}} sekunder.",
+    "read": "Les dette",
+    "noMic": "Gi tilgang til mikrofonen i telefonens innstillinger for å spille inn.",
+    "checking": "Sjekker opptaket ditt…",
+    "startA11y": "Start opptak",
+    "stopA11y": "Stopp opptak",
+    "tap": "Trykk for å spille inn",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Opptaket ditt: {{seconds}} s",
+    "use": "Bruk dette opptaket",
+    "keep": "Behold",
+    "again": "Spill inn på nytt",
+    "heardMatches": "Vi hørte",
+    "heardDiffers": "Vi hørte noe annet",
+    "keepNote": "Behold opptaket, så endres sceneteksten til det du sa. Da kan de som godkjenner, lese det som blir sagt. Eller spill inn på nytt.",
+    "nothingHeard": "Ingen lyd. Sjekk mikrofonen og ta opp på nytt, litt nærmere."
   }
 }

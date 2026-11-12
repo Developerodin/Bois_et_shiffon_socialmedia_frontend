@@ -854,6 +854,7 @@ model ContentItem {
   decisions    ApprovalDecision[]
   publications PublicationAttempt[]
   renders      ReelRender[]
+  recordings   ReelRecording[]
 
   @@index([workspaceId, brandId, status])
   @@index([brandId, scheduledFor])
@@ -1195,4 +1196,25 @@ model ReelAsset {
   brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
 
   @@index([brandId, kind, createdAt])
+}
+
+/// A voiceover the person recorded for one reel scene (mobile R11). The scene points at it (recordingId); its length
+/// is the server's measure, written into the plan. Deleted with the reel; unused ones after 30 days (daily sweep).
+model ReelRecording {
+  id               String   @id @default(cuid())
+  workspaceId      String
+  contentItemId    String
+  /// The 24 kHz mono WAV in the brand's media
+  key              String
+  seconds          Float
+  /// What the person was asked to read, and what speech-to-text heard
+  text             String
+  transcript       String
+  uploadedByUserId String
+  createdAt        DateTime @default(now())
+
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+
+  @@index([contentItemId])
+  @@index([createdAt])
 }

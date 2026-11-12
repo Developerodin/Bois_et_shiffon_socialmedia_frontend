@@ -3,7 +3,6 @@
   "seconds_one": "{{count}} secundă",
   "seconds_other": "{{count}} secunde",
   "noPresenter": "Fără prezentator",
-  "comingSoon": "În curând",
   "aiActor": "Actor AI",
   "assistant": "Asistentul tău video",
   "sourceWebsite": "Sursa site-ului",
@@ -395,7 +394,7 @@
     "rewriteOpening": "Rescrie deschiderea",
     "narratorAudio": "Audio narator",
     "recordOwn": "Înregistrează-ți propria voce",
-    "recordOwnMeta": "Narațiune personalizată opțională pentru brand",
+    "recordOwnMeta": "Citește tu scenele, maximum 15 secunde fiecare. O scenă înregistrată folosește vocea ta.",
     "record": "Înregistrează",
     "saving": "Se salvează…",
     "sceneTooLong": "Scena {{n}} are peste 30 de cuvinte (15 s). Scurteaz-o.",
@@ -403,7 +402,14 @@
     "keepScenes_other": "Păstrează {{count}} paragrafe, câte unul pe scenă, cu un rând gol între ele.",
     "rewriteOpeningAsk": "Rescrie introducerea scenei 1, ca să fie mai scurtă și mai surprinzătoare.",
     "voiceName": "Voce: {{name}}",
-    "changeVoice": "Schimbă vocea"
+    "changeVoice": "Schimbă vocea",
+    "sceneLine": "Scena {{n}} · {{text}}",
+    "recorded": "Înregistrat · {{seconds}} s",
+    "notRecorded": "Folosește vocea de mai sus",
+    "removeRecording": "Elimină",
+    "recordAgain": "Înregistrează din nou",
+    "saveBeforeRecording": "Salvează modificările scenariului (Continuă) înainte de a înregistra.",
+    "recordingDropped": "Înregistrarea scenei {{n}} a fost eliminată: textul ei s-a schimbat. Înregistreaz-o din nou, dacă vrei."
   },
   "templates": {
     "title": "Șabloane de reel",
@@ -489,5 +495,24 @@
     },
     "playA11y": "Redă o mostră a vocii {{name}}",
     "stopA11y": "Oprește redarea mostrei vocii {{name}}"
+  },
+  "record": {
+    "title": "Înregistrează scena {{n}}",
+    "intro": "Citește textul de mai jos cu vocea ta, în cel mult {{seconds}} secunde.",
+    "read": "Citește acest text",
+    "noMic": "Permite accesul la microfon în setările telefonului pentru a înregistra.",
+    "checking": "Verificăm înregistrarea…",
+    "startA11y": "Începe înregistrarea",
+    "stopA11y": "Oprește înregistrarea",
+    "tap": "Apasă pentru a înregistra",
+    "timer": "{{seconds}} / {{max}} s",
+    "length": "Înregistrarea ta: {{seconds}} s",
+    "use": "Folosește înregistrarea",
+    "keep": "Păstreaz-o",
+    "again": "Înregistrează din nou",
+    "heardMatches": "Am auzit",
+    "heardDiffers": "Am auzit altceva",
+    "keepNote": "Păstreaz-o, iar textul scenei va fi înlocuit cu ce ai spus, astfel încât persoanele care aprobă să citească exact ce se aude. Sau înregistrează din nou.",
+    "nothingHeard": "Nu se aude nimic. Verifică microfonul și înregistrează din nou, puțin mai aproape."
   }
 }

@@ -200,7 +200,7 @@ export function forgetBrand() {
 export type SceneKind = "detail" | "room" | "physics";
 /** transition: how the scene hands over to the next, set by the director (apps/web/server/reels/router.ts). */
 export type Transition = "cut" | "match" | "dissolve";
-export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string; standIn?: boolean; transition?: Transition; presenter?: boolean };
+export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string; standIn?: boolean; transition?: Transition; presenter?: boolean; recordingId?: string; recordingSeconds?: number };
 export type TemplatePreview = { videoKey: string; videoUrl: string; posterKey: string; posterUrl: string };
 export type ReelTemplateOption = { id: string; seconds: number; preview: TemplatePreview | null; own: boolean; making: boolean; failed: boolean };
 /** A voice a reel may use: "coral" (OpenAI) or "eleven:<id>" (ElevenLabs); sampleUrl to listen to, when there is one. */
@@ -236,7 +236,8 @@ export type ReelDetail = {
   credits: number;
   photoUrls: Record<string, string>;
 };
-export type PlanResult = { version: number; plan: ReelPlan; price: number; reply?: string };
+/** droppedRecordings: scene numbers whose recording was dropped because their text changed. */
+export type PlanResult = { version: number; plan: ReelPlan; price: number; reply?: string; droppedRecordings?: number[] };
 /** Progress while a plan is written (apps/web/server/reels/service.ts PlanEvent). */
 export type PlanStage = "reading" | "writing" | "directing";
 export type DraftSoFar = { reply: string; title: string; scenes: { shot: string; voiceText: string }[] };
@@ -278,6 +279,15 @@ export const reels = {
   async options(signal?: AbortSignal) {
     const { ws, base } = await reelBase();
     return api<ReelOptions>(`${base}/reels/options`, { workspaceId: ws, signal });
+  },
+  /** R11 Record voiceover: one take (M4A) for one scene's text. matches: what was heard is that text. */
+  async uploadRecording(id: string, uri: string, text: string, language?: string) {
+    const { ws, base } = await reelBase();
+    const form = new FormData();
+    form.append("file", new File(uri) as unknown as Blob);
+    form.append("text", text);
+    if (language) form.append("language", language);
+    return api<{ id: string; seconds: number; transcript: string; matches: boolean }>(`${base}/reels/${encodeURIComponent(id)}/recordings`, { form, workspaceId: ws, timeoutMs: 60_000 });
   },
   /** R11 Voices. */
   async voices(signal?: AbortSignal) {
