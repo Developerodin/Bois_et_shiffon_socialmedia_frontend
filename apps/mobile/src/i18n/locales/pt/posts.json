@@ -3,7 +3,7 @@
     "planned": "Planeado",
     "briefReady": "Brief pronto",
     "needsReview": "Precisa de revisão",
-    "draftReady": "Rascunho pronto",
+    "awaitingApproval": "À espera de aprovação",
     "approved": "Aprovado",
     "scheduled": "Agendado",
     "published": "Publicado",
@@ -130,7 +130,13 @@
     "askChanges": "Pedir alterações",
     "sending": "A enviar...",
     "nextAskChanges": "Pedir alterações",
-    "approverNeeded": "Alguém responsável pela aprovação precisa de rever isto"
+    "approverNeeded": "Alguém responsável pela aprovação precisa de rever isto",
+    "decisionNote": "Nota: por que razão pode avançar na mesma ou o que é preciso alterar",
+    "anywayNeeded": "Indica por que razão pode avançar na mesma.",
+    "approveAnyway": "Aprovar na mesma",
+    "approving": "A aprovar...",
+    "nextAnyway": "Aprova na mesma ou pede alterações acima",
+    "approvedAnyway": "(aprovado mesmo assim)"
   },
   "edit": {
     "title": "Editar publicação",

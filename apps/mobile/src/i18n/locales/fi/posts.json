@@ -3,7 +3,7 @@
     "planned": "Suunniteltu",
     "briefReady": "Brief valmis",
     "needsReview": "Tarvitsee tarkistuksen",
-    "draftReady": "Luonnos valmis",
+    "awaitingApproval": "Odottaa hyväksyntää",
     "approved": "Hyväksytty",
     "scheduled": "Aikataulutettu",
     "published": "Julkaistu",
@@ -130,7 +130,13 @@
     "askChanges": "Pyydä muutoksia",
     "sending": "Lähetetään...",
     "nextAskChanges": "Pyydä muutoksia",
-    "approverNeeded": "Hyväksyjän on tarkistettava tämä"
+    "approverNeeded": "Hyväksyjän on tarkistettava tämä",
+    "decisionNote": "Huomautus: miksi sen voi silti julkaista tai mitä pitää muuttaa",
+    "anywayNeeded": "Kerro, miksi sen voi silti julkaista.",
+    "approveAnyway": "Hyväksy silti",
+    "approving": "Hyväksytään...",
+    "nextAnyway": "Hyväksy se silti tai pyydä muutoksia yllä",
+    "approvedAnyway": "(hyväksytty silti)"
   },
   "edit": {
     "title": "Muokkaa julkaisua",

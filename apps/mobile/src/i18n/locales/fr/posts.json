@@ -3,7 +3,7 @@
     "planned": "Prévu",
     "briefReady": "Brief prêt",
     "needsReview": "À revoir",
-    "draftReady": "Brouillon prêt",
+    "awaitingApproval": "En attente d’approbation",
     "approved": "Approuvé",
     "scheduled": "Planifié",
     "published": "Publié",
@@ -130,7 +130,13 @@
     "askChanges": "Demander des modifications",
     "sending": "Envoi...",
     "nextAskChanges": "Demander des modifications",
-    "approverNeeded": "Une personne chargée de la validation doit examiner cette publication"
+    "approverNeeded": "Une personne chargée de la validation doit examiner cette publication",
+    "decisionNote": "Note : pourquoi le contenu peut être publié quand même ou ce qui doit changer",
+    "anywayNeeded": "Explique pourquoi le contenu peut être publié quand même.",
+    "approveAnyway": "Approuver quand même",
+    "approving": "Approbation en cours...",
+    "nextAnyway": "Approuve quand même ou demande des modifications ci-dessus",
+    "approvedAnyway": "(approuvé quand même)"
   },
   "edit": {
     "title": "Modifier la publication",

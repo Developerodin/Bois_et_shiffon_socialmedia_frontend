@@ -482,6 +482,11 @@ export const posts = {
     const { ws, base } = await reelBase();
     return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "decide", version, verdict: "CHANGES_REQUESTED", note, switchProducts }, workspaceId: ws });
   },
+  /** "Approve anyway": approves past the overridable issues (stock, an ended offer). Needs rules.approve and a note of at most 500 characters. */
+  async approveAnyway(id: string, version: number, note: string) {
+    const { ws, base } = await reelBase();
+    return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { body: { action: "decide", version, verdict: "APPROVED", note, override: true }, workspaceId: ws });
+  },
 };
 
 /** The person's permissions on the current business (apps/web permissions.catalog.ts keys). */
@@ -504,7 +509,7 @@ export type PostRelease = {
   /** The campaign the post was planned for; times are brand wall-clock strings ("2026-11-30 20:00"), ends null = ongoing. */
   campaign: PostCampaign | null;
 };
-/** overridable: an approver may approve past it on the web ("Approve anyway"). state: the offer's (ended / withdrawn / changed / early) or the product's stock. */
+/** overridable: an approver with rules.approve may approve past it ("Approve anyway"). state: the offer's (ended / withdrawn / changed / early) or the product's stock. */
 export type ProductIssue = { productId?: string; campaignId?: string; name?: string; kind: "availability" | "price" | "offer"; state?: string; message: string; refuses: boolean; overridable: boolean };
 export type PostCampaign = { kind: "offer" | "campaign" | "priority"; name: string; offer: string | null; discountPercent: number | null; code: string | null; starts: string; ends: string | null; timeZone: string; withdrawn: boolean };
 export async function postRelease(id: string, signal?: AbortSignal) {

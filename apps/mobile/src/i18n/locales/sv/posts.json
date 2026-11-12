@@ -3,7 +3,7 @@
     "planned": "Planerad",
     "briefReady": "Brief klar",
     "needsReview": "Behöver granskas",
-    "draftReady": "Utkast klart",
+    "awaitingApproval": "Väntar på godkännande",
     "approved": "Godkänd",
     "scheduled": "Schemalagd",
     "published": "Publicerad",
@@ -130,7 +130,13 @@
     "askChanges": "Be om ändringar",
     "sending": "Skickar...",
     "nextAskChanges": "Be om ändringar",
-    "approverNeeded": "Någon som kan godkänna behöver granska detta"
+    "approverNeeded": "Någon som kan godkänna behöver granska detta",
+    "decisionNote": "Kommentar: varför det ändå kan publiceras eller vad som behöver ändras",
+    "anywayNeeded": "Ange varför det ändå kan publiceras.",
+    "approveAnyway": "Godkänn ändå",
+    "approving": "Godkänner...",
+    "nextAnyway": "Godkänn ändå eller be om ändringar ovan",
+    "approvedAnyway": "(godkänd ändå)"
   },
   "edit": {
     "title": "Redigera inlägg",

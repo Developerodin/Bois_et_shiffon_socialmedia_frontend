@@ -3,7 +3,7 @@
     "planned": "Zaplanowane",
     "briefReady": "Brief gotowy",
     "needsReview": "Wymaga przeglądu",
-    "draftReady": "Szkic gotowy",
+    "awaitingApproval": "Czeka na zatwierdzenie",
     "approved": "Zatwierdzone",
     "scheduled": "Zaplanowane",
     "published": "Opublikowane",
@@ -130,7 +130,13 @@
     "askChanges": "Poproś o zmiany",
     "sending": "Wysyłanie...",
     "nextAskChanges": "Poproś o zmiany",
-    "approverNeeded": "Ten post musi sprawdzić osoba zatwierdzająca"
+    "approverNeeded": "Ten post musi sprawdzić osoba zatwierdzająca",
+    "decisionNote": "Uwaga: dlaczego można to mimo wszystko opublikować lub co trzeba zmienić",
+    "anywayNeeded": "Napisz, dlaczego można to mimo wszystko opublikować.",
+    "approveAnyway": "Zatwierdź mimo to",
+    "approving": "Zatwierdzanie...",
+    "nextAnyway": "Zatwierdź mimo to lub poproś o zmiany powyżej",
+    "approvedAnyway": "(zatwierdzono mimo to)"
   },
   "edit": {
     "title": "Edytuj post",

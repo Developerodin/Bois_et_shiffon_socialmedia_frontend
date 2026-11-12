@@ -3,7 +3,7 @@
     "planned": "Plánováno",
     "briefReady": "Brief připraven",
     "needsReview": "Potřebuje kontrolu",
-    "draftReady": "Návrh připraven",
+    "awaitingApproval": "Čeká na schválení",
     "approved": "Schváleno",
     "scheduled": "Naplánováno",
     "published": "Publikováno",
@@ -130,7 +130,13 @@
     "askChanges": "Požádat o úpravy",
     "sending": "Odesílání...",
     "nextAskChanges": "Požádat o úpravy",
-    "approverNeeded": "Tohle musí posoudit schvalovatel."
+    "approverNeeded": "Tohle musí posoudit schvalovatel.",
+    "decisionNote": "Poznámka: proč to lze přesto zveřejnit nebo co je třeba změnit",
+    "anywayNeeded": "Napiš, proč to lze přesto zveřejnit.",
+    "approveAnyway": "Přesto schválit",
+    "approving": "Schvaluje se...",
+    "nextAnyway": "Přesto to schval nebo výše požádej o úpravy",
+    "approvedAnyway": "(přesto schváleno)"
   },
   "edit": {
     "title": "Upravit příspěvek",

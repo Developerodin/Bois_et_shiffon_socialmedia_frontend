@@ -3,7 +3,7 @@
     "planned": "Planificat",
     "briefReady": "Brief pregătit",
     "needsReview": "Necesită revizuire",
-    "draftReady": "Schiță pregătită",
+    "awaitingApproval": "În așteptarea aprobării",
     "approved": "Aprobat",
     "scheduled": "Programat",
     "published": "Publicat",
@@ -130,7 +130,13 @@
     "askChanges": "Solicită modificări",
     "sending": "Se trimite...",
     "nextAskChanges": "Solicită modificări",
-    "approverNeeded": "Cineva cu drept de aprobare trebuie să verifice asta"
+    "approverNeeded": "Cineva cu drept de aprobare trebuie să verifice asta",
+    "decisionNote": "Notă: de ce poate fi publicat totuși sau ce trebuie schimbat",
+    "anywayNeeded": "Spune de ce poate fi publicat totuși.",
+    "approveAnyway": "Aprobă totuși",
+    "approving": "Se aprobă...",
+    "nextAnyway": "Aprobă totuși sau cere modificări mai sus",
+    "approvedAnyway": "(aprobat oricum)"
   },
   "edit": {
     "title": "Editează postarea",

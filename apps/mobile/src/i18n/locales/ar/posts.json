@@ -3,7 +3,7 @@
     "planned": "مخطط",
     "briefReady": "الملخص جاهز",
     "needsReview": "يحتاج إلى مراجعة",
-    "draftReady": "المسودة جاهزة",
+    "awaitingApproval": "بانتظار الموافقة",
     "approved": "موافق عليه",
     "scheduled": "مجدول",
     "published": "منشور",
@@ -130,7 +130,13 @@
     "askChanges": "طلب تعديلات",
     "sending": "جارٍ الإرسال...",
     "nextAskChanges": "طلب تعديلات",
-    "approverNeeded": "يحتاج أحد المعتمدين إلى مراجعة هذا"
+    "approverNeeded": "يحتاج أحد المعتمدين إلى مراجعة هذا",
+    "decisionNote": "ملاحظة: سبب إمكانية نشره رغم ذلك، أو ما يجب تعديله",
+    "anywayNeeded": "اذكر سبب إمكانية نشره رغم ذلك.",
+    "approveAnyway": "الموافقة رغم ذلك",
+    "approving": "جارٍ الاعتماد...",
+    "nextAnyway": "وافق عليه رغم ذلك أو اطلب تعديلات أعلاه",
+    "approvedAnyway": "(تمت الموافقة على أي حال)"
   },
   "edit": {
     "title": "تحرير المنشور",

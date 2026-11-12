@@ -3,7 +3,7 @@
     "planned": "Geplant",
     "briefReady": "Brief bereit",
     "needsReview": "Benötigt Überprüfung",
-    "draftReady": "Entwurf bereit",
+    "awaitingApproval": "Freigabe ausstehend",
     "approved": "Genehmigt",
     "scheduled": "Geplant",
     "published": "Veröffentlicht",
@@ -130,7 +130,13 @@
     "askChanges": "Änderungen anfordern",
     "sending": "Wird gesendet...",
     "nextAskChanges": "Änderungen anfordern",
-    "approverNeeded": "Eine freigabeberechtigte Person muss sich das ansehen."
+    "approverNeeded": "Eine freigabeberechtigte Person muss sich das ansehen.",
+    "decisionNote": "Hinweis: Warum es trotzdem veröffentlicht werden kann oder was geändert werden muss",
+    "anywayNeeded": "Gib an, warum es trotzdem veröffentlicht werden kann.",
+    "approveAnyway": "Trotzdem freigeben",
+    "approving": "Wird freigegeben...",
+    "nextAnyway": "Gib es trotzdem frei oder bitte oben um Änderungen",
+    "approvedAnyway": "(trotzdem genehmigt)"
   },
   "edit": {
     "title": "Beitrag bearbeiten",

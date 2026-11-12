@@ -3,7 +3,7 @@
     "planned": "Tervezett",
     "briefReady": "Vázlat kész",
     "needsReview": "Felülvizsgálatra vár",
-    "draftReady": "Vázlat kész",
+    "awaitingApproval": "Jóváhagyásra vár",
     "approved": "Jóváhagyva",
     "scheduled": "Ütemezett",
     "published": "Közzétéve",
@@ -130,7 +130,13 @@
     "askChanges": "Módosítás kérése",
     "sending": "Küldés...",
     "nextAskChanges": "Módosítás kérése",
-    "approverNeeded": "Ezt egy jóváhagyónak kell átnéznie."
+    "approverNeeded": "Ezt egy jóváhagyónak kell átnéznie.",
+    "decisionNote": "Megjegyzés: miért mehet ki mégis, vagy min kell változtatni",
+    "anywayNeeded": "Írd le, miért mehet ki mégis.",
+    "approveAnyway": "Mégis jóváhagyom",
+    "approving": "Jóváhagyás...",
+    "nextAnyway": "Hagyd jóvá mégis, vagy kérj módosításokat fent",
+    "approvedAnyway": "(mégis jóváhagyva)"
   },
   "edit": {
     "title": "Bejegyzés szerkesztése",

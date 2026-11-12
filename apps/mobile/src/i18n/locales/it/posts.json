@@ -3,7 +3,7 @@
     "planned": "Pianificato",
     "briefReady": "Brief pronto",
     "needsReview": "Da rivedere",
-    "draftReady": "Bozza pronta",
+    "awaitingApproval": "In attesa di approvazione",
     "approved": "Approvato",
     "scheduled": "Programmato",
     "published": "Pubblicato",
@@ -130,7 +130,13 @@
     "askChanges": "Chiedi modifiche",
     "sending": "Invio in corso...",
     "nextAskChanges": "Chiedi modifiche",
-    "approverNeeded": "Serve la revisione di chi approva"
+    "approverNeeded": "Serve la revisione di chi approva",
+    "decisionNote": "Nota: perché si può pubblicare comunque o cosa va modificato",
+    "anywayNeeded": "Spiega perché si può pubblicare comunque.",
+    "approveAnyway": "Approva comunque",
+    "approving": "Approvazione...",
+    "nextAnyway": "Approva comunque o richiedi modifiche qui sopra",
+    "approvedAnyway": "(approvato comunque)"
   },
   "edit": {
     "title": "Modifica post",

@@ -3,7 +3,7 @@
     "planned": "Planlagt",
     "briefReady": "Brief klar",
     "needsReview": "Trenger gjennomgang",
-    "draftReady": "Utkast klart",
+    "awaitingApproval": "Venter på godkjenning",
     "approved": "Godkjent",
     "scheduled": "Planlagt",
     "published": "Publisert",
@@ -130,7 +130,13 @@
     "askChanges": "Be om endringer",
     "sending": "Sender...",
     "nextAskChanges": "Be om endringer",
-    "approverNeeded": "En godkjenner må se på dette"
+    "approverNeeded": "En godkjenner må se på dette",
+    "decisionNote": "Merknad: hvorfor den likevel kan publiseres, eller hva som må endres",
+    "anywayNeeded": "Si hvorfor den likevel kan publiseres.",
+    "approveAnyway": "Godkjenn likevel",
+    "approving": "Godkjenner...",
+    "nextAnyway": "Godkjenn likevel, eller be om endringer ovenfor",
+    "approvedAnyway": "(godkjent likevel)"
   },
   "edit": {
     "title": "Rediger innlegg",

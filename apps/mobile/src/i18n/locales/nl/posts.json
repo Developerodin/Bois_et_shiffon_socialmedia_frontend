@@ -3,7 +3,7 @@
     "planned": "Gepland",
     "briefReady": "Brief klaar",
     "needsReview": "Moet worden beoordeeld",
-    "draftReady": "Concept klaar",
+    "awaitingApproval": "Wacht op goedkeuring",
     "approved": "Goedgekeurd",
     "scheduled": "Gepland",
     "published": "Gepubliceerd",
@@ -130,7 +130,13 @@
     "askChanges": "Wijzigingen aanvragen",
     "sending": "Verzenden...",
     "nextAskChanges": "Wijzigingen aanvragen",
-    "approverNeeded": "Iemand moet dit beoordelen"
+    "approverNeeded": "Iemand moet dit beoordelen",
+    "decisionNote": "Toelichting: waarom het toch geplaatst kan worden of wat er moet veranderen",
+    "anywayNeeded": "Leg uit waarom het toch geplaatst kan worden.",
+    "approveAnyway": "Toch goedkeuren",
+    "approving": "Wordt goedgekeurd...",
+    "nextAnyway": "Keur het toch goed of vraag hierboven om wijzigingen",
+    "approvedAnyway": "(toch goedgekeurd)"
   },
   "edit": {
     "title": "Bericht bewerken",

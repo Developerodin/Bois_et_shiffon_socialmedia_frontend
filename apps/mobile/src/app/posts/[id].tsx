@@ -61,6 +61,7 @@ export default function PostDetail() {
   const [fixing, setFixing] = useState<number | null>(null);
   const [fixError, setFixError] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
+  const [approvingAnyway, setApprovingAnyway] = useState(false);
   // "Ask for changes" on a product issue: null = not touched yet (prefilled from the issues / the default below).
   const [askNote, setAskNote] = useState<string | null>(null);
   const [switchPick, setSwitchPick] = useState<boolean | null>(null);
@@ -113,13 +114,30 @@ export default function PostDetail() {
   const scheduled = release?.attempts.find((a) => a.status === "SCHEDULED");
   const uncertain = release?.attempts.find((a) => a.status === "PENDING_VERIFY");
   // Issues (a product sold out, removed or repriced; the offer ended or changed) on a post that is waiting, approved or scheduled. A refusing
-  // one blocks Schedule; approvers can send it back here ("Approve anyway" is a web action).
+  // one blocks Schedule; approvers can send it back here, or approve past it when every refusing issue is overridable
+  // (stock, an ended offer) and they also hold rules.approve, as on the web.
   const issues = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED"].includes(post.status) ? (release?.productIssues ?? []) : [];
   const refused = issues.some((i) => i.refuses);
   const canAsk = issues.length > 0 && (post.status === "AWAITING_APPROVAL" || post.status === "APPROVED") && can("content.approve");
-  const note = askNote ?? issues.map((i) => i.message).join("\n");
+  const canAnyway = canAsk && refused && can("rules.approve") && issues.every((i) => !i.refuses || i.overridable);
+  // Prefilled with the issues for "Ask for changes"; empty when "Approve anyway" is on offer (its note says why it can go out).
+  const note = askNote ?? (canAnyway ? "" : issues.map((i) => i.message).join("\n"));
   const unavailable = issues.some((i) => i.refuses && i.kind === "availability");
   const switchProducts = switchPick ?? unavailable;
+  const approveAnyway = async () => {
+    if (!note.trim()) return setAskError(t("detail.anywayNeeded"));
+    setAskError(null);
+    setApprovingAnyway(true);
+    try {
+      setRelease(await posts.approveAnyway(post.id, post.latest?.version ?? 0, note.trim()));
+      setAskNote(null);
+      await reloadPosts();
+    } catch (e) {
+      setAskError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setApprovingAnyway(false);
+    }
+  };
   const askChanges = async () => {
     if (!note.trim()) return setAskError(t("detail.noteNeeded"));
     setAskError(null);
@@ -229,11 +247,12 @@ export default function PostDetail() {
           {issues.map((i) => (
             <Text key={(i.productId ?? i.campaignId) + i.kind + i.message} style={[type.body, i.refuses && { color: color.error }]}>
               {i.message}
+              {!i.refuses && i.overridable ? ` ${t("detail.approvedAnyway")}` : ""}
             </Text>
           ))}
           {canAsk ? (
             <>
-              <Field label={t("detail.askNote")} multiline value={note} onChangeText={setAskNote} maxLength={2000} error={askError} />
+              <Field label={t(canAnyway ? "detail.decisionNote" : "detail.askNote")} multiline value={note} onChangeText={setAskNote} maxLength={canAnyway ? 500 : 2000} error={askError} />
               {issues.some((i) => i.kind !== "offer") ? (
                 <>
                   <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: switchProducts }} onPress={() => setSwitchPick(!switchProducts)} style={[styles.row8, { minHeight: 44 }]}>
@@ -245,7 +264,8 @@ export default function PostDetail() {
                   {!switchProducts && unavailable ? <Text style={type.meta}>{t("detail.productStays")}</Text> : null}
                 </>
               ) : null}
-              <Button label={asking ? t("detail.sending") : t("detail.askChanges")} variant="outline" height={44} disabled={asking} onPress={() => void askChanges()} />
+              {canAnyway ? <Button label={approvingAnyway ? t("detail.approving") : t("detail.approveAnyway")} height={44} disabled={asking || approvingAnyway} onPress={() => void approveAnyway()} /> : null}
+              <Button label={asking ? t("detail.sending") : t("detail.askChanges")} variant="outline" height={44} disabled={asking || approvingAnyway} onPress={() => void askChanges()} />
             </>
           ) : null}
         </Card>
@@ -281,7 +301,7 @@ export default function PostDetail() {
         </View>
       )}
       {ready && refused ? (
-        <Text style={[type.meta, { paddingTop: space[8] }]}>{t(can("content.approve") ? "detail.nextAskChanges" : "detail.approverNeeded")}</Text>
+        <Text style={[type.meta, { paddingTop: space[8] }]}>{t(canAnyway ? "detail.nextAnyway" : can("content.approve") ? "detail.nextAskChanges" : "detail.approverNeeded")}</Text>
       ) : ready && !allowed ? (
         <Text style={[type.meta, { paddingTop: space[8] }]}>{t("detail.noPermission")}</Text>
       ) : null}

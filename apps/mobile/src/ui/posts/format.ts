@@ -28,7 +28,7 @@ export const STATUS_KEY: Record<PostStatus, string> = {
   PLANNED: "status.planned",
   BRIEF_READY: "status.briefReady",
   DRAFT_REVIEW: "status.needsReview",
-  AWAITING_APPROVAL: "status.draftReady",
+  AWAITING_APPROVAL: "status.awaitingApproval",
   APPROVED: "status.approved",
   SCHEDULED: "status.scheduled",
   PUBLISHED: "status.published",

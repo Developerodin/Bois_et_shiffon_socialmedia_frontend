@@ -3,7 +3,7 @@
     "planned": "Planificado",
     "briefReady": "Brief listo",
     "needsReview": "Necesita revisión",
-    "draftReady": "Borrador listo",
+    "awaitingApproval": "Pendiente de aprobación",
     "approved": "Aprobado",
     "scheduled": "Programado",
     "published": "Publicado",
@@ -130,7 +130,13 @@
     "askChanges": "Pedir cambios",
     "sending": "Enviando...",
     "nextAskChanges": "Pedir cambios",
-    "approverNeeded": "Alguien debe revisar y aprobar esto"
+    "approverNeeded": "Alguien debe revisar y aprobar esto",
+    "decisionNote": "Nota: por qué puede publicarse de todos modos o qué hay que cambiar",
+    "anywayNeeded": "Explica por qué puede publicarse de todos modos.",
+    "approveAnyway": "Aprobar de todos modos",
+    "approving": "Aprobando...",
+    "nextAnyway": "Apruébalo de todos modos o pide cambios arriba",
+    "approvedAnyway": "(aprobado de todos modos)"
   },
   "edit": {
     "title": "Editar publicación",

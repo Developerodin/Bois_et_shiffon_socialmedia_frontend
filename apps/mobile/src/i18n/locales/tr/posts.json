@@ -3,7 +3,7 @@
     "planned": "Planlandı",
     "briefReady": "Özet hazır",
     "needsReview": "İnceleme gerekiyor",
-    "draftReady": "Taslak hazır",
+    "awaitingApproval": "Onay bekleniyor",
     "approved": "Onaylandı",
     "scheduled": "Zamanlandı",
     "published": "Yayınlandı",
@@ -130,7 +130,13 @@
     "askChanges": "Değişiklik iste",
     "sending": "Gönderiliyor...",
     "nextAskChanges": "Değişiklik iste",
-    "approverNeeded": "Bunu bir onaylayıcının incelemesi gerekiyor"
+    "approverNeeded": "Bunu bir onaylayıcının incelemesi gerekiyor",
+    "decisionNote": "Not: Neden yine de yayımlanabileceği veya nelerin değişmesi gerektiği",
+    "anywayNeeded": "Neden yine de yayımlanabileceğini belirt.",
+    "approveAnyway": "Yine de onayla",
+    "approving": "Onaylanıyor...",
+    "nextAnyway": "Yukarıdan yine de onayla veya değişiklik iste",
+    "approvedAnyway": "(yine de onaylandı)"
   },
   "edit": {
     "title": "Gönderiyi düzenle",

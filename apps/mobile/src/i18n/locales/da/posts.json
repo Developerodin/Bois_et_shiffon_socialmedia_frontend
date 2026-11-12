@@ -3,7 +3,7 @@
     "planned": "Planlagt",
     "briefReady": "Brief klar",
     "needsReview": "Kræver gennemgang",
-    "draftReady": "Kladde klar",
+    "awaitingApproval": "Afventer godkendelse",
     "approved": "Godkendt",
     "scheduled": "Planlagt",
     "published": "Udgivet",
@@ -130,7 +130,13 @@
     "askChanges": "Bed om ændringer",
     "sending": "Sender...",
     "nextAskChanges": "Bed om ændringer",
-    "approverNeeded": "En godkender skal se på dette"
+    "approverNeeded": "En godkender skal se på dette",
+    "decisionNote": "Note: hvorfor det alligevel kan udgives, eller hvad der skal ændres",
+    "anywayNeeded": "Angiv, hvorfor det alligevel kan udgives.",
+    "approveAnyway": "Godkend alligevel",
+    "approving": "Godkender...",
+    "nextAnyway": "Godkend alligevel, eller bed om ændringer ovenfor",
+    "approvedAnyway": "(godkendt alligevel)"
   },
   "edit": {
     "title": "Rediger indlæg",

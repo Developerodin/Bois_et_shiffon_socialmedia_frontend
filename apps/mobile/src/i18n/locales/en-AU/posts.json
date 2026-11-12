@@ -3,7 +3,7 @@
     "planned": "Planned",
     "briefReady": "Brief ready",
     "needsReview": "Needs review",
-    "draftReady": "Draft ready",
+    "awaitingApproval": "Waiting for approval",
     "approved": "Approved",
     "scheduled": "Scheduled",
     "published": "Published",
@@ -130,7 +130,13 @@
     "askChanges": "Ask for changes",
     "sending": "Sending...",
     "nextAskChanges": "Ask for changes",
-    "approverNeeded": "An approver needs to look at this"
+    "approverNeeded": "An approver needs to look at this",
+    "decisionNote": "Note: why it can go out anyway, or what needs to change",
+    "anywayNeeded": "Say why it can go out anyway.",
+    "approveAnyway": "Approve anyway",
+    "approving": "Approving...",
+    "nextAnyway": "Approve it anyway or ask for changes above",
+    "approvedAnyway": "(approved anyway)"
   },
   "edit": {
     "title": "Edit post",
