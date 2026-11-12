@@ -507,7 +507,53 @@
     "missing": "This reel's voice isn't available any more. Pick another.",
     "confirmDeleteTitle": "Delete {{name}}?",
     "confirmWithdrawTitle": "Withdraw consent for {{name}}?",
-    "confirmBody": "The voice is deleted for the whole workspace, at ElevenLabs too. Reels using it need another voice. This can't be undone."
+    "confirmBody": "The voice is deleted for the whole workspace, at ElevenLabs too. Reels using it need another voice. This can't be undone.",
+    "tab": {
+      "ours": "Our voices",
+      "library": "Voice library"
+    },
+    "searchPlaceholder": "Search voices (name, style…)",
+    "libraryNotYet": "You can listen to every library voice now. Reels can use them once our ElevenLabs plan is upgraded.",
+    "libraryNone": "No voices match these filters.",
+    "more": "More voices",
+    "retry": "Try again",
+    "fromLibrary": "From the ElevenLabs library",
+    "filter": {
+      "language": {
+        "fr": "French",
+        "en": "English",
+        "de": "German",
+        "es": "Spanish",
+        "it": "Italian",
+        "pt": "Portuguese",
+        "nl": "Dutch"
+      },
+      "gender": {
+        "female": "Female",
+        "male": "Male",
+        "neutral": "Neutral"
+      },
+      "age": {
+        "young": "Young",
+        "middle_aged": "Middle-aged",
+        "old": "Older"
+      },
+      "useCase": {
+        "social_media": "Social media",
+        "advertisement": "Advertising",
+        "narrative_story": "Storytelling",
+        "conversational": "Conversational",
+        "informative_educational": "Educational"
+      }
+    },
+    "filterTitle": {
+      "language": "Language",
+      "gender": "Gender",
+      "age": "Age",
+      "useCase": "Use"
+    },
+    "any": "Any",
+    "clear": "Clear"
   },
   "record": {
     "title": "Record scene {{n}}",

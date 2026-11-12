@@ -507,7 +507,53 @@
     "missing": "A voz deste reel já não está disponível. Escolhe outra.",
     "confirmDeleteTitle": "Eliminar {{name}}?",
     "confirmWithdrawTitle": "Retirar consentimento para {{name}}?",
-    "confirmBody": "A voz será eliminada de todo o espaço de trabalho, incluindo da ElevenLabs. Os reels que a usam precisam de outra voz. Esta ação não pode ser desfeita."
+    "confirmBody": "A voz será eliminada de todo o espaço de trabalho, incluindo da ElevenLabs. Os reels que a usam precisam de outra voz. Esta ação não pode ser desfeita.",
+    "tab": {
+      "ours": "As nossas vozes",
+      "library": "Biblioteca de vozes"
+    },
+    "searchPlaceholder": "Pesquisar vozes (nome, estilo…)",
+    "libraryNotYet": "Já podes ouvir todas as vozes da biblioteca. Poderás usá-las em Reels assim que atualizarmos o nosso plano ElevenLabs.",
+    "libraryNone": "Nenhuma voz corresponde a estes filtros.",
+    "more": "Mais vozes",
+    "retry": "Tentar novamente",
+    "fromLibrary": "Da biblioteca ElevenLabs",
+    "filter": {
+      "language": {
+        "fr": "Francês",
+        "en": "Inglês",
+        "de": "Alemão",
+        "es": "Espanhol",
+        "it": "Italiano",
+        "pt": "Português",
+        "nl": "Neerlandês"
+      },
+      "gender": {
+        "female": "Feminino",
+        "male": "Masculino",
+        "neutral": "Neutro"
+      },
+      "age": {
+        "young": "Jovem",
+        "middle_aged": "Meia-idade",
+        "old": "Mais velha"
+      },
+      "useCase": {
+        "social_media": "Redes sociais",
+        "advertisement": "Publicidade",
+        "narrative_story": "Narração de histórias",
+        "conversational": "Conversacional",
+        "informative_educational": "Educativo"
+      }
+    },
+    "filterTitle": {
+      "language": "Idioma",
+      "gender": "Género",
+      "age": "Idade",
+      "useCase": "Utilização"
+    },
+    "any": "Qualquer",
+    "clear": "Limpar"
   },
   "record": {
     "title": "Gravar cena {{n}}",

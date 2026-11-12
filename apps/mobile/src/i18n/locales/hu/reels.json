@@ -507,7 +507,53 @@
     "missing": "A Reel hangja már nem érhető el. Válassz másikat.",
     "confirmDeleteTitle": "Törlöd ezt: {{name}}?",
     "confirmWithdrawTitle": "{{name}}: visszavonod a hozzájárulást?",
-    "confirmBody": "A hang törlődik a teljes munkaterületről és az ElevenLabs rendszeréből is. Az ezt használó Reelsekhez másik hang kell. Ez nem vonható vissza."
+    "confirmBody": "A hang törlődik a teljes munkaterületről és az ElevenLabs rendszeréből is. Az ezt használó Reelsekhez másik hang kell. Ez nem vonható vissza.",
+    "tab": {
+      "ours": "Hangjaink",
+      "library": "Hangtár"
+    },
+    "searchPlaceholder": "Hangok keresése (név, stílus…)",
+    "libraryNotYet": "A hangtár összes hangját meghallgathatod. A Reels-videókban akkor használhatod őket, ha magasabb ElevenLabs-csomagra váltunk.",
+    "libraryNone": "Nincs a szűrőknek megfelelő hang.",
+    "more": "További hangok",
+    "retry": "Újrapróbálás",
+    "fromLibrary": "Az ElevenLabs hangtárából",
+    "filter": {
+      "language": {
+        "fr": "Francia",
+        "en": "Angol",
+        "de": "Német",
+        "es": "Spanyol",
+        "it": "Olasz",
+        "pt": "Portugál",
+        "nl": "Holland"
+      },
+      "gender": {
+        "female": "Női",
+        "male": "Férfi",
+        "neutral": "Semleges"
+      },
+      "age": {
+        "young": "Fiatal",
+        "middle_aged": "Középkorú",
+        "old": "Idősebb"
+      },
+      "useCase": {
+        "social_media": "Közösségi média",
+        "advertisement": "Reklám",
+        "narrative_story": "Történetmesélés",
+        "conversational": "Beszélgetés",
+        "informative_educational": "Oktatás"
+      }
+    },
+    "filterTitle": {
+      "language": "Nyelv",
+      "gender": "Nem",
+      "age": "Életkor",
+      "useCase": "Felhasználás"
+    },
+    "any": "Bármelyik",
+    "clear": "Törlés"
   },
   "record": {
     "title": "{{n}}. jelenet felvétele",

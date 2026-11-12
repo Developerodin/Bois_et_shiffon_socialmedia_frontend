@@ -507,7 +507,53 @@
     "missing": "Die Stimme dieses Reels ist nicht mehr verfügbar. Wähle eine andere.",
     "confirmDeleteTitle": "{{name}} löschen?",
     "confirmWithdrawTitle": "Einwilligung für {{name}} widerrufen?",
-    "confirmBody": "Die Stimme wird für den gesamten Arbeitsbereich und auch bei ElevenLabs gelöscht. Reels, die sie verwenden, brauchen eine andere Stimme. Das lässt sich nicht rückgängig machen."
+    "confirmBody": "Die Stimme wird für den gesamten Arbeitsbereich und auch bei ElevenLabs gelöscht. Reels, die sie verwenden, brauchen eine andere Stimme. Das lässt sich nicht rückgängig machen.",
+    "tab": {
+      "ours": "Unsere Stimmen",
+      "library": "Stimmenbibliothek"
+    },
+    "searchPlaceholder": "Stimmen suchen (Name, Stil …)",
+    "libraryNotYet": "Du kannst dir jetzt alle Stimmen aus der Bibliothek anhören. Für Reels kannst du sie nutzen, sobald wir unser ElevenLabs-Abo upgraden.",
+    "libraryNone": "Keine Stimmen entsprechen diesen Filtern.",
+    "more": "Weitere Stimmen",
+    "retry": "Erneut versuchen",
+    "fromLibrary": "Aus der ElevenLabs-Bibliothek",
+    "filter": {
+      "language": {
+        "fr": "Französisch",
+        "en": "Englisch",
+        "de": "Deutsch",
+        "es": "Spanisch",
+        "it": "Italienisch",
+        "pt": "Portugiesisch",
+        "nl": "Niederländisch"
+      },
+      "gender": {
+        "female": "Weiblich",
+        "male": "Männlich",
+        "neutral": "Neutral"
+      },
+      "age": {
+        "young": "Jung",
+        "middle_aged": "Mittleres Alter",
+        "old": "Älter"
+      },
+      "useCase": {
+        "social_media": "Social Media",
+        "advertisement": "Werbung",
+        "narrative_story": "Storytelling",
+        "conversational": "Gespräch",
+        "informative_educational": "Wissensvermittlung"
+      }
+    },
+    "filterTitle": {
+      "language": "Sprache",
+      "gender": "Geschlecht",
+      "age": "Alter",
+      "useCase": "Verwendung"
+    },
+    "any": "Alle",
+    "clear": "Zurücksetzen"
   },
   "record": {
     "title": "Szene {{n}} aufnehmen",

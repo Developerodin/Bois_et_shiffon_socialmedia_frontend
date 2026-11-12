@@ -32,6 +32,8 @@ export const ReelPlan = z.object({
   presenter: z.string().min(1).max(100), // "none", or the id of one of the brand's presenters (presenters.ts)
   template: z.string().max(60),
   voice: z.string().min(1).max(100),
+  // The voice's name, for showing it (a library voice's name isn't in our lists); never used to pick the voice.
+  voiceName: z.string().max(80).optional(),
   // The reel's own language (voiceover, on-screen text, caption): the brand's by default, or what the person asked for.
   language: z.string().regex(/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/).optional(),
   scenes: z.array(ReelScene).min(2).max(6), // the reel rule needs a script of at least two beats

@@ -507,7 +507,53 @@
     "missing": "Tämän reelin ääni ei ole enää saatavilla. Valitse toinen.",
     "confirmDeleteTitle": "Poistetaanko {{name}}?",
     "confirmWithdrawTitle": "Perutaanko suostumus äänen {{name}} käyttöön?",
-    "confirmBody": "Ääni poistetaan koko työtilasta ja myös ElevenLabs-palvelusta. Sitä käyttävät reelit tarvitsevat uuden äänen. Tätä ei voi perua."
+    "confirmBody": "Ääni poistetaan koko työtilasta ja myös ElevenLabs-palvelusta. Sitä käyttävät reelit tarvitsevat uuden äänen. Tätä ei voi perua.",
+    "tab": {
+      "ours": "Omat äänet",
+      "library": "Äänikirjasto"
+    },
+    "searchPlaceholder": "Hae ääniä (nimi, tyyli…)",
+    "libraryNotYet": "Voit kuunnella kaikkia kirjaston ääniä jo nyt. Voit käyttää niitä Reels-videoissa, kun ElevenLabs-tilauksemme on päivitetty.",
+    "libraryNone": "Näillä suodattimilla ei löytynyt ääniä.",
+    "more": "Lisää ääniä",
+    "retry": "Yritä uudelleen",
+    "fromLibrary": "ElevenLabs-kirjastosta",
+    "filter": {
+      "language": {
+        "fr": "Ranska",
+        "en": "Englanti",
+        "de": "Saksa",
+        "es": "Espanja",
+        "it": "Italia",
+        "pt": "Portugali",
+        "nl": "Hollanti"
+      },
+      "gender": {
+        "female": "Nainen",
+        "male": "Mies",
+        "neutral": "Neutraali"
+      },
+      "age": {
+        "young": "Nuori",
+        "middle_aged": "Keski-ikäinen",
+        "old": "Vanhempi"
+      },
+      "useCase": {
+        "social_media": "Sosiaalinen media",
+        "advertisement": "Mainonta",
+        "narrative_story": "Tarinankerronta",
+        "conversational": "Keskusteleva",
+        "informative_educational": "Opettavainen"
+      }
+    },
+    "filterTitle": {
+      "language": "Kieli",
+      "gender": "Sukupuoli",
+      "age": "Ikä",
+      "useCase": "Käyttötarkoitus"
+    },
+    "any": "Kaikki",
+    "clear": "Tyhjennä"
   },
   "record": {
     "title": "Äänitä kohtaus {{n}}",

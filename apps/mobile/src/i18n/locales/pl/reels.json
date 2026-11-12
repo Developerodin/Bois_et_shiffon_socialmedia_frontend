@@ -507,7 +507,53 @@
     "missing": "Głos w tej rolce nie jest już dostępny. Wybierz inny.",
     "confirmDeleteTitle": "Usunąć {{name}}?",
     "confirmWithdrawTitle": "Wycofać zgodę na {{name}}?",
-    "confirmBody": "Głos zostanie usunięty z całego obszaru roboczego, również w ElevenLabs. Rolki, które go używają, będą wymagać innego głosu. Tej operacji nie można cofnąć."
+    "confirmBody": "Głos zostanie usunięty z całego obszaru roboczego, również w ElevenLabs. Rolki, które go używają, będą wymagać innego głosu. Tej operacji nie można cofnąć.",
+    "tab": {
+      "ours": "Nasze głosy",
+      "library": "Biblioteka głosów"
+    },
+    "searchPlaceholder": "Szukaj głosów (nazwa, styl…)",
+    "libraryNotYet": "Możesz już odsłuchać wszystkie głosy z biblioteki. Rolki będą mogły z nich korzystać po zmianie planu ElevenLabs na wyższy.",
+    "libraryNone": "Żadne głosy nie pasują do tych filtrów.",
+    "more": "Więcej głosów",
+    "retry": "Spróbuj ponownie",
+    "fromLibrary": "Z biblioteki ElevenLabs",
+    "filter": {
+      "language": {
+        "fr": "Francuski",
+        "en": "Angielski",
+        "de": "Niemiecki",
+        "es": "Hiszpański",
+        "it": "Włoski",
+        "pt": "Portugalski",
+        "nl": "Niderlandzki"
+      },
+      "gender": {
+        "female": "Żeński",
+        "male": "Męski",
+        "neutral": "Neutralny"
+      },
+      "age": {
+        "young": "Młody",
+        "middle_aged": "W średnim wieku",
+        "old": "Starszy"
+      },
+      "useCase": {
+        "social_media": "Media społecznościowe",
+        "advertisement": "Reklama",
+        "narrative_story": "Opowiadanie historii",
+        "conversational": "Konwersacyjny",
+        "informative_educational": "Edukacyjny"
+      }
+    },
+    "filterTitle": {
+      "language": "Język",
+      "gender": "Płeć",
+      "age": "Wiek",
+      "useCase": "Zastosowanie"
+    },
+    "any": "Wszystkie",
+    "clear": "Wyczyść"
   },
   "record": {
     "title": "Nagraj scenę {{n}}",

@@ -119,8 +119,14 @@ export default function ReelsScript() {
               <Mic size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={strong14}>{t("script.voiceName", { name: voice?.name ?? "…" })}</Text>
-              {voice ? <Text style={meta}>{t(`voices.gender.${voice.gender}`)}</Text> : voices ? <Text style={[meta, { color: color.error }]}>{t("voices.missing")}</Text> : null}
+              <Text style={strong14}>{t("script.voiceName", { name: voice?.name ?? plan?.voiceName ?? "…" })}</Text>
+              {voice ? (
+                <Text style={meta}>{t(`voices.gender.${voice.gender}`)}</Text>
+              ) : plan?.voice.startsWith("library:") ? (
+                <Text style={meta}>{t("voices.fromLibrary")}</Text>
+              ) : voices ? (
+                <Text style={[meta, { color: color.error }]}>{t("voices.missing")}</Text>
+              ) : null}
             </View>
           </View>
           <ActionButton

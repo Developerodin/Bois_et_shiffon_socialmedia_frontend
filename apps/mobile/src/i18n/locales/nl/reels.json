@@ -507,7 +507,53 @@
     "missing": "De stem van deze reel is niet meer beschikbaar. Kies een andere.",
     "confirmDeleteTitle": "{{name}} verwijderen?",
     "confirmWithdrawTitle": "Toestemming voor {{name}} intrekken?",
-    "confirmBody": "De stem wordt uit de hele werkruimte verwijderd, ook bij ElevenLabs. Reels die deze stem gebruiken, hebben een andere stem nodig. Dit kan niet ongedaan worden gemaakt."
+    "confirmBody": "De stem wordt uit de hele werkruimte verwijderd, ook bij ElevenLabs. Reels die deze stem gebruiken, hebben een andere stem nodig. Dit kan niet ongedaan worden gemaakt.",
+    "tab": {
+      "ours": "Onze stemmen",
+      "library": "Stembibliotheek"
+    },
+    "searchPlaceholder": "Zoek stemmen (naam, stijl…)",
+    "libraryNotYet": "Je kunt nu alle stemmen in de bibliotheek beluisteren. Reels kunnen ze gebruiken zodra ons ElevenLabs-abonnement is geüpgraded.",
+    "libraryNone": "Geen stemmen gevonden met deze filters.",
+    "more": "Meer stemmen",
+    "retry": "Opnieuw proberen",
+    "fromLibrary": "Uit de ElevenLabs-bibliotheek",
+    "filter": {
+      "language": {
+        "fr": "Frans",
+        "en": "Engels",
+        "de": "Duits",
+        "es": "Spaans",
+        "it": "Italiaans",
+        "pt": "Portugees",
+        "nl": "Nederlands"
+      },
+      "gender": {
+        "female": "Vrouwelijk",
+        "male": "Mannelijk",
+        "neutral": "Neutraal"
+      },
+      "age": {
+        "young": "Jong",
+        "middle_aged": "Middelbare leeftijd",
+        "old": "Ouder"
+      },
+      "useCase": {
+        "social_media": "Sociale media",
+        "advertisement": "Reclame",
+        "narrative_story": "Verhalen vertellen",
+        "conversational": "Gespreksstijl",
+        "informative_educational": "Educatief"
+      }
+    },
+    "filterTitle": {
+      "language": "Taal",
+      "gender": "Geslacht",
+      "age": "Leeftijd",
+      "useCase": "Gebruik"
+    },
+    "any": "Alle",
+    "clear": "Wissen"
   },
   "record": {
     "title": "Scène {{n}} opnemen",

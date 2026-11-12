@@ -1,13 +1,15 @@
 /**
  * Reel voiceover, one WAV per scene (Higgsfield's API has no voice models): OpenAI text-to-speech, or ElevenLabs.
  * Voice ids: a bare name is an OpenAI voice ("coral"); "eleven:<voiceId>" is an ElevenLabs stock voice;
- * "clone:<Voice.id>" is one of the workspace's cloned voices (clones.ts). Only stock voices and the workspace's live
- * clones are accepted, so no other ElevenLabs voice, public or another customer's, can be used; an unknown or
+ * "clone:<Voice.id>" is one of the workspace's cloned voices (clones.ts); "library:<voiceId>" is a voice from
+ * ElevenLabs' public library (library.ts). Only stock voices, library voices and the workspace's live clones are
+ * accepted, so no other ElevenLabs voice, public or another customer's, can be used; an unknown or
  * archived voice throws instead of silently becoming another one.
  * WAV so the length can be read without a decoder (wav.ts) and scenes can be padded and joined as raw PCM; both
  * providers give 24 kHz mono 16-bit, so their scenes join.
  */
 import { liveClone, liveClones } from "@/server/reels/clones";
+import { isLibraryVoice } from "@/server/reels/library";
 import { languageName } from "@/server/reels/plan";
 import { pcmWav } from "@/server/reels/wav";
 import { mediaKnown, signedMediaUrl } from "@/server/storage/media";
@@ -31,10 +33,10 @@ export const STOCK_VOICES: StockVoice[] = [
   { id: "eleven:SAz9YHcvj6GT2YYXdXww", name: "River", gender: "neutral", provider: "elevenlabs", previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/SAz9YHcvj6GT2YYXdXww/e6c95f0b-2227-491a-b3d7-2249240decb7.mp3" },
 ];
 export const isStockVoice = (id: string) => STOCK_VOICES.some((v) => v.id === id);
-/** Spoken by ElevenLabs (stock or a clone): one scene at a time. */
-export const isElevenVoice = (id: string) => id.startsWith("eleven:") || id.startsWith("clone:");
-/** A voice this workspace may use: a stock voice or one of its live clones. */
-export const isKnownVoice = async (workspaceId: string, id: string) => isStockVoice(id) || !!(await liveClone(workspaceId, id));
+/** Spoken by ElevenLabs (stock, library or a clone): one scene at a time. */
+export const isElevenVoice = (id: string) => id.startsWith("eleven:") || id.startsWith("clone:") || id.startsWith("library:");
+/** A voice this workspace may use: a stock voice, a library voice or one of its live clones. */
+export const isKnownVoice = async (workspaceId: string, id: string) => isStockVoice(id) || (await isLibraryVoice(id)) || !!(await liveClone(workspaceId, id));
 /** Where an OpenAI voice's sample lives (made once by scripts/render-voice-samples.ts). */
 export const voiceSampleKey = (id: string) => `system/voices/${id}.wav`;
 export const SAMPLE_LINE = "Bonjour ! Voici à quoi ressemble ma voix dans vos vidéos.";
@@ -50,6 +52,7 @@ export async function speak(input: { text: string; voice: string; language?: str
     if (!clone?.providerVoiceId) throw new Error(`Unknown voice ${input.voice}: pick another.`);
     return elevenSpeak(input.text, clone.providerVoiceId, input.deadline);
   }
+  if (await isLibraryVoice(input.voice)) return elevenSpeak(input.text, input.voice.slice("library:".length), input.deadline);
   if (!isStockVoice(input.voice)) throw new Error(`Unknown voice ${input.voice}: pick another.`);
   return isElevenVoice(input.voice) ? elevenSpeak(input.text, input.voice.slice("eleven:".length), input.deadline) : openaiSpeak(input.text, input.voice, input.language);
 }

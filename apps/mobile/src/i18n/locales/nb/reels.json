@@ -507,7 +507,53 @@
     "missing": "Stemmen i denne reelen er ikke lenger tilgjengelig. Velg en annen.",
     "confirmDeleteTitle": "Slette {{name}}?",
     "confirmWithdrawTitle": "Trekke tilbake samtykket for {{name}}?",
-    "confirmBody": "Stemmen slettes for hele arbeidsområdet, også hos ElevenLabs. Reels som bruker den, trenger en annen stemme. Dette kan ikke angres."
+    "confirmBody": "Stemmen slettes for hele arbeidsområdet, også hos ElevenLabs. Reels som bruker den, trenger en annen stemme. Dette kan ikke angres.",
+    "tab": {
+      "ours": "Våre stemmer",
+      "library": "Stemmebibliotek"
+    },
+    "searchPlaceholder": "Søk etter stemmer (navn, stil…)",
+    "libraryNotYet": "Du kan lytte til alle stemmene i biblioteket nå. Reels kan bruke dem når ElevenLabs-abonnementet vårt er oppgradert.",
+    "libraryNone": "Ingen stemmer samsvarer med filtrene.",
+    "more": "Flere stemmer",
+    "retry": "Prøv igjen",
+    "fromLibrary": "Fra ElevenLabs-biblioteket",
+    "filter": {
+      "language": {
+        "fr": "Fransk",
+        "en": "Engelsk",
+        "de": "Tysk",
+        "es": "Spansk",
+        "it": "Italiensk",
+        "pt": "Portugisisk",
+        "nl": "Nederlandsk"
+      },
+      "gender": {
+        "female": "Kvinne",
+        "male": "Mann",
+        "neutral": "Nøytral"
+      },
+      "age": {
+        "young": "Ung",
+        "middle_aged": "Middelaldrende",
+        "old": "Eldre"
+      },
+      "useCase": {
+        "social_media": "Sosiale medier",
+        "advertisement": "Reklame",
+        "narrative_story": "Historiefortelling",
+        "conversational": "Samtale",
+        "informative_educational": "Informasjon og læring"
+      }
+    },
+    "filterTitle": {
+      "language": "Språk",
+      "gender": "Kjønn",
+      "age": "Alder",
+      "useCase": "Bruksområde"
+    },
+    "any": "Alle",
+    "clear": "Nullstill"
   },
   "record": {
     "title": "Spill inn scene {{n}}",

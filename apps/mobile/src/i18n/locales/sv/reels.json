@@ -507,7 +507,53 @@
     "missing": "Rösten i den här reelen är inte längre tillgänglig. Välj en annan.",
     "confirmDeleteTitle": "Radera {{name}}?",
     "confirmWithdrawTitle": "Återkalla samtycke för {{name}}?",
-    "confirmBody": "Rösten raderas för hela arbetsytan, även hos ElevenLabs. Reels som använder den behöver en annan röst. Det går inte att ångra."
+    "confirmBody": "Rösten raderas för hela arbetsytan, även hos ElevenLabs. Reels som använder den behöver en annan röst. Det går inte att ångra.",
+    "tab": {
+      "ours": "Våra röster",
+      "library": "Röstbibliotek"
+    },
+    "searchPlaceholder": "Sök röster (namn, stil…)",
+    "libraryNotYet": "Du kan lyssna på alla röster i biblioteket redan nu. De kan användas i Reels när vår ElevenLabs-plan har uppgraderats.",
+    "libraryNone": "Inga röster matchar filtren.",
+    "more": "Fler röster",
+    "retry": "Försök igen",
+    "fromLibrary": "Från ElevenLabs bibliotek",
+    "filter": {
+      "language": {
+        "fr": "Franska",
+        "en": "Engelska",
+        "de": "Tyska",
+        "es": "Spanska",
+        "it": "Italienska",
+        "pt": "Portugisiska",
+        "nl": "Nederländska"
+      },
+      "gender": {
+        "female": "Kvinnlig",
+        "male": "Manlig",
+        "neutral": "Neutral"
+      },
+      "age": {
+        "young": "Ung",
+        "middle_aged": "Medelålders",
+        "old": "Äldre"
+      },
+      "useCase": {
+        "social_media": "Sociala medier",
+        "advertisement": "Reklam",
+        "narrative_story": "Berättande",
+        "conversational": "Samtal",
+        "informative_educational": "Information och utbildning"
+      }
+    },
+    "filterTitle": {
+      "language": "Språk",
+      "gender": "Kön",
+      "age": "Ålder",
+      "useCase": "Användning"
+    },
+    "any": "Alla",
+    "clear": "Rensa"
   },
   "record": {
     "title": "Spela in scen {{n}}",

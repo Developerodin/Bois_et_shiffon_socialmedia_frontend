@@ -507,7 +507,53 @@
     "missing": "La voix de ce reel n’est plus disponible. Choisis-en une autre.",
     "confirmDeleteTitle": "Supprimer {{name}} ?",
     "confirmWithdrawTitle": "Retirer le consentement pour {{name}} ?",
-    "confirmBody": "La voix sera supprimée de tout l’espace de travail et d’ElevenLabs. Les reels qui l’utilisent devront avoir une autre voix. Cette action est irréversible."
+    "confirmBody": "La voix sera supprimée de tout l’espace de travail et d’ElevenLabs. Les reels qui l’utilisent devront avoir une autre voix. Cette action est irréversible.",
+    "tab": {
+      "ours": "Nos voix",
+      "library": "Bibliothèque de voix"
+    },
+    "searchPlaceholder": "Rechercher une voix (nom, style…)",
+    "libraryNotYet": "Tu peux écouter toutes les voix de la bibliothèque dès maintenant. Tu pourras les utiliser dans tes Reels une fois notre forfait ElevenLabs mis à niveau.",
+    "libraryNone": "Aucune voix ne correspond à ces filtres.",
+    "more": "Plus de voix",
+    "retry": "Réessayer",
+    "fromLibrary": "De la bibliothèque ElevenLabs",
+    "filter": {
+      "language": {
+        "fr": "Français",
+        "en": "Anglais",
+        "de": "Allemand",
+        "es": "Espagnol",
+        "it": "Italien",
+        "pt": "Portugais",
+        "nl": "Néerlandais"
+      },
+      "gender": {
+        "female": "Féminine",
+        "male": "Masculine",
+        "neutral": "Neutre"
+      },
+      "age": {
+        "young": "Jeune",
+        "middle_aged": "Âge moyen",
+        "old": "Plus âgée"
+      },
+      "useCase": {
+        "social_media": "Réseaux sociaux",
+        "advertisement": "Publicité",
+        "narrative_story": "Narration",
+        "conversational": "Conversation",
+        "informative_educational": "Pédagogique"
+      }
+    },
+    "filterTitle": {
+      "language": "Langue",
+      "gender": "Genre",
+      "age": "Âge",
+      "useCase": "Utilisation"
+    },
+    "any": "Tous",
+    "clear": "Effacer"
   },
   "record": {
     "title": "Enregistrer la scène {{n}}",

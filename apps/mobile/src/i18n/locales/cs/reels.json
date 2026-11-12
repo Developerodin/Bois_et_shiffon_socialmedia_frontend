@@ -507,7 +507,53 @@
     "missing": "Hlas v tomto reelu už není dostupný. Vyber jiný.",
     "confirmDeleteTitle": "Smazat {{name}}?",
     "confirmWithdrawTitle": "Odvolat souhlas s použitím hlasu {{name}}?",
-    "confirmBody": "Hlas bude smazán v celém pracovním prostoru i ve službě ElevenLabs. Reely, které ho používají, budou potřebovat jiný hlas. Tuto akci nelze vrátit zpět."
+    "confirmBody": "Hlas bude smazán v celém pracovním prostoru i ve službě ElevenLabs. Reely, které ho používají, budou potřebovat jiný hlas. Tuto akci nelze vrátit zpět.",
+    "tab": {
+      "ours": "Naše hlasy",
+      "library": "Knihovna hlasů"
+    },
+    "searchPlaceholder": "Hledat hlasy (název, styl…)",
+    "libraryNotYet": "Všechny hlasy z knihovny si teď můžeš poslechnout. V Reels je budeš moct použít po upgradu našeho plánu ElevenLabs.",
+    "libraryNone": "Těmto filtrům neodpovídá žádný hlas.",
+    "more": "Další hlasy",
+    "retry": "Zkusit znovu",
+    "fromLibrary": "Z knihovny ElevenLabs",
+    "filter": {
+      "language": {
+        "fr": "Francouzština",
+        "en": "Angličtina",
+        "de": "Němčina",
+        "es": "Španělština",
+        "it": "Italština",
+        "pt": "Portugalština",
+        "nl": "Nizozemština"
+      },
+      "gender": {
+        "female": "Ženský",
+        "male": "Mužský",
+        "neutral": "Neutrální"
+      },
+      "age": {
+        "young": "Mladý",
+        "middle_aged": "Střední věk",
+        "old": "Starší"
+      },
+      "useCase": {
+        "social_media": "Sociální sítě",
+        "advertisement": "Reklama",
+        "narrative_story": "Vyprávění",
+        "conversational": "Konverzace",
+        "informative_educational": "Vzdělávání"
+      }
+    },
+    "filterTitle": {
+      "language": "Jazyk",
+      "gender": "Pohlaví",
+      "age": "Věk",
+      "useCase": "Použití"
+    },
+    "any": "Vše",
+    "clear": "Vymazat"
   },
   "record": {
     "title": "Nahrát scénu {{n}}",

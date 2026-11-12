@@ -205,6 +205,9 @@ export type TemplatePreview = { videoKey: string; videoUrl: string; posterKey: s
 export type ReelTemplateOption = { id: string; seconds: number; preview: TemplatePreview | null; own: boolean; making: boolean; failed: boolean };
 /** A voice a reel may use: "coral" (OpenAI) or "eleven:<id>" (ElevenLabs); sampleUrl to listen to, when there is one. */
 export type ReelVoiceOption = { id: string; name: string; gender: "female" | "male" | "neutral" | "clone"; sampleUrl: string | null; clone: boolean; mine: boolean };
+/** A voice from ElevenLabs' public library ("library:<id>"); traits are ElevenLabs' own words (e.g. "middle_aged"). */
+export type LibraryVoice = { id: string; name: string; gender: string | null; age: string | null; accent: string | null; language: string | null; useCase: string | null; previewUrl: string | null };
+export type LibraryFilters = { language?: string; gender?: string; age?: string; useCase?: string; search?: string; page?: number };
 /** What cloning needs: whether this person may (workspace admins), its price, the cap, the reading length, the consent text. */
 export type CloningInfo = { allowed: boolean; credits: number; max: number; seconds: { min: number; max: number }; consent: string };
 export type Presenter = { id: string; name: string; status: "RUNNING" | "DONE" | "FAILED"; sheet: { key: string; url: string } | null };
@@ -212,7 +215,7 @@ export type Presenter = { id: string; name: string; status: "RUNNING" | "DONE" |
 export type PresenterTrait = { id: string; options: Record<string, string> };
 export type ReelOptions = { templates: ReelTemplateOption[]; previewCredits: number; canPreview: boolean; presenters: Presenter[]; traits: PresenterTrait[]; presenterCredits: number };
 /** presenter: "none", or one of the brand's presenter ids. */
-export type ReelPlan = { title: string; presenter: string; template: string; voice: string; language?: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
+export type ReelPlan = { voiceName?: string; title: string; presenter: string; template: string; voice: string; language?: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
 export type RenderStep = "VOICE" | "CLIPS" | "JOIN" | "DONE" | "FAILED";
 /** Why a render failed, as a kind the app words itself (apps/web/server/reels/render.ts renderFailure). */
 export type RenderFailure = { kind: "unavailable" | "slow" | "scene" | "voiceDeleted" | "other"; scene?: number; stoppedAt: "VOICE" | "CLIPS" | "JOIN" };
@@ -297,6 +300,12 @@ export const reels = {
   async voices(signal?: AbortSignal) {
     const { ws, base } = await reelBase();
     return api<{ voices: ReelVoiceOption[]; cloning: CloningInfo }>(`${base}/voices`, { workspaceId: ws, signal });
+  },
+  /** Voices → Library: ElevenLabs' public voices, filtered; usable = reels can speak with them yet (paid plan). */
+  async voiceLibrary(filters: LibraryFilters, signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    const q = new URLSearchParams(Object.entries(filters).flatMap(([k, v]) => (v === undefined || v === "" ? [] : [[k, String(v)]])));
+    return api<{ voices: LibraryVoice[]; more: boolean; usable: boolean }>(`${base}/voices/library?${q}`, { workspaceId: ws, signal });
   },
   /** Voices → Clone a voice: the reading (M4A), its name and the consent tick. 402 = credits or plan. */
   async createClone(name: string, uri: string, appVersion?: string) {

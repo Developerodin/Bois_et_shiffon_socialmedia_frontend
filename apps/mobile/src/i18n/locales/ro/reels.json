@@ -507,7 +507,53 @@
     "missing": "Vocea acestui reel nu mai este disponibilă. Alege alta.",
     "confirmDeleteTitle": "Ștergi {{name}}?",
     "confirmWithdrawTitle": "Retragi consimțământul pentru {{name}}?",
-    "confirmBody": "Vocea va fi ștearsă din întregul spațiu de lucru și de la ElevenLabs. Reel-urile care o folosesc au nevoie de altă voce. Acțiunea nu poate fi anulată."
+    "confirmBody": "Vocea va fi ștearsă din întregul spațiu de lucru și de la ElevenLabs. Reel-urile care o folosesc au nevoie de altă voce. Acțiunea nu poate fi anulată.",
+    "tab": {
+      "ours": "Vocile noastre",
+      "library": "Biblioteca de voci"
+    },
+    "searchPlaceholder": "Caută voci (nume, stil…)",
+    "libraryNotYet": "Poți asculta acum toate vocile din bibliotecă. Le vei putea folosi în Reels după ce trecem la un plan ElevenLabs superior.",
+    "libraryNone": "Nicio voce nu corespunde filtrelor.",
+    "more": "Mai multe voci",
+    "retry": "Încearcă din nou",
+    "fromLibrary": "Din biblioteca ElevenLabs",
+    "filter": {
+      "language": {
+        "fr": "Franceză",
+        "en": "Engleză",
+        "de": "Germană",
+        "es": "Spaniolă",
+        "it": "Italiană",
+        "pt": "Portugheză",
+        "nl": "Neerlandeză"
+      },
+      "gender": {
+        "female": "Feminin",
+        "male": "Masculin",
+        "neutral": "Neutru"
+      },
+      "age": {
+        "young": "Tânără",
+        "middle_aged": "Matură",
+        "old": "În vârstă"
+      },
+      "useCase": {
+        "social_media": "Rețele sociale",
+        "advertisement": "Publicitate",
+        "narrative_story": "Povești",
+        "conversational": "Conversații",
+        "informative_educational": "Educație"
+      }
+    },
+    "filterTitle": {
+      "language": "Limbă",
+      "gender": "Gen",
+      "age": "Vârstă",
+      "useCase": "Utilizare"
+    },
+    "any": "Oricare",
+    "clear": "Resetează"
   },
   "record": {
     "title": "Înregistrează scena {{n}}",

@@ -507,7 +507,53 @@
     "missing": "Bu Reels videosunun sesi artık kullanılamıyor. Başka bir ses seç.",
     "confirmDeleteTitle": "{{name}} silinsin mi?",
     "confirmWithdrawTitle": "{{name}} için verdiğin onayı geri çekmek istiyor musun?",
-    "confirmBody": "Ses, tüm çalışma alanından ve ElevenLabs'ten silinir. Bu sesi kullanan Reels videoları için başka bir ses seçmen gerekir. Bu işlem geri alınamaz."
+    "confirmBody": "Ses, tüm çalışma alanından ve ElevenLabs'ten silinir. Bu sesi kullanan Reels videoları için başka bir ses seçmen gerekir. Bu işlem geri alınamaz.",
+    "tab": {
+      "ours": "Seslerimiz",
+      "library": "Ses kütüphanesi"
+    },
+    "searchPlaceholder": "Ses ara (ad, tarz...)",
+    "libraryNotYet": "Kütüphanedeki tüm sesleri şimdi dinleyebilirsin. ElevenLabs planımız yükseltildiğinde bunları Reels'te kullanabilirsin.",
+    "libraryNone": "Bu filtrelere uygun ses bulunamadı.",
+    "more": "Daha fazla ses",
+    "retry": "Tekrar dene",
+    "fromLibrary": "ElevenLabs kütüphanesinden",
+    "filter": {
+      "language": {
+        "fr": "Fransızca",
+        "en": "İngilizce",
+        "de": "Almanca",
+        "es": "İspanyolca",
+        "it": "İtalyanca",
+        "pt": "Portekizce",
+        "nl": "Felemenkçe"
+      },
+      "gender": {
+        "female": "Kadın",
+        "male": "Erkek",
+        "neutral": "Nötr"
+      },
+      "age": {
+        "young": "Genç",
+        "middle_aged": "Orta yaşlı",
+        "old": "İleri yaş"
+      },
+      "useCase": {
+        "social_media": "Sosyal medya",
+        "advertisement": "Reklam",
+        "narrative_story": "Hikâye anlatımı",
+        "conversational": "Sohbet",
+        "informative_educational": "Eğitim"
+      }
+    },
+    "filterTitle": {
+      "language": "Dil",
+      "gender": "Cinsiyet",
+      "age": "Yaş",
+      "useCase": "Kullanım alanı"
+    },
+    "any": "Tümü",
+    "clear": "Temizle"
   },
   "record": {
     "title": "Sahne {{n}} kaydı",

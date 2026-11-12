@@ -21,6 +21,10 @@ given a four-lens review (Fable, medium) and its findings fixed before committin
    removal queue the ElevenLabs delete in the same transaction, audit events, and "Made with AI" (caption line in the
    reel's language, shown to approvers, and a corner mark burned in) for presenter or cloned-voice reels.
 
+7. (next commit) ElevenLabs voice library on the Voices screen: filters (language, defaulting to the reel's; gender;
+   age; use) as one row of buttons opening a sheet, search, previews, picking saves `library:<id>`. Our ElevenLabs
+   free plan can't speak with library voices (402 `paid_plan_required`), so a render with one is refused before
+   charging until the upgrade. At the upgrade, check whether a library voice must first be added to our account.
 **Not yet tried live (no credits):** generic template previews (`scripts/render-template-previews.ts`), a real
 presenter, the A/B audio comparison (`scripts/compare-presenter-audio.ts`, delete after the owner decides), cloning
 (needs ElevenLabs Starter: the free plan can't clone). Guesses to confirm on the first live run are in the spec.
