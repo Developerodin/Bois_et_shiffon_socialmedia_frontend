@@ -256,7 +256,8 @@
     "checks": "Kontroller",
     "audioVoiceOnly": "Fransk speakerröst",
     "audioVoiceOnly_lang": "Speakerröst på {{language}}",
-    "blocked": "En kontroll hittade ett problem (se Kontroller). Rätta det i inläggstexten eller tryck på \"Inte rätt? Be om ändringar\"."
+    "blocked": "En kontroll hittade ett problem (se Kontroller). Rätta det i inläggstexten eller tryck på \"Inte rätt? Be om ändringar\".",
+    "aiDisclosure": "Läggs till vid publicering och kan inte tas bort: \"{{line}}\" (den här reelen har en AI-presentatör eller en klonad röst)."
   },
   "publish": {
     "title": "Publicera reel",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Kvinnlig röst",
       "male": "Manlig röst",
-      "neutral": "Neutral röst"
+      "neutral": "Neutral röst",
+      "clone": "Klonad röst"
     },
     "playA11y": "Spela upp röstprovet för {{name}}",
-    "stopA11y": "Stoppa röstprovet för {{name}}"
+    "stopA11y": "Stoppa röstprovet för {{name}}",
+    "mine": "Dina",
+    "clone": "Klona en röst · {{count}} krediter",
+    "cloneFull": "Den här arbetsytan har {{max}} klonade röster, vilket är maxantalet.",
+    "delete": "Ta bort",
+    "deleteA11y": "Ta bort {{name}}",
+    "withdraw": "Återkalla samtycke",
+    "withdrawFor": "Återkalla samtycke för {{name}}",
+    "missing": "Rösten i den här reelen är inte längre tillgänglig. Välj en annan.",
+    "confirmDeleteTitle": "Radera {{name}}?",
+    "confirmWithdrawTitle": "Återkalla samtycke för {{name}}?",
+    "confirmBody": "Rösten raderas för hela arbetsytan, även hos ElevenLabs. Reels som använder den behöver en annan röst. Det går inte att ångra."
   },
   "record": {
     "title": "Spela in scen {{n}}",
@@ -514,5 +527,28 @@
     "heardDiffers": "Vi hörde något annat",
     "keepNote": "Behåll inspelningen så ändras scenens text till det du sa. Då kan de som godkänner läsa det som sägs. Eller spela in igen.",
     "nothingHeard": "Inget ljud hördes. Kontrollera mikrofonen och spela in igen, lite närmare."
-  }
+  },
+  "clone": {
+    "title": "Klona en röst",
+    "intro": "Läs texten nedan högt i {{min}} till {{max}} sekunder i ett tyst rum. Rösten kan sedan läsa upp texten i alla reels i den här arbetsytan.",
+    "name": "Röstens namn",
+    "namePlaceholder": "t.ex. Léas röst",
+    "passageTitle": "Läs det här",
+    "passage": "Hej! Jag spelar in min röst till våra videor. I vår butik väljer vi varje föremål med omsorg: massivt trä, genuina material och möbler som håller länge. Vi älskar att hjälpa dig hitta bordet där vännerna samlas, bänken vid dörren och hyllan som äntligen passar. Kom och hälsa på, ta god tid på dig och fråga oss om vad du vill. Varje föremål har en historia, och vi berättar den gärna. Tack för att du lyssnade, vi ses snart!",
+    "consentTitle": "Samtycke",
+    "consentTick": "Jag samtycker",
+    "startA11y": "Börja läsa",
+    "stopA11y": "Stoppa",
+    "tap": "Tryck för att börja läsa",
+    "timer": "{{seconds}} s (minst {{min}})",
+    "tooShort": "Fortsätt läsa tills du har nått {{min}} sekunder.",
+    "send": "Skapa rösten · {{count}} krediter",
+    "sending": "Skapar rösten…",
+    "noMic": "Tillåt åtkomst till mikrofonen i telefonens inställningar för att spela in.",
+    "recorded": "Inspelat · {{seconds}} s",
+    "replaceTitle": "Spela in igen?",
+    "replaceBody": "Det du har läst in hittills ersätts.",
+    "replace": "Spela in igen"
+  },
+  "cancel": "Avbryt"
 }

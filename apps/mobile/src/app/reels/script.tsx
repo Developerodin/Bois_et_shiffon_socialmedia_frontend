@@ -120,7 +120,7 @@ export default function ReelsScript() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={strong14}>{t("script.voiceName", { name: voice?.name ?? "…" })}</Text>
-              {voice ? <Text style={meta}>{t(`voices.gender.${voice.gender}`)}</Text> : null}
+              {voice ? <Text style={meta}>{t(`voices.gender.${voice.gender}`)}</Text> : voices ? <Text style={[meta, { color: color.error }]}>{t("voices.missing")}</Text> : null}
             </View>
           </View>
           <ActionButton

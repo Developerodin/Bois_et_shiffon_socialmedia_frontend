@@ -164,6 +164,7 @@ export default function ReelsReview() {
             style={{ flex: 1, fontFamily: font.regular, fontSize: 16, lineHeight: 24, color: color.ink, minHeight: 96, textAlignVertical: "top" }}
           />
         </View>
+        {detail?.aiDisclosure ? <Text style={[meta, { paddingTop: space[8] }]}>{t("review.aiDisclosure", { line: detail.aiDisclosure })}</Text> : null}
         <View style={styles.tags}>
           {hashtags.map((h) => (
             <Tag key={h} label={h} style={{ paddingVertical: 4, paddingHorizontal: space[12] }} textStyle={{ color: color.ink }} />

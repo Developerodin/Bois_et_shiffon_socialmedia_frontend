@@ -256,7 +256,8 @@
     "checks": "Kontrole",
     "audioVoiceOnly": "Lektor po francusku",
     "audioVoiceOnly_lang": "Lektor ({{language}})",
-    "blocked": "Wykryto problem (zobacz Kontrole). Popraw go w opisie lub wybierz „Coś nie tak? Poproś o zmiany”."
+    "blocked": "Wykryto problem (zobacz Kontrole). Popraw go w opisie lub wybierz „Coś nie tak? Poproś o zmiany”.",
+    "aiDisclosure": "Przy publikacji dodamy informację, której nie można usunąć: \"{{line}}\" (ta rolka zawiera prezentera AI lub sklonowany głos)."
   },
   "publish": {
     "title": "Opublikuj rolkę",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Głos żeński",
       "male": "Głos męski",
-      "neutral": "Głos neutralny"
+      "neutral": "Głos neutralny",
+      "clone": "Sklonowany głos"
     },
     "playA11y": "Odtwórz próbkę głosu {{name}}",
-    "stopA11y": "Zatrzymaj odtwarzanie próbki głosu {{name}}"
+    "stopA11y": "Zatrzymaj odtwarzanie próbki głosu {{name}}",
+    "mine": "Twoje",
+    "clone": "Sklonuj głos · {{count}} kred.",
+    "cloneFull": "Ta przestrzeń robocza ma już maksymalną liczbę sklonowanych głosów: {{max}}.",
+    "delete": "Usuń",
+    "deleteA11y": "Usuń {{name}}",
+    "withdraw": "Wycofaj zgodę",
+    "withdrawFor": "Wycofaj zgodę na {{name}}",
+    "missing": "Głos w tej rolce nie jest już dostępny. Wybierz inny.",
+    "confirmDeleteTitle": "Usunąć {{name}}?",
+    "confirmWithdrawTitle": "Wycofać zgodę na {{name}}?",
+    "confirmBody": "Głos zostanie usunięty z całego obszaru roboczego, również w ElevenLabs. Rolki, które go używają, będą wymagać innego głosu. Tej operacji nie można cofnąć."
   },
   "record": {
     "title": "Nagraj scenę {{n}}",
@@ -514,5 +527,28 @@
     "heardDiffers": "Usłyszeliśmy coś innego",
     "keepNote": "Jeśli zachowasz nagranie, tekst sceny zmieni się na to, co zostało powiedziane, aby osoby zatwierdzające czytały to samo, co słychać. Możesz też nagrać ponownie.",
     "nothingHeard": "Nic nie słychać. Sprawdź mikrofon i nagraj ponownie, trochę bliżej mikrofonu."
-  }
+  },
+  "clone": {
+    "title": "Sklonuj głos",
+    "intro": "Przeczytaj poniższy tekst na głos w cichym pomieszczeniu. Nagranie powinno trwać od {{min}} do {{max}} sekund. Ten głos będzie mógł czytać teksty do dowolnej rolki w tej przestrzeni roboczej.",
+    "name": "Nazwa głosu",
+    "namePlaceholder": "np. Głos Léi",
+    "passageTitle": "Przeczytaj ten tekst",
+    "passage": "Cześć! Nagrywam swój głos do naszych filmów. W naszym sklepie każdy przedmiot wybieramy z uwagą: lite drewno, naturalne materiały i meble stworzone na lata. Uwielbiamy pomagać w znalezieniu stołu, przy którym spotykają się przyjaciele, ławki przy drzwiach czy półki, która wreszcie pasuje. Odwiedź nas, rozejrzyj się bez pośpiechu i pytaj o wszystko. Każdy przedmiot ma swoją historię i chętnie Ci ją opowiemy. Dziękuję za wysłuchanie i do zobaczenia!",
+    "consentTitle": "Zgoda",
+    "consentTick": "Wyrażam zgodę",
+    "startA11y": "Zacznij czytać",
+    "stopA11y": "Zatrzymaj",
+    "tap": "Dotknij, aby zacząć czytać",
+    "timer": "{{seconds}} s (co najmniej {{min}})",
+    "tooShort": "Czytaj dalej, aż minie {{min}} s.",
+    "send": "Utwórz głos · {{count}} kred.",
+    "sending": "Tworzenie głosu…",
+    "noMic": "Aby nagrywać, zezwól na dostęp do mikrofonu w ustawieniach telefonu.",
+    "recorded": "Nagrano · {{seconds}} s",
+    "replaceTitle": "Nagrać ponownie?",
+    "replaceBody": "Dotychczasowe nagranie zostanie zastąpione.",
+    "replace": "Nagraj ponownie"
+  },
+  "cancel": "Anuluj"
 }

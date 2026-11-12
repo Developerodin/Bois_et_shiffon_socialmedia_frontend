@@ -52,10 +52,16 @@ export function videoFilter(clips: Pick<JoinClip, "seconds" | "transition">[]): 
  * (≈ 5–10 s CPU for 20 s of video).
  * ponytail: no burned-in subtitles (another re-encode pass); Instagram's automatic captions cover it for now.
  */
-export async function joinReel(clips: JoinClip[], wavFile: string, outFile: string, opts: { reencode: boolean }): Promise<void> {
+/** mark: a PNG laid over the bottom-right corner (the "Made with AI" mark); it forces a re-encode. */
+export async function joinReel(clips: JoinClip[], wavFile: string, outFile: string, opts: { reencode: boolean; mark?: string }): Promise<void> {
   const tail = ["-c:a", "aac", "-b:a", "128k", "-shortest", "-movflags", "+faststart", outFile];
   let args: string[];
-  if (!opts.reencode) {
+  if (opts.mark) {
+    // Inputs: clips, the voice, then the mark. Kept above Instagram's caption area at the bottom.
+    const filter = `${videoFilter(clips)};[${clips.length + 1}:v]format=rgba[m];[v][m]overlay=W-w-32:H-h-360[vm]`;
+    args = ["-y", ...clips.flatMap((c) => ["-i", c.file]), "-i", wavFile, "-i", opts.mark, "-filter_complex", filter, "-map", "[vm]", "-map", `${clips.length}:a`,
+      "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", ...tail];
+  } else if (!opts.reencode) {
     const list = path.join(path.dirname(outFile), "clips.txt");
     await writeFile(list, clips.map((c) => `file '${c.file.replace(/'/g, "'\\''")}'`).join("\n"));
     args = ["-y", "-f", "concat", "-safe", "0", "-i", list, "-i", wavFile, "-map", "0:v", "-map", "1:a", "-c:v", "copy", ...tail];

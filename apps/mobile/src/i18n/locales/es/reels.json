@@ -256,7 +256,8 @@
     "checks": "Comprobaciones",
     "audioVoiceOnly": "Voz en francés",
     "audioVoiceOnly_lang": "Voz en off en {{language}}",
-    "blocked": "Se detectó un problema (ver Comprobaciones). Corrígelo en el texto de la publicación o pulsa \"¿No está bien? Pide cambios\"."
+    "blocked": "Se detectó un problema (ver Comprobaciones). Corrígelo en el texto de la publicación o pulsa \"¿No está bien? Pide cambios\".",
+    "aiDisclosure": "Se añade al publicar y no se puede quitar: \"{{line}}\" (este reel tiene un presentador generado por IA o una voz clonada)."
   },
   "publish": {
     "title": "Publicar reel",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Voz femenina",
       "male": "Voz masculina",
-      "neutral": "Voz neutra"
+      "neutral": "Voz neutra",
+      "clone": "Voz clonada"
     },
     "playA11y": "Reproducir una muestra de {{name}}",
-    "stopA11y": "Detener la muestra de {{name}}"
+    "stopA11y": "Detener la muestra de {{name}}",
+    "mine": "Tus voces",
+    "clone": "Clonar una voz · {{count}} créditos",
+    "cloneFull": "Este espacio de trabajo ya tiene el máximo de {{max}} voces clonadas.",
+    "delete": "Eliminar",
+    "deleteA11y": "Eliminar {{name}}",
+    "withdraw": "Retirar consentimiento",
+    "withdrawFor": "Retirar el consentimiento para {{name}}",
+    "missing": "La voz de este reel ya no está disponible. Elige otra.",
+    "confirmDeleteTitle": "¿Eliminar {{name}}?",
+    "confirmWithdrawTitle": "¿Retirar el consentimiento para {{name}}?",
+    "confirmBody": "La voz se eliminará de todo el espacio de trabajo y también de ElevenLabs. Los reels que la usan necesitarán otra voz. Esta acción no se puede deshacer."
   },
   "record": {
     "title": "Grabar escena {{n}}",
@@ -514,5 +527,28 @@
     "heardDiffers": "Hemos oído algo diferente",
     "keepNote": "Si conservas la grabación, el texto de la escena cambiará a lo que dijiste para que quienes la aprueben lean lo que se escucha. También puedes grabar de nuevo.",
     "nothingHeard": "No se oye nada. Revisa tu micrófono y vuelve a grabar un poco más cerca."
-  }
+  },
+  "clone": {
+    "title": "Clonar una voz",
+    "intro": "Lee el texto de abajo en voz alta durante entre {{min}} y {{max}} segundos, en un lugar tranquilo. Después, la voz podrá leer cualquier reel de este espacio de trabajo.",
+    "name": "Nombre de la voz",
+    "namePlaceholder": "Por ejemplo, voz de Léa",
+    "passageTitle": "Lee este texto",
+    "passage": "¡Hola! Estoy grabando mi voz para nuestros vídeos. En nuestra tienda, cada pieza se elige con cuidado: madera maciza, materiales auténticos y muebles hechos para durar. Nos encanta ayudarte a encontrar la mesa donde se reúnen los amigos, el banco junto a la puerta o la estantería que por fin encaja. Ven a visitarnos, tómate tu tiempo y pregúntanos lo que quieras. Cada pieza tiene una historia y nos encantará contártela. Gracias por escucharme y hasta pronto.",
+    "consentTitle": "Consentimiento",
+    "consentTick": "Acepto",
+    "startA11y": "Empezar a leer",
+    "stopA11y": "Detener",
+    "tap": "Toca para empezar a leer",
+    "timer": "{{seconds}} s (mínimo {{min}})",
+    "tooShort": "Sigue leyendo hasta llegar a {{min}} segundos.",
+    "send": "Crear voz · {{count}} créditos",
+    "sending": "Creando la voz…",
+    "noMic": "Permite el acceso al micrófono en los ajustes de tu teléfono para grabar.",
+    "recorded": "Grabado · {{seconds}} s",
+    "replaceTitle": "¿Volver a grabar?",
+    "replaceBody": "Se sustituirá tu grabación actual.",
+    "replace": "Volver a grabar"
+  },
+  "cancel": "Cancelar"
 }

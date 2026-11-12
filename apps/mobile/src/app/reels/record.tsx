@@ -57,6 +57,8 @@ export default function ReelsRecord() {
       await recorder.prepareToRecordAsync();
       pending.current = true;
       recorder.record({ forDuration: MAX_SECONDS });
+    } catch (e) {
+      setProblem(e instanceof Error ? e.message : String(e)); // e.g. the microphone is busy in another app
     } finally {
       starting.current = false;
     }

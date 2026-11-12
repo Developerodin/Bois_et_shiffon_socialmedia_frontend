@@ -256,7 +256,8 @@
     "checks": "Kontroly",
     "audioVoiceOnly": "Francouzský komentář",
     "audioVoiceOnly_lang": "Namluvení: {{language}}",
-    "blocked": "Kontrola odhalila problém (viz Kontroly). Oprav ho v popisku nebo klepni na „Není to ono? Požádat o změny“."
+    "blocked": "Kontrola odhalila problém (viz Kontroly). Oprav ho v popisku nebo klepni na „Není to ono? Požádat o změny“.",
+    "aiDisclosure": "Při zveřejnění se přidá a nelze odstranit: \"{{line}}\" (tento reel obsahuje AI moderátora nebo klonovaný hlas)."
   },
   "publish": {
     "title": "Publikovat reel",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Ženský hlas",
       "male": "Mužský hlas",
-      "neutral": "Neutrální hlas"
+      "neutral": "Neutrální hlas",
+      "clone": "Klonovaný hlas"
     },
     "playA11y": "Přehrát ukázku hlasu {{name}}",
-    "stopA11y": "Zastavit ukázku hlasu {{name}}"
+    "stopA11y": "Zastavit ukázku hlasu {{name}}",
+    "mine": "Tvoje hlasy",
+    "clone": "Klonovat hlas · {{count}} kreditů",
+    "cloneFull": "Tento pracovní prostor už má maximální počet klonovaných hlasů ({{max}}).",
+    "delete": "Smazat",
+    "deleteA11y": "Smazat {{name}}",
+    "withdraw": "Odvolat souhlas",
+    "withdrawFor": "Odvolat souhlas s použitím hlasu {{name}}",
+    "missing": "Hlas v tomto reelu už není dostupný. Vyber jiný.",
+    "confirmDeleteTitle": "Smazat {{name}}?",
+    "confirmWithdrawTitle": "Odvolat souhlas s použitím hlasu {{name}}?",
+    "confirmBody": "Hlas bude smazán v celém pracovním prostoru i ve službě ElevenLabs. Reely, které ho používají, budou potřebovat jiný hlas. Tuto akci nelze vrátit zpět."
   },
   "record": {
     "title": "Nahrát scénu {{n}}",
@@ -514,5 +527,28 @@
     "heardDiffers": "Slyšeli jsme něco jiného",
     "keepNote": "Pokud nahrávku ponecháš, text scény se změní podle toho, co v ní zazní, aby schvalovatelé četli to, co uslyší. Nebo nahraj scénu znovu.",
     "nothingHeard": "Nic není slyšet. Zkontroluj mikrofon a nahraj to znovu, tentokrát trochu blíž."
-  }
+  },
+  "clone": {
+    "title": "Klonovat hlas",
+    "intro": "V tiché místnosti čti následující text nahlas po dobu {{min}} až {{max}} sekund. Hlas pak může namluvit jakýkoli reel v tomto pracovním prostoru.",
+    "name": "Název hlasu",
+    "namePlaceholder": "např. Léin hlas",
+    "passageTitle": "Přečti tento text",
+    "passage": "Ahoj! Nahrávám svůj hlas pro naše videa. V našem obchodě vybíráme každý kousek s péčí: masivní dřevo, poctivé materiály a nábytek, který vydrží. Rádi ti pomůžeme najít stůl, u kterého se sejdou přátelé, lavici ke dveřím nebo polici, která konečně padne na své místo. Přijď se podívat, dej si načas a zeptej se nás na cokoli. Každý kousek má svůj příběh a my ti ho rádi povíme. Děkujeme za poslech a brzy na viděnou.",
+    "consentTitle": "Souhlas",
+    "consentTick": "Souhlasím",
+    "startA11y": "Začít číst",
+    "stopA11y": "Zastavit",
+    "tap": "Klepni a začni číst",
+    "timer": "{{seconds}} s (alespoň {{min}})",
+    "tooShort": "Čti dál, dokud neuplyne {{min}} sekund.",
+    "send": "Vytvořit hlas · {{count}} kreditů",
+    "sending": "Vytváříme hlas…",
+    "noMic": "Pro nahrávání povol mikrofon v nastavení telefonu.",
+    "recorded": "Nahráno · {{seconds}} s",
+    "replaceTitle": "Nahrát znovu?",
+    "replaceBody": "Dosavadní nahrávka bude nahrazena.",
+    "replace": "Nahrát znovu"
+  },
+  "cancel": "Zrušit"
 }

@@ -256,7 +256,8 @@
     "checks": "Sjekker",
     "audioVoiceOnly": "Fransk fortellerstemme",
     "audioVoiceOnly_lang": "Voiceover på {{language}}",
-    "blocked": "En sjekk fant et problem (se Sjekker). Rett det i bildeteksten, eller trykk på «Ikke helt riktig? Be om endringer»."
+    "blocked": "En sjekk fant et problem (se Sjekker). Rett det i bildeteksten, eller trykk på «Ikke helt riktig? Be om endringer».",
+    "aiDisclosure": "Legges til ved publisering og kan ikke fjernes: \"{{line}}\" (denne reelen har en KI-generert programleder eller en klonet stemme)."
   },
   "publish": {
     "title": "Publiser reel",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Kvinnestemme",
       "male": "Mannsstemme",
-      "neutral": "Nøytral stemme"
+      "neutral": "Nøytral stemme",
+      "clone": "Klonet stemme"
     },
     "playA11y": "Spill av en stemmeprøve med {{name}}",
-    "stopA11y": "Stopp stemmeprøven med {{name}}"
+    "stopA11y": "Stopp stemmeprøven med {{name}}",
+    "mine": "Dine",
+    "clone": "Klon en stemme · {{count}} kreditter",
+    "cloneFull": "Arbeidsområdet har nådd maksgrensen på {{max}} klonede stemmer.",
+    "delete": "Slett",
+    "deleteA11y": "Slett {{name}}",
+    "withdraw": "Trekk tilbake samtykke",
+    "withdrawFor": "Trekk tilbake samtykket for {{name}}",
+    "missing": "Stemmen i denne reelen er ikke lenger tilgjengelig. Velg en annen.",
+    "confirmDeleteTitle": "Slette {{name}}?",
+    "confirmWithdrawTitle": "Trekke tilbake samtykket for {{name}}?",
+    "confirmBody": "Stemmen slettes for hele arbeidsområdet, også hos ElevenLabs. Reels som bruker den, trenger en annen stemme. Dette kan ikke angres."
   },
   "record": {
     "title": "Spill inn scene {{n}}",
@@ -514,5 +527,28 @@
     "heardDiffers": "Vi hørte noe annet",
     "keepNote": "Behold opptaket, så endres sceneteksten til det du sa. Da kan de som godkjenner, lese det som blir sagt. Eller spill inn på nytt.",
     "nothingHeard": "Ingen lyd. Sjekk mikrofonen og ta opp på nytt, litt nærmere."
-  }
+  },
+  "clone": {
+    "title": "Klon en stemme",
+    "intro": "Les teksten nedenfor høyt i {{min}} til {{max}} sekunder i et stille rom. Stemmen kan deretter lese inn alle reels i dette arbeidsområdet.",
+    "name": "Navn på stemmen",
+    "namePlaceholder": "F.eks. Léas stemme",
+    "passageTitle": "Les dette",
+    "passage": "Hei! Jeg tar opp stemmen min til videoene våre. I butikken vår er hvert møbel valgt med omhu: heltre, ekte materialer og møbler som varer. Vi elsker å hjelpe deg med å finne bordet der venner samles, benken ved døren og hyllen som endelig passer. Kom innom, ta deg god tid og spør oss om hva som helst. Hvert møbel har en historie, og vi forteller den gjerne. Takk for at du lyttet, og vi sees snart.",
+    "consentTitle": "Samtykke",
+    "consentTick": "Jeg samtykker",
+    "startA11y": "Start lesing",
+    "stopA11y": "Stopp",
+    "tap": "Trykk for å begynne å lese",
+    "timer": "{{seconds}} s (minst {{min}})",
+    "tooShort": "Fortsett å lese til det har gått {{min}} sekunder.",
+    "send": "Opprett stemmen · {{count}} kreditter",
+    "sending": "Oppretter stemmen…",
+    "noMic": "Gi tilgang til mikrofonen i telefonens innstillinger for å ta opp.",
+    "recorded": "Spilt inn · {{seconds}} s",
+    "replaceTitle": "Ta opp på nytt?",
+    "replaceBody": "Innlesningen din så langt blir erstattet.",
+    "replace": "Ta opp på nytt"
+  },
+  "cancel": "Avbryt"
 }

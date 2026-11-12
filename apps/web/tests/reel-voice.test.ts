@@ -2,6 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/server/storage/media", () => ({ mediaKnown: vi.fn(async (k: string) => k.includes("sage")), signedMediaUrl: vi.fn(async (k: string) => `https://s3/${k}`) }));
 
+const clones = vi.hoisted(() => ({ live: vi.fn(async () => [] as object[]), one: vi.fn(async () => null as object | null) }));
+vi.mock("@/server/reels/clones", () => ({ liveClones: clones.live, liveClone: clones.one }));
+
 import { speak, STOCK_VOICES, voiceList } from "@/server/reels/voice";
 import { wavSeconds } from "@/server/reels/wav";
 
@@ -56,10 +59,28 @@ describe("speak", () => {
 
 describe("voice list", () => {
   it("lists every stock voice, ElevenLabs ones with their preview", async () => {
-    const list = await voiceList();
+    const list = await voiceList("w1", "u1");
     expect(list.map((v) => v.id)).toEqual(STOCK_VOICES.map((v) => v.id));
     expect(list.find((v) => v.id === "coral")?.sampleUrl).toBeNull(); // no sample stored (mocked)
     expect(list.find((v) => v.id === "sage")?.sampleUrl).toBe("https://s3/system/voices/sage.wav");
     expect(list.find((v) => v.id.startsWith("eleven:"))?.sampleUrl).toMatch(/^https:\/\//);
+  });
+});
+
+describe("cloned voices", () => {
+  it("lists the workspace's live clones first, marking the person's own", async () => {
+    clones.live.mockResolvedValueOnce([{ id: "v1", name: "Ma voix", ownerUserId: "u1", sampleKey: null }]);
+    const [first] = await voiceList("w1", "u1");
+    expect(first).toMatchObject({ id: "clone:v1", name: "Ma voix", clone: true, mine: true });
+  });
+
+  it("speaks a live clone of the workspace through ElevenLabs, and refuses an archived or foreign one", async () => {
+    clones.one.mockResolvedValueOnce({ id: "v1", providerVoiceId: "el123" });
+    fetchMock.mockResolvedValue(pcm(1));
+    await speak({ text: "Bonjour", voice: "clone:v1", workspaceId: "w1" });
+    expect(fetchMock.mock.calls[0][0]).toMatch(/text-to-speech\/el123\?/);
+    clones.one.mockResolvedValueOnce(null);
+    await expect(speak({ text: "Bonjour", voice: "clone:v1", workspaceId: "w1" })).rejects.toThrow(/^Unknown voice/);
+    await expect(speak({ text: "Bonjour", voice: "clone:v1" })).rejects.toThrow(/^Unknown voice/); // no workspace, no clone
   });
 });

@@ -1,7 +1,7 @@
 import { prisma } from "@/server/db/prisma";
 import type { ReelPlan } from "@/server/reels/plan";
 import { donePresenter } from "@/server/reels/presenters";
-import { isStockVoice } from "@/server/reels/voice";
+import { isKnownVoice } from "@/server/reels/voice";
 
 type Db = Pick<typeof prisma, "reelAsset">;
 
@@ -13,6 +13,6 @@ type Db = Pick<typeof prisma, "reelAsset">;
 export async function planOwnershipProblems(plan: ReelPlan, scope: { workspaceId: string; brandId: string }, db: Db = prisma): Promise<string[]> {
   const out: string[] = [];
   if (plan.presenter !== "none" && !(await donePresenter(scope, plan.presenter, db))) out.push("Presenter removed: pick another.");
-  if (!isStockVoice(plan.voice)) out.push("Voice not available: pick another.");
+  if (!(await isKnownVoice(scope.workspaceId, plan.voice))) out.push("Voice not available: pick another.");
   return out;
 }

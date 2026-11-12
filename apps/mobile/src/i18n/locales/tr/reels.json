@@ -256,7 +256,8 @@
     "checks": "Kontroller",
     "audioVoiceOnly": "Fransızca seslendirme",
     "audioVoiceOnly_lang": "{{language}} seslendirme",
-    "blocked": "Kontrolde bir sorun bulundu (bkz. Kontroller). Açıklamada düzelt veya \"Olmadı mı? Değişiklik iste\" seçeneğine dokun."
+    "blocked": "Kontrolde bir sorun bulundu (bkz. Kontroller). Açıklamada düzelt veya \"Olmadı mı? Değişiklik iste\" seçeneğine dokun.",
+    "aiDisclosure": "Paylaşıldığında eklenir ve kaldırılamaz: \"{{line}}\" (bu reels videosunda yapay zekâ sunucusu veya klonlanmış bir ses var)."
   },
   "publish": {
     "title": "Reel yayınla",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Kadın sesi",
       "male": "Erkek sesi",
-      "neutral": "Nötr ses"
+      "neutral": "Nötr ses",
+      "clone": "Klonlanmış ses"
     },
     "playA11y": "{{name}} ses örneğini oynat",
-    "stopA11y": "{{name}} ses örneğini durdur"
+    "stopA11y": "{{name}} ses örneğini durdur",
+    "mine": "Senin seslerin",
+    "clone": "Ses klonla · {{count}} kredi",
+    "cloneFull": "Bu çalışma alanında en fazla {{max}} ses klonlanabilir. Sınıra ulaşıldı.",
+    "delete": "Sil",
+    "deleteA11y": "{{name}} sesini sil",
+    "withdraw": "Onayı geri çek",
+    "withdrawFor": "{{name}} için verdiğin onayı geri çek",
+    "missing": "Bu Reels videosunun sesi artık kullanılamıyor. Başka bir ses seç.",
+    "confirmDeleteTitle": "{{name}} silinsin mi?",
+    "confirmWithdrawTitle": "{{name}} için verdiğin onayı geri çekmek istiyor musun?",
+    "confirmBody": "Ses, tüm çalışma alanından ve ElevenLabs'ten silinir. Bu sesi kullanan Reels videoları için başka bir ses seçmen gerekir. Bu işlem geri alınamaz."
   },
   "record": {
     "title": "Sahne {{n}} kaydı",
@@ -514,5 +527,28 @@
     "heardDiffers": "Farklı bir şey duyduk",
     "keepNote": "Bu kaydı kullanırsan sahne metni söylediklerinle değiştirilir. Böylece onaylayanlar seslendirilen metni okur. İstersen yeniden kaydedebilirsin.",
     "nothingHeard": "Ses duyulmadı. Mikrofonunu kontrol et ve biraz daha yakından tekrar kaydet."
-  }
+  },
+  "clone": {
+    "title": "Ses klonla",
+    "intro": "Aşağıdaki metni sessiz bir odada {{min}} ila {{max}} saniye boyunca sesli oku. Bu ses, ardından bu çalışma alanındaki tüm reels videolarını seslendirebilir.",
+    "name": "Ses adı",
+    "namePlaceholder": "Örn. Léa'nın sesi",
+    "passageTitle": "Bu metni oku",
+    "passage": "Merhaba! Videolarımız için sesimi kaydediyorum. Mağazamızdaki her parça özenle seçiliyor: masif ahşap, doğal malzemeler ve uzun ömürlü mobilyalar. Dostların etrafında toplandığı masayı, kapının yanındaki bankı ya da tam aradığın boyuttaki rafı bulmana yardımcı olmayı seviyoruz. Bizi ziyaret et, acele etmeden etrafı gez, aklına gelen her şeyi sor. Her parçanın bir hikâyesi var ve bunu seninle paylaşmaktan mutluluk duyarız. Dinlediğin için teşekkürler, yakında görüşmek üzere.",
+    "consentTitle": "Onay",
+    "consentTick": "Onaylıyorum",
+    "startA11y": "Okumaya başla",
+    "stopA11y": "Durdur",
+    "tap": "Okumaya başlamak için dokun",
+    "timer": "{{seconds}} sn (en az {{min}})",
+    "tooShort": "{{min}} saniyeye ulaşana kadar okumaya devam et.",
+    "send": "Sesi oluştur · {{count}} kredi",
+    "sending": "Ses oluşturuluyor…",
+    "noMic": "Kayıt yapmak için telefonunun ayarlarından mikrofon izni ver.",
+    "recorded": "Kaydedildi · {{seconds}} sn",
+    "replaceTitle": "Yeniden kaydedilsin mi?",
+    "replaceBody": "Şu ana kadarki kaydın yenisiyle değiştirilir.",
+    "replace": "Yeniden kaydet"
+  },
+  "cancel": "İptal"
 }

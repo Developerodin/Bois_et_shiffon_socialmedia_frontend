@@ -256,7 +256,8 @@
     "checks": "Controles",
     "audioVoiceOnly": "Franse voice-over",
     "audioVoiceOnly_lang": "{{language}} voice-over",
-    "blocked": "Een controle heeft een probleem gevonden (zie Controles). Pas de caption aan of tik op \"Niet goed? Vraag om aanpassingen\"."
+    "blocked": "Een controle heeft een probleem gevonden (zie Controles). Pas de caption aan of tik op \"Niet goed? Vraag om aanpassingen\".",
+    "aiDisclosure": "Wordt toegevoegd bij het plaatsen en kan niet worden verwijderd: \"{{line}}\" (deze reel heeft een AI-presentator of een gekloonde stem)."
   },
   "publish": {
     "title": "Publiceer reel",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Vrouwenstem",
       "male": "Mannenstem",
-      "neutral": "Neutrale stem"
+      "neutral": "Neutrale stem",
+      "clone": "Gekloonde stem"
     },
     "playA11y": "Luistervoorbeeld van {{name}} afspelen",
-    "stopA11y": "Luistervoorbeeld van {{name}} stoppen"
+    "stopA11y": "Luistervoorbeeld van {{name}} stoppen",
+    "mine": "Jouw stemmen",
+    "clone": "Stem klonen · {{count}} credits",
+    "cloneFull": "Deze werkruimte heeft {{max}} gekloonde stemmen. Dat is het maximum.",
+    "delete": "Verwijderen",
+    "deleteA11y": "{{name}} verwijderen",
+    "withdraw": "Toestemming intrekken",
+    "withdrawFor": "Toestemming voor {{name}} intrekken",
+    "missing": "De stem van deze reel is niet meer beschikbaar. Kies een andere.",
+    "confirmDeleteTitle": "{{name}} verwijderen?",
+    "confirmWithdrawTitle": "Toestemming voor {{name}} intrekken?",
+    "confirmBody": "De stem wordt uit de hele werkruimte verwijderd, ook bij ElevenLabs. Reels die deze stem gebruiken, hebben een andere stem nodig. Dit kan niet ongedaan worden gemaakt."
   },
   "record": {
     "title": "Scène {{n}} opnemen",
@@ -514,5 +527,28 @@
     "heardDiffers": "We hoorden iets anders",
     "keepNote": "Als je deze opname behoudt, wordt de scènetekst aangepast aan wat je hebt gezegd. Zo lezen beoordelaars wat er wordt uitgesproken. Of neem opnieuw op.",
     "nothingHeard": "Niets gehoord. Controleer je microfoon en neem opnieuw op, iets dichter bij de microfoon."
-  }
+  },
+  "clone": {
+    "title": "Stem klonen",
+    "intro": "Lees de tekst hieronder {{min}} tot {{max}} seconden hardop voor in een stille ruimte. De stem kan daarna elke reel in deze werkruimte inspreken.",
+    "name": "Naam van de stem",
+    "namePlaceholder": "Bijv. Léa's stem",
+    "passageTitle": "Lees dit voor",
+    "passage": "Hallo! Ik neem mijn stem op voor onze video's. In onze winkel is elk stuk met zorg gekozen: massief hout, eerlijke materialen en meubels die lang meegaan. We helpen je graag de tafel te vinden waaraan vrienden samenkomen, het bankje bij de deur of de plank die eindelijk past. Kom gerust langs, neem de tijd en vraag ons alles. Elk stuk heeft een verhaal en dat vertellen we je graag. Bedankt voor het luisteren en tot snel.",
+    "consentTitle": "Toestemming",
+    "consentTick": "Ik ga akkoord",
+    "startA11y": "Begin met voorlezen",
+    "stopA11y": "Stoppen",
+    "tap": "Tik om te beginnen met voorlezen",
+    "timer": "{{seconds}} s (minimaal {{min}})",
+    "tooShort": "Lees door tot {{min}} seconden.",
+    "send": "Stem maken · {{count}} credits",
+    "sending": "Stem maken…",
+    "noMic": "Geef in de instellingen van je telefoon toegang tot de microfoon om op te nemen.",
+    "recorded": "Opgenomen · {{seconds}} s",
+    "replaceTitle": "Opnieuw opnemen?",
+    "replaceBody": "Je opname tot nu toe wordt vervangen.",
+    "replace": "Opnieuw opnemen"
+  },
+  "cancel": "Annuleren"
 }

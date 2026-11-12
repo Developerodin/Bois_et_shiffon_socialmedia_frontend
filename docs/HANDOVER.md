@@ -4,6 +4,38 @@ Branch `ai-reels` (not pushed, not merged). Today moved the app's Figma screens 
 one module at a time. Each module was given a review for correctness, security, performance and maintainability,
 tested on the emulator, fixed, and committed.
 
+## Reels templates, presenters and voices (2026-11-12, later)
+
+Built from `docs/superpowers/specs/2026-11-12-reels-templates-actors-voices-design.md`, one commit per step, each
+given a four-lens review (Fable, medium) and its findings fixed before committing. Branch `desktop-shell`, not pushed.
+1. `9708b6b` chat revisions keep the voice picked on the voice screen.
+2. `34f73c8` templates (R12): six server templates, generic preview clips, paid per-brand previews (10 credits,
+   `ReelAsset` + one shared job, `server/reels/assets.ts`).
+3. `8a4f81a` presenters (R10): AI Influencer character sheets (2 credits), presenter scenes on Seedance
+   reference-to-video (4 credits/s, ≥4 s, one retry, cuts only), ownership checks at save and before charging.
+4. `e68dba3` voices: OpenAI five + six ElevenLabs stock voices, Voices screen with samples, unknown voices refused.
+5. `b739bc9` recorded voiceovers (R11): per-scene takes (expo-audio, ≤15 s), ffmpeg → 24 kHz WAV, speech-to-text
+   check with "Keep it / Record again", recordings follow their text, 30-day sweep.
+6. (this commit) voice cloning (ElevenLabs instant clone, 10 credits placeholder, 2 per workspace, `voices.manage`
+   for Owner/Admin with a data migration for existing Admin roles), consent record, delete / withdraw / member
+   removal queue the ElevenLabs delete in the same transaction, audit events, and "Made with AI" (caption line in the
+   reel's language, shown to approvers, and a corner mark burned in) for presenter or cloned-voice reels.
+
+**Not yet tried live (no credits):** generic template previews (`scripts/render-template-previews.ts`), a real
+presenter, the A/B audio comparison (`scripts/compare-presenter-audio.ts`, delete after the owner decides), cloning
+(needs ElevenLabs Starter: the free plan can't clone). Guesses to confirm on the first live run are in the spec.
+**Known gaps, by design for now:** account deletion doesn't exist; when built it must archive the person's clones and
+queue `voices.delete` like `removeMember`. A recording's audio file stays in storage when its reel is deleted (only
+the row cascades; no reel-delete path exists yet). Withdrawing consent needs access to at least one brand (the routes
+are brand routes); an owner with none must ask an admin. The data migration re-adds `voices.manage` to a system Admin
+role an owner had trimmed. Delete a workspace (no path yet) would drop clone rows without deleting at ElevenLabs.
+**Phone build on this Windows machine:** the default CMake 3.22.1 (ninja 1.10) can't build `react-native-worklets`
+past the 260-character path limit; `apps/mobile/android/local.properties` points at CMake 3.31.6 (ninja 1.12). Metro
+ran on 8082 because another project's agent holds 8081; the app's dev host was set to `10.0.2.2:8082`.
+**Test data to remove:** presenter "Léa (test)" (`npx tsx --env-file=.env scripts/_tmp/fake-presenter.ts
+cmvhqkx8h0001v630qd3rb7gb cmvuozmxd0009v640auzx32f3 delete`) and the test recordings on reel
+`cmwd6rj9e0005v620hne74fvm` (the sweep removes them after 30 days).
+
 ## Session of 2026-11-12 in short
 
 Branch `desktop-shell` (still not pushed). Owner picked the phone offer check and the campaigns-screen follow-ups.

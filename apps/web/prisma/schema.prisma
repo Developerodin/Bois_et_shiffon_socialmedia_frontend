@@ -120,6 +120,7 @@ model Workspace {
   roles        Role[]
   invitations  Invitation[]
   credits      CreditEntry[]
+  voices       Voice[]
   subscription Subscription?
 }
 
@@ -1217,4 +1218,26 @@ model ReelRecording {
 
   @@index([contentItemId])
   @@index([createdAt])
+}
+
+/// A workspace's cloned voice (ElevenLabs instant clone), usable in every brand of the workspace. At most 2 live.
+/// The person's sample audio is never stored by us; ElevenLabs keeps it with the voice until the voice is deleted.
+/// Archived = deleted, consent withdrawn or its owner removed; a job then deletes it at ElevenLabs.
+model Voice {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  ownerUserId     String
+  name            String
+  /// ElevenLabs voice id; null while the clone is being made
+  providerVoiceId String?
+  /// A short sample made once with the voice (our media)
+  sampleKey       String?
+  /// Consent record: userId, time, consent text version, app version, SHA-256 of the audio sent, ElevenLabs sample id
+  consent         Json
+  createdAt       DateTime  @default(now())
+  archivedAt      DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, archivedAt])
 }

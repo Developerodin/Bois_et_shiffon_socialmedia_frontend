@@ -256,7 +256,8 @@
     "checks": "Tarkistukset",
     "audioVoiceOnly": "Ranskankielinen kertojaääni",
     "audioVoiceOnly_lang": "Kertojaääni: {{language}}",
-    "blocked": "Tarkistuksessa löytyi ongelma (katso Tarkistukset). Korjaa se kuvatekstissä tai napauta \"Eikö näytä oikealta? Pyydä muutoksia\"."
+    "blocked": "Tarkistuksessa löytyi ongelma (katso Tarkistukset). Korjaa se kuvatekstissä tai napauta \"Eikö näytä oikealta? Pyydä muutoksia\".",
+    "aiDisclosure": "Lisätään julkaistaessa, eikä sitä voi poistaa: \"{{line}}\" (tässä reelissä on tekoälyjuontaja tai kloonattu ääni)."
   },
   "publish": {
     "title": "Julkaise rulla",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Naisääni",
       "male": "Miesääni",
-      "neutral": "Neutraali ääni"
+      "neutral": "Neutraali ääni",
+      "clone": "Kloonattu ääni"
     },
     "playA11y": "Toista ääninäyte: {{name}}",
-    "stopA11y": "Pysäytä ääninäyte: {{name}}"
+    "stopA11y": "Pysäytä ääninäyte: {{name}}",
+    "mine": "Omasi",
+    "clone": "Kloonaa ääni · {{count}} krediittiä",
+    "cloneFull": "Tässä työtilassa on {{max}} kloonattua ääntä, mikä on enimmäismäärä.",
+    "delete": "Poista",
+    "deleteA11y": "Poista {{name}}",
+    "withdraw": "Peru suostumus",
+    "withdrawFor": "Peru suostumus: {{name}}",
+    "missing": "Tämän reelin ääni ei ole enää saatavilla. Valitse toinen.",
+    "confirmDeleteTitle": "Poistetaanko {{name}}?",
+    "confirmWithdrawTitle": "Perutaanko suostumus äänen {{name}} käyttöön?",
+    "confirmBody": "Ääni poistetaan koko työtilasta ja myös ElevenLabs-palvelusta. Sitä käyttävät reelit tarvitsevat uuden äänen. Tätä ei voi perua."
   },
   "record": {
     "title": "Äänitä kohtaus {{n}}",
@@ -514,5 +527,28 @@
     "heardDiffers": "Kuulimme jotain muuta",
     "keepNote": "Jos säilytät äänitteen, kohtauksen tekstiksi tulee sanomasi, jotta hyväksyjät näkevät, mitä äänitteellä sanotaan. Voit myös äänittää uudelleen.",
     "nothingHeard": "Ei kuulunut mitään. Tarkista mikrofonisi ja äänitä uudelleen hieman lähempää."
-  }
+  },
+  "clone": {
+    "title": "Kloonaa ääni",
+    "intro": "Lue alla oleva teksti ääneen rauhallisessa huoneessa {{min}}–{{max}} sekunnin ajan. Ääni voi sen jälkeen lukea minkä tahansa tämän työtilan reelin.",
+    "name": "Äänen nimi",
+    "namePlaceholder": "esim. Léan ääni",
+    "passageTitle": "Lue tämä",
+    "passage": "Hei! Tallennan ääntäni videoitamme varten. Kaupassamme jokainen esine on valittu huolella: massiivipuuta, aitoja materiaaleja ja kestäviä huonekaluja. Autamme mielellämme löytämään pöydän, jonka ääreen ystävät kokoontuvat, penkin oven viereen tai hyllyn, joka mahtuu juuri oikeaan paikkaan. Tule käymään, tutustu rauhassa ja kysy mitä vain. Jokaisella esineellä on tarina, ja kerromme sen mielellämme. Kiitos kun kuuntelit ja nähdään pian!",
+    "consentTitle": "Suostumus",
+    "consentTick": "Hyväksyn",
+    "startA11y": "Aloita lukeminen",
+    "stopA11y": "Lopeta",
+    "tap": "Aloita lukeminen napauttamalla",
+    "timer": "{{seconds}} s (vähintään {{min}})",
+    "tooShort": "Jatka lukemista, kunnes {{min}} sekuntia on kulunut.",
+    "send": "Luo ääni · {{count}} krediittiä",
+    "sending": "Luodaan ääntä…",
+    "noMic": "Salli mikrofonin käyttö puhelimesi asetuksissa, jotta voit tallentaa.",
+    "recorded": "Tallennettu · {{seconds}} s",
+    "replaceTitle": "Tallennetaanko uudelleen?",
+    "replaceBody": "Tähän asti lukemasi korvataan uudella tallenteella.",
+    "replace": "Tallenna uudelleen"
+  },
+  "cancel": "Peruuta"
 }

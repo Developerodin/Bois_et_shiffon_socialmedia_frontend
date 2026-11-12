@@ -204,7 +204,9 @@ export type ReelScene = { photoKey: string; shot: string; direction: string; onS
 export type TemplatePreview = { videoKey: string; videoUrl: string; posterKey: string; posterUrl: string };
 export type ReelTemplateOption = { id: string; seconds: number; preview: TemplatePreview | null; own: boolean; making: boolean; failed: boolean };
 /** A voice a reel may use: "coral" (OpenAI) or "eleven:<id>" (ElevenLabs); sampleUrl to listen to, when there is one. */
-export type ReelVoiceOption = { id: string; name: string; gender: "female" | "male" | "neutral"; sampleUrl: string | null };
+export type ReelVoiceOption = { id: string; name: string; gender: "female" | "male" | "neutral" | "clone"; sampleUrl: string | null; clone: boolean; mine: boolean };
+/** What cloning needs: whether this person may (workspace admins), its price, the cap, the reading length, the consent text. */
+export type CloningInfo = { allowed: boolean; credits: number; max: number; seconds: { min: number; max: number }; consent: string };
 export type Presenter = { id: string; name: string; status: "RUNNING" | "DONE" | "FAILED"; sheet: { key: string; url: string } | null };
 /** A trait group (gender, age…) and its options, id → English label (the app shows its own words when it has them). */
 export type PresenterTrait = { id: string; options: Record<string, string> };
@@ -227,6 +229,8 @@ export type ReelDetail = {
   version: number; plan: ReelPlan | null; price: number | null;
   // The reel's and each scene's length in seconds, as the server prices them.
   seconds: number | null; sceneSeconds: number[];
+  // "Made with AI." for a reel with a presenter or a cloned voice: shown under the caption, added when it's posted.
+  aiDisclosure: string | null;
   caption: { caption?: string; hashtags?: string[] } | null; videoUrl: string | null;
   checks: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
   // softened: joins (scene n → n+1) the seam check turned into a dissolve because the two shots didn't match.
@@ -292,7 +296,22 @@ export const reels = {
   /** R11 Voices. */
   async voices(signal?: AbortSignal) {
     const { ws, base } = await reelBase();
-    return api<{ voices: ReelVoiceOption[] }>(`${base}/voices`, { workspaceId: ws, signal });
+    return api<{ voices: ReelVoiceOption[]; cloning: CloningInfo }>(`${base}/voices`, { workspaceId: ws, signal });
+  },
+  /** Voices → Clone a voice: the reading (M4A), its name and the consent tick. 402 = credits or plan. */
+  async createClone(name: string, uri: string, appVersion?: string) {
+    const { ws, base } = await reelBase();
+    const form = new FormData();
+    form.append("file", new File(uri) as unknown as Blob);
+    form.append("name", name);
+    form.append("consent", "1");
+    if (appVersion) form.append("appVersion", appVersion);
+    return api<{ id: string; name: string }>(`${base}/voices/clones`, { form, workspaceId: ws, timeoutMs: 90_000 });
+  },
+  /** withdraw: the owner withdraws consent (otherwise a plain delete). */
+  async deleteClone(id: string, withdraw = false) {
+    const { ws, base } = await reelBase();
+    return api<unknown>(`${base}/voices/clones/${encodeURIComponent(id)}${withdraw ? "?withdraw=1" : ""}`, { method: "DELETE", workspaceId: ws });
   },
   /** R10 "Create presenter": 402 = not enough credits or no plan. traits: group id → option id. */
   async createPresenter(name: string, traits: Record<string, string>) {

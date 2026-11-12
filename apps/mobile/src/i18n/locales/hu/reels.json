@@ -256,7 +256,8 @@
     "checks": "Ellenőrzések",
     "audioVoiceOnly": "Francia narráció",
     "audioVoiceOnly_lang": "{{language}} nyelvű narráció",
-    "blocked": "Az ellenőrzés problémát talált (lásd: Ellenőrzések). Javítsd a feliratban, vagy koppints a „Nem jó? Kérj módosításokat” gombra."
+    "blocked": "Az ellenőrzés problémát talált (lásd: Ellenőrzések). Javítsd a feliratban, vagy koppints a „Nem jó? Kérj módosításokat” gombra.",
+    "aiDisclosure": "Közzétételkor megjelenik, és nem távolítható el: \"{{line}}\" (ebben a Reels-videóban MI-műsorvezető vagy klónozott hang szerepel)."
   },
   "publish": {
     "title": "Reel közzététele",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Női hang",
       "male": "Férfi hang",
-      "neutral": "Semleges hang"
+      "neutral": "Semleges hang",
+      "clone": "Klónozott hang"
     },
     "playA11y": "Hangminta lejátszása: {{name}}",
-    "stopA11y": "Hangminta leállítása: {{name}}"
+    "stopA11y": "Hangminta leállítása: {{name}}",
+    "mine": "Saját hangok",
+    "clone": "Hang klónozása · {{count}} kredit",
+    "cloneFull": "Ebben a munkaterületen már {{max}} klónozott hang van, ami a megengedett maximum.",
+    "delete": "Törlés",
+    "deleteA11y": "{{name}} törlése",
+    "withdraw": "Hozzájárulás visszavonása",
+    "withdrawFor": "Hozzájárulás visszavonása: {{name}}",
+    "missing": "A Reel hangja már nem érhető el. Válassz másikat.",
+    "confirmDeleteTitle": "Törlöd ezt: {{name}}?",
+    "confirmWithdrawTitle": "{{name}}: visszavonod a hozzájárulást?",
+    "confirmBody": "A hang törlődik a teljes munkaterületről és az ElevenLabs rendszeréből is. Az ezt használó Reelsekhez másik hang kell. Ez nem vonható vissza."
   },
   "record": {
     "title": "{{n}}. jelenet felvétele",
@@ -514,5 +527,28 @@
     "heardDiffers": "Mást hallottunk",
     "keepNote": "Ha megtartod, a jelenet szövege arra változik, amit mondtál, így a jóváhagyók azt olvassák, ami elhangzik. Vagy készíts új felvételt.",
     "nothingHeard": "Nem hallottunk semmit. Ellenőrizd a mikrofonodat, és készítsd el újra a felvételt, kicsit közelebbről."
-  }
+  },
+  "clone": {
+    "title": "Hang klónozása",
+    "intro": "Olvasd fel az alábbi szöveget egy csendes helyiségben {{min}}–{{max}} másodpercig. Ezután a hanggal a munkaterület bármely Reels-videójának szövege felolvasható.",
+    "name": "Hang neve",
+    "namePlaceholder": "pl. Léa hangja",
+    "passageTitle": "Ezt olvasd fel",
+    "passage": "Szia! A videóinkhoz rögzítem a hangomat. Az üzletünkben minden darabot gondosan választunk ki: tömör fa, természetes anyagok és időtálló bútorok várnak. Örömmel segítünk megtalálni azt az asztalt, amely körül összegyűlhetnek a barátok, a padot az ajtó mellé vagy a polcot, amely végre elfér. Gyere el hozzánk, nézelődj nyugodtan, és kérdezz bátran! Minden darabnak megvan a maga története, és szívesen elmeséljük. Köszönöm, hogy meghallgattál, és hamarosan találkozunk!",
+    "consentTitle": "Hozzájárulás",
+    "consentTick": "Hozzájárulok",
+    "startA11y": "Felolvasás indítása",
+    "stopA11y": "Leállítás",
+    "tap": "Koppints a felolvasás indításához",
+    "timer": "{{seconds}} mp (legalább {{min}})",
+    "tooShort": "Olvass tovább, amíg el nem éred a {{min}} másodpercet.",
+    "send": "Hang létrehozása · {{count}} kredit",
+    "sending": "Hang létrehozása…",
+    "noMic": "A felvételhez engedélyezd a mikrofon használatát a telefonod beállításaiban.",
+    "recorded": "Felvéve · {{seconds}} mp",
+    "replaceTitle": "Újra felveszed?",
+    "replaceBody": "Az eddigi felvétel helyébe az új lép.",
+    "replace": "Újrafelvétel"
+  },
+  "cancel": "Mégse"
 }

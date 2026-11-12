@@ -1,10 +1,11 @@
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useVideoPlayer } from "expo-video";
-import { Check, Pause, Play } from "lucide-react-native";
-import { useEffect, useRef, useState } from "react";
+import { Check, Pause, Play, Trash2 } from "lucide-react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { reels, type ReelVoiceOption } from "@/api/endpoints";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { type CloningInfo, reels, type ReelVoiceOption } from "@/api/endpoints";
+import { Button } from "@/ui/button";
 import { color, radius, space } from "@/theme/tokens";
 import { BackTitle, BrandPill, ICON, PageHeader, ReelsScreen, bodyMuted, meta, rc, strong14 } from "@/ui/reels/kit";
 import { useReel } from "@/ui/reels/use-reel";
@@ -15,6 +16,8 @@ export default function ReelsVoices() {
   const { detail, busy, error, save } = useReel();
   const plan = detail?.plan ?? null;
   const [voices, setVoices] = useState<ReelVoiceOption[] | null>(null);
+  const [cloning, setCloning] = useState<CloningInfo | null>(null);
+  const [removing, setRemoving] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
   // One player for the samples (expo-video plays audio-only files too); the source follows the voice being played.
@@ -30,14 +33,38 @@ export default function ReelsVoices() {
     return () => (end.remove(), status.remove());
   }, [player]);
 
+  // Loaded on focus: back from cloning, the new voice is there.
+  const [round, setRound] = useState(0);
+  useFocusEffect(useCallback(() => setRound((r) => r + 1), []));
   useEffect(() => {
     const ctrl = new AbortController();
     reels.voices(ctrl.signal).then(
-      (r) => setVoices(r.voices),
+      (r) => (setVoices(r.voices), setCloning(r.cloning)),
       (e: unknown) => !ctrl.signal.aborted && setProblem(e instanceof Error ? e.message : String(e)),
     );
     return () => ctrl.abort();
-  }, []);
+  }, [round]);
+  const clones = voices?.filter((v) => v.clone).length ?? 0;
+
+  /** Delete a clone (its owner, or an admin), or withdraw consent for your own: confirmed first, it can't be undone. */
+  const confirmRemove = (v: ReelVoiceOption, withdraw: boolean) =>
+    Alert.alert(t(withdraw ? "voices.confirmWithdrawTitle" : "voices.confirmDeleteTitle", { name: v.name }), t("voices.confirmBody"), [
+      { text: t("cancel"), style: "cancel" },
+      { text: t(withdraw ? "voices.withdraw" : "voices.delete"), style: "destructive", onPress: () => void remove(v, withdraw) },
+    ]);
+  const remove = async (v: ReelVoiceOption, withdraw: boolean) => {
+    if (removing) return;
+    setRemoving(v.id);
+    setProblem(null);
+    try {
+      await reels.deleteClone(v.id, withdraw);
+      setRound((r) => r + 1);
+    } catch (e) {
+      setProblem(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRemoving(null);
+    }
+  };
 
   // A ref, not state: two taps in one frame would both pass a state check (two saves, or two backs).
   const picking = useRef(false);
@@ -58,6 +85,8 @@ export default function ReelsVoices() {
     >
       <Text style={[bodyMuted, { paddingHorizontal: 4 }]}>{t("voices.intro")}</Text>
       {error || problem ? <Text style={[meta, { color: color.error, paddingTop: space[12] }]}>{error ?? problem}</Text> : null}
+      {/* The plan's voice is gone (a deleted clone): saving the plan is refused until another is picked. */}
+      {voices && plan && !voices.some((v) => v.id === plan.voice) ? <Text style={[meta, { color: color.error, paddingTop: space[12] }]}>{t("voices.missing")}</Text> : null}
       {!voices && !problem ? <ActivityIndicator style={{ paddingTop: space[24] }} color={color.primary} /> : null}
       <View style={{ gap: space[12], paddingTop: space[16] }}>
         {voices?.map((v) => {
@@ -84,16 +113,46 @@ export default function ReelsVoices() {
               >
                 <View style={{ flex: 1 }}>
                   <Text style={strong14}>{v.name}</Text>
-                  <Text style={[meta, { paddingTop: 2 }]}>{gender}</Text>
+                  <Text style={[meta, { paddingTop: 2 }]}>{v.mine ? `${gender} · ${t("voices.mine")}` : gender}</Text>
                 </View>
                 <View style={[styles.radio, on ? { backgroundColor: color.primary } : { borderWidth: 1, borderColor: "#D4D4DC" }]}>
                   {on ? <Check size={14} color={color.onPrimary} strokeWidth={2.25} /> : null}
                 </View>
               </Pressable>
+              {v.clone && (v.mine || cloning?.allowed) ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("voices.deleteA11y", { name: v.name })}
+                  disabled={!!removing}
+                  hitSlop={8}
+                  onPress={() => confirmRemove(v, false)}
+                  style={styles.play}
+                >
+                  {removing === v.id ? <ActivityIndicator color={color.inkSecondary} /> : <Trash2 size={20} color={color.inkSecondary} strokeWidth={ICON.strokeWidth} />}
+                </Pressable>
+              ) : null}
             </View>
           );
         })}
       </View>
+
+      {/* Withdrawing consent is the owner's own act (kept apart from Delete, and recorded as such). */}
+      {voices?.some((v) => v.mine) ? (
+        <View style={{ paddingTop: space[16], gap: space[4] }}>
+          {voices
+            .filter((v) => v.mine)
+            .map((v) => (
+              <Button key={v.id} variant="ghost" label={t("voices.withdrawFor", { name: v.name })} disabled={!!removing} onPress={() => confirmRemove(v, true)} />
+            ))}
+        </View>
+      ) : null}
+
+      {cloning?.allowed ? (
+        <View style={{ paddingTop: space[16], gap: space[8] }}>
+          {clones >= cloning.max ? <Text style={[meta, { textAlign: "center" }]}>{t("voices.cloneFull", { max: cloning.max })}</Text> : null}
+          <Button variant="outline" label={t("voices.clone", { count: cloning.credits })} disabled={clones >= cloning.max} onPress={() => router.push("/reels/clone")} />
+        </View>
+      ) : null}
     </ReelsScreen>
   );
 }

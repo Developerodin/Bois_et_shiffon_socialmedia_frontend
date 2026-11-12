@@ -256,7 +256,8 @@
     "checks": "Checks",
     "audioVoiceOnly": "Voiceover",
     "audioVoiceOnly_lang": "{{language}} voiceover",
-    "blocked": "A check found a problem (see Checks). Fix it in the caption, or tap \"Not right? Ask for changes\"."
+    "blocked": "A check found a problem (see Checks). Fix it in the caption, or tap \"Not right? Ask for changes\".",
+    "aiDisclosure": "Added when it's posted, and can't be removed: \"{{line}}\" (this reel has an AI presenter or a cloned voice)."
   },
   "publish": {
     "title": "Publish reel",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Female voice",
       "male": "Male voice",
-      "neutral": "Neutral voice"
+      "neutral": "Neutral voice",
+      "clone": "Cloned voice"
     },
     "playA11y": "Play a sample of {{name}}",
-    "stopA11y": "Stop the sample of {{name}}"
+    "stopA11y": "Stop the sample of {{name}}",
+    "mine": "Yours",
+    "clone": "Clone a voice · {{count}} credits",
+    "cloneFull": "This workspace has {{max}} cloned voices, the most it can have.",
+    "delete": "Delete",
+    "deleteA11y": "Delete {{name}}",
+    "withdraw": "Withdraw consent",
+    "withdrawFor": "Withdraw consent for {{name}}",
+    "missing": "This reel's voice isn't available any more. Pick another.",
+    "confirmDeleteTitle": "Delete {{name}}?",
+    "confirmWithdrawTitle": "Withdraw consent for {{name}}?",
+    "confirmBody": "The voice is deleted for the whole workspace, at ElevenLabs too. Reels using it need another voice. This can't be undone."
   },
   "record": {
     "title": "Record scene {{n}}",
@@ -514,5 +527,28 @@
     "heardDiffers": "We heard something different",
     "keepNote": "Keep it, and the scene's text becomes what you said, so approvers read what is spoken. Or record again.",
     "nothingHeard": "Nothing. Check your microphone and record again, a little closer."
-  }
+  },
+  "clone": {
+    "title": "Clone a voice",
+    "intro": "Read the passage below aloud for {{min}} to {{max}} seconds, in a quiet room. The voice can then read any reel in this workspace.",
+    "name": "Voice name",
+    "namePlaceholder": "e.g. Léa's voice",
+    "passageTitle": "Read this",
+    "passage": "Hello! I'm recording my voice for our videos. At our shop, every piece is chosen with care: solid wood, honest materials, and furniture made to last. We love helping you find the table where friends gather, the bench by the door, the shelf that finally fits. Come and see us, take your time, ask us anything. Each piece has a story, and we're happy to tell it. Thank you for listening, and see you soon.",
+    "consentTitle": "Consent",
+    "consentTick": "I agree",
+    "startA11y": "Start reading",
+    "stopA11y": "Stop",
+    "tap": "Tap to start reading",
+    "timer": "{{seconds}} s (at least {{min}})",
+    "tooShort": "Keep reading until {{min}} seconds.",
+    "send": "Create the voice · {{count}} credits",
+    "sending": "Creating the voice…",
+    "noMic": "Allow the microphone in your phone's settings to record.",
+    "recorded": "Recorded · {{seconds}} s",
+    "replaceTitle": "Record again?",
+    "replaceBody": "Your reading so far is replaced.",
+    "replace": "Record again"
+  },
+  "cancel": "Cancel"
 }

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { archiveMemberClones } from "@/server/reels/clones";
 import { z } from "zod";
 import { isPermissionKey, LEGACY_ROLE_SLUG, permissionScope } from "@/server/auth/permissions.catalog";
 import { memberRole } from "@/server/auth/permissions";
@@ -181,10 +182,12 @@ export async function removeMember(workspaceId: string, actorUserId: string, mem
     if ((await memberRole(workspaceId, actorUserId))?.role?.slug !== "owner") throw new AccountFlowError("Only owners can remove an owner", 409);
     if ((await ownerCount(workspaceId)) <= 1) throw new AccountFlowError("A workspace needs at least one owner", 409);
   }
-  await prisma.$transaction([
-    prisma.brandMember.deleteMany({ where: { workspaceId, userId: member.userId } }),
-    prisma.workspaceMember.delete({ where: { id: member.id } }),
-  ]);
+  await prisma.$transaction(async (tx) => {
+    await tx.brandMember.deleteMany({ where: { workspaceId, userId: member.userId } });
+    await tx.workspaceMember.delete({ where: { id: member.id } });
+    // Their cloned voices leave with them: archived, and deleted at ElevenLabs by a job queued in this transaction.
+    await archiveMemberClones(tx, workspaceId, member.userId, actorUserId);
+  });
   await audit(workspaceId, actorUserId, "member.removed", member.id, { userId: member.userId });
 }
 

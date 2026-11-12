@@ -256,7 +256,8 @@
     "checks": "Verificări",
     "audioVoiceOnly": "Voce în franceză",
     "audioVoiceOnly_lang": "Voce din off în {{language}}",
-    "blocked": "A fost găsită o problemă (vezi Verificări). Corecteaz-o în descriere sau apasă „Nu e bine? Cere modificări”."
+    "blocked": "A fost găsită o problemă (vezi Verificări). Corecteaz-o în descriere sau apasă „Nu e bine? Cere modificări”.",
+    "aiDisclosure": "Se adaugă la publicare și nu poate fi eliminat: \"{{line}}\" (acest reel are un prezentator generat cu AI sau o voce clonată)."
   },
   "publish": {
     "title": "Publică reel",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Voce feminină",
       "male": "Voce masculină",
-      "neutral": "Voce neutră"
+      "neutral": "Voce neutră",
+      "clone": "Voce clonată"
     },
     "playA11y": "Redă o mostră a vocii {{name}}",
-    "stopA11y": "Oprește redarea mostrei vocii {{name}}"
+    "stopA11y": "Oprește redarea mostrei vocii {{name}}",
+    "mine": "Ale tale",
+    "clone": "Clonează o voce · {{count}} credite",
+    "cloneFull": "Acest spațiu de lucru are {{max}} voci clonate, numărul maxim permis.",
+    "delete": "Șterge",
+    "deleteA11y": "Șterge {{name}}",
+    "withdraw": "Retrage consimțământul",
+    "withdrawFor": "Retrage consimțământul pentru {{name}}",
+    "missing": "Vocea acestui reel nu mai este disponibilă. Alege alta.",
+    "confirmDeleteTitle": "Ștergi {{name}}?",
+    "confirmWithdrawTitle": "Retragi consimțământul pentru {{name}}?",
+    "confirmBody": "Vocea va fi ștearsă din întregul spațiu de lucru și de la ElevenLabs. Reel-urile care o folosesc au nevoie de altă voce. Acțiunea nu poate fi anulată."
   },
   "record": {
     "title": "Înregistrează scena {{n}}",
@@ -514,5 +527,28 @@
     "heardDiffers": "Am auzit altceva",
     "keepNote": "Păstreaz-o, iar textul scenei va fi înlocuit cu ce ai spus, astfel încât persoanele care aprobă să citească exact ce se aude. Sau înregistrează din nou.",
     "nothingHeard": "Nu se aude nimic. Verifică microfonul și înregistrează din nou, puțin mai aproape."
-  }
+  },
+  "clone": {
+    "title": "Clonează o voce",
+    "intro": "Citește textul de mai jos cu voce tare, într-o cameră liniștită, timp de {{min}} până la {{max}} de secunde. Vocea va putea apoi să citească orice reel din acest spațiu de lucru.",
+    "name": "Numele vocii",
+    "namePlaceholder": "ex. Vocea lui Léa",
+    "passageTitle": "Citește acest text",
+    "passage": "Bună! Îmi înregistrez vocea pentru videoclipurile noastre. În magazinul nostru, fiecare piesă este aleasă cu grijă: lemn masiv, materiale autentice și mobilier făcut să reziste. Ne place să te ajutăm să găsești masa în jurul căreia se adună prietenii, banca de lângă ușă sau raftul care se potrivește perfect. Vino să ne vezi, ia-ți timpul necesar și întreabă-ne orice. Fiecare piesă are o poveste și ne bucurăm să ți-o spunem. Mulțumim că ne-ai ascultat și pe curând!",
+    "consentTitle": "Consimțământ",
+    "consentTick": "Sunt de acord",
+    "startA11y": "Începe să citești",
+    "stopA11y": "Oprește",
+    "tap": "Atinge pentru a începe să citești",
+    "timer": "{{seconds}} s (minimum {{min}})",
+    "tooShort": "Continuă să citești până la {{min}} secunde.",
+    "send": "Creează vocea · {{count}} credite",
+    "sending": "Se creează vocea…",
+    "noMic": "Permite accesul la microfon din setările telefonului pentru a înregistra.",
+    "recorded": "Înregistrat · {{seconds}} s",
+    "replaceTitle": "Înregistrezi din nou?",
+    "replaceBody": "Înregistrarea de până acum va fi înlocuită.",
+    "replace": "Înregistrează din nou"
+  },
+  "cancel": "Anulează"
 }

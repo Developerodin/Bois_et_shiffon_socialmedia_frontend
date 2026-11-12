@@ -1,11 +1,13 @@
 /**
  * Reel voiceover, one WAV per scene (Higgsfield's API has no voice models): OpenAI text-to-speech, or ElevenLabs.
- * Voice ids: a bare name is an OpenAI voice ("coral"); "eleven:<voiceId>" is an ElevenLabs voice. Only voices in
- * STOCK_VOICES are accepted (clones of the workspace join them later), so no other ElevenLabs voice, public or
- * another customer's, can be used; an unknown voice throws instead of silently becoming another one.
+ * Voice ids: a bare name is an OpenAI voice ("coral"); "eleven:<voiceId>" is an ElevenLabs stock voice;
+ * "clone:<Voice.id>" is one of the workspace's cloned voices (clones.ts). Only stock voices and the workspace's live
+ * clones are accepted, so no other ElevenLabs voice, public or another customer's, can be used; an unknown or
+ * archived voice throws instead of silently becoming another one.
  * WAV so the length can be read without a decoder (wav.ts) and scenes can be padded and joined as raw PCM; both
  * providers give 24 kHz mono 16-bit, so their scenes join.
  */
+import { liveClone, liveClones } from "@/server/reels/clones";
 import { languageName } from "@/server/reels/plan";
 import { pcmWav } from "@/server/reels/wav";
 import { mediaKnown, signedMediaUrl } from "@/server/storage/media";
@@ -29,7 +31,10 @@ export const STOCK_VOICES: StockVoice[] = [
   { id: "eleven:SAz9YHcvj6GT2YYXdXww", name: "River", gender: "neutral", provider: "elevenlabs", previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/SAz9YHcvj6GT2YYXdXww/e6c95f0b-2227-491a-b3d7-2249240decb7.mp3" },
 ];
 export const isStockVoice = (id: string) => STOCK_VOICES.some((v) => v.id === id);
-export const isElevenVoice = (id: string) => id.startsWith("eleven:");
+/** Spoken by ElevenLabs (stock or a clone): one scene at a time. */
+export const isElevenVoice = (id: string) => id.startsWith("eleven:") || id.startsWith("clone:");
+/** A voice this workspace may use: a stock voice or one of its live clones. */
+export const isKnownVoice = async (workspaceId: string, id: string) => isStockVoice(id) || !!(await liveClone(workspaceId, id));
 /** Where an OpenAI voice's sample lives (made once by scripts/render-voice-samples.ts). */
 export const voiceSampleKey = (id: string) => `system/voices/${id}.wav`;
 export const SAMPLE_LINE = "Bonjour ! Voici à quoi ressemble ma voix dans vos vidéos.";
@@ -38,7 +43,13 @@ export const SAMPLE_LINE = "Bonjour ! Voici à quoi ressemble ma voix dans vos v
 const instructions = (language = "fr") => `Speak in ${languageName(language)}, with a calm, warm tone and a measured pace.`;
 
 /** deadline (epoch ms): stop waiting out a busy provider past it, so a render's voice step fits its job's time. */
-export async function speak(input: { text: string; voice: string; language?: string; deadline?: number }): Promise<Uint8Array> {
+export async function speak(input: { text: string; voice: string; language?: string; deadline?: number; workspaceId?: string }): Promise<Uint8Array> {
+  if (input.voice.startsWith("clone:")) {
+    // Checked here too: a clone archived after the render was charged is never spoken.
+    const clone = input.workspaceId ? await liveClone(input.workspaceId, input.voice) : null;
+    if (!clone?.providerVoiceId) throw new Error(`Unknown voice ${input.voice}: pick another.`);
+    return elevenSpeak(input.text, clone.providerVoiceId, input.deadline);
+  }
   if (!isStockVoice(input.voice)) throw new Error(`Unknown voice ${input.voice}: pick another.`);
   return isElevenVoice(input.voice) ? elevenSpeak(input.text, input.voice.slice("eleven:".length), input.deadline) : openaiSpeak(input.text, input.voice, input.language);
 }
@@ -88,5 +99,15 @@ async function elevenSpeak(text: string, voiceId: string, deadline = Infinity) {
 
 const sampleUrl = async (v: StockVoice) => v.previewUrl ?? ((await mediaKnown(voiceSampleKey(v.id))) ? signedMediaUrl(voiceSampleKey(v.id)) : null);
 
-/** R11's Voices screen: every voice a reel may use, with a sample to listen to (never generated here). */
-export const voiceList = () => Promise.all(STOCK_VOICES.map(async (v) => ({ id: v.id, name: v.name, gender: v.gender, sampleUrl: await sampleUrl(v) })));
+/**
+ * R11's Voices screen: every voice a reel may use, with a sample to listen to (never generated here). The
+ * workspace's clones come first; `mine` marks the ones the person owns.
+ */
+export async function voiceList(workspaceId: string, userId: string) {
+  const clones = await liveClones(workspaceId);
+  const stock = await Promise.all(STOCK_VOICES.map(async (v) => ({ id: v.id, name: v.name, gender: v.gender as StockVoice["gender"] | "clone", sampleUrl: await sampleUrl(v), clone: false, mine: false })));
+  const own = await Promise.all(
+    clones.map(async (c) => ({ id: `clone:${c.id}`, name: c.name, gender: "clone" as const, sampleUrl: c.sampleKey ? await signedMediaUrl(c.sampleKey) : null, clone: true, mine: c.ownerUserId === userId })),
+  );
+  return [...own, ...stock];
+}

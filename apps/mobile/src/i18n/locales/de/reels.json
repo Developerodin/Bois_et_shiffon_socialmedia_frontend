@@ -256,7 +256,8 @@
     "checks": "Prüfungen",
     "audioVoiceOnly": "Französisches Voiceover",
     "audioVoiceOnly_lang": "Voiceover auf {{language}}",
-    "blocked": "Eine Prüfung hat ein Problem gefunden (siehe Prüfungen). Korrigiere es in der Bildunterschrift oder tippe auf „Nicht richtig? Änderungen anfordern“."
+    "blocked": "Eine Prüfung hat ein Problem gefunden (siehe Prüfungen). Korrigiere es in der Bildunterschrift oder tippe auf „Nicht richtig? Änderungen anfordern“.",
+    "aiDisclosure": "Wird beim Veröffentlichen hinzugefügt und kann nicht entfernt werden: \"{{line}}\" (Dieses Reel enthält einen KI-Moderator oder eine geklonte Stimme)."
   },
   "publish": {
     "title": "Reel veröffentlichen",
@@ -491,10 +492,22 @@
     "gender": {
       "female": "Weibliche Stimme",
       "male": "Männliche Stimme",
-      "neutral": "Neutrale Stimme"
+      "neutral": "Neutrale Stimme",
+      "clone": "Geklonte Stimme"
     },
     "playA11y": "Hörprobe von {{name}} abspielen",
-    "stopA11y": "Hörprobe von {{name}} stoppen"
+    "stopA11y": "Hörprobe von {{name}} stoppen",
+    "mine": "Deine",
+    "clone": "Stimme klonen · {{count}} Credits",
+    "cloneFull": "Dieser Arbeitsbereich hat mit {{max}} geklonten Stimmen das Maximum erreicht.",
+    "delete": "Löschen",
+    "deleteA11y": "{{name}} löschen",
+    "withdraw": "Einwilligung widerrufen",
+    "withdrawFor": "Einwilligung für {{name}} widerrufen",
+    "missing": "Die Stimme dieses Reels ist nicht mehr verfügbar. Wähle eine andere.",
+    "confirmDeleteTitle": "{{name}} löschen?",
+    "confirmWithdrawTitle": "Einwilligung für {{name}} widerrufen?",
+    "confirmBody": "Die Stimme wird für den gesamten Arbeitsbereich und auch bei ElevenLabs gelöscht. Reels, die sie verwenden, brauchen eine andere Stimme. Das lässt sich nicht rückgängig machen."
   },
   "record": {
     "title": "Szene {{n}} aufnehmen",
@@ -514,5 +527,28 @@
     "heardDiffers": "Wir haben etwas anderes gehört",
     "keepNote": "Wenn du die Aufnahme behältst, wird der Szenentext durch das Gesagte ersetzt. So lesen die Personen, die die Aufnahme freigeben, genau das, was gesprochen wird. Du kannst auch erneut aufnehmen.",
     "nothingHeard": "Nichts gehört. Prüfe dein Mikrofon und nimm noch einmal aus etwas geringerer Entfernung auf."
-  }
+  },
+  "clone": {
+    "title": "Stimme klonen",
+    "intro": "Lies den Text unten {{min}} bis {{max}} Sekunden lang laut vor, am besten in einem ruhigen Raum. Die Stimme kann danach jedes Reel in diesem Arbeitsbereich vorlesen.",
+    "name": "Name der Stimme",
+    "namePlaceholder": "z. B. Léas Stimme",
+    "passageTitle": "Lies diesen Text vor",
+    "passage": "Hallo! Ich nehme meine Stimme für unsere Videos auf. In unserem Laden wird jedes Stück sorgfältig ausgewählt: Massivholz, ehrliche Materialien und Möbel, die lange halten. Wir helfen dir gerne, den Tisch zu finden, an dem Freunde zusammenkommen, die Bank für den Eingangsbereich oder das Regal, das endlich passt. Komm vorbei, nimm dir Zeit und frag uns alles, was du wissen möchtest. Jedes Stück hat eine Geschichte, und wir erzählen sie dir gerne. Danke fürs Zuhören und bis bald!",
+    "consentTitle": "Einwilligung",
+    "consentTick": "Ich stimme zu",
+    "startA11y": "Vorlesen starten",
+    "stopA11y": "Stoppen",
+    "tap": "Tippe, um mit dem Vorlesen zu beginnen",
+    "timer": "{{seconds}} s (mindestens {{min}})",
+    "tooShort": "Lies weiter, bis {{min}} Sekunden erreicht sind.",
+    "send": "Stimme erstellen · {{count}} Credits",
+    "sending": "Stimme wird erstellt…",
+    "noMic": "Erlaube in den Einstellungen deines Smartphones den Mikrofonzugriff, um aufzunehmen.",
+    "recorded": "Aufgenommen · {{seconds}} s",
+    "replaceTitle": "Erneut aufnehmen?",
+    "replaceBody": "Deine bisherige Aufnahme wird ersetzt.",
+    "replace": "Erneut aufnehmen"
+  },
+  "cancel": "Abbrechen"
 }
