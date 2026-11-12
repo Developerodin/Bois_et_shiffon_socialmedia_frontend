@@ -180,7 +180,8 @@
     "unavailable": "Video's maken is momenteel niet beschikbaar. Je credits zijn teruggestort. Probeer het later opnieuw.",
     "slow": "Het maken van de video duurde te lang. Je credits zijn teruggestort. Probeer het opnieuw.",
     "scene": "Scène {{n}} kon niet worden geanimeerd. Je credits zijn teruggestort. Probeer het opnieuw of kies een andere foto voor deze scène.",
-    "other": "Er is iets misgegaan bij het maken van de video. Je credits zijn teruggestort. Probeer het opnieuw."
+    "other": "Er is iets misgegaan bij het maken van de video. Je credits zijn teruggestort. Probeer het opnieuw.",
+    "voiceDeleted": "De stem voor deze reel is niet meer beschikbaar. Je credits zijn teruggestort. Kies een andere stem en probeer het opnieuw."
   },
   "results": {
     "failedShort": "Kon niet worden gemaakt · credits teruggestort",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Doelduur: {{count}} seconden",
     "rewriteOpening": "Herschrijf opening",
     "narratorAudio": "Verteller audio",
-    "calmVoice": "Rustige Franse stem",
-    "calmVoiceMeta": "Natuurlijk Frans, warme akoestische snelheid",
     "recordOwn": "Neem je eigen stem op",
     "recordOwnMeta": "Optionele aangepaste merkvertelling",
     "record": "Opnemen",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Houd {{count}} alinea's aan, één per scène, met een witregel ertussen.",
     "rewriteOpeningAsk": "Herschrijf de opening van scène 1: korter en verrassender.",
     "voiceName": "Stem: {{name}}",
-    "nextVoice": "Volgende stem"
+    "changeVoice": "Stem wijzigen"
   },
   "templates": {
     "title": "Reel sjablonen",
@@ -479,5 +478,16 @@
     "planFirst": "Plan eerst de reel (Maken → Samen een reel plannen) en kies daarna de foto's.",
     "saving": "Opslaan…",
     "sceneN": "Scène {{n}}"
+  },
+  "voices": {
+    "title": "Stemmen",
+    "intro": "Luister naar een voorbeeld en kies de stem die je reel inspreekt.",
+    "gender": {
+      "female": "Vrouwenstem",
+      "male": "Mannenstem",
+      "neutral": "Neutrale stem"
+    },
+    "playA11y": "Luistervoorbeeld van {{name}} afspelen",
+    "stopA11y": "Luistervoorbeeld van {{name}} stoppen"
   }
 }

@@ -180,7 +180,8 @@
     "unavailable": "Crearea videoclipurilor nu este disponibilă momentan. Creditele ți-au fost returnate. Încearcă din nou mai târziu.",
     "slow": "Crearea videoclipului a durat prea mult. Creditele ți-au fost returnate. Încearcă din nou.",
     "scene": "Scena {{n}} nu a putut fi animată. Creditele ți-au fost returnate. Încearcă din nou sau alege o altă fotografie pentru ea.",
-    "other": "Ceva nu a mers bine la crearea videoclipului. Creditele ți-au fost returnate. Încearcă din nou."
+    "other": "Ceva nu a mers bine la crearea videoclipului. Creditele ți-au fost returnate. Încearcă din nou.",
+    "voiceDeleted": "Vocea acestui reel nu mai este disponibilă. Ți-am returnat creditele. Alege altă voce și încearcă din nou."
   },
   "results": {
     "failedShort": "Nu a putut fi creat · credite returnate",
@@ -375,8 +376,7 @@
       "retro": "Retro",
       "sporty": "Sport",
       "streetstyle": "Street style"
-    },
-    "createButton_few": "Creează prezentator · {{count}} credite"
+    }
   },
   "script": {
     "title": "Script & voce",
@@ -394,8 +394,6 @@
     "targetDuration_other": "Durata țintă: {{count}} secunde",
     "rewriteOpening": "Rescrie deschiderea",
     "narratorAudio": "Audio narator",
-    "calmVoice": "Voce franceză calmă",
-    "calmVoiceMeta": "Franceză naturală, ritm acustic cald",
     "recordOwn": "Înregistrează-ți propria voce",
     "recordOwnMeta": "Narațiune personalizată opțională pentru brand",
     "record": "Înregistrează",
@@ -405,7 +403,7 @@
     "keepScenes_other": "Păstrează {{count}} paragrafe, câte unul pe scenă, cu un rând gol între ele.",
     "rewriteOpeningAsk": "Rescrie introducerea scenei 1, ca să fie mai scurtă și mai surprinzătoare.",
     "voiceName": "Voce: {{name}}",
-    "nextVoice": "Următoarea voce"
+    "changeVoice": "Schimbă vocea"
   },
   "templates": {
     "title": "Șabloane de reel",
@@ -454,8 +452,7 @@
     "previewNoPhotos": "Adaugă poze cu produsele pentru a previzualiza șabloanele cu ele.",
     "ownPreview": "Realizată cu pozele tale",
     "loadFailed": "Nu am putut încărca șabloanele.",
-    "makingA11y": "Se generează previzualizarea",
-    "previewMine_few": "Previzualizează cu pozele mele · {{count}} credite"
+    "makingA11y": "Se generează previzualizarea"
   },
   "assets": {
     "title": "Selectează resurse",
@@ -481,5 +478,16 @@
     "planFirst": "Planifică mai întâi reelul (Creează → Planificăm un reel împreună), apoi alege fotografiile.",
     "saving": "Se salvează…",
     "sceneN": "Scena {{n}}"
+  },
+  "voices": {
+    "title": "Voci",
+    "intro": "Ascultă o mostră, apoi alege vocea care îți va citi reelul.",
+    "gender": {
+      "female": "Voce feminină",
+      "male": "Voce masculină",
+      "neutral": "Voce neutră"
+    },
+    "playA11y": "Redă o mostră a vocii {{name}}",
+    "stopA11y": "Oprește redarea mostrei vocii {{name}}"
   }
 }

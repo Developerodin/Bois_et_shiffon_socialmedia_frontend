@@ -180,7 +180,8 @@
     "unavailable": "A videókészítés jelenleg nem érhető el. Kreditjeidet visszatérítettük. Próbáld újra később.",
     "slow": "A videó elkészítése túl sokáig tartott. Kreditjeidet visszatérítettük. Próbáld újra.",
     "scene": "A(z) {{n}}. jelenetet nem sikerült animálni. Kreditjeidet visszatérítettük. Próbáld újra, vagy válassz másik fotót a jelenethez.",
-    "other": "Hiba történt a videó készítése közben. Kreditjeidet visszatérítettük. Próbáld újra."
+    "other": "Hiba történt a videó készítése közben. Kreditjeidet visszatérítettük. Próbáld újra.",
+    "voiceDeleted": "A videódhoz választott hang már nem érhető el. Visszakaptad a kreditjeidet. Válassz másik hangot, és próbáld újra."
   },
   "results": {
     "failedShort": "Nem készült el · kreditek visszatérítve",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Cél időtartam: {{count}} másodperc",
     "rewriteOpening": "Nyitás újraírása",
     "narratorAudio": "Narrátor hang",
-    "calmVoice": "Nyugodt francia hang",
-    "calmVoiceMeta": "Természetes francia, meleg akusztikus tempó",
     "recordOwn": "Vedd fel saját hangodat",
     "recordOwnMeta": "Opcionális egyedi márka narráció",
     "record": "Felvétel",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Maradjon {{count}} bekezdés, jelenetenként egy, köztük üres sorral.",
     "rewriteOpeningAsk": "Írd át az 1. jelenet nyitását: legyen rövidebb és meglepőbb.",
     "voiceName": "Hang: {{name}}",
-    "nextVoice": "Következő hang"
+    "changeVoice": "Hang módosítása"
   },
   "templates": {
     "title": "Reel sablonok",
@@ -479,5 +478,16 @@
     "planFirst": "Előbb tervezd meg a reelt (Létrehozás → Reel közös tervezése), majd válaszd ki a fotóit.",
     "saving": "Mentés…",
     "sceneN": "{{n}}. jelenet"
+  },
+  "voices": {
+    "title": "Hangok",
+    "intro": "Hallgass bele a mintákba, majd válaszd ki, melyik hang olvassa fel a videód szövegét.",
+    "gender": {
+      "female": "Női hang",
+      "male": "Férfi hang",
+      "neutral": "Semleges hang"
+    },
+    "playA11y": "Hangminta lejátszása: {{name}}",
+    "stopA11y": "Hangminta leállítása: {{name}}"
   }
 }

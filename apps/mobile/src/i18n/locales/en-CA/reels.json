@@ -180,7 +180,8 @@
     "unavailable": "Video making is unavailable right now. Your credits are back. Please try again later.",
     "slow": "The video took too long to make. Your credits are back. Try again.",
     "scene": "Scene {{n}} couldn't be animated. Your credits are back. Try again, or pick another photo for it.",
-    "other": "Something went wrong while making the video. Your credits are back. Try again."
+    "other": "Something went wrong while making the video. Your credits are back. Try again.",
+    "voiceDeleted": "This reel's voice isn't available any more. Your credits are back. Pick another voice and try again."
   },
   "results": {
     "failedShort": "Couldn't be made · credits refunded",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Target duration: {{count}} seconds",
     "rewriteOpening": "Rewrite opening",
     "narratorAudio": "Narrator audio",
-    "calmVoice": "Calm French voice",
-    "calmVoiceMeta": "Natural French, warm acoustic pace",
     "recordOwn": "Record your own voice",
     "recordOwnMeta": "Optional custom brand narration",
     "record": "Record",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Keep {{count}} paragraphs, one per scene, with a blank line between.",
     "rewriteOpeningAsk": "Rewrite the opening hook of scene 1: shorter and more surprising.",
     "voiceName": "Voice: {{name}}",
-    "nextVoice": "Next voice"
+    "changeVoice": "Change voice"
   },
   "templates": {
     "title": "Reel templates",
@@ -479,5 +478,16 @@
     "planFirst": "Plan the reel first (Create → Plan a reel together), then pick its photos.",
     "saving": "Saving…",
     "sceneN": "Scene {{n}}"
+  },
+  "voices": {
+    "title": "Voices",
+    "intro": "Listen to a sample, then pick the voice that reads your reel.",
+    "gender": {
+      "female": "Female voice",
+      "male": "Male voice",
+      "neutral": "Neutral voice"
+    },
+    "playA11y": "Play a sample of {{name}}",
+    "stopA11y": "Stop the sample of {{name}}"
   }
 }

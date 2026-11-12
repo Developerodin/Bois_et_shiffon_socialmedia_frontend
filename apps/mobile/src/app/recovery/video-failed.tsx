@@ -138,7 +138,11 @@ export default function VideoFailed() {
           disabled={!detail || retrying}
           onPress={() => void retry()}
         />
-        <ActionButton label={t("videoFailed.editStoryboard")} variant="outline" onPress={() => router.push("/reels/storyboard")} />
+        {failure?.kind === "voiceDeleted" ? (
+          <ActionButton label={t("reels:script.changeVoice")} variant="outline" onPress={() => router.push("/reels/voices")} />
+        ) : (
+          <ActionButton label={t("videoFailed.editStoryboard")} variant="outline" onPress={() => router.push("/reels/storyboard")} />
+        )}
       </Footer>
     </SafeAreaView>
   );

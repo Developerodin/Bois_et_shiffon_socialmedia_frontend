@@ -180,7 +180,8 @@
     "unavailable": "Tvorba videa teď není dostupná. Kredity jsme ti vrátili. Zkus to prosím později.",
     "slow": "Tvorba videa trvala příliš dlouho. Kredity jsme ti vrátili. Zkus to znovu.",
     "scene": "Scénu {{n}} se nepodařilo animovat. Kredity jsme ti vrátili. Zkus to znovu nebo pro ni vyber jinou fotku.",
-    "other": "Při tvorbě videa se něco pokazilo. Kredity jsme ti vrátili. Zkus to znovu."
+    "other": "Při tvorbě videa se něco pokazilo. Kredity jsme ti vrátili. Zkus to znovu.",
+    "voiceDeleted": "Hlas pro tento reel už není dostupný. Kredity jsme ti vrátili. Vyber jiný hlas a zkus to znovu."
   },
   "results": {
     "failedShort": "Nepodařilo se vytvořit · kredity vráceny",
@@ -375,9 +376,7 @@
       "retro": "Retro",
       "sporty": "Sportovní",
       "streetstyle": "Streetstyle"
-    },
-    "createButton_few": "Vytvořit moderátora · {{count}} kredity",
-    "createButton_many": "Vytvořit moderátora · {{count}} kreditu"
+    }
   },
   "script": {
     "title": "Scénář & hlas",
@@ -395,8 +394,6 @@
     "targetDuration_other": "Cílová délka: {{count}} sekund",
     "rewriteOpening": "Přepsat úvod",
     "narratorAudio": "Zvuk vypravěče",
-    "calmVoice": "Klidný francouzský hlas",
-    "calmVoiceMeta": "Přirozený francouzský, teplé akustické tempo",
     "recordOwn": "Nahrát vlastní hlas",
     "recordOwnMeta": "Volitelná vlastní narace značky",
     "record": "Nahrát",
@@ -406,7 +403,7 @@
     "keepScenes_other": "Počet odstavců: {{count}}. Každá scéna má vlastní odstavec, odděl je prázdným řádkem.",
     "rewriteOpeningAsk": "Přepiš úvodní upoutávku ve scéně 1: kratší a překvapivější.",
     "voiceName": "Hlas: {{name}}",
-    "nextVoice": "Další hlas"
+    "changeVoice": "Změnit hlas"
   },
   "templates": {
     "title": "Šablony reelu",
@@ -481,5 +478,16 @@
     "planFirst": "Nejdřív naplánuj reel (Vytvořit → Naplánovat reel společně), pak vyber fotky.",
     "saving": "Ukládáme…",
     "sceneN": "Scéna {{n}}"
+  },
+  "voices": {
+    "title": "Hlasy",
+    "intro": "Poslechni si ukázku a pak vyber hlas, který namluví tvůj reel.",
+    "gender": {
+      "female": "Ženský hlas",
+      "male": "Mužský hlas",
+      "neutral": "Neutrální hlas"
+    },
+    "playA11y": "Přehrát ukázku hlasu {{name}}",
+    "stopA11y": "Zastavit ukázku hlasu {{name}}"
   }
 }

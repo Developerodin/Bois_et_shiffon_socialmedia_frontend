@@ -180,7 +180,8 @@
     "unavailable": "Video oluşturma şu anda kullanılamıyor. Kredilerin iade edildi. Lütfen daha sonra tekrar dene.",
     "slow": "Videonun oluşturulması çok uzun sürdü. Kredilerin iade edildi. Tekrar dene.",
     "scene": "Sahne {{n}} canlandırılamadı. Kredilerin iade edildi. Tekrar dene veya bu sahne için başka bir fotoğraf seç.",
-    "other": "Video oluşturulurken bir sorun oluştu. Kredilerin iade edildi. Tekrar dene."
+    "other": "Video oluşturulurken bir sorun oluştu. Kredilerin iade edildi. Tekrar dene.",
+    "voiceDeleted": "Bu reel için seçtiğin ses artık kullanılamıyor. Kredilerin iade edildi. Başka bir ses seçip tekrar dene."
   },
   "results": {
     "failedShort": "Oluşturulamadı · krediler iade edildi",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Hedef süre: {{count}} saniye",
     "rewriteOpening": "Açılışı yeniden yaz",
     "narratorAudio": "Anlatıcı sesi",
-    "calmVoice": "Sakin Fransızca ses",
-    "calmVoiceMeta": "Doğal Fransızca, sıcak akustik tempo",
     "recordOwn": "Kendi sesinizi kaydedin",
     "recordOwnMeta": "Opsiyonel özel marka anlatımı",
     "record": "Kaydet",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Her sahne için bir tane olmak üzere {{count}} paragraf kullan ve aralarında birer boş satır bırak.",
     "rewriteOpeningAsk": "1. sahnenin açılışını daha kısa ve şaşırtıcı olacak şekilde yeniden yaz.",
     "voiceName": "Ses: {{name}}",
-    "nextVoice": "Sonraki ses"
+    "changeVoice": "Sesi değiştir"
   },
   "templates": {
     "title": "Reel şablonları",
@@ -479,5 +478,16 @@
     "planFirst": "Önce reel'i planla (Oluştur → Birlikte reel planla), ardından fotoğraflarını seç.",
     "saving": "Kaydediliyor…",
     "sceneN": "Sahne {{n}}"
+  },
+  "voices": {
+    "title": "Sesler",
+    "intro": "Bir örnek dinle, ardından reel videonu seslendirecek sesi seç.",
+    "gender": {
+      "female": "Kadın sesi",
+      "male": "Erkek sesi",
+      "neutral": "Nötr ses"
+    },
+    "playA11y": "{{name}} ses örneğini oynat",
+    "stopA11y": "{{name}} ses örneğini durdur"
   }
 }

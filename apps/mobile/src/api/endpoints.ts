@@ -203,6 +203,8 @@ export type Transition = "cut" | "match" | "dissolve";
 export type ReelScene = { photoKey: string; shot: string; direction: string; onScreenText: string; voiceText: string; kind?: SceneKind; model?: string; prompt?: string; standIn?: boolean; transition?: Transition; presenter?: boolean };
 export type TemplatePreview = { videoKey: string; videoUrl: string; posterKey: string; posterUrl: string };
 export type ReelTemplateOption = { id: string; seconds: number; preview: TemplatePreview | null; own: boolean; making: boolean; failed: boolean };
+/** A voice a reel may use: "coral" (OpenAI) or "eleven:<id>" (ElevenLabs); sampleUrl to listen to, when there is one. */
+export type ReelVoiceOption = { id: string; name: string; gender: "female" | "male" | "neutral"; sampleUrl: string | null };
 export type Presenter = { id: string; name: string; status: "RUNNING" | "DONE" | "FAILED"; sheet: { key: string; url: string } | null };
 /** A trait group (gender, age…) and its options, id → English label (the app shows its own words when it has them). */
 export type PresenterTrait = { id: string; options: Record<string, string> };
@@ -211,7 +213,7 @@ export type ReelOptions = { templates: ReelTemplateOption[]; previewCredits: num
 export type ReelPlan = { title: string; presenter: string; template: string; voice: string; language?: string; scenes: ReelScene[]; caption: string; hashtags: string[] };
 export type RenderStep = "VOICE" | "CLIPS" | "JOIN" | "DONE" | "FAILED";
 /** Why a render failed, as a kind the app words itself (apps/web/server/reels/render.ts renderFailure). */
-export type RenderFailure = { kind: "unavailable" | "slow" | "scene" | "other"; scene?: number; stoppedAt: "VOICE" | "CLIPS" | "JOIN" };
+export type RenderFailure = { kind: "unavailable" | "slow" | "scene" | "voiceDeleted" | "other"; scene?: number; stoppedAt: "VOICE" | "CLIPS" | "JOIN" };
 export type ContentStatus = "PLANNED" | "DRAFT_REVIEW" | "AWAITING_APPROVAL" | "APPROVED" | "SCHEDULED" | "PUBLISHED" | "REJECTED" | "BLOCKED" | "CANCELLED";
 export type ReelSummary = {
   id: string; title: string; status: ContentStatus; version: number; postUrl: string | null; createdAt: string;
@@ -276,6 +278,11 @@ export const reels = {
   async options(signal?: AbortSignal) {
     const { ws, base } = await reelBase();
     return api<ReelOptions>(`${base}/reels/options`, { workspaceId: ws, signal });
+  },
+  /** R11 Voices. */
+  async voices(signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<{ voices: ReelVoiceOption[] }>(`${base}/voices`, { workspaceId: ws, signal });
   },
   /** R10 "Create presenter": 402 = not enough credits or no plan. traits: group id → option id. */
   async createPresenter(name: string, traits: Record<string, string>) {

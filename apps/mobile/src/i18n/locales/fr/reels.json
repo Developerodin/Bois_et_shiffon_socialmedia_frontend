@@ -180,7 +180,8 @@
     "unavailable": "La création de vidéos est momentanément indisponible. Tes crédits ont été remboursés. Réessaie plus tard.",
     "slow": "La création de la vidéo a pris trop de temps. Tes crédits ont été remboursés. Réessaie.",
     "scene": "La scène {{n}} n’a pas pu être animée. Tes crédits ont été remboursés. Réessaie ou choisis une autre photo pour cette scène.",
-    "other": "Une erreur s’est produite lors de la création de la vidéo. Tes crédits ont été remboursés. Réessaie."
+    "other": "Une erreur s’est produite lors de la création de la vidéo. Tes crédits ont été remboursés. Réessaie.",
+    "voiceDeleted": "La voix de ce reel n’est plus disponible. Tes crédits t’ont été remboursés. Choisis une autre voix et réessaie."
   },
   "results": {
     "failedShort": "Création impossible · crédits remboursés",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Durée cible : {{count}} secondes",
     "rewriteOpening": "Réécrire l'ouverture",
     "narratorAudio": "Audio du narrateur",
-    "calmVoice": "Voix française calme",
-    "calmVoiceMeta": "Français naturel, rythme acoustique chaleureux",
     "recordOwn": "Enregistrez votre propre voix",
     "recordOwnMeta": "Narration de marque personnalisée optionnelle",
     "record": "Enregistrer",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Garde {{count}} paragraphes, un par scène, avec une ligne vide entre chaque.",
     "rewriteOpeningAsk": "Réécris l’accroche de la scène 1 : plus courte et plus surprenante.",
     "voiceName": "Voix : {{name}}",
-    "nextVoice": "Voix suivante"
+    "changeVoice": "Changer de voix"
   },
   "templates": {
     "title": "Modèles de reel",
@@ -479,5 +478,16 @@
     "planFirst": "Planifie d’abord le reel (Créer → Planifier un reel ensemble), puis choisis ses photos.",
     "saving": "Enregistrement…",
     "sceneN": "Scène {{n}}"
+  },
+  "voices": {
+    "title": "Voix",
+    "intro": "Écoute un extrait, puis choisis la voix qui lira ton reel.",
+    "gender": {
+      "female": "Voix féminine",
+      "male": "Voix masculine",
+      "neutral": "Voix neutre"
+    },
+    "playA11y": "Écouter un extrait de la voix de {{name}}",
+    "stopA11y": "Arrêter l’extrait de {{name}}"
   }
 }

@@ -180,7 +180,8 @@
     "unavailable": "Die Videoerstellung ist gerade nicht verfügbar. Deine Credits wurden erstattet. Versuch es später erneut.",
     "slow": "Die Videoerstellung hat zu lange gedauert. Deine Credits wurden erstattet. Versuch es erneut.",
     "scene": "Szene {{n}} konnte nicht animiert werden. Deine Credits wurden erstattet. Versuch es erneut oder wähle ein anderes Foto für diese Szene.",
-    "other": "Bei der Videoerstellung ist etwas schiefgelaufen. Deine Credits wurden erstattet. Versuch es erneut."
+    "other": "Bei der Videoerstellung ist etwas schiefgelaufen. Deine Credits wurden erstattet. Versuch es erneut.",
+    "voiceDeleted": "Die Stimme für dieses Reel ist nicht mehr verfügbar. Deine Credits wurden dir zurückerstattet. Wähle eine andere Stimme und versuche es erneut."
   },
   "results": {
     "failedShort": "Erstellung fehlgeschlagen · Credits erstattet",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Zieldauer: {{count}} Sekunden",
     "rewriteOpening": "Eröffnung umschreiben",
     "narratorAudio": "Erzähler-Audio",
-    "calmVoice": "Ruhige französische Stimme",
-    "calmVoiceMeta": "Natürliche französische Stimme, warmes akustisches Tempo",
     "recordOwn": "Eigene Stimme aufnehmen",
     "recordOwnMeta": "Optionale benutzerdefinierte Marken-Narration",
     "record": "Aufnehmen",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Behalte {{count}} Absätze bei, einen pro Szene, mit einer Leerzeile dazwischen.",
     "rewriteOpeningAsk": "Schreibe den Einstieg von Szene 1 um: kürzer und überraschender.",
     "voiceName": "Stimme: {{name}}",
-    "nextVoice": "Nächste Stimme"
+    "changeVoice": "Stimme ändern"
   },
   "templates": {
     "title": "Reel-Vorlagen",
@@ -479,5 +478,16 @@
     "planFirst": "Plane zuerst das Reel (Erstellen → Gemeinsam ein Reel planen) und wähle dann die Fotos dafür aus.",
     "saving": "Wird gespeichert…",
     "sceneN": "Szene {{n}}"
+  },
+  "voices": {
+    "title": "Stimmen",
+    "intro": "Hör dir eine Hörprobe an und wähle dann die Stimme für dein Reel.",
+    "gender": {
+      "female": "Weibliche Stimme",
+      "male": "Männliche Stimme",
+      "neutral": "Neutrale Stimme"
+    },
+    "playA11y": "Hörprobe von {{name}} abspielen",
+    "stopA11y": "Hörprobe von {{name}} stoppen"
   }
 }

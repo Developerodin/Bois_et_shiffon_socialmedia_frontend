@@ -1,9 +1,10 @@
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Mic, Play, RefreshCw } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { reels, type ReelVoiceOption } from "@/api/endpoints";
 import { color, font, radius, space } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
@@ -11,8 +12,6 @@ import { Footer } from "@/ui/layout";
 import { ActionButton, BackTitle, BrandPill, ICON, PageHeader, Panel, ReelsScreen, Tag, eyebrow, languageName, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { useReel } from "@/ui/reels/use-reel";
 
-/** OpenAI voices the server accepts (apps/web/server/reels/voice.ts). */
-const VOICES = ["coral", "sage", "ash", "ballad", "verse"] as const;
 const words = (text: string) => text.split(/\s+/).filter((w) => /\w/.test(w)).length;
 
 /** R11 · Reels / Script and voice. One paragraph per scene (blank line between), so the box stays as designed. */
@@ -22,18 +21,24 @@ export default function ReelsScript() {
   const plan = detail?.plan;
   const language = languageName(plan?.language, i18n.language);
   const [edited, setEdited] = useState<string | null>(null);
-  const [voice, setVoice] = useState<string | null>(null);
   const script = edited ?? plan?.scenes.map((s) => s.voiceText).join("\n\n") ?? "";
   const parts = script.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean);
   const total = words(script);
   const tooLong = parts.findIndex((x) => words(x) > 30);
   const countMismatch = !!plan && parts.length !== plan.scenes.length;
-  const currentVoice = voice ?? plan?.voice ?? VOICES[0];
+  // The voice's name for the row (voices are picked on their own screen, which saves them).
+  const [voices, setVoices] = useState<ReelVoiceOption[] | null>(null);
+  useEffect(() => {
+    const ctrl = new AbortController();
+    reels.voices(ctrl.signal).then((r) => setVoices(r.voices), () => {});
+    return () => ctrl.abort();
+  }, []);
+  const voice = voices?.find((v) => v.id === plan?.voice);
   const thumb = plan ? detail?.photoUrls[plan.scenes[0].photoKey] : undefined;
   const onContinue = async () => {
     if (!plan) return;
-    if (edited !== null || voice !== null) {
-      const next = { ...plan, voice: currentVoice, scenes: plan.scenes.map((s, i) => ({ ...s, voiceText: parts[i] ?? s.voiceText })) };
+    if (edited !== null) {
+      const next = { ...plan, scenes: plan.scenes.map((s, i) => ({ ...s, voiceText: parts[i] ?? s.voiceText })) };
       if (!(await save(next))) return;
     }
     router.push("/reels/storyboard");
@@ -100,17 +105,17 @@ export default function ReelsScript() {
               <Mic size={20} color={color.ink} strokeWidth={ICON.strokeWidth} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={strong14}>{t("script.voiceName", { name: currentVoice })}</Text>
-              <Text style={meta}>{t("script.calmVoiceMeta")}</Text>
+              <Text style={strong14}>{t("script.voiceName", { name: voice?.name ?? "…" })}</Text>
+              {voice ? <Text style={meta}>{t(`voices.gender.${voice.gender}`)}</Text> : null}
             </View>
           </View>
           <ActionButton
-            label={t("script.nextVoice")}
+            label={t("script.changeVoice")}
             variant="ghost"
             leading={Play}
             height={44}
             style={{ gap: 4, paddingHorizontal: space[12] }}
-            onPress={() => setVoice(VOICES[(VOICES.indexOf(currentVoice as (typeof VOICES)[number]) + 1) % VOICES.length])}
+            onPress={() => router.push("/reels/voices")}
           />
         </View>
         <View style={[styles.record, { marginTop: space[12] }]}>

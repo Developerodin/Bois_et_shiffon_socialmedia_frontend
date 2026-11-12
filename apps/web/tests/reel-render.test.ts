@@ -277,6 +277,10 @@ describe("renderFailure (what the app may show)", () => {
   it("never passes the provider's message on, only a kind and where it stopped", () => {
     expect(renderFailure(failed("Higgsfield 403: not_enough_credits"))).toEqual({ kind: "unavailable", stoppedAt: "CLIPS" });
     expect(renderFailure(failed("Voiceover failed (401): bad key", { outputs: {} }))).toEqual({ kind: "unavailable", stoppedAt: "VOICE" });
+    expect(renderFailure(failed("ElevenLabs 429: busy", { outputs: {} }))).toEqual({ kind: "unavailable", stoppedAt: "VOICE" });
+    expect(renderFailure(failed("ElevenLabs 401: quota_exceeded", { outputs: {} }))).toEqual({ kind: "unavailable", stoppedAt: "VOICE" });
+    expect(renderFailure(failed("Unknown voice eleven:x: pick another.", { outputs: {} }))).toEqual({ kind: "voiceDeleted", stoppedAt: "VOICE" });
+    expect(renderFailure(failed('ElevenLabs 404: {"detail":{"status":"voice_not_found"}}', { outputs: {} }))).toEqual({ kind: "voiceDeleted", stoppedAt: "VOICE" });
     expect(renderFailure(failed("The video took more than a day. Credits refunded; try again.", { requests: { CLIPS: ["a"] } }))).toEqual({ kind: "slow", stoppedAt: "CLIPS" });
     expect(renderFailure(failed("Scene 2: content flagged", { requests: { CLIPS: ["a", "b"] } }))).toEqual({ kind: "scene", scene: 2, stoppedAt: "CLIPS" });
     expect(renderFailure(failed("Joining the reel failed: boom", { outputs: { ...outputs, clipUrls: ["u"] } }))).toEqual({ kind: "other", stoppedAt: "JOIN" });

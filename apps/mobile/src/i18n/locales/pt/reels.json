@@ -180,7 +180,8 @@
     "unavailable": "Não é possível criar vídeos de momento. Os teus créditos foram devolvidos. Tenta novamente mais tarde.",
     "slow": "A criação do vídeo demorou demasiado tempo. Os teus créditos foram devolvidos. Tenta novamente.",
     "scene": "Não foi possível animar a cena {{n}}. Os teus créditos foram devolvidos. Tenta novamente ou escolhe outra foto para esta cena.",
-    "other": "Ocorreu um erro ao criar o vídeo. Os teus créditos foram devolvidos. Tenta novamente."
+    "other": "Ocorreu um erro ao criar o vídeo. Os teus créditos foram devolvidos. Tenta novamente.",
+    "voiceDeleted": "A voz deste reel já não está disponível. Devolvemos os teus créditos. Escolhe outra voz e tenta novamente."
   },
   "results": {
     "failedShort": "Não foi possível criar · créditos devolvidos",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Duração alvo: {{count}} segundos",
     "rewriteOpening": "Reescrever abertura",
     "narratorAudio": "Áudio do narrador",
-    "calmVoice": "Voz calma em francês",
-    "calmVoiceMeta": "Francês natural, ritmo acústico quente",
     "recordOwn": "Grave a sua própria voz",
     "recordOwnMeta": "Narração personalizada opcional da marca",
     "record": "Gravar",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Mantém {{count}} parágrafos, um por cena, com uma linha em branco entre eles.",
     "rewriteOpeningAsk": "Reescreve a frase inicial da cena 1: mais curta e surpreendente.",
     "voiceName": "Voz: {{name}}",
-    "nextVoice": "Próxima voz"
+    "changeVoice": "Alterar voz"
   },
   "templates": {
     "title": "Modelos de reel",
@@ -479,5 +478,16 @@
     "planFirst": "Planeia primeiro o reel (Criar → Planear um reel em conjunto) e depois escolhe as fotos.",
     "saving": "A guardar…",
     "sceneN": "Cena {{n}}"
+  },
+  "voices": {
+    "title": "Vozes",
+    "intro": "Ouve uma amostra e escolhe a voz que vai narrar o teu reel.",
+    "gender": {
+      "female": "Voz feminina",
+      "male": "Voz masculina",
+      "neutral": "Voz neutra"
+    },
+    "playA11y": "Ouvir uma amostra de {{name}}",
+    "stopA11y": "Parar a amostra de {{name}}"
   }
 }

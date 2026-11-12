@@ -180,7 +180,8 @@
     "unavailable": "Videon luominen ei ole juuri nyt käytettävissä. Krediittisi on palautettu. Yritä myöhemmin uudelleen.",
     "slow": "Videon luominen kesti liian kauan. Krediittisi on palautettu. Yritä uudelleen.",
     "scene": "Kohtausta {{n}} ei voitu animoida. Krediittisi on palautettu. Yritä uudelleen tai valitse kohtaukseen toinen kuva.",
-    "other": "Videon luomisessa tapahtui virhe. Krediittisi on palautettu. Yritä uudelleen."
+    "other": "Videon luomisessa tapahtui virhe. Krediittisi on palautettu. Yritä uudelleen.",
+    "voiceDeleted": "Reelisi ääni ei ole enää käytettävissä. Krediittisi on palautettu. Valitse toinen ääni ja yritä uudelleen."
   },
   "results": {
     "failedShort": "Luonti epäonnistui · krediitit palautettu",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Tavoitekesto: {{count}} sekuntia",
     "rewriteOpening": "Kirjoita aloitus uudelleen",
     "narratorAudio": "Kertojaääni",
-    "calmVoice": "Rauhallinen ranskalainen ääni",
-    "calmVoiceMeta": "Luonnollinen ranska, lämmin akustinen tempo",
     "recordOwn": "Tallenna oma äänesi",
     "recordOwnMeta": "Valinnainen mukautettu brändikerronta",
     "record": "Tallenna",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Säilytä {{count}} kappaletta, yksi per kohtaus. Jätä kappaleiden väliin tyhjä rivi.",
     "rewriteOpeningAsk": "Kirjoita ensimmäisen kohtauksen aloituskoukku uudelleen: lyhyemmäksi ja yllättävämmäksi.",
     "voiceName": "Ääni: {{name}}",
-    "nextVoice": "Seuraava ääni"
+    "changeVoice": "Vaihda ääni"
   },
   "templates": {
     "title": "Rullapohjat",
@@ -479,5 +478,16 @@
     "planFirst": "Suunnittele reels-video ensin (Luo → Suunnitellaan reels-video yhdessä) ja valitse sitten sen kuvat.",
     "saving": "Tallennetaan…",
     "sceneN": "Kohtaus {{n}}"
+  },
+  "voices": {
+    "title": "Äänet",
+    "intro": "Kuuntele näyte ja valitse sitten ääni, joka lukee reelisi tekstin.",
+    "gender": {
+      "female": "Naisääni",
+      "male": "Miesääni",
+      "neutral": "Neutraali ääni"
+    },
+    "playA11y": "Toista ääninäyte: {{name}}",
+    "stopA11y": "Pysäytä ääninäyte: {{name}}"
   }
 }

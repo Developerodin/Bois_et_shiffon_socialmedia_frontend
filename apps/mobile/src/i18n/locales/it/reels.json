@@ -180,7 +180,8 @@
     "unavailable": "La creazione di video non è disponibile al momento. I tuoi crediti sono stati restituiti. Riprova più tardi.",
     "slow": "La creazione del video ha richiesto troppo tempo. I tuoi crediti sono stati restituiti. Riprova.",
     "scene": "Impossibile animare la scena {{n}}. I tuoi crediti sono stati restituiti. Riprova o scegli un'altra foto per la scena.",
-    "other": "Qualcosa è andato storto durante la creazione del video. I tuoi crediti sono stati restituiti. Riprova."
+    "other": "Qualcosa è andato storto durante la creazione del video. I tuoi crediti sono stati restituiti. Riprova.",
+    "voiceDeleted": "La voce di questo reel non è più disponibile. Ti abbiamo restituito i crediti. Scegli un'altra voce e riprova."
   },
   "results": {
     "failedShort": "Creazione non riuscita · crediti restituiti",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Durata target: {{count}} secondi",
     "rewriteOpening": "Riscrivi apertura",
     "narratorAudio": "Audio narratore",
-    "calmVoice": "Voce francese calma",
-    "calmVoiceMeta": "Francese naturale, ritmo acustico caldo",
     "recordOwn": "Registra la tua voce",
     "recordOwnMeta": "Narrazione personalizzata opzionale del brand",
     "record": "Registra",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Mantieni {{count}} paragrafi, uno per scena, con una riga vuota tra loro.",
     "rewriteOpeningAsk": "Riscrivi l'apertura della scena 1: più breve e sorprendente.",
     "voiceName": "Voce: {{name}}",
-    "nextVoice": "Voce successiva"
+    "changeVoice": "Cambia voce"
   },
   "templates": {
     "title": "Template reel",
@@ -479,5 +478,16 @@
     "planFirst": "Prima pianifica il reel (Crea → Pianifica un reel insieme), poi scegli le foto.",
     "saving": "Salvataggio…",
     "sceneN": "Scena {{n}}"
+  },
+  "voices": {
+    "title": "Voci",
+    "intro": "Ascolta un'anteprima, poi scegli la voce che leggerà il testo del tuo reel.",
+    "gender": {
+      "female": "Voce femminile",
+      "male": "Voce maschile",
+      "neutral": "Voce neutra"
+    },
+    "playA11y": "Ascolta un'anteprima di {{name}}",
+    "stopA11y": "Interrompi l'anteprima di {{name}}"
   }
 }

@@ -17,7 +17,7 @@ import { clipSeconds, planProblems, PRESENTER_MIN_SECONDS, ReelPlan, reelPrice, 
 import { donePresenter } from "@/server/reels/presenters";
 import { promptProblems } from "@/server/reels/prompt-check";
 import { BACKUP_MODEL, type ModelId, modelSeconds, needsReencode, PRESENTER_MODEL, routeScene, type Transition, VIDEO_MODELS } from "@/server/reels/router";
-import { speak } from "@/server/reels/voice";
+import { isElevenVoice, speak, voiceRefused } from "@/server/reels/voice";
 import { padAndJoinWav, wavSeconds } from "@/server/reels/wav";
 import { refundCharge, spendCredits } from "@/server/services/credits";
 import { lock, PublishingError, TX } from "@/server/services/publishing";
@@ -200,8 +200,20 @@ async function prepareVoice(r: ReelRender) {
   // Checked again here: the presenter may have been removed after the render was charged.
   const sheet = plan.presenter === "none" ? null : (await donePresenter(scope, plan.presenter))?.outputKey;
   if (plan.presenter !== "none" && !sheet) return failRender({ renderId: r.id }, new Error("Presenter removed: pick another."), true);
-  const scenes = await Promise.all(plan.scenes.map(async (s) => {
-    const wav = await speak({ text: s.voiceText, voice: plan.voice, language: plan.language });
+  // ElevenLabs scenes one after another (its shared account allows few requests at once); OpenAI's together.
+  // Retries for a busy provider stop after ~2 min: the job has 300 s and a cut-off attempt would speak everything again.
+  const deadline = Date.now() + 120_000;
+  const say = (text: string) => speak({ text, voice: plan.voice, language: plan.language, deadline });
+  const wavs: Uint8Array[] = [];
+  try {
+    if (isElevenVoice(plan.voice)) for (const s of plan.scenes) wavs.push(await say(s.voiceText));
+    else wavs.push(...(await Promise.all(plan.scenes.map((s) => say(s.voiceText)))));
+  } catch (e) {
+    if (voiceRefused(e)) return failRender({ renderId: r.id }, e, true); // refunded now, not after the queue's retries
+    throw e;
+  }
+  const scenes = await Promise.all(plan.scenes.map(async (s, i) => {
+    const wav = wavs[i];
     const voiceKey = mediaKey(scope, `${randomUUID()}.wav`);
     await putMedia(voiceKey, wav, "audio/wav");
     // Kling and Seedance follow the photo's shape: crop to 9:16 first.
@@ -410,14 +422,15 @@ async function notifyStarter(r: Pick<ReelRender, "workspaceId" | "chargeId" | "c
  * What the app may show about a failed render: a kind it words in the person's language. The provider's own message
  * ("Higgsfield 403: not_enough_credits") stays in the row and the audit log for admins, never on a customer's screen.
  */
-export type RenderFailure = { kind: "unavailable" | "slow" | "scene" | "other"; scene?: number; stoppedAt: "VOICE" | "CLIPS" | "JOIN" };
+export type RenderFailure = { kind: "unavailable" | "slow" | "scene" | "voiceDeleted" | "other"; scene?: number; stoppedAt: "VOICE" | "CLIPS" | "JOIN" };
 export function renderFailure(r: Pick<ReelRender, "step" | "error" | "requests" | "outputs">): RenderFailure | null {
   if (r.step !== "FAILED") return null;
   const raw = r.error ?? "";
   const out = (r.outputs ?? {}) as Partial<Outputs>;
   const stoppedAt = out.clipUrls ? "JOIN" : (r.requests as Requests).CLIPS?.length || out.voiceKeys ? "CLIPS" : "VOICE";
   // Our account with a provider (out of credit, key refused, not set up): nothing the person can fix.
-  if (/^(Higgsfield (401|402|403)|OpenAI (401|402|403)|Voiceover failed \((401|402|403)\))|not_enough_credits|isn't set up/i.test(raw)) return { kind: "unavailable", stoppedAt };
+  if (/^(Higgsfield (401|402|403)|OpenAI (401|402|403)|ElevenLabs (401|402|403|429)|Voiceover failed \((401|402|403)\))|not_enough_credits|quota_exceeded|isn't set up/i.test(raw)) return { kind: "unavailable", stoppedAt };
+  if (/^Unknown voice |voice_not_found/.test(raw)) return { kind: "voiceDeleted", stoppedAt };
   if (/more than a day/.test(raw)) return { kind: "slow", stoppedAt };
   const scene = /^Scene (\d+):/.exec(raw);
   if (scene) return { kind: "scene", scene: Number(scene[1]), stoppedAt };

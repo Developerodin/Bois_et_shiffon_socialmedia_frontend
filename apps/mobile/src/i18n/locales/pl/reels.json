@@ -180,7 +180,8 @@
     "unavailable": "Tworzenie filmów jest teraz niedostępne. Twoje kredyty zostały zwrócone. Spróbuj ponownie później.",
     "slow": "Tworzenie filmu trwało zbyt długo. Twoje kredyty zostały zwrócone. Spróbuj ponownie.",
     "scene": "Nie udało się animować sceny {{n}}. Twoje kredyty zostały zwrócone. Spróbuj ponownie lub wybierz inne zdjęcie do tej sceny.",
-    "other": "Coś poszło nie tak podczas tworzenia filmu. Twoje kredyty zostały zwrócone. Spróbuj ponownie."
+    "other": "Coś poszło nie tak podczas tworzenia filmu. Twoje kredyty zostały zwrócone. Spróbuj ponownie.",
+    "voiceDeleted": "Głos w tej rolce nie jest już dostępny. Zwróciliśmy Ci kredyty. Wybierz inny głos i spróbuj ponownie."
   },
   "results": {
     "failedShort": "Nie udało się utworzyć · kredyty zwrócone",
@@ -375,9 +376,7 @@
       "retro": "Retro",
       "sporty": "Sportowy",
       "streetstyle": "Uliczny"
-    },
-    "createButton_few": "Utwórz prezentera · {{count}} kredyty",
-    "createButton_many": "Utwórz prezentera · {{count}} kredytów"
+    }
   },
   "script": {
     "title": "Scenariusz i głos",
@@ -395,8 +394,6 @@
     "targetDuration_other": "Docelowy czas trwania: {{count}} sekund",
     "rewriteOpening": "Przepisz wstęp",
     "narratorAudio": "Dźwięk narratora",
-    "calmVoice": "Spokojny francuski głos",
-    "calmVoiceMeta": "Naturalny francuski, ciepłe tempo akustyczne",
     "recordOwn": "Nagraj swój głos",
     "recordOwnMeta": "Opcjonalna narracja marki",
     "record": "Nagraj",
@@ -406,7 +403,7 @@
     "keepScenes_other": "Zachowaj akapity: {{count}}, po jednym na scenę, oddzielone pustymi wierszami.",
     "rewriteOpeningAsk": "Napisz od nowa początek sceny 1 tak, by był krótszy i bardziej zaskakujący.",
     "voiceName": "Głos: {{name}}",
-    "nextVoice": "Następny głos"
+    "changeVoice": "Zmień głos"
   },
   "templates": {
     "title": "Szablony rolek",
@@ -481,5 +478,16 @@
     "planFirst": "Najpierw zaplanuj rolkę (Utwórz → Zaplanujmy rolkę), a potem wybierz zdjęcia.",
     "saving": "Zapisywanie…",
     "sceneN": "Scena {{n}}"
+  },
+  "voices": {
+    "title": "Głosy",
+    "intro": "Posłuchaj próbki, a potem wybierz głos do swojej rolki.",
+    "gender": {
+      "female": "Głos żeński",
+      "male": "Głos męski",
+      "neutral": "Głos neutralny"
+    },
+    "playA11y": "Odtwórz próbkę głosu {{name}}",
+    "stopA11y": "Zatrzymaj odtwarzanie próbki głosu {{name}}"
   }
 }

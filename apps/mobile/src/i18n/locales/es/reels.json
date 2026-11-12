@@ -180,7 +180,8 @@
     "unavailable": "La creación de videos no está disponible ahora. Te hemos devuelto los créditos. Inténtalo más tarde.",
     "slow": "El video tardó demasiado en crearse. Te hemos devuelto los créditos. Inténtalo de nuevo.",
     "scene": "No se pudo animar la escena {{n}}. Te hemos devuelto los créditos. Inténtalo de nuevo o elige otra foto para la escena.",
-    "other": "Algo salió mal al crear el video. Te hemos devuelto los créditos. Inténtalo de nuevo."
+    "other": "Algo salió mal al crear el video. Te hemos devuelto los créditos. Inténtalo de nuevo.",
+    "voiceDeleted": "La voz de este reel ya no está disponible. Te hemos devuelto los créditos. Elige otra voz y vuelve a intentarlo."
   },
   "results": {
     "failedShort": "No se pudo crear · créditos devueltos",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Duración objetivo: {{count}} segundos",
     "rewriteOpening": "Reescribir apertura",
     "narratorAudio": "Audio del narrador",
-    "calmVoice": "Voz francesa calmada",
-    "calmVoiceMeta": "Francés natural, ritmo acústico cálido",
     "recordOwn": "Graba tu propia voz",
     "recordOwnMeta": "Narración de marca personalizada opcional",
     "record": "Grabar",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Mantén {{count}} párrafos, uno por escena, con una línea en blanco entre ellos.",
     "rewriteOpeningAsk": "Reescribe el gancho inicial de la escena 1: más corto y sorprendente.",
     "voiceName": "Voz: {{name}}",
-    "nextVoice": "Siguiente voz"
+    "changeVoice": "Cambiar voz"
   },
   "templates": {
     "title": "Plantillas de reel",
@@ -479,5 +478,16 @@
     "planFirst": "Primero planifica el reel (Crear → Planificar un reel juntos) y después elige sus fotos.",
     "saving": "Guardando…",
     "sceneN": "Escena {{n}}"
+  },
+  "voices": {
+    "title": "Voces",
+    "intro": "Escucha una muestra y elige la voz que narrará tu reel.",
+    "gender": {
+      "female": "Voz femenina",
+      "male": "Voz masculina",
+      "neutral": "Voz neutra"
+    },
+    "playA11y": "Reproducir una muestra de {{name}}",
+    "stopA11y": "Detener la muestra de {{name}}"
   }
 }

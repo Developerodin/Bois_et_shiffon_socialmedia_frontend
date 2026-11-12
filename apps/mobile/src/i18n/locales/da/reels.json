@@ -180,7 +180,8 @@
     "unavailable": "Det er ikke muligt at lave videoer lige nu. Dine kreditter er tilbageført. Prøv igen senere.",
     "slow": "Det tog for lang tid at lave videoen. Dine kreditter er tilbageført. Prøv igen.",
     "scene": "Scene {{n}} kunne ikke animeres. Dine kreditter er tilbageført. Prøv igen, eller vælg et andet billede til scenen.",
-    "other": "Noget gik galt, da videoen skulle laves. Dine kreditter er tilbageført. Prøv igen."
+    "other": "Noget gik galt, da videoen skulle laves. Dine kreditter er tilbageført. Prøv igen.",
+    "voiceDeleted": "Stemmen til din reel er ikke længere tilgængelig. Du har fået dine kreditter tilbage. Vælg en anden stemme, og prøv igen."
   },
   "results": {
     "failedShort": "Kunne ikke laves · kreditter tilbageført",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Måltid: {{count}} sekunder",
     "rewriteOpening": "Omskriv åbning",
     "narratorAudio": "Fortæller audio",
-    "calmVoice": "Rolig fransk stemme",
-    "calmVoiceMeta": "Naturlig fransk, varm akustisk tempo",
     "recordOwn": "Optag din egen stemme",
     "recordOwnMeta": "Valgfri tilpasset brandfortælling",
     "record": "Optag",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Behold {{count}} afsnit, ét pr. scene, med en tom linje imellem.",
     "rewriteOpeningAsk": "Omskriv åbningen i scene 1, så den er kortere og mere overraskende.",
     "voiceName": "Stemme: {{name}}",
-    "nextVoice": "Næste stemme"
+    "changeVoice": "Skift stemme"
   },
   "templates": {
     "title": "Reel skabeloner",
@@ -479,5 +478,16 @@
     "planFirst": "Planlæg først din reel (Opret → Planlæg en reel sammen), og vælg derefter billeder.",
     "saving": "Gemmer…",
     "sceneN": "Scene {{n}}"
+  },
+  "voices": {
+    "title": "Stemmer",
+    "intro": "Lyt til en stemmeprøve, og vælg den stemme, der skal læse din reel op.",
+    "gender": {
+      "female": "Kvindelig stemme",
+      "male": "Mandlig stemme",
+      "neutral": "Neutral stemme"
+    },
+    "playA11y": "Afspil en stemmeprøve med {{name}}",
+    "stopA11y": "Stop stemmeprøven med {{name}}"
   }
 }

@@ -10,7 +10,7 @@ import { assetsOf, createAsset, registerAssetKind } from "@/server/reels/assets"
 import { fetchResult, higgsfield } from "@/server/reels/higgsfield";
 import { frameOf } from "@/server/reels/join";
 import { ownMediaKey, PublishingError } from "@/server/services/publishing";
-import { mediaExists, mediaKey, putMedia, signedMediaUrl } from "@/server/storage/media";
+import { mediaKey, mediaKnown, putMedia, signedMediaUrl } from "@/server/storage/media";
 
 /**
  * Reel templates (mobile R12): a shape the scriptwriter follows. Titles and subtitles are phone strings
@@ -155,14 +155,7 @@ registerAssetKind("template-preview", {
 
 // ── what the phone shows (GET …/reels/options) ────────────────────────────────────────────────────────────────
 
-// ponytail: generic previews only appear (never vanish), so a found one is remembered for the process's life.
-const genericFound = new Set<string>();
-async function genericPreview(t: ReelTemplate) {
-  const key = genericPreviewKey(t);
-  if (!genericFound.has(key) && !(await mediaExists(key).catch(() => false))) return null;
-  genericFound.add(key);
-  return key;
-}
+const genericPreview = async (t: ReelTemplate) => ((await mediaKnown(genericPreviewKey(t))) ? genericPreviewKey(t) : null);
 
 const media = async (videoKey: string) => ({ videoKey, videoUrl: await signedMediaUrl(videoKey), posterKey: posterKey(videoKey), posterUrl: await signedMediaUrl(posterKey(videoKey)) });
 

@@ -180,7 +180,8 @@
     "unavailable": "Det går inte att skapa videor just nu. Dina krediter har återbetalats. Försök igen senare.",
     "slow": "Det tog för lång tid att skapa videon. Dina krediter har återbetalats. Försök igen.",
     "scene": "Scen {{n}} kunde inte animeras. Dina krediter har återbetalats. Försök igen eller välj en annan bild för scenen.",
-    "other": "Något gick fel när videon skapades. Dina krediter har återbetalats. Försök igen."
+    "other": "Något gick fel när videon skapades. Dina krediter har återbetalats. Försök igen.",
+    "voiceDeleted": "Rösten för den här reelen är inte längre tillgänglig. Du har fått tillbaka dina krediter. Välj en annan röst och försök igen."
   },
   "results": {
     "failedShort": "Kunde inte skapas · krediter återbetalda",
@@ -393,8 +394,6 @@
     "targetDuration_other": "Målduration: {{count}} sekunder",
     "rewriteOpening": "Skriv om inledning",
     "narratorAudio": "Berättarröst",
-    "calmVoice": "Lugn fransk röst",
-    "calmVoiceMeta": "Naturlig franska, varm akustisk takt",
     "recordOwn": "Spela in din egen röst",
     "recordOwnMeta": "Valfri anpassad varumärkesberättelse",
     "record": "Spela in",
@@ -404,7 +403,7 @@
     "keepScenes_other": "Behåll {{count}} stycken, ett per scen, med en tom rad mellan dem.",
     "rewriteOpeningAsk": "Skriv om inledningen i scen 1 så att den blir kortare och mer överraskande.",
     "voiceName": "Röst: {{name}}",
-    "nextVoice": "Nästa röst"
+    "changeVoice": "Byt röst"
   },
   "templates": {
     "title": "Reel-mallar",
@@ -479,5 +478,16 @@
     "planFirst": "Planera din reel först (Skapa → Planera en reel tillsammans) och välj sedan foton.",
     "saving": "Sparar…",
     "sceneN": "Scen {{n}}"
+  },
+  "voices": {
+    "title": "Röster",
+    "intro": "Lyssna på ett röstprov och välj sedan rösten som läser upp din reel.",
+    "gender": {
+      "female": "Kvinnlig röst",
+      "male": "Manlig röst",
+      "neutral": "Neutral röst"
+    },
+    "playA11y": "Spela upp röstprovet för {{name}}",
+    "stopA11y": "Stoppa röstprovet för {{name}}"
   }
 }
