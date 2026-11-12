@@ -63,6 +63,18 @@ export async function deleteMedia(key: string) {
   await s3.send(new DeleteObjectCommand({ Bucket: MEDIA_BUCKET, Key: key }));
 }
 
+/**
+ * For files that only ever appear (generic previews, voice samples): a found key is remembered for the process's
+ * life, so a screen polling every 10 s doesn't ask storage each time. A failed check counts as not there yet.
+ */
+const known = new Set<string>();
+export async function mediaKnown(key: string) {
+  if (known.has(key)) return true;
+  if (!(await mediaExists(key).catch(() => false))) return false;
+  known.add(key);
+  return true;
+}
+
 /** Whether an object is stored (false on 404; other errors throw). */
 export async function mediaExists(key: string) {
   try {

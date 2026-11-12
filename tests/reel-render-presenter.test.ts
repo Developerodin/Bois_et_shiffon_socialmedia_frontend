@@ -6,7 +6,16 @@ vi.mock("@/server/db/prisma", () => ({ prisma: { reelRender: { findUnique: m.fin
 vi.mock("@/server/jobs/queue", () => ({ enqueueJob: m.enqueue }));
 vi.mock("@/server/reels/presenters", () => ({ donePresenter: m.presenter }));
 vi.mock("@/server/content/knowledge", () => ({ productPhotos: vi.fn(async () => [{ key: "w1/b1/table.jpg", title: "Table Bunting" }]) }));
-vi.mock("@/server/reels/voice", () => ({ speak: vi.fn(async () => new Uint8Array(8)) }));
+const speaking = vi.hoisted(() => ({ now: 0, most: 0 }));
+vi.mock("@/server/reels/voice", () => ({
+  isElevenVoice: (id: string) => id.startsWith("eleven:"),
+  speak: vi.fn(async () => {
+    speaking.most = Math.max(speaking.most, ++speaking.now);
+    await new Promise((r) => setTimeout(r, 5));
+    speaking.now--;
+    return new Uint8Array(8);
+  }),
+}));
 vi.mock("@/server/reels/wav", () => ({ wavSeconds: vi.fn(() => 2.5), padAndJoinWav: vi.fn() }));
 vi.mock("@/server/storage/media", async (orig) => ({ ...(await orig<object>()), putMedia: vi.fn(), signedMediaUrl: vi.fn(async (k: string) => `https://s3/${k}`) }));
 vi.mock("sharp", () => ({ default: Object.assign(() => ({ resize: () => ({ jpeg: () => ({ toBuffer: async () => Buffer.alloc(1) }) }) }), { concurrency: () => 1, cache: () => {} }) }));
@@ -46,5 +55,18 @@ describe("presenter scenes at VOICE", () => {
     m.presenter.mockResolvedValue(null);
     await advanceRender({ renderId: "r1" }).catch(() => {}); // failRender's transaction isn't mocked here
     expect(m.updateMany).not.toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ step: "CLIPS" }) }));
+  });
+
+  it("speaks ElevenLabs scenes one at a time, OpenAI ones together", async () => {
+    m.presenter.mockResolvedValue(null);
+    const body = (voice: string) => ({ body: { title: "T", presenter: "none", template: "", voice, caption: "", hashtags: [], scenes: [scene({}), scene({}), scene({})] } });
+    speaking.most = 0;
+    m.version.mockResolvedValue(body("eleven:EXAVITQu4vr4xnSDxMaL"));
+    await advanceRender({ renderId: "r1" });
+    expect(speaking.most).toBe(1);
+    speaking.most = 0;
+    m.version.mockResolvedValue(body("coral"));
+    await advanceRender({ renderId: "r1" });
+    expect(speaking.most).toBe(3);
   });
 });

@@ -57,3 +57,10 @@ describe("creating a presenter", () => {
     expect(PresenterRequest.safeParse({ name: "X", traits: { brief: "anything" } }).success).toBe(false);
   });
 });
+
+describe("voice ownership", () => {
+  it("refuses a voice outside our list", async () => {
+    expect(await planOwnershipProblems({ ...plan("none", [scene(), scene()]), voice: "eleven:someoneElse" }, scope)).toEqual(["Voice not available: pick another."]);
+    expect(await planOwnershipProblems({ ...plan("none", [scene(), scene()]), voice: "eleven:EXAVITQu4vr4xnSDxMaL" }, scope)).toEqual([]);
+  });
+});

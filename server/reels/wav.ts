@@ -39,7 +39,13 @@ export function padAndJoinWav(parts: Uint8Array[], seconds: number[]): Uint8Arra
     Buffer.from(p.buffer, p.byteOffset + formats[i].dataOffset, Math.min(want, p.byteLength - formats[i].dataOffset)).copy(out);
     return out;
   });
-  const size = pcm.reduce((n, b) => n + b.length, 0);
+  return pcmWav(Buffer.concat(pcm), f);
+}
+
+/** Raw 16-bit PCM (e.g. ElevenLabs pcm_24000) in a WAV with a correct header; 24 kHz mono, as OpenAI's voice. */
+export function pcmWav(pcm: Uint8Array, f: { channels: number; rate: number; bits: number } = { channels: 1, rate: 24_000, bits: 16 }): Uint8Array {
+  const block = (f.channels * f.bits) / 8;
+  const size = pcm.length;
   const head = Buffer.alloc(44);
   head.write("RIFF", 0);
   head.writeUInt32LE(36 + size, 4);
@@ -48,10 +54,10 @@ export function padAndJoinWav(parts: Uint8Array[], seconds: number[]): Uint8Arra
   head.writeUInt16LE(1, 20);
   head.writeUInt16LE(f.channels, 22);
   head.writeUInt32LE(f.rate, 24);
-  head.writeUInt32LE(f.byteRate, 28);
+  head.writeUInt32LE(f.rate * block, 28);
   head.writeUInt16LE(block, 32);
   head.writeUInt16LE(f.bits, 34);
   head.write("data", 36);
   head.writeUInt32LE(size, 40);
-  return new Uint8Array(Buffer.concat([head, ...pcm]));
+  return new Uint8Array(Buffer.concat([head, pcm]));
 }

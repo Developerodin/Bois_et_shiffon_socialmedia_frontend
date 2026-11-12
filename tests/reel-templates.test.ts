@@ -27,7 +27,7 @@ vi.mock("@/server/storage/media", async (orig) => ({
   ...(await orig<object>()),
   putMedia: m.put,
   signedMediaUrl: vi.fn(async (k: string) => `https://s3/${k}`),
-  mediaExists: vi.fn(async (k: string) => k.includes("spotlight")),
+  mediaKnown: vi.fn(async (k: string) => k.includes("spotlight")),
 }));
 
 import { runAsset } from "@/server/reels/assets";
