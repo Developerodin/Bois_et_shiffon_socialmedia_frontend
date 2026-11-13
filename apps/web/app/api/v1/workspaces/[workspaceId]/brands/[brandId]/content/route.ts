@@ -7,7 +7,7 @@ import { kickRunner } from "@/server/jobs/runner";
 import { createPost, ownMediaKey, postAiAllowed, PublishingError } from "@/server/services/publishing";
 import { signedMediaUrl } from "@/server/storage/media";
 import { isStoryBody } from "@/server/stories/body";
-import { createStory, failStoryStart, renderedUrl, STORY_START_NOTE, storyTab } from "@/server/stories/service";
+import { createStory, failStoryStart, renderedUrl, STORY_START_NOTE, storyForRequest, storyTab } from "@/server/stories/service";
 
 /** Calendar items with their latest draft and its latest quality check. */
 export async function GET(request: Request, context: { params: Promise<BrandRouteParams> }) {
@@ -104,6 +104,11 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     if (!parsed.success) return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid request", status: 400, detail: parsed.error.issues[0]?.message });
     const scope = await authorizeBrandRoute(request, context.params, "content.create");
     if (scope instanceof Response) return scope;
+    // A retried request gets its story back without touching the rate limit.
+    if (parsed.data.channel === "INSTAGRAM_STORY") {
+      const again = await storyForRequest(scope, parsed.data.requestId);
+      if (again) return Response.json({ id: again.id });
+    }
     if (!(await postAiAllowed(scope.workspaceId))) return problemResponse({ type: "https://api.brandpilot/errors/limit", title: "Too many posts written today. Try again tomorrow.", status: 429 });
     if (parsed.data.channel === "INSTAGRAM_STORY") {
       const story = await createStory(scope, parsed.data);

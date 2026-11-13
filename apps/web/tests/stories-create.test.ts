@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const db = vi.hoisted(() => ({
   product: { findFirst: vi.fn() },
   contentItem: { findFirst: vi.fn(), create: vi.fn(), updateMany: vi.fn(async (_a: unknown) => ({ count: 1 })) },
-  auditEvent: { create: vi.fn() },
+  auditEvent: { create: vi.fn(), findFirst: vi.fn(async (_a?: unknown) => null as unknown) },
   creditEntry: { count: vi.fn(async () => 0), findFirst: vi.fn(async (_a?: unknown) => null as unknown) },
   $executeRaw: vi.fn(),
   $transaction: vi.fn(),
@@ -25,6 +25,9 @@ import { POST as ITEM_POST } from "@/app/api/v1/workspaces/[workspaceId]/brands/
 
 const scope = { workspaceId: "w1", brandId: "b1", userId: "u1" };
 const REQ = "11111111-1111-4111-8111-111111111111";
+const REF = `story:b1:${REQ}`;
+// Which credit rows exist, by reason (the service asks for "story-write" and "refund" rows).
+const rows = { charge: false, refund: false };
 const input = { goal: "newArrival" as const, productId: "p1", direction: " warm ", requestId: REQ };
 const ctx = { params: Promise.resolve({ workspaceId: "w1", brandId: "b1" }) };
 const post = (body: unknown) => POST(new Request("http://x", { method: "POST", body: JSON.stringify(body) }), ctx as never);
@@ -36,7 +39,10 @@ beforeEach(() => {
   db.contentItem.findFirst.mockResolvedValue(null);
   db.contentItem.create.mockResolvedValue({ id: "i1" });
   db.creditEntry.count.mockResolvedValue(0);
-  db.creditEntry.findFirst.mockResolvedValue(null);
+  rows.charge = false;
+  rows.refund = false;
+  db.auditEvent.findFirst.mockResolvedValue(null);
+  db.creditEntry.findFirst.mockImplementation(async (a?: unknown) => ((a as { where: { reason: string } }).where.reason === "refund" ? rows.refund : rows.charge) ? { id: "row" } : null);
   m.spend.mockImplementation(async (i: { refId: string }) => i.refId);
   m.refund.mockResolvedValue(true);
   m.start.mockResolvedValue({ id: "run" });
@@ -47,11 +53,11 @@ beforeEach(() => {
 describe("createStory", () => {
   it("creates the item and charges 5 with the request id as refId", async () => {
     const r = await createStory(scope, input);
-    expect(r).toEqual({ id: "i1", chargeId: REQ, repeated: false });
-    expect(m.spend).toHaveBeenCalledWith({ workspaceId: "w1", amount: 5, reason: "story-write", refId: REQ, userId: "u1" });
+    expect(r).toEqual({ id: "i1", chargeId: REF, repeated: false });
+    expect(m.spend).toHaveBeenCalledWith({ workspaceId: "w1", amount: 5, reason: "story-write", refId: REF, userId: "u1" });
     expect(db.contentItem.create.mock.calls[0][0].data).toMatchObject({
       channel: "INSTAGRAM_STORY", status: "BRIEF_READY", productIds: ["p1"], campaignId: null, title: "Table Milo",
-      brief: { goal: "newArrival", products: ["Table Milo"], keyMessage: "warm", angle: "newArrival", requestId: REQ },
+      brief: { goal: "awareness", products: ["Table Milo"], keyMessage: "warm", angle: "newArrival", requestId: REQ },
     });
     expect(db.auditEvent.create).toHaveBeenCalledTimes(1);
   });
@@ -66,7 +72,7 @@ describe("createStory", () => {
   it("returns the existing item for a repeated request id: one item, no second create", async () => {
     db.contentItem.findFirst.mockResolvedValue({ id: "i1" });
     const r = await createStory(scope, input);
-    expect(r).toEqual({ id: "i1", chargeId: REQ, repeated: true });
+    expect(r).toEqual({ id: "i1", chargeId: REF, repeated: true });
     expect(db.contentItem.create).not.toHaveBeenCalled();
     expect(db.contentItem.findFirst.mock.calls[0][0].where.brief).toEqual({ path: ["requestId"], equals: REQ });
   });
@@ -85,30 +91,76 @@ describe("createStory", () => {
   });
 });
 
+describe("a spent or foreign request id", () => {
+  it("a repeat after the story was deleted is 409 story.requestUsed: no item, no new charge", async () => {
+    rows.charge = true;
+    db.auditEvent.findFirst.mockResolvedValue({ id: "a1" });
+    await expect(createStory(scope, input)).rejects.toMatchObject({ status: 409, code: "story.requestUsed" });
+    expect(db.contentItem.create).not.toHaveBeenCalled();
+    expect(m.spend).not.toHaveBeenCalled();
+    expect((db.auditEvent.findFirst.mock.calls[0]![0] as { where: { metadata: unknown } }).where.metadata).toEqual({ path: ["requestId"], equals: REQ });
+  });
+
+  it("a repeat of a refunded request id is 409 and creates nothing", async () => {
+    rows.charge = true;
+    rows.refund = true;
+    await expect(createStory(scope, input)).rejects.toMatchObject({ status: 409, code: "story.requestUsed" });
+    expect(db.contentItem.create).not.toHaveBeenCalled();
+  });
+
+  it("through the route: 409 and no Creator run", async () => {
+    rows.charge = true;
+    rows.refund = true;
+    const res = await post({ channel: "INSTAGRAM_STORY", goal: "newArrival", productId: "p1", requestId: REQ });
+    expect(res.status).toBe(409);
+    expect(m.start).not.toHaveBeenCalled();
+  });
+
+  it("a crash between charge and item: the same request id creates the item on the standing charge, charging nothing more", async () => {
+    rows.charge = true;
+    const r = await createStory(scope, input);
+    expect(r).toEqual({ id: "i1", chargeId: REF, repeated: false });
+    expect(m.spend).not.toHaveBeenCalled();
+  });
+
+  it("the same request id in another brand is charged separately, with its own refId and item", async () => {
+    await createStory({ ...scope, brandId: "b2" }, input);
+    expect(m.spend).toHaveBeenCalledWith(expect.objectContaining({ refId: `story:b2:${REQ}` }));
+    expect(db.contentItem.create).toHaveBeenCalledTimes(1);
+    expect((db.contentItem.findFirst.mock.calls[0]![0] as { where: { brandId: string } }).where.brandId).toBe("b2");
+  });
+
+  it("records the request id in the audit row, which outlives the story", async () => {
+    await createStory(scope, input);
+    expect((db.auditEvent.create.mock.calls[0]![0] as { data: { metadata: object } }).data.metadata).toMatchObject({ requestId: REQ });
+  });
+});
+
 describe("POST content (story)", () => {
   const body = { channel: "INSTAGRAM_STORY", goal: "newArrival", productId: "p1", requestId: REQ };
 
   it("starts the Creator prepaid with the charge", async () => {
     const res = await post(body);
     expect(res.status).toBe(201);
-    expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "creator", input: { itemId: "i1" }, prepaidChargeId: REQ }));
+    expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "creator", input: { itemId: "i1" }, prepaidChargeId: REF }));
   });
 
-  it("does not start a second run for a repeated request", async () => {
+  it("does not start a second run for a repeated request, and does not touch the rate limit", async () => {
     db.contentItem.findFirst.mockResolvedValue({ id: "i1" });
     const res = await post(body);
     expect(res.status).toBe(200);
+    expect(m.allowed).not.toHaveBeenCalled();
     expect(m.start).not.toHaveBeenCalled();
   });
 
   it("refunds once and blocks the story when the Creator can't start", async () => {
     m.start.mockRejectedValue(new Error("down"));
-    db.contentItem.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({ brief: { goal: "newArrival" } });
+    db.contentItem.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce(null).mockResolvedValueOnce({ brief: { goal: "newArrival" } });
     const res = await post(body);
     expect(res.status).toBe(502);
     expect((await res.json()).code).toBe("story.writeStart");
     expect(m.refund).toHaveBeenCalledTimes(1);
-    expect(m.refund).toHaveBeenCalledWith("w1", REQ);
+    expect(m.refund).toHaveBeenCalledWith("w1", REF);
     expect((db.contentItem.updateMany.mock.calls[0]![0] as { data: unknown }).data).toMatchObject({ status: "BLOCKED", brief: { goal: "newArrival", note: "Writing didn't start. Try again." } });
   });
 
@@ -127,7 +179,7 @@ describe("rewrite of a story", () => {
     const chargeId = await reopenStoryWrite(scope, "i1");
     expect(chargeId).toBe("i1:retry:1");
     expect(m.spend).toHaveBeenCalledWith(expect.objectContaining({ amount: 5, reason: "story-write", refId: "i1:retry:1" }));
-    expect((db.creditEntry.findFirst.mock.calls[0]![0] as { where: unknown }).where).toMatchObject({ reason: "refund", refId: REQ });
+    expect((db.creditEntry.findFirst.mock.calls[0]![0] as { where: unknown }).where).toMatchObject({ reason: "refund", refId: REF });
   });
 
   it("counts earlier retries: the second retry is :retry:2 and checks retry 1 was refunded", async () => {
@@ -138,9 +190,16 @@ describe("rewrite of a story", () => {
     expect((db.creditEntry.findFirst.mock.calls[0]![0] as { where: { refId: string } }).where.refId).toBe("i1:retry:1");
   });
 
-  it("is free while the charge stands, or when the story has a version", async () => {
-    db.contentItem.findFirst.mockResolvedValue(story("BRIEF_READY"));
-    expect(await reopenStoryWrite(scope, "i1")).toBeNull();
+  it("prepays a stranded story's run with its standing charge, and clears the blocked note", async () => {
+    rows.charge = true;
+    db.contentItem.findFirst.mockResolvedValue({ ...story("BLOCKED"), brief: { requestId: REQ, note: "Writing didn't start. Try again." } });
+    expect(await reopenStoryWrite(scope, "i1")).toBe(REF);
+    expect(m.spend).not.toHaveBeenCalled();
+    expect((db.contentItem.updateMany.mock.calls[0]![0] as { data: { status: string; brief: object } }).data).toEqual({ status: "BRIEF_READY", brief: { requestId: REQ } });
+  });
+
+  it("is free when the story has a version", async () => {
+    rows.charge = true;
     db.contentItem.findFirst.mockResolvedValue({ ...story(), versions: [{ version: 1, body: {} }] });
     db.creditEntry.findFirst.mockResolvedValue({ id: "refund" });
     expect(await reopenStoryWrite(scope, "i1")).toBeNull();
