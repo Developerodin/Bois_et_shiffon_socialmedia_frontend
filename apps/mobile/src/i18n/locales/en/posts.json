@@ -306,7 +306,11 @@
       "rateLimited": "Too many tries. Try again later.",
       "stale": "Someone else changed this story. Your changes weren’t saved.",
       "notEditable": "This story can’t be edited any more.",
-      "renderLimit": "Too many story saves this hour. Try again later."
+      "renderLimit": "Too many story saves this hour. Try again later.",
+      "type": "Photos can be JPG or PNG, clips MP4 or MOV.",
+      "tooLarge": "That file is too large (photos up to 15 MB, clips up to 100 MB).",
+      "uploadLimit": "Too many uploads this hour. Try again later.",
+      "videoLong": "Clips can be up to 3 minutes."
     },
     "editor": {
       "done": "Done",
@@ -400,6 +404,31 @@
       "byHandNow": "Post by hand now",
       "changeTime": "Change time to {{time}}",
       "stopByHand": "Stop posting by hand"
+    },
+    "picker": {
+      "title": "Photo or clip",
+      "tabs": "Where from",
+      "phone": "Phone",
+      "products": "Products",
+      "library": "Library",
+      "generate": "Generate",
+      "rightsQuestion": "Do you own this photo or clip, or have permission to use it?",
+      "rightsYes": "We own or may use this",
+      "rightsNo": "No",
+      "rightsRefused": "We can only use photos and clips you own or have permission to use.",
+      "choose": "Choose from phone",
+      "camera": "Take a photo or video",
+      "cameraDenied": "Allow camera access in Settings to take a photo or video.",
+      "uploading": "Uploading… {{percent}}%",
+      "checking": "Checking the file…",
+      "offline": "Offline: we’ll try again",
+      "cancel": "Cancel upload",
+      "noProducts": "No product photos for this story.",
+      "emptyLibrary": "Nothing in the library yet.",
+      "video": "Video",
+      "pick": "Use {{title}}",
+      "replace": "Replace photo or clip",
+      "add": "Choose photo or clip"
     }
   },
   "editStory": {

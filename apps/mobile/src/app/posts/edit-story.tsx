@@ -19,11 +19,15 @@ import { useWorkingPoll } from "@/ui/posts/use-working-poll";
 import { storyCodeText, storyError } from "@/ui/stories/errors";
 import { FrameMenu, frameLabel, FrameStrip } from "@/ui/stories/frame-strip";
 import { STORY_LIMITS, textFits } from "@/ui/stories/limits";
+import { type Picked, StoryPicker } from "@/ui/stories/picker";
 import { StoryPreview } from "@/ui/stories/preview";
 import { usePermissions } from "@/ui/use-permissions";
 
-/** A frame being edited; `from` is its index in the saved version (its rendered picture), -1 for a new one. */
-type EditFrame = StoryFrameInput & { from: number };
+/**
+ * A frame being edited; `from` is its index in the saved version (its rendered picture), -1 for a new one. `picked`
+ * is a newly chosen photo or clip, previewed until a save renders it.
+ */
+type EditFrame = StoryFrameInput & { from: number; picked?: Pick<Picked, "url" | "kind"> };
 type Draft = { frames: EditFrame[]; cta: string; link: string; brandMark: boolean };
 /**
  * `key` names the field last typed in, so a run of keystrokes in one field is one change for Undo. `base` is the
@@ -43,14 +47,15 @@ const fromBody = (b: StoryBody): Draft => ({
   brandMark: b.brandMark,
 });
 // Only client fields go up (the server strips its own anyway); JSON drops the undefined ones.
-const toInput = (d: Draft): StoryInput => ({ frames: d.frames.map(({ from: _from, ...f }) => f), cta: d.cta, link: d.link, brandMark: d.brandMark });
+const toInput = (d: Draft): StoryInput => ({ frames: d.frames.map(({ from: _from, picked: _picked, ...f }) => f), cta: d.cta, link: d.link, brandMark: d.brandMark });
 const same = (a: Draft, b: Draft) => JSON.stringify(toInput(a)) === JSON.stringify(toInput(b));
 
 /**
- * P08 · Posts / Edit story: a true 9:16 preview of the selected frame, the frame strip, and the Text, Brand and CTA
- * tools (Image comes with the picker). Saving makes a new version and renders it; Save and check opens the story,
- * and an approved story left unchanged offers Schedule story instead. Undo steps back one change; leaving with
- * changes asks first. While frames are being prepared the editor is read-only.
+ * P08 · Posts / Edit story: a true 9:16 preview of the selected frame, the frame strip, and the Text, Image, Brand
+ * and CTA tools. Image and the strip's + open the picker (a phone upload, a product photo, the library). Saving makes
+ * a new version and renders it; Save and check opens the story, and an approved story left unchanged offers Schedule
+ * story instead. Undo steps back one change; leaving with changes asks first. While frames are being prepared the
+ * editor is read-only.
  */
 export default function EditStory() {
   const { t } = useTranslation("posts");
@@ -72,6 +77,8 @@ export default function EditStory() {
   // The frame whose "…" menu is open, and the blocked navigation the discard sheet is asking about.
   const [menuFor, setMenuFor] = useState<number | null>(null);
   const [leaving, setLeaving] = useState<(() => void) | null>(null);
+  // The picker is open for frame i, or for a new frame ("new").
+  const [picking, setPicking] = useState<number | "new" | null>(null);
 
   const version = story?.latest?.version ?? null;
   const body = story?.latest?.body as unknown as StoryBody | undefined;
@@ -110,8 +117,9 @@ export default function EditStory() {
   const frame = frames[at] as EditFrame | undefined;
   const last = frames.length - 1;
   const savedLast = saved.frames.length - 1;
-  const urlOf = (f: EditFrame) => (f.from >= 0 ? (release?.frames[f.from]?.url ?? null) : null);
-  const kindOf = (f: EditFrame) => (f.from >= 0 ? (body?.frames[f.from]?.mediaKind ?? null) : null);
+  const renderedOf = (f: EditFrame) => (f.from >= 0 && !f.picked ? (release?.frames[f.from]?.url ?? null) : null);
+  const urlOf = (f: EditFrame) => f.picked?.url ?? renderedOf(f);
+  const kindOf = (f: EditFrame) => f.picked?.kind ?? (f.from >= 0 ? (body?.frames[f.from]?.mediaKind ?? null) : null);
   // The rendered picture still shows this frame as edited (its text, its CTA if it's last, the brand mark).
   const fresh = (f: EditFrame, i: number) => {
     const s = saved.frames[f.from];
@@ -141,6 +149,17 @@ export default function EditStory() {
     [next[i], next[i + dir]] = [next[i + dir], next[i]];
     change({ ...draft, frames: next });
     setSelected(i + dir);
+  };
+  // A new photo or clip drops the old one's crop; a clip starts at 0 with sound.
+  const pick = (p: Picked) => {
+    const media = { source: p.source, picked: { url: p.url, kind: p.kind }, crop: undefined, clip: p.kind === "video" ? { start: 0, sound: true } : undefined };
+    if (picking === "new") {
+      change({ ...draft, frames: [...frames, { label: "", headline: "", body: "", from: -1, ...media }] });
+      setSelected(frames.length);
+    } else if (picking !== null) {
+      change({ ...draft, frames: frames.map((f, i) => (i === picking ? { ...f, ...media } : f)) });
+    }
+    setPicking(null);
   };
   const remove = (i: number) => {
     change({ ...draft, frames: frames.filter((_, j) => j !== i) });
@@ -181,8 +200,7 @@ export default function EditStory() {
   const pw = Math.min(area.width, (area.height * 9) / 16);
   const tools: { key: Tool; Icon: typeof Type; off?: boolean }[] = [
     { key: "text", Icon: Type, off: !frame },
-    // TODO(Task 17): the Image tool opens the picker.
-    { key: "image", Icon: Crop, off: true },
+    { key: "image", Icon: Crop, off: !frame },
     { key: "brand", Icon: BadgeCheck },
     { key: "cta", Icon: MousePointer2 },
   ];
@@ -218,8 +236,8 @@ export default function EditStory() {
               cta={draft.cta}
               brandMark={draft.brandMark}
               editing={tool === "text"}
-              url={urlOf(frame)}
-              sourceUrl={frame.from >= 0 ? (release?.frames[frame.from]?.sourceUrl ?? null) : null}
+              url={renderedOf(frame)}
+              sourceUrl={frame.picked?.url ?? (frame.from >= 0 ? (release?.frames[frame.from]?.sourceUrl ?? null) : null)}
               fresh={fresh(frame, at)}
               width={pw}
               accessibilityLabel={frameLabel(t, strip[at], at, frames.length)}
@@ -271,6 +289,8 @@ export default function EditStory() {
                 <Field label={t("stories.editor.headline")} value={frame.headline} maxLength={STORY_LIMITS.headline} height={44} onChangeText={(v) => setFrame({ headline: v }, "headline")} />
                 <Field label={t("stories.editor.body")} value={frame.body} maxLength={STORY_LIMITS.body} height={44} onChangeText={(v) => setFrame({ body: v }, "body")} />
               </>
+            ) : tool === "image" && frame ? (
+              <Button label={frame.source ? t("stories.picker.replace") : t("stories.picker.add")} onPress={() => setPicking(at)} />
             ) : tool === "brand" ? (
               <View style={styles.between}>
                 <Text style={[type.body, { flex: 1 }]}>{t("stories.editor.brandMark")}</Text>
@@ -298,7 +318,7 @@ export default function EditStory() {
           </ScrollView>
         ) : (
           <View style={{ paddingBottom: Math.max(insets.bottom, space[16]) }}>
-            <FrameStrip frames={strip} selected={at} onSelect={setSelected} onMenu={setMenuFor} disabled={readOnly} />
+            <FrameStrip frames={strip} selected={at} onSelect={setSelected} onMenu={setMenuFor} onAdd={() => setPicking("new")} disabled={readOnly} />
             <View style={styles.bottom}>
               <View style={styles.caption}>
                 <Text style={[type.meta, { color: color.onPrimary }]} numberOfLines={2}>
@@ -325,6 +345,7 @@ export default function EditStory() {
         )}
       </KeyboardAvoidingView>
 
+      <StoryPicker visible={picking !== null} productIds={body?.productIds ?? []} onClose={() => setPicking(null)} onPick={pick} />
       <FrameMenu index={menuFor} frames={strip} onClose={() => setMenuFor(null)} onMove={move} onRemove={remove} />
       <Sheet visible={!!leaving} onClose={() => setLeaving(null)} label={t("stories.editor.discardTitle")} scrim="rgba(10,10,12,0.6)" gutter={space[20]}>
         <Text style={[type.cardTitle, { fontFamily: "Inter_600SemiBold" }]}>{t("stories.editor.discardTitle")}</Text>

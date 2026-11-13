@@ -81,6 +81,18 @@ function untilReachable(ms: number): Promise<boolean> {
   });
 }
 
+/**
+ * A transfer that doesn't go through api() (a PUT straight to storage) failed to get through: count the app as
+ * offline, and resolve once the server answers again.
+ */
+export function waitForServer(): Promise<void> {
+  setConnection("offline");
+  void probeUntilReachable();
+  return new Promise((resolve) => {
+    const off = connection.subscribe((c) => c === "online" && (off(), resolve()));
+  });
+}
+
 /** Runs `run` with a signal that aborts after `ms` (React Native has no AbortSignal.timeout). */
 async function withTimeout<T>(ms: number, run: (signal: AbortSignal) => Promise<T>, outer?: AbortSignal): Promise<T> {
   const ctrl = new AbortController();

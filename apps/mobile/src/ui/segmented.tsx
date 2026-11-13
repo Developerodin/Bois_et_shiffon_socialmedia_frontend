@@ -2,13 +2,13 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { color, radius, space } from "@/theme/tokens";
 
 /** Segmented tabs (Figma "Library · Segmented tabs"): lilac track, selected segment solid indigo. */
-export function Segmented<T extends string>({ options, value, onChange, label }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void; label: string }) {
+export function Segmented<T extends string>({ options, value, onChange, label }: { options: { value: T; label: string; disabled?: boolean }[]; value: T; onChange: (v: T) => void; label: string }) {
   return (
     <View accessibilityRole="tablist" accessibilityLabel={label} style={styles.track}>
       {options.map((o) => {
         const on = o.value === value;
         return (
-          <Pressable key={o.value} accessibilityRole="tab" accessibilityState={{ selected: on }} onPress={() => onChange(o.value)} style={[styles.tab, on && styles.on]}>
+          <Pressable key={o.value} accessibilityRole="tab" accessibilityState={{ selected: on, disabled: o.disabled }} disabled={o.disabled} onPress={() => onChange(o.value)} style={[styles.tab, on && styles.on, o.disabled && { opacity: 0.4 }]}>
             <Text style={[styles.text, on && styles.textOn]} numberOfLines={1}>
               {o.label}
             </Text>
