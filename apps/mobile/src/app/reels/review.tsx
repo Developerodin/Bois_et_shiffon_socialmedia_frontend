@@ -12,6 +12,7 @@ import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, T
 import { downloadReel } from "@/ui/reels/download";
 import { recheckReel, useReel } from "@/ui/reels/use-reel";
 import { reelSeconds } from "@/api/endpoints";
+import { backToStory, useStoryReturn } from "@/ui/stories/generate";
 
 /** Statuses from which the reel may be downloaded: the checks have run (studio reels: the maker approves by sending). */
 const SENDABLE = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED", "PUBLISHED"];
@@ -23,7 +24,10 @@ const CHECK_SLOW_MS = 150_000;
 const CHECK_AUTO_MS = 90_000;
 const CHECK_ICON: Record<CheckResult["status"], LucideIcon> = { pass: CircleCheck, warn: TriangleAlert, blocker: CircleAlert };
 
-/** R07 · Reels / Result review. Plays the reel; Download or Schedule is the approval of exactly this version. */
+/**
+ * R07 · Reels / Result review. Plays the reel; Download or Schedule is the approval of exactly this version. Opened from a
+ * story's Generate, it also offers Use in story: the story's approval covers the reel as a frame.
+ */
 export default function ReelsReview() {
   const { t, i18n } = useTranslation("reels");
   const { id, detail, error, setError, change, load } = useReelWithChange();
@@ -41,6 +45,9 @@ export default function ReelsReview() {
   const schedulable = !!status && SCHEDULABLE.includes(status);
   const scheduled = status === "SCHEDULED";
   const shownCaption = caption ?? detail?.caption?.caption ?? "";
+  const story = useStoryReturn();
+  // The video on screen: the newest finished render made it (each one saves a version with its videoKey).
+  const videoKey = detail?.videoUrl ? detail.renders.find((r) => r.step === "DONE" && r.videoKey)?.videoKey : undefined;
   const hashtags = detail?.caption?.hashtags ?? [];
   const language = languageName(plan?.language, i18n.language);
   const context = language ? "lang" : undefined;
@@ -96,6 +103,9 @@ export default function ReelsReview() {
       footer={
         <Footer>
           {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
+          {story ? (
+            <ActionButton trailing={ArrowRight} disabled={!videoKey || blocked} label={t("review.useInStory")} onPress={() => videoKey && backToStory(story, { kind: "reel", id: videoKey })} />
+          ) : null}
           <View style={{ flexDirection: "row", gap: space[12] }}>
             <ActionButton
               style={{ flex: 1, paddingHorizontal: 0 }}

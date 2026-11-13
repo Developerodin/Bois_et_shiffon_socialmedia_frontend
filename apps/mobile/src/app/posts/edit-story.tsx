@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { router, useLocalSearchParams, usePreventRemove } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams, usePreventRemove } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ArrowLeft, BadgeCheck, Crop, MousePointer2, Type, Undo2 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
@@ -19,6 +19,7 @@ import { useWorkingPoll } from "@/ui/posts/use-working-poll";
 import { CropArea, CropControls, CropImage, type Crop as FrameCrop, type Size } from "@/ui/stories/crop";
 import { storyCodeText, storyError } from "@/ui/stories/errors";
 import { FrameMenu, frameLabel, FrameStrip } from "@/ui/stories/frame-strip";
+import { setStoryReturn } from "@/ui/stories/generate";
 import { STORY_LIMITS, textFits } from "@/ui/stories/limits";
 import { type Picked, StoryPicker } from "@/ui/stories/picker";
 import { StoryPreview } from "@/ui/stories/preview";
@@ -58,11 +59,13 @@ const same = (a: Draft, b: Draft) => JSON.stringify(toInput(a)) === JSON.stringi
  * crops the frame (drag and pinch on the preview, or Fit / Fill), and for a clip picks its 15 s and its sound. Saving
  * makes a new version and renders it; Save and check opens the story, and an approved story left unchanged offers Schedule
  * story instead. Undo steps back one change; leaving with changes asks first. While frames are being prepared the
- * editor is read-only.
+ * editor is read-only. The picker's Generate saves the story, then opens Photoshoot or the Reels studio; their Use in
+ * story comes back here with `frame` and `source=<kind>:<id>`, which is put on that frame (or a new one when `frame`
+ * is the frame count) with the Image tool open, as soon as the editor isn't read-only.
  */
 export default function EditStory() {
   const { t } = useTranslation("posts");
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, frame: backFrame, source: backSource } = useLocalSearchParams<{ id: string; frame?: string; source?: string }>();
   const { all, loading, error } = usePosts();
   const story = all?.find((p) => p.id === id && p.channel === "INSTAGRAM_STORY") ?? null;
   const { can } = usePermissions();
@@ -89,6 +92,32 @@ export default function EditStory() {
       setMedia((p) => ({ ...(p?.url === url ? p : {}), url, ...(m.size ? { size: m.size } : {}), ...(m.duration !== undefined ? { duration: m.duration } : {}) })),
     [],
   );
+
+  // A result from Photoshoot or Reels, looked up in the library (for its preview), waiting to be put on its frame.
+  const [incoming, setIncoming] = useState<{ frame: number; pick: Picked } | null>(null);
+  useEffect(() => {
+    if (!backSource) return;
+    const colon = backSource.indexOf(":");
+    const kind = backSource.slice(0, colon);
+    const sourceId = backSource.slice(colon + 1);
+    const frame = Number(backFrame);
+    const ctrl = new AbortController();
+    stories
+      .sources([], ctrl.signal)
+      .then(
+        (r) => {
+          const s = r.tabs.find((x) => x.tab === "library")?.items.find((x) => x.ref.kind === kind && x.ref.id === sourceId);
+          if (!s || !Number.isInteger(frame)) return setSaveError(t("stories.picker.generateMissing"));
+          setIncoming({ frame, pick: { source: s.ref, kind: s.kind, url: s.previewUrl, ...(s.width && s.height ? { size: { width: s.width, height: s.height } } : {}) } });
+        },
+        (e) => !ctrl.signal.aborted && setSaveError(storyError(e)),
+      )
+      // Handled once: a later visit with the same result is a new trip, with params set again.
+      .finally(() => !ctrl.signal.aborted && router.setParams({ frame: undefined, source: undefined }));
+    return () => ctrl.abort();
+  }, [backSource, backFrame, t]);
+  // Shown again (back from Generate either way): the trip is over, so the result screens stop offering Use in story.
+  useFocusEffect(useCallback(() => setStoryReturn(null), []));
 
   const version = story?.latest?.version ?? null;
   const body = story?.latest?.body as unknown as StoryBody | undefined;
@@ -164,15 +193,36 @@ export default function EditStory() {
     setSelected(i + dir);
   };
   // A new photo or clip drops the old one's crop; a clip starts at 0 with sound.
-  const pick = (p: Picked) => {
+  const place = (p: Picked, target: number | "new") => {
     const media = { source: p.source, picked: { url: p.url, kind: p.kind, size: p.size }, crop: undefined, clip: p.kind === "video" ? { start: 0, sound: true } : undefined };
-    if (picking === "new") {
+    if (target === "new") {
       change({ ...draft, frames: [...frames, { label: "", headline: "", body: "", from: -1, ...media }] });
       setSelected(frames.length);
-    } else if (picking !== null) {
-      change({ ...draft, frames: frames.map((f, i) => (i === picking ? { ...f, ...media } : f)) });
+    } else {
+      change({ ...draft, frames: frames.map((f, i) => (i === target ? { ...f, ...media } : f)) });
+      setSelected(target);
     }
+  };
+  const pick = (p: Picked) => {
+    if (picking !== null) place(p, picking);
     setPicking(null);
+  };
+  // A Generate result is back and the editor can take it: on its frame, or a new one (the frame count), with the
+  // Image tool open (a reel's trim). Set during render so it lands with the draft it was meant for.
+  if (incoming && !readOnly) {
+    setIncoming(null);
+    place(incoming.pick, incoming.frame < frames.length ? incoming.frame : "new");
+    setTool("image");
+  }
+  // Generate: save first (a failed save stays here with its reason), then off to Photoshoot or the Reels studio. A new
+  // frame isn't made until the result comes back: a frame without a photo or clip can't be saved.
+  const generate = async (to: "photoshoot" | "reels") => {
+    const target = picking === "new" ? frames.length : picking;
+    setPicking(null);
+    if (target === null || (changed && (!!problem || !(await save())))) return;
+    setStoryReturn({ id: story.id, frame: target });
+    if (to === "reels") router.push("/reels");
+    else router.push(body?.productIds?.length ? { pathname: "/photoshoot/product", params: { ratio: "9:16" } } : "/photoshoot");
   };
   const remove = (i: number) => {
     change({ ...draft, frames: frames.filter((_, j) => j !== i) });
@@ -399,7 +449,7 @@ export default function EditStory() {
         )}
       </KeyboardAvoidingView>
 
-      <StoryPicker visible={picking !== null} productIds={body?.productIds ?? []} onClose={() => setPicking(null)} onPick={pick} />
+      <StoryPicker visible={picking !== null} productIds={body?.productIds ?? []} onClose={() => setPicking(null)} onPick={pick} onGenerate={(to) => void generate(to)} />
       <FrameMenu index={menuFor} frames={strip} onClose={() => setMenuFor(null)} onMove={move} onRemove={remove} />
       <Sheet visible={!!leaving} onClose={() => setLeaving(null)} label={t("stories.editor.discardTitle")} scrim="rgba(10,10,12,0.6)" gutter={space[20]}>
         <Text style={[type.cardTitle, { fontFamily: "Inter_600SemiBold" }]}>{t("stories.editor.discardTitle")}</Text>

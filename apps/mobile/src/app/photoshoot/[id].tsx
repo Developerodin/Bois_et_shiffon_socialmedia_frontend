@@ -3,7 +3,7 @@ import { Image } from "expo-image";
 import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { Redirect, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { ChevronLeft, Columns2, Download, Share2, Sparkle } from "lucide-react-native";
+import { ArrowRight, ChevronLeft, Columns2, Download, Share2, Sparkle } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PageLoading } from "@/ui/page-loading";
@@ -13,6 +13,7 @@ import { Badge, IconLabelButton, Page, PhotoPill } from "@/ui/photoshoot/control
 import { shootTitle } from "@/ui/photoshoot/describe";
 import { models } from "@/ui/photoshoot/options";
 import { startShoot } from "@/ui/photoshoot/start";
+import { backToStory, useStoryReturn } from "@/ui/stories/generate";
 import { color, radius, space, type } from "@/theme/tokens";
 
 const ASPECT = { "1:1": 1, "4:5": 4 / 5, "9:16": 9 / 16 } as const;
@@ -20,7 +21,8 @@ const ASPECT = { "1:1": 1, "4:5": 4 / 5, "9:16": 9 / 16 } as const;
 /**
  * F07 · Photoshoot / Result detail: the shoot's four photos (tap a thumbnail to show it), the original beside it
  * ("Compare original"), and what was asked. Download and Share hand the shown photo to the phone's share sheet;
- * Variation runs the same setup again (charged again).
+ * Variation runs the same setup again (charged again). Opened from a story's Generate, Use in story takes the shown
+ * photo back to the story's frame.
  */
 export default function ResultDetail() {
   const { t } = useTranslation("photoshoot");
@@ -30,6 +32,7 @@ export default function ResultDetail() {
   const [shown, setShown] = useState(0);
   const [compare, setCompare] = useState(false);
   const [busy, setBusy] = useState<"share" | "variation" | null>(null);
+  const story = useStoryReturn();
   useFocusEffect(
     useCallback(() => {
       const ctrl = new AbortController();
@@ -93,6 +96,7 @@ export default function ResultDetail() {
         shoot ? (
           <>
             {error ? <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
+            {story && photo ? <IconLabelButton label={t("detail.useInStory")} icon={ArrowRight} trailing onPress={() => backToStory(story, { kind: "photoshoot", id: photo.key })} /> : null}
             <View style={styles.actions}>
               <IconLabelButton label={t("detail.downloadPhoto")} icon={Download} disabled={busy !== null} onPress={() => void share()} style={{ flex: 1, paddingHorizontal: 0 }} />
               <IconLabelButton

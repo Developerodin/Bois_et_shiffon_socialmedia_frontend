@@ -29,10 +29,22 @@ const MAX_CLIP_MS = 180_000;
 /**
  * The Image tool's picker (P08), as a bottom sheet with four tabs. Phone: the person first says "We own or may use
  * this" (each time), then picks or shoots a photo or clip, which is uploaded here with progress and Cancel. Products
- * and Library list what the server already has. Generate comes with Photoshoot and Reels (shown off until then).
- * Closing the sheet cancels a running upload.
+ * and Library list what the server already has. Generate hands over to Photoshoot (a photo) or the Reels studio (a
+ * clip) through `onGenerate`; their result screens bring the result back. Closing the sheet cancels a running upload.
  */
-export function StoryPicker({ visible, productIds, onClose, onPick }: { visible: boolean; productIds: string[]; onClose: () => void; onPick: (p: Picked) => void }) {
+export function StoryPicker({
+  visible,
+  productIds,
+  onClose,
+  onPick,
+  onGenerate,
+}: {
+  visible: boolean;
+  productIds: string[];
+  onClose: () => void;
+  onPick: (p: Picked) => void;
+  onGenerate: (to: "photoshoot" | "reels") => void;
+}) {
   const { t } = useTranslation("posts");
   const [tab, setTab] = useState<Tab>("phone");
   const [rights, setRights] = useState<"yes" | "no" | null>(null);
@@ -108,8 +120,7 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
     { value: "phone", label: t("stories.picker.phone") },
     { value: "products", label: t("stories.picker.products"), disabled: !!progress },
     { value: "library", label: t("stories.picker.library"), disabled: !!progress },
-    // TODO(Task 19): Generate (Photoshoot, Reels).
-    { value: "generate", label: t("stories.picker.generate"), disabled: true },
+    { value: "generate", label: t("stories.picker.generate"), disabled: !!progress },
   ];
   const items = tab === "products" || tab === "library" ? sources?.[tab] : undefined;
 
@@ -150,6 +161,12 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
               {rights === "no" ? <Text accessibilityLiveRegion="polite" style={type.meta}>{t("stories.picker.rightsRefused")}</Text> : null}
             </>
           )
+        ) : tab === "generate" ? (
+          <>
+            <Text style={type.body}>{t("stories.picker.generateBody")}</Text>
+            <Button label={t("stories.picker.photoshoot")} onPress={() => onGenerate("photoshoot")} />
+            <Button label={t("stories.picker.reels")} variant="outline" onPress={() => onGenerate("reels")} />
+          </>
         ) : loadError ? (
           <Text style={[type.body, { color: color.error }]}>{loadError}</Text>
         ) : !items ? (

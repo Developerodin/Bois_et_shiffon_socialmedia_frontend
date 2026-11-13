@@ -179,6 +179,7 @@
     "ready": "Ready"
   },
   "detail": {
+    "useInStory": "Use in story",
     "downloadPhoto": "Download photo",
     "variation": "Variation",
     "share": "Share photoshoot",

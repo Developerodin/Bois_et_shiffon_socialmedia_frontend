@@ -219,6 +219,7 @@
     "saving": "Saving…"
   },
   "review": {
+    "useInStory": "Use in story",
     "joinSoftened": "Scene {{n}} → {{next}}",
     "joinSoftenedNote": "The two shots didn't quite match, so they blend with a dissolve",
     "subtitle": "Reel draft · Ready to review",

@@ -31,16 +31,16 @@ const SCENES: SegmentOption<SceneStyle>[] = [
 
 /**
  * F02 · Photoshoot / Product setup, on the brand's photo library. `asset` (a media key) comes back from the source
- * picker (F04); without one, the library's first photo.
+ * picker (F04); without one, the library's first photo. `ratio` presets the format (a story frame asks for 9:16).
  */
 export default function ProductSetup() {
   const { t } = useTranslation("photoshoot");
-  const { asset: assetKey } = useLocalSearchParams<{ asset?: string }>();
+  const { asset: assetKey, ratio: preset } = useLocalSearchParams<{ asset?: string; ratio?: string }>();
   const brand = useCurrentBrand();
   const photos = libraryPhotos(brand?.view);
   const asset = photos.find((p) => p.key === assetKey) ?? photos[0];
   const available = useCredits();
-  const [ratio, setRatio] = useState<AspectRatio>("4:5");
+  const [ratio, setRatio] = useState<AspectRatio>(() => RATIOS.find((r) => r.value === preset)?.value ?? "4:5");
   const [scene, setScene] = useState<SceneStyle>("interior");
   const [brief, setBrief] = useState("");
   const [tier, setTier] = useState<ShootTier>("base");

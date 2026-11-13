@@ -448,7 +448,11 @@
       "video": "Video",
       "pick": "Use {{title}}",
       "replace": "Replace photo or clip",
-      "add": "Choose photo or clip"
+      "add": "Choose photo or clip",
+      "generateBody": "Make a new one at the usual price. We save your story first, and the result comes back to this frame.",
+      "photoshoot": "Photoshoot: a photo",
+      "reels": "Reels studio: a clip",
+      "generateMissing": "We couldn’t find that photo or clip. Pick it from the Library tab."
     }
   },
   "editStory": {
