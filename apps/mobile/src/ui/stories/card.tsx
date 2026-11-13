@@ -108,8 +108,11 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
   );
 }
 
-/** A partly posted story (Post the rest / Mark as done) or one whose frame may not have appeared ("Did frame 3 appear?"). */
-function Unfinished({ story, onChanged }: { story: Card; onChanged: () => void }) {
+/**
+ * A partly posted story (Post the rest / Mark as done) or one whose frame may not have appeared ("Did frame 3 appear?").
+ * Also on the story detail screen.
+ */
+export function Unfinished({ story, onChanged }: { story: Pick<Card, "id" | "status" | "publishIssue">; onChanged: () => void }) {
   const { t } = useTranslation("posts");
   const [attempts, setAttempts] = useState<StoryAttempt[] | null>(null);
   const [pending, setPending] = useState<string | null>(null);

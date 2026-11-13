@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { PageLoading } from "@/ui/page-loading";
-import { connections, postRelease, posts, type Connection, type PostRelease } from "@/api/endpoints";
+import { connections, postRelease, posts, stories, type Connection, type PostRelease, type StoryBody, type StoryRelease } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Card } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
@@ -13,8 +13,9 @@ import { MonthCalendar } from "@/ui/posts/calendar";
 import { BusinessChip, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { CardTitle, Pill, tint } from "@/ui/posts/controls";
 import { BUSINESS_TZ_LABEL, dayKey, shortDate, time24, ymd } from "@/ui/posts/format";
-import { coverSource, reloadPosts, usePost } from "@/ui/posts/use-posts";
+import { coverSource, reloadPosts, usePosts } from "@/ui/posts/use-posts";
 import { openReel } from "@/ui/reels/use-reel";
+import { storyError } from "@/ui/stories/errors";
 
 const icons = {
   link: require("../../../assets/figma/posts/btn-link.svg"),
@@ -35,11 +36,17 @@ function firstSlot(planned: string | null, now: number) {
   return d;
 }
 
-/** P05 · Posts / Schedule post: destination, date & time, then schedule (locked until a channel is linked). */
+/**
+ * P05 · Posts / Schedule post: destination, date & time, then schedule (locked until a channel is linked).
+ * An approved story also offers Post by hand: at the picked time or now (a reminder, no account needed), change that
+ * time, or stop it. Scheduling a story that was set to be posted by hand clears that on the server.
+ */
 export default function SchedulePost() {
   const { t } = useTranslation("posts");
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const { post } = usePost(id);
+  // Posts and stories (usePost leaves stories out).
+  const { all } = usePosts();
+  const post = all?.find((p) => p.id === id) ?? null;
   const [release, setRelease] = useState<PostRelease | null>(null);
   const [linked, setLinked] = useState<Connection[]>([]);
   const [slot, setSlot] = useState<Date | null>(null);
@@ -54,6 +61,8 @@ export default function SchedulePost() {
   // The release read failed (not a scheduling error): the destination card offers a retry instead of spinning.
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  // Stories: Schedule or Post by hand; null = not picked yet (Post by hand when it is already set to that).
+  const [mode, setMode] = useState<"schedule" | "byHand" | null>(null);
   const back = () => (router.canGoBack() ? router.back() : router.navigate("/posts"));
 
   // Read again on every focus: coming back from X03 Reconnect (or Connections) unlocks Schedule.
@@ -111,6 +120,10 @@ export default function SchedulePost() {
           : null;
   const canSchedule = !!release && !!connectionId && future && !imageProblem && (!needsBoard || !!boardId) && !busy;
   const isCarousel = post.channel === "INSTAGRAM_CAROUSEL";
+  const isStory = post.channel === "INSTAGRAM_STORY";
+  const storyBody = isStory ? (post.latest.body as unknown as StoryBody) : null;
+  const byHandOn = !!release && "byHand" in release && (release as StoryRelease).byHand;
+  const how = isStory ? (mode ?? (byHandOn ? "byHand" : "schedule")) : "schedule";
 
   const pickDay = (key: string) => {
     const [y, m, d] = key.split("-").map(Number);
@@ -133,10 +146,25 @@ export default function SchedulePost() {
     try {
       await posts.schedule(post.id, post.latest.version, { connectionId, runAt: at, approve: post.status === "AWAITING_APPROVAL", photoKeys: keys, boardId: boardId ?? undefined });
       await reloadPosts();
-      router.navigate("/posts/calendar");
+      if (isStory) back();
+      else router.navigate("/posts/calendar");
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(isStory ? storyError(e) : e instanceof Error ? e.message : String(e));
       void reloadPosts(); // the approval may have gone through before the scheduling failed
+    } finally {
+      setBusy(false);
+    }
+  };
+  // Post by hand at `when` (null: stop posting by hand); the story detail shows the rest.
+  const byHand = async (when: Date | null) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await stories.byHand(post.id, when);
+      await reloadPosts();
+      back();
+    } catch (e) {
+      setError(storyError(e));
     } finally {
       setBusy(false);
     }
@@ -151,12 +179,33 @@ export default function SchedulePost() {
             {post.title}
           </Text>
           <Text style={[type.body, { color: color.inkSecondary }]} numberOfLines={1}>
-            {post.latest.body.caption.split("\n")[0]}
+            {storyBody ? (storyBody.frames[0]?.headline ?? "") : post.latest.body.caption.split("\n")[0]}
           </Text>
-          <Text style={[type.label, { fontFamily: "Inter_600SemiBold", color: color.inkSecondary }]}>{isCarousel ? t("schedule.carouselFormat") : t("schedule.feedFormat")}</Text>
+          <Text style={[type.label, { fontFamily: "Inter_600SemiBold", color: color.inkSecondary }]}>
+            {storyBody ? t("schedule.storyFormat", { count: storyBody.frames.length }) : isCarousel ? t("schedule.carouselFormat") : t("schedule.feedFormat")}
+          </Text>
         </View>
       </Card>
 
+      {isStory ? (
+        <Card style={{ marginTop: space[12] }}>
+          <CardTitle>{t("schedule.how")}</CardTitle>
+          <View style={[styles.chips, { paddingTop: space[8] }]} accessibilityRole="radiogroup">
+            <Pill label={t("schedule.modeSchedule")} selected={how === "schedule"} onPress={() => setMode("schedule")} />
+            <Pill label={t("schedule.modeByHand")} selected={how === "byHand"} onPress={() => setMode("byHand")} />
+          </View>
+          <Text style={[type.meta, { paddingTop: space[8] }]}>
+            {how === "byHand" ? t("schedule.byHandBody") : storyBody?.link ? t("schedule.noLinkScheduled") : t("schedule.scheduleBody")}
+          </Text>
+          {byHandOn && post.scheduledFor ? (
+            <Text style={[type.label, { fontFamily: "Inter_600SemiBold", paddingTop: space[8] }]}>
+              {t("schedule.byHandSet", { date: shortDate(post.scheduledFor), time: time24(post.scheduledFor) })}
+            </Text>
+          ) : null}
+        </Card>
+      ) : null}
+
+      {how === "schedule" ? (
       <Card style={{ marginTop: space[12] }}>
         <View style={styles.between}>
           <CardTitle>{t("schedule.destination")}</CardTitle>
@@ -222,6 +271,7 @@ export default function SchedulePost() {
           </>
         )}
       </Card>
+      ) : null}
 
       <Card style={{ marginTop: space[12] }}>
         <CardTitle>{t("schedule.timing")}</CardTitle>
@@ -282,12 +332,25 @@ export default function SchedulePost() {
           </Pressable>
         ) : null}
         {error ? <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
-        <Button
-          label={busy ? t("schedule.scheduling") : connected || !release ? t("schedule.schedulePost") : t("schedule.scheduleLocked")}
-          icon={connected || !release ? undefined : icons.lock}
-          disabled={!canSchedule}
-          onPress={() => void schedule()}
-        />
+        {how === "byHand" ? (
+          <>
+            <Button
+              label={t(byHandOn ? "schedule.changeTime" : "schedule.byHandAt", { time: time24(at.toISOString()) })}
+              loading={busy}
+              disabled={!future || !release}
+              onPress={() => void byHand(at)}
+            />
+            <Button label={t("schedule.byHandNow")} variant="outline" disabled={busy || !release} onPress={() => void byHand(new Date())} />
+            {byHandOn ? <Button label={t("schedule.stopByHand")} variant="ghost" disabled={busy} onPress={() => void byHand(null)} /> : null}
+          </>
+        ) : (
+          <Button
+            label={busy ? t("schedule.scheduling") : connected || !release ? t(isStory ? "schedule.scheduleStory" : "schedule.schedulePost") : t("schedule.scheduleLocked")}
+            icon={connected || !release ? undefined : icons.lock}
+            disabled={!canSchedule}
+            onPress={() => void schedule()}
+          />
+        )}
         <Button label={t("schedule.later")} variant="outline" icon={icons.bookmark} onPress={back} />
       </View>
     </PostsScreen>

@@ -1,4 +1,4 @@
-import { router, useFocusEffect, type Href } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { stories, type DueStory, type StoryItem, type StoryTab } from "@/api/endpoints";
 import { storyError } from "@/ui/stories/errors";
@@ -31,7 +31,7 @@ const asCard = (s: StoryItem, now: number): StoryCard => ({
 });
 
 /** A story's own screen (the story detail; posting by hand starts there). */
-export const openStory = (id: string) => router.push(`/posts/story/${encodeURIComponent(id)}` as Href);
+export const openStory = (id: string) => router.push({ pathname: "/posts/story/[id]", params: { id } });
 
 const POLL_MS = 5_000;
 const EMPTY: Record<StoryTab, StoryCard[]> = { drafts: [], scheduled: [], posted: [] };

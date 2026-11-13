@@ -651,6 +651,8 @@ export const stories = {
     return api<StoryRelease>(`${base}/content/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
   },
   editStory: (id: string, version: number, story: StoryInput) => storyAct(id, { action: "editStory", version, story }),
+  /** The approver signs off this exact version (stories never auto-publish; the person schedules or posts it by hand). */
+  approve: (id: string, version: number) => storyAct(id, { action: "decide", version, verdict: "APPROVED" }),
   duplicate: (id: string) => storyAct<{ id: string }>(id, { action: "duplicate" }),
   /** Drafts only (409 story.notDeletable). */
   remove: (id: string) => storyAct<null>(id, { action: "delete" }),

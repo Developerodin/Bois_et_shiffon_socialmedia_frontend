@@ -2,17 +2,17 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
-import { Camera, Check, Pencil } from "lucide-react-native";
+import { Camera, Pencil } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PageLoading } from "@/ui/page-loading";
 import { postRelease, posts, type PostCampaign, type PostChannel, type PostRelease } from "@/api/endpoints";
 import { Button } from "@/ui/button";
-import { Field } from "@/ui/field";
 import { Card } from "@/ui/layout";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { Badge, tint } from "@/ui/posts/controls";
+import { DecisionCard } from "@/ui/posts/decision-card";
 import { STATUS_KEY } from "@/ui/posts/format";
 import { coverSource, coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
 import { usePermissions } from "@/ui/use-permissions";
@@ -63,11 +63,6 @@ export default function PostDetail() {
   const [fixing, setFixing] = useState<number | null>(null);
   const [fixError, setFixError] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
-  const [approvingAnyway, setApprovingAnyway] = useState(false);
-  // "Ask for changes" on a product issue: null = not touched yet (prefilled from the issues / the default below).
-  const [askNote, setAskNote] = useState<string | null>(null);
-  const [switchPick, setSwitchPick] = useState<boolean | null>(null);
-  const [askError, setAskError] = useState<string | null>(null);
   // Being written (BRIEF_READY), sent back for a rewrite, or waiting for its check: re-read every 5 s so the new
   // draft shows up on its own, for up to 3 minutes (a writer that never starts mustn't poll forever).
   const working =
@@ -116,45 +111,12 @@ export default function PostDetail() {
   const scheduled = release?.attempts.find((a) => a.status === "SCHEDULED");
   const uncertain = release?.attempts.find((a) => a.status === "PENDING_VERIFY");
   // Issues (a product sold out, removed or repriced; the offer ended or changed) on a post that is waiting, approved or scheduled. A refusing
-  // one blocks Schedule; approvers can send it back here, or approve past it when every refusing issue is overridable
-  // (stock, an ended offer) and they also hold rules.approve, as on the web.
+  // one blocks Schedule; DecisionCard lets approvers send it back, or approve past it when every refusing issue is
+  // overridable (stock, an ended offer) and they also hold rules.approve, as on the web.
   const issues = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED"].includes(post.status) ? (release?.productIssues ?? []) : [];
   const refused = issues.some((i) => i.refuses);
   const canAsk = issues.length > 0 && (post.status === "AWAITING_APPROVAL" || post.status === "APPROVED") && can("content.approve");
   const canAnyway = canAsk && refused && can("rules.approve") && issues.every((i) => !i.refuses || i.overridable);
-  // Prefilled with the issues for "Ask for changes"; empty when "Approve anyway" is on offer (its note says why it can go out).
-  const note = askNote ?? (canAnyway ? "" : issues.map((i) => i.message).join("\n"));
-  const unavailable = issues.some((i) => i.refuses && i.kind === "availability");
-  const switchProducts = switchPick ?? unavailable;
-  const approveAnyway = async () => {
-    if (!note.trim()) return setAskError(t("detail.anywayNeeded"));
-    setAskError(null);
-    setApprovingAnyway(true);
-    try {
-      setRelease(await posts.approveAnyway(post.id, post.latest?.version ?? 0, note.trim()));
-      setAskNote(null);
-      await reloadPosts();
-    } catch (e) {
-      setAskError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setApprovingAnyway(false);
-    }
-  };
-  const askChanges = async () => {
-    if (!note.trim()) return setAskError(t("detail.noteNeeded"));
-    setAskError(null);
-    setAsking(true);
-    try {
-      setRelease(await posts.sendBack(post.id, post.latest?.version ?? 0, note.trim(), switchProducts));
-      setAskNote(null);
-      setSwitchPick(null);
-      await reloadPosts();
-    } catch (e) {
-      setAskError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setAsking(false);
-    }
-  };
   const settle = async (attemptId: string, action: "cancel" | "posted" | "not-posted") => {
     setSettling(true);
     setFixError(null);
@@ -243,35 +205,16 @@ export default function PostDetail() {
           <Text style={type.body}>{campaignLine(release.campaign, t)}</Text>
         </Card>
       ) : null}
-      {issues.length ? (
-        <Card style={{ marginTop: space[12], gap: space[8] }}>
-          <Text style={styles.eyebrow}>{t("detail.issues")}</Text>
-          {issues.map((i) => (
-            <Text key={(i.productId ?? i.campaignId) + i.kind + i.message} style={[type.body, i.refuses && { color: color.error }]}>
-              {i.message}
-              {!i.refuses && i.overridable ? ` ${t("detail.approvedAnyway")}` : ""}
-            </Text>
-          ))}
-          {canAsk ? (
-            <>
-              <Field label={t(canAnyway ? "detail.decisionNote" : "detail.askNote")} multiline value={note} onChangeText={setAskNote} maxLength={canAnyway ? 500 : 2000} error={askError} />
-              {issues.some((i) => i.kind !== "offer") ? (
-                <>
-                  <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: switchProducts }} onPress={() => setSwitchPick(!switchProducts)} style={[styles.row8, { minHeight: 44 }]}>
-                    <View style={[styles.box, switchProducts && { backgroundColor: color.primary, borderColor: color.primary }]}>
-                      {switchProducts ? <Check size={14} color={color.onPrimary} strokeWidth={2.5} /> : null}
-                    </View>
-                    <Text style={type.body}>{t("detail.suggestProduct")}</Text>
-                  </Pressable>
-                  {!switchProducts && unavailable ? <Text style={type.meta}>{t("detail.productStays")}</Text> : null}
-                </>
-              ) : null}
-              {canAnyway ? <Button label={approvingAnyway ? t("detail.approving") : t("detail.approveAnyway")} height={44} disabled={asking || approvingAnyway} onPress={() => void approveAnyway()} /> : null}
-              <Button label={asking ? t("detail.sending") : t("detail.askChanges")} variant="outline" height={44} disabled={asking || approvingAnyway} onPress={() => void askChanges()} />
-            </>
-          ) : null}
-        </Card>
-      ) : null}
+      <DecisionCard
+        id={post.id}
+        version={post.latest?.version ?? 0}
+        status={post.status}
+        issues={issues}
+        onDecided={async (r) => {
+          if (r) setRelease(r);
+          await reloadPosts();
+        }}
+      />
       {fixError && !blocked ? <Text style={[type.meta, { color: color.error, paddingTop: space[12] }]}>{fixError}</Text> : null}
       {working ? (
         <View style={{ paddingTop: space[16], gap: space[8] }}>
@@ -353,6 +296,5 @@ const styles = StyleSheet.create({
     borderColor: tint.hair,
     borderRadius: radius.control,
   },
-  box: { width: 20, height: 20, alignItems: "center", justifyContent: "center", borderRadius: 4, borderWidth: 1.5, borderColor: color.controlOutline },
   actions: { flexDirection: "row", alignItems: "center", gap: space[8], paddingTop: space[20] },
 });

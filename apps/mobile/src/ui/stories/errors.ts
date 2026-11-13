@@ -7,8 +7,13 @@ import i18n from "@/i18n";
  */
 export function storyError(e: unknown): string {
   if (!(e instanceof ApiError)) return e instanceof Error ? e.message : String(e);
-  const key = e.code?.startsWith("story.") ? e.code.slice("story.".length) : null;
-  if (!key) return e.message;
   const data = (e.data && typeof e.data === "object" ? e.data : {}) as Record<string, unknown>;
-  return i18n.t(`posts:stories.errors.${key}`, { ...data, defaultValue: e.message });
+  return storyCodeText(e.code, e.message, data);
+}
+
+/** The same mapping for a code the server reports outside a refusal (a story's failed render: renderErrorCode). */
+export function storyCodeText(code: string | null | undefined, fallback: string, data: Record<string, unknown> = {}): string {
+  const key = code?.startsWith("story.") ? code.slice("story.".length) : null;
+  if (!key) return fallback;
+  return i18n.t(`posts:stories.errors.${key}`, { ...data, defaultValue: fallback });
 }
