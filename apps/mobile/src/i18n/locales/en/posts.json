@@ -452,7 +452,10 @@
       "generateBody": "Make a new one at the usual price. We save your story first, and the result comes back to this frame.",
       "photoshoot": "Photoshoot: a photo",
       "reels": "Reels studio: a clip",
-      "generateMissing": "We couldn’t find that photo or clip. Pick it from the Library tab."
+      "generateMissing": "We couldn’t find that photo or clip. Pick it from the Library tab.",
+      "generateFrameGone": "That frame isn’t in the story any more, so the photo or clip wasn’t added.",
+      "generateReadOnly": "This story can’t be changed now, so the photo or clip wasn’t added.",
+      "generateBlocked": "Fix this first, so we can save your story: {{problem}}"
     }
   },
   "editStory": {

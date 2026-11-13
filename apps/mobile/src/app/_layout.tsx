@@ -69,7 +69,10 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.canvas } }} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.canvas } }}>
+        {/* One editor per story: Use in story (ui/stories/generate.ts) pops back to that story's editor, never another's. */}
+        <Stack.Screen name="posts/edit-story" getId={({ params }) => (params as { id?: string } | undefined)?.id} />
+      </Stack>
       <ConnectionBanner />
       <ReadyBanner />
     </SafeAreaProvider>

@@ -96,7 +96,7 @@ export default function ResultDetail() {
         shoot ? (
           <>
             {error ? <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
-            {story && photo ? <IconLabelButton label={t("detail.useInStory")} icon={ArrowRight} trailing onPress={() => backToStory(story, { kind: "photoshoot", id: photo.key })} /> : null}
+            {story && photo ? <IconLabelButton label={t("detail.useInStory")} icon={ArrowRight} trailing onPress={() => backToStory(story, { source: { kind: "photoshoot", id: photo.key }, kind: "photo", url: photo.url })} /> : null}
             <View style={styles.actions}>
               <IconLabelButton label={t("detail.downloadPhoto")} icon={Download} disabled={busy !== null} onPress={() => void share()} style={{ flex: 1, paddingHorizontal: 0 }} />
               <IconLabelButton

@@ -235,6 +235,8 @@ export type ReelDetail = {
   // "Made with AI." for a reel with a presenter or a cloned voice: shown under the caption, added when it's posted.
   aiDisclosure: string | null;
   caption: { caption?: string; hashtags?: string[] } | null; videoUrl: string | null;
+  // The video's media key: the source a story frame uses for this reel.
+  videoKey: string | null;
   checks: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
   // softened: joins (scene n → n+1) the seam check turned into a dissolve because the two shots didn't match.
   // credits: what that attempt was charged (refunded if it failed); null when unknown.

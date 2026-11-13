@@ -38,12 +38,15 @@ export function StoryPicker({
   onClose,
   onPick,
   onGenerate,
+  generateBlocked,
 }: {
   visible: boolean;
   productIds: string[];
   onClose: () => void;
   onPick: (p: Picked) => void;
   onGenerate: (to: "photoshoot" | "reels") => void;
+  /** Why Generate can't save the story first (its text doesn't fit, a bad link): shown, and the buttons are off. */
+  generateBlocked?: string | null;
 }) {
   const { t } = useTranslation("posts");
   const [tab, setTab] = useState<Tab>("phone");
@@ -164,8 +167,13 @@ export function StoryPicker({
         ) : tab === "generate" ? (
           <>
             <Text style={type.body}>{t("stories.picker.generateBody")}</Text>
-            <Button label={t("stories.picker.photoshoot")} onPress={() => onGenerate("photoshoot")} />
-            <Button label={t("stories.picker.reels")} variant="outline" onPress={() => onGenerate("reels")} />
+            {generateBlocked ? (
+              <Text accessibilityLiveRegion="polite" style={[type.meta, { color: color.error }]}>
+                {t("stories.picker.generateBlocked", { problem: generateBlocked })}
+              </Text>
+            ) : null}
+            <Button label={t("stories.picker.photoshoot")} disabled={!!generateBlocked} onPress={() => onGenerate("photoshoot")} />
+            <Button label={t("stories.picker.reels")} variant="outline" disabled={!!generateBlocked} onPress={() => onGenerate("reels")} />
           </>
         ) : loadError ? (
           <Text style={[type.body, { color: color.error }]}>{loadError}</Text>

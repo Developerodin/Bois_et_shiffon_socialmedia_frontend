@@ -12,7 +12,7 @@ import { ActionButton, BackButton, HeaderTitle, ICON, PageHeader, ReelsScreen, T
 import { downloadReel } from "@/ui/reels/download";
 import { recheckReel, useReel } from "@/ui/reels/use-reel";
 import { reelSeconds } from "@/api/endpoints";
-import { backToStory, useStoryReturn } from "@/ui/stories/generate";
+import { backToStory, REEL_SIZE, useStoryReturn } from "@/ui/stories/generate";
 
 /** Statuses from which the reel may be downloaded: the checks have run (studio reels: the maker approves by sending). */
 const SENDABLE = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED", "PUBLISHED"];
@@ -46,8 +46,7 @@ export default function ReelsReview() {
   const scheduled = status === "SCHEDULED";
   const shownCaption = caption ?? detail?.caption?.caption ?? "";
   const story = useStoryReturn();
-  // The video on screen: the newest finished render made it (each one saves a version with its videoKey).
-  const videoKey = detail?.videoUrl ? detail.renders.find((r) => r.step === "DONE" && r.videoKey)?.videoKey : undefined;
+  const videoKey = detail?.videoKey;
   const hashtags = detail?.caption?.hashtags ?? [];
   const language = languageName(plan?.language, i18n.language);
   const context = language ? "lang" : undefined;
@@ -104,7 +103,7 @@ export default function ReelsReview() {
         <Footer>
           {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
           {story ? (
-            <ActionButton trailing={ArrowRight} disabled={!videoKey || blocked} label={t("review.useInStory")} onPress={() => videoKey && backToStory(story, { kind: "reel", id: videoKey })} />
+            <ActionButton trailing={ArrowRight} disabled={!videoKey || blocked} label={t("review.useInStory")} onPress={() => videoKey && detail?.videoUrl && backToStory(story, { source: { kind: "reel", id: videoKey }, kind: "video", url: detail.videoUrl, size: REEL_SIZE })} />
           ) : null}
           <View style={{ flexDirection: "row", gap: space[12] }}>
             <ActionButton

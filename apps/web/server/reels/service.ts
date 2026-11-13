@@ -270,6 +270,8 @@ export async function reelDetail(scope: Omit<Scope, "userId">, itemId: string) {
     sceneSeconds: plan.success ? plan.data.scenes.map(sceneSeconds) : [],
     caption: (latest?.body as { caption?: string; hashtags?: string[] } | undefined) ?? null,
     videoUrl,
+    // The video on screen, as a story frame's source (stories/sources.ts resolves a reel by its videoKey).
+    videoKey: body?.videoKey ?? null,
     checks: latest?.checks[0] ? { overall: latest.checks[0].overall, results: latest.checks[0].results } : null,
     renders,
     chat: chatOf(item.brief),

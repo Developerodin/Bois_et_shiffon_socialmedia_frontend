@@ -19,7 +19,7 @@ import { useWorkingPoll } from "@/ui/posts/use-working-poll";
 import { CropArea, CropControls, CropImage, type Crop as FrameCrop, type Size } from "@/ui/stories/crop";
 import { storyCodeText, storyError } from "@/ui/stories/errors";
 import { FrameMenu, frameLabel, FrameStrip } from "@/ui/stories/frame-strip";
-import { setStoryReturn } from "@/ui/stories/generate";
+import { clearStoryTrip, handoffFor, setStoryReturn } from "@/ui/stories/generate";
 import { STORY_LIMITS, textFits } from "@/ui/stories/limits";
 import { type Picked, StoryPicker } from "@/ui/stories/picker";
 import { StoryPreview } from "@/ui/stories/preview";
@@ -60,12 +60,13 @@ const same = (a: Draft, b: Draft) => JSON.stringify(toInput(a)) === JSON.stringi
  * makes a new version and renders it; Save and check opens the story, and an approved story left unchanged offers Schedule
  * story instead. Undo steps back one change; leaving with changes asks first. While frames are being prepared the
  * editor is read-only. The picker's Generate saves the story, then opens Photoshoot or the Reels studio; their Use in
- * story comes back here with `frame` and `source=<kind>:<id>`, which is put on that frame (or a new one when `frame`
- * is the frame count) with the Image tool open, as soon as the editor isn't read-only.
+ * story comes back here with `frame`, `source=<kind>:<id>` and `base` (the version the trip started from), which is put
+ * on that frame (or a new one when `frame` is the frame count and there's room) with the Image tool open, as soon as the
+ * editor isn't read-only. The change is based on `base`, so a save someone else made meanwhile makes Save stale.
  */
 export default function EditStory() {
   const { t } = useTranslation("posts");
-  const { id, frame: backFrame, source: backSource } = useLocalSearchParams<{ id: string; frame?: string; source?: string }>();
+  const { id, frame: backFrame, source: backSource, base: backBase } = useLocalSearchParams<{ id: string; frame?: string; source?: string; base?: string }>();
   const { all, loading, error } = usePosts();
   const story = all?.find((p) => p.id === id && p.channel === "INSTAGRAM_STORY") ?? null;
   const { can } = usePermissions();
@@ -93,31 +94,40 @@ export default function EditStory() {
     [],
   );
 
-  // A result from Photoshoot or Reels, looked up in the library (for its preview), waiting to be put on its frame.
-  const [incoming, setIncoming] = useState<{ frame: number; pick: Picked } | null>(null);
+  // A result from Photoshoot or Reels, waiting to be put on its frame. Its preview comes from the result screen; a deep
+  // link has none, so it is looked up in the library (which lists only the newest shoots and reels).
+  const [incoming, setIncoming] = useState<{ frame: number; base?: number; pick: Picked } | null>(null);
   useEffect(() => {
     if (!backSource) return;
     const colon = backSource.indexOf(":");
     const kind = backSource.slice(0, colon);
     const sourceId = backSource.slice(colon + 1);
     const frame = Number(backFrame);
+    const base = backBase ? Number(backBase) : undefined;
+    const handed = handoffFor(backSource);
     const ctrl = new AbortController();
-    stories
-      .sources([], ctrl.signal)
-      .then(
-        (r) => {
+    (handed
+      ? Promise.resolve(handed)
+      : stories.sources([], ctrl.signal).then((r): Picked | null => {
           const s = r.tabs.find((x) => x.tab === "library")?.items.find((x) => x.ref.kind === kind && x.ref.id === sourceId);
-          if (!s || !Number.isInteger(frame)) return setSaveError(t("stories.picker.generateMissing"));
-          setIncoming({ frame, pick: { source: s.ref, kind: s.kind, url: s.previewUrl, ...(s.width && s.height ? { size: { width: s.width, height: s.height } } : {}) } });
+          return s ? { source: s.ref, kind: s.kind, url: s.previewUrl, ...(s.width && s.height ? { size: { width: s.width, height: s.height } } : {}) } : null;
+        })
+    )
+      .then(
+        (pick) => {
+          if (!pick || !Number.isInteger(frame) || (base !== undefined && !Number.isInteger(base))) return setSaveError(t("stories.picker.generateMissing"));
+          setIncoming({ frame, ...(base === undefined ? {} : { base }), pick });
         },
         (e) => !ctrl.signal.aborted && setSaveError(storyError(e)),
       )
       // Handled once: a later visit with the same result is a new trip, with params set again.
-      .finally(() => !ctrl.signal.aborted && router.setParams({ frame: undefined, source: undefined }));
+      .finally(() => !ctrl.signal.aborted && router.setParams({ frame: undefined, source: undefined, base: undefined }));
     return () => ctrl.abort();
-  }, [backSource, backFrame, t]);
-  // Shown again (back from Generate either way): the trip is over, so the result screens stop offering Use in story.
+  }, [backSource, backFrame, backBase, t]);
+  // Shown again (back from Generate either way) or closed: the trip is over, so the result screens stop offering Use in
+  // story.
   useFocusEffect(useCallback(() => setStoryReturn(null), []));
+  useEffect(() => clearStoryTrip, []);
 
   const version = story?.latest?.version ?? null;
   const body = story?.latest?.body as unknown as StoryBody | undefined;
@@ -174,9 +184,10 @@ export default function EditStory() {
   const problem = misfit >= 0 ? t("stories.editor.frameTooLong", { n: misfit + 1 }) : badLink ? t("stories.editor.badLink") : null;
   const approved = story.status === "APPROVED" && !!release?.approvalValid && !changed && can("publish.execute");
 
-  const change = (next: Draft, key: string | null = null) => {
+  // `base`: a Generate result is pinned to the version its trip started from.
+  const change = (next: Draft, key: string | null = null, base?: number) => {
     const history = active && key !== null && active.key === key ? active.history : [...(active?.history ?? []), draft];
-    setEdits({ draft: next, history, key, base: active?.base ?? version });
+    setEdits({ draft: next, history, key, base: base ?? active?.base ?? version });
     setSavedFrom(null);
   };
   const undo = () => {
@@ -193,13 +204,13 @@ export default function EditStory() {
     setSelected(i + dir);
   };
   // A new photo or clip drops the old one's crop; a clip starts at 0 with sound.
-  const place = (p: Picked, target: number | "new") => {
+  const place = (p: Picked, target: number | "new", base?: number) => {
     const media = { source: p.source, picked: { url: p.url, kind: p.kind, size: p.size }, crop: undefined, clip: p.kind === "video" ? { start: 0, sound: true } : undefined };
     if (target === "new") {
-      change({ ...draft, frames: [...frames, { label: "", headline: "", body: "", from: -1, ...media }] });
+      change({ ...draft, frames: [...frames, { label: "", headline: "", body: "", from: -1, ...media }] }, null, base);
       setSelected(frames.length);
     } else {
-      change({ ...draft, frames: frames.map((f, i) => (i === target ? { ...f, ...media } : f)) });
+      change({ ...draft, frames: frames.map((f, i) => (i === target ? { ...f, ...media } : f)) }, null, base);
       setSelected(target);
     }
   };
@@ -207,20 +218,34 @@ export default function EditStory() {
     if (picking !== null) place(p, picking);
     setPicking(null);
   };
-  // A Generate result is back and the editor can take it: on its frame, or a new one (the frame count), with the
-  // Image tool open (a reel's trim). Set during render so it lands with the draft it was meant for.
-  if (incoming && !readOnly) {
+  // A Generate result is back and the editor can take it: on its frame, or a new one (the frame count, while there is
+  // room), with the Image tool open (a reel's trim). It waits while the trip's own save is still rendering (a fresh
+  // editor sees the older version until then). If that save never landed (its render failed), there is nothing to pin
+  // to, and the edit is based as usual. Set during render so it lands with the draft it was meant for.
+  const tripBase = incoming?.base;
+  if (incoming && !editable) {
     setIncoming(null);
-    place(incoming.pick, incoming.frame < frames.length ? incoming.frame : "new");
-    setTool("image");
+    setSaveError(t("stories.picker.generateReadOnly"));
+  } else if (incoming && !readOnly && (tripBase === undefined || version >= tripBase || (!!release && !release.rendering))) {
+    const f = incoming.frame;
+    const target = f >= 0 && f < frames.length ? f : f === frames.length && frames.length < STORY_LIMITS.maxFrames ? "new" : null;
+    setIncoming(null);
+    if (target === null) setSaveError(t("stories.picker.generateFrameGone"));
+    else {
+      place(incoming.pick, target, tripBase !== undefined && version >= tripBase ? tripBase : undefined);
+      setTool("image");
+    }
   }
   // Generate: save first (a failed save stays here with its reason), then off to Photoshoot or the Reels studio. A new
-  // frame isn't made until the result comes back: a frame without a photo or clip can't be saved.
+  // frame isn't made until the result comes back: a frame without a photo or clip can't be saved. The trip's version is
+  // the one this save makes (the next one: the server refuses the save if the story has moved on), or the current one.
   const generate = async (to: "photoshoot" | "reels") => {
     const target = picking === "new" ? frames.length : picking;
+    if (target === null || (changed && problem)) return;
     setPicking(null);
-    if (target === null || (changed && (!!problem || !(await save())))) return;
-    setStoryReturn({ id: story.id, frame: target });
+    const base = changed ? (active?.base ?? version) + 1 : version;
+    if (changed && !(await save())) return;
+    setStoryReturn({ id: story.id, frame: target, base });
     if (to === "reels") router.push("/reels");
     else router.push(body?.productIds?.length ? { pathname: "/photoshoot/product", params: { ratio: "9:16" } } : "/photoshoot");
   };
@@ -449,7 +474,7 @@ export default function EditStory() {
         )}
       </KeyboardAvoidingView>
 
-      <StoryPicker visible={picking !== null} productIds={body?.productIds ?? []} onClose={() => setPicking(null)} onPick={pick} onGenerate={(to) => void generate(to)} />
+      <StoryPicker visible={picking !== null} productIds={body?.productIds ?? []} onClose={() => setPicking(null)} onPick={pick} onGenerate={(to) => void generate(to)} generateBlocked={changed ? problem : null} />
       <FrameMenu index={menuFor} frames={strip} onClose={() => setMenuFor(null)} onMove={move} onRemove={remove} />
       <Sheet visible={!!leaving} onClose={() => setLeaving(null)} label={t("stories.editor.discardTitle")} scrim="rgba(10,10,12,0.6)" gutter={space[20]}>
         <Text style={[type.cardTitle, { fontFamily: "Inter_600SemiBold" }]}>{t("stories.editor.discardTitle")}</Text>
