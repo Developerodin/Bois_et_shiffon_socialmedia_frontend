@@ -32,4 +32,7 @@ How to make them on a local database:
 - **Admin**: `npm run platform-admin -w web -- create <email>` (prints the password once), or
   `grant <email>` for an existing account.
 
+`stories.spec.ts` seeds a story with `scripts/seed-story.ts`, which writes only to the pinned dev brand and only when the
+database host is listed: set `SEED_ALLOW_DB_HOSTS=<host of DATABASE_URL>` in `apps/web/.env` or the shell (see `.env.example`).
+
 Traces, screenshots and videos go to `test-results/` and reports to `playwright-report/`, both git-ignored.
