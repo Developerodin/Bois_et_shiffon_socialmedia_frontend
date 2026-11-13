@@ -80,6 +80,7 @@ export async function autoPublish(scope: Scope & { userId: string }, itemId: str
     });
     const latest = item?.versions[0];
     if (!item || !latest || !item.scheduledFor || item.scheduledFor.getTime() < Date.now() + 5 * 60_000) return;
+    if (item.channel === "INSTAGRAM_STORY") return; // stories are packaged and posted by a person
     const req = publishRequirements(item.channel);
     if (!req.provider || req.needsBoard) return;
     const account = await prisma.integrationConnection.findFirst({ where: { brandId: scope.brandId, provider: req.provider, status: "ACTIVE" }, orderBy: { createdAt: "asc" }, select: { id: true } });

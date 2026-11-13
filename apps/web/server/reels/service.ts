@@ -48,7 +48,7 @@ const ACTIVE = ["VOICE", "CLIPS", "JOIN"] as const;
 
 /** Route error → problem response (shared by the reels routes; route files may only export handlers). */
 export function toReelProblem(error: unknown) {
-  if (error instanceof PublishingError) return problemResponse({ type: "https://api.brandpilot/errors/reels", title: error.message, status: error.status, detail: error.message });
+  if (error instanceof PublishingError) return problemResponse({ type: "https://api.brandpilot/errors/reels", title: error.message, status: error.status, detail: error.message, code: error.code });
   return fromAccessError(error);
 }
 

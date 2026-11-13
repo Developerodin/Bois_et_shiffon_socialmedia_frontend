@@ -469,7 +469,7 @@ export const photoshoots = {
 
 /** A post's text (apps/web ContentVersion.body); photoKeys are the brand photos it shows, the first is the cover. */
 export type PostBody = { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; photoKeys?: string[] };
-export type PostChannel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL" | "INSTAGRAM_REEL" | "FACEBOOK_POST" | "PINTEREST_PIN" | "THREADS_POST";
+export type PostChannel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL" | "INSTAGRAM_REEL" | "INSTAGRAM_STORY" | "FACEBOOK_POST" | "PINTEREST_PIN" | "THREADS_POST";
 export type PostStatus = "PLANNED" | "BRIEF_READY" | "DRAFT_REVIEW" | "AWAITING_APPROVAL" | "APPROVED" | "SCHEDULED" | "PUBLISHED" | "REVIEWED" | "REJECTED" | "BLOCKED";
 /** One calendar item (GET …/content): the latest draft, its check and the approver's last word on it. */
 export type PostItem = {

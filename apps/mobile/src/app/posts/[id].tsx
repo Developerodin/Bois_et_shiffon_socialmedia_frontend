@@ -24,6 +24,7 @@ const CHANNEL_NAME: Record<PostChannel, string> = {
   INSTAGRAM_POST: "detail.instagramFeed",
   INSTAGRAM_CAROUSEL: "detail.instagramCarousel",
   INSTAGRAM_REEL: "detail.instagramReel",
+  INSTAGRAM_STORY: "detail.instagramStory",
   FACEBOOK_POST: "detail.facebookPage",
   PINTEREST_PIN: "detail.pinterest",
   THREADS_POST: "detail.threads",

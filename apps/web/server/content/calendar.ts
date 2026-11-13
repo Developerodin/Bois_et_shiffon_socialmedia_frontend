@@ -13,6 +13,7 @@ export const WEEKDAYS_BY_CHANNEL: Record<ContentChannel, number[]> = {
   FACEBOOK_POST: [2, 6],
   PINTEREST_PIN: [1, 3, 5],
   THREADS_POST: [2, 4],
+  INSTAGRAM_STORY: [], // never planned automatically
 };
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);

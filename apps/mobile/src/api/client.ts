@@ -33,6 +33,12 @@ export class ApiError extends Error {
   ) {
     super(message);
   }
+
+  /** The server's stable error code (e.g. "story.frames"), when it sent one. */
+  get code(): string | undefined {
+    const c = (this.data as { code?: unknown } | null | undefined)?.code;
+    return typeof c === "string" ? c : undefined;
+  }
 }
 
 /**

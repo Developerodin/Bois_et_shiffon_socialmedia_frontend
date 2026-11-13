@@ -26,7 +26,7 @@ import { signedMediaUrl } from "@/server/storage/media";
 export const PUBLISH_JOB = "content.publish";
 
 export class PublishingError extends Error {
-  constructor(message: string, readonly status = 409) {
+  constructor(message: string, readonly status = 409, /** Stable string clients can switch on; story refusals always carry one. */ readonly code?: string) {
     super(message);
   }
 }
@@ -40,6 +40,7 @@ const CHANNEL_PROVIDER: Record<ContentChannel, IntegrationProvider | null> = {
   PINTEREST_PIN: "PINTEREST",
   INSTAGRAM_CAROUSEL: "INSTAGRAM",
   INSTAGRAM_REEL: "INSTAGRAM",
+  INSTAGRAM_STORY: "INSTAGRAM",
 };
 // How many images each channel takes [min, max]; Reels take a video instead.
 const IMAGES: Record<ContentChannel, [number, number]> = {
@@ -49,13 +50,15 @@ const IMAGES: Record<ContentChannel, [number, number]> = {
   FACEBOOK_POST: [0, 1],
   THREADS_POST: [0, 1],
   INSTAGRAM_REEL: [0, 0],
+  INSTAGRAM_STORY: [0, 0], // frames, not images: see publishRequirements
 };
 const TEXT_LIMIT: Partial<Record<ContentChannel, number>> = { THREADS_POST: 500, INSTAGRAM_POST: 2200, INSTAGRAM_CAROUSEL: 2200, INSTAGRAM_REEL: 2200 };
-const LIVE: Prisma.EnumPublicationStatusFilter = { in: ["SCHEDULED", "PUBLISHING", "PUBLISHED", "PENDING_VERIFY"] };
+const LIVE: Prisma.EnumPublicationStatusFilter = { in: ["SCHEDULED", "PUBLISHING", "PUBLISHED", "PENDING_VERIFY", "PARTIAL"] };
 
 export function publishRequirements(channel: ContentChannel) {
   const [minImages, maxImages] = IMAGES[channel];
-  return { provider: CHANNEL_PROVIDER[channel], needsImage: minImages > 0, minImages, maxImages, needsVideo: channel === "INSTAGRAM_REEL", needsBoard: channel === "PINTEREST_PIN" };
+  const base = { provider: CHANNEL_PROVIDER[channel], needsImage: minImages > 0, minImages, maxImages, needsVideo: channel === "INSTAGRAM_REEL", needsBoard: channel === "PINTEREST_PIN" };
+  return channel === "INSTAGRAM_STORY" ? { ...base, frames: [3, 5] as [number, number] } : base;
 }
 
 /** Where the post's media lives: our private uploads (signed at posting time) and/or public links. */
@@ -165,7 +168,7 @@ export const ownMediaKey = (scope: { workspaceId: string; brandId: string }, key
   return key.startsWith(prefix) && /^[A-Za-z0-9][A-Za-z0-9._-]*\.(jpg|png)$/.test(key.slice(prefix.length)) && !key.includes("..");
 };
 // A person can edit until the post is handed to a platform; a scheduled post must be cancelled first.
-const EDITABLE = ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"];
+export const EDITABLE = ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"];
 
 /**
  * A person saves a draft: always a new immutable version (any approval of the old one stops
