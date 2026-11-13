@@ -20,7 +20,20 @@ const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
  * Edit the draft by hand. Saving makes a new version that goes back to the Quality check;
  * any approval of the old version stops holding, and the editor can't approve their own version.
  */
-export function DraftEditor({ url, item, onSaved, onCancel }: { url: string; item: ContentItem; onSaved: () => void; onCancel: () => void }) {
+export function DraftEditor(props: { url: string; item: ContentItem; onSaved: () => void; onCancel: () => void }) {
+  // A story's frames are made on the phone; the web shows them read-only.
+  if (props.item.channel === "INSTAGRAM_STORY") {
+    return (
+      <div className="flex flex-col items-start gap-2 text-sm">
+        <p className="text-muted-foreground">Stories are edited on the phone.</p>
+        <Button type="button" variant="ghost" onClick={props.onCancel}>Close</Button>
+      </div>
+    );
+  }
+  return <TextDraftEditor {...props} />;
+}
+
+function TextDraftEditor({ url, item, onSaved, onCancel }: { url: string; item: ContentItem; onSaved: () => void; onCancel: () => void }) {
   const start = item.latest?.body ?? EMPTY;
   // The version this edit is based on, fixed when the editor opens: the item prop refreshes every few
   // seconds, and sending the fresh version would silently overwrite someone else's newer save.

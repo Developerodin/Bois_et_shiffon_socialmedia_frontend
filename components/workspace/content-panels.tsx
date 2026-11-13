@@ -38,6 +38,9 @@ export type ContentItem = {
   /** The last publish went wrong: FAILED = not posted (reason in publishError), CHECK = may have posted. */
   publishIssue: "FAILED" | "CHECK" | null;
   publishError: string | null;
+  /** Stories: planned to be posted by hand at `scheduledFor`, and the first rendered frame (signed link). */
+  byHand?: boolean;
+  firstFrameUrl?: string | null;
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
@@ -160,6 +163,7 @@ export const CHANNEL_LABEL: Record<string, string> = {
   INSTAGRAM_POST: "Instagram post",
   INSTAGRAM_CAROUSEL: "Instagram carousel",
   INSTAGRAM_REEL: "Instagram Reel",
+  INSTAGRAM_STORY: "Instagram story",
   FACEBOOK_POST: "Facebook",
   PINTEREST_PIN: "Pinterest",
   THREADS_POST: "Threads",
@@ -193,6 +197,7 @@ const DECISION: Record<Opportunity["decision"], { label: string; tone: string }>
   HOLD: { label: "Hold", tone: "bg-warning/15 text-warning" },
   REJECT: { label: "Reject", tone: "bg-muted text-muted-foreground" },
 };
+const time = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 
 /* ───────────── Ideas panel ───────────── */
@@ -390,7 +395,12 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
           <ul className="divide-y divide-border">
             {list.map((i) => (
               <li key={i.id}>
-                <button type="button" onClick={() => onOpen(i.id)} className="flex w-full flex-col gap-1 px-4 py-2.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                <button type="button" onClick={() => onOpen(i.id)} className="flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                  {i.channel === "INSTAGRAM_STORY" && (
+                    // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
+                    i.firstFrameUrl ? <img src={i.firstFrameUrl} alt="" className="aspect-[9/16] w-9 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-9 shrink-0 rounded bg-muted" />
+                  )}
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="flex items-center justify-between gap-2 text-[11px]">
                     <span className="text-muted-foreground">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
                     {i.publishIssue ? (
@@ -402,6 +412,8 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
                     )}
                   </span>
                   <span className="text-sm">{i.title}</span>
+                  {i.byHand && i.scheduledFor && <span className="text-[11px] font-medium text-primary">Post by hand &middot; {time(i.scheduledFor)}</span>}
+                  </span>
                 </button>
               </li>
             ))}
@@ -454,7 +466,8 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
   }, []);
   if (!step) return null;
   const canRun = perms?.includes("agents.run");
-  const canEdit = perms?.includes("content.create");
+  const story = item.channel === "INSTAGRAM_STORY";
+  const canEdit = perms?.includes("content.create") && !story;
 
   async function run(key: string) {
     setPending(true);
@@ -491,7 +504,8 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
               <Pencil aria-hidden /> {step.edit}
             </Button>
           )}
-          {perms && !(step.agent && canRun) && !(step.edit && canEdit) && (
+          {story && step.edit && <p className="text-sm text-muted-foreground">Edit it on the phone.</p>}
+          {perms && !(step.agent && canRun) && !(step.edit && canEdit) && !(story && step.edit) && (
             <p className="text-sm text-muted-foreground">Your role can&rsquo;t do this step. Someone who runs agents or edits content will pick it up.</p>
           )}
         </div>
@@ -513,6 +527,106 @@ function RunWatch({ base, runId, onFailed, onDone }: { base: string; runId: stri
     if (run?.status === "SUCCEEDED") onDone?.();
   }, [run, onFailed, onDone]);
   return null;
+}
+
+type StoryFrameView = { n: number; url: string | null; kind: "photo" | "video" | null; headline: string };
+type StoryView = { rendering: boolean; renderError: string | null; frames: StoryFrameView[] };
+
+/** A story's rendered frames, read-only: 9:16 thumbnails (click for full size), clips play in place. Stories are edited on the phone. */
+function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
+  // Fetched when the version changes and polled only while rendering: each response signs new links, so polling always would reload every picture.
+  const [data, setData] = useState<StoryView | null>(null);
+  const [failed, setFailed] = useState(false);
+  const url = `${base}/content/${encodeURIComponent(item.id)}`;
+  const version = item.latest?.version;
+  const reload = useCallback(
+    () =>
+      request<Partial<StoryView>>(url).then(
+        (d) => {
+          setData({ rendering: d.rendering ?? false, renderError: d.renderError ?? null, frames: d.frames ?? [] });
+          setFailed(false);
+        },
+        () => setFailed(true),
+      ),
+    [url],
+  );
+  useEffect(() => void reload(), [reload, version]);
+  const rendering = data?.rendering;
+  useEffect(() => {
+    if (!rendering) return;
+    const t = setInterval(() => void reload(), 3000);
+    return () => clearInterval(t);
+  }, [rendering, reload]);
+  const [zoom, setZoom] = useState<StoryFrameView | null>(null);
+  useEffect(() => {
+    if (!zoom) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setZoom(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoom]);
+  const body = item.latest?.body as unknown as { frames?: { label?: string; headline?: string; body?: string }[]; cta?: string; link?: string } | undefined;
+  const link = body?.link ? safeHttpUrl(body.link) : null;
+  return (
+    <section aria-label="Story frames" className="rounded-xl border border-border p-4">
+      <h2 className="text-sm font-semibold">
+        Story {item.latest ? `v${item.latest.version}` : ""}
+        {item.latest?.byPerson && <span className="ml-2 font-normal text-muted-foreground">edited by a person</span>}
+      </h2>
+      {!data ? (
+        failed ? <LoadFailed what="the frames" onRetry={reload} className="mt-2" /> : <p className="mt-2 text-sm text-muted-foreground">Loading frames…</p>
+      ) : (
+        <>
+          {data.rendering && (
+            <p role="status" className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+              <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> Rendering the frames…
+            </p>
+          )}
+          {data.renderError && <p role="alert" className="mt-2 text-sm text-destructive">{data.renderError}</p>}
+          {data.frames.length === 0 && !data.rendering && <p className="mt-2 text-sm text-muted-foreground">No frames yet.</p>}
+          <ol className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {data.frames.map((f) => (
+              <li key={f.n} className="flex flex-col gap-1.5">
+                {f.url && f.kind === "video" ? (
+                  <video controls preload="metadata" src={f.url} aria-label={`Frame ${f.n}`} className="aspect-[9/16] w-full rounded-lg bg-muted object-cover" />
+                ) : f.url ? (
+                  <button type="button" onClick={() => setZoom(f)} className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`Frame ${f.n}, full size`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- a signed storage link */}
+                    <img src={f.url} alt={`Frame ${f.n}${f.headline ? `: ${f.headline}` : ""}`} className="aspect-[9/16] w-full rounded-lg bg-muted object-cover" />
+                  </button>
+                ) : (
+                  <div className="flex aspect-[9/16] w-full items-center justify-center rounded-lg bg-muted p-2 text-center text-xs text-muted-foreground">Frame {f.n}: no picture yet</div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {f.n}. {f.headline || "No headline"}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+      {body?.cta && <p className="mt-3 text-sm"><span className="text-muted-foreground">Button: </span>{body.cta}</p>}
+      {link && (
+        <p className="mt-1 text-sm">
+          <span className="text-muted-foreground">Link: </span>
+          <a href={link.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 underline-offset-2 hover:underline">
+            {link.hostname} <ExternalLink className="size-3" aria-hidden="true" />
+          </a>
+        </p>
+      )}
+      <p className="mt-3 text-xs text-muted-foreground">Edit on the phone. The frames here are what you approve.</p>
+      {zoom?.url && (
+        <div role="dialog" aria-modal="true" aria-label={`Frame ${zoom.n}`} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setZoom(null)}>
+          <div className="relative max-h-full" onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- a signed storage link */}
+            <img src={zoom.url} alt={`Frame ${zoom.n} full size`} className="max-h-[90vh] w-auto rounded-lg" />
+            <Button size="sm" variant="secondary" className="absolute right-2 top-2" onClick={() => setZoom(null)} autoFocus>
+              <X aria-hidden /> Close
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
 
 export function ContentView({ base, id, onBack }: { base: string; id: string; onBack: () => void }) {
@@ -597,6 +711,9 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
 
           {!editing && <NextStep base={base} item={item} perms={perms} onEdit={() => setEditing(true)} />}
 
+          {item.channel === "INSTAGRAM_STORY" ? (
+            <StoryFrames base={base} item={item} />
+          ) : (
           <section aria-labelledby="draft-h" className="rounded-xl border border-border p-4">
             <div className="flex items-center justify-between gap-2">
               <h2 id="draft-h" className="text-sm font-semibold">
@@ -644,6 +761,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
               </div>
             )}
           </section>
+          )}
 
           {item.latest?.check && (
             <section aria-labelledby="qc-h" className="rounded-xl border border-border p-4">
