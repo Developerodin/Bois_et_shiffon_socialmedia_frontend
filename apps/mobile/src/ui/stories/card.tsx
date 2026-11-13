@@ -13,14 +13,16 @@ import { storyError } from "@/ui/stories/errors";
 import { openStory, type StoryCard as Card } from "@/ui/stories/use-stories";
 import { usePermissions } from "@/ui/use-permissions";
 
-/** The line under a card's title: when it goes out, or what it's waiting for. */
+/** The card's badge: what the story is waiting for, short enough for one line over the frame. */
 function useStatusLine(s: Card) {
   const { t } = useTranslation("posts");
   if (s.writing) return t("stories.writing");
-  if (s.tab === "scheduled" && s.scheduledFor) return t(s.byHand ? "stories.byHandAt" : "stories.scheduledAt", { when: relativeSlot(s.scheduledFor) });
+  // When it goes out is under the title (the badge is too narrow for it).
+  if (s.tab === "scheduled") return t(s.byHand ? "stories.byHand" : "status.scheduled");
   // Posted but not finished: an attempt went out in part, or one frame's outcome is unknown.
   if (s.tab === "posted" && s.status === "SCHEDULED") return t(s.publishIssue === "CHECK" ? "stories.needsCheck" : "stories.partlyPosted");
-  return t(STATUS_KEY[s.status]);
+  // The shared "Waiting for approval" doesn't fit the badge on one line.
+  return s.status === "AWAITING_APPROVAL" ? t("stories.toApprove") : t(STATUS_KEY[s.status]);
 }
 
 /**
@@ -31,6 +33,7 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
   const { t } = useTranslation("posts");
   const { can } = usePermissions();
   const line = useStatusLine(story);
+  const when = story.tab === "scheduled" && story.scheduledFor ? relativeSlot(story.scheduledFor) : null;
   const [busy, setBusy] = useState(false);
 
   const run = async (act: () => Promise<unknown>) => {
@@ -67,13 +70,13 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
     <View style={{ flex: 1, gap: space[8] }}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t("stories.cardLabel", { title: story.title, status: line })}
+        accessibilityLabel={t("stories.cardLabel", { title: story.title, status: when ? `${line}, ${when}` : line })}
         disabled={story.writing}
         onPress={() => openStory(story.id)}
         style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}
       >
         {story.firstFrameUrl ? (
-          <Image source={{ uri: story.firstFrameUrl, cacheKey: `story-${story.id}-${story.frames}` }} style={StyleSheet.absoluteFill} contentFit="cover" />
+          <Image source={{ uri: story.firstFrameUrl, cacheKey: `story-${story.id}-v${story.version}` }} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : (
           <View style={styles.placeholder}>
             {story.writing ? <ActivityIndicator color={color.primary} /> : <ImagePlus size={24} color={color.inkSecondary} strokeWidth={1.75} />}
@@ -83,7 +86,7 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
         <LinearGradient colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0)", "rgba(0,0,0,0.8)"]} locations={[0, 0.5, 1]} style={StyleSheet.absoluteFill} />
         <View style={styles.top}>
           <View style={styles.status}>
-            <Text style={styles.statusText} numberOfLines={2}>
+            <Text style={styles.statusText} numberOfLines={1}>
               {line}
             </Text>
           </View>
@@ -97,6 +100,7 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
           <Text style={styles.title} numberOfLines={2}>
             {story.title}
           </Text>
+          {when ? <Text style={styles.when}>{when}</Text> : null}
         </View>
       </Pressable>
       {story.tab === "posted" && story.status === "SCHEDULED" && can("publish.execute") ? <Unfinished story={story} onChanged={onChanged} /> : null}
@@ -185,6 +189,7 @@ const styles = StyleSheet.create({
   statusText: { fontFamily: "Inter_600SemiBold", fontSize: 12, lineHeight: 20, color: color.onPrimary },
   more: { width: 24, height: 24, alignItems: "center", justifyContent: "center", borderRadius: radius.badge, backgroundColor: "rgba(0,0,0,0.4)" },
   bottom: { position: "absolute", left: 12, right: 12, bottom: 12, padding: space[8] },
+  when: { fontFamily: "Inter_400Regular", fontSize: 12, lineHeight: 18, color: color.onPrimary },
   title: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 14,

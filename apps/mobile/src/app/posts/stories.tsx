@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -37,7 +37,14 @@ export default function Stories() {
   const { t } = useTranslation("posts");
   const { tabs, due, loading, error, refresh } = useStories();
   const { can } = usePermissions();
-  const [tab, setTab] = useState<StoryTab>("drafts");
+  // Today's due card opens the Scheduled tab (?tab=scheduled).
+  const params = useLocalSearchParams<{ tab?: string }>();
+  const [tab, setTab] = useState<StoryTab>(TABS.includes(params.tab as StoryTab) ? (params.tab as StoryTab) : "drafts");
+  const [retrying, setRetrying] = useState(false);
+  const retry = () => {
+    setRetrying(true);
+    void refresh().finally(() => setRetrying(false));
+  };
   // One request id per sheet open; null = closed.
   const [sheet, setSheet] = useState<string | null>(null);
   const openSheet = () => setSheet(requestId());
@@ -67,7 +74,7 @@ export default function Stories() {
       {error ? (
         <View style={styles.state}>
           <Text style={type.body}>{t("stories.loadFailed")}</Text>
-          <Button label={t("stories.retry")} variant="outline" onPress={() => void refresh()} />
+          <Button label={t("stories.retry")} variant="outline" loading={retrying} onPress={retry} />
         </View>
       ) : null}
       {!loading && !error && total === 0 ? (
@@ -146,7 +153,12 @@ function NewStorySheet({ requestId, onClose, onCreated }: { requestId: string; o
       await stories.create(requestId, { goal, productId, direction: direction.trim() || undefined });
       onCreated();
     } catch (e) {
-      setError({ text: storyError(e), credits: e instanceof ApiError && e.code === "story.credits" });
+      // Writing didn't start: the server keeps the story (blocked, credits returned) under this request, so it shows in
+      // Drafts with its note and Fix it, rather than this sheet offering a retry that would only find it again.
+      if (e instanceof ApiError && e.code === "story.writeStart") return onCreated();
+      // A 429 here is the daily writing limit.
+      const limit = e instanceof ApiError && e.status === 429 && !e.code;
+      setError({ text: limit ? t("stories.errors.limit") : storyError(e), credits: e instanceof ApiError && e.code === "story.credits" });
       setSending(false);
     }
   };

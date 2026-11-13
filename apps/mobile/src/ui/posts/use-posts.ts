@@ -44,6 +44,12 @@ export const forgetPosts = () => {
 };
 
 const isStory = (p: Pick<PostItem, "channel">) => p.channel === "INSTAGRAM_STORY";
+// The posts without stories, worked out once per list so screens get the same array until the list changes.
+let postsOnly: { from: PostItem[] | null; items: PostItem[] | null } = { from: null, items: null };
+const withoutStories = (items: PostItem[] | null) => {
+  if (postsOnly.from !== items) postsOnly = { from: items, items: items && items.filter((p) => !isStory(p)) };
+  return postsOnly.items;
+};
 
 /**
  * `items`: the posts, without stories (stories have their own screens, P07 and the story detail). `all`: posts and
@@ -52,7 +58,7 @@ const isStory = (p: Pick<PostItem, "channel">) => p.channel === "INSTAGRAM_STORY
 export function usePosts() {
   const s = useSyncExternalStore(subscribe, () => state);
   useFocusEffect(useCallback(() => void reloadPosts(), []));
-  return { items: s.items && s.items.filter((p) => !isStory(p)), all: s.items, error: s.error, loading: s.items === null && !s.error, reload: reloadPosts };
+  return { items: withoutStories(s.items), all: s.items, error: s.error, loading: s.items === null && !s.error, reload: reloadPosts };
 }
 
 export const usePost = (id: string | undefined) => {

@@ -474,7 +474,7 @@ export type PostStatus = "PLANNED" | "BRIEF_READY" | "DRAFT_REVIEW" | "AWAITING_
 /** One calendar item (GET …/content): the latest draft, its check and the approver's last word on it. */
 export type PostItem = {
   id: string; title: string; channel: PostChannel; status: PostStatus; scheduledFor: string | null; studio: boolean; pillar: string | null;
-  brief: { goal?: string; products?: string[]; cta?: string } | null;
+  brief: { goal?: string; products?: string[]; cta?: string; requestId?: string } | null;
   publishIssue: "FAILED" | "CHECK" | null; publishError: string | null;
   /** Stories only: the first rendered frame (signed for an hour), their cover. */
   firstFrameUrl?: string | null;
@@ -611,8 +611,8 @@ export type StoryGoal = "newArrival" | "productFeature" | "specialOffer";
 export type StoryTab = "drafts" | "scheduled" | "posted";
 /** A story in the content list (GET …/content): its tab and first rendered frame (signed for an hour). */
 export type StoryItem = Omit<PostItem, "latest"> & {
-  tab: StoryTab; firstFrameUrl: string | null; byHand: boolean;
-  latest: { version: number; body: StoryBody; createdAt: string; byPerson: boolean; check: PostItem["latest"] extends infer L ? (L extends { check: infer C } ? C : never) : never } | null;
+  tab: StoryTab; firstFrameUrl: string | null; byHand: boolean; createdAt: string;
+  latest: { version: number; body: StoryBody; createdAt: string; byPerson: boolean; check: NonNullable<PostItem["latest"]>["check"] } | null;
 };
 /** A story's attempt also says how many frames it has and which are out (0-based `i`). */
 export type StoryAttempt = PostRelease["attempts"][number] & { frames?: number; progress?: { i: number; state: "publishing" | "published" | "not-posted" }[]; code?: string | null };

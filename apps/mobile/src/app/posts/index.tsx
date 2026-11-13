@@ -43,7 +43,7 @@ export default function PostsToday() {
       </Text>
       <Text style={[type.body, { color: color.inkSecondary, paddingTop: 2 }]}>{t("today.subtitle")}</Text>
 
-      <DueCard items={due} onOpenMany={() => router.push("/posts/stories")} />
+      <DueCard items={due} onOpenMany={() => router.push({ pathname: "/posts/stories", params: { tab: "scheduled" } })} />
 
       {loading ? <PageLoading photo /> : null}
       {error && !items ? (

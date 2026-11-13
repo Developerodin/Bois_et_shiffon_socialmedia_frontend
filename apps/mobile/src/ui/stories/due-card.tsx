@@ -20,21 +20,21 @@ const keyFor = (brandId: string) => `espanda.storiesDueDismissed.${brandId}`;
 export function DueCard({ items, onOpenMany }: { items: DueStory[]; onOpenMany: () => void }) {
   const { t } = useTranslation("posts");
   const brandId = useCurrentBrand()?.id;
-  // Hidden while reading the stored dismissal: nothing shows until it's known.
-  const [hidden, setHidden] = useState(true);
+  // Whether the card is shown, for the business it was read for: hidden until that business's dismissal is known.
+  const [shown, setShown] = useState<{ brandId: string; show: boolean } | null>(null);
   useEffect(() => {
     if (!brandId) return;
     let live = true;
     SecureStore.getItemAsync(keyFor(brandId)).then(
-      (v) => live && setHidden(Date.now() - (Number(v) || 0) < DAY_MS),
-      () => live && setHidden(false),
+      (v) => live && setShown({ brandId, show: Date.now() - (Number(v) || 0) >= DAY_MS }),
+      () => live && setShown({ brandId, show: true }),
     );
     return () => void (live = false);
   }, [brandId]);
 
-  if (!items.length || !brandId || hidden) return null;
+  if (!items.length || !brandId || shown?.brandId !== brandId || !shown.show) return null;
   const dismiss = () => {
-    setHidden(true);
+    setShown({ brandId, show: false });
     SecureStore.setItemAsync(keyFor(brandId), String(Date.now())).catch(() => {});
   };
   const n = items.length;

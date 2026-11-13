@@ -268,8 +268,6 @@
     "posted_one": "Posted ({{count}})",
     "posted_other": "Posted ({{count}})",
     "writing": "Writing...",
-    "scheduledAt": "Scheduled · {{when}}",
-    "byHandAt": "Post by hand · {{when}}",
     "partlyPosted": "Partly posted",
     "needsCheck": "Check if it posted",
     "cardLabel": "{{title}}, {{status}}",
@@ -300,14 +298,15 @@
       "credits": "Not enough credits to write a story.",
       "limit": "Too many posts written today. Try again tomorrow.",
       "requestUsed": "This request was already used. Close this and start a new story.",
-      "writeStart": "Writing didn’t start. Your credits were returned. Try again.",
       "notDeletable": "Only draft stories can be deleted.",
       "expiredConfirm": "The frames already posted have expired. Posting the rest makes a story of {{remainingFrames}} frames. Tap again to go ahead.",
       "alreadyHandled": "This was already handled. Open Stories again to see where it stands.",
       "partlyPosted": "Part of this story is already posted. Post the rest or mark it as done.",
       "notFound": "This story no longer exists.",
       "rateLimited": "Too many tries. Try again later."
-    }
+    },
+    "toApprove": "To approve",
+    "byHand": "By hand"
   },
   "editStory": {
     "back": "Back",
