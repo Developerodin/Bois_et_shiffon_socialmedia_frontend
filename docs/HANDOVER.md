@@ -8,8 +8,10 @@ tested on the emulator, fixed, and committed.
 
 Branch `desktop-shell`, committed, **not pushed** (`main` still at `08e5fb1`). Spec
 `docs/superpowers/specs/2026-11-13-instagram-stories-design.md`, plan `docs/superpowers/plans/2026-11-13-instagram-stories.md`
-(commits `f7e6ef6` to the Task 19 fixes). Each task had its own review and fix round; the whole-branch four-lens review
-has **not** been run yet.
+(commits `f7e6ef6` to `e033d6b`). Each task had its own review (most had a fix round). The whole-branch four-lens
+review ran at the end of the day: no Critical findings and 8 Important; the handover one is fixed here, **7 to fix tomorrow** (list below; full reports in
+`docs/handover/2026-11-13-stories-final-review/`). Web: 756 vitest tests pass, tsc clean; phone: tsc clean, `expo lint`
+shows only 4 older errors in the reels screens.
 
 **What it does**
 - A story is 3–5 frames, each a photo or a clip (15 s window, sound on or off), with headline/body text, a CTA on the
@@ -32,7 +34,9 @@ has **not** been run yet.
 **Before it can go live**
 - Scheduling needs an Instagram **Business** account connected; it was not run end to end against the Graph API.
 - Generate needs Higgsfield credits for new Photoshoot or Reels results (picking existing ones works).
-- The in-app by-hand reminder relies on push notifications being set up for the release build.
+- The in-app due card works today; only a push reminder for by-hand stories waits for Firebase push setup.
+- Check that `next build` traces `ffprobe-static` and the fonts (`next.config.ts` outputFileTracingIncludes); not run.
+- A new phone dev build is needed (expo-media-library, expo-clipboard and the `app.json` plugins).
 - New phone strings are English only in this branch; the other 23 languages need translating.
 - A release build is needed to confirm an upload retries after the app returns from the background, and pinch-to-zoom
   needs a real device.
@@ -43,8 +47,38 @@ has **not** been run yet.
 - Clips picked from the library or posts (not uploaded, not reels) take their size from the player, so a rotated one may
   preview a little off; the render is right.
 - The server doesn't strip a crop sent on a reel frame (the phone never sends one).
-- Deferred review minors are listed in the build ledger summary; the main ones: library list has no cap, list GET
-  exposes media keys, calendar thumbnails re-signed on each poll, no per-version frame history.
+- Deferred minors from the per-task reviews: library list has no cap, list GET exposes media keys, calendar thumbnails
+  re-signed on each poll, no per-version frame history.
+
+**To fix tomorrow (final review, Important)** — details and file:line in `docs/handover/2026-11-13-stories-final-review/`
+1. Correctness: a duplicated story is created PLANNED, so a Generate calendar run gives it an AI brief and the Creator
+   overwrites the person's text as v2 (`server/stories/service.ts:370`, `brief.ts:38`, `creator.ts:75`).
+2. Spec: web users never see the post-by-hand steps; the zip has only `link.txt` (`package/route.ts:58`), the web panel
+   shows none (`release-panel.tsx:482`), and the server `STEPS` (`by-hand.ts:63`) are unused while the phone keeps its
+   own copy. One source of steps, shown on web and in the zip.
+3. Spec: a story whose first frame is a clip shows an `.mp4` as an image thumbnail in four places (web calendar
+   `content-panels.tsx:400`, phone card `ui/stories/card.tsx:79`, Today `ui/posts/use-posts.ts:76`, due list). Needs a
+   poster JPEG from the clip render or a video tile.
+4. Phone: a Planner story with no draft is a dead end ("Add photos" → editor says "not drafted yet", no action)
+   (`posts/story/[id].tsx:259`, `edit-story.tsx:152`, `ui/stories/card.tsx:83`).
+5. Phone: VoiceOver can't reach a story card's "…" menu (Duplicate, Delete) (`ui/stories/card.tsx:71`); add
+   accessibilityActions.
+6. Phone: about 31 of 47 story refusal codes have no app string, so people see server English (`ui/stories/errors.ts:15`,
+   `stories.errors` in en `posts.json`), e.g. `story.textFit`, `story.clipWindow`, `story.renderFailed`, `story.framesNotReady`.
+7. Phone: the editor hides a failed story read (no error, no retry; a rendering or approved story opens editable)
+   (`edit-story.tsx:143`).
+
+**Minor worth doing with them**
+- Security: rendered clips keep the phone's GPS location tag; add `-map_metadata -1` to `clipArgs`
+  (`server/stories/render.ts:396`), bump `RENDERER_VERSION`, optionally strip it at upload check.
+- Money: a re-run Creator job can refund a paid story, and the Generate calendar run can write paid stories free
+  (`engine.ts:225`, `runner.ts:65`, `creator.ts:74`); nobody is charged twice.
+- An edit to an approved by-hand story after its zip was downloaded blocks "I posted it" (`manual-post.ts:91`); a retried
+  final render step never starts Quality (`stories/service.ts:251`); an agent's failed clip render shows on the phone as
+  the person's failed save (`stories/service.ts:293`).
+- Web: the by-hand time shows without a day in the content list, and the time field accepts a past time.
+- Duplicated constants across server modules (`MIN_CLIP_SECONDS`, `LOGO_MAX_BYTES`, the 8 MB cap, the 15 s window) and
+  about 12 exports with no outside user.
 
 ## Reels templates, presenters and voices (end of day 2026-11-12)
 
