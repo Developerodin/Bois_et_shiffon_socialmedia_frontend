@@ -44,13 +44,14 @@ function zipStream(pack: Awaited<ReturnType<typeof storyPackage>>) {
         controller.enqueue(chunk);
         if (final) controller.close();
       });
+      let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
       try {
         for (const f of pack.frames) {
-          const res = await fetch(f.url);
+          const res = await fetch(f.url, { signal: AbortSignal.timeout(60_000) });
           if (!res.ok || !res.body) throw new Error(`frame ${f.n} unavailable`);
           const file = new ZipPassThrough(`frame-${f.n}.${f.kind === "video" ? "mp4" : "jpg"}`);
           zip.add(file);
-          const reader = res.body.getReader();
+          reader = res.body.getReader();
           for (let r = await reader.read(); !r.done; r = await reader.read()) file.push(r.value);
           file.push(new Uint8Array(0), true);
         }
@@ -59,6 +60,7 @@ function zipStream(pack: Awaited<ReturnType<typeof storyPackage>>) {
         link.push(new TextEncoder().encode(pack.link ? `${pack.link}\n` : "No link on this story.\n"), true);
         zip.end();
       } catch (e) {
+        await reader?.cancel().catch(() => null);
         controller.error(e);
       }
     },

@@ -828,6 +828,8 @@ export async function releaseState(scope: { workspaceId: string; brandId: string
   const c = item.campaignId ? campaigns.get(item.campaignId) : undefined;
   return {
     latestVersion: latest?.version ?? null,
+    byHand: item.byHand,
+    scheduledFor: item.scheduledFor,
     approvedVersionId: approval?.contentVersionId ?? null,
     approvalValid: Boolean(approval),
     requirements: req,
