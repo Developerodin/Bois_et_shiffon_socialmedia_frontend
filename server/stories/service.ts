@@ -5,7 +5,8 @@ import { startAgentRun } from "@/server/agents/engine";
 import { hitRateLimit } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
 import { enqueueJob } from "@/server/jobs/queue";
-import { refundCharge } from "@/server/services/credits";
+import { liveOfferFor } from "@/server/content/knowledge";
+import { CREDIT_COSTS, InsufficientCreditsError, refundCharge, spendCredits } from "@/server/services/credits";
 import { EDITABLE, lock, PublishingError, TX } from "@/server/services/publishing";
 import { getMediaBytes, signedMediaUrl } from "@/server/storage/media";
 import { isStoryBody, type StoryBody, type StoryFrame, type StoryFrameInput, type StoryInput } from "@/server/stories/body";
@@ -364,4 +365,86 @@ export async function deleteStory(scope: Scope, itemId: string) {
       data: { workspaceId: scope.workspaceId, brandId: scope.brandId, actorUserId: scope.userId, action: "content.delete", entityType: "ContentItem", entityId: item.id, metadata: { channel: item.channel, status: item.status } },
     });
   }, TX);
+}
+
+const STORY_GOALS = ["newArrival", "productFeature", "specialOffer"] as const;
+export const STORY_START_NOTE = "Writing didn't start. Try again.";
+const noCredits = () => new PublishingError("Not enough credits to write a story.", 402, "story.credits");
+
+/**
+ * The app's "New story": 5 credits, charged before the item exists with refId = the app's request id, so a double
+ * tap or a retried request pays once and gets the same item back (`repeated`). The caller then starts the Creator
+ * with `prepaidChargeId: chargeId` and calls `failStoryStart` if that throws.
+ * Fails: a crash between the charge and the item leaves a charge with no item (the request id retried finds the
+ * charge and creates the item); a crash between the item and the run leaves a BRIEF_READY story its person can "Fix".
+ */
+export async function createStory(scope: Scope, input: { goal: (typeof STORY_GOALS)[number]; productId: string; direction?: string; requestId: string }) {
+  const product = await prisma.product.findFirst({ where: { id: input.productId, workspaceId: scope.workspaceId, brandId: scope.brandId, archivedAt: null }, select: { id: true, title: true } });
+  if (!product) throw new PublishingError("That product isn't in this brand.", 400, "story.product");
+  let chargeId: string;
+  try {
+    chargeId = await spendCredits({ workspaceId: scope.workspaceId, amount: CREDIT_COSTS.storyWrite, reason: "story-write", refId: input.requestId, userId: scope.userId });
+  } catch (e) {
+    if (e instanceof InsufficientCreditsError) throw noCredits();
+    throw e;
+  }
+  const campaignId = input.goal === "specialOffer" ? await liveOfferFor(scope, [product.id]) : null;
+  const direction = input.direction?.trim() ?? "";
+  return prisma.$transaction(async (tx) => {
+    // Two requests with one id at once: the second waits here, then finds the first's item.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`story-create:${scope.workspaceId}:${input.requestId}`}))`;
+    const existing = await tx.contentItem.findFirst({
+      where: { workspaceId: scope.workspaceId, brandId: scope.brandId, channel: "INSTAGRAM_STORY", brief: { path: ["requestId"], equals: input.requestId } },
+      select: { id: true },
+    });
+    if (existing) return { id: existing.id, chargeId, repeated: true };
+    const item = await tx.contentItem.create({
+      data: {
+        workspaceId: scope.workspaceId, brandId: scope.brandId, title: product.title, channel: "INSTAGRAM_STORY", status: "BRIEF_READY", productIds: [product.id], campaignId,
+        brief: { goal: input.goal, products: [product.title], keyMessage: direction, angle: input.goal, requestId: input.requestId },
+      },
+    });
+    await tx.auditEvent.create({
+      data: { workspaceId: scope.workspaceId, brandId: scope.brandId, actorUserId: scope.userId, action: "content.create", entityType: "ContentItem", entityId: item.id, metadata: { channel: "INSTAGRAM_STORY", goal: input.goal } },
+    });
+    return { id: item.id, chargeId, repeated: false };
+  }, TX);
+}
+
+/** The Creator didn't start: give the 5 credits back and park the story as BLOCKED with a note the app shows. */
+export async function failStoryStart(scope: BrandScope, itemId: string, chargeId: string) {
+  await refundCharge(scope.workspaceId, chargeId);
+  const item = await prisma.contentItem.findFirst({ where: { id: itemId, workspaceId: scope.workspaceId, brandId: scope.brandId }, select: { brief: true } });
+  const brief = (item?.brief && typeof item.brief === "object" && !Array.isArray(item.brief) ? item.brief : {}) as Record<string, unknown>;
+  await prisma.contentItem.updateMany({
+    where: { id: itemId, workspaceId: scope.workspaceId, brandId: scope.brandId },
+    data: { status: "BLOCKED", brief: { ...brief, note: STORY_START_NOTE } as Prisma.InputJsonValue },
+  });
+}
+
+/**
+ * "Fix it" on a story. Free while the first charge stands. A story with no version whose latest charge was refunded
+ * (the writer failed) charges again, refId `<itemId>:retry:<n>`; the retry is idempotent, so a double tap pays once.
+ * Returns the new charge id to prepay the run with, or null when nothing was charged. A BLOCKED story goes back to
+ * BRIEF_READY so the writer picks it up.
+ */
+export async function reopenStoryWrite(scope: Scope, itemId: string): Promise<string | null> {
+  const { item, latest } = await loadStory(prisma, scope, itemId);
+  const requestId = (item.brief as { requestId?: unknown } | null)?.requestId;
+  let chargeId: string | null = null;
+  if (!latest && typeof requestId === "string") {
+    const prefix = `${item.id}:retry:`;
+    const retries = await prisma.creditEntry.count({ where: { workspaceId: scope.workspaceId, reason: "story-write", refId: { startsWith: prefix } } });
+    const last = retries ? `${prefix}${retries}` : requestId;
+    if (await prisma.creditEntry.findFirst({ where: { workspaceId: scope.workspaceId, reason: "refund", refId: last }, select: { id: true } })) {
+      try {
+        chargeId = await spendCredits({ workspaceId: scope.workspaceId, amount: CREDIT_COSTS.storyWrite, reason: "story-write", refId: `${prefix}${retries + 1}`, userId: scope.userId });
+      } catch (e) {
+        if (e instanceof InsufficientCreditsError) throw noCredits();
+        throw e;
+      }
+    }
+  }
+  if (item.status === "BLOCKED") await prisma.contentItem.updateMany({ where: { id: item.id, status: "BLOCKED" }, data: { status: "BRIEF_READY" } });
+  return chargeId;
 }

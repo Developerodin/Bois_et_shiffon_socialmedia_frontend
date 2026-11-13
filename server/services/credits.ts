@@ -6,7 +6,7 @@ import { prisma } from "@/server/db/prisma";
  * A starter grant per workspace, then a plan's monthly credits as "plan-credits" rows (server/services/subscriptions.ts).
  * ponytail: purchases and top-ups will be more rows of the same kind.
  */
-export const CREDIT_COSTS = { siteAudit: 10, manualRun: 5, reelPerSecond: 2, presenterPerSecond: 4 } as const;
+export const CREDIT_COSTS = { siteAudit: 10, manualRun: 5, reelPerSecond: 2, presenterPerSecond: 4, storyWrite: 5 } as const;
 export const STARTER_CREDITS = 20;
 /** The quality check is the required gate before approval: never charge for it on top of the draft it checks. */
 export const FREE_MANUAL_AGENTS: ReadonlySet<string> = new Set(["quality"]);
