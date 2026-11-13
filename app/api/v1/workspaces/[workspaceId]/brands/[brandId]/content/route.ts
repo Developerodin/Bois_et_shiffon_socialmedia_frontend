@@ -81,7 +81,7 @@ export async function POST(request: Request, context: { params: Promise<BrandRou
     kickRunner();
     return Response.json({ id: item.id }, { status: 201 });
   } catch (error) {
-    if (error instanceof PublishingError) return problemResponse({ type: "https://api.brandpilot/errors/publishing", title: error.message, status: error.status, detail: error.message });
+    if (error instanceof PublishingError) return problemResponse({ type: "https://api.brandpilot/errors/publishing", title: error.message, status: error.status, detail: error.message, code: error.code });
     return fromAccessError(error);
   }
 }

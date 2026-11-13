@@ -128,7 +128,7 @@ export async function POST(request: Request, context: Params) {
 
 function toProblem(error: unknown) {
   if (error instanceof PublishingError) {
-    return problemResponse({ type: "https://api.brandpilot/errors/publishing", title: error.message, status: error.status, detail: error.message });
+    return problemResponse({ type: "https://api.brandpilot/errors/publishing", title: error.message, status: error.status, detail: error.message, code: error.code });
   }
   return fromAccessError(error);
 }

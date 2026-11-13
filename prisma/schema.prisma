@@ -800,6 +800,7 @@ enum ContentChannel {
   INSTAGRAM_POST
   INSTAGRAM_CAROUSEL
   INSTAGRAM_REEL
+  INSTAGRAM_STORY
   FACEBOOK_POST
   PINTEREST_PIN
   THREADS_POST
@@ -845,6 +846,7 @@ model ContentItem {
   campaignId    String?
   studio        Boolean        @default(false) // made in the mobile Reels studio: the writing agents leave it alone
   postUrl       String? // posted by hand after a download; the link the person pasted back
+  byHand        Boolean        @default(false) // a story the person posts themselves from a downloaded package
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
@@ -1144,6 +1146,7 @@ enum PublicationStatus {
   PUBLISHED
   FAILED // the platform refused; safe to try again
   PENDING_VERIFY // outcome unknown (timeout, 5xx); a person checks before any retry
+  PARTIAL // a story: some frames posted, the rest still to do
   CANCELLED
 }
 
@@ -1240,4 +1243,28 @@ model Voice {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, archivedAt])
+}
+
+/// A photo or clip the person uploaded for a story frame (presigned PUT, then verified). Unused ones are swept after 7 days.
+model MediaUpload {
+  id                String    @id @default(cuid())
+  workspaceId       String
+  brandId           String
+  key               String    @unique
+  kind              String // "photo" | "video"
+  status            String    @default("PENDING") // "PENDING" | "VERIFIED" | "REJECTED"
+  bytes             Int
+  durationSec       Float?
+  width             Int?
+  height            Int?
+  hasAudio          Boolean?
+  productId         String?
+  rightsConfirmedBy String?
+  rightsConfirmedAt DateTime?
+  reason            String?
+  createdBy         String
+  createdAt         DateTime  @default(now())
+
+  @@unique([brandId, productId])
+  @@index([workspaceId, brandId, status, createdAt])
 }
