@@ -245,9 +245,7 @@
     "scheduled_other": "Naplánováno ({{count}})",
     "samplePreview": "Ukázkový náhled",
     "moreOptions": "Další možnosti pro {{title}}",
-    "editStory": "Upravit příběh",
-    "comingSoon": "Již brzy",
-    "comingSoonBody": "Stories zatím nejsou dostupné. Příspěvky, karusely a reels už můžeš plánovat."
+    "editStory": "Upravit příběh"
   },
   "editStory": {
     "back": "Zpět",

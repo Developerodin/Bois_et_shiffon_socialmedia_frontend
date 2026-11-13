@@ -245,9 +245,7 @@
     "scheduled_other": "Geplant ({{count}})",
     "samplePreview": "Beispielvorschau",
     "moreOptions": "Weitere Optionen für {{title}}",
-    "editStory": "Story bearbeiten",
-    "comingSoon": "Bald verfügbar",
-    "comingSoonBody": "Stories sind noch nicht verfügbar. Beiträge, Karussells und Reels kannst du schon jetzt einplanen."
+    "editStory": "Story bearbeiten"
   },
   "editStory": {
     "back": "Zurück",

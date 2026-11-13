@@ -17,7 +17,7 @@ const VIEWS = ["month", "list"] as const;
 /** P02 · Posts / Calendar: month grid with a dot per posting day, then the selected day's posts. */
 export default function PostsCalendar() {
   const { t } = useTranslation("posts");
-  const { items, error, reload } = usePosts();
+  const { all: items, error, reload } = usePosts(); // stories too: a story opens its own screen (openPost)
   const [retry, setRetry] = useState<"idle" | "busy" | "failed">("idle");
   const tryAgain = () => {
     setRetry("busy");

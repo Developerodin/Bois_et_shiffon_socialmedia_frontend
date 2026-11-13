@@ -245,9 +245,7 @@
     "scheduled_other": "Programate ({{count}})",
     "samplePreview": "Previzualizare exemplu",
     "moreOptions": "Mai multe opțiuni pentru {{title}}",
-    "editStory": "Editează povestea",
-    "comingSoon": "În curând",
-    "comingSoonBody": "Story-urile nu sunt încă disponibile. Poți programa deja postări, carusele și reeluri."
+    "editStory": "Editează povestea"
   },
   "editStory": {
     "back": "Înapoi",

@@ -2,8 +2,9 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ArrowRight, Clock, SquarePen } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Glow } from "@/ui/aura";
+import { PageLoading } from "@/ui/page-loading";
 import { Button } from "@/ui/button";
 import { color, radius, space, type } from "@/theme/tokens";
 import { BottomNav, BusinessSwitcher, ModuleHeader, PostsScreen } from "@/ui/posts/chrome";
@@ -11,12 +12,15 @@ import { Badge } from "@/ui/posts/controls";
 import { CHANNEL_LABEL, STATUS_KEY, isLockedIn, relativeSlot, upcomingThisWeek } from "@/ui/posts/format";
 import { coverSource, coverUrl, openPost, usePosts } from "@/ui/posts/use-posts";
 import { usePlan } from "@/ui/plans/use-plan";
+import { DueCard } from "@/ui/stories/due-card";
+import { useStories } from "@/ui/stories/use-stories";
 import { useEffect } from "react";
 
-/** P01 · Posts / Today: the post waiting for approval and this week's agenda. */
+/** P01 · Posts / Today: stories due to be posted by hand, the post waiting for approval and this week's agenda (posts and stories). */
 export default function PostsToday() {
   const { t } = useTranslation("posts");
-  const { items, error, loading, reload } = usePosts();
+  const { items, all, error, loading, reload } = usePosts();
+  const { due } = useStories();
   // No plan: the calendar is locked, so the No-subscription Posts home (L05) shows instead.
   const { loaded, planned } = usePlan();
   useEffect(() => {
@@ -24,7 +28,7 @@ export default function PostsToday() {
   }, [loaded, planned]);
   // Studio reels are approved in Reels (R07); this card is for the agents' posts.
   const pending = items?.find((p) => p.status === "AWAITING_APPROVAL" && !p.studio);
-  const agenda = upcomingThisWeek(items ?? []).slice(0, 2);
+  const agenda = upcomingThisWeek(all ?? []).slice(0, 2);
   const product = pending?.brief?.products?.[0];
   const format = pending && (pending.channel === "INSTAGRAM_CAROUSEL" ? t("today.slides", { count: pending.latest?.body.slides.length ?? 0 }) : CHANNEL_LABEL[pending.channel]);
 
@@ -39,7 +43,9 @@ export default function PostsToday() {
       </Text>
       <Text style={[type.body, { color: color.inkSecondary, paddingTop: 2 }]}>{t("today.subtitle")}</Text>
 
-      {loading ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
+      <DueCard items={due} onOpenMany={() => router.push("/posts/stories")} />
+
+      {loading ? <PageLoading photo /> : null}
       {error && !items ? (
         <View style={[styles.section, styles.agenda, { gap: space[12] }]}>
           <Text style={type.body}>{t("today.loadFailed")}</Text>

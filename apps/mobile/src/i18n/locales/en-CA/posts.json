@@ -245,9 +245,7 @@
     "scheduled_other": "Scheduled ({{count}})",
     "samplePreview": "Sample preview",
     "moreOptions": "More options for {{title}}",
-    "editStory": "Edit story",
-    "comingSoon": "Coming soon",
-    "comingSoonBody": "Stories are not available yet. Posts, carousels and reels are ready to schedule now."
+    "editStory": "Edit story"
   },
   "editStory": {
     "back": "Back",

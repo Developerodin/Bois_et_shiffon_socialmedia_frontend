@@ -3,6 +3,7 @@ import { useCallback, useSyncExternalStore } from "react";
 import { posts, type PostItem } from "@/api/endpoints";
 import type { Post } from "@/ui/posts/format";
 import { openReel } from "@/ui/reels/use-reel";
+import { openStory } from "@/ui/stories/use-stories";
 
 /**
  * The business's posts (calendar items), shared by every Posts screen: one list in module state, re-read when a
@@ -42,10 +43,16 @@ export const forgetPosts = () => {
   set({ items: null, error: null });
 };
 
+const isStory = (p: Pick<PostItem, "channel">) => p.channel === "INSTAGRAM_STORY";
+
+/**
+ * `items`: the posts, without stories (stories have their own screens, P07 and the story detail). `all`: posts and
+ * stories, for the calendar and Today's agenda (openPost opens a story's own screen).
+ */
 export function usePosts() {
   const s = useSyncExternalStore(subscribe, () => state);
   useFocusEffect(useCallback(() => void reloadPosts(), []));
-  return { ...s, loading: s.items === null && !s.error, reload: reloadPosts };
+  return { items: s.items && s.items.filter((p) => !isStory(p)), all: s.items, error: s.error, loading: s.items === null && !s.error, reload: reloadPosts };
 }
 
 export const usePost = (id: string | undefined) => {
@@ -56,15 +63,15 @@ export const usePost = (id: string | undefined) => {
 /** Caption with its hashtags, as the post will read. */
 export const fullCaption = (p: PostItem) => {
   const b = p.latest?.body;
-  return b ? [b.caption, b.hashtags.join(" ")].filter(Boolean).join("\n\n") : "";
+  return b && !isStory(p) ? [b.caption, b.hashtags.join(" ")].filter(Boolean).join("\n\n") : "";
 };
 
 /** The cover photo (the first of the post's pictures). */
-export const coverUrl = (p: PostItem) => p.latest?.photoUrls[0] ?? null;
+export const coverUrl = (p: PostItem) => (isStory(p) ? (p.firstFrameUrl ?? null) : (p.latest?.photoUrls[0] ?? null));
 /** For expo-image: cached by the photo's storage key, since the signed link changes on every read. */
 export const coverSource = (p: PostItem) => {
   const uri = coverUrl(p);
-  return uri ? { uri, cacheKey: p.latest?.body.photoKeys?.[0] } : undefined;
+  return uri ? { uri, cacheKey: isStory(p) ? undefined : p.latest?.body.photoKeys?.[0] } : undefined;
 };
 
 /** The shape the Posts rows and cards draw (shared with the sample stories). */
@@ -72,8 +79,9 @@ export const asPost = (p: PostItem): Post => {
   return { id: p.id, title: p.title, channel: p.channel, status: p.status, scheduledFor: p.scheduledFor, caption: fullCaption(p), image: coverSource(p) };
 };
 
-/** Opens a post; studio reels live in the Reels module. */
-export function openPost(p: Pick<PostItem, "id" | "studio">) {
+/** Opens a post; studio reels live in the Reels module, stories on their own screen. */
+export function openPost(p: Pick<PostItem, "id" | "studio" | "channel">) {
+  if (isStory(p)) return openStory(p.id);
   if (!p.studio) return router.push(`/posts/${p.id}`);
   openReel(p.id);
   router.push("/reels/review");

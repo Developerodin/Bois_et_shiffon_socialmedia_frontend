@@ -245,9 +245,7 @@
     "scheduled_other": "Schemalagt ({{count}})",
     "samplePreview": "Exempelförhandsvisning",
     "moreOptions": "Fler alternativ för {{title}}",
-    "editStory": "Redigera story",
-    "comingSoon": "Kommer snart",
-    "comingSoonBody": "Stories är inte tillgängliga än. Inlägg, karuseller och reels kan schemaläggas redan nu."
+    "editStory": "Redigera story"
   },
   "editStory": {
     "back": "Tillbaka",

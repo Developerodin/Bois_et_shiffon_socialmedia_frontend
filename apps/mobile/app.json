@@ -38,6 +38,20 @@
       "expo-secure-store",
       "expo-notifications",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to use your photos and videos in your stories.",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to use your camera to take photos and videos for your stories."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save your story's photos and videos to your gallery.",
+          "granularPermissions": ["photo", "video"]
+        }
+      ],
+      [
         "expo-audio",
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to use your microphone to record voiceovers for your reels.",

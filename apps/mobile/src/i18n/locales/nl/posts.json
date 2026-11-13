@@ -245,9 +245,7 @@
     "scheduled_other": "Gepland ({{count}})",
     "samplePreview": "Voorbeeldweergave",
     "moreOptions": "Meer opties voor {{title}}",
-    "editStory": "Verhaal bewerken",
-    "comingSoon": "Binnenkort beschikbaar",
-    "comingSoonBody": "Stories zijn nog niet beschikbaar. Posts, carrousels en reels kun je nu al inplannen."
+    "editStory": "Verhaal bewerken"
   },
   "editStory": {
     "back": "Terug",

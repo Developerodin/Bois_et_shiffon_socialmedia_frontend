@@ -245,9 +245,7 @@
     "scheduled_other": "Planlanmış ({{count}})",
     "samplePreview": "Örnek önizleme",
     "moreOptions": "{{title}} için daha fazla seçenek",
-    "editStory": "Hikayeyi düzenle",
-    "comingSoon": "Çok yakında",
-    "comingSoonBody": "Hikâyeler henüz kullanılamıyor. Gönderileri, karuselleri ve Reels videolarını şimdi planlayabilirsin."
+    "editStory": "Hikayeyi düzenle"
   },
   "editStory": {
     "back": "Geri",

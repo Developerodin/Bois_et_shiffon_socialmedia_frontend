@@ -245,9 +245,7 @@
     "scheduled_other": "निर्धारित ({{count}})",
     "samplePreview": "नमूना पूर्वावलोकन",
     "moreOptions": "{{title}} के लिए अधिक विकल्प",
-    "editStory": "कहानी संपादित करें",
-    "comingSoon": "जल्द आ रहा है",
-    "comingSoonBody": "स्टोरीज़ अभी उपलब्ध नहीं हैं। पोस्ट, कैरोसेल और रील्स अभी शेड्यूल कर सकते हैं।"
+    "editStory": "कहानी संपादित करें"
   },
   "editStory": {
     "back": "वापस",

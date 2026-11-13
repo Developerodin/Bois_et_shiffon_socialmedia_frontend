@@ -245,9 +245,7 @@
     "scheduled_other": "Zaplanowane ({{count}})",
     "samplePreview": "Podgląd próbki",
     "moreOptions": "Więcej opcji dla {{title}}",
-    "editStory": "Edytuj relację",
-    "comingSoon": "Już wkrótce",
-    "comingSoonBody": "Relacje nie są jeszcze dostępne. Posty, karuzele i rolki możesz już zaplanować."
+    "editStory": "Edytuj relację"
   },
   "editStory": {
     "back": "Wstecz",

@@ -245,9 +245,7 @@
     "scheduled_other": "Ütemezett ({{count}})",
     "samplePreview": "Minta előnézet",
     "moreOptions": "További lehetőségek: {{title}}",
-    "editStory": "Történet szerkesztése",
-    "comingSoon": "Hamarosan",
-    "comingSoonBody": "A sztorik még nem érhetők el. Bejegyzéseket, lapozós bejegyzéseket és reeleket már most időzíthetsz."
+    "editStory": "Történet szerkesztése"
   },
   "editStory": {
     "back": "Vissza",

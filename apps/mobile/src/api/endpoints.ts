@@ -476,6 +476,8 @@ export type PostItem = {
   id: string; title: string; channel: PostChannel; status: PostStatus; scheduledFor: string | null; studio: boolean; pillar: string | null;
   brief: { goal?: string; products?: string[]; cta?: string } | null;
   publishIssue: "FAILED" | "CHECK" | null; publishError: string | null;
+  /** Stories only: the first rendered frame (signed for an hour), their cover. */
+  firstFrameUrl?: string | null;
   latest: {
     version: number; body: PostBody; createdAt: string; byPerson: boolean; photoUrls: string[];
     check: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
@@ -591,6 +593,101 @@ export async function postRelease(id: string, signal?: AbortSignal) {
   const { ws, base } = await reelBase();
   return api<PostRelease>(`${base}/content/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
 }
+
+/**
+ * Instagram stories (P07, P08, story detail). Types mirror apps/web server/stories/body.ts; the server strips its own
+ * fields (mediaKey, renderedKey, aiMark, rights, file) from anything the app sends. Refusals carry ApiError.code.
+ */
+export type SourceRef = { kind: "upload" | "library" | "product" | "post" | "photoshoot" | "reel"; id: string };
+export type StoryFrameInput = {
+  source?: SourceRef; label: string; headline: string; body: string; composition?: string;
+  crop?: { x: number; y: number; scale: number }; clip?: { start: number; sound: boolean };
+};
+export type StoryFrame = StoryFrameInput & { mediaKind?: "photo" | "video"; renderedKey?: string; aiMark?: boolean; rights?: { kind: "owned" } | { kind: "confirmed"; by: string; name: string } };
+export type StoryBody = { frames: StoryFrame[]; cta: string; link: string; hook: string; productIds: string[]; brandMark: boolean };
+export type StoryInput = { frames: StoryFrameInput[]; cta: string; link: string; brandMark: boolean };
+export type StoryGoal = "newArrival" | "productFeature" | "specialOffer";
+/** The P07 tab the server puts a story in (any partly posted or unconfirmed attempt counts as posted). */
+export type StoryTab = "drafts" | "scheduled" | "posted";
+/** A story in the content list (GET …/content): its tab and first rendered frame (signed for an hour). */
+export type StoryItem = Omit<PostItem, "latest"> & {
+  tab: StoryTab; firstFrameUrl: string | null; byHand: boolean;
+  latest: { version: number; body: StoryBody; createdAt: string; byPerson: boolean; check: PostItem["latest"] extends infer L ? (L extends { check: infer C } ? C : never) : never } | null;
+};
+/** A story's attempt also says how many frames it has and which are out (0-based `i`). */
+export type StoryAttempt = PostRelease["attempts"][number] & { frames?: number; progress?: { i: number; state: "publishing" | "published" | "not-posted" }[]; code?: string | null };
+/** GET/POST …/content/:id for a story: the post state plus render progress and the latest frames. */
+export type StoryRelease = Omit<PostRelease, "attempts"> & {
+  attempts: StoryAttempt[]; byHand: boolean; scheduledFor: string | null;
+  rendering: boolean; renderError: string | null; renderErrorCode: string | null;
+  frames: { n: number; url: string | null; kind: "photo" | "video" | null; headline: string }[];
+  /** editStory: saved now, or rendering first. */
+  saved?: "saved" | "rendering";
+};
+export type StorySource = { ref: SourceRef; title: string; kind: "photo" | "video"; previewUrl: string; durationSec?: number };
+export type DueStory = { id: string; title: string; scheduledFor: string; firstFrameUrl: string | null };
+export type StoryPackage = { frames: { n: number; url: string; kind: "photo" | "video" }[]; link: string; steps: string[] };
+export type UploadSlot = { uploadId: string; url: string; headers: Record<string, string> };
+export type UploadResult = { status: "VERIFIED"; durationSec?: number; previewUrl: string } | { status: "REJECTED"; reason: string; code: string };
+
+const storyAct = async <T = StoryRelease>(id: string, body: Record<string, unknown>) => {
+  const { ws, base } = await reelBase();
+  return api<T>(`${base}/content/${encodeURIComponent(id)}`, { body, workspaceId: ws });
+};
+
+export const stories = {
+  async list(signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    const r = await api<{ items: (PostItem | StoryItem)[] }>(`${base}/content`, { workspaceId: ws, signal });
+    return r.items.filter((i): i is StoryItem => i.channel === "INSTAGRAM_STORY");
+  },
+  /** P07 New story: 5 credits (402 story.credits), once per requestId (one per sheet open); the agent writes it now. */
+  async create(requestId: string, input: { goal: StoryGoal; productId: string; direction?: string }) {
+    const { ws, base } = await reelBase();
+    return api<{ id: string }>(`${base}/content`, { body: { channel: "INSTAGRAM_STORY", requestId, ...input }, workspaceId: ws });
+  },
+  async get(id: string, signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return api<StoryRelease>(`${base}/content/${encodeURIComponent(id)}`, { workspaceId: ws, signal });
+  },
+  editStory: (id: string, version: number, story: StoryInput) => storyAct(id, { action: "editStory", version, story }),
+  duplicate: (id: string) => storyAct<{ id: string }>(id, { action: "duplicate" }),
+  /** Drafts only (409 story.notDeletable). */
+  remove: (id: string) => storyAct<null>(id, { action: "delete" }),
+  async sources(productIds: string[] = [], signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    const q = productIds.length ? `?productIds=${encodeURIComponent(productIds.join(","))}` : "";
+    return api<{ tabs: { tab: "products" | "library"; items: StorySource[] }[] }>(`${base}/stories/sources${q}`, { workspaceId: ws, signal });
+  },
+  /** A single-use place to PUT one photo or clip; the person has confirmed "We own or may use this". */
+  async uploadSlot(input: { kind: "photo" | "video"; contentType: string; bytes: number }) {
+    const { ws, base } = await reelBase();
+    return api<UploadSlot>(`${base}/stories/uploads`, { body: { ...input, rightsConfirmed: true }, workspaceId: ws });
+  },
+  async uploadDone(uploadId: string) {
+    const { ws, base } = await reelBase();
+    return api<UploadResult>(`${base}/stories/uploads/${encodeURIComponent(uploadId)}`, { method: "POST", body: {}, workspaceId: ws, timeoutMs: 120_000 });
+  },
+  /** An approved story's frames (links good for an hour), link and steps for posting it by hand. */
+  async package(id: string) {
+    const { ws, base } = await reelBase();
+    return api<StoryPackage>(`${base}/stories/${encodeURIComponent(id)}/package`, { workspaceId: ws });
+  },
+  /** Stories due to be posted by hand (needs publish.execute). */
+  async due(signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    return (await api<{ items: DueStory[] }>(`${base}/stories/due`, { workspaceId: ws, signal })).items;
+  },
+  /** Post by hand at `at` (null: stop posting by hand). */
+  byHand: (id: string, at: Date | null) => storyAct(id, { action: "byHand", at: at ? at.toISOString() : null }),
+  /** "I posted it", with the story's link when the person pastes one. */
+  postedByHand: (id: string, url?: string) => storyAct(id, { action: "postedByHand", ...(url ? { url } : {}) }),
+  /** confirm: post the rest although the posted frames expired (after a 409 story.expiredConfirm). */
+  postRest: (id: string, attemptId: string, confirm?: boolean) => storyAct(id, { action: "postRest", attemptId, ...(confirm ? { confirm: true } : {}) }),
+  markDone: (id: string, attemptId: string) => storyAct(id, { action: "markDone", attemptId }),
+  /** frame: 0-based. */
+  settleFrame: (id: string, attemptId: string, frame: number, appeared: boolean) => storyAct(id, { action: "settleFrame", attemptId, frame, appeared }),
+};
 
 /** Google Growth (G13/G14) and Reviews: the brand's Business Profile, read live from Google. */
 export type GoogleProfile =

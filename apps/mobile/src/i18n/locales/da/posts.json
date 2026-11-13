@@ -245,9 +245,7 @@
     "scheduled_other": "Planlagt ({{count}})",
     "samplePreview": "Eksempelvisning",
     "moreOptions": "Flere muligheder for {{title}}",
-    "editStory": "Rediger story",
-    "comingSoon": "Kommer snart",
-    "comingSoonBody": "Stories er ikke tilgængelige endnu. Du kan allerede planlægge opslag, karruseller og reels."
+    "editStory": "Rediger story"
   },
   "editStory": {
     "back": "Tilbage",

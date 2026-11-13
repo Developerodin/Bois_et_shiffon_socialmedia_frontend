@@ -245,9 +245,7 @@
     "scheduled_other": "Programmate ({{count}})",
     "samplePreview": "Anteprima campione",
     "moreOptions": "Altre opzioni per {{title}}",
-    "editStory": "Modifica storia",
-    "comingSoon": "In arrivo",
-    "comingSoonBody": "Le storie non sono ancora disponibili. Puoi già programmare post, caroselli e reel."
+    "editStory": "Modifica storia"
   },
   "editStory": {
     "back": "Indietro",

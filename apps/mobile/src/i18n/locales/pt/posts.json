@@ -245,9 +245,7 @@
     "scheduled_other": "Agendadas ({{count}})",
     "samplePreview": "Pré-visualização de exemplo",
     "moreOptions": "Mais opções para {{title}}",
-    "editStory": "Editar story",
-    "comingSoon": "Disponível em breve",
-    "comingSoonBody": "As stories ainda não estão disponíveis. Já podes agendar publicações, carrosséis e reels."
+    "editStory": "Editar story"
   },
   "editStory": {
     "back": "Voltar",

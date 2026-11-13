@@ -245,9 +245,7 @@
     "scheduled_other": "Planifiées ({{count}})",
     "samplePreview": "Aperçu d'exemple",
     "moreOptions": "Plus d'options pour {{title}}",
-    "editStory": "Modifier la story",
-    "comingSoon": "Bientôt disponible",
-    "comingSoonBody": "Les stories ne sont pas encore disponibles. Tu peux déjà programmer des publications, des carrousels et des reels."
+    "editStory": "Modifier la story"
   },
   "editStory": {
     "back": "Retour",

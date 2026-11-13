@@ -245,9 +245,7 @@
     "scheduled_other": "Ajastettu ({{count}})",
     "samplePreview": "Näyte-esikatselu",
     "moreOptions": "Lisää vaihtoehtoja {{title}}",
-    "editStory": "Muokkaa tarinaa",
-    "comingSoon": "Tulossa pian",
-    "comingSoonBody": "Tarinat eivät ole vielä saatavilla. Julkaisuja, karuselleja ja Reels-videoita voi jo ajoittaa."
+    "editStory": "Muokkaa tarinaa"
   },
   "editStory": {
     "back": "Takaisin",
