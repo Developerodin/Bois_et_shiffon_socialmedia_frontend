@@ -12,7 +12,7 @@ import i18n from "@/i18n";
 export const albumName = (title: string) => {
   const safe = title
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^A-Za-z0-9_ -]/g, " ")
     .replace(/\s+/g, " ")
     .trim()
@@ -26,10 +26,10 @@ export const albumName = (title: string) => {
  * in an album named after the story ("saved"). Without gallery permission, the share sheet opens for one frame at a
  * time, like a reel's download ("shared").
  *
- * A download that stops partway throws, saying which frame; nothing is saved then, so the gallery never holds half a
- * story. The album name is checked before any file is added (Album.create with file paths). Saving the same story again
- * adds the frames to its album again (Album.get finds it by name; titles aren't unique, so two stories with the same
- * title share an album).
+ * All or nothing: a download that stops partway throws, saying which frame, and deletes the frames already downloaded;
+ * nothing reaches the gallery then. If adding to the gallery fails partway, the frames this save added are deleted
+ * again (best effort: if that delete fails too, they stay). Saving the same story again adds its frames to its album
+ * again (Album.get finds it by name; titles aren't unique, so two stories with the same title share an album).
  */
 export async function saveFramesToGallery(pkg: StoryPackage, title: string): Promise<"saved" | "shared"> {
   const perm = await requestPermissionsAsync(false, ["photo", "video"]);
@@ -39,17 +39,26 @@ export async function saveFramesToGallery(pkg: StoryPackage, title: string): Pro
       const target = new File(Paths.cache, `story-frame-${f.n}.${f.kind === "video" ? "mp4" : "jpg"}`);
       files.push(await File.downloadFileAsync(f.url, target, { idempotent: true }));
     } catch {
+      for (const done of files) {
+        try {
+          done.delete();
+        } catch {
+          // Already gone; the cache is the system's to clear anyway.
+        }
+      }
       throw new Error(i18n.t("posts:stories.byHandView.downloadStopped", { n: f.n, total: pkg.frames.length }));
     }
   }
   if (perm.granted) {
     const name = albumName(title);
+    const added: Asset[] = [];
     try {
       const album = await Album.get(name);
-      // One at a time, in frame order (the gallery sorts by date added).
-      if (album) for (const file of files) await Asset.create(file.uri, album);
-      else await Album.create(name, files.map((f) => f.uri));
+      // One at a time, in frame order (the gallery sorts by date added); a new album then takes them in.
+      for (const file of files) added.push(await Asset.create(file.uri, album ?? undefined));
+      if (!album) await Album.create(name, added);
     } catch {
+      await Asset.delete(added).catch(() => {});
       throw new Error(i18n.t("posts:stories.byHandView.saveFailed"));
     }
     return "saved";

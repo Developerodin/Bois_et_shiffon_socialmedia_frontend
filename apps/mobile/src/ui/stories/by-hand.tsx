@@ -1,5 +1,5 @@
 import * as Clipboard from "expo-clipboard";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { stories } from "@/api/endpoints";
@@ -21,6 +21,8 @@ export function ByHand({ id, title, frames, link, onPosted }: { id: string; titl
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState("");
+  // Set once "I posted it" went through: the screen is being left, so nothing more is set on it.
+  const left = useRef(false);
 
   const run = async (key: "save" | "posted", fn: () => Promise<void>) => {
     setPending(key);
@@ -31,7 +33,7 @@ export function ByHand({ id, title, frames, link, onPosted }: { id: string; titl
     } catch (e) {
       setError(storyError(e));
     } finally {
-      setPending(null);
+      if (!left.current) setPending(null);
     }
   };
   const save = () =>
@@ -42,11 +44,17 @@ export function ByHand({ id, title, frames, link, onPosted }: { id: string; titl
   const posted = () =>
     run("posted", async () => {
       await stories.postedByHand(id, url.trim() || undefined);
+      left.current = true;
       onPosted();
     });
   const copy = async () => {
-    await Clipboard.setStringAsync(link);
-    setCopied(true);
+    setError(null);
+    try {
+      await Clipboard.setStringAsync(link);
+      setCopied(true);
+    } catch (e) {
+      setError(storyError(e));
+    }
   };
   const steps = [t("stories.byHandView.step1"), t("stories.byHandView.step2"), t("stories.byHandView.step3", { count: frames }), ...(link ? [t("stories.byHandView.step4")] : []), t("stories.byHandView.step5")];
 

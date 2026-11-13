@@ -182,24 +182,24 @@ export default function SchedulePost() {
             {storyBody ? (storyBody.frames[0]?.headline ?? "") : post.latest.body.caption.split("\n")[0]}
           </Text>
           <Text style={[type.label, { fontFamily: "Inter_600SemiBold", color: color.inkSecondary }]}>
-            {storyBody ? t("schedule.storyFormat", { count: storyBody.frames.length }) : isCarousel ? t("schedule.carouselFormat") : t("schedule.feedFormat")}
+            {storyBody ? t("stories.scheduling.storyFormat", { count: storyBody.frames.length }) : isCarousel ? t("schedule.carouselFormat") : t("schedule.feedFormat")}
           </Text>
         </View>
       </Card>
 
       {isStory ? (
         <Card style={{ marginTop: space[12] }}>
-          <CardTitle>{t("schedule.how")}</CardTitle>
+          <CardTitle>{t("stories.scheduling.how")}</CardTitle>
           <View style={[styles.chips, { paddingTop: space[8] }]} accessibilityRole="radiogroup">
-            <Pill label={t("schedule.modeSchedule")} selected={how === "schedule"} onPress={() => setMode("schedule")} />
-            <Pill label={t("schedule.modeByHand")} selected={how === "byHand"} onPress={() => setMode("byHand")} />
+            <Pill label={t("stories.scheduling.modeSchedule")} selected={how === "schedule"} onPress={() => setMode("schedule")} />
+            <Pill label={t("stories.scheduling.modeByHand")} selected={how === "byHand"} onPress={() => setMode("byHand")} />
           </View>
           <Text style={[type.meta, { paddingTop: space[8] }]}>
-            {how === "byHand" ? t("schedule.byHandBody") : storyBody?.link ? t("schedule.noLinkScheduled") : t("schedule.scheduleBody")}
+            {how === "byHand" ? t("stories.scheduling.byHandBody") : storyBody?.link ? t("stories.scheduling.noLinkScheduled") : t("stories.scheduling.scheduleBody")}
           </Text>
           {byHandOn && post.scheduledFor ? (
             <Text style={[type.label, { fontFamily: "Inter_600SemiBold", paddingTop: space[8] }]}>
-              {t("schedule.byHandSet", { date: shortDate(post.scheduledFor), time: time24(post.scheduledFor) })}
+              {t("stories.scheduling.byHandSet", { date: shortDate(post.scheduledFor), time: time24(post.scheduledFor) })}
             </Text>
           ) : null}
         </Card>
@@ -332,20 +332,25 @@ export default function SchedulePost() {
           </Pressable>
         ) : null}
         {error ? <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
-        {how === "byHand" ? (
+        {how === "byHand" && !release && loadError ? (
+          <>
+            <Text style={[type.meta, { color: color.error, textAlign: "center" }]}>{t("schedule.loadFailed")}</Text>
+            <Button label={t("schedule.retry")} variant="outline" onPress={() => setAttempt((n) => n + 1)} />
+          </>
+        ) : how === "byHand" ? (
           <>
             <Button
-              label={t(byHandOn ? "schedule.changeTime" : "schedule.byHandAt", { time: time24(at.toISOString()) })}
+              label={t(byHandOn ? "stories.scheduling.changeTime" : "stories.scheduling.byHandAt", { time: time24(at.toISOString()) })}
               loading={busy}
               disabled={!future || !release}
               onPress={() => void byHand(at)}
             />
-            <Button label={t("schedule.byHandNow")} variant="outline" disabled={busy || !release} onPress={() => void byHand(new Date())} />
-            {byHandOn ? <Button label={t("schedule.stopByHand")} variant="ghost" disabled={busy} onPress={() => void byHand(null)} /> : null}
+            <Button label={t("stories.scheduling.byHandNow")} variant="outline" disabled={busy || !release} onPress={() => void byHand(new Date())} />
+            {byHandOn ? <Button label={t("stories.scheduling.stopByHand")} variant="ghost" disabled={busy} onPress={() => void byHand(null)} /> : null}
           </>
         ) : (
           <Button
-            label={busy ? t("schedule.scheduling") : connected || !release ? t(isStory ? "schedule.scheduleStory" : "schedule.schedulePost") : t("schedule.scheduleLocked")}
+            label={busy ? t("schedule.scheduling") : connected || !release ? t(isStory ? "stories.scheduling.scheduleStory" : "schedule.schedulePost") : t("schedule.scheduleLocked")}
             icon={connected || !release ? undefined : icons.lock}
             disabled={!canSchedule}
             onPress={() => void schedule()}

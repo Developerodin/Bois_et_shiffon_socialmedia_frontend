@@ -137,8 +137,7 @@
     "approveAnyway": "Approve anyway",
     "approving": "Approving...",
     "nextAnyway": "Approve it anyway or ask for changes above",
-    "approvedAnyway": "(approved anyway)",
-    "changesNote": "Note (needed to request changes)"
+    "approvedAnyway": "(approved anyway)"
   },
   "edit": {
     "title": "Edit post",
@@ -206,21 +205,7 @@
     "reconnect": "Reconnect {{channel}}",
     "reelInStudio": "Reels are made and posted from the Reels studio. Tap to open this one there.",
     "loadFailed": "Couldn't check where this post can go. Check your connection.",
-    "retry": "Try again",
-    "storyFormat_one": "Story · {{count}} frame, 9:16",
-    "storyFormat_other": "Story · {{count}} frames, 9:16",
-    "how": "How it goes out",
-    "modeSchedule": "Schedule",
-    "modeByHand": "Post by hand",
-    "scheduleBody": "Posts by itself from your Instagram business account.",
-    "noLinkScheduled": "No tappable link when scheduled: Instagram only lets you add the link sticker by hand.",
-    "byHandBody": "At the time you pick, the story shows as due. You save its frames and post them from Instagram.",
-    "byHandSet": "Post by hand · {{date}}, {{time}}",
-    "scheduleStory": "Schedule story",
-    "byHandAt": "Post by hand at {{time}}",
-    "byHandNow": "Post by hand now",
-    "changeTime": "Change time to {{time}}",
-    "stopByHand": "Stop posting by hand"
+    "retry": "Try again"
   },
   "brief": {
     "title": "Create a post",
@@ -346,7 +331,7 @@
       "changeTime": "Change time",
       "noPublish": "Someone who can publish has to schedule it or post it by hand.",
       "posted": "Posted.",
-      "actionFailed": "That didn’t work"
+      "changesNote": "Note (needed to request changes)"
     },
     "byHandView": {
       "title": "Post it by hand",
@@ -369,6 +354,22 @@
       "linkPlaceholder": "https://www.instagram.com/stories/…",
       "postedIt": "I posted it",
       "saveFailed": "The frames couldn’t be saved to your gallery. Try again."
+    },
+    "scheduling": {
+      "storyFormat_one": "Story · {{count}} frame, 9:16",
+      "storyFormat_other": "Story · {{count}} frames, 9:16",
+      "how": "How it goes out",
+      "modeSchedule": "Schedule",
+      "modeByHand": "Post by hand",
+      "scheduleBody": "Posts by itself from your Instagram business account.",
+      "noLinkScheduled": "No tappable link when scheduled: Instagram only lets you add the link sticker by hand.",
+      "byHandBody": "At the time you pick, the story shows as due. You save its frames and post them from Instagram.",
+      "byHandSet": "Post by hand · {{date}}, {{time}}",
+      "scheduleStory": "Schedule story",
+      "byHandAt": "Post by hand at {{time}}",
+      "byHandNow": "Post by hand now",
+      "changeTime": "Change time to {{time}}",
+      "stopByHand": "Stop posting by hand"
     }
   },
   "editStory": {

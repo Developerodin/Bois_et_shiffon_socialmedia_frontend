@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -15,6 +15,7 @@ import { Badge, tint } from "@/ui/posts/controls";
 import { DecisionCard } from "@/ui/posts/decision-card";
 import { STATUS_KEY } from "@/ui/posts/format";
 import { coverSource, coverUrl, reloadPosts, usePost } from "@/ui/posts/use-posts";
+import { useWorkingPoll } from "@/ui/posts/use-working-poll";
 import { usePermissions } from "@/ui/use-permissions";
 
 const editIcon = require("../../../assets/figma/posts/btn-edit.svg");
@@ -68,16 +69,7 @@ export default function PostDetail() {
   const working =
     post?.status === "BRIEF_READY" ||
     (post?.status === "DRAFT_REVIEW" && (!post.latest?.check || post.latest.review?.verdict === "CHANGES_REQUESTED" || fixing === post.latest.version));
-  // The draft version that took too long (a newer one starts the wait again).
-  const [slowAt, setSlowAt] = useState<number | null>(null);
-  const waitingOn = post?.latest?.version ?? 0;
-  const slow = slowAt === waitingOn;
-  useEffect(() => {
-    if (!working) return;
-    const timer = setInterval(() => void reloadPosts(), 5000);
-    const stop = setTimeout(() => (clearInterval(timer), setSlowAt(waitingOn)), 3 * 60_000);
-    return () => (clearInterval(timer), clearTimeout(stop));
-  }, [working, waitingOn]);
+  const { slow, retry } = useWorkingPoll(working, post?.latest?.version ?? 0, reloadPosts);
 
   if (!post) {
     return (
@@ -95,7 +87,7 @@ export default function PostDetail() {
     try {
       await posts.rewrite(post.id, post.latest?.version ?? 0);
       setFixing(post.latest?.version ?? 0);
-      setSlowAt(null);
+      retry();
     } catch (e) {
       setFixError(e instanceof Error ? e.message : String(e));
     } finally {

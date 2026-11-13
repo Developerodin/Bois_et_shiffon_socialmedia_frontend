@@ -16,7 +16,8 @@ import { usePermissions } from "@/ui/use-permissions";
  *
  * `approve` (stories): the version waits for approval, so the card also offers a plain Approve (when nothing refuses)
  * and "Request changes" without any issue. Posts are approved by scheduling them instead.
- * `onDecided` gets the new release (null after a plain approve, whose answer the caller re-reads).
+ * `onDecided` gets the new release (null after a plain approve, whose answer the caller re-reads). `errorText` turns a
+ * refusal into the app's words (stories pass storyError); the default is the error's own message.
  */
 export function DecisionCard({
   id,
@@ -25,6 +26,7 @@ export function DecisionCard({
   issues,
   approve,
   onDecided,
+  errorText = (e) => (e instanceof Error ? e.message : String(e)),
 }: {
   id: string;
   version: number;
@@ -32,13 +34,17 @@ export function DecisionCard({
   issues: ProductIssue[];
   approve?: () => Promise<unknown>;
   onDecided: (release: PostRelease | null) => void | Promise<void>;
+  errorText?: (e: unknown) => string;
 }) {
   const { t } = useTranslation("posts");
   const { can } = usePermissions();
   const [busy, setBusy] = useState<"anyway" | "ask" | "approve" | null>(null);
-  // "Ask for changes" on a product issue: null = not touched yet (prefilled from the issues / the default below).
-  const [askNote, setAskNote] = useState<string | null>(null);
-  const [switchPick, setSwitchPick] = useState<boolean | null>(null);
+  // "Ask for changes" on a product issue: null = not touched yet (prefilled from the issues / the default below). Kept per
+  // version, so a new version starts from its own issues again.
+  const [draft, setDraft] = useState<{ version: number; note: string | null; pick: boolean | null }>({ version, note: null, pick: null });
+  const { note: askNote, pick: switchPick } = draft.version === version ? draft : { note: null, pick: null };
+  const setAskNote = (note: string | null) => setDraft({ version, note, pick: switchPick });
+  const setSwitchPick = (pick: boolean | null) => setDraft({ version, note: askNote, pick });
   const [error, setError] = useState<string | null>(null);
 
   const refused = issues.some((i) => i.refuses);
@@ -57,11 +63,10 @@ export function DecisionCard({
     setBusy(key);
     try {
       const r = await call();
-      setAskNote(null);
-      setSwitchPick(null);
+      setDraft({ version, note: null, pick: null });
       await onDecided(r);
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(errorText(e));
     } finally {
       setBusy(null);
     }
@@ -82,7 +87,7 @@ export function DecisionCard({
       ) : null}
       {canAsk || plain ? (
         <>
-          <Field label={t(canAnyway ? "detail.decisionNote" : issues.length ? "detail.askNote" : "detail.changesNote")} multiline value={note} onChangeText={setAskNote} maxLength={canAnyway ? 500 : 2000} error={error} />
+          <Field label={t(canAnyway ? "detail.decisionNote" : issues.length ? "detail.askNote" : "stories.detail.changesNote")} multiline value={note} onChangeText={setAskNote} maxLength={canAnyway ? 500 : 2000} error={error} />
           {issues.some((i) => i.kind !== "offer") ? (
             <>
               <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: switchProducts }} onPress={() => setSwitchPick(!switchProducts)} style={[styles.row8, { minHeight: 44 }]}>

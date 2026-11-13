@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { posts, stories, type StoryBody, type StoryRelease } from "@/api/endpoints";
@@ -14,15 +14,13 @@ import { Badge } from "@/ui/posts/controls";
 import { DecisionCard } from "@/ui/posts/decision-card";
 import { STATUS_KEY, shortDate, time24 } from "@/ui/posts/format";
 import { reloadPosts, usePosts } from "@/ui/posts/use-posts";
+import { useWorkingPoll } from "@/ui/posts/use-working-poll";
 import { ByHand } from "@/ui/stories/by-hand";
 import { Unfinished } from "@/ui/stories/card";
 import { storyCodeText, storyError } from "@/ui/stories/errors";
 import { usePermissions } from "@/ui/use-permissions";
 
-const POLL_MS = 5_000;
 const FRAME_MAX = 300;
-/** Same 3-minute cap as the post detail: a writer or render that never finishes mustn't poll forever. */
-const POLL_CAP_MS = 3 * 60_000;
 
 /**
  * The story detail (the story counterpart of posts/[id].tsx): its rendered frames to swipe through (clips play), the
@@ -43,22 +41,30 @@ export default function StoryDetail() {
   const [fixing, setFixing] = useState<number | null>(null);
 
   const version = story?.latest?.version ?? null;
-  const load = useCallback(
-    (signal?: AbortSignal) =>
-      id
-        ? stories.get(id, signal).then(
-            (r) => !signal?.aborted && (setRelease(r), setLoadError(null)),
-            (e: unknown) => !signal?.aborted && setLoadError(storyError(e)),
-          )
-        : Promise.resolve(),
-    [id],
-  );
+  // Only the newest read lands, and none after the screen is gone (a slow answer must not overwrite a newer one).
+  const seq = useRef(0);
+  const live = useRef(true);
+  useEffect(() => {
+    live.current = true;
+    return () => void (live.current = false);
+  }, []);
+  const load = useCallback(() => {
+    if (!id) return Promise.resolve();
+    const mine = ++seq.current;
+    const current = () => live.current && mine === seq.current;
+    return stories.get(id).then(
+      (r) => void (current() && (setRelease(r), setLoadError(null))),
+      (e: unknown) => void (current() && setLoadError(storyError(e))),
+    );
+  }, [id]);
+  // The status, text and check come from the shared posts list (the item's own GET has none of them). It may predate
+  // this story (a fresh link), so "not found" waits for a list read made after this screen opened.
+  const [listRead, setListRead] = useState(false);
   // On every focus (the schedule screen changes the release without a new version) and on each new version.
   useFocusEffect(
     useCallback(() => {
-      const ctrl = new AbortController();
-      void load(ctrl.signal);
-      return () => ctrl.abort();
+      void load();
+      void reloadPosts().then(() => live.current && setListRead(true));
     }, [load, version]), // eslint-disable-line react-hooks/exhaustive-deps -- a new version re-reads the frames
   );
   const refresh = useCallback(async () => {
@@ -70,20 +76,15 @@ export default function StoryDetail() {
     !!release?.rendering ||
     story?.status === "BRIEF_READY" ||
     (story?.status === "DRAFT_REVIEW" && (!story.latest?.check || story.latest.review?.verdict === "CHANGES_REQUESTED" || fixing === story.latest.version));
-  useEffect(() => {
-    if (!working) return;
-    const timer = setInterval(() => void refresh(), POLL_MS);
-    const stop = setTimeout(() => clearInterval(timer), POLL_CAP_MS);
-    return () => (clearInterval(timer), clearTimeout(stop));
-  }, [working, refresh]);
+  const { slow, retry } = useWorkingPoll(working, version ?? 0, refresh);
 
   if (!story) {
+    const failed = loadError ?? (error ? t("stories.detail.loadFailed") : listRead && !loading ? t("stories.errors.notFound") : null);
     return (
       <PostsScreen header={<PageHeader title={t("stories.detail.title")} />} nav={<BottomNav active="stories" />} contentStyle={{ padding: space[16] }}>
-        {/* The list may predate this story (a fresh link): wait for it unless the story itself didn't load. */}
-        {loadError || (error && !loading) ? (
+        {failed ? (
           <View style={{ gap: space[8] }}>
-            <Text style={type.body}>{loadError ?? t("stories.detail.loadFailed")}</Text>
+            <Text style={type.body}>{failed}</Text>
             <Button label={t("stories.retry")} variant="outline" height={44} onPress={() => void refresh()} />
           </View>
         ) : (
@@ -122,7 +123,14 @@ export default function StoryDetail() {
     act("fix", async () => {
       await posts.rewrite(story.id, version ?? 0);
       setFixing(version ?? 0);
+      retry();
     });
+  // Slow: a stuck render is read again; a stuck writer or check is asked again (as on the post detail).
+  const tryAgain = () => {
+    if (!release?.rendering) return void fix();
+    retry();
+    void refresh();
+  };
 
   return (
     <PostsScreen
@@ -146,14 +154,14 @@ export default function StoryDetail() {
 
       {release?.rendering ? (
         <Text style={[type.meta, { paddingTop: space[12] }]} accessibilityLiveRegion="polite">
-          {t("stories.detail.preparing")}
+          {slow ? t("detail.slow") : t("stories.detail.preparing")}
         </Text>
       ) : release?.renderError ? (
         <Card style={{ marginTop: space[12], gap: space[8] }}>
           <Text style={[styles.eyebrow, { color: color.error }]}>{t("stories.detail.renderFailed")}</Text>
           <Text style={type.body}>{storyCodeText(release.renderErrorCode, release.renderError)}</Text>
           <Text style={type.meta}>{t("stories.detail.renderFailedBody")}</Text>
-          {editable ? <Button label={t("stories.retry")} variant="outline" height={44} onPress={edit} /> : null}
+          {editable ? <Button label={t("stories.editStory")} variant="outline" height={44} onPress={edit} /> : null}
         </Card>
       ) : null}
 
@@ -168,7 +176,7 @@ export default function StoryDetail() {
 
       {working && !release?.rendering ? (
         <Text style={[type.meta, { paddingTop: space[12] }]} accessibilityLiveRegion="polite">
-          {t("detail.notReady")}
+          {slow ? t("detail.slow") : t("detail.notReady")}
         </Text>
       ) : check ? (
         <Card style={{ marginTop: space[12], gap: space[8] }}>
@@ -190,8 +198,14 @@ export default function StoryDetail() {
         </View>
       ) : null}
 
+      {slow && working ? (
+        <View style={{ paddingTop: space[8] }}>
+          <Button label={busy === "fix" ? t("edit.regenerating") : t("detail.tryAgain")} variant="outline" height={44} disabled={busy !== null} onPress={tryAgain} />
+        </View>
+      ) : null}
+
       {version !== null && !working ? (
-        <DecisionCard id={story.id} version={version} status={story.status} issues={issues} approve={() => stories.approve(story.id, version)} onDecided={() => refresh()} />
+        <DecisionCard id={story.id} version={version} status={story.status} issues={issues} approve={() => stories.approve(story.id, version)} onDecided={() => refresh()} errorText={storyError} />
       ) : null}
       {story.status === "AWAITING_APPROVAL" && !can("content.approve") ? <Text style={[type.meta, { paddingTop: space[12] }]}>{t("stories.detail.waitingApprover")}</Text> : null}
 
@@ -258,7 +272,9 @@ function Frames({ frames }: { frames: StoryRelease["frames"] }) {
   const { t } = useTranslation("posts");
   // At most 300 wide (533 tall), so the checks and actions start on the first screen.
   const [width, setWidth] = useState(0);
-  const [page, setPage] = useState(0);
+  const [rawPage, setPage] = useState(0);
+  // Clamped: a new version may have fewer frames than the page the person was on.
+  const page = Math.min(rawPage, Math.max(frames.length - 1, 0));
   if (!frames.length) {
     return (
       <View style={[styles.frame, styles.empty, { width: FRAME_MAX, alignSelf: "center" }]}>
@@ -300,6 +316,7 @@ function Frames({ frames }: { frames: StoryRelease["frames"] }) {
   );
 }
 
+/** Every clip frame gets its own player and they all load at once; a story has at most 5 frames. */
 function Clip({ url, active }: { url: string; active: boolean }) {
   const player = useVideoPlayer(url, (p) => {
     p.loop = true;
