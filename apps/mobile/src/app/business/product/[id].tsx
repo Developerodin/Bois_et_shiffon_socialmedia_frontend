@@ -3,7 +3,8 @@ import { useLocalSearchParams } from "expo-router";
 import { ExternalLink, Package } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { ApiError } from "@/api/client";
 import { catalog, type FullProduct, type ProductFacts } from "@/api/endpoints";
 import { color, radius, space } from "@/theme/tokens";
@@ -74,7 +75,7 @@ export default function ProductDetail() {
   return (
     <BizScreen top={space[12]} header={<BrandHeader title={t("products.detailTitle")} fallback="/business/products" />}>
       {!product ? (
-        error ? <Text style={[meta, { color: color.error }]}>{error}</Text> : <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} />
+        error ? <Text style={[meta, { color: color.error }]}>{error}</Text> : <PageLoading photo />
       ) : (
         <>
           <SettingsCard style={{ flexDirection: "row", gap: space[12] }}>

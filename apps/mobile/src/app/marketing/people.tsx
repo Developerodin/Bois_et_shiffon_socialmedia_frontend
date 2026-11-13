@@ -1,7 +1,8 @@
 import { Fragment } from "react";
 import { router, type Href } from "expo-router";
 import { Users } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { useTranslation } from "react-i18next";
 import { formatDate, formatNumber } from "@/i18n";
 import { color, space } from "@/theme/tokens";
@@ -28,7 +29,7 @@ export default function CustomersPeople() {
           <TextButton label={t("google.retry")} onPress={load} style={{ alignSelf: "flex-start" }} />
         </View>
       ) : null}
-      {!data && !error ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
+      {!data && !error ? <PageLoading rows={4} /> : null}
 
       {data && !people.length ? (
         <View style={{ marginTop: space[20] }}>

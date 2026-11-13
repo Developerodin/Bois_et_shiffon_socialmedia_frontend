@@ -4,7 +4,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Camera, Check, Pencil } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { postRelease, posts, type PostCampaign, type PostChannel, type PostRelease } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
@@ -86,7 +87,7 @@ export default function PostDetail() {
   if (!post) {
     return (
       <PostsScreen header={<PageHeader title={t("detail.title")} />} nav={<BottomNav active="posts" />} contentStyle={{ padding: space[16] }}>
-        {loading ? <ActivityIndicator color={color.primary} /> : <Text style={type.body}>{error ? t("today.loadFailed") : t("detail.notFound")}</Text>}
+        {loading ? <PageLoading photo /> : <Text style={type.body}>{error ? t("today.loadFailed") : t("detail.notFound")}</Text>}
       </PostsScreen>
     );
   }

@@ -2,6 +2,7 @@
   "back": "वापस",
   "close": "बंद करें",
   "continue": "जारी रखें",
+  "loading": "लोड हो रहा है",
   "step": "{{total}} में से चरण {{step}}",
   "auth": {
     "orContinueWith": "या जारी रखें",

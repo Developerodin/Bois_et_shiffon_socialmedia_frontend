@@ -3,6 +3,7 @@ import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import { ArrowRight, Circle, CircleCheck, Info, Plus } from "lucide-react-native";
 import { ActivityIndicator, Pressable, Share, StyleSheet, Text, TextInput, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { Trans, useTranslation } from "react-i18next";
 import { aiDraft, google, type GooglePost, type GoogleProfile } from "@/api/endpoints";
 import { formatDate } from "@/i18n";
@@ -114,7 +115,7 @@ export default function GoogleWorkspace() {
           </View>
         </Panel>
       ) : null}
-      {!profile && !error ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
+      {!profile && !error ? <PageLoading /> : null}
       {busy === "draft" ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
 
       {profile && tab === "posts" && draft ? (

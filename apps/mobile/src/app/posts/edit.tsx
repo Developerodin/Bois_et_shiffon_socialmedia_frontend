@@ -3,7 +3,8 @@ import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { posts, uploadPhoto, type PostBody } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
@@ -50,7 +51,7 @@ export default function EditPost() {
   if (!post || !post.latest || !body) {
     return (
       <PostsScreen header={<PageHeader title={t("edit.title")} right={<BusinessChip />} />} contentStyle={{ padding: space[16] }}>
-        {post ? <Text style={type.body}>{t("detail.noDraft")}</Text> : <ActivityIndicator color={color.primary} />}
+        {post ? <Text style={type.body}>{t("detail.noDraft")}</Text> : <PageLoading photo />}
       </PostsScreen>
     );
   }

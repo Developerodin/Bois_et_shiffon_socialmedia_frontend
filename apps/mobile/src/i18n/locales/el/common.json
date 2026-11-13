@@ -2,6 +2,7 @@
   "back": "Πίσω",
   "close": "Κλείσιμο",
   "continue": "Συνέχεια",
+  "loading": "Φόρτωση",
   "step": "Βήμα {{step}} από {{total}}",
   "auth": {
     "orContinueWith": "ή συνεχίστε με",

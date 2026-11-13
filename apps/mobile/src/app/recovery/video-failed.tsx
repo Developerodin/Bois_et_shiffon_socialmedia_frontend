@@ -3,7 +3,8 @@ import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import { ChevronDown, ChevronUp, CircleAlert, CircleCheck, RotateCcw } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ApiError } from "@/api/client";
 import { formatNumber } from "@/i18n";
@@ -86,7 +87,7 @@ export default function VideoFailed() {
         />
 
         {!detail ? (
-          <ActivityIndicator color={color.primary} style={{ marginTop: space[32] }} />
+          <PageLoading />
         ) : (
           <>
             <Panel style={styles.reel}>

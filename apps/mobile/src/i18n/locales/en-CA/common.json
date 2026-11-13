@@ -2,6 +2,7 @@
   "back": "Back",
   "close": "Close",
   "continue": "Continue",
+  "loading": "Loading",
   "step": "Step {{step}} of {{total}}",
   "auth": {
     "orContinueWith": "or continue with",

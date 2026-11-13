@@ -2,6 +2,7 @@
   "back": "Tilbage",
   "close": "Luk",
   "continue": "Fortsæt",
+  "loading": "Indlæser",
   "step": "Trin {{step}} af {{total}}",
   "auth": {
     "orContinueWith": "eller fortsæt med",

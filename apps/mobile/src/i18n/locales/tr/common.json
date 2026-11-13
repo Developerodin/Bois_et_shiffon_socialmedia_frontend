@@ -2,6 +2,7 @@
   "back": "Geri",
   "close": "Kapat",
   "continue": "Devam et",
+  "loading": "Yükleniyor",
   "step": "Adım {{step}} / {{total}}",
   "auth": {
     "orContinueWith": "veya devam et",

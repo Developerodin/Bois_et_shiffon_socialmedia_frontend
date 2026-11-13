@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Check, Plus, Sparkles, X } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { uploadPhoto } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { BackButton, ps, STROKE, TopBar } from "@/ui/photoshoot/chrome";
@@ -114,7 +115,7 @@ export default function SourcePicker() {
       ) : null}
 
       {error ? <Text style={[type.meta, { color: color.error, paddingTop: space[12] }]}>{error}</Text> : null}
-      {!view ? <ActivityIndicator color={color.ink} style={{ paddingTop: space[24] }} /> : null}
+      {!view ? <PageLoading photo /> : null}
       {view && !items.length ? <Text style={[type.body, { color: color.inkSecondary, paddingTop: space[16] }]}>{t(tab === "website" ? "source.emptyWebsite" : "source.emptyUploads")}</Text> : null}
 
       <View style={styles.grid}>

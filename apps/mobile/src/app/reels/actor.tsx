@@ -4,6 +4,7 @@ import { Check, ShieldCheck, Trash2, UserRound, VideoOff } from "lucide-react-na
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { ApiError } from "@/api/client";
 import { reels, type Presenter, type ReelOptions } from "@/api/endpoints";
 import { color, radius, space } from "@/theme/tokens";
@@ -129,7 +130,7 @@ export default function ReelsActor() {
       </Option>
 
       <Text style={[eyebrow, { paddingTop: space[24], paddingHorizontal: 4 }]}>{t("actor.yours")}</Text>
-      {!options ? <ActivityIndicator style={{ paddingTop: space[16] }} color={color.primary} /> : null}
+      {!options ? <PageLoading rows={3} /> : null}
       {options && !options.presenters.length ? <Text style={[meta, { paddingTop: space[8], paddingHorizontal: 4 }]}>{t("actor.none")}</Text> : null}
       {options?.presenters.map((p) => {
         const ready = p.status === "DONE";

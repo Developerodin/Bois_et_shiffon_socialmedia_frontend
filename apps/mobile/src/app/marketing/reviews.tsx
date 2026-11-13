@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
 import { Bot, Link, Share2, Star } from "lucide-react-native";
 import { ActivityIndicator, Share, StyleSheet, Text, TextInput, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { useTranslation } from "react-i18next";
 import { aiDraft, google, type GoogleReview } from "@/api/endpoints";
 import { formatDate } from "@/i18n";
@@ -33,7 +34,7 @@ export default function CustomersReviews() {
           <TextButton label={t("google.retry")} onPress={load} style={{ alignSelf: "flex-start" }} />
         </View>
       ) : null}
-      {!data && !error ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
+      {!data && !error ? <PageLoading rows={3} /> : null}
 
       {data && !data.connected ? (
         <View style={{ marginTop: space[20] }}>

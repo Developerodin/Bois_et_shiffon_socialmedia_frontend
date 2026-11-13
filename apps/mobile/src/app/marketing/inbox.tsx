@@ -1,7 +1,8 @@
 import { router, type Href } from "expo-router";
 import { ArrowRight, Lock, MessageCircle } from "lucide-react-native";
 import { Fragment } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { useTranslation } from "react-i18next";
 import type { Conversation } from "@/api/endpoints";
 import { formatDate } from "@/i18n";
@@ -28,7 +29,7 @@ export default function CustomersInbox() {
           <TextButton label={t("google.retry")} onPress={load} style={{ alignSelf: "flex-start" }} />
         </View>
       ) : null}
-      {!data && !error ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
+      {!data && !error ? <PageLoading rows={4} /> : null}
 
       {data && !readable ? (
         <View style={{ marginTop: space[20] }}>

@@ -4,6 +4,7 @@ import { ArrowDown, Lock, Sparkles, TriangleAlert, Volume2 } from "lucide-react-
 import { Fragment, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { ApiError } from "@/api/client";
 import { reelSeconds } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
@@ -53,7 +54,7 @@ export default function ReelsStoryboard() {
   if (!plan) {
     return (
       <ReelsScreen header={<PageHeader left={<BackButton label={t("goBack")} />} center={<HeaderTitle center>{t("storyboard.title")}</HeaderTitle>} />}>
-        {error ? <Text style={[bodyMuted, { color: color.error }]}>{error}</Text> : <ActivityIndicator style={{ marginTop: space[32] }} color={color.primary} />}
+        {error ? <Text style={[bodyMuted, { color: color.error }]}>{error}</Text> : <PageLoading rows={3} />}
       </ReelsScreen>
     );
   }

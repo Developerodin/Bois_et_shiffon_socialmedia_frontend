@@ -3,7 +3,8 @@ import { router } from "expo-router";
 import { ChevronRight, Package, RefreshCw, Search } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { catalog, type CatalogStatus, type Product } from "@/api/endpoints";
 import { formatNumber } from "@/i18n";
 import { color, radius, space } from "@/theme/tokens";
@@ -130,7 +131,7 @@ export default function Products() {
       {error ? <Text style={[meta, { color: color.error, paddingTop: space[12] }]}>{error}</Text> : null}
 
       {!list ? (
-        error ? null : <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} />
+        error ? null : <PageLoading rows={4} />
       ) : list.products.length === 0 ? (
         <SettingsCard style={{ alignItems: "center", paddingVertical: space[32], marginTop: space[16] }}>
           <Package size={28} color={color.inkMuted} strokeWidth={ICON.strokeWidth} />

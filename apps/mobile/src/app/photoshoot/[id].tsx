@@ -5,7 +5,8 @@ import * as Sharing from "expo-sharing";
 import { Redirect, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, Columns2, Download, Share2, Sparkle } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { photoshoots, type Shoot } from "@/api/endpoints";
 import { BackButton, BrandChip, Glow, HeaderIcon, ps, TopBar } from "@/ui/photoshoot/chrome";
 import { Badge, IconLabelButton, Page, PhotoPill } from "@/ui/photoshoot/controls";
@@ -109,7 +110,7 @@ export default function ResultDetail() {
       }
     >
       {!shoot ? (
-        error ? <Text style={[type.meta, { color: color.error }]}>{error}</Text> : <ActivityIndicator color={color.ink} style={{ paddingTop: space[32] }} />
+        error ? <Text style={[type.meta, { color: color.error }]}>{error}</Text> : <PageLoading photo />
       ) : (
         <>
           <View style={[styles.card, { padding: space[8] }]}>

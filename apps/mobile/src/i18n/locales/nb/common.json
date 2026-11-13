@@ -2,6 +2,7 @@
   "back": "Tilbake",
   "close": "Lukk",
   "continue": "Fortsett",
+  "loading": "Laster inn",
   "step": "Steg {{step}} av {{total}}",
   "auth": {
     "orContinueWith": "eller fortsett med",

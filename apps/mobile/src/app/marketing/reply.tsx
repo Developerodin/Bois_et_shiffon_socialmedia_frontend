@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { Bot, ShieldCheck } from "lucide-react-native";
 import { ActivityIndicator, StyleSheet, Text, TextInput, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { useTranslation } from "react-i18next";
 import { aiDraft, inbox, type Thread } from "@/api/endpoints";
 import { formatDate } from "@/i18n";
@@ -57,7 +58,7 @@ export default function ReplyAssistant() {
   const name = data?.person.name ?? t("inbox.customer");
   return (
     <ReelsScreen bg={color.canvas} glow={false} header={<TitleHeader title={t("reply.title")} fallback="/marketing/inbox" right={<BrandInline />} />} contentStyle={{ paddingTop: space[16] }}>
-      {!data && !error ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
+      {!data && !error ? <PageLoading /> : null}
 
       {data ? (
         <Panel>

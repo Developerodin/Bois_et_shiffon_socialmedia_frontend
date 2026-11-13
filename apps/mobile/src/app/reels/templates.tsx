@@ -5,6 +5,7 @@ import { Check } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { ApiError } from "@/api/client";
 import { reels, type ReelOptions } from "@/api/endpoints";
 import { color, radius, space } from "@/theme/tokens";
@@ -112,7 +113,7 @@ export default function ReelsTemplates() {
     >
       {/* Search and filters have no backend yet: said once, instead of controls that do nothing. */}
       <Text style={meta}>{t("templates.searchSoon")}</Text>
-      {!options && !loadError ? <ActivityIndicator style={{ paddingTop: space[24] }} color={color.primary} /> : null}
+      {!options && !loadError ? <PageLoading photo /> : null}
       {!options && loadError ? (
         <View style={{ paddingTop: space[24], gap: space[12] }}>
           <Text style={[meta, { color: color.error, textAlign: "center" }]}>{t("templates.loadFailed")}</Text>

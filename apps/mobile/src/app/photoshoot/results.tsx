@@ -3,7 +3,8 @@ import { Image } from "expo-image";
 import { router, useFocusEffect } from "expo-router";
 import { Images, Plus } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { photoshoots, type Shoot } from "@/api/endpoints";
 import { BottomNav, BusinessSwitch, Glow, ModuleHeader, ps, STROKE } from "@/ui/photoshoot/chrome";
 import { Badge, FilterChips, IconLabelButton, Page } from "@/ui/photoshoot/controls";
@@ -86,7 +87,7 @@ export default function Results() {
 
       <View style={styles.list}>
         {error ? <Text style={[type.meta, { color: color.error }]}>{error}</Text> : null}
-        {shoots === null && !error ? <ActivityIndicator color={color.ink} style={{ paddingVertical: space[24] }} /> : null}
+        {shoots === null && !error ? <PageLoading photo /> : null}
         {shoots && list.length === 0 ? <Text style={[type.body, { color: color.inkSecondary, textAlign: "center", paddingVertical: space[24] }]}>{t("results.empty")}</Text> : null}
         {list.map((s) => (s.status === "DONE" ? <PreviewCard key={s.id} shoot={s} /> : <PendingCard key={s.id} shoot={s} />))}
       </View>

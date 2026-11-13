@@ -4,6 +4,7 @@ import { CalendarDays, Clock, Lock, TriangleAlert } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { connections, postRelease, posts, type Connection, type PostRelease } from "@/api/endpoints";
 import { Button } from "@/ui/button";
 import { Card } from "@/ui/layout";
@@ -76,7 +77,7 @@ export default function SchedulePost() {
   if (!post || !post.latest) {
     return (
       <PostsScreen header={<PageHeader title={t("schedule.title")} right={<BusinessChip />} />} contentStyle={{ padding: space[16] }}>
-        <ActivityIndicator color={color.primary} />
+        <PageLoading photo />
       </PostsScreen>
     );
   }

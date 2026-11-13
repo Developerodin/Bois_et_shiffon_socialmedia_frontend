@@ -4,6 +4,7 @@ import { Check, ChevronDown, Pause, Play, Search, Trash2, X } from "lucide-react
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { type CloningInfo, type LibraryFilters, type LibraryVoice, reels, type ReelVoiceOption } from "@/api/endpoints";
 import { Field } from "@/ui/field";
 import { Button } from "@/ui/button";
@@ -200,7 +201,7 @@ export default function ReelsVoices() {
               </Pressable>
             ) : null}
           </ChipRow>
-          {!library ? <ActivityIndicator style={{ paddingTop: space[16] }} color={color.primary} /> : null}
+          {!library ? <PageLoading rows={3} /> : null}
           {library && !library.voices.length ? <Text style={meta}>{t("voices.libraryNone")}</Text> : null}
           {library?.voices.map((v) => {
             const traits = [v.gender && t(`voices.filter.gender.${v.gender}`, { defaultValue: v.gender }), v.age && t(`voices.filter.age.${v.age}`, { defaultValue: v.age }), v.accent].filter(Boolean).join(" · ");
@@ -239,7 +240,7 @@ export default function ReelsVoices() {
           {problem && tab === "library" ? <Button variant="ghost" label={t("voices.retry")} onPress={() => (setProblem(null), setLibraryRound((r) => r + 1))} /> : null}
         </View>
       ) : null}
-      {tab === "ours" && !voices && !problem ? <ActivityIndicator style={{ paddingTop: space[24] }} color={color.primary} /> : null}
+      {tab === "ours" && !voices && !problem ? <PageLoading rows={3} /> : null}
       <View style={{ gap: space[12], paddingTop: space[16], display: tab === "ours" ? "flex" : "none" }}>
         {voices?.map((v) => {
           const on = v.id === plan?.voice;

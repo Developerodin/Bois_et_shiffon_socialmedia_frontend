@@ -2,6 +2,7 @@
   "back": "Terug",
   "close": "Sluiten",
   "continue": "Doorgaan",
+  "loading": "Laden",
   "step": "Stap {{step}} van {{total}}",
   "auth": {
     "orContinueWith": "of ga verder met",

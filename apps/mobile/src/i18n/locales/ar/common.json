@@ -2,6 +2,7 @@
   "back": "رجوع",
   "close": "إغلاق",
   "continue": "متابعة",
+  "loading": "جارٍ التحميل",
   "step": "الخطوة {{step}} من {{total}}",
   "auth": {
     "orContinueWith": "أو تابع باستخدام",

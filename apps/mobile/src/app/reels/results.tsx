@@ -4,6 +4,7 @@ import { ArrowRight, Link2, LoaderCircle, Play, Plus, RotateCcw } from "lucide-r
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { ApiError } from "@/api/client";
 import { type ReelSummary, reels } from "@/api/endpoints";
 import { formatNumber } from "@/i18n";
@@ -65,7 +66,7 @@ export default function ReelsResults() {
         ))}
       </View>
       {error ? <Text style={[meta, { color: color.error }]}>{error}</Text> : null}
-      {list === null ? <ActivityIndicator color={color.primary} style={{ marginTop: space[24] }} /> : null}
+      {list === null ? <PageLoading photo /> : null}
       {list?.length === 0 ? <Text style={bodyMuted}>{t("results.empty")}</Text> : null}
 
       <View style={{ gap: space[16], paddingTop: 4 }}>

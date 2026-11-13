@@ -4,6 +4,7 @@ import { ChevronRight, Video } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { type Opportunity, opportunities, reels } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { ActionButton, BottomNav, Chip, ChipRow, ICON, ModuleHeader, ReelsScreen, Tag, bodyMuted, meta } from "@/ui/reels/kit";
@@ -62,7 +63,7 @@ export default function ReelsIdeas() {
       </ChipRow>
 
       {error ? <Text style={[bodyMuted, { color: color.error, paddingTop: space[16] }]}>{error}</Text> : null}
-      {ideas === null ? <ActivityIndicator style={{ marginTop: space[32] }} color={color.primary} /> : null}
+      {ideas === null ? <PageLoading rows={3} /> : null}
       {ideas?.length === 0 && !error ? <Text style={[bodyMuted, { paddingTop: space[24] }]}>{t("ideas.empty")}</Text> : null}
       <View style={{ gap: space[24], paddingTop: space[24] }}>
         {shown.map((idea, i) => {

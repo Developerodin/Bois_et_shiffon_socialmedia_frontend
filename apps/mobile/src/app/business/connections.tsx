@@ -4,6 +4,7 @@ import { Camera, Globe, MessageCircle, ShoppingBag, Store, type LucideIcon } fro
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { connections, disconnectAccount, type Connection, type SocialProvider } from "@/api/endpoints";
 import { color, radius, space } from "@/theme/tokens";
 import { BizScreen, BrandHeader, IconTile, SectionHead, SettingsCard, SmallButton, TextAction, bc, strong14 } from "@/ui/business/kit";
@@ -78,7 +79,7 @@ export default function Connections() {
 
       <SectionHead title={t("connections.channelsTitle")} aside={t("connections.accounts")} style={{ marginTop: space[20], paddingBottom: space[8] }} />
       {error ? <Text style={[meta, { color: color.error, paddingBottom: space[8] }]}>{error}</Text> : null}
-      {!list && !error ? <ActivityIndicator color={color.primary} /> : null}
+      {!list && !error ? <PageLoading rows={3} /> : null}
       <View style={{ gap: space[12] }}>
         {CHANNELS.map((c) => {
           // Linked accounts of this type (a person can link more than one Page); ERROR = its sign-in expired.

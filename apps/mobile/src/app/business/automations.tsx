@@ -3,6 +3,7 @@ import { CircleCheck, Megaphone, ShieldCheck, Unplug } from "lucide-react-native
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { PageLoading } from "@/ui/page-loading";
 import { automations as api, connections, type Automations as Saved } from "@/api/endpoints";
 import { color, font, radius, space, type } from "@/theme/tokens";
 import { BizScreen, BrandHeader, SectionHead, SettingsCard, Toggle, bc, strong14 } from "@/ui/business/kit";
@@ -66,7 +67,7 @@ export default function Automations() {
       <SectionHead title={t("automations.queueTitle")} aside={t("automations.manageConnections")} onAside={() => router.push("/business/connections")} style={{ marginTop: space[24], paddingBottom: space[20] }} />
 
       {error ? <Text style={[meta, { color: color.error, paddingBottom: space[8] }]}>{error}</Text> : null}
-      {!saved && !error ? <ActivityIndicator color={color.primary} /> : null}
+      {!saved && !error ? <PageLoading rows={3} /> : null}
       <View style={{ gap: space[12] }}>
         {ITEMS.map((a) => {
           const active = a.key ? !!saved?.[a.key] : false;

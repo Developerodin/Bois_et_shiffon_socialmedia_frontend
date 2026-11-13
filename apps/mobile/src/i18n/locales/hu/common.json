@@ -2,6 +2,7 @@
   "back": "Vissza",
   "close": "Bezárás",
   "continue": "Folytatás",
+  "loading": "Betöltés",
   "step": "{{step}} / {{total}} lépés",
   "auth": {
     "orContinueWith": "vagy folytatás ezzel",

@@ -2,6 +2,7 @@
   "back": "Takaisin",
   "close": "Sulje",
   "continue": "Jatka",
+  "loading": "Ladataan",
   "step": "Vaihe {{step}}/{{total}}",
   "auth": {
     "orContinueWith": "tai jatka käyttäen",

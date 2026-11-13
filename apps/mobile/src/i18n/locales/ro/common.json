@@ -2,6 +2,7 @@
   "back": "Înapoi",
   "close": "Închide",
   "continue": "Continuă",
+  "loading": "Se încarcă",
   "step": "Pasul {{step}} din {{total}}",
   "auth": {
     "orContinueWith": "sau continuă cu",

@@ -2,6 +2,7 @@
   "back": "Tillbaka",
   "close": "Stäng",
   "continue": "Fortsätt",
+  "loading": "Läser in",
   "step": "Steg {{step}} av {{total}}",
   "auth": {
     "orContinueWith": "eller fortsätt med",

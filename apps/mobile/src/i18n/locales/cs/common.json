@@ -2,6 +2,7 @@
   "back": "Zpět",
   "close": "Zavřít",
   "continue": "Pokračovat",
+  "loading": "Načítání",
   "step": "Krok {{step}} z {{total}}",
   "auth": {
     "orContinueWith": "nebo pokračujte s",

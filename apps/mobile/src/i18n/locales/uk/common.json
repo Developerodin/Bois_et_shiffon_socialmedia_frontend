@@ -2,6 +2,7 @@
   "back": "Назад",
   "close": "Закрити",
   "continue": "Продовжити",
+  "loading": "Завантаження",
   "step": "Крок {{step}} з {{total}}",
   "auth": {
     "orContinueWith": "або продовжити з",
