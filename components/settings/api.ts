@@ -6,6 +6,8 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    /** The problem JSON's stable `code` (e.g. "story.expiredConfirm"), when it has one. */
+    public code?: string,
   ) {
     super(message);
   }
@@ -79,13 +81,15 @@ export async function request<T>(url: string, init?: RequestInit): Promise<T> {
   if (res.status === 401 && url.startsWith("/api/")) redirectToLogin();
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
+    let code: string | undefined;
     try {
-      const body = (await res.json()) as { detail?: string; title?: string };
+      const body = (await res.json()) as { detail?: string; title?: string; code?: string };
       message = body.detail || body.title || message;
+      code = body.code;
     } catch {
       // Non-JSON error body; keep the generic message.
     }
-    throw new ApiError(res.status, message);
+    throw new ApiError(res.status, message, code);
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
