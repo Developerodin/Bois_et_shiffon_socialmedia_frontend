@@ -19,6 +19,7 @@ import { onAssetFailure, REEL_ASSET_JOB, runAsset } from "@/server/reels/assets"
 import "@/server/reels/templates"; // registers its asset kind
 import "@/server/reels/presenters"; // registers its asset kind
 import { purgeOldRecordings } from "@/server/reels/recordings";
+import { purgeStaleUploads } from "@/server/stories/uploads";
 import { runVoiceDelete, VOICE_DELETE_JOB } from "@/server/reels/clones";
 import { ReconnectNeeded, refreshExpiringTokens } from "@/server/services/connections";
 import { executePublication, onPublishJobLost, PUBLISH_JOB } from "@/server/services/publishing";
@@ -116,6 +117,7 @@ async function dailySweep() {
   await runMonthlyPlans();
   await enqueueDailyCatalogSyncs();
   await purgeOldRecordings();
+  await purgeStaleUploads();
   const scheduled = AGENTS.filter((a) => a.schedule === "daily");
   if (scheduled.length === 0) return;
   const startOfDay = new Date(new Date().toISOString().slice(0, 10));
