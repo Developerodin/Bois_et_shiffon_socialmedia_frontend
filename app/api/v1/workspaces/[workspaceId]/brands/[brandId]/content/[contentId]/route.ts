@@ -179,7 +179,7 @@ async function storyExtras(scope: { workspaceId: string; brandId: string }, item
 
 function toProblem(error: unknown) {
   if (error instanceof PublishingError) {
-    return problemResponse({ type: "https://api.brandpilot/errors/publishing", title: error.message, status: error.status, detail: error.message, code: error.code });
+    return problemResponse({ type: "https://api.brandpilot/errors/publishing", title: error.message, status: error.status, detail: error.message, code: error.code, ...error.data });
   }
   return fromAccessError(error);
 }

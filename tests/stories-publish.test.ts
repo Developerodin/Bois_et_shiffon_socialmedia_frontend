@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type Row = Record<string, any>;
 // A small in-memory database: enough of Prisma's where (equality, `in`) to run the publishing services for real.
-const db = vi.hoisted(() => ({ items: [] as Row[], versions: [] as Row[], decisions: [] as Row[], attempts: [] as Row[], conns: [] as Row[], audits: [] as Row[], jobs: [] as Row[], n: 0 }));
+const db = vi.hoisted(() => ({ items: [] as Row[], versions: [] as Row[], decisions: [] as Row[], attempts: [] as Row[], conns: [] as Row[], audits: [] as Row[], jobs: [] as Row[], n: 0, onRowLock: null as null | (() => void) }));
 const m = vi.hoisted(() => ({ markReconnect: vi.fn() }));
 
 vi.mock("@/server/db/prisma", () => {
@@ -11,6 +11,8 @@ vi.mock("@/server/db/prisma", () => {
   const copy = <T,>(x: T): T => (x == null ? x : structuredClone(x));
   const prisma: Row = {
     $executeRaw: async () => 0,
+    // SELECT … FOR UPDATE: whatever a concurrent writer committed before the lock was granted happens in onRowLock.
+    $queryRaw: async () => { db.onRowLock?.(); return []; },
     contentItem: {
       findFirst: async ({ where }: Row) => {
         const i = db.items.find((r) => match(r, where));
@@ -22,6 +24,7 @@ vi.mock("@/server/db/prisma", () => {
     },
     approvalDecision: {
       findFirst: async ({ where }: Row) => copy(db.decisions.filter((d) => match(d, where)).at(-1) ?? null),
+      findMany: async ({ where }: Row) => copy(db.decisions.filter((d) => match(d, where))),
       create: async ({ data }: Row) => { const d = { id: `d${++db.n}`, ...copy(data) }; db.decisions.push(d); return copy(d); },
     },
     auditEvent: { create: async ({ data }: Row) => { db.audits.push(copy(data)); return {}; } },
@@ -43,6 +46,7 @@ vi.mock("@/server/db/prisma", () => {
     },
     integrationConnection: { findFirst: async ({ where }: Row) => copy(db.conns.find((c) => match(c, where)) ?? null), findMany: async () => [] },
     brandProfile: { findFirst: async () => null },
+    user: { findMany: async () => [] },
   };
   prisma.$transaction = async (arg: unknown) => (typeof arg === "function" ? (arg as (tx: Row) => unknown)(prisma) : Promise.all(arg as unknown[]));
   return { prisma };
@@ -92,6 +96,8 @@ vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
 import { decide, executePublication, markDone, onPublishJobLost, packageHash, postRest, schedulePublication, settleFrame, settlePublication } from "@/server/services/publishing";
 import { attemptOutcome, expiredFrames, type FrameProgress, nextFramesToPublish, publishingLimitRoom, settleStoryFrame } from "@/server/stories/publish";
 import { POST } from "@/app/api/v1/workspaces/[workspaceId]/brands/[brandId]/content/[contentId]/route";
+import { authorizeBrandRoute } from "@/server/api/brand-route";
+import { kickRunner } from "@/server/jobs/runner";
 
 const scope = { workspaceId: "w1", brandId: "b1" };
 const body = (n: number) => ({
@@ -122,7 +128,7 @@ async function partlyPosted() {
 }
 
 beforeEach(() => {
-  Object.assign(db, { items: [], versions: [], decisions: [], attempts: [], audits: [], jobs: [], n: 0 });
+  Object.assign(db, { items: [], versions: [], decisions: [], attempts: [], audits: [], jobs: [], n: 0, onRowLock: null });
   db.conns = [{ id: "c1", brandId: "b1", provider: "INSTAGRAM", status: "ACTIVE", encryptedCredentials: "x", externalAccountId: "ig1", displayName: "Shop" }];
   Object.assign(graph, { quota: { quota_total: 100, quota_usage: 0 }, refusePublish: new Set(), unknownPublish: new Set(), containerError: new Set(), refuseCreate: "", created: [], published: [], onLimit: null });
   m.markReconnect.mockClear();
@@ -298,6 +304,31 @@ describe("publishing a story", () => {
 });
 
 describe("a lost story job", () => {
+  it("decides from the row read under the lock: a frame stored as publishing just before it is in doubt", async () => {
+    seed();
+    db.attempts.push({ id: "a9", ...scope, contentItemId: "s1", contentVersionId: "v1", connectionId: "c1", createdByUserId: "u1", status: "PUBLISHING", target: { story: true, frames: 4, progress: [{ i: 0, state: "published", mediaId: "m0" }] } });
+    db.onRowLock = () => { att("a9").target.progress.push({ i: 1, state: "publishing" }); };
+    await onPublishJobLost({ attemptId: "a9" });
+    expect(att("a9")).toMatchObject({ status: "PENDING_VERIFY", error: "Frame 1 was posted; we couldn't confirm frame 2. Check the account." });
+  });
+
+  it("decides from the row read under the lock: a frame published since the first read leaves nothing stuck", async () => {
+    seed();
+    db.attempts.push({ id: "a9", ...scope, contentItemId: "s1", contentVersionId: "v1", connectionId: "c1", createdByUserId: "u1", status: "PUBLISHING", target: { story: true, frames: 4, progress: [{ i: 0, state: "published", mediaId: "m0" }, { i: 1, state: "publishing" }] } });
+    db.onRowLock = () => { att("a9").target.progress[1] = { i: 1, state: "published", mediaId: "m1" }; };
+    await onPublishJobLost({ attemptId: "a9" });
+    expect(att("a9")).toMatchObject({ status: "PARTIAL", error: "Publishing stopped midway. 2 of 4 frames are posted." });
+    expect(item().status).toBe("SCHEDULED");
+  });
+
+  it("with every frame out: PUBLISHED with frame 1's id, item PUBLISHED", async () => {
+    seed();
+    db.attempts.push({ id: "a9", ...scope, contentItemId: "s1", contentVersionId: "v1", connectionId: "c1", createdByUserId: "u1", status: "PUBLISHING", target: { story: true, frames: 2, progress: [{ i: 0, state: "published", mediaId: "m0" }, { i: 1, state: "published", mediaId: "m1" }] } });
+    await onPublishJobLost({ attemptId: "a9" });
+    expect(att("a9")).toMatchObject({ status: "PUBLISHED", externalId: "m0", externalUrl: null, error: null });
+    expect(item().status).toBe("PUBLISHED");
+  });
+
   const publishing = (progress: FrameProgress) => {
     seed();
     db.attempts.push({ id: "a9", ...scope, contentItemId: "s1", contentVersionId: "v1", connectionId: "c1", createdByUserId: "u1", status: "PUBLISHING", target: { story: true, frames: 4, progress } });
@@ -352,7 +383,8 @@ describe("post the rest and mark as done", () => {
     const third = await postRest(ref(second.id));
     await run(third);
     expect(graph.created.sort()).toEqual([2, 3]);
-    expect(att(third.id)).toMatchObject({ status: "PUBLISHED", externalId: "m0" });
+    // Frame 1's id and link, though this attempt only posted frames 3–4.
+    expect(att(third.id)).toMatchObject({ status: "PUBLISHED", externalId: "m0", externalUrl: "https://www.instagram.com/stories/shop/m0/" });
     expect(item().status).toBe("PUBLISHED");
     noFramePostedTwice();
   });
@@ -397,6 +429,30 @@ describe("post the rest and mark as done", () => {
     const calls = (over: Row) => [postRest(ref(a.id, over)), markDone(ref(a.id, over)), settleFrame(ref(a.id, { frame: 2, appeared: true, ...over }))];
     for (const p of [...calls({ itemId: "s2" }), ...calls({ brandId: "b2" })]) await expect(p).rejects.toMatchObject({ status: 404 });
     expect(att(a.id).status).toBe("PARTIAL");
+  });
+
+  it("the route's postRest needs publish.execute, is scoped, kicks the runner, and returns the expired count as data", async () => {
+    seed();
+    const a = await partlyPosted();
+    const req = (b: object) => new Request("http://x", { method: "POST", body: JSON.stringify(b) });
+    const params = { params: Promise.resolve({ workspaceId: "w1", brandId: "b1", contentId: "s1" }) };
+    vi.mocked(kickRunner).mockClear();
+    db.attempts.push({ id: "other", ...scope, contentItemId: "s2", status: "PARTIAL", target: { story: true, frames: 4, progress: [] } });
+    const foreign = await POST(req({ action: "postRest", attemptId: "other" }), params);
+    expect(foreign.status).toBe(404);
+    expect(vi.mocked(authorizeBrandRoute)).toHaveBeenLastCalledWith(expect.anything(), expect.anything(), "publish.execute");
+    expect(kickRunner).not.toHaveBeenCalled();
+
+    att(a.id).target.progress.forEach((f: Row) => { if (f.at) f.at = new Date(Date.now() - 25 * 3_600_000).toISOString(); });
+    const expired = await POST(req({ action: "postRest", attemptId: a.id }), params);
+    expect(expired.status).toBe(409);
+    expect(await expired.json()).toMatchObject({ code: "story.expiredConfirm", expiredFrames: 2, remainingFrames: 2 });
+    expect(kickRunner).not.toHaveBeenCalled();
+
+    const ok = await POST(req({ action: "postRest", attemptId: a.id, confirm: true }), params);
+    expect(ok.status).toBe(200);
+    expect(kickRunner).toHaveBeenCalledTimes(1);
+    expect(db.attempts.filter((x) => x.contentItemId === "s1")).toHaveLength(2);
   });
 
   it("the route runs them with their codes", async () => {

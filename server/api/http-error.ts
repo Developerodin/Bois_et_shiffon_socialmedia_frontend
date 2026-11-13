@@ -8,6 +8,8 @@ export type ApiProblem = {
   detail?: string;
   code?: string;
   errors?: Record<string, string[]>;
+  /** Extra machine-readable fields some problems carry (e.g. a story's `expiredFrames`). */
+  [extra: string]: unknown;
 };
 
 export function problemResponse(problem: ApiProblem) {

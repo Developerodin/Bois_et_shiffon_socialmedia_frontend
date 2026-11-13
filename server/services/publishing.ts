@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { aiDisclosureLine, needsAiDisclosure } from "@/server/reels/plan";
 import type { ApprovalVerdict, ContentChannel, IntegrationProvider, Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
-import { instagramPublishingLimit, PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
+import { instagramPermalink, instagramPublishingLimit, PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
 import { enqueueJob } from "@/server/jobs/queue";
 import { accessToken, markReconnect, ReconnectNeeded } from "@/server/services/connections";
 import { safeHttpUrl } from "@/lib/website";
@@ -28,7 +28,12 @@ import { attemptOutcome, expiredFrames, type FrameProgress, nextFramesToPublish,
 export const PUBLISH_JOB = "content.publish";
 
 export class PublishingError extends Error {
-  constructor(message: string, readonly status = 409, /** Stable string clients can switch on; story refusals always carry one. */ readonly code?: string) {
+  constructor(
+    message: string,
+    readonly status = 409,
+    /** Stable string clients can switch on; story refusals always carry one. */ readonly code?: string,
+    /** Extra fields for the problem JSON (e.g. `expiredFrames`), so apps needn't parse the message. */ readonly data?: Record<string, number | string | boolean>,
+  ) {
     super(message);
   }
 }
@@ -585,8 +590,10 @@ export async function executePublication(payload: unknown) {
         account,
       );
       if (attemptOutcome(st.frames, progress) !== "PUBLISHED") throw new Error("Not every frame was posted");
+      // Both describe frame 1: its link comes with the result when this attempt posted it, else it is asked for.
       const first = progress.find((f) => f.i === 0)?.mediaId ?? res.externalId;
-      await finishStory("PUBLISHED", { externalId: first, externalUrl: safeHttpUrl(res.externalUrl)?.href ?? null, publishedAt: new Date(), error: null }, "PUBLISHED");
+      const link = res.externalId === first ? res.externalUrl : await instagramPermalink(first, account).catch(() => null);
+      await finishStory("PUBLISHED", { externalId: first, externalUrl: safeHttpUrl(link)?.href ?? null, publishedAt: new Date(), error: null }, "PUBLISHED");
     } catch (e) {
       const msg = e instanceof Error ? e.message.slice(0, 300) : "Unknown error";
       if (e instanceof PublishRefused && /^401 |access token|OAuthException/i.test(msg)) await markReconnect(conn!.id, `The platform rejected the access (${msg.slice(0, 120)}). Reconnect ${conn!.displayName}.`);
@@ -612,8 +619,7 @@ export async function executePublication(payload: unknown) {
 export async function onPublishJobLost(payload: unknown) {
   const { attemptId } = payload as { attemptId: string };
   const a = await prisma.publicationAttempt.findFirst({ where: { id: attemptId, status: "PUBLISHING" } });
-  const st = storyTargetOf(a?.target);
-  if (a && st) return storyJobLost(a, st);
+  if (storyTargetOf(a?.target)) return storyJobLost(attemptId);
   await prisma.publicationAttempt.updateMany({
     where: { id: attemptId, status: "PUBLISHING" },
     data: { status: "PENDING_VERIFY", error: "Publishing stopped midway. Check the account before trying again." },
@@ -623,17 +629,25 @@ export async function onPublishJobLost(payload: unknown) {
 /**
  * A story's job stopped mid-run. A frame recorded "publishing" may be out: PENDING_VERIFY naming it. Without one, no
  * publish call was in flight (each is recorded first, and every later write needs the attempt still PUBLISHING), so the
- * frames recorded are exactly what's out: PARTIAL, or FAILED when none are.
+ * frames recorded are exactly what's out: PUBLISHED, PARTIAL, or FAILED when none are.
+ * The row is locked and read inside the transaction, and the status written from that same read: a worker that is
+ * somehow still running waits on the lock to store its next frame, then finds the attempt no longer PUBLISHING.
  */
-async function storyJobLost(a: { id: string; workspaceId: string; brandId: string; contentItemId: string; createdByUserId: string }, st: StoryTarget) {
-  const unsure = st.progress.some((f) => f.state === "publishing");
-  const posted = postedCount(st.progress);
-  const status = unsure ? "PENDING_VERIFY" : posted ? "PARTIAL" : "FAILED";
-  const error = unsure ? unconfirmedMessage(st.progress) : `Publishing stopped midway. ${posted ? `${posted} of ${st.frames} frames are posted.` : "Nothing was posted."}`;
+async function storyJobLost(attemptId: string) {
   await prisma.$transaction(async (tx) => {
-    const { count } = await tx.publicationAttempt.updateMany({ where: { id: a.id, status: "PUBLISHING" }, data: { status, error } });
+    await tx.$queryRaw`SELECT "id" FROM "PublicationAttempt" WHERE "id" = ${attemptId} FOR UPDATE`;
+    const a = await tx.publicationAttempt.findFirst({ where: { id: attemptId, status: "PUBLISHING" } });
+    const st = storyTargetOf(a?.target);
+    if (!a || !st) return;
+    const unsure = st.progress.some((f) => f.state === "publishing");
+    const posted = postedCount(st.progress);
+    const outcome = attemptOutcome(st.frames, st.progress);
+    const status = unsure ? "PENDING_VERIFY" : outcome;
+    const error = unsure ? unconfirmedMessage(st.progress) : outcome === "PUBLISHED" ? null : `Publishing stopped midway. ${posted ? `${posted} of ${st.frames} frames are posted.` : "Nothing was posted."}`;
+    const done = status === "PUBLISHED" ? { publishedAt: new Date(), externalId: st.progress.find((f) => f.i === 0)?.mediaId ?? null, externalUrl: null } : {};
+    const { count } = await tx.publicationAttempt.updateMany({ where: { id: a.id, status: "PUBLISHING" }, data: { status, error, ...done } });
     if (count !== 1) return;
-    await tx.contentItem.update({ where: { id: a.contentItemId }, data: { status: status === "FAILED" ? "APPROVED" : "SCHEDULED" } });
+    await tx.contentItem.update({ where: { id: a.contentItemId }, data: { status: status === "FAILED" ? "APPROVED" : status === "PUBLISHED" ? "PUBLISHED" : "SCHEDULED" } });
     await tx.auditEvent.create({
       data: { workspaceId: a.workspaceId, brandId: a.brandId, actorUserId: a.createdByUserId, action: `content.publish.${status.toLowerCase()}`, entityType: "PublicationAttempt", entityId: a.id, metadata: { lost: true, posted, total: st.frames } },
     });
@@ -711,7 +725,8 @@ export async function settleFrame(input: AttemptRef & { frame: number; appeared:
       where: { id: a.id, status: "PENDING_VERIFY" },
       data: {
         status, target: { ...st, progress },
-        ...(status === "PUBLISHED" ? { publishedAt: new Date(), externalId: progress.find((f) => f.i === 0)?.mediaId ?? a.externalId, error: null } : {}),
+        // Frame 1's id; its link isn't known here (no token), so none rather than another frame's.
+        ...(status === "PUBLISHED" ? { publishedAt: new Date(), externalId: progress.find((f) => f.i === 0)?.mediaId ?? a.externalId, externalUrl: null, error: null } : {}),
         ...(status === "PARTIAL" ? { error: `${posted} of ${st.frames} frames are posted.` } : {}),
         ...(status === "FAILED" ? { error: "Checked: it didn't post. You can publish again." } : {}),
       },
@@ -736,7 +751,7 @@ export async function postRest(input: AttemptRef & { confirm?: boolean }) {
     const expired = expiredFrames(st.progress, new Date());
     if (expired > 0 && !input.confirm) {
       const left = st.frames - postedCount(st.progress);
-      throw new PublishingError(`${expired === 1 ? "Frame 1 has" : `Frames 1–${expired} have`} expired. Posting the rest makes a story of ${left} frame${left === 1 ? "" : "s"}.`, 409, "story.expiredConfirm");
+      throw new PublishingError(`${expired === 1 ? "Frame 1 has" : `Frames 1–${expired} have`} expired. Posting the rest makes a story of ${left} frame${left === 1 ? "" : "s"}.`, 409, "story.expiredConfirm", { expiredFrames: expired, remainingFrames: left });
     }
     const { count } = await tx.publicationAttempt.updateMany({ where: { id: a.id, status: "PARTIAL" }, data: { status: "CANCELLED" } });
     if (count !== 1) throw new PublishingError("This was already handled. Reload the story.", 409, "story.alreadyHandled");
@@ -777,10 +792,9 @@ export async function releaseState(scope: { workspaceId: string; brandId: string
   // ponytail: a crashed worker leaves PUBLISHING forever; after 10 min treat it as unknown outcome.
   for (const a of attempts) {
     if (a.status === "PUBLISHING" && Date.now() - a.updatedAt.getTime() > 10 * 60_000) {
-      const st = storyTargetOf(a.target);
-      if (st) {
+      if (storyTargetOf(a.target)) {
         // A story is settled from its recorded frames (storyJobLost); read back what that decided.
-        await storyJobLost(a, st);
+        await storyJobLost(a.id);
         Object.assign(a, (await prisma.publicationAttempt.findFirst({ where: { id: a.id } })) ?? {});
         continue;
       }
