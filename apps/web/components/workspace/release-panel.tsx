@@ -505,7 +505,10 @@ function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data
       const p = (await res.json().catch(() => null)) as { detail?: string; title?: string } | null;
       throw new ApiError(res.status, p?.detail || p?.title || "The download didn’t start. Try again.");
     }
-    const href = URL.createObjectURL(await res.blob());
+    const blob = await res.blob().catch(() => {
+      throw new ApiError(0, "The download stopped partway. Try again.");
+    });
+    const href = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = href;
     a.download = `story-${id}.zip`;
@@ -564,6 +567,7 @@ function History({ data, canPublish, onSettle, onAct }: { data: Release; canPubl
   const [link, setLink] = useState("");
   // A partly posted story whose posted frames expired: the server said so; the next "Post the rest" confirms.
   const [expiredOk, setExpiredOk] = useState<string | null>(null);
+  const [doneAsk, setDoneAsk] = useState<string | null>(null);
   const rows = [
     ...data.decisions.map((d) => ({ at: d.at, key: d.id, d, a: null as Attempt | null })),
     ...data.attempts.map((a) => ({ at: a.publishedAt ?? a.runAt, key: a.id, d: null as Decision | null, a })),
@@ -647,8 +651,9 @@ function History({ data, canPublish, onSettle, onAct }: { data: Release; canPubl
                   <Button size="sm" variant="outline" disabled={pending !== null} onClick={() => story(a.id + "rest", { action: "postRest", attemptId: a.id, ...(expiredOk === a.id ? { confirm: true } : {}) })}>
                     {pending === a.id + "rest" ? "Posting…" : expiredOk === a.id ? "Post the rest anyway" : "Post the rest"}
                   </Button>
-                  <Button size="sm" variant="ghost" disabled={pending !== null} onClick={() => story(a.id + "done", { action: "markDone", attemptId: a.id })}>
-                    {pending === a.id + "done" ? "Saving…" : "Mark as done"}
+                  {/* Two steps: marking done closes off "Post the rest" for good. */}
+                  <Button size="sm" variant="ghost" disabled={pending !== null} onClick={() => (doneAsk === a.id ? story(a.id + "done", { action: "markDone", attemptId: a.id }) : setDoneAsk(a.id))}>
+                    {pending === a.id + "done" ? "Saving…" : doneAsk === a.id ? "Yes, leave the rest unposted" : "Mark as done"}
                   </Button>
                 </span>
               )}
