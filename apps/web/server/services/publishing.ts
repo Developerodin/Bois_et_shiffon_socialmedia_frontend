@@ -191,6 +191,8 @@ export async function saveDraft(input: { workspaceId: string; brandId: string; u
   return prisma.$transaction(async (tx) => {
     await lock(tx, input.itemId);
     const { item, latest } = await loadItem(input, input.itemId, tx);
+    // A story version is only ever made by createStoryVersion, after its frames are rendered (server/stories/service.ts).
+    if (item.channel === "INSTAGRAM_STORY") throw new PublishingError("Stories are saved with editStory", 400, "story.useEditStory");
     if ((latest?.version ?? 0) !== input.version) throw new PublishingError("Someone saved a newer draft while you were editing. Copy your changes, reload and try again.");
     if (item.status === "SCHEDULED") throw new PublishingError("This post is scheduled. Cancel it first, then edit.");
     if (!EDITABLE.includes(item.status)) throw new PublishingError("A published post can't be edited");

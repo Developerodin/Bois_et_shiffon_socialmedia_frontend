@@ -20,7 +20,7 @@ const FONT_DIR = path.join(process.cwd(), "assets", "fonts");
 process.env.FONTCONFIG_FILE = path.join(FONT_DIR, "fonts.conf");
 
 /** Bump when the layout changes: every frame gets a new content key, so old files are never reused for new pixels. */
-export const RENDERER_VERSION = 1;
+export const RENDERER_VERSION = 2;
 const W = 1080;
 const H = 1920;
 const MB = 1024 * 1024;
@@ -68,6 +68,8 @@ export type RenderOpts = {
   cta: string;
   brandMark: boolean;
   logoKey?: string;
+  /** Changes whenever the logo's bytes change (a short hash of them), so a replaced logo never reuses old frames. */
+  logoTag?: string;
   /** 1-based frame number, for error messages only (not part of the hash). */
   n?: number;
 };
@@ -178,7 +180,7 @@ export function renderInputsHash(frame: StoryFrame, opts: RenderOpts): string {
     frame.clip ? [frame.clip.start, frame.clip.sound] : null,
     opts.isLast ? opts.cta : "",
     !!frame.aiMark,
-    opts.brandMark ? (opts.logoKey ?? "") : "",
+    opts.brandMark ? [opts.logoKey ?? "", opts.logoTag ?? ""] : "",
     opts.language,
   ];
   return createHash("sha256").update(JSON.stringify(inputs)).digest("hex");

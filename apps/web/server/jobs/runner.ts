@@ -20,9 +20,10 @@ import "@/server/reels/templates"; // registers its asset kind
 import "@/server/reels/presenters"; // registers its asset kind
 import { purgeOldRecordings } from "@/server/reels/recordings";
 import { purgeStaleUploads } from "@/server/stories/uploads";
+import { onStoryRenderFailure, runStoryRender, STORY_RENDER_JOB } from "@/server/stories/service";
 import { runVoiceDelete, VOICE_DELETE_JOB } from "@/server/reels/clones";
 import { ReconnectNeeded, refreshExpiringTokens } from "@/server/services/connections";
-import { executePublication, onPublishJobLost, PUBLISH_JOB } from "@/server/services/publishing";
+import { executePublication, onPublishJobLost, PUBLISH_JOB, PublishingError } from "@/server/services/publishing";
 import { runMonthlyPlans } from "@/server/services/automations";
 import { renewDuePlans } from "@/server/services/subscriptions";
 
@@ -42,6 +43,7 @@ const HANDLERS: Record<string, Handler> = {
   [PUBLISH_JOB]: { run: executePublication, onFailure: onPublishJobLost },
   [REEL_ASSET_JOB]: { run: runAsset, onFailure: onAssetFailure },
   [REEL_RENDER_JOB]: { run: advanceRender, onFailure: failRender },
+  [STORY_RENDER_JOB]: { run: runStoryRender, onFailure: onStoryRenderFailure },
   [VOICE_DELETE_JOB]: { run: runVoiceDelete },
 };
 
@@ -72,8 +74,9 @@ export async function runDueJobs({ budgetMs = 45_000 } = {}) {
       await handler.run(job.payload);
       await completeJob(job);
     } catch (error) {
-      // A catalogue sync whose Shopify token was refused waits for a person to reconnect; retrying can't help.
-      const refused = job.type === CATALOG_SYNC_JOB && error instanceof ReconnectNeeded;
+      // A catalogue sync whose Shopify token was refused waits for a person to reconnect; a story render refused
+      // (stale, approved meanwhile, text or clip window) would be refused again. Retrying can't help either.
+      const refused = (job.type === CATALOG_SYNC_JOB && error instanceof ReconnectNeeded) || (job.type === STORY_RENDER_JOB && error instanceof PublishingError);
       const retryable = error instanceof AiProviderError ? error.retryable : !(error instanceof NothingToDoError || refused);
       const exhausted = await failJob(job, error, retryable && Boolean(handler));
       await handler?.onFailure?.(job.payload, error, exhausted).catch(() => {});

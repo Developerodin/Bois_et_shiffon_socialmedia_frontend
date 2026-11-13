@@ -8,6 +8,8 @@ import { kickRunner } from "@/server/jobs/runner";
 import { accessToken } from "@/server/services/connections";
 import { autoPublish } from "@/server/services/automations";
 import { decide, postAiAllowed, PublishingError, releaseState, saveDraft, schedulePublication, settlePublication } from "@/server/services/publishing";
+import { parseStoryInput } from "@/server/stories/body";
+import { deleteStory, duplicateStory, saveStoryVersion, storyView } from "@/server/stories/service";
 
 // Queued work runs after the response (kickRunner); give it room to finish.
 export const maxDuration = 300;
@@ -41,9 +43,13 @@ const Action = z.discriminatedUnion("action", [
   // The app's "Fix it" / "Try again": the writer (re)writes a post that's waiting for a draft, blocked or sent back,
   // or the check runs again on a draft that never got one.
   z.object({ action: z.literal("rewrite"), version: z.number().int().min(0) }),
+  // A story's save: `story` is checked by parseStoryInput (which also strips server fields).
+  z.object({ action: z.literal("editStory"), version: z.number().int().min(0), story: z.unknown() }),
+  z.object({ action: z.literal("duplicate") }),
+  z.object({ action: z.literal("delete") }),
 ]);
 
-const PERMISSION = { rewrite: "content.create", edit: "content.create", decide: "content.approve", publish: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
+const PERMISSION = { rewrite: "content.create", edit: "content.create", editStory: "content.create", duplicate: "content.create", delete: "content.create", decide: "content.approve", publish: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
 
 /** Approval history, publishing history, and where this post can go (with Pinterest boards). */
 export async function GET(request: Request, context: Params) {
@@ -60,7 +66,7 @@ export async function GET(request: Request, context: Params) {
         boards[a.id] = c ? await accessToken(c).then(pinterestBoards).catch(() => null) : null;
       }
     }
-    return Response.json({ ...state, boards });
+    return Response.json({ ...state, boards, ...(await storyExtras(scope, contentId, state.requirements)) });
   } catch (error) {
     return toProblem(error);
   }
@@ -81,10 +87,28 @@ export async function POST(request: Request, context: Params) {
     // An edit or a send-back starts free AI runs (Quality, Creator): capped per workspace per day.
     const startsAi =
       body.action === "edit" ||
+      body.action === "editStory" ||
       body.action === "rewrite" ||
       (body.action === "decide" && body.verdict === "CHANGES_REQUESTED" && !(await prisma.contentItem.findFirst({ where: { id: itemId, brandId: scope.brandId }, select: { studio: true } }))?.studio);
     if (startsAi && !(await postAiAllowed(scope.workspaceId))) throw new PublishingError("Too many posts written today. Try again tomorrow.", 429);
-    if (body.action === "edit") {
+    if (body.action === "duplicate") {
+      const copy = await duplicateStory(scope, itemId);
+      return Response.json({ id: copy.id }, { status: 201 });
+    }
+    if (body.action === "delete") {
+      await deleteStory(scope, itemId);
+      return new Response(null, { status: 204 });
+    }
+    if (body.action === "editStory") {
+      const saved = await saveStoryVersion(scope, itemId, body.version, parseStoryInput(body.story), { kind: "person", userId: scope.userId });
+      // Saved now: check it now, as for posts. Rendering: the render job starts Quality itself once the version exists.
+      if (saved.status === "saved") {
+        await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: "quality", trigger: "event", input: { itemId, version: saved.version } }).catch(() => null);
+      }
+      kickRunner();
+      const state = await releaseState(scope, itemId);
+      return Response.json({ ...state, saved: saved.status, ...(await storyExtras(scope, itemId, state.requirements)) });
+    } else if (body.action === "edit") {
       const saved = await saveDraft({ ...scope, itemId, version: body.version, body: body.body });
       // Check this edit now rather than at the next daily run, so the person can schedule it today.
       await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: "quality", trigger: "event", input: { itemId, version: saved.version } }).catch(() => null);
@@ -124,6 +148,11 @@ export async function POST(request: Request, context: Params) {
   } catch (error) {
     return toProblem(error);
   }
+}
+
+/** A story's render progress and rendered frames (signed for an hour); nothing for other posts. */
+async function storyExtras(scope: { workspaceId: string; brandId: string }, itemId: string, requirements: object) {
+  return "frames" in requirements ? storyView(scope, itemId) : {};
 }
 
 function toProblem(error: unknown) {
