@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
+import { registerManualPost } from "@/server/services/manual-post";
 import { hitRateLimit } from "@/server/auth/rate-limit";
 import { startAgentRun } from "@/server/agents/engine";
 import { kickRunner } from "@/server/jobs/runner";
@@ -222,21 +223,8 @@ export async function recheckQuality(scope: Omit<Scope, "userId">, itemId: strin
   return "started";
 }
 
-const INSTAGRAM_POST = /^https:\/\/(www\.)?instagram\.com\/(reel|reels|p)\/[A-Za-z0-9_-]+\/?(\?.*)?$/;
-
 /** After a manual post: the link the person pasted back, so the reel's results can be followed. */
-export async function registerPostLink(scope: Scope, itemId: string, url: string) {
-  const link = url.trim();
-  if (!INSTAGRAM_POST.test(link)) throw new PublishingError("Paste the link of the Instagram post (instagram.com/reel/…)", 400);
-  await prisma.$transaction(async (tx) => {
-    await lock(tx, itemId);
-    const { item } = await loadReel(scope, itemId, tx);
-    if (item.status === "SCHEDULED") throw new PublishingError("This reel is scheduled to post by itself. Cancel that first.", 409);
-    if (item.status !== "APPROVED") throw new PublishingError("Download the reel first, then add its link.", 409);
-    await tx.contentItem.update({ where: { id: itemId }, data: { status: "PUBLISHED", postUrl: link } });
-    await tx.auditEvent.create({ data: { workspaceId: scope.workspaceId, brandId: scope.brandId, actorUserId: scope.userId, action: "content.publish.manual", entityType: "ContentItem", entityId: itemId, metadata: { url: link } } });
-  }, TX);
-}
+export const registerPostLink = (scope: Scope, itemId: string, url: string) => registerManualPost(scope, itemId, url, "reel");
 
 export async function listReels(scope: Omit<Scope, "userId">) {
   const items = await prisma.contentItem.findMany({
