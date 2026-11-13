@@ -169,6 +169,16 @@ describe("saveStoryVersion, photos only", () => {
     expect(m.photo.mock.calls[0][1].logoKey).toBeUndefined();
     expect(m.get).not.toHaveBeenCalled();
   });
+
+  it("refuses a frame without a source, unless the agent asks to keep empty frames (kept unrendered)", async () => {
+    const empty: StoryInput = { ...input(), frames: [frame("p1"), { label: "", headline: "Empty", body: "" }, frame("p3")] };
+    await expect(saveStoryVersion(scope, "i1", 0, empty, person)).rejects.toMatchObject({ status: 400, code: "story.source" });
+    const r = await saveStoryVersion(scope, "i1", 0, empty, agent, { photosOnly: true, keepEmpty: true });
+    expect(r).toEqual({ status: "saved", version: 1 });
+    expect(m.photo).toHaveBeenCalledTimes(2);
+    const f = db.versions[0].body.frames[1];
+    expect(f).toEqual({ label: "", headline: "Empty", body: "" });
+  });
 });
 
 describe("saveStoryVersion with a clip, and the render job", () => {
