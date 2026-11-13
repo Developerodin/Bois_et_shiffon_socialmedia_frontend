@@ -17,6 +17,8 @@ export const MEDIA_BUCKET = "media";
 
 // ponytail: one module-level client; Neon requires path-style addressing
 const s3 = new S3Client({ forcePathStyle: true });
+// Presigning only: with the default checksum behaviour the SDK adds x-amz-checksum parameters the phone can't satisfy.
+const presigner = new S3Client({ forcePathStyle: true, requestChecksumCalculation: "WHEN_REQUIRED" });
 
 const SEGMENT = /^[A-Za-z0-9_-]+$/;
 const FILE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
@@ -57,6 +59,25 @@ export function signedMediaUrl(key: string, expiresInSeconds = 3600) {
     new GetObjectCommand({ Bucket: MEDIA_BUCKET, Key: key }),
     { expiresIn: expiresInSeconds },
   );
+}
+
+/**
+ * A URL the phone can PUT one file to. The length and type are signed, so storage refuses any other size or type
+ * (a signed header the client doesn't send, or sends differently, fails the signature).
+ */
+export function presignedPut(key: string, contentType: string, bytes: number, expiresInSeconds: number) {
+  return getSignedUrl(
+    presigner,
+    new PutObjectCommand({ Bucket: MEDIA_BUCKET, Key: key, ContentType: contentType, ContentLength: bytes }),
+    { expiresIn: expiresInSeconds, signableHeaders: new Set(["content-type", "content-length"]) },
+  );
+}
+
+/** The whole object as bytes (callers cap the size first: uploads are limited by their signed length). */
+export async function getMediaBytes(key: string) {
+  const r = await s3.send(new GetObjectCommand({ Bucket: MEDIA_BUCKET, Key: key }));
+  if (!r.Body) throw new Error("Empty storage response");
+  return r.Body.transformToByteArray();
 }
 
 export async function deleteMedia(key: string) {
