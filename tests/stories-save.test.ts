@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type Row = Record<string, any>;
-const db = vi.hoisted(() => ({ item: null as Row | null, versions: [] as Row[], attempts: [] as Row[], profile: null as Row | null, limits: new Map<string, number>() }));
+const db = vi.hoisted(() => ({ item: null as Row | null, versions: [] as Row[], attempts: [] as Row[], profile: null as Row | null, uploads: [] as Row[], limits: new Map<string, number>() }));
 const m = vi.hoisted(() => ({ resolve: vi.fn(), photo: vi.fn(), clip: vi.fn(), enqueue: vi.fn(), refund: vi.fn(), start: vi.fn(), get: vi.fn(), jobFind: vi.fn(), authorize: vi.fn(), kick: vi.fn() }));
 
 vi.mock("@/server/db/prisma", () => {
@@ -29,6 +29,9 @@ vi.mock("@/server/db/prisma", () => {
     job: { findFirst: m.jobFind },
     publicationAttempt: { findMany: vi.fn(async () => db.attempts) },
     brandProfile: { findFirst: vi.fn(async () => db.profile) },
+    mediaUpload: {
+      findMany: vi.fn(async ({ where }: Row) => db.uploads.filter((u) => u.workspaceId === where.workspaceId && u.brandId === where.brandId && where.key.in.includes(u.key))),
+    },
     $executeRaw: vi.fn(async () => 0),
   };
   prisma.$transaction = async (fn: (tx: Row) => unknown) => fn(prisma);
@@ -72,6 +75,7 @@ beforeEach(() => {
   db.item = { id: "i1", workspaceId: "w1", brandId: "b1", channel: "INSTAGRAM_STORY", status: "DRAFT_REVIEW", byHand: true, productIds: ["prod1"], opportunityId: "o1", title: "Story" };
   db.versions = [];
   db.attempts = [];
+  db.uploads = [];
   db.profile = { locales: ["fr"], assets: null };
   db.limits = new Map();
   m.resolve.mockImplementation(async (_s: unknown, ref: { id: string }) => ({
@@ -215,10 +219,15 @@ describe("saveStoryVersion with a clip, and the render job", () => {
     expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", trigger: "event", input: { itemId: "i1", version: 1 } }));
   });
 
-  it("gives the editor the clip's own source, so it can trim and crop it", async () => {
+  it("gives the editor the clip's own source and its upright size, so it can trim and crop it", async () => {
+    db.uploads = [
+      { workspaceId: "w9", brandId: "b9", key: "w1/b1/uploads/c1.mp4", width: 1, height: 1 },
+      { workspaceId: "w1", brandId: "b1", key: "w1/b1/uploads/c1.mp4", width: 1080, height: 1920 },
+    ];
     await runAll();
     const view = await storyView(scope, "i1");
-    expect(view.frames[1]).toMatchObject({ kind: "video", sourceUrl: "https://signed/w1/b1/uploads/c1.mp4" });
+    expect(view.frames[1]).toMatchObject({ kind: "video", sourceUrl: "https://signed/w1/b1/uploads/c1.mp4", sourceSize: { width: 1080, height: 1920 } });
+    expect(view.frames[0].sourceSize).toBeNull();
   });
 
   it("refuses with story.notEditable when the story is approved while the job runs", async () => {
@@ -466,7 +475,7 @@ describe("content route", () => {
     expect(m.authorize.mock.calls[0][2]).toBe("content.create");
     const json = await res.json();
     expect(json).toMatchObject({ saved: "saved", rendering: false, renderError: null });
-    expect(json.frames[0]).toEqual({ n: 1, url: "https://signed/w1/b1/stories/p1.jpg.jpg", sourceUrl: "https://signed/w1/b1/uploads/p1.jpg", kind: "photo", headline: "Headline p1" });
+    expect(json.frames[0]).toEqual({ n: 1, url: "https://signed/w1/b1/stories/p1.jpg.jpg", sourceUrl: "https://signed/w1/b1/uploads/p1.jpg", sourceSize: null, kind: "photo", headline: "Headline p1" });
     expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", input: { itemId: "i1", version: 1 } }));
   });
 

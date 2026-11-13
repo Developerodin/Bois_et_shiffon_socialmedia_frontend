@@ -134,15 +134,18 @@ describe("product photos", () => {
 describe("listStorySources", () => {
   it("lists product photos and the library, with no clips for photosOnly", async () => {
     m.products.mockResolvedValue([{ id: "p1", title: "Mug", imageUrl: "https://shop.test/p.jpg" }]);
-    m.uploads.mockResolvedValue([{ id: "up1", key: "k1", kind: "photo", durationSec: null }]);
+    const photo = { id: "up1", key: "k1", kind: "photo", durationSec: null, width: 4000, height: 3000 };
+    m.uploads.mockResolvedValueOnce([photo, { id: "up2", key: "k2", kind: "video", durationSec: 30, width: 1080, height: 1920 }]).mockResolvedValue([photo]);
     m.shoots.mockResolvedValue([{ outputKeys: ["s1.jpg"] }]);
     m.renders.mockResolvedValue([{ videoKey: "r.mp4", contentVersionId: "v1" }]);
     m.versions.mockResolvedValue([{ id: "v1", body: { title: "Spring" } }]);
     const all = await listStorySources(scope, { productIds: ["p1"] });
     expect(all.map((t) => t.tab)).toEqual(["products", "library"]);
     expect(all[0].items).toEqual([{ ref: { kind: "product", id: "p1" }, title: "Mug", kind: "photo", previewUrl: "https://shop.test/p.jpg" }]);
-    expect(all[1].items.map((i) => i.ref.kind)).toEqual(["upload", "library", "photoshoot", "reel"]);
-    expect(all[1].items.at(-1)).toMatchObject({ title: "Spring", kind: "video", previewUrl: "https://signed/r.mp4" });
+    expect(all[1].items.map((i) => i.ref.kind)).toEqual(["upload", "upload", "library", "photoshoot", "reel"]);
+    expect(all[1].items[0]).not.toHaveProperty("width");
+    expect(all[1].items[1]).toMatchObject({ kind: "video", durationSec: 30, width: 1080, height: 1920 });
+    expect(all[1].items.at(-1)).toMatchObject({ title: "Spring", kind: "video", previewUrl: "https://signed/r.mp4", width: 1080, height: 1920 });
 
     const photos = await listStorySources(scope, { productIds: [], photosOnly: true });
     expect(photos[1].items.some((i) => i.kind === "video")).toBe(false);

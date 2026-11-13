@@ -52,7 +52,8 @@ export async function createUploadSlot(
 }
 
 type Rejected = { status: "REJECTED"; reason: string; code: string };
-type Verified = { status: "VERIFIED"; durationSec?: number; previewUrl: string };
+/** A clip's upright size (probe.ts turns quarter-rotated streams) comes back so the phone crops the shape the renderer cuts. */
+type Verified = { status: "VERIFIED"; durationSec?: number; width?: number; height?: number; previewUrl: string };
 type Checked = { contentType: string; ext: string; width?: number; height?: number; durationSec?: number; hasAudio?: boolean };
 class Reject extends Error {
   constructor(message: string, readonly code: string) {
@@ -93,7 +94,9 @@ export async function verifyUpload(scope: Scope, uploadId: string): Promise<Veri
       where: { id: row.id },
       data: { status: "VERIFIED", key: finalKey, reason: null, width: meta.width ?? null, height: meta.height ?? null, durationSec: meta.durationSec ?? null, hasAudio: meta.hasAudio ?? null },
     });
-    return { status: "VERIFIED", ...(meta.durationSec === undefined ? {} : { durationSec: meta.durationSec }), previewUrl: await signedMediaUrl(finalKey) };
+    // Photos leave it out: sharp's metadata is before EXIF orientation, and the phone measures the decoded photo itself.
+    const size = row.kind === "video" && meta.width && meta.height ? { width: meta.width, height: meta.height } : {};
+    return { status: "VERIFIED", ...(meta.durationSec === undefined ? {} : { durationSec: meta.durationSec }), ...size, previewUrl: await signedMediaUrl(finalKey) };
   } catch (e) {
     const reject = e instanceof Reject ? e : new Reject("That file couldn't be checked.", "story.uploadCheck");
     await deleteMedia(row.key).catch(() => {});

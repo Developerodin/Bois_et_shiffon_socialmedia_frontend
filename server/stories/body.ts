@@ -13,6 +13,8 @@ export type StoryFrame = StoryFrameInput & {
   mediaKey?: string; mediaKind?: "photo" | "video"; renderedKey?: string; aiMark?: boolean;
   rights?: { kind: "owned" } | { kind: "confirmed"; by: string; name: string }; file?: FrameFile;
 };
+/** Every finished reel is fitted to 1080×1920 (reels/join.ts). */
+export const REEL_SIZE = { width: 1080, height: 1920 } as const;
 export type StoryBody = { frames: StoryFrame[]; cta: string; link: string; hook: string; productIds: string[]; brandMark: boolean };
 export type StoryInput = { frames: StoryFrameInput[]; cta: string; link: string; brandMark: boolean };
 
