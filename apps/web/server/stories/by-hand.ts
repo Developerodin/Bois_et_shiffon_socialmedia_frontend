@@ -13,14 +13,16 @@ const MAX_LINK = 300;
  * Checks a story link a person pasted: Instagram's own story address (query ignored), and, with an Instagram account
  * connected, that account's story. Nothing keeps the link today; this stops a wrong paste early.
  */
-export async function checkStoryLink(scope: BrandScope, raw: string) {
+export async function checkStoryLink(scope: BrandScope, raw: string): Promise<string> {
   const link = raw.trim();
   if (link.length > MAX_LINK) throw new PublishingError("That link is too long to be a story link.", 400, "story.linkInvalid");
-  const match = STORY_LINK.exec(link.split(/[?#]/)[0]);
+  const bare = link.split(/[?#]/)[0];
+  const match = STORY_LINK.exec(bare);
   if (!match) throw new PublishingError("Paste the story's link (instagram.com/stories/…).", 400, "story.linkInvalid");
-  const conn = await prisma.integrationConnection.findFirst({ where: { brandId: scope.brandId, provider: "INSTAGRAM", status: "ACTIVE" }, select: { displayName: true } });
-  const handle = conn?.displayName?.replace(/^@/, "");
-  if (handle && handle.toLowerCase() !== match[2].toLowerCase()) throw new PublishingError("That story is on another account.", 400, "story.linkAccount");
+  const conns = await prisma.integrationConnection.findMany({ where: { brandId: scope.brandId, provider: "INSTAGRAM", status: "ACTIVE" }, select: { displayName: true } });
+  const handles = conns.flatMap((c) => (c.displayName ? [c.displayName.replace(/^@/, "").toLowerCase()] : []));
+  if (handles.length && !handles.includes(match[2].toLowerCase())) throw new PublishingError("That story is on another account.", 400, "story.linkAccount");
+  return bare;
 }
 
 /**
@@ -36,7 +38,7 @@ export async function setByHand(scope: Scope, itemId: string, at: Date | null) {
       throw new PublishingError("This story is scheduled to post by itself. Cancel that first.", 409, "story.cancelScheduledFirst");
     }
     if (item.status !== "APPROVED" || !(await currentApproval(item.id, latest, item.channel, tx))) throw new PublishingError("Approve the story first.", 409, "story.notApproved");
-    await tx.contentItem.update({ where: { id: item.id }, data: at ? { byHand: true, scheduledFor: at } : { byHand: false, scheduledFor: null } });
+    await tx.contentItem.update({ where: { id: item.id }, data: at ? { byHand: true, scheduledFor: at } : { byHand: false } });
   }, TX);
 }
 
