@@ -4,14 +4,21 @@
  * are run here and recorded in place of its AI review, so the story waits for approval like a real one.
  *
  *   npx tsx --env-file=.env scripts/seed-story.ts [--status draft|approved] [--brand <brandId>]   (prints the item id)
+ *   npx tsx --env-file=.env scripts/seed-story.ts --reel <file.mp4>   (a finished studio reel, for Generate → Use in story)
  *   npx tsx --env-file=.env scripts/seed-story.ts --remove <itemId>
  *
  * draft: written by admin@cmo.local, waiting for approval (the e2e account approves it). approved: also approved by
  * emu-test@cmo.local. Rendered files stay in storage (content-addressed, shared by identical frames).
  *
+ * --reel: copies the MP4 into the brand's media and records a studio reel whose render is DONE with that videoKey, as
+ * if Higgsfield had made it (no credits spent), with a passing check so the review screen doesn't start one. Its scenes
+ * point at the brand's photoshoot photos. The MP4 stays in storage after --remove.
+ *
  * Guards (seed and --remove): only the pinned dev workspace and brand, never NODE_ENV=production, and only when the
  * DATABASE_URL host is listed in SEED_ALLOW_DB_HOSTS (comma-separated host names).
  */
+import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import type { Prisma } from "@prisma/client";
 import { overallOf } from "@/server/content/rules";
 import { prisma } from "@/server/db/prisma";
@@ -19,10 +26,13 @@ import { decide } from "@/server/services/publishing";
 import { checkStory } from "@/server/stories/checks";
 import { isStoryBody, type SourceRef, type StoryInput } from "@/server/stories/body";
 import { saveStoryVersion } from "@/server/stories/service";
+import { toVersionBody, type ReelPlan } from "@/server/reels/plan";
+import { mediaKey, putMedia } from "@/server/storage/media";
 
 const WRITER = "admin@cmo.local";
 const APPROVER = "emu-test@cmo.local";
 const MARK = "Seeded story";
+const REEL_MARK = "Seeded reel";
 const WORKSPACE_ID = "cmvhqkx8h0001v630qd3rb7gb";
 const BRAND_ID = "cmvuozmxd0009v640auzx32f3";
 
@@ -39,8 +49,9 @@ const arg = (name: string) => {
 };
 
 async function remove(id: string) {
-  const { count } = await prisma.contentItem.deleteMany({ where: { id, workspaceId: WORKSPACE_ID, brandId: BRAND_ID, channel: "INSTAGRAM_STORY", title: { startsWith: MARK } } });
-  if (count === 0) throw new Error(`${id} is not a seeded story of the dev brand.`);
+  const seeded = { OR: [{ channel: "INSTAGRAM_STORY" as const, title: { startsWith: MARK } }, { channel: "INSTAGRAM_REEL" as const, studio: true, title: { startsWith: REEL_MARK } }] };
+  const { count } = await prisma.contentItem.deleteMany({ where: { id, workspaceId: WORKSPACE_ID, brandId: BRAND_ID, ...seeded } });
+  if (count === 0) throw new Error(`${id} is not a seeded story or reel of the dev brand.`);
   console.log(`removed ${id}`);
 }
 
@@ -90,10 +101,43 @@ async function seed(status: string) {
   }
 }
 
+async function seedReel(file: string) {
+  const scope = { workspaceId: WORKSPACE_ID, brandId: BRAND_ID };
+  const writer = await prisma.user.findUniqueOrThrow({ where: { email: WRITER } });
+  const shoots = await prisma.photoShoot.findMany({ where: { ...scope, status: "DONE" }, orderBy: { createdAt: "desc" }, select: { outputKeys: true } });
+  const photos = shoots.flatMap((s) => s.outputKeys).slice(0, 2);
+  if (photos.length < 2) throw new Error("Needs 2 finished photoshoot photos on the brand.");
+  const videoKey = mediaKey(scope, `${randomUUID()}.mp4`);
+  await putMedia(videoKey, await readFile(file), "video/mp4");
+  const plan: ReelPlan = {
+    title: "La chaise Julia en 15 secondes",
+    presenter: "none",
+    template: "",
+    voice: "alloy",
+    language: "fr",
+    scenes: photos.map((photoKey, i) => ({ photoKey, shot: "Plan large", direction: "", onScreenText: i ? "Chêne et lin" : "La chaise Julia", voiceText: i ? "Chêne massif et lin lavé." : "Voici la chaise Julia." })),
+    caption: "La chaise Julia, faite main.",
+    hashtags: [],
+  };
+  const item = await prisma.contentItem.create({
+    data: {
+      ...scope, title: `${REEL_MARK}: ${plan.title}`, channel: "INSTAGRAM_REEL", studio: true, status: "AWAITING_APPROVAL", brief: { seed: "story-reel" },
+      versions: { create: { version: 1, body: { ...toVersionBody(plan), videoKey }, createdBy: writer.id } },
+    },
+    include: { versions: true },
+  });
+  const version = item.versions[0];
+  await prisma.reelRender.create({ data: { ...scope, contentItemId: item.id, contentVersionId: version.id, attempt: 1, step: "DONE", videoKey, chargeId: `seed-${randomUUID()}`, webhookSecret: randomUUID() } });
+  await prisma.qualityCheck.create({ data: { contentVersionId: version.id, overall: "PASS", results: [] } });
+  console.log(JSON.stringify({ itemId: item.id, videoKey }));
+}
+
 async function main() {
   guard();
   const rm = arg("remove");
   if (rm) return remove(rm);
+  const reel = arg("reel");
+  if (reel) return seedReel(reel);
   const status = arg("status") ?? "draft";
   if (status !== "draft" && status !== "approved") throw new Error("--status draft|approved");
   return seed(status);
