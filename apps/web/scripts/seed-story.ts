@@ -8,6 +8,9 @@
  *
  * draft: written by admin@cmo.local, waiting for approval (the e2e account approves it). approved: also approved by
  * emu-test@cmo.local. Rendered files stay in storage (content-addressed, shared by identical frames).
+ *
+ * Guards (seed and --remove): only the pinned dev workspace and brand, never NODE_ENV=production, and only when the
+ * DATABASE_URL host is listed in SEED_ALLOW_DB_HOSTS (comma-separated host names).
  */
 import type { Prisma } from "@prisma/client";
 import { overallOf } from "@/server/content/rules";
@@ -20,23 +23,30 @@ import { saveStoryVersion } from "@/server/stories/service";
 const WRITER = "admin@cmo.local";
 const APPROVER = "emu-test@cmo.local";
 const MARK = "Seeded story";
+const WORKSPACE_ID = "cmvhqkx8h0001v630qd3rb7gb";
+const BRAND_ID = "cmvuozmxd0009v640auzx32f3";
+
+function guard() {
+  if (process.env.NODE_ENV === "production") throw new Error("Refusing to seed with NODE_ENV=production.");
+  const host = new URL(process.env.DATABASE_URL ?? "postgres://none").hostname;
+  const allowed = (process.env.SEED_ALLOW_DB_HOSTS ?? "").split(",").map((h) => h.trim()).filter(Boolean);
+  if (!allowed.includes(host)) throw new Error(`Refusing: database host ${host} is not in SEED_ALLOW_DB_HOSTS.`);
+  if (arg("brand") !== undefined && arg("brand") !== BRAND_ID) throw new Error("Refusing: --brand must be the pinned dev brand.");
+}
 const arg = (name: string) => {
   const i = process.argv.indexOf(`--${name}`);
   return i >= 0 ? process.argv[i + 1] : undefined;
 };
 
 async function remove(id: string) {
-  const item = await prisma.contentItem.findUnique({ where: { id }, select: { channel: true, title: true } });
-  if (!item || item.channel !== "INSTAGRAM_STORY" || !item.title.startsWith(MARK)) throw new Error(`${id} is not a seeded story.`);
-  await prisma.contentItem.delete({ where: { id } });
+  const { count } = await prisma.contentItem.deleteMany({ where: { id, workspaceId: WORKSPACE_ID, brandId: BRAND_ID, channel: "INSTAGRAM_STORY", title: { startsWith: MARK } } });
+  if (count === 0) throw new Error(`${id} is not a seeded story of the dev brand.`);
   console.log(`removed ${id}`);
 }
 
 async function seed(status: string) {
-  const ws = await prisma.workspace.findFirstOrThrow({ where: { name: { startsWith: "Bois & Chiffons" } }, select: { id: true } });
-  const brand = arg("brand")
-    ? await prisma.brand.findFirstOrThrow({ where: { id: arg("brand"), workspaceId: ws.id }, select: { id: true } })
-    : await prisma.brand.findFirstOrThrow({ where: { workspaceId: ws.id, displayName: "Bois & Chiffons", photoShoots: { some: { status: "DONE" } } }, select: { id: true } });
+  const ws = { id: WORKSPACE_ID };
+  const brand = await prisma.brand.findFirstOrThrow({ where: { id: BRAND_ID, workspaceId: WORKSPACE_ID }, select: { id: true } });
   const [writer, approver] = await Promise.all([prisma.user.findUniqueOrThrow({ where: { email: WRITER } }), prisma.user.findUniqueOrThrow({ where: { email: APPROVER } })]);
   const scope = { workspaceId: ws.id, brandId: brand.id, userId: writer.id };
 
@@ -59,22 +69,29 @@ async function seed(status: string) {
   const item = await prisma.contentItem.create({
     data: { workspaceId: ws.id, brandId: brand.id, title: `${MARK}: la chaise Julia`, channel: "INSTAGRAM_STORY", status: "PLANNED", brief: { seed: "story-web" } },
   });
-  const saved = await saveStoryVersion(scope, item.id, 0, input, { kind: "person", userId: writer.id }, { photosOnly: true });
-  if (saved.status !== "saved") throw new Error("Photo stories render in the request; got " + saved.status);
+  try {
+    const saved = await saveStoryVersion(scope, item.id, 0, input, { kind: "person", userId: writer.id }, { photosOnly: true });
+    if (saved.status !== "saved") throw new Error("Photo stories render in the request; got " + saved.status);
 
-  // Quality without its AI review: the story rules, recorded as the check, then the item waits for approval.
-  const version = await prisma.contentVersion.findFirstOrThrow({ where: { contentItemId: item.id, version: saved.version } });
-  if (!isStoryBody(version.body)) throw new Error("Saved version is not a story");
-  const results = checkStory(version.body);
-  const overall = overallOf(results);
-  await prisma.qualityCheck.create({ data: { contentVersionId: version.id, overall, results: results as unknown as Prisma.InputJsonValue } });
-  await prisma.contentItem.update({ where: { id: item.id }, data: { status: overall === "BLOCKER" ? "DRAFT_REVIEW" : "AWAITING_APPROVAL" } });
-  if (status === "approved") await decide({ ...scope, userId: approver.id, itemId: item.id, version: saved.version, verdict: "APPROVED" });
+    // Quality without its AI review: the story rules, recorded as the check, then the item waits for approval.
+    const version = await prisma.contentVersion.findFirstOrThrow({ where: { contentItemId: item.id, version: saved.version } });
+    if (!isStoryBody(version.body)) throw new Error("Saved version is not a story");
+    const results = checkStory(version.body);
+    const overall = overallOf(results);
+    await prisma.qualityCheck.create({ data: { contentVersionId: version.id, overall, results: results as unknown as Prisma.InputJsonValue } });
+    await prisma.contentItem.update({ where: { id: item.id }, data: { status: overall === "BLOCKER" ? "DRAFT_REVIEW" : "AWAITING_APPROVAL" } });
+    if (status === "approved") await decide({ ...scope, userId: approver.id, itemId: item.id, version: saved.version, verdict: "APPROVED" });
 
-  console.log(JSON.stringify({ itemId: item.id, workspaceId: ws.id, brandId: brand.id, status: overall === "BLOCKER" ? "DRAFT_REVIEW" : status === "approved" ? "APPROVED" : "AWAITING_APPROVAL", check: overall }));
+    console.log(JSON.stringify({ itemId: item.id, workspaceId: ws.id, brandId: brand.id, status: overall === "BLOCKER" ? "DRAFT_REVIEW" : status === "approved" ? "APPROVED" : "AWAITING_APPROVAL", check: overall }));
+  } catch (e) {
+    // No orphan: nothing was printed, so nobody could remove it.
+    await prisma.contentItem.deleteMany({ where: { id: item.id } });
+    throw e;
+  }
 }
 
 async function main() {
+  guard();
   const rm = arg("remove");
   if (rm) return remove(rm);
   const status = arg("status") ?? "draft";
