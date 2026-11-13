@@ -4,6 +4,48 @@ Branch `ai-reels` (not pushed, not merged). Today moved the app's Figma screens 
 one module at a time. Each module was given a review for correctness, security, performance and maintainability,
 tested on the emulator, fixed, and committed.
 
+## Instagram stories (end of day 2026-11-13)
+
+Branch `desktop-shell`, committed, **not pushed** (`main` still at `08e5fb1`). Spec
+`docs/superpowers/specs/2026-11-13-instagram-stories-design.md`, plan `docs/superpowers/plans/2026-11-13-instagram-stories.md`
+(commits `f7e6ef6` to the Task 19 fixes). Each task had its own review and fix round; the whole-branch four-lens review
+has **not** been run yet.
+
+**What it does**
+- A story is 3–5 frames, each a photo or a clip (15 s window, sound on or off), with headline/body text, a CTA on the
+  last frame and an optional brand mark, rendered on the server (`server/stories/render.ts`, ffmpeg + sharp, text burned in).
+- Frame sources: phone upload (one-tap rights confirmation, single-use upload slots, 20 per brand per hour), catalogue
+  products, the brand's earlier work (library, posts, photoshoots, finished reels), and Generate (Photoshoot or the Reels
+  studio, with **Use in story** bringing the result back to its frame).
+- The agents plan and write stories (Planner slots Wed + Sat); an app-requested story costs 5 credits, refunded if writing fails.
+- Checks: story rules plus the shared text, product and offer checks.
+- Two ways out: Schedule (published frame by frame, never a frame twice, partly-posted state with Post the rest / Mark
+  done) or Post by hand (a checked zip package plus a due list and in-app reminder; the pasted story link is kept).
+- Web: calendar, lists, content workspace with approval, schedule, download, post by hand. Phone: Stories and Today
+  screens, approve / schedule / post by hand, and the editor (frames, text, CTA, picker, crop with Fit/Fill, trim, sound).
+
+**How to try it**
+- Seed a draft: `npx tsx --env-file=.env scripts/seed-story.ts` in `apps/web` (pinned to the dev workspace and brand;
+  only database hosts listed in `SEED_ALLOW_DB_HOSTS`); `--reel` seeds a finished reel to pick; `--remove` cleans up.
+- Phone deep links: `espanda://posts/edit-story?id=<id>`, `espanda://posts/story/<id>`.
+
+**Before it can go live**
+- Scheduling needs an Instagram **Business** account connected; it was not run end to end against the Graph API.
+- Generate needs Higgsfield credits for new Photoshoot or Reels results (picking existing ones works).
+- The in-app by-hand reminder relies on push notifications being set up for the release build.
+- New phone strings are English only in this branch; the other 23 languages need translating.
+- A release build is needed to confirm an upload retries after the app returns from the background, and pinch-to-zoom
+  needs a real device.
+
+**Known gaps (documented, not built)**
+- Generate for a product story opens Photoshoot's product setup at 9:16 but doesn't preselect the product photo
+  (catalogue products aren't linked to the photo library); owner to confirm that reading of "product preset".
+- Clips picked from the library or posts (not uploaded, not reels) take their size from the player, so a rotated one may
+  preview a little off; the render is right.
+- The server doesn't strip a crop sent on a reel frame (the phone never sends one).
+- Deferred review minors are listed in the build ledger summary; the main ones: library list has no cap, list GET
+  exposes media keys, calendar thumbnails re-signed on each poll, no per-version frame history.
+
 ## Reels templates, presenters and voices (end of day 2026-11-12)
 
 Branch `desktop-shell`, everything committed, **not pushed** (`main` still at `08e5fb1`). Built from
