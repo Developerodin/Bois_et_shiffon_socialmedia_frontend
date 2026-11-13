@@ -127,7 +127,7 @@ export const lock = (tx: Prisma.TransactionClient, itemId: string) => tx.$execut
 
 export type DraftInput = { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; photoKeys?: string[] };
 
-const APP_GOALS = { newArrival: "awareness", productFeature: "saves", specialOffer: "sales" } as const;
+export const APP_GOALS = { newArrival: "awareness", productFeature: "saves", specialOffer: "sales" } as const;
 /**
  * Writing and checking posts from the app is free (event runs), so cap it per workspace per day.
  * ponytail: one flat cap shared by create, edit and re-generate; per-plan allowances come with billing.
