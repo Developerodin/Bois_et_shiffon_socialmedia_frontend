@@ -5,9 +5,10 @@ import { icons } from "@/ui/icons";
 
 /**
  * Espanda button (Figma "Library · Button"). Variants seen across the app:
- * primary (indigo), disabled (grey), outline (white + control outline), ghost (text only).
+ * primary (indigo), disabled (grey), outline (white + control outline), ghost (text only), danger (red outline:
+ * a destructive choice, e.g. Discard changes).
  */
-type Variant = "primary" | "outline" | "ghost";
+type Variant = "primary" | "outline" | "ghost" | "danger";
 
 type Props = {
   label: string;
@@ -28,7 +29,7 @@ type Props = {
 export function Button({ label, onPress, variant = "primary", disabled, loading, arrow, icon, height, style, accessibilityLabel }: Props) {
   const off = disabled || loading;
   const v = off && variant === "primary" ? styles.disabled : styles[variant];
-  const ink = off && variant === "primary" ? color.disabledInk : variant === "primary" ? color.onPrimary : color.ink;
+  const ink = off && variant === "primary" ? color.disabledInk : variant === "primary" ? color.onPrimary : variant === "danger" ? color.error : color.ink;
   return (
     <Pressable
       accessibilityRole="button"
@@ -82,6 +83,7 @@ const styles = StyleSheet.create({
   disabled: { backgroundColor: color.disabledBg },
   outline: { backgroundColor: color.surface, borderColor: color.controlOutline },
   ghost: { backgroundColor: "transparent" },
+  danger: { backgroundColor: color.surface, borderColor: color.error },
   icon: { width: 20, height: 20 },
   iconButton: { width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radius.control },
 });
