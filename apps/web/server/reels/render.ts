@@ -376,7 +376,7 @@ async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { w
   const mp4 = path.join(dir, "reel.mp4");
   const reencode = needsReencode(joined.map((c, i) => ({ model: out.models[i], clip: out.clipSeconds[i], scene: c.seconds, transition: c.transition })));
   const mark = needsAiDisclosure(plan) ? path.join(dir, "ai-mark.png") : undefined;
-  if (mark) await writeFile(mark, await aiMark(aiDisclosureLine(plan.language)));
+  if (mark) await writeFile(mark, await aiMarkPng(aiDisclosureLine(plan.language)));
   await joinReel(joined, wav, mp4, { reencode, mark });
   const videoKey = mediaKey(scope, `${randomUUID()}.mp4`);
   await putMedia(videoKey, await readFile(mp4), "video/mp4");
@@ -395,7 +395,7 @@ async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { w
 }
 
 /** The small "Made with AI" mark burned into presenter and cloned-voice reels (a rounded label, white on dark). */
-const aiMark = (line: string) =>
+export const aiMarkPng = (line: string) =>
   sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="72"><rect width="300" height="72" rx="20" fill="rgba(0,0,0,0.55)"/><text x="150" y="47" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="600" fill="#fff">${line.replace(/\.$/, "").replace(/'/g, "&#39;")}</text></svg>`)).png().toBuffer();
 
 /**
