@@ -175,3 +175,9 @@ export async function instagramPublishingLimit(account: { id: string; token: str
   if (typeof d?.config?.quota_total !== "number" || typeof d.quota_usage !== "number") throw new ProviderError("Instagram didn't say how much of its daily limit is left");
   return { config: { quota_total: d.config.quota_total, quota_duration: d.config.quota_duration ?? 86_400 }, quota_usage: d.quota_usage };
 }
+
+/** A media's permalink (a story's stops working after 24 h). */
+export async function instagramPermalink(mediaId: string, account: { token: string }) {
+  const res = await call<{ permalink?: string }>(`${IG}/${mediaId}?fields=permalink&access_token=${encodeURIComponent(account.token)}`);
+  return res.permalink ?? null;
+}
