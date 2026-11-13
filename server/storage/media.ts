@@ -85,3 +85,10 @@ export async function mediaExists(key: string) {
     throw e;
   }
 }
+
+/** Detect the type from the file's first bytes, not its name or the browser's claim. */
+export function imageType(b: Uint8Array) {
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return { ext: "jpg", type: "image/jpeg" };
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return { ext: "png", type: "image/png" };
+  return null;
+}

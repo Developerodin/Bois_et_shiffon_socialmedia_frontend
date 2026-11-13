@@ -2,20 +2,13 @@ import { randomUUID } from "node:crypto";
 import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
 import { prisma } from "@/server/db/prisma";
-import { mediaKey, putMedia, signedMediaUrl } from "@/server/storage/media";
+import { imageType, mediaKey, putMedia, signedMediaUrl } from "@/server/storage/media";
 
 // ponytail: a cap so the JSON list stays small; a table if brands need bigger libraries.
 const LIBRARY_MAX = 60;
 
 // Vercel caps request bodies at 4.5 MB; videos stay as links.
 const MAX_BYTES = 4 * 1024 * 1024;
-
-/** Detect the type from the file's first bytes, not its name or the browser's claim. */
-function imageType(b: Uint8Array) {
-  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return { ext: "jpg", type: "image/jpeg" };
-  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return { ext: "png", type: "image/png" };
-  return null;
-}
 
 const invalid = (title: string, status = 400) => problemResponse({ type: "https://api.brandpilot/errors/media", title, status, detail: title });
 
