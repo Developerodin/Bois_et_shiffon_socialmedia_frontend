@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "{{tool}}-verktyg",
-    "captionTitle": "Storytext / Länkklistermärke",
-    "languageCode": "FR",
     "saveDraft": "Spara utkast",
     "scheduleStory": "Schemalägg story"
   },

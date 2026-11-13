@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "{{tool}} työkalu",
-    "captionTitle": "Tarinan kuvateksti / Linkkitarra",
-    "languageCode": "FR",
     "saveDraft": "Tallenna luonnos",
     "scheduleStory": "Ajasta tarina"
   },

@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "Herramienta {{tool}}",
-    "captionTitle": "Subtítulo de la historia / Sticker de enlace",
-    "languageCode": "FR",
     "saveDraft": "Guardar borrador",
     "scheduleStory": "Programar historia"
   },

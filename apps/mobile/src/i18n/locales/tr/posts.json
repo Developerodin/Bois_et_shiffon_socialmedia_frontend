@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "{{tool}} aracı",
-    "captionTitle": "Hikaye başlığı / Bağlantı etiketi",
-    "languageCode": "FR",
     "saveDraft": "Taslağı kaydet",
     "scheduleStory": "Hikayeyi planla"
   },

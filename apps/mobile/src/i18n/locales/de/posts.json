@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "{{tool}}-Werkzeug",
-    "captionTitle": "Story-Beschriftung / Link-Sticker",
-    "languageCode": "FR",
     "saveDraft": "Entwurf speichern",
     "scheduleStory": "Story planen"
   },

@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "{{tool}}-verktøy",
-    "captionTitle": "Story-tekst / Link-klistremerke",
-    "languageCode": "FR",
     "saveDraft": "Lagre utkast",
     "scheduleStory": "Planlegg story"
   },

@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "Nástroj {{tool}}",
-    "captionTitle": "Titulek příběhu / Odkazový štítek",
-    "languageCode": "FR",
     "saveDraft": "Uložit návrh",
     "scheduleStory": "Naplánovat příběh"
   },

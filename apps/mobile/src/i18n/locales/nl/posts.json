@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "{{tool}} tool",
-    "captionTitle": "Verhaalbijschrift / Linksticker",
-    "languageCode": "FR",
     "saveDraft": "Concept opslaan",
     "scheduleStory": "Verhaal plannen"
   },

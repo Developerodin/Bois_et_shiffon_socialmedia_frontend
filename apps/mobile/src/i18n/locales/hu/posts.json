@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "{{tool}} eszköz",
-    "captionTitle": "Történet felirat / Link matrica",
-    "languageCode": "FR",
     "saveDraft": "Vázlat mentése",
     "scheduleStory": "Történet ütemezése"
   },

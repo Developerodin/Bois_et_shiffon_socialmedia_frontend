@@ -257,8 +257,6 @@
       "cta": "Заклик до дії"
     },
     "toolLabel": "Інструмент {{tool}}",
-    "captionTitle": "Підпис історії / Наліпка з посиланням",
-    "languageCode": "FR",
     "saveDraft": "Зберегти чернетку",
     "scheduleStory": "Запланувати історію"
   },

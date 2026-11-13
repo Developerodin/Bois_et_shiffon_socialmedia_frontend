@@ -257,8 +257,6 @@
       "cta": "CTA"
     },
     "toolLabel": "Outil {{tool}}",
-    "captionTitle": "Légende de la story / Autocollant de lien",
-    "languageCode": "FR",
     "saveDraft": "Enregistrer le brouillon",
     "scheduleStory": "Planifier la story"
   },
