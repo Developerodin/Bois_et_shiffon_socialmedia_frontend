@@ -20,6 +20,12 @@ describe("parseProbeJson", () => {
     expect(() => parseProbeJson("nope")).toThrow();
     expect(() => parseProbeJson("{}")).toThrow();
   });
+  it("reports the upright size of a clip with rotation metadata", () => {
+    const json = (extra: object) => JSON.stringify({ format: { duration: "3" }, streams: [{ codec_type: "video", width: 1920, height: 1080, avg_frame_rate: "30/1", ...extra }] });
+    expect(parseProbeJson(json({ side_data_list: [{ rotation: -90 }] }))).toMatchObject({ width: 1080, height: 1920 });
+    expect(parseProbeJson(json({ tags: { rotate: "270" } }))).toMatchObject({ width: 1080, height: 1920 });
+    expect(parseProbeJson(json({ side_data_list: [{ rotation: 180 }] }))).toMatchObject({ width: 1920, height: 1080 });
+  });
 });
 
 describe("videoProblem", () => {
@@ -38,4 +44,9 @@ describe("videoProblem", () => {
     expect(p?.message).toBeTruthy();
   });
   it("accepts the limits themselves", () => expect(videoProblem({ ...ok, durationSec: 180, width: 4096, fps: 60, audioStreams: 0 })).toBeNull());
+  it("refuses a sliver or a tiny clip by its shape", () => {
+    expect(videoProblem({ ...ok, width: 4096, height: 64 })?.code).toBe("story.videoShape");
+    expect(videoProblem({ ...ok, width: 239, height: 426 })?.code).toBe("story.videoShape");
+    expect(videoProblem({ ...ok, width: 240, height: 426 })).toBeNull();
+  });
 });

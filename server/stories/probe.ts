@@ -3,7 +3,16 @@ import ffprobe from "ffprobe-static";
 
 export type VideoMeta = { durationSec: number; width: number; height: number; fps: number; videoStreams: number; audioStreams: number };
 
-type Stream = { codec_type?: string; width?: number; height?: number; avg_frame_rate?: string; r_frame_rate?: string; duration?: string };
+type Stream = {
+  codec_type?: string; width?: number; height?: number; avg_frame_rate?: string; r_frame_rate?: string; duration?: string;
+  side_data_list?: { rotation?: number }[]; tags?: { rotate?: string };
+};
+
+/** A quarter turn (phone clips shot upright carry rotation metadata) swaps the shown width and height. */
+const quarterTurn = (s?: Stream) => {
+  const r = Number(s?.side_data_list?.find((d) => typeof d.rotation === "number")?.rotation ?? s?.tags?.rotate ?? 0);
+  return Math.abs(r) % 180 === 90;
+};
 
 const rate = (r?: string) => {
   const [n, d] = (r ?? "").split("/").map(Number);
@@ -20,10 +29,12 @@ export function parseProbeJson(json: string): VideoMeta {
   const video = j.streams.filter((s) => s.codec_type === "video");
   const first = video[0];
   const durationSec = Number(j.format.duration ?? first?.duration);
+  const [w, h] = [first?.width ?? 0, first?.height ?? 0];
   return {
     durationSec: Number.isFinite(durationSec) ? durationSec : 0,
-    width: first?.width ?? 0,
-    height: first?.height ?? 0,
+    // As shown (ffmpeg auto-rotates on decode), so crops and checks see the upright size.
+    width: quarterTurn(first) ? h : w,
+    height: quarterTurn(first) ? w : h,
     fps: first ? rate(first.avg_frame_rate) || rate(first.r_frame_rate) : 0,
     videoStreams: video.length,
     audioStreams: j.streams.filter((s) => s.codec_type === "audio").length,
@@ -55,6 +66,7 @@ export function videoProblem(m: VideoMeta): { code: string; message: string } | 
   if (!(m.durationSec > 0)) return { code: "story.videoUnreadable", message: "That clip couldn't be read." };
   if (m.durationSec > 180) return { code: "story.videoLong", message: "Clips can be up to 3 minutes." };
   if (Math.max(m.width, m.height) > 4096) return { code: "story.videoLarge", message: "The clip is bigger than 4096 pixels on a side." };
+  if (Math.min(m.width, m.height) < 240) return { code: "story.videoShape", message: "The clip is too small or too narrow (at least 240 pixels on each side)." };
   if (m.fps > 60) return { code: "story.videoFps", message: "The clip runs faster than 60 frames per second." };
   return null;
 }
