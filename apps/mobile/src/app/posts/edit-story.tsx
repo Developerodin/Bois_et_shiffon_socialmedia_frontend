@@ -16,11 +16,13 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { BusinessChip, glass, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { reloadPosts, usePosts } from "@/ui/posts/use-posts";
 import { useWorkingPoll } from "@/ui/posts/use-working-poll";
+import { CropArea, CropControls, CropImage, type Crop as FrameCrop, type Size } from "@/ui/stories/crop";
 import { storyCodeText, storyError } from "@/ui/stories/errors";
 import { FrameMenu, frameLabel, FrameStrip } from "@/ui/stories/frame-strip";
 import { STORY_LIMITS, textFits } from "@/ui/stories/limits";
 import { type Picked, StoryPicker } from "@/ui/stories/picker";
 import { StoryPreview } from "@/ui/stories/preview";
+import { ClipPicture, Trim } from "@/ui/stories/trim";
 import { usePermissions } from "@/ui/use-permissions";
 
 /**
@@ -52,8 +54,9 @@ const same = (a: Draft, b: Draft) => JSON.stringify(toInput(a)) === JSON.stringi
 
 /**
  * P08 · Posts / Edit story: a true 9:16 preview of the selected frame, the frame strip, and the Text, Image, Brand
- * and CTA tools. Image and the strip's + open the picker (a phone upload, a product photo, the library). Saving makes
- * a new version and renders it; Save and check opens the story, and an approved story left unchanged offers Schedule
+ * and CTA tools. Image and the strip's + open the picker (a phone upload, a product photo, the library); Image also
+ * crops the frame (drag and pinch on the preview, or Fit / Fill), and for a clip picks its 15 s and its sound. Saving
+ * makes a new version and renders it; Save and check opens the story, and an approved story left unchanged offers Schedule
  * story instead. Undo steps back one change; leaving with changes asks first. While frames are being prepared the
  * editor is read-only.
  */
@@ -79,6 +82,13 @@ export default function EditStory() {
   const [leaving, setLeaving] = useState<(() => void) | null>(null);
   // The picker is open for frame i, or for a new frame ("new").
   const [picking, setPicking] = useState<number | "new" | null>(null);
+  // The selected frame's source as loaded on the preview: its picture size (crop) and a clip's length (trim).
+  const [media, setMedia] = useState<{ url: string; size?: Size; duration?: number } | null>(null);
+  const noteMedia = useCallback(
+    (url: string, m: { size?: Size; duration?: number }) =>
+      setMedia((p) => ({ ...(p?.url === url ? p : {}), url, ...(m.size ? { size: m.size } : {}), ...(m.duration !== undefined ? { duration: m.duration } : {}) })),
+    [],
+  );
 
   const version = story?.latest?.version ?? null;
   const body = story?.latest?.body as unknown as StoryBody | undefined;
@@ -120,10 +130,13 @@ export default function EditStory() {
   const renderedOf = (f: EditFrame) => (f.from >= 0 && !f.picked ? (release?.frames[f.from]?.url ?? null) : null);
   const urlOf = (f: EditFrame) => f.picked?.url ?? renderedOf(f);
   const kindOf = (f: EditFrame) => f.picked?.kind ?? (f.from >= 0 ? (body?.frames[f.from]?.mediaKind ?? null) : null);
-  // The rendered picture still shows this frame as edited (its text, its CTA if it's last, the brand mark).
+  // The rendered picture still shows this frame as edited (its text, crop and clip window, its CTA if it's last, the
+  // brand mark).
   const fresh = (f: EditFrame, i: number) => {
     const s = saved.frames[f.from];
     if (!s || draft.brandMark !== saved.brandMark || s.label !== f.label || s.headline !== f.headline || s.body !== f.body) return false;
+    if (s.crop?.x !== f.crop?.x || s.crop?.y !== f.crop?.y || s.crop?.scale !== f.crop?.scale) return false;
+    if (s.clip?.start !== f.clip?.start || s.clip?.sound !== f.clip?.sound) return false;
     return (i === last) === (f.from === savedLast) && (i !== last || draft.cta === saved.cta);
   };
   const misfit = frames.map((f, i) => textFits(f, i === last, draft.cta)).findIndex((r) => !r.fits);
@@ -205,6 +218,36 @@ export default function EditStory() {
     { key: "cta", Icon: MousePointer2 },
   ];
   const strip = frames.map((f) => ({ url: urlOf(f), kind: kindOf(f), headline: f.headline }));
+  // Image mode: the source shows (a clip plays its window) and drag / pinch crop it. A reel keeps its framing.
+  const imageMode = tool === "image" && !readOnly && !!frame;
+  const src = frame ? (frame.picked?.url ?? (frame.from >= 0 ? (release?.frames[frame.from]?.sourceUrl ?? null) : null)) : null;
+  const isClip = !!frame && kindOf(frame) === "video";
+  const clip = frame?.clip ?? { start: 0, sound: true };
+  const cropLocked = frame?.source?.kind === "reel";
+  const srcSize = media && media.url === src ? media.size : undefined;
+  const duration = media && media.url === src ? (media.duration ?? null) : null;
+  const setCrop = (c: FrameCrop | undefined) => setFrame({ crop: c }, "crop");
+  const sourceView = (crop?: FrameCrop) =>
+    !src ? null : imageMode && isClip ? (
+      <ClipPicture url={src} clip={clip} crop={cropLocked ? undefined : crop} width={pw} size={srcSize} onLoad={(m) => noteMedia(src, m)} />
+    ) : (
+      <CropImage uri={src} crop={cropLocked ? undefined : crop} width={pw} size={srcSize} onSize={(size) => noteMedia(src, { size })} />
+    );
+  const preview = (f: EditFrame, crop?: FrameCrop) => (
+    <StoryPreview
+      frame={f}
+      isLast={at === last}
+      cta={draft.cta}
+      brandMark={draft.brandMark}
+      editing={tool === "text"}
+      url={renderedOf(f)}
+      sourceUrl={src}
+      sourceView={sourceView(crop)}
+      fresh={!imageMode && fresh(f, at)}
+      width={pw}
+      accessibilityLabel={frameLabel(t, strip[at], at, frames.length)}
+    />
+  );
   // Someone else saved since these edits started: saving now is refused (story.stale).
   const stale = !!active && version !== active.base && !savedFrom;
   const failure = renderFailed ? storyCodeText(release?.renderErrorCode, release?.renderError ?? "") : (saveError ?? (stale ? t("stories.errors.stale") : null));
@@ -229,19 +272,12 @@ export default function EditStory() {
 
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         <View style={styles.stage} onLayout={(e) => setArea({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}>
-          {pw > 0 && frame ? (
-            <StoryPreview
-              frame={frame}
-              isLast={at === last}
-              cta={draft.cta}
-              brandMark={draft.brandMark}
-              editing={tool === "text"}
-              url={renderedOf(frame)}
-              sourceUrl={frame.picked?.url ?? (frame.from >= 0 ? (release?.frames[frame.from]?.sourceUrl ?? null) : null)}
-              fresh={fresh(frame, at)}
-              width={pw}
-              accessibilityLabel={frameLabel(t, strip[at], at, frames.length)}
-            />
+          {pw > 0 && frame && imageMode && src && !cropLocked ? (
+            <CropArea src={srcSize} crop={frame.crop} width={pw} onChange={setCrop}>
+              {(crop) => preview(frame, crop)}
+            </CropArea>
+          ) : pw > 0 && frame ? (
+            preview(frame, frame.crop)
           ) : pw > 0 ? (
             <View style={[styles.empty, { width: pw, height: (pw * 16) / 9 }]}>
               <Text style={[type.meta, { color: color.onPrimary, textAlign: "center" }]}>{t("stories.detail.noFrames")}</Text>
@@ -290,7 +326,19 @@ export default function EditStory() {
                 <Field label={t("stories.editor.body")} value={frame.body} maxLength={STORY_LIMITS.body} height={44} onChangeText={(v) => setFrame({ body: v }, "body")} />
               </>
             ) : tool === "image" && frame ? (
-              <Button label={frame.source ? t("stories.picker.replace") : t("stories.picker.add")} onPress={() => setPicking(at)} />
+              <>
+                <Button label={frame.source ? t("stories.picker.replace") : t("stories.picker.add")} onPress={() => setPicking(at)} />
+                {src ? <CropControls size={srcSize} crop={frame.crop} locked={cropLocked} onChange={setCrop} /> : null}
+                {isClip && src ? (
+                  <>
+                    <Trim duration={duration} start={clip.start} onChange={(start) => setFrame({ clip: { ...clip, start } }, "trim")} />
+                    <View style={styles.between}>
+                      <Text style={[type.body, { flex: 1 }]}>{t("stories.trim.sound")}</Text>
+                      <Toggle label={t("stories.trim.sound")} value={clip.sound} onValueChange={(v) => setFrame({ clip: { ...clip, sound: v } }, "sound")} />
+                    </View>
+                  </>
+                ) : null}
+              </>
             ) : tool === "brand" ? (
               <View style={styles.between}>
                 <Text style={[type.body, { flex: 1 }]}>{t("stories.editor.brandMark")}</Text>

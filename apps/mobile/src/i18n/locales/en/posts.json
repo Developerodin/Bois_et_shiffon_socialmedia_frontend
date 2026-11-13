@@ -405,6 +405,25 @@
       "changeTime": "Change time to {{time}}",
       "stopByHand": "Stop posting by hand"
     },
+    "crop": {
+      "hint": "Drag or pinch the picture to frame it.",
+      "fit": "Fit",
+      "fitLabel": "Fit: show the whole picture",
+      "fill": "Fill",
+      "fillLabel": "Fill: cover the whole frame",
+      "locked": "Frames from a reel keep their framing."
+    },
+    "trim": {
+      "loading": "Loading the clip…",
+      "whole": "The whole clip plays ({{length}}).",
+      "range": "Plays {{from}}–{{to}} of {{length}}",
+      "window": "Part of the clip that plays",
+      "earlier": "−1 s",
+      "earlierLabel": "Start one second earlier",
+      "later": "+1 s",
+      "laterLabel": "Start one second later",
+      "sound": "Sound"
+    },
     "picker": {
       "title": "Photo or clip",
       "tabs": "Where from",

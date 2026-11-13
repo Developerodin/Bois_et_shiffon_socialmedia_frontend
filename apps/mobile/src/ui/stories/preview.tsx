@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import type { ReactNode } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, View } from "react-native";
 import { font } from "@/theme/tokens";
@@ -14,8 +15,10 @@ type Props = {
   editing: boolean;
   /** The frame's rendered picture, if it has one. */
   url: string | null;
-  /** The frame's photo before any text was drawn on it (photos only). */
+  /** The frame's photo or clip before any text was drawn on it. */
   sourceUrl?: string | null;
+  /** That source drawn by the caller (placed by its crop, or the clip playing); without it the source covers the frame. */
+  sourceView?: ReactNode;
   /** The rendered picture already shows this text, CTA and brand mark; otherwise the text is drawn over it. */
   fresh: boolean;
   /** Preview width; the height is 16/9 of it. */
@@ -25,11 +28,11 @@ type Props = {
 
 /**
  * One story frame as a true 9:16 preview. While the rendered frame matches the edits it is shown as is; after a change
- * the text is drawn live over the source photo with TEXT_BOX's layout scaled down, so the person sees roughly where it
- * lands. Without a source photo (clips) it goes over the rendered frame, dimmed, since the old text is burned in.
+ * the text is drawn live over the source photo or clip with TEXT_BOX's layout scaled down, so the person sees roughly
+ * where it lands. Without a source it goes over the rendered frame, dimmed, since the old text is burned in.
  * The server redraws the frame on save.
  */
-export function StoryPreview({ frame, isLast, cta, brandMark, editing, url, sourceUrl, fresh, width, accessibilityLabel }: Props) {
+export function StoryPreview({ frame, isLast, cta, brandMark, editing, url, sourceUrl, sourceView, fresh, width, accessibilityLabel }: Props) {
   const brand = useCurrentBrand();
   const s = width / TEXT_BOX.frame.width;
   const t = TEXT_BOX;
@@ -42,7 +45,7 @@ export function StoryPreview({ frame, isLast, cta, brandMark, editing, url, sour
 
   return (
     <View style={[styles.frame, { width, height: (width * 16) / 9 }]} accessible accessibilityLabel={accessibilityLabel}>
-      {picture ? <Image source={{ uri: picture }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+      {sourceView && live && sourceUrl ? sourceView : picture ? <Image source={{ uri: picture }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
       {live ? (
         <>
           {url && picture === url ? <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.7)" }]} /> : null}

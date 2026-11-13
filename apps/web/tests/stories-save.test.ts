@@ -57,7 +57,7 @@ vi.mock("@/server/services/publishing", async (orig) => ({
 import { prisma } from "@/server/db/prisma";
 import { POST } from "@/app/api/v1/workspaces/[workspaceId]/brands/[brandId]/content/[contentId]/route";
 import { saveDraft } from "@/server/services/publishing";
-import { createStoryVersion, deleteStory, duplicateStory, onStoryRenderFailure, runStoryRender, saveStoryVersion, STORY_RENDER_JOB, storyRenderState, storyTab } from "@/server/stories/service";
+import { createStoryVersion, deleteStory, duplicateStory, onStoryRenderFailure, runStoryRender, saveStoryVersion, STORY_RENDER_JOB, storyRenderState, storyTab, storyView } from "@/server/stories/service";
 import type { StoryInput } from "@/server/stories/body";
 
 const scope = { workspaceId: "w1", brandId: "b1", userId: "u1" };
@@ -213,6 +213,12 @@ describe("saveStoryVersion with a clip, and the render job", () => {
     expect(db.versions).toHaveLength(1);
     expect(db.versions[0].body.frames[1]).toMatchObject({ renderedKey: "w1/b1/stories/c1.mp4.mp4", file: { durationSec: 15 } });
     expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", trigger: "event", input: { itemId: "i1", version: 1 } }));
+  });
+
+  it("gives the editor the clip's own source, so it can trim and crop it", async () => {
+    await runAll();
+    const view = await storyView(scope, "i1");
+    expect(view.frames[1]).toMatchObject({ kind: "video", sourceUrl: "https://signed/w1/b1/uploads/c1.mp4" });
   });
 
   it("refuses with story.notEditable when the story is approved while the job runs", async () => {
