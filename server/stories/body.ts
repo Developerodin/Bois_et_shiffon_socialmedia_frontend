@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { PublishingError } from "@/server/services/publishing";
 
-export const STORY_LIMITS = { frames: [3, 5], maxFrames: 5, label: 30, headline: 60, body: 120, cta: 40, clipSeconds: 15, link: 2000 } as const;
+export const STORY_LIMITS = { frames: [3, 5], maxFrames: 5, label: 30, headline: 60, body: 120, cta: 40, composition: 100, clipSeconds: 15, link: 2000 } as const;
 
 export type SourceRef = { kind: "upload" | "library" | "product" | "post" | "photoshoot" | "reel"; id: string };
 export type StoryFrameInput = {
@@ -22,7 +22,7 @@ const frameSchema = z.object({
   label: z.string().max(STORY_LIMITS.label),
   headline: z.string().max(STORY_LIMITS.headline),
   body: z.string().max(STORY_LIMITS.body),
-  composition: z.string().max(100).optional(),
+  composition: z.string().max(STORY_LIMITS.composition).optional(),
   crop: z.object({ x: z.number().finite(), y: z.number().finite(), scale: z.number().finite().positive() }).strip().optional(),
   clip: z.object({ start: z.number().finite().min(0), sound: z.boolean() }).strip().optional(),
 }).strip();

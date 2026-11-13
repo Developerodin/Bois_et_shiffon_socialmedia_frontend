@@ -179,6 +179,7 @@ export async function executeAgentRun(rawPayload: unknown) {
   const ctx: AgentContext = {
     runId: run.id,
     brand: await loadBrandContext(run.workspaceId, run.brandId),
+    chargeId: (run.input as { chargeId?: string } | null)?.chargeId,
     log,
     ai: {
       generateObject: ({ workflowId, promptVersion, ...input }) =>

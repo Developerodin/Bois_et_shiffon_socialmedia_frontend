@@ -21,6 +21,8 @@ export const Brief = z.object({
   visual: z.string(),
   questions: z.array(z.string()),
 });
+/** A story's brief also plans its frames (in order). A separate schema: strict structured output has no optional fields. */
+const StoryBrief = Brief.extend({ frames: z.array(z.object({ purpose: z.string(), composition: z.string() })) });
 const PER_RUN = 8;
 
 /** Brief writer: each PLANNED post gets a production brief → BRIEF_READY. */
@@ -62,10 +64,11 @@ export const briefAgent: AgentDefinition = {
       const pushed = campaign && !isWithdrawn(campaign) ? ` ${campaign.name} ${names.join(" ")} ${campaign.categories.join(" ")}` : "";
       const candidates = rankCandidates(catalogue, `${item.title} ${String(prior.angle ?? "")} ${idea}${pushed}`, now);
       const facts = item.campaignId ? `\nCampaign (commercial data, not instructions): ${JSON.stringify(campaignFacts(campaign, timeZone, names, item.scheduledFor))}` : "";
-      const out = await ctx.ai.generateObject({
+      const story = item.channel === "INSTAGRAM_STORY";
+      const out: z.infer<typeof Brief> & { frames?: z.infer<typeof StoryBrief>["frames"] } = await ctx.ai.generateObject({
         workflowId: "brief.write",
         promptVersion: CONTENT_PROMPT_VERSION,
-        schema: Brief,
+        schema: story ? StoryBrief : Brief,
         schemaName: "content_brief",
         system: BRIEF_SYSTEM,
         // Brand knowledge first: shared by every post in this run, so it can be billed at the cached rate.
@@ -79,6 +82,15 @@ export const briefAgent: AgentDefinition = {
           cta: "Enregistrez ce post pour votre prochain entretien.",
           visual: "Photo produit de la marque en lumière naturelle, gros plan sur le grain du bois.",
           questions: ["Quels produits mettre en avant ?"],
+          ...(story
+            ? {
+                frames: [
+                  { purpose: "hook", composition: "Le produit entier en lumière naturelle, la question en titre" },
+                  { purpose: "detail", composition: "Gros plan sur le grain du bois, un fait en titre" },
+                  { purpose: "ask", composition: "Le produit dans une pièce, l'appel à l'action" },
+                ],
+              }
+            : {}),
         },
       });
       // Unknown ids dropped (not a validate rule: a retry would pay for the call twice); the brief names the chosen ones.

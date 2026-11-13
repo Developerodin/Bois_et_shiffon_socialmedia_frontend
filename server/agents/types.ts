@@ -11,6 +11,8 @@ import type { GenerateObjectInput } from "@/server/ai/provider";
 export type AgentContext = {
   runId: string;
   brand: BrandContext;
+  /** The run's paid charge, if any (billing bookkeeping, never agent input): a story writer refunds it when nothing was saved. */
+  chargeId?: string;
   log: (
     level: AgentEventLevel,
     message: string,

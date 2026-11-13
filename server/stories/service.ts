@@ -77,7 +77,8 @@ export async function saveStoryVersion(
   baseVersion: number,
   input: StoryInput,
   actor: StoryActor,
-  opts: { photosOnly?: boolean } = {},
+  /** keepEmpty: the agent's frames without a source (too few photos) are kept, unrendered, for a person to fill. */
+  opts: { photosOnly?: boolean; keepEmpty?: boolean } = {},
 ): Promise<{ status: "saved"; version: number } | { status: "rendering" }> {
   if (actor.kind === "person" && !(await hitRateLimit(`story-render:user:${actor.userId}`, 30, HOUR)).allowed) throw renderLimit();
   if (!(await hitRateLimit(`story-render:brand:${scope.brandId}`, 100, HOUR)).allowed) throw renderLimit();
@@ -86,7 +87,7 @@ export async function saveStoryVersion(
   assertEditable(item.status, latest?.version ?? 0, baseVersion);
 
   const frames: StoryFrame[] = [];
-  for (const [i, f] of input.frames.entries()) frames.push(await resolveFrame(scope, f, i, opts));
+  for (const [i, f] of input.frames.entries()) frames.push(!f.source && opts.keepEmpty ? textOnly(f) : await resolveFrame(scope, f, i, opts));
   frames.forEach((f, i) => {
     const fit = textFits(f, i === frames.length - 1, input.cta);
     if (!fit.fits) throw new PublishingError(`Frame ${i + 1}: the ${fit.field} doesn't fit.`, 400, "story.textFit");
@@ -103,6 +104,11 @@ export async function saveStoryVersion(
   const version = await prisma.$transaction((tx) => createStoryVersion(tx, scope, itemId, baseVersion, { frames: rendered, ...settings, hook: "", productIds: [] }, actor, { statusAtSave: item.status }), TX);
   return { status: "saved", version: version.version };
 }
+
+/** A frame with text and no picture yet (Quality's "Frames" check blocks it until a person adds one). */
+const textOnly = (f: StoryFrameInput): StoryFrame => ({
+  label: f.label, headline: f.headline, body: f.body, ...(f.composition === undefined ? {} : { composition: f.composition }),
+});
 
 async function resolveFrame(scope: Scope, f: StoryFrameInput, i: number, opts: { photosOnly?: boolean }): Promise<StoryFrame> {
   if (!f.source) throw new PublishingError(`Frame ${i + 1} has no photo or clip.`, 400, "story.source");
@@ -153,11 +159,11 @@ const renderOpts = (scope: BrandScope, i: number, count: number, s: Settings, lo
   n: i + 1,
 });
 
-/** Renders every photo frame (content-addressed: an unchanged frame reuses its file). Clip frames pass through. */
+/** Renders every photo frame (content-addressed: an unchanged frame reuses its file). Clip and empty frames pass through. */
 async function renderPhotos(scope: BrandScope, frames: StoryFrame[], s: Settings, look: Look): Promise<StoryFrame[]> {
   const out: StoryFrame[] = [];
   for (const [i, f] of frames.entries()) {
-    if (f.mediaKind === "video") {
+    if (f.mediaKind === "video" || !f.mediaKey) {
       out.push(f);
       continue;
     }
@@ -183,7 +189,7 @@ export async function createStoryVersion(tx: Prisma.TransactionClient, scope: Br
   await lock(tx, itemId);
   const { item, latest } = await loadStory(tx, scope, itemId);
   assertEditable(item.status, latest?.version ?? 0, baseVersion, opts.statusAtSave);
-  if (body.frames.some((f) => !f.renderedKey || !f.mediaKey)) throw new Error("Story frames must be rendered before a version is saved");
+  if (body.frames.some((f) => f.source && (!f.renderedKey || !f.mediaKey))) throw new Error("Story frames must be rendered before a version is saved");
   const previous = (latest?.body ?? null) as { productIds?: unknown } | null;
   const productIds = Array.isArray(previous?.productIds) ? (previous.productIds as string[]) : item.productIds;
   const stored: StoryBody & { renderId?: string } = {
