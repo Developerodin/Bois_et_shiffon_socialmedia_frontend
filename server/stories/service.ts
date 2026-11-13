@@ -1,0 +1,319 @@
+import { createHash, randomUUID } from "node:crypto";
+import type { Prisma } from "@prisma/client";
+import { z } from "zod";
+import { startAgentRun } from "@/server/agents/engine";
+import { hitRateLimit } from "@/server/auth/rate-limit";
+import { prisma } from "@/server/db/prisma";
+import { enqueueJob } from "@/server/jobs/queue";
+import { refundCharge } from "@/server/services/credits";
+import { EDITABLE, lock, PublishingError, TX } from "@/server/services/publishing";
+import { getMediaBytes, signedMediaUrl } from "@/server/storage/media";
+import { isStoryBody, type StoryBody, type StoryFrame, type StoryFrameInput, type StoryInput } from "@/server/stories/body";
+import { renderClipFrame, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
+import { resolveSource } from "@/server/stories/sources";
+
+/**
+ * Saving a story (design "One render step"): every version is created by `createStoryVersion`, after all its frames
+ * are rendered. Photo-only stories render in the request; a story with a clip renders in the job queue, one clip per
+ * run (a clip can take up to ~4 minutes with its retry encode), then its photos, then the version.
+ */
+export const STORY_RENDER_JOB = "story.render";
+
+const HOUR = 3_600_000;
+const LOGO_MAX_BYTES = 5 * 1024 * 1024;
+/** A clip window must leave at least this much of the clip (the renderer refuses shorter output too). */
+const MIN_CLIP_SECONDS = 0.5;
+
+type BrandScope = { workspaceId: string; brandId: string };
+type Scope = BrandScope & { userId: string };
+type Db = Prisma.TransactionClient | typeof prisma;
+export type StoryActor = { kind: "person"; userId: string } | { kind: "agent"; runId: string; model?: string; chargeId?: string };
+/** What the brand's frames look like beyond their own content: fixed for one save, so every frame of it agrees. */
+type Look = { language: string; logoKey?: string; logoTag?: string };
+type Settings = Pick<StoryBody, "cta" | "link" | "brandMark">;
+type RenderPayload = BrandScope & Settings & Look & {
+  itemId: string; baseVersion: number; frames: StoryFrame[]; actor: StoryActor;
+  /** The next frame index to look at for a clip. */
+  next: number;
+  /** One per save: the follow-up jobs' idempotency keys, so a retried step can't queue its successor twice. */
+  renderId: string;
+  /** The item's status when it was saved: an approval that lands while the frames render refuses the version. */
+  statusAtSave: string;
+};
+
+const notFound = () => new PublishingError("Story not found", 404, "story.notFound");
+const notEditable = () => new PublishingError("This story can't be edited any more.", 409, "story.notEditable");
+const stale = () => new PublishingError("Someone else changed this story. Your changes weren't saved.", 409, "story.stale");
+const renderLimit = () => new PublishingError("Too many story saves this hour. Try again later.", 429, "story.renderLimit");
+
+/** The story, scoped to the brand; any other item (another brand's, or a post) is "not found". */
+async function loadStory(db: Db, scope: BrandScope, itemId: string) {
+  const item = await db.contentItem.findFirst({
+    where: { id: itemId, workspaceId: scope.workspaceId, brandId: scope.brandId },
+    include: { versions: { orderBy: { version: "desc" }, take: 1 } },
+  });
+  if (!item || item.channel !== "INSTAGRAM_STORY") throw notFound();
+  return { item, latest: item.versions[0] ?? null };
+}
+
+/**
+ * An approved story can be edited (the new version goes back to review), but one approved after the save started
+ * can't: the person approving saw the old frames, and a silent new version would void what they just approved.
+ */
+function assertEditable(status: string, latestVersion: number, baseVersion: number, statusAtSave?: string) {
+  if (!EDITABLE.includes(status)) throw notEditable();
+  if (status === "APPROVED" && statusAtSave !== undefined && statusAtSave !== "APPROVED") throw notEditable();
+  if (latestVersion !== baseVersion) throw stale();
+}
+
+/**
+ * A person's or an agent's save. Client input carries no server fields (parseStoryInput strips them); frames are
+ * rebuilt here field by field anyway, so only keys from `resolveSource` ever reach the renderer or the version.
+ * Rate limits come first, so refused saves count too (each costs a lookup and possibly a product photo fetch).
+ */
+export async function saveStoryVersion(
+  scope: Scope,
+  itemId: string,
+  baseVersion: number,
+  input: StoryInput,
+  actor: StoryActor,
+  opts: { photosOnly?: boolean } = {},
+): Promise<{ status: "saved"; version: number } | { status: "rendering" }> {
+  if (actor.kind === "person" && !(await hitRateLimit(`story-render:user:${actor.userId}`, 30, HOUR)).allowed) throw renderLimit();
+  if (!(await hitRateLimit(`story-render:brand:${scope.brandId}`, 100, HOUR)).allowed) throw renderLimit();
+  const { item, latest } = await loadStory(prisma, scope, itemId);
+  // Checked again under the lock when the version is created; refusing now saves the render.
+  assertEditable(item.status, latest?.version ?? 0, baseVersion);
+
+  const frames: StoryFrame[] = [];
+  for (const [i, f] of input.frames.entries()) frames.push(await resolveFrame(scope, f, i, opts));
+  frames.forEach((f, i) => {
+    const fit = textFits(f, i === frames.length - 1, input.cta);
+    if (!fit.fits) throw new PublishingError(`Frame ${i + 1}: the ${fit.field} doesn't fit.`, 400, "story.textFit");
+  });
+  const settings: Settings = { cta: input.cta, link: input.link, brandMark: input.brandMark };
+  const look = await brandLook(scope, input.brandMark);
+
+  if (frames.some((f) => f.mediaKind === "video")) {
+    const payload: RenderPayload = { workspaceId: scope.workspaceId, brandId: scope.brandId, itemId, baseVersion, frames, ...settings, ...look, actor, next: 0, renderId: randomUUID(), statusAtSave: item.status };
+    await queueStep(payload);
+    return { status: "rendering" };
+  }
+  const rendered = await renderPhotos(scope, frames, settings, look);
+  const version = await prisma.$transaction((tx) => createStoryVersion(tx, scope, itemId, baseVersion, { frames: rendered, ...settings, hook: "", productIds: [] }, actor, { statusAtSave: item.status }), TX);
+  return { status: "saved", version: version.version };
+}
+
+async function resolveFrame(scope: Scope, f: StoryFrameInput, i: number, opts: { photosOnly?: boolean }): Promise<StoryFrame> {
+  if (!f.source) throw new PublishingError(`Frame ${i + 1} has no photo or clip.`, 400, "story.source");
+  const r = await resolveSource(scope, f.source, opts);
+  const clip = r.mediaKind === "video" ? (f.clip ?? { start: 0, sound: true }) : undefined;
+  if (clip && r.durationSec !== undefined && clip.start + MIN_CLIP_SECONDS > r.durationSec) {
+    throw new PublishingError(`Frame ${i + 1}: the chosen part starts after the clip ends.`, 400, "story.clipWindow");
+  }
+  return {
+    source: { kind: f.source.kind, id: f.source.id },
+    label: f.label,
+    headline: f.headline,
+    body: f.body,
+    ...(f.composition === undefined ? {} : { composition: f.composition }),
+    ...(f.crop ? { crop: { x: f.crop.x, y: f.crop.y, scale: f.crop.scale } } : {}),
+    ...(clip ? { clip: { start: clip.start, sound: clip.sound } } : {}),
+    mediaKey: r.mediaKey,
+    mediaKind: r.mediaKind,
+    aiMark: r.aiMark,
+    rights: r.rights,
+  };
+}
+
+const LogoAsset = z.object({ logo: z.object({ key: z.string() }).nullable().optional() });
+
+/**
+ * The brand's content language (as posts read it: the first of `locales`) and, with the brand mark on, the brand's own
+ * logo from Research's assets. The logo's identity is a hash of its bytes, so replacing it re-renders every frame.
+ * A logo that can't be read renders the frame without it rather than failing the save.
+ */
+async function brandLook(scope: BrandScope, brandMark: boolean): Promise<Look> {
+  const profile = await prisma.brandProfile.findFirst({ where: { brandId: scope.brandId, workspaceId: scope.workspaceId }, select: { locales: true, assets: true } });
+  const language = z.array(z.string()).safeParse(profile?.locales).data?.[0] ?? "en";
+  const key = brandMark ? LogoAsset.safeParse(profile?.assets).data?.logo?.key : undefined;
+  if (!key || !key.startsWith(`${scope.workspaceId}/${scope.brandId}/`) || key.includes("..")) return { language };
+  const bytes = await getMediaBytes(key, LOGO_MAX_BYTES).catch(() => null);
+  if (!bytes) return { language };
+  return { language, logoKey: key, logoTag: createHash("sha256").update(bytes).digest("hex").slice(0, 16) };
+}
+
+const renderOpts = (scope: BrandScope, i: number, count: number, s: Settings, look: Look): RenderOpts => ({
+  scope: { workspaceId: scope.workspaceId, brandId: scope.brandId },
+  language: look.language,
+  isLast: i === count - 1,
+  cta: s.cta,
+  brandMark: s.brandMark,
+  ...(look.logoKey ? { logoKey: look.logoKey, logoTag: look.logoTag } : {}),
+  n: i + 1,
+});
+
+/** Renders every photo frame (content-addressed: an unchanged frame reuses its file). Clip frames pass through. */
+async function renderPhotos(scope: BrandScope, frames: StoryFrame[], s: Settings, look: Look): Promise<StoryFrame[]> {
+  const out: StoryFrame[] = [];
+  for (const [i, f] of frames.entries()) {
+    if (f.mediaKind === "video") {
+      out.push(f);
+      continue;
+    }
+    const { key, file } = await renderPhotoFrame(f, renderOpts(scope, i, frames.length, s, look));
+    out.push({ ...f, renderedKey: key, file });
+  }
+  return out;
+}
+
+async function queueStep(p: RenderPayload) {
+  await enqueueJob({
+    type: STORY_RENDER_JOB, workspaceId: p.workspaceId, brandId: p.brandId, payload: p as unknown as Prisma.InputJsonValue, maxAttempts: 2,
+    idempotencyKey: `story-render:${p.renderId}:${p.next}`,
+  });
+}
+
+/**
+ * Creates the story version, in the caller's transaction. Under the per-post lock it re-reads the item (scoped) and
+ * refuses if it was scheduled or published meanwhile (approved too, given `statusAtSave`), or if someone saved another
+ * version. The caller starts Quality afterwards.
+ */
+export async function createStoryVersion(tx: Prisma.TransactionClient, scope: BrandScope, itemId: string, baseVersion: number, body: StoryBody, actor: StoryActor, opts: { statusAtSave?: string } = {}) {
+  await lock(tx, itemId);
+  const { item, latest } = await loadStory(tx, scope, itemId);
+  assertEditable(item.status, latest?.version ?? 0, baseVersion, opts.statusAtSave);
+  if (body.frames.some((f) => !f.renderedKey || !f.mediaKey)) throw new Error("Story frames must be rendered before a version is saved");
+  const previous = (latest?.body ?? null) as { productIds?: unknown } | null;
+  const productIds = Array.isArray(previous?.productIds) ? (previous.productIds as string[]) : item.productIds;
+  const stored: StoryBody = { frames: body.frames, cta: body.cta, link: body.link, brandMark: body.brandMark, hook: body.frames[0]?.headline ?? "", productIds };
+  const version = await tx.contentVersion.create({
+    data: {
+      contentItemId: item.id, version: baseVersion + 1, body: stored as unknown as Prisma.InputJsonValue,
+      ...(actor.kind === "person" ? { createdBy: actor.userId } : { createdBy: "agent", agentRunId: actor.runId, model: actor.model ?? null }),
+    },
+  });
+  // A new version voids any approval; a by-hand plan was for the old one.
+  await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW", byHand: false } });
+  await tx.auditEvent.create({
+    data: {
+      workspaceId: scope.workspaceId, brandId: scope.brandId, actorUserId: actor.kind === "person" ? actor.userId : null,
+      action: "content.edit", entityType: "ContentItem", entityId: item.id,
+      metadata: { version: version.version, from: item.status, ...(actor.kind === "agent" ? { agentRunId: actor.runId } : {}) },
+    },
+  });
+  return version;
+}
+
+/**
+ * Job handler: renders the next clip frame and queues the next step with the result in its payload; once no clip is
+ * left, renders the photos, saves the version and starts Quality. Every step first checks the story is still editable
+ * at the same version, so a story approved or re-saved meanwhile stops before more encoding. Refusals (PublishingError)
+ * aren't retried (runner.ts); the message lands in Job.lastError for `storyRenderState`.
+ */
+export async function runStoryRender(payload: unknown) {
+  const p = payload as RenderPayload;
+  const scope = { workspaceId: p.workspaceId, brandId: p.brandId };
+  const { item, latest } = await loadStory(prisma, scope, p.itemId);
+  assertEditable(item.status, latest?.version ?? 0, p.baseVersion, p.statusAtSave);
+  const frames = [...p.frames];
+  let i = p.next;
+  while (i < frames.length && frames[i].mediaKind !== "video") i++;
+  if (i < frames.length) {
+    const { key, file } = await renderClipFrame(frames[i], renderOpts(scope, i, frames.length, p, p));
+    frames[i] = { ...frames[i], renderedKey: key, file };
+    await queueStep({ ...p, frames, next: i + 1 });
+    return;
+  }
+  const rendered = await renderPhotos(scope, frames, p, p);
+  const body = { frames: rendered, cta: p.cta, link: p.link, brandMark: p.brandMark, hook: "", productIds: [] };
+  const version = await prisma.$transaction((tx) => createStoryVersion(tx, scope, p.itemId, p.baseVersion, body, p.actor, { statusAtSave: p.statusAtSave }), TX);
+  await startAgentRun({ workspaceId: p.workspaceId, brandId: p.brandId, agentKey: "quality", trigger: "event", input: { itemId: p.itemId, version: version.version } }).catch(() => null);
+}
+
+/** Job onFailure: an agent's paid story is refunded when its render finally fails (refundCharge is idempotent). */
+export async function onStoryRenderFailure(payload: unknown, _error: unknown, exhausted: boolean) {
+  const p = payload as Pick<RenderPayload, "workspaceId" | "actor">;
+  if (exhausted && p.actor?.kind === "agent" && p.actor.chargeId) await refundCharge(p.workspaceId, p.actor.chargeId);
+}
+
+/**
+ * Whether a render is under way for this story, else the newest failed render's error since its last version.
+ * ponytail: matches jobs by a JSON path on the payload (no index); fine while render jobs are few. Add an itemId
+ * column on Job if this shows up in query times.
+ */
+export async function storyRenderState(scope: BrandScope, itemId: string): Promise<{ rendering: boolean; error?: string }> {
+  const where = { type: STORY_RENDER_JOB, workspaceId: scope.workspaceId, brandId: scope.brandId, payload: { path: ["itemId"], equals: itemId } };
+  const busy = await prisma.job.findFirst({ where: { ...where, status: { in: ["PENDING", "RUNNING"] } }, select: { id: true } });
+  if (busy) return { rendering: true };
+  const latest = await prisma.contentVersion.findFirst({ where: { contentItemId: itemId, item: { workspaceId: scope.workspaceId, brandId: scope.brandId } }, orderBy: { version: "desc" }, select: { createdAt: true } });
+  const failed = await prisma.job.findFirst({
+    where: { ...where, status: "DEAD_LETTER", ...(latest ? { updatedAt: { gt: latest.createdAt } } : {}) },
+    orderBy: { updatedAt: "desc" },
+    select: { lastError: true },
+  });
+  return failed?.lastError ? { rendering: false, error: failed.lastError.replace(/^\w*Error: /, "") } : { rendering: false };
+}
+
+export type StoryTab = "drafts" | "scheduled" | "posted";
+/** Which P07 tab a story sits in. Any partly posted or unverified attempt counts as posted (someone has to look). */
+export function storyTab(item: { status: string; byHand: boolean }, attempts: { status: string }[]): StoryTab {
+  if (item.status === "PUBLISHED" || item.status === "REVIEWED" || attempts.some((a) => a.status === "PARTIAL" || a.status === "PENDING_VERIFY")) return "posted";
+  if (item.status === "SCHEDULED" || (item.status === "APPROVED" && item.byHand)) return "scheduled";
+  return "drafts";
+}
+
+/** The rendered frame's URL (an hour), only for files under this brand's stories folder. */
+export function renderedUrl(scope: BrandScope, key: string | undefined) {
+  return key && key.startsWith(`${scope.workspaceId}/${scope.brandId}/stories/`) && !key.includes("..") ? signedMediaUrl(key, 3600) : null;
+}
+
+/** What the story screens add to the post state: render progress and the latest version's frames. */
+export async function storyView(scope: BrandScope, itemId: string) {
+  const [state, latest] = await Promise.all([
+    storyRenderState(scope, itemId),
+    prisma.contentVersion.findFirst({ where: { contentItemId: itemId, item: { workspaceId: scope.workspaceId, brandId: scope.brandId } }, orderBy: { version: "desc" }, select: { body: true } }),
+  ]);
+  const frames = isStoryBody(latest?.body) ? latest.body.frames : [];
+  return {
+    rendering: state.rendering,
+    renderError: state.error ?? null,
+    frames: await Promise.all(frames.map(async (f, i) => ({ n: i + 1, url: await renderedUrl(scope, f.renderedKey), kind: f.mediaKind ?? null, headline: f.headline }))),
+  };
+}
+
+/**
+ * A new planned story with a copy of the latest version, without its rendered files (the next save renders it again).
+ * The copy keeps each frame's source and resolved mediaKey, so the upload sweep still sees the file as used.
+ */
+export async function duplicateStory(scope: Scope, itemId: string) {
+  const { item, latest } = await loadStory(prisma, scope, itemId);
+  const body = isStoryBody(latest?.body) ? latest.body : null;
+  return prisma.$transaction(async (tx) => {
+    const copy = await tx.contentItem.create({
+      data: { workspaceId: scope.workspaceId, brandId: scope.brandId, title: item.title, channel: item.channel, status: "PLANNED", productIds: item.productIds, opportunityId: item.opportunityId },
+    });
+    if (body) {
+      const frames = body.frames.map(({ renderedKey: _r, file: _f, ...f }) => f);
+      await tx.contentVersion.create({ data: { contentItemId: copy.id, version: 1, body: { ...body, frames } as unknown as Prisma.InputJsonValue, createdBy: scope.userId } });
+    }
+    await tx.auditEvent.create({
+      data: { workspaceId: scope.workspaceId, brandId: scope.brandId, actorUserId: scope.userId, action: "content.create", entityType: "ContentItem", entityId: copy.id, metadata: { channel: item.channel, duplicateOf: item.id } },
+    });
+    return copy;
+  }, TX);
+}
+
+/** Deletes a story still in the Drafts tab (its versions, decisions and attempts cascade). */
+export async function deleteStory(scope: Scope, itemId: string) {
+  await prisma.$transaction(async (tx) => {
+    await lock(tx, itemId);
+    const { item } = await loadStory(tx, scope, itemId);
+    const attempts = await tx.publicationAttempt.findMany({ where: { contentItemId: item.id, status: { in: ["PARTIAL", "PENDING_VERIFY"] } }, select: { status: true } });
+    if (storyTab(item, attempts) !== "drafts") throw new PublishingError("Only draft stories can be deleted.", 409, "story.notDeletable");
+    await tx.contentItem.delete({ where: { id: item.id } });
+    await tx.auditEvent.create({
+      data: { workspaceId: scope.workspaceId, brandId: scope.brandId, actorUserId: scope.userId, action: "content.delete", entityType: "ContentItem", entityId: item.id, metadata: { channel: item.channel, status: item.status } },
+    });
+  }, TX);
+}

@@ -6,6 +6,8 @@ import { prisma } from "@/server/db/prisma";
 import { kickRunner } from "@/server/jobs/runner";
 import { createPost, ownMediaKey, postAiAllowed, PublishingError } from "@/server/services/publishing";
 import { signedMediaUrl } from "@/server/storage/media";
+import { isStoryBody } from "@/server/stories/body";
+import { renderedUrl, storyTab } from "@/server/stories/service";
 
 /** Calendar items with their latest draft and its latest quality check. */
 export async function GET(request: Request, context: { params: Promise<BrandRouteParams> }) {
@@ -33,9 +35,25 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
     };
     // Writers already check keys (ownMediaKey); checked again here so a bad stored key is never signed.
     const photoUrls = await Promise.all(rows.map((r) => Promise.all(photoKeys(r).filter((k) => ownMediaKey(scope, k)).map((k) => signedMediaUrl(k)))));
+    // Stories: their P07 tab (any partly posted or unverified attempt, not only the latest, moves one to Posted) and
+    // the first rendered frame as the card.
+    const storyIds = rows.filter((r) => r.channel === "INSTAGRAM_STORY").map((r) => r.id);
+    const openAttempts = storyIds.length
+      ? await prisma.publicationAttempt.findMany({ where: { contentItemId: { in: storyIds }, status: { in: ["PARTIAL", "PENDING_VERIFY"] } }, select: { contentItemId: true, status: true } })
+      : [];
+    const story = async (r: (typeof rows)[number]) => {
+      if (r.channel !== "INSTAGRAM_STORY") return {};
+      const body = r.versions[0]?.body;
+      return {
+        tab: storyTab(r, openAttempts.filter((a) => a.contentItemId === r.id)),
+        firstFrameUrl: isStoryBody(body) ? await renderedUrl(scope, body.frames[0]?.renderedKey) : null,
+      };
+    };
+    const stories = await Promise.all(rows.map(story));
     return Response.json({
       items: rows.map(({ versions, decisions, publications, ...i }, n) => ({
         ...i,
+        ...stories[n],
         // The last publish went wrong: "FAILED" (back to Approved, reason in publishError) or "CHECK" (may have posted).
         publishIssue: publications[0]?.status === "PENDING_VERIFY" ? "CHECK" : publications[0]?.status === "FAILED" && i.status === "APPROVED" ? "FAILED" : null,
         publishError: publications[0]?.status === "FAILED" || publications[0]?.status === "PENDING_VERIFY" ? publications[0].error : null,

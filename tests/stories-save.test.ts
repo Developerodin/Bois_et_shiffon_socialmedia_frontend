@@ -1,0 +1,343 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+type Row = Record<string, any>;
+const db = vi.hoisted(() => ({ item: null as Row | null, versions: [] as Row[], attempts: [] as Row[], profile: null as Row | null, limits: new Map<string, number>() }));
+const m = vi.hoisted(() => ({ resolve: vi.fn(), photo: vi.fn(), clip: vi.fn(), enqueue: vi.fn(), refund: vi.fn(), start: vi.fn(), get: vi.fn(), jobFind: vi.fn(), authorize: vi.fn(), kick: vi.fn() }));
+
+vi.mock("@/server/db/prisma", () => {
+  const mine = () => db.versions.filter((v) => v.contentItemId === db.item?.id).sort((a, b) => b.version - a.version);
+  const prisma: Row = {
+    contentItem: {
+      findFirst: vi.fn(async ({ where }: Row) => {
+        const i = db.item;
+        if (!i || where.id !== i.id || where.workspaceId !== i.workspaceId || where.brandId !== i.brandId) return null;
+        return { ...i, versions: mine().slice(0, 1).map((v) => ({ ...v, checks: [] })) };
+      }),
+      update: vi.fn(async ({ data }: Row) => Object.assign(db.item!, data)),
+      create: vi.fn(async ({ data }: Row) => ({ id: "copy1", ...data })),
+      delete: vi.fn(async () => ({})),
+    },
+    contentVersion: {
+      create: vi.fn(async ({ data }: Row) => {
+        const v = { id: `v${data.version}`, createdAt: new Date(), ...data };
+        db.versions.push(v);
+        return v;
+      }),
+      findFirst: vi.fn(async () => mine()[0] ?? null),
+    },
+    auditEvent: { create: vi.fn(async () => ({})) },
+    job: { findFirst: m.jobFind },
+    publicationAttempt: { findMany: vi.fn(async () => db.attempts) },
+    brandProfile: { findFirst: vi.fn(async () => db.profile) },
+    $executeRaw: vi.fn(async () => 0),
+  };
+  prisma.$transaction = async (fn: (tx: Row) => unknown) => fn(prisma);
+  return { prisma };
+});
+vi.mock("@/server/auth/rate-limit", () => ({
+  hitRateLimit: vi.fn(async (key: string, limit: number) => {
+    const n = (db.limits.get(key) ?? 0) + 1;
+    db.limits.set(key, n);
+    return { allowed: n <= limit, count: n };
+  }),
+}));
+vi.mock("@/server/stories/sources", () => ({ resolveSource: m.resolve }));
+vi.mock("@/server/stories/render", async (orig) => ({ ...(await orig<object>()), renderPhotoFrame: m.photo, renderClipFrame: m.clip }));
+vi.mock("@/server/jobs/queue", async (orig) => ({ ...(await orig<object>()), enqueueJob: m.enqueue }));
+vi.mock("@/server/services/credits", async (orig) => ({ ...(await orig<object>()), refundCharge: m.refund }));
+vi.mock("@/server/agents/engine", async (orig) => ({ ...(await orig<object>()), startAgentRun: m.start }));
+vi.mock("@/server/storage/media", async (orig) => ({ ...(await orig<object>()), getMediaBytes: m.get, signedMediaUrl: async (k: string) => `https://signed/${k}` }));
+
+vi.mock("@/server/api/brand-route", () => ({ authorizeBrandRoute: m.authorize }));
+vi.mock("@/server/jobs/runner", () => ({ kickRunner: m.kick }));
+vi.mock("@/server/services/publishing", async (orig) => ({
+  ...(await orig<object>()), postAiAllowed: async () => true, releaseState: async () => ({ latestVersion: db.versions.length, requirements: { frames: [3, 5] } }),
+}));
+
+import { prisma } from "@/server/db/prisma";
+import { POST } from "@/app/api/v1/workspaces/[workspaceId]/brands/[brandId]/content/[contentId]/route";
+import { saveDraft } from "@/server/services/publishing";
+import { deleteStory, duplicateStory, onStoryRenderFailure, runStoryRender, saveStoryVersion, STORY_RENDER_JOB, storyRenderState, storyTab } from "@/server/stories/service";
+import type { StoryInput } from "@/server/stories/body";
+
+const scope = { workspaceId: "w1", brandId: "b1", userId: "u1" };
+const person = { kind: "person", userId: "u1" } as const;
+const agent = { kind: "agent", runId: "r1", model: "gpt", chargeId: "c1" } as const;
+const frame = (id: string, o: object = {}) => ({ source: { kind: "upload" as const, id }, label: "New", headline: `Headline ${id}`, body: "Body", ...o });
+const input = (frames = [frame("p1"), frame("p2"), frame("p3")]): StoryInput => ({ frames, cta: "Shop now", link: "https://shop.test/x", brandMark: false });
+const p = prisma as unknown as Row;
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  db.item = { id: "i1", workspaceId: "w1", brandId: "b1", channel: "INSTAGRAM_STORY", status: "DRAFT_REVIEW", byHand: true, productIds: ["prod1"], opportunityId: "o1", title: "Story" };
+  db.versions = [];
+  db.attempts = [];
+  db.profile = { locales: ["fr"], assets: null };
+  db.limits = new Map();
+  m.resolve.mockImplementation(async (_s: unknown, ref: { id: string }) => ({
+    mediaKey: `w1/b1/uploads/${ref.id}.${ref.id.startsWith("c") ? "mp4" : "jpg"}`, mediaKind: ref.id.startsWith("c") ? "video" : "photo", aiMark: false, rights: { kind: "owned" },
+    ...(ref.id.startsWith("c") ? { durationSec: 20 } : {}),
+  }));
+  m.photo.mockImplementation(async (f: { mediaKey: string }) => ({ key: `w1/b1/stories/${f.mediaKey.split("/").pop()}.jpg`, file: { width: 1080, height: 1920, bytes: 10 } }));
+  m.clip.mockImplementation(async (f: { mediaKey: string }) => ({ key: `w1/b1/stories/${f.mediaKey.split("/").pop()}.mp4`, file: { width: 1080, height: 1920, bytes: 10, durationSec: 15 } }));
+  m.enqueue.mockImplementation(async (j: unknown) => j);
+  m.start.mockResolvedValue({ id: "run" });
+  m.refund.mockResolvedValue(true);
+});
+
+describe("saveStoryVersion, photos only", () => {
+  it("renders now and saves a version in review, clearing by-hand; client server fields never reach the version", async () => {
+    const sneaky = input([frame("p1", { renderedKey: "w9/b9/stories/evil.jpg", mediaKey: "w9/b9/evil.jpg", file: { width: 1, height: 1, bytes: 1 } }), frame("p2"), frame("p3")]);
+    const r = await saveStoryVersion(scope, "i1", 0, sneaky, person);
+    expect(r).toEqual({ status: "saved", version: 1 });
+    const body = db.versions[0].body;
+    expect(body.frames[0].renderedKey).toBe("w1/b1/stories/p1.jpg.jpg");
+    expect(body.frames[0].mediaKey).toBe("w1/b1/uploads/p1.jpg");
+    expect(JSON.stringify(body)).not.toContain("w9/");
+    // The renderer only ever sees the resolved key.
+    expect(m.photo.mock.calls[0][0].mediaKey).toBe("w1/b1/uploads/p1.jpg");
+    expect(body).toMatchObject({ hook: "Headline p1", productIds: ["prod1"], cta: "Shop now", link: "https://shop.test/x", brandMark: false });
+    expect(db.item).toMatchObject({ status: "DRAFT_REVIEW", byHand: false });
+    expect(db.versions[0].createdBy).toBe("u1");
+    expect(m.enqueue).not.toHaveBeenCalled();
+    expect(m.photo.mock.calls[2][1]).toMatchObject({ language: "fr", isLast: true, cta: "Shop now", n: 3, scope: { workspaceId: "w1", brandId: "b1" } });
+  });
+
+  it("refuses a stale base with 409 story.stale and saves nothing", async () => {
+    db.versions.push({ id: "v1", contentItemId: "i1", version: 1, body: { productIds: [] }, createdAt: new Date() });
+    await expect(saveStoryVersion(scope, "i1", 0, input(), person)).rejects.toMatchObject({ status: 409, code: "story.stale" });
+    expect(db.versions).toHaveLength(1);
+  });
+
+  it.each(["SCHEDULED", "PUBLISHED"])("refuses a %s story with 409 story.notEditable", async (status) => {
+    db.item!.status = status;
+    await expect(saveStoryVersion(scope, "i1", 0, input(), person)).rejects.toMatchObject({ status: 409, code: "story.notEditable" });
+    expect(db.versions).toHaveLength(0);
+  });
+
+  it("answers 404 for another brand's item", async () => {
+    await expect(saveStoryVersion({ ...scope, brandId: "b2" }, "i1", 0, input(), person)).rejects.toMatchObject({ status: 404 });
+    expect(m.resolve).not.toHaveBeenCalled();
+  });
+
+  it("names the frame and field that doesn't fit", async () => {
+    const long = input([frame("p1"), frame("p2", { body: "WWWW ".repeat(24).trim()}), frame("p3")]);
+    await expect(saveStoryVersion(scope, "i1", 0, long, person)).rejects.toMatchObject({ status: 400, code: "story.textFit", message: expect.stringMatching(/Frame 2.*body/) });
+  });
+
+  it("refuses a clip window that starts within half a second of the clip's end", async () => {
+    await expect(saveStoryVersion(scope, "i1", 0, input([frame("p1"), frame("c1", { clip: { start: 19.6, sound: true } }), frame("p3")]), person)).rejects.toMatchObject({ status: 400, code: "story.clipWindow" });
+    expect(m.enqueue).not.toHaveBeenCalled();
+  });
+
+  it("refuses the 31st render by one person in an hour with 429", async () => {
+    for (let v = 0; v < 30; v++) await saveStoryVersion(scope, "i1", v, input(), person);
+    await expect(saveStoryVersion(scope, "i1", 30, input(), person)).rejects.toMatchObject({ status: 429, code: "story.renderLimit" });
+    expect(db.versions).toHaveLength(30);
+  });
+
+  it("counts agent saves toward the brand cap (and not a person's)", async () => {
+    db.limits.set("story-render:brand:b1", 100);
+    await expect(saveStoryVersion(scope, "i1", 0, input(), agent, { photosOnly: true })).rejects.toMatchObject({ status: 429, code: "story.renderLimit" });
+    expect([...db.limits.keys()].some((k) => k.startsWith("story-render:user:"))).toBe(false);
+    expect(m.resolve).not.toHaveBeenCalled();
+  });
+
+  it("passes photosOnly to the source lookup and records the agent on the version", async () => {
+    await saveStoryVersion(scope, "i1", 0, input(), agent, { photosOnly: true });
+    expect(m.resolve.mock.calls[0][2]).toEqual({ photosOnly: true });
+    expect(db.versions[0]).toMatchObject({ createdBy: "agent", agentRunId: "r1", model: "gpt" });
+  });
+
+  it("passes the brand's own logo with an identity that changes with its bytes", async () => {
+    db.profile = { locales: ["en"], assets: { logo: { key: "w1/b1/brand-logo.png" } } };
+    m.get.mockResolvedValueOnce(new Uint8Array([1, 2, 3]));
+    await saveStoryVersion(scope, "i1", 0, { ...input(), brandMark: true }, person);
+    const first = m.photo.mock.calls[0][1];
+    m.get.mockResolvedValueOnce(new Uint8Array([4, 5, 6]));
+    await saveStoryVersion(scope, "i1", 1, { ...input(), brandMark: true }, person);
+    const second = m.photo.mock.calls[3][1];
+    expect(first.logoKey).toBe("w1/b1/brand-logo.png");
+    expect(first.logoTag).toBeTruthy();
+    expect(second.logoTag).not.toBe(first.logoTag);
+  });
+
+  it("never passes another brand's logo", async () => {
+    db.profile = { locales: ["en"], assets: { logo: { key: "w9/b9/brand-logo.png" } } };
+    await saveStoryVersion(scope, "i1", 0, { ...input(), brandMark: true }, person);
+    expect(m.photo.mock.calls[0][1].logoKey).toBeUndefined();
+    expect(m.get).not.toHaveBeenCalled();
+  });
+});
+
+describe("saveStoryVersion with a clip, and the render job", () => {
+  const withClip = () => input([frame("p1"), frame("c1", { clip: { start: 2, sound: false } }), frame("p3")]);
+
+  it("queues the render with two attempts and saves no version yet", async () => {
+    const r = await saveStoryVersion(scope, "i1", 0, withClip(), person);
+    expect(r).toEqual({ status: "rendering" });
+    expect(db.versions).toHaveLength(0);
+    const job = m.enqueue.mock.calls[0][0];
+    expect(job).toMatchObject({ type: STORY_RENDER_JOB, workspaceId: "w1", brandId: "b1", maxAttempts: 2 });
+    expect(job.payload).toMatchObject({ itemId: "i1", baseVersion: 0, next: 0, cta: "Shop now", link: "https://shop.test/x", brandMark: false, actor: person });
+    expect(job.payload.frames[1]).toMatchObject({ mediaKey: "w1/b1/uploads/c1.mp4", mediaKind: "video", clip: { start: 2, sound: false } });
+  });
+
+  async function runAll() {
+    await saveStoryVersion(scope, "i1", 0, withClip(), person);
+    let job = m.enqueue.mock.calls.at(-1)![0];
+    for (;;) {
+      const before = m.enqueue.mock.calls.length;
+      await runStoryRender(job.payload);
+      if (m.enqueue.mock.calls.length === before) return;
+      job = m.enqueue.mock.calls.at(-1)![0];
+    }
+  }
+
+  it("renders one clip per run, then the photos, then saves the version and starts Quality", async () => {
+    await runAll();
+    expect(m.clip).toHaveBeenCalledTimes(1);
+    expect(m.photo).toHaveBeenCalledTimes(2);
+    expect(m.enqueue.mock.calls[1][0].payload.next).toBe(2);
+    expect(db.versions).toHaveLength(1);
+    expect(db.versions[0].body.frames[1]).toMatchObject({ renderedKey: "w1/b1/stories/c1.mp4.mp4", file: { durationSec: 15 } });
+    expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", trigger: "event", input: { itemId: "i1", version: 1 } }));
+  });
+
+  it("refuses with story.notEditable when the story is approved while the job runs", async () => {
+    await saveStoryVersion(scope, "i1", 0, withClip(), person);
+    const first = m.enqueue.mock.calls[0][0];
+    await runStoryRender(first.payload);
+    db.item!.status = "APPROVED";
+    await expect(runStoryRender(m.enqueue.mock.calls[1][0].payload)).rejects.toMatchObject({ status: 409, code: "story.notEditable" });
+    expect(db.versions).toHaveLength(0);
+  });
+
+  it("refuses with story.notEditable when the story is published while the job runs", async () => {
+    await saveStoryVersion(scope, "i1", 0, withClip(), person);
+    db.item!.status = "PUBLISHED";
+    await expect(runStoryRender(m.enqueue.mock.calls[0][0].payload)).rejects.toMatchObject({ status: 409, code: "story.notEditable" });
+    expect(m.clip).not.toHaveBeenCalled();
+    expect(db.versions).toHaveLength(0);
+  });
+
+  it("still edits a story that was already approved when it was saved", async () => {
+    db.item!.status = "APPROVED";
+    await runAll();
+    expect(db.versions).toHaveLength(1);
+    expect(db.item).toMatchObject({ status: "DRAFT_REVIEW", byHand: false });
+  });
+
+  it("refuses with story.stale when someone saved while the job ran", async () => {
+    await saveStoryVersion(scope, "i1", 0, withClip(), person);
+    await runStoryRender(m.enqueue.mock.calls[0][0].payload);
+    db.versions.push({ id: "v1", contentItemId: "i1", version: 1, body: { productIds: [] }, createdAt: new Date() });
+    await expect(runStoryRender(m.enqueue.mock.calls[1][0].payload)).rejects.toMatchObject({ status: 409, code: "story.stale" });
+    expect(db.versions).toHaveLength(1);
+  });
+
+  it("refunds an agent's charge once when the render finally fails, and not before", async () => {
+    const payload = { workspaceId: "w1", brandId: "b1", itemId: "i1", actor: agent };
+    await onStoryRenderFailure(payload, new Error("x"), false);
+    expect(m.refund).not.toHaveBeenCalled();
+    await onStoryRenderFailure(payload, new Error("x"), true);
+    expect(m.refund).toHaveBeenCalledTimes(1);
+    expect(m.refund).toHaveBeenCalledWith("w1", "c1");
+    await onStoryRenderFailure({ ...payload, actor: person }, new Error("x"), true);
+    expect(m.refund).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("storyRenderState", () => {
+  it("is rendering while a job for the item is pending or running", async () => {
+    m.jobFind.mockResolvedValueOnce({ id: "j1" });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: true });
+    expect(m.jobFind.mock.calls[0][0].where).toMatchObject({ type: STORY_RENDER_JOB, workspaceId: "w1", brandId: "b1", payload: { path: ["itemId"], equals: "i1" } });
+  });
+  it("reports the newest failed job's error since the last version", async () => {
+    m.jobFind.mockResolvedValueOnce(null).mockResolvedValueOnce({ lastError: "Error: Frame 2: the chosen part starts after the clip ends." });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false, error: "Frame 2: the chosen part starts after the clip ends." });
+  });
+});
+
+describe("saveDraft", () => {
+  it("refuses a story with 400 story.useEditStory", async () => {
+    await expect(saveDraft({ ...scope, itemId: "i1", version: 0, body: { hook: "", caption: "x", hashtags: [], slides: [], script: [], pinTitle: "", altText: "" } }))
+      .rejects.toMatchObject({ status: 400, code: "story.useEditStory" });
+  });
+});
+
+describe("storyTab", () => {
+  it.each([
+    ["PLANNED", false, [], "drafts"],
+    ["BRIEF_READY", false, [], "drafts"],
+    ["DRAFT_REVIEW", false, [], "drafts"],
+    ["AWAITING_APPROVAL", false, [], "drafts"],
+    ["REJECTED", false, [], "drafts"],
+    ["BLOCKED", false, [], "drafts"],
+    ["APPROVED", false, [], "drafts"],
+    ["APPROVED", true, [], "scheduled"],
+    ["SCHEDULED", false, [], "scheduled"],
+    ["SCHEDULED", false, ["PARTIAL"], "posted"],
+    ["SCHEDULED", false, ["PENDING_VERIFY"], "posted"],
+    ["SCHEDULED", false, ["FAILED"], "scheduled"],
+    ["PUBLISHED", false, [], "posted"],
+  ] as const)("%s (byHand %s, attempts %j) → %s", (status, byHand, attempts, tab) => {
+    expect(storyTab({ status, byHand }, attempts.map((s) => ({ status: s })))).toBe(tab);
+  });
+});
+
+describe("deleteStory and duplicateStory", () => {
+  it("refuses to delete a scheduled story with 409", async () => {
+    db.item!.status = "SCHEDULED";
+    await expect(deleteStory(scope, "i1")).rejects.toMatchObject({ status: 409 });
+    expect(p.contentItem.delete).not.toHaveBeenCalled();
+  });
+  it("deletes a draft", async () => {
+    await deleteStory(scope, "i1");
+    expect(p.contentItem.delete).toHaveBeenCalledWith({ where: { id: "i1" } });
+  });
+  it("answers 404 for another brand's story", async () => {
+    await expect(deleteStory({ ...scope, brandId: "b2" }, "i1")).rejects.toMatchObject({ status: 404 });
+  });
+  it("duplicates as a planned story with the latest body minus render fields", async () => {
+    db.versions.push({ id: "v1", contentItemId: "i1", version: 1, createdAt: new Date(), body: { frames: [{ label: "", headline: "H", body: "", source: { kind: "upload", id: "p1" }, mediaKey: "w1/b1/uploads/p1.jpg", mediaKind: "photo", renderedKey: "w1/b1/stories/x.jpg", file: { width: 1, height: 1, bytes: 1 } }], cta: "", link: "", hook: "H", productIds: ["prod1"], brandMark: false } });
+    const copy = await duplicateStory(scope, "i1");
+    expect(copy.id).toBe("copy1");
+    expect(p.contentItem.create.mock.calls[0][0].data).toMatchObject({ workspaceId: "w1", brandId: "b1", channel: "INSTAGRAM_STORY", status: "PLANNED", productIds: ["prod1"], opportunityId: "o1" });
+    const v = db.versions.find((x) => x.contentItemId === "copy1")!;
+    expect(v.version).toBe(1);
+    expect(v.body.frames[0].renderedKey).toBeUndefined();
+    expect(v.body.frames[0].file).toBeUndefined();
+    expect(v.body.frames[0].mediaKey).toBe("w1/b1/uploads/p1.jpg");
+  });
+});
+
+describe("content route", () => {
+  const post = (body: object) =>
+    POST(new Request("http://x", { method: "POST", body: JSON.stringify(body) }), { params: Promise.resolve({ workspaceId: "w1", brandId: "b1", contentId: "i1" }) });
+  beforeEach(() => m.authorize.mockResolvedValue(scope));
+
+  it("editStory saves with content.create, starts Quality and returns the signed frames", async () => {
+    const story = { ...input(), frames: input().frames.map((f, i) => (i === 0 ? { ...f, renderedKey: "w9/b9/stories/evil.jpg" } : f)) };
+    const res = await post({ action: "editStory", version: 0, story });
+    expect(res.status).toBe(200);
+    expect(m.authorize.mock.calls[0][2]).toBe("content.create");
+    const json = await res.json();
+    expect(json).toMatchObject({ saved: "saved", rendering: false, renderError: null });
+    expect(json.frames[0]).toEqual({ n: 1, url: "https://signed/w1/b1/stories/p1.jpg.jpg", kind: "photo", headline: "Headline p1" });
+    expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", input: { itemId: "i1", version: 1 } }));
+  });
+
+  it("editStory refuses invalid input with the story code", async () => {
+    const res = await post({ action: "editStory", version: 0, story: { ...input(), link: "http://plain.test" } });
+    expect(res.status).toBe(400);
+    expect((await res.json()).code).toBe("story.invalid");
+  });
+
+  it("delete answers 204 for a draft; duplicate answers 201 with the new id", async () => {
+    expect((await post({ action: "duplicate" })).status).toBe(201);
+    expect((await post({ action: "delete" })).status).toBe(204);
+    expect(m.authorize.mock.calls.map((c) => c[2])).toEqual(["content.create", "content.create"]);
+  });
+});
