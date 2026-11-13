@@ -46,9 +46,19 @@ export function FrameStrip({
           >
             {f.url ? <Image source={{ uri: f.url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <Text style={styles.n}>{i + 1}</Text>}
           </Pressable>
-          {/* 20 px inside the thumbnail's corner; hitSlop keeps the target 44 px. */}
-          <Pressable accessibilityRole="button" accessibilityLabel={t("stories.editor.frameOptions", { n: i + 1 })} hitSlop={12} disabled={disabled} onPress={() => onMenu(i)} style={styles.more}>
-            <Ellipsis size={12} color={color.onPrimary} strokeWidth={2} />
+          {/* A 20 px badge in the thumbnail's corner on a 36 px target inside the thumbnail (Android doesn't hit-test
+              slop past the parent's edges), plus hitSlop on the inner sides. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("stories.editor.frameOptions", { n: i + 1 })}
+            hitSlop={{ left: 8, bottom: 8 }}
+            disabled={disabled}
+            onPress={() => onMenu(i)}
+            style={styles.more}
+          >
+            <View style={styles.badge}>
+              <Ellipsis size={12} color={color.onPrimary} strokeWidth={2} />
+            </View>
           </Pressable>
         </View>
       ))}
@@ -62,8 +72,11 @@ export function FrameStrip({
 }
 
 type T = ReturnType<typeof useTranslation<"posts">>["t"];
-const frameLabel = (t: T, f: StripFrame, i: number, total: number) =>
-  t(f.kind === "video" ? "stories.detail.frameLabelVideo" : "stories.detail.frameLabel", { n: i + 1, total, headline: f.headline });
+/** "Frame 2 of 4, video: <headline>", without the headline part when it's empty. */
+export const frameLabel = (t: T, f: StripFrame, i: number, total: number) =>
+  f.headline.trim()
+    ? t(f.kind === "video" ? "stories.detail.frameLabelVideo" : "stories.detail.frameLabel", { n: i + 1, total, headline: f.headline })
+    : t(f.kind === "video" ? "stories.editor.frameLabelVideoEmpty" : "stories.editor.frameLabelEmpty", { n: i + 1, total });
 
 /**
  * A frame's menu as a bottom sheet: Move left, Move right (only where the frame can go) and Remove frame. A row runs
@@ -106,7 +119,8 @@ const styles = StyleSheet.create({
   thumb: { width: W, height: (W * 16) / 9, borderRadius: radius.badge, overflow: "hidden", backgroundColor: "#2A2533", borderWidth: 1, borderColor: "rgba(255,255,255,0.25)", alignItems: "center", justifyContent: "center" },
   thumbOn: { borderWidth: 2, borderColor: color.onPrimary },
   n: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: color.onPrimary },
-  more: { position: "absolute", top: 3, right: 3, width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.6)" },
+  more: { position: "absolute", top: 0, right: 0, width: 36, height: 36, padding: 3, alignItems: "flex-end" },
+  badge: { width: 20, height: 20, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.6)" },
   add: { borderStyle: "dashed" },
   menuHead: { flexDirection: "row", alignItems: "center", gap: space[12], paddingBottom: space[12] },
   menuThumb: { width: 27, height: 48, borderRadius: 6, overflow: "hidden", backgroundColor: color.divider, alignItems: "center", justifyContent: "center" },

@@ -37,6 +37,7 @@ export function StoryPreview({ frame, isLast, cta, brandMark, editing, url, sour
   const picture = live && sourceUrl ? sourceUrl : url;
   const top = brandMark && brand?.logoUrl ? Math.max(t.textTop, t.safe.top + t.brandMark.height + t.gaps.brandMarkToText) : t.textTop;
   const headline = headlineSize(frame.headline) ?? t.headline.minSize;
+  // render.ts draws its "bold" layers with Inter SemiBold (fontFor), the same face as font.semibold.
   const text = (size: number, semibold: boolean) => ({ fontFamily: semibold ? font.semibold : font.regular, fontSize: size * s, lineHeight: size * s * t.lineHeight, color: "#FFFFFF", textAlign: "center" as const });
 
   return (

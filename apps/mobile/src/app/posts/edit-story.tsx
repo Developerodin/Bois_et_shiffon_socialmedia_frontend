@@ -16,8 +16,8 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { BusinessChip, glass, PageHeader, PostsScreen } from "@/ui/posts/chrome";
 import { reloadPosts, usePosts } from "@/ui/posts/use-posts";
 import { useWorkingPoll } from "@/ui/posts/use-working-poll";
-import { storyError } from "@/ui/stories/errors";
-import { FrameMenu, FrameStrip } from "@/ui/stories/frame-strip";
+import { storyCodeText, storyError } from "@/ui/stories/errors";
+import { FrameMenu, frameLabel, FrameStrip } from "@/ui/stories/frame-strip";
 import { STORY_LIMITS, textFits } from "@/ui/stories/limits";
 import { StoryPreview } from "@/ui/stories/preview";
 import { usePermissions } from "@/ui/use-permissions";
@@ -25,8 +25,12 @@ import { usePermissions } from "@/ui/use-permissions";
 /** A frame being edited; `from` is its index in the saved version (its rendered picture), -1 for a new one. */
 type EditFrame = StoryFrameInput & { from: number };
 type Draft = { frames: EditFrame[]; cta: string; link: string; brandMark: boolean };
-/** `key` names the field last typed in, so a run of keystrokes in one field is one change for Undo. */
-type Edits = { draft: Draft; history: Draft[]; key: string | null };
+/**
+ * `key` names the field last typed in, so a run of keystrokes in one field is one change for Undo. `base` is the
+ * version the edits started from: the save is checked against it, so someone else's newer save is never overwritten
+ * (the shared posts list, and with it `version`, moves on whenever any screen reloads it).
+ */
+type Edits = { draft: Draft; history: Draft[]; key: string | null; base: number };
 type Tool = "text" | "image" | "brand" | "cta";
 
 const EDITABLE = ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"];
@@ -90,7 +94,7 @@ export default function EditStory() {
   const disablePrevention = usePreventRemove(changed, ({ repeat }) => setLeaving(() => repeat));
 
   if (!story || !draft || !saved || version === null) {
-    const failed = error ? t("stories.detail.loadFailed") : story ? t("detail.noDraft") : !loading && all ? t("stories.errors.notFound") : null;
+    const failed = error ? t("stories.detail.loadFailed") : story ? t("stories.editor.noDraft") : !loading && all ? t("stories.errors.notFound") : null;
     return (
       <PostsScreen header={<PageHeader title={t("stories.editStory")} />} contentStyle={{ padding: space[16] }}>
         {failed ? <Text style={type.body}>{failed}</Text> : <PageLoading photo />}
@@ -122,12 +126,13 @@ export default function EditStory() {
 
   const change = (next: Draft, key: string | null = null) => {
     const history = active && key !== null && active.key === key ? active.history : [...(active?.history ?? []), draft];
-    setEdits({ draft: next, history, key });
+    setEdits({ draft: next, history, key, base: active?.base ?? version });
     setSavedFrom(null);
   };
   const undo = () => {
     const h = active?.history ?? [];
-    setEdits(h.length > 1 ? { draft: h[h.length - 1], history: h.slice(0, -1), key: null } : null);
+    // h[0] is the version the edits started from, so undoing the first change drops the edits altogether.
+    setEdits(active && h.length > 1 ? { ...active, draft: h[h.length - 1], history: h.slice(0, -1), key: null } : null);
   };
   const setFrame = (patch: Partial<StoryFrameInput>, field: string) =>
     change({ ...draft, frames: frames.map((f, i) => (i === at ? { ...f, ...patch } : f)) }, `${field}:${at}`);
@@ -146,10 +151,11 @@ export default function EditStory() {
     setBusy(true);
     setSaveError(null);
     try {
-      const r = await stories.editStory(story.id, version, toInput(draft));
+      const r = await stories.editStory(story.id, active?.base ?? version, toInput(draft));
       setRelease(r);
-      setSavedFrom({ version, rendering: r.saved === "rendering" });
-      setEdits({ draft, history: [], key: null });
+      setSavedFrom({ version: active?.base ?? version, rendering: r.saved === "rendering" });
+      // The history stays: if a clip's render fails, Undo still steps back one change at a time.
+      if (active) setEdits({ ...active, key: null });
       void reloadPosts();
       return true;
     } catch (e) {
@@ -168,12 +174,11 @@ export default function EditStory() {
     if (changed && !(await save())) return;
     openStory();
   };
-  const back = () => (router.canGoBack() ? router.back() : openStory());
+  // Nothing behind the editor (a deep link): openStory skips the discard check, so ask here first.
+  const back = () => (router.canGoBack() ? router.back() : changed ? setLeaving(() => openStory) : openStory());
 
   // Fit 9:16 into the space between the header and the tools below: letterboxed on short phones.
   const pw = Math.min(area.width, (area.height * 9) / 16);
-  const label = (f: EditFrame, i: number) =>
-    t(kindOf(f) === "video" ? "stories.detail.frameLabelVideo" : "stories.detail.frameLabel", { n: i + 1, total: frames.length, headline: f.headline });
   const tools: { key: Tool; Icon: typeof Type; off?: boolean }[] = [
     { key: "text", Icon: Type, off: !frame },
     // TODO(Task 17): the Image tool opens the picker.
@@ -181,8 +186,15 @@ export default function EditStory() {
     { key: "brand", Icon: BadgeCheck },
     { key: "cta", Icon: MousePointer2 },
   ];
-  const strip = frames.map((f, i) => ({ url: urlOf(f), kind: kindOf(f), headline: f.headline || String(i + 1) }));
-  const status = rendering ? (slow ? t("detail.slow") : t("stories.detail.preparing")) : (saveError ?? problem ?? (!editable ? t("stories.editor.readOnly") : null));
+  const strip = frames.map((f) => ({ url: urlOf(f), kind: kindOf(f), headline: f.headline }));
+  // Someone else saved since these edits started: saving now is refused (story.stale).
+  const stale = !!active && version !== active.base && !savedFrom;
+  const failure = renderFailed ? storyCodeText(release?.renderErrorCode, release?.renderError ?? "") : (saveError ?? (stale ? t("stories.errors.stale") : null));
+  const status = rendering
+    ? slow
+      ? t("detail.slow")
+      : t("stories.detail.preparing")
+    : (failure ?? problem ?? (!editable ? t("stories.editor.readOnly") : null));
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -210,7 +222,7 @@ export default function EditStory() {
               sourceUrl={frame.from >= 0 ? (release?.frames[frame.from]?.sourceUrl ?? null) : null}
               fresh={fresh(frame, at)}
               width={pw}
-              accessibilityLabel={label(frame, at)}
+              accessibilityLabel={frameLabel(t, strip[at], at, frames.length)}
             />
           ) : pw > 0 ? (
             <View style={[styles.empty, { width: pw, height: (pw * 16) / 9 }]}>
@@ -294,7 +306,7 @@ export default function EditStory() {
                 </Text>
               </View>
               {status ? (
-                <Text accessibilityLiveRegion="polite" style={[type.meta, { color: saveError || problem ? "#FCA5A5" : color.onPrimary, textAlign: "center" }]}>
+                <Text accessibilityLiveRegion="polite" style={[type.meta, { color: failure || problem ? "#FCA5A5" : color.onPrimary, textAlign: "center" }]}>
                   {status}
                 </Text>
               ) : null}
