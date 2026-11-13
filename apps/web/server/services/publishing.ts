@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { aiDisclosureLine, needsAiDisclosure } from "@/server/reels/plan";
 import type { ApprovalVerdict, ContentChannel, IntegrationProvider, Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
-import { PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
+import { instagramPublishingLimit, PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
 import { enqueueJob } from "@/server/jobs/queue";
 import { accessToken, markReconnect, ReconnectNeeded } from "@/server/services/connections";
 import { safeHttpUrl } from "@/lib/website";
@@ -14,6 +14,8 @@ import { campaignKind, isWithdrawn, offerIssues, offerSnapshotOf, wallTime } fro
 import { liveOfferFor, productIdsForPhoto } from "@/server/content/knowledge";
 import { hitRateLimit } from "@/server/auth/rate-limit";
 import { signedMediaUrl } from "@/server/storage/media";
+import type { StoryBody } from "@/server/stories/body";
+import { attemptOutcome, expiredFrames, type FrameProgress, nextFramesToPublish, publishingLimitRoom, settleStoryFrame, unconfirmedMessage, withFrame } from "@/server/stories/publish";
 
 /**
  * Approval → publishing (design §6 "sealed package", DEC-015/016). Rules:
@@ -63,6 +65,26 @@ export function publishRequirements(channel: ContentChannel) {
 
 /** Where the post's media lives: our private uploads (signed at posting time) and/or public links. */
 type Target = { boardId: string | null; imageUrl?: string | null; media?: string[]; links?: string[]; videoUrl?: string | null; videoKey?: string | null };
+/**
+ * A story attempt posts the frames of its sealed version (no media in the target). `progress`: every frame this
+ * attempt or an earlier one of the same story posted, and the one in flight (see server/stories/publish.ts).
+ * `errorCode`: the stable code of the attempt's refusal, for the apps.
+ */
+type StoryTarget = { story: true; frames: number; progress: FrameProgress; errorCode?: string };
+const storyTargetOf = (t: unknown): StoryTarget | null => (t && typeof t === "object" && (t as StoryTarget).story === true && Array.isArray((t as StoryTarget).progress) ? (t as StoryTarget) : null);
+const postedCount = (progress: FrameProgress) => progress.filter((f) => f.state === "published").length;
+
+/** The story's frames as approved, refused unless every one has its rendered file. Nothing is sent before this holds. */
+function readyFrames(body: unknown) {
+  const frames = (body as Partial<StoryBody> | null)?.frames ?? [];
+  if (!frames.length || frames.some((f) => !f.renderedKey)) {
+    throw new PublishingError("Every frame needs its finished picture or clip before the story can go out. Nothing was posted.", 409, "story.framesNotReady");
+  }
+  return frames as (StoryBody["frames"][number] & { renderedKey: string })[];
+}
+const BUSINESS_ONLY = "Instagram only lets business accounts post stories this way. Post it by hand, or switch the account to Business.";
+// ponytail: Graph's wording for a non-business account isn't documented for stories; matched loosely, checked on the first live run.
+const NOT_BUSINESS = /business|professional account|creator account/i;
 
 /**
  * The posted text. A reel made with an AI presenter or a cloned voice always says so, in its own language (it can't be
@@ -281,7 +303,8 @@ export async function decide(input: {
       },
     });
     const status = input.verdict === "APPROVED" ? "APPROVED" : input.verdict === "REJECTED" ? "REJECTED" : "DRAFT_REVIEW";
-    await tx.contentItem.update({ where: { id: item.id }, data: { status } });
+    // Leaving APPROVED ends a story's Post by hand (only stories ever set byHand).
+    await tx.contentItem.update({ where: { id: item.id }, data: { status, ...(item.byHand && status !== "APPROVED" ? { byHand: false } : {}) } });
     await tx.auditEvent.create({
       data: {
         workspaceId: input.workspaceId, brandId: input.brandId, actorUserId: input.userId,
@@ -335,45 +358,55 @@ export async function schedulePublication(input: {
       where: { id: input.connectionId, brandId: input.brandId, provider: req.provider, status: "ACTIVE" },
     });
     if (!conn) throw new PublishingError("Choose a connected account for this channel", 400);
-    const https = (u: string) => {
-      const h = safeHttpUrl(u.trim())?.href;
-      return h?.startsWith("https://") ? h : null;
-    };
-    const rawLinks = [...(input.imageLinks ?? []), ...(input.imageUrl?.trim() ? [input.imageUrl] : [])].filter((u) => u.trim());
-    const links = rawLinks.map(https);
-    if (links.some((l) => !l)) throw new PublishingError("Image links must be public https:// addresses", 400);
-    const media = input.mediaKeys ?? [];
-    if (media.some((k) => !ownMediaKey(input, k))) throw new PublishingError("Unknown image", 400);
-    // A draft that names its pictures (photoKeys) posts those: the approval covered them, not other files.
-    const approvedPhotos = (latest.body as { photoKeys?: string[] }).photoKeys;
-    if (approvedPhotos && media.some((k) => !approvedPhotos.includes(k))) throw new PublishingError("Post the photos on the approved draft, or edit the post first", 400);
-    const count = media.length + links.length;
-    if (count < req.minImages) throw new PublishingError(req.minImages === 1 ? "This channel needs an image" : `A carousel needs at least ${req.minImages} images`, 400);
-    if (count > req.maxImages) throw new PublishingError(req.maxImages === 0 ? "Reels take a video, not images" : `This channel takes at most ${req.maxImages} image${req.maxImages === 1 ? "" : "s"}`, 400);
-    if (req.provider === "INSTAGRAM" && media.some((k) => !/\.jpe?g$/i.test(k))) throw new PublishingError("Instagram only accepts JPEG photos. Upload a .jpg instead.", 400);
-    // A studio reel posts the video that was approved, from our storage, signed at posting time.
-    const videoKey = item.studio ? ((latest.body as { videoKey?: string }).videoKey ?? null) : null;
-    if (item.studio && input.videoUrl?.trim()) throw new PublishingError("This reel posts its own video", 400);
-    if (item.studio && !videoKey) throw new PublishingError("This reel has no video yet", 400);
-    const videoUrl = input.videoUrl?.trim() ? https(input.videoUrl) : null;
-    if (input.videoUrl?.trim() && !videoUrl) throw new PublishingError("The video link must be a public https:// address", 400);
-    if (req.needsVideo && !videoUrl && !videoKey) throw new PublishingError("A Reel needs a video link", 400);
-    const imageUrl = links[0] ?? null;
-    if (req.needsBoard && !input.boardId) throw new PublishingError("Choose a board", 400);
-    const limit = TEXT_LIMIT[item.channel];
-    if (limit && postText(latest.body as Body).length > limit) throw new PublishingError(`The text is over this channel's ${limit}-character limit`, 400);
+    const story = item.channel === "INSTAGRAM_STORY";
+    let target: Target | StoryTarget;
+    if (story) {
+      if (input.boardId || input.imageUrl?.trim() || input.imageLinks?.length || input.mediaKeys?.length || input.videoUrl?.trim()) throw new PublishingError("A story posts its own frames", 400, "story.ownFrames");
+      target = { story: true, frames: readyFrames(latest.body).length, progress: [] };
+    } else {
+      const https = (u: string) => {
+        const h = safeHttpUrl(u.trim())?.href;
+        return h?.startsWith("https://") ? h : null;
+      };
+      const rawLinks = [...(input.imageLinks ?? []), ...(input.imageUrl?.trim() ? [input.imageUrl] : [])].filter((u) => u.trim());
+      const links = rawLinks.map(https);
+      if (links.some((l) => !l)) throw new PublishingError("Image links must be public https:// addresses", 400);
+      const media = input.mediaKeys ?? [];
+      if (media.some((k) => !ownMediaKey(input, k))) throw new PublishingError("Unknown image", 400);
+      // A draft that names its pictures (photoKeys) posts those: the approval covered them, not other files.
+      const approvedPhotos = (latest.body as { photoKeys?: string[] }).photoKeys;
+      if (approvedPhotos && media.some((k) => !approvedPhotos.includes(k))) throw new PublishingError("Post the photos on the approved draft, or edit the post first", 400);
+      const count = media.length + links.length;
+      if (count < req.minImages) throw new PublishingError(req.minImages === 1 ? "This channel needs an image" : `A carousel needs at least ${req.minImages} images`, 400);
+      if (count > req.maxImages) throw new PublishingError(req.maxImages === 0 ? "Reels take a video, not images" : `This channel takes at most ${req.maxImages} image${req.maxImages === 1 ? "" : "s"}`, 400);
+      if (req.provider === "INSTAGRAM" && media.some((k) => !/\.jpe?g$/i.test(k))) throw new PublishingError("Instagram only accepts JPEG photos. Upload a .jpg instead.", 400);
+      // A studio reel posts the video that was approved, from our storage, signed at posting time.
+      const videoKey = item.studio ? ((latest.body as { videoKey?: string }).videoKey ?? null) : null;
+      if (item.studio && input.videoUrl?.trim()) throw new PublishingError("This reel posts its own video", 400);
+      if (item.studio && !videoKey) throw new PublishingError("This reel has no video yet", 400);
+      const videoUrl = input.videoUrl?.trim() ? https(input.videoUrl) : null;
+      if (input.videoUrl?.trim() && !videoUrl) throw new PublishingError("The video link must be a public https:// address", 400);
+      if (req.needsVideo && !videoUrl && !videoKey) throw new PublishingError("A Reel needs a video link", 400);
+      const imageUrl = links[0] ?? null;
+      if (req.needsBoard && !input.boardId) throw new PublishingError("Choose a board", 400);
+      const limit = TEXT_LIMIT[item.channel];
+      if (limit && postText(latest.body as Body).length > limit) throw new PublishingError(`The text is over this channel's ${limit}-character limit`, 400);
+      target = { boardId: input.boardId ?? null, imageUrl, media, links: links as string[], videoUrl, videoKey } satisfies Target;
+    }
 
     const live = await tx.publicationAttempt.findFirst({ where: { contentVersionId: latest.id, connectionId: conn.id, status: LIVE } });
+    if (live?.status === "PARTIAL") throw new PublishingError("Part of this story is already posted. Post the rest or mark it done.", 409, "story.partlyPosted");
     if (live) throw new PublishingError(live.status === "PUBLISHED" ? "Already published to this account" : "Already scheduled for this account");
 
     const a = await tx.publicationAttempt.create({
       data: {
         workspaceId: input.workspaceId, brandId: input.brandId, contentItemId: item.id, contentVersionId: latest.id,
         packageHash: approval.packageHash, connectionId: conn.id, provider: conn.provider,
-        target: { boardId: input.boardId ?? null, imageUrl, media, links: links as string[], videoUrl, videoKey } satisfies Target, runAt, createdByUserId: input.userId,
+        target, runAt, createdByUserId: input.userId,
       },
     });
-    await tx.contentItem.update({ where: { id: item.id }, data: { status: "SCHEDULED", scheduledFor: runAt } });
+    // Scheduling a story ends its Post by hand.
+    await tx.contentItem.update({ where: { id: item.id }, data: { status: "SCHEDULED", scheduledFor: runAt, ...(story ? { byHand: false } : {}) } });
     await enqueueJob({ type: PUBLISH_JOB, workspaceId: input.workspaceId, brandId: input.brandId, payload: { attemptId: a.id }, runAt, maxAttempts: 1, idempotencyKey: `publish:${a.id}` }, tx);
     return a;
   }, TX);
@@ -387,7 +420,8 @@ export async function executePublication(payload: unknown) {
   if (claimed.count !== 1) return; // cancelled, or already handled
   const a = await prisma.publicationAttempt.findUniqueOrThrow({ where: { id: attemptId } });
   let overrideUsed = false;
-  const finish = (status: "PUBLISHED" | "FAILED" | "PENDING_VERIFY", data: Prisma.PublicationAttemptUpdateInput, itemStatus: "PUBLISHED" | "APPROVED" | "SCHEDULED" | "AWAITING_APPROVAL") =>
+  type ItemStatus = "PUBLISHED" | "APPROVED" | "SCHEDULED" | "AWAITING_APPROVAL";
+  const finish = (status: "PUBLISHED" | "FAILED" | "PENDING_VERIFY", data: Prisma.PublicationAttemptUpdateInput, itemStatus: ItemStatus) =>
     prisma.$transaction([
       prisma.publicationAttempt.update({ where: { id: a.id }, data: { status, ...data } }),
       prisma.contentItem.update({ where: { id: a.contentItemId }, data: { status: itemStatus } }),
@@ -395,12 +429,38 @@ export async function executePublication(payload: unknown) {
         data: { workspaceId: a.workspaceId, brandId: a.brandId, actorUserId: a.createdByUserId, action: `content.publish.${status.toLowerCase()}`, entityType: "PublicationAttempt", entityId: a.id, metadata: { provider: a.provider, overrideUsed } },
       }),
     ]);
+  // A story records its frames as it goes. Its every write needs the attempt still PUBLISHING: once the lost-job
+  // handler has settled it, a worker that is somehow still running can neither post another frame nor overwrite that.
+  const storyT = storyTargetOf(a.target);
+  let progress: FrameProgress = storyT?.progress ?? [];
+  const finishStory = (status: "PUBLISHED" | "PARTIAL" | "FAILED" | "PENDING_VERIFY", data: Prisma.PublicationAttemptUpdateManyMutationInput, itemStatus: ItemStatus, errorCode?: string) =>
+    prisma.$transaction(async (tx) => {
+      const { errorCode: _old, ...rest } = storyT!;
+      const target = { ...rest, progress, ...(errorCode ? { errorCode } : {}) };
+      const { count } = await tx.publicationAttempt.updateMany({ where: { id: a.id, status: "PUBLISHING" }, data: { status, ...data, target } });
+      if (count !== 1) return;
+      await tx.contentItem.update({ where: { id: a.contentItemId }, data: { status: itemStatus } });
+      await tx.auditEvent.create({
+        data: {
+          workspaceId: a.workspaceId, brandId: a.brandId, actorUserId: a.createdByUserId, action: `content.publish.${status.toLowerCase()}`, entityType: "PublicationAttempt", entityId: a.id,
+          metadata: { provider: a.provider, overrideUsed, posted: postedCount(progress), total: storyT!.frames },
+        },
+      });
+    }, TX);
+  /**
+   * Stopped before anything new was sent. A story attempt carrying frames posted earlier (Post the rest) stays PARTIAL
+   * and its item SCHEDULED, so Post the rest and Mark as done stay available; otherwise it is a plain FAILED.
+   */
+  const fail = (error: string, itemStatus: ItemStatus, errorCode?: string) =>
+    !storyT ? finish("FAILED", { error }, itemStatus)
+    : postedCount(progress) ? finishStory("PARTIAL", { error: `${postedCount(progress)} of ${storyT.frames} frames are posted. ${error}` }, "SCHEDULED", errorCode)
+    : finishStory("FAILED", { error }, itemStatus, errorCode);
 
   // Re-check the seal at the moment of posting: an edit after scheduling voids the approval.
   const { item, latest } = await loadItem(a, a.contentItemId);
   const approval = await currentApproval(item.id, latest, item.channel);
   if (!latest || latest.id !== a.contentVersionId || approval?.packageHash !== a.packageHash) {
-    await finish("FAILED", { error: "The draft changed after approval. Approve the new version, then publish again." }, "AWAITING_APPROVAL");
+    await fail("The draft changed after approval. Approve the new version, then publish again.", "AWAITING_APPROVAL");
     return;
   }
   overrideUsed = approval.productOverride !== null;
@@ -414,13 +474,13 @@ export async function executePublication(payload: unknown) {
     refusal = "Couldn't check the linked products. Nothing was posted. Try again.";
   }
   if (refusal) {
-    await finish("FAILED", { error: refusal }, "APPROVED");
+    await fail(refusal, "APPROVED");
     return;
   }
   const conn = await prisma.integrationConnection.findFirst({ where: { id: a.connectionId, status: "ACTIVE" } });
   const publisher = PUBLISHERS[a.provider];
   if (!conn?.encryptedCredentials || !publisher) {
-    await finish("FAILED", { error: "The account was disconnected or needs reconnecting. Reconnect it in Settings → Connections, then publish again." }, "APPROVED");
+    await fail("The account was disconnected or needs reconnecting. Reconnect it in Settings → Connections, then publish again.", "APPROVED");
     return;
   }
   // Refresh an expiring token before posting. Nothing has been sent yet, so any failure here is safe to retry.
@@ -431,7 +491,11 @@ export async function executePublication(payload: unknown) {
     const error = e instanceof ReconnectNeeded
       ? `${conn.displayName}'s access expired. Reconnect it in Settings → Connections, then publish again.`
       : "Couldn't reach the platform to refresh the account's access. Nothing was posted. Try again.";
-    await finish("FAILED", { error }, "APPROVED");
+    await fail(error, "APPROVED");
+    return;
+  }
+  if (storyT) {
+    await publishStory();
     return;
   }
   const body = latest.body as Body;
@@ -454,6 +518,91 @@ export async function executePublication(payload: unknown) {
     }
     else await finish("PENDING_VERIFY", { error: `We couldn't confirm whether it posted (${msg}). Check the account before trying again.` }, "SCHEDULED");
   }
+
+  /**
+   * Instagram story (spec "Going out"): the account's daily limit must have room for every frame still to post, then
+   * the publisher makes every container (nothing public) and publishes them in order, frame by frame. A frame is
+   * recorded "publishing" before its publish call and "published" with its media id after it, so whatever stops us,
+   * we know which frames are out and the one we can't be sure of.
+   */
+  async function publishStory() {
+    const st = storyT!;
+    let frames: ReturnType<typeof readyFrames>;
+    let todo: number[];
+    try {
+      frames = readyFrames(latest!.body);
+      if (frames.length !== st.frames) throw new PublishingError("The story's frames changed. Nothing was posted.", 409, "story.framesNotReady");
+      todo = nextFramesToPublish(st.frames, progress);
+    } catch (e) {
+      await fail(e instanceof Error ? e.message : "The frames aren't ready. Nothing was posted.", "APPROVED", e instanceof PublishingError ? e.code : "story.unconfirmed");
+      return;
+    }
+    const account = { id: conn!.externalAccountId, token };
+    let room: number;
+    let duration: number;
+    try {
+      const limit = await instagramPublishingLimit(account);
+      room = publishingLimitRoom(limit);
+      duration = limit.config.quota_duration;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      if (e instanceof PublishRefused && NOT_BUSINESS.test(msg)) await fail(BUSINESS_ONLY, "APPROVED", "story.businessOnly");
+      else await fail("Couldn't read Instagram's daily limit. Nothing was posted. Try again.", "APPROVED", "story.limitUnknown");
+      return;
+    }
+    if (room < todo.length) {
+      // A rolling 24 h window, and Instagram doesn't say when each use drops out: after one full window there is room.
+      const after = new Date(Date.now() + duration * 1000).toISOString().slice(0, 16).replace("T", " ");
+      await fail(`Instagram's daily limit leaves room for ${room} of ${todo.length} frames. Try after ${after} UTC.`, "APPROVED", "story.dailyLimit");
+      return;
+    }
+    const save = async (next: FrameProgress) => {
+      const { count } = await prisma.publicationAttempt.updateMany({ where: { id: a.id, status: "PUBLISHING" }, data: { target: { ...st, progress: next } } });
+      if (count !== 1) throw new Error("Publishing was stopped");
+    };
+    try {
+      // Signed just before the containers are made (all at once), valid an hour.
+      const urls = await Promise.all(frames.map((f, i) => (todo.includes(i) ? signedMediaUrl(f.renderedKey, 3600) : "")));
+      const res = await publisher!(
+        {
+          text: "", title: item.title, altText: "", link: null, imageUrl: null, imageUrls: [], videoUrl: null, boardId: null,
+          story: {
+            frames: frames.map((f, i) => ({ url: urls[i], kind: /\.mp4$/i.test(f.renderedKey) ? "video" : "photo" })),
+            skip: frames.map((_, i) => i).filter((i) => !todo.includes(i)),
+            // Kept in memory only once stored: if storing fails, the publish call isn't made.
+            onPublishing: async (i) => {
+              const next = withFrame(progress, i, { state: "publishing" });
+              await save(next);
+              progress = next;
+            },
+            // It is out whether or not storing works: kept in memory first.
+            onPublished: async (i, mediaId) => {
+              progress = withFrame(progress, i, { state: "published", mediaId, at: new Date().toISOString() });
+              await save(progress);
+            },
+          },
+        },
+        account,
+      );
+      if (attemptOutcome(st.frames, progress) !== "PUBLISHED") throw new Error("Not every frame was posted");
+      const first = progress.find((f) => f.i === 0)?.mediaId ?? res.externalId;
+      await finishStory("PUBLISHED", { externalId: first, externalUrl: safeHttpUrl(res.externalUrl)?.href ?? null, publishedAt: new Date(), error: null }, "PUBLISHED");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message.slice(0, 300) : "Unknown error";
+      if (e instanceof PublishRefused && /^401 |access token|OAuthException/i.test(msg)) await markReconnect(conn!.id, `The platform rejected the access (${msg.slice(0, 120)}). Reconnect ${conn!.displayName}.`);
+      const inFlight = progress.find((f) => f.state === "publishing");
+      // A publish call whose answer we didn't get: that frame may be out. A person checks it (settleFrame).
+      if (inFlight && !(e instanceof PublishRefused)) {
+        await finishStory("PENDING_VERIFY", { error: unconfirmedMessage(progress) }, "SCHEDULED");
+        return;
+      }
+      // Instagram refused that frame's publish: it isn't out.
+      if (inFlight) progress = withFrame(progress, inFlight.i, { state: "not-posted" });
+      const posted = postedCount(progress);
+      if (!posted && e instanceof PublishRefused && NOT_BUSINESS.test(msg)) await fail(BUSINESS_ONLY, "APPROVED", "story.businessOnly");
+      else await fail(posted ? `The next frame wasn't posted (${msg}).` : msg, "APPROVED", posted ? "story.partlyPosted" : "story.refused");
+    }
+  }
 }
 
 /**
@@ -462,10 +611,33 @@ export async function executePublication(payload: unknown) {
  */
 export async function onPublishJobLost(payload: unknown) {
   const { attemptId } = payload as { attemptId: string };
+  const a = await prisma.publicationAttempt.findFirst({ where: { id: attemptId, status: "PUBLISHING" } });
+  const st = storyTargetOf(a?.target);
+  if (a && st) return storyJobLost(a, st);
   await prisma.publicationAttempt.updateMany({
     where: { id: attemptId, status: "PUBLISHING" },
     data: { status: "PENDING_VERIFY", error: "Publishing stopped midway. Check the account before trying again." },
   });
+}
+
+/**
+ * A story's job stopped mid-run. A frame recorded "publishing" may be out: PENDING_VERIFY naming it. Without one, no
+ * publish call was in flight (each is recorded first, and every later write needs the attempt still PUBLISHING), so the
+ * frames recorded are exactly what's out: PARTIAL, or FAILED when none are.
+ */
+async function storyJobLost(a: { id: string; workspaceId: string; brandId: string; contentItemId: string; createdByUserId: string }, st: StoryTarget) {
+  const unsure = st.progress.some((f) => f.state === "publishing");
+  const posted = postedCount(st.progress);
+  const status = unsure ? "PENDING_VERIFY" : posted ? "PARTIAL" : "FAILED";
+  const error = unsure ? unconfirmedMessage(st.progress) : `Publishing stopped midway. ${posted ? `${posted} of ${st.frames} frames are posted.` : "Nothing was posted."}`;
+  await prisma.$transaction(async (tx) => {
+    const { count } = await tx.publicationAttempt.updateMany({ where: { id: a.id, status: "PUBLISHING" }, data: { status, error } });
+    if (count !== 1) return;
+    await tx.contentItem.update({ where: { id: a.contentItemId }, data: { status: status === "FAILED" ? "APPROVED" : "SCHEDULED" } });
+    await tx.auditEvent.create({
+      data: { workspaceId: a.workspaceId, brandId: a.brandId, actorUserId: a.createdByUserId, action: `content.publish.${status.toLowerCase()}`, entityType: "PublicationAttempt", entityId: a.id, metadata: { lost: true, posted, total: st.frames } },
+    });
+  }, TX);
 }
 
 /** Cancel a scheduled post, or settle a PENDING_VERIFY one after someone looked at the account. */
@@ -485,6 +657,18 @@ export async function settlePublication(input: {
     where: { id: input.attemptId, workspaceId: input.workspaceId, brandId: input.brandId, ...(input.itemId ? { contentItemId: input.itemId } : {}) },
   });
   if (!a) throw new PublishingError("Not found", 404);
+  const st = storyTargetOf(a.target);
+  // A story is settled frame by frame (settleFrame): "it didn't post" could otherwise let posted frames go out again.
+  if (st && input.action !== "cancel") throw new PublishingError("Say whether the unconfirmed frame appeared", 409, "story.settleFrame");
+  // Cancelling Post the rest goes back to the partly posted story, not to an approved one that could post every frame again.
+  if (st && postedCount(st.progress)) {
+    const { count } = await prisma.publicationAttempt.updateMany({ where: { id: a.id, status: "SCHEDULED" }, data: { status: "PARTIAL" } });
+    if (count !== 1) throw new PublishingError("It's no longer scheduled");
+    await prisma.auditEvent.create({
+      data: { workspaceId: a.workspaceId, brandId: a.brandId, actorUserId: input.userId, action: "content.publish.cancel", entityType: "PublicationAttempt", entityId: a.id, metadata: { posted: postedCount(st.progress), total: st.frames } },
+    });
+    return;
+  }
   const externalUrl = input.url ? safeHttpUrl(input.url)?.href ?? null : null;
   const { count } = await prisma.publicationAttempt.updateMany({
     where: { id: a.id, status: from },
@@ -495,6 +679,91 @@ export async function settlePublication(input: {
   await prisma.auditEvent.create({
     data: { workspaceId: a.workspaceId, brandId: a.brandId, actorUserId: input.userId, action: `content.publish.${input.action}`, entityType: "PublicationAttempt", entityId: a.id, metadata: {} },
   });
+}
+
+type AttemptRef = { workspaceId: string; brandId: string; userId: string; itemId: string; attemptId: string };
+
+/** The item's story attempt, scoped to the brand and the item; 404 otherwise. Call under the item's lock. */
+async function storyAttempt(tx: Prisma.TransactionClient, input: AttemptRef) {
+  const a = await tx.publicationAttempt.findFirst({ where: { id: input.attemptId, workspaceId: input.workspaceId, brandId: input.brandId, contentItemId: input.itemId } });
+  const st = storyTargetOf(a?.target);
+  if (!a || !st) throw new PublishingError("Not found", 404);
+  return { a, st };
+}
+const audit = (tx: Prisma.TransactionClient, input: AttemptRef, action: string, entityId: string, metadata: Prisma.InputJsonValue) =>
+  tx.auditEvent.create({ data: { workspaceId: input.workspaceId, brandId: input.brandId, actorUserId: input.userId, action, entityType: "PublicationAttempt", entityId, metadata } });
+
+/**
+ * A person looked at the account: did the unconfirmed frame (0-based) appear? The attempt becomes PUBLISHED when that
+ * was the last frame missing, PARTIAL when some are out, FAILED (item back to APPROVED) when none are.
+ */
+export async function settleFrame(input: AttemptRef & { frame: number; appeared: boolean }) {
+  return prisma.$transaction(async (tx) => {
+    await lock(tx, input.itemId);
+    const { a, st } = await storyAttempt(tx, input);
+    if (a.status !== "PENDING_VERIFY" || !st.progress.some((f) => f.i === input.frame && f.state === "publishing")) {
+      throw new PublishingError("This frame was already settled. Reload the story.", 409, "story.alreadyHandled");
+    }
+    const progress = settleStoryFrame(st.progress, input.frame, input.appeared);
+    const status = attemptOutcome(st.frames, progress);
+    const posted = postedCount(progress);
+    const { count } = await tx.publicationAttempt.updateMany({
+      where: { id: a.id, status: "PENDING_VERIFY" },
+      data: {
+        status, target: { ...st, progress },
+        ...(status === "PUBLISHED" ? { publishedAt: new Date(), externalId: progress.find((f) => f.i === 0)?.mediaId ?? a.externalId, error: null } : {}),
+        ...(status === "PARTIAL" ? { error: `${posted} of ${st.frames} frames are posted.` } : {}),
+        ...(status === "FAILED" ? { error: "Checked: it didn't post. You can publish again." } : {}),
+      },
+    });
+    if (count !== 1) throw new PublishingError("This frame was already settled. Reload the story.", 409, "story.alreadyHandled");
+    await tx.contentItem.update({ where: { id: a.contentItemId }, data: { status: status === "PUBLISHED" ? "PUBLISHED" : status === "PARTIAL" ? "SCHEDULED" : "APPROVED" } });
+    await audit(tx, input, "content.publish.settle-frame", a.id, { frame: input.frame + 1, appeared: input.appeared, posted, total: st.frames });
+  }, TX);
+}
+
+/**
+ * Post the rest of a partly posted story: a new attempt carrying the frames that are out, which posts only the others
+ * after the usual seal and product gate (executePublication). One PARTIAL attempt makes at most one: the first call
+ * moves it to CANCELLED, so a second tap gets `story.alreadyHandled`. Frames over 24 h old have expired on Instagram:
+ * the person confirms first.
+ */
+export async function postRest(input: AttemptRef & { confirm?: boolean }) {
+  return prisma.$transaction(async (tx) => {
+    await lock(tx, input.itemId);
+    const { a, st } = await storyAttempt(tx, input);
+    if (a.status !== "PARTIAL") throw new PublishingError("This was already handled. Reload the story.", 409, "story.alreadyHandled");
+    const expired = expiredFrames(st.progress, new Date());
+    if (expired > 0 && !input.confirm) {
+      const left = st.frames - postedCount(st.progress);
+      throw new PublishingError(`${expired === 1 ? "Frame 1 has" : `Frames 1–${expired} have`} expired. Posting the rest makes a story of ${left} frame${left === 1 ? "" : "s"}.`, 409, "story.expiredConfirm");
+    }
+    const { count } = await tx.publicationAttempt.updateMany({ where: { id: a.id, status: "PARTIAL" }, data: { status: "CANCELLED" } });
+    if (count !== 1) throw new PublishingError("This was already handled. Reload the story.", 409, "story.alreadyHandled");
+    const progress = st.progress.filter((f) => f.state === "published");
+    const runAt = new Date();
+    const next = await tx.publicationAttempt.create({
+      data: {
+        workspaceId: a.workspaceId, brandId: a.brandId, contentItemId: a.contentItemId, contentVersionId: a.contentVersionId, packageHash: a.packageHash,
+        connectionId: a.connectionId, provider: a.provider, target: { story: true, frames: st.frames, progress } satisfies StoryTarget, runAt, createdByUserId: input.userId,
+      },
+    });
+    await enqueueJob({ type: PUBLISH_JOB, workspaceId: a.workspaceId, brandId: a.brandId, payload: { attemptId: next.id }, runAt, maxAttempts: 1, idempotencyKey: `publish:${next.id}` }, tx);
+    await audit(tx, input, "content.publish.post-rest", next.id, { from: a.id, posted: progress.length, total: st.frames, expired });
+    return next;
+  }, TX);
+}
+
+/** Leave a partly posted story as it is: the item counts as published, and the audit says how many frames went out. */
+export async function markDone(input: AttemptRef) {
+  return prisma.$transaction(async (tx) => {
+    await lock(tx, input.itemId);
+    const { a, st } = await storyAttempt(tx, input);
+    const { count } = await tx.publicationAttempt.updateMany({ where: { id: a.id, status: "PARTIAL" }, data: { status: "CANCELLED" } });
+    if (count !== 1) throw new PublishingError("This was already handled. Reload the story.", 409, "story.alreadyHandled");
+    await tx.contentItem.update({ where: { id: a.contentItemId }, data: { status: "PUBLISHED" } });
+    await audit(tx, input, "content.publish.partial-done", a.id, { posted: postedCount(st.progress), total: st.frames });
+  }, TX);
 }
 
 /** Everything the post view needs: history, whether approval still holds, and where it can go. */
@@ -508,6 +777,13 @@ export async function releaseState(scope: { workspaceId: string; brandId: string
   // ponytail: a crashed worker leaves PUBLISHING forever; after 10 min treat it as unknown outcome.
   for (const a of attempts) {
     if (a.status === "PUBLISHING" && Date.now() - a.updatedAt.getTime() > 10 * 60_000) {
+      const st = storyTargetOf(a.target);
+      if (st) {
+        // A story is settled from its recorded frames (storyJobLost); read back what that decided.
+        await storyJobLost(a, st);
+        Object.assign(a, (await prisma.publicationAttempt.findFirst({ where: { id: a.id } })) ?? {});
+        continue;
+      }
       await prisma.publicationAttempt.updateMany({ where: { id: a.id, status: "PUBLISHING" }, data: { status: "PENDING_VERIFY", error: "Publishing stopped midway. Check the account before trying again." } });
       a.status = "PENDING_VERIFY";
     }
@@ -547,7 +823,12 @@ export async function releaseState(scope: { workspaceId: string; brandId: string
       id: d.id, verdict: d.verdict, note: d.note, by: who(d.userId), at: d.createdAt, current: d.verdict === "APPROVED" && d.packageHash === approval?.packageHash,
       version: d.contentVersionId === latest?.id ? latest.version : null, override: overrides.has(d.id) ? overrideNames(overrides.get(d.id)!) : null,
     })),
-    attempts: attempts.map((a) => ({ id: a.id, status: a.status, provider: a.provider, account: accountName.get(a.connectionId) ?? "Disconnected account", runAt: a.runAt, publishedAt: a.publishedAt, externalUrl: a.externalUrl, error: a.error, by: who(a.createdByUserId) })),
+    attempts: attempts.map((a) => {
+      // A story attempt also says which frames are out (0-based `i`), how many there are, and its refusal's code.
+      const st = storyTargetOf(a.target);
+      const story = st ? { frames: st.frames, progress: st.progress, code: st.errorCode ?? null } : {};
+      return { id: a.id, status: a.status, provider: a.provider, account: accountName.get(a.connectionId) ?? "Disconnected account", runAt: a.runAt, publishedAt: a.publishedAt, externalUrl: a.externalUrl, error: a.error, by: who(a.createdByUserId), ...story };
+    }),
     productIssues,
     // The post's campaign in brand time (`ends` null: a standing priority); null when it has none.
     campaign: c

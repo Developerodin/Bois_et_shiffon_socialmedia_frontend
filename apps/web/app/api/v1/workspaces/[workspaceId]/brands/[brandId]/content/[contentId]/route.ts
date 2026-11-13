@@ -7,7 +7,7 @@ import { pinterestBoards } from "@/server/integrations/publishers";
 import { kickRunner } from "@/server/jobs/runner";
 import { accessToken } from "@/server/services/connections";
 import { autoPublish } from "@/server/services/automations";
-import { decide, postAiAllowed, PublishingError, releaseState, saveDraft, schedulePublication, settlePublication } from "@/server/services/publishing";
+import { decide, markDone, postAiAllowed, postRest, PublishingError, releaseState, saveDraft, schedulePublication, settleFrame, settlePublication } from "@/server/services/publishing";
 import { parseStoryInput } from "@/server/stories/body";
 import { deleteStory, duplicateStory, failStoryStart, reopenStoryWrite, saveStoryVersion, STORY_START_NOTE, storyView } from "@/server/stories/service";
 
@@ -45,11 +45,16 @@ const Action = z.discriminatedUnion("action", [
   z.object({ action: z.literal("rewrite"), version: z.number().int().min(0) }),
   // A story's save: `story` is checked by parseStoryInput (which also strips server fields).
   z.object({ action: z.literal("editStory"), version: z.number().int().min(0), story: z.unknown() }),
+  // A partly posted story: post the frames still missing (confirm: go ahead although posted frames expired), leave it
+  // as it is, or say whether the unconfirmed frame (0-based) appeared.
+  z.object({ action: z.literal("postRest"), attemptId: z.string().min(1), confirm: z.boolean().optional() }),
+  z.object({ action: z.literal("markDone"), attemptId: z.string().min(1) }),
+  z.object({ action: z.literal("settleFrame"), attemptId: z.string().min(1), frame: z.number().int().min(0).max(4), appeared: z.boolean() }),
   z.object({ action: z.literal("duplicate") }),
   z.object({ action: z.literal("delete") }),
 ]);
 
-const PERMISSION = { rewrite: "content.create", edit: "content.create", editStory: "content.create", duplicate: "content.create", delete: "content.create", decide: "content.approve", publish: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
+const PERMISSION = { rewrite: "content.create", edit: "content.create", editStory: "content.create", duplicate: "content.create", delete: "content.create", decide: "content.approve", publish: "publish.execute", postRest: "publish.execute", markDone: "publish.execute", settleFrame: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
 
 /** Approval history, publishing history, and where this post can go (with Pinterest boards). */
 export async function GET(request: Request, context: Params) {
@@ -151,6 +156,13 @@ export async function POST(request: Request, context: Params) {
     } else if (body.action === "publish") {
       const a = await schedulePublication({ ...scope, itemId, version: body.version, connectionId: body.connectionId, boardId: body.boardId, imageUrl: body.imageUrl, imageLinks: body.imageLinks, mediaKeys: body.mediaKeys, videoUrl: body.videoUrl, runAt: body.runAt ? new Date(body.runAt) : undefined });
       if (a.runAt.getTime() <= Date.now() + 5_000) kickRunner();
+    } else if (body.action === "postRest") {
+      await postRest({ ...scope, itemId, attemptId: body.attemptId, confirm: body.confirm });
+      kickRunner();
+    } else if (body.action === "markDone") {
+      await markDone({ ...scope, itemId, attemptId: body.attemptId });
+    } else if (body.action === "settleFrame") {
+      await settleFrame({ ...scope, itemId, attemptId: body.attemptId, frame: body.frame, appeared: body.appeared });
     } else {
       await settlePublication({ ...scope, itemId, attemptId: body.attemptId, action: body.action, url: body.url });
     }

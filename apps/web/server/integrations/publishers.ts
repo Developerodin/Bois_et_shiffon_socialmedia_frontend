@@ -15,6 +15,19 @@ export type PostPayload = {
   imageUrls: string[]; // all images (carousels)
   videoUrl: string | null; // Reels
   boardId: string | null;
+  /** An Instagram story: one container per frame (see the INSTAGRAM publisher). */
+  story?: StoryPayload;
+};
+/**
+ * `frames`: every frame of the story, links signed just before the call; `skip`: frames already posted (their url may
+ * be empty). `onPublishing(i)` is awaited before frame i's media_publish (if it throws, nothing is sent for i);
+ * `onPublished(i, id)` right after it.
+ */
+export type StoryPayload = {
+  frames: { url: string; kind: "photo" | "video" }[];
+  skip: number[];
+  onPublishing(i: number): Promise<void>;
+  onPublished(i: number, mediaId: string): Promise<void>;
 };
 export type Published = { externalId: string; externalUrl: string | null };
 
@@ -65,6 +78,35 @@ export const PUBLISHERS: Partial<
 
   async INSTAGRAM(p, { id, token }) {
     const ready = (cid: string, tries?: number) => waitForContainer(`${IG}/${cid}?fields=FIELD&access_token=${encodeURIComponent(token)}`, "status_code", tries);
+    const permalink = (mediaId: string) => call<{ permalink?: string }>(`${IG}/${mediaId}?fields=permalink&access_token=${encodeURIComponent(token)}`).catch(() => ({ permalink: undefined }));
+    if (p.story) {
+      const { frames, skip, onPublishing, onPublished } = p.story;
+      const todo = frames.map((_, i) => i).filter((i) => !skip.includes(i));
+      // Phase 1: every container, waited for together (clips up to ~3 min). Nothing is public yet, so any error here,
+      // even a 5xx, means nothing was posted. allSettled: no polling is left running after a failure.
+      const made = await Promise.allSettled(todo.map(async (i) => {
+        const f = frames[i];
+        const c = await post(`${IG}/${id}/media`, { media_type: "STORIES", [f.kind === "video" ? "video_url" : "image_url"]: f.url, access_token: token });
+        await ready(c.id, f.kind === "video" ? 60 : undefined);
+        return c.id;
+      }));
+      const failed = made.find((r): r is PromiseRejectedResult => r.status === "rejected");
+      if (failed) {
+        const e = failed.reason;
+        throw e instanceof PublishRefused ? e : new PublishRefused(`The platform didn't take the frames (${e instanceof Error ? e.message : "error"}). Nothing was posted. Try again.`);
+      }
+      const containers = made.map((r) => (r as PromiseFulfilledResult<string>).value);
+      // Phase 2: publish in order, recording each frame before and after its call.
+      let first: string | null = null;
+      for (const [n, i] of todo.entries()) {
+        await onPublishing(i);
+        const res = await post(`${IG}/${id}/media_publish`, { creation_id: containers[n], access_token: token });
+        first ??= res.id;
+        await onPublished(i, res.id);
+      }
+      if (!first) throw new PublishRefused("There were no frames left to post");
+      return { externalId: first, externalUrl: (await permalink(first)).permalink ?? null };
+    }
     let c: { id: string };
     if (p.videoUrl) {
       // Reels: video processing takes longer (up to ~2.5 min, still within the job's time).
@@ -122,4 +164,14 @@ export async function pinterestBoards(token: string) {
     headers: { authorization: `Bearer ${token}` },
   });
   return res.items.map((b) => ({ id: b.id, name: b.name }));
+}
+
+/** The account's rolling 24 h API publishing limit (stories count toward it). A 4xx is a PublishRefused. */
+export async function instagramPublishingLimit(account: { id: string; token: string }) {
+  const res = await call<{ data?: { config?: { quota_total?: number; quota_duration?: number }; quota_usage?: number }[] }>(
+    `${IG}/${account.id}/content_publishing_limit?fields=config,quota_usage&access_token=${encodeURIComponent(account.token)}`,
+  );
+  const d = res.data?.[0];
+  if (typeof d?.config?.quota_total !== "number" || typeof d.quota_usage !== "number") throw new ProviderError("Instagram didn't say how much of its daily limit is left");
+  return { config: { quota_total: d.config.quota_total, quota_duration: d.config.quota_duration ?? 86_400 }, quota_usage: d.quota_usage };
 }
