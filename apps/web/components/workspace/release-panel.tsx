@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, Check, CircleAlert, ExternalLink, ImageUp, Send, ShieldCheck, Undo2, X } from "lucide-react";
+import { CalendarClock, Check, CircleAlert, Download, ExternalLink, ImageUp, Send, ShieldCheck, Undo2, X } from "lucide-react";
 import { ApiError, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,9 +151,16 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
             : "An issue stops this post. An approver or publisher needs to look at it."}
         </p>
       ) : status === "APPROVED" && data.approvalValid && data.requirements.frames ? (
-        <p className="text-sm text-muted-foreground">
-          {data.byHand && data.scheduledFor ? `Approved. Post by hand · ${when(data.scheduledFor)}.` : "Approved. A story is scheduled or posted by hand from the phone for now."}
-        </p>
+        canPublish ? (
+          <>
+            <PublishForm base={base} data={data} version={version!} onPublish={(b) => act({ action: "publish", version, ...b })} />
+            <StoryByHand base={base} id={id} data={data} onAct={act} />
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {data.byHand && data.scheduledFor ? `Approved. Post by hand · ${when(data.scheduledFor)}.` : "Approved. Someone who can publish will post it."}
+          </p>
+        )
       ) : status === "APPROVED" && data.approvalValid ? (
         canPublish ? (
           <PublishForm base={base} data={data} version={version!} onPublish={(b) => act({ action: "publish", version, ...b })} />
@@ -169,7 +176,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
       ) : status === "REJECTED" ? (
         <p className="text-sm text-muted-foreground">Rejected. Editing the draft sends it back through review.</p>
       ) : null}
-      <History data={data} canPublish={canPublish} onSettle={(attemptId, action, link) => act({ action, attemptId, ...(link ? { url: link } : {}) })} />
+      <History data={data} canPublish={canPublish} onSettle={(attemptId, action, link) => act({ action, attemptId, ...(link ? { url: link } : {}) })} onAct={act} />
     </section>
   );
 }
@@ -468,6 +475,78 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
   );
 }
 
+/**
+ * An approved story posted by a person: when it is due (Today shows it from then on), the frames as one zip, then
+ * "I posted it" with the story's link if they have it.
+ */
+function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data: Release; onAct: (body: Record<string, unknown>) => Promise<void> }) {
+  const [at, setAt] = useState("");
+  const [link, setLink] = useState("");
+  const [pending, setPending] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const due = data.byHand && data.scheduledFor ? data.scheduledFor : null;
+
+  async function run(key: string, fn: () => Promise<unknown>) {
+    setPending(key);
+    setError(null);
+    try {
+      await fn();
+    } catch (e) {
+      setError(errText(e));
+    } finally {
+      setPending(null);
+    }
+  }
+  // Fetched first (not a plain link) so a refusal shows its message here instead of downloading as a file.
+  // ponytail: the whole zip sits in memory as a blob; five long clips make a few hundred MB.
+  async function download() {
+    const res = await fetch(`${base}/stories/${encodeURIComponent(id)}/package?format=zip`, { cache: "no-store" });
+    if (!res.ok) {
+      const p = (await res.json().catch(() => null)) as { detail?: string; title?: string } | null;
+      throw new ApiError(res.status, p?.detail || p?.title || "The download didn’t start. Try again.");
+    }
+    const href = URL.createObjectURL(await res.blob());
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = `story-${id}.zip`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(href), 60_000);
+  }
+
+  return (
+    <div className="flex flex-col gap-3 border-t border-border pt-4">
+      <h3 className="text-sm font-medium">Or post it by hand</h3>
+      {due && <p className="text-sm">Post by hand · {when(due)}</p>}
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="byhand-at" className="text-sm">
+            {due ? "Change the time" : "Post by hand at"} <span className="text-muted-foreground">(empty: now)</span>
+          </label>
+          <Input id="byhand-at" type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} className="h-11 w-fit" />
+        </div>
+        <Button variant="outline" disabled={pending !== null} onClick={() => run("at", () => onAct({ action: "byHand", at: (at ? new Date(at) : new Date()).toISOString() }).then(() => setAt("")))}>
+          <CalendarClock aria-hidden /> {pending === "at" ? "Saving…" : due ? "Change time" : "Post by hand"}
+        </Button>
+        {due && (
+          <Button variant="ghost" disabled={pending !== null} onClick={() => run("off", () => onAct({ action: "byHand", at: null }))}>
+            {pending === "off" ? "Saving…" : "Stop posting by hand"}
+          </Button>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" disabled={pending !== null} onClick={() => run("zip", download)}>
+          <Download aria-hidden /> {pending === "zip" ? "Preparing…" : "Download frames"}
+        </Button>
+        <Input type="url" inputMode="url" aria-label="Story link (optional)" placeholder="Story link (optional)" value={link} onChange={(e) => setLink(e.target.value)} className="h-9 w-64 max-w-full" />
+        <Button disabled={pending !== null} onClick={() => run("posted", () => onAct({ action: "postedByHand", ...(link.trim() ? { url: link.trim() } : {}) }))}>
+          <Check aria-hidden /> {pending === "posted" ? "Saving…" : "I posted it"}
+        </Button>
+      </div>
+      {error && <p role="alert" className="flex items-start gap-2 text-sm text-destructive"><CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />{error}</p>}
+    </div>
+  );
+}
+
 const ATTEMPT: Record<Attempt["status"], { label: string; tone: string }> = {
   SCHEDULED: { label: "Scheduled", tone: "bg-primary/15 text-primary" },
   PUBLISHING: { label: "Publishing…", tone: "bg-primary/15 text-primary" },
@@ -479,10 +558,12 @@ const ATTEMPT: Record<Attempt["status"], { label: string; tone: string }> = {
 };
 const VERDICT: Record<Decision["verdict"], string> = { APPROVED: "approved", CHANGES_REQUESTED: "asked for changes to", REJECTED: "rejected" };
 
-function History({ data, canPublish, onSettle }: { data: Release; canPublish: boolean; onSettle: (attemptId: string, action: "cancel" | "posted" | "not-posted", link?: string) => Promise<void> }) {
+function History({ data, canPublish, onSettle, onAct }: { data: Release; canPublish: boolean; onSettle: (attemptId: string, action: "cancel" | "posted" | "not-posted", link?: string) => Promise<void>; onAct: (body: Record<string, unknown>) => Promise<void> }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
   const [link, setLink] = useState("");
+  // A partly posted story whose posted frames expired: the server said so; the next "Post the rest" confirms.
+  const [expiredOk, setExpiredOk] = useState<string | null>(null);
   const rows = [
     ...data.decisions.map((d) => ({ at: d.at, key: d.id, d, a: null as Attempt | null })),
     ...data.attempts.map((a) => ({ at: a.publishedAt ?? a.runAt, key: a.id, d: null as Decision | null, a })),
@@ -496,6 +577,21 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
     try {
       await onSettle(id, action, action === "posted" ? link.trim() : undefined);
     } catch (e) {
+      setError(errText(e));
+    } finally {
+      setPending(null);
+    }
+  }
+
+  // A story's own actions: post the rest, mark as done, say whether a frame appeared.
+  async function story(key: string, body: Record<string, unknown>) {
+    setPending(key);
+    setError(null);
+    try {
+      await onAct(body);
+      setExpiredOk(null);
+    } catch (e) {
+      if (e instanceof ApiError && e.code === "story.expiredConfirm") setExpiredOk(String(body.attemptId));
       setError(errText(e));
     } finally {
       setPending(null);
@@ -546,7 +642,24 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
                   </Button>
                 </span>
               )}
-              {canPublish && a.status === "PENDING_VERIFY" && (
+              {canPublish && a.frames !== undefined && a.status === "PARTIAL" && (
+                <span className="flex flex-wrap items-center gap-2">
+                  <Button size="sm" variant="outline" disabled={pending !== null} onClick={() => story(a.id + "rest", { action: "postRest", attemptId: a.id, ...(expiredOk === a.id ? { confirm: true } : {}) })}>
+                    {pending === a.id + "rest" ? "Posting…" : expiredOk === a.id ? "Post the rest anyway" : "Post the rest"}
+                  </Button>
+                  <Button size="sm" variant="ghost" disabled={pending !== null} onClick={() => story(a.id + "done", { action: "markDone", attemptId: a.id })}>
+                    {pending === a.id + "done" ? "Saving…" : "Mark as done"}
+                  </Button>
+                </span>
+              )}
+              {canPublish && a.frames !== undefined && a.status === "PENDING_VERIFY" && a.progress?.filter((f) => f.state === "publishing").map((f) => (
+                <span key={f.i} className="flex flex-wrap items-center gap-2">
+                  Did frame {f.i + 1} appear?
+                  <Button size="sm" variant="outline" disabled={pending !== null} onClick={() => story(a.id + "yes", { action: "settleFrame", attemptId: a.id, frame: f.i, appeared: true })}>Yes</Button>
+                  <Button size="sm" variant="outline" disabled={pending !== null} onClick={() => story(a.id + "no", { action: "settleFrame", attemptId: a.id, frame: f.i, appeared: false })}>No</Button>
+                </span>
+              ))}
+              {canPublish && a.frames === undefined && a.status === "PENDING_VERIFY" && (
                 <span className="flex flex-wrap items-center gap-2">
                   <Input type="url" inputMode="url" aria-label="Post link (optional)" placeholder="Post link (optional)" value={link} onChange={(e) => setLink(e.target.value)} className="h-9 w-64 max-w-full" />
                   <Button size="sm" variant="outline" disabled={pending !== null} onClick={() => settle(a.id, "posted")}>It&rsquo;s live</Button>

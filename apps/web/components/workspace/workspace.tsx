@@ -332,7 +332,20 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
             onShowPanel={showPanel}
           />
         ) : (
-          <Home user={user} agents={agents} agentsFailed={failed.agents} today={today} reports={reports} connections={connections} pipeline={pipeline} canRun={canRun} onOpen={open} onShowPanel={showPanel} onRetry={retry} />
+          <Home
+            user={user}
+            agents={agents}
+            agentsFailed={failed.agents}
+            today={today}
+            reports={reports}
+            connections={connections}
+            pipeline={pipeline}
+            canRun={canRun}
+            onOpen={open}
+            onShowPanel={showPanel}
+            onRetry={retry}
+            due={perms?.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={showPanel} /> : null}
+          />
         ),
     },
     {
@@ -692,7 +705,10 @@ function Home({
   onOpen,
   onShowPanel,
   onRetry,
+  due,
 }: {
+  /** The card for stories due to be posted by hand (people who can publish only). */
+  due: React.ReactNode;
   user: Props["user"];
   agents: AgentSummary[] | null;
   agentsFailed: boolean;
@@ -822,6 +838,7 @@ function Home({
             </span>
           )}
         </div>
+        {due}
         {open.length > 0 ? (
           <ul className="mt-4 divide-y divide-border rounded-xl border border-border">
             {open.slice(0, 5).map((t) => (
@@ -897,6 +914,53 @@ function Home({
         </details>
       </section>
     </div>
+  );
+}
+
+type DueStory = { id: string; title: string; scheduledFor: string };
+const pickDue = (d: { items: DueStory[] }) => d.items;
+const DAY_MS = 24 * 3600_000;
+
+/**
+ * Stories due to be posted by hand: one card with a count, until someone posts them or stops Post by hand. Dismiss hides
+ * it in this browser for a day (localStorage, per business; a blocked storage just means it can't stay dismissed).
+ */
+function DueStories({ base, onOpen, onShowPanel }: { base: string; onOpen: (v: View) => void; onShowPanel: (id: PanelId) => void }) {
+  const items = useBrandData(base, "stories/due", pickDue as (d: never) => DueStory[]).data;
+  const key = `stories-due-dismissed:${base}`;
+  // Read after mount: the server render has no localStorage.
+  const [dismissedAt, setDismissedAt] = useState<number | null>(null);
+  useEffect(() => {
+    try {
+      setDismissedAt(Number(localStorage.getItem(key)) || 0);
+    } catch {
+      setDismissedAt(0);
+    }
+  }, [key]);
+  if (!items?.length || dismissedAt === null || Date.now() - dismissedAt < DAY_MS) return null;
+  const dismiss = () => {
+    try {
+      localStorage.setItem(key, String(Date.now()));
+    } catch {
+      // Storage blocked: hidden until the page reloads.
+    }
+    setDismissedAt(Date.now());
+  };
+  const n = items.length;
+  return (
+    <section aria-label="Stories to post by hand" className="mt-4 flex items-center gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3">
+      <CalendarDays className="size-4 shrink-0 text-warning" aria-hidden="true" />
+      <p className="min-w-0 flex-1 truncate text-sm">
+        <span className="font-medium">{n} {n === 1 ? "story" : "stories"} to post by hand</span>
+        {n === 1 && <span className="text-muted-foreground"> · {items[0].title}</span>}
+      </p>
+      <Button size="sm" onClick={() => (n === 1 ? onOpen({ kind: "content", id: items[0].id }) : onShowPanel("content"))}>
+        Open
+      </Button>
+      <Button size="sm" variant="ghost" onClick={dismiss}>
+        Dismiss
+      </Button>
+    </section>
   );
 }
 
