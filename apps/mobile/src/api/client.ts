@@ -61,6 +61,8 @@ export const connection = {
 
 const PROBE_MS = 5_000;
 let probing = false;
+// Probes that found the server unreachable, so a waiter can tell a real outage from an at-once answer.
+let probeFailures = 0;
 async function probeUntilReachable() {
   if (probing) return;
   probing = true;
@@ -68,6 +70,7 @@ async function probeUntilReachable() {
     await new Promise((r) => setTimeout(r, PROBE_MS));
     // Any answer at all (even "sign in required") means the server is reachable.
     if (await withTimeout(PROBE_MS, (signal) => fetch(`${API_URL}/api/v1/me`, { signal })).then(() => true, () => false)) setConnection("online");
+    else probeFailures++;
   }
   probing = false;
 }
@@ -83,13 +86,21 @@ function untilReachable(ms: number): Promise<boolean> {
 
 /**
  * A transfer that doesn't go through api() (a PUT straight to storage) failed to get through: count the app as
- * offline, and resolve once the server answers again.
+ * offline, and resolve once the server answers again, with whether it was really unreachable meanwhile (false: it
+ * answered at once, so the failure wasn't the network). Aborting the signal drops the listener and rejects.
  */
-export function waitForServer(): Promise<void> {
+export function waitForServer(signal?: AbortSignal): Promise<boolean> {
+  const before = probeFailures;
   setConnection("offline");
   void probeUntilReachable();
-  return new Promise((resolve) => {
-    const off = connection.subscribe((c) => c === "online" && (off(), resolve()));
+  return new Promise((resolve, reject) => {
+    const done = () => {
+      off();
+      signal?.removeEventListener("abort", abort);
+    };
+    const abort = () => (done(), reject(new Error("aborted")));
+    const off = connection.subscribe((c) => c === "online" && (done(), resolve(probeFailures !== before)));
+    signal?.addEventListener("abort", abort);
   });
 }
 

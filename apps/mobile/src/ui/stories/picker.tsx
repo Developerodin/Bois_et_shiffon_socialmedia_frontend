@@ -21,6 +21,9 @@ type Tab = "phone" | "products" | "library" | "generate";
 // The types the server takes (server/stories/uploads.ts); the picker's mimeType, else the file's extension.
 const BY_EXT: Record<string, string> = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", mp4: "video/mp4", mov: "video/quicktime" };
 const KIND_OF: Record<string, "photo" | "video"> = { "image/jpeg": "photo", "image/png": "photo", "video/mp4": "video", "video/quicktime": "video" };
+// The server's limits (server/stories/uploads.ts, probe.ts), checked here first so a file it would refuse isn't sent.
+const MAX_BYTES = { photo: 15 * 1024 * 1024, video: 100 * 1024 * 1024 } as const;
+const MAX_CLIP_MS = 180_000;
 
 /**
  * The Image tool's picker (P08), as a bottom sheet with four tabs. Phone: the person first says "We own or may use
@@ -77,8 +80,12 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
     const kind = a.type === "video" ? "video" : "photo";
     const contentType = a.mimeType ?? BY_EXT[a.uri.split(".").pop()?.toLowerCase() ?? ""];
     if (!contentType || KIND_OF[contentType] !== kind) return setError(t("stories.errors.type"));
+    const bytes = new File(a.uri).size;
+    if (bytes > MAX_BYTES[kind]) return setError(t("stories.errors.tooLarge"));
+    if (kind === "video" && (a.duration ?? 0) > MAX_CLIP_MS) return setError(t("stories.errors.videoLong"));
     setProgress({ fraction: 0, offline: false });
-    const job = uploadToSlot(a.uri, kind, new File(a.uri).size, contentType, setProgress);
+    // Only the running upload may move the bar: a cancelled or replaced one is ignored.
+    const job = uploadToSlot(a.uri, kind, bytes, contentType, (p) => upload.current === job && setProgress(p));
     upload.current = job;
     try {
       const { uploadId, durationSec } = await job.promise;
@@ -98,8 +105,8 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
 
   const tabs: { value: Tab; label: string; disabled?: boolean }[] = [
     { value: "phone", label: t("stories.picker.phone") },
-    { value: "products", label: t("stories.picker.products") },
-    { value: "library", label: t("stories.picker.library") },
+    { value: "products", label: t("stories.picker.products"), disabled: !!progress },
+    { value: "library", label: t("stories.picker.library"), disabled: !!progress },
     // TODO(Task 19): Generate (Photoshoot, Reels).
     { value: "generate", label: t("stories.picker.generate"), disabled: true },
   ];
@@ -113,9 +120,17 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
         {tab === "phone" ? (
           progress ? (
             <>
-              <Text accessibilityLiveRegion="polite" style={[type.body, progress.offline && { color: color.error }]}>
-                {progress.offline ? t("stories.picker.offline") : progress.fraction >= 1 ? t("stories.picker.checking") : t("stories.picker.uploading", { percent: Math.round(progress.fraction * 100) })}
-              </Text>
+              {/* Only the state is announced (uploading, checking, offline); the percentage is the progress bar's value. */}
+              <View style={styles.between}>
+                <Text accessibilityLiveRegion="polite" style={[type.body, progress.offline && { color: color.error }]}>
+                  {progress.offline ? t("stories.picker.offline") : progress.fraction >= 1 ? t("stories.picker.checking") : t("stories.picker.uploading")}
+                </Text>
+                {!progress.offline && progress.fraction < 1 ? (
+                  <Text importantForAccessibility="no" style={type.body}>
+                    {t("stories.picker.percent", { percent: Math.round(progress.fraction * 100) })}
+                  </Text>
+                ) : null}
+              </View>
               <View style={styles.track} accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: 100, now: Math.round(progress.fraction * 100) }}>
                 <View style={[styles.bar, { width: `${Math.round(progress.fraction * 100)}%` }]} />
               </View>
@@ -131,7 +146,7 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
               <Text style={type.body}>{t("stories.picker.rightsQuestion")}</Text>
               <Button label={t("stories.picker.rightsYes")} onPress={() => setRights("yes")} />
               <Button label={t("stories.picker.rightsNo")} variant="outline" onPress={() => setRights("no")} />
-              {rights === "no" ? <Text style={type.meta}>{t("stories.picker.rightsRefused")}</Text> : null}
+              {rights === "no" ? <Text accessibilityLiveRegion="polite" style={type.meta}>{t("stories.picker.rightsRefused")}</Text> : null}
             </>
           )
         ) : loadError ? (
@@ -171,6 +186,7 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
 }
 
 const styles = StyleSheet.create({
+  between: { flexDirection: "row", justifyContent: "space-between", gap: space[12] },
   track: { height: 8, borderRadius: radius.round, backgroundColor: color.divider, overflow: "hidden" },
   bar: { height: 8, backgroundColor: color.primary },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: space[8] },
