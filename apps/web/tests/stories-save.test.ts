@@ -57,7 +57,7 @@ vi.mock("@/server/services/publishing", async (orig) => ({
 import { prisma } from "@/server/db/prisma";
 import { POST } from "@/app/api/v1/workspaces/[workspaceId]/brands/[brandId]/content/[contentId]/route";
 import { saveDraft } from "@/server/services/publishing";
-import { deleteStory, duplicateStory, onStoryRenderFailure, runStoryRender, saveStoryVersion, STORY_RENDER_JOB, storyRenderState, storyTab } from "@/server/stories/service";
+import { createStoryVersion, deleteStory, duplicateStory, onStoryRenderFailure, runStoryRender, saveStoryVersion, STORY_RENDER_JOB, storyRenderState, storyTab } from "@/server/stories/service";
 import type { StoryInput } from "@/server/stories/body";
 
 const scope = { workspaceId: "w1", brandId: "b1", userId: "u1" };
@@ -83,6 +83,7 @@ beforeEach(() => {
   m.enqueue.mockImplementation(async (j: unknown) => j);
   m.start.mockResolvedValue({ id: "run" });
   m.refund.mockResolvedValue(true);
+  m.jobFind.mockReset().mockResolvedValue(null);
 });
 
 describe("saveStoryVersion, photos only", () => {
@@ -249,14 +250,138 @@ describe("saveStoryVersion with a clip, and the render job", () => {
 });
 
 describe("storyRenderState", () => {
-  it("is rendering while a job for the item is pending or running", async () => {
-    m.jobFind.mockResolvedValueOnce({ id: "j1" });
-    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: true });
-    expect(m.jobFind.mock.calls[0][0].where).toMatchObject({ type: STORY_RENDER_JOB, workspaceId: "w1", brandId: "b1", payload: { path: ["itemId"], equals: "i1" } });
+  // A tiny job table honouring the filters storyRenderState uses (status, payload path equals / gte).
+  let jobs: Row[] = [];
+  const pathOk = (payload: Row, c: Row) => {
+    const v = payload[c.path[0]];
+    return "equals" in c ? v === c.equals : v >= c.gte;
+  };
+  beforeEach(() => {
+    jobs = [];
+    m.jobFind.mockImplementation(async ({ where }: Row) => {
+      const statuses: string[] = typeof where.status === "string" ? [where.status] : where.status.in;
+      const conds: Row[] = [...(where.payload ? [where.payload] : []), ...(where.AND ?? []).map((a: Row) => a.payload)];
+      const hits = jobs.filter((j) => j.type === where.type && j.brandId === where.brandId && statuses.includes(j.status) && conds.every((c) => pathOk(j.payload, c)));
+      return hits.sort((a, b) => b.updatedAt - a.updatedAt)[0] ?? null;
+    });
   });
-  it("reports the newest failed job's error since the last version", async () => {
-    m.jobFind.mockResolvedValueOnce(null).mockResolvedValueOnce({ lastError: "Error: Frame 2: the chosen part starts after the clip ends." });
-    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false, error: "Frame 2: the chosen part starts after the clip ends." });
+  const job = (o: Row) => jobs.push({ type: STORY_RENDER_JOB, workspaceId: "w1", brandId: "b1", updatedAt: Date.now() + jobs.length, ...o, payload: { itemId: "i1", baseVersion: 0, ...o.payload } });
+
+  it("is rendering while a job for the item is pending or running", async () => {
+    job({ status: "PENDING" });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: true });
+  });
+
+  it("ignores another item's jobs", async () => {
+    job({ status: "PENDING", payload: { itemId: "i2" } });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false });
+  });
+
+  it("shows a refusal word for word, with its code", async () => {
+    await saveStoryVersion(scope, "i1", 0, input([frame("p1"), frame("c1"), frame("p3")]), person);
+    db.item!.status = "PUBLISHED";
+    const err = await runStoryRender(m.enqueue.mock.calls[0][0].payload).catch((e: unknown) => e);
+    job({ status: "DEAD_LETTER", lastError: String(err).slice(0, 2000) });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false, error: "This story can't be edited any more.", errorCode: "story.notEditable" });
+  });
+
+  it("never shows raw render errors (ffmpeg text, temp paths)", async () => {
+    job({ status: "DEAD_LETTER", lastError: "Error: ffmpeg exited 1: C:\\Temp\\story-frame-x\\source: Invalid data" });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false, error: "The clip couldn't be rendered. Try again.", errorCode: "story.renderFailed" });
+  });
+
+  it("ignores an older save's failure once a newer version exists", async () => {
+    db.versions.push({ id: "v2", contentItemId: "i1", version: 2, body: {}, createdAt: new Date() });
+    job({ status: "DEAD_LETTER", lastError: "Error: x", payload: { baseVersion: 1 } });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false });
+    job({ status: "DEAD_LETTER", lastError: "Error: y", payload: { baseVersion: 2 } });
+    expect((await storyRenderState(scope, "i1")).errorCode).toBe("story.renderFailed");
+  });
+});
+
+describe("the check under the lock", () => {
+  const sideEffect = (fn: () => void) =>
+    m.photo.mockImplementationOnce(async () => {
+      fn();
+      return { key: "w1/b1/stories/a.jpg", file: { width: 1080, height: 1920, bytes: 1 } };
+    });
+
+  it("refuses a photo save when the story is approved while its frames render", async () => {
+    sideEffect(() => (db.item!.status = "APPROVED"));
+    await expect(saveStoryVersion(scope, "i1", 0, input(), person)).rejects.toMatchObject({ status: 409, code: "story.notEditable" });
+    expect(db.versions).toHaveLength(0);
+  });
+
+  it("refuses a photo save when someone saves while its frames render", async () => {
+    sideEffect(() => db.versions.push({ id: "v1", contentItemId: "i1", version: 1, body: {}, createdAt: new Date() }));
+    await expect(saveStoryVersion(scope, "i1", 0, input(), person)).rejects.toMatchObject({ status: 409, code: "story.stale" });
+    expect(db.versions).toHaveLength(1);
+  });
+
+  it("refuses the job's last step when the story is published while its photos render", async () => {
+    await saveStoryVersion(scope, "i1", 0, input([frame("p1"), frame("c1"), frame("p3")]), person);
+    await runStoryRender(m.enqueue.mock.calls[0][0].payload);
+    sideEffect(() => (db.item!.status = "PUBLISHED"));
+    await expect(runStoryRender(m.enqueue.mock.calls[1][0].payload)).rejects.toMatchObject({ status: 409, code: "story.notEditable" });
+    expect(db.versions).toHaveLength(0);
+  });
+
+  it("refuses the job's last step when the story is approved while its photos render", async () => {
+    await saveStoryVersion(scope, "i1", 0, input([frame("p1"), frame("c1"), frame("p3")]), person);
+    await runStoryRender(m.enqueue.mock.calls[0][0].payload);
+    sideEffect(() => (db.item!.status = "APPROVED"));
+    await expect(runStoryRender(m.enqueue.mock.calls[1][0].payload)).rejects.toMatchObject({ status: 409, code: "story.notEditable" });
+    expect(db.versions).toHaveLength(0);
+  });
+
+  const rendered = { frames: [{ label: "", headline: "H", body: "", mediaKey: "w1/b1/uploads/a.jpg", mediaKind: "photo" as const, renderedKey: "w1/b1/stories/a.jpg" }], cta: "", link: "", brandMark: false, hook: "", productIds: [] };
+  const direct = (base: number, o: object = {}) => (prisma as never as { $transaction: (fn: (tx: never) => unknown) => Promise<unknown> }).$transaction((tx) => createStoryVersion(tx, scope, "i1", base, rendered, person, o));
+
+  it("createStoryVersion refuses a stale base", async () => {
+    db.versions.push({ id: "v1", contentItemId: "i1", version: 1, body: {}, createdAt: new Date() });
+    await expect(direct(0)).rejects.toMatchObject({ status: 409, code: "story.stale" });
+    expect(db.versions).toHaveLength(1);
+  });
+
+  it.each(["SCHEDULED", "PUBLISHED"])("createStoryVersion refuses a %s story", async (status) => {
+    db.item!.status = status;
+    await expect(direct(0)).rejects.toMatchObject({ status: 409, code: "story.notEditable" });
+    expect(db.versions).toHaveLength(0);
+  });
+
+  it("createStoryVersion refuses a story approved since the save started, not one approved before it", async () => {
+    db.item!.status = "APPROVED";
+    await expect(direct(0, { statusAtSave: "AWAITING_APPROVAL" })).rejects.toMatchObject({ status: 409, code: "story.notEditable" });
+    expect(db.versions).toHaveLength(0);
+    await direct(0, { statusAtSave: "APPROVED" });
+    expect(db.versions).toHaveLength(1);
+  });
+});
+
+describe("a retried final step", () => {
+  const clipStory = () => input([frame("p1"), frame("c1"), frame("p3")]);
+
+  it("treats its own committed version as done: no stale refusal, no refund", async () => {
+    await saveStoryVersion(scope, "i1", 0, clipStory(), agent);
+    await runStoryRender(m.enqueue.mock.calls[0][0].payload);
+    const last = m.enqueue.mock.calls[1][0].payload;
+    await runStoryRender(last);
+    expect(db.versions).toHaveLength(1);
+    expect(db.versions[0].body.renderId).toBe(last.renderId);
+    // The job died before it was marked complete, and runs again.
+    await expect(runStoryRender(last)).resolves.toBeUndefined();
+    expect(db.versions).toHaveLength(1);
+    expect(m.refund).not.toHaveBeenCalled();
+  });
+
+  it("still refuses another save's job on the same base as stale", async () => {
+    await saveStoryVersion(scope, "i1", 0, clipStory(), person);
+    await saveStoryVersion(scope, "i1", 0, clipStory(), person);
+    const [a, b] = [m.enqueue.mock.calls[0][0].payload, m.enqueue.mock.calls[1][0].payload];
+    await runStoryRender(a);
+    await runStoryRender(m.enqueue.mock.calls.at(-1)![0].payload);
+    await expect(runStoryRender(b)).rejects.toMatchObject({ code: "story.stale" });
+    expect(db.versions).toHaveLength(1);
   });
 });
 

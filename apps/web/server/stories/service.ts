@@ -179,14 +179,18 @@ async function queueStep(p: RenderPayload) {
  * refuses if it was scheduled or published meanwhile (approved too, given `statusAtSave`), or if someone saved another
  * version. The caller starts Quality afterwards.
  */
-export async function createStoryVersion(tx: Prisma.TransactionClient, scope: BrandScope, itemId: string, baseVersion: number, body: StoryBody, actor: StoryActor, opts: { statusAtSave?: string } = {}) {
+export async function createStoryVersion(tx: Prisma.TransactionClient, scope: BrandScope, itemId: string, baseVersion: number, body: StoryBody, actor: StoryActor, opts: { statusAtSave?: string; renderId?: string } = {}) {
   await lock(tx, itemId);
   const { item, latest } = await loadStory(tx, scope, itemId);
   assertEditable(item.status, latest?.version ?? 0, baseVersion, opts.statusAtSave);
   if (body.frames.some((f) => !f.renderedKey || !f.mediaKey)) throw new Error("Story frames must be rendered before a version is saved");
   const previous = (latest?.body ?? null) as { productIds?: unknown } | null;
   const productIds = Array.isArray(previous?.productIds) ? (previous.productIds as string[]) : item.productIds;
-  const stored: StoryBody = { frames: body.frames, cta: body.cta, link: body.link, brandMark: body.brandMark, hook: body.frames[0]?.headline ?? "", productIds };
+  const stored: StoryBody & { renderId?: string } = {
+    frames: body.frames, cta: body.cta, link: body.link, brandMark: body.brandMark, hook: body.frames[0]?.headline ?? "", productIds,
+    // Server-owned: lets a retried final job step recognise the version it already made.
+    ...(opts.renderId ? { renderId: opts.renderId } : {}),
+  };
   const version = await tx.contentVersion.create({
     data: {
       contentItemId: item.id, version: baseVersion + 1, body: stored as unknown as Prisma.InputJsonValue,
@@ -212,9 +216,32 @@ export async function createStoryVersion(tx: Prisma.TransactionClient, scope: Br
  * aren't retried (runner.ts); the message lands in Job.lastError for `storyRenderState`.
  */
 export async function runStoryRender(payload: unknown) {
-  const p = payload as RenderPayload;
+  try {
+    await renderStep(payload as RenderPayload);
+  } catch (e) {
+    throw e instanceof PublishingError ? new StoryRenderRefused(e) : e;
+  }
+}
+
+/**
+ * A refusal, as the job queue stores it (`String(error)` → Job.lastError): a marker and its code and message as JSON,
+ * so `storyRenderState` shows refusals word for word and anything else (ffmpeg or sharp text, temp paths) never.
+ */
+const REFUSED = "story-refused:";
+class StoryRenderRefused extends PublishingError {
+  constructor(e: PublishingError) {
+    super(e.message, e.status, e.code);
+  }
+  override toString() {
+    return REFUSED + JSON.stringify({ code: this.code ?? null, message: this.message });
+  }
+}
+
+async function renderStep(p: RenderPayload) {
   const scope = { workspaceId: p.workspaceId, brandId: p.brandId };
   const { item, latest } = await loadStory(prisma, scope, p.itemId);
+  // A retried final step whose version was committed (the job died before completing): nothing left to do.
+  if (latest?.version === p.baseVersion + 1 && (latest.body as { renderId?: unknown } | null)?.renderId === p.renderId) return;
   assertEditable(item.status, latest?.version ?? 0, p.baseVersion, p.statusAtSave);
   const frames = [...p.frames];
   let i = p.next;
@@ -227,7 +254,7 @@ export async function runStoryRender(payload: unknown) {
   }
   const rendered = await renderPhotos(scope, frames, p, p);
   const body = { frames: rendered, cta: p.cta, link: p.link, brandMark: p.brandMark, hook: "", productIds: [] };
-  const version = await prisma.$transaction((tx) => createStoryVersion(tx, scope, p.itemId, p.baseVersion, body, p.actor, { statusAtSave: p.statusAtSave }), TX);
+  const version = await prisma.$transaction((tx) => createStoryVersion(tx, scope, p.itemId, p.baseVersion, body, p.actor, { statusAtSave: p.statusAtSave, renderId: p.renderId }), TX);
   await startAgentRun({ workspaceId: p.workspaceId, brandId: p.brandId, agentKey: "quality", trigger: "event", input: { itemId: p.itemId, version: version.version } }).catch(() => null);
 }
 
@@ -237,22 +264,36 @@ export async function onStoryRenderFailure(payload: unknown, _error: unknown, ex
   if (exhausted && p.actor?.kind === "agent" && p.actor.chargeId) await refundCharge(p.workspaceId, p.actor.chargeId);
 }
 
+const RENDER_FAILED = { error: "The clip couldn't be rendered. Try again.", errorCode: "story.renderFailed" };
+
+/** A failed job's lastError as people may see it: refusals word for word, anything else generic. */
+function renderFailure(lastError: string | null): { error: string; errorCode: string } {
+  if (!lastError?.startsWith(REFUSED)) return RENDER_FAILED;
+  try {
+    const r = JSON.parse(lastError.slice(REFUSED.length)) as { code?: unknown; message?: unknown };
+    return typeof r.message === "string" ? { error: r.message, errorCode: typeof r.code === "string" ? r.code : RENDER_FAILED.errorCode } : RENDER_FAILED;
+  } catch {
+    return RENDER_FAILED; // cut off at 2000 characters
+  }
+}
+
 /**
- * Whether a render is under way for this story, else the newest failed render's error since its last version.
+ * Whether a render is under way for this story, else the newest failed render made from the latest version (an older
+ * save's failure no longer matters once a newer version exists).
  * ponytail: matches jobs by a JSON path on the payload (no index); fine while render jobs are few. Add an itemId
  * column on Job if this shows up in query times.
  */
-export async function storyRenderState(scope: BrandScope, itemId: string): Promise<{ rendering: boolean; error?: string }> {
+export async function storyRenderState(scope: BrandScope, itemId: string): Promise<{ rendering: boolean; error?: string; errorCode?: string }> {
   const where = { type: STORY_RENDER_JOB, workspaceId: scope.workspaceId, brandId: scope.brandId, payload: { path: ["itemId"], equals: itemId } };
   const busy = await prisma.job.findFirst({ where: { ...where, status: { in: ["PENDING", "RUNNING"] } }, select: { id: true } });
   if (busy) return { rendering: true };
-  const latest = await prisma.contentVersion.findFirst({ where: { contentItemId: itemId, item: { workspaceId: scope.workspaceId, brandId: scope.brandId } }, orderBy: { version: "desc" }, select: { createdAt: true } });
+  const latest = await prisma.contentVersion.findFirst({ where: { contentItemId: itemId, item: { workspaceId: scope.workspaceId, brandId: scope.brandId } }, orderBy: { version: "desc" }, select: { version: true } });
   const failed = await prisma.job.findFirst({
-    where: { ...where, status: "DEAD_LETTER", ...(latest ? { updatedAt: { gt: latest.createdAt } } : {}) },
+    where: { type: STORY_RENDER_JOB, workspaceId: scope.workspaceId, brandId: scope.brandId, status: "DEAD_LETTER", AND: [{ payload: { path: ["itemId"], equals: itemId } }, { payload: { path: ["baseVersion"], gte: latest?.version ?? 0 } }] },
     orderBy: { updatedAt: "desc" },
     select: { lastError: true },
   });
-  return failed?.lastError ? { rendering: false, error: failed.lastError.replace(/^\w*Error: /, "") } : { rendering: false };
+  return failed ? { rendering: false, ...renderFailure(failed.lastError) } : { rendering: false };
 }
 
 export type StoryTab = "drafts" | "scheduled" | "posted";
@@ -278,6 +319,7 @@ export async function storyView(scope: BrandScope, itemId: string) {
   return {
     rendering: state.rendering,
     renderError: state.error ?? null,
+    renderErrorCode: state.errorCode ?? null,
     frames: await Promise.all(frames.map(async (f, i) => ({ n: i + 1, url: await renderedUrl(scope, f.renderedKey), kind: f.mediaKind ?? null, headline: f.headline }))),
   };
 }
