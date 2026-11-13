@@ -22,7 +22,11 @@ vi.mock("@/server/storage/media", async (orig) => ({
 vi.mock("@/server/stories/probe", async (orig) => ({ ...(await orig<object>()), probeVideo: m.probe }));
 
 import { createUploadSlot, purgeStaleUploads, verifyUpload } from "@/server/stories/uploads";
-import { presignedPut } from "@/server/storage/media";
+import { S3Client } from "@aws-sdk/client-s3";
+import { Readable } from "node:stream";
+import { MediaTooLarge, presignedPut } from "@/server/storage/media";
+
+const realGet = (await vi.importActual<typeof import("@/server/storage/media")>("@/server/storage/media")).getMediaBytes;
 
 const scope = { workspaceId: "w1", brandId: "b1", userId: "u1" };
 const slot = (o: object = {}) => createUploadSlot(scope, { kind: "photo", contentType: "image/jpeg", bytes: 1000, rightsConfirmed: true, ...o } as never);
@@ -76,6 +80,23 @@ describe("presignedPut", () => {
   });
 });
 
+describe("getMediaBytes", () => {
+  const reply = (chunks: Buffer[], len?: number) =>
+    vi.spyOn(S3Client.prototype, "send").mockResolvedValue({ Body: Readable.from(chunks), ContentLength: len ?? chunks.reduce((n, c) => n + c.length, 0) } as never);
+  it("returns the bytes within the limit", async () => {
+    reply([Buffer.from([1, 2]), Buffer.from([3])]);
+    expect([...(await realGet("k", 3))]).toEqual([1, 2, 3]);
+  });
+  it("refuses a reported length over the limit before reading", async () => {
+    reply([Buffer.from([1])], 99);
+    await expect(realGet("k", 3)).rejects.toBeInstanceOf(MediaTooLarge);
+  });
+  it("stops a stream that runs past the limit despite a small reported length", async () => {
+    reply([Buffer.alloc(2), Buffer.alloc(2)], 2);
+    await expect(realGet("k", 3)).rejects.toBeInstanceOf(MediaTooLarge);
+  });
+});
+
 describe("verifying an upload", () => {
   const jpeg = () => sharp({ create: { width: 64, height: 48, channels: 3, background: "#888" } }).jpeg().toBuffer();
   const row = (o: object = {}) => ({ id: "up1", workspaceId: "w1", brandId: "b1", key: "w1/b1/uploads/a.jpg", kind: "photo", bytes: 0, ...o });
@@ -96,6 +117,30 @@ describe("verifying an upload", () => {
     expect(m.delMedia).toHaveBeenCalledWith("w1/b1/uploads/a.jpg");
     expect(m.update.mock.calls[0][0].data).toMatchObject({ status: "VERIFIED", width: 64, height: 48 });
     expect(m.updateMany.mock.calls[0][0]).toEqual({ where: { id: "up1", workspaceId: "w1", brandId: "b1", status: "PENDING" }, data: { status: "REJECTED", reason: "checking" } });
+  });
+
+  it("rejects an object bigger than announced, and stores a PNG disguised as .jpg under .png", async () => {
+    m.updateMany.mockResolvedValue({ count: 1 });
+    m.findFirst.mockResolvedValue(row({ bytes: 10 }));
+    m.get.mockRejectedValueOnce(new MediaTooLarge());
+    expect(await verifyUpload(scope, "up1")).toMatchObject({ status: "REJECTED", code: "story.uploadSize" });
+    expect(m.get).toHaveBeenCalledWith("w1/b1/uploads/a.jpg", 10);
+    const png = new Uint8Array(await sharp({ create: { width: 8, height: 8, channels: 3, background: "#fff" } }).png().toBuffer());
+    m.findFirst.mockResolvedValue(row({ bytes: png.length }));
+    m.get.mockResolvedValueOnce(png);
+    expect(await verifyUpload(scope, "up1")).toMatchObject({ status: "VERIFIED" });
+    expect(m.put.mock.calls[0][0]).toMatch(/\.png$/);
+    expect(m.put.mock.calls[0][2]).toBe("image/png");
+  });
+
+  it("removes the usable copy if the row update fails after it was written", async () => {
+    const good = new Uint8Array(await jpeg());
+    m.updateMany.mockResolvedValue({ count: 1 });
+    m.findFirst.mockResolvedValue(row({ bytes: good.length }));
+    m.get.mockResolvedValue(good);
+    m.update.mockRejectedValueOnce(new Error("db down")).mockResolvedValue({});
+    expect(await verifyUpload(scope, "up1")).toMatchObject({ status: "REJECTED" });
+    expect(m.delMedia).toHaveBeenCalledWith(m.put.mock.calls[0][0]);
   });
 
   it("answers 409 when the row was already claimed, 404 when it isn't this brand's", async () => {
