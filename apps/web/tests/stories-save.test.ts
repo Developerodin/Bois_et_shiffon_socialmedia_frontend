@@ -460,7 +460,7 @@ describe("content route", () => {
     expect(m.authorize.mock.calls[0][2]).toBe("content.create");
     const json = await res.json();
     expect(json).toMatchObject({ saved: "saved", rendering: false, renderError: null });
-    expect(json.frames[0]).toEqual({ n: 1, url: "https://signed/w1/b1/stories/p1.jpg.jpg", kind: "photo", headline: "Headline p1" });
+    expect(json.frames[0]).toEqual({ n: 1, url: "https://signed/w1/b1/stories/p1.jpg.jpg", sourceUrl: "https://signed/w1/b1/uploads/p1.jpg", kind: "photo", headline: "Headline p1" });
     expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", input: { itemId: "i1", version: 1 } }));
   });
 

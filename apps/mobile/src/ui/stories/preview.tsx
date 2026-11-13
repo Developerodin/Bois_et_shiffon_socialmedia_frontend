@@ -14,6 +14,8 @@ type Props = {
   editing: boolean;
   /** The frame's rendered picture, if it has one. */
   url: string | null;
+  /** The frame's photo before any text was drawn on it (photos only). */
+  sourceUrl?: string | null;
   /** The rendered picture already shows this text, CTA and brand mark; otherwise the text is drawn over it. */
   fresh: boolean;
   /** Preview width; the height is 16/9 of it. */
@@ -23,24 +25,26 @@ type Props = {
 
 /**
  * One story frame as a true 9:16 preview. While the rendered frame matches the edits it is shown as is; after a change
- * the text is drawn live over it (dimmed, since the old text is burned into the picture) with TEXT_BOX's layout scaled
- * down, so the person sees roughly where it lands. The server redraws the frame on save.
+ * the text is drawn live over the source photo with TEXT_BOX's layout scaled down, so the person sees roughly where it
+ * lands. Without a source photo (clips) it goes over the rendered frame, dimmed, since the old text is burned in.
+ * The server redraws the frame on save.
  */
-export function StoryPreview({ frame, isLast, cta, brandMark, editing, url, fresh, width, accessibilityLabel }: Props) {
+export function StoryPreview({ frame, isLast, cta, brandMark, editing, url, sourceUrl, fresh, width, accessibilityLabel }: Props) {
   const brand = useCurrentBrand();
   const s = width / TEXT_BOX.frame.width;
   const t = TEXT_BOX;
   const live = !fresh || !url;
+  const picture = live && sourceUrl ? sourceUrl : url;
   const top = brandMark && brand?.logoUrl ? Math.max(t.textTop, t.safe.top + t.brandMark.height + t.gaps.brandMarkToText) : t.textTop;
   const headline = headlineSize(frame.headline) ?? t.headline.minSize;
   const text = (size: number, semibold: boolean) => ({ fontFamily: semibold ? font.semibold : font.regular, fontSize: size * s, lineHeight: size * s * t.lineHeight, color: "#FFFFFF", textAlign: "center" as const });
 
   return (
     <View style={[styles.frame, { width, height: (width * 16) / 9 }]} accessible accessibilityLabel={accessibilityLabel}>
-      {url ? <Image source={{ uri: url }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
+      {picture ? <Image source={{ uri: picture }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}
       {live ? (
         <>
-          {url ? <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.7)" }]} /> : null}
+          {url && picture === url ? <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.7)" }]} /> : null}
           {/* The renderer's fixed gradient (render.ts GRADIENT). */}
           <LinearGradient
             colors={["rgba(0,0,0,0.66)", "rgba(0,0,0,0.5)", "rgba(0,0,0,0)", "rgba(0,0,0,0)", "rgba(0,0,0,0.62)"]}

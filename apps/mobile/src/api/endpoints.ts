@@ -620,7 +620,7 @@ export type StoryAttempt = PostRelease["attempts"][number] & { frames?: number; 
 export type StoryRelease = Omit<PostRelease, "attempts"> & {
   attempts: StoryAttempt[]; byHand: boolean; scheduledFor: string | null;
   rendering: boolean; renderError: string | null; renderErrorCode: string | null;
-  frames: { n: number; url: string | null; kind: "photo" | "video" | null; headline: string }[];
+  frames: { n: number; url: string | null; sourceUrl?: string | null; kind: "photo" | "video" | null; headline: string }[];
   /** editStory: saved now, or rendering first. */
   saved?: "saved" | "rendering";
 };

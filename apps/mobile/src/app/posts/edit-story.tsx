@@ -207,6 +207,7 @@ export default function EditStory() {
               brandMark={draft.brandMark}
               editing={tool === "text"}
               url={urlOf(frame)}
+              sourceUrl={frame.from >= 0 ? (release?.frames[frame.from]?.sourceUrl ?? null) : null}
               fresh={fresh(frame, at)}
               width={pw}
               accessibilityLabel={label(frame, at)}
