@@ -9,7 +9,7 @@ import { accessToken } from "@/server/services/connections";
 import { autoPublish } from "@/server/services/automations";
 import { decide, postAiAllowed, PublishingError, releaseState, saveDraft, schedulePublication, settlePublication } from "@/server/services/publishing";
 import { parseStoryInput } from "@/server/stories/body";
-import { deleteStory, duplicateStory, saveStoryVersion, storyView } from "@/server/stories/service";
+import { deleteStory, duplicateStory, failStoryStart, reopenStoryWrite, saveStoryVersion, STORY_START_NOTE, storyView } from "@/server/stories/service";
 
 // Queued work runs after the response (kickRunner); give it room to finish.
 export const maxDuration = 300;
@@ -116,15 +116,25 @@ export async function POST(request: Request, context: Params) {
     } else if (body.action === "rewrite") {
       const item = await prisma.contentItem.findFirst({
         where: { id: itemId, workspaceId: scope.workspaceId, brandId: scope.brandId, studio: false },
-        select: { status: true, versions: { orderBy: { version: "desc" }, take: 1, select: { version: true, checks: { orderBy: { createdAt: "desc" }, take: 1, select: { overall: true } } } } },
+        select: { status: true, channel: true, versions: { orderBy: { version: "desc" }, take: 1, select: { version: true, checks: { orderBy: { createdAt: "desc" }, take: 1, select: { overall: true } } } } },
       });
       const latest = item?.versions[0];
-      if (!item || !["BRIEF_READY", "DRAFT_REVIEW"].includes(item.status) || (latest?.version ?? 0) !== body.version) {
+      const story = item?.channel === "INSTAGRAM_STORY";
+      // A story whose writer failed (or never started) is BLOCKED; "Fix it" reopens it.
+      if (!item || !["BRIEF_READY", "DRAFT_REVIEW", ...(story ? ["BLOCKED"] : [])].includes(item.status) || (latest?.version ?? 0) !== body.version) {
         throw new PublishingError("This post isn't waiting for the writer any more. Reload it.", 409);
       }
       // A draft with no check yet needs the check, not a new draft (the writer leaves people's edits alone).
       const unchecked = item.status === "DRAFT_REVIEW" && latest && !latest.checks[0];
-      await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: unchecked ? "quality" : "creator", trigger: "event", input: unchecked ? { itemId, version: latest.version } : { itemId } });
+      // A story with no version whose charge was refunded pays again (5 credits, once per retry); anything else is free.
+      const chargeId = story && !unchecked ? await reopenStoryWrite(scope, itemId) : null;
+      try {
+        await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: unchecked ? "quality" : "creator", trigger: "event", input: unchecked ? { itemId, version: latest.version } : { itemId }, ...(chargeId ? { prepaidChargeId: chargeId } : {}) });
+      } catch (e) {
+        if (!chargeId) throw e;
+        await failStoryStart(scope, itemId, chargeId);
+        throw new PublishingError(STORY_START_NOTE, 502, "story.writeStart");
+      }
       kickRunner();
     } else if (body.action === "decide") {
       await decide({ ...scope, itemId, version: body.version, verdict: body.verdict, note: body.note, override: body.override, switchProducts: body.switchProducts });

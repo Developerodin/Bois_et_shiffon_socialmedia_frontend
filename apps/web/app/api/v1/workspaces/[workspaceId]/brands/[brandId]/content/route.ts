@@ -7,7 +7,7 @@ import { kickRunner } from "@/server/jobs/runner";
 import { createPost, ownMediaKey, postAiAllowed, PublishingError } from "@/server/services/publishing";
 import { signedMediaUrl } from "@/server/storage/media";
 import { isStoryBody } from "@/server/stories/body";
-import { renderedUrl, storyTab } from "@/server/stories/service";
+import { createStory, failStoryStart, renderedUrl, STORY_START_NOTE, storyTab } from "@/server/stories/service";
 
 /** Calendar items with their latest draft and its latest quality check. */
 export async function GET(request: Request, context: { params: Promise<BrandRouteParams> }) {
@@ -86,14 +86,38 @@ const NewPostInput = z.object({
   direction: z.string().max(500).optional(),
 });
 
-/** A new post from the app (P06): the Creator writes it now, then Quality checks it. */
+// A new story (P07): paid, once per requestId (a uuid the app makes when the person taps).
+const NewStoryInput = z.object({
+  channel: z.literal("INSTAGRAM_STORY"),
+  goal: z.enum(["newArrival", "productFeature", "specialOffer"]),
+  productId: z.string().min(1).max(100),
+  direction: z.string().max(500).optional(),
+  requestId: z.string().uuid(),
+});
+
+/** A new post or story from the app (P06/P07): the Creator writes it now, then Quality checks it. */
 export async function POST(request: Request, context: { params: Promise<BrandRouteParams> }) {
   try {
-    const parsed = NewPostInput.safeParse(await request.json().catch(() => null));
+    const json = await request.json().catch(() => null);
+    const isStory = (json as { channel?: unknown } | null)?.channel === "INSTAGRAM_STORY";
+    const parsed = isStory ? NewStoryInput.safeParse(json) : NewPostInput.safeParse(json);
     if (!parsed.success) return problemResponse({ type: "https://api.brandpilot/errors/validation", title: "Invalid request", status: 400, detail: parsed.error.issues[0]?.message });
     const scope = await authorizeBrandRoute(request, context.params, "content.create");
     if (scope instanceof Response) return scope;
     if (!(await postAiAllowed(scope.workspaceId))) return problemResponse({ type: "https://api.brandpilot/errors/limit", title: "Too many posts written today. Try again tomorrow.", status: 429 });
+    if (parsed.data.channel === "INSTAGRAM_STORY") {
+      const story = await createStory(scope, parsed.data);
+      // A repeat of a request already taken: the same story, no second run.
+      if (story.repeated) return Response.json({ id: story.id });
+      try {
+        await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: "creator", trigger: "event", input: { itemId: story.id }, prepaidChargeId: story.chargeId });
+      } catch (e) {
+        await failStoryStart(scope, story.id, story.chargeId);
+        throw new PublishingError(STORY_START_NOTE, 502, "story.writeStart");
+      }
+      kickRunner();
+      return Response.json({ id: story.id }, { status: 201 });
+    }
     const item = await createPost({ ...scope, ...parsed.data });
     await startAgentRun({ workspaceId: scope.workspaceId, brandId: scope.brandId, agentKey: "creator", trigger: "event", input: { itemId: item.id } }).catch(() => null);
     kickRunner();
