@@ -327,8 +327,22 @@ export async function storyView(scope: BrandScope, itemId: string) {
     rendering: state.rendering,
     renderError: state.error ?? null,
     renderErrorCode: state.errorCode ?? null,
-    frames: await Promise.all(frames.map(async (f, i) => ({ n: i + 1, url: await renderedUrl(scope, f.renderedKey), kind: f.mediaKind ?? null, headline: f.headline }))),
+    frames: await Promise.all(
+      frames.map(async (f, i) => ({
+        n: i + 1,
+        url: await renderedUrl(scope, f.renderedKey),
+        // The untouched photo, so the phone editor can preview new text without the old text burned in. Clips get none.
+        sourceUrl: f.mediaKind === "photo" ? await sourceUrl(scope, f.mediaKey) : null,
+        kind: f.mediaKind ?? null,
+        headline: f.headline,
+      })),
+    ),
   };
+}
+
+/** A frame's source photo URL (an hour), only for files under this brand's folder. */
+function sourceUrl(scope: BrandScope, key: string | undefined) {
+  return key && key.startsWith(`${scope.workspaceId}/${scope.brandId}/`) && !key.includes("..") ? signedMediaUrl(key, 3600) : null;
 }
 
 /**
