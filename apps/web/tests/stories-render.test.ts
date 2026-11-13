@@ -6,7 +6,7 @@ import ffmpegPath from "ffmpeg-static";
 import sharp from "sharp";
 import { describe, expect, it, vi } from "vitest";
 import type { StoryFrame } from "@/server/stories/body";
-import { clipArgs, cropBox, escapeMarkup, renderClipFrame, renderedKeyFor, renderInputsHash, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
+import { clipArgs, cropWindow, escapeMarkup, renderClipFrame, renderedKeyFor, renderInputsHash, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
 
 const scope = { workspaceId: "ws1", brandId: "b1" };
 const opts: RenderOpts = { scope, language: "fr", isLast: true, cta: "Voir la table", brandMark: false };
@@ -76,16 +76,47 @@ describe("textFits", () => {
   });
 });
 
-describe("cropBox", () => {
-  it("fills by default, centred", () => {
-    expect(cropBox(2000, 1500, undefined)).toEqual({ width: 2560, height: 1920, left: 740, top: 0, dx: 0, dy: 0 });
+describe("cropWindow", () => {
+  it("fills by default, centred, cutting the window in source pixels", () => {
+    expect(cropWindow(2000, 1500, undefined)).toEqual({ left: 578, top: 0, width: 844, height: 1500, outWidth: 1080, outHeight: 1920, dx: 0, dy: 0 });
   });
   it("letterboxes below 1 and clamps the focal point", () => {
-    const b = cropBox(2000, 1500, { x: 0.5, y: 0.5, scale: 0.421875 });
-    expect(b.width).toBe(1080);
-    expect(b.dy).toBeGreaterThan(0);
-    expect(cropBox(2000, 1500, { x: 5, y: -1, scale: 1 }).left).toBe(2560 - 1080);
+    expect(cropWindow(2000, 1500, { x: 0.5, y: 0.5, scale: 0.421875 })).toEqual({ left: 0, top: 0, width: 2000, height: 1500, outWidth: 1080, outHeight: 810, dx: 0, dy: 555 });
+    expect(cropWindow(2000, 1500, { x: 5, y: -1, scale: 1 })).toMatchObject({ left: 1156, top: 0 });
   });
+  it("never outputs more than the frame, whatever the source shape or zoom", () => {
+    for (const [w, h, scale] of [[4096, 64, 1], [64, 4096, 4], [240, 240, 4], [4096, 4096, 0.1]]) {
+      const b = cropWindow(w, h, { x: 0.5, y: 0.5, scale });
+      expect(b.outWidth).toBeLessThanOrEqual(1080);
+      expect(b.outHeight).toBeLessThanOrEqual(1920);
+      expect(b.left + b.width).toBeLessThanOrEqual(w);
+      expect(b.top + b.height).toBeLessThanOrEqual(h);
+    }
+  });
+});
+
+describe("clipArgs geometry", () => {
+  it("crops a 4096×64 source before scaling, and never scales past 1080×1920", () => {
+    const graph = (crop?: { x: number; y: number; scale: number }) => {
+      const a = clipArgs("in.mov", "overlay.png", "out.mp4", { start: 0, sound: true }, undefined, "normal", { width: 4096, height: 64, crop });
+      return a[a.indexOf("-filter_complex") + 1];
+    };
+    for (const g of [graph(), graph({ x: 0.9, y: 0.5, scale: 4 }), graph({ x: 0.5, y: 0.5, scale: 0.1 })]) {
+      expect(g.indexOf("crop=")).toBeGreaterThan(-1);
+      expect(g.indexOf("crop=")).toBeLessThan(g.indexOf("scale="));
+      const targets = [...g.matchAll(/scale=(\d+):(\d+)/g)];
+      expect(targets.length).toBeGreaterThan(0);
+      for (const [, w, h] of targets) {
+        expect(Number(w)).toBeLessThanOrEqual(1080);
+        expect(Number(h)).toBeLessThanOrEqual(1920);
+      }
+    }
+  });
+});
+
+describe("renderInputsHash crop", () => {
+  it("treats no crop and the default crop as the same pixels", () =>
+    expect(renderInputsHash({ ...frame, crop: { x: 0.5, y: 0.5, scale: 1 } }, opts)).toBe(renderInputsHash(frame, opts)));
 });
 
 describe("renderPhotoFrame", () => {
@@ -116,6 +147,31 @@ describe("renderPhotoFrame", () => {
     const ar = { ...frame, label: "مجموعة", headline: "طاولة من خشب الأكاسيا", body: "שלום" };
     await expect(renderPhotoFrame(ar, { ...opts, language: "ar" }, { get, put, exists: async () => false })).resolves.toMatchObject({ file: { width: 1080 } });
   });
+  it("crops a phone photo upright (EXIF orientation applied before the window is cut)", async () => {
+    // Stored 400×200 with orientation 6: shown as 200×400.
+    const rotated = await sharp({ create: { width: 400, height: 200, channels: 3, background: "#864" } }).withMetadata({ orientation: 6 }).jpeg().toBuffer();
+    const put = vi.fn(async () => undefined);
+    const r = await renderPhotoFrame({ ...frame, crop: { x: 0.5, y: 0.9, scale: 1 } }, opts, { get: async () => new Uint8Array(rotated), put, exists: async () => false });
+    expect(r.file).toMatchObject({ width: 1080, height: 1920 });
+  });
+});
+
+describe("renderClipFrame window", () => {
+  it("refuses a window that starts after the clip ends, before storing anything", async () => {
+    if (!ffmpegPath) return;
+    const dir = await mkdtemp(path.join(tmpdir(), "story-clip-test-"));
+    try {
+      const src = path.join(dir, "src.mp4");
+      await new Promise<void>((res, rej) => execFile(ffmpegPath as string, ["-y", "-f", "lavfi", "-i", "testsrc=size=640x360:rate=30:duration=3", "-c:v", "libx264", "-pix_fmt", "yuv420p", src], (e) => (e ? rej(e) : res())));
+      const put = vi.fn(async () => undefined);
+      const clip: StoryFrame = { ...frame, mediaKey: "ws1/b1/clip.mp4", mediaKind: "video", clip: { start: 10, sound: true } };
+      await expect(renderClipFrame(clip, { ...opts, n: 3 }, { get: async () => new Uint8Array(await readFile(src)), put, exists: async () => false }))
+        .rejects.toMatchObject({ status: 400, code: "story.clipWindow" });
+      expect(put).not.toHaveBeenCalled();
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
 });
 
 describe("renderClipFrame", () => {

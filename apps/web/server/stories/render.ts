@@ -29,6 +29,8 @@ const VIDEO_MAX_BYTES = 100 * MB;
 const LOGO_MAX_BYTES = 5 * MB;
 /** Instagram's story video cap we hold ourselves to. */
 const CLIP_MAX_BYTES = 8 * MB;
+/** A rendered clip frame shorter than this is refused (the window starts at or past the clip's end). */
+const MIN_CLIP_SECONDS = 0.5;
 const PIXELS = { limitInputPixels: 40_000_000 } as const;
 
 /**
@@ -47,7 +49,12 @@ export const TEXT_BOX = {
   headline: { size: 84, minSize: 64, step: 4, maxLines: 3 },
   body: { size: 40, maxLines: 4 },
   cta: { size: 40, maxLines: 2, padX: 48, padY: 24 },
-  gap: 24,
+  /**
+   * Blocks are laid out by line boxes, not ink: a block is `lines × size × lineHeight` tall (Inter's own line spacing;
+   * Noto scripts use their fonts' taller natural spacing), and the gaps are between those boxes.
+   */
+  lineHeight: 1.22,
+  gaps: { brandMarkToText: 32, labelToHeadline: 28, headlineToBody: 46, textToCta: 32 },
   brandMark: { height: 96, logoWidth: 216, logoHeight: 72 },
   em: { wide: 1.08, upper: 0.8, digit: 0.68, narrow: 0.42, space: 0.3, lower: 0.64, other: 0.75 },
   wideChars: "MWmw@%ЖжШшЩщЮюФф",
@@ -167,7 +174,7 @@ export function renderInputsHash(frame: StoryFrame, opts: RenderOpts): string {
     frame.label,
     frame.headline,
     frame.body,
-    frame.crop ? [frame.crop.x, frame.crop.y, frame.crop.scale] : null,
+    Object.values(normCrop(frame.crop)),
     frame.clip ? [frame.clip.start, frame.clip.sound] : null,
     opts.isLast ? opts.cta : "",
     !!frame.aiMark,
@@ -189,21 +196,28 @@ export function renderedKeyFor(scope: RenderOpts["scope"], hash: string, kind: "
  *   source with black bars (Fit is min(1080/w, 1920/h) / max(1080/w, 1920/h)). Clamped to 0.1–4.
  * - `x`, `y` (0–1) are the point of the source placed at the frame's centre, clamped so no gap opens on a covered side.
  * - No crop = { x: 0.5, y: 0.5, scale: 1 }.
- * Returns the scaled source size, the window cut from it (left/top), and where it sits on the frame (dx/dy).
+ * Returns the window to cut from the upright source, in source pixels (left/top/width/height), the size it's scaled to
+ * (outWidth × outHeight, even, never more than 1080×1920), and where that sits on the black frame (dx/dy).
+ * Cutting first, then scaling, keeps the work bounded by the frame whatever the source's shape or the zoom.
  */
-export function cropBox(srcW: number, srcH: number, crop: StoryFrame["crop"]) {
+export function cropWindow(srcW: number, srcH: number, crop: StoryFrame["crop"]) {
   const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
   const c = normCrop(crop);
   const s = Math.max(W / srcW, H / srcH) * c.scale;
-  const width = Math.max(1, Math.round(srcW * s));
-  const height = Math.max(1, Math.round(srcH * s));
+  const width = clamp(Math.round(Math.min(srcW, W / s)), 1, srcW);
+  const height = clamp(Math.round(Math.min(srcH, H / s)), 1, srcH);
+  const even = (v: number, max: number) => clamp(2 * Math.round((v * s) / 2), 2, max);
+  const outWidth = even(width, W);
+  const outHeight = even(height, H);
   return {
+    left: Math.floor(clamp(c.x * srcW - width / 2, 0, srcW - width)),
+    top: Math.floor(clamp(c.y * srcH - height / 2, 0, srcH - height)),
     width,
     height,
-    left: Math.round(clamp(c.x * width - W / 2, 0, Math.max(0, width - W))),
-    top: Math.round(clamp(c.y * height - H / 2, 0, Math.max(0, height - H))),
-    dx: Math.max(0, Math.round((W - width) / 2)),
-    dy: Math.max(0, Math.round((H - height) / 2)),
+    outWidth,
+    outHeight,
+    dx: (W - outWidth) / 2,
+    dy: (H - outHeight) / 2,
   };
 }
 const normCrop = (crop: StoryFrame["crop"]) => ({
@@ -220,21 +234,45 @@ function fontFor(text: string, bold: boolean): { family: string; file: string } 
   return bold ? { family: "Inter SemiBold", file: "Inter-SemiBold.ttf" } : { family: "Inter", file: "Inter-Regular.ttf" };
 }
 
-type Layer = { input: Buffer; width: number; height: number };
+/**
+ * sharp crops text images to their ink, so spacing by image height would drift with the letters (a line of "ace" is
+ * shorter than "\u00C9g"). Each layer is drawn between two invisible strut lines ("|", alpha \u2248 0, spanning the line box);
+ * with the strut's line metrics we know exactly where the text's line boxes start and how tall they are.
+ */
+const STRUT = `<span alpha="1">|</span>`;
+const strutMetrics = new Map<string, Promise<{ bar: number; advance: number }>>();
+function strutFor(font: string, fontfile: string) {
+  let m = strutMetrics.get(font);
+  if (!m) {
+    const height = async (t: string) => (await sharp({ text: { text: t, font, fontfile, dpi: 72, rgba: true } }).metadata()).height;
+    m = Promise.all([height(STRUT), height(`${STRUT}\n${STRUT}`)]).then(([bar, two]) => ({ bar, advance: two - bar }));
+    strutMetrics.set(font, m);
+  }
+  return m;
+}
+
+/** A text image plus its line box: the box starts `boxTop` px below the image top and is `boxHeight` tall. */
+type Layer = { input: Buffer; width: number; height: number; boxTop: number; boxHeight: number };
 async function textLayer(text: string, o: { size: number; bold: boolean; width: number; color: string; rtl: boolean }): Promise<Layer> {
   const font = fontFor(text, o.bold);
+  const desc = `${font.family} ${o.size}`;
+  const fontfile = path.join(FONT_DIR, font.file);
   // Our own RLM (user bidi controls are stripped) sets each line's base direction for right-to-left languages.
   const lines = escapeMarkup(text).split("\n").map((l) => (o.rtl ? `\u200F${l}` : l)).join("\n");
-  const { data, info } = await sharp({
-    text: { text: `<span foreground="${o.color}">${lines}</span>`, font: `${font.family} ${o.size}`, fontfile: path.join(FONT_DIR, font.file), width: o.width, align: "centre", dpi: 72, rgba: true, wrap: "word-char" },
-  }).png().toBuffer({ resolveWithObject: true });
-  return { input: data, width: info.width, height: info.height };
+  const [{ data, info }, strut] = await Promise.all([
+    sharp({
+      text: { text: `${STRUT}\n<span foreground="${o.color}">${lines}</span>\n${STRUT}`, font: desc, fontfile, width: o.width, align: "centre", dpi: 72, rgba: true, wrap: "word-char" },
+    }).png().toBuffer({ resolveWithObject: true }),
+    strutFor(desc, fontfile),
+  ]);
+  // The ink runs from the top strut's bar to the bottom strut's bar; the bar sits (advance \u2212 bar) / 2 inside its line.
+  return { input: data, width: info.width, height: info.height, boxTop: Math.round((strut.advance + strut.bar) / 2), boxHeight: info.height - strut.bar - strut.advance };
 }
 
 const svg = (body: string, w: number, h: number) => Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${body}</svg>`);
-/** Fixed, whatever the text: dark at the top (text) and bottom (CTA), clear in the middle. */
+/** Fixed, whatever the text: dark at the top through the text (~40% down), clear lower in the middle, dark again behind the CTA. */
 const GRADIENT = svg(
-  `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0.62"/><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="0.72" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.62"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#g)"/>`,
+  `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0.66"/><stop offset="0.4" stop-color="#000" stop-opacity="0.5"/><stop offset="0.6" stop-color="#000" stop-opacity="0"/><stop offset="0.72" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.62"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#g)"/>`,
   W,
   H,
 );
@@ -256,43 +294,49 @@ async function overlayLayers(frame: StoryFrame, opts: RenderOpts, deps: RenderDe
     const left = Math.round((W - tileW) / 2);
     layers.push({ input: svg(`<rect width="${tileW}" height="${bm.height}" rx="22" fill="#fff"/>`, tileW, bm.height), left, top: t.safe.top });
     layers.push({ input: logo.data, left: left + 24, top: t.safe.top + Math.round((bm.height - logo.info.height) / 2) });
-    y = Math.max(y, t.safe.top + bm.height + 32);
+    y = Math.max(y, t.safe.top + bm.height + t.gaps.brandMarkToText);
   }
   if (withAiMark && frame.aiMark) {
     layers.push({ input: await aiMarkPng(aiDisclosureLine(opts.language)), left: W - 48 - 300, top: t.safe.top });
   }
 
-  const centred = (l: Layer, top: number): OverlayOptions => ({ input: l.input, left: Math.round((W - l.width) / 2), top });
+  // Places a layer so its line box starts at `boxTop`.
+  const centred = (l: Layer, boxTop: number): OverlayOptions => ({ input: l.input, left: Math.round((W - l.width) / 2), top: boxTop - l.boxTop });
+  let gapBefore = 0;
   if (clean(frame.label)) {
     const l = await textLayer(upper(frame.label, opts.language), { size: t.label.size, bold: true, width: t.width - 2 * t.label.padX, color: "#FFFFFF", rtl });
     const pw = l.width + 2 * t.label.padX;
-    const ph = l.height + 2 * t.label.padY;
+    const ph = l.boxHeight + 2 * t.label.padY;
     layers.push({ input: svg(`<rect width="${pw}" height="${ph}" rx="14" fill="#fff" fill-opacity="0.24"/>`, pw, ph), left: Math.round((W - pw) / 2), top: y });
     layers.push(centred(l, y + t.label.padY));
-    y += ph + t.gap;
+    y += ph;
+    gapBefore = t.gaps.labelToHeadline;
   }
   if (clean(frame.headline)) {
     const size = headlineSize(frame.headline);
     if (size === null) throw new PublishingError(`${frameLabel(opts)}: the headline doesn't fit.`, 400, "story.textFit");
     const l = await textLayer(frame.headline, { size, bold: true, width: t.width, color: "#FFFFFF", rtl });
+    y += gapBefore;
     layers.push(centred(l, y));
-    y += l.height + t.gap;
+    y += l.boxHeight;
+    gapBefore = t.gaps.headlineToBody;
   }
   if (clean(frame.body)) {
     const l = await textLayer(frame.body, { size: t.body.size, bold: false, width: t.width, color: "#FFFFFF", rtl });
+    y += gapBefore;
     layers.push(centred(l, y));
-    y += l.height;
+    y += l.boxHeight;
   }
 
   let bottom = H - t.safe.bottom;
   if (opts.isLast && clean(opts.cta)) {
     const l = await textLayer(opts.cta, { size: t.cta.size, bold: true, width: t.width - 2 * t.cta.padX, color: "#111111", rtl });
     const pw = l.width + 2 * t.cta.padX;
-    const ph = l.height + 2 * t.cta.padY;
+    const ph = l.boxHeight + 2 * t.cta.padY;
     const top = bottom - ph;
     layers.push({ input: svg(`<rect width="${pw}" height="${ph}" rx="${Math.min(ph / 2, 48)}" fill="#fff"/>`, pw, ph), left: Math.round((W - pw) / 2), top });
     layers.push(centred(l, top + t.cta.padY));
-    bottom = top - 32;
+    bottom = top - t.gaps.textToCta;
   }
   // The estimate is generous, so this only trips if a font measures wider than TEXT_BOX.em allows.
   if (y > bottom) throw new PublishingError(`${frameLabel(opts)}: the text doesn't fit.`, 400, "story.textFit");
@@ -314,10 +358,11 @@ export async function renderPhotoFrame(frame: StoryFrame, opts: RenderOpts, deps
 
   const src = await deps.get(sourceKey(frame, opts), PHOTO_MAX_BYTES);
   const meta = await sharp(src, PIXELS).metadata();
-  const box = cropBox(meta.autoOrient.width, meta.autoOrient.height, frame.crop);
+  const box = cropWindow(meta.autoOrient.width, meta.autoOrient.height, frame.crop);
+  // Cut the window in (upright) source pixels first, then scale it: never more than 1080×1920 is produced.
   const piece = await sharp(src, { ...PIXELS, autoOrient: true })
-    .resize(box.width, box.height, { fit: "fill" })
-    .extract({ left: box.left, top: box.top, width: Math.min(box.width, W), height: Math.min(box.height, H) })
+    .extract({ left: box.left, top: box.top, width: box.width, height: box.height })
+    .resize(box.outWidth, box.outHeight, { fit: "fill" })
     .toBuffer();
   const out = await sharp({ create: { width: W, height: H, channels: 3, background: "#000" } })
     .composite([{ input: piece, left: box.dx, top: box.dy }, ...(await overlayLayers(frame, opts, deps, true))])
@@ -330,18 +375,20 @@ export async function renderPhotoFrame(frame: StoryFrame, opts: RenderOpts, deps
 
 /**
  * ffmpeg arguments for a clip frame (pure). Input locked to the file protocol and the mov/mp4 demuxer, the 15 s window
- * read from `start`, fitted with the crop (ffmpeg auto-rotates phone clips first), the overlay PNG on top, then the
- * AI mark at the top right. "small" is the one lower-bitrate retry when the first output is over the size cap.
+ * read from `start`, the crop window cut in source pixels and only then scaled (bounded by 1080×1920 whatever the
+ * source's shape), the overlay PNG on top, then the AI mark at the top right. `source` is the clip's upright size
+ * (ffprobe, rotation applied, matching ffmpeg's auto-rotate); without it the clip is fitted whole. "small" is the one
+ * lower-bitrate retry when the first output is over the size cap.
  */
-export function clipArgs(input: string, overlayPng: string, out: string, clip: { start: number; sound: boolean }, mark?: string, quality: "normal" | "small" = "normal", crop?: StoryFrame["crop"]): string[] {
-  const c = normCrop(crop);
-  const fit = `max(${W}/iw\\,${H}/ih)*${c.scale}`;
-  const graph = [
-    `[0:v]scale=w=trunc(iw*${fit}/2)*2:h=trunc(ih*${fit}/2)*2`,
-    `pad=w=max(iw\\,${W}):h=max(ih\\,${H}):x=(ow-iw)/2:y=(oh-ih)/2:color=black`,
-    `crop=${W}:${H}:x=clip(${c.x}*iw-${W / 2}\\,0\\,iw-${W}):y=clip(${c.y}*ih-${H / 2}\\,0\\,ih-${H})`,
-    "setsar=1[b];[b][1:v]overlay=0:0",
-  ].join(",") + (mark ? `[o];[o][2:v]overlay=${W - 48 - 300}:${TEXT_BOX.safe.top}` : "") + ",format=yuv420p[v]";
+export function clipArgs(input: string, overlayPng: string, out: string, clip: { start: number; sound: boolean }, mark?: string, quality: "normal" | "small" = "normal", source?: { width: number; height: number; crop?: StoryFrame["crop"] }): string[] {
+  const fitted = source
+    ? (() => {
+        const b = cropWindow(source.width, source.height, source.crop);
+        return `crop=${b.width}:${b.height}:${b.left}:${b.top},scale=${b.outWidth}:${b.outHeight},pad=${W}:${H}:${b.dx}:${b.dy}:color=black`;
+      })()
+    : `scale=${W}:${H}:force_original_aspect_ratio=decrease:force_divisible_by=2,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=black`;
+  const graph = `[0:v]${fitted},setsar=1[b];[b][1:v]overlay=0:0`
+    + (mark ? `[o];[o][2:v]overlay=${W - 48 - 300}:${TEXT_BOX.safe.top}` : "") + ",format=yuv420p[v]";
   const still = (file: string) => ["-protocol_whitelist", "file", "-f", "png_pipe", "-i", file];
   const video = quality === "normal" ? ["-crf", "21", "-maxrate", "3500k", "-bufsize", "7000k"] : ["-b:v", "2000k", "-maxrate", "2000k", "-bufsize", "4000k"];
   return [
@@ -377,15 +424,21 @@ export async function renderClipFrame(frame: StoryFrame, opts: RenderOpts, deps:
     const mark = frame.aiMark ? path.join(dir, "ai-mark.png") : undefined;
     if (mark) await writeFile(mark, await aiMarkPng(aiDisclosureLine(opts.language)));
     const clip = frame.clip ?? { start: 0, sound: true };
+    const src = await probeVideo(input);
+    const windowRefused = () => new PublishingError(`${frameLabel(opts)}: the chosen part starts after the clip ends.`, 400, "story.clipWindow");
+    if (clip.start + MIN_CLIP_SECONDS > src.durationSec) throw windowRefused();
+    const source = { width: src.width, height: src.height, crop: frame.crop };
 
-    await run(clipArgs(input, overlay, out, clip, mark, "normal", frame.crop), 110_000);
+    await run(clipArgs(input, overlay, out, clip, mark, "normal", source), 110_000);
     let bytes = new Uint8Array(await readFile(out));
     if (bytes.length > CLIP_MAX_BYTES) {
-      await run(clipArgs(input, overlay, out, clip, mark, "small", frame.crop), 110_000);
+      await run(clipArgs(input, overlay, out, clip, mark, "small", source), 110_000);
       bytes = new Uint8Array(await readFile(out));
       if (bytes.length > CLIP_MAX_BYTES) throw new PublishingError(`${frameLabel(opts)} is too large after compression.`, 422, "story.frameTooLarge");
     }
     const file = { width: W, height: H, bytes: bytes.length, durationSec: (await probeVideo(out)).durationSec };
+    // The container's duration can disagree with where the frames end; the output itself is the final word.
+    if (file.durationSec < MIN_CLIP_SECONDS) throw windowRefused();
     await deps.put(key, bytes, "video/mp4");
     return { key, file };
   } finally {
