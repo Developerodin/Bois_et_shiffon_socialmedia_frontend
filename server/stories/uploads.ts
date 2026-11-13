@@ -6,7 +6,7 @@ import sharp from "sharp";
 import { prisma } from "@/server/db/prisma";
 import { hitRateLimit } from "@/server/auth/rate-limit";
 import { PublishingError } from "@/server/services/publishing";
-import { deleteMedia, getMediaBytes, imageType, mediaKey, presignedPut, putMedia, signedMediaUrl } from "@/server/storage/media";
+import { deleteMedia, getMediaBytes, imageType, MediaTooLarge, mediaKey, presignedPut, putMedia, signedMediaUrl } from "@/server/storage/media";
 import { probeVideo, videoProblem } from "@/server/stories/probe";
 
 type Scope = { workspaceId: string; brandId: string; userId: string };
@@ -53,7 +53,7 @@ export async function createUploadSlot(
 
 type Rejected = { status: "REJECTED"; reason: string; code: string };
 type Verified = { status: "VERIFIED"; durationSec?: number; previewUrl: string };
-type Checked = { contentType: string; width?: number; height?: number; durationSec?: number; hasAudio?: boolean };
+type Checked = { contentType: string; ext: string; width?: number; height?: number; durationSec?: number; hasAudio?: boolean };
 class Reject extends Error {
   constructor(message: string, readonly code: string) {
     super(message);
@@ -78,12 +78,15 @@ export async function verifyUpload(scope: Scope, uploadId: string): Promise<Veri
   }
   const row = await prisma.mediaUpload.findFirst({ where: { id: uploadId, workspaceId, brandId } });
   if (!row) throw new PublishingError("Upload not found.", 404, "story.upload");
+  let finalKey: string | undefined;
   try {
-    const bytes = await getMediaBytes(row.key);
+    const bytes = await getMediaBytes(row.key, row.bytes).catch((e) => {
+      if (e instanceof MediaTooLarge) throw new Reject("The file is bigger than announced.", "story.uploadSize");
+      throw e;
+    });
     if (bytes.length !== row.bytes) throw new Reject("The file isn't the size that was announced.", "story.uploadSize");
-    const ext = row.key.split(".").pop()!;
-    const meta = row.kind === "video" ? await checkVideo(bytes, ext) : await checkPhoto(bytes);
-    const finalKey = mediaKey(scope, `${randomUUID()}.${ext}`);
+    const meta = row.kind === "video" ? await checkVideo(bytes, row.key.split(".").pop()!) : await checkPhoto(bytes);
+    finalKey = mediaKey(scope, `${randomUUID()}.${meta.ext}`);
     await putMedia(finalKey, bytes, meta.contentType);
     await deleteMedia(row.key).catch(() => {});
     await prisma.mediaUpload.update({
@@ -94,6 +97,7 @@ export async function verifyUpload(scope: Scope, uploadId: string): Promise<Veri
   } catch (e) {
     const reject = e instanceof Reject ? e : new Reject("That file couldn't be checked.", "story.uploadCheck");
     await deleteMedia(row.key).catch(() => {});
+    if (finalKey) await deleteMedia(finalKey).catch(() => {}); // written but the row update failed: no orphan
     await prisma.mediaUpload.update({ where: { id: row.id }, data: { status: "REJECTED", reason: reject.message } });
     return { status: "REJECTED", reason: reject.message, code: reject.code };
   }
@@ -107,7 +111,7 @@ async function checkPhoto(bytes: Uint8Array): Promise<Checked> {
     .catch(() => {
       throw new Reject("That photo couldn't be read.", "story.type");
     });
-  return { contentType: type.type, width: m.width, height: m.height };
+  return { contentType: type.type, ext: type.ext, width: m.width, height: m.height };
 }
 
 async function checkVideo(bytes: Uint8Array, ext: string): Promise<Checked> {
@@ -121,6 +125,7 @@ async function checkVideo(bytes: Uint8Array, ext: string): Promise<Checked> {
     const problem = videoProblem(meta);
     if (problem) throw new Reject(problem.message, problem.code);
     return {
+      ext,
       contentType: ext === "mov" ? "video/quicktime" : "video/mp4",
       width: meta.width,
       height: meta.height,

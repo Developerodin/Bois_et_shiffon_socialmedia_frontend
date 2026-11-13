@@ -73,11 +73,31 @@ export function presignedPut(key: string, contentType: string, bytes: number, ex
   );
 }
 
-/** The whole object as bytes (callers cap the size first: uploads are limited by their signed length). */
-export async function getMediaBytes(key: string) {
+export class MediaTooLarge extends Error {}
+
+/**
+ * The object as bytes, never more than maxBytes: refused up front when storage reports a bigger length, and the
+ * stream stops as soon as the running count passes it (so a lying length can't make us buffer a huge file).
+ */
+export async function getMediaBytes(key: string, maxBytes: number) {
   const r = await s3.send(new GetObjectCommand({ Bucket: MEDIA_BUCKET, Key: key }));
-  if (!r.Body) throw new Error("Empty storage response");
-  return r.Body.transformToByteArray();
+  const body = r.Body as (AsyncIterable<Uint8Array> & { destroy?: () => void }) | undefined;
+  if (!body) throw new Error("Empty storage response");
+  if ((r.ContentLength ?? 0) > maxBytes) {
+    body.destroy?.();
+    throw new MediaTooLarge();
+  }
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for await (const chunk of body) {
+    total += chunk.length;
+    if (total > maxBytes) {
+      body.destroy?.();
+      throw new MediaTooLarge();
+    }
+    chunks.push(chunk);
+  }
+  return new Uint8Array(Buffer.concat(chunks));
 }
 
 export async function deleteMedia(key: string) {
