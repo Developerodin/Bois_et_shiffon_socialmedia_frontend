@@ -8,6 +8,8 @@ import { kickRunner } from "@/server/jobs/runner";
 import { accessToken } from "@/server/services/connections";
 import { autoPublish } from "@/server/services/automations";
 import { decide, markDone, postAiAllowed, postRest, PublishingError, releaseState, saveDraft, schedulePublication, settleFrame, settlePublication } from "@/server/services/publishing";
+import { registerManualPost } from "@/server/services/manual-post";
+import { checkStoryLink, setByHand } from "@/server/stories/by-hand";
 import { parseStoryInput } from "@/server/stories/body";
 import { deleteStory, duplicateStory, failStoryStart, reopenStoryWrite, saveStoryVersion, STORY_START_NOTE, storyView } from "@/server/stories/service";
 
@@ -50,11 +52,14 @@ const Action = z.discriminatedUnion("action", [
   z.object({ action: z.literal("postRest"), attemptId: z.string().min(1), confirm: z.boolean().optional() }),
   z.object({ action: z.literal("markDone"), attemptId: z.string().min(1) }),
   z.object({ action: z.literal("settleFrame"), attemptId: z.string().min(1), frame: z.number().int().min(0).max(4), appeared: z.boolean() }),
+  // Post a story by hand: `at` is when it is due (null turns it off); postedByHand says it was posted (url: the story's link, checked, not kept).
+  z.object({ action: z.literal("byHand"), at: z.string().datetime({ offset: true }).nullable() }),
+  z.object({ action: z.literal("postedByHand"), url: z.string().max(2000).optional() }),
   z.object({ action: z.literal("duplicate") }),
   z.object({ action: z.literal("delete") }),
 ]);
 
-const PERMISSION = { rewrite: "content.create", edit: "content.create", editStory: "content.create", duplicate: "content.create", delete: "content.create", decide: "content.approve", publish: "publish.execute", postRest: "publish.execute", markDone: "publish.execute", settleFrame: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
+const PERMISSION = { rewrite: "content.create", edit: "content.create", editStory: "content.create", duplicate: "content.create", delete: "content.create", decide: "content.approve", publish: "publish.execute", postRest: "publish.execute", markDone: "publish.execute", byHand: "publish.execute", postedByHand: "publish.execute", settleFrame: "publish.execute", cancel: "publish.execute", posted: "publish.execute", "not-posted": "publish.execute" } as const;
 
 /** Approval history, publishing history, and where this post can go (with Pinterest boards). */
 export async function GET(request: Request, context: Params) {
@@ -159,6 +164,11 @@ export async function POST(request: Request, context: Params) {
     } else if (body.action === "postRest") {
       await postRest({ ...scope, itemId, attemptId: body.attemptId, confirm: body.confirm });
       kickRunner();
+    } else if (body.action === "byHand") {
+      await setByHand(scope, itemId, body.at ? new Date(body.at) : null);
+    } else if (body.action === "postedByHand") {
+      if (body.url?.trim()) await checkStoryLink(scope, body.url);
+      await registerManualPost(scope, itemId, undefined, "story");
     } else if (body.action === "markDone") {
       await markDone({ ...scope, itemId, attemptId: body.attemptId });
     } else if (body.action === "settleFrame") {

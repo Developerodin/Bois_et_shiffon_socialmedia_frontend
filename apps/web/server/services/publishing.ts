@@ -104,7 +104,7 @@ export function packageHash(item: { id: string; channel: string }, version: { id
   return createHash("sha256").update(JSON.stringify([item.id, item.channel, version.id, version.body])).digest("hex");
 }
 
-async function loadItem(scope: { workspaceId: string; brandId: string }, itemId: string, db: Prisma.TransactionClient = prisma) {
+export async function loadItem(scope: { workspaceId: string; brandId: string }, itemId: string, db: Prisma.TransactionClient = prisma) {
   const item = await db.contentItem.findFirst({
     where: { id: itemId, workspaceId: scope.workspaceId, brandId: scope.brandId },
     include: { versions: { orderBy: { version: "desc" }, take: 1, include: { checks: { orderBy: { createdAt: "desc" }, take: 1 } } } },
@@ -114,7 +114,7 @@ async function loadItem(scope: { workspaceId: string; brandId: string }, itemId:
 }
 
 /** The approval that currently lets this post go out, or null. */
-async function currentApproval(itemId: string, latest: { id: string; body: unknown } | null, channel: string, db: Prisma.TransactionClient = prisma) {
+export async function currentApproval(itemId: string, latest: { id: string; body: unknown } | null, channel: string, db: Prisma.TransactionClient = prisma) {
   if (!latest) return null;
   const last = await db.approvalDecision.findFirst({ where: { contentItemId: itemId }, orderBy: { createdAt: "desc" } });
   const ok = last?.verdict === "APPROVED" && last.contentVersionId === latest.id && last.packageHash === packageHash({ id: itemId, channel }, latest);
