@@ -24,9 +24,11 @@ type Props = {
   height?: number;
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
+  /** One of a set of choices (Fit / Fill): tells screen readers which is chosen. */
+  selected?: boolean;
 };
 
-export function Button({ label, onPress, variant = "primary", disabled, loading, arrow, icon, height, style, accessibilityLabel }: Props) {
+export function Button({ label, onPress, variant = "primary", disabled, loading, arrow, icon, height, style, accessibilityLabel, selected }: Props) {
   const off = disabled || loading;
   const v = off && variant === "primary" ? styles.disabled : styles[variant];
   const ink = off && variant === "primary" ? color.disabledInk : variant === "primary" ? color.onPrimary : variant === "danger" ? color.error : color.ink;
@@ -34,7 +36,7 @@ export function Button({ label, onPress, variant = "primary", disabled, loading,
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
-      accessibilityState={{ disabled: !!off, busy: !!loading }}
+      accessibilityState={{ disabled: !!off, busy: !!loading, ...(selected === undefined ? {} : { selected }) }}
       disabled={off}
       onPress={onPress}
       style={({ pressed }) => [

@@ -620,15 +620,18 @@ export type StoryAttempt = PostRelease["attempts"][number] & { frames?: number; 
 export type StoryRelease = Omit<PostRelease, "attempts"> & {
   attempts: StoryAttempt[]; byHand: boolean; scheduledFor: string | null;
   rendering: boolean; renderError: string | null; renderErrorCode: string | null;
-  frames: { n: number; url: string | null; sourceUrl?: string | null; kind: "photo" | "video" | null; headline: string }[];
+  /** `sourceSize`: a clip's upright size as the renderer crops it (null for photos, or when unknown). */
+  frames: { n: number; url: string | null; sourceUrl?: string | null; sourceSize?: MediaSize | null; kind: "photo" | "video" | null; headline: string }[];
   /** editStory: saved now, or rendering first. */
   saved?: "saved" | "rendering";
 };
-export type StorySource = { ref: SourceRef; title: string; kind: "photo" | "video"; previewUrl: string; durationSec?: number };
+export type MediaSize = { width: number; height: number };
+/** `width`/`height`: a clip's upright size (photos leave them out: the phone measures the decoded photo). */
+export type StorySource = { ref: SourceRef; title: string; kind: "photo" | "video"; previewUrl: string; durationSec?: number; width?: number; height?: number };
 export type DueStory = { id: string; title: string; scheduledFor: string; firstFrameUrl: string | null };
 export type StoryPackage = { frames: { n: number; url: string; kind: "photo" | "video" }[]; link: string; steps: string[] };
 export type UploadSlot = { uploadId: string; url: string; headers: Record<string, string> };
-export type UploadResult = { status: "VERIFIED"; durationSec?: number; previewUrl: string } | { status: "REJECTED"; reason: string; code: string };
+export type UploadResult = { status: "VERIFIED"; durationSec?: number; width?: number; height?: number; previewUrl: string } | { status: "REJECTED"; reason: string; code: string };
 
 const storyAct = async <T = StoryRelease>(id: string, body: Record<string, unknown>) => {
   const { ws, base } = await reelBase();

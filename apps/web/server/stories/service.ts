@@ -9,7 +9,7 @@ import { liveOfferFor } from "@/server/content/knowledge";
 import { CREDIT_COSTS, InsufficientCreditsError, refundCharge, spendCredits } from "@/server/services/credits";
 import { APP_GOALS, EDITABLE, lock, PublishingError, TX } from "@/server/services/publishing";
 import { getMediaBytes, signedMediaUrl } from "@/server/storage/media";
-import { isStoryBody, type StoryBody, type StoryFrame, type StoryFrameInput, type StoryInput } from "@/server/stories/body";
+import { isStoryBody, REEL_SIZE, type StoryBody, type StoryFrame, type StoryFrameInput, type StoryInput } from "@/server/stories/body";
 import { renderClipFrame, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
 import { resolveSource } from "@/server/stories/sources";
 
@@ -323,6 +323,17 @@ export async function storyView(scope: BrandScope, itemId: string) {
     prisma.contentVersion.findFirst({ where: { contentItemId: itemId, item: { workspaceId: scope.workspaceId, brandId: scope.brandId } }, orderBy: { version: "desc" }, select: { body: true } }),
   ]);
   const frames = isStoryBody(latest?.body) ? latest.body.frames : [];
+  // A clip's upright size (probe.ts turns quarter-rotated streams), so the phone crops the shape the renderer cuts.
+  const clipKeys = frames.filter((f) => f.mediaKind === "video" && f.source?.kind === "upload" && f.mediaKey).map((f) => f.mediaKey!);
+  const uploads = clipKeys.length
+    ? await prisma.mediaUpload.findMany({ where: { workspaceId: scope.workspaceId, brandId: scope.brandId, key: { in: clipKeys } }, select: { key: true, width: true, height: true } })
+    : [];
+  const sourceSize = (f: StoryFrame) => {
+    if (f.mediaKind !== "video") return null;
+    if (f.source?.kind === "reel") return REEL_SIZE;
+    const u = uploads.find((x) => x.key === f.mediaKey);
+    return u?.width && u.height ? { width: u.width, height: u.height } : null;
+  };
   return {
     rendering: state.rendering,
     renderError: state.error ?? null,
@@ -334,6 +345,7 @@ export async function storyView(scope: BrandScope, itemId: string) {
         // The untouched photo or clip, so the phone editor can preview new text, crop and trim without the old text
         // burned in. The phone reads a clip's length from its player.
         sourceUrl: await sourceUrl(scope, f.mediaKey),
+        sourceSize: sourceSize(f),
         kind: f.mediaKind ?? null,
         headline: f.headline,
       })),

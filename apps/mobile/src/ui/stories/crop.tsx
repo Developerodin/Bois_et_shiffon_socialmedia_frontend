@@ -92,6 +92,9 @@ export function CropImage({ uri, crop, width, size, onSize }: { uri: string; cro
 export function CropArea({ src, crop, width, onChange, children }: { src?: Size; crop?: Crop; width: number; onChange: (c: Crop) => void; children: (crop?: Crop) => ReactNode }) {
   const [live, setLive] = useState<Crop | null>(null);
   const cur = useRef<Crop | null>(null);
+  // The crop and the finger when the touch began: the pan follows the finger's whole travel from there, so nothing is
+  // lost to per-event rounding or to the movement before the gesture activated (translationX starts at activation).
+  const panFrom = useRef<{ crop: Crop; x: number; y: number } | null>(null);
   const move = (f: (c: Crop, src: Size) => Crop) => {
     if (!src) return;
     const next = clampCrop(src, f(cur.current ?? norm(crop), src));
@@ -108,8 +111,21 @@ export function CropArea({ src, crop, width, onChange, children }: { src?: Size;
   const pan = usePanGesture({
     runOnJS: true,
     enabled: !!src,
-    onUpdate: (e) => move((c, s) => ({ ...c, x: c.x - e.changeX / k / (cover(s) * c.scale) / s.width, y: c.y - e.changeY / k / (cover(s) * c.scale) / s.height })),
-    onFinalize: end,
+    onBegin: (e) => {
+      panFrom.current = src ? { crop: clampCrop(src, cur.current ?? norm(crop)), x: e.absoluteX, y: e.absoluteY } : null;
+    },
+    onUpdate: (e) =>
+      move((c, s) => {
+        const from = panFrom.current;
+        if (!from) return c;
+        const dx = e.absoluteX - from.x;
+        const dy = e.absoluteY - from.y;
+        return { ...c, x: from.crop.x - dx / k / (cover(s) * c.scale) / s.width, y: from.crop.y - dy / k / (cover(s) * c.scale) / s.height };
+      }),
+    onFinalize: () => {
+      panFrom.current = null;
+      end();
+    },
   });
   const pinch = usePinchGesture({
     runOnJS: true,
@@ -142,6 +158,7 @@ export function CropControls({ size, crop, locked, onChange }: { size?: Size; cr
           label={t("stories.crop.fit")}
           accessibilityLabel={t("stories.crop.fitLabel")}
           variant={fit !== null && Math.abs(scale - fit) < 0.001 ? "primary" : "outline"}
+          selected={fit !== null && Math.abs(scale - fit) < 0.001}
           height={44}
           style={{ flex: 1 }}
           disabled={fit === null}
@@ -151,6 +168,7 @@ export function CropControls({ size, crop, locked, onChange }: { size?: Size; cr
           label={t("stories.crop.fill")}
           accessibilityLabel={t("stories.crop.fillLabel")}
           variant={Math.abs(scale - 1) < 0.001 ? "primary" : "outline"}
+          selected={Math.abs(scale - 1) < 0.001}
           height={44}
           style={{ flex: 1 }}
           onPress={() => onChange(crop ? { x: crop.x, y: crop.y, scale: 1 } : undefined)}

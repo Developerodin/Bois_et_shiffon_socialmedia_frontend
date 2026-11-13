@@ -18,15 +18,19 @@ const tenths = (s: number) => Math.round(s * 10) / 10;
 const lastStart = (duration: number) => Math.max(0, Math.floor((duration - CLIP_SECONDS) * 10) / 10);
 
 /**
- * The clip itself on the preview while the Image tool is open: its chosen 15 s on a loop, silent when its sound is
- * off, placed by its crop. Reports the clip's length and picture size once it loads (the trim and crop need them).
+ * A clip on the preview, placed by its crop: playing its chosen 15 s on a loop (silent when its sound is off) while the
+ * Image tool is open, otherwise paused on the window's first picture. Reports the clip's length and its track size once
+ * it loads; the track size can be before rotation, so the server's upright size is preferred where there is one.
  */
-export function ClipPicture({ url, clip, crop, width, size, onLoad }: { url: string; clip: Clip; crop?: Crop; width: number; size?: Size; onLoad: (m: { duration: number; size?: Size }) => void }) {
+export function ClipPicture({ url, clip, crop, width, size, playing, onLoad }: { url: string; clip: Clip; crop?: Crop; width: number; size?: Size; playing: boolean; onLoad: (m: { duration: number; size?: Size }) => void }) {
   const player = useVideoPlayer(url, (p) => {
     p.loop = true;
     p.timeUpdateEventInterval = 0.25;
-    p.play();
   });
+  useEffect(() => {
+    if (playing) player.play();
+    else player.pause();
+  }, [player, playing]);
   // expo-video is driven by setting the player's properties; the React Compiler's immutability rule can't know that.
   /* eslint-disable react-hooks/immutability */
   useEventListener(player, "sourceLoad", (e) => {
@@ -61,15 +65,21 @@ export function Trim({ duration, start, onChange }: { duration: number | null; s
   const [track, setTrack] = useState(0);
   const [live, setLive] = useState<number | null>(null);
   const cur = useRef<number | null>(null);
+  // Where the window and the finger were when the touch began: the window follows the finger's whole travel from there.
+  // (translationX starts at activation, so the few points before it would be lost on every drag.)
+  const from = useRef({ start: 0, x: 0 });
   const max = duration === null ? 0 : lastStart(duration);
   const at = Math.min(live ?? start, max);
   const set = (v: number) => onChange(tenths(Math.min(max, Math.max(0, v))));
   const drag = usePanGesture({
     runOnJS: true,
     activeOffsetX: [-4, 4],
+    onBegin: (e) => {
+      from.current = { start: at, x: e.absoluteX };
+    },
     onUpdate: (e) => {
       if (!track || duration === null) return;
-      const next = Math.min(max, Math.max(0, (cur.current ?? at) + (e.changeX / track) * duration));
+      const next = Math.min(max, Math.max(0, from.current.start + ((e.absoluteX - from.current.x) / track) * duration));
       cur.current = next;
       setLive(next);
     },

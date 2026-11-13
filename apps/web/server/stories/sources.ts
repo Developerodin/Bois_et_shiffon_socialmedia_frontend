@@ -4,11 +4,11 @@ import { needsAiDisclosure } from "@/server/reels/plan";
 import { safeFetchBytes } from "@/server/research/crawl";
 import { PublishingError } from "@/server/services/publishing";
 import { imageType, mediaKey, putMedia, signedMediaUrl } from "@/server/storage/media";
-import type { SourceRef, StoryFrame } from "@/server/stories/body";
+import { REEL_SIZE, type SourceRef, type StoryFrame } from "@/server/stories/body";
 
 export type Resolved = { mediaKey: string; mediaKind: "photo" | "video"; aiMark: boolean; rights: NonNullable<StoryFrame["rights"]>; durationSec?: number };
 type Scope = { workspaceId: string; brandId: string; userId: string };
-type Item = { ref: SourceRef; title: string; kind: "photo" | "video"; previewUrl: string; durationSec?: number };
+type Item = { ref: SourceRef; title: string; kind: "photo" | "video"; previewUrl: string; durationSec?: number; width?: number; height?: number };
 
 const PRODUCT_IMAGE_MAX = 15 * 1024 * 1024;
 const LIST_MAX = 60;
@@ -115,7 +115,7 @@ export async function listStorySources(scope: Scope, opts: { productIds: string[
   const [uploads, profile, shoots, reels] = await Promise.all([
     prisma.mediaUpload.findMany({
       where: { workspaceId, brandId, status: "VERIFIED", productId: null, ...(opts.photosOnly ? { kind: "photo" } : {}) },
-      orderBy: { createdAt: "desc" }, take: LIST_MAX, select: { id: true, key: true, kind: true, durationSec: true },
+      orderBy: { createdAt: "desc" }, take: LIST_MAX, select: { id: true, key: true, kind: true, durationSec: true, width: true, height: true },
     }),
     prisma.brandProfile.findFirst({ where: { brandId, workspaceId }, select: { uploads: true } }),
     prisma.photoShoot.findMany({ where: { workspaceId, brandId, status: "DONE" }, orderBy: { createdAt: "desc" }, take: 10, select: { outputKeys: true } }),
@@ -127,11 +127,19 @@ export async function listStorySources(scope: Scope, opts: { productIds: string[
   const reelTitle = (id: string) => (versions.find((v) => v.id === id)?.body as { title?: string } | undefined)?.title || "Reel";
 
   const library: Item[] = [];
-  for (const u of uploads) library.push({ ref: { kind: "upload", id: u.id }, title: u.kind === "video" ? "Clip" : "Upload", kind: u.kind === "video" ? "video" : "photo", previewUrl: await signedMediaUrl(u.key), ...(u.durationSec == null ? {} : { durationSec: u.durationSec }) });
+  // A clip's upright size, so the phone crops the shape the renderer cuts (photos: the phone measures the decoded photo).
+  for (const u of uploads) {
+    const video = u.kind === "video";
+    library.push({
+      ref: { kind: "upload", id: u.id }, title: video ? "Clip" : "Upload", kind: video ? "video" : "photo", previewUrl: await signedMediaUrl(u.key),
+      ...(u.durationSec == null ? {} : { durationSec: u.durationSec }),
+      ...(video && u.width && u.height ? { width: u.width, height: u.height } : {}),
+    });
+  }
   const entries = Array.isArray(profile?.uploads) ? (profile.uploads as { key?: string; title?: string }[]) : [];
   for (const e of entries) if (e?.key) library.push({ ref: { kind: "library", id: e.key }, title: e.title || "Photo", kind: "photo", previewUrl: await signedMediaUrl(e.key) });
   for (const s of shoots) for (const key of s.outputKeys) library.push({ ref: { kind: "photoshoot", id: key }, title: "Photoshoot", kind: "photo", previewUrl: await signedMediaUrl(key) });
-  for (const r of reels) library.push({ ref: { kind: "reel", id: r.videoKey! }, title: reelTitle(r.contentVersionId), kind: "video", previewUrl: await signedMediaUrl(r.videoKey!) });
+  for (const r of reels) library.push({ ref: { kind: "reel", id: r.videoKey! }, title: reelTitle(r.contentVersionId), kind: "video", previewUrl: await signedMediaUrl(r.videoKey!), ...REEL_SIZE });
 
   return [{ tab: "products", items: productItems }, { tab: "library", items: library }];
 }

@@ -29,7 +29,7 @@ import { usePermissions } from "@/ui/use-permissions";
  * A frame being edited; `from` is its index in the saved version (its rendered picture), -1 for a new one. `picked`
  * is a newly chosen photo or clip, previewed until a save renders it.
  */
-type EditFrame = StoryFrameInput & { from: number; picked?: Pick<Picked, "url" | "kind"> };
+type EditFrame = StoryFrameInput & { from: number; picked?: Pick<Picked, "url" | "kind" | "size"> };
 type Draft = { frames: EditFrame[]; cta: string; link: string; brandMark: boolean };
 /**
  * `key` names the field last typed in, so a run of keystrokes in one field is one change for Undo. `base` is the
@@ -165,7 +165,7 @@ export default function EditStory() {
   };
   // A new photo or clip drops the old one's crop; a clip starts at 0 with sound.
   const pick = (p: Picked) => {
-    const media = { source: p.source, picked: { url: p.url, kind: p.kind }, crop: undefined, clip: p.kind === "video" ? { start: 0, sound: true } : undefined };
+    const media = { source: p.source, picked: { url: p.url, kind: p.kind, size: p.size }, crop: undefined, clip: p.kind === "video" ? { start: 0, sound: true } : undefined };
     if (picking === "new") {
       change({ ...draft, frames: [...frames, { label: "", headline: "", body: "", from: -1, ...media }] });
       setSelected(frames.length);
@@ -224,12 +224,15 @@ export default function EditStory() {
   const isClip = !!frame && kindOf(frame) === "video";
   const clip = frame?.clip ?? { start: 0, sound: true };
   const cropLocked = frame?.source?.kind === "reel";
-  const srcSize = media && media.url === src ? media.size : undefined;
+  // A clip's upright size from the server comes first: the player's track size can be before rotation (a portrait phone
+  // clip reports landscape), and the crop must be worked out on the shape the renderer cuts.
+  const serverSize = !isClip || !frame ? undefined : frame.picked ? frame.picked.size : (release?.frames[frame.from]?.sourceSize ?? undefined);
+  const srcSize = serverSize ?? (media && media.url === src ? media.size : undefined);
   const duration = media && media.url === src ? (media.duration ?? null) : null;
   const setCrop = (c: FrameCrop | undefined) => setFrame({ crop: c }, "crop");
   const sourceView = (crop?: FrameCrop) =>
-    !src ? null : imageMode && isClip ? (
-      <ClipPicture url={src} clip={clip} crop={cropLocked ? undefined : crop} width={pw} size={srcSize} onLoad={(m) => noteMedia(src, m)} />
+    !src ? null : isClip ? (
+      <ClipPicture url={src} clip={clip} crop={cropLocked ? undefined : crop} width={pw} size={srcSize} playing={imageMode} onLoad={(m) => noteMedia(src, m)} />
     ) : (
       <CropImage uri={src} crop={cropLocked ? undefined : crop} width={pw} size={srcSize} onSize={(size) => noteMedia(src, { size })} />
     );
@@ -306,64 +309,67 @@ export default function EditStory() {
         </View>
 
         {tool && !readOnly ? (
-          <ScrollView style={styles.panel} contentContainerStyle={{ gap: space[8], padding: space[16], paddingBottom: Math.max(insets.bottom, space[16]) }} keyboardShouldPersistTaps="handled">
-            <View style={styles.panelHead}>
-              <Text style={type.cardTitle}>{t(`editStory.tools.${tool}`)}</Text>
-              <Pressable accessibilityRole="button" hitSlop={10} onPress={() => setTool(null)}>
-                <Text style={[type.label, { color: color.primary }]}>{t("stories.editor.done")}</Text>
-              </Pressable>
-            </View>
-            {tool === "text" && frame ? (
-              <>
-                {/* Above the fields, so the keyboard never hides it. */}
-                {!fit.fits ? (
-                  <Text accessibilityLiveRegion="polite" style={[type.meta, { color: color.error }]}>
-                    {t("stories.editor.tooLong", { field: t(`stories.editor.${fit.field}`) })}
-                  </Text>
-                ) : null}
-                <Field label={t("stories.editor.label")} value={frame.label} maxLength={STORY_LIMITS.label} height={44} onChangeText={(v) => setFrame({ label: v }, "label")} />
-                <Field label={t("stories.editor.headline")} value={frame.headline} maxLength={STORY_LIMITS.headline} height={44} onChangeText={(v) => setFrame({ headline: v }, "headline")} />
-                <Field label={t("stories.editor.body")} value={frame.body} maxLength={STORY_LIMITS.body} height={44} onChangeText={(v) => setFrame({ body: v }, "body")} />
-              </>
-            ) : tool === "image" && frame ? (
-              <>
-                <Button label={frame.source ? t("stories.picker.replace") : t("stories.picker.add")} onPress={() => setPicking(at)} />
-                {src ? <CropControls size={srcSize} crop={frame.crop} locked={cropLocked} onChange={setCrop} /> : null}
-                {isClip && src ? (
-                  <>
-                    <Trim duration={duration} start={clip.start} onChange={(start) => setFrame({ clip: { ...clip, start } }, "trim")} />
-                    <View style={styles.between}>
-                      <Text style={[type.body, { flex: 1 }]}>{t("stories.trim.sound")}</Text>
-                      <Toggle label={t("stories.trim.sound")} value={clip.sound} onValueChange={(v) => setFrame({ clip: { ...clip, sound: v } }, "sound")} />
-                    </View>
-                  </>
-                ) : null}
-              </>
-            ) : tool === "brand" ? (
-              <View style={styles.between}>
-                <Text style={[type.body, { flex: 1 }]}>{t("stories.editor.brandMark")}</Text>
-                <Toggle label={t("stories.editor.brandMark")} value={draft.brandMark} onValueChange={(v) => change({ ...draft, brandMark: v })} />
+          // The inset sits outside the scroll area, so its last row (a clip's Sound) is never under the navigation bar.
+          <View style={[styles.panelWrap, { paddingBottom: insets.bottom }]}>
+            <ScrollView style={styles.panel} contentContainerStyle={{ gap: space[8], padding: space[16] }} keyboardShouldPersistTaps="handled">
+              <View style={styles.panelHead}>
+                <Text style={type.cardTitle}>{t(`editStory.tools.${tool}`)}</Text>
+                <Pressable accessibilityRole="button" hitSlop={10} onPress={() => setTool(null)}>
+                  <Text style={[type.label, { color: color.primary }]}>{t("stories.editor.done")}</Text>
+                </Pressable>
               </View>
-            ) : tool === "cta" ? (
-              <>
-                <Field label={t("stories.editor.cta")} value={draft.cta} maxLength={STORY_LIMITS.cta} height={44} onChangeText={(v) => change({ ...draft, cta: v }, "cta")} />
-                <Field
-                  label={t("stories.editor.link")}
-                  value={draft.link}
-                  maxLength={STORY_LIMITS.link}
-                  height={44}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  keyboardType="url"
-                  placeholder="https://"
-                  error={badLink ? t("stories.editor.badLink") : null}
-                  onChangeText={(v) => change({ ...draft, link: v.trim() }, "link")}
-                />
-                {last >= 0 && !textFits(frames[last], true, draft.cta).fits ? <Text style={[type.meta, { color: color.error }]}>{t("stories.editor.tooLong", { field: t("stories.editor.cta") })}</Text> : null}
-                <Text style={type.meta}>{t("stories.scheduling.noLinkScheduled")}</Text>
-              </>
-            ) : null}
-          </ScrollView>
+              {tool === "text" && frame ? (
+                <>
+                  {/* Above the fields, so the keyboard never hides it. */}
+                  {!fit.fits ? (
+                    <Text accessibilityLiveRegion="polite" style={[type.meta, { color: color.error }]}>
+                      {t("stories.editor.tooLong", { field: t(`stories.editor.${fit.field}`) })}
+                    </Text>
+                  ) : null}
+                  <Field label={t("stories.editor.label")} value={frame.label} maxLength={STORY_LIMITS.label} height={44} onChangeText={(v) => setFrame({ label: v }, "label")} />
+                  <Field label={t("stories.editor.headline")} value={frame.headline} maxLength={STORY_LIMITS.headline} height={44} onChangeText={(v) => setFrame({ headline: v }, "headline")} />
+                  <Field label={t("stories.editor.body")} value={frame.body} maxLength={STORY_LIMITS.body} height={44} onChangeText={(v) => setFrame({ body: v }, "body")} />
+                </>
+              ) : tool === "image" && frame ? (
+                <>
+                  <Button label={frame.source ? t("stories.picker.replace") : t("stories.picker.add")} onPress={() => setPicking(at)} />
+                  {src ? <CropControls size={srcSize} crop={frame.crop} locked={cropLocked} onChange={setCrop} /> : null}
+                  {isClip && src ? (
+                    <>
+                      <Trim duration={duration} start={clip.start} onChange={(start) => setFrame({ clip: { ...clip, start } }, "trim")} />
+                      <View style={styles.between}>
+                        <Text style={[type.body, { flex: 1 }]}>{t("stories.trim.sound")}</Text>
+                        <Toggle label={t("stories.trim.sound")} value={clip.sound} onValueChange={(v) => setFrame({ clip: { ...clip, sound: v } }, "sound")} />
+                      </View>
+                    </>
+                  ) : null}
+                </>
+              ) : tool === "brand" ? (
+                <View style={styles.between}>
+                  <Text style={[type.body, { flex: 1 }]}>{t("stories.editor.brandMark")}</Text>
+                  <Toggle label={t("stories.editor.brandMark")} value={draft.brandMark} onValueChange={(v) => change({ ...draft, brandMark: v })} />
+                </View>
+              ) : tool === "cta" ? (
+                <>
+                  <Field label={t("stories.editor.cta")} value={draft.cta} maxLength={STORY_LIMITS.cta} height={44} onChangeText={(v) => change({ ...draft, cta: v }, "cta")} />
+                  <Field
+                    label={t("stories.editor.link")}
+                    value={draft.link}
+                    maxLength={STORY_LIMITS.link}
+                    height={44}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="url"
+                    placeholder="https://"
+                    error={badLink ? t("stories.editor.badLink") : null}
+                    onChangeText={(v) => change({ ...draft, link: v.trim() }, "link")}
+                  />
+                  {last >= 0 && !textFits(frames[last], true, draft.cta).fits ? <Text style={[type.meta, { color: color.error }]}>{t("stories.editor.tooLong", { field: t("stories.editor.cta") })}</Text> : null}
+                  <Text style={type.meta}>{t("stories.scheduling.noLinkScheduled")}</Text>
+                </>
+              ) : null}
+            </ScrollView>
+          </View>
         ) : (
           <View style={{ paddingBottom: Math.max(insets.bottom, space[16]) }}>
             <FrameStrip frames={strip} selected={at} onSelect={setSelected} onMenu={setMenuFor} onAdd={() => setPicking("new")} disabled={readOnly} />
@@ -449,7 +455,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.control,
   },
   toolOn: { backgroundColor: color.primary, borderColor: color.primary },
-  panel: { flexGrow: 0, maxHeight: 340, backgroundColor: color.surface, borderTopLeftRadius: radius.card, borderTopRightRadius: radius.card },
+  panelWrap: { backgroundColor: color.surface, borderTopLeftRadius: radius.card, borderTopRightRadius: radius.card },
+  panel: { flexGrow: 0, maxHeight: 340 },
   panelHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   between: { flexDirection: "row", alignItems: "center", gap: space[12] },
   bottom: { paddingTop: space[8], paddingHorizontal: space[16], gap: space[8] },

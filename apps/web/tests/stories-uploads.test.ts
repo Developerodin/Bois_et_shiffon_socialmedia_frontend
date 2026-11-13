@@ -109,6 +109,7 @@ describe("verifying an upload", () => {
     m.get.mockResolvedValueOnce(good).mockResolvedValue(swapped);
     const r = await verifyUpload(scope, "up1");
     expect(r).toMatchObject({ status: "VERIFIED" });
+    expect(r).not.toHaveProperty("width"); // a photo's size is measured on the phone, after EXIF orientation
     expect(m.get).toHaveBeenCalledTimes(1);
     expect(m.put).toHaveBeenCalledTimes(1);
     expect(m.put.mock.calls[0][0]).toMatch(/^w1\/b1\/[0-9a-f-]+\.jpg$/);
@@ -182,7 +183,7 @@ describe("verifying an upload", () => {
     m.probe.mockResolvedValue({ durationSec: 200, width: 1080, height: 1920, fps: 30, videoStreams: 1, audioStreams: 1 });
     expect(await verifyUpload(scope, "up1")).toMatchObject({ status: "REJECTED" });
     m.probe.mockResolvedValue({ durationSec: 12, width: 1080, height: 1920, fps: 30, videoStreams: 1, audioStreams: 0 });
-    expect(await verifyUpload(scope, "up1")).toMatchObject({ status: "VERIFIED", durationSec: 12 });
+    expect(await verifyUpload(scope, "up1")).toMatchObject({ status: "VERIFIED", durationSec: 12, width: 1080, height: 1920 });
     expect(m.put.mock.calls[0][0]).toMatch(/\.mp4$/);
     expect(m.update.mock.calls.at(-1)?.[0].data).toMatchObject({ hasAudio: false, durationSec: 12 });
   });

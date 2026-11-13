@@ -5,7 +5,7 @@ import { Play } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { stories, type SourceRef, type StorySource } from "@/api/endpoints";
+import { type MediaSize, stories, type SourceRef, type StorySource } from "@/api/endpoints";
 import { color, radius, space, type } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { PageLoading } from "@/ui/page-loading";
@@ -15,7 +15,8 @@ import { storyError } from "@/ui/stories/errors";
 import { UploadCancelled, uploadToSlot, type UploadProgress } from "@/ui/stories/upload";
 
 /** What a frame gets from the picker: the source to save, and a picture to preview until the save renders it. */
-export type Picked = { source: SourceRef; kind: "photo" | "video"; url: string; durationSec?: number };
+/** `size`: a clip's upright size from the server (the player's track size can be before rotation). */
+export type Picked = { source: SourceRef; kind: "photo" | "video"; url: string; durationSec?: number; size?: MediaSize };
 type Tab = "phone" | "products" | "library" | "generate";
 
 // The types the server takes (server/stories/uploads.ts); the picker's mimeType, else the file's extension.
@@ -88,8 +89,8 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
     const job = uploadToSlot(a.uri, kind, bytes, contentType, (p) => upload.current === job && setProgress(p));
     upload.current = job;
     try {
-      const { uploadId, durationSec } = await job.promise;
-      onPickNow.current({ source: { kind: "upload", id: uploadId }, kind, url: a.uri, ...(durationSec === undefined ? {} : { durationSec }) });
+      const { uploadId, durationSec, size } = await job.promise;
+      onPickNow.current({ source: { kind: "upload", id: uploadId }, kind, url: a.uri, ...(durationSec === undefined ? {} : { durationSec }), ...(size ? { size } : {}) });
     } catch (e) {
       if (!(e instanceof UploadCancelled)) setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -162,7 +163,15 @@ export function StoryPicker({ visible, productIds, onClose, onPick }: { visible:
                 key={`${s.ref.kind}:${s.ref.id}`}
                 accessibilityRole="button"
                 accessibilityLabel={t("stories.picker.pick", { title: s.kind === "video" ? `${s.title}, ${t("stories.picker.video")}` : s.title })}
-                onPress={() => onPick({ source: s.ref, kind: s.kind, url: s.previewUrl, ...(s.durationSec === undefined ? {} : { durationSec: s.durationSec }) })}
+                onPress={() =>
+                  onPick({
+                    source: s.ref,
+                    kind: s.kind,
+                    url: s.previewUrl,
+                    ...(s.durationSec === undefined ? {} : { durationSec: s.durationSec }),
+                    ...(s.width && s.height ? { size: { width: s.width, height: s.height } } : {}),
+                  })
+                }
                 style={({ pressed }) => [styles.tile, { width: tile, height: (tile * 16) / 9 }, pressed && { opacity: 0.8 }]}
               >
                 <Image source={{ uri: s.previewUrl }} style={StyleSheet.absoluteFill} contentFit="cover" />

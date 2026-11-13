@@ -1,7 +1,7 @@
 import { File, type UploadTask } from "expo-file-system";
 import { AppState } from "react-native";
 import { ApiError, waitForServer } from "@/api/client";
-import { stories } from "@/api/endpoints";
+import { type MediaSize, stories } from "@/api/endpoints";
 import i18n from "@/i18n";
 import { storyCodeText, storyError } from "@/ui/stories/errors";
 
@@ -27,6 +27,9 @@ const MAX_REACHABLE_FAILURES = 3;
  * again. A "done" that times out (the check took over 120 s) or whose answer was lost counts as not getting
  * through, so the whole file is resent to a new slot; the first verified file is then unused and swept.
  */
+/** A clip's `size` is its upright size from the server's check, which is what the renderer crops. */
+type Uploaded = { uploadId: string; durationSec?: number; size?: MediaSize };
+
 export function uploadToSlot(uri: string, kind: "photo" | "video", bytes: number, contentType: string, onProgress: (p: UploadProgress) => void) {
   let cancelled = false;
   let task: UploadTask | null = null;
@@ -68,10 +71,10 @@ export function uploadToSlot(uri: string, kind: "photo" | "video", bytes: number
     }
     stillWanted();
     if (done.status === "REJECTED") throw new Refused(storyCodeText(done.code, done.reason));
-    return { uploadId: slot.uploadId, ...(done.durationSec === undefined ? {} : { durationSec: done.durationSec }) };
+    return { uploadId: slot.uploadId, ...(done.durationSec === undefined ? {} : { durationSec: done.durationSec }), ...(done.width && done.height ? { size: { width: done.width, height: done.height } } : {}) };
   };
 
-  const run = async (): Promise<{ uploadId: string; durationSec?: number }> => {
+  const run = async (): Promise<Uploaded> => {
     if (!new File(uri).exists) throw new Refused(i18n.t("common:net.failed"));
     let reachableFailures = 0;
     for (;;) {
