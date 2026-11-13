@@ -13,7 +13,7 @@ import { zoneCity } from "@/server/content/offer-checks";
 
 type Attempt = {
   id: string;
-  status: "SCHEDULED" | "PUBLISHING" | "PUBLISHED" | "FAILED" | "PENDING_VERIFY" | "CANCELLED";
+  status: "SCHEDULED" | "PUBLISHING" | "PUBLISHED" | "PARTIAL" | "FAILED" | "PENDING_VERIFY" | "CANCELLED";
   provider: string;
   account: string;
   runAt: string;
@@ -21,6 +21,9 @@ type Attempt = {
   externalUrl: string | null;
   error: string | null;
   by: string;
+  /** A story attempt: how many frames it has and which are out (0-based `i`). */
+  frames?: number;
+  progress?: { i: number; state: "publishing" | "published" | "not-posted" }[];
 };
 type Decision = { id: string; verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null; by: string; at: string; current: boolean; version: number | null; override: string[] | null };
 /** A gate issue: a linked product (availability, price) or the post's offer. `overridable`: "Approve anyway" can cover it. */
@@ -30,7 +33,10 @@ type Campaign = { kind: "offer" | "campaign" | "priority"; name: string; offer: 
 type Release = {
   latestVersion: number | null;
   approvalValid: boolean;
-  requirements: { provider: string | null; needsImage: boolean; minImages: number; maxImages: number; needsVideo: boolean; needsBoard: boolean };
+  requirements: { provider: string | null; needsImage: boolean; minImages: number; maxImages: number; needsVideo: boolean; needsBoard: boolean; frames?: [number, number] };
+  /** A story marked to be posted by hand, and when it is due. */
+  byHand?: boolean;
+  scheduledFor?: string | null;
   accounts: { id: string; displayName: string }[];
   boards?: Record<string, { id: string; name: string }[] | null>;
   decisions: Decision[];
@@ -143,6 +149,10 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
           {canPublish && data.attempts.some((a) => a.status === "SCHEDULED")
             ? allOverridable ? "Cancel the schedule, then approve anyway or ask for changes." : "Cancel the schedule, then ask for changes."
             : "An issue stops this post. An approver or publisher needs to look at it."}
+        </p>
+      ) : status === "APPROVED" && data.approvalValid && data.requirements.frames ? (
+        <p className="text-sm text-muted-foreground">
+          {data.byHand && data.scheduledFor ? `Approved. Post by hand · ${when(data.scheduledFor)}.` : "Approved. A story is scheduled or posted by hand from the phone for now."}
         </p>
       ) : status === "APPROVED" && data.approvalValid ? (
         canPublish ? (
@@ -464,6 +474,7 @@ const ATTEMPT: Record<Attempt["status"], { label: string; tone: string }> = {
   PUBLISHED: { label: "Published", tone: "bg-success/15 text-success" },
   FAILED: { label: "Not posted", tone: "bg-destructive/15 text-destructive" },
   PENDING_VERIFY: { label: "Check needed", tone: "bg-warning/15 text-warning" },
+  PARTIAL: { label: "Partly posted", tone: "bg-warning/15 text-warning" },
   CANCELLED: { label: "Cancelled", tone: "bg-muted text-muted-foreground" },
 };
 const VERDICT: Record<Decision["verdict"], string> = { APPROVED: "approved", CHANGES_REQUESTED: "asked for changes to", REJECTED: "rejected" };
@@ -522,6 +533,9 @@ function History({ data, canPublish, onSettle }: { data: Release; canPublish: bo
                   </a>
                 )}
               </span>
+              {a.frames !== undefined && a.progress && (
+                <span className="text-muted-foreground">{a.progress.filter((f) => f.state === "published").length} of {a.frames} frames posted</span>
+              )}
               {a.error && a.status !== "PUBLISHED" && <span className="text-muted-foreground">{a.error}</span>}
               {overdue && <span className="text-muted-foreground">Overdue: waiting for the job runner to post it.</span>}
               {!canPublish && a.status === "PENDING_VERIFY" && <span className="text-muted-foreground">Waiting for someone who can publish to confirm whether it posted.</span>}
