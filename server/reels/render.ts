@@ -337,8 +337,9 @@ async function join(r: ReelRender, urls: string[]) {
   if (claimed.count !== 1) return;
   const scope = { workspaceId: r.workspaceId, brandId: r.brandId };
   const dir = await mkdtemp(path.join(tmpdir(), "reel-"));
+  let made: boolean;
   try {
-    await joinClips(r, out, urls, scope, dir);
+    made = await joinClips(r, out, urls, scope, dir);
   } catch (e) {
     // Release the claim so the queue's retry joins again at once; give up (and refund) after a few failures,
     // e.g. clip links that expired or a clip ffmpeg can't read.
@@ -349,9 +350,11 @@ async function join(r: ReelRender, urls: string[]) {
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
-  // Same input shape as recheckQuality (itemId + the new version), so its in-flight test sees this run. A missed start is retried by the app's recheck.
-  const made = await prisma.contentVersion.findFirst({ where: { contentItemId: r.contentItemId }, orderBy: { version: "desc" }, select: { version: true } });
-  await startAgentRun({ ...scope, agentKey: "quality", trigger: "event", input: { itemId: r.contentItemId, version: made?.version } }).catch(() => null);
+  if (made) {
+    // Same input shape as recheckQuality (itemId + the new version), so its in-flight test sees this run. A missed start is retried by the app's recheck.
+    const latest = await prisma.contentVersion.findFirst({ where: { contentItemId: r.contentItemId }, orderBy: { version: "desc" }, select: { version: true } });
+    await startAgentRun({ ...scope, agentKey: "quality", trigger: "event", input: { itemId: r.contentItemId, version: latest?.version } }).catch(() => null);
+  }
   await notifyStarter(r, true);
 }
 
@@ -382,7 +385,7 @@ async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { w
   const videoKey = mediaKey(scope, `${randomUUID()}.mp4`);
   await putMedia(videoKey, await readFile(mp4), "video/mp4");
 
-  await prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     await lock(tx, r.contentItemId);
     const item = await tx.contentItem.findFirst({ where: { id: r.contentItemId }, include: { versions: { orderBy: { version: "desc" }, take: 1 } } });
     const latest = item?.versions[0];
@@ -390,8 +393,12 @@ async function joinClips(r: ReelRender, out: Outputs, urls: string[], scope: { w
     // Only the join that still holds the step publishes; a render marked failed (and refunded) meanwhile writes nothing.
     const done = await tx.reelRender.updateMany({ where: { id: r.id, step: "JOIN" }, data: { step: "DONE", videoKey, error: null, claimedAt: null, outputs: { ...out, seams } as Prisma.InputJsonValue } });
     if (done.count !== 1) throw new Error("This render is no longer joining");
+    // Scheduled or posted while it rendered: that post stands. A new version would void its approval (and, scheduled,
+    // jump the item to AWAITING_APPROVAL at post time with no Quality check for it), so the video stays on the render.
+    if (item.status === "SCHEDULED" || item.status === "PUBLISHED") return false;
     await tx.contentVersion.create({ data: { contentItemId: item.id, version: latest.version + 1, body: { ...(latest.body as object), videoKey }, createdBy: "agent" } });
     await tx.contentItem.update({ where: { id: item.id }, data: { status: "DRAFT_REVIEW" } });
+    return true;
   }, TX);
 }
 
