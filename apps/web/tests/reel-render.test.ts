@@ -139,6 +139,24 @@ describe("advanceRender", () => {
     vi.unstubAllGlobals();
   });
 
+  it.each(["PUBLISHED", "SCHEDULED"])("a render that finishes after the reel was %s leaves the item and its approval alone", async (status) => {
+    const wav = Buffer.alloc(44 + 48_000);
+    wav.write("RIFF", 0); wav.write("WAVEfmt ", 8); wav.writeUInt32LE(16, 16); wav.writeUInt16LE(1, 20); wav.writeUInt16LE(1, 22);
+    wav.writeUInt32LE(24_000, 24); wav.writeUInt32LE(48_000, 28); wav.writeUInt16LE(2, 32); wav.writeUInt16LE(16, 34); wav.write("data", 36);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(wav)));
+    m.tx.reelRender.findUnique.mockResolvedValue(render({ requests: { CLIPS: ["ra", "rb"] } }));
+    m.status.mockResolvedValue({ state: "completed", url: "https://cdn/x.mp4" });
+    m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
+    m.tx.contentItem.findFirst.mockResolvedValue({ id: "i1", status, versions: [{ id: "v1", version: 2, body: plan }] });
+    await advanceRender({ renderId: "r1" });
+    // The render itself is done (its video is kept on it), but no new version and no status change.
+    expect(m.tx.reelRender.updateMany).toHaveBeenLastCalledWith(expect.objectContaining({ data: expect.objectContaining({ step: "DONE" }) }));
+    expect(m.tx.contentVersion.create).not.toHaveBeenCalled();
+    expect(m.tx.contentItem.update).not.toHaveBeenCalled();
+    expect(m.startAgentRun).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
   it("join is single-flight: a tick while a join runs waits", () => {
     const now = Date.now();
     expect(nextStep(render({ step: "JOIN", claimedAt: new Date(now - 30_000), outputs: { ...outputs, clipUrls: ["u"] } }), [], now)).toEqual({ action: "wait" });
