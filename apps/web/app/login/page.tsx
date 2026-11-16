@@ -1,27 +1,5 @@
-// eslint-disable-next-line no-restricted-imports -- converted in task 5
-import { auth, signIn } from "@/auth";
-import { PendingButton } from "@/components/auth/pending-button";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
-import { Input } from "@/components/ui/input";
-// eslint-disable-next-line no-restricted-imports -- converted in task 5
-import { AuthError, CredentialsSignin } from "next-auth";
-import Link from "next/link";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-
-const ERRORS: Record<string, string> = {
-  invalid: "Email or password is incorrect.",
-  unavailable: "We couldn't check your sign-in just now. Try again in a moment.",
-  rate_limited: "Too many sign-in attempts. Wait 15 minutes and try again.",
-  google_unverified: "Google didn't confirm this email address. Use a verified Google account or sign in with email.",
-  disabled: "This account is disabled. Ask a workspace owner to restore it.",
-  AccessDenied: "Google sign-in was cancelled or not allowed for this account.",
-  OAuthAccountNotLinked: "This email already has an account. Sign in with email and password.",
-  OAuthCallbackError: "Google sign-in didn't complete. Try again.",
-  Configuration: "Google sign-in isn't set up correctly. Ask an admin to check the Google client settings.",
-};
-
-const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+import { LoginForm } from "@/components/auth/login-form";
 
 /** Entrance stagger for the n-th part of the form (with the .rise-in class). */
 const rise = (n: number) => ({ animationDelay: `${n * 40}ms` });
@@ -53,15 +31,6 @@ export default async function LoginPage({
 }) {
   const { error, reset, invited, expired, next: nextParam, callbackUrl } = await searchParams;
   const next = safeNext(nextParam, callbackUrl);
-  // Already signed in: go where they were headed. Not after an "expired" bounce, so a half-valid session can't loop.
-  if (!expired) {
-    const session = await auth().catch(() => null);
-    if (session?.user?.id) redirect(next);
-  }
-  // A failed sign-in leaves the email in a two-minute cookie (never the password, never the URL) to refill the field.
-  const retryEmail = error ? ((await cookies()).get("login_email")?.value ?? "") : "";
-  const keepNext = next === "/" ? "" : `&next=${encodeURIComponent(next)}`;
-  const message = error ? (ERRORS[error] ?? ERRORS.invalid) : null;
   const notice = reset
     ? "Password updated. Sign in with your new password."
     : invited
@@ -83,107 +52,7 @@ export default async function LoginPage({
             <h1 id="signin-h" className="rise-in font-display text-4xl font-medium tracking-tight text-balance" style={rise(1)}>
               Sign in
             </h1>
-            <p className="rise-in mt-3 text-sm text-muted-foreground" style={rise(2)}>
-              {googleEnabled
-                ? "New here? Continue with Google to create your account."
-                : "Use the email and password from your invitation."}
-            </p>
-            {notice && !message ? (
-              <p role="status" className="rise-in mt-6 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm text-success" style={rise(3)}>
-                {notice}
-              </p>
-            ) : null}
-            {googleEnabled ? (
-              <>
-                <form
-                  className="rise-in mt-8"
-                  style={rise(4)}
-                  action={async () => {
-                    "use server";
-                    await signIn("google", { redirectTo: next });
-                  }}
-                >
-                  <PendingButton variant="outline" pendingLabel="Opening Google…" className="h-11 w-full">
-                    <GoogleMark />
-                    Continue with Google
-                  </PendingButton>
-                </form>
-                <div className="rise-in mt-6 flex items-center gap-3 text-xs text-muted-foreground" style={rise(5)}>
-                  <span className="h-px flex-1 bg-border" aria-hidden="true" />
-                  or with email
-                  <span className="h-px flex-1 bg-border" aria-hidden="true" />
-                </div>
-              </>
-            ) : null}
-            <form
-              className="rise-in mt-6 space-y-4"
-              style={rise(6)}
-              action={async (formData) => {
-                "use server";
-                try {
-                  await signIn("credentials", {
-                    email: formData.get("email"),
-                    password: formData.get("password"),
-                    redirectTo: next,
-                  });
-                } catch (error) {
-                  if (error instanceof AuthError) {
-                    // Only CredentialsSignin means "wrong email/password"; anything else (e.g. the DB is
-                    // unreachable) must not tell people their password is wrong.
-                    const code = !(error instanceof CredentialsSignin)
-                      ? "unavailable"
-                      : error.code === "rate_limited"
-                        ? "rate_limited"
-                        : "invalid";
-                    const typed = formData.get("email");
-                    if (typeof typed === "string" && typed.length <= 254) {
-                      (await cookies()).set("login_email", typed, { httpOnly: true, sameSite: "lax", path: "/login", maxAge: 120 });
-                    }
-                    redirect(`/login?error=${code}${keepNext}`);
-                  }
-                  throw error;
-                }
-              }}
-            >
-              <label className="block text-sm">
-                <span className="text-muted-foreground">Email</span>
-                <Input
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  defaultValue={retryEmail}
-                  className="mt-1.5 h-11"
-                  placeholder="you@yourbrand.com"
-                />
-              </label>
-              <label className="block text-sm">
-                <span className="text-muted-foreground">Password</span>
-                <Input
-                  name="password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  className="mt-1.5 h-11"
-                />
-              </label>
-              {message ? (
-                <p role="alert" className="rise-in text-sm text-destructive">
-                  {message}
-                </p>
-              ) : null}
-              <PendingButton pendingLabel="Signing in…" className="h-11 w-full">
-                Sign in
-              </PendingButton>
-              <div className="text-center">
-                <Link
-                  href="/forgot-password"
-                  className="inline-block rounded-sm py-1 text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-            </form>
+            <LoginForm next={next} error={error} expired={Boolean(expired)} notice={notice} />
           </div>
         </section>
 
@@ -237,17 +106,5 @@ function MorningLog() {
         Agents draft and check. Nothing is published until someone on your team approves it.
       </p>
     </aside>
-  );
-}
-
-/** Google "G" mark, in Google's own colours as its sign-in guidelines require. */
-function GoogleMark() {
-  return (
-    <svg viewBox="0 0 48 48" className="size-4" aria-hidden="true">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-    </svg>
   );
 }
