@@ -26,7 +26,7 @@ type Draft = { frames: (Record<keyof typeof FrameText, string> & { sourceId?: st
 /** ponytail: the first 20 photos (product photo first); a big library isn't all offered. */
 const MAX_SOURCES = 20;
 
-export type StoryShared = {
+type StoryShared = {
   knowledge: string;
   productsLine: string;
   campaignLine: string;
@@ -44,7 +44,7 @@ export function onlyMediaBlockers(results: { check: string; status: string }[]):
 }
 
 /** Our own hard rules for a written story; null when it passes. `sources`: the offered ids (first write only). */
-export function storyDraftProblems(d: Draft, opts: { count: [number, number]; sources?: Set<string> }): string | null {
+function storyDraftProblems(d: Draft, opts: { count: [number, number]; sources?: Set<string> }): string | null {
   const out: string[] = [];
   const [min, max] = opts.count;
   if (d.frames.length < min || d.frames.length > max) out.push(min === max ? `Write exactly ${min} frames.` : `Write ${min} to ${max} frames.`);

@@ -7,7 +7,7 @@ import type { Picked } from "@/ui/stories/picker";
  * version the trip started from (the one the pre-leave save made): the result is pinned to it, so a teammate's save in
  * the meantime makes the editor's Save stale instead of being overwritten. Absent on a deep link that doesn't carry it.
  */
-export type StoryReturn = { id: string; frame: number; base?: number };
+type StoryReturn = { id: string; frame: number; base?: number };
 
 /** Every finished reel is fitted to 1080×1920 (server REEL_SIZE, apps/web/server/stories/body.ts). */
 export const REEL_SIZE: MediaSize = { width: 1080, height: 1920 };

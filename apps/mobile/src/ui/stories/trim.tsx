@@ -7,15 +7,15 @@ import { GestureDetector, GestureHandlerRootView, usePanGesture } from "react-na
 import { color, radius, space, type } from "@/theme/tokens";
 import { Button } from "@/ui/button";
 import { type Crop, placed, type Size } from "@/ui/stories/crop";
+import { STORY_LIMITS } from "@/ui/stories/limits";
 
-/** A story clip plays this long from `start` (render.ts reads the same window). */
-export const CLIP_SECONDS = 15;
+/** A clip frame plays STORY_LIMITS.clipSeconds from `start` (render.ts reads the same window), with or without sound. */
 export type Clip = { start: number; sound: boolean };
 
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 const tenths = (s: number) => Math.round(s * 10) / 10;
 /** The latest start that still leaves 15 s; 0 means the clip is 15 s or shorter and plays whole. */
-const lastStart = (duration: number) => Math.max(0, Math.floor((duration - CLIP_SECONDS) * 10) / 10);
+const lastStart = (duration: number) => Math.max(0, Math.floor((duration - STORY_LIMITS.clipSeconds) * 10) / 10);
 
 /**
  * A clip on the preview, placed by its crop: playing its chosen 15 s on a loop (silent when its sound is off) while the
@@ -46,7 +46,7 @@ export function ClipPicture({ url, clip, crop, width, size, playing, onLoad }: {
   }, [player, clip.start]);
   // Back to the start of the window when it ends (or when the loop wraps to 0 before it).
   useEventListener(player, "timeUpdate", ({ currentTime }) => {
-    if (currentTime >= clip.start + CLIP_SECONDS || currentTime < clip.start - 0.5) player.currentTime = clip.start;
+    if (currentTime >= clip.start + STORY_LIMITS.clipSeconds || currentTime < clip.start - 0.5) player.currentTime = clip.start;
   });
   /* eslint-enable react-hooks/immutability */
   return (
@@ -91,7 +91,7 @@ export function Trim({ duration, start, onChange }: { duration: number | null; s
   });
   if (duration === null) return <Text style={type.meta}>{t("stories.trim.loading")}</Text>;
   if (max === 0) return <Text style={type.meta}>{t("stories.trim.whole", { length: mmss(duration) })}</Text>;
-  const range = t("stories.trim.range", { from: mmss(at), to: mmss(at + CLIP_SECONDS), length: mmss(duration) });
+  const range = t("stories.trim.range", { from: mmss(at), to: mmss(at + STORY_LIMITS.clipSeconds), length: mmss(duration) });
 
   return (
     <View style={{ gap: space[8] }}>
@@ -108,7 +108,7 @@ export function Trim({ duration, start, onChange }: { duration: number | null; s
               accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
               onAccessibilityAction={(e) => set(at + (e.nativeEvent.actionName === "increment" ? 1 : -1))}
               hitSlop={{ top: 8, bottom: 8 }}
-              style={[styles.window, { left: (at / duration) * track, width: (CLIP_SECONDS / duration) * track }]}
+              style={[styles.window, { left: (at / duration) * track, width: (STORY_LIMITS.clipSeconds / duration) * track }]}
             />
           </GestureDetector>
         </View>

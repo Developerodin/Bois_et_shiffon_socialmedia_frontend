@@ -83,7 +83,7 @@ export function headlineSize(headline: string): number | null {
   return null;
 }
 
-export type FitField = "label" | "headline" | "body" | "cta";
+type FitField = "label" | "headline" | "body" | "cta";
 /** Whether a frame's text fits the layout (labels measured upper-cased); the CTA only counts on the last frame. */
 export function textFits(frame: { label: string; headline: string; body: string }, isLast: boolean, cta: string): { fits: true } | { fits: false; field: FitField } {
   const { label, body, cta: c } = TEXT_BOX;

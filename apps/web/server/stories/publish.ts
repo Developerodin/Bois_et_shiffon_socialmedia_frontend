@@ -3,7 +3,7 @@
  * index. A frame is "publishing" from just before its media_publish call until its media id is recorded: if the job
  * stops in between, nobody knows whether it went out, so a person checks (settleStoryFrame).
  */
-export type FrameState = "publishing" | "published" | "not-posted";
+type FrameState = "publishing" | "published" | "not-posted";
 export type FrameProgress = { i: number; state: FrameState; mediaId?: string; at?: string }[];
 
 const DAY_MS = 86_400_000;

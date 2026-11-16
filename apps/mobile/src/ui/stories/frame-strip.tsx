@@ -6,7 +6,7 @@ import { color, radius, space, type } from "@/theme/tokens";
 import { Sheet } from "@/ui/recovery/sheet";
 import { STORY_LIMITS } from "@/ui/stories/limits";
 
-export type StripFrame = { url: string | null; kind: "photo" | "video" | null; headline: string };
+type StripFrame = { url: string | null; kind: "photo" | "video" | null; headline: string };
 
 const W = 45;
 

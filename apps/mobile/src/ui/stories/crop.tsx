@@ -43,7 +43,7 @@ export function cropWindow(srcW: number, srcH: number, crop?: Crop) {
 }
 
 /** Fit: the whole source shows, with black bars on the sides it doesn't reach. Fill is scale 1. */
-export const fitScale = (src: Size) => Math.min(W / src.width, H / src.height) / cover(src);
+const fitScale = (src: Size) => Math.min(W / src.width, H / src.height) / cover(src);
 
 // A 1920×1080 source at Fit keeps its whole width, 608 px tall and centred: worked out by hand from render.ts.
 if (__DEV__) {

@@ -1,13 +1,12 @@
 import type { CheckResult } from "@/server/content/rules";
-import { STORY_LIMITS, type StoryBody } from "@/server/stories/body";
+import { FRAME_MAX_BYTES, STORY_LIMITS, type StoryBody } from "@/server/stories/body";
 import { textFits } from "@/server/stories/render";
 
 /** Story check rows about the frames' media, not their text: the Creator can't fix these, so it doesn't rewrite for them. */
 export const STORY_MEDIA_CHECKS = ["Frames", "Frame files", "Asset rights"] as const;
 const [FRAMES, FRAME_FILES, ASSET_RIGHTS] = STORY_MEDIA_CHECKS;
 
-const MAX_FILE_BYTES = 8 * 1024 * 1024;
-const MAX_CLIP_SECONDS = 15.5; // the 15 s window plus encoder slack
+const MAX_CLIP_SECONDS = STORY_LIMITS.clipSeconds + 0.5; // the window plus encoder slack
 
 const row = (check: string, ok: boolean, okNote: string, badNote: string, bad: CheckResult["status"] = "blocker"): CheckResult =>
   ({ check, status: ok ? "pass" : bad, note: ok ? okNote : badNote });
@@ -27,7 +26,7 @@ export function checkStory(body: StoryBody): CheckResult[] {
     const clip = f.mediaKind === "video" || f.file.durationSec != null;
     const p: string[] = [];
     if (f.file.width !== 1080 || f.file.height !== 1920) p.push(`is ${f.file.width}×${f.file.height}, not 1080×1920`);
-    if (f.file.bytes > MAX_FILE_BYTES) p.push("is over 8 MB");
+    if (f.file.bytes > FRAME_MAX_BYTES) p.push("is over 8 MB");
     if (clip && (f.file.durationSec ?? 0) > MAX_CLIP_SECONDS) p.push(`runs ${f.file.durationSec}s, over ${MAX_CLIP_SECONDS}s`);
     return p.length ? [`Frame ${i + 1} ${p.join(" and ")}`] : [];
   });
