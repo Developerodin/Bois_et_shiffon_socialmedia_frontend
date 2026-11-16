@@ -122,6 +122,21 @@ describe("clones that go wrong", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 500 })));
     await expect(runVoiceDelete({ voiceId: "v1" })).rejects.toThrow(/ElevenLabs 500/);
   });
+
+  it("a delete that used up its tries is queued again later, so the voice isn't left at ElevenLabs", async () => {
+    const { onVoiceDeleteFailure } = await import("@/server/reels/clones");
+    m.prisma.voice.findUnique.mockResolvedValue({ id: "v1", workspaceId: "w1", archivedAt: new Date(), providerVoiceId: "el1", sampleKey: null });
+    await onVoiceDeleteFailure({ voiceId: "v1" }, new Error("ElevenLabs 503"), false);
+    expect(m.enqueue).not.toHaveBeenCalled(); // the queue still retries this one itself
+    await onVoiceDeleteFailure({ voiceId: "v1" }, new Error("ElevenLabs 503"), true);
+    expect(m.enqueue).toHaveBeenCalledWith(expect.objectContaining({ type: "voices.delete", payload: { voiceId: "v1" }, runAt: expect.any(Date), idempotencyKey: expect.stringMatching(/^voice:v1:delete:\d+$/) }));
+    expect(m.tx.auditEvent.create.mock.calls[0][0].data).toMatchObject({ action: "voice.clone.delete_failed", entityId: "v1" });
+    // Already deleted there: nothing more to do.
+    m.enqueue.mockClear();
+    m.prisma.voice.findUnique.mockResolvedValue({ id: "v1", workspaceId: "w1", archivedAt: new Date(), providerVoiceId: null, sampleKey: null });
+    await onVoiceDeleteFailure({ voiceId: "v1" }, new Error("x"), true);
+    expect(m.enqueue).not.toHaveBeenCalled();
+  });
 });
 
 describe("removing a clone", () => {
