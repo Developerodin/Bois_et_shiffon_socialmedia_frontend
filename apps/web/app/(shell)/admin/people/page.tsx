@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Ago, day, Empty, PageHeader, Pager, Pill, SearchBox, Table, withQuery } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { listPeople, pageCount, pageNumber } from "@/server/services/platform-admin";
 
 export const metadata = { title: "People · Platform admin" };

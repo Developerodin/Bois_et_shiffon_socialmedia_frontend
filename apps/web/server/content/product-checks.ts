@@ -1,5 +1,8 @@
 import type { Product } from "@prisma/client";
 import { z } from "zod";
+import { byExternalId, groupKey, handleOf, productName, REMOVED_PRODUCT_NAME } from "@espanda/shared";
+
+export { byExternalId, groupKey, handleOf, productName, REMOVED_PRODUCT_NAME };
 
 /**
  * Product rules for content (docs/superpowers/specs/2026-11-05-products-in-content-design.md): stock, prices,
@@ -58,38 +61,8 @@ export type ProductCheckResult = {
 export type GateIssue = { productId: string; kind: "availability" | "price"; message: string; refuses: boolean; overridable: boolean };
 
 const STALE_MS = 50 * 3_600_000; // two missed daily syncs
-/** The name of a gone link whose row was deleted (MANUAL rows are hard-deleted). */
-export const REMOVED_PRODUCT_NAME = "a removed product";
-
-/**
- * "Oslo Chair — Oak" → "Oslo Chair": a product's name is its representative's title before the variant, on one line
- * (names go into prompts after the last "---"; a newline could fake a new section).
- */
-export const productName = (title: string) => title.split(" — ")[0]!.replace(/\s+/g, " ").trim();
-
 /** The product ids a version body links (`body.productIds`). */
 export const linkedIds = (body: unknown) => (body as { productIds?: string[] } | null | undefined)?.productIds ?? [];
-
-/** `/products/<handle>` of a URL, or null (no URL, not a product page). */
-export function handleOf(url: string | null) {
-  if (!url) return null;
-  try {
-    const m = /\/products\/([^/]+)/.exec(new URL(url).pathname);
-    return m ? m[1]!.toLowerCase() : null;
-  } catch {
-    return null;
-  }
-}
-
-/** The key a row groups under: synced rows of one source sharing a product handle; MANUAL or URL-less rows alone. */
-export function groupKey(row: Pick<ProductRow, "id" | "source" | "url">) {
-  const handle = row.source === "MANUAL" ? null : handleOf(row.url);
-  return handle ? `${row.source}:${handle}` : `id:${row.id}`;
-}
-
-/** First by externalId (numeric order): a group's representative, the id a link stores. */
-export const byExternalId = (a: Pick<ProductRow, "externalId">, b: Pick<ProductRow, "externalId">) =>
-  (a.externalId ?? "").localeCompare(b.externalId ?? "", undefined, { numeric: true });
 
 /**
  * stockState(group of live variant rows, now) → gone (empty group) / in (a fresh variant claims stock) /

@@ -1,6 +1,8 @@
 import { AutoSubmitForm } from "@/components/admin/auto-submit-form";
 import { pillButton as button } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { NO_WORKSPACE } from "@/server/services/activity";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import type { PickerOptions } from "@/server/services/platform-admin";
 
 const field = "h-9 max-w-64 rounded-full border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";

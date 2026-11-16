@@ -1,7 +1,9 @@
+// eslint-disable-next-line no-restricted-imports -- converted in task 5
 import { auth, signIn } from "@/auth";
 import { PendingButton } from "@/components/auth/pending-button";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
 import { Input } from "@/components/ui/input";
+// eslint-disable-next-line no-restricted-imports -- converted in task 5
 import { AuthError, CredentialsSignin } from "next-auth";
 import Link from "next/link";
 import { cookies } from "next/headers";

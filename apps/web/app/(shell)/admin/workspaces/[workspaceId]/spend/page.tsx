@@ -1,4 +1,5 @@
 import { SpendView } from "@/components/admin/spend-view";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
 
 export const metadata = { title: "Spend · Workspace · Platform admin" };

@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import { LogTable } from "@/components/admin/log-table";
 import { SpendChart } from "@/components/admin/spend-chart";
 import { Section, Stat, type Fx } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { platformLogs, spendBreakdown, workspaceDetail } from "@/server/services/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Workspace · Platform admin" };

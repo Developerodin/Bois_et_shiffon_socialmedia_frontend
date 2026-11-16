@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 import { Library } from "lucide-react";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { auth } from "@/auth";
 import { ContextBoard } from "@/components/context/context-board";
 import { NewBrandDialog } from "@/components/shell/new-brand-dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
 export default async function ContextPage() {

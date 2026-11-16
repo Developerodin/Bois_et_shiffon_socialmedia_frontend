@@ -1,3 +1,4 @@
+import "server-only";
 import { BrandStatus } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { AccessDeniedError, BrandArchivedError } from "@/server/auth/errors";

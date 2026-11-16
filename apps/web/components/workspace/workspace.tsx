@@ -41,7 +41,7 @@ import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/
 import { NAV } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { readable } from "@/lib/agent-message";
-import { safeHttpUrl } from "@/lib/website";
+import { safeHttpUrl } from "@espanda/shared";
 import { timeAgo } from "@/lib/time";
 
 type Finding = { id: string; severity: string; title: string; why?: string };

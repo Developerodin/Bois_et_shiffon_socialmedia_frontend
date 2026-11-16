@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { day, Empty, Pill, Section, Table, when } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { workspaceDetail } from "@/server/services/platform-admin";
 
 export const metadata = { title: "Projects · Workspace · Platform admin" };

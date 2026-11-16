@@ -5,7 +5,7 @@ import { hitRateLimit } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
 import { PublishingError } from "@/server/services/publishing";
 import { storyPackage } from "@/server/stories/by-hand";
-import { stepsText } from "@/server/stories/by-hand-steps";
+import { stepsText } from "@espanda/shared";
 
 type Params = { params: Promise<BrandRouteParams & { contentId: string }> };
 

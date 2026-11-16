@@ -3,7 +3,7 @@ import { fromAccessError, problemResponse } from "@/server/api/http-error";
 import { authorizeBrandRoute, type BrandRouteParams } from "@/server/api/brand-route";
 import { prisma } from "@/server/db/prisma";
 import { listCompetitors } from "@/server/services/competitor-audits";
-import { domainOf } from "@/lib/website";
+import { domainOf } from "@espanda/shared";
 
 /** Competitors with the latest shared audit of each domain, plus this workspace's credits. */
 export async function GET(request: Request, context: { params: Promise<BrandRouteParams> }) {

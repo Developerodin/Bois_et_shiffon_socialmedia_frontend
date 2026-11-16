@@ -3,7 +3,7 @@ import type { AgentDefinition } from "@/server/agents/types";
 import { prisma } from "@/server/db/prisma";
 import { latestAuditReports } from "@/server/services/audit-reports";
 import { listContextDocs } from "@/server/services/context-docs";
-import { domainOf } from "@/lib/website";
+import { domainOf } from "@espanda/shared";
 
 export const COMPETITORS_PROMPT_VERSION = "1";
 

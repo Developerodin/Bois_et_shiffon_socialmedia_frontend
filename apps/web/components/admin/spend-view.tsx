@@ -1,7 +1,9 @@
 import { SpendChart } from "@/components/admin/spend-chart";
 import { SpendTables } from "@/components/admin/spend-tables";
 import { period as periodOf, PERIODS, Section, Segmented, Stat, withQuery, type Fx } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { spendBreakdown } from "@/server/services/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { usdInrRate } from "@/server/usage/fx";
 
 const dollars = (v: number) => `$${v.toFixed(v >= 100 ? 0 : v >= 1 ? 2 : 4)}`;

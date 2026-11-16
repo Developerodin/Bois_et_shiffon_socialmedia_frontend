@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { brandNameFromWebsite, normalizeWebsite, safeHttpUrl } from "@/lib/website";
+import { brandNameFromWebsite, normalizeWebsite, safeHttpUrl } from "@espanda/shared";
 
 describe("website input", () => {
   it("adds https and trims what people paste", () => {

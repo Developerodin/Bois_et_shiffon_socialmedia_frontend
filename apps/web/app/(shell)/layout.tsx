@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { auth } from "@/auth";
 import { PageViewTracker } from "@/components/page-view-tracker";
 import { AssistantPanel } from "@/components/shell/assistant-panel";
@@ -7,9 +8,13 @@ import { AssistantProvider } from "@/components/shell/assistant-state";
 import { Sidebar } from "@/components/shell/sidebar";
 import { TopBar } from "@/components/shell/top-bar";
 import { MainArea } from "@/components/workspace/main-area";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { effectivePermissions } from "@/server/auth/permissions";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { isPlatformAdmin } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadRoleLabel } from "@/server/shell/load-role-label";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
 /** The Refined workspace frame: sidebar | top bar over the page | the Espanda panel. */

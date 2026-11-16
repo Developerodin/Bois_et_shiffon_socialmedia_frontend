@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { Bot } from "lucide-react";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { auth } from "@/auth";
 import { AgentsBoard } from "@/components/agents/agents-board";
 import { EmptyState } from "@/components/ui/empty-state";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
 export default async function AgentsPage() {

@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { Settings } from "lucide-react";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { auth } from "@/auth";
 import { SettingsBoard } from "@/components/settings/settings-board";
 import { EmptyState } from "@/components/ui/empty-state";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
 export default async function SettingsPage({

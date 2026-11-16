@@ -1,4 +1,5 @@
 import { AdminNav } from "@/components/admin/admin-nav";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
 
 /** The platform admin console's frame: section navigation beside every page. Each page also guards itself.

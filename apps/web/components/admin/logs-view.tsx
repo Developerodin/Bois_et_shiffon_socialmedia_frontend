@@ -1,7 +1,9 @@
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { LogTable } from "@/components/admin/log-table";
 import { CursorPager, period as periodOf, PERIODS, Segmented, withQuery } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { LOG_FILTERS, PAGE, parseCursor, peopleMatching, pickerOptions, platformLogs, type LogKind } from "@/server/services/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { usdInrRate } from "@/server/usage/fx";
 
 const KINDS: { value: LogKind; label: string; about: string }[] = [

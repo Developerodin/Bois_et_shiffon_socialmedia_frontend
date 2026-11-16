@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Empty, Money, Table, type Fx } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import type { SpendBreakdown } from "@/server/services/platform-admin";
 
 const COMPACT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });

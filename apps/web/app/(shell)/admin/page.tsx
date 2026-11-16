@@ -2,8 +2,11 @@ import Link from "next/link";
 import { LogTable } from "@/components/admin/log-table";
 import { SpendChart } from "@/components/admin/spend-chart";
 import { Ago, Money, PageHeader, Section, Stat, Table, type Fx } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { platformLogs, platformOverview, spendBreakdown } from "@/server/services/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Platform admin" };

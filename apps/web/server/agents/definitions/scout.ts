@@ -5,7 +5,7 @@ import { campaignsForPlanning } from "@/server/catalog/campaigns";
 import { brandKnowledge } from "@/server/content/knowledge";
 import { offerState, wallTime } from "@/server/content/offer-checks";
 import { prisma } from "@/server/db/prisma";
-import { safeHttpUrl } from "@/lib/website";
+import { safeHttpUrl } from "@espanda/shared";
 
 const CHANNELS = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "FACEBOOK_POST", "PINTEREST_PIN", "THREADS_POST"] as const;
 

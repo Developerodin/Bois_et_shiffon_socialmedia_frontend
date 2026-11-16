@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { Empty, Pill, Section, Table } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { PERMISSIONS } from "@/server/auth/permissions.catalog";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { workspaceDetail } from "@/server/services/platform-admin";
 
 export const metadata = { title: "Roles · Workspace · Platform admin" };

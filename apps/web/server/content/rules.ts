@@ -1,4 +1,5 @@
 import type { ContentChannel } from "@prisma/client";
+import { CAPTION_LIMITS } from "@espanda/shared";
 
 /**
  * Deterministic content checks (no AI): same draft in → same result out.
@@ -18,7 +19,7 @@ export type DraftBody = {
 export type CheckStatus = "pass" | "warn" | "blocker";
 export type CheckResult = { check: string; status: CheckStatus; note: string };
 
-export const LIMITS = { captionMax: 2200, previewChars: 125, hashtagsMax: 5, pinTitleMax: 100, threadsMax: 500 };
+export const LIMITS = CAPTION_LIMITS;
 
 /** Phrases that read as AI-written marketing filler, in French and English. Lower-case. */
 export const SLOP = [

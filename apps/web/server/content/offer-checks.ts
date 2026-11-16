@@ -1,5 +1,6 @@
 import type { Campaign } from "@prisma/client";
 import { z } from "zod";
+import { offerPercents, zoneCity } from "@espanda/shared";
 import type { LinkedProduct } from "@/server/content/product-checks";
 
 /**
@@ -51,9 +52,6 @@ export function isTimeZone(timeZone: string) {
     return false;
   }
 }
-
-/** How a zone reads to people: "Europe/Paris" → "Paris", "America/New_York" → "New York". */
-export const zoneCity = (timeZone: string) => timeZone.split("/").pop()!.replace(/_/g, " ");
 
 /** The one time formatter: an instant as `"YYYY-MM-DD HH:mm"` wall-clock time in `timeZone`. */
 export function wallTime(instant: Date, timeZone: string) {
@@ -169,9 +167,6 @@ const DISCOUNT = new RegExp(
 export function discountsIn(text: string): number[] {
   return [...new Set([...text.matchAll(DISCOUNT)].map((m) => Number(m[1] ?? m[2] ?? m[3])))];
 }
-
-/** Every percent in an offer's own wording, whatever the phrasing ("30 % sur tout le salon" → 30). */
-export const offerPercents = (offer: string) => [...offer.matchAll(/(\d{1,3})[   ]?%/g)].map((m) => Number(m[1]));
 
 /** A linked product variant's compare-at discount: round((1 − price / compareAtPrice) × 100), or none. */
 function compareAtDiscounts(links: LinkedProduct[]) {

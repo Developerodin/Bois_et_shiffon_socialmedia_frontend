@@ -2,12 +2,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
 import { SignOutButton } from "@/components/workspace/sign-out-item";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { auth } from "@/auth";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
 import { WelcomeFlow } from "@/components/welcome/welcome-flow";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { effectivePermissions } from "@/server/auth/permissions";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadShellContext } from "@/server/shell/load-shell-context";
-import { normalizeWebsite } from "@/lib/website";
+import { normalizeWebsite } from "@espanda/shared";
 
 export const metadata = { title: "Add your brand" };
 

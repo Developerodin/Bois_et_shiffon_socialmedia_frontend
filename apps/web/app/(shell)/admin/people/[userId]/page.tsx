@@ -4,7 +4,9 @@ import { after } from "next/server";
 import { AccessMatrix } from "@/components/admin/access";
 import { LogTable } from "@/components/admin/log-table";
 import { Ago, day, PageHeader, Pill, Section, Stat, when } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { personDetail, platformLogs, recordPersonView } from "@/server/services/platform-admin";
 
 export const metadata = { title: "Person · Platform admin" };

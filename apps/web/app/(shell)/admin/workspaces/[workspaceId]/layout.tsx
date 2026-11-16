@@ -2,8 +2,11 @@ import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { TabLinks } from "@/components/admin/tab-links";
 import { day, PageHeader } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { prisma } from "@/server/db/prisma";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { recordWorkspaceView } from "@/server/services/platform-admin";
 
 /**

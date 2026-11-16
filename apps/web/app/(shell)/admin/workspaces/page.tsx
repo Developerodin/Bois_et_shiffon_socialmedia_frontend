@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Ago, day, Empty, Money, PageHeader, Pager, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { listWorkspaces, pageCount, pageNumber, type WorkspaceSort } from "@/server/services/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Workspaces · Platform admin" };

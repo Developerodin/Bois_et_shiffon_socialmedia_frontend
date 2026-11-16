@@ -5,7 +5,7 @@ import { prisma } from "@/server/db/prisma";
 import { instagramPermalink, instagramPublishingLimit, PUBLISHERS, PublishRefused } from "@/server/integrations/publishers";
 import { enqueueJob } from "@/server/jobs/queue";
 import { accessToken, markReconnect, ReconnectNeeded } from "@/server/services/connections";
-import { safeHttpUrl } from "@/lib/website";
+import { safeHttpUrl } from "@espanda/shared";
 import { hasOtherApprover, requirePermission } from "@/server/auth/permissions";
 import { linkedProducts } from "@/server/catalog/linked";
 import { gateIssues, linkedIds, ProductOverride, snapshotOf } from "@/server/content/product-checks";

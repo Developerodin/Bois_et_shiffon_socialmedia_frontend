@@ -2,13 +2,14 @@
   "name": "social-media-agent",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
     "dev:reddit": "npm run dev -w brandpilot-ai",
     "dev:web": "npm run dev -w web",
     "build:web": "npm run build -w web",
-    "lint": "npm run lint -w web",
+    "lint": "npm run lint -w web && cd packages/shared && eslint src",
     "test": "npm run test -w web",
     "test:e2e": "npm run test:e2e -w web",
     "db:migrate": "npm run db:migrate -w web",

@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { CAPTION_LIMITS } from "@espanda/shared";
 import type { ContentItem } from "@/components/workspace/content-panels";
 
 type Body = NonNullable<ContentItem["latest"]>["body"];
 const EMPTY: Body = { hook: "", caption: "", hashtags: [], slides: [], script: [], pinTitle: "", altText: "" };
-// Mirrors server/content/rules.ts and the publish limits.
-const CAPTION_MAX: Record<string, number> = { THREADS_POST: 500, PINTEREST_PIN: 500 };
-const HASHTAGS_MAX = 5;
+// Limits shared with server/content/rules.ts; the publish limits for Threads and Pinterest are 500.
+const CAPTION_MAX: Record<string, number> = { THREADS_POST: CAPTION_LIMITS.threadsMax, PINTEREST_PIN: 500 };
+const HASHTAGS_MAX = CAPTION_LIMITS.hashtagsMax;
 const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
 
 /**
@@ -51,7 +52,7 @@ function TextDraftEditor({ url, item, onSaved, onCancel }: { url: string; item: 
   const captionRef = useRef<HTMLTextAreaElement>(null);
 
   const ch = item.channel;
-  const captionMax = CAPTION_MAX[ch] ?? 2200;
+  const captionMax = CAPTION_MAX[ch] ?? CAPTION_LIMITS.captionMax;
   const body: Body = {
     hook,
     caption,

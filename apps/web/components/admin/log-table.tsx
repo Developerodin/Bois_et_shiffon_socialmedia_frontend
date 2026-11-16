@@ -1,4 +1,5 @@
 import { Ago, Empty, Money, Pill, Table, type Fx } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import type { LogKind, LogRow } from "@/server/services/platform-admin";
 
 const COMPACT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });

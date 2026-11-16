@@ -2,9 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { Ago, CursorPager, Empty, Money, PageHeader, period as periodOf, PERIODS, Pill, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { NO_WORKSPACE, personSummary, personTimeline } from "@/server/services/activity";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { PAGE, parseCursor, pickerOptions } from "@/server/services/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 4
 import { usdInrRate } from "@/server/usage/fx";
 
 export const metadata = { title: "Person activity · Platform admin" };

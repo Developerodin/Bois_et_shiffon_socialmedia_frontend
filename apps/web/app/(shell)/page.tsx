@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { auth } from "@/auth";
 import { Workspace } from "@/components/workspace/workspace";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { isPlatformAdmin } from "@/server/auth/platform-admin";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { prisma } from "@/server/db/prisma";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
 /** The workspace: one screen with Context, Today and Agents (Okara pattern); the chat is the shell's Espanda panel. */

@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 import { Lock, Package } from "lucide-react";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { auth } from "@/auth";
 import { ProductsBoard } from "@/components/products/products-board";
 import { EmptyState } from "@/components/ui/empty-state";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { effectivePermissions } from "@/server/auth/permissions";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
 /** The business's product catalogue: synced from Shopify or the website's feed, plus products added by hand. */

@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 import { Lock, Plug } from "lucide-react";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { auth } from "@/auth";
 import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { EmptyState } from "@/components/ui/empty-state";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { effectivePermissions } from "@/server/auth/permissions";
+// eslint-disable-next-line no-restricted-imports -- converted in task 3
 import { loadShellContext } from "@/server/shell/load-shell-context";
 
 /** The business's connected accounts. Settings keeps its own Connections tab; the OAuth callback still lands there. */

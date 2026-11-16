@@ -2,6 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["@espanda/shared"],
   // Reel joining runs ffmpeg (server/reels/join.ts) and story uploads run ffprobe (server/stories/probe.ts; Linux for deploys, Windows for local builds) and story frames need the bundled fonts (server/stories/render.ts); jobs run in any API route's after(), so every v1 route ships the binary (ponytail: ~75 MB per function; move rendering to one route if size bites).
   outputFileTracingIncludes: { "/api/v1/**/*": ["../../node_modules/ffmpeg-static/ffmpeg*", "../../node_modules/ffprobe-static/bin/linux/x64/*", "../../node_modules/ffprobe-static/bin/win32/x64/*", "./assets/fonts/*"] },
   serverExternalPackages: ["ffmpeg-static", "ffprobe-static"],
