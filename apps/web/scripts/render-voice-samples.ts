@@ -1,7 +1,7 @@
 /**
  * One sample per OpenAI stock voice for the Voices screen (ElevenLabs voices have their own preview links).
  * Skips samples already stored. Costs a few cents of OpenAI speech.
- *   npx tsx --env-file=.env scripts/render-voice-samples.ts
+ *   npx tsx --conditions=react-server --env-file=.env scripts/render-voice-samples.ts
  */
 import { mediaExists, putMedia } from "@/server/storage/media";
 import { SAMPLE_LINE, speak, STOCK_VOICES, voiceSampleKey } from "@/server/reels/voice";

@@ -3,7 +3,7 @@
  * made from a demo brand's photos. Every customer sees the result, so use only a brand whose photos we may show to
  * all (our own demo brand). Spends our Higgsfield credits (customers aren't charged). Skips previews already
  * stored, and the Idempotency-Key `template:<id>:<version>` makes a rerun after a crash return the same job.
- *   npx tsx --env-file=.env scripts/render-template-previews.ts <workspaceId> <brandId>
+ *   npx tsx --conditions=react-server --env-file=.env scripts/render-template-previews.ts <workspaceId> <brandId>
  */
 import { productPhotos } from "@/server/content/knowledge";
 import { prisma } from "@/server/db/prisma";
@@ -14,7 +14,7 @@ import { mediaExists, putMedia, signedMediaUrl } from "@/server/storage/media";
 
 async function main() {
   const [workspaceId, brandId] = process.argv.slice(2);
-  if (!workspaceId || !brandId) throw new Error("Usage: npx tsx --env-file=.env scripts/render-template-previews.ts <workspaceId> <brandId>");
+  if (!workspaceId || !brandId) throw new Error("Usage: npx tsx --conditions=react-server --env-file=.env scripts/render-template-previews.ts <workspaceId> <brandId>");
   const photos = await productPhotos(workspaceId, brandId);
   if (!photos.length) throw new Error("That brand has no photos");
   for (const [i, t] of REEL_TEMPLATES.entries()) {

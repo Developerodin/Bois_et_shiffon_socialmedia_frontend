@@ -2,7 +2,7 @@
  * Product catalogue pure-logic checks (server/catalog): feed variant → row, price parsing, HTML stripping,
  * variant titles, "archive only after a complete fetch", the row cap, Shopify ids and throttling, the stock label.
  * No network, no database.
- * Run: npx tsx --env-file=.env scripts/check-catalog.ts
+ * Run: npx tsx --conditions=react-server --env-file=.env scripts/check-catalog.ts
  */
 import assert from "node:assert/strict";
 import { stockLabel } from "@/components/products/api";

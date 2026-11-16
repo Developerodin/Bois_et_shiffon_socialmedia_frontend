@@ -3,9 +3,9 @@
  * saveStoryVersion with a person actor), from photos the brand already has. No AI calls: Quality's rule-based checks
  * are run here and recorded in place of its AI review, so the story waits for approval like a real one.
  *
- *   npx tsx --env-file=.env scripts/seed-story.ts [--status draft|approved] [--brand <brandId>]   (prints the item id)
- *   npx tsx --env-file=.env scripts/seed-story.ts --reel <file.mp4>   (a finished studio reel, for Generate → Use in story)
- *   npx tsx --env-file=.env scripts/seed-story.ts --remove <itemId>
+ *   npx tsx --conditions=react-server --env-file=.env scripts/seed-story.ts [--status draft|approved] [--brand <brandId>]   (prints the item id)
+ *   npx tsx --conditions=react-server --env-file=.env scripts/seed-story.ts --reel <file.mp4>   (a finished studio reel, for Generate → Use in story)
+ *   npx tsx --conditions=react-server --env-file=.env scripts/seed-story.ts --remove <itemId>
  *
  * draft: written by admin@cmo.local, waiting for approval (the e2e account approves it). approved: also approved by
  * emu-test@cmo.local. Rendered files stay in storage (content-addressed, shared by identical frames).

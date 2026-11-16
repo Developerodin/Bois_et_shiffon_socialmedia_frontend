@@ -9,7 +9,7 @@ const codeOf = (raw: unknown) => { try { parseStoryInput(raw); } catch (e) { ret
 
 describe("parseStoryInput", () => {
   it("strips server-only fields", () => {
-    const out = parseStoryInput(input({ frames: [frame({ mediaKey: "k", renderedKey: "r", aiMark: true, rights: { kind: "owned" }, file: { width: 1, height: 1, bytes: 1 } })] })) as any;
+    const out = parseStoryInput(input({ frames: [frame({ mediaKey: "k", renderedKey: "r", aiMark: true, rights: { kind: "owned" }, file: { width: 1, height: 1, bytes: 1 } })] })) as { frames: Record<string, unknown>[] };
     for (const k of ["mediaKey", "renderedKey", "aiMark", "rights", "file"]) expect(out.frames[0]).not.toHaveProperty(k);
   });
   it("accepts 0 frames", () => {

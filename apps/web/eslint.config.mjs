@@ -29,6 +29,11 @@ const eslintConfig = [
       ],
     },
   },
+  // These tests fake Prisma with in-memory tables whose rows and where-clauses have no fixed shape.
+  {
+    files: ["tests/stories-by-hand.test.ts", "tests/stories-publish.test.ts", "tests/stories-save.test.ts"],
+    rules: { "@typescript-eslint/no-explicit-any": "off" },
+  },
   {
     ignores: [
       "node_modules/**",

@@ -13,7 +13,7 @@ test.describe.configure({ mode: "serial" });
 test.setTimeout(180_000);
 test.use({ storageState: authFile("owner"), viewport: { width: 1440, height: 900 } });
 
-const tsx = (...args: string[]) => execSync(`npx tsx --env-file=.env scripts/seed-story.ts ${args.join(" ")}`, { cwd: process.cwd(), encoding: "utf8" });
+const tsx = (...args: string[]) => execSync(`npx tsx --conditions=react-server --env-file=.env scripts/seed-story.ts ${args.join(" ")}`, { cwd: process.cwd(), encoding: "utf8" });
 const shot = (name: string) => (process.env.E2E_SHOTS ? { path: `${process.env.E2E_SHOTS}/${name}.png` } : undefined);
 type Seeded = { itemId: string; workspaceId: string; brandId: string };
 let seeded: Seeded;

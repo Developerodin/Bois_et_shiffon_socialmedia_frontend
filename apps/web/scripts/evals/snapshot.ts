@@ -2,7 +2,7 @@
  * Freezes the test set's real inputs into fixtures.json, so the cases don't change when live data does: the
  * Bois & Chiffons homepage and pages (public website), its brand knowledge and strategy documents, one real brief
  * and draft. Re-run only to refresh the inputs on purpose (then re-run the evals to get a new baseline).
- * Run: npx tsx --env-file=.env scripts/evals/snapshot.ts
+ * Run: npx tsx --conditions=react-server --env-file=.env scripts/evals/snapshot.ts
  */
 import { writeFileSync } from "node:fs";
 import { brandKnowledge } from "@/server/content/knowledge";

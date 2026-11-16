@@ -3,7 +3,7 @@
  *   A: our voice track (OpenAI speech), lip-synced by Seedance 2.5 reference-to-video (what render.ts does).
  *   B: Higgsfield's native audio (Seedance 2.5 image-to-video speaking the line itself, generate_audio on).
  * Prints both finished clip links to compare by eye and ear. B is not wired into the render.
- *   npx tsx --env-file=.env scripts/compare-presenter-audio.ts <workspaceId> <brandId> <presenterId> "<line>"
+ *   npx tsx --conditions=react-server --env-file=.env scripts/compare-presenter-audio.ts <workspaceId> <brandId> <presenterId> "<line>"
  */
 import { randomUUID } from "node:crypto";
 import { prisma } from "@/server/db/prisma";
@@ -23,7 +23,7 @@ async function finished(requestId: string) {
 
 async function main() {
   const [workspaceId, brandId, presenterId, line] = process.argv.slice(2);
-  if (!line) throw new Error('Usage: npx tsx --env-file=.env scripts/compare-presenter-audio.ts <workspaceId> <brandId> <presenterId> "<line>"');
+  if (!line) throw new Error('Usage: npx tsx --conditions=react-server --env-file=.env scripts/compare-presenter-audio.ts <workspaceId> <brandId> <presenterId> "<line>"');
   const scope = { workspaceId, brandId };
   const presenter = await donePresenter(scope, presenterId);
   if (!presenter?.outputKey) throw new Error("No finished presenter with that id in this brand");
