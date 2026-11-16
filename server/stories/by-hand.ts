@@ -60,16 +60,8 @@ export async function dueByHand(scope: BrandScope, now = new Date()) {
   return due;
 }
 
-const STEPS = [
-  "Save every picture and clip to your phone.",
-  "Open Instagram, tap + and choose Story.",
-  "Add the pictures and clips in order.",
-  "If there is a link, add it with the Link sticker.",
-  "Post the story, then come back and tap “I posted it”.",
-];
-
 /**
- * What a person needs to post an approved story themselves: the frames (links good for an hour, as renderedUrl signs them), its link and the steps.
+ * What a person needs to post an approved story themselves: the frames (links good for an hour, as renderedUrl signs them) and its link.
  * Refused unless the approval holds and no product or offer issue stops it (same gate as publishing).
  */
 export async function storyPackage(scope: BrandScope, itemId: string) {
@@ -91,6 +83,5 @@ export async function storyPackage(scope: BrandScope, itemId: string) {
   return {
     frames: body.frames.map((f, i) => ({ n: i + 1, url: urls[i] as string, kind: f.mediaKind ?? "photo" })),
     link: body.link,
-    steps: STEPS,
   };
 }

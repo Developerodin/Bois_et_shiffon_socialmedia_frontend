@@ -141,12 +141,11 @@ describe("setByHand and dueByHand", () => {
 });
 
 describe("storyPackage", () => {
-  it("returns the frames, link and steps", async () => {
+  it("returns the frames and link", async () => {
     seed();
     const p = await storyPackage(user, "s1");
     expect(p.frames).toEqual([1, 2, 3].map((n) => ({ n, url: `https://signed.example/w1/b1/stories/f${n - 1}.jpg`, kind: "photo" })));
     expect(p.link).toBe("https://shop.example/p");
-    expect(p.steps.length).toBeGreaterThan(0);
   });
   it("refuses an ended offer with the gate's message", async () => {
     seed();
@@ -178,15 +177,16 @@ describe("package route", () => {
     expect((await res.json()).frames).toHaveLength(3);
     expect(db.audits.map((a) => a.action)).toEqual(["content.package.download"]);
   });
-  it("streams a zip of frame files and link.txt", async () => {
+  it("streams a zip of frame files and steps.txt with the link", async () => {
     seed();
     const res = await packageRoute(req("?format=zip"), ctx());
     expect(res.headers.get("Content-Disposition")).toBe('attachment; filename="story-s1.zip"');
     expect(res.headers.get("Cache-Control")).toBe("no-store");
     const files = unzipSync(new Uint8Array(await res.arrayBuffer()));
-    expect(Object.keys(files).sort()).toEqual(["frame-1.jpg", "frame-2.jpg", "frame-3.jpg", "link.txt"]);
+    expect(Object.keys(files).sort()).toEqual(["frame-1.jpg", "frame-2.jpg", "frame-3.jpg", "steps.txt"]);
     expect(new TextDecoder().decode(files["frame-2.jpg"])).toBe("bytes of https://signed.example/w1/b1/stories/f1.jpg");
-    expect(new TextDecoder().decode(files["link.txt"])).toContain("https://shop.example/p");
+    expect(new TextDecoder().decode(files["steps.txt"])).toContain("Link: https://shop.example/p");
+    expect(new TextDecoder().decode(files["steps.txt"])).toContain("1. Unzip the download");
   });
   it("answers 429 for the 21st package in an hour", async () => {
     seed();

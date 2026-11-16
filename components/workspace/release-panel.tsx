@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/lib/website";
 import { zoneCity } from "@/server/content/offer-checks";
+import { BY_HAND_STEPS } from "@/server/stories/by-hand-steps";
 
 type Attempt = {
   id: string;
@@ -545,6 +546,9 @@ function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data
           <Check aria-hidden /> {pending === "posted" ? "Saving…" : "I posted it"}
         </Button>
       </div>
+      <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+        {BY_HAND_STEPS.map((s) => <li key={s}>{s}</li>)}
+      </ol>
       {error && <p role="alert" className="flex items-start gap-2 text-sm text-destructive"><CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />{error}</p>}
     </div>
   );
