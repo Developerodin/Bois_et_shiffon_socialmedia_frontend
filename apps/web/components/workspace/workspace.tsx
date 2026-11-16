@@ -1109,10 +1109,13 @@ function AgentView({
   }
 
   // Once per mount; the ref stops React's dev double-effect from starting two paid runs.
+  // A run already going counts as the auto-run: the ref is set first, so the end of that run
+  // (the poll hands a new `agent`) doesn't start a second paid one.
   const autoStarted = useRef(false);
   useEffect(() => {
-    if (!autoRun || autoStarted.current || !agent || running) return;
+    if (!autoRun || autoStarted.current || !agent) return;
     autoStarted.current = true;
+    if (running) return;
     void run();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when the agent has loaded
   }, [autoRun, agent]);
