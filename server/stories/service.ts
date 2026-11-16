@@ -9,7 +9,7 @@ import { liveOfferFor } from "@/server/content/knowledge";
 import { CREDIT_COSTS, InsufficientCreditsError, refundCharge, spendCredits } from "@/server/services/credits";
 import { APP_GOALS, EDITABLE, lock, PublishingError, TX } from "@/server/services/publishing";
 import { getMediaBytes, signedMediaUrl } from "@/server/storage/media";
-import { isStoryBody, REEL_SIZE, type StoryBody, type StoryFrame, type StoryFrameInput, type StoryInput } from "@/server/stories/body";
+import { isStoryBody, LOGO_MAX_BYTES, MIN_CLIP_SECONDS, REEL_SIZE, type StoryBody, type StoryFrame, type StoryFrameInput, type StoryInput } from "@/server/stories/body";
 import { posterKeyFor, renderClipFrame, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
 import { resolveSource } from "@/server/stories/sources";
 
@@ -21,14 +21,12 @@ import { resolveSource } from "@/server/stories/sources";
 export const STORY_RENDER_JOB = "story.render";
 
 const HOUR = 3_600_000;
-const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 /** A clip window must leave at least this much of the clip (the renderer refuses shorter output too). */
-const MIN_CLIP_SECONDS = 0.5;
 
 type BrandScope = { workspaceId: string; brandId: string };
 type Scope = BrandScope & { userId: string };
 type Db = Prisma.TransactionClient | typeof prisma;
-export type StoryActor = { kind: "person"; userId: string } | { kind: "agent"; runId: string; model?: string; chargeId?: string };
+type StoryActor = { kind: "person"; userId: string } | { kind: "agent"; runId: string; model?: string; chargeId?: string };
 /** What the brand's frames look like beyond their own content: fixed for one save, so every frame of it agrees. */
 type Look = { language: string; logoKey?: string; logoTag?: string };
 type Settings = Pick<StoryBody, "cta" | "link" | "brandMark">;

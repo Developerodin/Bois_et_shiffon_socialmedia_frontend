@@ -6,7 +6,7 @@ import { PublishingError } from "@/server/services/publishing";
 import { imageType, mediaKey, putMedia, signedMediaUrl } from "@/server/storage/media";
 import { REEL_SIZE, type SourceRef, type StoryFrame } from "@/server/stories/body";
 
-export type Resolved = { mediaKey: string; mediaKind: "photo" | "video"; aiMark: boolean; rights: NonNullable<StoryFrame["rights"]>; durationSec?: number };
+type Resolved = { mediaKey: string; mediaKind: "photo" | "video"; aiMark: boolean; rights: NonNullable<StoryFrame["rights"]>; durationSec?: number };
 type Scope = { workspaceId: string; brandId: string; userId: string };
 type Item = { ref: SourceRef; title: string; kind: "photo" | "video"; previewUrl: string; durationSec?: number; width?: number; height?: number };
 

@@ -2,6 +2,12 @@ import { z } from "zod";
 import { PublishingError } from "@/server/services/publishing";
 
 export const STORY_LIMITS = { frames: [3, 5], maxFrames: 5, label: 30, headline: 60, body: 120, cta: 40, composition: 100, clipSeconds: 15, link: 2000 } as const;
+/** Instagram's cap on a story frame's file (photo or clip). */
+export const FRAME_MAX_BYTES = 8 * 1024 * 1024;
+/** The shortest clip window worth rendering: a start this close to the clip's end is refused. */
+export const MIN_CLIP_SECONDS = 0.5;
+/** The brand logo burned into frames. */
+export const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 
 export type SourceRef = { kind: "upload" | "library" | "product" | "post" | "photoshoot" | "reel"; id: string };
 export type StoryFrameInput = {

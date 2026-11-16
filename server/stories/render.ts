@@ -8,7 +8,7 @@ import { aiDisclosureLine } from "@/server/reels/plan";
 import { aiMarkPng } from "@/server/reels/render";
 import { PublishingError } from "@/server/services/publishing";
 import { getMediaBytes, mediaExists, mediaKey, putMedia } from "@/server/storage/media";
-import { type FrameFile, STORY_LIMITS, type StoryFrame } from "@/server/stories/body";
+import { FRAME_MAX_BYTES, type FrameFile, LOGO_MAX_BYTES, MIN_CLIP_SECONDS, STORY_LIMITS, type StoryFrame } from "@/server/stories/body";
 import { probeVideo } from "@/server/stories/probe";
 
 const FONT_DIR = path.join(process.cwd(), "assets", "fonts");
@@ -21,17 +21,14 @@ process.env.FONTCONFIG_FILE = path.join(FONT_DIR, "fonts.conf");
 
 /** Bump when the layout changes: every frame gets a new content key, so old files are never reused for new pixels. */
 // 3: clips drop the source's metadata (its title, comment, and any phone location or model tags).
-export const RENDERER_VERSION = 3;
+const RENDERER_VERSION = 3;
 const W = 1080;
 const H = 1920;
 const MB = 1024 * 1024;
 const PHOTO_MAX_BYTES = 25 * MB;
 const VIDEO_MAX_BYTES = 100 * MB;
-const LOGO_MAX_BYTES = 5 * MB;
 /** Instagram's story video cap we hold ourselves to. */
-const CLIP_MAX_BYTES = 8 * MB;
 /** A rendered clip frame shorter than this is refused (the window starts at or past the clip's end). */
-const MIN_CLIP_SECONDS = 0.5;
 const PIXELS = { limitInputPixels: 40_000_000 } as const;
 
 /**
@@ -75,7 +72,7 @@ export type RenderOpts = {
   n?: number;
 };
 
-export type RenderDeps = {
+type RenderDeps = {
   get: (key: string, maxBytes: number) => Promise<Uint8Array>;
   put: (key: string, body: Uint8Array, contentType: string) => Promise<void>;
   exists: (key: string) => Promise<boolean>;
@@ -452,10 +449,10 @@ export async function renderClipFrame(frame: StoryFrame, opts: RenderOpts, deps:
 
     await run(clipArgs(input, overlay, out, clip, mark, "normal", source), 110_000);
     let bytes = new Uint8Array(await readFile(out));
-    if (bytes.length > CLIP_MAX_BYTES) {
+    if (bytes.length > FRAME_MAX_BYTES) {
       await run(clipArgs(input, overlay, out, clip, mark, "small", source), 110_000);
       bytes = new Uint8Array(await readFile(out));
-      if (bytes.length > CLIP_MAX_BYTES) throw new PublishingError(`${frameLabel(opts)} is too large after compression.`, 422, "story.frameTooLarge", frameData(opts));
+      if (bytes.length > FRAME_MAX_BYTES) throw new PublishingError(`${frameLabel(opts)} is too large after compression.`, 422, "story.frameTooLarge", frameData(opts));
     }
     const file = { width: W, height: H, bytes: bytes.length, durationSec: (await probeVideo(out)).durationSec };
     // The container's duration can disagree with where the frames end; the output itself is the final word.
