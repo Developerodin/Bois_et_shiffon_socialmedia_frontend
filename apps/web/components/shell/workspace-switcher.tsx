@@ -1,6 +1,7 @@
 "use client";
 
-import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
+import { useRouter } from "next/navigation";
+import { setActiveContext } from "@/components/context/api";
 import { okToDiscard } from "@/components/context/unsaved";
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 
@@ -18,12 +19,13 @@ export function WorkspaceItems({
   workspaces: WorkspaceOption[];
   activeWorkspaceId: string | null;
 }) {
+  const router = useRouter();
   return (
     <DropdownMenuRadioGroup
       value={activeWorkspaceId ?? ""}
       onValueChange={(id) => {
         if (!okToDiscard()) return;
-        void setActiveWorkspace(id);
+        void setActiveContext({ workspaceId: id }).then(() => router.refresh(), () => {});
       }}
     >
       {workspaces.map((ws) => (

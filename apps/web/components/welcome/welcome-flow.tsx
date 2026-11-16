@@ -4,10 +4,10 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
-import { setActiveBrand } from "@/app/(shell)/actions/shell-context";
 import { fetchEvents, type AgentEvent } from "@/components/agents/api";
 import {
   createBrand,
+  setActiveContext,
   fetchContextDocs,
   ProblemError,
   startResearch,
@@ -82,7 +82,7 @@ function AddressStep({
         created.current = { brandId: brand.id, runId: researchRunId, website };
       }
       const started = created.current;
-      await setActiveBrand(workspaceId, started.brandId);
+      await setActiveContext({ workspaceId, brandId: started.brandId });
       router.replace(`/welcome?${new URLSearchParams({ brand: started.brandId, run: started.runId, site: started.website })}`);
       onStarted(started);
     } catch (err) {

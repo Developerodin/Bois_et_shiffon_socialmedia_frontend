@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronDown, Plus } from "lucide-react";
-import { setActiveBrand } from "@/app/(shell)/actions/shell-context";
+import { setActiveContext } from "@/components/context/api";
 import { okToDiscard } from "@/components/context/unsaved";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -35,6 +36,7 @@ const SIDEBAR_BOX =
   "flex h-11 w-[180px] items-center gap-2 rounded-2xl border border-control bg-card px-3 text-sm font-medium text-foreground";
 
 function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit<Props, "workspaceId"> & { workspaceId: string }) {
+  const router = useRouter();
   const active = brands.find((b) => b.id === activeBrandId) ?? brands[0];
   // The switch round-trips to the server and re-renders the shell; say so instead of looking idle.
   const [switching, startSwitch] = useTransition();
@@ -85,7 +87,8 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
               if (!okToDiscard()) return;
               setTarget(brand.id);
               startSwitch(async () => {
-                await setActiveBrand(workspaceId, brand.id);
+                await setActiveContext({ workspaceId, brandId: brand.id });
+                router.refresh();
               });
             }}
           >

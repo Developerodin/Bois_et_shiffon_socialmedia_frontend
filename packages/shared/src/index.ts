@@ -4,3 +4,4 @@ export * from "./by-hand-steps";
 export * from "./content-limits";
 export * from "./offers";
 export * from "./products";
+export * from "./api/shell";

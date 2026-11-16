@@ -1,21 +1,12 @@
-import { redirect } from "next/navigation";
 import { Library } from "lucide-react";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { auth } from "@/auth";
 import { ContextBoard } from "@/components/context/context-board";
 import { NewBrandDialog } from "@/components/shell/new-brand-dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { loadShellContext } from "@/server/shell/load-shell-context";
+import { getShell } from "@/lib/server-fetch";
 
 export default async function ContextPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const shell = await loadShellContext(session.user.id);
+  const shell = await getShell();
 
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
     return (

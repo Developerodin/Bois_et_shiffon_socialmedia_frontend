@@ -1,24 +1,12 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { setActiveWorkspace } from "@/app/(shell)/actions/shell-context";
 import { SignOutButton } from "@/components/workspace/sign-out-item";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { auth } from "@/auth";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { OpenWorkspaceButton } from "@/components/welcome/open-workspace-button";
 import { WelcomeFlow } from "@/components/welcome/welcome-flow";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { effectivePermissions } from "@/server/auth/permissions";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { loadShellContext } from "@/server/shell/load-shell-context";
+import { getShell } from "@/lib/server-fetch";
 import { normalizeWebsite } from "@espanda/shared";
 
 export const metadata = { title: "Add your brand" };
-
-async function openWorkspace(workspaceId: string) {
-  "use server";
-  await setActiveWorkspace(workspaceId);
-  redirect("/");
-}
 
 /** First run: a signed-in person with no brand enters their website, then watches it being read. */
 export default async function WelcomePage({
@@ -26,13 +14,10 @@ export default async function WelcomePage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-
-  const shell = await loadShellContext(session.user.id);
+  const shell = await getShell();
   const q = await searchParams;
   const workspaceId = shell.activeWorkspaceId;
-  const canCreate = workspaceId ? (await effectivePermissions(workspaceId, session.user.id)).has("brand.create") : false;
+  const canCreate = shell.workspacePermissions.includes("brand.create");
   const site = q.site ? normalizeWebsite(q.site) : null;
   const resume =
     q.brand && q.run && site && shell.brands.some((b) => b.id === q.brand)
@@ -57,9 +42,7 @@ export default async function WelcomePage({
           {shell.workspaces
             .filter((w) => w.id !== workspaceId)
             .map((w) => (
-              <form key={w.id} action={openWorkspace.bind(null, w.id)}>
-                <button type="submit" className="py-2 hover:text-foreground">Open {w.name}</button>
-              </form>
+              <OpenWorkspaceButton key={w.id} workspaceId={w.id} name={w.name} />
             ))}
           <SignOutButton className="py-2 hover:text-foreground" />
         </nav>

@@ -1,17 +1,10 @@
-import { redirect } from "next/navigation";
 import { Gauge } from "lucide-react";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { auth } from "@/auth";
 import { AuditBoard } from "@/components/performance/audit-board";
 import { EmptyState } from "@/components/ui/empty-state";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { loadShellContext } from "@/server/shell/load-shell-context";
+import { getShell } from "@/lib/server-fetch";
 
 export default async function PerformancePage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-
-  const shell = await loadShellContext(session.user.id);
+  const shell = await getShell();
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
     return (
       <div className="mx-auto max-w-5xl">

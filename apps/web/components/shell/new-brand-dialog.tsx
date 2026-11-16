@@ -3,8 +3,7 @@
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { setActiveBrand } from "@/app/(shell)/actions/shell-context";
-import { createBrand, ProblemError } from "@/components/context/api";
+import { createBrand, ProblemError, setActiveContext } from "@/components/context/api";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,7 +49,7 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
         });
         created.current = brand.id;
       }
-      await setActiveBrand(workspaceId, created.current);
+      await setActiveContext({ workspaceId, brandId: created.current });
       created.current = null;
       setOpen(false);
       setName("");

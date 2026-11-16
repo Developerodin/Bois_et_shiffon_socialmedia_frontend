@@ -2,6 +2,7 @@
 // Keep these types in sync with the route handlers under app/api/v1.
 
 import type { RunStatus } from "@/components/agents/api";
+import type { ContextRequest } from "@espanda/shared";
 import { NetworkError, send } from "@/lib/net";
 
 export type ContextDocKind =
@@ -93,6 +94,11 @@ export function createBrand(
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+/** Make a workspace (and optionally one of its brands) the active one; the server sets the cookies. */
+export function setActiveContext(body: ContextRequest) {
+  return request<{ ok: true }>("/api/v1/me/context", { method: "POST", body: JSON.stringify(body) });
 }
 
 export function fetchContextDocs(

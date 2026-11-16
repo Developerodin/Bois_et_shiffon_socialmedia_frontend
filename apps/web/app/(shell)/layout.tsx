@@ -1,35 +1,17 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { auth } from "@/auth";
 import { PageViewTracker } from "@/components/page-view-tracker";
 import { AssistantPanel } from "@/components/shell/assistant-panel";
 import { AssistantProvider } from "@/components/shell/assistant-state";
 import { Sidebar } from "@/components/shell/sidebar";
 import { TopBar } from "@/components/shell/top-bar";
 import { MainArea } from "@/components/workspace/main-area";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { effectivePermissions } from "@/server/auth/permissions";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { isPlatformAdmin } from "@/server/auth/platform-admin";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { loadRoleLabel } from "@/server/shell/load-role-label";
-// eslint-disable-next-line no-restricted-imports -- converted in task 3
-import { loadShellContext } from "@/server/shell/load-shell-context";
+import { getShell } from "@/lib/server-fetch";
 
 /** The Refined workspace frame: sidebar | top bar over the page | the Espanda panel. */
 export default async function ShellLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-  const userId = session.user.id;
-
-  const shell = await loadShellContext(userId);
+  const shell = await getShell();
   const workspaceId = shell.activeWorkspaceId;
-  const [canCreateBrand, roleLabel, platformAdmin] = await Promise.all([
-    workspaceId ? effectivePermissions(workspaceId, userId).then((p) => p.has("brand.create")) : false,
-    workspaceId ? loadRoleLabel(workspaceId, userId) : null,
-    isPlatformAdmin(userId),
-  ]);
+  const canCreateBrand = shell.workspacePermissions.includes("brand.create");
   const brandName = shell.brands.find((b) => b.id === shell.activeBrandId)?.displayName ?? null;
 
   return (
@@ -42,8 +24,8 @@ export default async function ShellLayout({ children }: { children: React.ReactN
           activeWorkspaceId={workspaceId}
           activeBrandId={shell.activeBrandId}
           canCreateBrand={canCreateBrand}
-          platformAdmin={platformAdmin}
-          user={{ name: session.user.name, email: session.user.email, image: session.user.image, roleLabel }}
+          platformAdmin={shell.isPlatformAdmin}
+          user={{ ...shell.user, roleLabel: shell.roleLabel }}
         />
       </Suspense>
       <AssistantProvider>
