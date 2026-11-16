@@ -61,10 +61,11 @@ export async function createClone(scope: Scope, input: { name: string; bytes: Ui
   // A place is taken by a row being made (no provider id yet) as much as by a live one: two taps can't make a third.
   const voice = await prisma.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`clones:${scope.workspaceId}`}))`;
-    // A place held by a request that died (timeout, crash) for over 5 minutes is given back, with its credits.
+    // A place held by a request that died (timeout, crash) for over 5 minutes is given back, with its credits. It is
+    // archived, not deleted: the request may have died after ElevenLabs made the voice, so the delete job looks there.
     const abandoned = await tx.voice.findMany({ where: { workspaceId: scope.workspaceId, providerVoiceId: null, archivedAt: null, createdAt: { lt: new Date(Date.now() - 5 * 60_000) } } });
     for (const a of abandoned) {
-      await tx.voice.delete({ where: { id: a.id } });
+      await archiveClone(tx, a, null, "voice.clone.abandoned");
       await refundCharge(scope.workspaceId, a.id, tx);
     }
     const live = await tx.voice.count({ where: { workspaceId: scope.workspaceId, archivedAt: null } });
@@ -175,12 +176,22 @@ export async function archiveMemberClones(tx: Prisma.TransactionClient, workspac
 export async function runVoiceDelete(payload: unknown) {
   const v = await prisma.voice.findUnique({ where: { id: (payload as { voiceId: string }).voiceId } });
   if (!v?.archivedAt) return;
-  if (v.providerVoiceId) {
-    const res = await fetch(`${EL}/voices/${encodeURIComponent(v.providerVoiceId)}`, { method: "DELETE", headers: { "xi-api-key": key() }, signal: AbortSignal.timeout(15_000) });
+  // Never saved here (the request died after ElevenLabs made it, or before): find it there by the id in its name.
+  const ids = v.providerVoiceId ? [v.providerVoiceId] : await voicesNamedFor(v.id);
+  for (const id of ids) {
+    const res = await fetch(`${EL}/voices/${encodeURIComponent(id)}`, { method: "DELETE", headers: { "xi-api-key": key() }, signal: AbortSignal.timeout(15_000) });
     if (!res.ok && res.status !== 404) throw new Error(`ElevenLabs ${res.status}: couldn't delete the voice`);
   }
   if (v.sampleKey) await deleteMedia(v.sampleKey);
   await prisma.voice.update({ where: { id: v.id }, data: { providerVoiceId: null, sampleKey: null } });
+}
+
+/** ElevenLabs voices made for this row: createClone names each one "<name> (<Voice.id>)". */
+async function voicesNamedFor(voiceId: string) {
+  const res = await fetch(`${EL}/voices`, { headers: { "xi-api-key": key() }, signal: AbortSignal.timeout(15_000) });
+  if (!res.ok) throw new Error(`ElevenLabs ${res.status}: couldn't list voices`);
+  const { voices = [] } = (await res.json()) as { voices?: { voice_id: string; name: string }[] };
+  return voices.filter((x) => x.name.endsWith(`(${voiceId})`)).map((x) => x.voice_id);
 }
 
 /**
@@ -192,7 +203,7 @@ export async function onVoiceDeleteFailure(payload: unknown, error: unknown, exh
   if (!exhausted) return;
   const { voiceId } = payload as { voiceId: string };
   const v = await prisma.voice.findUnique({ where: { id: voiceId } });
-  if (!v?.archivedAt || (!v.providerVoiceId && !v.sampleKey)) return;
+  if (!v?.archivedAt) return; // the job only fails before its last write, so an archived voice still has work left
   const runAt = new Date(Date.now() + 6 * 3600_000);
   await enqueueJob({ type: VOICE_DELETE_JOB, workspaceId: v.workspaceId, payload: { voiceId }, runAt, maxAttempts: 8, idempotencyKey: `voice:${voiceId}:delete:${runAt.getTime()}` });
   await audit(prisma, v.workspaceId, null, "voice.clone.delete_failed", voiceId, { error: String(error).slice(0, 300), retryAt: runAt.toISOString() });

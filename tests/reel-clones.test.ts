@@ -100,8 +100,22 @@ describe("clones that go wrong", () => {
     elevenLabs(Response.json({ voice_id: "el1" }));
     m.tx.voice.findMany.mockResolvedValueOnce([{ id: "stale" }]);
     await createClone(scope, input);
-    expect(m.tx.voice.delete).toHaveBeenCalledWith({ where: { id: "stale" } });
+    // Archived and its delete queued (not just forgotten): the request may have died after ElevenLabs made the voice.
+    expect(m.tx.voice.delete).not.toHaveBeenCalledWith({ where: { id: "stale" } });
+    expect(m.tx.voice.update).toHaveBeenCalledWith({ where: { id: "stale" }, data: { archivedAt: expect.any(Date) } });
+    expect(m.enqueue).toHaveBeenCalledWith(expect.objectContaining({ type: "voices.delete", payload: { voiceId: "stale" } }), m.tx);
     expect(m.refund).toHaveBeenCalledWith("w1", "stale", m.tx);
+  });
+
+  it("the delete job finds a voice that was never saved here by the id in its ElevenLabs name", async () => {
+    const { runVoiceDelete } = await import("@/server/reels/clones");
+    m.prisma.voice.findUnique.mockResolvedValue({ id: "stale", archivedAt: new Date(), providerVoiceId: null, sampleKey: null });
+    const fetch = vi.fn(async (url: string, init?: { method?: string }) =>
+      init?.method === "DELETE" ? Response.json({}) : Response.json({ voices: [{ voice_id: "el9", name: "Ma voix (stale)" }, { voice_id: "el2", name: "Other (v2)" }] }));
+    vi.stubGlobal("fetch", fetch);
+    await runVoiceDelete({ voiceId: "stale" });
+    const deleted = fetch.mock.calls.filter(([, init]) => init?.method === "DELETE").map(([url]) => url);
+    expect(deleted).toEqual([expect.stringMatching(/\/voices\/el9$/)]);
   });
 
   it("deletes the voice at ElevenLabs when it can't be kept (its owner left meanwhile)", async () => {
@@ -131,11 +145,6 @@ describe("clones that go wrong", () => {
     await onVoiceDeleteFailure({ voiceId: "v1" }, new Error("ElevenLabs 503"), true);
     expect(m.enqueue).toHaveBeenCalledWith(expect.objectContaining({ type: "voices.delete", payload: { voiceId: "v1" }, runAt: expect.any(Date), idempotencyKey: expect.stringMatching(/^voice:v1:delete:\d+$/) }));
     expect(m.tx.auditEvent.create.mock.calls[0][0].data).toMatchObject({ action: "voice.clone.delete_failed", entityId: "v1" });
-    // Already deleted there: nothing more to do.
-    m.enqueue.mockClear();
-    m.prisma.voice.findUnique.mockResolvedValue({ id: "v1", workspaceId: "w1", archivedAt: new Date(), providerVoiceId: null, sampleKey: null });
-    await onVoiceDeleteFailure({ voiceId: "v1" }, new Error("x"), true);
-    expect(m.enqueue).not.toHaveBeenCalled();
   });
 });
 
