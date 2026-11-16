@@ -77,6 +77,8 @@ export default function EditStory() {
   const [tool, setTool] = useState<Tool | null>(null);
   const [busy, setBusy] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // The story's release (frames, render and approval state) couldn't be read: the editor stays read-only until it is.
+  const [readError, setReadError] = useState<string | null>(null);
   // The version a save was based on (and whether it renders first, for clips): until the new version shows up, the
   // edits stay on screen, read-only.
   const [savedFrom, setSavedFrom] = useState<{ version: number; rendering: boolean } | null>(null);
@@ -140,7 +142,19 @@ export default function EditStory() {
   const draft = active?.draft ?? saved;
   const changed = !!active && !!saved && !pending && !same(active.draft, saved);
 
-  const load = useCallback(() => (id ? stories.get(id).then(setRelease, () => undefined) : Promise.resolve()), [id]);
+  const load = useCallback(
+    () =>
+      id
+        ? stories.get(id).then(
+            (r) => {
+              setRelease(r);
+              setReadError(null);
+            },
+            (e: unknown) => setReadError(storyError(e)),
+          )
+        : Promise.resolve(),
+    [id],
+  );
   useEffect(() => void load(), [load]);
   const refresh = useCallback(async () => {
     await Promise.all([reloadPosts(), load()]);
@@ -160,7 +174,8 @@ export default function EditStory() {
 
   const editable = EDITABLE.includes(story.status) && can("content.create");
   const rendering = !!release?.rendering || pending;
-  const readOnly = !editable || rendering || busy;
+  // Without the release the editor can't tell a rendering or approved story from an editable one.
+  const readOnly = !editable || rendering || busy || !release;
   const frames = draft.frames;
   const at = Math.min(selected, Math.max(frames.length - 1, 0));
   const frame = frames[at] as EditFrame | undefined;
@@ -333,7 +348,9 @@ export default function EditStory() {
     ? slow
       ? t("detail.slow")
       : t("stories.detail.preparing")
-    : (failure ?? problem ?? (!editable ? t("stories.editor.readOnly") : null));
+    : !release && readError
+      ? readError
+      : (failure ?? problem ?? (!editable ? t("stories.editor.readOnly") : null));
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -455,17 +472,18 @@ export default function EditStory() {
                 </Text>
               </View>
               {status ? (
-                <Text accessibilityLiveRegion="polite" style={[type.meta, { color: failure || problem ? "#FCA5A5" : color.onPrimary, textAlign: "center" }]}>
+                <Text accessibilityLiveRegion="polite" style={[type.meta, { color: failure || problem || (!release && readError) ? "#FCA5A5" : color.onPrimary, textAlign: "center" }]}>
                   {status}
                 </Text>
               ) : null}
+              {!release && readError ? <Button label={t("stories.retry")} variant="outline" height={44} onPress={() => void load()} /> : null}
               <View style={styles.actions}>
                 <Button label={t("editStory.saveDraft")} variant="outline" style={{ flex: 1 }} disabled={!changed || readOnly || !!problem} onPress={() => void save()} />
                 <Button
                   label={busy ? t("edit.saving") : approved ? t("editStory.scheduleStory") : t("stories.editor.saveAndCheck")}
                   arrow
                   style={{ flex: 2 }}
-                  disabled={busy || (changed && (readOnly || !!problem))}
+                  disabled={busy || !release || (changed && (readOnly || !!problem))}
                   onPress={() => void main()}
                 />
               </View>
