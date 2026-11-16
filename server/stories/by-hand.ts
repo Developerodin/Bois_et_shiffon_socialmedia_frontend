@@ -1,7 +1,7 @@
 import { prisma } from "@/server/db/prisma";
 import { currentApproval, loadItem, lock, productGate, PublishingError, TX } from "@/server/services/publishing";
 import { isStoryBody } from "@/server/stories/body";
-import { renderedUrl } from "@/server/stories/service";
+import { coverUrl, renderedUrl } from "@/server/stories/service";
 
 type BrandScope = { workspaceId: string; brandId: string };
 type Scope = BrandScope & { userId: string };
@@ -55,7 +55,7 @@ export async function dueByHand(scope: BrandScope, now = new Date()) {
     const latest = i.versions[0] ?? null;
     if (!(await currentApproval(i.id, latest, i.channel))) continue;
     const frames = isStoryBody(latest?.body) ? latest.body.frames : [];
-    due.push({ id: i.id, title: i.title, scheduledFor: i.scheduledFor!, firstFrameUrl: await renderedUrl(scope, frames[0]?.renderedKey) });
+    due.push({ id: i.id, title: i.title, scheduledFor: i.scheduledFor!, firstFrameUrl: await coverUrl(scope, frames[0]?.renderedKey) });
   }
   return due;
 }

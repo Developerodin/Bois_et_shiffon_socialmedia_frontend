@@ -7,7 +7,7 @@ import { kickRunner } from "@/server/jobs/runner";
 import { createPost, ownMediaKey, postAiAllowed, PublishingError } from "@/server/services/publishing";
 import { signedMediaUrl } from "@/server/storage/media";
 import { isStoryBody } from "@/server/stories/body";
-import { createStory, failStoryStart, renderedUrl, STORY_START_NOTE, storyForRequest, storyTab } from "@/server/stories/service";
+import { coverUrl, createStory, failStoryStart, STORY_START_NOTE, storyForRequest, storyTab } from "@/server/stories/service";
 
 /** Calendar items with their latest draft and its latest quality check. */
 export async function GET(request: Request, context: { params: Promise<BrandRouteParams> }) {
@@ -46,7 +46,7 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
       const body = r.versions[0]?.body;
       return {
         tab: storyTab(r, openAttempts.filter((a) => a.contentItemId === r.id)),
-        firstFrameUrl: isStoryBody(body) ? await renderedUrl(scope, body.frames[0]?.renderedKey) : null,
+        firstFrameUrl: isStoryBody(body) ? await coverUrl(scope, body.frames[0]?.renderedKey) : null,
       };
     };
     const stories = await Promise.all(rows.map(story));
