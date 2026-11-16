@@ -48,6 +48,17 @@ export default function Planner() {
   const [run, setRun] = useState<{ id: string; status: RunStatus; planned?: number; unscheduled?: number; nothingToDo?: boolean } | null>(null);
   const started = run !== null;
   const runId = run?.id;
+  // The run lives on the server, not in this screen: coming back while it still runs shows it again instead of
+  // offering Generate (5 credits) a second time. Generate waits for this answer; a failed read doesn't block it.
+  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    const ctrl = new AbortController();
+    posts
+      .runningPlanner(ctrl.signal)
+      .then((r) => r && setRun((cur) => cur ?? r), () => undefined)
+      .finally(() => !ctrl.signal.aborted && setChecked(true));
+    return () => ctrl.abort();
+  }, []);
   useEffect(() => {
     if (!runId) return;
     const ctrl = new AbortController();
@@ -199,7 +210,7 @@ export default function Planner() {
           {run?.status === "FAILED" ? <Button label={t("planner.tryAgain")} variant="outline" onPress={() => setRun(null)} /> : null}
         </View>
       ) : (
-        <Button label={busy ? t("planner.generating") : t("planner.generate")} icon={sparkles} disabled={busy} style={{ marginTop: space[16] }} onPress={() => void generate()} />
+        <Button label={busy ? t("planner.generating") : t("planner.generate")} icon={sparkles} disabled={busy || !checked} style={{ marginTop: space[16] }} onPress={() => void generate()} />
       )}
       {!started ? <Text style={[type.meta, { textAlign: "center", paddingTop: space[8] }]}>{t("planner.cost", { n: GENERATE_CREDITS })}</Text> : null}
     </PostsScreen>

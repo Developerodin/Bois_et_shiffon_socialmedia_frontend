@@ -537,6 +537,13 @@ export const posts = {
       { workspaceId: ws, signal },
     );
   },
+  /** The Planner run still going for this business, if any: P09 picks it up again after the screen was left. */
+  async runningPlanner(signal?: AbortSignal) {
+    const { ws, base } = await reelBase();
+    const { agents } = await api<{ agents: { key: string; lastRun: { id: string; status: RunStatus } | null }[] }>(`${base}/agents`, { workspaceId: ws, signal });
+    const run = agents.find((a) => a.key === "planner")?.lastRun;
+    return run && (run.status === "QUEUED" || run.status === "RUNNING") ? run : null;
+  },
   /** P06: a new post from a product photo; the writer drafts it now and the check follows (about a minute). */
   async create(input: { channel: "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL"; goal: "newArrival" | "productFeature" | "specialOffer"; product: { title: string; photoKey: string }; direction?: string }) {
     const { ws, base } = await reelBase();
