@@ -160,7 +160,7 @@ export default function StoryDetail() {
       ) : release?.renderError ? (
         <Card style={{ marginTop: space[12], gap: space[8] }}>
           <Text style={[styles.eyebrow, { color: color.error }]}>{t("stories.detail.renderFailed")}</Text>
-          <Text style={type.body}>{storyCodeText(release.renderErrorCode, release.renderError)}</Text>
+          <Text style={type.body}>{storyCodeText(release.renderErrorCode, release.renderError, release.renderErrorData ?? {})}</Text>
           <Text style={type.meta}>{t("stories.detail.renderFailedBody")}</Text>
           {editable ? <Button label={t("stories.editStory")} variant="outline" height={44} onPress={edit} /> : null}
         </Card>

@@ -343,7 +343,7 @@ export default function EditStory() {
   );
   // Someone else saved since these edits started: saving now is refused (story.stale).
   const stale = !!active && version !== active.base && !savedFrom;
-  const failure = renderFailed ? storyCodeText(release?.renderErrorCode, release?.renderError ?? "") : (saveError ?? (stale ? t("stories.errors.stale") : null));
+  const failure = renderFailed ? storyCodeText(release?.renderErrorCode, release?.renderError ?? "", release?.renderErrorData ?? {}) : (saveError ?? (stale ? t("stories.errors.stale") : null));
   const status = rendering
     ? slow
       ? t("detail.slow")

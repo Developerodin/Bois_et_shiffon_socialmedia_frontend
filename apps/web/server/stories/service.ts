@@ -112,11 +112,11 @@ const textOnly = (f: StoryFrameInput): StoryFrame => ({
 });
 
 async function resolveFrame(scope: Scope, f: StoryFrameInput, i: number, opts: { photosOnly?: boolean }): Promise<StoryFrame> {
-  if (!f.source) throw new PublishingError(`Frame ${i + 1} has no photo or clip.`, 400, "story.source");
+  if (!f.source) throw new PublishingError(`Frame ${i + 1} has no photo or clip.`, 400, "story.source", { n: i + 1 });
   const r = await resolveSource(scope, f.source, opts);
   const clip = r.mediaKind === "video" ? (f.clip ?? { start: 0, sound: true }) : undefined;
   if (clip && r.durationSec !== undefined && clip.start + MIN_CLIP_SECONDS > r.durationSec) {
-    throw new PublishingError(`Frame ${i + 1}: the chosen part starts after the clip ends.`, 400, "story.clipWindow");
+    throw new PublishingError(`Frame ${i + 1}: the chosen part starts after the clip ends.`, 400, "story.clipWindow", { n: i + 1 });
   }
   return {
     source: { kind: f.source.kind, id: f.source.id },
@@ -237,10 +237,10 @@ export async function runStoryRender(payload: unknown) {
 const REFUSED = "story-refused:";
 class StoryRenderRefused extends PublishingError {
   constructor(e: PublishingError) {
-    super(e.message, e.status, e.code);
+    super(e.message, e.status, e.code, e.data);
   }
   override toString() {
-    return REFUSED + JSON.stringify({ code: this.code ?? null, message: this.message });
+    return REFUSED + JSON.stringify({ code: this.code ?? null, message: this.message, data: this.data ?? null });
   }
 }
 
@@ -274,11 +274,14 @@ export async function onStoryRenderFailure(payload: unknown, _error: unknown, ex
 const RENDER_FAILED = { error: "The clip couldn't be rendered. Try again.", errorCode: "story.renderFailed" };
 
 /** A failed job's lastError as people may see it: refusals word for word, anything else generic. */
-function renderFailure(lastError: string | null): { error: string; errorCode: string } {
+type RenderFailure = { error: string; errorCode: string; errorData?: Record<string, unknown> };
+function renderFailure(lastError: string | null): RenderFailure {
   if (!lastError?.startsWith(REFUSED)) return RENDER_FAILED;
   try {
-    const r = JSON.parse(lastError.slice(REFUSED.length)) as { code?: unknown; message?: unknown };
-    return typeof r.message === "string" ? { error: r.message, errorCode: typeof r.code === "string" ? r.code : RENDER_FAILED.errorCode } : RENDER_FAILED;
+    const r = JSON.parse(lastError.slice(REFUSED.length)) as { code?: unknown; message?: unknown; data?: unknown };
+    if (typeof r.message !== "string") return RENDER_FAILED;
+    const errorData = r.data && typeof r.data === "object" ? (r.data as Record<string, unknown>) : undefined;
+    return { error: r.message, errorCode: typeof r.code === "string" ? r.code : RENDER_FAILED.errorCode, ...(errorData ? { errorData } : {}) };
   } catch {
     return RENDER_FAILED; // cut off at 2000 characters
   }
@@ -290,7 +293,7 @@ function renderFailure(lastError: string | null): { error: string; errorCode: st
  * ponytail: matches jobs by a JSON path on the payload (no index); fine while render jobs are few. Add an itemId
  * column on Job if this shows up in query times.
  */
-export async function storyRenderState(scope: BrandScope, itemId: string): Promise<{ rendering: boolean; error?: string; errorCode?: string }> {
+export async function storyRenderState(scope: BrandScope, itemId: string): Promise<{ rendering: boolean } & Partial<RenderFailure>> {
   const where = { type: STORY_RENDER_JOB, workspaceId: scope.workspaceId, brandId: scope.brandId, payload: { path: ["itemId"], equals: itemId } };
   const busy = await prisma.job.findFirst({ where: { ...where, status: { in: ["PENDING", "RUNNING"] } }, select: { id: true } });
   if (busy) return { rendering: true };
@@ -343,6 +346,8 @@ export async function storyView(scope: BrandScope, itemId: string) {
     rendering: state.rendering,
     renderError: state.error ?? null,
     renderErrorCode: state.errorCode ?? null,
+    // Fields for the app's own wording of the refusal (a frame's number).
+    renderErrorData: state.errorData ?? null,
     frames: await Promise.all(
       frames.map(async (f, i) => ({
         n: i + 1,

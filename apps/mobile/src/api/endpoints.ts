@@ -621,7 +621,7 @@ export type StoryAttempt = PostRelease["attempts"][number] & { frames?: number; 
 /** GET/POST …/content/:id for a story: the post state plus render progress and the latest frames. */
 export type StoryRelease = Omit<PostRelease, "attempts"> & {
   attempts: StoryAttempt[]; byHand: boolean; scheduledFor: string | null;
-  rendering: boolean; renderError: string | null; renderErrorCode: string | null;
+  rendering: boolean; renderError: string | null; renderErrorCode: string | null; renderErrorData: Record<string, unknown> | null;
   /** `sourceSize`: a clip's upright size as the renderer crops it (null for photos, or when unknown). */
   frames: { n: number; url: string | null; sourceUrl?: string | null; sourceSize?: MediaSize | null; kind: "photo" | "video" | null; headline: string }[];
   /** editStory: saved now, or rendering first. */
