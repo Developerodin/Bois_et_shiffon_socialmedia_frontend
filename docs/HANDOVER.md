@@ -75,10 +75,11 @@ shows only 4 older errors in the reels screens.
 - Only a person's failed render shows as the story's render error.
 - Emulator-checked 2026-11-16: items 3, 4, 6, 7 of the Important list (5 needs VoiceOver/TalkBack; 1, 2 are tests only).
 
-**Minor still open**
-- Web: the by-hand time shows without a day in the content list, and the time field accepts a past time.
-- Duplicated constants across server modules (`MIN_CLIP_SECONDS`, `LOGO_MAX_BYTES`, the 8 MB cap, the 15 s window) and
-  about 12 exports with no outside user.
+**Also fixed 2026-11-16** (`b44c0f6`..`baf6420`)
+- Web: the content list shows the by-hand day and time (`dayTime` in `lib/time.ts`); the by-hand field has `min` now.
+- A story whose first save is still rendering shows "Preparing frames…" (content list `rendering`), emulator-checked.
+- Story limits defined once in `stories/body.ts` (`FRAME_MAX_BYTES`, `MIN_CLIP_SECONDS`, `LOGO_MAX_BYTES`); 12
+  file-only exports made local. Nothing from the final review is left open; the go-live list above still is.
 
 ## Reels templates, presenters and voices (end of day 2026-11-12)
 
