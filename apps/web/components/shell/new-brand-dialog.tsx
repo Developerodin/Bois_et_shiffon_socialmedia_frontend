@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { setActiveBrand } from "@/app/(shell)/actions/shell-context";
@@ -33,6 +33,9 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
   const [url, setUrl] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<FormError | null>(null);
+  // Brand made by an earlier attempt whose switch failed: Create again must only switch, not
+  // create a second brand and a second paid research run. Cleared when the dialog closes.
+  const created = useRef<string | null>(null);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -40,12 +43,15 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
     setPending(true);
     setError(null);
     try {
-      const { brand } = await createBrand(workspaceId, {
-        displayName: name.trim(),
-        websiteUrl: url.trim(),
-      });
-      // Brand exists now; if switching fails the user can still pick it from the switcher.
-      await setActiveBrand(workspaceId, brand.id);
+      if (!created.current) {
+        const { brand } = await createBrand(workspaceId, {
+          displayName: name.trim(),
+          websiteUrl: url.trim(),
+        });
+        created.current = brand.id;
+      }
+      await setActiveBrand(workspaceId, created.current);
+      created.current = null;
       setOpen(false);
       setName("");
       setUrl("");
@@ -63,6 +69,12 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
         setError({
           field: "form",
           message: "Only workspace owners and admins can create brands.",
+        });
+      } else if (created.current) {
+        console.error("[brands] switch after create failed", err);
+        setError({
+          field: "form",
+          message: "The brand was created but we couldn't open it. Try again, or pick it from the brand switcher.",
         });
       } else {
         console.error("[brands] create failed", err);
@@ -85,7 +97,10 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
       onOpenChange={(next) => {
         if (pending) return;
         setOpen(next);
-        if (!next) setError(null);
+        if (!next) {
+          setError(null);
+          created.current = null;
+        }
       }}
     >
       <DialogTrigger asChild>
