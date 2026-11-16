@@ -16,7 +16,7 @@ vi.mock("@/server/auth/request-user", () => ({ issueMobileToken: vi.fn(async () 
 vi.mock("@/server/email/outbox", () => ({ queueEmail: m.queueEmail }));
 vi.mock("@/server/services/google-signup", () => ({ provisionGoogleUser: vi.fn() }));
 
-import { completeRegistration, emailNextStep, passwordSignIn, startRegistration } from "@/server/services/mobile-auth";
+import { completeRegistration, emailNextStep, passwordSignIn, sendEmailCode, startRegistration } from "@/server/services/mobile-auth";
 
 const request = new Request("https://app/api/v1/mobile/password", { headers: { "x-forwarded-for": "1.2.3.4" } });
 const PASSWORD = "correct horse battery";
@@ -97,5 +97,17 @@ describe("email-first: which screen comes next", () => {
   it("a disabled account looks like one without a password", async () => {
     m.db.user.findUnique.mockResolvedValue(await active({ status: "DISABLED" }));
     await expect(emailNextStep({ email: "a@b.co" }, request)).resolves.toEqual({ next: "code" });
+  });
+});
+
+describe("email sign-in codes (mobile)", () => {
+  it("a new code leaves earlier live codes working, so a stranger asking for codes can't void the one in the inbox", async () => {
+    m.db.user.findUnique.mockResolvedValue(null);
+    await sendEmailCode({ email: "a@b.co" }, request);
+    const where = m.db.verificationToken.deleteMany.mock.calls[0][0].where;
+    expect(where.identifier).toBe("mobile-code:a@b.co");
+    // Only expired codes (and a same-code duplicate) are cleared, never a live one.
+    expect(where.OR).toEqual([{ expires: { lte: expect.any(Date) } }, { token: expect.any(String) }]);
+    expect(m.db.verificationToken.create).toHaveBeenCalledTimes(1);
   });
 });
