@@ -64,14 +64,18 @@ shows only 4 older errors in the reels screens.
    (`dailyLimit`, `businessOnly`, `refused`…) still show the server's text.
 7. Editor failed read: error and Try again in the status line, read-only until the read succeeds.
 
-**Minor worth doing with them**
-- Security: rendered clips keep the phone's GPS location tag; add `-map_metadata -1` to `clipArgs`
-  (`server/stories/render.ts:396`), bump `RENDERER_VERSION`, optionally strip it at upload check.
-- Money: a re-run Creator job can refund a paid story, and the Generate calendar run can write paid stories free
-  (`engine.ts:225`, `runner.ts:65`, `creator.ts:74`); nobody is charged twice.
-- An edit to an approved by-hand story after its zip was downloaded blocks "I posted it" (`manual-post.ts:91`); a retried
-  final render step never starts Quality (`stories/service.ts:251`); an agent's failed clip render shows on the phone as
-  the person's failed save (`stories/service.ts:293`).
+**Minor fixed 2026-11-16** (`8e68f95`..`747d6e6`)
+- Clip metadata: `-map_metadata -1 -map_chapters -1`, `RENDERER_VERSION` 3. Checked with real ffmpeg: its MP4 output
+  already dropped location tags, but a source clip's title and comment went through; now nothing does.
+- Money: a run that SUCCEEDED is left alone on failure; a paid run that saved a version or queued its story render keeps
+  its charge; calendar Creator runs skip paid New stories not yet written (one whose own run failed stays unwritten
+  until deleted, where before a calendar run wrote it free).
+- By-hand stories refuse edits (`story.byHandOn`) until posting by hand is stopped; the phone hides the edit.
+- A retried final render step starts Quality when the version has no check.
+- Only a person's failed render shows as the story's render error.
+- Emulator-checked 2026-11-16: items 3, 4, 6, 7 of the Important list (5 needs VoiceOver/TalkBack; 1, 2 are tests only).
+
+**Minor still open**
 - Web: the by-hand time shows without a day in the content list, and the time field accepts a past time.
 - Duplicated constants across server modules (`MIN_CLIP_SECONDS`, `LOGO_MAX_BYTES`, the 8 MB cap, the 15 s window) and
   about 12 exports with no outside user.
