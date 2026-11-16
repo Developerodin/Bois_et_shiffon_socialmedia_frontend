@@ -29,5 +29,5 @@ export default function middleware(request: NextRequest) {
 export const config = {
   // Left out: the Server's /api, the load balancer's /healthz, and public files (the sign-in pages show the logo in
   // public/brand and the tab icon before anyone signs in).
-  matcher: ["/((?!api/|healthz|_next/static|_next/image|favicon.ico|icon.png|brand/).*)"],
+  matcher: ["/((?!api/|healthz$|_next/static|_next/image|favicon.ico|icon.png|brand/).*)"],
 };

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
-import middleware, { hasSessionCookie } from "@/middleware";
+import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
+import middleware, { config, hasSessionCookie } from "@/middleware";
 
 describe("hasSessionCookie", () => {
   it.each(["authjs.session-token", "__Secure-authjs.session-token", "authjs.session-token.0", "__Secure-authjs.session-token.0"])("accepts %s", (name) => {
@@ -31,5 +32,16 @@ describe("middleware", () => {
     const res = middleware(req("/agents?x=1", "authjs.session-token=abc"));
     expect(res.headers.get("location")).toBeNull();
     expect(res.headers.get("x-middleware-request-x-pathname")).toBe("/agents?x=1");
+  });
+});
+
+describe("matcher", () => {
+  const runs = (path: string) => unstable_doesMiddlewareMatch({ config, url: path });
+  it("skips the Server's /api and the health check, and only that exact path", () => {
+    expect(runs("/api/v1/me")).toBe(false);
+    expect(runs("/healthz")).toBe(false);
+    expect(runs("/healthzz")).toBe(true);
+    expect(runs("/healthz/x")).toBe(true);
+    expect(runs("/agents")).toBe(true);
   });
 });
