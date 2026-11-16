@@ -208,6 +208,19 @@ export async function executeAgentRun(rawPayload: unknown) {
   await log("SUCCESS", `${agent.name} finished`);
 }
 
+/**
+ * Whether a run already saved its work: a content version it wrote, or a story render it queued (that job refunds on
+ * its own failure, onStoryRenderFailure). ponytail: ContentVersion.agentRunId has no index; this only runs when a paid
+ * run finally fails. Add one if that path gets frequent.
+ */
+async function delivered(run: { id: string; workspaceId: string; brandId: string }) {
+  const version = await prisma.contentVersion.findFirst({ where: { agentRunId: run.id, item: { workspaceId: run.workspaceId } }, select: { id: true } });
+  if (version) return true;
+  // "story.render" written out: importing STORY_RENDER_JOB from stories/service would be circular (it imports this file).
+  const render = await prisma.job.findFirst({ where: { type: "story.render", workspaceId: run.workspaceId, brandId: run.brandId, payload: { path: ["actor", "runId"], equals: run.id } }, select: { id: true } });
+  return !!render;
+}
+
 /** Called by the runner after a failed attempt. */
 export async function onAgentRunFailure(rawPayload: unknown, error: unknown, exhausted: boolean) {
   const parsed = AgentRunJobPayload.safeParse(rawPayload);
@@ -215,15 +228,19 @@ export async function onAgentRunFailure(rawPayload: unknown, error: unknown, exh
   const { runId } = parsed.data;
   // The message alone: the UI reads it (e.g. "No new drafts…" means nothing to do), so no "Error: " prefix.
   const text = error instanceof Error ? error.message : String(error);
+  // A run that finished (its job died before being marked done, then was re-run or reclaimed) stays finished and paid.
+  const before = await prisma.agentRun.findUnique({ where: { id: runId }, select: { status: true } });
+  if (!before || before.status === "SUCCEEDED") return;
   const run = await prisma.agentRun.update({
     where: { id: runId },
     data: exhausted
       ? { status: "FAILED", finishedAt: new Date(), error: text.slice(0, 2000) }
       : { status: "QUEUED", error: text.slice(0, 2000) },
   });
-  // Paid runs (e.g. competitor site audits) get their credits back when they finally fail.
+  // Paid runs (e.g. competitor site audits) get their credits back when they finally fail, unless they already
+  // delivered: a re-run of a paid story finds nothing left to do, but the story it wrote is there.
   const chargeId = (run.input as { chargeId?: string } | null)?.chargeId;
-  if (exhausted && chargeId) await refundCharge(run.workspaceId, chargeId);
+  if (exhausted && chargeId && !(await delivered(run))) await refundCharge(run.workspaceId, chargeId);
   await prisma.agentEvent.create({
     data: {
       workspaceId: run.workspaceId,

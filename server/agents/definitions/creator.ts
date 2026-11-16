@@ -71,7 +71,12 @@ export const creatorAgent: AgentDefinition = {
     // A person's own edit waiting for its check is left alone, and so is a story blocked only for its media (no photo,
     // wrong file, rights): new text can't fix those, a person has to.
     // New briefs first, so drafts the check keeps blocking can't take every slot and starve the new posts.
+    // A paid "New story" not yet written is its own paid run's to write: a calendar run (no itemId) writing it would
+    // give it away free (or race the paid run, which then refunds).
+    const paidUnwritten = (i: (typeof items)[number]) =>
+      !itemId && i.channel === "INSTAGRAM_STORY" && !i.versions.length && typeof (i.brief as { requestId?: unknown } | null)?.requestId === "string";
     const todo = items
+      .filter((i) => !paidUnwritten(i))
       .filter((i) => i.status === "BRIEF_READY" || (i.versions[0]?.checks[0]?.overall === "BLOCKER" && !storyMediaOnly(i)) || sentBack(i))
       .sort((a, b) => Number(b.status === "BRIEF_READY") - Number(a.status === "BRIEF_READY"))
       .slice(0, PER_RUN);
