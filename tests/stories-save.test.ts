@@ -310,6 +310,11 @@ describe("storyRenderState", () => {
     expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false, error: "This story can't be edited any more.", errorCode: "story.notEditable" });
   });
 
+  it("keeps a refusal's data (a frame's number) for the app's own wording", async () => {
+    job({ status: "DEAD_LETTER", lastError: `story-refused:${JSON.stringify({ code: "story.textFit", message: "Frame 2: the text doesn't fit.", data: { n: 2 } })}` });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false, error: "Frame 2: the text doesn't fit.", errorCode: "story.textFit", errorData: { n: 2 } });
+  });
+
   it("never shows raw render errors (ffmpeg text, temp paths)", async () => {
     job({ status: "DEAD_LETTER", lastError: "Error: ffmpeg exited 1: C:\\Temp\\story-frame-x\\source: Invalid data" });
     expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false, error: "The clip couldn't be rendered. Try again.", errorCode: "story.renderFailed" });

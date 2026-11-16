@@ -283,6 +283,8 @@ const GRADIENT = svg(
 );
 
 const frameLabel = (opts: RenderOpts) => `Frame ${opts.n ?? "?"}`;
+/** The frame number as refusal data, so the app can word a frame refusal itself. */
+const frameData = (opts: RenderOpts) => (opts.n ? { n: opts.n } : undefined);
 
 /** Gradient, brand mark, text and CTA (and the AI mark when asked), positioned on a 1080×1920 frame. */
 async function overlayLayers(frame: StoryFrame, opts: RenderOpts, deps: RenderDeps, withAiMark: boolean): Promise<OverlayOptions[]> {
@@ -319,7 +321,7 @@ async function overlayLayers(frame: StoryFrame, opts: RenderOpts, deps: RenderDe
   }
   if (clean(frame.headline)) {
     const size = headlineSize(frame.headline);
-    if (size === null) throw new PublishingError(`${frameLabel(opts)}: the headline doesn't fit.`, 400, "story.textFit");
+    if (size === null) throw new PublishingError(`${frameLabel(opts)}: the headline doesn't fit.`, 400, "story.textFit", frameData(opts));
     const l = await textLayer(frame.headline, { size, bold: true, width: t.width, color: "#FFFFFF", rtl });
     y += gapBefore;
     layers.push(centred(l, y));
@@ -344,12 +346,12 @@ async function overlayLayers(frame: StoryFrame, opts: RenderOpts, deps: RenderDe
     bottom = top - t.gaps.textToCta;
   }
   // The estimate is generous, so this only trips if a font measures wider than TEXT_BOX.em allows.
-  if (y > bottom) throw new PublishingError(`${frameLabel(opts)}: the text doesn't fit.`, 400, "story.textFit");
+  if (y > bottom) throw new PublishingError(`${frameLabel(opts)}: the text doesn't fit.`, 400, "story.textFit", frameData(opts));
   return layers;
 }
 
 function sourceKey(frame: StoryFrame, opts: RenderOpts): string {
-  if (!frame.mediaKey) throw new PublishingError(`${frameLabel(opts)} has no photo or clip.`, 400, "story.source");
+  if (!frame.mediaKey) throw new PublishingError(`${frameLabel(opts)} has no photo or clip.`, 400, "story.source", frameData(opts));
   return frame.mediaKey;
 }
 
@@ -441,7 +443,7 @@ export async function renderClipFrame(frame: StoryFrame, opts: RenderOpts, deps:
     if (mark) await writeFile(mark, await aiMarkPng(aiDisclosureLine(opts.language)));
     const clip = frame.clip ?? { start: 0, sound: true };
     const src = await probeVideo(input);
-    const windowRefused = () => new PublishingError(`${frameLabel(opts)}: the chosen part starts after the clip ends.`, 400, "story.clipWindow");
+    const windowRefused = () => new PublishingError(`${frameLabel(opts)}: the chosen part starts after the clip ends.`, 400, "story.clipWindow", frameData(opts));
     if (clip.start + MIN_CLIP_SECONDS > src.durationSec) throw windowRefused();
     const source = { width: src.width, height: src.height, crop: frame.crop };
 
@@ -450,7 +452,7 @@ export async function renderClipFrame(frame: StoryFrame, opts: RenderOpts, deps:
     if (bytes.length > CLIP_MAX_BYTES) {
       await run(clipArgs(input, overlay, out, clip, mark, "small", source), 110_000);
       bytes = new Uint8Array(await readFile(out));
-      if (bytes.length > CLIP_MAX_BYTES) throw new PublishingError(`${frameLabel(opts)} is too large after compression.`, 422, "story.frameTooLarge");
+      if (bytes.length > CLIP_MAX_BYTES) throw new PublishingError(`${frameLabel(opts)} is too large after compression.`, 422, "story.frameTooLarge", frameData(opts));
     }
     const file = { width: W, height: H, bytes: bytes.length, durationSec: (await probeVideo(out)).durationSec };
     // The container's duration can disagree with where the frames end; the output itself is the final word.
