@@ -288,7 +288,7 @@ describe("storyRenderState", () => {
   // A tiny job table honouring the filters storyRenderState uses (status, payload path equals / gte).
   let jobs: Row[] = [];
   const pathOk = (payload: Row, c: Row) => {
-    const v = payload[c.path[0]];
+    const v = (c.path as string[]).reduce((o: Row | undefined, k) => o?.[k], payload) as unknown as number;
     return "equals" in c ? v === c.equals : v >= c.gte;
   };
   beforeEach(() => {
@@ -300,7 +300,7 @@ describe("storyRenderState", () => {
       return hits.sort((a, b) => b.updatedAt - a.updatedAt)[0] ?? null;
     });
   });
-  const job = (o: Row) => jobs.push({ type: STORY_RENDER_JOB, workspaceId: "w1", brandId: "b1", updatedAt: Date.now() + jobs.length, ...o, payload: { itemId: "i1", baseVersion: 0, ...o.payload } });
+  const job = (o: Row) => jobs.push({ type: STORY_RENDER_JOB, workspaceId: "w1", brandId: "b1", updatedAt: Date.now() + jobs.length, ...o, payload: { itemId: "i1", baseVersion: 0, actor: { kind: "person", userId: "u1" }, ...o.payload } });
 
   it("is rendering while a job for the item is pending or running", async () => {
     job({ status: "PENDING" });
@@ -323,6 +323,11 @@ describe("storyRenderState", () => {
   it("keeps a refusal's data (a frame's number) for the app's own wording", async () => {
     job({ status: "DEAD_LETTER", lastError: `story-refused:${JSON.stringify({ code: "story.textFit", message: "Frame 2: the text doesn't fit.", data: { n: 2 } })}` });
     expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false, error: "Frame 2: the text doesn't fit.", errorCode: "story.textFit", errorData: { n: 2 } });
+  });
+
+  it("doesn't show an agent's failed rewrite as the person's render error", async () => {
+    job({ status: "DEAD_LETTER", lastError: "Error: ffmpeg exited 1", payload: { actor: { kind: "agent", runId: "r1" } } });
+    expect(await storyRenderState(scope, "i1")).toEqual({ rendering: false });
   });
 
   it("never shows raw render errors (ffmpeg text, temp paths)", async () => {
