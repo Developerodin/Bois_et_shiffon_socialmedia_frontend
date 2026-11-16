@@ -9,7 +9,7 @@ tested on the emulator, fixed, and committed.
 Branch `desktop-shell`, committed, **not pushed** (`main` still at `08e5fb1`). Spec
 `docs/superpowers/specs/2026-11-13-instagram-stories-design.md`, plan `docs/superpowers/plans/2026-11-13-instagram-stories.md`
 (commits `f7e6ef6` to `e033d6b`). Each task had its own review (most had a fix round). The whole-branch four-lens
-review ran at the end of the day: no Critical findings and 8 Important; the handover one is fixed here, **7 to fix tomorrow** (list below; full reports in
+review ran at the end of the day: no Critical findings and 8 Important, **all fixed by 2026-11-16** (list below; full reports in
 `docs/handover/2026-11-13-stories-final-review/`). Web: 756 vitest tests pass, tsc clean; phone: tsc clean, `expo lint`
 shows only 4 older errors in the reels screens.
 
@@ -50,23 +50,19 @@ shows only 4 older errors in the reels screens.
 - Deferred minors from the per-task reviews: library list has no cap, list GET exposes media keys, calendar thumbnails
   re-signed on each poll, no per-version frame history.
 
-**To fix tomorrow (final review, Important)** — details and file:line in `docs/handover/2026-11-13-stories-final-review/`
-1. Correctness: a duplicated story is created PLANNED, so a Generate calendar run gives it an AI brief and the Creator
-   overwrites the person's text as v2 (`server/stories/service.ts:370`, `brief.ts:38`, `creator.ts:75`).
-2. Spec: web users never see the post-by-hand steps; the zip has only `link.txt` (`package/route.ts:58`), the web panel
-   shows none (`release-panel.tsx:482`), and the server `STEPS` (`by-hand.ts:63`) are unused while the phone keeps its
-   own copy. One source of steps, shown on web and in the zip.
-3. Spec: a story whose first frame is a clip shows an `.mp4` as an image thumbnail in four places (web calendar
-   `content-panels.tsx:400`, phone card `ui/stories/card.tsx:79`, Today `ui/posts/use-posts.ts:76`, due list). Needs a
-   poster JPEG from the clip render or a video tile.
-4. Phone: a Planner story with no draft is a dead end ("Add photos" → editor says "not drafted yet", no action)
-   (`posts/story/[id].tsx:259`, `edit-story.tsx:152`, `ui/stories/card.tsx:83`).
-5. Phone: VoiceOver can't reach a story card's "…" menu (Duplicate, Delete) (`ui/stories/card.tsx:71`); add
-   accessibilityActions.
-6. Phone: about 31 of 47 story refusal codes have no app string, so people see server English (`ui/stories/errors.ts:15`,
-   `stories.errors` in en `posts.json`), e.g. `story.textFit`, `story.clipWindow`, `story.renderFailed`, `story.framesNotReady`.
-7. Phone: the editor hides a failed story read (no error, no retry; a rendering or approved story opens editable)
-   (`edit-story.tsx:143`).
+**Final review Important items: all fixed 2026-11-16** (`a927ccc`..`9f712cf`; reports in `docs/handover/2026-11-13-stories-final-review/`)
+1. Duplicated story rewritten by the agents: the Brief writer now only takes PLANNED items with no version.
+2. By-hand steps: one list in `server/stories/by-hand-steps.ts`, shown in the web panel and written to the zip's
+   `steps.txt` with the link; the unused `steps` field left the package JSON. The phone keeps its translated steps.
+3. Clip-first thumbnails: the clip render stores a poster JPEG beside the MP4 (`posterKeyFor`), and `coverUrl` hands it
+   to the content list and the due list. Clips rendered before this get a poster only when their render is reused.
+4. Unwritten Planner story: the detail hides Edit until there's a version and says it isn't written; the card says
+   "Not written yet". No "Write it now" action (would need a new paid server action).
+5. VoiceOver: the card offers Duplicate and Delete as accessibility actions.
+6. Refusal strings: en strings for the reachable save, render, upload, posting and by-hand codes; frame refusals send
+   `{ n }` as data and a failed render keeps it (`renderErrorData`). Posting outcomes stored on attempts
+   (`dailyLimit`, `businessOnly`, `refused`…) still show the server's text.
+7. Editor failed read: error and Try again in the status line, read-only until the read succeeds.
 
 **Minor worth doing with them**
 - Security: rendered clips keep the phone's GPS location tag; add `-map_metadata -1` to `clipArgs`
