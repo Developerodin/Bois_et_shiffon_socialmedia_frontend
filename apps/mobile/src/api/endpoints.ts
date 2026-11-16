@@ -631,7 +631,7 @@ export type MediaSize = { width: number; height: number };
 /** `width`/`height`: a clip's upright size (photos leave them out: the phone measures the decoded photo). */
 export type StorySource = { ref: SourceRef; title: string; kind: "photo" | "video"; previewUrl: string; durationSec?: number; width?: number; height?: number };
 export type DueStory = { id: string; title: string; scheduledFor: string; firstFrameUrl: string | null };
-export type StoryPackage = { frames: { n: number; url: string; kind: "photo" | "video" }[]; link: string; steps: string[] };
+export type StoryPackage = { frames: { n: number; url: string; kind: "photo" | "video" }[]; link: string };
 export type UploadSlot = { uploadId: string; url: string; headers: Record<string, string> };
 export type UploadResult = { status: "VERIFIED"; durationSec?: number; width?: number; height?: number; previewUrl: string } | { status: "REJECTED"; reason: string; code: string };
 
@@ -675,7 +675,7 @@ export const stories = {
     const { ws, base } = await reelBase();
     return api<UploadResult>(`${base}/stories/uploads/${encodeURIComponent(uploadId)}`, { method: "POST", body: {}, workspaceId: ws, timeoutMs: 120_000 });
   },
-  /** An approved story's frames (links good for an hour), link and steps for posting it by hand. */
+  /** An approved story's frames (links good for an hour), and link for posting it by hand. */
   async package(id: string) {
     const { ws, base } = await reelBase();
     return api<StoryPackage>(`${base}/stories/${encodeURIComponent(id)}/package`, { workspaceId: ws });

@@ -5,13 +5,14 @@ import { hitRateLimit } from "@/server/auth/rate-limit";
 import { prisma } from "@/server/db/prisma";
 import { PublishingError } from "@/server/services/publishing";
 import { storyPackage } from "@/server/stories/by-hand";
+import { stepsText } from "@/server/stories/by-hand-steps";
 
 type Params = { params: Promise<BrandRouteParams & { contentId: string }> };
 
 const HEADERS = { "Cache-Control": "no-store" };
 
 /**
- * An approved story's frames, link and steps for posting it by hand (`?format=zip`: the frames and link.txt in one zip).
+ * An approved story's frames and link for posting it by hand (`?format=zip`: the frames and steps.txt, with the link, in one zip).
  * 20 per person per hour. The zip is stored without compression and streamed one frame at a time.
  */
 export async function GET(request: Request, context: Params) {
@@ -55,9 +56,9 @@ function zipStream(pack: Awaited<ReturnType<typeof storyPackage>>) {
           for (let r = await reader.read(); !r.done; r = await reader.read()) file.push(r.value);
           file.push(new Uint8Array(0), true);
         }
-        const link = new ZipPassThrough("link.txt");
-        zip.add(link);
-        link.push(new TextEncoder().encode(pack.link ? `${pack.link}\n` : "No link on this story.\n"), true);
+        const steps = new ZipPassThrough("steps.txt");
+        zip.add(steps);
+        steps.push(new TextEncoder().encode(stepsText(pack.link)), true);
         zip.end();
       } catch (e) {
         await reader?.cancel().catch(() => null);
