@@ -166,15 +166,20 @@ const brandStore = {
 let current: CurrentBrand | null = null;
 let pending: Promise<CurrentBrand> | null = null;
 
+/** The lookup answered: this person has no business yet (as opposed to the lookup failing). */
+export class NoBusiness extends Error {}
+/** A business was picked on this phone before (end of onboarding, a switch, an earlier lookup). */
+export const hasSavedBrand = () => brandStore.get().then((raw) => !!raw);
+
 async function lookUpBrand(): Promise<CurrentBrand> {
   const { workspaces } = await me();
   const saved = await brandStore.get().then((raw) => (raw ? (JSON.parse(raw) as { workspaceId: string; brandId: string }) : null), () => null);
   const ws = workspaces.find((w) => w.id === saved?.workspaceId)?.id ?? workspaces.find((w) => w.id === onboarding.workspaceId)?.id ?? workspaces[0]?.id;
-  if (!ws) throw new Error("No workspace");
+  if (!ws) throw new NoBusiness("No workspace");
   const { brands } = await api<{ brands: { id: string; displayName: string; createdAt: string }[] }>(`/workspaces/${encodeURIComponent(ws)}/brands`, { workspaceId: ws });
   const newest = [...brands].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
   const pick = brands.find((b) => b.id === saved?.brandId) ?? brands.find((b) => b.id === onboarding.brandId) ?? newest;
-  if (!pick) throw new Error("No business yet");
+  if (!pick) throw new NoBusiness("No business yet");
   return rememberBrand({ workspaceId: ws, brandId: pick.id, name: pick.displayName });
 }
 

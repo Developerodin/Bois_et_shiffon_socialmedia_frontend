@@ -1,14 +1,15 @@
 import { useState, type ReactNode } from "react";
 import { Image } from "expo-image";
-import { router } from "expo-router";
 import { Trans, useTranslation } from "react-i18next";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TurboModuleRegistry, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ApiError } from "@/api/client";
 import { auth } from "@/api/endpoints";
+import { signedInHome } from "@/ui/account-actions";
 import { Aura } from "@/ui/aura";
 import { Button } from "@/ui/button";
 import { icons, images } from "@/ui/icons";
+import { resetTo } from "@/ui/reset-stack";
 import { color, radius, space, type } from "@/theme/tokens";
 
 /** Shared shell of A01 (mobile) and A14 (email): logo on the aura, white sheet with the form. */
@@ -34,7 +35,7 @@ export function AuthSheet({ title, subtitle, tagline, children }: { title: strin
   );
 }
 
-/** "or continue with" rule + Google / Apple buttons. */
+/** "or continue with" rule + the Google button. Apple is hidden until Sign in with Apple is built (it signed no one in). */
 export function SocialSignIn() {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
@@ -54,7 +55,7 @@ export function SocialSignIn() {
       if (!isSuccessResponse(res)) return; // closed the Google sheet
       if (!res.data.idToken) throw new Error("no idToken");
       await auth.google(res.data.idToken);
-      router.replace("/onboarding/welcome");
+      resetTo(await signedInHome());
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("auth.googleFailed"));
     } finally {
@@ -71,7 +72,6 @@ export function SocialSignIn() {
       </View>
       <View style={styles.socials}>
         <Button label={t("auth.google")} variant="outline" icon={icons.google} loading={busy} style={{ flex: 1 }} onPress={() => void google()} />
-        <Button label={t("auth.apple")} variant="outline" icon={icons.apple} style={{ flex: 1 }} onPress={() => router.push("/onboarding/welcome")} />
       </View>
       {error ? (
         <Text accessibilityRole="alert" style={[type.meta, { paddingTop: space[8], color: color.error }]}>

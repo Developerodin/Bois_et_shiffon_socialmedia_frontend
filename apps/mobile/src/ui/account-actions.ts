@@ -1,5 +1,5 @@
 import { api, session } from "@/api/client";
-import { forgetBrand, me, rememberBrand } from "@/api/endpoints";
+import { currentBrand, forgetBrand, hasSavedBrand, me, NoBusiness, rememberBrand } from "@/api/endpoints";
 import { clearOnboarding } from "@/ui/onboarding/state";
 import { forgetPosts } from "@/ui/posts/use-posts";
 import { disablePush } from "@/ui/push";
@@ -22,6 +22,22 @@ export async function signOut() {
   clearOnboarding();
   forgetBrand();
   forgetBusinessState();
+}
+
+/**
+ * Where a signed-in person goes (after any sign-in, and at app start with a saved sign-in): the app if they have a
+ * business, onboarding if they have none. Onboarding creates a business, so it's only chosen when the server said
+ * there is none: a failed lookup (offline, a 5xx) goes to the app, whose screens retry.
+ * ponytail: looks in one workspace (the saved one, else the first), like currentBrand(); a business only in another
+ * workspace reads as none. Upgrade path: a "my brands" route across workspaces.
+ */
+export async function signedInHome(): Promise<"/posts" | "/onboarding/welcome"> {
+  try {
+    if (!(await hasSavedBrand())) await currentBrand();
+    return "/posts";
+  } catch (e) {
+    return e instanceof NoBusiness ? "/onboarding/welcome" : "/posts";
+  }
 }
 
 export type Business = { workspaceId: string; brandId: string; name: string; createdAt: string; site: string | null };

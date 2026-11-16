@@ -6,6 +6,7 @@ import { Pressable, Text, View } from "react-native";
 import { ApiError } from "@/api/client";
 import { auth } from "@/api/endpoints";
 import { Button } from "@/ui/button";
+import { signedInHome } from "@/ui/account-actions";
 import { resetTo } from "@/ui/reset-stack";
 import { Field } from "@/ui/field";
 import { AuthSheet, Legal } from "@/ui/onboarding/auth-sheet";
@@ -43,7 +44,7 @@ export default function PasswordStep() {
         return router.push({ pathname: "/onboarding/verify", params: { email, register: "1" } });
       }
       await auth.passwordSignIn(email, password);
-      resetTo("/onboarding/welcome");
+      resetTo(await signedInHome());
     } catch (e) {
       setError(e instanceof ApiError && e.status === 503 ? t("email.notConfigured") : e instanceof ApiError ? e.message : t(isNew || kind === "code" ? "email.sendFailed" : "email.signInFailed"));
     } finally {

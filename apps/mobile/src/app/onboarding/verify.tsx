@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, TextInput, View, type TextInputInstance } from "react-native";
 import { ApiError } from "@/api/client";
 import { auth } from "@/api/endpoints";
+import { signedInHome } from "@/ui/account-actions";
 import { clearRegistration, registrationFor } from "@/ui/onboarding/registration";
 import { onboarding } from "@/ui/onboarding/state";
 import { Glow } from "@/ui/aura";
@@ -49,7 +50,7 @@ export default function Verify() {
           return router.replace({ pathname: "/onboarding/email", params: { linkPhone: "1" } });
         }
       }
-      resetTo("/onboarding/welcome");
+      resetTo(await signedInHome());
     } catch (e) {
       setError(e instanceof ApiError ? e.message : t("verify.checkFailed"));
       setCode("");
