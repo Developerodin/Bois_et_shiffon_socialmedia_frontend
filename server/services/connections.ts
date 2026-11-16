@@ -5,6 +5,7 @@ import { hashToken, newToken } from "@/server/auth/tokens";
 import { currentKeyVersion, decryptCredentials, encryptCredentials } from "@/server/crypto/credentials";
 import { prisma } from "@/server/db/prisma";
 import { PROVIDERS, ProviderError, providerConfig, type ConnectedAccount, type OAuthProvider } from "@/server/integrations/providers";
+import { postedCount, storyTargetOf } from "@/server/services/publishing";
 
 const STATE_TTL_MS = 10 * 60_000; // DEC-017: ≤10 min
 
@@ -236,13 +237,23 @@ export async function disconnect(input: { workspaceId: string; brandId: string; 
       data: { status: "REVOKED", encryptedCredentials: null },
     });
     if (count === 0) return null;
-    const scheduled = await tx.publicationAttempt.findMany({ where: { connectionId: input.connectionId, status: "SCHEDULED" }, select: { id: true, contentItemId: true } });
-    if (scheduled.length) {
+    const scheduled = await tx.publicationAttempt.findMany({ where: { connectionId: input.connectionId, status: "SCHEDULED" }, select: { id: true, contentItemId: true, target: true } });
+    // A story's Post the rest carries frames already out: it goes back to PARTIAL with its item still SCHEDULED (as
+    // cancelling it does), not to an approved story whose next schedule would post those frames again.
+    const partial = scheduled.filter((a) => postedCount(storyTargetOf(a.target)?.progress ?? []) > 0);
+    const plain = scheduled.filter((a) => !partial.includes(a));
+    if (partial.length) {
       await tx.publicationAttempt.updateMany({
-        where: { id: { in: scheduled.map((a) => a.id) }, status: "SCHEDULED" },
+        where: { id: { in: partial.map((a) => a.id) }, status: "SCHEDULED" },
+        data: { status: "PARTIAL", error: "The account was disconnected. Reconnect it, then post the rest or mark the story as done." },
+      });
+    }
+    if (plain.length) {
+      await tx.publicationAttempt.updateMany({
+        where: { id: { in: plain.map((a) => a.id) }, status: "SCHEDULED" },
         data: { status: "CANCELLED", error: "Cancelled because the account was disconnected. Schedule it again with a connected account." },
       });
-      await tx.contentItem.updateMany({ where: { id: { in: scheduled.map((a) => a.contentItemId) }, status: "SCHEDULED" }, data: { status: "APPROVED" } });
+      await tx.contentItem.updateMany({ where: { id: { in: plain.map((a) => a.contentItemId) }, status: "SCHEDULED" }, data: { status: "APPROVED" } });
     }
     await tx.auditEvent.create({
       data: {

@@ -76,8 +76,8 @@ type Target = { boardId: string | null; imageUrl?: string | null; media?: string
  * `errorCode`: the stable code of the attempt's refusal, for the apps.
  */
 type StoryTarget = { story: true; frames: number; progress: FrameProgress; errorCode?: string };
-const storyTargetOf = (t: unknown): StoryTarget | null => (t && typeof t === "object" && (t as StoryTarget).story === true && Array.isArray((t as StoryTarget).progress) ? (t as StoryTarget) : null);
-const postedCount = (progress: FrameProgress) => progress.filter((f) => f.state === "published").length;
+export const storyTargetOf = (t: unknown): StoryTarget | null => (t && typeof t === "object" && (t as StoryTarget).story === true && Array.isArray((t as StoryTarget).progress) ? (t as StoryTarget) : null);
+export const postedCount = (progress: FrameProgress) => progress.filter((f) => f.state === "published").length;
 
 /** The story's frames as approved, refused unless every one has its rendered file. Nothing is sent before this holds. */
 function readyFrames(body: unknown) {
