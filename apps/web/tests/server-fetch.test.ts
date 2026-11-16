@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const nav = vi.hoisted(() => ({ redirect: vi.fn(), notFound: vi.fn() }));
 vi.mock("next/navigation", () => nav);
-vi.mock("next/headers", () => ({ cookies: async () => ({ toString: () => "a=1; b=2" }) }));
+const pathname = vi.hoisted(() => ({ value: null as string | null }));
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ toString: () => "a=1; b=2" }),
+  headers: async () => ({ get: (k: string) => (k === "x-pathname" ? pathname.value : null) }),
+}));
 
 import { api, serverFetch } from "@/lib/server-fetch";
 
@@ -10,6 +14,7 @@ const fetchMock = vi.fn();
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubGlobal("fetch", fetchMock);
+  pathname.value = null;
   nav.redirect.mockImplementation(() => {
     throw new Error("NEXT_REDIRECT");
   });
@@ -39,6 +44,20 @@ describe("serverFetch", () => {
     fetchMock.mockResolvedValue(new Response("{}", { status: 401 }));
     await expect(serverFetch("/api/v1/x")).rejects.toThrow("NEXT_REDIRECT");
     expect(nav.redirect).toHaveBeenCalledWith(expect.stringContaining("expired=1"));
+  });
+
+  it("carries the current path and query into the sign-in redirect", async () => {
+    fetchMock.mockResolvedValue(new Response("{}", { status: 401 }));
+    pathname.value = "/agents?x=1";
+    await expect(serverFetch("/api/v1/x")).rejects.toThrow("NEXT_REDIRECT");
+    expect(nav.redirect).toHaveBeenCalledWith("/login?expired=1&next=%2Fagents%3Fx%3D1");
+  });
+
+  it("drops a path that could leave the site", async () => {
+    fetchMock.mockResolvedValue(new Response("{}", { status: 401 }));
+    pathname.value = "//evil.example";
+    await expect(serverFetch("/api/v1/x")).rejects.toThrow("NEXT_REDIRECT");
+    expect(nav.redirect).toHaveBeenCalledWith("/login?expired=1");
   });
 
   it("shows not-found for 404 and 403", async () => {

@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { ShellResponse } from "@espanda/shared";
 
@@ -12,8 +12,7 @@ export function api(strings: TemplateStringsArray, ...values: (string | number)[
 /**
  * Call the Server API from a server component, as the signed-in person (their cookie is forwarded).
  * 401 sends them to sign in again; 403/404 show the not-found page; anything else non-2xx reaches the error page.
- * ponytail: the 401 redirect doesn't carry the page being viewed (middleware already bounces signed-out visits
- * with it); thread the path through if that bounce ever stops covering this.
+ * The 401 redirect carries the page being viewed (x-pathname, set in middleware) so sign-in returns there.
  */
 export async function serverFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const base = process.env.SERVER_URL ?? "http://localhost:3100";
@@ -23,7 +22,12 @@ export async function serverFetch<T>(path: string, init?: RequestInit): Promise<
     cache: "no-store",
     headers: { ...(cookie ? { cookie } : {}), ...init?.headers },
   });
-  if (res.status === 401) redirect("/login?expired=1");
+  if (res.status === 401) {
+    const here = (await headers()).get("x-pathname");
+    // Same-site paths only ("//host" would be an open redirect).
+    const next = here && here.startsWith("/") && !here.startsWith("//") ? `&next=${encodeURIComponent(here)}` : "";
+    redirect(`/login?expired=1${next}`);
+  }
   if (res.status === 403 || res.status === 404) notFound();
   if (!res.ok) throw new Error(`server ${res.status}`);
   return (await res.json()) as T;
