@@ -151,7 +151,7 @@ export default function StoryDetail() {
           <PageLoading photo rows={1} style={{ marginTop: 0 }} />
         )
       ) : (
-        <Frames frames={release.frames} written={version !== null} />
+        <Frames frames={release.frames} written={version !== null} rendering={release.rendering} />
       )}
 
       {release?.rendering ? (
@@ -270,7 +270,7 @@ export default function StoryDetail() {
 }
 
 /** The rendered frames, one 9:16 page each: swipe through them; the visible clip plays (muted, looping). */
-function Frames({ frames, written }: { frames: StoryRelease["frames"]; written: boolean }) {
+function Frames({ frames, written, rendering }: { frames: StoryRelease["frames"]; written: boolean; rendering: boolean }) {
   const { t } = useTranslation("posts");
   // At most 300 wide (533 tall), so the checks and actions start on the first screen.
   const [width, setWidth] = useState(0);
@@ -280,7 +280,7 @@ function Frames({ frames, written }: { frames: StoryRelease["frames"]; written: 
   if (!frames.length) {
     return (
       <View style={[styles.frame, styles.empty, { width: FRAME_MAX, alignSelf: "center" }]}>
-        <Text style={[type.meta, { textAlign: "center", paddingHorizontal: space[16] }]}>{t(written ? "stories.detail.noFrames" : "stories.detail.notWritten")}</Text>
+        <Text style={[type.meta, { textAlign: "center", paddingHorizontal: space[16] }]}>{t(rendering ? "stories.detail.preparing" : written ? "stories.detail.noFrames" : "stories.detail.notWritten")}</Text>
       </View>
     );
   }

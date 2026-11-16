@@ -4,7 +4,7 @@ import { stories, type DueStory, type StoryItem, type StoryTab } from "@/api/end
 import { storyError } from "@/ui/stories/errors";
 
 /** What a P07 card draws. writing: the agent hasn't saved a version yet (the "Writing…" card). */
-export type StoryCard = Pick<StoryItem, "id" | "title" | "status" | "tab" | "scheduledFor" | "byHand" | "firstFrameUrl" | "publishIssue"> & {
+export type StoryCard = Pick<StoryItem, "id" | "title" | "status" | "tab" | "scheduledFor" | "byHand" | "firstFrameUrl" | "publishIssue" | "rendering"> & {
   writing: boolean;
   version: number | null;
 };
@@ -26,6 +26,7 @@ const asCard = (s: StoryItem, now: number): StoryCard => ({
   byHand: s.byHand,
   firstFrameUrl: s.firstFrameUrl,
   publishIssue: s.publishIssue,
+  rendering: s.rendering,
   writing: isWriting(s, now),
   version: s.latest?.version ?? null,
 });

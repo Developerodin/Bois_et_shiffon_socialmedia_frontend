@@ -614,6 +614,8 @@ export type StoryTab = "drafts" | "scheduled" | "posted";
 /** A story in the content list (GET …/content): its tab and first rendered frame (signed for an hour). */
 export type StoryItem = Omit<PostItem, "latest"> & {
   tab: StoryTab; firstFrameUrl: string | null; byHand: boolean; createdAt: string;
+  /** Its frames are being prepared (a first save has no version until that ends). */
+  rendering: boolean;
   latest: { version: number; body: StoryBody; createdAt: string; byPerson: boolean; check: NonNullable<PostItem["latest"]>["check"] } | null;
 };
 /** A story's attempt also says how many frames it has and which are out (0-based `i`). */

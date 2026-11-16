@@ -78,8 +78,8 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
           <Image source={{ uri: story.firstFrameUrl, cacheKey: `story-${story.id}-v${story.version}` }} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : (
           <View style={styles.placeholder}>
-            {story.writing ? <ActivityIndicator color={color.primary} /> : <ImagePlus size={24} color={color.inkSecondary} strokeWidth={1.75} />}
-            {story.writing ? null : <Text style={[type.meta, { color: color.ink }]}>{t(story.version === null ? "stories.notWritten" : "stories.addPhotos")}</Text>}
+            {story.writing || story.rendering ? <ActivityIndicator color={color.primary} /> : <ImagePlus size={24} color={color.inkSecondary} strokeWidth={1.75} />}
+            {story.writing ? null : <Text style={[type.meta, { color: color.ink }]}>{t(story.rendering ? "stories.detail.preparing" : story.version === null ? "stories.notWritten" : "stories.addPhotos")}</Text>}
           </View>
         )}
         <LinearGradient colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0)", "rgba(0,0,0,0.8)"]} locations={[0, 0.5, 1]} style={StyleSheet.absoluteFill} />
