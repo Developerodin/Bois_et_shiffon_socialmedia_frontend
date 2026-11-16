@@ -7,7 +7,7 @@ import { kickRunner } from "@/server/jobs/runner";
 import { createPost, ownMediaKey, postAiAllowed, PublishingError } from "@/server/services/publishing";
 import { signedMediaUrl } from "@/server/storage/media";
 import { isStoryBody } from "@/server/stories/body";
-import { coverUrl, createStory, failStoryStart, STORY_START_NOTE, storyForRequest, storyTab } from "@/server/stories/service";
+import { coverUrl, createStory, failStoryStart, STORY_RENDER_JOB, STORY_START_NOTE, storyForRequest, storyTab } from "@/server/stories/service";
 
 /** Calendar items with their latest draft and its latest quality check. */
 export async function GET(request: Request, context: { params: Promise<BrandRouteParams> }) {
@@ -41,11 +41,18 @@ export async function GET(request: Request, context: { params: Promise<BrandRout
     const openAttempts = storyIds.length
       ? await prisma.publicationAttempt.findMany({ where: { contentItemId: { in: storyIds }, status: { in: ["PARTIAL", "PENDING_VERIFY"] } }, select: { contentItemId: true, status: true } })
       : [];
+    // Stories whose frames are being prepared (a first save has no version until its render ends). One read of the
+    // brand's in-flight renders, matched here. ponytail: fine while renders in flight are few; filter by item in SQL if not.
+    const renders = storyIds.length
+      ? await prisma.job.findMany({ where: { type: STORY_RENDER_JOB, workspaceId: scope.workspaceId, brandId: scope.brandId, status: { in: ["PENDING", "RUNNING"] } }, select: { payload: true } })
+      : [];
+    const rendering = new Set(renders.map((j) => (j.payload as { itemId?: unknown } | null)?.itemId));
     const story = async (r: (typeof rows)[number]) => {
       if (r.channel !== "INSTAGRAM_STORY") return {};
       const body = r.versions[0]?.body;
       return {
         tab: storyTab(r, openAttempts.filter((a) => a.contentItemId === r.id)),
+        rendering: rendering.has(r.id),
         firstFrameUrl: isStoryBody(body) ? await coverUrl(scope, body.frames[0]?.renderedKey) : null,
       };
     };
