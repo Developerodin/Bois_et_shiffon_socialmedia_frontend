@@ -183,5 +183,20 @@ export async function runVoiceDelete(payload: unknown) {
   await prisma.voice.update({ where: { id: v.id }, data: { providerVoiceId: null, sampleKey: null } });
 }
 
+/**
+ * Job onFailure: a delete that used up its 8 tries (about an hour: an ElevenLabs outage, a missing key) is queued again
+ * in 6 hours, with an audit event, so a withdrawn voice is never left at ElevenLabs for good.
+ * ponytail: it keeps retrying every 6 h until it succeeds; an alert to an admin is the upgrade if these pile up.
+ */
+export async function onVoiceDeleteFailure(payload: unknown, error: unknown, exhausted: boolean) {
+  if (!exhausted) return;
+  const { voiceId } = payload as { voiceId: string };
+  const v = await prisma.voice.findUnique({ where: { id: voiceId } });
+  if (!v?.archivedAt || (!v.providerVoiceId && !v.sampleKey)) return;
+  const runAt = new Date(Date.now() + 6 * 3600_000);
+  await enqueueJob({ type: VOICE_DELETE_JOB, workspaceId: v.workspaceId, payload: { voiceId }, runAt, maxAttempts: 8, idempotencyKey: `voice:${voiceId}:delete:${runAt.getTime()}` });
+  await audit(prisma, v.workspaceId, null, "voice.clone.delete_failed", voiceId, { error: String(error).slice(0, 300), retryAt: runAt.toISOString() });
+}
+
 /** Whether this person may clone (the Voices screen shows the button only then). */
 export const canManageVoices = async (workspaceId: string, userId: string) => (await effectivePermissions(workspaceId, userId)).has("voices.manage");

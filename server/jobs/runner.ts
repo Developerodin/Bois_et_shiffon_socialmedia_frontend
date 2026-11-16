@@ -21,7 +21,7 @@ import "@/server/reels/presenters"; // registers its asset kind
 import { purgeOldRecordings } from "@/server/reels/recordings";
 import { purgeStaleUploads } from "@/server/stories/uploads";
 import { onStoryRenderFailure, runStoryRender, STORY_RENDER_JOB } from "@/server/stories/service";
-import { runVoiceDelete, VOICE_DELETE_JOB } from "@/server/reels/clones";
+import { onVoiceDeleteFailure, runVoiceDelete, VOICE_DELETE_JOB } from "@/server/reels/clones";
 import { ReconnectNeeded, refreshExpiringTokens } from "@/server/services/connections";
 import { executePublication, onPublishJobLost, PUBLISH_JOB, PublishingError } from "@/server/services/publishing";
 import { runMonthlyPlans } from "@/server/services/automations";
@@ -44,7 +44,7 @@ const HANDLERS: Record<string, Handler> = {
   [REEL_ASSET_JOB]: { run: runAsset, onFailure: onAssetFailure },
   [REEL_RENDER_JOB]: { run: advanceRender, onFailure: failRender },
   [STORY_RENDER_JOB]: { run: runStoryRender, onFailure: onStoryRenderFailure },
-  [VOICE_DELETE_JOB]: { run: runVoiceDelete },
+  [VOICE_DELETE_JOB]: { run: runVoiceDelete, onFailure: onVoiceDeleteFailure },
 };
 
 /**
