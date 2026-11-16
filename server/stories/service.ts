@@ -44,6 +44,7 @@ type RenderPayload = BrandScope & Settings & Look & {
 
 const notFound = () => new PublishingError("Story not found", 404, "story.notFound");
 const notEditable = () => new PublishingError("This story can't be edited any more.", 409, "story.notEditable");
+const byHandOn = () => new PublishingError("This story is set to be posted by hand. Stop posting by hand first, so nobody posts the old frames.", 409, "story.byHandOn");
 const stale = () => new PublishingError("Someone else changed this story. Your changes weren't saved.", 409, "story.stale");
 const renderLimit = () => new PublishingError("Too many story saves this hour. Try again later.", 429, "story.renderLimit");
 
@@ -60,9 +61,13 @@ async function loadStory(db: Db, scope: BrandScope, itemId: string) {
 /**
  * An approved story can be edited (the new version goes back to review), but one approved after the save started
  * can't: the person approving saw the old frames, and a silent new version would void what they just approved.
+ * Nor can one set to be posted by hand: its frames may already be downloaded, and an edit would void the approval
+ * behind "I posted it" (like a scheduled story, it has to be taken off first).
  */
-function assertEditable(status: string, latestVersion: number, baseVersion: number, statusAtSave?: string) {
+function assertEditable(item: { status: string; byHand: boolean }, latestVersion: number, baseVersion: number, statusAtSave?: string) {
+  const { status } = item;
   if (!EDITABLE.includes(status)) throw notEditable();
+  if (status === "APPROVED" && item.byHand) throw byHandOn();
   if (status === "APPROVED" && statusAtSave !== undefined && statusAtSave !== "APPROVED") throw notEditable();
   if (latestVersion !== baseVersion) throw stale();
 }
@@ -85,7 +90,7 @@ export async function saveStoryVersion(
   if (!(await hitRateLimit(`story-render:brand:${scope.brandId}`, 100, HOUR)).allowed) throw renderLimit();
   const { item, latest } = await loadStory(prisma, scope, itemId);
   // Checked again under the lock when the version is created; refusing now saves the render.
-  assertEditable(item.status, latest?.version ?? 0, baseVersion);
+  assertEditable(item, latest?.version ?? 0, baseVersion);
 
   const frames: StoryFrame[] = [];
   for (const [i, f] of input.frames.entries()) frames.push(!f.source && opts.keepEmpty ? textOnly(f) : await resolveFrame(scope, f, i, opts));
@@ -189,7 +194,7 @@ async function queueStep(p: RenderPayload) {
 export async function createStoryVersion(tx: Prisma.TransactionClient, scope: BrandScope, itemId: string, baseVersion: number, body: StoryBody, actor: StoryActor, opts: { statusAtSave?: string; renderId?: string } = {}) {
   await lock(tx, itemId);
   const { item, latest } = await loadStory(tx, scope, itemId);
-  assertEditable(item.status, latest?.version ?? 0, baseVersion, opts.statusAtSave);
+  assertEditable(item, latest?.version ?? 0, baseVersion, opts.statusAtSave);
   if (body.frames.some((f) => f.source && (!f.renderedKey || !f.mediaKey))) throw new Error("Story frames must be rendered before a version is saved");
   const previous = (latest?.body ?? null) as { productIds?: unknown } | null;
   const productIds = Array.isArray(previous?.productIds) ? (previous.productIds as string[]) : item.productIds;
@@ -247,9 +252,14 @@ class StoryRenderRefused extends PublishingError {
 async function renderStep(p: RenderPayload) {
   const scope = { workspaceId: p.workspaceId, brandId: p.brandId };
   const { item, latest } = await loadStory(prisma, scope, p.itemId);
-  // A retried final step whose version was committed (the job died before completing): nothing left to do.
-  if (latest?.version === p.baseVersion + 1 && (latest.body as { renderId?: unknown } | null)?.renderId === p.renderId) return;
-  assertEditable(item.status, latest?.version ?? 0, p.baseVersion, p.statusAtSave);
+  // A retried final step whose version was committed (the job died before completing): only Quality may be left to
+  // start. Not when the version is already checked; a run still going for it is joined by startAgentRun.
+  if (latest?.version === p.baseVersion + 1 && (latest.body as { renderId?: unknown } | null)?.renderId === p.renderId) {
+    const checked = await prisma.qualityCheck.findFirst({ where: { contentVersionId: latest.id }, select: { id: true } });
+    if (!checked) await startAgentRun({ workspaceId: p.workspaceId, brandId: p.brandId, agentKey: "quality", trigger: "event", input: { itemId: p.itemId, version: latest.version } }).catch(() => null);
+    return;
+  }
+  assertEditable(item, latest?.version ?? 0, p.baseVersion, p.statusAtSave);
   const frames = [...p.frames];
   let i = p.next;
   while (i < frames.length && frames[i].mediaKind !== "video") i++;

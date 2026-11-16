@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type Row = Record<string, any>;
-const db = vi.hoisted(() => ({ item: null as Row | null, versions: [] as Row[], attempts: [] as Row[], profile: null as Row | null, uploads: [] as Row[], limits: new Map<string, number>() }));
+const db = vi.hoisted(() => ({ checked: null as Row | null, item: null as Row | null, versions: [] as Row[], attempts: [] as Row[], profile: null as Row | null, uploads: [] as Row[], limits: new Map<string, number>() }));
 const m = vi.hoisted(() => ({ resolve: vi.fn(), photo: vi.fn(), clip: vi.fn(), enqueue: vi.fn(), refund: vi.fn(), start: vi.fn(), get: vi.fn(), jobFind: vi.fn(), authorize: vi.fn(), kick: vi.fn() }));
 
 vi.mock("@/server/db/prisma", () => {
@@ -26,6 +26,7 @@ vi.mock("@/server/db/prisma", () => {
       findFirst: vi.fn(async () => mine()[0] ?? null),
     },
     auditEvent: { create: vi.fn(async () => ({})) },
+    qualityCheck: { findFirst: vi.fn(async () => db.checked) },
     job: { findFirst: m.jobFind },
     publicationAttempt: { findMany: vi.fn(async () => db.attempts) },
     brandProfile: { findFirst: vi.fn(async () => db.profile) },
@@ -72,7 +73,8 @@ const p = prisma as unknown as Row;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  db.item = { id: "i1", workspaceId: "w1", brandId: "b1", channel: "INSTAGRAM_STORY", status: "DRAFT_REVIEW", byHand: true, productIds: ["prod1"], opportunityId: "o1", title: "Story" };
+  db.item = { id: "i1", workspaceId: "w1", brandId: "b1", channel: "INSTAGRAM_STORY", status: "DRAFT_REVIEW", byHand: false, productIds: ["prod1"], opportunityId: "o1", title: "Story" };
+  db.checked = null;
   db.versions = [];
   db.attempts = [];
   db.uploads = [];
@@ -92,6 +94,7 @@ beforeEach(() => {
 
 describe("saveStoryVersion, photos only", () => {
   it("renders now and saves a version in review, clearing by-hand; client server fields never reach the version", async () => {
+    db.item!.byHand = true; // left over from an earlier approval: a draft's save clears it
     const sneaky = input([frame("p1", { renderedKey: "w9/b9/stories/evil.jpg", mediaKey: "w9/b9/evil.jpg", file: { width: 1, height: 1, bytes: 1 } }), frame("p2"), frame("p3")]);
     const r = await saveStoryVersion(scope, "i1", 0, sneaky, person);
     expect(r).toEqual({ status: "saved", version: 1 });
@@ -254,6 +257,13 @@ describe("saveStoryVersion with a clip, and the render job", () => {
     expect(db.item).toMatchObject({ status: "DRAFT_REVIEW", byHand: false });
   });
 
+  it("refuses to edit an approved story set to be posted by hand (its frames may be downloaded already)", async () => {
+    Object.assign(db.item!, { status: "APPROVED", byHand: true });
+    await expect(saveStoryVersion(scope, "i1", 0, input([frame("p1"), frame("p2"), frame("p3")]), person)).rejects.toMatchObject({ status: 409, code: "story.byHandOn" });
+    expect(db.versions).toHaveLength(0);
+    expect(m.photo).not.toHaveBeenCalled();
+  });
+
   it("refuses with story.stale when someone saved while the job ran", async () => {
     await saveStoryVersion(scope, "i1", 0, withClip(), person);
     await runStoryRender(m.enqueue.mock.calls[0][0].payload);
@@ -399,9 +409,23 @@ describe("a retried final step", () => {
     expect(db.versions).toHaveLength(1);
     expect(db.versions[0].body.renderId).toBe(last.renderId);
     // The job died before it was marked complete, and runs again.
+    m.start.mockClear();
     await expect(runStoryRender(last)).resolves.toBeUndefined();
     expect(db.versions).toHaveLength(1);
     expect(m.refund).not.toHaveBeenCalled();
+    // It may have died before Quality was started: the version has no check, so it starts it.
+    expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", input: { itemId: "i1", version: 1 } }));
+  });
+
+  it("doesn't check a version again when its Quality check is already there", async () => {
+    await saveStoryVersion(scope, "i1", 0, clipStory(), agent);
+    await runStoryRender(m.enqueue.mock.calls[0][0].payload);
+    const last = m.enqueue.mock.calls[1][0].payload;
+    await runStoryRender(last);
+    db.checked = { id: "q1" };
+    m.start.mockClear();
+    await runStoryRender(last);
+    expect(m.start).not.toHaveBeenCalled();
   });
 
   it("still refuses another save's job on the same base as stale", async () => {
