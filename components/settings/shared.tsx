@@ -76,7 +76,7 @@ export function ListSkeleton({ label, rows = 3 }: { label: string; rows?: number
       {Array.from({ length: rows }, (_, i) => (
         <div
           key={i}
-          className="h-16 animate-pulse rounded-2xl border border-border bg-card motion-reduce:animate-none"
+          className="h-16 animate-pulse rounded-2xl bg-muted motion-reduce:animate-none"
         />
       ))}
       <span className="sr-only">{label}</span>
