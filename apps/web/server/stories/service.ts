@@ -298,8 +298,9 @@ function renderFailure(lastError: string | null): RenderFailure {
 }
 
 /**
- * Whether a render is under way for this story, else the newest failed render made from the latest version (an older
- * save's failure no longer matters once a newer version exists).
+ * Whether a render is under way for this story, else the newest failed render a person saved from the latest version
+ * (an older save's failure no longer matters once a newer version exists; an agent's failed rewrite isn't the person's
+ * to fix, and its paid charge is refunded by onStoryRenderFailure).
  * ponytail: matches jobs by a JSON path on the payload (no index); fine while render jobs are few. Add an itemId
  * column on Job if this shows up in query times.
  */
@@ -309,7 +310,7 @@ export async function storyRenderState(scope: BrandScope, itemId: string): Promi
   if (busy) return { rendering: true };
   const latest = await prisma.contentVersion.findFirst({ where: { contentItemId: itemId, item: { workspaceId: scope.workspaceId, brandId: scope.brandId } }, orderBy: { version: "desc" }, select: { version: true } });
   const failed = await prisma.job.findFirst({
-    where: { type: STORY_RENDER_JOB, workspaceId: scope.workspaceId, brandId: scope.brandId, status: "DEAD_LETTER", AND: [{ payload: { path: ["itemId"], equals: itemId } }, { payload: { path: ["baseVersion"], gte: latest?.version ?? 0 } }] },
+    where: { type: STORY_RENDER_JOB, workspaceId: scope.workspaceId, brandId: scope.brandId, status: "DEAD_LETTER", AND: [{ payload: { path: ["itemId"], equals: itemId } }, { payload: { path: ["baseVersion"], gte: latest?.version ?? 0 } }, { payload: { path: ["actor", "kind"], equals: "person" } }] },
     orderBy: { updatedAt: "desc" },
     select: { lastError: true },
   });
