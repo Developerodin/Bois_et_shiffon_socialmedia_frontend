@@ -161,6 +161,18 @@ describe("Creator and stories", () => {
     expect(db.contentVersion.create).not.toHaveBeenCalled();
     expect(m.start).toHaveBeenCalledWith(expect.objectContaining({ agentKey: "quality", input: { itemId: "i1", version: 1 } }));
   });
+
+  it("leaves a paid New story not yet written to its own run (a calendar run would write it free)", async () => {
+    db.contentItem.findMany.mockResolvedValue([item({ brief: { goal: "newArrival", requestId: "req-1" } })]);
+    await expect(creatorAgent.run(ctx(), {})).rejects.toThrow(/Nothing to write/);
+    expect(m.save).not.toHaveBeenCalled();
+  });
+
+  it("still writes a paid New story in its own run", async () => {
+    db.contentItem.findMany.mockResolvedValue([item({ brief: { goal: "newArrival", requestId: "req-1" } })]);
+    await creatorAgent.run({ ...(ctx() as object), chargeId: "c1" } as never, { itemId: "i1" });
+    expect(m.save).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("Planner and Brief writer", () => {
