@@ -426,14 +426,16 @@ export async function executePublication(payload: unknown) {
   const a = await prisma.publicationAttempt.findUniqueOrThrow({ where: { id: attemptId } });
   let overrideUsed = false;
   type ItemStatus = "PUBLISHED" | "APPROVED" | "SCHEDULED" | "AWAITING_APPROVAL";
-  const finish = (status: "PUBLISHED" | "FAILED" | "PENDING_VERIFY", data: Prisma.PublicationAttemptUpdateInput, itemStatus: ItemStatus) =>
-    prisma.$transaction([
-      prisma.publicationAttempt.update({ where: { id: a.id }, data: { status, ...data } }),
-      prisma.contentItem.update({ where: { id: a.contentItemId }, data: { status: itemStatus } }),
-      prisma.auditEvent.create({
+  // Only while still PUBLISHING: a slow worker must not overwrite PENDING_VERIFY or a person's settle (then reschedule).
+  const finish = (status: "PUBLISHED" | "FAILED" | "PENDING_VERIFY", data: Prisma.PublicationAttemptUpdateManyMutationInput, itemStatus: ItemStatus) =>
+    prisma.$transaction(async (tx) => {
+      const { count } = await tx.publicationAttempt.updateMany({ where: { id: a.id, status: "PUBLISHING" }, data: { status, ...data } });
+      if (count !== 1) return;
+      await tx.contentItem.update({ where: { id: a.contentItemId }, data: { status: itemStatus } });
+      await tx.auditEvent.create({
         data: { workspaceId: a.workspaceId, brandId: a.brandId, actorUserId: a.createdByUserId, action: `content.publish.${status.toLowerCase()}`, entityType: "PublicationAttempt", entityId: a.id, metadata: { provider: a.provider, overrideUsed } },
-      }),
-    ]);
+      });
+    }, TX);
   // A story records its frames as it goes. Its every write needs the attempt still PUBLISHING: once the lost-job
   // handler has settled it, a worker that is somehow still running can neither post another frame nor overwrite that.
   const storyT = storyTargetOf(a.target);
