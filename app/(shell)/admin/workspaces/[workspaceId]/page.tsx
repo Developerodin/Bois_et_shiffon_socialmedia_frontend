@@ -16,8 +16,9 @@ export default async function AdminWorkspaceOverview({ params }: { params: Promi
   const [d, spend, activity, runs] = await Promise.all([
     serverFetch<AdminWorkspaceDetail>(api`/api/v1/admin/workspaces/${workspaceId}`),
     serverFetch<AdminSpend>(withQuery("/api/v1/admin/spend", {}, { workspaceId })), // the default period is the last 30 days
-    serverFetch<AdminLogsResponse>(withQuery("/api/v1/admin/logs", {}, { workspaceId })),
-    serverFetch<AdminLogsResponse>(withQuery("/api/v1/admin/logs", {}, { workspaceId, log: "runs" })),
+    // The newest rows however old, not the Logs page's default 30 days.
+    serverFetch<AdminLogsResponse>(withQuery("/api/v1/admin/logs", {}, { workspaceId, days: "all" })),
+    serverFetch<AdminLogsResponse>(withQuery("/api/v1/admin/logs", {}, { workspaceId, log: "runs", days: "all" })),
   ]);
   const fx = fxOf(spend.usdInr);
   const base = `/admin/workspaces/${workspaceId}`;

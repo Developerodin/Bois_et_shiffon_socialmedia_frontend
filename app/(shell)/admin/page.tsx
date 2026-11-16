@@ -17,7 +17,7 @@ export default async function AdminOverview() {
   const [o, spend, activity] = await Promise.all([
     serverFetch<Overview>("/api/v1/admin/overview"),
     serverFetch<AdminSpend>("/api/v1/admin/spend"), // the default period is the last 30 days
-    serverFetch<AdminLogsResponse>("/api/v1/admin/logs"),
+    serverFetch<AdminLogsResponse>("/api/v1/admin/logs?days=all"), // the newest rows however old, not the Logs page's 30 days
   ]);
   const fx = fxOf(o.usdInr);
   const c30 = usd30(o.customers);
