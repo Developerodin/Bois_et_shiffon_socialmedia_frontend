@@ -126,15 +126,23 @@ describe("executePublication product gate", () => {
 
   it("a refusal is FAILED with its message, back to APPROVED, before the token refresh", async () => {
     await executePublication({ attemptId: "a1" });
-    expect(db.publicationAttempt.update).toHaveBeenCalledWith({ where: { id: "a1" }, data: { status: "FAILED", error: "Milo Sofa is out of stock. Nothing was posted." } });
+    expect(db.publicationAttempt.updateMany).toHaveBeenCalledWith({ where: { id: "a1", status: "PUBLISHING" }, data: { status: "FAILED", error: "Milo Sofa is out of stock. Nothing was posted." } });
     expect(db.contentItem.update).toHaveBeenCalledWith({ where: { id: "i1" }, data: { status: "APPROVED" } });
     expect(accessToken).not.toHaveBeenCalled();
+  });
+
+  it("a slow worker whose attempt was settled meanwhile (PENDING_VERIFY, not posted) writes nothing on it or the item", async () => {
+    db.publicationAttempt.updateMany.mockResolvedValueOnce({ count: 1 }).mockResolvedValueOnce({ count: 0 });
+    await executePublication({ attemptId: "a1" });
+    expect(db.publicationAttempt.updateMany).toHaveBeenLastCalledWith(expect.objectContaining({ where: { id: "a1", status: "PUBLISHING" } }));
+    expect(db.contentItem.update).not.toHaveBeenCalled();
+    expect(db.auditEvent.create).not.toHaveBeenCalled();
   });
 
   it("an error while checking is FAILED, not PENDING_VERIFY", async () => {
     linked.mockRejectedValue(new Error("db down"));
     await executePublication({ attemptId: "a1" });
-    expect(db.publicationAttempt.update).toHaveBeenCalledWith({ where: { id: "a1" }, data: { status: "FAILED", error: expect.stringContaining("Nothing was posted") } });
+    expect(db.publicationAttempt.updateMany).toHaveBeenCalledWith({ where: { id: "a1", status: "PUBLISHING" }, data: { status: "FAILED", error: expect.stringContaining("Nothing was posted") } });
     expect(accessToken).not.toHaveBeenCalled();
   });
 
@@ -142,7 +150,7 @@ describe("executePublication product gate", () => {
     db.approvalDecision.findFirst.mockResolvedValue(approval({ productOverride: { productIds: ["p1"], states: { p1: "out" } } }));
     db.integrationConnection.findFirst.mockResolvedValue(null); // stops right after the gate
     await executePublication({ attemptId: "a1" });
-    expect(db.publicationAttempt.update).toHaveBeenCalledWith({ where: { id: "a1" }, data: { status: "FAILED", error: expect.stringContaining("disconnected") } });
+    expect(db.publicationAttempt.updateMany).toHaveBeenCalledWith({ where: { id: "a1", status: "PUBLISHING" }, data: { status: "FAILED", error: expect.stringContaining("disconnected") } });
     expect(db.auditEvent.create).toHaveBeenCalledWith({ data: expect.objectContaining({ metadata: { provider: "INSTAGRAM", overrideUsed: true } }) });
   });
 });

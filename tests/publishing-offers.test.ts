@@ -140,8 +140,8 @@ describe("scheduling and publishing against the offer's window", () => {
     db.publicationAttempt.findUniqueOrThrow.mockResolvedValue({ id: "a1", ...scope, contentItemId: "i1", contentVersionId: "v2", packageHash: approval().packageHash, connectionId: "conn", provider: "INSTAGRAM", createdByUserId: "boss", target: {} });
     db.contentItem.findFirst.mockResolvedValue(item("SCHEDULED"));
     await executePublication({ attemptId: "a1" });
-    expect(db.publicationAttempt.update).toHaveBeenCalledWith({
-      where: { id: "a1" }, data: { status: "FAILED", error: '"Black Friday" ended 2026-11-30 20:00 (Paris). Approve anyway or ask for changes. Nothing was posted.' },
+    expect(db.publicationAttempt.updateMany).toHaveBeenCalledWith({
+      where: { id: "a1", status: "PUBLISHING" }, data: { status: "FAILED", error: '"Black Friday" ended 2026-11-30 20:00 (Paris). Approve anyway or ask for changes. Nothing was posted.' },
     });
   });
 });
