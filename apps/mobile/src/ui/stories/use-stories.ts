@@ -39,7 +39,8 @@ const EMPTY: Record<StoryTab, StoryCard[]> = { drafts: [], scheduled: [], posted
 
 /**
  * The business's stories by P07 tab (the server's `tab`), and the ones due to be posted by hand. Read when the screen
- * comes into focus, and every 5 s while it's focused and a story is being written, so the draft shows up when it lands.
+ * comes into focus, and every 5 s while it's focused and a story is being written or its frames rendered ("Preparing
+ * frames…"), so the draft or the frames show up when they land.
  * Due stories need publish.execute; without it (or if they can't load) the list is just empty.
  */
 export function useStories() {
@@ -71,7 +72,7 @@ export function useStories() {
     setDue(dueList);
   }, []);
 
-  const writing = items?.some((s) => s.writing) ?? false;
+  const writing = items?.some((s) => s.writing || s.rendering) ?? false;
   useFocusEffect(useCallback(() => void refresh(), [refresh]));
   // Only while the screen is focused; a tick is skipped while the last read is still out.
   useFocusEffect(

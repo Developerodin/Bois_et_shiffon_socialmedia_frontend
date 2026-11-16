@@ -3,6 +3,7 @@ import { currentBrand, forgetBrand, hasSavedBrand, me, NoBusiness, rememberBrand
 import { clearOnboarding } from "@/ui/onboarding/state";
 import { forgetPosts } from "@/ui/posts/use-posts";
 import { disablePush } from "@/ui/push";
+import { forgetRenders } from "@/ui/reels/render-watch";
 import { openReel } from "@/ui/reels/use-reel";
 import { forgetCurrentBrand, siteLabel } from "@/ui/use-current-brand";
 import { forgetPlan } from "@/ui/plans/use-plan";
@@ -13,6 +14,7 @@ function forgetBusinessState() {
   forgetCurrentBrand();
   forgetPosts();
   openReel(null);
+  forgetRenders();
 }
 
 /** Sign out (Account M12 and the drawer M13): this phone stops getting the person's notifications and forgets their data. */

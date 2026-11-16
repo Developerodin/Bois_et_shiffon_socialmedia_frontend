@@ -6,9 +6,11 @@ import i18n from "@/i18n";
 import { onboarding } from "@/ui/onboarding/state";
 
 /** 0 = opening website, 1 = reading brand identity, 2 = gathering photos, 3 = finished. */
-export type ResearchProgress = { step: number; failed: string | null; retry: () => void };
+export type ResearchProgress = { step: number; failed: string | null; slow: boolean; retry: () => void };
 
 const POLL_MS = 2500;
+// A run stuck in QUEUED (no worker) or RUNNING mustn't poll forever: after this the screen offers a way on.
+const CAP_MS = 3 * 60_000;
 
 /**
  * Creates the brand from the website (server starts Research + SEO + GEO) and follows the Research run:
@@ -26,10 +28,17 @@ export function useResearch(site: string | undefined): ResearchProgress {
   const [failed, setFailed] = useState<string | null>(null);
   const started = useRef(false);
   const [attempt, setAttempt] = useState(0);
+  const [slow, setSlow] = useState(false);
 
   useEffect(() => {
     const ctrl = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
+    // Stops polling; done or failed first makes `slow` irrelevant (the screen checks those first).
+    const cap = setTimeout(() => {
+      ctrl.abort();
+      clearTimeout(timer);
+      setSlow(true);
+    }, CAP_MS);
 
     async function poll(ws: string, brandId: string, runId: string) {
       try {
@@ -89,11 +98,17 @@ export function useResearch(site: string | undefined): ResearchProgress {
     void start();
     return () => {
       ctrl.abort();
+      clearTimeout(cap);
       if (timer) clearTimeout(timer);
     };
   }, [site, attempt]);
 
   async function retry() {
+    // Slow, not failed: follow the same run again (restarting it here could start a second Research).
+    if (slow) {
+      setSlow(false);
+      return setAttempt((a) => a + 1);
+    }
     setFailed(null);
     setStep(0);
     const { workspaceId: ws, brandId } = onboarding;
@@ -110,5 +125,5 @@ export function useResearch(site: string | undefined): ResearchProgress {
     setAttempt((a) => a + 1);
   }
 
-  return { step, failed, retry };
+  return { step, failed, slow, retry };
 }

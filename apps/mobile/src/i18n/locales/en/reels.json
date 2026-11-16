@@ -305,7 +305,10 @@
     "brandWorkspace": "Brand workspace",
     "channel": "Channel",
     "instagramConnected": "Instagram (Connected)",
-    "editInCalendar": "To change the time, cancel the schedule and schedule the reel again."
+    "editInCalendar": "To change the time, cancel the schedule and schedule the reel again.",
+    "failedTitle": "Your reel wasn't published",
+    "failedBody": "Nothing was posted. Open the reel to schedule it again.",
+    "checkBody": "We couldn't confirm whether your reel was posted. Look at the account, then tell us."
   },
   "actor": {
     "title": "Choose a presenter",

@@ -9,6 +9,7 @@ import { Button } from "@/ui/button";
 import { images } from "@/ui/icons";
 import { Screen, StepHeader } from "@/ui/layout";
 import { SpinnerMark } from "@/ui/onboarding/spinner-mark";
+import { onboarding } from "@/ui/onboarding/state";
 import { useResearch } from "@/ui/onboarding/use-research";
 import { color, radius, space, type } from "@/theme/tokens";
 
@@ -24,7 +25,8 @@ export default function Learning() {
   const via = site ? "Website" : place ? "Maps" : "Manual";
   const host = site ? site.replace(/^https?:\/\/(www\.)?/, "").replace(/\/.*$/, "") : name ?? t("learning.fallbackName");
 
-  const { step: done, failed, retry } = useResearch(site);
+  const { step: done, failed, slow, retry } = useResearch(site);
+  const review = () => router.replace({ pathname: "/onboarding/review", params: { site: site ?? "", name: name ?? "" } });
   const stage = (i: number): Stage => (i < done ? "done" : i === done && !failed ? "running" : "queued");
   const finished = done >= STAGES.length;
 
@@ -46,7 +48,16 @@ export default function Learning() {
               <Button label={t("learning.tryAgain")} onPress={() => void retry()} />
             </>
           ) : finished ? (
-            <Button label={t("common:continue")} arrow onPress={() => router.replace({ pathname: "/onboarding/review", params: { site: site ?? "", name: name ?? "" } })} />
+            <Button label={t("common:continue")} arrow onPress={review} />
+          ) : slow ? (
+            <>
+              <Text accessibilityRole="alert" style={[type.meta, { textAlign: "center" }]}>
+                {t("learning.slow")}
+              </Text>
+              <Button label={t("learning.keepWaiting")} onPress={() => void retry()} />
+              {/* A09 shows what Research found so far and lets the owner fill in the rest. */}
+              {onboarding.brandId ? <Button label={t("learning.continueAnyway")} variant="ghost" onPress={review} /> : null}
+            </>
           ) : (
             <Button label={t("learning.inProgressButton")} loading disabled />
           )}

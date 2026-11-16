@@ -15,6 +15,9 @@ import { imageSource, useBrandAssets } from "@/ui/onboarding/use-brand-assets";
 import { color, radius, space, type } from "@/theme/tokens";
 
 const POLL_MS = 2500;
+// Waiting for Research and then for Scout: past this, polling stops and the failed footer offers Try again and
+// Continue without ideas, so a run that never ends can't block onboarding.
+const CAP_MS = 5 * 60_000;
 
 /**
  * Starts the brand's first Scout run (free, once: the server returns the existing run on a second call) and
@@ -32,8 +35,14 @@ function useFirstIdeas() {
     if (!ws || !brandId) return;
     const ctrl = new AbortController();
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const cap = setTimeout(() => {
+      ctrl.abort();
+      clearTimeout(timer);
+      setFailed(i18n.t("onboarding:preparing.errors.slow"));
+    }, CAP_MS);
     const follow = (next: FirstIdeas["run"]) => {
       setRun(next);
+      if (next?.status === "SUCCEEDED" || next?.status === "FAILED") clearTimeout(cap);
       if (next?.status === "FAILED") return setFailed(next.error ?? i18n.t("onboarding:preparing.errors.stopped"));
       if (next?.status !== "SUCCEEDED") timer = setTimeout(poll, POLL_MS);
     };
@@ -54,11 +63,16 @@ function useFirstIdeas() {
           if (r.waiting) timer = setTimeout(start, POLL_MS);
           else follow(r.run);
         },
-        (e) => !ctrl.signal.aborted && setFailed(e instanceof ApiError ? e.message : i18n.t("onboarding:preparing.errors.startFailed")),
+        (e) => {
+          if (ctrl.signal.aborted) return;
+          clearTimeout(cap);
+          setFailed(e instanceof ApiError ? e.message : i18n.t("onboarding:preparing.errors.startFailed"));
+        },
       );
     start();
     return () => {
       ctrl.abort();
+      clearTimeout(cap);
       clearTimeout(timer);
     };
   }, [ws, brandId, attempt]);

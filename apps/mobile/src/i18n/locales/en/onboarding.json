@@ -184,6 +184,9 @@
       "startFailed": "Couldn't start reading your website.",
       "restartFailed": "Couldn't restart. Try again."
     },
+    "slow": "This is taking longer than usual. Keep waiting, or go on and fill in the details yourself.",
+    "keepWaiting": "Keep waiting",
+    "continueAnyway": "Continue anyway",
     "bodyMaps": "Reading your Google Maps listing and finding your business online.",
     "sourceMaps": "Google Maps listing",
     "foundMaps": "Listing picked"
@@ -334,7 +337,8 @@
     "errors": {
       "noBrand": "Your business isn’t set up yet. Go back a step.",
       "stopped": "Finding ideas stopped.",
-      "startFailed": "Couldn’t start finding ideas."
+      "startFailed": "Couldn’t start finding ideas.",
+      "slow": "Finding ideas is taking longer than usual."
     }
   },
   "connect": {

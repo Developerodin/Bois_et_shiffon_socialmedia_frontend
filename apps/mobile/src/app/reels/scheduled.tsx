@@ -11,7 +11,7 @@ import { Button } from "@/ui/button";
 import { Footer } from "@/ui/layout";
 import { BrandPill, ICON, PageHeader, Panel, ReelsScreen, bodyMuted, meta, metaInk, rc, strong14 } from "@/ui/reels/kit";
 import { ApiError } from "@/api/client";
-import { currentBrand, postRelease, posts } from "@/api/endpoints";
+import { currentBrand, postRelease, posts, type PostRelease } from "@/api/endpoints";
 import { usePermissions } from "@/ui/use-permissions";
 import { useReel } from "@/ui/reels/use-reel";
 
@@ -22,9 +22,10 @@ export default function ReelsScheduled() {
   const { t } = useTranslation("reels");
   const { id, detail } = useReel(5000); // Publishing now → Published without leaving the screen
   const [brandName, setBrandName] = useState("");
-  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [release, setRelease] = useState<PostRelease | null>(null);
   const { can } = usePermissions();
   const [cancelling, setCancelling] = useState(false);
+  const [settling, setSettling] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     currentBrand().then((b) => setBrandName(b.name), () => {});
@@ -34,11 +35,30 @@ export default function ReelsScheduled() {
   // "Publish now" also lands here: only a slot still ahead is a schedule; the same screen says what is happening otherwise.
   const later = status === "SCHEDULED" && at.getTime() > Date.now() + 60_000;
   const published = status === "PUBLISHED";
-  // Reels share the posts' release path: the scheduled attempt is what Cancel settles (same as a post's detail screen).
+  // Reels share the posts' release path (same as a post's detail screen): the scheduled attempt is what Cancel settles,
+  // and the attempts say how a publish ended. Re-read with each poll of the reel until it's published.
   useEffect(() => {
-    if (!id || !later) return setAttemptId(null);
-    postRelease(id).then((r) => setAttemptId(r.attempts.find((a) => a.status === "SCHEDULED")?.id ?? null), () => setAttemptId(null));
-  }, [id, later]);
+    if (!id || published) return;
+    postRelease(id).then(setRelease, () => {});
+  }, [id, published, detail]);
+  const attemptId = later ? (release?.attempts.find((a) => a.status === "SCHEDULED")?.id ?? null) : null;
+  // The publish ran but the outcome is unknown (the item stays SCHEDULED): the person checks the account, as on posts.
+  const uncertain = !published ? release?.attempts.find((a) => a.status === "PENDING_VERIFY") : undefined;
+  // Back to APPROVED (a failed publish, or cancelled elsewhere): nothing went out; the reel can be scheduled again.
+  const notOut = !!status && status !== "SCHEDULED" && status !== "PUBLISHED";
+  const lastFailed = release?.attempts[0]?.status === "FAILED" ? release.attempts[0].error : null;
+  const settle = async (attempt: string, action: "posted" | "not-posted") => {
+    if (!id) return;
+    setSettling(true);
+    setError(null);
+    try {
+      setRelease(await posts.settle(id, attempt, action));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setSettling(false);
+    }
+  };
   const cancel = async () => {
     if (!id || !attemptId) return;
     setCancelling(true);
@@ -81,6 +101,12 @@ export default function ReelsScheduled() {
         <Footer>
           {error ? <Text style={[meta, { color: color.error, textAlign: "center" }]}>{error}</Text> : null}
           <Button label={t("scheduled.viewReel")} arrow onPress={() => router.push("/reels/review")} />
+          {uncertain && can("publish.execute") ? (
+            <View style={{ flexDirection: "row", gap: space[8] }}>
+              <Button label={t("posts:detail.wasPosted")} variant="outline" height={44} style={{ flex: 1 }} disabled={settling} onPress={() => void settle(uncertain.id, "posted")} />
+              <Button label={t("posts:detail.notPosted")} variant="outline" height={44} style={{ flex: 1 }} disabled={settling} onPress={() => void settle(uncertain.id, "not-posted")} />
+            </View>
+          ) : null}
           {attemptId && can("publish.execute") ? <Button label={cancelling ? t("scheduled.cancelling") : t("scheduled.cancelSchedule")} variant="outline" height={44} disabled={cancelling} onPress={() => void cancel()} /> : null}
           <Button label={t("scheduled.backToResults")} variant="ghost" height={44} onPress={() => router.replace("/reels/results")} />
         </Footer>
@@ -94,10 +120,10 @@ export default function ReelsScheduled() {
       />
       <View style={{ alignItems: "center", maxWidth: 280 }}>
         <View style={styles.badge}>
-          <Check size={28} color={color.onPrimary} strokeWidth={ICON.strokeWidth} />
+          {notOut ? <X size={28} color={color.onPrimary} strokeWidth={ICON.strokeWidth} /> : uncertain ? <Clock size={28} color={color.onPrimary} strokeWidth={ICON.strokeWidth} /> : <Check size={28} color={color.onPrimary} strokeWidth={ICON.strokeWidth} />}
         </View>
-        <Text style={[type.pageTitle, { textAlign: "center", paddingTop: space[12] }]}>{published ? t("scheduled.publishedTitle") : later ? t("scheduled.title") : t("scheduled.publishingTitle")}</Text>
-        <Text style={[bodyMuted, { textAlign: "center", paddingTop: 4 }]}>{published ? t("scheduled.publishedBody") : later ? t("scheduled.body") : t("scheduled.publishingBody")}</Text>
+        <Text style={[type.pageTitle, { textAlign: "center", paddingTop: space[12] }]}>{published ? t("scheduled.publishedTitle") : notOut ? t("scheduled.failedTitle") : uncertain ? t("posts:detail.checkAccount", { account: uncertain.account }) : later ? t("scheduled.title") : t("scheduled.publishingTitle")}</Text>
+        <Text style={[bodyMuted, { textAlign: "center", paddingTop: 4 }]}>{published ? t("scheduled.publishedBody") : notOut ? (lastFailed ?? t("scheduled.failedBody")) : uncertain ? (uncertain.error ?? t("scheduled.checkBody")) : later ? t("scheduled.body") : t("scheduled.publishingBody")}</Text>
       </View>
 
       <Panel style={{ alignSelf: "stretch", marginTop: space[24] }}>
@@ -109,7 +135,7 @@ export default function ReelsScheduled() {
           </View>
         </View>
         <View style={{ paddingTop: space[16], gap: space[12] }}>
-          <Row Icon={Clock} label={later ? t("scheduled.publishDate") : t("scheduled.publishDateNow")} value={<Text style={metaInk}>{t("scheduled.dateTime", { date, time })}</Text>} />
+          <Row Icon={Clock} label={published ? t("scheduled.publishDateNow") : t("scheduled.publishDate")} value={<Text style={metaInk}>{t("scheduled.dateTime", { date, time })}</Text>} />
           <Row Icon={Globe} label={t("timezone")} value={<Text style={metaInk}>{TIME_ZONE}</Text>} />
           <Row Icon={Store} label={t("scheduled.brandWorkspace")} value={<Text style={metaInk}>{brandName}</Text>} />
           <Row

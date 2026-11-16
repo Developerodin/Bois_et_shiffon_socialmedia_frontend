@@ -159,7 +159,7 @@ export default function EditStory() {
   const refresh = useCallback(async () => {
     await Promise.all([reloadPosts(), load()]);
   }, [load]);
-  const { slow } = useWorkingPoll(!!release?.rendering || pending, version ?? 0, refresh);
+  const { slow, retry } = useWorkingPoll(!!release?.rendering || pending, version ?? 0, refresh);
 
   const disablePrevention = usePreventRemove(changed, ({ repeat }) => setLeaving(() => repeat));
 
@@ -479,6 +479,18 @@ export default function EditStory() {
                 </Text>
               ) : null}
               {!release && readError ? <Button label={t("stories.retry")} variant="outline" height={44} onPress={() => void load()} /> : null}
+              {/* Past the 3-minute poll: read again now and poll another 3 minutes, so the result or render error shows. */}
+              {rendering && slow ? (
+                <Button
+                  label={t("stories.retry")}
+                  variant="outline"
+                  height={44}
+                  onPress={() => {
+                    retry();
+                    void refresh();
+                  }}
+                />
+              ) : null}
               <View style={styles.actions}>
                 <Button label={t("editStory.saveDraft")} variant="outline" style={{ flex: 1 }} disabled={!changed || readOnly || !!problem} onPress={() => void save()} />
                 <Button
