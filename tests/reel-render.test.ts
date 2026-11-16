@@ -185,6 +185,15 @@ describe("advanceRender", () => {
     expect(m.enqueue).toHaveBeenCalled();
   });
 
+  it("can't read the clips' status for over a day: gives up and refunds instead of polling forever", async () => {
+    m.tx.reelRender.findUnique.mockResolvedValue(render({ requests: { CLIPS: ["ra", "rb"] }, createdAt: new Date(Date.now() - 25 * 3600_000) }));
+    m.status.mockRejectedValue(new Error("Higgsfield 404"));
+    m.tx.reelRender.updateMany.mockResolvedValue({ count: 1 });
+    await advanceRender({ renderId: "r1" });
+    expect(m.refund).toHaveBeenCalledWith("w1", "v1:1", m.tx);
+    expect(m.enqueue).not.toHaveBeenCalled();
+  });
+
   it("a failing join releases its claim and retries, then fails and refunds on the third", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("link expired"); }));
     const joining = (joinErrors: number) => render({ step: "JOIN", claimedAt: null, outputs: { ...outputs, clipUrls: ["https://cdn/a.mp4", "https://cdn/b.mp4"], joinErrors } });

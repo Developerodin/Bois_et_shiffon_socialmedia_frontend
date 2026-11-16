@@ -41,6 +41,7 @@ const CLAIM_STALE_MS = 2 * 60_000;
 const JOIN_STALE_MS = 6 * 60_000;
 const JOIN_TRIES = 3;
 const GIVE_UP_MS = 24 * 3600_000;
+const GIVE_UP_ERROR = "The video took more than a day. Credits refunded; try again.";
 
 type Requests = { CLIPS?: string[] };
 /** One join between scenes after the seam check: what the director planned, what was used, and why. */
@@ -80,7 +81,7 @@ export function nextStep(r: RenderState, statuses: HfStatus[], now = Date.now())
   if (r.step === "DONE" || r.step === "FAILED") return { action: "done" };
   if (r.step === "VOICE") return { action: "voice" };
   const out = r.outputs as Outputs;
-  if (now - r.createdAt.getTime() > GIVE_UP_MS) return { action: "fail", error: "The video took more than a day. Credits refunded; try again." };
+  if (now - r.createdAt.getTime() > GIVE_UP_MS) return { action: "fail", error: GIVE_UP_ERROR };
   if (r.step === "JOIN") return r.claimedAt && now - r.claimedAt.getTime() < JOIN_STALE_MS ? { action: "wait" } : { action: "join", urls: out.clipUrls ?? [] };
   const ids = (r.requests as Requests).CLIPS;
   if (!ids?.length) return r.claimedAt && now - r.claimedAt.getTime() < CLAIM_STALE_MS ? { action: "wait" } : { action: "submit" };
@@ -167,7 +168,7 @@ export async function advanceRender(payload: unknown) {
   // Can't read the clips' status (Higgsfield or network down): wait, as they're still running and billed there;
   // the day-long give-up still applies. Failing here would refund a render that may well finish.
   const statuses = r.step === "CLIPS" && ids.length ? await Promise.all(ids.map((id) => higgsfield.status(id))).catch(() => null) : [];
-  if (statuses === null) return enqueueTick(r, POLL_MS);
+  if (statuses === null) return Date.now() - r.createdAt.getTime() > GIVE_UP_MS ? failRender({ renderId }, new Error(GIVE_UP_ERROR), true) : enqueueTick(r, POLL_MS);
   const next = nextStep(r, statuses);
   // A throw here is retried by the queue with backoff; failRender runs once its attempts are exhausted.
   switch (next.action) {
