@@ -85,9 +85,10 @@ export function backoffMs(attempts: number) {
   return Math.min(60 * 60_000, 2 ** attempts * 15_000);
 }
 
+/** Whether the job has no tries left, or null when this runner had lost the lease (nothing written: not its to fail). */
 export async function failJob(job: Job, error: unknown, retryable = true) {
   const exhausted = !retryable || job.attempts >= job.maxAttempts;
-  await prisma.job.updateMany({
+  const { count } = await prisma.job.updateMany({
     where: { id: job.id, leasedBy: job.leasedBy, status: "RUNNING" },
     data: {
       status: exhausted ? "DEAD_LETTER" : "PENDING",
@@ -96,5 +97,5 @@ export async function failJob(job: Job, error: unknown, retryable = true) {
       lastError: String(error).slice(0, 2000),
     },
   });
-  return exhausted;
+  return count === 1 ? exhausted : null;
 }
