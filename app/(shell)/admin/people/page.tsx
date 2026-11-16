@@ -1,15 +1,14 @@
 import Link from "next/link";
+import type { AdminPeople } from "@espanda/shared";
 import { Ago, day, Empty, PageHeader, Pager, Pill, SearchBox, Table, withQuery } from "@/components/admin/ui";
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { listPeople, pageCount, pageNumber } from "@/server/services/platform-admin";
+import { serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "People · Platform admin" };
 
 export default async function AdminPeople({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
-  await requirePlatformAdminPage();
   const q = await searchParams;
-  const page = pageNumber(q.page);
-  const p = await listPeople({ q: q.q, page });
+  const p = await serverFetch<AdminPeople>(withQuery("/api/v1/admin/people", {}, q));
+  const { page } = p;
   const current = { q: q.q, page: page > 1 ? String(page) : undefined };
 
   return (
@@ -53,7 +52,7 @@ export default async function AdminPeople({ searchParams }: { searchParams: Prom
           <span key="j" className="whitespace-nowrap">{day(u.createdAt)}</span>,
         ])}
       />
-      <Pager page={page} hasMore={p.hasMore} pages={pageCount(p.total)} href={(n) => withQuery("/admin/people", current, { page: n > 1 ? String(n) : undefined })} />
+      <Pager page={page} hasMore={p.next !== null} pages={p.pages} href={(n) => withQuery("/admin/people", current, { page: n > 1 ? String(n) : undefined })} />
     </>
   );
 }

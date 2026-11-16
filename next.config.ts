@@ -1,28 +1,23 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
+// The Server's address. In production the load balancer sends /api/* to the Server before it reaches this app, so the
+// rewrite below only serves local dev; server components call SERVER_URL directly (lib/server-fetch.ts).
+const SERVER_URL = process.env.SERVER_URL ?? "http://localhost:3101";
+
 const nextConfig: NextConfig = {
-  // Reel joining runs ffmpeg (server/reels/join.ts) and story uploads run ffprobe (server/stories/probe.ts; Linux for deploys, Windows for local builds) and story frames need the bundled fonts (server/stories/render.ts); jobs run in any API route's after(), so every v1 route ships the binary (ponytail: ~75 MB per function; move rendering to one route if size bites).
-  outputFileTracingIncludes: { "/api/v1/**/*": ["../../node_modules/ffmpeg-static/ffmpeg*", "../../node_modules/ffprobe-static/bin/linux/x64/*", "../../node_modules/ffprobe-static/bin/win32/x64/*", "./assets/fonts/*"] },
-  serverExternalPackages: ["ffmpeg-static", "ffprobe-static"],
+  output: "standalone",
+  transpilePackages: ["@espanda/shared"],
   turbopack: {
     // Monorepo root: npm workspaces hoist `next` into ../../node_modules.
     root: path.join(__dirname, "../.."),
   },
-  // The mobile app's Expo web preview (dev only) calls this API cross-origin with a Bearer token.
-  // Native apps need no CORS; production sends none of these headers.
-  async headers() {
-    if (process.env.NODE_ENV !== "development") return [];
-    return [
-      {
-        source: "/api/v1/:path*",
-        headers: [
-          { key: "Access-Control-Allow-Origin", value: "http://localhost:8090" },
-          { key: "Access-Control-Allow-Methods", value: "GET, POST, PATCH, PUT, DELETE, OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Authorization, Content-Type, X-Workspace-Id" },
-        ],
-      },
-    ];
+  experimental: {
+    // The dev proxy otherwise cuts a request after 30 s; chat streams and agent runs take up to 300 s.
+    proxyTimeout: 330_000,
+  },
+  async rewrites() {
+    return [{ source: "/api/:path*", destination: `${SERVER_URL}/api/:path*` }];
   },
 };
 

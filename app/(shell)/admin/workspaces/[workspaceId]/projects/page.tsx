@@ -1,15 +1,12 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import type { AdminWorkspaceDetail } from "@espanda/shared";
 import { day, Empty, Pill, Section, Table, when } from "@/components/admin/ui";
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { workspaceDetail } from "@/server/services/platform-admin";
+import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Projects · Workspace · Platform admin" };
 
 export default async function AdminWorkspaceProjects({ params }: { params: Promise<{ workspaceId: string }> }) {
-  await requirePlatformAdminPage();
-  const d = await workspaceDetail((await params).workspaceId);
-  if (!d) notFound();
+  const d = await serverFetch<AdminWorkspaceDetail>(api`/api/v1/admin/workspaces/${(await params).workspaceId}`);
   const wide = d.members.filter((m) => m.projects.some((p) => p.effective.some((e) => e.key === "brand.read") && !p.projectRole)).map((m) => m.user.name ?? m.user.email);
 
   return (

@@ -1,17 +1,18 @@
+import type { AdminSpend } from "@espanda/shared";
 import { SpendChart } from "@/components/admin/spend-chart";
 import { SpendTables } from "@/components/admin/spend-tables";
-import { period as periodOf, PERIODS, Section, Segmented, Stat, withQuery, type Fx } from "@/components/admin/ui";
-import { spendBreakdown } from "@/server/services/platform-admin";
-import { usdInrRate } from "@/server/usage/fx";
+import { fxOf, period as periodOf, PERIODS, Section, Segmented, Stat, withQuery, type Fx } from "@/components/admin/ui";
+import { serverFetch } from "@/lib/server-fetch";
 
 const dollars = (v: number) => `$${v.toFixed(v >= 100 ? 0 : v >= 1 ? 2 : 4)}`;
 const rupees = (v: number, fx: Fx) => (fx ? `₹${(v * fx.rate).toFixed(v * fx.rate >= 100 ? 0 : 2)}` : null);
 
 /** Spend & usage for the platform (no workspaceId) or one workspace: period and test-run switches, chart, breakdowns. */
 export async function SpendView({ path, query, workspaceId }: { path: string; query: { days?: string; tests?: string }; workspaceId?: string }) {
-  const { value: period, days, param, span } = periodOf(query.days);
+  const { value: period, param, span } = periodOf(query.days);
   const tests = !workspaceId && query.tests === "1";
-  const [s, fx] = await Promise.all([spendBreakdown({ days, workspaceId, includeTests: tests }), usdInrRate()]);
+  const s = await serverFetch<AdminSpend>(withQuery("/api/v1/admin/spend", {}, { ...query, workspaceId }));
+  const fx = fxOf(s.usdInr);
   const current = { days: param, tests: tests ? "1" : undefined };
   const total = s.aiUsd + s.apiUsd;
 

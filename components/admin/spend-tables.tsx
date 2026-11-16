@@ -1,13 +1,13 @@
 import Link from "next/link";
+import type { AdminSpend } from "@espanda/shared";
 import { Empty, Money, Table, type Fx } from "@/components/admin/ui";
-import type { SpendBreakdown } from "@/server/services/platform-admin";
 
 const COMPACT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 const compact = (n: number) => (n ? COMPACT.format(n) : <Empty />);
 const count = (n: number) => (n ? n.toLocaleString("en") : <Empty key="n" />);
 
-/** Every breakdown of a SpendBreakdown, as tables. `workspaceLinks`: link workspace rows to their pages. */
-export function SpendTables({ s, fx, workspaceLinks }: { s: SpendBreakdown; fx: Fx; workspaceLinks?: boolean }) {
+/** Every breakdown of the spend response, as tables. `workspaceLinks`: link workspace rows to their pages. */
+export function SpendTables({ s, fx, workspaceLinks }: { s: AdminSpend; fx: Fx; workspaceLinks?: boolean }) {
   const aiTotal = s.aiUsd || 1;
   return (
     <div className="flex flex-col gap-4">

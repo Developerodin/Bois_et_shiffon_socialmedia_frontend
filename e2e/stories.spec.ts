@@ -1,31 +1,32 @@
 import { execSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { authFile } from "./global-setup";
-import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "../lib/shell-cookies";
+import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@espanda/shared";
 
 /**
  * Stories on the web. Part 1: a seeded 4-frame photo story waits for approval; open it from the calendar, see its frames
  * (read-only), approve it. Part 2: a seeded approved story is set to be posted by hand at a past time, shows as due on
- * Today, its zip downloads, and "I posted it" publishes it. scripts/seed-story.ts makes the stories through the server
- * code path (photos from the brand, no AI calls) and removes them afterwards. Needs the dev Bois & Chiffons brand.
+ * Today, its zip downloads, and "I posted it" publishes it. The Server's scripts/seed-story.ts makes the stories through
+ * the server code path (photos from the brand, no AI calls) and removes them afterwards. Needs the dev Bois & Chiffons brand.
  */
 test.describe.configure({ mode: "serial" });
 test.setTimeout(180_000);
 test.use({ storageState: authFile("owner"), viewport: { width: 1440, height: 900 } });
 
-const tsx = (...args: string[]) => execSync(`npx tsx --env-file=.env scripts/seed-story.ts ${args.join(" ")}`, { cwd: process.cwd(), encoding: "utf8" });
+// Seeds through the Server (its scripts and env); --silent keeps npm's banner out of the JSON line read below.
+const seedScript = (...args: string[]) => execSync(`npm run --silent seed:story -w server -- ${args.join(" ")}`, { encoding: "utf8" });
 const shot = (name: string) => (process.env.E2E_SHOTS ? { path: `${process.env.E2E_SHOTS}/${name}.png` } : undefined);
 type Seeded = { itemId: string; workspaceId: string; brandId: string };
 let seeded: Seeded;
 let approved: Seeded | undefined;
-const seed = (...args: string[]): Seeded => JSON.parse(tsx(...args).trim().split("\n").pop()!);
+const seed = (...args: string[]): Seeded => JSON.parse(seedScript(...args).trim().split("\n").pop()!);
 
 test.beforeAll(() => {
   seeded = seed();
 });
 test.afterAll(() => {
-  if (seeded) tsx("--remove", seeded.itemId);
-  if (approved) tsx("--remove", approved.itemId);
+  if (seeded) seedScript("--remove", seeded.itemId);
+  if (approved) seedScript("--remove", approved.itemId);
 });
 test.beforeEach(async ({ context, baseURL }) => {
   await context.addCookies([

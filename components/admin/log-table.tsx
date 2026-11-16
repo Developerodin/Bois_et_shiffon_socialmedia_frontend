@@ -1,5 +1,5 @@
+import type { AdminLogRow as LogRow, LogKind } from "@espanda/shared";
 import { Ago, Empty, Money, Pill, Table, type Fx } from "@/components/admin/ui";
-import type { LogKind, LogRow } from "@/server/services/platform-admin";
 
 const COMPACT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 const runTone = (s: string) => (s === "SUCCEEDED" ? "good" : s === "FAILED" ? "bad" : "warn");

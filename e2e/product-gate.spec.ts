@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { authFile } from "./global-setup";
-import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "../lib/shell-cookies";
+import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@espanda/shared";
 
 /**
  * The approval gate on a post whose linked product is sold out. Needs a seeded post:

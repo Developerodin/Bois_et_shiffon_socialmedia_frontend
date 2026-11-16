@@ -1,23 +1,19 @@
-import { notFound } from "next/navigation";
-import { after } from "next/server";
+import type { AdminWorkspaceHeader } from "@espanda/shared";
 import { TabLinks } from "@/components/admin/tab-links";
 import { day, PageHeader } from "@/components/admin/ui";
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { prisma } from "@/server/db/prisma";
-import { recordWorkspaceView } from "@/server/services/platform-admin";
+import { api, serverFetch } from "@/lib/server-fetch";
 
 /**
  * One workspace's pages share this header and tab row. Entering the workspace is recorded in its audit log once
  * per visit (moving between its tabs keeps this layout, so it doesn't record again).
  */
 export default async function AdminWorkspaceLayout({ children, params }: { children: React.ReactNode; params: Promise<{ workspaceId: string }> }) {
-  const [viewer, { workspaceId }] = await Promise.all([requirePlatformAdminPage(), params]);
-  const ws = await prisma.workspace.findUnique({
-    where: { id: workspaceId },
-    select: { name: true, createdAt: true, owner: { select: { email: true } }, _count: { select: { members: true, brands: true, roles: true } } },
-  });
-  if (!ws) notFound();
-  after(() => recordWorkspaceView(workspaceId, viewer)); // written after the page is sent: the visit never waits on it
+  const { workspaceId } = await params;
+  // The header and the audit entry in one go; a missing workspace is a 404 from both.
+  const [ws] = await Promise.all([
+    serverFetch<AdminWorkspaceHeader>(api`/api/v1/admin/workspaces/${workspaceId}/header`),
+    serverFetch(api`/api/v1/admin/workspaces/${workspaceId}/visit`, { method: "POST" }),
+  ]);
   const base = `/admin/workspaces/${workspaceId}`;
 
   return (

@@ -9,7 +9,7 @@ import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { safeHttpUrl } from "@/lib/website";
+import { safeHttpUrl } from "@espanda/shared";
 
 /* ───────────── shared types + data ───────────── */
 

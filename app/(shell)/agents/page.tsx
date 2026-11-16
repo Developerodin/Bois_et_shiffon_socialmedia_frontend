@@ -1,17 +1,10 @@
-import { redirect } from "next/navigation";
 import { Bot } from "lucide-react";
-import { auth } from "@/auth";
 import { AgentsBoard } from "@/components/agents/agents-board";
 import { EmptyState } from "@/components/ui/empty-state";
-import { loadShellContext } from "@/server/shell/load-shell-context";
+import { getShell } from "@/lib/server-fetch";
 
 export default async function AgentsPage() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const shell = await loadShellContext(session.user.id);
+  const shell = await getShell();
 
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
     return (

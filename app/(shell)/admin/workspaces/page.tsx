@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { Ago, day, Empty, Money, PageHeader, Pager, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { listWorkspaces, pageCount, pageNumber, type WorkspaceSort } from "@/server/services/platform-admin";
-import { usdInrRate } from "@/server/usage/fx";
+import { type AdminWorkspaces, type WorkspaceSort } from "@espanda/shared";
+import { Ago, day, Empty, fxOf, Money, PageHeader, Pager, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
+import { serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Workspaces · Platform admin" };
 
@@ -17,11 +16,11 @@ const usd30 = (s: { aiUsd30: number; apiUsd30: number }) => s.aiUsd30 + s.apiUsd
 const count = (n: number, key: string) => (n ? n.toLocaleString("en") : <Empty key={key} />);
 
 export default async function AdminWorkspaces({ searchParams }: { searchParams: Promise<{ q?: string; sort?: string; page?: string }> }) {
-  await requirePlatformAdminPage();
   const q = await searchParams;
   const sort = (SORTS.some((s) => s.value === q.sort) ? q.sort : "newest") as WorkspaceSort;
-  const page = pageNumber(q.page);
-  const [w, fx] = await Promise.all([listWorkspaces({ q: q.q, sort, page }), usdInrRate()]);
+  const w = await serverFetch<AdminWorkspaces>(withQuery("/api/v1/admin/workspaces", {}, q));
+  const { page } = w;
+  const fx = fxOf(w.usdInr);
   const c30 = w.customers30;
   const current = { q: q.q, sort: sort === "newest" ? undefined : sort, page: page > 1 ? String(page) : undefined };
 
@@ -59,7 +58,7 @@ export default async function AdminWorkspaces({ searchParams }: { searchParams: 
           <Ago key="a" at={x.lastActive} />,
         ])}
       />
-      <Pager page={page} hasMore={w.hasMore} pages={pageCount(w.total)} href={(p) => withQuery("/admin/workspaces", current, { page: p > 1 ? String(p) : undefined })} />
+      <Pager page={page} hasMore={w.next !== null} pages={w.pages} href={(p) => withQuery("/admin/workspaces", current, { page: p > 1 ? String(p) : undefined })} />
     </>
   );
 }

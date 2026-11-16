@@ -1,21 +1,14 @@
-import { redirect } from "next/navigation";
 import { Settings } from "lucide-react";
-import { auth } from "@/auth";
 import { SettingsBoard } from "@/components/settings/settings-board";
 import { EmptyState } from "@/components/ui/empty-state";
-import { loadShellContext } from "@/server/shell/load-shell-context";
+import { getShell } from "@/lib/server-fetch";
 
 export default async function SettingsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const shell = await loadShellContext(session.user.id);
+  const shell = await getShell();
 
   if (!shell.activeWorkspaceId) {
     return (

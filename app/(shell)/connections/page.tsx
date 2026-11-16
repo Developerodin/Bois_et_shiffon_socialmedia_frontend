@@ -1,10 +1,7 @@
-import { redirect } from "next/navigation";
 import { Lock, Plug } from "lucide-react";
-import { auth } from "@/auth";
 import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { EmptyState } from "@/components/ui/empty-state";
-import { effectivePermissions } from "@/server/auth/permissions";
-import { loadShellContext } from "@/server/shell/load-shell-context";
+import { getShell } from "@/lib/server-fetch";
 
 /** The business's connected accounts. Settings keeps its own Connections tab; the OAuth callback still lands there. */
 export default async function ConnectionsPage({
@@ -12,14 +9,9 @@ export default async function ConnectionsPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-
-  const shell = await loadShellContext(session.user.id);
+  const shell = await getShell();
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
-    const canCreateBrand = shell.activeWorkspaceId
-      ? (await effectivePermissions(shell.activeWorkspaceId, session.user.id)).has("brand.create")
-      : false;
+    const canCreateBrand = shell.workspacePermissions.includes("brand.create");
     return (
       <div className="mx-auto max-w-5xl">
         <EmptyState
@@ -37,7 +29,7 @@ export default async function ConnectionsPage({
     );
   }
 
-  const perms = await effectivePermissions(shell.activeWorkspaceId, session.user.id, shell.activeBrandId);
+  const perms = new Set(shell.brandPermissions);
   if (!perms.has("brand.read")) {
     return (
       <div className="mx-auto max-w-5xl">

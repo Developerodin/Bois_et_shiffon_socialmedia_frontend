@@ -18,7 +18,7 @@ const TIER_INFO: Record<AiTierName, string> = {
 /**
  * Platform-wide AI models (platform admins only): which model each tier uses and every model's price. Changes apply
  * to all workspaces within a minute. Before moving a tier to a new model, run the test set against it
- * (npm run eval -w web -- --models <name>).
+ * (npm run eval -w server -- --models <name>).
  */
 export function AiModelsTab() {
   const fetcher = useCallback(() => settingsApi.aiModels(), []);
@@ -94,7 +94,7 @@ export function AiModelsTab() {
       <SectionHeader
         id="ai-models-heading"
         title="AI models"
-        description="Which model each tier uses, and what every model costs. This applies to all workspaces, within a minute. Test a model before moving a tier to it: npm run eval -w web -- --models <name>."
+        description="Which model each tier uses, and what every model costs. This applies to all workspaces, within a minute. Test a model before moving a tier to it: npm run eval -w server -- --models <name>."
       />
       {body}
       {editing ? <ModelDialog model={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={setFresh} /> : null}

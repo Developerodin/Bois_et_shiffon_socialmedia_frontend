@@ -1,17 +1,13 @@
-import { notFound } from "next/navigation";
+import { PERMISSIONS, type AdminWorkspaceDetail } from "@espanda/shared";
 import { Empty, Pill, Section, Table } from "@/components/admin/ui";
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { PERMISSIONS } from "@/server/auth/permissions.catalog";
-import { workspaceDetail } from "@/server/services/platform-admin";
+import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Roles · Workspace · Platform admin" };
 
 const DESCRIPTION = new Map<string, string>(PERMISSIONS.map(([key, , description]) => [key, description]));
 
 export default async function AdminWorkspaceRoles({ params }: { params: Promise<{ workspaceId: string }> }) {
-  await requirePlatformAdminPage();
-  const d = await workspaceDetail((await params).workspaceId);
-  if (!d) notFound();
+  const d = await serverFetch<AdminWorkspaceDetail>(api`/api/v1/admin/workspaces/${(await params).workspaceId}`);
 
   return (
     <Section id="roles" title="Roles" description="Built-in and custom roles, how many people hold each, and what it allows. Hover a permission for its meaning.">

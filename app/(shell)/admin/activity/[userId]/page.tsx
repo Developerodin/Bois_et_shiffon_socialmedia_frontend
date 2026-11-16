@@ -1,11 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type AdminPersonTimeline } from "@espanda/shared";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
-import { Ago, CursorPager, Empty, Money, PageHeader, period as periodOf, PERIODS, Pill, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-import { NO_WORKSPACE, personSummary, personTimeline } from "@/server/services/activity";
-import { PAGE, parseCursor, pickerOptions } from "@/server/services/platform-admin";
-import { usdInrRate } from "@/server/usage/fx";
+import { Ago, CursorPager, Empty, fxOf, Money, PageHeader, period as periodOf, PERIODS, Pill, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
+import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Person activity · Platform admin" };
 
@@ -13,36 +10,35 @@ const LABEL = { visit: "Page visit", action: "Action", task: "Agent task", ai: "
 
 /** One person's timeline, with what they've cost in the header. Never chat text. */
 export default async function AdminPersonActivity({ params, searchParams }: { params: Promise<{ userId: string }>; searchParams: Promise<{ ws?: string; days?: string; before?: string }> }) {
-  await requirePlatformAdminPage();
   const { userId } = await params;
   const q = await searchParams;
   const ws = q.ws || undefined;
   const workspaceId = ws === NO_WORKSPACE ? null : ws; // null: only what happened outside any workspace
-  const { value: days, days: n, param, span } = periodOf(q.days);
-  const before = parseCursor(q.before);
-  const [s, t, options, fx] = await Promise.all([personSummary({ userId, workspaceId, days: n }), personTimeline({ userId, workspaceId, days: n, before }), pickerOptions(), usdInrRate()]);
-  if (!s.user && !t.total) notFound(); // a deleted account still shows what it left behind
-  const name = s.user ? (s.user.name ?? s.user.email) : "(deleted user)";
+  const { value: days, param, span } = periodOf(q.days);
+  const before = q.before;
+  const t = await serverFetch<AdminPersonTimeline>(withQuery(api`/api/v1/admin/activity/${userId}`, {}, q)); // 404 unless the account or what it left behind exists
+  const fx = fxOf(t.usdInr);
+  const name = t.user ? (t.user.name ?? t.user.email) : "(deleted user)";
   const path = `/admin/activity/${userId}`;
   const current = { ws, days: param };
 
   return (
     <>
       <PageHeader title={name} crumbs={[{ href: "/admin/activity", label: "Activity" }, { label: name }]}>
-        {s.user?.name ? `${s.user.email} · ` : ""}
-        {t.total.toLocaleString("en")} {t.total === 1 ? "entry" : "entries"}, {span}, newest first, {PAGE} a page. An agent task’s AI calls are counted in its row. Chat text is never shown.{" "}
-        {s.user ? (
+        {t.user?.name ? `${t.user.email} · ` : ""}
+        {t.total.toLocaleString("en")} {t.total === 1 ? "entry" : "entries"}, {span}, newest first, {ADMIN_PAGE_SIZE} a page. An agent task’s AI calls are counted in its row. Chat text is never shown.{" "}
+        {t.user ? (
           <Link href={`/admin/people/${userId}`} className="underline underline-offset-4">
             Their workspaces and roles
           </Link>
         ) : null}
       </PageHeader>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat label="AI spend" value={<Money usd={s.aiUsd} fx={fx} />} hint={`${workspaceId === null ? "outside any workspace" : ws ? "in this workspace" : "everywhere"}, ${span}`} />
-        <Stat label="Other paid APIs" value={<Money usd={s.apiUsd} fx={fx} />} hint="maps, page speed, phone checks" />
+        <Stat label="AI spend" value={<Money usd={t.aiUsd} fx={fx} />} hint={`${workspaceId === null ? "outside any workspace" : ws ? "in this workspace" : "everywhere"}, ${span}`} />
+        <Stat label="Other paid APIs" value={<Money usd={t.apiUsd} fx={fx} />} hint="maps, page speed, phone checks" />
       </div>
       <div className="flex flex-col items-start gap-3">
-        <ActivityPickers ws={ws} options={options} person={false} noWorkspace hidden={{ days: param }} />
+        <ActivityPickers ws={ws} options={{ workspaces: t.workspaces }} person={false} noWorkspace hidden={{ days: param }} />
         <Segmented label="Period" options={PERIODS} value={days} href={(v) => withQuery(path, current, { days: v === "30" ? undefined : v })} />
       </div>
       <Table

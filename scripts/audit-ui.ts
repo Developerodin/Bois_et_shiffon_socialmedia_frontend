@@ -1,7 +1,7 @@
 /**
  * UI audit against a running app (npm run build && npm run start): axe-core WCAG 2.0–2.2 A/AA +
  * best practices on every page at desktop, 375px and light theme, plus horizontal overflow,
- * tap targets under 24px and keyboard focus visibility. Run: npm run audit:ui -w web
+ * tap targets under 24px and keyboard focus visibility. Run: npm run audit:ui -w web-frontend
  */
 import { chromium, type Page } from "@playwright/test";
 import path from "node:path";
