@@ -101,13 +101,11 @@ describe("email-first: which screen comes next", () => {
 });
 
 describe("email sign-in codes (mobile)", () => {
-  it("a new code leaves earlier live codes working, so a stranger asking for codes can't void the one in the inbox", async () => {
+  it("a new code replaces every earlier code, so only one code per email is ever guessable", async () => {
     m.db.user.findUnique.mockResolvedValue(null);
     await sendEmailCode({ email: "a@b.co" }, request);
     const where = m.db.verificationToken.deleteMany.mock.calls[0][0].where;
-    expect(where.identifier).toBe("mobile-code:a@b.co");
-    // Only expired codes (and a same-code duplicate) are cleared, never a live one.
-    expect(where.OR).toEqual([{ expires: { lte: expect.any(Date) } }, { token: expect.any(String) }]);
+    expect(where).toEqual({ identifier: "mobile-code:a@b.co" });
     expect(m.db.verificationToken.create).toHaveBeenCalledTimes(1);
   });
 });
