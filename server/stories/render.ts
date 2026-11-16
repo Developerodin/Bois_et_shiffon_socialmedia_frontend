@@ -20,7 +20,8 @@ const FONT_DIR = path.join(process.cwd(), "assets", "fonts");
 process.env.FONTCONFIG_FILE = path.join(FONT_DIR, "fonts.conf");
 
 /** Bump when the layout changes: every frame gets a new content key, so old files are never reused for new pixels. */
-export const RENDERER_VERSION = 2;
+// 3: clips drop the source's metadata (its title, comment, and any phone location or model tags).
+export const RENDERER_VERSION = 3;
 const W = 1080;
 const H = 1920;
 const MB = 1024 * 1024;
@@ -404,6 +405,8 @@ export function clipArgs(input: string, overlayPng: string, out: string, clip: {
     ...still(overlayPng),
     ...(mark ? still(mark) : []),
     "-filter_complex", graph, "-map", "[v]",
+    // No metadata or chapters from the source: a phone clip's title, comment, location or model must not go out.
+    "-map_metadata", "-1", "-map_chapters", "-1",
     ...(clip.sound ? ["-map", "0:a:0?", "-c:a", "aac", "-b:a", "128k"] : ["-an"]),
     "-c:v", "libx264", "-preset", "veryfast", ...video, "-threads", "2",
     "-movflags", "+faststart", out,

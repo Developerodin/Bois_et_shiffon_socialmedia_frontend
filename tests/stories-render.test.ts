@@ -48,6 +48,10 @@ describe("clipArgs", () => {
     expect(args.join(" ")).toContain("-threads 2");
     expect(args.join(" ")).not.toMatch(/concat|http/);
   });
+  it("drops the source's metadata (a phone clip's GPS location)", () => {
+    expect(args.join(" ")).toContain("-map_metadata -1");
+    expect(args.indexOf("-map_metadata")).toBeLessThan(args.indexOf("out.mp4"));
+  });
   it("takes the 15 s window from the start", () => {
     expect(args[args.indexOf("-ss") + 1]).toBe("12");
     expect(args[args.indexOf("-t") + 1]).toBe("15");
@@ -180,7 +184,7 @@ describe("renderClipFrame", () => {
     const dir = await mkdtemp(path.join(tmpdir(), "story-clip-test-"));
     try {
       const src = path.join(dir, "src.mp4");
-      await new Promise<void>((res, rej) => execFile(ffmpegPath as string, ["-y", "-f", "lavfi", "-i", "testsrc=size=640x360:rate=30:duration=3", "-f", "lavfi", "-i", "sine=duration=3", "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", src], (e) => (e ? rej(e) : res())));
+      await new Promise<void>((res, rej) => execFile(ffmpegPath as string, ["-y", "-f", "lavfi", "-i", "testsrc=size=640x360:rate=30:duration=3", "-f", "lavfi", "-i", "sine=duration=3", "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-metadata", "location=+48.8566+002.3522/", "-metadata", "comment=from-the-phone", "-movflags", "use_metadata_tags", src], (e) => (e ? rej(e) : res())));
       const put = vi.fn(async () => undefined);
       const clip: StoryFrame = { ...frame, mediaKey: "ws1/b1/clip.mp4", mediaKind: "video", clip: { start: 0, sound: false }, aiMark: true };
       const r = await renderClipFrame(clip, { ...opts, n: 2 }, { get: async () => new Uint8Array(await readFile(src)), put, exists: async () => false });
@@ -190,6 +194,11 @@ describe("renderClipFrame", () => {
       expect(r.file.durationSec).toBeLessThan(3.5);
       expect(put.mock.calls[0]).toEqual([posterKeyFor(r.key), expect.any(Uint8Array), "image/jpeg"]);
       expect(put.mock.calls[1]).toEqual([r.key, expect.any(Uint8Array), "video/mp4"]);
+      // The source's tags (a phone clip's location, its comment) stay out of the rendered clip.
+      const out = Buffer.from((put.mock.calls[1] as unknown as [string, Uint8Array])[1]);
+      expect((await readFile(src)).includes("from-the-phone")).toBe(true);
+      expect(out.includes("from-the-phone")).toBe(false);
+      expect(out.includes("+48.8566")).toBe(false);
       const jpg = (put.mock.calls[0] as unknown as [string, Uint8Array])[1];
       expect(await sharp(jpg).metadata()).toMatchObject({ format: "jpeg", width: 1080, height: 1920 });
     } finally {
