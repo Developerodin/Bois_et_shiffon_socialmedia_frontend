@@ -7,6 +7,7 @@ import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
+import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/lib/website";
 
@@ -197,7 +198,6 @@ const DECISION: Record<Opportunity["decision"], { label: string; tone: string }>
   HOLD: { label: "Hold", tone: "bg-warning/15 text-warning" },
   REJECT: { label: "Reject", tone: "bg-muted text-muted-foreground" },
 };
-const time = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 
 /* ───────────── Ideas panel ───────────── */
@@ -412,7 +412,7 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
                     )}
                   </span>
                   <span className="text-sm">{i.title}</span>
-                  {i.byHand && i.scheduledFor && <span className="text-[11px] font-medium text-primary">Post by hand &middot; {time(i.scheduledFor)}</span>}
+                  {i.byHand && i.scheduledFor && <span className="text-[11px] font-medium text-primary">Post by hand &middot; {dayTime(i.scheduledFor)}</span>}
                   </span>
                 </button>
               </li>
