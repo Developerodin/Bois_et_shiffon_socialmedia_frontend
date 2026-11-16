@@ -7,6 +7,7 @@ import { ApiError, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/lib/website";
 import { zoneCity } from "@/server/content/offer-checks";
@@ -47,7 +48,6 @@ type Release = {
 };
 
 const PROVIDER_NAME: Record<string, string> = { META: "Facebook", INSTAGRAM: "Instagram", THREADS: "Threads", PINTEREST: "Pinterest" };
-const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const CAMPAIGN_KIND = { offer: "Offer", campaign: "Campaign", priority: "Priority" } as const;
 /** "Offer: Black Friday · -20 % · 2026-11-27 08:00 – 2026-11-30 20:00 (Paris)" or "Priority: Oak dining". */
 function campaignLine(c: Campaign) {
@@ -159,7 +159,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
           </>
         ) : (
           <p className="text-sm text-muted-foreground">
-            {data.byHand && data.scheduledFor ? `Approved. Post by hand · ${when(data.scheduledFor)}.` : "Approved. Someone who can publish will post it."}
+            {data.byHand && data.scheduledFor ? `Approved. Post by hand · ${dayTime(data.scheduledFor)}.` : "Approved. Someone who can publish will post it."}
           </p>
         )
       ) : status === "APPROVED" && data.approvalValid ? (
@@ -459,7 +459,7 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
           ))}
         </div>
         {later && (
-          <Input type="datetime-local" aria-label="Publish date and time" value={runAt} min={new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)} onChange={(e) => setRunAt(e.target.value)} className="h-11 w-fit" />
+          <Input type="datetime-local" aria-label="Publish date and time" value={runAt} min={nowLocalInput()} onChange={(e) => setRunAt(e.target.value)} className="h-11 w-fit" />
         )}
       </fieldset>
 
@@ -520,13 +520,13 @@ function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data
   return (
     <div className="flex flex-col gap-3 border-t border-border pt-4">
       <h3 className="text-sm font-medium">Or post it by hand</h3>
-      {due && <p className="text-sm">Post by hand · {when(due)}</p>}
+      {due && <p className="text-sm">Post by hand · {dayTime(due)}</p>}
       <div className="flex flex-wrap items-end gap-2">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="byhand-at" className="text-sm">
             {due ? "Change the time" : "Post by hand at"} <span className="text-muted-foreground">(empty: now)</span>
           </label>
-          <Input id="byhand-at" type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} className="h-11 w-fit" />
+          <Input id="byhand-at" type="datetime-local" value={at} min={nowLocalInput()} onChange={(e) => setAt(e.target.value)} className="h-11 w-fit" />
         </div>
         <Button variant="outline" disabled={pending !== null} onClick={() => run("at", () => onAct({ action: "byHand", at: (at ? new Date(at) : new Date()).toISOString() }).then(() => setAt("")))}>
           <CalendarClock aria-hidden /> {pending === "at" ? "Saving…" : due ? "Change time" : "Post by hand"}
@@ -618,7 +618,7 @@ function History({ data, canPublish, onSettle, onAct }: { data: Release; canPubl
               <span>
                 <span className="font-medium">{d.by}</span> {VERDICT[d.verdict]} {d.version ? `v${d.version}` : "an earlier draft"}
                 {d.override && ` anyway: ${d.override.join(", ")}`}
-                <span className="text-muted-foreground"> · {when(d.at)}</span>
+                <span className="text-muted-foreground"> · {dayTime(d.at)}</span>
                 {d.verdict === "APPROVED" && !d.current && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">no longer valid</span>}
               </span>
               {d.note && <span className="text-muted-foreground">&ldquo;{d.note}&rdquo;</span>}
@@ -629,7 +629,7 @@ function History({ data, canPublish, onSettle, onAct }: { data: Release; canPubl
                 <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", ATTEMPT[a.status].tone)}>{overdue ? "Overdue" : ATTEMPT[a.status].label}</span>
                 <span>
                   {PROVIDER_NAME[a.provider] ?? a.provider} · {a.account}
-                  <span className="text-muted-foreground"> · {a.status === "PUBLISHED" && a.publishedAt ? when(a.publishedAt) : when(a.runAt)} · by {a.by}</span>
+                  <span className="text-muted-foreground"> · {a.status === "PUBLISHED" && a.publishedAt ? dayTime(a.publishedAt) : dayTime(a.runAt)} · by {a.by}</span>
                 </span>
                 {a.status === "PUBLISHED" && safeHttpUrl(a.externalUrl) && (
                   <a href={safeHttpUrl(a.externalUrl)!.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline">
