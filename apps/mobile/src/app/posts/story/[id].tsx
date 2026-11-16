@@ -103,7 +103,8 @@ export default function StoryDetail() {
   const unfinished = release?.attempts.some((a) => a.status === "PARTIAL" || a.status === "PENDING_VERIFY");
   const approved = story.status === "APPROVED" && !!release?.approvalValid;
   const byHand = approved && !!release?.byHand && !!release.scheduledFor;
-  const editable = ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"].includes(story.status) && can("content.create");
+  // Nothing to edit until the writer has saved a first version (a Planner story starts without one).
+  const editable = version !== null && ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"].includes(story.status) && can("content.create");
   const edit = () => router.push({ pathname: "/posts/edit-story", params: { id: story.id } });
   const when = (iso: string) => ({ date: shortDate(iso), time: time24(iso) });
 
@@ -149,7 +150,7 @@ export default function StoryDetail() {
           <PageLoading photo rows={1} style={{ marginTop: 0 }} />
         )
       ) : (
-        <Frames frames={release.frames} />
+        <Frames frames={release.frames} written={version !== null} />
       )}
 
       {release?.rendering ? (
@@ -268,7 +269,7 @@ export default function StoryDetail() {
 }
 
 /** The rendered frames, one 9:16 page each: swipe through them; the visible clip plays (muted, looping). */
-function Frames({ frames }: { frames: StoryRelease["frames"] }) {
+function Frames({ frames, written }: { frames: StoryRelease["frames"]; written: boolean }) {
   const { t } = useTranslation("posts");
   // At most 300 wide (533 tall), so the checks and actions start on the first screen.
   const [width, setWidth] = useState(0);
@@ -278,7 +279,7 @@ function Frames({ frames }: { frames: StoryRelease["frames"] }) {
   if (!frames.length) {
     return (
       <View style={[styles.frame, styles.empty, { width: FRAME_MAX, alignSelf: "center" }]}>
-        <Text style={[type.meta, { textAlign: "center", paddingHorizontal: space[16] }]}>{t("stories.detail.noFrames")}</Text>
+        <Text style={[type.meta, { textAlign: "center", paddingHorizontal: space[16] }]}>{t(written ? "stories.detail.noFrames" : "stories.detail.notWritten")}</Text>
       </View>
     );
   }

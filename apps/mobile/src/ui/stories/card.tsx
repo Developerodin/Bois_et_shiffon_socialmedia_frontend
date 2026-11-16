@@ -47,24 +47,20 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
       setBusy(false);
     }
   };
+  const duplicate = () => void run(() => stories.duplicate(story.id));
+  const remove = () =>
+    Alert.alert(t("stories.deleteTitle"), t("stories.deleteBody"), [
+      { text: t("stories.cancel"), style: "cancel" },
+      { text: t("stories.delete"), style: "destructive", onPress: () => void run(() => stories.remove(story.id)) },
+    ]);
+  const deletable = story.tab === "drafts";
   const menu = () =>
     Alert.alert(story.title, undefined, [
-      { text: t("stories.duplicate"), onPress: () => void run(() => stories.duplicate(story.id)) },
-      ...(story.tab === "drafts"
-        ? [
-            {
-              text: t("stories.delete"),
-              style: "destructive" as const,
-              onPress: () =>
-                Alert.alert(t("stories.deleteTitle"), t("stories.deleteBody"), [
-                  { text: t("stories.cancel"), style: "cancel" },
-                  { text: t("stories.delete"), style: "destructive", onPress: () => void run(() => stories.remove(story.id)) },
-                ]),
-            },
-          ]
-        : []),
+      { text: t("stories.duplicate"), onPress: duplicate },
+      ...(deletable ? [{ text: t("stories.delete"), style: "destructive" as const, onPress: remove }] : []),
       { text: t("stories.cancel"), style: "cancel" },
     ]);
+  const hasMenu = !story.writing && can("content.create");
 
   return (
     <View style={{ flex: 1, gap: space[8] }}>
@@ -73,6 +69,9 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
         accessibilityLabel={t("stories.cardLabel", { title: story.title, status: when ? `${line}, ${when}` : line })}
         disabled={story.writing}
         onPress={() => openStory(story.id)}
+        // On iOS the card hides the nested "…" button from VoiceOver, so its choices are offered as card actions too.
+        accessibilityActions={hasMenu && !busy ? [{ name: "duplicate", label: t("stories.duplicate") }, ...(deletable ? [{ name: "delete", label: t("stories.delete") }] : [])] : undefined}
+        onAccessibilityAction={(e) => (e.nativeEvent.actionName === "duplicate" ? duplicate() : e.nativeEvent.actionName === "delete" ? remove() : undefined)}
         style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}
       >
         {story.firstFrameUrl ? (
@@ -80,7 +79,7 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
         ) : (
           <View style={styles.placeholder}>
             {story.writing ? <ActivityIndicator color={color.primary} /> : <ImagePlus size={24} color={color.inkSecondary} strokeWidth={1.75} />}
-            {story.writing ? null : <Text style={[type.meta, { color: color.ink }]}>{t("stories.addPhotos")}</Text>}
+            {story.writing ? null : <Text style={[type.meta, { color: color.ink }]}>{t(story.version === null ? "stories.notWritten" : "stories.addPhotos")}</Text>}
           </View>
         )}
         <LinearGradient colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0)", "rgba(0,0,0,0.8)"]} locations={[0, 0.5, 1]} style={StyleSheet.absoluteFill} />
@@ -90,7 +89,7 @@ export function StoryCard({ story, onChanged }: { story: Card; onChanged: () => 
               {line}
             </Text>
           </View>
-          {story.writing || !can("content.create") ? null : (
+          {!hasMenu ? null : (
             <Pressable accessibilityRole="button" accessibilityLabel={t("stories.moreOptions", { title: story.title })} hitSlop={10} disabled={busy} onPress={menu} style={styles.more}>
               {busy ? <ActivityIndicator size="small" color={color.onPrimary} /> : <Ellipsis size={16} color={color.onPrimary} strokeWidth={1.75} />}
             </Pressable>
