@@ -192,6 +192,9 @@ export function renderedKeyFor(scope: RenderOpts["scope"], hash: string, kind: "
   return mediaKey(scope, file).replace(/[^/]+$/, `stories/${file}`);
 }
 
+/** A rendered clip's poster: its first picture as a JPEG next to the MP4, for lists that can only show an image. */
+export const posterKeyFor = (videoKey: string) => videoKey.replace(/\.mp4$/, ".jpg");
+
 /**
  * Crop, as the phone sends it (and must preview it):
  * - `scale` multiplies the cover fit: 1 = Fill (the frame is covered, the overflow cut), below 1 shows more of the
@@ -416,7 +419,18 @@ export async function renderClipFrame(frame: StoryFrame, opts: RenderOpts, deps:
       await writeFile(out, bytes);
       return { width: W, height: H, bytes: bytes.length, durationSec: (await probeVideo(out)).durationSec };
     };
-    if (await deps.exists(key)) return { key, file: await measure(await deps.get(key, VIDEO_MAX_BYTES)) };
+    // The poster is taken from the finished MP4 at `out`, so it shows the overlay; a clip rendered before posters
+    // existed gets one here the next time it is reused.
+    const poster = async () => {
+      const jpg = path.join(dir, "poster.jpg");
+      await run(["-hide_banner", "-y", "-protocol_whitelist", "file", "-f", "mov", "-i", out, "-frames:v", "1", "-q:v", "3", jpg], 30_000);
+      await deps.put(posterKeyFor(key), new Uint8Array(await readFile(jpg)), "image/jpeg");
+    };
+    if (await deps.exists(key)) {
+      const file = await measure(await deps.get(key, VIDEO_MAX_BYTES));
+      if (!(await deps.exists(posterKeyFor(key)))) await poster();
+      return { key, file };
+    }
 
     const input = path.join(dir, "source");
     await writeFile(input, await deps.get(sourceKey(frame, opts), VIDEO_MAX_BYTES));
@@ -441,6 +455,8 @@ export async function renderClipFrame(frame: StoryFrame, opts: RenderOpts, deps:
     const file = { width: W, height: H, bytes: bytes.length, durationSec: (await probeVideo(out)).durationSec };
     // The container's duration can disagree with where the frames end; the output itself is the final word.
     if (file.durationSec < MIN_CLIP_SECONDS) throw windowRefused();
+    // Poster first: an MP4 in storage always has its poster beside it.
+    await poster();
     await deps.put(key, bytes, "video/mp4");
     return { key, file };
   } finally {

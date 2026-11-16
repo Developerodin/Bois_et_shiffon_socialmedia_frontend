@@ -10,7 +10,7 @@ import { CREDIT_COSTS, InsufficientCreditsError, refundCharge, spendCredits } fr
 import { APP_GOALS, EDITABLE, lock, PublishingError, TX } from "@/server/services/publishing";
 import { getMediaBytes, signedMediaUrl } from "@/server/storage/media";
 import { isStoryBody, REEL_SIZE, type StoryBody, type StoryFrame, type StoryFrameInput, type StoryInput } from "@/server/stories/body";
-import { renderClipFrame, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
+import { posterKeyFor, renderClipFrame, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
 import { resolveSource } from "@/server/stories/sources";
 
 /**
@@ -314,6 +314,11 @@ export function storyTab(item: { status: string; byHand: boolean }, attempts: { 
 /** The rendered frame's URL (an hour), only for files under this brand's stories folder. */
 export function renderedUrl(scope: BrandScope, key: string | undefined) {
   return key && key.startsWith(`${scope.workspaceId}/${scope.brandId}/stories/`) && !key.includes("..") ? signedMediaUrl(key, 3600) : null;
+}
+
+/** A story's list thumbnail: frame 1's rendered picture, or its poster JPEG when frame 1 is a clip. */
+export function coverUrl(scope: BrandScope, key: string | undefined) {
+  return renderedUrl(scope, key?.endsWith(".mp4") ? posterKeyFor(key) : key);
 }
 
 /** What the story screens add to the post state: render progress and the latest version's frames. */

@@ -6,7 +6,7 @@ import ffmpegPath from "ffmpeg-static";
 import sharp from "sharp";
 import { describe, expect, it, vi } from "vitest";
 import type { StoryFrame } from "@/server/stories/body";
-import { clipArgs, cropWindow, escapeMarkup, renderClipFrame, renderedKeyFor, renderInputsHash, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
+import { clipArgs, cropWindow, escapeMarkup, posterKeyFor, renderClipFrame, renderedKeyFor, renderInputsHash, renderPhotoFrame, type RenderOpts, textFits } from "@/server/stories/render";
 
 const scope = { workspaceId: "ws1", brandId: "b1" };
 const opts: RenderOpts = { scope, language: "fr", isLast: true, cta: "Voir la table", brandMark: false };
@@ -188,7 +188,10 @@ describe("renderClipFrame", () => {
       expect(r.file).toMatchObject({ width: 1080, height: 1920 });
       expect(r.file.durationSec).toBeGreaterThan(2.5);
       expect(r.file.durationSec).toBeLessThan(3.5);
-      expect(put.mock.calls[0]).toEqual([r.key, expect.any(Uint8Array), "video/mp4"]);
+      expect(put.mock.calls[0]).toEqual([posterKeyFor(r.key), expect.any(Uint8Array), "image/jpeg"]);
+      expect(put.mock.calls[1]).toEqual([r.key, expect.any(Uint8Array), "video/mp4"]);
+      const jpg = (put.mock.calls[0] as unknown as [string, Uint8Array])[1];
+      expect(await sharp(jpg).metadata()).toMatchObject({ format: "jpeg", width: 1080, height: 1920 });
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
