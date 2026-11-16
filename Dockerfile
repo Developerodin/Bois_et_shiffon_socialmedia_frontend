@@ -20,7 +20,9 @@ COPY packages/shared packages/shared
 RUN npm run build -w web-frontend
 
 FROM base AS runtime
-ENV NODE_ENV=production PORT=3100 HOSTNAME=0.0.0.0
+# KEEP_ALIVE_TIMEOUT (read by the standalone server.js) above the ALB's 330 s idle timeout: with Node's 5 s default
+# the ALB reuses a connection the target has closed and the caller gets a 502.
+ENV NODE_ENV=production PORT=3100 HOSTNAME=0.0.0.0 KEEP_ALIVE_TIMEOUT=335000
 COPY --from=build --chown=node:node /app/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /app/apps/web/.next/static apps/web/.next/static
 COPY --from=build --chown=node:node /app/apps/web/public apps/web/public
