@@ -10,9 +10,12 @@ const db = vi.hoisted(() => {
   };
   return d;
 });
+const refresh = vi.hoisted(() => vi.fn());
 vi.mock("@/server/db/prisma", () => ({ prisma: db }));
+vi.mock("@/server/crypto/credentials", () => ({ currentKeyVersion: () => 1, encryptCredentials: () => "sealed", decryptCredentials: () => ({ accessToken: "old", refreshToken: "r" }) }));
+vi.mock("@/server/integrations/providers", () => ({ PROVIDERS: { INSTAGRAM: { refresh } }, providerConfig: () => ({ clientId: "id", secret: "s" }), ProviderError: class extends Error {} }));
 
-import { disconnect } from "@/server/services/connections";
+import { accessToken, disconnect, ReconnectNeeded } from "@/server/services/connections";
 
 const input = { workspaceId: "w1", brandId: "b1", connectionId: "c1", userId: "u1" };
 const frame = (i: number, state: string) => ({ i, state, mediaId: state === "published" ? `m${i}` : null });
@@ -37,5 +40,22 @@ describe("disconnect", () => {
     expect(db.publicationAttempt.updateMany).toHaveBeenCalledTimes(1);
     expect(db.publicationAttempt.updateMany).toHaveBeenCalledWith({ where: { id: { in: ["a2"] }, status: "SCHEDULED" }, data: expect.objectContaining({ status: "PARTIAL" }) });
     expect(db.contentItem.updateMany).not.toHaveBeenCalled();
+  });
+});
+
+describe("accessToken refresh", () => {
+  const conn = { id: "c1", provider: "INSTAGRAM", status: "ACTIVE", displayName: "@shop", encryptedCredentials: "x", tokenExpiresAt: new Date(Date.now() + 86_400_000) } as Parameters<typeof accessToken>[0];
+
+  it("writes the new tokens only onto a still-connected account", async () => {
+    refresh.mockResolvedValue({ credentials: { accessToken: "new", refreshToken: "r2" }, tokenExpiresAt: new Date(Date.now() + 60 * 86_400_000) });
+    db.integrationConnection.updateMany.mockResolvedValue({ count: 1 });
+    await expect(accessToken(conn)).resolves.toBe("new");
+    expect(db.integrationConnection.updateMany).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "c1", status: "ACTIVE" } }));
+  });
+
+  it("disconnected during the refresh: nothing written back, and no token handed out", async () => {
+    refresh.mockResolvedValue({ credentials: { accessToken: "new", refreshToken: "r2" }, tokenExpiresAt: new Date(Date.now() + 60 * 86_400_000) });
+    db.integrationConnection.updateMany.mockResolvedValue({ count: 0 });
+    await expect(accessToken(conn)).rejects.toBeInstanceOf(ReconnectNeeded);
   });
 });

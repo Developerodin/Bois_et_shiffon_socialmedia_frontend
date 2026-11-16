@@ -44,12 +44,15 @@ export async function accessToken(conn: IntegrationConnection): Promise<string> 
     if (!adapter.refresh || !cfg) throw new ProviderError("400 This account can't be refreshed automatically");
     const next = await adapter.refresh({ credentials: creds, ...cfg });
     const keyVersion = currentKeyVersion();
-    await prisma.integrationConnection.update({
-      where: { id: conn.id },
+    // Only onto a still-connected account: a Disconnect during the refresh must keep its credentials gone.
+    const { count } = await prisma.integrationConnection.updateMany({
+      where: { id: conn.id, status: "ACTIVE" },
       data: { encryptedCredentials: encryptCredentials(next.credentials, keyVersion), credentialKeyVersion: keyVersion, tokenExpiresAt: next.tokenExpiresAt, lastError: null },
     });
+    if (count !== 1) throw new ReconnectNeeded(`${conn.displayName} isn't connected`);
     return next.credentials.accessToken;
   } catch (e) {
+    if (e instanceof ReconnectNeeded) throw e;
     const refused = e instanceof ProviderError && /^4\d\d /.test(e.message);
     // An expired token with a refresh token isn't lost on a network blip: the next call refreshes again.
     if (refused || (expired && !creds.refreshToken)) {
