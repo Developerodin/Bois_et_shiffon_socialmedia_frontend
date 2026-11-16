@@ -15,7 +15,7 @@ export function api(strings: TemplateStringsArray, ...values: (string | number)[
  * The 401 redirect carries the page being viewed (x-pathname, set in middleware) so sign-in returns there.
  */
 export async function serverFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const base = process.env.SERVER_URL ?? "http://localhost:3100";
+  const base = process.env.SERVER_URL ?? "http://localhost:3101";
   const cookie = (await cookies()).toString();
   const res = await fetch(base + path, {
     ...init,

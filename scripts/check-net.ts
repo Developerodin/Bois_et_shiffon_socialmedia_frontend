@@ -1,6 +1,6 @@
 /**
  * lib/net.ts checks: offline, server unreachable and gateway errors, with the browser's online state, its events
- * and fetch faked. Run: npm run check:net -w web
+ * and fetch faked. Run: npm run check:net -w web-frontend
  */
 import assert from "node:assert/strict";
 import { NetworkError, send } from "@/lib/net";

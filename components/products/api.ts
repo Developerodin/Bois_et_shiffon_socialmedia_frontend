@@ -1,7 +1,6 @@
 // Client-side contract for the products API (app/api/v1/.../brands/[brandId]/products). Keep in sync with the routes.
 import { request } from "@/components/settings/api";
-// eslint-disable-next-line no-restricted-imports -- converted in task 6
-import type { CatalogSync } from "@/server/catalog/sync";
+import type { CatalogSync } from "@espanda/shared";
 
 export type { CatalogSync };
 

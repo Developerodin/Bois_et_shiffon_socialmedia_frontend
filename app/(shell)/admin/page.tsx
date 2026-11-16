@@ -70,7 +70,7 @@ export default async function AdminOverview() {
 
       <footer className="max-w-prose border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
         Spend is list price from the usage ledger{fx ? `, in rupees at ₹${fx.rate.toFixed(2)} per dollar` : ""}.
-        {o.unpriced ? ` ${o.unpriced.toLocaleString("en")} AI calls from before costs were stored aren’t counted; the usage report (npm run usage -w web) prices them from their tokens.` : ""}
+        {o.unpriced ? ` ${o.unpriced.toLocaleString("en")} AI calls from before costs were stored aren’t counted; the usage report (npm run usage -w server) prices them from their tokens.` : ""}
       </footer>
     </>
   );

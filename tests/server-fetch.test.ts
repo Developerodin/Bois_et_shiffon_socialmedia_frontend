@@ -35,7 +35,7 @@ describe("serverFetch", () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: 1 })));
     await expect(serverFetch("/api/v1/x")).resolves.toEqual({ ok: 1 });
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe("http://localhost:3100/api/v1/x");
+    expect(url).toBe("http://localhost:3101/api/v1/x");
     expect(init.cache).toBe("no-store");
     expect(init.headers.cookie).toBe("a=1; b=2");
   });

@@ -17,10 +17,20 @@ export default defineConfig({
   },
   // PLAYWRIGHT_CHANNEL=msedge uses the installed Edge when Playwright's own browsers aren't downloaded.
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], channel: process.env.PLAYWRIGHT_CHANNEL } }],
-  webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3100",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // Both apps: the Server (API, sign-in) and the website, which sends /api/* to it.
+  webServer: [
+    {
+      command: "npm run dev",
+      cwd: "../server",
+      url: "http://localhost:3101/api/auth/providers",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command: "npm run dev",
+      url: "http://localhost:3100",
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 });

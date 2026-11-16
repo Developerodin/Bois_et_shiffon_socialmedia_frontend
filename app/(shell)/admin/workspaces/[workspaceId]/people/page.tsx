@@ -36,7 +36,7 @@ export default async function AdminWorkspacePeople({ params }: { params: Promise
         />
       </Section>
 
-      <Section id="access" title="What each person can do" description="Every permission, on the workspace and on each project, with the role that grants it. Matches what the app enforces (npm run check:platform-admin -w web).">
+      <Section id="access" title="What each person can do" description="Every permission, on the workspace and on each project, with the role that grants it. Matches what the app enforces (npm run check:platform-admin -w server).">
         <div className="flex flex-col gap-2">
           {d.members.map((m) => (
             <details key={m.user.id} className="group rounded-xl border border-border bg-card">
