@@ -34,4 +34,11 @@ describe("the runner and story renders", () => {
     expect(m.updateMany.mock.calls[0][0].data.status).toBe("PENDING");
     expect(m.onFailure).toHaveBeenCalledWith(job.payload, crash, false);
   });
+
+  it("a runner that lost its lease runs no failure hook (another runner holds the job)", async () => {
+    m.run.mockRejectedValue(new Error("cut off"));
+    m.updateMany.mockResolvedValue({ count: 0 }); // the fail write matched nothing: not this runner's lease any more
+    await runDueJobs({ budgetMs: 5_000 });
+    expect(m.onFailure).not.toHaveBeenCalled();
+  });
 });

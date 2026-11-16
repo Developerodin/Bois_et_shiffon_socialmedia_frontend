@@ -64,8 +64,7 @@ export async function runDueJobs({ budgetMs = 45_000 } = {}) {
     // Reclaimed after its last attempt died mid-run (timeout, crash): stop here instead of looping forever.
     if (job.attempts > job.maxAttempts) {
       const error = new Error("Stopped: it was cut off before finishing on every attempt");
-      await failJob(job, error, false);
-      await handler?.onFailure?.(job.payload, error, true).catch(() => {});
+      if ((await failJob(job, error, false)) !== null) await handler?.onFailure?.(job.payload, error, true).catch(() => {});
       continue;
     }
     const release = holdLease(job);
@@ -79,7 +78,9 @@ export async function runDueJobs({ budgetMs = 45_000 } = {}) {
       const refused = (job.type === CATALOG_SYNC_JOB && error instanceof ReconnectNeeded) || (job.type === STORY_RENDER_JOB && error instanceof PublishingError);
       const retryable = error instanceof AiProviderError ? error.retryable : !(error instanceof NothingToDoError || refused);
       const exhausted = await failJob(job, error, retryable && Boolean(handler));
-      await handler?.onFailure?.(job.payload, error, exhausted).catch(() => {});
+      // A runner that lost its lease leaves the job to whoever holds it: its failure hooks (mark failed, refund) would
+      // undo work the other runner may still finish.
+      if (exhausted !== null) await handler?.onFailure?.(job.payload, error, exhausted).catch(() => {});
     } finally {
       release();
     }
