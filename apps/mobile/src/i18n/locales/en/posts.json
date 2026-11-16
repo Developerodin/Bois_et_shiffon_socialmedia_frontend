@@ -334,7 +334,8 @@
       "linkInvalid": "Paste the story’s link (instagram.com/stories/…).",
       "linkAccount": "That story is on another Instagram account.",
       "settleFrame": "Say whether the frame that wasn’t confirmed appeared first.",
-      "writeStart": "Writing didn’t start. Try again."
+      "writeStart": "Writing didn’t start. Try again.",
+      "byHandOn": "This story is set to be posted by hand. Stop posting by hand first, so nobody posts the old frames."
     },
     "editor": {
       "done": "Done",

@@ -104,7 +104,8 @@ export default function StoryDetail() {
   const approved = story.status === "APPROVED" && !!release?.approvalValid;
   const byHand = approved && !!release?.byHand && !!release.scheduledFor;
   // Nothing to edit until the writer has saved a first version (a Planner story starts without one).
-  const editable = version !== null && ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"].includes(story.status) && can("content.create");
+  // Not while it's set to be posted by hand (the server refuses: its frames may be downloaded already).
+  const editable = !(story.status === "APPROVED" && release?.byHand) && version !== null && ["PLANNED", "BRIEF_READY", "DRAFT_REVIEW", "AWAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"].includes(story.status) && can("content.create");
   const edit = () => router.push({ pathname: "/posts/edit-story", params: { id: story.id } });
   const when = (iso: string) => ({ date: shortDate(iso), time: time24(iso) });
 

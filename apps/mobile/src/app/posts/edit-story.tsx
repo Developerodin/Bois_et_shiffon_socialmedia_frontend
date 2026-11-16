@@ -172,7 +172,9 @@ export default function EditStory() {
     );
   }
 
-  const editable = EDITABLE.includes(story.status) && can("content.create");
+  // Set to be posted by hand: its frames may be downloaded already, so the server refuses edits until that's stopped.
+  const byHandOn = story.status === "APPROVED" && !!release?.byHand;
+  const editable = EDITABLE.includes(story.status) && can("content.create") && !byHandOn;
   const rendering = !!release?.rendering || pending;
   // Without the release the editor can't tell a rendering or approved story from an editable one.
   const readOnly = !editable || rendering || busy || !release;
@@ -350,7 +352,7 @@ export default function EditStory() {
       : t("stories.detail.preparing")
     : !release && readError
       ? readError
-      : (failure ?? problem ?? (!editable ? t("stories.editor.readOnly") : null));
+      : (failure ?? problem ?? (byHandOn ? t("stories.errors.byHandOn") : !editable ? t("stories.editor.readOnly") : null));
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
