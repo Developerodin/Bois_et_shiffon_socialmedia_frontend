@@ -25,6 +25,18 @@ export async function signOut() {
 }
 
 /**
+ * A saved sign-in stopped working (expired, signed out elsewhere): the same cleanup as signing out, so the next
+ * person to sign in doesn't get this one's business. Onboarding answers stay, so they continue where they were.
+ * The token is already gone, so the server can't be told to drop this phone's push device; only the phone forgets
+ * it (it stops counting as registered, and the in-app banner takes over).
+ */
+export function sessionEnded() {
+  void disablePush();
+  forgetBrand();
+  forgetBusinessState();
+}
+
+/**
  * Where a signed-in person goes (after any sign-in, and at app start with a saved sign-in): the app if they have a
  * business, onboarding if they have none. Onboarding creates a business, so it's only chosen when the server said
  * there is none: a failed lookup (offline, a 5xx) goes to the app, whose screens retry.

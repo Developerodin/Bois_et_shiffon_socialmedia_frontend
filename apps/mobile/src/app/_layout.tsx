@@ -10,6 +10,7 @@ import "@/i18n";
 import { onSignedOut, session } from "@/api/client";
 import { me, recordPageView } from "@/api/endpoints";
 import { color } from "@/theme/tokens";
+import { sessionEnded } from "@/ui/account-actions";
 import { Button } from "@/ui/button";
 import { ConnectionBanner } from "@/ui/connection-banner";
 import { ErrorScreen } from "@/ui/error-screen";
@@ -37,9 +38,16 @@ export default function RootLayout() {
     if (ready) void SplashScreen.hideAsync();
   }, [ready]);
 
-  // A saved sign-in that stops working (expired, signed out elsewhere): back to sign in, saying why. Onboarding
-  // answers are kept, so they continue where they were once signed in again.
-  useEffect(() => onSignedOut(() => resetTo({ pathname: "/onboarding/sign-in", params: { expired: "1" } })), []);
+  // A saved sign-in that stops working (expired, signed out elsewhere): forget its business, then back to sign in,
+  // saying why. Onboarding answers are kept, so they continue where they were once signed in again.
+  useEffect(
+    () =>
+      onSignedOut(() => {
+        sessionEnded();
+        resetTo({ pathname: "/onboarding/sign-in", params: { expired: "1" } });
+      }),
+    [],
+  );
 
   // Is the saved sign-in still good? Asked at launch and whenever the app comes back to the front, so one that
   // stopped working is noticed right away, not on whichever screen next happens to call the server. In the
