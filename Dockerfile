@@ -3,7 +3,7 @@
 # No env is baked in. At run time it needs only SERVER_URL (server-side rendering calls the Server there).
 # SERVER_URL is also read by `next build` for the dev-only /api rewrite; in production the load balancer or nginx
 # sends /api/* to the Server, so the website never proxies.
-FROM --platform=linux/amd64 node:20-bookworm-slim AS base
+FROM --platform=linux/amd64 node:22-bookworm-slim AS base
 ENV NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
 
