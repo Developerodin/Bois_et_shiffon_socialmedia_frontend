@@ -24,6 +24,11 @@ export const Brief = z.object({
 /** A story's brief also plans its frames (in order). A separate schema: strict structured output has no optional fields. */
 const StoryBrief = Brief.extend({ frames: z.array(z.object({ purpose: z.string(), composition: z.string() })) });
 const PER_RUN = 8;
+/**
+ * Planned posts with no version yet. A planned item that already has one (a duplicated story) holds a person's text:
+ * briefing it would let the Creator rewrite that text as the next version.
+ */
+const WAITING = (brandId: string) => ({ brandId, status: "PLANNED" as const, studio: false, versions: { none: {} } });
 
 /** Brief writer: each PLANNED post gets a production brief → BRIEF_READY. */
 export const briefAgent: AgentDefinition = {
@@ -35,7 +40,7 @@ export const briefAgent: AgentDefinition = {
   async run(ctx, input) {
     const { brand } = ctx;
     const items = await prisma.contentItem.findMany({
-      where: { brandId: brand.brandId, status: "PLANNED", studio: false }, // studio reels plan themselves
+      where: WAITING(brand.brandId), // studio reels plan themselves
       orderBy: [{ scheduledFor: "asc" }, { createdAt: "asc" }],
       take: PER_RUN,
       include: { opportunity: { select: { title: true, summary: true, angle: true, reason: true } } },
@@ -98,7 +103,7 @@ export const briefAgent: AgentDefinition = {
       const chosen = candidates.filter((c) => productIds.includes(c.id)).slice(0, 3);
       // Only if it's still waiting for a brief: someone may have written the draft meanwhile.
       const { count } = await prisma.contentItem.updateMany({
-        where: { id: item.id, status: "PLANNED" },
+        where: { id: item.id, status: "PLANNED", versions: { none: {} } },
         data: { brief: { ...prior, ...brief, ...(chosen.length ? { products: chosen.map((c) => c.name) } : {}) }, productIds: chosen.map((c) => c.id), status: "BRIEF_READY" },
       });
       await ctx.log(count ? "SUCCESS" : "WARN", count ? `Brief ready: ${item.title}` : `Skipped (it moved on while I was writing): ${item.title}`, { type: "ContentItem", id: item.id });
@@ -108,7 +113,7 @@ export const briefAgent: AgentDefinition = {
       const start = (agentKey: string, next: number) =>
         startAgentRun({ workspaceId: brand.workspaceId, brandId: brand.brandId, agentKey, trigger: "event", input: { chain: true, round: next } }).catch(() => null);
       await start("creator", round);
-      const waiting = await prisma.contentItem.count({ where: { brandId: brand.brandId, status: "PLANNED", studio: false } });
+      const waiting = await prisma.contentItem.count({ where: WAITING(brand.brandId) });
       if (waiting > 0 && round + 1 < CHAIN_ROUNDS && (await postAiAllowed(brand.workspaceId))) await start("brief", round + 1);
     }
     return { briefed: items.length };

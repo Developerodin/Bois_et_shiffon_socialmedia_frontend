@@ -183,4 +183,13 @@ describe("Planner and Brief writer", () => {
     expect(brief.frames?.length).toBeGreaterThanOrEqual(3);
     expect(brief.frames?.[0]).toEqual({ purpose: expect.any(String), composition: expect.any(String) });
   });
+
+  it("leaves a planned item that already has a version (a duplicated story) unbriefed", async () => {
+    db.contentItem.findMany.mockResolvedValue([{ ...item({ status: "PLANNED", brief: { angle: "a" } }), pillar: null, scheduledFor: null, campaignId: null, opportunity: null }]);
+    await briefAgent.run(ctx(), {});
+    const [find] = db.contentItem.findMany.mock.calls.at(-1) as unknown as [{ where: { versions?: unknown } }];
+    const [upd] = db.contentItem.updateMany.mock.calls.at(-1) as unknown as [{ where: { versions?: unknown } }];
+    expect(find.where.versions).toEqual({ none: {} });
+    expect(upd.where.versions).toEqual({ none: {} });
+  });
 });
