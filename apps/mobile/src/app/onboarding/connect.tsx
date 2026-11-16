@@ -1,3 +1,4 @@
+import { useLocalSearchParams } from "expo-router";
 import { Check, CircleCheck, Download, Hash, Lock, SlidersHorizontal, Star, Video } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,8 +26,10 @@ export default function Connect() {
   };
   const { data: brand } = useBrandAssets();
   const [busy, setBusy] = useState<SocialProvider | null>(null);
-  const [failed, setFailed] = useState<string | null>(null);
-  const [connected, setConnected] = useState<string[]>([]);
+  // Set by app/connect.tsx when Android closed the app during the consent page and the return link finished it.
+  const back = useLocalSearchParams<{ connected?: string; failed?: string }>();
+  const [failed, setFailed] = useState<string | null>(back.failed ?? null);
+  const [connected, setConnected] = useState<string[]>(back.connected ? [back.connected] : []);
   const [done, setDone] = useState<SocialProvider[]>([]);
   const connect = async (provider: SocialProvider) => {
     setSkipSheet(false);
