@@ -28,9 +28,13 @@ export async function resetRateLimit(key: string) {
 export const limitKey = (kind: string, value: string) =>
   `${kind}:${createHash("sha256").update(value.trim().toLowerCase()).digest("hex").slice(0, 32)}`;
 
-/** First hop of X-Forwarded-For (set by Vercel / our proxy), else "unknown". */
+/**
+ * Right-most X-Forwarded-For entry, else x-real-ip, else "unknown". We run behind one trusted
+ * proxy hop (our ALB or nginx), which appends the real peer address; earlier entries are
+ * client-supplied and spoofable. Adding a second proxy hop means revisiting this.
+ */
 export function clientIp(request: Request | undefined) {
-  const forwarded = request?.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const forwarded = request?.headers.get("x-forwarded-for")?.split(",").map((s) => s.trim()).filter(Boolean).pop();
   return forwarded || request?.headers.get("x-real-ip")?.trim() || "unknown";
 }
 
