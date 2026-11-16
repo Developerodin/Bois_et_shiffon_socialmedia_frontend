@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import { ADMIN_PAGE_SIZE, type LogKind, type MemberPermissions, type WorkspaceSort } from "@espanda/shared";
 import { LEGACY_ROLE_SLUG, PERMISSIONS, type PermissionKey } from "@/server/auth/permissions.catalog";
 import { prisma } from "@/server/db/prisma";
 
@@ -12,7 +13,8 @@ import { prisma } from "@/server/db/prisma";
  * what the first does. ponytail: the Overview still loads every workspace's totals; fine into the thousands.
  */
 const DAY = 86_400_000;
-export const PAGE = 50;
+export const PAGE = ADMIN_PAGE_SIZE;
+export type { LogKind, MemberPermissions, WorkspaceSort };
 /** `?page=` as a page number: anything odd is page 1. ponytail: capped at 1000 (deep pages read more rows, see activity.ts). */
 export const pageNumber = (v?: string) => {
   const n = Number(v);
@@ -92,7 +94,6 @@ export async function platformOverview() {
   };
 }
 
-export type WorkspaceSort = "newest" | "spend" | "active" | "name";
 /**
  * One page of workspaces, searched (name or owner email), sorted and paged in SQL; spend and last activity are
  * worked out for that page only. Spend is the last 30 days, AI calls plus other paid APIs; last activity is the
@@ -141,7 +142,6 @@ export async function listWorkspaces({ q = "", sort = "newest", page = 1 }: { q?
   return { total: Number(total), customers30: num(usd), rows, hasMore: Number(total) > page * PAGE };
 }
 
-export type MemberPermissions = { key: PermissionKey; description: string; via: string }[];
 const DESCRIPTION = new Map<string, string>(PERMISSIONS.map(([key, , description]) => [key, description]));
 const perms = (keys: string[], via: string): MemberPermissions => keys.map((key) => ({ key: key as PermissionKey, description: DESCRIPTION.get(key) ?? key, via }));
 
@@ -333,7 +333,6 @@ export type SpendBreakdown = Awaited<ReturnType<typeof spendBreakdown>>;
 
 // ── Logs ────────────────────────────────────────────────────────────────────
 
-export type LogKind = "audit" | "runs" | "events" | "calls";
 /** What each log can be narrowed to (the `status` filter). */
 export const LOG_FILTERS: Record<LogKind, { value: string; label: string }[]> = {
   audit: [{ value: "auth", label: "Sign-ins" }, { value: "platform", label: "Platform admin" }, { value: "content", label: "Content" }, { value: "member", label: "Members & roles" }],

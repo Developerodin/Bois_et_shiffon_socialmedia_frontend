@@ -1,13 +1,9 @@
 import Link from "next/link";
+import type { AdminLogsResponse, AdminOverview as Overview, AdminSpend } from "@espanda/shared";
 import { LogTable } from "@/components/admin/log-table";
 import { SpendChart } from "@/components/admin/spend-chart";
-import { Ago, Money, PageHeader, Section, Stat, Table, type Fx } from "@/components/admin/ui";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { platformLogs, platformOverview, spendBreakdown } from "@/server/services/platform-admin";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { usdInrRate } from "@/server/usage/fx";
+import { Ago, fxOf, Money, PageHeader, Section, Stat, Table, type Fx } from "@/components/admin/ui";
+import { serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Platform admin" };
 
@@ -18,10 +14,14 @@ const more = "text-xs text-muted-foreground underline-offset-4 hover:text-foregr
 
 /** The console's front page: the numbers that matter, the last 30 days of spend, who costs most, what just happened. */
 export default async function AdminOverview() {
-  await requirePlatformAdminPage();
-  const [o, spend, activity, fx] = await Promise.all([platformOverview(), spendBreakdown({ days: 30 }), platformLogs({ kind: "audit" }), usdInrRate()]);
+  const [o, spend, activity] = await Promise.all([
+    serverFetch<Overview>("/api/v1/admin/overview"),
+    serverFetch<AdminSpend>("/api/v1/admin/spend"), // the default period is the last 30 days
+    serverFetch<AdminLogsResponse>("/api/v1/admin/logs"),
+  ]);
+  const fx = fxOf(o.usdInr);
   const c30 = usd30(o.customers);
-  const top = [...o.workspaces].sort((a, b) => usd30(b.spend) - usd30(a.spend)).slice(0, 5);
+  const top = o.top;
 
   return (
     <>
@@ -31,7 +31,7 @@ export default async function AdminOverview() {
 
       {/* Customers and the test set apart: test runs can cost hundreds of times what customers do. */}
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <Stat href="/admin/workspaces" label="Workspaces" value={o.workspaces.length.toLocaleString("en")} hint={`${o.users.toLocaleString("en")} people`} />
+        <Stat href="/admin/workspaces" label="Workspaces" value={o.workspaceCount.toLocaleString("en")} hint={`${o.users.toLocaleString("en")} people`} />
         <Stat href="/admin/spend" label="Customer spend, last 30 days" value={dollars(c30)} hint={[rupees(c30, fx), `all time ${dollars(o.customers.aiUsd + o.customers.apiUsd)}`].filter(Boolean).join(" · ")} />
         <Stat href="/admin/logs?log=calls" label="AI calls, last 30 days" value={o.customers.calls30.toLocaleString("en")} hint={`${o.customers.apiCalls30.toLocaleString("en")} other paid API calls`} />
         <Stat href="/admin/spend?tests=1" label="Test runs, last 30 days" value={dollars(usd30(o.tests))} hint={`${o.tests.calls30.toLocaleString("en")} calls (npm run eval)`} />
@@ -57,7 +57,7 @@ export default async function AdminOverview() {
             ])}
           />
           <Link href="/admin/workspaces" className={more}>
-            All {o.workspaces.length.toLocaleString("en")} workspaces
+            All {o.workspaceCount.toLocaleString("en")} workspaces
           </Link>
         </Section>
         <Section id="activity" title="Latest activity" description="Sign-ins, role changes, approvals and admin visits, across the platform.">

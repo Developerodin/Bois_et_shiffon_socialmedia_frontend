@@ -5,7 +5,9 @@ import { cn } from "@/lib/utils";
 
 /** Small building blocks for the platform admin console (app/(shell)/admin). Server components only. */
 
-export type Fx = { rate: number; from: string; asOf?: Date } | null;
+export type Fx = { rate: number } | null;
+/** The USD to INR rate an admin API response carries, as the money cells take it. */
+export const fxOf = (usdInr: number | null): Fx => (usdInr ? { rate: usdInr } : null);
 
 const DATE = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" });
 export const when = (d: Date | string | null | undefined) => (d ? `${DATE.format(new Date(d))} UTC` : "–");
@@ -173,17 +175,8 @@ export function CursorPager({ newest, older }: { newest?: string; older?: string
   );
 }
 
-/** The period switch (Spend, Activity, Logs): `?days=` 7, 30 (the default, left out of the URL), 90 or all. */
-export const PERIODS = [
-  { value: "7", label: "7 days" },
-  { value: "30", label: "30 days" },
-  { value: "90", label: "90 days" },
-  { value: "all", label: "All time" },
-];
-export function period(v?: string) {
-  const value = PERIODS.some((p) => p.value === v) ? v! : "30";
-  return { value, days: value === "all" ? null : Number(value), param: value === "30" ? undefined : value, span: value === "all" ? "all time" : `last ${value} days` };
-}
+/** The period switch (Spend, Activity, Logs): `?days=` 7, 30 (the default, left out of the URL), 90 or all. The API reads the same query. */
+export { PERIODS, period } from "@espanda/shared";
 
 /** Page header for the console: eyebrow, title, one line of context. */
 export function PageHeader({ eyebrow, title, children, crumbs }: { eyebrow?: string; title: string; children?: React.ReactNode; crumbs?: { href?: string; label: string }[] }) {

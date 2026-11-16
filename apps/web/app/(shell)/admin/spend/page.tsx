@@ -1,12 +1,9 @@
 import { SpendView } from "@/components/admin/spend-view";
 import { PageHeader } from "@/components/admin/ui";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
 
 export const metadata = { title: "Spend & usage · Platform admin" };
 
 export default async function AdminSpend({ searchParams }: { searchParams: Promise<{ days?: string; tests?: string }> }) {
-  await requirePlatformAdminPage();
   return (
     <>
       <PageHeader eyebrow="Platform admin" title="Spend & usage">

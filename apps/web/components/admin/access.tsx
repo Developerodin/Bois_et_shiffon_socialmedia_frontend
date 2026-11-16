@@ -1,9 +1,6 @@
 import { Check } from "lucide-react";
+import { PERMISSIONS, type MemberPermissions } from "@espanda/shared";
 import { Empty } from "@/components/admin/ui";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { PERMISSIONS } from "@/server/auth/permissions.catalog";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import type { MemberPermissions } from "@/server/services/platform-admin";
 
 /**
  * What one person can do, as a matrix: every permission down the side, one column per scope (the workspace, then

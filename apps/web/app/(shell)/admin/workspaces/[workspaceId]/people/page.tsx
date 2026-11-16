@@ -1,18 +1,13 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import type { AdminWorkspaceDetail } from "@espanda/shared";
 import { AccessMatrix } from "@/components/admin/access";
 import { day, Empty, Pill, Section, Table, when } from "@/components/admin/ui";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { workspaceDetail } from "@/server/services/platform-admin";
+import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "People · Workspace · Platform admin" };
 
 export default async function AdminWorkspacePeople({ params }: { params: Promise<{ workspaceId: string }> }) {
-  await requirePlatformAdminPage();
-  const d = await workspaceDetail((await params).workspaceId);
-  if (!d) notFound();
+  const d = await serverFetch<AdminWorkspaceDetail>(api`/api/v1/admin/workspaces/${(await params).workspaceId}`);
 
   return (
     <>

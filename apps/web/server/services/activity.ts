@@ -1,3 +1,4 @@
+import { NO_WORKSPACE, type ActivitySort } from "@espanda/shared";
 import { prisma } from "@/server/db/prisma";
 import { cursorOf, type Cursor, nameLookup, olderThan, PAGE, TEST_WORKSPACE } from "@/server/services/platform-admin";
 
@@ -61,7 +62,7 @@ export function mergeActivityCounts(sources: { visits: Counted[]; actions: Count
   return [...rows.values()].sort((a, b) => +b.last - +a.last);
 }
 
-export type ActivitySort = "active" | "visits" | "actions" | "tasks" | "spend";
+export type { ActivitySort };
 const BY: Record<ActivitySort, (r: ActivityCount) => number> = { active: (r) => +r.last, visits: (r) => r.visits, actions: (r) => r.actions, tasks: (r) => r.tasks, spend: (r) => r.usd };
 /** Biggest first; ties stay most recently active first. */
 export const sortActivity = (rows: ActivityCount[], sort: ActivitySort) => [...rows].sort((a, b) => BY[sort](b) - BY[sort](a) || +b.last - +a.last);
@@ -103,8 +104,7 @@ export async function activityList({ workspaceId, userIds, days = null, sort = "
   return { total: all.length, hasMore: all.length > page * PAGE, rows: rows.map((r) => ({ ...r, ...names(r) })) };
 }
 
-/** `?ws=` value for activity outside any workspace (the Activity list's "no workspace" rows). */
-export const NO_WORKSPACE = "none";
+export { NO_WORKSPACE };
 
 // ── One person's timeline ───────────────────────────────────────────────────
 

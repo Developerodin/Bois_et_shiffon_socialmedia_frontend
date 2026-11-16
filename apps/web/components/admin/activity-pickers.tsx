@@ -1,9 +1,6 @@
+import { NO_WORKSPACE } from "@espanda/shared";
 import { AutoSubmitForm } from "@/components/admin/auto-submit-form";
 import { pillButton as button } from "@/components/admin/ui";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { NO_WORKSPACE } from "@/server/services/activity";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import type { PickerOptions } from "@/server/services/platform-admin";
 
 const field = "h-9 max-w-64 rounded-full border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
@@ -11,7 +8,7 @@ const field = "h-9 max-w-64 rounded-full border border-input bg-card px-3 text-s
  * Workspace and person filters in one plain GET form: every view has its own URL, and a new choice starts again at
  * the newest page. The person box matches any part of a name or email.
  */
-export function ActivityPickers({ ws, who, options, hidden = {}, person = true, noWorkspace = false }: { ws?: string; who?: string; options: PickerOptions; hidden?: Record<string, string | undefined>; person?: boolean; noWorkspace?: boolean }) {
+export function ActivityPickers({ ws, who, options, hidden = {}, person = true, noWorkspace = false }: { ws?: string; who?: string; options: { workspaces: { id: string; name: string }[] }; hidden?: Record<string, string | undefined>; person?: boolean; noWorkspace?: boolean }) {
   return (
     <AutoSubmitForm className="flex flex-wrap items-center gap-2">
       {Object.entries(hidden).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}

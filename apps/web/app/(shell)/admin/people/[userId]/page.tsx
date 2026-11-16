@@ -1,24 +1,18 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { after } from "next/server";
+import type { AdminPerson } from "@espanda/shared";
 import { AccessMatrix } from "@/components/admin/access";
 import { LogTable } from "@/components/admin/log-table";
 import { Ago, day, PageHeader, Pill, Section, Stat, when } from "@/components/admin/ui";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { personDetail, platformLogs, recordPersonView } from "@/server/services/platform-admin";
+import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Person · Platform admin" };
 
 /** One person across the platform. Read-only; the visit is recorded in the audit log. */
 export default async function AdminPerson({ params }: { params: Promise<{ userId: string }> }) {
-  const viewer = await requirePlatformAdminPage();
   const { userId } = await params;
-  const p = await personDetail(userId);
-  if (!p) notFound();
-  after(() => recordPersonView(userId, viewer)); // written after the page is sent: the visit never waits on it
-  const audit = (await platformLogs({ kind: "audit", actorIds: [userId] })).rows.slice(0, 15);
+  // Recorded alongside the read (a missing person is a 404 from both).
+  const [p] = await Promise.all([serverFetch<AdminPerson>(api`/api/v1/admin/people/${userId}`), serverFetch(api`/api/v1/admin/people/${userId}/visit`, { method: "POST" })]);
+  const audit = p.audit;
 
   return (
     <>

@@ -1,14 +1,9 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import type { AdminLogsResponse, AdminSpend, AdminWorkspaceDetail } from "@espanda/shared";
 import { LogTable } from "@/components/admin/log-table";
 import { SpendChart } from "@/components/admin/spend-chart";
-import { Section, Stat, type Fx } from "@/components/admin/ui";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { requirePlatformAdminPage } from "@/server/auth/platform-admin";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { platformLogs, spendBreakdown, workspaceDetail } from "@/server/services/platform-admin";
-// eslint-disable-next-line no-restricted-imports -- converted in task 4
-import { usdInrRate } from "@/server/usage/fx";
+import { fxOf, Section, Stat, withQuery, type Fx } from "@/components/admin/ui";
+import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Workspace · Platform admin" };
 
@@ -17,16 +12,14 @@ const rupees = (v: number, fx: Fx) => (fx ? `₹${(v * fx.rate).toFixed(v * fx.r
 const more = "text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline";
 
 export default async function AdminWorkspaceOverview({ params }: { params: Promise<{ workspaceId: string }> }) {
-  await requirePlatformAdminPage();
   const { workspaceId } = await params;
-  const [d, spend, activity, runs, fx] = await Promise.all([
-    workspaceDetail(workspaceId),
-    spendBreakdown({ days: 30, workspaceId }),
-    platformLogs({ kind: "audit", workspaceId }),
-    platformLogs({ kind: "runs", workspaceId }),
-    usdInrRate(),
+  const [d, spend, activity, runs] = await Promise.all([
+    serverFetch<AdminWorkspaceDetail>(api`/api/v1/admin/workspaces/${workspaceId}`),
+    serverFetch<AdminSpend>(withQuery("/api/v1/admin/spend", {}, { workspaceId })), // the default period is the last 30 days
+    serverFetch<AdminLogsResponse>(withQuery("/api/v1/admin/logs", {}, { workspaceId })),
+    serverFetch<AdminLogsResponse>(withQuery("/api/v1/admin/logs", {}, { workspaceId, log: "runs" })),
   ]);
-  if (!d) notFound();
+  const fx = fxOf(spend.usdInr);
   const base = `/admin/workspaces/${workspaceId}`;
   const s30 = spend.aiUsd + spend.apiUsd;
 
