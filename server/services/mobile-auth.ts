@@ -40,11 +40,11 @@ export async function sendEmailCode(input: z.infer<typeof EmailInput>, request: 
 
   const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
   await prisma.$transaction(async (tx) => {
-    // Earlier codes stay valid until they expire or one is used: a stranger asking for a code for someone's email
-    // can't void the one in their inbox (each request sends that inbox a working code). The per-email limit keeps it
-    // to 5 live codes. ponytail: that makes a guess 5x likelier (8 tries per 15 min against 5 codes in a million), and
-    // a stranger's 8 wrong guesses still lock this email's verifying for 15 min; per-email limits can't tell them apart.
-    await tx.verificationToken.deleteMany({ where: { identifier: identifier(email), OR: [{ expires: { lte: new Date() } }, { token: hash(email, code) }] } });
+    // One live code per email: each extra live code would multiply a guesser's odds (8 tries per 15 min, 6 digits).
+    // ponytail: so a stranger requesting codes for someone's email voids the one in their inbox, and 8 wrong guesses
+    // lock its verifying for 15 min; per-email limits can't tell them from the owner. Upgrade: longer codes or a
+    // per-device challenge if that abuse shows up.
+    await tx.verificationToken.deleteMany({ where: { identifier: identifier(email) } });
     await tx.verificationToken.create({ data: { identifier: identifier(email), token: hash(email, code), expires: new Date(Date.now() + CODE_TTL_MS) } });
     await queueEmail(tx, {
       to: email,
@@ -73,7 +73,6 @@ async function spendCode(email: string, code: string) {
   // Single use: the delete is the check, so two parallel submits can't both succeed.
   const used = await prisma.verificationToken.deleteMany({ where: { identifier: identifier(email), token: hash(email, code), expires: { gt: new Date() } } });
   if (used.count !== 1) throw new AccountFlowError("That code is wrong or has expired.", 400);
-  await prisma.verificationToken.deleteMany({ where: { identifier: identifier(email) } }); // one sign-in spends them all
 }
 
 /**
