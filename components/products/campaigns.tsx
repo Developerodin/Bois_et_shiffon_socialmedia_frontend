@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { campaignsApi, type Campaign, type CampaignBody, type CampaignKind, type Product } from "@/components/products/api";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
-import { byExternalId, groupKey, offerPercents, productName, REMOVED_PRODUCT_NAME, zoneCity } from "@espanda/shared";
+import { byExternalId, groupKey, offerPercents, productName, REMOVED_PRODUCT_NAME, zoneCity } from "@/shared";
 
 const KIND_LABEL: Record<CampaignKind, string> = { priority: "Standing priority", campaign: "Campaign", offer: "Offer" };
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;

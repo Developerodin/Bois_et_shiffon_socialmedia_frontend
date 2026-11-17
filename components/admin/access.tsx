@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { PERMISSIONS, type MemberPermissions } from "@espanda/shared";
+import { PERMISSIONS, type MemberPermissions } from "@/shared";
 import { Empty } from "@/components/admin/ui";
 
 /**

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type AdminPersonTimeline } from "@espanda/shared";
+import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type AdminPersonTimeline } from "@/shared";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { Ago, CursorPager, Empty, fxOf, Money, PageHeader, period as periodOf, PERIODS, Pill, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
 import { api, serverFetch } from "@/lib/server-fetch";

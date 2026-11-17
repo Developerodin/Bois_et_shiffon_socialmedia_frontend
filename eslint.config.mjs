@@ -19,7 +19,7 @@ const SOURCES = "{ts,tsx,js,jsx,mjs}";
 // npm workspaces also link every app into node_modules by its package name ("server/…" resolves to apps/server), and
 // "@/../" or "./../" climb out as well. no-restricted-imports doesn't see import(), so no-restricted-syntax repeats
 // the escapes for it (esquery regexes can't hold "/", hence \x2F).
-const LEAVES = "Leaves apps/web: import from inside the app, or from @espanda/shared.";
+const LEAVES = "Leaves apps/web: import from inside the app, or from @/shared.";
 const boundary = (depth) => {
   const escapes = [`^(\\./)?(\\.\\./){${depth + 1},}`, "^@/\\.\\.(/|$)", "^(server|mobile-app)(/|$)"];
   return {

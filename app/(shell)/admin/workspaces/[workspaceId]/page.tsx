@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AdminLogsResponse, AdminSpend, AdminWorkspaceDetail } from "@espanda/shared";
+import type { AdminLogsResponse, AdminSpend, AdminWorkspaceDetail } from "@/shared";
 import { LogTable } from "@/components/admin/log-table";
 import { SpendChart } from "@/components/admin/spend-chart";
 import { fxOf, Section, Stat, withQuery, type Fx } from "@/components/admin/ui";

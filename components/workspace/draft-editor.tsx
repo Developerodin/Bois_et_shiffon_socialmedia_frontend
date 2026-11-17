@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { CAPTION_LIMITS } from "@espanda/shared";
+import { CAPTION_LIMITS } from "@/shared";
 import type { ContentItem } from "@/components/workspace/content-panels";
 
 type Body = NonNullable<ContentItem["latest"]>["body"];

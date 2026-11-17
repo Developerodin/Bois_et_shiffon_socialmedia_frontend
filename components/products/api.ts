@@ -1,6 +1,6 @@
 // Client-side contract for the products API (app/api/v1/.../brands/[brandId]/products). Keep in sync with the routes.
 import { request } from "@/components/settings/api";
-import type { CatalogSync } from "@espanda/shared";
+import type { CatalogSync } from "@/shared";
 
 export type { CatalogSync };
 

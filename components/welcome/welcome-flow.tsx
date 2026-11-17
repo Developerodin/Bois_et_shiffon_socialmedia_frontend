@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { keepPolling, settleCheck, type CheckState } from "@/components/welcome/reading-state";
 import { readable } from "@/lib/agent-message";
-import { brandNameFromWebsite, normalizeWebsite } from "@espanda/shared";
+import { brandNameFromWebsite, normalizeWebsite } from "@/shared";
 import { cn } from "@/lib/utils";
 
 const DOCS = ["Product information", "Marketing strategy", "Competitor analysis", "Brand voice", "Content strategy"];

@@ -1,4 +1,4 @@
-import { PERMISSIONS, type AdminWorkspaceDetail } from "@espanda/shared";
+import { PERMISSIONS, type AdminWorkspaceDetail } from "@/shared";
 import { Empty, Pill, Section, Table } from "@/components/admin/ui";
 import { api, serverFetch } from "@/lib/server-fetch";
 

@@ -1,4 +1,4 @@
-import { ADMIN_PAGE_SIZE, type AdminLogsResponse, type LogKind } from "@espanda/shared";
+import { ADMIN_PAGE_SIZE, type AdminLogsResponse, type LogKind } from "@/shared";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { LogTable } from "@/components/admin/log-table";
 import { CursorPager, fxOf, period as periodOf, PERIODS, Segmented, withQuery } from "@/components/admin/ui";

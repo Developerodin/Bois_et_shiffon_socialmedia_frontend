@@ -8,7 +8,7 @@ import { LoadFailed, useBrandData, usePerms } from "@/components/workspace/conte
 import { ScoreRing } from "@/components/workspace/score-ring";
 import { readable } from "@/lib/agent-message";
 import { cn } from "@/lib/utils";
-import { safeHttpUrl } from "@espanda/shared";
+import { safeHttpUrl } from "@/shared";
 
 type Audit = {
   id: string;

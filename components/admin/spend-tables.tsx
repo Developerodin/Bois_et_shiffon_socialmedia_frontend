@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AdminSpend } from "@espanda/shared";
+import type { AdminSpend } from "@/shared";
 import { Empty, Money, Table, type Fx } from "@/components/admin/ui";
 
 const COMPACT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });

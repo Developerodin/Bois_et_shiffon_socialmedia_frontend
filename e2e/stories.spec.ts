@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 import { authFile } from "./global-setup";
-import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@espanda/shared";
+import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@/shared";
 
 /**
  * Stories on the web. Part 1: a seeded 4-frame photo story waits for approval; open it from the calendar, see its frames

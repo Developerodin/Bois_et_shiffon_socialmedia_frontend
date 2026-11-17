@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { BY_HAND_STEPS, safeHttpUrl, zoneCity } from "@espanda/shared";
+import { BY_HAND_STEPS, safeHttpUrl, zoneCity } from "@/shared";
 
 type Attempt = {
   id: string;

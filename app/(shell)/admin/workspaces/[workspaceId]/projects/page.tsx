@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AdminWorkspaceDetail } from "@espanda/shared";
+import type { AdminWorkspaceDetail } from "@/shared";
 import { day, Empty, Pill, Section, Table, when } from "@/components/admin/ui";
 import { api, serverFetch } from "@/lib/server-fetch";
 

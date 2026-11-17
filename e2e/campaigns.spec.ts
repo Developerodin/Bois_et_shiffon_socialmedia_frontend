@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { authFile } from "./global-setup";
-import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@espanda/shared";
+import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@/shared";
 
 /**
  * "Campaigns and offers" on /products (owner: create, edit, withdraw an offer; viewer: read-only), and, with

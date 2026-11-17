@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import type { ShellResponse } from "@espanda/shared";
+import type { ShellResponse } from "@/shared";
 
 /** Build an API path: every interpolated value is URL-encoded, so an id can never add a path segment or a query. */
 export function api(strings: TemplateStringsArray, ...values: (string | number)[]) {

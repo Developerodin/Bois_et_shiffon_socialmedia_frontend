@@ -4,7 +4,7 @@ import { EspandaLogo } from "@/components/brand/espanda-logo";
 import { OpenWorkspaceButton } from "@/components/welcome/open-workspace-button";
 import { WelcomeFlow } from "@/components/welcome/welcome-flow";
 import { getShell } from "@/lib/server-fetch";
-import { normalizeWebsite } from "@espanda/shared";
+import { normalizeWebsite } from "@/shared";
 
 export const metadata = { title: "Add your brand" };
 

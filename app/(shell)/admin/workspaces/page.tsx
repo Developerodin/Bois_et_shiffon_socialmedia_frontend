@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { type AdminWorkspaces, type WorkspaceSort } from "@espanda/shared";
+import { type AdminWorkspaces, type WorkspaceSort } from "@/shared";
 import { Ago, day, Empty, fxOf, Money, PageHeader, Pager, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
 import { serverFetch } from "@/lib/server-fetch";
 

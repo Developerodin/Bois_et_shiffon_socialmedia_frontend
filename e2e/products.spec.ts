@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { authFile } from "./global-setup";
-import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@espanda/shared";
+import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@/shared";
 
 test.describe.configure({ mode: "serial" });
 // The dev server compiles each route on its first visit; give these pages time.

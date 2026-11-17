@@ -1,4 +1,4 @@
-import { NO_WORKSPACE } from "@espanda/shared";
+import { NO_WORKSPACE } from "@/shared";
 import { AutoSubmitForm } from "@/components/admin/auto-submit-form";
 import { pillButton as button } from "@/components/admin/ui";
 

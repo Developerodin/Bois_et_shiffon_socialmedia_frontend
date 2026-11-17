@@ -2,7 +2,7 @@
 // Keep these types in sync with the route handlers under app/api/v1.
 
 import type { RunStatus } from "@/components/agents/api";
-import type { ContextRequest } from "@espanda/shared";
+import type { ContextRequest } from "@/shared";
 import { NetworkError, send } from "@/lib/net";
 
 export type ContextDocKind =

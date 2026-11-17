@@ -1,4 +1,4 @@
-import type { AdminLogRow as LogRow, LogKind } from "@espanda/shared";
+import type { AdminLogRow as LogRow, LogKind } from "@/shared";
 import { Ago, Empty, Money, Pill, Table, type Fx } from "@/components/admin/ui";
 
 const COMPACT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });

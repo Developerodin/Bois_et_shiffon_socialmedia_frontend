@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AdminPeople } from "@espanda/shared";
+import type { AdminPeople } from "@/shared";
 import { Ago, day, Empty, PageHeader, Pager, Pill, SearchBox, Table, withQuery } from "@/components/admin/ui";
 import { serverFetch } from "@/lib/server-fetch";
 

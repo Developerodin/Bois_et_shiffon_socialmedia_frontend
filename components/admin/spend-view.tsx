@@ -1,4 +1,4 @@
-import type { AdminSpend } from "@espanda/shared";
+import type { AdminSpend } from "@/shared";
 import { SpendChart } from "@/components/admin/spend-chart";
 import { SpendTables } from "@/components/admin/spend-tables";
 import { fxOf, period as periodOf, PERIODS, Section, Segmented, Stat, withQuery, type Fx } from "@/components/admin/ui";

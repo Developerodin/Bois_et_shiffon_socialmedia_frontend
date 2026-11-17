@@ -1,4 +1,4 @@
-import type { AdminWorkspaceHeader } from "@espanda/shared";
+import type { AdminWorkspaceHeader } from "@/shared";
 import { TabLinks } from "@/components/admin/tab-links";
 import { day, PageHeader } from "@/components/admin/ui";
 import { api, serverFetch } from "@/lib/server-fetch";

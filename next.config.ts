@@ -7,7 +7,6 @@ const SERVER_URL = process.env.SERVER_URL ?? "http://localhost:3101";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  transpilePackages: ["@espanda/shared"],
   turbopack: {
     // Monorepo root: npm workspaces hoist `next` into ../../node_modules.
     root: path.join(__dirname, "../.."),

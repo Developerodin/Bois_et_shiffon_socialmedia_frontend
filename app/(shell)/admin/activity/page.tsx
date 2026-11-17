@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type ActivitySort, type AdminActivityList } from "@espanda/shared";
+import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type ActivitySort, type AdminActivityList } from "@/shared";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
 import { Ago, Empty, fxOf, Money, PageHeader, Pager, period as periodOf, PERIODS, Segmented, Table, withQuery } from "@/components/admin/ui";
 import { serverFetch } from "@/lib/server-fetch";

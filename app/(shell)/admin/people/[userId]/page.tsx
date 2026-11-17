@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AdminPerson } from "@espanda/shared";
+import type { AdminPerson } from "@/shared";
 import { AccessMatrix } from "@/components/admin/access";
 import { LogTable } from "@/components/admin/log-table";
 import { Ago, day, PageHeader, Pill, Section, Stat, when } from "@/components/admin/ui";

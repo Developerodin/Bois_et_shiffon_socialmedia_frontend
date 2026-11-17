@@ -176,7 +176,7 @@ export function CursorPager({ newest, older }: { newest?: string; older?: string
 }
 
 /** The period switch (Spend, Activity, Logs): `?days=` 7, 30 (the default, left out of the URL), 90 or all. The API reads the same query. */
-export { PERIODS, period } from "@espanda/shared";
+export { PERIODS, period } from "@/shared";
 
 /** Page header for the console: eyebrow, title, one line of context. */
 export function PageHeader({ eyebrow, title, children, crumbs }: { eyebrow?: string; title: string; children?: React.ReactNode; crumbs?: { href?: string; label: string }[] }) {
