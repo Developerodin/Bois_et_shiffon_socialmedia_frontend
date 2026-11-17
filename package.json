@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 3100",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "node scripts/check-shared.mjs && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check:net": "tsx --conditions=react-server scripts/check-net.ts",
