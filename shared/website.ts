@@ -46,3 +46,6 @@ export function domainOf(raw: string | null | undefined): string | null {
   if (/\.(local|localhost|internal|lan|home|corp|intranet|test|invalid|example)$/.test(host)) return null;
   return host.replace(/^www\./, "");
 }
+
+/** A website address as people say it: "boisetchiffons.fr" (no scheme, www or trailing slash). */
+export const siteLabel = (url: string | null | undefined) => (url ? url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") : null);

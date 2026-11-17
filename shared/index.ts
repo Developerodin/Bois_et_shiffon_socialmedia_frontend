@@ -8,3 +8,4 @@ export * from "./api/shell";
 export * from "./permissions";
 export * from "./api/admin";
 export * from "./contract";
+export * from "./brand-look";
