@@ -6,11 +6,13 @@ import { chromium, type FullConfig } from "@playwright/test";
 export const ROLES = ["owner", "viewer", "admin"] as const;
 export type Role = (typeof ROLES)[number];
 export const authFile = (role: Role) => path.join(__dirname, ".auth", `${role}.json`);
+/** The server repo's checkout: next to this one (../server) unless SERVER_DIR says otherwise. */
+export const SERVER_DIR = path.resolve(__dirname, "..", process.env.SERVER_DIR ?? "../server");
 
 /**
  * Signs each e2e account in once through /login and saves its session to e2e/.auth/<role>.json (git-ignored).
  * Login is rate-limited per email and IP, so the specs reuse these sessions instead of signing in again.
- * Credentials come from the environment only (E2E_* from apps/server/.env if present); see e2e/README.md.
+ * Credentials come from the environment only (E2E_* from the server repo's .env if present); see e2e/README.md.
  */
 export default async function globalSetup(config: FullConfig) {
   const use = config.projects[0].use;
@@ -22,7 +24,7 @@ export default async function globalSetup(config: FullConfig) {
 
   // The e2e accounts sit with the dev seed accounts in the Server's env file; only the E2E_* names are taken from it,
   // so none of the Server's secrets reach this process.
-  const envFile = path.join(__dirname, "..", "..", "server", ".env");
+  const envFile = path.join(SERVER_DIR, ".env");
   if (existsSync(envFile)) {
     for (const [name, value] of Object.entries(parseEnv(readFileSync(envFile, "utf8")))) {
       if (name.startsWith("E2E_") && process.env[name] === undefined) process.env[name] = value;

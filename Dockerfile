@@ -1,5 +1,5 @@
-# Web Frontend image. Build from the repo root:
-#   docker build -f apps/web/Dockerfile -t espanda-web .
+# Web Frontend image. Build from this repo's root:
+#   docker build -t espanda-web .
 # No env is baked in. At run time it needs only SERVER_URL (server-side rendering calls the Server there).
 # SERVER_URL is also read by `next build` for the dev-only /api rewrite; in production the load balancer or nginx
 # sends /api/* to the Server, so the website never proxies.
@@ -9,24 +9,19 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json ./
-COPY apps/web/package.json apps/web/
-COPY apps/server/package.json apps/server/
-COPY packages/shared/package.json packages/shared/
-RUN npm ci -w web-frontend -w @espanda/shared
+RUN npm ci
 
 FROM deps AS build
-COPY apps/web apps/web
-COPY packages/shared packages/shared
-RUN npm run build -w web-frontend
+COPY . .
+RUN npm run build
 
 FROM base AS runtime
 # KEEP_ALIVE_TIMEOUT (read by the standalone server.js) above the ALB's 330 s idle timeout: with Node's 5 s default
 # the ALB reuses a connection the target has closed and the caller gets a 502.
 ENV NODE_ENV=production PORT=3100 HOSTNAME=0.0.0.0 KEEP_ALIVE_TIMEOUT=335000
-COPY --from=build --chown=node:node /app/apps/web/.next/standalone ./
-COPY --from=build --chown=node:node /app/apps/web/.next/static apps/web/.next/static
-COPY --from=build --chown=node:node /app/apps/web/public apps/web/public
-WORKDIR /app/apps/web
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static .next/static
+COPY --from=build --chown=node:node /app/public public
 USER node
 EXPOSE 3100
 CMD ["node", "server.js"]

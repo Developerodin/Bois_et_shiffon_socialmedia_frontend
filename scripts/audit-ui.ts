@@ -8,7 +8,7 @@ import path from "node:path";
 
 // Optional: a locally installed Chromium if Playwright's bundled one isn't downloaded.
 const EXE = process.env.PW_CHROMIUM_PATH || undefined;
-const AXE = path.resolve(process.cwd(), "../../node_modules/axe-core/axe.min.js");
+const AXE = path.resolve(process.cwd(), "node_modules/axe-core/axe.min.js");
 const BASE = "http://localhost:3100";
 const PUBLIC = ["/login", "/forgot-password", "/reset-password?token=bad", "/invite/bad-token"];
 const PRIVATE = ["/", "/welcome", "/settings", "/settings?tab=connections", "/performance", "/context", "/calendar"];

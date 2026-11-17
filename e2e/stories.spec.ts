@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
-import { authFile } from "./global-setup";
+import { authFile, SERVER_DIR } from "./global-setup";
 import { SHELL_COOKIE_BRAND, SHELL_COOKIE_WORKSPACE } from "@/shared";
 
 /**
@@ -14,7 +14,7 @@ test.setTimeout(180_000);
 test.use({ storageState: authFile("owner"), viewport: { width: 1440, height: 900 } });
 
 // Seeds through the Server (its scripts and env); --silent keeps npm's banner out of the JSON line read below.
-const seedScript = (...args: string[]) => execSync(`npm run --silent seed:story -w server -- ${args.join(" ")}`, { encoding: "utf8" });
+const seedScript = (...args: string[]) => execSync(`npm run --silent seed:story -- ${args.join(" ")}`, { cwd: SERVER_DIR, encoding: "utf8" });
 const shot = (name: string) => (process.env.E2E_SHOTS ? { path: `${process.env.E2E_SHOTS}/${name}.png` } : undefined);
 type Seeded = { itemId: string; workspaceId: string; brandId: string };
 let seeded: Seeded;

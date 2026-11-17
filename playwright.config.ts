@@ -21,7 +21,8 @@ export default defineConfig({
   webServer: [
     {
       command: "npm run dev",
-      cwd: "../server",
+      // The server repo, checked out next to this one unless SERVER_DIR says otherwise.
+      cwd: process.env.SERVER_DIR ?? "../server",
       url: "http://localhost:3101/api/auth/providers",
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

@@ -1,0 +1,14 @@
+# Build context for the website image. Secrets never enter an image: the only run-time variable is SERVER_URL, so
+# every .env* stays out of the context.
+**/.env*
+**/node_modules
+**/.next
+**/dist
+**/test-results
+**/playwright-report
+# Playwright sign-in state: live session cookies for the e2e accounts.
+**/e2e/.auth
+**/*.tsbuildinfo
+.git
+.claude
+.superpowers

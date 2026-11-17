@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "check:net": "tsx --conditions=react-server scripts/check-net.ts",
-    "audit:ui": "tsx scripts/audit-ui.ts"
+    "audit:ui": "tsx scripts/audit-ui.ts",
+    "check:bundle": "node scripts/check-bundle.mjs"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.152",
@@ -45,5 +46,8 @@
     "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.5"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
