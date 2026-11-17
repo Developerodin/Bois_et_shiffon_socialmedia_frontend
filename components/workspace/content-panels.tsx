@@ -7,6 +7,7 @@ import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
+import { useBrandData } from "@/components/workspace/use-job";
 import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/shared";
@@ -51,56 +52,7 @@ export type ContentItem = {
   } | null;
 };
 
-const POLL_MS = 6000;
-
-// Last response per URL, shared by every panel on the page: a post opened from the calendar shows at once,
-// and a fresh response (e.g. after an edit) updates every panel showing that URL, not just the one that asked.
-const lastResponse = new Map<string, unknown>();
-const listeners = new Map<string, Set<(d: unknown) => void>>();
-const fetchedAt = new Map<string, number>();
-
-/** Poll a brand API path; `reload` refetches now. Starts from the last response any panel got. */
-export function useBrandData<T>(base: string, path: string, pick: (d: never) => T) {
-  const url = `${base}/${path}`;
-  const [data, setData] = useState<T | null>(() => (lastResponse.has(url) ? pick(lastResponse.get(url) as never) : null));
-  const [failed, setFailed] = useState(false);
-  const load = useCallback(
-    () =>
-      request<never>(url).then(
-        (d) => {
-          fetchedAt.set(url, Date.now());
-          lastResponse.set(url, d);
-          listeners.get(url)?.forEach((fn) => fn(d));
-        },
-        () => setFailed(true),
-      ),
-    [url],
-  );
-  useEffect(() => {
-    const fn = (d: unknown) => {
-      setData(pick(d as never));
-      setFailed(false);
-    };
-    const set = listeners.get(url) ?? new Set();
-    listeners.set(url, set.add(fn));
-    return () => void set.delete(fn);
-  }, [url, pick]);
-  useEffect(() => {
-    void load();
-    // Pause while the tab is hidden; catch up as soon as it's visible again.
-    // Several panels watch the same URL; one fetch per interval feeds them all.
-    const t = setInterval(() => {
-      if (document.visibilityState === "visible" && Date.now() - (fetchedAt.get(url) ?? 0) > POLL_MS / 2) void load();
-    }, POLL_MS);
-    const onShow = () => document.visibilityState === "visible" && void load();
-    document.addEventListener("visibilitychange", onShow);
-    return () => {
-      clearInterval(t);
-      document.removeEventListener("visibilitychange", onShow);
-    };
-  }, [load, url]);
-  return { data, failed, reload: load };
-}
+export { useBrandData };
 
 /** The signed-in person's permissions on this brand; [] if they couldn't be loaded. */
 export function usePerms(base: string) {

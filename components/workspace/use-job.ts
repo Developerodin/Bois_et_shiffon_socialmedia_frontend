@@ -1,0 +1,158 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ApiError, request } from "@/components/settings/api";
+
+/** Poll steps: until `untilMs` since mount, poll every `everyMs`. The last step applies past every `untilMs`. */
+export type Intervals = readonly (readonly [untilMs: number, everyMs: number])[];
+
+export const JOB_INTERVALS = {
+  always: [[Infinity, 6_000]],
+  reelRender: [[120_000, 5_000], [600_000, 10_000], [Infinity, 30_000]],
+  photoshoot: [[Infinity, 5_000]],
+  photoshootList: [[Infinity, 10_000]],
+  preview: [[Infinity, 10_000]],
+  storyRender: [[60_000, 3_000], [Infinity, 10_000]],
+  // Publishing gives up after 10 minutes: the caller passes capMs: 600_000.
+  publishing: [[Infinity, 5_000]],
+} as const satisfies Record<string, Intervals>;
+
+const MAX_DELAY_MS = 60_000;
+// The server sends no Retry-After on a 429, so wait the longest delay.
+const RATE_LIMITED_MS = 60_000;
+
+/** How long to wait before the next poll: the step for the elapsed time, doubled per error in a row, at most a minute. */
+export function nextDelay(intervals: Intervals, elapsedMs: number, errors: number, rateLimited: boolean): number {
+  if (rateLimited) return RATE_LIMITED_MS;
+  const step = intervals.find(([untilMs]) => elapsedMs < untilMs) ?? intervals[intervals.length - 1];
+  return Math.min(step[1] * 2 ** errors, MAX_DELAY_MS);
+}
+
+// Last response per URL, shared by every panel on the page: a post opened from the calendar shows at once,
+// and a fresh response (e.g. after an edit) updates every panel showing that URL, not just the one that asked.
+const lastResponse = new Map<string, unknown>();
+const fetchedAt = new Map<string, number>();
+const inFlight = new Map<string, Promise<unknown>>();
+const listeners = new Map<string, Set<(d: unknown) => void>>();
+
+/**
+ * GET `url`, joining the request already in flight for it if there is one. A success is stored and sent to every
+ * subscriber; a failure rejects every waiter and leaves the last good response in place.
+ */
+export function fetchShared(url: string): Promise<unknown> {
+  const pending = inFlight.get(url);
+  if (pending) return pending;
+  const p = request<unknown>(url)
+    .then((d) => {
+      lastResponse.set(url, d);
+      fetchedAt.set(url, Date.now());
+      listeners.get(url)?.forEach((fn) => fn(d));
+      return d;
+    })
+    .finally(() => inFlight.delete(url));
+  inFlight.set(url, p);
+  return p;
+}
+
+export function sharedResponse(url: string): unknown | undefined {
+  return lastResponse.get(url);
+}
+
+export function subscribeShared(url: string, fn: (d: unknown) => void): () => void {
+  const set = listeners.get(url) ?? new Set();
+  listeners.set(url, set.add(fn));
+  return () => void set.delete(fn);
+}
+
+const visible = () => document.visibilityState === "visible";
+
+/**
+ * Poll `url` until `done(data)` (forever without `done`), on the shared per-URL cache: panels on one URL share one
+ * request. Backs off on errors, waits a minute when rate limited, pauses while the tab is hidden and fetches as soon
+ * as it's visible. `slow` turns on once `capMs` has passed since mount without the job being done; polling goes on.
+ * `pick` and `done` must be stable (module-level or memoised), or every render restarts the polling.
+ */
+export function useJob<T>(
+  url: string,
+  { pick, done, intervals, capMs }: { pick: (d: never) => T; done?: (data: T) => boolean; intervals: Intervals; capMs?: number },
+): { data: T | null; failed: boolean; slow: boolean; reload: () => Promise<void> } {
+  const [data, setData] = useState<T | null>(() => {
+    const d = sharedResponse(url);
+    return d === undefined ? null : pick(d as never);
+  });
+  const [failed, setFailed] = useState(false);
+  const [slow, setSlow] = useState(false);
+  const startedAt = useRef(0);
+  const errors = useRef(0);
+  const rateLimited = useRef(false);
+  const finished = data !== null && done !== undefined && done(data);
+
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
+
+  const onError = useCallback((e: unknown) => {
+    errors.current += 1;
+    rateLimited.current = e instanceof ApiError && e.status === 429;
+    setFailed(true);
+  }, []);
+
+  // Any success on this URL (ours or another panel's) brings the data and clears the error backoff.
+  useEffect(
+    () =>
+      subscribeShared(url, (d) => {
+        setData(pick(d as never));
+        setFailed(false);
+        errors.current = 0;
+        rateLimited.current = false;
+      }),
+    [url, pick],
+  );
+
+  useEffect(() => {
+    if (finished) return;
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Each poll() starts a new chain; an older chain still awaiting its response doesn't schedule again.
+    let chain = 0;
+    const delay = () => nextDelay(intervals, Date.now() - startedAt.current, errors.current, rateLimited.current);
+    const poll = (force: boolean) => {
+      clearTimeout(timer);
+      const mine = ++chain;
+      const next = () => {
+        if (alive && mine === chain && visible()) timer = setTimeout(tick, delay());
+      };
+      // Another panel fetched this URL moments ago: its response already reached us.
+      if (!force && Date.now() - (fetchedAt.get(url) ?? 0) < delay() / 2) return next();
+      // A StrictMode remount or a second panel joins the request in flight rather than sending another.
+      void fetchShared(url)
+        .then(undefined, (e) => alive && onError(e))
+        .then(next);
+    };
+    const tick = () => visible() && poll(false);
+    const onShow = () => visible() && poll(true);
+    poll(false);
+    document.addEventListener("visibilitychange", onShow);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onShow);
+    };
+  }, [url, intervals, finished, onError]);
+
+  useEffect(() => {
+    if (finished || capMs === undefined) return;
+    const t = setTimeout(() => setSlow(true), Math.max(0, startedAt.current + capMs - Date.now()));
+    return () => clearTimeout(t);
+  }, [finished, capMs]);
+
+  const reload = useCallback(() => fetchShared(url).then(() => undefined, onError), [url, onError]);
+
+  return { data, failed, slow: slow && !finished, reload };
+}
+
+/** Poll a brand API path every 6 s; `reload` refetches now. Starts from the last response any panel got. */
+export function useBrandData<T>(base: string, path: string, pick: (d: never) => T) {
+  const { data, failed, reload } = useJob(`${base}/${path}`, { pick, intervals: JOB_INTERVALS.always });
+  return { data, failed, reload };
+}
