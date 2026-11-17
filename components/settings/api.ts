@@ -73,21 +73,29 @@ export type RequestOptions = SendInit & { onLine?: (line: unknown) => void };
 
 /** Reads a JSON-lines answer: progress lines go to onLine, the closing line resolves or rejects the call. */
 async function readLines<T>(body: ReadableStream<Uint8Array>, onLine?: (line: unknown) => void): Promise<T> {
+  const lost = () => new ApiError(0, "The answer stopped partway. Try again.");
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (value) buffer += decoder.decode(value, { stream: !done });
-    for (let end = buffer.indexOf("\n"); end >= 0; end = buffer.indexOf("\n")) {
-      const line = JSON.parse(buffer.slice(0, end)) as { type?: string; result?: T; status?: number; detail?: string; code?: string };
-      buffer = buffer.slice(end + 1);
-      if (line.type === "done") return line.result as T;
-      // The line is the error's data, so a streamed 402 still carries planRequired and the code.
-      if (line.type === "error") throw new ApiError(line.status ?? 500, line.detail ?? "Request failed", line.code, line);
-      onLine?.(line);
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (value) buffer += decoder.decode(value, { stream: !done });
+      for (let end = buffer.indexOf("\n"); end >= 0; end = buffer.indexOf("\n")) {
+        const text = buffer.slice(0, end).trim();
+        buffer = buffer.slice(end + 1);
+        if (!text) continue; // keep-alive
+        const line = JSON.parse(text) as { type?: string; result?: T; status?: number; detail?: string; code?: string };
+        if (line.type === "done") return line.result as T;
+        // The line is the error's data, so a streamed 402 still carries planRequired and the code.
+        if (line.type === "error") throw new ApiError(line.status ?? 500, line.detail ?? "Request failed", line.code, line);
+        onLine?.(line);
+      }
+      if (done) throw lost(); // ended before its last line
     }
-    if (done) throw new ApiError(0, "The answer stopped partway. Try again."); // ended before its last line
+  } catch (error) {
+    // A dropped connection, a send() timeout during the read, or a garbled line: all a lost answer.
+    throw error instanceof ApiError ? error : lost();
   }
 }
 

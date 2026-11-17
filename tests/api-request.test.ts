@@ -84,6 +84,33 @@ describe("request streams", () => {
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(0);
   });
+  it("rejects with status 0 when the connection drops mid-answer", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        new ReadableStream({
+          start(c) {
+            c.enqueue(new TextEncoder().encode('{"type":"stage"}\n'));
+            c.error(new TypeError("network error"));
+          },
+        }),
+        { headers: { "content-type": "application/x-ndjson" } },
+      ),
+    );
+    const err = await failure(request("/x", { onLine: vi.fn() }));
+    expect(err).toBeInstanceOf(ApiError);
+    expect(err.status).toBe(0);
+  });
+
+  it("skips blank keep-alive lines", async () => {
+    fetchMock.mockResolvedValue(stream('\n\n{"type":"done","result":{"x":2}}\n'));
+    await expect(request("/x", { onLine: vi.fn() })).resolves.toEqual({ x: 2 });
+  });
+
+  it("treats a malformed line as a lost connection", async () => {
+    fetchMock.mockResolvedValue(stream('not json\n'));
+    const err = await failure(request("/x", { onLine: vi.fn() }));
+    expect(err.status).toBe(0);
+  });
 });
 
 describe("createBrand", () => {
