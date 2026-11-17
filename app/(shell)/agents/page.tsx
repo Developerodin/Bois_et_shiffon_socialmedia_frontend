@@ -2,6 +2,9 @@ import { Bot } from "lucide-react";
 import { AgentsBoard } from "@/components/agents/agents-board";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
+import { navFor } from "@/lib/nav";
+
+export const metadata = { title: navFor("/agents").title };
 
 export default async function AgentsPage() {
   const shell = await getShell();

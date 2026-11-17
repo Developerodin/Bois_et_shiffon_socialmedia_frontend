@@ -2,6 +2,9 @@ import { Lock, Package } from "lucide-react";
 import { ProductsBoard } from "@/components/products/products-board";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
+import { navFor } from "@/lib/nav";
+
+export const metadata = { title: navFor("/products").title };
 
 /** The business's product catalogue: synced from Shopify or the website's feed, plus products added by hand. */
 export default async function ProductsPage() {

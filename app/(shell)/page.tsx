@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { Workspace } from "@/components/workspace/workspace";
 import { getShell } from "@/lib/server-fetch";
+import { navFor } from "@/lib/nav";
+
+export const metadata = { title: navFor("/").title };
 
 /** The workspace: one screen with Context, Today and Agents (Okara pattern); the chat is the shell's Espanda panel. */
 export default async function WorkspacePage() {

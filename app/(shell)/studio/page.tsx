@@ -1,5 +1,8 @@
 import { Sparkles } from "lucide-react";
 import { ComingSoon } from "@/components/shell/coming-soon";
+import { navFor } from "@/lib/nav";
+
+export const metadata = { title: navFor("/studio").title };
 
 export default function Page() {
   return (

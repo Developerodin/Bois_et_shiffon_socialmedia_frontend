@@ -3,6 +3,9 @@ import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
 import { PageHeader } from "@/components/ui/page-header";
+import { navFor } from "@/lib/nav";
+
+export const metadata = { title: navFor("/connections").title };
 
 /** The business's connected accounts. Settings keeps its own Connections tab; the OAuth callback still lands there. */
 export default async function ConnectionsPage({

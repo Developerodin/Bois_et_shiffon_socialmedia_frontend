@@ -18,6 +18,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex h-dvh bg-background text-foreground">
+      <a href="#content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-2xl focus:bg-card focus:px-4 focus:py-3 focus:shadow-lg focus:ring-2 focus:ring-ring">Skip to content</a>
       {/* Suspense: the sidebar reads ?panel= (useSearchParams), which would otherwise stop pages prerendering. */}
       <Suspense fallback={<div className="h-full w-[232px] shrink-0 bg-card" />}>
         <Sidebar

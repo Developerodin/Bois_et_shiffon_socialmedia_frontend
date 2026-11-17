@@ -4,6 +4,9 @@ import { NewBrandDialog } from "@/components/shell/new-brand-dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
+import { navFor } from "@/lib/nav";
+
+export const metadata = { title: navFor("/context").title };
 
 export default async function ContextPage() {
   const shell = await getShell();

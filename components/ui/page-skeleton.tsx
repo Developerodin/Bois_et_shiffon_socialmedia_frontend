@@ -2,9 +2,10 @@ import { cn } from "@/lib/utils";
 
 /** Shown the moment you click (loading.tsx), until the page's data arrives: a header, tiles and rows. */
 export function PageSkeleton({ header = true }: { header?: boolean }) {
-  const block = "rounded-lg bg-muted/60 motion-safe:animate-pulse";
+  const block = "rounded-lg bg-border motion-safe:animate-pulse";
   return (
     <div role="status" aria-label="Loading" className="flex flex-col gap-8">
+      <span className="sr-only">Loading…</span>
       {header ? (
         <div className="flex flex-col gap-3">
           <div className={cn(block, "h-3 w-28")} />

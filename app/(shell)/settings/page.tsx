@@ -2,6 +2,9 @@ import { Settings } from "lucide-react";
 import { SettingsBoard } from "@/components/settings/settings-board";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
+import { navFor } from "@/lib/nav";
+
+export const metadata = { title: navFor("/settings").title };
 
 export default async function SettingsPage({
   searchParams,
