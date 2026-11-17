@@ -63,6 +63,16 @@ export function sharedResponse(url: string): unknown | undefined {
   return lastResponse.get(url);
 }
 
+/** An answer the server gave for `url` another way (a PATCH that returns the new view): every subscriber shows it. */
+export function putShared(url: string, d: unknown): void {
+  lastResponse.set(url, d);
+  fetchedAt.set(url, Date.now());
+  listeners.get(url)?.forEach((fn) => fn(d));
+}
+
+/** When `url` last got an answer (0: never). */
+export const sharedAt = (url: string): number => fetchedAt.get(url) ?? 0;
+
 export function subscribeShared(url: string, fn: (d: unknown) => void): () => void {
   const set = listeners.get(url) ?? new Set();
   listeners.set(url, set.add(fn));

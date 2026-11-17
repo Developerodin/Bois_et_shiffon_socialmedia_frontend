@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { JOB_INTERVALS, fetchShared, nextDelay, sharedResponse, subscribeShared } from "@/components/workspace/use-job";
+import { JOB_INTERVALS, fetchShared, nextDelay, putShared, sharedAt, sharedResponse, subscribeShared } from "@/components/workspace/use-job";
 
 const fetchMock = vi.fn();
 const json = (body: unknown, status = 200) =>
@@ -71,5 +71,26 @@ describe("fetchShared", () => {
     await expect(fresh).resolves.toEqual({ n: 2 });
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(sharedResponse("/c")).toEqual({ n: 2 });
+  });
+});
+
+describe("putShared", () => {
+  it("stores the answer, tells that URL's subscribers and stamps the time", () => {
+    const a = vi.fn();
+    const b = vi.fn();
+    const offA = subscribeShared("/put-a", a);
+    const offB = subscribeShared("/put-b", b);
+    const before = Date.now();
+    putShared("/put-a", 1);
+    expect(sharedResponse("/put-a")).toBe(1);
+    expect(a).toHaveBeenCalledWith(1);
+    expect(b).not.toHaveBeenCalled();
+    expect(sharedAt("/put-a")).toBeGreaterThanOrEqual(before);
+    offA();
+    offB();
+  });
+
+  it("reports 0 for a URL never answered", () => {
+    expect(sharedAt("/never")).toBe(0);
   });
 });
