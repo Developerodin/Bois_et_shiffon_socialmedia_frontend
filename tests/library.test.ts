@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MEDIA_MAX_BYTES } from "@/shared";
-import { brandLookUrl, colorHint, initialSource, paletteAfter, photoCount, pickUploads } from "@/components/library/api";
+import { brandLookUrl, colorHint, initialSource, paletteAfter, photoCount, pickUploads, withFallback } from "@/components/library/api";
 
 const file = (name: string, type: string, size = 1) => ({ name, type, size }) as File;
 const photo = (key: string) => ({ key, url: `https://x/${key}`, title: "t", kind: null });
@@ -38,6 +38,15 @@ describe("initialSource", () => {
   });
   it("opens on website when there is nothing", () => {
     expect(initialSource({ website: [], uploads: [] })).toBe("website");
+  });
+});
+
+describe("withFallback", () => {
+  const list = [photo("a")];
+  it("puts a photo the list lacks first", () => expect(withFallback(list, photo("n"))).toEqual([photo("n"), photo("a")]));
+  it("leaves the list alone when it has the photo or there is none", () => {
+    expect(withFallback(list, photo("a"))).toBe(list);
+    expect(withFallback(list, null)).toBe(list);
   });
 });
 

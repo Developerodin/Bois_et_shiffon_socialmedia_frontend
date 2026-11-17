@@ -1,5 +1,5 @@
 import { request } from "@/components/settings/api";
-import { MEDIA_MAX_BYTES, normalizeHex, type BrandAssetsView, type BrandDetailsEdit, type libraryPhotos } from "@/shared";
+import { MEDIA_MAX_BYTES, normalizeHex, type BrandAssetsView, type BrandDetailsEdit, type LibraryPhoto, type libraryPhotos } from "@/shared";
 
 const enc = encodeURIComponent;
 const base = (w: string, b: string) => `/api/v1/workspaces/${enc(w)}/brands/${enc(b)}`;
@@ -38,6 +38,11 @@ export function pickUploads(files: readonly File[]): { files: File[]; errors: st
 export function initialSource(lib: ReturnType<typeof libraryPhotos>, selectedKey?: string): "website" | "uploads" {
   if (selectedKey && lib.uploads.some((p) => p.key === selectedKey)) return "uploads";
   return lib.website.length === 0 && lib.uploads.length > 0 ? "uploads" : "website";
+}
+
+/** The photos with `extra` first when the list doesn't hold its key yet (an upload the library hasn't read back). */
+export function withFallback(photos: LibraryPhoto[], extra: LibraryPhoto | null): LibraryPhoto[] {
+  return extra && !photos.some((p) => p.key === extra.key) ? [extra, ...photos] : photos;
 }
 
 /** The palette after setting slot `index` to `hex` (appending for "new"), or dropping it when `hex` is null. */

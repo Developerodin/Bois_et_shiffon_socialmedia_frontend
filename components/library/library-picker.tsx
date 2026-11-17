@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { errorMessage } from "@/components/settings/api";
 import { ListSkeleton, LoadError } from "@/components/settings/shared";
 import { libraryPhotos, siteLabel, type LibraryPhoto } from "@/shared";
-import { initialSource, libraryApi, pickUploads } from "./api";
+import { initialSource, libraryApi, pickUploads, withFallback } from "./api";
 import { PhotoGrid, SourceSwitch, type Source } from "./photo-grid";
 import { useBrandLook } from "./use-brand-look";
 
@@ -52,10 +52,13 @@ function PickerBody({ workspaceId, brandId, onOpenChange, selectedKey = null, ca
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  // The upload's own answer, so the photo can be used even if the library can't be read back (it won't refetch for 50 min).
+  const [uploaded, setUploaded] = useState<LibraryPhoto | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const source = picked ?? initialSource(lib, selectedKey ?? undefined);
-  const chosen = [...lib.website, ...lib.uploads].find((p) => p.key === selected);
+  const uploads = withFallback(lib.uploads, uploaded);
+  const chosen = [...lib.website, ...uploads].find((p) => p.key === selected);
 
   async function addFile(e: ChangeEvent<HTMLInputElement>) {
     const input = e.currentTarget;
@@ -69,11 +72,11 @@ function PickerBody({ workspaceId, brandId, onOpenChange, selectedKey = null, ca
     setUploading(true);
     setStatus("Uploading…");
     try {
-      const { key } = await libraryApi.upload(workspaceId, brandId, files[0]);
-      await reload();
+      const { key, previewUrl } = await libraryApi.upload(workspaceId, brandId, files[0]);
+      setUploaded({ key, url: previewUrl, title: "Photo", kind: null });
       setPicked("uploads");
-      // Kept even if the reloaded view lacks it yet: the choice shows once the view has it.
       setSelected(key);
+      await reload();
       setStatus("Added 1 photo.");
     } catch (err) {
       setStatus("");
@@ -113,7 +116,7 @@ function PickerBody({ workspaceId, brandId, onOpenChange, selectedKey = null, ca
         failed ? <LoadError message="Couldn't load your photos." onRetry={() => void reload()} /> : <ListSkeleton label="Loading photos" />
       ) : (
         <div className="flex flex-col gap-4">
-          <SourceSwitch name="picker-source" value={source} counts={{ website: lib.website.length, uploads: lib.uploads.length }} onChange={setPicked} />
+          <SourceSwitch name="picker-source" value={source} counts={{ website: lib.website.length, uploads: uploads.length }} onChange={setPicked} />
           {source === "website" && view.website ? (
             <p className="flex flex-wrap items-center gap-2 text-sm">
               <span className="font-medium">{view.name} · Website</span>
@@ -125,7 +128,7 @@ function PickerBody({ workspaceId, brandId, onOpenChange, selectedKey = null, ca
               mode="pick"
               name="picker-photo"
               label="Photos"
-              photos={lib[source]}
+              photos={source === "uploads" ? uploads : lib.website}
               empty={EMPTY[source]}
               selected={selected}
               onSelect={setSelected}
