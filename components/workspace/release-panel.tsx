@@ -68,7 +68,14 @@ const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Something 
 export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: string[] | null; onChanged: () => void }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
   const { data, failed: loadError, slow, reload } = useJob(url, { pick: asRelease, done: notGoingOut, intervals: JOB_INTERVALS.publishing, capMs: 600_000 });
-  useEffect(() => void reload(), [status, version, reload]);
+  // The hook's own mount poll is the first fetch; only a real change of status or version needs a fresh one.
+  const seen = useRef(`${status}:${version}`);
+  useEffect(() => {
+    const now = `${status}:${version}`;
+    if (seen.current === now) return;
+    seen.current = now;
+    void reload();
+  }, [status, version, reload]);
 
   async function act(body: Record<string, unknown>) {
     await request<Release>(url, { method: "POST", body: JSON.stringify(body) });

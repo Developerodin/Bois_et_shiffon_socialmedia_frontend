@@ -70,7 +70,14 @@ export type PublicInvitation = {
   existingAccount: boolean;
 };
 
-export type RequestOptions = SendInit & { onLine?: (line: unknown) => void };
+export type RequestOptions = SendInit & {
+  /**
+   * Streamed (JSON-lines) answer: each progress line arrives here. send()'s AbortSignal.timeout keeps running while
+   * the body is read, so a streamed call must pass a long `timeoutMs`; the 30 s default cuts a long answer off
+   * as "The answer stopped partway".
+   */
+  onLine?: (line: unknown) => void;
+};
 
 /** A 402 carrying a paywall refusal opens the paywall; the caller still gets its error. */
 function refuse(body: unknown) {

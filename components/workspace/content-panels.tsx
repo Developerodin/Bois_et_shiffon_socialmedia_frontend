@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
@@ -493,7 +493,13 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   const url = `${base}/content/${encodeURIComponent(item.id)}`;
   const version = item.latest?.version;
   const { data, failed, reload } = useJob(url, { pick: pickStoryView, done: storyDone, intervals: JOB_INTERVALS.storyRender });
-  useEffect(() => void reload(), [reload, version]);
+  // The hook's own mount poll is the first fetch; only a real change of version needs a fresh one (fresh never joins an in-flight request).
+  const seen = useRef(version);
+  useEffect(() => {
+    if (seen.current === version) return;
+    seen.current = version;
+    void reload();
+  }, [reload, version]);
   const [zoom, setZoom] = useState<StoryFrameView | null>(null);
   useEffect(() => {
     if (!zoom) return;

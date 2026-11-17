@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, request } from "@/components/settings/api";
 
-/** Poll steps: until `untilMs` since mount, poll every `everyMs`. The last step applies past every `untilMs`. */
+/** Poll steps: until `untilMs` into the running episode, poll every `everyMs`. The last step applies past every `untilMs`. */
 export type Intervals = readonly (readonly [untilMs: number, everyMs: number])[];
 
 export const JOB_INTERVALS = {
@@ -74,7 +74,7 @@ const visible = () => document.visibilityState === "visible";
 /**
  * Poll `url` until `done(data)` (forever without `done`), on the shared per-URL cache: panels on one URL share one
  * request. Backs off on errors, waits a minute when rate limited, pauses while the tab is hidden and fetches as soon
- * as it's visible. `slow` turns on once `capMs` has passed since mount without the job being done; polling goes on.
+ * as it's visible. `slow` turns on once `capMs` has passed into the running episode without the job being done; polling goes on.
  * `pick`, `done` and `intervals` must be stable (module-level or memoised), or every render restarts the polling.
  * A new `url` starts over: data from the cache (or none), no errors, the clock and `slow` reset.
  */
