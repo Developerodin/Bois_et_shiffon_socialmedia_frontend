@@ -17,10 +17,13 @@ export function api(strings: TemplateStringsArray, ...values: (string | number)[
 export async function serverFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const base = process.env.SERVER_URL ?? "http://localhost:3101";
   const cookie = (await cookies()).toString();
+  // A write with the person's cookie must say it comes from the website, or the server's cross-origin check refuses it.
+  const write = !!init?.method && !/^(GET|HEAD)$/i.test(init.method);
+  const origin: Record<string, string> = write ? { origin: new URL(process.env.WEB_ORIGIN ?? "http://localhost:3100").origin } : {};
   const res = await fetch(base + path, {
     ...init,
     cache: "no-store",
-    headers: { ...(cookie ? { cookie } : {}), ...init?.headers },
+    headers: { ...(cookie ? { cookie } : {}), ...origin, ...init?.headers },
   });
   if (res.status === 401) {
     const here = (await headers()).get("x-pathname");

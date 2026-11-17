@@ -40,6 +40,14 @@ describe("serverFetch", () => {
     expect(init.headers.cookie).toBe("a=1; b=2");
   });
 
+  it("says a write comes from the website, and leaves reads alone", async () => {
+    fetchMock.mockImplementation(async () => new Response("{}"));
+    await serverFetch("/api/v1/x", { method: "PATCH" });
+    await serverFetch("/api/v1/x");
+    expect(fetchMock.mock.calls[0][1].headers.origin).toBe("http://localhost:3100");
+    expect(fetchMock.mock.calls[1][1].headers.origin).toBeUndefined();
+  });
+
   it("sends a 401 to sign in again", async () => {
     fetchMock.mockResolvedValue(new Response("{}", { status: 401 }));
     await expect(serverFetch("/api/v1/x")).rejects.toThrow("NEXT_REDIRECT");
