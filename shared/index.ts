@@ -7,3 +7,4 @@ export * from "./products";
 export * from "./api/shell";
 export * from "./permissions";
 export * from "./api/admin";
+export * from "./contract";
