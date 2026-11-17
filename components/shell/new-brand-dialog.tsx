@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useRef, useState, type FormEvent, type ReactNode, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { createBrand, ProblemError, setActiveContext } from "@/components/context/api";
@@ -19,15 +19,25 @@ import { Input } from "@/components/ui/input";
 
 type Props = {
   workspaceId: string;
-  /** Element that opens the dialog; defaults to a small "New brand" button. */
-  trigger?: ReactNode;
+  /** Element that opens the dialog; defaults to a small "New brand" button. null renders no trigger (open it with `open`). */
+  trigger?: ReactNode | null;
+  /** Controlled open state; the dialog is uncontrolled when `open` is not given. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Where focus goes when the dialog closes (e.g. the menu trigger that led to it). */
+  returnFocus?: RefObject<HTMLElement | null>;
 };
 
 type FormError = { field: "name" | "url" | "form"; message: string };
 
-export function NewBrandDialog({ workspaceId, trigger }: Props) {
+export function NewBrandDialog({ workspaceId, trigger, open: openProp, onOpenChange, returnFocus }: Props) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const open = openProp ?? ownOpen;
+  const setOpen = (next: boolean) => {
+    setOwnOpen(next);
+    onOpenChange?.(next);
+  };
   const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   const [pending, setPending] = useState(false);
@@ -102,14 +112,25 @@ export function NewBrandDialog({ workspaceId, trigger }: Props) {
         }
       }}
     >
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="outline" size="sm">
-            New brand
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent>
+      {trigger === null ? null : (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button variant="outline" size="sm">
+              New brand
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
+      <DialogContent
+        onCloseAutoFocus={
+          returnFocus
+            ? (e) => {
+                e.preventDefault();
+                returnFocus.current?.focus();
+              }
+            : undefined
+        }
+      >
         <DialogHeader>
           <p className="text-xs font-medium text-primary">
             New brand

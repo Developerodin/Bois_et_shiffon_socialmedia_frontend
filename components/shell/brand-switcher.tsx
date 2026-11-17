@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Plus } from "lucide-react";
 import { setActiveContext } from "@/components/context/api";
@@ -41,6 +41,8 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
   // The switch round-trips to the server and re-renders the shell; say so instead of looking idle.
   const [switching, startSwitch] = useTransition();
   const [target, setTarget] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   if (!active) {
     return canCreate ? (
@@ -59,9 +61,11 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
   }
 
   return (
+    <>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          ref={triggerRef}
           type="button"
           aria-label="Select business"
           aria-busy={switching}
@@ -101,18 +105,17 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
         {canCreate ? (
           <>
             <DropdownMenuSeparator />
-            <NewBrandDialog
-              workspaceId={workspaceId}
-              trigger={
-                <button type="button" className="flex min-h-9 w-full items-center gap-2 rounded-lg px-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <Plus className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" /> Create a business
-                </button>
-              }
-            />
+            <DropdownMenuItem onSelect={() => setCreating(true)}>
+              <Plus className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" /> Create a business
+            </DropdownMenuItem>
           </>
         ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
+    {canCreate ? (
+      <NewBrandDialog workspaceId={workspaceId} open={creating} onOpenChange={setCreating} trigger={null} returnFocus={triggerRef} />
+    ) : null}
+    </>
   );
 }
 
