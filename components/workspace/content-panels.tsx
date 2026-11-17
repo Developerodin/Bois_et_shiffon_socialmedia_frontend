@@ -7,7 +7,7 @@ import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
-import { useBrandData } from "@/components/workspace/use-job";
+import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
 import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/shared";
@@ -484,31 +484,16 @@ function RunWatch({ base, runId, onFailed, onDone }: { base: string; runId: stri
 type StoryFrameView = { n: number; url: string | null; kind: "photo" | "video" | null; headline: string };
 type StoryView = { rendering: boolean; renderError: string | null; frames: StoryFrameView[] };
 
+const pickStoryView = (d: Partial<StoryView>): StoryView => ({ rendering: d.rendering ?? false, renderError: d.renderError ?? null, frames: d.frames ?? [] });
+const storyDone = (v: StoryView) => !v.rendering;
+
 /** A story's rendered frames, read-only: 9:16 thumbnails (click for full size), clips play in place. Stories are edited on the phone. */
 function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   // Fetched when the version changes and polled only while rendering: each response signs new links, so polling always would reload every picture.
-  const [data, setData] = useState<StoryView | null>(null);
-  const [failed, setFailed] = useState(false);
   const url = `${base}/content/${encodeURIComponent(item.id)}`;
   const version = item.latest?.version;
-  const reload = useCallback(
-    () =>
-      request<Partial<StoryView>>(url).then(
-        (d) => {
-          setData({ rendering: d.rendering ?? false, renderError: d.renderError ?? null, frames: d.frames ?? [] });
-          setFailed(false);
-        },
-        () => setFailed(true),
-      ),
-    [url],
-  );
+  const { data, failed, reload } = useJob(url, { pick: pickStoryView, done: storyDone, intervals: JOB_INTERVALS.storyRender });
   useEffect(() => void reload(), [reload, version]);
-  const rendering = data?.rendering;
-  useEffect(() => {
-    if (!rendering) return;
-    const t = setInterval(() => void reload(), 3000);
-    return () => clearInterval(t);
-  }, [rendering, reload]);
   const [zoom, setZoom] = useState<StoryFrameView | null>(null);
   useEffect(() => {
     if (!zoom) return;

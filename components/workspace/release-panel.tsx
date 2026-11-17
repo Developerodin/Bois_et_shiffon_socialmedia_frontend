@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CalendarClock, Check, CircleAlert, Download, ExternalLink, ImageUp, Send, ShieldCheck, Undo2, X } from "lucide-react";
 import { ApiError, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { CLIENT_TAG } from "@/lib/net";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -54,42 +55,24 @@ function campaignLine(c: Campaign) {
   if (c.withdrawn) return `${head} (withdrawn)`;
   return [head, c.discountPercent ? `-${c.discountPercent} %` : null, c.code, c.ends ? `${c.starts} – ${c.ends} (${zoneCity(c.timeZone)})` : null].filter(Boolean).join(" · ");
 }
+const asRelease = (d: Release) => d;
+/** Follow a post that is going out right now (due within a minute, or up to 10 minutes overdue) until it is out. */
+const notGoingOut = (d: Release) =>
+  !d.attempts.some((a) => {
+    const due = new Date(a.runAt).getTime() - Date.now();
+    return a.status === "PUBLISHING" || (a.status === "SCHEDULED" && due < 60_000 && due > -10 * 60_000);
+  });
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Try again.");
 
 /** Approve the exact draft shown above, then publish or schedule it, with a full history. */
 export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: string[] | null; onChanged: () => void }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
-  const [data, setData] = useState<Release | null>(null);
-  const [loadError, setLoadError] = useState(false);
-  const load = useCallback(
-    () =>
-      request<Release>(url).then(
-        (d) => {
-          setData(d);
-          setLoadError(false);
-        },
-        () => setLoadError(true),
-      ),
-    [url],
-  );
-
-  useEffect(() => void load(), [load]);
-  // Follow a post that is going out right now (due within a minute, or up to 10 minutes overdue).
-  const busy = data?.attempts.some((a) => {
-    const due = new Date(a.runAt).getTime() - Date.now();
-    return a.status === "PUBLISHING" || (a.status === "SCHEDULED" && due < 60_000 && due > -10 * 60_000);
-  });
-  useEffect(() => {
-    if (!busy) return;
-    const t = setInterval(() => void load(), 3000);
-    return () => clearInterval(t);
-  }, [busy, load]);
-  useEffect(() => void load(), [status, version, load]);
+  const { data, failed: loadError, slow, reload } = useJob(url, { pick: asRelease, done: notGoingOut, intervals: JOB_INTERVALS.publishing, capMs: 600_000 });
+  useEffect(() => void reload(), [status, version, reload]);
 
   async function act(body: Record<string, unknown>) {
-    const next = await request<Release>(url, { method: "POST", body: JSON.stringify(body) });
-    setData((d) => ({ ...next, boards: d?.boards }));
-    void load();
+    await request<Release>(url, { method: "POST", body: JSON.stringify(body) });
+    await reload();
     // The post's status lives in the parent's list: refresh it now, not on its next poll.
     onChanged();
   }
@@ -100,7 +83,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
         {loadError ? (
           <>
             Couldn&rsquo;t load approval and publishing.
-            <Button size="sm" variant="outline" onClick={() => void load()}>Try again</Button>
+            <Button size="sm" variant="outline" onClick={() => void reload()}>Try again</Button>
           </>
         ) : (
           "Loading approval…"
@@ -177,6 +160,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
         <p className="text-sm text-muted-foreground">Rejected. Editing the draft sends it back through review.</p>
       ) : null}
       <History data={data} canPublish={canPublish} onSettle={(attemptId, action, link) => act({ action, attemptId, ...(link ? { url: link } : {}) })} onAct={act} />
+      {slow && <p className="text-sm text-muted-foreground">Still not confirmed. Check the account to see whether it posted.</p>}
     </section>
   );
 }
