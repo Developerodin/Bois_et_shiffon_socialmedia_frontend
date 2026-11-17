@@ -15,6 +15,7 @@ const stream = (...chunks: string[]) =>
     }),
     { headers: { "content-type": "application/x-ndjson" } },
   );
+const failure = (p: Promise<unknown>) => p.then(() => { throw new Error("expected a rejection"); }, (e: ApiError) => e);
 const sent = () => new Headers(fetchMock.mock.calls[0][1].headers);
 
 beforeEach(() => {
@@ -30,7 +31,7 @@ afterEach(() => {
 describe("request errors", () => {
   it("keeps the whole problem body on the error", async () => {
     fetchMock.mockResolvedValue(json({ title: "t", detail: "d", code: "render.alreadyDone", extra: 1 }, 409));
-    const err = await request("/x").catch((e) => e as ApiError);
+    const err = await failure(request("/x"));
     expect(err).toBeInstanceOf(ApiError);
     expect(err).toMatchObject({ status: 409, message: "d", code: "render.alreadyDone" });
     expect((err.data as Record<string, unknown>).extra).toBe(1);
@@ -71,7 +72,7 @@ describe("request streams", () => {
 
   it("rejects with the error line as data", async () => {
     fetchMock.mockResolvedValue(stream('{"type":"error","status":402,"detail":"Needs a plan","planRequired":true}\n'));
-    const err = await request("/x", { onLine: vi.fn() }).catch((e) => e as ApiError);
+    const err = await failure(request("/x", { onLine: vi.fn() }));
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(402);
     expect((err.data as Record<string, unknown>).planRequired).toBe(true);
@@ -79,7 +80,7 @@ describe("request streams", () => {
 
   it("rejects with status 0 when the stream stops early", async () => {
     fetchMock.mockResolvedValue(stream('{"type":"stage"}\n'));
-    const err = await request("/x", { onLine: vi.fn() }).catch((e) => e as ApiError);
+    const err = await failure(request("/x", { onLine: vi.fn() }));
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(0);
   });
