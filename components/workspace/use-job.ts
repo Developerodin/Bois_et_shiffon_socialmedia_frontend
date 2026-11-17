@@ -108,6 +108,16 @@ export function useJob<T>(
     rateLimited.current = false;
   }, [url]);
 
+  // A job that starts running again (a post going out after the panel sat idle) gets its own clock: its own cap and cadence.
+  const wasFinished = useRef(finished);
+  useEffect(() => {
+    if (wasFinished.current && !finished) {
+      startedAt.current = Date.now();
+      setSlow(false);
+    }
+    wasFinished.current = finished;
+  }, [finished]);
+
   const onError = useCallback((e: unknown) => {
     errors.current += 1;
     rateLimited.current = e instanceof ApiError && e.status === 429;
