@@ -6,17 +6,16 @@ import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Camera, Clapperboard, FileText, Images, Inbox, LayoutDashboard, Menu, Package, Plug, PenSquare, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
-import { SHELL_STROKE } from "@/components/shell/icon";
+import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
 import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { tool } from "@/components/shell/top-bar";
 import { AccountMenu } from "@/components/workspace/account-menu";
 import type { WebFeature } from "@/lib/features";
 import { NAV, navFor, sidebarGroups, type NavEntry } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-const MAIN_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, products: Package, connections: Plug,
+const NAV_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, products: Package, connections: Plug,
   automations: Workflow,
   library: Images,
   photoshoot: Camera,
@@ -92,7 +91,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
             {g.label ? <p className="mb-2 px-5 text-xs text-muted-foreground">{g.label}</p> : null}
             <ul className="mr-7 ml-5">
               {g.entries.map((e) => {
-                const Icon = MAIN_ICONS[e.id];
+                const Icon = NAV_ICONS[e.id];
                 const on = isActive(e);
                 return (
                   <li key={e.id}>

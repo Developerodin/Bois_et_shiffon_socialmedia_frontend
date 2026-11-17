@@ -74,14 +74,14 @@ export function agentRunPrice(sub: Subscription | null, agentKey: string): numbe
   return sub.freeAgents?.includes(agentKey) ? 0 : sub.prices.manualRun;
 }
 
-const credits = (n: number) => `${n} ${n === 1 ? "credit" : "credits"}`;
+const creditsText = (n: number) => `${n} ${n === 1 ? "credit" : "credits"}`;
 
 /** "Run now · 5 credits": the visible words first, so the accessible name still starts with them. A free or unknown price adds nothing. */
-export const withPrice = (label: string, price: number | null): string => (price ? `${label} · ${credits(price)}` : label);
+export const withPrice = (label: string, price: number | null): string => (price ? `${label} · ${creditsText(price)}` : label);
 
 export function creditsLabel(balance: number | null, unlimited: boolean): string {
   if (unlimited) return "Unlimited credits";
-  return balance === null ? "Credits" : credits(balance);
+  return balance === null ? "Credits" : creditsText(balance);
 }
 
 /** The workspace id in a `/api/v1/workspaces/<w>/brands/<b>` base, for callers that only hold the base. */

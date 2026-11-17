@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { AdminPeople } from "@/shared";
-import { Ago, day, Empty, PageHeader, Pager, SearchBox, Table, withQuery } from "@/components/admin/ui";
+import { Ago, day, Empty, Pager, SearchBox, Table, withQuery } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 import { serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "People · Platform admin" };

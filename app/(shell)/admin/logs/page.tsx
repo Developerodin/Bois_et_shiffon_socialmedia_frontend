@@ -1,5 +1,5 @@
 import { LogsView } from "@/components/admin/logs-view";
-import { PageHeader } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata = { title: "Logs · Platform admin" };
 

@@ -128,7 +128,7 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
     body = (
       <>
         {/* Desktop: table */}
-        <div className="-mx-5 hidden md:block">
+        <div className="-mx-5 hidden overflow-x-auto md:block">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-border text-xs text-muted-foreground">
               <tr>

@@ -1,5 +1,5 @@
 import { SpendView } from "@/components/admin/spend-view";
-import { PageHeader } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const metadata = { title: "Spend & usage · Platform admin" };
 

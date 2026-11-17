@@ -1,6 +1,7 @@
 import type { AdminWorkspaceHeader } from "@/shared";
 import { TabLinks } from "@/components/admin/tab-links";
-import { day, PageHeader } from "@/components/admin/ui";
+import { day } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 import { api, serverFetch } from "@/lib/server-fetch";
 
 /**

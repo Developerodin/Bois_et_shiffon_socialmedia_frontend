@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 import { AiModelsTab } from "@/components/settings/ai-models-tab";
 
 export const metadata = { title: "AI models · Platform admin" };

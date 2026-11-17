@@ -2,7 +2,8 @@ import Link from "next/link";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type AdminPersonTimeline } from "@/shared";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
-import { Ago, CursorPager, Empty, fxOf, Money, PageHeader, period as periodOf, PERIODS, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
+import { Ago, CursorPager, Empty, fxOf, Money, period as periodOf, PERIODS, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Person activity · Platform admin" };

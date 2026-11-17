@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw } from "lucide-react";
-import { SHELL_STROKE } from "@/components/shell/icon";
-import { TOPBAR_SLOT_ID, tool } from "@/components/shell/top-bar";
+import { SHELL_STROKE, tool } from "@/components/shell/icon";
+import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { AdminLogsResponse, AdminOverview as Overview, AdminSpend } from "@/shared";
 import { LogTable } from "@/components/admin/log-table";
 import { SpendChart } from "@/components/admin/spend-chart";
-import { Ago, fxOf, Money, PageHeader, Section, Stat, Table, type Fx } from "@/components/admin/ui";
+import { Ago, fxOf, Money, Section, Stat, Table, type Fx } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 import { serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Platform admin" };

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type ActivitySort, type AdminActivityList } from "@/shared";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
-import { Ago, Empty, fxOf, Money, PageHeader, Pager, period as periodOf, PERIODS, Segmented, Table, withQuery } from "@/components/admin/ui";
+import { Ago, Empty, fxOf, Money, Pager, period as periodOf, PERIODS, Segmented, Table, withQuery } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 import { serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Activity · Platform admin" };

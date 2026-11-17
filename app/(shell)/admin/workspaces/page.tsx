@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { type AdminWorkspaces, type WorkspaceSort } from "@/shared";
-import { Ago, day, Empty, fxOf, Money, PageHeader, Pager, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
+import { Ago, day, Empty, fxOf, Money, Pager, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 import { serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Workspaces · Platform admin" };

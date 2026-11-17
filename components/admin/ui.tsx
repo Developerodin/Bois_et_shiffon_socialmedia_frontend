@@ -71,6 +71,7 @@ export function Stat({ label, value, hint, href }: { label: string; value: React
   );
 }
 
+/** The flat (no card) section used only in the admin console; elsewhere use PageSection. */
 export function Section({ id, title, description, children }: { id: string; title: string; description?: string; children: React.ReactNode }) {
   return (
     <section id={id} aria-labelledby={`${id}-h`} className="scroll-mt-24 flex flex-col gap-3">
@@ -153,6 +154,3 @@ export function CursorPager({ newest, older }: { newest?: string; older?: string
 
 /** The period switch (Spend, Activity, Logs): `?days=` 7, 30 (the default, left out of the URL), 90 or all. The API reads the same query. */
 export { PERIODS, period } from "@/shared";
-
-export { PageHeader } from "@/components/ui/page-header";
-

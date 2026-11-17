@@ -3,7 +3,8 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import type { AdminPerson } from "@/shared";
 import { AccessMatrix } from "@/components/admin/access";
 import { LogTable } from "@/components/admin/log-table";
-import { Ago, day, PageHeader, Section, Stat, when } from "@/components/admin/ui";
+import { Ago, day, Section, Stat, when } from "@/components/admin/ui";
+import { PageHeader } from "@/components/ui/page-header";
 import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Person · Platform admin" };

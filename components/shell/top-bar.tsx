@@ -6,7 +6,7 @@ import { ChevronRight, ChevronUp, MessageCircle, SquareTerminal } from "lucide-r
 import { AgentLog } from "@/components/agents/agent-log";
 import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { CreditsChip } from "@/components/shell/credits-chip";
-import { SHELL_STROKE } from "@/components/shell/icon";
+import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -14,9 +14,6 @@ type Props = { brandName: string | null; workspaceId: string | null; brandId: st
 
 const LOGS_KEY = "ws.logsOpen";
 export const TOPBAR_SLOT_ID = "topbar-slot";
-
-export const tool =
-  "flex h-11 items-center gap-2 rounded-2xl px-3 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px";
 
 /** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (below 1280 px) the assistant toggle on the right. */
 export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
