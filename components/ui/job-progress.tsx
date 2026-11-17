@@ -63,6 +63,9 @@ export function JobProgress({ title, steps, value = null, job, onRetry }: {
     if (!job.slow) setDismissed(false);
   }, [job.slow]);
 
+  const showSlow = job.slow && !dismissed;
+  const pct = value === null ? null : Math.min(100, Math.max(0, value));
+
   return (
     <section aria-label={title} className="rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
       <h3 className="text-lg font-semibold">{title}</h3>
@@ -71,13 +74,13 @@ export function JobProgress({ title, steps, value = null, job, onRetry }: {
         aria-label={title}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={value === null ? undefined : Math.round(value)}
+        aria-valuenow={pct === null ? undefined : Math.round(pct)}
         aria-valuetext={progressText(steps, value)}
         className="mt-3 h-2 overflow-hidden rounded-full bg-border"
       >
         <div
           className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none"
-          style={{ width: `${value === null ? 0 : Math.min(100, Math.max(0, value))}%` }}
+          style={{ width: `${pct ?? 0}%` }}
         />
       </div>
       <ol className="mt-3 space-y-2">
@@ -90,19 +93,24 @@ export function JobProgress({ title, steps, value = null, job, onRetry }: {
         ))}
       </ol>
       <p aria-live="polite" className="sr-only">{announcement}</p>
-      {job.slow && !dismissed && (
-        <div role="status" className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-          <span>This is taking longer than usual.</span>
-          <Button size="sm" variant="ghost" onClick={() => setDismissed(true)}>Keep waiting</Button>
-          <Button size="sm" variant="outline" onClick={onRetry ?? (() => void job.reload())}>{onRetry ? "Retry" : "Check now"}</Button>
-        </div>
-      )}
-      {job.failed && (
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-destructive">
-          <span>Couldn&apos;t check progress.</span>
-          <Button size="sm" variant="outline" onClick={() => void job.reload()}>Try again</Button>
-        </div>
-      )}
+      {/* Live regions stay mounted so a screen reader hears the text when it appears. */}
+      <div role="status" className={showSlow ? "mt-3 flex flex-wrap items-center gap-2 text-sm" : "sr-only"}>
+        {showSlow && (
+          <>
+            <span>This is taking longer than usual.</span>
+            <Button size="sm" variant="ghost" onClick={() => setDismissed(true)}>Keep waiting</Button>
+            <Button size="sm" variant="outline" onClick={onRetry ?? (() => void job.reload())}>{onRetry ? "Retry" : "Check now"}</Button>
+          </>
+        )}
+      </div>
+      <div role="alert" className={job.failed ? "mt-3 flex flex-wrap items-center gap-2 text-sm text-destructive" : "sr-only"}>
+        {job.failed && (
+          <>
+            <span>Couldn&apos;t check progress.</span>
+            <Button size="sm" variant="outline" onClick={() => void job.reload()}>Try again</Button>
+          </>
+        )}
+      </div>
     </section>
   );
 }

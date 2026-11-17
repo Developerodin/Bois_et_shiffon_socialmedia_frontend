@@ -1,5 +1,7 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { progressText, stepAnnouncement, type JobStep } from "@/components/ui/job-progress";
+import { JobProgress, progressText, stepAnnouncement, type JobStep } from "@/components/ui/job-progress";
 
 const steps = (...states: JobStep["state"][]): JobStep[] => states.map((state, i) => ({ label: "abc"[i], state }));
 
@@ -30,5 +32,24 @@ describe("stepAnnouncement", () => {
   it("announces a failure once", () => {
     expect(stepAnnouncement(steps("done", "active", "waiting"), steps("done", "failed", "waiting"))).toBe("Failed: b");
     expect(stepAnnouncement(steps("done", "failed", "waiting"), steps("done", "failed", "waiting"))).toBeNull();
+  });
+});
+
+const html = (job: { slow: boolean; failed: boolean }, value: number | null = null) =>
+  renderToStaticMarkup(createElement(JobProgress, { title: "Shoot", steps: steps("active"), value, job: { ...job, reload: async () => {} } }));
+
+describe("JobProgress notices", () => {
+  it("keeps both live regions mounted while quiet", () => {
+    const h = html({ slow: false, failed: false });
+    expect(h).toContain('role="status"');
+    expect(h).toContain('role="alert"');
+    expect(h).not.toContain("Couldn");
+  });
+  it("puts the failure inside the alert region", () => {
+    expect(html({ slow: false, failed: true })).toMatch(/role="alert"[^>]*>[^]*Couldn/);
+  });
+  it("clamps aria-valuenow", () => {
+    expect(html({ slow: false, failed: false }, 140)).toContain('aria-valuenow="100"');
+    expect(html({ slow: false, failed: false }, -5)).toContain('aria-valuenow="0"');
   });
 });
