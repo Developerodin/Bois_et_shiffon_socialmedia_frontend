@@ -81,6 +81,10 @@ export function PanelLayout<Id extends string>({
   // A panel moved or hidden from a menu: once the new layout renders, focus follows it and the live region says where.
   const pending = useRef<{ id: Id; title: string } | null>(null);
   const [message, setMessage] = useState("");
+  // Set only by a move or hide from a panel menu: that close skips Radix's return to the (remounted or gone)
+  // trigger. Escape, outside click and Collapse/Expand keep Radix's default return. Cleared by the handler,
+  // which runs in Radix's setTimeout(0) after the effect below has already cleared `pending`.
+  const suppressReturn = useRef(false);
   // The top bar is rendered by the shell layout, so it exists by the time this mounts.
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   useEffect(() => setSlot(document.getElementById(TOPBAR_SLOT_ID)), []);
@@ -143,6 +147,10 @@ export function PanelLayout<Id extends string>({
   const announce = (id: Id, change: () => void) => {
     pending.current = { id, title: panels.find((p) => p.id === id)!.title };
     change();
+  };
+  const fromMenu = (id: Id, change: () => void) => {
+    suppressReturn.current = true;
+    announce(id, change);
   };
   const toggleCollapse = (id: Id) =>
     commit({ ...layout, collapsed: layout.collapsed.includes(id) ? layout.collapsed.filter((p) => p !== id) : [...layout.collapsed, id] });
@@ -221,8 +229,11 @@ export function PanelLayout<Id extends string>({
     if (!p) return;
     pending.current = null;
     const shown = layout.columns.some((c) => c.panels.includes(p.id));
+    // These ids assume one PanelLayout per page.
     document.getElementById(shown ? `panel-head-${p.id}` : "layout-menu")?.focus();
-    setMessage(layoutMessage(p.title, layout, p.id));
+    const next = layoutMessage(p.title, layout, p.id);
+    // An unchanged string would not re-render or re-announce, so a repeat alternates a trailing no-break space.
+    setMessage((m) => (m === next ? `${next}\u00a0` : next));
   }, [layout]);
 
   const def = (id: Id) => panels.find((p) => p.id === id)!;
@@ -246,6 +257,7 @@ export function PanelLayout<Id extends string>({
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Panels</DropdownMenuLabel>
+        {/* Hiding here leaves focus in this open menu (its trap); on close Radix returns it to Layout. Intended. */}
         {panels.map((p) => (
           <DropdownMenuCheckboxItem key={p.id} checked={visible.includes(p.id)} onCheckedChange={(on) => (on ? show(p.id) : announce(p.id, () => hide(p.id)))} onSelect={(e) => e.preventDefault()}>
             {p.title}
@@ -375,13 +387,17 @@ export function PanelLayout<Id extends string>({
                               <MoreHorizontal aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
-                            <DropdownMenuItem onSelect={() => announce(id, () => shift(id, -1))}>Move left</DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => announce(id, () => shift(id, 1))}>Move right</DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => announce(id, () => move(id, "new-column"))}>Open in its own column</DropdownMenuItem>
+                          <DropdownMenuContent align="end" onCloseAutoFocus={(e) => {
+                              if (!suppressReturn.current) return;
+                              e.preventDefault();
+                              suppressReturn.current = false;
+                            }}>
+                            <DropdownMenuItem onSelect={() => fromMenu(id, () => shift(id, -1))}>Move left</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => fromMenu(id, () => shift(id, 1))}>Move right</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => fromMenu(id, () => move(id, "new-column"))}>Open in its own column</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => toggleCollapse(id)}>{collapsed ? "Expand" : "Collapse"}</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={() => announce(id, () => hide(id))}>Hide panel</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => fromMenu(id, () => hide(id))}>Hide panel</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
