@@ -38,18 +38,23 @@ const listeners = new Map<string, Set<(d: unknown) => void>>();
 /**
  * GET `url`, joining the request already in flight for it if there is one. A success is stored and sent to every
  * subscriber; a failure rejects every waiter and leaves the last good response in place.
+ * `fresh` (a reload after a change) never joins: it waits for the request in flight, then sends its own, so its answer
+ * is from after the change. It becomes the request in flight, so there is still only one at a time per URL.
  */
-export function fetchShared(url: string): Promise<unknown> {
+export function fetchShared(url: string, fresh = false): Promise<unknown> {
   const pending = inFlight.get(url);
-  if (pending) return pending;
-  const p = request<unknown>(url)
+  if (pending && !fresh) return pending;
+  const p: Promise<unknown> = (pending ? pending.catch(() => undefined) : Promise.resolve())
+    .then(() => request<unknown>(url))
     .then((d) => {
       lastResponse.set(url, d);
       fetchedAt.set(url, Date.now());
       listeners.get(url)?.forEach((fn) => fn(d));
       return d;
     })
-    .finally(() => inFlight.delete(url));
+    .finally(() => {
+      if (inFlight.get(url) === p) inFlight.delete(url);
+    });
   inFlight.set(url, p);
   return p;
 }
@@ -70,18 +75,28 @@ const visible = () => document.visibilityState === "visible";
  * Poll `url` until `done(data)` (forever without `done`), on the shared per-URL cache: panels on one URL share one
  * request. Backs off on errors, waits a minute when rate limited, pauses while the tab is hidden and fetches as soon
  * as it's visible. `slow` turns on once `capMs` has passed since mount without the job being done; polling goes on.
- * `pick` and `done` must be stable (module-level or memoised), or every render restarts the polling.
+ * `pick`, `done` and `intervals` must be stable (module-level or memoised), or every render restarts the polling.
+ * A new `url` starts over: data from the cache (or none), no errors, the clock and `slow` reset.
  */
 export function useJob<T>(
   url: string,
   { pick, done, intervals, capMs }: { pick: (d: never) => T; done?: (data: T) => boolean; intervals: Intervals; capMs?: number },
 ): { data: T | null; failed: boolean; slow: boolean; reload: () => Promise<void> } {
-  const [data, setData] = useState<T | null>(() => {
+  const cached = () => {
     const d = sharedResponse(url);
     return d === undefined ? null : pick(d as never);
-  });
+  };
+  const [data, setData] = useState<T | null>(cached);
   const [failed, setFailed] = useState(false);
   const [slow, setSlow] = useState(false);
+  // The URL `data`, `failed` and `slow` belong to: on a new URL, reset them before anything uses the old job's state.
+  const [shownUrl, setShownUrl] = useState(url);
+  if (shownUrl !== url) {
+    setShownUrl(url);
+    setData(cached());
+    setFailed(false);
+    setSlow(false);
+  }
   const startedAt = useRef(0);
   const errors = useRef(0);
   const rateLimited = useRef(false);
@@ -89,7 +104,9 @@ export function useJob<T>(
 
   useEffect(() => {
     startedAt.current = Date.now();
-  }, []);
+    errors.current = 0;
+    rateLimited.current = false;
+  }, [url]);
 
   const onError = useCallback((e: unknown) => {
     errors.current += 1;
@@ -98,16 +115,18 @@ export function useJob<T>(
   }, []);
 
   // Any success on this URL (ours or another panel's) brings the data and clears the error backoff.
-  useEffect(
-    () =>
-      subscribeShared(url, (d) => {
-        setData(pick(d as never));
-        setFailed(false);
-        errors.current = 0;
-        rateLimited.current = false;
-      }),
-    [url, pick],
-  );
+  useEffect(() => {
+    const off = subscribeShared(url, (d) => {
+      setData(pick(d as never));
+      setFailed(false);
+      errors.current = 0;
+      rateLimited.current = false;
+    });
+    // A response that landed between render and this effect.
+    const d = sharedResponse(url);
+    if (d !== undefined) setData(pick(d as never));
+    return off;
+  }, [url, pick]);
 
   useEffect(() => {
     if (finished) return;
@@ -144,9 +163,9 @@ export function useJob<T>(
     if (finished || capMs === undefined) return;
     const t = setTimeout(() => setSlow(true), Math.max(0, startedAt.current + capMs - Date.now()));
     return () => clearTimeout(t);
-  }, [finished, capMs]);
+  }, [url, finished, capMs]);
 
-  const reload = useCallback(() => fetchShared(url).then(() => undefined, onError), [url, onError]);
+  const reload = useCallback(() => fetchShared(url, true).then(() => undefined, onError), [url, onError]);
 
   return { data, failed, slow: slow && !finished, reload };
 }

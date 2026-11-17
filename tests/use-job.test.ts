@@ -56,4 +56,20 @@ describe("fetchShared", () => {
     expect(results.map((r) => r.status)).toEqual(["rejected", "rejected"]);
     expect(sharedResponse("/b")).toBeUndefined();
   });
+
+  it("sends a fresh request after the one in flight, never alongside it", async () => {
+    let first!: (r: Response) => void;
+    fetchMock
+      .mockImplementationOnce(() => new Promise<Response>((r) => (first = r)))
+      .mockImplementationOnce(async () => json({ n: 2 }));
+    const polled = fetchShared("/c");
+    const fresh = fetchShared("/c", true);
+    await Promise.resolve();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    first(json({ n: 1 }));
+    await expect(polled).resolves.toEqual({ n: 1 });
+    await expect(fresh).resolves.toEqual({ n: 2 });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(sharedResponse("/c")).toEqual({ n: 2 });
+  });
 });
