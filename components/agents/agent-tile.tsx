@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Play } from "lucide-react";
 import { startRun, type AgentSummary, type RunStatus } from "@/components/agents/api";
 import { errorMessage } from "@/components/settings/api";
+import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -38,6 +40,8 @@ type Props = {
 export function AgentTile({ agent, workspaceId, brandId, onRunStarted }: Props) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const price = useRunPrice(workspaceId, agent.key);
+  const label = pending ? "Starting…" : withPrice("Run now", price);
 
   const status = agent.lastRun?.status ?? null;
   const active = status === "QUEUED" || status === "RUNNING";
@@ -49,6 +53,7 @@ export function AgentTile({ agent, workspaceId, brandId, onRunStarted }: Props) 
     try {
       await startRun(workspaceId, brandId, agent.key);
       onRunStarted();
+      void loadPlanCredits(workspaceId, true);
     } catch (err) {
       setError(errorMessage(err, "Could not start a run. Try again."));
     } finally {
@@ -83,10 +88,10 @@ export function AgentTile({ agent, workspaceId, brandId, onRunStarted }: Props) 
           size="sm"
           onClick={() => void runNow()}
           disabled={pending || active || !agent.enabled}
-          aria-label={`Run ${agent.name} now`}
+          aria-label={`${label}, ${agent.name}`}
         >
           <Play aria-hidden="true" />
-          {pending ? "Starting…" : "Run now"}
+          {label}
         </Button>
       </div>
       {status === "FAILED" && agent.lastRun?.error ? (

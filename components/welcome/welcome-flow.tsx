@@ -13,10 +13,12 @@ import {
   startResearch,
   type ContextDocsResponse,
 } from "@/components/context/api";
+import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { keepPolling, settleCheck, type CheckState } from "@/components/welcome/reading-state";
 import { readable } from "@/lib/agent-message";
 import { brandNameFromWebsite, normalizeWebsite } from "@/shared";
+import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 
 const DOCS = ["Product information", "Marketing strategy", "Competitor analysis", "Brand voice", "Content strategy"];
@@ -206,6 +208,7 @@ function ReadingRoom({
   const [now, setNow] = useState(() => Date.now());
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
+  const retryPrice = useRunPrice(workspaceId, "research");
   const [checks, setChecks] = useState<Record<string, CheckState>>({ seo: "waiting", geo: "waiting" });
   // Polls in a row where the brand's research run wasn't this one, and polls in a row that failed.
   const [misses, setMisses] = useState(0);
@@ -293,6 +296,7 @@ function ReadingRoom({
     try {
       const { run } = await startResearch(workspaceId, brandId);
       onRetry(run.id);
+      void loadPlanCredits(workspaceId, true);
     } catch (err) {
       setRetryError(err instanceof ProblemError ? err.message : "Couldn't restart. Check your connection and try again.");
     } finally {
@@ -399,7 +403,7 @@ function ReadingRoom({
               <Button onClick={() => onRetry(docs.research!.runId)}>Follow the latest reading</Button>
             ) : (
               <Button onClick={retry} disabled={retrying}>
-                {retrying ? "Starting…" : "Read it again"}
+                {retrying ? "Starting…" : withPrice("Read it again", retryPrice)}
               </Button>
             )}
           </div>
@@ -426,7 +430,7 @@ function ReadingRoom({
               <Link href="/context">See what was drafted</Link>
             </Button>
             <Button onClick={retry} disabled={retrying}>
-              {retrying ? "Restarting…" : "Try again"}
+              {retrying ? "Restarting…" : withPrice("Try again", retryPrice)}
             </Button>
           </div>
         </div>

@@ -45,6 +45,17 @@ describe("plan and credits store", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("reads again after an in-flight read when forced, since that read may predate a charge", async () => {
+    const balance = { e1: 20 };
+    answer(balance);
+    const first = loadPlanCredits("e1");
+    balance.e1 = 15; // a paid run lands while the first read is out
+    const forced = [loadPlanCredits("e1", true), loadPlanCredits("e1", true)];
+    await Promise.all([first, ...forced]);
+    expect(planCredits("e1").credits).toBe(15);
+    expect(fetchMock).toHaveBeenCalledTimes(4); // the first read and one follow-up, not one per forced call
+  });
+
   it("keeps the old values and flags a failure, without rejecting", async () => {
     answer({ c1: 9 });
     await loadPlanCredits("c1");

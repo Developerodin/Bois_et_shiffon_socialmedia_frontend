@@ -4,11 +4,13 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type R
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { SHELL_STROKE } from "@/components/shell/icon";
+import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Check, Globe, Loader2, Play, Square, TriangleAlert, Wrench } from "lucide-react";
 import { startRun } from "@/components/agents/api";
 import { CLIENT_TAG, isOffline, NET_MESSAGE, send } from "@/lib/net";
 import { Markdown } from "@/components/context/markdown";
 import { Button } from "@/components/ui/button";
+import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 
 const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) => string> = {
@@ -124,11 +126,13 @@ export function ChatPane({ header, intro, empty, ...props }: Props & ChatSlots) 
  */
 function StartAgent({ workspaceId, brandId, agentKey }: { workspaceId: string; brandId: string; agentKey: string }) {
   const [state, setState] = useState<"idle" | "starting" | "started" | { error: string }>("idle");
+  const price = useRunPrice(workspaceId, agentKey);
   const start = async () => {
     setState("starting");
     try {
       await startRun(workspaceId, brandId, agentKey);
       setState("started");
+      void loadPlanCredits(workspaceId, true);
     } catch (e) {
       setState({
         error: e instanceof Error ? e.message : "Could not start the agent.",
@@ -146,7 +150,7 @@ function StartAgent({ workspaceId, brandId, agentKey }: { workspaceId: string; b
     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
       <Button size="sm" variant="outline" onClick={() => void start()} disabled={state === "starting"}>
         {state === "starting" ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Play aria-hidden="true" />}
-        Start the {agentKey} agent
+        {withPrice(`Start the ${agentKey} agent`, price)}
       </Button>
       {typeof state === "object" && (
         <span role="alert" className="text-destructive">

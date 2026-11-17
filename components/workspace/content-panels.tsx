@@ -4,10 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
+import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
+import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
 import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -158,6 +160,9 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
     return s === "RUNNING" || s === "QUEUED";
   }, []);
   const plannerRunning = useBrandData(base, "agents", pickPlanner as (d: never) => boolean).data === true;
+  const workspaceId = workspaceIdOf(base);
+  const planPrice = useRunPrice(workspaceId, "planner");
+  const scoutPrice = useRunPrice(workspaceId, "scout");
   const planFailed = useCallback((why: string) => {
     setPlanning(null);
     setError(why);
@@ -174,6 +179,7 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
     try {
       const { run } = await request<{ run: { id: string } }>(`${base}/agents/planner/runs`, { method: "POST", body: "{}" });
       setPlanning(run.id);
+      if (workspaceId) void loadPlanCredits(workspaceId, true);
     } catch (e) {
       setError(errorMessage(e, "Couldn't start the Planner. Try again."));
     }
@@ -205,7 +211,7 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
           {shortlisted > 0 && perms?.includes("agents.run") ? (
             <Button size="sm" onClick={() => void plan()} disabled={!!planning || plannerRunning}>
               {planning || plannerRunning ? <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> : null}
-              {planning || plannerRunning ? "Planning posts…" : `Plan posts from ${shortlisted === 1 ? "this idea" : `these ${shortlisted} ideas`}`}
+              {planning || plannerRunning ? "Planning posts…" : withPrice(`Plan posts from ${shortlisted === 1 ? "this idea" : `these ${shortlisted} ideas`}`, planPrice)}
             </Button>
           ) : (
             <span>· shortlist the ideas you like, then plan them into posts</span>
@@ -241,7 +247,7 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
           <p className="text-sm text-muted-foreground">{data.length ? "No open ideas. Switch to All to see past ones." : "No ideas yet. The Opportunities agent finds what to post about."}</p>
           {perms?.includes("agents.run") && (
             <Button size="sm" variant="secondary" onClick={onRunScout}>
-              Find ideas
+              {withPrice("Find ideas", scoutPrice)}
             </Button>
           )}
         </div>
@@ -389,6 +395,9 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
   const [error, setError] = useState<string | null>(null);
   // The run finished and the post may look the same: say so, until the post changes or another run starts.
   const [ranOut, setRanOut] = useState(false);
+  const workspaceId = workspaceIdOf(base);
+  // Before the early return below; the key is unused when the step has no agent.
+  const price = useRunPrice(workspaceId, step?.agent?.key ?? "");
   useEffect(() => {
     setStarted(null);
     setError(null);
@@ -415,6 +424,7 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
     try {
       const { run } = await request<{ run: { id: string } }>(`${base}/agents/${encodeURIComponent(key)}/runs`, { method: "POST", body: "{}" });
       setStarted({ key, runId: run.id });
+      if (workspaceId) void loadPlanCredits(workspaceId, true);
     } catch (e) {
       setError(errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
@@ -435,7 +445,7 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
         <div className="flex flex-wrap gap-2">
           {step.agent && canRun && (
             <Button size="sm" onClick={() => run(step.agent!.key)} disabled={pending}>
-              <Sparkles aria-hidden /> {pending ? "Starting…" : step.agent.label}
+              <Sparkles aria-hidden /> {pending ? "Starting…" : withPrice(step.agent.label, price)}
             </Button>
           )}
           {step.edit && canEdit && (

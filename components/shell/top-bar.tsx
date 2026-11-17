@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ChevronRight, ChevronUp, MessageCircle, SquareTerminal } from "lucide-react";
 import { AgentLog } from "@/components/agents/agent-log";
 import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
+import { CreditsChip } from "@/components/shell/credits-chip";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
@@ -59,6 +60,7 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
+          {workspaceId && <CreditsChip workspaceId={workspaceId} />}
           {/* The Overview's panel layout portals its Layout menu here (one header band instead of two). */}
           <div id={TOPBAR_SLOT_ID} className="contents" />
           {brandId && (

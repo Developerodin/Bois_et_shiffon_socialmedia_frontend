@@ -15,8 +15,10 @@ import {
 import { DocPane } from "@/components/context/doc-pane";
 import { docState, DocStateBadge } from "@/components/context/doc-state";
 import { okToDiscard } from "@/components/context/unsaved";
+import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { usePerms } from "@/components/workspace/content-panels";
 import { Button } from "@/components/ui/button";
+import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
 
@@ -43,6 +45,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
   // Hide what this role can't do (the server refuses it anyway); null while loading counts as no.
   const perms = usePerms(`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`);
   const can = (p: string) => !!perms?.includes(p);
+  const researchPrice = useRunPrice(workspaceId, "research");
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [selected, setSelected] = useState<ContextDocKind>(
     "product-information",
@@ -130,6 +133,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
           : prev,
       );
       setRerun({ pending: false, error: null });
+      void loadPlanCredits(workspaceId, true);
     } catch (err) {
       setRerun({
         pending: false,
@@ -224,7 +228,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
                     rerun.pending && "animate-spin motion-reduce:animate-none",
                   )}
                 />
-                Re-run research
+                {withPrice("Re-run research", researchPrice)}
               </Button>
               ) : null}
               {rerun.error ? (

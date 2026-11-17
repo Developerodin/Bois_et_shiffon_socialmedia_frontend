@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
-import { loadPlanCredits, onPlanCredits, planCredits, type PlanCredits } from "@/lib/plan-credits";
+import { agentRunPrice, loadPlanCredits, onPlanCredits, planCredits, type PlanCredits } from "@/lib/plan-credits";
 
 const EMPTY: PlanCredits = planCredits("");
 
@@ -39,4 +39,9 @@ export function usePlan(workspaceId: string | null) {
     failed: entry.failed,
     reload,
   };
+}
+
+/** Credits a manual run of `agentKey` costs in this workspace; null means show no price. */
+export function useRunPrice(workspaceId: string | null, agentKey: string): number | null {
+  return agentRunPrice(useEntry(workspaceId).entry.subscription, agentKey);
 }

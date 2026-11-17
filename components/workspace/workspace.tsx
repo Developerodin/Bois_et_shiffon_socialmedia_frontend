@@ -33,6 +33,7 @@ import { fetchContextDocs, type ContextDocEntry, type ContextDocKind, type Conte
 import { okToDiscard } from "@/components/context/unsaved";
 import { ApiError, errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
+import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
@@ -40,6 +41,7 @@ import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandDa
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { NAV } from "@/lib/nav";
+import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
@@ -346,6 +348,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
           />
         ) : (
           <Home
+            workspaceId={workspaceId}
             user={user}
             agents={agents}
             agentsFailed={failed.agents}
@@ -566,6 +569,7 @@ function ContextPane({
   const site = safeSite(website);
   const [editing, setEditing] = useState(false);
   const [siteSaved, setSiteSaved] = useState(false);
+  const researchPrice = useRunPrice(workspaceIdOf(base), "research");
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -588,8 +592,8 @@ function ContextPane({
               Website saved. Agents use it from their next run.
               {canRun ? (
                 <>
-                  {" "}
-                  <button type="button" onClick={() => { setSiteSaved(false); onOpenResearch(); }} className="font-medium underline underline-offset-2">Re-read it now</button> to redraft the documents.
+                  {" "}To redraft the documents,{" "}
+                  <button type="button" onClick={() => { setSiteSaved(false); onOpenResearch(); }} className="font-medium underline underline-offset-2">{withPrice("re-read it now", researchPrice)}</button>.
                 </>
               ) : null}
               {" "}
@@ -708,6 +712,7 @@ function agentStatus(a: AgentSummary | undefined) {
 }
 
 function Home({
+  workspaceId,
   user,
   agents,
   agentsFailed,
@@ -721,6 +726,7 @@ function Home({
   onRetry,
   due,
 }: {
+  workspaceId: string;
   /** The card for stories due to be posted by hand (people who can publish only). */
   due: React.ReactNode;
   user: Props["user"];
@@ -737,6 +743,7 @@ function Home({
   onShowPanel: (id: PanelId) => void;
 }) {
   const first = firstNameOf(user.name);
+  const scoutPrice = useRunPrice(workspaceId, "scout");
   const tasks = useMemo(() => {
     const list: { id: string; done: boolean; label: string; detail?: string; action: React.ReactNode }[] = [];
     const run = (key: string, label: string, done: boolean) =>
@@ -753,7 +760,7 @@ function Home({
         detail: "Scout reads your documents and the season",
         action: (
           <Button size="sm" onClick={() => onOpen({ kind: "agent", key: "scout", run: true })}>
-            Get ideas
+            {withPrice("Get ideas", scoutPrice)}
           </Button>
         ),
       });
@@ -824,7 +831,7 @@ function Home({
       });
     }
     return list;
-  }, [reports, connections, pipeline, canRun, onOpen, onShowPanel]);
+  }, [reports, connections, pipeline, canRun, onOpen, onShowPanel, scoutPrice]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done);
@@ -1110,6 +1117,7 @@ function AgentView({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const running = agent?.lastRun?.status === "RUNNING" || agent?.lastRun?.status === "QUEUED";
+  const price = useRunPrice(workspaceId, agentKey);
 
   async function run() {
     setPending(true);
@@ -1117,6 +1125,7 @@ function AgentView({
     try {
       await startRun(workspaceId, brandId, agentKey);
       onRan();
+      void loadPlanCredits(workspaceId, true);
     } catch (e) {
       setError(e instanceof ApiError && e.status === 403 ? "Your role can't run agents. Ask an owner or admin." : errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
@@ -1152,7 +1161,7 @@ function AgentView({
           {canRun && (
             <Button onClick={run} disabled={pending || running}>
               {pending || running ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
-              {running ? "Running…" : agent?.lastRun ? "Run again" : "Run"}
+              {running ? "Running…" : withPrice(agent?.lastRun ? "Run again" : "Run", price)}
             </Button>
           )}
         </div>
@@ -1322,6 +1331,16 @@ function feedLine(key: string, a: AgentSummary | undefined, reports: { seo: Repo
   return a?.lastRun ? "Done" : "Not run yet";
 }
 
+/** The feed's icon-only run button, its own component so each row reads its agent's price (shown on hover and in the name). */
+function FeedRunButton({ workspaceId, agent, disabled, spinning, onRun }: { workspaceId: string; agent: AgentSummary; disabled: boolean; spinning: boolean; onRun: () => void }) {
+  const label = withPrice(`Run ${agent.name}`, useRunPrice(workspaceId, agent.key));
+  return (
+    <Button size="sm" variant="ghost" disabled={disabled} onClick={onRun} aria-label={label} title={label}>
+      {spinning ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
+    </Button>
+  );
+}
+
 function AgentsFeed({
   agents,
   agentsFailed,
@@ -1354,6 +1373,7 @@ function AgentsFeed({
     try {
       await startRun(workspaceId, brandId, key);
       onRan();
+      void loadPlanCredits(workspaceId, true);
     } catch (e) {
       setError(errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
@@ -1387,9 +1407,7 @@ function AgentsFeed({
               <span className="block truncate text-sm text-muted-foreground">{feedLine(a.key, a, reports, docs)}</span>
             </button>
             {(canRun || running) && (
-              <Button size="sm" variant="ghost" disabled={!canRun || running || busy === a.key} onClick={() => run(a.key)} aria-label={`Run ${a.name}`}>
-                {running || busy === a.key ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
-              </Button>
+              <FeedRunButton workspaceId={workspaceId} agent={a} disabled={!canRun || running || busy === a.key} spinning={running || busy === a.key} onRun={() => run(a.key)} />
             )}
           </li>
         );
