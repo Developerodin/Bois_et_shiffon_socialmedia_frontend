@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
 import middleware, { config, contentSecurityPolicy, hasSessionCookie } from "@/middleware";
@@ -38,6 +38,7 @@ describe("middleware", () => {
 describe("framing and CSP headers", () => {
   const req = (path: string, cookie?: string) => new NextRequest(`http://localhost:3100${path}`, { headers: cookie ? { cookie } : {} });
   const page = () => middleware(req("/agents", "authjs.session-token=abc"));
+  beforeEach(() => vi.stubEnv("STORAGE_ORIGIN", ""));
   afterEach(() => vi.unstubAllEnvs());
 
   it("refuses framing and starts a report-only policy with a nonce on a page", () => {
@@ -70,6 +71,30 @@ describe("framing and CSP headers", () => {
     vi.stubEnv("STORAGE_ORIGIN", "");
     expect(contentSecurityPolicy("n")).not.toContain("undefined");
     expect(page().headers.get("content-security-policy-report-only")).not.toContain("undefined");
+  });
+});
+
+describe("STORAGE_ORIGIN hygiene", () => {
+  const req = new NextRequest("http://localhost:3100/agents", { headers: { cookie: "authjs.session-token=abc" } });
+  afterEach(() => vi.unstubAllEnvs());
+
+  it.each(["https://a; script-src *", "https://a b", "https://a,https://b c", "javascript:alert(1)", "not a url"])("leaves out a malformed value %j", (value) => {
+    vi.stubEnv("STORAGE_ORIGIN", value);
+    const policy = middleware(req).headers.get("content-security-policy-report-only")!;
+    expect(policy).toContain("connect-src 'self';");
+    expect(policy.match(/script-src/g)).toHaveLength(1);
+  });
+
+  it("does not throw on a value with a newline and never puts one in the header", () => {
+    vi.stubEnv("STORAGE_ORIGIN", "https://a" + String.fromCharCode(10) + "script-src *");
+    const policy = middleware(req).headers.get("content-security-policy-report-only")!;
+    expect(policy).not.toMatch(/[\r\n]/);
+    expect(policy.match(/script-src/g)).toHaveLength(1);
+  });
+
+  it("reduces a value with a path to its origin", () => {
+    vi.stubEnv("STORAGE_ORIGIN", "https://media.example/bucket/x");
+    expect(middleware(req).headers.get("content-security-policy-report-only")).toContain("connect-src 'self' https://media.example;");
   });
 });
 

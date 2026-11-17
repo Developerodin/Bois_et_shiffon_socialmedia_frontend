@@ -38,8 +38,19 @@ function withSecurityHeaders(res: NextResponse, policy: string): NextResponse {
 // revoked cookie gets through here and is turned away by the Server's 401 (lib/server-fetch.ts sends it to /login).
 // /api/* never reaches this middleware: it is rewritten to the Server (next.config.ts), whose own middleware rolls
 // the session cookie forward.
+/** The origin of STORAGE_ORIGIN, or undefined when it is not a clean http(s) URL: a typo must not inject policy sources or break the header. */
+function cleanOrigin(value: string | undefined): string | undefined {
+  try {
+    const url = new URL(value ?? "");
+    // URL still accepts characters such as a comma in a host; a comma would start a second policy.
+    return /^https?:\/\/[a-z0-9.-]+(:\d+)?$/.test(url.origin) ? url.origin : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export default function middleware(request: NextRequest) {
-  const policy = contentSecurityPolicy(btoa(crypto.randomUUID()), process.env.STORAGE_ORIGIN);
+  const policy = contentSecurityPolicy(btoa(crypto.randomUUID()), cleanOrigin(process.env.STORAGE_ORIGIN));
   const { pathname, search } = request.nextUrl;
   if (!PUBLIC_PATHS.some((p) => pathname.startsWith(p)) && !hasSessionCookie(request.cookies.getAll())) {
     const login = new URL("/login", request.url);
