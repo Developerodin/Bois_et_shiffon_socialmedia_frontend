@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronRight, ChevronUp, MessageCircle, SquareTerminal } from "lucide-react";
 import { AgentLog } from "@/components/agents/agent-log";
@@ -10,7 +10,7 @@ import { SHELL_STROKE } from "@/components/shell/icon";
 import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null };
+type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null; nav?: ReactNode };
 
 const LOGS_KEY = "ws.logsOpen";
 export const TOPBAR_SLOT_ID = "topbar-slot";
@@ -19,7 +19,7 @@ export const tool =
   "flex h-11 items-center gap-2 rounded-2xl px-3 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px";
 
 /** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (below 1280 px) the assistant toggle on the right. */
-export function TopBar({ brandName, workspaceId, brandId }: Props) {
+export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
   const { title, brandScoped } = navFor(usePathname());
   const { open: assistantOpen, setOpen: setAssistantOpen } = useAssistant();
   const [logsOpen, setLogsOpen] = useState(false);
@@ -42,7 +42,8 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
 
   return (
     <div className="sticky top-0 z-30 bg-card">
-      <header className="flex h-18 items-center gap-3 px-8">
+      <header className="flex h-18 items-center gap-3 px-4 sm:px-8">
+        {nav}
         <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
           <ol className="flex min-w-0 items-center gap-1 text-sm">
             {brandScoped && brandName ? (
@@ -66,7 +67,7 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
           {brandId && (
             <button type="button" id="logs-toggle" onClick={toggleLogs} onKeyDown={(e) => e.key === "Escape" && logsOpen && toggleLogs()} aria-expanded={logsOpen} aria-controls="agent-log-drawer" className={cn(tool, logsOpen && "bg-accent text-primary-strong")}>
               <SquareTerminal className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
-              Logs
+              <span className="sr-only sm:not-sr-only">Logs</span>
               <ChevronUp className={cn("size-4 transition-transform motion-reduce:transition-none", !logsOpen && "rotate-180")} strokeWidth={SHELL_STROKE} aria-hidden="true" />
             </button>
           )}
@@ -74,7 +75,7 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
           {workspaceId && (
             <button type="button" id={ASSISTANT_TOGGLE_ID} onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, "xl:hidden")}>
               <MessageCircle className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
-              Espanda
+              <span className="sr-only sm:not-sr-only">Espanda</span>
             </button>
           )}
         </div>

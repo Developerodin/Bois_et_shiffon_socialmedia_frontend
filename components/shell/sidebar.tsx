@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Camera, Clapperboard, FileText, Images, Inbox, LayoutDashboard, Package, Plug, PenSquare, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
+import { Camera, Clapperboard, FileText, Images, Inbox, LayoutDashboard, Menu, Package, Plug, PenSquare, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
 import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { tool } from "@/components/shell/top-bar";
 import { AccountMenu } from "@/components/workspace/account-menu";
 import type { WebFeature } from "@/lib/features";
 import { NAV, navFor, sidebarGroups, type NavEntry } from "@/lib/nav";
@@ -38,7 +41,7 @@ type Props = {
 const row =
   "flex items-center gap-3 rounded-2xl text-sm transition-colors active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, user }: Props) {
+function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, user }: Props) {
   const pathname = usePathname();
   const panel = useSearchParams().get("panel");
 
@@ -50,7 +53,7 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
   const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));
 
   return (
-    <aside aria-label="Workspace" className="flex h-full w-[232px] shrink-0 flex-col bg-card">
+    <>
       <div className="px-5 pt-8">
         <Link href="/" aria-label="Espanda, Overview" className="inline-block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <EspandaLogo height={33} priority />
@@ -149,6 +152,34 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
           activeWorkspaceId={activeWorkspaceId}
         />
       </div>
+    </>
+  );
+}
+
+/** Desktop (768 px and up): the fixed sidebar. Below that the same body lives in MobileNav's sheet. */
+export function Sidebar(props: Props) {
+  return (
+    <aside aria-label="Workspace" className="hidden h-full w-[232px] shrink-0 flex-col bg-card md:flex">
+      <SidebarBody {...props} />
     </aside>
+  );
+}
+
+/** Below 768 px: a Menu button in the top bar that opens the sidebar body as a left sheet, closed again on navigation. */
+export function MobileNav(props: Props) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  useEffect(() => setOpen(false), [pathname]);
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger className={cn(tool, "md:hidden")}>
+        <Menu className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
+        <span className="sr-only sm:not-sr-only">Menu</span>
+      </SheetTrigger>
+      <SheetContent side="left" className="flex w-[264px] max-w-[85vw] flex-col bg-card p-0">
+        <SheetTitle className="sr-only">Menu</SheetTitle>
+        <SidebarBody {...props} />
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -9,5 +9,5 @@ import { cn } from "@/lib/utils";
  */
 export function MainArea({ children }: { children: React.ReactNode }) {
   const full = usePathname() === "/";
-  return <main id="content" tabIndex={-1} className={cn("min-h-0 flex-1 bg-background focus:outline-none", full ? "overflow-hidden" : "overflow-y-auto p-8")}>{children}</main>;
+  return <main id="content" tabIndex={-1} className={cn("min-h-0 flex-1 bg-background focus:outline-none", full ? "overflow-hidden" : "overflow-y-auto p-4 sm:p-8")}>{children}</main>;
 }
