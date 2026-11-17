@@ -87,6 +87,8 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
     }
   }
 
+  // Empty and error states are boxes of their own, so only the skeleton and the table go in the card.
+  const inCard = state.kind === "loading" || (state.kind === "ready" && state.data.products.length > 0);
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading products" />;
   else if (state.kind === "forbidden")
@@ -230,9 +232,13 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
       ) : null}
       <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
       {data ? <CampaignsSection workspaceId={workspaceId} brandId={brandId} products={data.products} canManage={canManageCommercial} /> : null}
-      <PageSection id="catalogue" title="Catalogue">
-        {body}
-      </PageSection>
+      {inCard ? (
+        <PageSection id="catalogue" title="Catalogue">
+          {body}
+        </PageSection>
+      ) : (
+        body
+      )}
       {editing !== null ? (
         <ProductDialog
           workspaceId={workspaceId}
