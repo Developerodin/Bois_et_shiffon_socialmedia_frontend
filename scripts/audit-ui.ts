@@ -1,7 +1,11 @@
 /**
  * UI audit against a running app (npm run build && npm run start): axe-core WCAG 2.0–2.2 A/AA +
- * best practices on every page at desktop, 375px and light theme, plus horizontal overflow,
- * tap targets under 24px and keyboard focus visibility. Run: npm run audit:ui -w web-frontend
+ * best practices on every page at desktop, 375px, 320px and light theme, plus horizontal overflow,
+ * tap targets under 24px and keyboard focus visibility. Run: npm run audit:ui --prefix .
+ * (needs SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD).
+ * The 320px pass and the `offscreen` count exist because content pushed past the right edge was
+ * hidden by `overflow-x: clip`, so `overflow` read "none" while content was cut off (C1).
+ * `offscreen` counts visible elements in main/header whose right edge is beyond the viewport.
  */
 import { chromium, type Page } from "@playwright/test";
 import path from "node:path";
@@ -11,7 +15,8 @@ const EXE = process.env.PW_CHROMIUM_PATH || undefined;
 const AXE = path.resolve(process.cwd(), "node_modules/axe-core/axe.min.js");
 const BASE = "http://localhost:3100";
 const PUBLIC = ["/login", "/forgot-password", "/reset-password?token=bad", "/invite/bad-token"];
-const PRIVATE = ["/", "/welcome", "/settings", "/settings?tab=connections", "/performance", "/context", "/calendar"];
+const PRIVATE = ["/", "/welcome", "/settings", "/settings?tab=connections", "/performance", "/context", "/calendar",
+  "/products", "/connections", "/agents", "/studio", "/settings?tab=members", "/admin", "/admin/people"];
 
 type Row = { page: string; vp: string; id: string; impact: string; help: string; n: number; sample: string };
 const rows: Row[] = [];
@@ -39,7 +44,11 @@ async function audit(page: Page, url: string, vp: string) {
     const tiny = interactive.filter((el) => { const r = el.getBoundingClientRect(); return r.width < 24 || r.height < 24; })
       .map((el) => (el.getAttribute("aria-label") || (el as HTMLElement).innerText || el.tagName).trim().slice(0, 30));
     const under44 = interactive.filter((el) => { const r = el.getBoundingClientRect(); return r.height < 44; }).length;
-    return { overflow, tiny: [...new Set(tiny)].slice(0, 8), tinyCount: tiny.length, under44, total: interactive.length };
+    const offs = [...document.querySelectorAll("main *, header *")].filter((el) => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden" && r.right > window.innerWidth + 1;
+    }).map((el) => `${el.tagName.toLowerCase()}${el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/)[0] : ""}`);
+    return { overflow, offscreen: offs.length, offNames: [...new Set(offs)].slice(0, 5), tiny: [...new Set(tiny)].slice(0, 8), tinyCount: tiny.length, under44, total: interactive.length };
   });
   // Keyboard: tab through the first 12 stops and check each shows a visible focus indicator.
   let noRing = 0;
@@ -56,12 +65,13 @@ async function audit(page: Page, url: string, vp: string) {
     });
     if (f && !f.visible) { noRing++; noRingNames.push(f.name); }
   }
-  extras.push(`${vp.padEnd(7)} ${url.padEnd(26)} overflow:${metrics.overflow > 0 ? metrics.overflow + "px" : "none"} | targets<24px: ${metrics.tinyCount} ${metrics.tiny.length ? "(" + metrics.tiny.join(", ") + ")" : ""} | <44px tall: ${metrics.under44}/${metrics.total} | focus w/o visible ring: ${noRing}/12 ${noRingNames.length ? "(" + [...new Set(noRingNames)].slice(0, 4).join(", ") + ")" : ""}`);
+  extras.push(`${vp.padEnd(7)} ${url.padEnd(26)} overflow:${metrics.overflow > 0 ? metrics.overflow + "px" : "none"} | offscreen: ${metrics.offscreen} ${metrics.offNames.length ? "(" + metrics.offNames.join(", ") + ")" : ""} | targets<24px: ${metrics.tinyCount} ${metrics.tiny.length ? "(" + metrics.tiny.join(", ") + ")" : ""} | <44px tall: ${metrics.under44}/${metrics.total} | focus w/o visible ring: ${noRing}/12 ${noRingNames.length ? "(" + [...new Set(noRingNames)].slice(0, 4).join(", ") + ")" : ""}`);
 }
 
 (async () => {
+  if (!process.env.SEED_ADMIN_EMAIL || !process.env.SEED_ADMIN_PASSWORD) throw new Error("Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD (a dev admin login) before running the audit.");
   const browser = await chromium.launch({ executablePath: EXE });
-  for (const [vp, size] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 375, height: 812 }]] as const) {
+  for (const [vp, size] of [["desktop", { width: 1440, height: 900 }], ["mobile", { width: 375, height: 812 }], ["narrow", { width: 320, height: 640 }]] as const) {
     const anon = await browser.newContext({ viewport: size, colorScheme: "dark" });
     const ap = await anon.newPage();
     for (const u of PUBLIC) await audit(ap, u, vp);
