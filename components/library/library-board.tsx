@@ -5,7 +5,7 @@ import { ImagePlus, RefreshCw } from "lucide-react";
 import { flushSync } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
-import { PageSection } from "@/components/ui/page-section";
+import { focusSectionHeading, PageSection } from "@/components/ui/page-section";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { errorMessage } from "@/components/settings/api";
 import { LoadError } from "@/components/settings/shared";
@@ -92,11 +92,7 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
       flushSync(() => setBusyKey(null));
       // The removed tile's button is gone; land on "Add photos", or on the section heading for a role that can't add.
       if (addRef.current) addRef.current.focus();
-      else {
-        const heading = document.getElementById("photos-h");
-        heading?.setAttribute("tabindex", "-1");
-        heading?.focus();
-      }
+      else focusSectionHeading("photos");
     }
   }
 

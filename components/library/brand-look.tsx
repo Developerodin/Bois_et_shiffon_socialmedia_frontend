@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageSection } from "@/components/ui/page-section";
+import { focusSectionHeading, PageSection } from "@/components/ui/page-section";
 import { errorMessage } from "@/components/settings/api";
 import { MAX_COLORS, TONE_GROUPS, type BrandAssetsView, type Tone } from "@/shared";
 import { libraryApi } from "./api";
@@ -49,11 +49,7 @@ export function BrandLook({ workspaceId, brandId, view, canEdit, set }: Props) {
     if (!removed.current && opener.current?.isConnected) return;
     e.preventDefault();
     if (addRef.current) addRef.current.focus();
-    else {
-      const heading = document.getElementById("palette-h");
-      heading?.setAttribute("tabindex", "-1");
-      heading?.focus();
-    }
+    else focusSectionHeading("palette");
   }
 
   const toggle = (tone: Tone) => {

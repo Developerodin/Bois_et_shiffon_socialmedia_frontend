@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+/** Moves focus to a section's heading (for when the control that held it is gone). */
+export function focusSectionHeading(id: string) {
+  const heading = document.getElementById(`${id}-h`);
+  heading?.setAttribute("tabindex", "-1");
+  heading?.focus();
+}
+
 /** A titled card on the page: h2, optional description and actions, then the body inset by px-5 (no body, no padding). */
 export function PageSection({ id, title, description, actions, className, children }: { id: string; title: string; description?: ReactNode; actions?: ReactNode; className?: string; children?: ReactNode }) {
   return (
