@@ -1,6 +1,7 @@
 // Client-side contract for the RBAC API
 // (docs/superpowers/specs/2026-10-21-rbac-api-contract.md). Keep in sync with the route handlers.
 import { NetworkError, send, type SendInit } from "@/lib/net";
+import { openPaywall, refusalOf } from "@/lib/paywall";
 
 export class ApiError extends Error {
   constructor(
@@ -71,6 +72,12 @@ export type PublicInvitation = {
 
 export type RequestOptions = SendInit & { onLine?: (line: unknown) => void };
 
+/** A 402 carrying a paywall refusal opens the paywall; the caller still gets its error. */
+function refuse(body: unknown) {
+  const refusal = refusalOf(body);
+  if (refusal) openPaywall(refusal);
+}
+
 /** Reads a JSON-lines answer: progress lines go to onLine, the closing line resolves or rejects the call. */
 async function readLines<T>(body: ReadableStream<Uint8Array>, onLine?: (line: unknown) => void): Promise<T> {
   const lost = () => new ApiError(0, "The answer stopped partway. Try again.");
@@ -88,7 +95,10 @@ async function readLines<T>(body: ReadableStream<Uint8Array>, onLine?: (line: un
         const line = JSON.parse(text) as { type?: string; result?: T; status?: number; detail?: string; code?: string };
         if (line.type === "done") return line.result as T;
         // The line is the error's data, so a streamed 402 still carries planRequired and the code.
-        if (line.type === "error") throw new ApiError(line.status ?? 500, line.detail ?? "Request failed", line.code, line);
+        if (line.type === "error") {
+          if (line.status === 402) refuse(line);
+          throw new ApiError(line.status ?? 500, line.detail ?? "Request failed", line.code, line);
+        }
         onLine?.(line);
       }
       if (done) throw lost(); // ended before its last line
@@ -128,6 +138,7 @@ export async function request<T>(url: string, init: RequestOptions = {}): Promis
     } catch {
       // Non-JSON error body; keep the generic message.
     }
+    if (res.status === 402) refuse(data);
     throw new ApiError(res.status, message, code, data);
   }
   if (res.status === 204) return undefined as T;
