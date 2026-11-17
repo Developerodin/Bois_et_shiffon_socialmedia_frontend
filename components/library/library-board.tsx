@@ -1,0 +1,163 @@
+"use client";
+
+import { useMemo, useRef, useState, type ChangeEvent } from "react";
+import { ImagePlus, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { PageSection } from "@/components/ui/page-section";
+import { PageSkeleton } from "@/components/ui/page-skeleton";
+import { errorMessage } from "@/components/settings/api";
+import { LoadError } from "@/components/settings/shared";
+import { navFor } from "@/lib/nav";
+import { libraryPhotos, siteLabel, type LibraryPhoto } from "@/shared";
+import { initialSource, libraryApi, photoCount, pickUploads } from "./api";
+import { PhotoGrid, SourceSwitch, type Source } from "./photo-grid";
+import { useBrandLook } from "./use-brand-look";
+
+const EMPTY: Record<Source, { title: string; body: string }> = {
+  website: { title: "No website photos", body: "Product photos read from your website appear here. Add your website in onboarding, or upload your own." },
+  uploads: { title: "No uploads yet", body: "Photos you upload appear here, and the writers and reels can use them." },
+};
+
+type Props = { workspaceId: string; brandId: string; canEdit: boolean; canUpload: boolean };
+
+/** Brand & photos: the website's product photos and the owner's uploads (the brand look panel joins on the right). */
+export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props) {
+  const { view, failed, reload, set } = useBrandLook(workspaceId, brandId);
+  const lib = useMemo(() => libraryPhotos(view), [view]);
+  // Null until the owner picks a tab: until then it follows what the library holds.
+  const [picked, setPicked] = useState<Source | null>(null);
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const addRef = useRef<HTMLButtonElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  if (!view) {
+    return (
+      <div className="mx-auto max-w-7xl">
+        {failed ? <LoadError message="Couldn't load your brand and photos." onRetry={() => void reload()} /> : <PageSkeleton header={false} />}
+      </div>
+    );
+  }
+
+  const source = picked ?? initialSource(lib);
+  const shown = lib[source];
+  const busy = uploading || busyKey !== null;
+
+  async function addFiles(e: ChangeEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    const { files, errors } = pickUploads(Array.from(input.files ?? []));
+    setStatus("");
+    setError(errors.join(" "));
+    if (files.length === 0) {
+      input.value = "";
+      return;
+    }
+    setPicked("uploads");
+    setUploading(true);
+    let added = 0;
+    try {
+      for (const [i, file] of files.entries()) {
+        setStatus(`Uploading ${i + 1} of ${files.length}…`);
+        await libraryApi.upload(workspaceId, brandId, file);
+        added += 1;
+      }
+    } catch (err) {
+      // The first refusal (library full, too large) stops the rest: they would be refused the same way.
+      setError((prev) => [prev, errorMessage(err)].filter(Boolean).join(" "));
+    } finally {
+      await reload();
+      setStatus(added > 0 ? `Added ${photoCount(added)}.` : "");
+      input.value = "";
+      setUploading(false);
+    }
+  }
+
+  async function remove(p: LibraryPhoto) {
+    setStatus("");
+    setError("");
+    setBusyKey(p.key);
+    try {
+      set(await libraryApi.edit(workspaceId, brandId, { removeUpload: p.key }));
+      setStatus(`Removed ${p.title}.`);
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusyKey(null);
+      // The removed tile's button is gone; land on "Add photos", or on the section heading for a role that can't add.
+      if (addRef.current) addRef.current.focus();
+      else {
+        const heading = document.getElementById("photos-h");
+        heading?.setAttribute("tabindex", "-1");
+        heading?.focus();
+      }
+    }
+  }
+
+  return (
+    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+      <PageHeader
+        title={navFor("/library").title}
+        actions={
+          <Button variant="outline" disabled={busy} onClick={() => void reload()}>
+            <RefreshCw aria-hidden="true" />
+            Refresh
+          </Button>
+        }
+      >
+        Your brand&apos;s colours and tone, and the photos every module draws from. Nothing is published without your approval.
+      </PageHeader>
+
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <PageSection
+          id="photos"
+          title="Photos"
+          description={`${siteLabel(view.website) ?? "Source website"} · ${photoCount(shown.length)}`}
+          actions={
+            canUpload ? (
+              <Button ref={addRef} disabled={uploading} onClick={() => fileRef.current?.click()}>
+                <ImagePlus aria-hidden="true" />
+                Add photos
+              </Button>
+            ) : (
+              <p className="text-sm text-muted-foreground">Your role can&apos;t add photos.</p>
+            )
+          }
+        >
+          <div className="flex flex-col gap-4">
+            {canUpload ? (
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png"
+                multiple
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+                onChange={addFiles}
+              />
+            ) : null}
+            <SourceSwitch name="library-source" value={source} counts={{ website: lib.website.length, uploads: lib.uploads.length }} onChange={setPicked} />
+            {/* Always mounted so screen readers hear each change; empty lines take no height. */}
+            <div>
+              <p aria-live="polite" className="text-sm text-muted-foreground">{status}</p>
+              <p role="alert" className="text-sm text-destructive">{error}</p>
+            </div>
+            <PhotoGrid
+              mode="browse"
+              photos={shown}
+              label={source === "website" ? "Website photos" : "Uploads"}
+              empty={EMPTY[source]}
+              onRemove={source === "uploads" && canEdit ? remove : undefined}
+              // While a batch uploads, "" holds every remove button disabled (no photo has an empty key).
+              busyKey={uploading ? "" : busyKey}
+            />
+          </div>
+        </PageSection>
+        {/* The brand look panel (Task 5) goes in the right column. */}
+      </div>
+    </div>
+  );
+}

@@ -89,7 +89,7 @@ describe("navFor, coming routes", () => {
     expect(navFor("/studio").title).toBe("Studio");
     expect(navFor("/reels/abc")).toMatchObject({ activeId: "reels", title: "Reels" });
     expect(navFor("/inbox").title).toBe("Inbox");
-    expect(navFor("/library").title).toBe("Photo library");
+    expect(navFor("/library").title).toBe("Brand & photos");
     expect(navFor("/photoshoot").title).toBe("Photoshoot");
     expect(navFor("/automations").title).toBe("Automations");
   });

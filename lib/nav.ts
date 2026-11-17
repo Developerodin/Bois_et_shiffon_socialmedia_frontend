@@ -23,7 +23,7 @@ export const NAV: readonly NavEntry[] = [
   { id: "connections", label: "Connections", href: "/connections", group: "main" },
   { id: "automations", label: "Automations", href: "/automations", group: "main", feature: "automations" },
 
-  { id: "library", label: "Photo library", href: "/library", group: "create", feature: "library" },
+  { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },
   { id: "photoshoot", label: "Photoshoot", href: "/photoshoot", group: "create", feature: "photoshoot" },
   { id: "reels", label: "Reels", href: "/reels", group: "create", feature: "reels" },
   { id: "studio", label: "Studio", href: "/studio", group: "create", feature: "stories" },
