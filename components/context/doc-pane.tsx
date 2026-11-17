@@ -13,6 +13,7 @@ import { Markdown } from "@/components/context/markdown";
 import { okToDiscard, setUnsaved } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { safeHttpUrl } from "@/shared";
 
 type Props = {
   entry: ContextDocEntry;
@@ -35,18 +36,6 @@ function formatDate(iso: string) {
         dateStyle: "medium",
         timeStyle: "short",
       });
-}
-
-// Agent-supplied URLs: only link http(s), never javascript:/data: schemes.
-function safeHref(url: string) {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === "http:" || parsed.protocol === "https:"
-      ? parsed.href
-      : null;
-  } catch {
-    return null;
-  }
 }
 
 function errorMessage(err: unknown, action: "save" | "confirm") {
@@ -313,7 +302,7 @@ export function DocPane({
           </h4>
           <ul className="flex flex-col gap-2 text-sm">
             {latest.sources.map((source, i) => {
-              const href = safeHref(source.url);
+              const href = safeHttpUrl(source.url)?.href ?? null;
               return (
                 <li key={`${source.url}-${i}`} className="min-w-0">
                   {href ? (

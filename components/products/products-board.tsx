@@ -12,6 +12,7 @@ import { CampaignsSection } from "@/components/products/campaigns";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { timeAgo } from "@/lib/time";
+import { safeHttpUrl } from "@/shared";
 
 const SOURCE_LINE = {
   SHOPIFY: "From your Shopify store",
@@ -142,8 +143,8 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
                       <span className="size-10 shrink-0 rounded-lg bg-muted" aria-hidden="true" />
                     )}
                     <div className="min-w-0">
-                      {p.url ? (
-                        <a href={p.url} target="_blank" rel="noreferrer" className="font-medium text-foreground hover:underline">
+                      {safeHttpUrl(p.url) ? (
+                        <a href={safeHttpUrl(p.url)!.href} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:underline">
                           {p.title}
                         </a>
                       ) : (

@@ -28,9 +28,9 @@ const boundary = (depth) => {
       "no-restricted-imports": [
         "error",
         {
-          paths: ["@prisma/client", "prisma", "next-auth", "@ai-sdk/openai", "nodemailer", "bcryptjs", "sharp", "ffmpeg-static", "ffprobe-static", "jose"].map((name) => ({ name, message: SERVER_ONLY })),
+          paths: ["@prisma/client", "prisma", "next-auth", "@ai-sdk/openai", "nodemailer", "bcryptjs", "sharp", "ffmpeg-static", "ffprobe-static", "jose", "twilio", "fflate"].map((name) => ({ name, message: SERVER_ONLY })),
           patterns: [
-            { group: ["next-auth/*", "!next-auth/react", "@auth/*", "@aws-sdk/*", "@prisma/*"], message: SERVER_ONLY },
+            { group: ["next-auth/*", "!next-auth/react", "@auth/*", "@aws-sdk/*", "@prisma/*", "@elevenlabs/*"], message: SERVER_ONLY },
             ...escapes.map((regex) => ({ regex, message: LEAVES })),
           ],
         },
@@ -45,6 +45,7 @@ const boundary = (depth) => {
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  { rules: { "react/no-danger": "error" } },
   ...Array.from({ length: 12 }, (_, depth) => boundary(depth)),
   {
     ignores: [

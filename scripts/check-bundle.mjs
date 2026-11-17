@@ -1,4 +1,5 @@
-// Fails if this app's build output (.next) carries the Prisma client or the name of a Server secret.
+// Fails if a NEXT_PUBLIC_ name looks like a secret (source, .env*, Dockerfile, next.config.ts or the build env; needs no
+// build), or if this app's build output (.next) carries the Prisma client or the name of a Server secret.
 // Run after `npm run build` with an empty env. Secret names: a fixed core list plus every name in the server repo's
 // .env.example (checked out next to this one, or at SERVER_DIR) that looks like a secret, so a new one is covered once
 // it is added there. Without the server repo only the core list is checked, and the script says so.
@@ -11,6 +12,24 @@ import { fileURLToPath } from "node:url";
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const out = path.join(root, ".next");
 const serverExample = path.resolve(root, process.env.SERVER_DIR ?? "../server", ".env.example");
+// NEXT_PUBLIC_ values are inlined into the browser bundle, so such a name must never look like a secret.
+// PUBLIC_ALLOW: names allowed despite the pattern, each with a comment why. Empty on purpose.
+const PUBLIC_ALLOW = [];
+const walkSrc = (dir) => (existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).flatMap((d) => (d.isDirectory() ? walkSrc(path.join(dir, d.name)) : /\.(ts|tsx|mjs)$/.test(d.name) ? [path.join(dir, d.name)] : [])) : []);
+const scanned = [
+  ...["app", "components", "lib", "shared"].flatMap((d) => walkSrc(path.join(root, d))),
+  ...readdirSync(root).filter((n) => n.startsWith(".env")).map((n) => path.join(root, n)),
+  ...["Dockerfile", "next.config.ts"].map((n) => path.join(root, n)).filter((f) => existsSync(f)),
+];
+const seen = new Map();
+for (const file of scanned) for (const m of readFileSync(file, "utf8").matchAll(/NEXT_PUBLIC_[A-Z0-9_]+/g)) if (!seen.has(m[0])) seen.set(m[0], path.relative(root, file));
+for (const name of Object.keys(process.env)) if (/NEXT_PUBLIC_[A-Z0-9_]+/.test(name) && !seen.has(name)) seen.set(name, "env");
+const secretish = [...seen].filter(([name]) => /SECRET|KEY|TOKEN/.test(name) && !PUBLIC_ALLOW.includes(name));
+if (secretish.length) {
+  for (const [name, file] of secretish) console.error(`check-bundle: NEXT_PUBLIC_ name looks like a secret: ${name} (${file})`);
+  process.exit(1);
+}
+
 if (!existsSync(out)) {
   console.error("check-bundle: .next is missing; run `npm run build` first.");
   process.exit(1);
