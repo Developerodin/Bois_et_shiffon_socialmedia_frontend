@@ -52,6 +52,12 @@ export function sanitize<Id extends string>(raw: unknown, ids: Id[], fallback: L
   return columns.length ? { columns, collapsed: (l.collapsed ?? []).filter((p) => ids.includes(p)) } : fallback;
 }
 
+/** What a screen reader hears after a panel is moved or hidden (WCAG 4.1.3). */
+export function layoutMessage<Id extends string>(title: string, layout: Layout<Id>, id: Id): string {
+  const i = layout.columns.findIndex((c) => c.panels.includes(id));
+  return i < 0 ? `${title} hidden` : `${title} moved to column ${i + 1} of ${layout.columns.length}`;
+}
+
 export function PanelLayout<Id extends string>({
   panels,
   presets,
@@ -72,6 +78,9 @@ export function PanelLayout<Id extends string>({
   const [hintSeen, setHintSeen] = useState(true);
   const dragging = useRef<Id | null>(null);
   const rowRef = useRef<HTMLDivElement>(null);
+  // A panel moved or hidden from a menu: once the new layout renders, focus follows it and the live region says where.
+  const pending = useRef<{ id: Id; title: string } | null>(null);
+  const [message, setMessage] = useState("");
   // The top bar is rendered by the shell layout, so it exists by the time this mounts.
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   useEffect(() => setSlot(document.getElementById(TOPBAR_SLOT_ID)), []);
@@ -130,6 +139,10 @@ export function PanelLayout<Id extends string>({
     const last = layout.columns.length - 1;
     if (last < 0) return commit({ ...layout, columns: [{ id: colId(), size: 1, panels: [id] }] });
     move(id, { column: last });
+  };
+  const announce = (id: Id, change: () => void) => {
+    pending.current = { id, title: panels.find((p) => p.id === id)!.title };
+    change();
   };
   const toggleCollapse = (id: Id) =>
     commit({ ...layout, collapsed: layout.collapsed.includes(id) ? layout.collapsed.filter((p) => p !== id) : [...layout.collapsed, id] });
@@ -201,6 +214,17 @@ export function PanelLayout<Id extends string>({
     });
   }, [focus]);
 
+  // After a move the panel's <section> remounts in its new column, so Radix's focus return target is gone:
+  // focus its header button here (or Layout when hidden); the panel menu's own focus return is turned off.
+  useEffect(() => {
+    const p = pending.current;
+    if (!p) return;
+    pending.current = null;
+    const shown = layout.columns.some((c) => c.panels.includes(p.id));
+    document.getElementById(shown ? `panel-head-${p.id}` : "layout-menu")?.focus();
+    setMessage(layoutMessage(p.title, layout, p.id));
+  }, [layout]);
+
   const def = (id: Id) => panels.find((p) => p.id === id)!;
   // Phones show one panel at a time, so every panel gets a tab; the layout only arranges desktop.
   const activeMobile = mobilePanel ?? (visible.find((v) => v !== "context" as Id) ?? ids[0]);
@@ -208,7 +232,7 @@ export function PanelLayout<Id extends string>({
   const layoutMenu = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" className={tool}>
+        <button type="button" id="layout-menu" className={tool}>
           <LayoutPanelLeft className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" /> Layout
         </button>
       </DropdownMenuTrigger>
@@ -223,7 +247,7 @@ export function PanelLayout<Id extends string>({
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Panels</DropdownMenuLabel>
         {panels.map((p) => (
-          <DropdownMenuCheckboxItem key={p.id} checked={visible.includes(p.id)} onCheckedChange={(on) => (on ? show(p.id) : hide(p.id))} onSelect={(e) => e.preventDefault()}>
+          <DropdownMenuCheckboxItem key={p.id} checked={visible.includes(p.id)} onCheckedChange={(on) => (on ? show(p.id) : announce(p.id, () => hide(p.id)))} onSelect={(e) => e.preventDefault()}>
             {p.title}
           </DropdownMenuCheckboxItem>
         ))}
@@ -237,11 +261,14 @@ export function PanelLayout<Id extends string>({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
+      <p aria-live="polite" className="sr-only">
+        {message}
+      </p>
       {wide && slot && createPortal(
       <>
         {!hintSeen && (
           <p className="flex items-center gap-2 pr-2 text-xs text-muted-foreground">
-            Drag a panel by its header to move it. Drag the dividers to resize.
+            Drag a panel by its header, or use its ⋯ menu, to move it. Drag the dividers or use the arrow keys to resize.
             <button
               type="button"
               className="rounded px-1.5 py-1 font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -331,6 +358,7 @@ export function PanelLayout<Id extends string>({
                       <GripVertical className="size-4 text-muted-foreground/50 group-hover:text-muted-foreground" aria-hidden="true" />
                       <button
                         type="button"
+                        id={`panel-head-${id}`}
                         onClick={() => toggleCollapse(id)}
                         aria-expanded={!collapsed}
                         className="flex min-w-0 items-center gap-1.5 rounded py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -347,13 +375,13 @@ export function PanelLayout<Id extends string>({
                               <MoreHorizontal aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onSelect={() => shift(id, -1)}>Move left</DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => shift(id, 1)}>Move right</DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => move(id, "new-column")}>Open in its own column</DropdownMenuItem>
+                          <DropdownMenuContent align="end" onCloseAutoFocus={(e) => e.preventDefault()}>
+                            <DropdownMenuItem onSelect={() => announce(id, () => shift(id, -1))}>Move left</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => announce(id, () => shift(id, 1))}>Move right</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => announce(id, () => move(id, "new-column"))}>Open in its own column</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => toggleCollapse(id)}>{collapsed ? "Expand" : "Collapse"}</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={() => hide(id)}>Hide panel</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => announce(id, () => hide(id))}>Hide panel</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
