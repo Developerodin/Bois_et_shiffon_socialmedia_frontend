@@ -10,7 +10,7 @@ const pick = (d: never) => d as BrandAssetsView;
 
 /**
  * The brand's look and photo library, shared by every panel on the page. Reads again once the answer is 50 minutes
- * old. Ceiling: that check runs on render, so a page nobody touches refreshes on its next render or tab show.
+ * old. Ceiling: that check runs on render, so a page nobody touches re-reads on its next render or Refresh.
  */
 export function useBrandLook(workspaceId: string, brandId: string) {
   const url = brandLookUrl(workspaceId, brandId);
