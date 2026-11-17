@@ -18,6 +18,7 @@ import { okToDiscard } from "@/components/context/unsaved";
 import { usePerms } from "@/components/workspace/content-panels";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 
 // Poll only while research is in flight; one manager per brand makes 3s cheap.
 const RESEARCH_POLL_MS = 3000;
@@ -164,25 +165,11 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8">
-      <section
-        aria-labelledby="context-heading"
-        className="flex flex-col gap-2"
-      >
-        <p className="text-xs text-primary">
-          Strategy documents
-        </p>
-        <h1
-          id="context-heading"
-          className="font-display text-3xl font-medium tracking-tight sm:text-4xl"
-        >
-          Brand context
-        </h1>
-        <p className="max-w-2xl text-sm text-muted-foreground text-pretty sm:text-base">
-          Agents use the latest version of each document as soon as Research
-          writes it. Fix anything it got wrong and agents pick up your edit on
-          their next run.
-        </p>
-      </section>
+      <PageHeader eyebrow="Strategy documents" title="Brand context">
+        Agents use the latest version of each document as soon as Research
+        writes it. Fix anything it got wrong and agents pick up your edit on
+        their next run.
+      </PageHeader>
 
       {state.kind === "loading" ? (
         <div className="grid gap-4 md:grid-cols-[16rem_1fr]" aria-busy="true">

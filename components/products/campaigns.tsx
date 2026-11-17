@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { PageSection } from "@/components/ui/page-section";
 import { Textarea } from "@/components/ui/textarea";
 import { campaignsApi, type Campaign, type CampaignBody, type CampaignKind, type Product } from "@/components/products/api";
 import { errorMessage } from "@/components/settings/api";
@@ -51,22 +52,23 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
   ];
 
   return (
-    <section aria-labelledby="campaigns-h" className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 id="campaigns-h" className="font-display text-lg font-semibold">Campaigns and offers</h2>
-          <p className="text-sm text-muted-foreground">
-            {timeZone ? `Times are in ${zoneLabel(timeZone)}.` : "No timezone set yet: it's asked for on the first save."}{" "}
-            {canManage && timeZone ? (
-              <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setZoneOpen(true)}>Change</button>
-            ) : null}
-          </p>
-        </div>
-        {canManage ? <Button onClick={() => setEditing("new")}>New campaign</Button> : null}
-      </div>
+    <PageSection
+      id="campaigns"
+      title="Campaigns and offers"
+      className="flex flex-col gap-3"
+      description={
+        <>
+          {timeZone ? `Times are in ${zoneLabel(timeZone)}.` : "No timezone set yet: it's asked for on the first save."}{" "}
+          {canManage && timeZone ? (
+            <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setZoneOpen(true)}>Change</button>
+          ) : null}
+        </>
+      }
+      actions={canManage ? <Button onClick={() => setEditing("new")}>New campaign</Button> : null}
+    >
       <p aria-live="polite" className="text-sm empty:hidden">{notice}</p>
       {list.length ? (
-        <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
+        <ul className="-mx-5 divide-y divide-border">
           {list.map((c) => (
             <li key={c.id} className="flex flex-wrap items-start justify-between gap-3 px-5 py-3 text-sm">
               <div className="min-w-0">
@@ -132,7 +134,7 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
           reload();
         }}
       />
-    </section>
+    </PageSection>
   );
 }
 

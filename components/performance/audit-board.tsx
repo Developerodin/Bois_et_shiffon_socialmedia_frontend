@@ -9,6 +9,8 @@ import { request } from "@/components/settings/api";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ListSkeleton, LoadError, formatDate, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
+import { PageSection } from "@/components/ui/page-section";
 
 type Severity = "critical" | "high" | "medium" | "low";
 type Finding = { id: string; category: string; severity: Severity; title: string; detail: string; fix: string; why?: string; urls?: string[] };
@@ -73,16 +75,15 @@ export function Findings({ findings }: { findings: Finding[] }) {
   );
 }
 
-function Panel({ title, report, agent, children }: { title: string; report: Report | null; agent: string; children?: React.ReactNode }) {
+function Panel({ id, title, report, agent, children }: { id: string; title: string; report: Report | null; agent: string; children?: React.ReactNode }) {
   return (
-    <section aria-label={title} className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="font-display text-xl font-medium tracking-tight">{title}</h2>
-          {report && <p className="mt-1 text-xs text-muted-foreground">Last run {formatDate(report.createdAt)}</p>}
-        </div>
-        {report && <Score label="out of 100" value={report.score} big />}
-      </div>
+    <PageSection
+      id={id}
+      title={title}
+      className="flex flex-col gap-5"
+      description={report ? `Last run ${formatDate(report.createdAt)}` : undefined}
+      actions={report ? <Score label="out of 100" value={report.score} big /> : undefined}
+    >
       {report ? (
         <>
           <p className="text-sm leading-relaxed">{report.summary}</p>
@@ -94,7 +95,7 @@ function Panel({ title, report, agent, children }: { title: string; report: Repo
           No report yet. Run the <Link href="/agents" className="text-primary underline-offset-4 hover:underline">{agent} agent</Link> to create one.
         </p>
       )}
-    </section>
+    </PageSection>
   );
 }
 
@@ -139,7 +140,7 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
     const competitors = (geo?.metrics.competitors ?? []) as { name: string; mentions: number }[];
     body = (
       <div className="grid gap-6 xl:grid-cols-2">
-        <Panel title="SEO health" report={seo} agent="SEO">
+        <Panel id="seo" title="SEO health" report={seo} agent="SEO">
           {ps && (
             <div className="flex flex-wrap gap-8 rounded-xl bg-muted/40 px-5 py-4">
               <Score label="Performance (mobile)" value={ps.performance} />
@@ -149,7 +150,7 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
             </div>
           )}
         </Panel>
-        <Panel title="AI visibility (GEO)" report={geo} agent="GEO">
+        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO">
           {geo && (
             <div className="flex flex-col gap-4 rounded-xl bg-muted/40 px-5 py-4">
               <div className="flex flex-wrap gap-8">
@@ -182,10 +183,9 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8">
-      <div>
-        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">Performance</h1>
-        <p className="mt-1 text-sm text-muted-foreground">How findable the brand is, in search engines and in AI assistants, and what to fix first.</p>
-      </div>
+      <PageHeader title="Performance">
+        How findable the brand is, in search engines and in AI assistants, and what to fix first.
+      </PageHeader>
       {body}
     </div>
   );

@@ -2,6 +2,7 @@ import { Lock, Plug } from "lucide-react";
 import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
+import { PageHeader } from "@/components/ui/page-header";
 
 /** The business's connected accounts. Settings keeps its own Connections tab; the OAuth callback still lands there. */
 export default async function ConnectionsPage({
@@ -53,12 +54,9 @@ export default async function ConnectionsPage({
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
-      <div>
-        <h1 className="font-display text-2xl leading-[30px] font-semibold tracking-tight">Connections</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The accounts this business has connected, and what each one lets the agents do.
-        </p>
-      </div>
+      <PageHeader title="Connections">
+        The accounts this business has connected, and what each one lets the agents do.
+      </PageHeader>
       <ConnectionsTab
         key={shell.activeBrandId}
         workspaceId={shell.activeWorkspaceId}

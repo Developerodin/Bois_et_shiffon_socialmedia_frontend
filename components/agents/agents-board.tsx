@@ -5,6 +5,7 @@ import { AgentLog } from "@/components/agents/agent-log";
 import { AgentTile } from "@/components/agents/agent-tile";
 import { fetchAgents, type AgentSummary } from "@/components/agents/api";
 import { ServiceUnavailable } from "@/components/agents/service-unavailable";
+import { PageHeader } from "@/components/ui/page-header";
 
 // Agents list refresh cadence. Polling is fine at Slice 0 scale (one tab per
 // manager, a handful of agents); move to SSE if many viewers per brand appear.
@@ -53,20 +54,10 @@ export function AgentsBoard({ workspaceId, brandId }: Props) {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-10">
-      <section aria-labelledby="agents-heading" className="flex flex-col gap-5">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2
-              id="agents-heading"
-              className="font-display text-3xl font-medium tracking-tight sm:text-4xl"
-            >
-              Your agents
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Each one works on the active brand. Run one now, or watch the log below.
-            </p>
-          </div>
-        </div>
+      <section className="flex flex-col gap-5">
+        <PageHeader title="Your agents">
+          Each one works on the active brand. Run one now, or watch the log below.
+        </PageHeader>
 
         {state.kind === "loading" ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-busy="true">

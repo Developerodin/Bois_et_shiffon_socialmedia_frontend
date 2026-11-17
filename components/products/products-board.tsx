@@ -5,6 +5,8 @@ import { Package, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { productsApi, stockLabel, thumbUrl, type FullProduct, type Product } from "@/components/products/api";
@@ -119,7 +121,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           {matches.length === state.data.products.length ? `${matches.length} products` : `${matches.length} of ${state.data.products.length} products`}
         </p>
       </div>
-      <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+      <div className="-mx-5 overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-border text-xs text-muted-foreground">
             <tr>
@@ -194,32 +196,33 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl leading-[30px] font-semibold tracking-tight">Products</h1>
-          {data ? (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {data.source ? SOURCE_LINE[data.source] : "No synced source"}
-              {syncing
-                ? " · Syncing…"
-                : lastSync && !lastSync.error && lastSync.source
-                  ? ` · Last synced ${timeAgo(lastSync.at)}, ${lastSync.count} product${lastSync.count === 1 ? "" : "s"}`
-                  : ""}
-            </p>
-          ) : null}
-        </div>
-        {canEdit ? (
-          <div className="flex gap-2">
-            {data?.source ? (
-              <Button variant="outline" onClick={syncNow} disabled={syncing}>
-                <RefreshCw aria-hidden="true" />
-                {syncing ? "Syncing…" : "Sync now"}
-              </Button>
-            ) : null}
-            <Button onClick={() => setEditing("new")}>Add product</Button>
-          </div>
+      <PageHeader
+        title="Products"
+        actions={
+          canEdit ? (
+            <>
+              {data?.source ? (
+                <Button variant="outline" onClick={syncNow} disabled={syncing}>
+                  <RefreshCw aria-hidden="true" />
+                  {syncing ? "Syncing…" : "Sync now"}
+                </Button>
+              ) : null}
+              <Button onClick={() => setEditing("new")}>Add product</Button>
+            </>
+          ) : null
+        }
+      >
+        {data ? (
+          <>
+            {data.source ? SOURCE_LINE[data.source] : "No synced source"}
+            {syncing
+              ? " · Syncing…"
+              : lastSync && !lastSync.error && lastSync.source
+                ? ` · Last synced ${timeAgo(lastSync.at)}, ${lastSync.count} product${lastSync.count === 1 ? "" : "s"}`
+                : ""}
+          </>
         ) : null}
-      </div>
+      </PageHeader>
       {lastSync?.error && !syncing ? (
         <p role="status" className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
           {lastSync.error} <span className="text-muted-foreground">({timeAgo(lastSync.at)})</span>
@@ -227,7 +230,9 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
       ) : null}
       <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
       {data ? <CampaignsSection workspaceId={workspaceId} brandId={brandId} products={data.products} canManage={canManageCommercial} /> : null}
-      {body}
+      <PageSection id="catalogue" title="Catalogue">
+        {body}
+      </PageSection>
       {editing !== null ? (
         <ProductDialog
           workspaceId={workspaceId}

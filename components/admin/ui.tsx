@@ -85,25 +85,6 @@ export function Section({ id, title, description, children }: { id: string; titl
   );
 }
 
-export function Crumbs({ items }: { items: { href?: string; label: string }[] }) {
-  return (
-    <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-      {items.map((it, i) => (
-        <span key={it.label}>
-          {i ? " / " : ""}
-          {it.href ? (
-            <Link href={it.href} className="underline-offset-4 hover:underline">
-              {it.label}
-            </Link>
-          ) : (
-            <span className="text-foreground">{it.label}</span>
-          )}
-        </span>
-      ))}
-    </nav>
-  );
-}
-
 /** A URL for this page with some query values changed (empty removes one; changing a filter resets the page). */
 export function withQuery(path: string, current: Record<string, string | undefined>, change: Record<string, string | undefined>) {
   const next = new URLSearchParams();
@@ -173,14 +154,5 @@ export function CursorPager({ newest, older }: { newest?: string; older?: string
 /** The period switch (Spend, Activity, Logs): `?days=` 7, 30 (the default, left out of the URL), 90 or all. The API reads the same query. */
 export { PERIODS, period } from "@/shared";
 
-/** Page header for the console: eyebrow, title, one line of context. */
-export function PageHeader({ eyebrow, title, children, crumbs }: { eyebrow?: string; title: string; children?: React.ReactNode; crumbs?: { href?: string; label: string }[] }) {
-  return (
-    <header className="flex flex-col gap-2">
-      {crumbs ? <Crumbs items={crumbs} /> : eyebrow ? <p className="text-xs text-primary">{eyebrow}</p> : null}
-      <h1 className="font-display text-3xl font-medium tracking-tight text-balance">{title}</h1>
-      {children ? <div className="max-w-prose text-sm text-muted-foreground">{children}</div> : null}
-    </header>
-  );
-}
+export { PageHeader } from "@/components/ui/page-header";
 
