@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { unstable_doesMiddlewareMatch } from "next/experimental/testing/server";
-import middleware, { config, hasSessionCookie } from "@/middleware";
+import middleware, { config, contentSecurityPolicy, hasSessionCookie } from "@/middleware";
 
 describe("hasSessionCookie", () => {
   it.each(["authjs.session-token", "__Secure-authjs.session-token", "authjs.session-token.0", "__Secure-authjs.session-token.0"])("accepts %s", (name) => {
@@ -32,6 +32,44 @@ describe("middleware", () => {
     const res = middleware(req("/agents?x=1", "authjs.session-token=abc"));
     expect(res.headers.get("location")).toBeNull();
     expect(res.headers.get("x-middleware-request-x-pathname")).toBe("/agents?x=1");
+  });
+});
+
+describe("framing and CSP headers", () => {
+  const req = (path: string, cookie?: string) => new NextRequest(`http://localhost:3100${path}`, { headers: cookie ? { cookie } : {} });
+  const page = () => middleware(req("/agents", "authjs.session-token=abc"));
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("refuses framing and starts a report-only policy with a nonce on a page", () => {
+    const res = page();
+    expect(res.headers.get("x-frame-options")).toBe("DENY");
+    expect(res.headers.get("content-security-policy")).toBe("frame-ancestors 'none'");
+    const policy = res.headers.get("content-security-policy-report-only");
+    expect(policy).toContain("'nonce-");
+    expect(policy).toContain("default-src 'self'");
+  });
+
+  it("hands Next the same policy on the request, report-only only, and uses a new nonce each time", () => {
+    const res = page();
+    expect(res.headers.get("x-middleware-request-content-security-policy-report-only")).toBe(res.headers.get("content-security-policy-report-only"));
+    expect(res.headers.get("x-middleware-request-content-security-policy")).toBeNull();
+    expect(page().headers.get("content-security-policy-report-only")).not.toBe(res.headers.get("content-security-policy-report-only"));
+  });
+
+  it("refuses framing on the sign-in redirect too", () => {
+    const res = middleware(req("/agents"));
+    expect(res.headers.get("x-frame-options")).toBe("DENY");
+    expect(res.headers.get("content-security-policy")).toBe("frame-ancestors 'none'");
+  });
+
+  it("allows the storage origin for media and uploads, and leaves it out when unset", () => {
+    vi.stubEnv("STORAGE_ORIGIN", "https://media.example");
+    const policy = page().headers.get("content-security-policy-report-only")!;
+    expect(policy).toContain("media-src 'self' blob: https://media.example;");
+    expect(policy).toContain("connect-src 'self' https://media.example;");
+    vi.stubEnv("STORAGE_ORIGIN", "");
+    expect(contentSecurityPolicy("n")).not.toContain("undefined");
+    expect(page().headers.get("content-security-policy-report-only")).not.toContain("undefined");
   });
 });
 
