@@ -6,7 +6,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { Check, Globe, Loader2, Play, Square, TriangleAlert, Wrench } from "lucide-react";
 import { startRun } from "@/components/agents/api";
-import { isOffline, NET_MESSAGE, send } from "@/lib/net";
+import { CLIENT_TAG, isOffline, NET_MESSAGE, send } from "@/lib/net";
 import { Markdown } from "@/components/context/markdown";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -177,6 +177,7 @@ function ChatSession({
     messages: initial.messages,
     transport: new DefaultChatTransport({
       api,
+      headers: { "X-Client": CLIENT_TAG },
       // The server keeps the history; send only the newest message.
       prepareSendMessagesRequest: ({ messages: all, id }) => ({
         body: { id, message: all[all.length - 1] },

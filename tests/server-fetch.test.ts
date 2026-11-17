@@ -38,6 +38,7 @@ describe("serverFetch", () => {
     expect(url).toBe("http://localhost:3101/api/v1/x");
     expect(init.cache).toBe("no-store");
     expect(init.headers.cookie).toBe("a=1; b=2");
+    expect(init.headers["x-client"]).toBe("web/dev");
   });
 
   it("says a write comes from the website, and leaves reads alone", async () => {

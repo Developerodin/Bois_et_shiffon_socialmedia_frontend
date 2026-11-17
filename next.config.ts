@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
 const SERVER_URL = process.env.SERVER_URL ?? "http://localhost:3101";
 
 const nextConfig: NextConfig = {
+  env: { WEB_VERSION: process.env.npm_package_version ?? "dev" },
   output: "standalone",
   // This repo is its own project root. Pinned explicitly: while the folder still sits inside the old monorepo, Next
   // would otherwise pick the parent's lockfile and trace (and nest the standalone output) from there.

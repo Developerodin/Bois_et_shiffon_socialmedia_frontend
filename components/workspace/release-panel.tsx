@@ -7,6 +7,7 @@ import { ApiError, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { CLIENT_TAG } from "@/lib/net";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { BY_HAND_STEPS, safeHttpUrl, zoneCity } from "@/shared";
@@ -499,7 +500,10 @@ function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data
   // Fetched first (not a plain link) so a refusal shows its message here instead of downloading as a file.
   // ponytail: the whole zip sits in memory as a blob; five long clips make a few hundred MB.
   async function download() {
-    const res = await fetch(`${base}/stories/${encodeURIComponent(id)}/package?format=zip`, { cache: "no-store" });
+    const res = await fetch(`${base}/stories/${encodeURIComponent(id)}/package?format=zip`, {
+      cache: "no-store",
+      headers: { "X-Client": CLIENT_TAG },
+    });
     if (!res.ok) {
       const p = (await res.json().catch(() => null)) as { detail?: string; title?: string } | null;
       throw new ApiError(res.status, p?.detail || p?.title || "The download didn’t start. Try again.");

@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { CLIENT_TAG } from "@/lib/net";
 import type { ShellResponse } from "@/shared";
 
 /** Build an API path: every interpolated value is URL-encoded, so an id can never add a path segment or a query. */
@@ -23,7 +24,7 @@ export async function serverFetch<T>(path: string, init?: RequestInit): Promise<
   const res = await fetch(base + path, {
     ...init,
     cache: "no-store",
-    headers: { ...(cookie ? { cookie } : {}), ...origin, ...init?.headers },
+    headers: { ...(cookie ? { cookie } : {}), ...origin, "x-client": CLIENT_TAG, ...init?.headers },
   });
   if (res.status === 401) {
     const here = (await headers()).get("x-pathname");
