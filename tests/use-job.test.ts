@@ -94,3 +94,21 @@ describe("putShared", () => {
     expect(sharedAt("/never")).toBe(0);
   });
 });
+
+describe("putShared racing a read", () => {
+  it("keeps the edit's answer when an older read finishes after it", async () => {
+    let resolve!: (r: Response) => void;
+    fetchMock.mockImplementation(() => new Promise<Response>((r) => (resolve = r)));
+    const heard = vi.fn();
+    const off = subscribeShared("/race", heard);
+    const read = fetchShared("/race");
+    await Promise.resolve();
+    putShared("/race", "new");
+    heard.mockClear();
+    resolve(json("old"));
+    expect(await read).toBe("new");
+    expect(sharedResponse("/race")).toBe("new");
+    expect(heard).not.toHaveBeenCalled();
+    off();
+  });
+});

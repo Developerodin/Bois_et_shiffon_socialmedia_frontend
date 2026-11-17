@@ -32,6 +32,8 @@ export function nextDelay(intervals: Intervals, elapsedMs: number, errors: numbe
 // and a fresh response (e.g. after an edit) updates every panel showing that URL, not just the one that asked.
 const lastResponse = new Map<string, unknown>();
 const fetchedAt = new Map<string, number>();
+// How many times putShared answered a URL: a read that started before the latest one is older than it.
+const puts = new Map<string, number>();
 const inFlight = new Map<string, Promise<unknown>>();
 const listeners = new Map<string, Set<(d: unknown) => void>>();
 
@@ -44,9 +46,12 @@ const listeners = new Map<string, Set<(d: unknown) => void>>();
 export function fetchShared(url: string, fresh = false): Promise<unknown> {
   const pending = inFlight.get(url);
   if (pending && !fresh) return pending;
+  const putsAtStart = puts.get(url) ?? 0;
   const p: Promise<unknown> = (pending ? pending.catch(() => undefined) : Promise.resolve())
     .then(() => request<unknown>(url))
     .then((d) => {
+      // An edit's answer landed while this read was out: the read may predate it, so keep the edit's answer.
+      if ((puts.get(url) ?? 0) !== putsAtStart) return lastResponse.get(url);
       lastResponse.set(url, d);
       fetchedAt.set(url, Date.now());
       listeners.get(url)?.forEach((fn) => fn(d));
@@ -65,6 +70,7 @@ export function sharedResponse(url: string): unknown | undefined {
 
 /** An answer the server gave for `url` another way (a PATCH that returns the new view): every subscriber shows it. */
 export function putShared(url: string, d: unknown): void {
+  puts.set(url, (puts.get(url) ?? 0) + 1);
   lastResponse.set(url, d);
   fetchedAt.set(url, Date.now());
   listeners.get(url)?.forEach((fn) => fn(d));
