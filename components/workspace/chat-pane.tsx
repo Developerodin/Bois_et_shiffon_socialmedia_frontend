@@ -290,7 +290,7 @@ function ChatSession({
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-4 border-t border-border bg-card p-6">
+      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-3 border-t border-border bg-card p-4">
         <label htmlFor="chat-input" className="sr-only">
           Message Espanda
         </label>
@@ -300,14 +300,15 @@ function ChatSession({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKey}
           placeholder="Ask Espanda anything…"
-          className="h-34 w-full resize-none rounded-2xl border border-input bg-card p-4 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-24 w-full resize-none rounded-2xl border border-input bg-card p-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
         />
         {busy ? (
-          <Button type="button" variant="secondary" onClick={() => void stop()} className="h-12 w-full rounded-2xl active:translate-y-px">
+          <Button type="button" variant="secondary" onClick={() => void stop()} className="h-11 w-full rounded-2xl active:translate-y-px">
             <Square aria-hidden="true" /> Stop
           </Button>
         ) : (
-          <Button type="submit" disabled={!input.trim()} className="h-12 w-full rounded-2xl active:translate-y-px">
+          // Disabled reads as "not yet" (muted), not as a faded primary.
+          <Button type="submit" disabled={!input.trim()} className="h-11 w-full rounded-2xl active:translate-y-px disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
             Send message
           </Button>
         )}

@@ -12,8 +12,9 @@ import { cn } from "@/lib/utils";
 type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null };
 
 const LOGS_KEY = "ws.logsOpen";
+export const TOPBAR_SLOT_ID = "topbar-slot";
 
-const tool =
+export const tool =
   "flex h-11 items-center gap-2 rounded-2xl px-3 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px";
 
 /** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (below 1280 px) the assistant toggle on the right. */
@@ -58,6 +59,8 @@ export function TopBar({ brandName, workspaceId, brandId }: Props) {
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
+          {/* The Overview's panel layout portals its Layout menu here (one header band instead of two). */}
+          <div id={TOPBAR_SLOT_ID} className="contents" />
           {brandId && (
             <button type="button" id="logs-toggle" onClick={toggleLogs} onKeyDown={(e) => e.key === "Escape" && logsOpen && toggleLogs()} aria-expanded={logsOpen} aria-controls="agent-log-drawer" className={cn(tool, logsOpen && "bg-accent text-primary-strong")}>
               <SquareTerminal className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />

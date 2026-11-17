@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw } from "lucide-react";
+import { SHELL_STROKE } from "@/components/shell/icon";
+import { TOPBAR_SLOT_ID, tool } from "@/components/shell/top-bar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -69,6 +72,9 @@ export function PanelLayout<Id extends string>({
   const [hintSeen, setHintSeen] = useState(true);
   const dragging = useRef<Id | null>(null);
   const rowRef = useRef<HTMLDivElement>(null);
+  // The top bar is rendered by the shell layout, so it exists by the time this mounts.
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setSlot(document.getElementById(TOPBAR_SLOT_ID)), []);
 
   // Load the saved arrangement once (after mount, so server and client render the same first).
   useEffect(() => {
@@ -202,9 +208,9 @@ export function PanelLayout<Id extends string>({
   const layoutMenu = (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-          <LayoutPanelLeft aria-hidden="true" /> Layout
-        </Button>
+        <button type="button" className={tool}>
+          <LayoutPanelLeft className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" /> Layout
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>Presets</DropdownMenuLabel>
@@ -231,9 +237,10 @@ export function PanelLayout<Id extends string>({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="hidden h-9 shrink-0 items-center justify-between gap-2 border-b border-border px-3 lg:flex">
+      {wide && slot && createPortal(
+      <>
         {!hintSeen && (
-          <p className="hidden items-center gap-2 text-xs text-muted-foreground lg:flex">
+          <p className="flex items-center gap-2 pr-2 text-xs text-muted-foreground">
             Drag a panel by its header to move it. Drag the dividers to resize.
             <button
               type="button"
@@ -251,8 +258,10 @@ export function PanelLayout<Id extends string>({
             </button>
           </p>
         )}
-        <div className="ml-auto">{layoutMenu}</div>
-      </div>
+        {layoutMenu}
+      </>,
+      slot,
+      )}
 
       {/* Phones and small tablets: one panel at a time with tabs (Okara pattern). */}
       <div className="flex min-h-0 flex-1 flex-col lg:hidden">
@@ -273,11 +282,13 @@ export function PanelLayout<Id extends string>({
         </nav>
       </div>
 
-      <div ref={rowRef} className="hidden min-h-0 flex-1 lg:flex">
+      {/* Panels are cards on the page background: separation comes from the gaps, not hairlines. */}
+      <div ref={rowRef} className="hidden min-h-0 flex-1 py-3 pl-3 lg:flex">
         {layout.columns.map((col, ci) => (
-          <div key={col.id} className="flex min-h-0 min-w-0" style={{ flex: `${col.size} 1 0%` }}>
+          // A column whose panels are all collapsed shrinks to a header-wide strip instead of holding its share.
+          <div key={col.id} className="flex min-h-0 min-w-0" style={{ flex: col.panels.every((p) => layout.collapsed.includes(p)) ? "0 0 15rem" : `${col.size} 1 0%` }}>
             <div
-              className={cn("flex min-h-0 min-w-0 flex-1 flex-col", dropHint === `col-${ci}` && "bg-primary/5")}
+              className={cn("flex min-h-0 min-w-0 flex-1 flex-col gap-3 rounded-2xl", dropHint === `col-${ci}` && "bg-primary/5")}
               onDragOver={allow(`col-${ci}`)}
               onDragLeave={() => setDropHint(null)}
               onDrop={onDrop({ column: ci })}
@@ -290,7 +301,7 @@ export function PanelLayout<Id extends string>({
                   <section
                     key={id}
                     aria-label={p.title}
-                    className={cn("flex min-h-0 flex-col border-b border-border last:border-b-0", collapsed ? "flex-none" : "flex-1")}
+                    className={cn("flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm", collapsed ? "flex-none" : "flex-1")}
                   >
                     <header
                       draggable
@@ -312,7 +323,8 @@ export function PanelLayout<Id extends string>({
                         onDrop({ column: ci, before: id })(e);
                       }}
                       className={cn(
-                        "group flex h-10 shrink-0 cursor-grab items-center gap-2 border-b border-border px-2 active:cursor-grabbing",
+                        "group flex h-11 shrink-0 cursor-grab items-center gap-2 px-3 active:cursor-grabbing",
+                        !collapsed && "border-b border-border",
                         dropHint === hint && "shadow-[inset_0_2px_0_0_var(--primary)]",
                       )}
                     >
@@ -362,7 +374,8 @@ export function PanelLayout<Id extends string>({
                 tabIndex={0}
                 onPointerDown={(e) => startResize(ci, e)}
                 onKeyDown={(e) => nudge(ci, e)}
-                className="relative w-px shrink-0 cursor-col-resize before:absolute before:inset-y-0 before:-inset-x-1 before:z-10 before:content-[''] bg-border outline-none transition-colors hover:bg-primary focus-visible:bg-primary [box-shadow:0_0_0_3px_transparent] hover:[box-shadow:0_0_0_2px_color-mix(in_srgb,var(--primary)_30%,transparent)]"
+                // The gap between cards is the handle; a line shows only on hover or keyboard focus.
+                className="relative w-3 shrink-0 cursor-col-resize outline-none after:absolute after:inset-y-4 after:left-1/2 after:w-0.5 after:-translate-x-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary"
               />
             )}
           </div>

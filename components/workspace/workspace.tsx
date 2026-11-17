@@ -18,6 +18,7 @@ import {
   Lock,
   MessageSquareQuote,
   PenLine,
+  Plug,
   RotateCw,
   ScanSearch,
   ShieldCheck,
@@ -60,6 +61,17 @@ const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
   seo: { icon: Gauge, tint: "text-success" },
   geo: { icon: MessageSquareQuote, tint: "text-primary-strong" },
   competitors: { icon: Users, tint: "text-primary-strong" },
+};
+/** Today's tasks show the icon of the agent or step they lead to, so the rows don't all look alike. */
+const TASK_ICON: Record<string, LucideIcon> = {
+  seo: Gauge,
+  geo: MessageSquareQuote,
+  scout: Compass,
+  ideas: Compass,
+  plan: CalendarDays,
+  write: PenLine,
+  approve: ShieldCheck,
+  connect: Plug,
 };
 /** The agents the sidebar marks "Soon": one list, so the Overview counts match it. */
 const PLANNED: { key: string; name: string; icon: LucideIcon; does: string }[] = NAV.filter((e) => e.group === "agent" && e.soon).map((e) => ({
@@ -557,7 +569,7 @@ function ContextPane({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <section className="border-b border-border px-5 py-5">
+        <section className="px-5 pb-4 pt-5">
           {editing ? (
             <BrandEditor base={base} brandName={brandName} website={website} onDone={(changed) => { setEditing(false); setSiteSaved(changed); }} />
           ) : (
@@ -602,12 +614,13 @@ function ContextPane({
           )}
         </section>
 
-        <section aria-labelledby="docs-h" className="border-b border-border px-3 py-4">
-          <h2 id="docs-h" className="flex items-center gap-2 px-2 text-sm font-semibold">
+        <section aria-labelledby="docs-h" className="px-5 py-4">
+          <h2 id="docs-h" className="flex items-center gap-2 text-sm font-semibold">
             Documents <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{docs?.docs.filter((d) => d.latest).length ?? 0}</span>
           </h2>
-          <LoadGate ready={!!docs} failed={docsFailed} what="your documents" onRetry={onRetry} rows={2} className="mt-2 px-2">
-          <ul className="mt-2">
+          <LoadGate ready={!!docs} failed={docsFailed} what="your documents" onRetry={onRetry} rows={2} className="mt-2">
+          {/* Rows bleed into the padding so their hover fills edge to edge while the text lines up with the headings. */}
+          <ul className="-mx-2 mt-2">
             {(docs?.docs ?? []).map((d) => (
               <li key={d.kind}>
                 <button
@@ -630,7 +643,7 @@ function ContextPane({
           </LoadGate>
         </section>
 
-        <section aria-labelledby="comp-h" className="border-b border-border px-5 py-4">
+        <section aria-labelledby="comp-h" className="px-5 py-4">
           <h2 id="comp-h" className="flex items-center gap-2 text-sm font-semibold">
             Competitors {reportsReady && <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{competitors.length}</span>}
           </h2>
@@ -653,7 +666,7 @@ function ContextPane({
           </LoadGate>
         </section>
 
-        <section aria-labelledby="conn-h" className="px-5 py-4">
+        <section aria-labelledby="conn-h" className="px-5 pb-6 pt-4">
           <h2 id="conn-h" className="text-sm font-semibold">
             Accounts
           </h2>
@@ -818,13 +831,11 @@ function Home({
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center justify-between border-b border-border px-6 py-5">
-        <h1 className="font-display text-2xl font-medium tracking-tight">
-          {first ? `Welcome, ${first}.` : "Welcome."}
-        </h1>
-      </div>
+      <h1 className="px-5 pt-6 font-display text-2xl font-medium tracking-tight">
+        {first ? `Welcome, ${first}.` : "Welcome."}
+      </h1>
 
-      <section aria-labelledby="today-h" className="px-6 py-6">
+      <section aria-labelledby="today-h" className="px-5 pb-8 pt-5">
         <div className="flex items-center justify-between gap-4">
           <h2 id="today-h" className="text-base font-semibold">
             Today
@@ -841,16 +852,21 @@ function Home({
         {due}
         {open.length > 0 ? (
           <ul className="mt-4 divide-y divide-border rounded-xl border border-border">
-            {open.slice(0, 5).map((t) => (
+            {open.slice(0, 5).map((t) => {
+              const Icon = TASK_ICON[t.id] ?? FileText;
+              return (
               <li key={t.id} className="flex items-center gap-3 px-4 py-3">
-                <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent" aria-hidden="true">
+                  <Icon className="size-4 text-accent-foreground" />
+                </span>
                 <p className="min-w-0 flex-1 truncate text-sm">
                   <span className="font-medium">{t.label}</span>
                   {t.detail && <span className="text-muted-foreground"> · {t.detail}</span>}
                 </p>
                 {t.action}
               </li>
-            ))}
+              );
+            })}
           </ul>
         ) : today.loading ? (
           <div className="mt-4">
@@ -866,7 +882,7 @@ function Home({
         )}
       </section>
 
-      <section aria-labelledby="agents-h" className="px-6 pb-10">
+      <section aria-labelledby="agents-h" className="px-5 pb-10">
         <div className="flex items-center justify-between">
           <h2 id="agents-h" className="text-base font-semibold">
             Agents
@@ -990,10 +1006,9 @@ function AgentFolder({
       title={title}
       className="group flex w-full flex-col items-center gap-1.5 rounded-lg p-1.5 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default"
     >
-      {/* Folder: a tab on top of a rounded body, the agent's icon on the front. */}
-      <span className={cn("relative mt-1.5 h-11 w-14 transition-transform duration-200 ease-out group-enabled:group-hover:-translate-y-0.5 motion-reduce:transition-none", locked && "opacity-55")}>
-        <span className="absolute -top-1.5 left-1 h-3 w-6 rounded-t-md bg-muted-foreground/30" aria-hidden="true" />
-        <span className="absolute inset-0 grid place-items-center rounded-md rounded-tl-none bg-muted-foreground/20 ring-1 ring-inset ring-white/5">
+      {/* The agent's icon on a soft tile; the badge in the corner carries running, failed or locked. */}
+      <span className={cn("relative size-12 transition-transform duration-200 ease-out group-enabled:group-hover:-translate-y-0.5 motion-reduce:transition-none", locked && "opacity-55")}>
+        <span className="absolute inset-0 grid place-items-center rounded-xl bg-accent transition-colors group-enabled:group-hover:bg-primary/15">
           <Icon className={cn("size-5", tint)} aria-hidden="true" />
         </span>
         {(locked || state === "running" || state === "failed") && (
