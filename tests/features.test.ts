@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const nav = vi.hoisted(() => ({ notFound: vi.fn() }));
 vi.mock("next/navigation", () => nav);
 
-import { featureOn, requireFeature } from "@/lib/features";
+import { featureOn, featuresOn, requireFeature } from "@/lib/features";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -29,6 +29,25 @@ describe("featureOn", () => {
     expect(featureOn("inbox", "w1")).toBe(true);
     expect(featureOn("inbox", "w2")).toBe(false);
     expect(featureOn("inbox", null)).toBe(false);
+  });
+});
+
+describe("featuresOn", () => {
+  it("lists the features that are on, in list order", () => {
+    vi.stubEnv("WEB_FEATURES", "reels, inbox");
+    expect(featuresOn("w1")).toEqual(["reels", "inbox"]);
+  });
+
+  it("ignores a misspelt flag", () => {
+    vi.stubEnv("WEB_FEATURES", "reel");
+    expect(featuresOn("w1")).toEqual([]);
+  });
+
+  it("scopes WEB_FEATURE_WORKSPACES to its workspace", () => {
+    vi.stubEnv("WEB_FEATURE_WORKSPACES", "library:w1");
+    expect(featuresOn("w1")).toEqual(["library"]);
+    expect(featuresOn("w2")).toEqual([]);
+    expect(featuresOn(null)).toEqual([]);
   });
 });
 

@@ -1,15 +1,19 @@
 /** The workspace route table: one list the sidebar, the top bar's breadcrumb and the panel read. */
 
+import type { WebFeature } from "@/lib/features";
+
 export type AgentKey = "spark" | "beat" | "wave" | "echo" | "pulse" | "hum" | "surge" | "drift";
 
 export type NavEntry = {
   id: string;
   label: string;
   href: string;
-  group: "main" | "agent" | "more" | "admin";
+  group: "main" | "create" | "customers" | "agent" | "more" | "admin";
   role?: string;
   soon?: boolean;
   blurb?: string;
+  /** Shown only while this flag is on for the workspace. */
+  feature?: WebFeature;
 };
 
 export const NAV: readonly NavEntry[] = [
@@ -17,6 +21,14 @@ export const NAV: readonly NavEntry[] = [
   { id: "context", label: "Business context", href: "/context", group: "main" },
   { id: "products", label: "Products", href: "/products", group: "main" },
   { id: "connections", label: "Connections", href: "/connections", group: "main" },
+  { id: "automations", label: "Automations", href: "/automations", group: "main", feature: "automations" },
+
+  { id: "library", label: "Photo library", href: "/library", group: "create", feature: "library" },
+  { id: "photoshoot", label: "Photoshoot", href: "/photoshoot", group: "create", feature: "photoshoot" },
+  { id: "reels", label: "Reels", href: "/reels", group: "create", feature: "reels" },
+  { id: "studio", label: "Studio", href: "/studio", group: "create", feature: "stories" },
+
+  { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox" },
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
@@ -35,6 +47,19 @@ export const NAV: readonly NavEntry[] = [
 
   { id: "admin", label: "Admin", href: "/admin", group: "admin" },
 ];
+
+type SidebarGroup = { id: "main" | "create" | "customers"; label: string | null; entries: NavEntry[] };
+
+/** The sidebar's lists: the main one, then Create and Customers, each only when one of its entries is enabled. */
+export function sidebarGroups(enabled: readonly WebFeature[]): SidebarGroup[] {
+  const shown = (e: NavEntry) => !e.feature || enabled.includes(e.feature);
+  const groups: SidebarGroup[] = [
+    { id: "main", label: null, entries: NAV.filter((e) => e.group === "main" && shown(e)) },
+    { id: "create", label: "Create", entries: NAV.filter((e) => e.group === "create" && shown(e)) },
+    { id: "customers", label: "Customers", entries: NAV.filter((e) => e.group === "customers" && shown(e)) },
+  ];
+  return groups.filter((g) => g.id === "main" || g.entries.length > 0);
+}
 
 const hrefPath = (href: string) => href.split(/[?#]/)[0] || "/";
 

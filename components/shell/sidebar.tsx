@@ -3,16 +3,24 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
-import { FileText, LayoutDashboard, Package, Plug, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Camera, Clapperboard, FileText, Images, Inbox, LayoutDashboard, Package, Plug, PenSquare, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
 import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
 import { AccountMenu } from "@/components/workspace/account-menu";
-import { NAV, navFor, type NavEntry } from "@/lib/nav";
+import type { WebFeature } from "@/lib/features";
+import { NAV, navFor, sidebarGroups, type NavEntry } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-const MAIN_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, products: Package, connections: Plug };
+const MAIN_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, products: Package, connections: Plug,
+  automations: Workflow,
+  library: Images,
+  photoshoot: Camera,
+  reels: Clapperboard,
+  studio: PenSquare,
+  inbox: Inbox,
+};
 
 type Props = {
   brands: BrandOption[];
@@ -22,13 +30,15 @@ type Props = {
   canCreateBrand: boolean;
   /** Visibility only: /admin is gated by its own layout, so hiding the link is never the access check. */
   platformAdmin: boolean;
+  /** Decided on the server (lib/features.ts is server-only) and passed down as data. */
+  features: readonly WebFeature[];
   user: { name?: string | null; email?: string | null; image?: string | null; roleLabel?: string | null };
 };
 
 const row =
   "flex items-center gap-3 rounded-2xl text-sm transition-colors active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, user }: Props) {
+export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, user }: Props) {
   const pathname = usePathname();
   const panel = useSearchParams().get("panel");
 
@@ -74,24 +84,29 @@ export function Sidebar({ brands, workspaces, activeWorkspaceId, activeBrandId, 
         </nav>
       ) : (
       <nav aria-label="Workspace" className="mt-6 min-h-0 flex-1 overflow-y-auto pb-4">
-        <ul className="mr-7 ml-5">
-          {NAV.filter((e) => e.group === "main").map((e) => {
-            const Icon = MAIN_ICONS[e.id];
-            const on = isActive(e);
-            return (
-              <li key={e.id}>
-                <Link
-                  href={e.href}
-                  aria-current={on ? "page" : undefined}
-                  className={cn(row, "h-12 px-3", on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
-                >
-                  {Icon ? <Icon className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : null}
-                  {e.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        {sidebarGroups(features).map((g) => (
+          <div key={g.id} className={g.label ? "mt-6" : undefined}>
+            {g.label ? <p className="mb-2 px-5 text-xs text-muted-foreground">{g.label}</p> : null}
+            <ul className="mr-7 ml-5">
+              {g.entries.map((e) => {
+                const Icon = MAIN_ICONS[e.id];
+                const on = isActive(e);
+                return (
+                  <li key={e.id}>
+                    <Link
+                      href={e.href}
+                      aria-current={on ? "page" : undefined}
+                      className={cn(row, "h-12 px-3", on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+                    >
+                      {Icon ? <Icon className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : null}
+                      {e.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
 
         <p className="mt-6 mb-2 px-5 text-xs text-muted-foreground">Your agents</p>
         <ul className="mx-5">

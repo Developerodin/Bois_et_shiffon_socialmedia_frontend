@@ -6,6 +6,7 @@ import { PaywallDialog } from "@/components/shell/paywall-dialog";
 import { Sidebar } from "@/components/shell/sidebar";
 import { TopBar } from "@/components/shell/top-bar";
 import { MainArea } from "@/components/workspace/main-area";
+import { featuresOn } from "@/lib/features";
 import { getShell } from "@/lib/server-fetch";
 
 /** The Refined workspace frame: sidebar | top bar over the page | the Espanda panel. */
@@ -26,6 +27,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
           activeBrandId={shell.activeBrandId}
           canCreateBrand={canCreateBrand}
           platformAdmin={shell.isPlatformAdmin}
+          features={featuresOn(workspaceId)}
           user={{ ...shell.user, roleLabel: shell.roleLabel }}
         />
       </Suspense>

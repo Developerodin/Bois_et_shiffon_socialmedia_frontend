@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NAV, navFor } from "@/lib/nav";
+import { NAV, navFor, sidebarGroups } from "@/lib/nav";
 
 describe("NAV", () => {
   it("lists the agents in order", () => {
@@ -45,5 +45,52 @@ describe("navFor", () => {
   });
   it("ignores the query string", () => {
     expect(navFor("/performance?x=1").title).toBe("Performance");
+  });
+});
+
+describe("sidebarGroups", () => {
+  const ids = (g: { entries: { id: string }[] }) => g.entries.map((e) => e.id);
+
+  it("shows only the main list with no flags", () => {
+    const g = sidebarGroups([]);
+    expect(g.map((x) => x.id)).toEqual(["main"]);
+    expect(g[0].label).toBeNull();
+    expect(ids(g[0])).toEqual(["overview", "context", "products", "connections"]);
+  });
+
+  it("adds Create when one of its features is on", () => {
+    const g = sidebarGroups(["reels"]);
+    expect(g.map((x) => x.id)).toEqual(["main", "create"]);
+    expect(g[1].label).toBe("Create");
+    expect(ids(g[1])).toEqual(["reels"]);
+  });
+
+  it("adds Customers and Automations", () => {
+    const g = sidebarGroups(["inbox", "automations"]);
+    expect(g.map((x) => x.id)).toEqual(["main", "customers"]);
+    expect(ids(g[0]).at(-1)).toBe("automations");
+    expect(g[1].label).toBe("Customers");
+    expect(ids(g[1])).toEqual(["inbox"]);
+  });
+
+  it("gates Studio on stories", () => {
+    expect(ids(sidebarGroups(["stories"])[1])).toEqual(["studio"]);
+  });
+
+  it("flags every Create and Customers entry", () => {
+    for (const e of NAV.filter((x) => x.group === "create" || x.group === "customers")) {
+      expect(e.feature).toBeDefined();
+    }
+  });
+});
+
+describe("navFor, coming routes", () => {
+  it("names the new routes", () => {
+    expect(navFor("/studio").title).toBe("Studio");
+    expect(navFor("/reels/abc")).toMatchObject({ activeId: "reels", title: "Reels" });
+    expect(navFor("/inbox").title).toBe("Inbox");
+    expect(navFor("/library").title).toBe("Photo library");
+    expect(navFor("/photoshoot").title).toBe("Photoshoot");
+    expect(navFor("/automations").title).toBe("Automations");
   });
 });
