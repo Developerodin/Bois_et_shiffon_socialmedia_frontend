@@ -75,7 +75,7 @@ export function JobProgress({ title, steps, value = null, job, onRetry }: {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={pct === null ? undefined : Math.round(pct)}
-        aria-valuetext={progressText(steps, value)}
+        aria-valuetext={progressText(steps, pct)}
         className="mt-3 h-2 overflow-hidden rounded-full bg-border"
       >
         <div
