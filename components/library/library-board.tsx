@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import { ImagePlus, RefreshCw } from "lucide-react";
+import { flushSync } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
@@ -12,6 +13,7 @@ import { navFor } from "@/lib/nav";
 import { libraryPhotos, siteLabel, type LibraryPhoto } from "@/shared";
 import { initialSource, libraryApi, photoCount, pickUploads } from "./api";
 import { PhotoGrid, SourceSwitch, type Source } from "./photo-grid";
+import { BrandLook } from "./brand-look";
 import { useBrandLook } from "./use-brand-look";
 
 const EMPTY: Record<Source, { title: string; body: string }> = {
@@ -21,7 +23,7 @@ const EMPTY: Record<Source, { title: string; body: string }> = {
 
 type Props = { workspaceId: string; brandId: string; canEdit: boolean; canUpload: boolean };
 
-/** Brand & photos: the website's product photos and the owner's uploads (the brand look panel joins on the right). */
+/** Brand & photos: the website's product photos and the owner's uploads, with the brand look panel on the right. */
 export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props) {
   const { view, failed, reload, set } = useBrandLook(workspaceId, brandId);
   const lib = useMemo(() => libraryPhotos(view), [view]);
@@ -85,7 +87,8 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
     } catch (err) {
       setError(errorMessage(err));
     } finally {
-      setBusyKey(null);
+      // Flushed first: "Add photos" is disabled while busy, and a disabled button can't take focus.
+      flushSync(() => setBusyKey(null));
       // The removed tile's button is gone; land on "Add photos", or on the section heading for a role that can't add.
       if (addRef.current) addRef.current.focus();
       else {
@@ -117,7 +120,7 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
           description={`${siteLabel(view.website) ?? "Source website"} · ${photoCount(shown.length)}`}
           actions={
             canUpload ? (
-              <Button ref={addRef} disabled={uploading} onClick={() => fileRef.current?.click()}>
+              <Button ref={addRef} disabled={busy} onClick={() => fileRef.current?.click()}>
                 <ImagePlus aria-hidden="true" />
                 Add photos
               </Button>
@@ -156,7 +159,7 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
             />
           </div>
         </PageSection>
-        {/* The brand look panel (Task 5) goes in the right column. */}
+        <BrandLook workspaceId={workspaceId} brandId={brandId} view={view} canEdit={canEdit} set={set} />
       </div>
     </div>
   );
