@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, Plus } from "lucide-react";
 import { setActiveContext } from "@/components/context/api";
 import { okToDiscard } from "@/components/context/unsaved";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,7 +94,7 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
           >
             <span className="flex w-full items-center justify-between gap-2">
               {brand.displayName}
-              {brand.status === "ARCHIVED" ? <Badge variant="outline">Archived</Badge> : null}
+              {brand.status === "ARCHIVED" ? <StatusBadge>Archived</StatusBadge> : null}
             </span>
           </DropdownMenuItem>
         ))}

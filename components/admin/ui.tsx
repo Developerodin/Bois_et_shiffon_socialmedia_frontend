@@ -85,11 +85,6 @@ export function Section({ id, title, description, children }: { id: string; titl
   );
 }
 
-export function Pill({ tone = "muted", children }: { tone?: "good" | "warn" | "bad" | "muted"; children: React.ReactNode }) {
-  const tones = { good: "border-success/40 bg-success/10 text-success", warn: "border-warning/40 bg-warning/10 text-warning", bad: "border-destructive/40 bg-destructive/10 text-destructive", muted: "border-border bg-muted text-muted-foreground" };
-  return <span className={cn("inline-flex whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-medium", tones[tone])}>{children}</span>;
-}
-
 export function Crumbs({ items }: { items: { href?: string; label: string }[] }) {
   return (
     <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">

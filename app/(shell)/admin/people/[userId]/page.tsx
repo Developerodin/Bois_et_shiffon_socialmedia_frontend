@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { AdminPerson } from "@/shared";
 import { AccessMatrix } from "@/components/admin/access";
 import { LogTable } from "@/components/admin/log-table";
-import { Ago, day, PageHeader, Pill, Section, Stat, when } from "@/components/admin/ui";
+import { Ago, day, PageHeader, Section, Stat, when } from "@/components/admin/ui";
 import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Person · Platform admin" };
@@ -42,9 +43,9 @@ export default async function AdminPerson({ params }: { params: Promise<{ userId
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-1">
-                    <Pill tone="good">{w.role ?? "no role"}</Pill>
+                    <StatusBadge tone="good">{w.role ?? "no role"}</StatusBadge>
                     {w.projects.map((pr) => (
-                      <Pill key={pr.id}>{`${pr.name}: ${pr.role}`}</Pill>
+                      <StatusBadge key={pr.id}>{`${pr.name}: ${pr.role}`}</StatusBadge>
                     ))}
                   </div>
                 </header>

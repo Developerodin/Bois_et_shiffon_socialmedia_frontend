@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type AdminPersonTimeline } from "@/shared";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
-import { Ago, CursorPager, Empty, fxOf, Money, PageHeader, period as periodOf, PERIODS, Pill, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
+import { Ago, CursorPager, Empty, fxOf, Money, PageHeader, period as periodOf, PERIODS, Segmented, Stat, Table, withQuery } from "@/components/admin/ui";
 import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Person activity · Platform admin" };
@@ -48,9 +49,9 @@ export default async function AdminPersonActivity({ params, searchParams }: { pa
         empty="Nothing recorded for them here in this period."
         rows={t.items.map((i) => [
           <Ago key="w" at={i.at} />,
-          <Pill key="k" tone={i.kind === "task" && i.status === "FAILED" ? "bad" : "muted"}>
+          <StatusBadge key="k" tone={i.kind === "task" && i.status === "FAILED" ? "bad" : "muted"}>
             {i.kind === "visit" ? `${LABEL.visit} · ${i.platform}` : LABEL[i.kind]}
-          </Pill>,
+          </StatusBadge>,
           <div key="d" className="min-w-0 max-w-sm">
             <span className="font-mono text-xs">{i.detail}</span>
             {i.kind === "task" || i.kind === "ai" ? <p className="text-xs text-muted-foreground">{[i.model, i.status?.toLowerCase()].filter(Boolean).join(" · ")}</p> : null}

@@ -10,6 +10,8 @@ import { ReleasePanel } from "@/components/workspace/release-panel";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
 import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { TONE_CLASS, toneOf } from "@/lib/status";
 import { safeHttpUrl } from "@/shared";
 
 /* ───────────── shared types + data ───────────── */
@@ -133,23 +135,8 @@ export const STATUS_LABEL: Record<string, string> = {
   REJECTED: "Rejected",
   BLOCKED: "Blocked",
 };
-const STATUS_TONE: Record<string, string> = {
-  AWAITING_APPROVAL: "bg-primary/15 text-primary",
-  APPROVED: "bg-success/15 text-success",
-  PUBLISHED: "bg-success/15 text-success",
-  BLOCKED: "bg-destructive/15 text-destructive",
-  REJECTED: "bg-destructive/15 text-destructive",
-  SCHEDULED: "bg-primary/15 text-primary",
-};
-const PUBLISH_ISSUE = {
-  FAILED: { label: "Not posted", tone: "bg-destructive/15 text-destructive" },
-  CHECK: { label: "Check needed", tone: "bg-warning/15 text-warning" },
-};
-const DECISION: Record<Opportunity["decision"], { label: string; tone: string }> = {
-  RECOMMEND: { label: "Recommend", tone: "bg-success/15 text-success" },
-  HOLD: { label: "Hold", tone: "bg-warning/15 text-warning" },
-  REJECT: { label: "Reject", tone: "bg-muted text-muted-foreground" },
-};
+const PUBLISH_ISSUE = { FAILED: "Not posted", CHECK: "Check needed" };
+const DECISION: Record<Opportunity["decision"], string> = { RECOMMEND: "Recommend", HOLD: "Hold", REJECT: "Reject" };
 const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 
 /* ───────────── Ideas panel ───────────── */
@@ -263,7 +250,7 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
           {shown.map((o) => (
             <li key={o.id} className={cn("flex flex-col gap-2 px-4 py-3.5", o.status === "DISMISSED" && "opacity-60")}>
               <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                <span className={cn("rounded-full px-2 py-0.5 font-medium", DECISION[o.decision].tone)}>{DECISION[o.decision].label}</span>
+                <StatusBadge status={o.decision}>{DECISION[o.decision]}</StatusBadge>
                 {o.timing && <span className="text-muted-foreground">{o.timing}</span>}
                 {o.status !== "NEW" && <span className="rounded-full border border-border px-2 py-0.5 text-muted-foreground">{o.status === "SHORTLISTED" ? "Shortlisted" : o.status === "PLANNED" ? "Planned" : "Dismissed"}</span>}
               </div>
@@ -356,11 +343,11 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
                   <span className="flex items-center justify-between gap-2 text-[11px]">
                     <span className="text-muted-foreground">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
                     {i.publishIssue ? (
-                      <span className={cn("rounded-full px-2 py-0.5 font-medium", PUBLISH_ISSUE[i.publishIssue].tone)}>{PUBLISH_ISSUE[i.publishIssue].label}</span>
+                      <StatusBadge status={i.publishIssue}>{PUBLISH_ISSUE[i.publishIssue]}</StatusBadge>
                     ) : (
-                      <span className={cn("rounded-full px-2 py-0.5 font-medium", STATUS_TONE[i.status] ?? "bg-muted text-muted-foreground")}>
+                      <StatusBadge status={i.status}>
                         {i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status)}
-                      </span>
+                      </StatusBadge>
                     )}
                   </span>
                   <span className="text-sm">{i.title}</span>
@@ -610,7 +597,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
             <h1 className="mt-1 font-display text-2xl font-medium tracking-tight">{item.title}</h1>
             {item.opportunity && <p className="mt-1 text-sm text-muted-foreground">From the idea: {item.opportunity.title}</p>}
             {item.publishIssue && (
-              <p role="status" className={cn("mt-2 flex items-start gap-2 rounded-lg px-3 py-2 text-sm", PUBLISH_ISSUE[item.publishIssue].tone)}>
+              <p role="status" className={cn("mt-2 flex items-start gap-2 rounded-lg px-3 py-2 text-sm", TONE_CLASS[toneOf(item.publishIssue)])}>
                 <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
                 <span>
                   <span className="font-medium">{item.publishIssue === "FAILED" ? "Not posted." : "Check needed: it may or may not have posted."}</span> {item.publishError}

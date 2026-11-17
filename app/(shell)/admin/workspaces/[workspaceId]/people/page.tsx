@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { AdminWorkspaceDetail } from "@/shared";
 import { AccessMatrix } from "@/components/admin/access";
-import { day, Empty, Pill, Section, Table, when } from "@/components/admin/ui";
+import { day, Empty, Section, Table, when } from "@/components/admin/ui";
 import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "People · Workspace · Platform admin" };
@@ -22,13 +23,13 @@ export default async function AdminWorkspacePeople({ params }: { params: Promise
               </Link>
               {m.user.name ? <p className="truncate text-xs text-muted-foreground">{m.user.email}</p> : null}
             </div>,
-            m.role?.name ?? <Pill tone="bad">no role</Pill>,
+            m.role?.name ?? <StatusBadge tone="bad">no role</StatusBadge>,
             <div key="r" className="flex flex-wrap gap-1">
-              {m.projects.some((p) => p.projectRole) ? m.projects.filter((p) => p.projectRole).map((p) => <Pill key={p.brandId}>{`${p.brand}: ${p.projectRole}`}</Pill>) : <Empty />}
+              {m.projects.some((p) => p.projectRole) ? m.projects.filter((p) => p.projectRole).map((p) => <StatusBadge key={p.brandId}>{`${p.brand}: ${p.projectRole}`}</StatusBadge>) : <Empty />}
             </div>,
-            <Pill key="s" tone={m.user.status === "ACTIVE" ? "good" : "bad"}>
+            <StatusBadge key="s" tone={m.user.status === "ACTIVE" ? "good" : "bad"}>
               {m.user.status.toLowerCase()}
-            </Pill>,
+            </StatusBadge>,
             <span key="j" className="whitespace-nowrap" title={when(m.joinedAt)}>
               {day(m.joinedAt)}
             </span>,

@@ -1,10 +1,8 @@
 import type { AdminLogRow as LogRow, LogKind } from "@/shared";
-import { Ago, Empty, Money, Pill, Table, type Fx } from "@/components/admin/ui";
+import { Ago, Empty, Money, Table, type Fx } from "@/components/admin/ui";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const COMPACT = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
-const runTone = (s: string) => (s === "SUCCEEDED" ? "good" : s === "FAILED" ? "bad" : "warn");
-const levelTone = (l: string) => (l === "ERROR" ? "bad" : l === "WARN" ? "warn" : l === "SUCCESS" ? "good" : "muted");
-const callTone = (s: string) => (s === "SUCCEEDED" ? "good" : s === "FAILED" ? "bad" : "warn");
 const CALL_STATUS: Record<string, string> = { SUCCEEDED: "succeeded", FAILED: "failed", ESCALATED: "asked again", FELL_BACK: "used a backup" };
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 /** A kind-specific field of a log row (each kind carries its own: action, agent, status…). */
@@ -56,7 +54,7 @@ export function LogTable({ kind, rows, fx, platform }: { kind: LogKind; rows: Lo
           ...ws(r),
           project(r),
           r.who ?? <span key="t" className="text-muted-foreground">{str(f(r, "trigger"))}</span>,
-          <Pill key="s" tone={runTone(str(f(r, "status")))}>{str(f(r, "status")).toLowerCase()}</Pill>,
+          <StatusBadge key="s" status={str(f(r, "status"))}>{str(f(r, "status")).toLowerCase()}</StatusBadge>,
           n(r, "seconds") !== null ? `${n(r, "seconds")} s` : <Empty key="d" />,
           f(r, "error") ? (
             <span key="e" className="line-clamp-2 max-w-xs text-xs text-destructive" title={str(f(r, "error"))}>
@@ -79,7 +77,7 @@ export function LogTable({ kind, rows, fx, platform }: { kind: LogKind; rows: Lo
           str(f(r, "agent")),
           ...ws(r),
           project(r),
-          <Pill key="l" tone={levelTone(str(f(r, "level")))}>{str(f(r, "level")).toLowerCase()}</Pill>,
+          <StatusBadge key="l" status={str(f(r, "level"))}>{str(f(r, "level")).toLowerCase()}</StatusBadge>,
           <span key="m" className="block max-w-prose">{str(f(r, "message"))}</span>,
         ])}
       />
@@ -102,10 +100,10 @@ export function LogTable({ kind, rows, fx, platform }: { kind: LogKind; rows: Lo
           {str(f(r, "model"))}
           {f(r, "tier") ? <span className="text-muted-foreground"> · {str(f(r, "tier"))}</span> : null}
         </span>,
-        <Pill key="s" tone={callTone(str(f(r, "status")))}>
+        <StatusBadge key="s" status={str(f(r, "status"))}>
           {CALL_STATUS[str(f(r, "status"))] ?? str(f(r, "status")).toLowerCase()}
-        </Pill>,
-        f(r, "checks") === null || f(r, "checks") === undefined ? <Empty key="c" /> : <Pill key="c" tone={f(r, "checks") ? "good" : "warn"}>{f(r, "checks") ? "passed" : "flagged"}</Pill>,
+        </StatusBadge>,
+        f(r, "checks") === null || f(r, "checks") === undefined ? <Empty key="c" /> : <StatusBadge key="c" tone={f(r, "checks") ? "good" : "warn"}>{f(r, "checks") ? "passed" : "flagged"}</StatusBadge>,
         n(r, "tokens") ? COMPACT.format(n(r, "tokens")!) : <Empty key="k" />,
         n(r, "ms") !== null ? `${(n(r, "ms")! / 1000).toFixed(1)} s` : <Empty key="ms" />,
         n(r, "usd") !== null ? <Money key="u" usd={n(r, "usd")!} fx={fx} /> : <Empty key="u" />,

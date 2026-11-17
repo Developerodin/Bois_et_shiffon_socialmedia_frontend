@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { errorMessage, settingsApi, type AiModel, type AiModelSettings, type AiTierName } from "@/components/settings/api";
-import { ConfirmDialog, ListSkeleton, LoadError, SectionHeader, StatusPill, selectClass, useLoad } from "@/components/settings/shared";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { ConfirmDialog, ListSkeleton, LoadError, SectionHeader, selectClass, useLoad } from "@/components/settings/shared";
 
 const TIER_INFO: Record<AiTierName, string> = {
   heavy: "Writing that shapes everything else or reaches customers: strategy documents, post drafts, the check before approval.",
@@ -70,10 +71,10 @@ export function AiModelsTab() {
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {usedBy.length ? <StatusPill tone="good">{usedBy.join(", ")}</StatusPill> : null}
-                    {m.evalCandidate ? <StatusPill tone="muted">Compared in tests</StatusPill> : null}
-                    {m.judgeRank ? <StatusPill tone="muted">Judge {m.judgeRank}</StatusPill> : null}
-                    {!m.cacheBreakpoints ? <StatusPill tone="muted">No cache breakpoints</StatusPill> : null}
+                    {usedBy.length ? <StatusBadge tone="good">{usedBy.join(", ")}</StatusBadge> : null}
+                    {m.evalCandidate ? <StatusBadge tone="muted">Compared in tests</StatusBadge> : null}
+                    {m.judgeRank ? <StatusBadge tone="muted">Judge {m.judgeRank}</StatusBadge> : null}
+                    {!m.cacheBreakpoints ? <StatusBadge tone="muted">No cache breakpoints</StatusBadge> : null}
                     <Button size="sm" variant="ghost" onClick={() => setEditing(m)} aria-label={`Edit ${m.name}`}>
                       <Pencil />
                     </Button>

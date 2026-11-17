@@ -11,6 +11,7 @@ import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { CLIENT_TAG } from "@/lib/net";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { BY_HAND_STEPS, safeHttpUrl, zoneCity } from "@/shared";
 
 type Attempt = {
@@ -547,14 +548,14 @@ function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data
   );
 }
 
-const ATTEMPT: Record<Attempt["status"], { label: string; tone: string }> = {
-  SCHEDULED: { label: "Scheduled", tone: "bg-primary/15 text-primary" },
-  PUBLISHING: { label: "Publishing…", tone: "bg-primary/15 text-primary" },
-  PUBLISHED: { label: "Published", tone: "bg-success/15 text-success" },
-  FAILED: { label: "Not posted", tone: "bg-destructive/15 text-destructive" },
-  PENDING_VERIFY: { label: "Check needed", tone: "bg-warning/15 text-warning" },
-  PARTIAL: { label: "Partly posted", tone: "bg-warning/15 text-warning" },
-  CANCELLED: { label: "Cancelled", tone: "bg-muted text-muted-foreground" },
+const ATTEMPT: Record<Attempt["status"], string> = {
+  SCHEDULED: "Scheduled",
+  PUBLISHING: "Publishing…",
+  PUBLISHED: "Published",
+  FAILED: "Not posted",
+  PENDING_VERIFY: "Check needed",
+  PARTIAL: "Partly posted",
+  CANCELLED: "Cancelled",
 };
 const VERDICT: Record<Decision["verdict"], string> = { APPROVED: "approved", CHANGES_REQUESTED: "asked for changes to", REJECTED: "rejected" };
 
@@ -619,7 +620,7 @@ function History({ data, canPublish, onSettle, onAct }: { data: Release; canPubl
           ) : a ? (
             <li key={key} className="flex flex-col gap-1.5 py-2.5 text-sm">
               <span className="flex flex-wrap items-center gap-2">
-                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium", ATTEMPT[a.status].tone)}>{overdue ? "Overdue" : ATTEMPT[a.status].label}</span>
+                <StatusBadge status={a.status}>{overdue ? "Overdue" : ATTEMPT[a.status]}</StatusBadge>
                 <span>
                   {PROVIDER_NAME[a.provider] ?? a.provider} · {a.account}
                   <span className="text-muted-foreground"> · {a.status === "PUBLISHED" && a.publishedAt ? dayTime(a.publishedAt) : dayTime(a.runAt)} · by {a.by}</span>

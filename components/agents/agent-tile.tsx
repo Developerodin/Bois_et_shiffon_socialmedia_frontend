@@ -7,19 +7,13 @@ import { errorMessage } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const STATUS_LABEL: Record<RunStatus, string> = {
   QUEUED: "Queued",
   RUNNING: "Running",
   SUCCEEDED: "Succeeded",
   FAILED: "Failed",
-};
-
-const STATUS_DOT: Record<RunStatus, string> = {
-  QUEUED: "bg-warning",
-  RUNNING: "bg-primary status-pulse",
-  SUCCEEDED: "bg-success",
-  FAILED: "bg-destructive",
 };
 
 function formatWhen(iso: string | null): string | null {
@@ -74,16 +68,9 @@ export function AgentTile({ agent, workspaceId, brandId, onRunStarted }: Props) 
         <h3 className="font-display text-lg font-medium leading-tight tracking-tight">
           {agent.name}
         </h3>
-        <span className="flex shrink-0 items-center gap-2 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
-          <span
-            className={cn(
-              "size-1.5 rounded-full",
-              status ? STATUS_DOT[status] : "bg-muted-foreground",
-            )}
-            aria-hidden="true"
-          />
+        <StatusBadge status={agent.enabled ? status : null} className="shrink-0">
           {agent.enabled ? (status ? STATUS_LABEL[status] : "Idle") : "Disabled"}
-        </span>
+        </StatusBadge>
       </div>
 
       <p className="flex-1 text-sm text-muted-foreground">{agent.description}</p>

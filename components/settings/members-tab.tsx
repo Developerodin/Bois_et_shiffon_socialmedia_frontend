@@ -11,21 +11,21 @@ import {
   type MemberStatus,
   type Role,
 } from "@/components/settings/api";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ConfirmDialog,
   ListSkeleton,
   LoadError,
   SectionHeader,
-  StatusPill,
   formatDate,
   selectClass,
   useLoad,
 } from "@/components/settings/shared";
 
-const STATUS: Record<MemberStatus, { tone: "good" | "warn" | "muted"; label: string }> = {
-  ACTIVE: { tone: "good", label: "Active" },
-  INVITED: { tone: "warn", label: "Invited" },
-  DISABLED: { tone: "muted", label: "Disabled" },
+const STATUS: Record<MemberStatus, { label: string }> = {
+  ACTIVE: { label: "Active" },
+  INVITED: { label: "Invited" },
+  DISABLED: { label: "Disabled" },
 };
 
 type Props = {
@@ -145,7 +145,7 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
                     <p className="text-xs text-muted-foreground">{m.email}</p>
                   </td>
                   <td className="px-5 py-4">
-                    <StatusPill tone={STATUS[m.status].tone}>{STATUS[m.status].label}</StatusPill>
+                    <StatusBadge status={m.status}>{STATUS[m.status].label}</StatusBadge>
                   </td>
                   <td className="px-5 py-4">{roleControl(m)}</td>
                   <td className="px-5 py-4 text-muted-foreground">{formatDate(m.joinedAt)}</td>
@@ -165,7 +165,7 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
                   <p className="truncate font-medium text-foreground">{m.name ?? m.email}</p>
                   {m.name ? <p className="truncate text-xs text-muted-foreground">{m.email}</p> : null}
                 </div>
-                <StatusPill tone={STATUS[m.status].tone}>{STATUS[m.status].label}</StatusPill>
+                <StatusBadge status={m.status}>{STATUS[m.status].label}</StatusBadge>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex-1">{roleControl(m)}</div>

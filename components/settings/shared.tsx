@@ -11,31 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 import { ApiError, errorMessage } from "@/components/settings/api";
 
 export const selectClass =
   "h-9 w-full rounded-md border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60";
-
-const TONES = {
-  good: "border-success/40 bg-success/10 text-success",
-  muted: "border-border bg-muted text-muted-foreground",
-  warn: "border-warning/40 bg-warning/10 text-warning",
-  bad: "border-destructive/40 bg-destructive/10 text-destructive",
-} as const;
-
-export function StatusPill({ tone, children }: { tone: keyof typeof TONES; children: React.ReactNode }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
-        TONES[tone],
-      )}
-    >
-      {children}
-    </span>
-  );
-}
 
 export function SystemLock() {
   return (

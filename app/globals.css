@@ -3,7 +3,8 @@
 
 /*
  * Espanda light theme. One token set, hex values. Contrast pairs: ink on canvas and surface, primary-foreground on
- * primary, primary-strong and the status colours as text on surface.
+ * primary, primary-strong and the status colours as text on surface;
+ * status text on tints uses the -ink tokens.
  */
 :root {
   color-scheme: light;
@@ -31,6 +32,8 @@
   --destructive-foreground: #ffffff;
   --success: #1a7f4b;
   --warning: #9a5b00;
+  --success-ink: #146b3e;
+  --warning-ink: #8a5100;
   --ring: #5b50d6;
   --chart-1: #5b50d6;
   --terminal: #191620;
@@ -66,6 +69,8 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-success-ink: var(--success-ink);
+  --color-warning-ink: var(--warning-ink);
   --color-ring: var(--ring);
   --color-overlay: var(--overlay);
   --color-terminal: var(--terminal);

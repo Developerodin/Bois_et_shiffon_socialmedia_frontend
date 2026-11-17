@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { AdminPeople } from "@/shared";
-import { Ago, day, Empty, PageHeader, Pager, Pill, SearchBox, Table, withQuery } from "@/components/admin/ui";
+import { Ago, day, Empty, PageHeader, Pager, SearchBox, Table, withQuery } from "@/components/admin/ui";
 import { serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "People · Platform admin" };
@@ -38,15 +39,15 @@ export default async function AdminPeople({ searchParams }: { searchParams: Prom
             {u.workspaces.length
               ? u.workspaces.map((w) => (
                   <Link key={w.id} href={`/admin/workspaces/${w.id}/people`} className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                    <Pill>{w.name}</Pill>
+                    <StatusBadge>{w.name}</StatusBadge>
                   </Link>
                 ))
               : <Empty />}
           </div>,
           u.projectRoles ? u.projectRoles.toLocaleString("en") : <Empty key="r" />,
           <div key="s" className="flex flex-wrap gap-1">
-            <Pill tone={u.status === "ACTIVE" ? "good" : "bad"}>{u.status.toLowerCase()}</Pill>
-            {u.isPlatformAdmin ? <Pill tone="warn">platform admin</Pill> : null}
+            <StatusBadge tone={u.status === "ACTIVE" ? "good" : "bad"}>{u.status.toLowerCase()}</StatusBadge>
+            {u.isPlatformAdmin ? <StatusBadge tone="warn">platform admin</StatusBadge> : null}
           </div>,
           <Ago key="l" at={u.lastSignIn} />,
           <span key="j" className="whitespace-nowrap">{day(u.createdAt)}</span>,

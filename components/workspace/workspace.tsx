@@ -41,6 +41,7 @@ import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { NAV } from "@/lib/nav";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
 import { safeHttpUrl } from "@/shared";
 import { timeAgo } from "@/lib/time";
@@ -472,7 +473,7 @@ function plainSummary(markdown: string | undefined) {
 
 function docBadge(entry: ContextDocEntry, researching: boolean) {
   if (entry.latest?.status === "CONFIRMED") return <Check className="size-4 text-success" aria-label="Confirmed" />;
-  if (entry.latest) return <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-medium text-success">New</span>;
+  if (entry.latest) return <StatusBadge tone="good">New</StatusBadge>;
   if (researching) return <Loader2 className="size-4 animate-spin text-muted-foreground motion-reduce:animate-none" aria-label="Drafting" />;
   return <Lock className="size-3.5 text-muted-foreground" aria-label="Not drafted yet" />;
 }

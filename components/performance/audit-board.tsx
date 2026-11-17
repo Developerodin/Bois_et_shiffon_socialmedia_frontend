@@ -6,7 +6,8 @@ import { Gauge, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { fetchAgents } from "@/components/agents/api";
 import { request } from "@/components/settings/api";
-import { ListSkeleton, LoadError, StatusPill, formatDate, useLoad } from "@/components/settings/shared";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { ListSkeleton, LoadError, formatDate, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
 
 type Severity = "critical" | "high" | "medium" | "low";
@@ -48,7 +49,7 @@ export function Findings({ findings }: { findings: Finding[] }) {
               <span className="mt-0.5 w-5 shrink-0 text-right font-mono text-xs text-muted-foreground">{i + 1}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <StatusPill tone={TONE[f.severity]}>{f.severity}</StatusPill>
+                  <StatusBadge tone={TONE[f.severity]}>{f.severity}</StatusBadge>
                   <span className="text-xs text-muted-foreground">{f.category}</span>
                 </div>
                 <p className="mt-1 font-medium">{f.title}</p>
@@ -159,9 +160,9 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
               <ul className="flex flex-col gap-2 text-sm">
                 {questions.map((q) => (
                   <li key={q.question} className="flex items-start gap-2">
-                    <StatusPill tone={q.branded ? "muted" : q.mentioned ? "good" : "warn"}>
+                    <StatusBadge tone={q.branded ? "muted" : q.mentioned ? "good" : "warn"}>
                       {q.branded ? "Names brand" : q.mentioned ? "Mentioned" : "Not yet"}
-                    </StatusPill>
+                    </StatusBadge>
                     <span>{q.question}</span>
                   </li>
                 ))}

@@ -13,12 +13,12 @@ import {
   type Provider,
   type ProviderInfo,
 } from "@/components/settings/api";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ConfirmDialog,
   ListSkeleton,
   LoadError,
   SectionHeader,
-  StatusPill,
   formatDate,
   useLoad,
 } from "@/components/settings/shared";
@@ -106,7 +106,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                   <p className="mt-0.5 text-sm text-muted-foreground">{PURPOSE[p.provider]}</p>
                 </div>
                 {!p.configured ? (
-                  <StatusPill tone="muted">Not set up</StatusPill>
+                  <StatusBadge tone="muted">Not set up</StatusBadge>
                 ) : canManage ? (
                   <Button
                     size="sm"
@@ -128,9 +128,9 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                   }
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <StatusPill tone={c.status === "ACTIVE" ? "good" : "bad"}>
+                    <StatusBadge tone={c.status === "ACTIVE" ? "good" : "bad"}>
                       {c.status === "ACTIVE" ? "Connected" : "Needs reconnect"}
-                    </StatusPill>
+                    </StatusBadge>
                     <span className="truncate text-sm">{c.displayName}</span>
                     <span className="text-xs text-muted-foreground">
                       {fresh.has(c.displayName) && c.status === "ACTIVE" ? "just now" : `since ${formatDate(c.connectedAt)}`}

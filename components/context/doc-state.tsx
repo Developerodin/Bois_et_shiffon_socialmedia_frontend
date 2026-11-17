@@ -1,5 +1,6 @@
 import type { ContextDocEntry } from "@/components/context/api";
-import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/ui/status-badge";
+import type { Tone } from "@/lib/status";
 
 type State = { key: "none" | "draft" | "confirmed"; label: string };
 
@@ -11,23 +12,14 @@ export function docState(entry: ContextDocEntry): State {
   return { key: "draft", label: "In use" };
 }
 
-const TONE: Record<State["key"], string> = {
-  none: "border-border text-muted-foreground",
-  draft: "border-primary/40 bg-primary/10 text-primary",
-  confirmed: "border-success/40 bg-success/10 text-success",
-};
+const TONE: Record<State["key"], Tone> = { none: "muted", draft: "info", confirmed: "good" };
 
 export function DocStateBadge({ entry }: { entry: ContextDocEntry }) {
   const state = docState(entry);
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium",
-        TONE[state.key],
-      )}
-    >
+    <StatusBadge tone={TONE[state.key]} className="gap-1.5">
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
       {state.label}
-    </span>
+    </StatusBadge>
   );
 }

@@ -1,5 +1,6 @@
 import { PERMISSIONS, type AdminWorkspaceDetail } from "@/shared";
-import { Empty, Pill, Section, Table } from "@/components/admin/ui";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Empty, Section, Table } from "@/components/admin/ui";
 import { api, serverFetch } from "@/lib/server-fetch";
 
 export const metadata = { title: "Roles · Workspace · Platform admin" };
@@ -18,7 +19,7 @@ export default async function AdminWorkspaceRoles({ params }: { params: Promise<
         rows={d.roles.map((r) => [
           <div key="n" className="min-w-44">
             <p className="flex items-center gap-2 font-medium">
-              {r.name} {r.isSystem ? <Pill>built in</Pill> : <Pill tone="warn">custom</Pill>}
+              {r.name} {r.isSystem ? <StatusBadge>built in</StatusBadge> : <StatusBadge tone="warn">custom</StatusBadge>}
             </p>
             {r.description ? <p className="mt-0.5 text-xs text-muted-foreground">{r.description}</p> : null}
           </div>,

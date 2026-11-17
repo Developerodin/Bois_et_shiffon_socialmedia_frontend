@@ -22,22 +22,22 @@ import {
   type InvitationStatus,
   type Role,
 } from "@/components/settings/api";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ConfirmDialog,
   ListSkeleton,
   LoadError,
   SectionHeader,
-  StatusPill,
   formatDate,
   selectClass,
   useLoad,
 } from "@/components/settings/shared";
 
-const STATUS: Record<InvitationStatus, { tone: "good" | "warn" | "muted" | "bad"; label: string }> = {
-  PENDING: { tone: "warn", label: "Pending" },
-  ACCEPTED: { tone: "good", label: "Accepted" },
-  REVOKED: { tone: "muted", label: "Revoked" },
-  EXPIRED: { tone: "bad", label: "Expired" },
+const STATUS: Record<InvitationStatus, { label: string }> = {
+  PENDING: { label: "Pending" },
+  ACCEPTED: { label: "Accepted" },
+  REVOKED: { label: "Revoked" },
+  EXPIRED: { label: "Expired" },
 };
 
 const DELIVERY: Record<EmailDelivery, string> = {
@@ -95,7 +95,7 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <StatusPill tone={STATUS[inv.status].tone}>{STATUS[inv.status].label}</StatusPill>
+              <StatusBadge status={inv.status}>{STATUS[inv.status].label}</StatusBadge>
               {inv.status === "PENDING" ? (
                 <Button variant="outline" size="sm" onClick={() => setRevoking(inv)}>
                   Revoke
