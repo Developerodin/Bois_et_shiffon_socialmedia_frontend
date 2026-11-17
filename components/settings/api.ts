@@ -1,6 +1,6 @@
 // Client-side contract for the RBAC API
 // (docs/superpowers/specs/2026-10-21-rbac-api-contract.md). Keep in sync with the route handlers.
-import { NetworkError, send } from "@/lib/net";
+import { NetworkError, send, type SendInit } from "@/lib/net";
 
 export class ApiError extends Error {
   constructor(
@@ -8,6 +8,8 @@ export class ApiError extends Error {
     message: string,
     /** The problem JSON's stable `code` (e.g. "story.expiredConfirm"), when it has one. */
     public code?: string,
+    /** The parsed error body (or the streamed error line), for fields beyond message and code. */
+    public data?: unknown,
   ) {
     super(message);
   }
@@ -67,12 +69,39 @@ export type PublicInvitation = {
   existingAccount: boolean;
 };
 
+export type RequestOptions = SendInit & { onLine?: (line: unknown) => void };
+
+/** Reads a JSON-lines answer: progress lines go to onLine, the closing line resolves or rejects the call. */
+async function readLines<T>(body: ReadableStream<Uint8Array>, onLine?: (line: unknown) => void): Promise<T> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (value) buffer += decoder.decode(value, { stream: !done });
+    for (let end = buffer.indexOf("\n"); end >= 0; end = buffer.indexOf("\n")) {
+      const line = JSON.parse(buffer.slice(0, end)) as { type?: string; result?: T; status?: number; detail?: string; code?: string };
+      buffer = buffer.slice(end + 1);
+      if (line.type === "done") return line.result as T;
+      // The line is the error's data, so a streamed 402 still carries planRequired and the code.
+      if (line.type === "error") throw new ApiError(line.status ?? 500, line.detail ?? "Request failed", line.code, line);
+      onLine?.(line);
+    }
+    if (done) throw new ApiError(0, "The answer stopped partway. Try again."); // ended before its last line
+  }
+}
+
 // Errors are problem+json {type,title,status,detail?}; surface detail/title when present.
-export async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const headers = init?.body ? { "Content-Type": "application/json" } : undefined;
+export async function request<T>(url: string, init: RequestOptions = {}): Promise<T> {
+  const { onLine, headers: callerHeaders, ...rest } = init;
+  const headers = new Headers();
+  // Only a string body is JSON; FormData needs the browser to set its own multipart boundary.
+  if (typeof rest.body === "string") headers.set("Content-Type", "application/json");
+  if (onLine) headers.set("Accept", "application/x-ndjson");
+  new Headers(callerHeaders).forEach((v, k) => headers.set(k, v));
   let res: Response;
   try {
-    res = await send(url, { cache: "no-store", headers, ...init });
+    res = await send(url, { cache: "no-store", ...rest, headers });
   } catch (error) {
     // Offline, timed out, server unreachable: status 0, with a message that says which (lib/net.ts).
     if (error instanceof NetworkError) throw new ApiError(0, error.message);
@@ -82,16 +111,19 @@ export async function request<T>(url: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     let code: string | undefined;
+    let data: unknown;
     try {
       const body = (await res.json()) as { detail?: string; title?: string; code?: string };
       message = body.detail || body.title || message;
       code = body.code;
+      data = body;
     } catch {
       // Non-JSON error body; keep the generic message.
     }
-    throw new ApiError(res.status, message, code);
+    throw new ApiError(res.status, message, code, data);
   }
   if (res.status === 204) return undefined as T;
+  if (res.body && res.headers.get("content-type")?.includes("application/x-ndjson")) return readLines<T>(res.body, onLine);
   return (await res.json()) as T;
 }
 

@@ -3,7 +3,8 @@
 
 import type { RunStatus } from "@/components/agents/api";
 import type { ContextRequest } from "@/shared";
-import { NetworkError, send } from "@/lib/net";
+import { request } from "@/components/settings/api";
+import { SLOW_MS } from "@/lib/net";
 
 export type ContextDocKind =
   | "product-information"
@@ -37,43 +38,7 @@ export type ContextDocsResponse = {
   research: { runId: string; status: RunStatus; error?: string | null } | null;
 };
 
-/** Error carrying the problem+json `detail` (or `title`) when the server sent one. */
-export class ProblemError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
-}
-
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  let res: Response;
-  try {
-    res = await send(url, {
-      cache: "no-store",
-      ...init,
-      headers: init?.body
-        ? { "content-type": "application/json", ...init.headers }
-        : init?.headers,
-    });
-  } catch (error) {
-    // Offline, timed out, server unreachable: status 0, with a message that says which (lib/net.ts).
-    if (error instanceof NetworkError) throw new ProblemError(0, error.message);
-    throw error;
-  }
-  if (!res.ok) {
-    let message = `Request failed (${res.status})`;
-    try {
-      const problem = (await res.json()) as { title?: string; detail?: string };
-      message = problem.detail || problem.title || message;
-    } catch {
-      // Non-JSON error body; keep the generic message.
-    }
-    throw new ProblemError(res.status, message);
-  }
-  return (await res.json()) as T;
-}
+export { ApiError as ProblemError } from "@/components/settings/api";
 
 function ws(workspaceId: string) {
   return `/api/v1/workspaces/${encodeURIComponent(workspaceId)}`;
@@ -93,6 +58,7 @@ export function createBrand(
   }>(`${ws(workspaceId)}/brands`, {
     method: "POST",
     body: JSON.stringify(body),
+    timeoutMs: SLOW_MS,
   });
 }
 
