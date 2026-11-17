@@ -19,6 +19,8 @@ describe("toneOf", () => {
     expect(toneOf("FAILED")).toBe("bad");
     expect(toneOf("RUNNING")).toBe("info");
     expect(toneOf("QUEUED")).toBe("warn");
+    expect(toneOf("ESCALATED")).toBe("warn");
+    expect(toneOf("FELL_BACK")).toBe("warn");
   });
   it("is muted for anything else", () => {
     expect(toneOf("REVIEWED")).toBe("muted");

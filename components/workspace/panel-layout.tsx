@@ -276,30 +276,25 @@ export function PanelLayout<Id extends string>({
       <p aria-live="polite" className="sr-only">
         {message}
       </p>
-      {wide && slot && createPortal(
-      <>
-        {!hintSeen && (
-          <p className="flex items-center gap-2 pr-2 text-xs text-muted-foreground">
-            Drag a panel by its header, or use its ⋯ menu, to move it. Drag the dividers or use the arrow keys to resize.
-            <button
-              type="button"
-              className="rounded px-1.5 py-1 font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              onClick={() => {
-                setHintSeen(true);
-                try {
-                  localStorage.setItem(`${storageKey}.hint`, "1");
-                } catch {
-                  // ignore
-                }
-              }}
-            >
-              Got it
-            </button>
-          </p>
-        )}
-        {layoutMenu}
-      </>,
-      slot,
+      {wide && slot && createPortal(layoutMenu, slot)}
+      {wide && !hintSeen && (
+        <p className="flex items-center gap-2 px-4 pt-3 text-xs text-muted-foreground">
+          Drag a panel by its header, or use its ⋯ menu, to move it. Drag the dividers or use the arrow keys to resize.
+          <button
+            type="button"
+            className="rounded px-1.5 py-1 font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => {
+              setHintSeen(true);
+              try {
+                localStorage.setItem(`${storageKey}.hint`, "1");
+              } catch {
+                // ignore
+              }
+            }}
+          >
+            Got it
+          </button>
+        </p>
       )}
 
       {/* Phones and small tablets: one panel at a time with tabs (Okara pattern). */}

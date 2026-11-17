@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SignOutButton } from "@/components/workspace/sign-out-item";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { PaywallDialog } from "@/components/shell/paywall-dialog";
 import { OpenWorkspaceButton } from "@/components/welcome/open-workspace-button";
 import { WelcomeFlow } from "@/components/welcome/welcome-flow";
 import { getShell } from "@/lib/server-fetch";
@@ -57,6 +58,7 @@ export default async function WelcomePage({
           </div>
         )}
       </main>
+      <PaywallDialog workspaceId={workspaceId} />
     </div>
   );
 }

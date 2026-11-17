@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 export function PageSkeleton({ header = true }: { header?: boolean }) {
   const block = "rounded-lg bg-border motion-safe:animate-pulse";
   return (
-    <div role="status" aria-label="Loading" className="flex flex-col gap-8">
+    <div role="status" className="flex flex-col gap-8">
       <span className="sr-only">Loading…</span>
       {header ? (
         <div className="flex flex-col gap-3">

@@ -16,6 +16,7 @@ function pages(dir: string, rel = ""): string[] {
 
 describe("page titles", () => {
   it("gives every shell page a title", () => {
+    expect(pages(SHELL).length).toBeGreaterThan(5);
     const missing = pages(SHELL)
       .filter((p) => !REDIRECT_ONLY.has(p))
       .filter((p) => !/export const metadata|export async function generateMetadata/.test(readFileSync(join(SHELL, p, "page.tsx"), "utf8")));
