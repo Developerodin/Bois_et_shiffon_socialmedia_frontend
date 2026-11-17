@@ -14,6 +14,7 @@ import { libraryPhotos, siteLabel, type LibraryPhoto } from "@/shared";
 import { initialSource, libraryApi, photoCount, pickUploads } from "./api";
 import { PhotoGrid, SourceSwitch, type Source } from "./photo-grid";
 import { BrandLook } from "./brand-look";
+import { PhotoFileInput, StatusLines } from "./upload-parts";
 import { useBrandLook } from "./use-brand-look";
 
 const EMPTY: Record<Source, { title: string; body: string }> = {
@@ -131,23 +132,10 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
         >
           <div className="flex flex-col gap-4">
             {canUpload ? (
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/jpeg,image/png"
-                multiple
-                className="sr-only"
-                tabIndex={-1}
-                aria-hidden="true"
-                onChange={addFiles}
-              />
+              <PhotoFileInput ref={fileRef} multiple onChange={addFiles} />
             ) : null}
             <SourceSwitch name="library-source" value={source} counts={{ website: lib.website.length, uploads: lib.uploads.length }} onChange={setPicked} />
-            {/* Always mounted so screen readers hear each change; empty lines take no height. */}
-            <div>
-              <p aria-live="polite" className="text-sm text-muted-foreground">{status}</p>
-              <p role="alert" className="text-sm text-destructive">{error}</p>
-            </div>
+            <StatusLines status={status} error={error} />
             <PhotoGrid
               mode="browse"
               photos={shown}

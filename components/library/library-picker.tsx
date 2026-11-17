@@ -9,6 +9,7 @@ import { ListSkeleton, LoadError } from "@/components/settings/shared";
 import { libraryPhotos, siteLabel, type LibraryPhoto } from "@/shared";
 import { initialSource, libraryApi, pickUploads, withFallback } from "./api";
 import { PhotoGrid, SourceSwitch, type Source } from "./photo-grid";
+import { PhotoFileInput, StatusLines } from "./upload-parts";
 import { useBrandLook } from "./use-brand-look";
 
 const EMPTY: Record<Source, { title: string; body: string }> = {
@@ -97,7 +98,7 @@ function PickerBody({ workspaceId, brandId, onOpenChange, selectedKey = null, ca
           </div>
           {canUpload ? (
             <>
-              <input ref={fileRef} type="file" accept="image/jpeg,image/png" className="sr-only" tabIndex={-1} aria-hidden="true" onChange={addFile} />
+              <PhotoFileInput ref={fileRef} onChange={addFile} />
               <Button variant="outline" disabled={uploading} onClick={() => fileRef.current?.click()}>
                 <Upload aria-hidden="true" />
                 Upload new
@@ -105,11 +106,7 @@ function PickerBody({ workspaceId, brandId, onOpenChange, selectedKey = null, ca
             </>
           ) : null}
         </div>
-        {/* Always mounted so screen readers hear each change; empty lines take no height. */}
-        <div>
-          <p aria-live="polite" className="text-sm text-muted-foreground">{status}</p>
-          <p role="alert" className="text-sm text-destructive">{error}</p>
-        </div>
+        <StatusLines status={status} error={error} />
       </DialogHeader>
 
       {!view ? (
