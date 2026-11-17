@@ -46,3 +46,8 @@ next-env.d.ts
 /e2e/.auth/
 /test-results/
 /playwright-report/
+
+# Formerly covered by the monorepo root .gitignore
+/dist/
+.superpowers/
+*.log
