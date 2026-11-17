@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { errorMessage } from "@/components/settings/api";
 import { ListSkeleton, LoadError } from "@/components/settings/shared";
-import { libraryPhotos, siteLabel } from "@/shared";
+import { libraryPhotos, siteLabel, type LibraryPhoto } from "@/shared";
 import { initialSource, libraryApi, pickUploads } from "./api";
 import { PhotoGrid, SourceSwitch, type Source } from "./photo-grid";
 import { useBrandLook } from "./use-brand-look";
@@ -24,8 +24,8 @@ type Props = {
   selectedKey?: string | null;
   canUpload: boolean;
   title?: string;
-  /** Called with the chosen photo's key; the dialog closes after. */
-  onUse: (key: string) => void;
+  /** Called with the chosen photo; the dialog closes after. */
+  onUse: (photo: LibraryPhoto) => void;
   children?: ReactNode;
 };
 
@@ -141,10 +141,10 @@ function PickerBody({ workspaceId, brandId, onOpenChange, selectedKey = null, ca
           <p className="text-muted-foreground">{selected ? "1 photo selected" : "Select a photo"}</p>
         </div>
         <Button
-          disabled={!selected || uploading}
+          disabled={!chosen || uploading}
           onClick={() => {
-            if (!selected) return;
-            onUse(selected);
+            if (!chosen) return;
+            onUse(chosen);
             onOpenChange(false);
           }}
         >
