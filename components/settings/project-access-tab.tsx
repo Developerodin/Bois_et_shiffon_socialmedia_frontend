@@ -4,13 +4,13 @@ import { useCallback, useState } from "react";
 import { FolderLock, Trash2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import { errorMessage, settingsApi } from "@/components/settings/api";
 import {
   ConfirmDialog,
   ListSkeleton,
   LoadError,
-  SectionHeader,
   formatDate,
   selectClass,
   useLoad,
@@ -59,6 +59,8 @@ export function ProjectAccessTab({ workspaceId, brandId, canManage }: Props) {
     });
   }
 
+  // Empty and error states are boxes of their own, so only the skeleton and the list go in the card.
+  const inCard = state.kind === "loading" || state.kind === "ready";
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading project access" />;
   else if (state.kind === "forbidden")
@@ -66,9 +68,9 @@ export function ProjectAccessTab({ workspaceId, brandId, canManage }: Props) {
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
   else {
     const { viaWorkspace, people, invitations } = state.data;
-    const row = "flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between";
+    const row = "flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between";
     body = (
-      <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+      <ul className="-mx-5 divide-y divide-border">
         {people.map((p) => (
           <li key={p.id} className={row}>
             <Person name={p.name} email={p.email} />
@@ -121,14 +123,17 @@ export function ProjectAccessTab({ workspaceId, brandId, canManage }: Props) {
   }
 
   return (
-    <section aria-labelledby="project-heading" className="flex flex-col gap-5">
-      <SectionHeader
-        id="project-heading"
+    <div className="flex flex-col gap-5">
+      <PageSection
+        id="project"
         title="Project access"
         description="People working on this project. Someone invited here sees only this project, with the role you pick. Workspace owners and admins reach every project."
-      />
+        className={state.kind === "ready" ? "pb-0" : undefined}
+      >
+        {inCard ? (
+          <>
       {canManage && state.kind === "ready" ? (
-        <form onSubmit={add} className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-end">
+        <form onSubmit={add} className="flex flex-col gap-2 pb-4 sm:flex-row sm:items-end">
           <label className="flex flex-1 flex-col gap-1.5 text-sm">
             <span className="text-muted-foreground">Colleague&apos;s email</span>
             <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />
@@ -146,7 +151,7 @@ export function ProjectAccessTab({ workspaceId, brandId, canManage }: Props) {
           </Button>
         </form>
       ) : null}
-      <div aria-live="polite" className="empty:hidden">
+      <div aria-live="polite" className="empty:hidden pb-4">
         {status ? (
           <p className={status.ok ? "text-sm text-success" : "text-sm text-destructive"}>
             {status.text}
@@ -155,6 +160,10 @@ export function ProjectAccessTab({ workspaceId, brandId, canManage }: Props) {
         ) : null}
       </div>
       {body}
+          </>
+        ) : null}
+      </PageSection>
+      {inCard ? null : body}
       <ConfirmDialog
         open={removing !== null}
         onOpenChange={(open) => !open && setRemoving(null)}
@@ -168,7 +177,7 @@ export function ProjectAccessTab({ workspaceId, brandId, canManage }: Props) {
           reload();
         }}
       />
-    </section>
+    </div>
   );
 }
 

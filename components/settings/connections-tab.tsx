@@ -5,6 +5,7 @@ import { CircleAlert, CircleCheck, Plug, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import {
   errorMessage,
@@ -18,7 +19,6 @@ import {
   ConfirmDialog,
   ListSkeleton,
   LoadError,
-  SectionHeader,
   formatDate,
   useLoad,
 } from "@/components/settings/shared";
@@ -88,6 +88,8 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
     }
   }
 
+  // Empty and error states are boxes of their own, so only the skeleton and the list go in the card.
+  const inCard = state.kind === "loading" || state.kind === "ready";
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading connections" />;
   else if (state.kind === "forbidden")
@@ -95,11 +97,11 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
   else
     body = (
-      <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+      <ul className="-mx-5 divide-y divide-border">
         {state.data.providers.map((p) => {
           const accounts = state.data.connections.filter((c) => c.provider === p.provider && !gone.has(c.id));
           return (
-            <li key={p.provider} className="flex flex-col gap-3 px-6 py-5">
+            <li key={p.provider} className="flex flex-col gap-3 px-5 py-4">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="font-medium">{p.label}</p>
@@ -163,12 +165,15 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
     );
 
   return (
-    <section aria-labelledby="connections-heading" className="flex flex-col gap-5">
-      <SectionHeader
-        id="connections-heading"
+    <div className="flex flex-col gap-5">
+      <PageSection
+        id="connections"
         title="Connected accounts"
         description="This brand's own channel accounts. Tokens are stored encrypted and never shown."
-      />
+        className={state.kind === "ready" ? "pb-0" : undefined}
+      >
+        {inCard ? body : null}
+      </PageSection>
       {banner && (
         <div
           role={banner.kind === "error" ? "alert" : "status"}
@@ -200,7 +205,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
           </button>
         </div>
       )}
-      {body}
+      {inCard ? null : body}
       <ConfirmDialog
         open={removing !== null}
         onOpenChange={(open) => !open && setRemoving(null)}
@@ -236,7 +241,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
           }}
         />
       ) : null}
-    </section>
+    </div>
   );
 }
 

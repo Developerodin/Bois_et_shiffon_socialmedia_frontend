@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { Crown, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageSection } from "@/components/ui/page-section";
 import {
   errorMessage,
   settingsApi,
@@ -16,7 +17,6 @@ import {
   ConfirmDialog,
   ListSkeleton,
   LoadError,
-  SectionHeader,
   formatDate,
   selectClass,
   useLoad,
@@ -114,6 +114,8 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
     );
   }
 
+  // Empty and error states are boxes of their own, so only the skeleton and the list go in the card.
+  const inCard = state.kind === "loading" || (state.kind === "ready" && state.data.members.length > 0);
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading members" />;
   else if (state.kind === "forbidden")
@@ -126,7 +128,7 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
     body = (
       <>
         {/* Desktop: table */}
-        <div className="hidden overflow-hidden rounded-2xl border border-border bg-card md:block">
+        <div className="-mx-5 hidden md:block">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-border text-xs text-muted-foreground">
               <tr>
@@ -157,9 +159,9 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
         </div>
 
         {/* Mobile: cards */}
-        <ul className="flex flex-col gap-3 md:hidden">
+        <ul className="-mx-5 divide-y divide-border md:hidden">
           {members.map((m) => (
-            <li key={m.id} className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5">
+            <li key={m.id} className="flex flex-col gap-4 px-5 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate font-medium text-foreground">{m.name ?? m.email}</p>
@@ -180,19 +182,22 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
   }
 
   return (
-    <section aria-labelledby="members-heading" className="flex flex-col gap-5">
-      <SectionHeader
-        id="members-heading"
+    <div className="flex flex-col gap-5">
+      <PageSection
+        id="members"
         title="Members"
         description="Everyone in this workspace and their workspace role. The primary owner created the workspace; only they can hand that over."
-      />
+        className={state.kind === "ready" ? "pb-0" : undefined}
+      >
+        {inCard ? body : null}
+      </PageSection>
       <p
         aria-live="polite"
         className={status?.ok ? "text-sm text-success empty:hidden" : "text-sm text-destructive empty:hidden"}
       >
         {status?.text}
       </p>
-      {body}
+      {inCard ? null : body}
       <ConfirmDialog
         open={handingOver !== null}
         onOpenChange={(open) => !open && setHandingOver(null)}
@@ -229,6 +234,6 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
           onRolesChanged();
         }}
       />
-    </section>
+    </div>
   );
 }

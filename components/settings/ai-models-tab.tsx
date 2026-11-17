@@ -5,10 +5,11 @@ import { Cpu, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import { errorMessage, settingsApi, type AiModel, type AiModelSettings, type AiTierName } from "@/components/settings/api";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ConfirmDialog, ListSkeleton, LoadError, SectionHeader, selectClass, useLoad } from "@/components/settings/shared";
+import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 
 const TIER_INFO: Record<AiTierName, string> = {
   heavy: "Writing that shapes everything else or reaches customers: strategy documents, post drafts, the check before approval.",
@@ -30,6 +31,8 @@ export function AiModelsTab() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const data = fresh ?? (state.kind === "ready" ? state.data : null);
 
+  // Empty and error states are boxes of their own, so only the skeleton and the list go in the card.
+  const inCard = state.kind === "loading" || (state.kind === "ready" && data !== null);
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading AI models" />;
   else if (state.kind === "forbidden") body = <EmptyState icon={Cpu} title="Platform admins only" description="AI models apply to every workspace, so only platform admins can change them." />;
@@ -41,7 +44,7 @@ export function AiModelsTab() {
           <h3 id="tiers-heading" className="text-sm font-medium text-foreground">
             Tiers
           </h3>
-          <ul className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
+          <ul className="-mx-5 divide-y divide-border">
             {data.tiers.map((t) => (
               <TierRow key={t.tier} tier={t} models={data.models.map((m) => m.name)} onSaved={setFresh} />
             ))}
@@ -57,11 +60,11 @@ export function AiModelsTab() {
               <Plus /> Add model
             </Button>
           </div>
-          <ul className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
+          <ul className="-mx-5 divide-y divide-border">
             {data.models.map((m) => {
               const usedBy = data.tiers.filter((t) => t.model === m.name || t.backup === m.name).map((t) => `${t.tier}${t.backup === m.name ? " backup" : ""}`);
               return (
-                <li key={m.name} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                <li key={m.name} className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
                   <div className="min-w-0">
                     <p className="truncate font-mono text-sm text-foreground">{m.name}</p>
                     <p className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
@@ -91,13 +94,16 @@ export function AiModelsTab() {
     );
 
   return (
-    <section aria-labelledby="ai-models-heading" className="flex flex-col gap-6">
-      <SectionHeader
-        id="ai-models-heading"
+    <div className="flex flex-col gap-6">
+      <PageSection
+        id="ai-models"
         title="AI models"
         description="Which model each tier uses, and what every model costs. This applies to all workspaces, within a minute. Test a model before moving a tier to it: npm run eval -w server -- --models <name>."
-      />
-      {body}
+        className="flex flex-col gap-6"
+      >
+        {inCard ? body : null}
+      </PageSection>
+      {inCard ? null : body}
       {editing ? <ModelDialog model={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={setFresh} /> : null}
       <ConfirmDialog
         open={deleting !== null}
@@ -111,7 +117,7 @@ export function AiModelsTab() {
           if (deleting) setFresh(await settingsApi.deleteAiModel(deleting));
         }}
       />
-    </section>
+    </div>
   );
 }
 
@@ -135,7 +141,7 @@ function TierRow({ tier, models, onSaved }: { tier: AiModelSettings["tiers"][num
   }
 
   return (
-    <li className="flex flex-col gap-3 p-4">
+    <li className="flex flex-col gap-3 px-5 py-4">
       <div>
         <p className="font-medium capitalize text-foreground">{tier.tier}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{TIER_INFO[tier.tier]}</p>

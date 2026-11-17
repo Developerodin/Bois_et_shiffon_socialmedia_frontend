@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import {
   errorMessage,
@@ -27,7 +28,6 @@ import {
   ConfirmDialog,
   ListSkeleton,
   LoadError,
-  SectionHeader,
   formatDate,
   selectClass,
   useLoad,
@@ -58,6 +58,8 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
   const restoreFocus = useRef<(() => void) | null>(null);
   const [revoking, setRevoking] = useState<Invitation | null>(null);
 
+  // Empty and error states are boxes of their own, so only the skeleton and the list go in the card.
+  const inCard = state.kind === "loading" || (state.kind === "ready" && state.data.length > 0);
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading invitations" />;
   else if (state.kind === "forbidden")
@@ -79,11 +81,11 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
     );
   else
     body = (
-      <ul className="overflow-hidden rounded-2xl border border-border bg-card divide-y divide-border">
+      <ul className="-mx-5 divide-y divide-border">
         {state.data.map((inv) => (
           <li
             key={inv.id}
-            className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+            className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
           >
             <div className="min-w-0">
               <p className="truncate font-medium text-foreground">{inv.email}</p>
@@ -108,12 +110,12 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
     );
 
   return (
-    <section aria-labelledby="invitations-heading" className="flex flex-col gap-5">
-      <SectionHeader
-        id="invitations-heading"
+    <div className="flex flex-col gap-5">
+      <PageSection
+        id="invitations"
         title="Invitations"
         description="People you've asked to join the workspace or one of its projects. Pending links can be revoked at any time. To invite someone to one project only, use Project access."
-        action={
+        actions={
           <Button
             onClick={() => {
               restoreFocus.current = rememberFocus("settings-panel-invitations");
@@ -123,8 +125,11 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
             <UserPlus /> Invite
           </Button>
         }
-      />
-      {body}
+        className={state.kind === "ready" ? "pb-0" : undefined}
+      >
+        {inCard ? body : null}
+      </PageSection>
+      {inCard ? null : body}
       {inviting ? (
         <InviteDialog
           workspaceId={workspaceId}
@@ -150,7 +155,7 @@ export function InvitationsTab({ workspaceId, roles }: Props) {
           reload();
         }}
       />
-    </section>
+    </div>
   );
 }
 

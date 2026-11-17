@@ -25,30 +25,6 @@ export function SystemLock() {
   );
 }
 
-export function SectionHeader({
-  id,
-  title,
-  description,
-  action,
-}: {
-  id: string;
-  title: string;
-  description: string;
-  action?: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h2 id={id} className="font-display text-xl font-medium tracking-tight">
-          {title}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
-      {action}
-    </div>
-  );
-}
-
 export function ListSkeleton({ label, rows = 3 }: { label: string; rows?: number }) {
   return (
     <div role="status" className="flex flex-col gap-3" aria-busy="true">

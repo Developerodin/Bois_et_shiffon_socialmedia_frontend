@@ -4,12 +4,12 @@ import { useCallback, useRef, useState } from "react";
 import { Pencil, Plus, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageSection } from "@/components/ui/page-section";
 import { settingsApi, type Role } from "@/components/settings/api";
 import {
   ConfirmDialog,
   ListSkeleton,
   LoadError,
-  SectionHeader,
   SystemLock,
   useLoad,
   type Load,
@@ -42,6 +42,8 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
   const [deleting, setDeleting] = useState<Role | null>(null);
   const { state, reload } = roles;
 
+  // Empty and error states are boxes of their own, so only the skeleton and the list go in the card.
+  const inCard = state.kind === "loading" || (state.kind === "ready" && state.data.length > 0);
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading roles" />;
   else if (state.kind === "forbidden")
@@ -64,11 +66,11 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
   else {
     const sorted = [...state.data].sort((a, b) => Number(b.isSystem) - Number(a.isSystem));
     body = (
-      <ul className="flex flex-col gap-3">
+      <ul className="-mx-5 divide-y divide-border">
         {sorted.map((r) => (
           <li
             key={r.id}
-            className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5"
+            className="flex flex-col gap-4 px-5 py-4"
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
@@ -138,20 +140,23 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
   }
 
   return (
-    <section aria-labelledby="roles-heading" className="flex flex-col gap-5">
-      <SectionHeader
-        id="roles-heading"
+    <div className="flex flex-col gap-5">
+      <PageSection
+        id="roles"
         title="Roles"
         description="Owners can change what any built-in role may do (except Owner, which keeps everything). Custom roles let you build your own."
-        action={
+        actions={
           manage ? (
             <Button onClick={() => setEditing("new")}>
               <Plus /> New role
             </Button>
           ) : undefined
         }
-      />
-      {body}
+        className={state.kind === "ready" ? "pb-0" : undefined}
+      >
+        {inCard ? body : null}
+      </PageSection>
+      {inCard ? null : body}
       {editing !== null ? (
         <RoleDialog
           workspaceId={workspaceId}
@@ -182,6 +187,6 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
           reload();
         }}
       />
-    </section>
+    </div>
   );
 }

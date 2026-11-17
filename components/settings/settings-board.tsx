@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { ShieldOff } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import { settingsApi } from "@/components/settings/api";
 import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { InvitationsTab } from "@/components/settings/invitations-tab";
@@ -154,14 +155,9 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
-      <div>
-        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
-          Settings
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Who works on this project and the workspace, what each role can do, who is waiting to join, and which accounts this project has connected.
-        </p>
-      </div>
+      <PageHeader title="Settings">
+        Who works on this project and the workspace, what each role can do, who is waiting to join, and which accounts this project has connected.
+      </PageHeader>
       {body}
     </div>
   );
