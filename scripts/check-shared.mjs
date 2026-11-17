@@ -7,13 +7,16 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const LOCAL = "shared";
 
+// Line endings are normalised so a git checkout with autocrlf does not change the hash.
+const lf = (p) => Buffer.from(readFileSync(p).toString("latin1").replace(/\r\n/g, "\n"), "latin1");
+
 export function hashTree(dir) {
   const files = readdirSync(dir, { withFileTypes: true, recursive: true })
     .filter((e) => e.isFile() && e.name !== ".hash")
     .map((e) => path.relative(dir, path.join(e.parentPath, e.name)).replaceAll("\\", "/"))
     .sort();
   const hash = createHash("sha256");
-  for (const f of files) hash.update(f).update("\0").update(readFileSync(path.join(dir, f))).update("\0");
+  for (const f of files) hash.update(f).update("\0").update(lf(path.join(dir, f))).update("\0");
   return hash.digest("hex");
 }
 
