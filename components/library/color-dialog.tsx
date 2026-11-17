@@ -16,24 +16,31 @@ const HUE_LABEL: Record<string, string> = {
 };
 
 type Index = number | "new";
-type Props = { colors: string[]; index: Index | null; onClose: () => void; onSave: (hexes: string[]) => Promise<void> };
+type Props = {
+  colors: string[];
+  index: Index | null;
+  onClose: () => void;
+  onSave: (hexes: string[]) => Promise<void>;
+  /** Where focus goes once the dialog closes; call preventDefault to override the return to the opener. */
+  onCloseAutoFocus?: (e: Event) => void;
+};
 
 /**
  * Change, remove or add one colour (`index: "new"`), as the phone's colour sheet. Saves the whole palette; a failed
  * save keeps the dialog open with a message, so nothing is lost silently.
  */
-export function ColorDialog({ colors, index, onClose, onSave }: Props) {
+export function ColorDialog({ colors, index, onClose, onSave, onCloseAutoFocus }: Props) {
   const [saving, setSaving] = useState(false);
   return (
     // While a save is in flight the dialog stays put (Escape, outside click and the close button do nothing).
     <Dialog open={index !== null} onOpenChange={(open) => !open && !saving && onClose()}>
       {/* Keyed: a fresh editor (and starting value) for each opening. */}
-      {index !== null ? <Editor key={String(index)} colors={colors} index={index} saving={saving} setSaving={setSaving} onClose={onClose} onSave={onSave} /> : null}
+      {index !== null ? <Editor key={String(index)} colors={colors} index={index} saving={saving} setSaving={setSaving} onClose={onClose} onSave={onSave} onCloseAutoFocus={onCloseAutoFocus} /> : null}
     </Dialog>
   );
 }
 
-function Editor({ colors, index, saving, setSaving, onClose, onSave }: Omit<Props, "index"> & { index: Index; saving: boolean; setSaving: (v: boolean) => void }) {
+function Editor({ colors, index, saving, setSaving, onClose, onSave, onCloseAutoFocus }: Omit<Props, "index"> & { index: Index; saving: boolean; setSaving: (v: boolean) => void }) {
   const [text, setText] = useState(index === "new" ? "#" : colors[index]);
   const [hue, setHue] = useState(() => nearestHue(normalizeHex(text)));
   const [error, setError] = useState("");
@@ -62,7 +69,7 @@ function Editor({ colors, index, saving, setSaving, onClose, onSave }: Omit<Prop
 
   const hueLabel = HUE_LABEL[HUES[hue].key];
   return (
-    <DialogContent aria-describedby={undefined}>
+    <DialogContent aria-describedby={undefined} onCloseAutoFocus={onCloseAutoFocus}>
       <DialogHeader>
         <DialogTitle>{index === "new" ? "Add colour" : "Edit colour"}</DialogTitle>
       </DialogHeader>

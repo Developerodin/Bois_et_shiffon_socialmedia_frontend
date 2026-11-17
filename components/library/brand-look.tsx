@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
@@ -27,9 +27,38 @@ export function BrandLook({ workspaceId, brandId, view, canEdit, set }: Props) {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const addRef = useRef<HTMLButtonElement>(null);
+  // The button that opened the dialog, and whether the last save dropped a colour (its swatch then shows another).
+  const opener = useRef<Element | null>(null);
+  const removed = useRef(false);
+
+  const openEditor = (i: number | "new") => {
+    opener.current = document.activeElement;
+    removed.current = false;
+    setEditing(i);
+  };
+
+  async function saveColors(hexes: string[]) {
+    set(await libraryApi.edit(workspaceId, brandId, { colors: hexes }));
+    removed.current = hexes.length < colors.length;
+  }
+
+  // Escape, Cancel and an edit return focus to the opening swatch (Radix's default). After a remove, or when the
+  // opener is gone (the palette just filled up, so "Add colour" left), land on "Add colour" or the section heading.
+  function focusAfterClose(e: Event) {
+    if (!removed.current && opener.current?.isConnected) return;
+    e.preventDefault();
+    if (addRef.current) addRef.current.focus();
+    else {
+      const heading = document.getElementById("palette-h");
+      heading?.setAttribute("tabindex", "-1");
+      heading?.focus();
+    }
+  }
 
   const toggle = (tone: Tone) => {
     setStatus("");
+    setError("");
     setPicked(tones.includes(tone) ? tones.filter((x) => x !== tone) : [...tones, tone]);
   };
 
@@ -56,7 +85,7 @@ export function BrandLook({ workspaceId, brandId, view, canEdit, set }: Props) {
         title="Brand colour palette"
         actions={
           canEdit && view.assets && colors.length < MAX_COLORS ? (
-            <Button variant="outline" onClick={() => setEditing("new")}>
+            <Button ref={addRef} variant="outline" onClick={() => openEditor("new")}>
               <Plus aria-hidden="true" />
               Add colour
             </Button>
@@ -78,12 +107,13 @@ export function BrandLook({ workspaceId, brandId, view, canEdit, set }: Props) {
                 );
                 const box = "flex min-w-20 flex-col items-center gap-2 rounded-2xl border border-border px-3 py-3";
                 return (
-                  <li key={hex}>
+                  // Keyed by place, so an edited swatch stays the same element and focus can return to it.
+                  <li key={i}>
                     {canEdit ? (
                       <button
                         type="button"
                         aria-label={`Edit colour ${hex}`}
-                        onClick={() => setEditing(i)}
+                        onClick={() => openEditor(i)}
                         className={`${box} transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
                       >
                         {swatch}
@@ -111,7 +141,8 @@ export function BrandLook({ workspaceId, brandId, view, canEdit, set }: Props) {
           colors={colors}
           index={editing}
           onClose={() => setEditing(null)}
-          onSave={async (hexes) => set(await libraryApi.edit(workspaceId, brandId, { colors: hexes }))}
+          onSave={saveColors}
+          onCloseAutoFocus={focusAfterClose}
         />
       </PageSection>
 
