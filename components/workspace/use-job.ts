@@ -12,6 +12,7 @@ export const JOB_INTERVALS = {
   photoshoot: [[120_000, 5_000], [600_000, 10_000], [Infinity, 30_000]],
   photoshootList: [[Infinity, 10_000]],
   preview: [[Infinity, 10_000]],
+  reelList: [[Infinity, 10_000]],
   storyRender: [[60_000, 3_000], [Infinity, 10_000]],
   // Publishing gives up after 10 minutes: the caller passes capMs: 600_000.
   publishing: [[Infinity, 5_000]],
