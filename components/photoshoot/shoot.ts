@@ -13,6 +13,8 @@ import {
 import type { JobStep } from "@/components/ui/job-progress";
 import { stale } from "@/lib/signed-links";
 
+export { linksFetchedAt } from "@/lib/signed-links";
+
 /** The studio's choices, before they become a request. Pure: no React. */
 export type Scene = (typeof SCENES)[number];
 export type Pose = (typeof POSES)[number];
@@ -80,14 +82,6 @@ export const runningBesides = (shoots: readonly Shoot[], trackedId: string | nul
 export function countByKind(shoots: readonly Shoot[]): { all: number; product: number; fashion: number } {
   const product = shoots.filter((s) => s.kind === "product").length;
   return { all: shoots.length, product, fashion: shoots.length - product };
-}
-
-/**
- * When the links keepLinks returned were fetched: a kept result mixes `prev`'s links with `next`'s (new shots, a
- * download link `prev` lacked), so it is as old as the older of the two answers; otherwise as old as `next`.
- */
-export function linksFetchedAt(prevFetchedAt: number | undefined, fetchedAt: number, now = Date.now()): number {
-  return prevFetchedAt !== undefined && !stale(prevFetchedAt, now) ? Math.min(prevFetchedAt, fetchedAt) : fetchedAt;
 }
 
 /**
