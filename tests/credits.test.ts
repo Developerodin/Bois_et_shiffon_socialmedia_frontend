@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { paywallCopy } from "@/components/shell/paywall-dialog";
-import { agentRunPrice, creditsLabel, creditsText, shootPrice, withPrice, workspaceIdOf, type Subscription } from "@/lib/plan-credits";
+import { agentRunPrice, creditsLabel, creditsText, shootPrice, shootPriceBlocker, withPrice, workspaceIdOf, type Subscription } from "@/lib/plan-credits";
 
 const bare: Subscription = { plan: null, unlimited: false, plans: [] };
 const prices = { manualRun: 5, siteAudit: 10, storyWrite: 2, reelPerSecond: 1, presenterPerSecond: 3 };
@@ -73,5 +73,15 @@ describe("paywallCopy", () => {
   });
   it("uses the plan refusal's title", () => {
     expect(paywallCopy({ planRequired: true, title: "Reels need a plan" }).title).toBe("Reels need a plan");
+  });
+});
+
+describe("shootPriceBlocker", () => {
+  it("holds a paid press until the plan is read, so its button always shows the price", () => {
+    expect(shootPriceBlocker(null, false)).toBe("Reading your plan's prices…");
+    expect(shootPriceBlocker(null, true)).toBe("Couldn't read your plan's prices.");
+    expect(shootPriceBlocker(bare, false)).toBeNull();
+    // Unlimited: no price to show, and nothing to wait for.
+    expect(shootPriceBlocker({ ...bare, unlimited: true }, true)).toBeNull();
   });
 });

@@ -75,6 +75,15 @@ export function shootPrice(sub: Subscription | null, tier: ShootTier): number | 
   return SHOOT_CREDITS[tier];
 }
 
+/**
+ * Why a photoshoot can't be pressed yet: its button must show what it spends, so it waits for the plan to be read
+ * (`failed`: the last read failed). null once read, an unlimited plan included.
+ */
+export function shootPriceBlocker(sub: Subscription | null, failed: boolean): string | null {
+  if (sub) return null;
+  return failed ? "Couldn't read your plan's prices." : "Reading your plan's prices…";
+}
+
 /** Credits a manual run of `agentKey` costs; null (show no price) when the subscription isn't read, the server is too old, or the workspace is unlimited. */
 export function agentRunPrice(sub: Subscription | null, agentKey: string): number | null {
   if (!sub || sub.unlimited || !sub.prices) return null;

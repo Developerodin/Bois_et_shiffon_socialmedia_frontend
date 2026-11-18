@@ -31,7 +31,7 @@ export function CurrentShoot({ workspaceId, brandId, shootId, onRetry, pressing,
 }) {
   const job = useShoot(workspaceId, brandId, shootId);
   const { data: shoot, failed, status } = job;
-  const priceOf = useShootPrices(workspaceId);
+  const { priceOf, blocker: priceBlocker } = useShootPrices(workspaceId);
   const steps = useMemo(() => shootSteps(shoot), [shoot]);
 
   // The refund puts credits back: the chip in the top bar reads them again.
@@ -90,9 +90,16 @@ export function CurrentShoot({ workspaceId, brandId, shootId, onRetry, pressing,
           <p className="text-sm text-muted-foreground">{refundLine(shoot.credits)}</p>
           {onRetry ? (
             <>
-              <Button type="button" variant="secondary" disabled={pressing} onClick={() => onRetry(retryRequest(shoot))}>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={pressing || priceBlocker !== null}
+                aria-describedby={priceBlocker ? "retry-blocker" : undefined}
+                onClick={() => onRetry(retryRequest(shoot))}
+              >
                 {withPrice("Try again", priceOf(shoot.input.tier))}
               </Button>
+              {priceBlocker ? <p id="retry-blocker" className="text-sm text-muted-foreground">{priceBlocker}</p> : null}
               <p role="alert" className="text-sm text-destructive empty:hidden">{retryError}</p>
             </>
           ) : null}

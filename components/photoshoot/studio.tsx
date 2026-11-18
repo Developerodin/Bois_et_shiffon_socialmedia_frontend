@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { useShootPrices } from "@/components/shell/use-plan-credits";
-import { fetchShared, putShared, sharedResponse } from "@/components/workspace/use-job";
+import { fetchShared, putShared, sharedAt, sharedResponse, stale } from "@/components/workspace/use-job";
 import { navFor } from "@/lib/nav";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { shootUrl, shootsUrl } from "./api";
@@ -30,8 +30,9 @@ function showCreated(w: string, b: string, shoot: Shoot) {
   putShared(shootUrl(w, b, shoot.id), { shoot });
   const list = shootsUrl(w, b);
   const old = sharedResponse(list) as { shoots: Shoot[] } | undefined;
-  // No list read yet: read it now rather than put a list of one; a read already out may predate the shoot.
-  if (old) putShared(list, { shoots: prependShoot(old.shoots, shoot) });
+  // No list read yet, or one whose links have expired (putting it would date them now): read it again instead.
+  // A read already out may predate the shoot, so this one waits for it and goes after.
+  if (old && !stale(sharedAt(list))) putShared(list, { shoots: prependShoot(old.shoots, shoot) });
   else void fetchShared(list, true).catch(() => undefined);
 }
 
@@ -65,10 +66,11 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
       alive.current = false;
     };
   }, []);
-  const priceOf = useShootPrices(workspaceId);
+  const prices = useShootPrices(workspaceId);
 
   const setup = kind === "product" ? product : fashion;
-  const blocker = generateBlocker(kind, setup);
+  // The setup's reason first; then the plan's prices, so the button always says what it spends.
+  const blocker = generateBlocker(kind, setup) ?? prices.blocker;
 
   async function press(r: ShootRequest, from: "generate" | "retry") {
     if (pressingRef.current) return;
@@ -130,9 +132,14 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
                     }}
                   >
                     {pressing ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}
-                    {withPrice("Generate photoshoot", priceOf(setup.tier))}
+                    {withPrice("Generate photoshoot", prices.priceOf(setup.tier))}
                   </Button>
                   {blocker ? <p id="generate-blocker" className="text-sm text-muted-foreground">{blocker}</p> : null}
+                  {blocker !== null && blocker === prices.blocker && prices.failed ? (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => void prices.reload()}>
+                      Read prices again
+                    </Button>
+                  ) : null}
                   <p role="alert" className="text-sm text-destructive empty:hidden">{error?.from === "generate" ? error.text : ""}</p>
                 </div>
               </div>

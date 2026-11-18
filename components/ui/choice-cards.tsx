@@ -7,7 +7,8 @@ const COLUMNS = { 2: "grid-cols-2", 3: "grid-cols-1 sm:grid-cols-3", 4: "grid-co
 
 /**
  * One choice from a few, as cards with a title, an optional description and an optional meta line (a price, a ratio).
- * Native radios in labels: arrow keys move, one tab stop per group. Selected: a ring and a check.
+ * Native radios in labels: arrow keys move, one tab stop per group. Selected: a primary border, a tint and a check;
+ * the ring is for keyboard focus only (primary and ring are one colour, and focus moves with the selection).
  */
 export function ChoiceCards<T extends string>({ legend, name, value, onChange, options, columns = 3 }: {
   legend: string;
@@ -25,7 +26,7 @@ export function ChoiceCards<T extends string>({ legend, name, value, onChange, o
         {options.map((o) => (
           <label
             key={o.value}
-            className="relative flex cursor-pointer flex-col gap-1 rounded-xl border border-border bg-card px-4 py-3 pr-9 text-sm transition-colors ring-offset-2 ring-offset-background hover:bg-muted has-[:checked]:border-primary has-[:checked]:ring-2 has-[:checked]:ring-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
+            className="relative flex cursor-pointer flex-col gap-1 rounded-xl border border-border bg-card px-4 py-3 pr-9 text-sm transition-colors ring-offset-2 ring-offset-background hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
           >
             <input type="radio" name={name} value={o.value} checked={value === o.value} onChange={() => onChange(o.value)} className="peer sr-only" />
             <span className="font-medium">{o.title}</span>

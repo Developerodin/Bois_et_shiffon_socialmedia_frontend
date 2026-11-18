@@ -78,7 +78,7 @@ export function SourceRow({ workspaceId, brandId, canUpload, label, required = f
 
 /** Quality: the four tiers with what each costs here (no price on an unlimited workspace). */
 export function TierChoice({ workspaceId, name, value, onChange }: { workspaceId: string; name: string; value: ShootTier; onChange: (t: ShootTier) => void }) {
-  const priceOf = useShootPrices(workspaceId);
+  const { priceOf } = useShootPrices(workspaceId);
   const options = SHOOT_TIER_IDS.map((t) => {
     const price = priceOf(t);
     return { value: t, title: LABELS.tiers[t].name, description: LABELS.tiers[t].desc, meta: price ? creditsText(price) : undefined };

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 import type { ShootTier } from "@/shared";
-import { agentRunPrice, loadPlanCredits, onPlanCredits, planCredits, shootPrice, type PlanCredits } from "@/lib/plan-credits";
+import { agentRunPrice, loadPlanCredits, onPlanCredits, planCredits, shootPrice, shootPriceBlocker, type PlanCredits } from "@/lib/plan-credits";
 
 const EMPTY: PlanCredits = planCredits("");
 
@@ -47,8 +47,13 @@ export function useRunPrice(workspaceId: string | null, agentKey: string): numbe
   return agentRunPrice(useEntry(workspaceId).entry.subscription, agentKey);
 }
 
-/** What a new photoshoot on each tier costs in this workspace; null means show no price. */
-export function useShootPrices(workspaceId: string | null): (tier: ShootTier) => number | null {
-  const sub = useEntry(workspaceId).entry.subscription;
-  return useCallback((tier: ShootTier) => shootPrice(sub, tier), [sub]);
+/**
+ * What a new photoshoot on each tier costs in this workspace (null: show no price), and why a press must wait
+ * (`blocker`: the plan isn't read yet; `reload` reads it again).
+ */
+export function useShootPrices(workspaceId: string | null) {
+  const { entry, reload } = useEntry(workspaceId);
+  const sub = entry.subscription;
+  const priceOf = useCallback((tier: ShootTier) => shootPrice(sub, tier), [sub]);
+  return { priceOf, blocker: shootPriceBlocker(sub, entry.failed), failed: entry.failed, reload };
 }
