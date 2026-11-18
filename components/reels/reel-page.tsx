@@ -12,6 +12,7 @@ import { STEP_LABELS } from "./labels";
 import { PlanStep, usePlanChat } from "./plan-step";
 import { PhotosStep } from "./photos-step";
 import { PresenterStep } from "./presenter-step";
+import { ScriptStep } from "./script-step";
 import { useReelSave } from "./use-reel-save";
 import { BUILT_STEPS, stepFrom, stepState } from "./reel";
 import { StoryboardStep } from "./storyboard-step";
@@ -53,7 +54,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
   const { data: detail, failed, status, reload } = useReel(workspaceId, brandId, reelId);
   const { data: options } = useReelOptions(workspaceId, brandId);
   const chat = usePlanChat(workspaceId, brandId, reelId);
-  // One save lock for the whole page: the steps that edit the plan (Photos, Script) take it from here (Tasks 6-7 pass it down).
+  // One save lock for the whole page: the steps that edit the plan (Photos, Script) take it from here.
   const save = useReelSave(workspaceId, brandId, reelId);
   const step = stepFrom(stepParam, detail);
   const [scene, setScene] = useState(0);
@@ -111,6 +112,9 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
           ) : null}
           {step === "photos" ? (
             <PhotosStep workspaceId={workspaceId} brandId={brandId} detail={detail} canCreate={canCreate} save={save} chatBusy={chat.stream.sending} />
+          ) : null}
+          {step === "script" ? (
+            <ScriptStep workspaceId={workspaceId} brandId={brandId} detail={detail} canCreate={canCreate} save={save} chatBusy={chat.stream.sending} />
           ) : null}
           {step === "storyboard" ? (
             <StoryboardStep photosHref={stepHref("photos")} detail={detail} options={options} current={index} onSelect={(i) => { setScene(i); setWatching(false); }} onWatch={() => setWatching(true)} />

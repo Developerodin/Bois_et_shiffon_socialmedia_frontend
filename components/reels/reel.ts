@@ -1,12 +1,12 @@
-import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, wordCount, type ReelDetail, type ReelOptions, type ReelPlan, type ReelSummary } from "@/shared";
+import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, wordCount, type ReelDetail, type ReelOptions, type ReelPlan, type ReelScene, type ReelSummary } from "@/shared";
 import { stale } from "@/lib/signed-links";
 import { starterProduct } from "./labels";
 
 /** The reel page's steps, in order (spec §5.3). Pure: no React. */
 export const REEL_STEPS = ["plan", "presenter", "photos", "script", "storyboard", "video", "review", "publish"] as const;
 export type ReelStep = (typeof REEL_STEPS)[number];
-// 3b adds script; 3c adds video, review, publish.
-export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "storyboard"];
+// 3c adds video, review, publish.
+export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "script", "storyboard"];
 
 /** Whether the reel's latest render is running: the shared rule (reelStage), applied to the detail's newest render. */
 export const rendering = (d: ReelDetail): boolean => reelStage({ render: d.renders[0] ?? null, videoUrl: d.videoUrl }) === "processing";
@@ -36,6 +36,7 @@ export function stepFrom(param: unknown, d: ReelDetail | null): ReelStep {
 export function stepState(step: ReelStep, d: ReelDetail | null): string {
   if (step === "plan") return d?.plan ? "Done" : "None";
   if (step === "presenter") return !d?.plan ? "None" : d.plan.presenter === "none" ? "No presenter" : "Done";
+  if (step === "script") return d?.plan ? "Done" : "None";
   if (step !== "storyboard" && step !== "photos") return "";
   if (!d?.plan) return "None";
   if (d.plan.scenes.some((s) => s.standIn)) return "Needs a photo";
@@ -148,7 +149,24 @@ export function slotStandIns(keys: readonly string[], plan: ReelPlan): boolean[]
   return keys.map((k) => standIns.has(k));
 }
 
-/** After a save the server refused as changed (409) and the reel was re-read: the edit restarts from the re-read version, keys kept, so "save again" works. Any other time, or another scene count, the edit is returned as it was. */
-export function adoptRefusedVersion<E extends { version: number; keys: readonly string[] }>(edit: E, refused: boolean, version: number, scenes: number): E {
-  return refused && edit.keys.length === scenes && edit.version !== version ? { ...edit, version } : edit;
+/** After a save the server refused as changed (409) and the reel was re-read: the edit restarts from the re-read version, its items kept, so "save again" works. Any other time, or another scene count, the edit is returned as it was. */
+export function adoptRefusedVersion<E extends { version: number; items: readonly unknown[] }>(edit: E, refused: boolean, version: number, scenes: number): E {
+  return refused && edit.items.length === scenes && edit.version !== version ? { ...edit, version } : edit;
+}
+
+/** Per scene, whether its take still goes with its text: the server keeps a take only on an exact match with the trimmed saved text. */
+export const recordedScenes = (scenes: readonly ReelScene[], texts: readonly string[]): boolean[] =>
+  scenes.map((s, i) => !!s.recordingId && (texts[i] ?? "").trim() === s.voiceText);
+
+/** One line per scene whose take the server dropped on a save (scene numbers, 1-based). */
+export const droppedRecordings = (dropped: readonly number[] | undefined): string[] =>
+  (dropped ?? []).map((n) => `Scene ${n}'s recording was removed: its text changed. Record it again if you want.`);
+
+/** A voice sample plays only from a secure link; blob: is for a take the person just made. */
+export const playableSample = (url: string): boolean => /^(https|blob):/i.test(url);
+
+/** What pressing a sample's button does: the playing one stops, another starts, a link that isn't playable is refused. */
+export function sampleAction(playing: string | null, id: string, url: string): "stop" | "play" | "refuse" {
+  if (playing === id) return "stop";
+  return playableSample(url) ? "play" : "refuse";
 }

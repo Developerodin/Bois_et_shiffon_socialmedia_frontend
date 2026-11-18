@@ -5,7 +5,7 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, adoptRefusedVersion, countByStage, slotStandIns, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { BUILT_STEPS, adoptRefusedVersion, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
@@ -44,7 +44,7 @@ describe("defaultStep", () => {
 
 describe("reachable and stepFrom", () => {
   it("keeps a built step, else storyboard with a plan, else plan", () => {
-    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "storyboard"]);
+    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "script", "storyboard"]);
     expect(reachable("presenter", detail())).toBe("presenter");
     expect(reachable("photos", detail())).toBe("photos");
     expect(reachable("plan", detail())).toBe("plan");
@@ -83,10 +83,41 @@ describe("stepState photos", () => {
   });
 });
 
+describe("stepState script", () => {
+  it("is None without a plan, else Done", () => {
+    expect(stepState("script", detail({ plan: null }))).toBe("None");
+    expect(stepState("script", detail())).toBe("Done");
+  });
+});
+
+describe("script helpers", () => {
+  const scenes = [{ ...plan.scenes[0], voiceText: "Hello", recordingId: "t1" }, { ...plan.scenes[0], voiceText: "Bye" }];
+  it("recordedScenes keeps a take only while the trimmed text matches", () => {
+    expect(recordedScenes(scenes, [" Hello ", "Bye"])).toEqual([true, false]);
+    expect(recordedScenes(scenes, ["Hello!", "Bye"])).toEqual([false, false]);
+  });
+  it("droppedRecordings gives one line per scene", () => {
+    expect(droppedRecordings(undefined)).toEqual([]);
+    expect(droppedRecordings([2, 3])).toEqual([
+      "Scene 2's recording was removed: its text changed. Record it again if you want.",
+      "Scene 3's recording was removed: its text changed. Record it again if you want.",
+    ]);
+  });
+  it("samples play only from https: or blob: links; the playing one stops", () => {
+    expect(playableSample("https://x/a.mp3")).toBe(true);
+    expect(playableSample("blob:https://x/1")).toBe(true);
+    expect(playableSample("http://x/a.mp3")).toBe(false);
+    expect(playableSample("javascript:alert(1)")).toBe(false);
+    expect(sampleAction("a", "a", "http://x")).toBe("stop");
+    expect(sampleAction("a", "b", "https://x")).toBe("play");
+    expect(sampleAction(null, "b", "data:audio/mp3;base64,AA")).toBe("refuse");
+  });
+});
+
 describe("adoptRefusedVersion", () => {
-  const edit = { version: 3, keys: ["a", "b"] };
+  const edit = { version: 3, items: ["a", "b"] };
   it("takes the re-read version only after a refusal with the same scene count", () => {
-    expect(adoptRefusedVersion(edit, true, 5, 2)).toEqual({ version: 5, keys: ["a", "b"] });
+    expect(adoptRefusedVersion(edit, true, 5, 2)).toEqual({ version: 5, items: ["a", "b"] });
     expect(adoptRefusedVersion(edit, false, 5, 2)).toBe(edit);
     expect(adoptRefusedVersion(edit, true, 5, 3)).toBe(edit);
     expect(adoptRefusedVersion(edit, true, 3, 2)).toBe(edit);
