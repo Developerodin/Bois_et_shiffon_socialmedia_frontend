@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { LIBRARY_FILTERS, type CloningInfo, type LibraryVoice, type ReelVoiceOption } from "@/shared";
 import { ApiError } from "@/components/settings/api";
-import { GENDER_LABELS, LIBRARY_LABELS, LIBRARY_TITLES, TRAIT_TITLES, canManageClone, cloneRetry, languageName, libraryQuery, mergeLibraryPage, readingLanguage } from "@/components/reels/voices";
+import { GENDER_LABELS, LIBRARY_LABELS, LIBRARY_TITLES, TRAIT_TITLES, canManageClone, cloneRetry, defaultLibraryLanguage, isAbort, languageName, libraryNarrowed, libraryQuery, mergeLibraryPage, readingLanguage } from "@/components/reels/voices";
 
 const lv = (id: string) => ({ id }) as LibraryVoice;
 const voice = (over: Partial<ReelVoiceOption>): ReelVoiceOption => ({ id: "v", name: "V", gender: "clone", sampleUrl: null, clone: true, mine: false, ...over });
@@ -14,6 +14,33 @@ describe("libraryQuery", () => {
 });
 describe("mergeLibraryPage", () => {
   it("appends unseen ids", () => expect(mergeLibraryPage([lv("a")], [lv("a"), lv("b")]).map((v) => v.id)).toEqual(["a", "b"]));
+});
+describe("mergeLibraryPage within the page", () => {
+  it("lists a voice once even when the new page repeats it", () => expect(mergeLibraryPage([lv("a")], [lv("b"), lv("b"), lv("a")]).map((v) => v.id)).toEqual(["a", "b"]));
+});
+describe("defaultLibraryLanguage", () => {
+  it("uses the reel's base language when the library has it, else Any", () => {
+    expect(defaultLibraryLanguage("pt-BR")).toBe("pt");
+    expect(defaultLibraryLanguage("fr")).toBe("fr");
+    expect(defaultLibraryLanguage("ja")).toBe("");
+    expect(defaultLibraryLanguage(undefined)).toBe("");
+  });
+});
+describe("libraryNarrowed", () => {
+  const base = { language: "fr", gender: "", age: "", useCase: "", search: "" };
+  it("is false at the start and true once anything differs", () => {
+    expect(libraryNarrowed(base, "fr")).toBe(false);
+    expect(libraryNarrowed({ ...base, language: "" }, "fr")).toBe(true);
+    expect(libraryNarrowed({ ...base, search: "x" }, "fr")).toBe(true);
+    expect(libraryNarrowed({ ...base, language: "" }, "")).toBe(false);
+  });
+});
+describe("isAbort", () => {
+  it("is true only for an AbortError", () => {
+    expect(isAbort(new DOMException("x", "AbortError"))).toBe(true);
+    expect(isAbort(new Error("x"))).toBe(false);
+    expect(isAbort(new ApiError(0, "x"))).toBe(false);
+  });
 });
 describe("cloneRetry", () => {
   it("reuses the take only when there was no answer or it is still making", () => {

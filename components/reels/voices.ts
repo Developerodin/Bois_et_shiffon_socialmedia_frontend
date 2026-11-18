@@ -40,11 +40,25 @@ export function libraryQuery(f: LibraryFilters): string {
   return q.toString();
 }
 
-/** `prev`, then those of `next` whose id isn't in it yet (pages can overlap). */
+/** `prev`, then those of `next` whose id isn't in it yet, nor earlier in `next` (pages can overlap). */
 export function mergeLibraryPage(prev: LibraryVoice[], next: LibraryVoice[]): LibraryVoice[] {
   const seen = new Set(prev.map((v) => v.id));
-  return [...prev, ...next.filter((v) => !seen.has(v.id))];
+  return [...prev, ...next.filter((v) => !seen.has(v.id) && seen.add(v.id))];
 }
+
+/** The library's language to start on: the reel's base language ("pt-BR" gives "pt") when the library has it, else "" (Any). */
+export function defaultLibraryLanguage(planLanguage: string | undefined): string {
+  const base = planLanguage?.split("-")[0] ?? "";
+  return (LIBRARY_FILTERS.language as readonly string[]).includes(base) ? base : "";
+}
+
+/** Whether the library's filters are anything beyond their start (the default language, nothing else): then Clear shows. */
+export function libraryNarrowed(f: { language: string; gender: string; age: string; useCase: string; search: string }, defaultLanguage: string): boolean {
+  return !!(f.gender || f.age || f.useCase || f.search || f.language !== defaultLanguage);
+}
+
+/** An aborted request: `request` rethrows it as is, and it is never a failure to show. */
+export const isAbort = (e: unknown): boolean => e instanceof DOMException && e.name === "AbortError";
 
 /**
  * Whether a failed clone press may reuse its recording take. Only when there was no answer (status 0) or the server says

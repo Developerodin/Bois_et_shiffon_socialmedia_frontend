@@ -1,6 +1,7 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
+import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { VOICE_TEXT_MAX, type ReelDetail } from "@/shared";
 import { Button } from "@/components/ui/button";
@@ -13,11 +14,13 @@ import { useVoices } from "./use-reels";
 import { VoiceRow } from "./voice-row";
 import { GENDER_LABELS } from "./voices";
 
+const VoicesSheet = dynamic(() => import("./voices-sheet").then((m) => m.VoicesSheet), { ssr: false });
+
 /**
  * The Script & voice step: the reel's voice, one text box per scene, and each scene's own recording. Text edits stay
  * here until Save script, which sends one save with the version the edit started from and trimmed texts (the server
  * keeps a take only when its text still matches). Memoised: the page passes it stable props, so stream frames skip it.
- * The Voices sheet and the record dialog (Tasks 8-9) join this step with their own buttons.
+ * Change voice opens the Voices sheet (mounted on first open, then kept). The record and clone dialogs (Task 9) join with their own buttons.
  */
 export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detail, canCreate, save, chatBusy }: {
   workspaceId: string;
@@ -32,6 +35,10 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
   const voices = useVoices(workspaceId, brandId).data;
   const sample = useSample();
   const [dropped, setDropped] = useState<string[]>([]);
+  const [voicesMounted, setVoicesMounted] = useState(false);
+  const [voicesOpen, setVoicesOpen] = useState(false);
+  // Task 9 opens the clone dialog here; the sheet shows no Clone button until it exists.
+  const openClone = useCallback(() => undefined, []);
 
   if (!plan) return <p className="text-sm text-muted-foreground">Plan a reel first: the script belongs to its scenes.</p>;
 
@@ -83,8 +90,14 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
           sampleUrl={voice?.sampleUrl ?? null}
           playing={!!voice && sample.playing === voice.id}
           onToggle={() => { if (voice?.sampleUrl) sample.toggle(voice.id, voice.sampleUrl); }}
+          action={editable ? (
+            <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => { setVoicesMounted(true); setVoicesOpen(true); }}>Change voice</Button>
+          ) : null}
         />
       </div>
+      {voicesMounted ? (
+        <VoicesSheet workspaceId={workspaceId} brandId={brandId} detail={detail} save={save} open={voicesOpen} onOpenChange={setVoicesOpen} onClone={openClone} />
+      ) : null}
 
       <ol className="flex flex-col gap-3">
         {plan.scenes.map((s, i) => {
