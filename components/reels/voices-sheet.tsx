@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Loader2, X } from "lucide-react";
-import { LIBRARY_FILTERS, NAME_MAX, type LibraryFilters, type LibraryVoice, type ReelDetail, type ReelVoiceOption } from "@/shared";
+import { LIBRARY_FILTERS, NAME_MAX, type LibraryVoice, type ReelDetail, type ReelVoiceOption } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
