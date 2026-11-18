@@ -107,3 +107,6 @@ const SHOOT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
 
 /** Whether a URL value (`?shoot=`, `[id]`) can be a shoot id. */
 export const isShootId = (s: unknown): s is string => typeof s === "string" && SHOOT_ID.test(s);
+
+/** The list with `shoot` first (a shoot just created), any older copy of it dropped. */
+export const prependShoot = (shoots: readonly Shoot[], shoot: Shoot): Shoot[] => [shoot, ...shoots.filter((s) => s.id !== shoot.id)];

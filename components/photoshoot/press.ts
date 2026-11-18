@@ -1,5 +1,6 @@
 import type { Shoot, ShootRequest } from "@/shared";
-import { ApiError } from "@/components/settings/api";
+import { ApiError, errorMessage } from "@/components/settings/api";
+import { refusalOf } from "@/lib/paywall";
 import { requestId } from "@/lib/net";
 import { photoshootApi } from "./api";
 
@@ -41,4 +42,10 @@ export function pressShoot(w: string, b: string, r: ShootRequest): Promise<Shoot
   let press = pressers.get(scope);
   if (!press) pressers.set(scope, (press = makePresser((req, id) => photoshootApi.create(w, b, req, id))));
   return press(r);
+}
+
+/** What to say when a press fails: null for a 402 that opened the paywall (it says it), else the server's sentence or a generic one. */
+export function pressErrorText(e: unknown): string | null {
+  if (e instanceof ApiError && e.status === 402 && refusalOf(e.data)) return null;
+  return errorMessage(e);
 }

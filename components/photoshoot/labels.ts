@@ -1,4 +1,5 @@
-import { MODEL_NAMES, MODELS, type ShootRequest, type ShootTier } from "@/shared";
+import { MODEL_NAMES, MODELS, type Shoot, type ShootRequest, type ShootTier } from "@/shared";
+import { creditsText } from "@/lib/plan-credits";
 import type { Background, FashionRatio, Model, Pose, Scene } from "./shoot";
 
 /** The phone's English labels (mobile src/i18n/locales/en/photoshoot.json). */
@@ -30,3 +31,15 @@ export const shootTitle = (input: ShootRequest): string =>
 /** How long the wait is, by tier. */
 export const waitLine = (tier: ShootTier): string =>
   tier === "ultra" ? "Four photos at Ultra quality, usually ready in a few minutes." : "Four photos, usually ready in about a minute.";
+
+/** A shoot's status pill: "Processing · 4 credits", "Ready", "Didn't work · 4 credits refunded". No amount when nothing was charged. */
+export function shootBadge(shoot: Pick<Shoot, "status" | "credits">): string {
+  const n = shoot.credits;
+  if (shoot.status === "DONE") return "Ready";
+  if (shoot.status === "RUNNING") return n > 0 ? `Processing · ${creditsText(n)}` : "Processing";
+  return n > 0 ? `Didn't work · ${creditsText(n)} refunded` : "Didn't work";
+}
+
+/** Under "This photoshoot didn't work": the refund, then what to do. */
+export const refundLine = (n: number): string =>
+  `${n > 0 ? `Your ${creditsText(n)} ${n === 1 ? "is" : "are"} back. ` : ""}Try again, or pick another quality.`;

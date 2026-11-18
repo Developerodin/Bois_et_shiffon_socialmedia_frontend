@@ -3,7 +3,7 @@
  * best practices on every page at desktop, 375px, 320px and light theme, plus horizontal overflow,
  * tap targets under 24px and keyboard focus visibility. Run: npm run audit:ui --prefix .
  * (needs SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD).
- * Flagged pages (/library) render only when the app runs with WEB_FEATURES containing their flag (library);
+ * Flagged pages (/library, /photoshoot) render only when the app runs with WEB_FEATURES containing their flag (library, photoshoot);
  * otherwise they are a 404.
  * The 320px pass and the `offscreen` count exist because content pushed past the right edge was
  * hidden by `overflow-x: clip`, so `overflow` read "none" while content was cut off (C1).
@@ -18,7 +18,7 @@ const AXE = path.resolve(process.cwd(), "node_modules/axe-core/axe.min.js");
 const BASE = "http://localhost:3100";
 const PUBLIC = ["/login", "/forgot-password", "/reset-password?token=bad", "/invite/bad-token"];
 const PRIVATE = ["/", "/welcome", "/settings", "/settings?tab=connections", "/performance", "/context", "/calendar",
-  "/products", "/connections", "/agents", "/studio", "/settings?tab=members", "/admin", "/admin/people", "/library"];
+  "/products", "/connections", "/agents", "/studio", "/settings?tab=members", "/admin", "/admin/people", "/library", "/photoshoot"];
 
 type Row = { page: string; vp: string; id: string; impact: string; help: string; n: number; sample: string };
 const rows: Row[] = [];

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useSyncExternalStore } from "react";
-import { agentRunPrice, loadPlanCredits, onPlanCredits, planCredits, type PlanCredits } from "@/lib/plan-credits";
+import type { ShootTier } from "@/shared";
+import { agentRunPrice, loadPlanCredits, onPlanCredits, planCredits, shootPrice, type PlanCredits } from "@/lib/plan-credits";
 
 const EMPTY: PlanCredits = planCredits("");
 
@@ -44,4 +45,10 @@ export function usePlan(workspaceId: string | null) {
 /** Credits a manual run of `agentKey` costs in this workspace; null means show no price. */
 export function useRunPrice(workspaceId: string | null, agentKey: string): number | null {
   return agentRunPrice(useEntry(workspaceId).entry.subscription, agentKey);
+}
+
+/** What a new photoshoot on each tier costs in this workspace; null means show no price. */
+export function useShootPrices(workspaceId: string | null): (tier: ShootTier) => number | null {
+  const sub = useEntry(workspaceId).entry.subscription;
+  return useCallback((tier: ShootTier) => shootPrice(sub, tier), [sub]);
 }

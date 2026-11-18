@@ -4,8 +4,8 @@ import { ApiError } from "@/components/settings/api";
 import { NetworkError } from "@/lib/net";
 import { stale } from "@/components/workspace/use-job";
 import { shootUrl, shootsUrl } from "@/components/photoshoot/api";
-import { LABELS, shootTitle, waitLine } from "@/components/photoshoot/labels";
-import { makePresser } from "@/components/photoshoot/press";
+import { LABELS, refundLine, shootBadge, shootTitle, waitLine } from "@/components/photoshoot/labels";
+import { makePresser, pressErrorText } from "@/components/photoshoot/press";
 import {
   DEFAULT_FASHION,
   DEFAULT_PRODUCT,
@@ -14,6 +14,7 @@ import {
   isShootId,
   keepLinks,
   linksFetchedAt,
+  prependShoot,
   retryRequest,
   shootSteps,
   toRequest,
@@ -240,5 +241,43 @@ describe("urls and ids", () => {
     expect(isShootId("")).toBe(false);
     expect(isShootId(undefined)).toBe(false);
     expect(isShootId([id])).toBe(false);
+  });
+});
+
+describe("studio text", () => {
+  it("badges a shoot by status with its credits", () => {
+    expect(shootBadge(shoot({ status: "RUNNING", credits: 4 }))).toBe("Processing · 4 credits");
+    expect(shootBadge(shoot({ status: "DONE" }))).toBe("Ready");
+    expect(shootBadge(shoot({ status: "FAILED", credits: 1 }))).toBe("Didn't work · 1 credit refunded");
+    // An unlimited workspace is charged nothing: no amount.
+    expect(shootBadge(shoot({ status: "RUNNING", credits: 0 }))).toBe("Processing");
+    expect(shootBadge(shoot({ status: "FAILED", credits: 0 }))).toBe("Didn't work");
+  });
+
+  it("says the refund in the phone's words", () => {
+    expect(refundLine(24)).toBe("Your 24 credits are back. Try again, or pick another quality.");
+    expect(refundLine(1)).toBe("Your 1 credit is back. Try again, or pick another quality.");
+    expect(refundLine(0)).toBe("Try again, or pick another quality.");
+  });
+});
+
+describe("prependShoot", () => {
+  it("puts the new shoot first and drops an older copy of it", () => {
+    const a = shoot({ id: "a" });
+    const b = shoot({ id: "b" });
+    const b2 = shoot({ id: "b", status: "DONE" });
+    expect(prependShoot([a, b], b2).map((s) => [s.id, s.status])).toEqual([["b", "DONE"], ["a", "RUNNING"]]);
+    expect(prependShoot([], a)).toEqual([a]);
+  });
+});
+
+describe("pressErrorText", () => {
+  it("is silent on a 402 the paywall shows, and says everything else", () => {
+    const paywall = new ApiError(402, "Not enough credits", undefined, { insufficientCredits: true, balance: 1, needed: 4 });
+    expect(pressErrorText(paywall)).toBeNull();
+    // A 402 that isn't ours opened no paywall: say it.
+    expect(pressErrorText(new ApiError(402, "Payment required"))).toBe("Payment required");
+    expect(pressErrorText(new ApiError(503, "Photoshoots are paused for now."))).toBe("Photoshoots are paused for now.");
+    expect(pressErrorText(new Error("boom"))).toBe("Something went wrong. Try again.");
   });
 });

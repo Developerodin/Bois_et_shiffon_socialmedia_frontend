@@ -10,3 +10,6 @@ export function timeAgo(iso: string | null | undefined) {
   const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
   return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`;
 }
+
+/** "18 Nov 2026" in the viewer's locale: a day, for when something was made. */
+export const dayDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });

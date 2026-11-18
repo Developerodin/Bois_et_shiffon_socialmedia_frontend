@@ -2,24 +2,24 @@
 
 import { Check, Images, Loader2, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import type { LibraryPhoto } from "@/shared";
 
 export type Source = "website" | "uploads";
 
-/** Website / Uploads pills: native radios in labels, so arrow keys move between them. */
+/** Website / Uploads pills. */
 export function SourceSwitch({ name, value, counts, onChange }: { name: string; value: Source; counts: Record<Source, number>; onChange: (s: Source) => void }) {
-  const pill = (s: Source, label: string) => (
-    <label className="cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring">
-      <input type="radio" name={name} value={s} checked={value === s} onChange={() => onChange(s)} className="peer sr-only" />
-      {label} ({counts[s]})
-    </label>
-  );
   return (
-    <fieldset className="flex gap-1 self-start rounded-full border border-border bg-card p-1">
-      <legend className="sr-only">Source</legend>
-      {pill("website", "Website")}
-      {pill("uploads", "Uploads")}
-    </fieldset>
+    <SegmentedRadios
+      label="Source"
+      name={name}
+      value={value}
+      onChange={onChange}
+      options={[
+        { value: "website", label: "Website", count: counts.website },
+        { value: "uploads", label: "Uploads", count: counts.uploads },
+      ]}
+    />
   );
 }
 
