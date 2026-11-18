@@ -14,9 +14,9 @@ import { useShoots } from "./use-shoots";
 
 type Filter = "all" | ShootKind;
 
-/** The brand's photoshoots, newest first, filtered by kind; each card opens its shoot. */
-export function PastShoots({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
-  const { data, failed, reload } = useShoots(workspaceId, brandId);
+/** The brand's photoshoots, newest first, filtered by kind; each card opens its shoot. `trackedId`: see useShoots. */
+export function PastShoots({ workspaceId, brandId, trackedId }: { workspaceId: string; brandId: string; trackedId: string | null }) {
+  const { data, failed, reload } = useShoots(workspaceId, brandId, trackedId);
   const { unlimited } = useShootPrices(workspaceId);
   const [filter, setFilter] = useState<Filter>("all");
   const counts = useMemo(() => countByKind(data ?? []), [data]);

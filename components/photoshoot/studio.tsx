@@ -25,8 +25,7 @@ const KINDS = [
 
 /**
  * The photoshoot studio: the setup for a product or a fashion shoot, the shoot just started, and past shoots.
- * Ceiling: while a shoot runs the page polls the list (10 s) and that shoot (5 s); fine at today's scale. Upgrade path:
- * drop the list's poll while "This shoot" tracks the only RUNNING shoot.
+ * While "This shoot" runs only it polls; the list polls only for other running shoots (e.g. one started on the phone).
  */
 export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShootId }: {
   workspaceId: string;
@@ -154,7 +153,7 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
         </>
       )}
 
-      <PastShoots workspaceId={workspaceId} brandId={brandId} />
+      <PastShoots workspaceId={workspaceId} brandId={brandId} trackedId={currentId} />
     </div>
   );
 }

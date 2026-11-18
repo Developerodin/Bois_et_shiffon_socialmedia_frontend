@@ -3,14 +3,14 @@
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import type { ShootRequest } from "@/shared";
+import type { Shoot, ShootRequest } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { JobProgress } from "@/components/ui/job-progress";
 import { useShootPrices } from "@/components/shell/use-plan-credits";
-import { sharedAt } from "@/components/workspace/use-job";
+import { fetchShared, sharedAt, sharedResponse } from "@/components/workspace/use-job";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { stale } from "@/lib/signed-links";
-import { shootUrl } from "./api";
+import { shootUrl, shootsUrl } from "./api";
 import { refundLine, shootTitle, waitLine } from "./labels";
 import { isRepeatClick } from "./press";
 import { retryRequest, shootSteps, stepsDone } from "./shoot";
@@ -41,6 +41,15 @@ export function CurrentShoot({ workspaceId, brandId, shootId, onRetry, pressing,
   useEffect(() => {
     if (shootStatus === "FAILED") void loadPlanCredits(workspaceId, true);
   }, [shootStatus, workspaceId]);
+
+  // The list doesn't poll for this shoot (useShoots trackedId): once it ends, read the list again so its card does too.
+  // Also when the list has no answer yet, or one without it: a read already out may predate the end (fresh goes after it).
+  useEffect(() => {
+    if (shootStatus !== "DONE" && shootStatus !== "FAILED") return;
+    const list = shootsUrl(workspaceId, brandId);
+    const listed = (sharedResponse(list) as { shoots: Shoot[] } | undefined)?.shoots.find((s) => s.id === shootId);
+    if (!listed || listed.status === "RUNNING") void fetchShared(list, true).catch(() => undefined);
+  }, [shootStatus, workspaceId, brandId, shootId]);
 
   if (failed && (status === 403 || status === 404)) {
     return (
