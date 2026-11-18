@@ -1,4 +1,4 @@
-import { REEL_DURATION_CHIPS, reelStage, type ReelDetail, type ReelSummary } from "@/shared";
+import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, wordCount, type ReelDetail, type ReelOptions, type ReelPlan, type ReelSummary } from "@/shared";
 import { stale } from "@/lib/signed-links";
 import { starterProduct } from "./labels";
 
@@ -81,4 +81,61 @@ export function keepReelLinks<T extends ReelSummary | ReelDetail>(prev: T | unde
   const n = next as ReelSummary;
   if (p.id !== n.id || p.version !== n.version) return next;
   return { ...n, thumbUrl: n.thumbUrl && p.thumbUrl ? p.thumbUrl : n.thumbUrl, videoUrl: n.videoUrl && p.videoUrl ? p.videoUrl : n.videoUrl } as T;
+}
+
+/** Why the reel can't be changed now, or null. The server refuses these edits too. */
+export function editLock(d: ReelDetail): string | null {
+  if (rendering(d)) return "A video is being made from this plan. Wait for it to finish.";
+  if (d.item.status === "SCHEDULED" || d.item.status === "PUBLISHED") return "This reel is already scheduled or posted.";
+  return null;
+}
+
+/** Whether any presenter or template preview is still being made. */
+export const optionsMaking = (o: ReelOptions): boolean => o.presenters.some((p) => p.status === "RUNNING") || o.templates.some((t) => t.making);
+
+/** The plan's presenter if it names a finished one of `options` (or options aren't read yet), else "none". */
+export function presenterChoice(plan: ReelPlan, options: ReelOptions | null | undefined): string {
+  if (plan.presenter === "none") return "none";
+  if (!options) return plan.presenter;
+  return options.presenters.some((p) => p.id === plan.presenter && p.status === "DONE") ? plan.presenter : "none";
+}
+
+/** The plan's presenter by name: "No presenter" for none (or one that isn't there), "…" while options are unread. */
+export function presenterName(plan: ReelPlan, options: ReelOptions | null | undefined): string {
+  if (plan.presenter === "none") return "No presenter";
+  if (!options) return "…";
+  return options.presenters.find((p) => p.id === plan.presenter)?.name ?? "No presenter";
+}
+
+/** Whether a press on a presenter or a template preview must wait: options unread, a presenter running, or that template making. */
+export function optionBusy(options: ReelOptions | null | undefined, kind: "presenter" | { templateId: string }): boolean {
+  if (!options) return true;
+  if (kind === "presenter") return options.presenters.some((p) => p.status === "RUNNING");
+  return options.templates.some((t) => t.id === kind.templateId && t.making);
+}
+
+/** A copy of `keys` with i and j swapped; out of range gives the copy unchanged. */
+export function swapScenes(keys: readonly string[], i: number, j: number): string[] {
+  const out = [...keys];
+  if (i < 0 || j < 0 || i >= out.length || j >= out.length) return out;
+  [out[i], out[j]] = [out[j]!, out[i]!];
+  return out;
+}
+
+/** Per scene, what stops the script being saved (a recorded scene's length is its recording's, so words don't count), or null. */
+export function sceneProblems(texts: readonly string[], recorded: readonly boolean[]): (string | null)[] {
+  return texts.map((raw, i) => {
+    const text = raw.trim();
+    const n = i + 1;
+    if (text === "") return `Scene ${n} needs text.`;
+    if (text.length > VOICE_TEXT_MAX) return `Scene ${n} is over ${VOICE_TEXT_MAX} characters.`;
+    if (!recorded[i] && wordCount(text) > MAX_SCENE_WORDS) return `Scene ${n} is over ${MAX_SCENE_WORDS} words (${MAX_SCENE_WORDS / WORDS_PER_SECOND} s). Shorten it.`;
+    return null;
+  });
+}
+
+/** "38 words · ~19 s" for a scene's text. */
+export function sceneCount(text: string): string {
+  const n = wordCount(text);
+  return `${n === 1 ? "1 word" : `${n} words`} · ~${Math.round(n / WORDS_PER_SECOND)} s`;
 }

@@ -3,6 +3,7 @@ import { Play } from "lucide-react";
 import { VIDEO_MODEL_NAMES, type ReelDetail, type ReelOptions } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { JOIN_LABELS } from "./labels";
+import { presenterName } from "./reel";
 
 const plural = (n: number, one: string) => (n === 1 ? `1 ${one}` : `${n} ${one}s`);
 
@@ -16,7 +17,7 @@ export function StoryboardStep({ detail, options, current, onSelect, onWatch }: 
 }) {
   const plan = detail.plan;
   if (!plan) return null;
-  const presenter = plan.presenter === "none" ? "No presenter" : options?.presenters.find((p) => p.id === plan.presenter)?.name ?? "Presenter";
+  const presenter = presenterName(plan, options);
   const facts = [detail.seconds !== null ? `${detail.seconds} s` : null, "9:16 vertical", presenter, plural(plan.scenes.length, "scene")].filter(Boolean).join(" · ");
   return (
     <div className="flex flex-col gap-4">

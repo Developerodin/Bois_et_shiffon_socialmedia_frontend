@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ReelDetail, ReelSummary } from "@/shared";
+import type { Presenter, ReelDetail, ReelOptions, ReelSummary } from "@/shared";
 import { ApiError } from "@/components/settings/api";
 import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, countByStage, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
-import { chipMessage, starterProduct } from "@/components/reels/labels";
+import { BUILT_STEPS, countByStage, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { chipMessage, presenterState, starterProduct } from "@/components/reels/labels";
 import { reelOptionsUrl, reelUrl, reelsUrl } from "@/components/reels/api";
 
 afterEach(() => vi.useRealTimers());
@@ -199,5 +199,69 @@ describe("the generic presser with a text key", () => {
     fail = false;
     await press("a");
     expect(ids).toEqual(["id-1", "id-2"]);
+  });
+});
+
+const pres = (id: string, status: Presenter["status"]): Presenter => ({ id, name: `N-${id}`, status, sheet: null });
+const opts = (presenters: Presenter[] = [], templates: ReelOptions["templates"] = []): ReelOptions => ({ templates, previewCredits: 1, canPreview: true, presenters, traits: [], presenterCredits: 5 });
+const tpl = (id: string, making = false) => ({ id, seconds: 10, preview: null, own: false, making, failed: false });
+const withPresenter = (presenter: string) => ({ ...plan, presenter });
+
+describe("editLock", () => {
+  it("locks a scheduled reel and lets a draft through", () => {
+    expect(editLock(detail({ item: { id: "r1", title: "T", status: "SCHEDULED", postUrl: null, scheduledFor: null } }))).toBe("This reel is already scheduled or posted.");
+    expect(editLock(detail())).toBeNull();
+  });
+});
+describe("options helpers", () => {
+  it("optionsMaking", () => {
+    expect(optionsMaking(opts())).toBe(false);
+    expect(optionsMaking(opts([pres("a", "RUNNING")]))).toBe(true);
+    expect(optionsMaking(opts([], [tpl("t", true)]))).toBe(true);
+  });
+  it("presenterChoice", () => {
+    expect(presenterChoice(withPresenter("a"), opts([pres("a", "DONE")]))).toBe("a");
+    expect(presenterChoice(withPresenter("a"), opts([pres("a", "FAILED")]))).toBe("none");
+    expect(presenterChoice(withPresenter("a"), opts())).toBe("none");
+    expect(presenterChoice(withPresenter("a"), null)).toBe("a");
+    expect(presenterChoice(withPresenter("a"), undefined)).toBe("a");
+  });
+  it("presenterName", () => {
+    expect(presenterName(withPresenter("none"), opts())).toBe("No presenter");
+    expect(presenterName(withPresenter("a"), opts([pres("a", "DONE")]))).toBe("N-a");
+    expect(presenterName(withPresenter("a"), null)).toBe("…");
+    expect(presenterName(withPresenter("a"), opts())).toBe("No presenter");
+  });
+  it("optionBusy", () => {
+    expect(optionBusy(null, "presenter")).toBe(true);
+    expect(optionBusy(undefined, { templateId: "t" })).toBe(true);
+    const o = opts([pres("a", "RUNNING")], [tpl("t", true), tpl("u")]);
+    expect(optionBusy(o, "presenter")).toBe(true);
+    expect(optionBusy(o, { templateId: "u" })).toBe(false);
+    expect(optionBusy(o, { templateId: "t" })).toBe(true);
+    expect(optionBusy(opts([], [tpl("t", true)]), "presenter")).toBe(false);
+  });
+});
+describe("presenterState", () => {
+  it("words each status", () => {
+    expect(presenterState(pres("a", "RUNNING"), 5)).toBe("Being made, about a minute");
+    expect(presenterState(pres("a", "DONE"), 5)).toBe("Ready");
+    expect(presenterState(pres("a", "FAILED"), 5)).toBe("Didn't work · 5 credits back");
+  });
+});
+describe("scene editing helpers", () => {
+  it("swapScenes", () => {
+    expect(swapScenes(["a", "b", "c"], 0, 1)).toEqual(["b", "a", "c"]);
+    expect(swapScenes(["a"], 0, 1)).toEqual(["a"]);
+  });
+  it("sceneProblems", () => {
+    const long = Array.from({ length: 31 }, () => "w").join(" ");
+    expect(sceneProblems(["", "x".repeat(401), long, long], [false, false, false, true])).toEqual([
+      "Scene 1 needs text.", "Scene 2 is over 400 characters.", "Scene 3 is over 30 words (15 s). Shorten it.", null,
+    ]);
+  });
+  it("sceneCount", () => {
+    expect(sceneCount("one two three")).toBe("3 words · ~2 s");
+    expect(sceneCount("one")).toBe("1 word · ~1 s");
   });
 });

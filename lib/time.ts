@@ -13,3 +13,6 @@ export function timeAgo(iso: string | null | undefined) {
 
 /** "18 Nov 2026" in the viewer's locale: a day, for when something was made. */
 export const dayDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+
+/** Seconds as a clock: 7 is "0:07", 90 is "1:30". */
+export const clock = (seconds: number): string => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;

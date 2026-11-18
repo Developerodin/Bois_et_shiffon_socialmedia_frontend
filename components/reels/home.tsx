@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import type { Presenter, ReelTemplateOption } from "@/shared";
+import type { ReelTemplateOption } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
@@ -14,7 +14,7 @@ import type { Opportunity } from "@/components/workspace/content-panels";
 import { openPaywall } from "@/lib/paywall";
 import { navFor } from "@/lib/nav";
 import { reelsUrl } from "./api";
-import { TEMPLATE_LABELS } from "./labels";
+import { PLAN_REFUSAL, TEMPLATE_LABELS, presenterState } from "./labels";
 import { TOO_LONG, type CreateBody } from "./plan-stream";
 import { starters } from "./reel";
 import { StartCard } from "./start-card";
@@ -23,11 +23,6 @@ import { useReelStream } from "./use-reel-stream";
 import { YourReels } from "./your-reels";
 
 const IdeasDialog = dynamic(() => import("./ideas-dialog").then((m) => m.IdeasDialog), { ssr: false });
-
-// The server's own sentence for a plan refusal (PlanRequiredError), so the paywall reads the same either way.
-const PLAN_REFUSAL = { planRequired: true, title: "This needs a plan. Choose one to make videos and plan your calendar." } as const;
-
-const PRESENTER_STATE: Record<Presenter["status"], string> = { RUNNING: "Being made…", DONE: "Ready", FAILED: "Didn't work" };
 
 /**
  * The reels home: plan a new reel (from a prompt, an idea or a template), the brand's presenters and templates, and
@@ -126,7 +121,7 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
             {presenters.map((p) => (
               <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
                 <span className="min-w-0 truncate font-medium">{p.name}</span>
-                <span className="shrink-0 text-muted-foreground">{PRESENTER_STATE[p.status]}</span>
+                <span className="shrink-0 text-muted-foreground">{presenterState(p, data?.presenterCredits ?? 0)}</span>
               </li>
             ))}
           </ul>

@@ -1,4 +1,4 @@
-import type { PlanStage, Transition } from "@/shared";
+import type { PlanStage, Presenter, Transition } from "@/shared";
 import type { ReelStep } from "./reel";
 
 // The phone's English (mobile src/i18n/locales/en/reels.json): keep the words in step.
@@ -36,3 +36,13 @@ export const TEMPLATE_LABELS: Record<string, { title: string; subtitle: string }
 
 export const chipMessage = (s: number) => `Make it about ${s} seconds.`;
 export const starterProduct = (p: string) => `A reel about ${p}`;
+
+// The server's own sentence for a plan refusal (PlanRequiredError), so the paywall reads the same either way.
+export const PLAN_REFUSAL = { planRequired: true, title: "This needs a plan. Choose one to make videos and plan your calendar." } as const;
+
+/** A presenter's state under its name; a failed one says how many credits it gave back. */
+export function presenterState(p: Presenter, credits: number): string {
+  if (p.status === "RUNNING") return "Being made, about a minute";
+  if (p.status === "DONE") return "Ready";
+  return `Didn't work · ${credits} ${credits === 1 ? "credit" : "credits"} back`;
+}

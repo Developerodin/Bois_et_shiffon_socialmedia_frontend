@@ -19,6 +19,7 @@ import { keepPolling, settleCheck, type CheckState } from "@/components/welcome/
 import { readable } from "@/lib/agent-message";
 import { brandNameFromWebsite, normalizeWebsite } from "@/shared";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
+import { clock } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 const DOCS = ["Product information", "Marketing strategy", "Competitor analysis", "Brand voice", "Content strategy"];
@@ -311,7 +312,7 @@ function ReadingRoom({
         <p aria-live="polite" className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
           {active ? <span className="size-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" /> : null}
           {statusLabel({ mismatch, status, polling, unreachable: fails >= 3, started: events.length > 0 })}
-          {active ? ` · ${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}` : null}
+          {active ? ` · ${clock(elapsed)}` : null}
         </p>
       </header>
 

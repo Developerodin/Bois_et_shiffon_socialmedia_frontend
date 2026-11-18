@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { reelUrl } from "./api";
 import { STAGE_LABELS, TEMPLATE_LABELS, chipMessage } from "./labels";
 import { TOO_LONG } from "./plan-stream";
-import { durationChips, rendering } from "./reel";
+import { durationChips, editLock } from "./reel";
 import { Draft } from "./start-card";
 import { useReelStream } from "./use-reel-stream";
 
@@ -148,13 +148,6 @@ function Templates({ templates, disabled, onUse }: { templates: ReelOptions["tem
       </Button>
     </section>
   );
-}
-
-/** Why the reel can't be changed now, or null. The server refuses these edits too. */
-function editLock(d: ReelDetail): string | null {
-  if (rendering(d)) return "A video is being made from this plan. Wait for it to finish.";
-  if (d.item.status === "SCHEDULED" || d.item.status === "PUBLISHED") return "This reel is already scheduled or posted.";
-  return null;
 }
 
 /**

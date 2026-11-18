@@ -16,7 +16,7 @@ export function pressErrorText(e: unknown): string | null {
 }
 
 /** The server already used (and refunded) this id: a kept id after a 5xx whose job the server had failed. */
-const idTaken = (e: unknown): boolean => e instanceof ApiError && e.status === 409 && e.code === "request.idTaken";
+export const idTaken = (e: unknown): boolean => e instanceof ApiError && e.status === 409 && e.code === "request.idTaken";
 
 /**
  * A paid press with a request id. The last press whose outcome is unknown keeps its id: no answer (timeout, offline,
