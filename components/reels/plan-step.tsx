@@ -43,10 +43,13 @@ export function usePlanChat(w: string, b: string, reelId: string) {
 
   // Try again sends the same body, so the revise presser reuses the kept request id: the reply can't be written twice.
   const send = useCallback(async (version: number, body: Body) => {
-    setReady(false);
-    setFailed(null);
     const composer = isComposerSend(body);
-    if (composer) setSent({ body, version });
+    // A presenter send leaves the composer's state (pending bubble, Try again, Plan ready) as it is.
+    if (composer) {
+      setReady(false);
+      setFailed(null);
+      setSent({ body, version });
+    }
     // Only the composer's own send empties it: a chip or Try again leaves what the person has typed.
     if (body.kind === "message") setText((t) => (t.trim() === body.message ? "" : t));
     const ok = await revise(reelId, version, body);
