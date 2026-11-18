@@ -8,6 +8,7 @@ import { makePresser } from "@/lib/presser";
  * it twice (the presser keeps the request id for a resend).
  */
 export const RECOVER_EVERY_MS = 3000;
+// Longer than the server's 150 s in-flight marker: a send waits up to 120 s (SLOW_MS), then recovery up to 180 s.
 export const RECOVER_CAP_MS = 180_000;
 export type Deps = { sleep: (ms: number) => Promise<void>; now: () => number; alive: () => boolean };
 export const TOO_LONG = "The reply is taking too long. Check back in a moment.";

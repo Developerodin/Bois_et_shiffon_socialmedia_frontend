@@ -9,7 +9,7 @@ export const TRANSITIONS = ["cut", "match", "dissolve"] as const;
 export type SceneKind = (typeof SCENE_KINDS)[number];
 export type Transition = (typeof TRANSITIONS)[number];
 
-// Mirrors mobile src/app/reels/storyboard.tsx MODEL_NAMES; keys must equal server router.ts VIDEO_MODELS (tested).
+// Mirrors mobile src/app/reels/storyboard.tsx MODEL_NAMES; keys must equal server router.ts MODEL_IDS (VIDEO_MODELS minus the presenter model; tested).
 export const VIDEO_MODEL_NAMES: Readonly<Record<string, string>> = { "kling-3-std": "Kling 3.0", "seedance-2.5": "Seedance 2.5", "hailuo-2.3": "Hailuo 2.3" };
 
 export const REEL_SCENES = { min: 2, max: 6 } as const;

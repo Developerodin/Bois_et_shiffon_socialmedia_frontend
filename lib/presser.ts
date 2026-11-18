@@ -1,9 +1,19 @@
 import { shouldKeepRequestId } from "@/shared";
-import { ApiError } from "@/components/settings/api";
+import { ApiError, errorMessage } from "@/components/settings/api";
 import { requestId } from "@/lib/net";
+import { refusalOf } from "@/lib/paywall";
 
 /** The server answered a press with a refusal, so it charged nothing (see shouldKeepRequestId, shared/photoshoot.ts). */
-const refused = (e: unknown): boolean => e instanceof ApiError && !shouldKeepRequestId(e.status);
+export const refused = (e: unknown): boolean => e instanceof ApiError && !shouldKeepRequestId(e.status);
+
+/** The second (or later) click of a double-click: ignored, so it never presses a paid button again. */
+export const isRepeatClick = (e: { detail: number }): boolean => e.detail > 1;
+
+/** What to say when a press fails: null for a 402 that opened the paywall (it says it), else the server's sentence or a generic one. */
+export function pressErrorText(e: unknown): string | null {
+  if (e instanceof ApiError && e.status === 402 && refusalOf(e.data)) return null;
+  return errorMessage(e);
+}
 
 /** The server already used (and refunded) this id: a kept id after a 5xx whose job the server had failed. */
 const idTaken = (e: unknown): boolean => e instanceof ApiError && e.status === 409 && e.code === "request.idTaken";

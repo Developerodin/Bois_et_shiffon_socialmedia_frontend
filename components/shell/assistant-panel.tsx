@@ -25,8 +25,9 @@ function useWide() {
 type Props = { workspaceId: string; brandId: string | null; brandName: string | null; canCreateBrand: boolean };
 
 /**
- * The Espanda chat: a 320 px column from 1280 px up, a right-hand drawer (opened from the top bar) below.
- * One element serves both, so the conversation, a typed draft and an in-flight reply survive crossing 1280 px.
+ * The Espanda chat: a 320 px column from 1280 px up on docked pages (assistantDocks), a right-hand drawer (opened from
+ * the top bar) below that and on pages that don't dock it. One element serves both, so the conversation, a typed draft
+ * and an in-flight reply survive the switch.
  * Narrow and closed, the drawer is off-screen and inert. Open, it takes focus, Escape or the scrim closes it and
  * focus goes back to the toggle. No focus trap: the page behind stays reachable, which the scrim only discourages.
  */

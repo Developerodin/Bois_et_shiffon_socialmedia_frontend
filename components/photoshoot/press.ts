@@ -1,15 +1,10 @@
-import { shootRequestKey, shouldKeepRequestId, type Shoot, type ShootRequest } from "@/shared";
-import { ApiError, errorMessage } from "@/components/settings/api";
-import { refusalOf } from "@/lib/paywall";
-import { makePresser as core } from "@/lib/presser";
+import { shootRequestKey, type Shoot, type ShootRequest } from "@/shared";
+import { makePresser as core, refused } from "@/lib/presser";
 import { loadPlanCredits } from "@/lib/plan-credits";
 import { stale } from "@/lib/signed-links";
 import { fetchShared, putShared, sharedAt, sharedResponse } from "@/components/workspace/use-job";
 import { photoshootApi, shootUrl, shootsUrl } from "./api";
 import { prependShoot } from "./shoot";
-
-/** The server answered a press with a refusal, so it charged nothing (see shouldKeepRequestId, shared/photoshoot.ts). */
-const refused = (e: unknown): boolean => e instanceof ApiError && !shouldKeepRequestId(e.status);
 
 /** Generate / Try again / Variation: the shared presser (lib/presser.ts) keyed by the request's fields, whatever their order (shootRequestKey). */
 export const makePresser = (send: (r: ShootRequest, requestId: string) => Promise<Shoot>, newId?: () => string) =>
@@ -20,8 +15,8 @@ export const makePresser = (send: (r: ShootRequest, requestId: string) => Promis
 // repeat (or a click that lands just after the answer) can't press again. A deliberate press after it is a new shoot.
 export const PRESS_COOLDOWN_MS = 1500;
 
-/** The second (or later) click of a double-click: ignored, so it never presses a paid button again. */
-export const isRepeatClick = (e: { detail: number }): boolean => e.detail > 1;
+// Lifted to lib/presser.ts (reels use them too); re-exported so the photoshoot's imports stay as they were.
+export { isRepeatClick, pressErrorText } from "@/lib/presser";
 
 // One presser per brand for the page's life, like the phone's module state: leaving the studio and coming back
 // still reuses an unanswered id. Ceiling: one small entry per brand pressed in this tab; nothing is evicted.
@@ -81,10 +76,4 @@ export async function pressAndShow(w: string, b: string, r: ShootRequest): Promi
   showCreated(w, b, shoot);
   void loadPlanCredits(w, true);
   return shoot;
-}
-
-/** What to say when a press fails: null for a 402 that opened the paywall (it says it), else the server's sentence or a generic one. */
-export function pressErrorText(e: unknown): string | null {
-  if (e instanceof ApiError && e.status === 402 && refusalOf(e.data)) return null;
-  return errorMessage(e);
 }

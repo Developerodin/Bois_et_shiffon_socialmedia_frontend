@@ -6,7 +6,7 @@ import { CHAT_MESSAGE_MAX, type DraftSoFar, type PlanStage } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { Textarea } from "@/components/ui/textarea";
-import { isRepeatClick } from "@/components/photoshoot/press";
+import { isRepeatClick } from "@/lib/presser";
 import { STAGE_LABELS } from "./labels";
 import type { CreateBody } from "./plan-stream";
 import type { Starter } from "./reel";
@@ -79,8 +79,9 @@ export function StartCard({ starters, ideaCount, onViewIdeas, onStart, sending, 
 
         {text === "" && !sending && starters.length > 0 ? (
           <ul aria-label="Ways to start" className="flex flex-wrap gap-2">
-            {starters.map((s) => (
-              <li key={s.label}>
+            {/* Product titles can repeat, so a product starter's key carries its place too. */}
+            {starters.map((s, i) => (
+              <li key={s.opportunityId ?? `p:${i}:${s.label}`}>
                 <Button type="button" variant="outline" size="sm" onClick={() => onStart({ prompt: s.message, opportunityId: s.opportunityId })}>
                   {s.label}
                 </Button>

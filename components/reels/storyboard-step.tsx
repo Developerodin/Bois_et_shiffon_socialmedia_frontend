@@ -42,7 +42,7 @@ export function StoryboardStep({ detail, options, current, onSelect, onWatch }: 
                   className="h-28 w-16 shrink-0 overflow-hidden rounded-xl bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element -- signed storage URLs, as in the library grid */}
-                  {photo ? <img src={photo} alt={s.shot} className="h-full w-full object-cover" /> : null}
+                  {photo ? <img src={photo} alt={s.shot} loading="lazy" decoding="async" className="h-full w-full object-cover" /> : null}
                 </button>
                 <div className="flex min-w-0 flex-col gap-1 text-sm">
                   <h3 className="font-medium">{i + 1}. {s.shot}</h3>

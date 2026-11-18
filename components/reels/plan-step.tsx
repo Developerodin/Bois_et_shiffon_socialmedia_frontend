@@ -6,8 +6,8 @@ import { CHAT_MESSAGE_MAX, type ChatTurn, type ReelDetail, type ReelOptions, typ
 import { Button } from "@/components/ui/button";
 import { ChoiceCards } from "@/components/ui/choice-cards";
 import { Textarea } from "@/components/ui/textarea";
-import { isRepeatClick } from "@/components/photoshoot/press";
 import { fetchShared } from "@/components/workspace/use-job";
+import { isRepeatClick } from "@/lib/presser";
 import { cn } from "@/lib/utils";
 import { reelUrl } from "./api";
 import { STAGE_LABELS, TEMPLATE_LABELS, chipMessage } from "./labels";
@@ -40,7 +40,8 @@ export function usePlanChat(w: string, b: string, reelId: string) {
     setReady(false);
     setFailed(null);
     setSent({ body, version });
-    if ("message" in body) setText("");
+    // Only the composer's own send empties it: a chip or Try again leaves what the person has typed.
+    if ("message" in body) setText((t) => (t.trim() === body.message ? "" : t));
     const ok = await revise(reelId, version, body);
     if (ok) {
       setReady(true);
@@ -196,12 +197,15 @@ export function PlanStep({ detail, options, canCreate, chat }: { detail: ReelDet
             <label htmlFor="reel-message" className="sr-only">Ask for changes</label>
             <Textarea
               id="reel-message"
-              className="rounded-xl"
+              className="rounded-xl aria-disabled:opacity-50"
               rows={3}
               placeholder="Ask for changes…"
               value={text}
               maxLength={CHAT_MESSAGE_MAX}
-              disabled={disabled}
+              // While sending: read-only, not disabled, so focus stays in the box. Disabled only while the reel is locked.
+              disabled={lock !== null}
+              readOnly={sending}
+              aria-disabled={sending || undefined}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => {
                 // Enter sends; Shift+Enter adds a line. Not while an input method is composing, nor on a held key's repeat.

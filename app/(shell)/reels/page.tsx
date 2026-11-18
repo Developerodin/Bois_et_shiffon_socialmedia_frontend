@@ -1,19 +1,12 @@
-import { Clapperboard } from "lucide-react";
+import { reelsAccess } from "@/components/reels/access";
 import { ReelsHome } from "@/components/reels/home";
-import { featureAccess } from "@/components/shell/feature-access";
 import { navFor } from "@/lib/nav";
 
 export const metadata = { title: navFor("/reels").title };
 
 /** The reels home: plan a new reel, the brand's presenters and templates, and its reels. */
 export default async function ReelsPage() {
-  const access = await featureAccess({
-    feature: "reels",
-    path: "/reels",
-    icon: Clapperboard,
-    noBusiness: "Reels belong to a business. Create or pick one from the sidebar, then its reels show here.",
-    noRead: "Your role cannot see this business's reels. Ask a workspace admin for access.",
-  });
+  const access = await reelsAccess();
   if (access.gate) return access.gate;
   const { workspaceId, brandId, perms } = access;
 

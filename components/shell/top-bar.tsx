@@ -15,7 +15,7 @@ type Props = { brandName: string | null; workspaceId: string | null; brandId: st
 const LOGS_KEY = "ws.logsOpen";
 export const TOPBAR_SLOT_ID = "topbar-slot";
 
-/** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (below 1280 px) the assistant toggle on the right. */
+/** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (wherever the assistant isn't docked: below 1280 px, or a page that doesn't dock it) the assistant toggle on the right. */
 export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
   const pathname = usePathname();
   const { title, brandScoped } = navFor(pathname);

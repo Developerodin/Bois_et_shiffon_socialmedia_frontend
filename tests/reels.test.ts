@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReelDetail, ReelSummary } from "@/shared";
 import { ApiError } from "@/components/settings/api";
 import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
-import { makePresser } from "@/lib/presser";
+import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
+import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
 import { BUILT_STEPS, countByStage, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, starterProduct } from "@/components/reels/labels";
@@ -75,6 +76,19 @@ describe("durationChips", () => {
     expect(durationChips(22)).toEqual([30]);
     expect(durationChips(null)).toEqual([20, 30]);
     expect(durationChips(30)).toEqual([20]);
+  });
+});
+
+describe("press helpers", () => {
+  it("have one definition, which the photoshoot re-exports", () => {
+    expect(photoshootPress.isRepeatClick).toBe(isRepeatClick);
+    expect(photoshootPress.pressErrorText).toBe(pressErrorText);
+  });
+  it("refused: a 4xx refusal charged nothing; no answer or a 5xx may have", () => {
+    expect(refused(new ApiError(400, "no"))).toBe(true);
+    expect(refused(new ApiError(0, "offline"))).toBe(false);
+    expect(refused(new ApiError(502, "gateway"))).toBe(false);
+    expect(refused(new Error("x"))).toBe(false);
   });
 });
 

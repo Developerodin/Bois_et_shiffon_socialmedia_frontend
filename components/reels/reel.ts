@@ -1,5 +1,6 @@
 import { REEL_DURATION_CHIPS, reelStage, type ReelDetail, type ReelSummary } from "@/shared";
 import { stale } from "@/lib/signed-links";
+import { starterProduct } from "./labels";
 
 /** The reel page's steps, in order (spec §5.3). Pure: no React. */
 export const REEL_STEPS = ["plan", "presenter", "photos", "script", "storyboard", "video", "review", "publish"] as const;
@@ -50,7 +51,7 @@ export type Starter = { label: string; message: string; opportunityId?: string }
 /** Up to three ways to begin a reel: the brand's reel ideas first (callers pass ideas.filter(isReelIdea)), then its products. */
 export function starters(ideas: { id: string; title: string }[], productTitles: string[]): Starter[] {
   const fromIdeas = ideas.map((i): Starter => ({ label: i.title, message: i.title, opportunityId: i.id }));
-  const fromProducts = productTitles.map((p): Starter => ({ label: p, message: `A reel about ${p}` }));
+  const fromProducts = productTitles.map((p): Starter => ({ label: p, message: starterProduct(p) }));
   return [...fromIdeas, ...fromProducts].slice(0, 3);
 }
 

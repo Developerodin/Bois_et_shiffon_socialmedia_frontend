@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DraftSoFar, PlanEvent, PlanStage, ReelDetail } from "@/shared";
 import { ApiError, request } from "@/components/settings/api";
-import { pressErrorText } from "@/components/photoshoot/press";
+import { pressErrorText } from "@/lib/presser";
 import { fetchShared, putShared } from "@/components/workspace/use-job";
 import { NET_MESSAGE, isOffline } from "@/lib/net";
 import { reelUrl, reelsApi } from "./api";

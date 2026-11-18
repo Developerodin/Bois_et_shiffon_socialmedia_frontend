@@ -110,6 +110,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
             photoUrl={shown ? detail.photoUrls[shown.photoKey] : undefined}
             videoUrl={showVideo ? (detail.videoUrl ?? undefined) : undefined}
             alt={shown?.shot ?? ""}
+            // The rendered video carries no on-screen text (only the "Made with AI" mark), so the overlay is hidden over it.
             onScreenText={showVideo ? undefined : shown?.onScreenText}
           />
           {showVideo ? (
