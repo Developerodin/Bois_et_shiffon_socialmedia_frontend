@@ -12,6 +12,7 @@ export const RECOVER_EVERY_MS = 3000;
 export const RECOVER_CAP_MS = 180_000;
 export type Deps = { sleep: (ms: number) => Promise<void>; now: () => number; alive: () => boolean };
 export const TOO_LONG = "The reply is taking too long. Check back in a moment.";
+export const CHANGED_ELSEWHERE = "This reel changed elsewhere. Your text is still here; save again.";
 export const CHANGED_WHILE_WAITING = "This reel changed while yours was waiting. Your text is still here; send again.";
 
 /** Thrown when the page left mid-recovery; the hook ignores it. */
@@ -80,10 +81,10 @@ export const makeCreatePresser = (
   newId,
 );
 
-export type ReviseBody = { version: number; message?: string; templateId?: string; deps: Deps };
+export type ReviseBody = { version: number; message?: string; templateId?: string; presenterId?: string; deps: Deps };
 
 /**
- * One revise presser per reel, keyed by the message (or the template picked). `done` and `answered` are success.
+ * One revise presser per reel, keyed by the presenter picked, the message, or the template picked. `done` and `answered` are success.
  * `other` shows the moved reel (put) and throws a status-0 error, which keeps the id: ours was never stored, so the
  * resend runs.
  */
@@ -97,6 +98,6 @@ export const makeRevisePresser = <R extends ReviseBody>(
     api.put(out.detail);
     throw new ApiError(0, CHANGED_WHILE_WAITING);
   },
-  (r) => r.message ?? `template:${r.templateId}`,
+  (r) => (r.presenterId ? `presenter:${r.presenterId}` : r.message ?? `template:${r.templateId}`),
   newId,
 );

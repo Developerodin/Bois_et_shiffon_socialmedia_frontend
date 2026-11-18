@@ -16,7 +16,13 @@ import { durationChips, editLock } from "./reel";
 import { Draft } from "./start-card";
 import { useReelStream } from "./use-reel-stream";
 
-type Body = { message: string } | { templateId: string };
+export type Body =
+  | { kind: "message"; message: string }
+  | { kind: "template"; templateId: string }
+  | { kind: "presenter"; presenterId: string; message: string };
+
+/** The composer's own sends (typed text, a chip, a template, Try again): they show the pending bubble and can be retried here. A presenter send's text and errors belong to the Presenter step. */
+export const isComposerSend = (body: Body): boolean => body.kind !== "presenter";
 
 /**
  * The Plan step's send state: the stream, the composer's text, the last send and its failure. Held by the reel page,
@@ -39,17 +45,18 @@ export function usePlanChat(w: string, b: string, reelId: string) {
   const send = useCallback(async (version: number, body: Body) => {
     setReady(false);
     setFailed(null);
-    setSent({ body, version });
+    const composer = isComposerSend(body);
+    if (composer) setSent({ body, version });
     // Only the composer's own send empties it: a chip or Try again leaves what the person has typed.
-    if ("message" in body) setText((t) => (t.trim() === body.message ? "" : t));
+    if (body.kind === "message") setText((t) => (t.trim() === body.message ? "" : t));
     const ok = await revise(reelId, version, body);
     if (ok) {
-      setReady(true);
+      if (composer) setReady(true);
       return;
     }
-    setFailed(body);
+    if (composer) setFailed(body);
     // The person's text goes back in the box, unless they typed something new meanwhile.
-    if ("message" in body) setText((t) => (t.trim() ? t : body.message));
+    if (body.kind === "message") setText((t) => (t.trim() ? t : body.message));
   }, [revise, reelId]);
 
   return { stream, text, setText, sent, failed, ready, send };
@@ -163,11 +170,11 @@ export function PlanStep({ detail, options, canCreate, chat }: { detail: ReelDet
   const message = text.trim();
 
   // Shown until the reel read after the send holds the turn (its version moved), or the send failed.
-  const pending = sent && "message" in sent.body && !failed && (sending || version === sent.version) ? sent.body.message : null;
-  const onChip = useCallback((s: number) => void send(version, { message: chipMessage(s) }), [send, version]);
+  const pending = sent && sent.body.kind === "message" && !failed && (sending || version === sent.version) ? sent.body.message : null;
+  const onChip = useCallback((s: number) => void send(version, { kind: "message", message: chipMessage(s) }), [send, version]);
 
   function submit() {
-    if (!disabled && message !== "") void send(version, { message });
+    if (!disabled && message !== "") void send(version, { kind: "message", message });
   }
 
   return (
@@ -228,7 +235,7 @@ export function PlanStep({ detail, options, canCreate, chat }: { detail: ReelDet
           </div>
 
           {options && options.templates.length > 0 ? (
-            <Templates templates={options.templates} disabled={disabled} onUse={(templateId) => void send(version, { templateId })} />
+            <Templates templates={options.templates} disabled={disabled} onUse={(templateId) => void send(version, { kind: "template", templateId })} />
           ) : null}
         </>
       )}

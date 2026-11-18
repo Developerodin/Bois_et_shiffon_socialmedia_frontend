@@ -22,7 +22,7 @@ function reviser(w: string, b: string, id: string) {
   if (!press) {
     const url = reelUrl(w, b, id);
     press = makeRevisePresser<Revise>({
-      send: (r, requestId) => reelsApi.chat(w, b, id, { version: r.version, message: r.message, templateId: r.templateId }, requestId, r.onLine),
+      send: (r, requestId) => reelsApi.chat(w, b, id, { version: r.version, message: r.message, templateId: r.templateId, presenterId: r.presenterId }, requestId, r.onLine),
       // Joins a read already out, and feeds useReel.
       get: () => fetchShared(url, true) as Promise<ReelDetail>,
       put: (d) => putShared(url, d),
@@ -131,7 +131,7 @@ export function useReelStream(w: string, b: string) {
     return made ? made.id : null;
   }, [run, creator]);
 
-  const revise = useCallback(async (id: string, version: number, body: { message?: string; templateId?: string }): Promise<boolean> => {
+  const revise = useCallback(async (id: string, version: number, body: { message?: string; templateId?: string; presenterId?: string }): Promise<boolean> => {
     const url = reelUrl(w, b, id);
     const out = await run(() => reviser(w, b, id)({ version, ...body, deps, onLine }), (e) => {
       // Refused over the reel's state (e.g. it changed in the meantime): show the reel as it is now.

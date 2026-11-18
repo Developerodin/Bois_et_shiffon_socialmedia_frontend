@@ -10,6 +10,7 @@ import { StepsRail } from "@/components/ui/steps-rail";
 import { ListSkeleton, LoadError } from "@/components/settings/shared";
 import { STEP_LABELS } from "./labels";
 import { PlanStep, usePlanChat } from "./plan-step";
+import { useReelSave } from "./use-reel-save";
 import { BUILT_STEPS, stepFrom, stepState } from "./reel";
 import { StoryboardStep } from "./storyboard-step";
 import { useReel, useReelOptions } from "./use-reels";
@@ -50,6 +51,8 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
   const { data: detail, failed, status, reload } = useReel(workspaceId, brandId, reelId);
   const { data: options } = useReelOptions(workspaceId, brandId);
   const chat = usePlanChat(workspaceId, brandId, reelId);
+  // One save lock for the whole page: the steps that edit the plan (Photos, Script) take it from here (Tasks 6-7 pass it down).
+  useReelSave(workspaceId, brandId, reelId);
   const step = stepFrom(stepParam, detail);
   const [scene, setScene] = useState(0);
   const [watching, setWatching] = useState(false);

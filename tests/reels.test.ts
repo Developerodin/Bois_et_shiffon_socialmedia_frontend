@@ -7,6 +7,8 @@ import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
 import { BUILT_STEPS, countByStage, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, presenterState, starterProduct } from "@/components/reels/labels";
+import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
+import { saveErrorText } from "@/components/reels/use-reel-save";
 import { reelOptionsUrl, reelUrl, reelsUrl } from "@/components/reels/api";
 
 afterEach(() => vi.useRealTimers());
@@ -263,5 +265,13 @@ describe("scene editing helpers", () => {
   it("sceneCount", () => {
     expect(sceneCount("one two three")).toBe("3 words · ~2 s");
     expect(sceneCount("one")).toBe("1 word · ~1 s");
+  });
+});
+
+describe("saveErrorText", () => {
+  it("only reel.changed gets the keep-your-text sentence", () => {
+    expect(saveErrorText(new ApiError(409, "This plan changed in the meantime. Reload and try again.", "reel.changed"))).toBe(CHANGED_ELSEWHERE);
+    expect(saveErrorText(new ApiError(409, "A newer version exists. Review it first."))).toBe("A newer version exists. Review it first.");
+    expect(saveErrorText(new ApiError(400, "Scene 2 is too long."))).toBe("Scene 2 is too long.");
   });
 });

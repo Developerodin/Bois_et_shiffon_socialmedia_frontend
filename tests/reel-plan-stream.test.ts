@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ChatTurn, PlanResult, ReelDetail } from "@/shared";
 import { ApiError } from "@/components/settings/api";
+import { isComposerSend } from "@/components/reels/plan-step";
 import {
   CHANGED_WHILE_WAITING, Gone, TOO_LONG, createWithRecovery, makeCreatePresser, makeRevisePresser, reviseWithRecovery, type Deps,
 } from "@/components/reels/plan-stream";
@@ -155,5 +156,28 @@ describe("the presser around send + recovery", () => {
     stale = false;
     await press({ version: 4, message: "shorter", deps: deps() });
     expect(sent).toEqual(["id-1", "id-2"]);
+  });
+  it("presses of one presenter share an id; a presenter press and a message of its name differ", async () => {
+    const sent: string[] = [];
+    const press = makeRevisePresser({
+      send: (_r, id) => (sent.push(id), dropped()),
+      get: () => Promise.resolve(detail(1)),
+      put: () => undefined,
+    }, ids());
+    await press({ version: 1, presenterId: "p1", message: "Use Ana", deps: deps() }).catch(() => undefined);
+    await press({ version: 1, presenterId: "p1", message: "Use Ana again", deps: deps() }).catch(() => undefined);
+    await press({ version: 1, message: "p1", deps: deps() }).catch(() => undefined);
+    await press({ version: 1, message: "Use Ana", deps: deps() }).catch(() => undefined);
+    expect(sent[0]).toBe(sent[1]);
+    expect(sent[2]).not.toBe(sent[0]);
+    expect(sent[3]).not.toBe(sent[0]);
+  });
+});
+
+describe("isComposerSend", () => {
+  it("a presenter send leaves the composer and the pending bubble alone", () => {
+    expect(isComposerSend({ kind: "presenter", presenterId: "p1", message: "Use Ana" })).toBe(false);
+    expect(isComposerSend({ kind: "message", message: "hi" })).toBe(true);
+    expect(isComposerSend({ kind: "template", templateId: "t" })).toBe(true);
   });
 });

@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { isReelIdea, reelStage, type ReelDetail, type ReelOptions, type ReelSummary } from "@/shared";
+import { isReelIdea, reelStage, type CloningInfo, type ReelDetail, type ReelOptions, type ReelSummary, type ReelVoiceOption } from "@/shared";
 import { JOB_INTERVALS, sharedAt, useJob } from "@/components/workspace/use-job";
 import { createLinkCache, useRereadWhenStale } from "@/components/workspace/use-steady-links";
 import { stale } from "@/lib/signed-links";
 import type { Opportunity } from "@/components/workspace/content-panels";
-import { opportunitiesUrl, reelOptionsUrl, reelUrl, reelsUrl } from "./api";
-import { keepReelLinks, rendering } from "./reel";
+import { opportunitiesUrl, reelOptionsUrl, reelUrl, reelsUrl, voicesUrl } from "./api";
+import { keepReelLinks, optionsMaking, rendering } from "./reel";
 
 // One link cache per type (the list's summaries, the page's detail): see createLinkCache for the ceiling.
 const summaries = createLinkCache<ReelSummary>((r) => r.id, keepReelLinks);
@@ -38,13 +38,24 @@ export function useReel(w: string, b: string, id: string) {
 
 const identity = (d: never) => d as ReelOptions;
 
-/** The templates and presenters: read once, and again only when their preview links go stale. */
+/** The templates and presenters: polled while one is being made, and read again when their preview links go stale. */
 export function useReelOptions(w: string, b: string) {
   const url = reelOptionsUrl(w, b);
-  const done = useMemo(() => () => !stale(sharedAt(url)), [url]);
-  const { data, failed, reload } = useJob(url, { pick: identity, done, intervals: JOB_INTERVALS.always });
+  const done = useMemo(() => (o: ReelOptions) => !optionsMaking(o) && !stale(sharedAt(url)), [url]);
+  const { data, failed, reload } = useJob(url, { pick: identity, done, intervals: JOB_INTERVALS.reelOptions });
   useRereadWhenStale(data ? sharedAt(url) : null, reload);
   return { data, failed, reload };
+}
+
+const pickVoices = (d: never) => d as { voices: ReelVoiceOption[]; cloning: CloningInfo };
+
+/** The voices a reel may use and what cloning needs: read once, and again when the clone samples (signed links) go stale. */
+export function useVoices(w: string, b: string) {
+  const url = voicesUrl(w, b);
+  const done = useMemo(() => () => !stale(sharedAt(url)), [url]);
+  const { data, reload } = useJob(url, { pick: pickVoices, done, intervals: JOB_INTERVALS.always });
+  useRereadWhenStale(data ? sharedAt(url) : null, reload);
+  return { data, reload };
 }
 
 const pickIdeas = (d: never) => (d as { opportunities: Opportunity[] }).opportunities.filter(isReelIdea);
