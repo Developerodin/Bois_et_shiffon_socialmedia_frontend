@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { PreviewFrame } from "@/components/ui/preview-frame";
 import { StepsRail } from "@/components/ui/steps-rail";
@@ -10,6 +11,7 @@ import { ListSkeleton, LoadError } from "@/components/settings/shared";
 import { STEP_LABELS } from "./labels";
 import { PlanStep, usePlanChat } from "./plan-step";
 import { BUILT_STEPS, stepFrom, stepState } from "./reel";
+import { StoryboardStep } from "./storyboard-step";
 import { useReel, useReelOptions } from "./use-reels";
 
 function BackLink() {
@@ -49,6 +51,8 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
   const { data: options } = useReelOptions(workspaceId, brandId);
   const chat = usePlanChat(workspaceId, brandId, reelId);
   const step = stepFrom(stepParam, detail);
+  const [scene, setScene] = useState(0);
+  const [watching, setWatching] = useState(false);
   const title = detail?.item.title;
 
   const steps = useMemo(() => BUILT_STEPS.map((s) => ({
@@ -73,7 +77,10 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
     );
   }
 
-  const first = detail.plan?.scenes[0];
+  const scenes = detail.plan?.scenes ?? [];
+  const index = Math.min(scene, Math.max(scenes.length - 1, 0));
+  const shown = scenes[index];
+  const showVideo = watching && !!detail.videoUrl;
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -93,10 +100,31 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
         <section aria-labelledby="reel-step" className="flex min-w-0 flex-col gap-4">
           <h2 id="reel-step" className="text-lg font-semibold">{STEP_LABELS[step]}</h2>
           {step === "plan" ? <PlanStep detail={detail} options={options} canCreate={canCreate} chat={chat} /> : null}
+          {step === "storyboard" ? (
+            <StoryboardStep detail={detail} options={options} current={index} onSelect={(i) => { setScene(i); setWatching(false); }} onWatch={() => setWatching(true)} />
+          ) : null}
         </section>
 
         <section id="reel-preview" tabIndex={-1} aria-label="Preview" className="min-w-0 focus-visible:outline-none md:col-start-2 lg:col-start-3 lg:row-start-1">
-          <PreviewFrame photoUrl={first ? detail.photoUrls[first.photoKey] : undefined} alt={first?.shot ?? ""} onScreenText={first?.onScreenText} />
+          <PreviewFrame
+            photoUrl={shown ? detail.photoUrls[shown.photoKey] : undefined}
+            videoUrl={showVideo ? (detail.videoUrl ?? undefined) : undefined}
+            alt={shown?.shot ?? ""}
+            onScreenText={showVideo ? undefined : shown?.onScreenText}
+          />
+          {showVideo ? (
+            <Button type="button" variant="outline" size="sm" className="mx-auto mt-3 flex" onClick={() => setWatching(false)}>Show the scenes</Button>
+          ) : scenes.length > 1 ? (
+            <div className="mt-3 flex items-center justify-center gap-3">
+              <Button type="button" variant="outline" size="icon" aria-label="Previous scene" disabled={index === 0} onClick={() => setScene(index - 1)}>
+                <ChevronLeft className="size-4" aria-hidden="true" />
+              </Button>
+              <span className="text-sm text-muted-foreground" aria-live="polite">{index + 1} of {scenes.length}</span>
+              <Button type="button" variant="outline" size="icon" aria-label="Next scene" disabled={index >= scenes.length - 1} onClick={() => setScene(index + 1)}>
+                <ChevronRight className="size-4" aria-hidden="true" />
+              </Button>
+            </div>
+          ) : null}
         </section>
       </div>
     </div>
