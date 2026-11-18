@@ -5,14 +5,13 @@ import dynamic from "next/dynamic";
 import { ArrowDown, ArrowUp, Loader2 } from "lucide-react";
 import type { LibraryPhoto, ReelDetail } from "@/shared";
 import { Button } from "@/components/ui/button";
-import { CHANGED_ELSEWHERE } from "./plan-stream";
-import { adoptRefusedVersion, editLock, slotStandIns, swapScenes } from "./reel";
+import { editLock, slotStandIns, swapScenes } from "./reel";
 import type { ReelSave } from "./use-reel-save";
+import { useStepEdit } from "./use-step-edit";
 
 // The picker is only fetched when a photo is first changed, so it stays out of the reel page's first load.
 const LibraryPicker = dynamic(() => import("@/components/library/library-picker").then((m) => m.LibraryPicker), { ssr: false });
 
-type Edit = { version: number; keys: string[] };
 type Dir = "earlier" | "later";
 
 /**
@@ -29,14 +28,10 @@ export const PhotosStep = memo(function PhotosStep({ workspaceId, brandId, detai
   chatBusy: boolean;
 }) {
   const plan = detail.plan;
-  const [edit, setEdit] = useState<Edit | null>(null);
+  // A re-read plan with another scene count drops the edit; after a refused save it adopts the re-read version.
+  const { edit, note, change, submit, error } = useStepEdit<string>(detail, save, plan?.scenes.length ?? null, "The plan changed: pick the photos again.");
   const [pickFor, setPickFor] = useState<number | null>(null);
-  const [note, setNote] = useState("");
   const [moved, setMoved] = useState("");
-  // The reel page's save error is shared by every step: show it here only after this step's own Save press.
-  const [tried, setTried] = useState(false);
-  // Set when this step's save failed; settled once the save (and its re-read) ends.
-  const [failed, setFailed] = useState(false);
   const [focus, setFocus] = useState<{ slot: number; dir: Dir; n: number } | null>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   // Photos picked this session, for display until the saved reel brings their links.
@@ -48,32 +43,14 @@ export const PhotosStep = memo(function PhotosStep({ workspaceId, brandId, detai
 
   if (!plan) return <p className="text-sm text-muted-foreground">Plan a reel first: photos belong to its scenes.</p>;
 
-  // A re-read plan with another scene count: the edit no longer lines up, so it is dropped.
-  if (edit && edit.keys.length !== plan.scenes.length) {
-    setEdit(null);
-    setNote("The plan changed: pick the photos again.");
-  }
-
-  // After a refused (409) save, the re-read plan is the one the person saves onto: adopt its version, keys kept.
-  if (edit && failed && !save.saving) {
-    setFailed(false);
-    const next = adoptRefusedVersion(edit, save.error === CHANGED_ELSEWHERE, detail.version, plan.scenes.length);
-    if (next !== edit) setEdit(next);
-  }
-
   const planKeys = plan.scenes.map((s) => s.photoKey);
-  const keys = edit && edit.keys.length === planKeys.length ? edit.keys : planKeys;
+  const keys = edit && edit.items.length === planKeys.length ? edit.items : planKeys;
   const dirty = keys.some((k, i) => k !== planKeys[i]);
   const standIns = slotStandIns(keys, plan);
   const lock = editLock(detail);
   const editable = lock === null && canCreate;
   const busy = chatBusy || save.saving;
   const last = keys.length - 1;
-
-  const change = (next: string[]) => {
-    setNote("");
-    setEdit({ version: edit?.version ?? detail.version, keys: next });
-  };
 
   function move(i: number, dir: Dir) {
     const j = dir === "earlier" ? i - 1 : i + 1;
@@ -93,11 +70,7 @@ export const PhotosStep = memo(function PhotosStep({ workspaceId, brandId, detai
 
   async function savePhotos() {
     if (!edit || !plan) return;
-    setTried(true);
-    save.clear();
-    const out = await save.save(edit.version, { ...plan, scenes: plan.scenes.map((s, i) => ({ ...s, photoKey: edit.keys[i] ?? s.photoKey })) });
-    if (out) setEdit(null);
-    else setFailed(true);
+    await submit({ ...plan, scenes: plan.scenes.map((s, i) => ({ ...s, photoKey: edit.items[i] ?? s.photoKey })) });
   }
 
   const btn = (slot: number, dir: Dir) => (el: HTMLButtonElement | null) => {
@@ -157,7 +130,7 @@ export const PhotosStep = memo(function PhotosStep({ workspaceId, brandId, detai
           </Button>
         </div>
       ) : null}
-      <p role="alert" className="text-sm text-destructive empty:hidden">{tried && !save.saving ? (save.error ?? "") : ""}</p>
+      <p role="alert" className="text-sm text-destructive empty:hidden">{error}</p>
 
       {pickFor !== null ? (
         <LibraryPicker

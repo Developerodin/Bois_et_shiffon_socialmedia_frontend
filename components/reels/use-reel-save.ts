@@ -7,9 +7,12 @@ import { fetchShared, putShared, sharedResponse } from "@/components/workspace/u
 import { reelUrl, reelsApi } from "./api";
 import { CHANGED_ELSEWHERE } from "./plan-stream";
 
+/** The server's code for a save refused because the plan moved on. */
+export const REEL_CHANGED = "reel.changed";
+
 /** What to show for a failed save; only reel.changed (the plan moved on) gets the keep-your-text sentence. */
 export const saveErrorText = (e: unknown): string =>
-  e instanceof ApiError && e.code === "reel.changed" ? CHANGED_ELSEWHERE : errorMessage(e);
+  e instanceof ApiError && e.code === REEL_CHANGED ? CHANGED_ELSEWHERE : errorMessage(e);
 
 /**
  * Saves the plan, one save at a time. Held once by the reel page and passed down, so every step and dialog shares one
@@ -21,14 +24,15 @@ export const saveErrorText = (e: unknown): string =>
  */
 export function useReelSave(w: string, b: string, reelId: string) {
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // The last failure: its sentence, and the server's code (so callers needn't compare the sentence).
+  const [failure, setFailure] = useState<{ text: string; code: string | null } | null>(null);
   const busy = useRef(false);
 
   const save = useCallback(async (version: number, plan: ReelPlan): Promise<PlanResult | null> => {
     if (busy.current) return null;
     busy.current = true;
     setSaving(true);
-    setError(null);
+    setFailure(null);
     const url = reelUrl(w, b, reelId);
     const reread = () => fetchShared(url, true).catch(() => undefined);
     try {
@@ -38,7 +42,7 @@ export function useReelSave(w: string, b: string, reelId: string) {
       await reread();
       return out;
     } catch (e) {
-      setError(saveErrorText(e));
+      setFailure({ text: saveErrorText(e), code: e instanceof ApiError ? (e.code ?? null) : null });
       if (e instanceof ApiError && (e.status === 409 || e.status === 0)) await reread();
       return null;
     } finally {
@@ -47,10 +51,12 @@ export function useReelSave(w: string, b: string, reelId: string) {
     }
   }, [w, b, reelId]);
 
-  const clear = useCallback(() => setError(null), []);
+  const clear = useCallback(() => setFailure(null), []);
 
   // Stable between renders unless saving/error change, so memoised steps given it don't re-render on every stream frame.
-  return useMemo(() => ({ saving, error, save, clear }), [saving, error, save, clear]);
+  const error = failure?.text ?? null;
+  const errorCode = failure?.code ?? null;
+  return useMemo(() => ({ saving, error, errorCode, save, clear }), [saving, error, errorCode, save, clear]);
 }
 
 export type ReelSave = ReturnType<typeof useReelSave>;
