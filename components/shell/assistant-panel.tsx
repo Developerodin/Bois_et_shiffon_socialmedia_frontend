@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { MessageCircle, SquarePen, X } from "lucide-react";
 import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { ChatPane, type ChatSlots } from "@/components/workspace/chat-pane";
+import { assistantDocks } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 const SUGGESTIONS = ["What should I focus on this week?", "Summarise what my agents did recently."];
@@ -30,15 +32,17 @@ type Props = { workspaceId: string; brandId: string | null; brandName: string | 
  */
 export function AssistantPanel(p: Props) {
   const wide = useWide();
+  const pathname = usePathname();
+  const docked = wide && assistantDocks(pathname);
   const { open, setOpen } = useAssistant();
   const ref = useRef<HTMLElement>(null);
   const wasOpen = useRef(false);
-  const shown = wide || open;
+  const shown = docked || open;
 
-  // Going wide closes the drawer, so it doesn't reappear on its own when the window narrows again.
+  // Going docked closes the drawer, so it doesn't reappear on its own when the window narrows again.
   useEffect(() => {
-    if (wide && open) setOpen(false);
-  }, [wide, open, setOpen]);
+    if (docked && open) setOpen(false);
+  }, [docked, open, setOpen]);
 
   useEffect(() => {
     ref.current?.toggleAttribute("inert", !shown);
@@ -46,54 +50,54 @@ export function AssistantPanel(p: Props) {
 
   // Escape closes the drawer even when focus has moved to the page behind it.
   useEffect(() => {
-    if (!open || wide) return;
+    if (!open || docked) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !e.defaultPrevented) setOpen(false);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, wide, setOpen]);
+  }, [open, docked, setOpen]);
 
   useEffect(() => {
-    if (open && !wide) ref.current?.focus();
-    else if (wasOpen.current && !open && !wide) document.getElementById(ASSISTANT_TOGGLE_ID)?.focus();
+    if (open && !docked) ref.current?.focus();
+    else if (wasOpen.current && !open && !docked) document.getElementById(ASSISTANT_TOGGLE_ID)?.focus();
     wasOpen.current = open;
-  }, [open, wide]);
+  }, [open, docked]);
 
   return (
     <>
-      {open && !wide ? (
-        <div aria-hidden="true" className="fixed inset-0 z-40 bg-black/50 xl:hidden" onClick={() => setOpen(false)} />
+      {open && !docked ? (
+        <div aria-hidden="true" className="fixed inset-0 z-40 bg-black/50" onClick={() => setOpen(false)} />
       ) : null}
       <aside
         ref={ref}
         tabIndex={-1}
         aria-label="Espanda"
-        role={wide ? undefined : "dialog"}
+        role={docked ? undefined : "dialog"}
         onKeyDown={(e) => {
-          if (e.key === "Escape" && !wide) setOpen(false);
+          if (e.key === "Escape" && !docked) setOpen(false);
         }}
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-full w-80 shrink-0 flex-col border-l border-border bg-background outline-none transition-transform motion-reduce:transition-none",
-          "xl:static xl:z-auto xl:translate-x-0 xl:border-l-0",
+          docked && "xl:static xl:z-auto xl:translate-x-0 xl:border-l-0",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="absolute top-4 right-4 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring xl:hidden"
+          className={cn("absolute top-4 right-4 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
         >
           <X className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
           <span className="sr-only">Close</span>
         </button>
-        <Body {...p} />
+        <Body {...p} docked={docked} />
       </aside>
     </>
   );
 }
 
-function Body({ workspaceId, brandId, brandName, canCreateBrand }: Props) {
+function Body({ workspaceId, brandId, brandName, canCreateBrand, docked }: Props & { docked: boolean }) {
   const title = <h2 className="text-xl/[26px] font-semibold text-foreground">Espanda</h2>;
   const subtitle = <p className="text-sm text-muted-foreground">Your team, one conversation</p>;
 
@@ -124,7 +128,7 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand }: Props) {
           disabled={busy || empty}
           aria-label="New conversation"
           title="New conversation"
-          className={`grid size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px disabled:opacity-50 disabled:hover:bg-transparent mr-8 xl:mr-0`}
+          className={cn("grid size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px disabled:opacity-50 disabled:hover:bg-transparent mr-8", docked && "xl:mr-0")}
         >
           <SquarePen className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
         </button>

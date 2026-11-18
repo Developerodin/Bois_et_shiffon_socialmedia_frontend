@@ -7,7 +7,7 @@ import { AgentLog } from "@/components/agents/agent-log";
 import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { CreditsChip } from "@/components/shell/credits-chip";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
-import { navFor } from "@/lib/nav";
+import { assistantDocks, navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null; nav?: ReactNode };
@@ -17,7 +17,8 @@ export const TOPBAR_SLOT_ID = "topbar-slot";
 
 /** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (below 1280 px) the assistant toggle on the right. */
 export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
-  const { title, brandScoped } = navFor(usePathname());
+  const pathname = usePathname();
+  const { title, brandScoped } = navFor(pathname);
   const { open: assistantOpen, setOpen: setAssistantOpen } = useAssistant();
   const [logsOpen, setLogsOpen] = useState(false);
   useEffect(() => {
@@ -70,7 +71,7 @@ export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
           )}
           {/* Same condition as the layout's AssistantPanel: no workspace, no panel to open. */}
           {workspaceId && (
-            <button type="button" id={ASSISTANT_TOGGLE_ID} onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, "xl:hidden")}>
+            <button type="button" id={ASSISTANT_TOGGLE_ID} onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, assistantDocks(pathname) && "xl:hidden")}>
               <MessageCircle className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               <span className="sr-only sm:not-sr-only">Espanda</span>
             </button>

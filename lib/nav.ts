@@ -14,6 +14,8 @@ export type NavEntry = {
   blurb?: string;
   /** Shown only while this flag is on for the workspace. */
   feature?: WebFeature;
+  /** The assistant is a drawer, not a docked column, on this page: it needs the full width. */
+  undocksAssistant?: true;
 };
 
 export const NAV: readonly NavEntry[] = [
@@ -25,7 +27,7 @@ export const NAV: readonly NavEntry[] = [
 
   { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },
   { id: "photoshoot", label: "Photoshoot", href: "/photoshoot", group: "create", feature: "photoshoot" },
-  { id: "reels", label: "Reels", href: "/reels", group: "create", feature: "reels" },
+  { id: "reels", label: "Reels", href: "/reels", group: "create", feature: "reels", undocksAssistant: true },
   { id: "studio", label: "Studio", href: "/studio", group: "create", feature: "stories" },
 
   { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox" },
@@ -68,9 +70,9 @@ const rank = (e: NavEntry) => (e.group === "agent" ? 0 : 1);
 
 /**
  * The entry a pathname belongs to: the longest href path that is the pathname or a parent of it, on whole segments.
- * "/" matches only itself. The query is ignored. Unknown paths read as the Overview, inside a business.
+ * "/" matches only itself. The query is ignored.
  */
-export function navFor(pathname: string): { activeId: string | null; title: string; brandScoped: boolean } {
+export function navEntryFor(pathname: string): NavEntry | null {
   const path = pathname.split(/[?#]/)[0] || "/";
   let best: NavEntry | null = null;
   let bestLen = -1;
@@ -83,6 +85,18 @@ export function navFor(pathname: string): { activeId: string | null; title: stri
       bestLen = p.length;
     }
   }
+  return best;
+}
+
+/** Whether the assistant sits as a column beside the page (from 1280 px up); false where the page needs the width. */
+export function assistantDocks(pathname: string): boolean {
+  return !navEntryFor(pathname)?.undocksAssistant;
+}
+
+/** The title and scope for a pathname. Unknown paths read as the Overview, inside a business. */
+export function navFor(pathname: string): { activeId: string | null; title: string; brandScoped: boolean } {
+  const path = pathname.split(/[?#]/)[0] || "/";
+  const best = navEntryFor(pathname);
   // /agents/<anything> that isn't an agent is no page: don't call it the Agent log.
   if (best?.id === "agent-log" && path !== "/agents" && path !== "/agents/")
     return { activeId: null, title: "Page not found", brandScoped: true };
