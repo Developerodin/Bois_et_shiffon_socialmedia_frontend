@@ -21,7 +21,7 @@ const stopTracks = (stream: MediaStream | null) => stream?.getTracks().forEach((
  * `onStart` runs after the browser checks and before the microphone opens; resolving false starts nothing (the clone
  * dialog asks to replace a reading there, and reads a fresh challenge).
  */
-export function AudioRecorder({ maxSeconds, minSeconds, disabled, notice, onTake, onStart, label }: {
+export function AudioRecorder({ maxSeconds, minSeconds, disabled, notice, onTake, onStart, onBusyChange, label }: {
   maxSeconds: number;
   minSeconds?: number;
   disabled?: boolean;
@@ -29,6 +29,8 @@ export function AudioRecorder({ maxSeconds, minSeconds, disabled, notice, onTake
   notice: ReactNode;
   onTake: (blob: Blob, seconds: number) => void;
   onStart?: () => boolean | void | Promise<boolean | void>;
+  /** True from Start until the take stops (or the start is given up): what the take depends on must not change then. */
+  onBusyChange?: (busy: boolean) => void;
   /** The recorder's accessible name, e.g. "Record scene 2". */
   label: string;
 }) {
@@ -47,8 +49,10 @@ export function AudioRecorder({ maxSeconds, minSeconds, disabled, notice, onTake
   const recorder = useRef<MediaRecorder | null>(null);
   const tick = useRef<ReturnType<typeof setInterval> | null>(null);
   const limit = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const callbacks = useRef({ onTake, onStart });
-  callbacks.current = { onTake, onStart };
+  const callbacks = useRef({ onTake, onStart, onBusyChange });
+  callbacks.current = { onTake, onStart, onBusyChange };
+  const busy = phase !== "idle";
+  useEffect(() => callbacks.current.onBusyChange?.(busy), [busy]);
 
   const clearTimers = () => {
     if (tick.current) clearInterval(tick.current);
@@ -173,9 +177,9 @@ export function AudioRecorder({ maxSeconds, minSeconds, disabled, notice, onTake
     if (r && r.state !== "inactive") r.stop();
   }
 
-  // A new microphone: the open stream (or one still being asked for) is dropped; the next Start uses the new one.
+  // A new microphone (only while idle): any stream still open is dropped first; the next Start uses the new one.
   function changeDevice(id: string) {
-    if (phase === "recording") return;
+    if (phase !== "idle") return;
     req.current++;
     stopTracks(stream.current);
     stream.current = null;
@@ -192,7 +196,7 @@ export function AudioRecorder({ maxSeconds, minSeconds, disabled, notice, onTake
       {allowed && devices.length > 0 ? (
         <div className="flex flex-col gap-1">
           <label htmlFor="recorder-device" className="text-sm font-medium">Microphone</label>
-          <select id="recorder-device" className={`${selectClass} rounded-xl`} value={deviceId} disabled={phase === "recording"} onChange={(e) => changeDevice(e.target.value)}>
+          <select id="recorder-device" className={`${selectClass} rounded-xl`} value={deviceId} disabled={phase !== "idle"} onChange={(e) => changeDevice(e.target.value)}>
             <option value="">Default microphone</option>
             {devices.filter((d) => d.deviceId && d.deviceId !== "default").map((d, i) => (
               <option key={d.deviceId} value={d.deviceId}>{d.label || `Microphone ${i + 1}`}</option>

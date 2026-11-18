@@ -75,6 +75,8 @@ export function CloneDialog({ workspaceId: w, brandId: b, cloning, open, onOpenC
   // The id the server answered with, until the voices list shows it.
   const [made, setMade] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  // The recorder is starting or recording: the language (so the challenge) must stay what the reading is read against.
+  const [recording, setRecording] = useState(false);
   const ctrl = useRef<AbortController | null>(null);
   const firstRead = useRef(true);
   const startedWith = useRef<ChallengeEntry | null>(null);
@@ -228,7 +230,7 @@ export function CloneDialog({ workspaceId: w, brandId: b, cloning, open, onOpenC
 
         <div className="flex flex-col gap-1">
           <label htmlFor="clone-lang" className="text-sm font-medium">Reading language</label>
-          <select id="clone-lang" className={`${selectClass} h-11 rounded-xl`} value={lang} disabled={!!take || pressing} onChange={(e) => setLang(e.target.value)}>
+          <select id="clone-lang" className={`${selectClass} h-11 rounded-xl`} value={lang} disabled={!!take || pressing || recording} onChange={(e) => setLang(e.target.value)}>
             {LANGS.map((l) => <option key={l} value={l}>{languageName(l)}</option>)}
           </select>
         </div>
@@ -259,6 +261,7 @@ export function CloneDialog({ workspaceId: w, brandId: b, cloning, open, onOpenC
           disabled={!current || pressing || made !== null}
           notice={NOTICE}
           onStart={beforeRecording}
+          onBusyChange={setRecording}
           onTake={took}
         />
 

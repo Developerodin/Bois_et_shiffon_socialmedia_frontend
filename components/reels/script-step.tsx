@@ -23,8 +23,9 @@ const CloneDialog = dynamic(() => import("./clone-dialog").then((m) => m.CloneDi
  * here until Save script, which sends one save with the version the edit started from and trimmed texts (the server
  * keeps a take only when its text still matches). Memoised: the page passes it stable props, so stream frames skip it.
  * Change voice opens the Voices sheet (mounted on first open, then kept). Record opens the record dialog for one scene,
- * mounted only while that scene is chosen (closing it turns the microphone off). A scene whose text has unsaved edits
- * can't be recorded: the take is checked against the saved text. The sheet's Clone a voice opens the clone dialog, also
+ * mounted only while that scene is chosen (closing it turns the microphone off). Nothing is recorded while any text has
+ * unsaved edits: the take is checked against the saved text, and its save would leave the edit on an old version (the
+ * next Save script would then put the old text back and drop the take). The sheet's Clone a voice opens the clone dialog, also
  * mounted only while open; the last challenge it read is kept here, so reopening it shows the same unsent sentences.
  */
 export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detail, canCreate, save, chatBusy }: {
@@ -121,7 +122,6 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
           const id = `script-${i}`;
           const problem = edit ? problems[i] ?? null : null;
           const recorded = !!s.recordingId;
-          const sceneDirty = texts[i] !== planTexts[i];
           return (
             <li key={i} className="flex flex-col gap-2 rounded-2xl border border-border bg-card px-4 py-4 shadow-sm">
               <label htmlFor={id} className="text-sm font-medium">Scene {i + 1} voiceover</label>
@@ -139,7 +139,7 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 {recorded ? <span>{`Recorded · ${(s.recordingSeconds ?? 0).toFixed(1)} s`}</span> : <span>Uses the voice above</span>}
                 {editable ? (
-                  <Button type="button" variant="outline" size="sm" disabled={busy || sceneDirty} aria-label={recorded ? `Record scene ${i + 1} again` : `Record scene ${i + 1}`} onClick={() => setRecordScene(i)}>
+                  <Button type="button" variant="outline" size="sm" disabled={busy || dirty} aria-label={recorded ? `Record scene ${i + 1} again` : `Record scene ${i + 1}`} onClick={() => setRecordScene(i)}>
                     <Mic className="size-4" aria-hidden="true" />
                     {recorded ? "Record again" : "Record"}
                   </Button>
@@ -149,7 +149,7 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
                 ) : null}
               </div>
               {recorded ? <p className="text-xs text-muted-foreground">Editing this text drops its recording.</p> : null}
-              {editable && (sceneDirty || (recorded && dirty)) ? <p className="text-xs text-muted-foreground">Save your script changes before recording.</p> : null}
+              {editable && dirty ? <p className="text-xs text-muted-foreground">Save your script changes before recording.</p> : null}
             </li>
           );
         })}
