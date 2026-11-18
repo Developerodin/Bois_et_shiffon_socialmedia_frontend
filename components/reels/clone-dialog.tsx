@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Play, Square } from "lucide-react";
 import { MAX_CLONE_BYTES, NAME_MAX, type CloningInfo } from "@/shared";
-// Straight from its file, not the @/shared barrel. While the barrel still re-exports it (shared/contract/index.ts, server-owned),
-// the passages ship in the common chunk all the same; once the barrel stops, this import alone keeps them in this lazy chunk.
+// From its own file: the @/shared barrel doesn't re-export it, so it stays out of the chunk every page loads.
 import { CLONE_PASSAGES } from "@/shared/contract/clone-passages";
 import { AudioRecorder } from "@/components/ui/audio-recorder";
 import { Button } from "@/components/ui/button";
