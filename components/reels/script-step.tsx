@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Loader2, Mic } from "lucide-react";
 import { VOICE_TEXT_MAX, type ReelDetail } from "@/shared";
@@ -12,10 +12,11 @@ import { useSample } from "./use-sample";
 import { useStepEdit } from "./use-step-edit";
 import { useVoices } from "./use-reels";
 import { VoiceRow } from "./voice-row";
-import { GENDER_LABELS } from "./voices";
+import { GENDER_LABELS, type ChallengeEntry } from "./voices";
 
 const VoicesSheet = dynamic(() => import("./voices-sheet").then((m) => m.VoicesSheet), { ssr: false });
 const RecordDialog = dynamic(() => import("./record-dialog").then((m) => m.RecordDialog), { ssr: false });
+const CloneDialog = dynamic(() => import("./clone-dialog").then((m) => m.CloneDialog), { ssr: false });
 
 /**
  * The Script & voice step: the reel's voice, one text box per scene, and each scene's own recording. Text edits stay
@@ -23,7 +24,8 @@ const RecordDialog = dynamic(() => import("./record-dialog").then((m) => m.Recor
  * keeps a take only when its text still matches). Memoised: the page passes it stable props, so stream frames skip it.
  * Change voice opens the Voices sheet (mounted on first open, then kept). Record opens the record dialog for one scene,
  * mounted only while that scene is chosen (closing it turns the microphone off). A scene whose text has unsaved edits
- * can't be recorded: the take is checked against the saved text.
+ * can't be recorded: the take is checked against the saved text. The sheet's Clone a voice opens the clone dialog, also
+ * mounted only while open; the last challenge it read is kept here, so reopening it shows the same unsent sentences.
  */
 export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detail, canCreate, save, chatBusy }: {
   workspaceId: string;
@@ -42,8 +44,11 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
   const [voicesOpen, setVoicesOpen] = useState(false);
   const [recordScene, setRecordScene] = useState<number | null>(null);
   const closeRecord = useCallback(() => setRecordScene(null), []);
-  // Task 9 opens the clone dialog here; the sheet shows no Clone button until it exists.
-  const openClone = useCallback(() => undefined, []);
+  const [cloneOpen, setCloneOpen] = useState(false);
+  const openClone = useCallback(() => setCloneOpen(true), []);
+  // After a clone, back to the Voices sheet (still open beneath), where the new voice is listed.
+  const cloned = useCallback(() => { setVoicesMounted(true); setVoicesOpen(true); }, []);
+  const challengeCache = useRef<ChallengeEntry | null>(null);
 
   if (!plan) return <p className="text-sm text-muted-foreground">Plan a reel first: the script belongs to its scenes.</p>;
 
@@ -104,6 +109,9 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
         <VoicesSheet workspaceId={workspaceId} brandId={brandId} detail={detail} save={save} open={voicesOpen} onOpenChange={setVoicesOpen} onClone={openClone} />
       ) : null}
 
+      {cloneOpen && voices?.cloning.allowed ? (
+        <CloneDialog workspaceId={workspaceId} brandId={brandId} cloning={voices.cloning} open onOpenChange={setCloneOpen} onCloned={cloned} challengeCache={challengeCache} />
+      ) : null}
       {recordScene !== null && editable ? (
         <RecordDialog workspaceId={workspaceId} brandId={brandId} detail={detail} scene={recordScene} save={save} onClose={closeRecord} />
       ) : null}

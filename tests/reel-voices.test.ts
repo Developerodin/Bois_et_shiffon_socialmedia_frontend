@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LIBRARY_FILTERS, type CloningInfo, type LibraryVoice, type ReelVoiceOption } from "@/shared";
 import { ApiError } from "@/components/settings/api";
 import type { ReelPlan } from "@/shared";
-import { LIBRARY_WAIT_MS, isLatest, libraryWait, nextLibraryPage, planWithVoice, showLibraryError, GENDER_LABELS, LIBRARY_LABELS, LIBRARY_TITLES, TRAIT_TITLES, canManageClone, cloneRetry, defaultLibraryLanguage, isAbort, languageName, libraryNarrowed, libraryQuery, mergeLibraryPage, readingLanguage } from "@/components/reels/voices";
+import { LIBRARY_WAIT_MS, isLatest, libraryWait, nextLibraryPage, planWithVoice, showLibraryError, GENDER_LABELS, LIBRARY_LABELS, LIBRARY_TITLES, TRAIT_TITLES, CHALLENGE_TTL_MS, type ChallengeEntry, canManageClone, cloneRetry, readableChallenge, reusableChallenge, defaultLibraryLanguage, isAbort, languageName, libraryNarrowed, libraryQuery, mergeLibraryPage, readingLanguage } from "@/components/reels/voices";
 
 const lv = (id: string) => ({ id }) as LibraryVoice;
 const voice = (over: Partial<ReelVoiceOption>): ReelVoiceOption => ({ id: "v", name: "V", gender: "clone", sampleUrl: null, clone: true, mine: false, ...over });
@@ -118,5 +118,22 @@ describe("planWithVoice", () => {
     expect(out.voice).toBe("library:x");
     expect(out.voiceName).toHaveLength(80);
     expect(out.title).toBe("t");
+  });
+});
+
+describe("clone challenges", () => {
+  const entry = (over: Partial<ChallengeEntry> = {}): ChallengeEntry => ({ lang: "fr", challenge: { challengeId: "c", lang: "fr", sentences: ["a"] }, at: 1_000, ...over });
+  it("reuses a kept challenge only for its language, unsent and under its life", () => {
+    expect(reusableChallenge(entry(), "fr", 1_000 + CHALLENGE_TTL_MS - 1)).not.toBeNull();
+    expect(reusableChallenge(entry(), "fr", 1_000 + CHALLENGE_TTL_MS)).toBeNull();
+    expect(reusableChallenge(entry(), "de", 2_000)).toBeNull();
+    expect(reusableChallenge(entry({ used: true }), "fr", 2_000)).toBeNull();
+    expect(reusableChallenge(null, "fr", 2_000)).toBeNull();
+  });
+  it("reads a new one before recording once half its life is gone, or it was sent", () => {
+    expect(readableChallenge(entry(), 1_000 + CHALLENGE_TTL_MS / 2)).toBe(true);
+    expect(readableChallenge(entry(), 1_001 + CHALLENGE_TTL_MS / 2)).toBe(false);
+    expect(readableChallenge(entry({ used: true }), 1_000)).toBe(false);
+    expect(readableChallenge(null, 1_000)).toBe(false);
   });
 });

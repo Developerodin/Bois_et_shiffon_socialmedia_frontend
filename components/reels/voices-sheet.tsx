@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Loader2, X } from "lucide-react";
+import { Loader2, Mic, X } from "lucide-react";
 import { LIBRARY_FILTERS, NAME_MAX, type LibraryVoice, type ReelDetail, type ReelVoiceOption } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -83,16 +83,16 @@ function RenameDialog({ voice, onClose, onSave }: { voice: ReelVoiceOption | nul
 /**
  * The Voices sheet: pick the reel's voice from the brand's own voices or the ElevenLabs library, and manage or add clones.
  * A radio only sets a local choice; Use this voice saves once, then closes. Its error is the sheet's own (the page-wide
- * save error belongs to whichever step pressed save). The Clone button joins when the clone dialog does (Task 9).
+ * save error belongs to whichever step pressed save). Clone a voice opens the clone dialog the Script step holds.
  */
-export function VoicesSheet({ workspaceId, brandId, detail, save, open, onOpenChange }: {
+export function VoicesSheet({ workspaceId, brandId, detail, save, open, onOpenChange, onClone }: {
   workspaceId: string;
   brandId: string;
   detail: ReelDetail;
   save: ReelSave;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Opens the clone dialog: wired by the Script step, called by the Clone button Task 9 adds. */
+  /** Opens the clone dialog (held by the Script step). */
   onClone: () => void;
 }) {
   const plan = detail.plan;
@@ -185,7 +185,10 @@ export function VoicesSheet({ workspaceId, brandId, detail, save, open, onOpenCh
           <div className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">{clones} of {cloning.max} used</p>
             {clones >= cloning.max ? <p role="status" className="text-sm text-muted-foreground">This workspace has {cloning.max} cloned voices, the most it can have.</p> : null}
-            {/* The "Clone a voice · N credits" button (calling onClone) comes with the clone dialog in Task 9. */}
+            <Button type="button" variant="outline" className="self-start" disabled={clones >= cloning.max} onClick={onClone}>
+              <Mic className="size-4" aria-hidden="true" />
+              Clone a voice
+            </Button>
           </div>
         ) : null}
 

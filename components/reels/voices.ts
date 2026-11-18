@@ -79,6 +79,20 @@ export function readingLanguage(preferred: readonly string[], available: readonl
   return "en";
 }
 
+/** How long a clone challenge lives on the server (apps/server/server/reels/clone-challenge.ts CHALLENGE_TTL_MS). */
+export const CHALLENGE_TTL_MS = 600_000;
+
+/** A clone challenge read for `lang` at `at`; `used` once a clone was sent with it (the server takes it on any answer). */
+export type ChallengeEntry = { lang: string; challenge: { challengeId: string; lang: string; sentences: string[] }; at: number; used?: boolean };
+
+/** The kept challenge, if reopening the dialog may show it again: same language, never sent, and under its 10 minutes. */
+export const reusableChallenge = (e: ChallengeEntry | null, lang: string, now: number): ChallengeEntry | null =>
+  e && !e.used && e.lang === lang && now - e.at < CHALLENGE_TTL_MS ? e : null;
+
+/** Whether a reading may start on this challenge: never sent, and at most half its life gone (else read a new one first). */
+export const readableChallenge = (e: ChallengeEntry | null, now: number): e is ChallengeEntry =>
+  !!e && !e.used && now - e.at <= CHALLENGE_TTL_MS / 2;
+
 /** "fr" as "French"; the code itself if the browser can't name it. */
 export function languageName(code: string): string {
   try {
