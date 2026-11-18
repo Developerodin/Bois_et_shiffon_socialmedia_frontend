@@ -79,14 +79,6 @@ export function putShared(url: string, d: unknown): void {
 /** When `url` last got an answer (0: never). */
 export const sharedAt = (url: string): number => fetchedAt.get(url) ?? 0;
 
-/** Signed links last an hour; an answer holding them is read again once it is 50 minutes old (as the phone does). */
-export const SIGNED_LINK_STALE_MS = 50 * 60_000;
-
-/** Whether an answer fetched at `fetchedAtMs` holds links too old to show. */
-export function stale(fetchedAtMs: number, now = Date.now()): boolean {
-  return now - fetchedAtMs >= SIGNED_LINK_STALE_MS;
-}
-
 export function subscribeShared(url: string, fn: (d: unknown) => void): () => void {
   const set = listeners.get(url) ?? new Set();
   listeners.set(url, set.add(fn));

@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import { PageSection } from "@/components/ui/page-section";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ListSkeleton, LoadError } from "@/components/settings/shared";
-import { sharedAt, stale } from "@/components/workspace/use-job";
+import { useShootPrices } from "@/components/shell/use-plan-credits";
+import { sharedAt } from "@/components/workspace/use-job";
+import { stale } from "@/lib/signed-links";
 import { shootsUrl } from "./api";
 import { countByKind, type ShootKind } from "./shoot";
 import { ShootCard } from "./shoot-card";
@@ -15,6 +17,7 @@ type Filter = "all" | ShootKind;
 /** The brand's photoshoots, newest first, filtered by kind; each card opens its shoot. */
 export function PastShoots({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
   const { data, failed, reload } = useShoots(workspaceId, brandId);
+  const { unlimited } = useShootPrices(workspaceId);
   const [filter, setFilter] = useState<Filter>("all");
   const counts = useMemo(() => countByKind(data ?? []), [data]);
   const shown = useMemo(() => (data ?? []).filter((s) => filter === "all" || s.kind === filter), [data, filter]);
@@ -49,7 +52,7 @@ export function PastShoots({ workspaceId, brandId }: { workspaceId: string; bran
       <ul aria-label="Photoshoots" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
         {shown.map((s) => (
           <li key={s.id}>
-            <ShootCard shoot={s} />
+            <ShootCard shoot={s} unlimited={unlimited} />
           </li>
         ))}
       </ul>

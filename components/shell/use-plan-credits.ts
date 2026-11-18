@@ -48,12 +48,12 @@ export function useRunPrice(workspaceId: string | null, agentKey: string): numbe
 }
 
 /**
- * What a new photoshoot on each tier costs in this workspace (null: show no price), and why a press must wait
- * (`blocker`: the plan isn't read yet; `reload` reads it again).
+ * What a new photoshoot on each tier costs in this workspace (null: show no price), why a press must wait
+ * (`blocker`: the plan isn't read yet; `reload` reads it again), and whether the workspace is unlimited (charged nothing).
  */
 export function useShootPrices(workspaceId: string | null) {
   const { entry, reload } = useEntry(workspaceId);
   const sub = entry.subscription;
   const priceOf = useCallback((tier: ShootTier) => shootPrice(sub, tier), [sub]);
-  return { priceOf, blocker: shootPriceBlocker(sub, entry.failed), failed: entry.failed, reload };
+  return { priceOf, blocker: shootPriceBlocker(sub, entry.failed), failed: entry.failed, unlimited: sub?.unlimited ?? false, reload };
 }

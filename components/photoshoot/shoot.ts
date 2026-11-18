@@ -11,7 +11,7 @@ import {
   type ShootTier,
 } from "@/shared";
 import type { JobStep } from "@/components/ui/job-progress";
-import { stale } from "@/components/workspace/use-job";
+import { stale } from "@/lib/signed-links";
 
 /** The studio's choices, before they become a request. Pure: no React. */
 export type Scene = (typeof SCENES)[number];
@@ -70,15 +70,14 @@ export function shootSteps(shoot: Shoot | null): JobStep[] {
   return STEP_LABELS.map((label, i) => ({ label, state: states[i] }));
 }
 
+/** How far the bar under the steps goes, in percent: the share of steps done. */
+export const stepsDone = (steps: readonly JobStep[]): number => (steps.filter((s) => s.state === "done").length / steps.length) * 100;
+
 export function countByKind(shoots: readonly Shoot[]): { all: number; product: number; fashion: number } {
   const product = shoots.filter((s) => s.kind === "product").length;
   return { all: shoots.length, product, fashion: shoots.length - product };
 }
 
-/**
- * `next`, but with `prev`'s signed links (the source, and each shot's url and download link by key) while `prev`'s
- * are fresh, so an image doesn't reload on every poll. A shot `prev` lacks, or a download link it lacks, comes from `next`.
- */
 /**
  * When the links keepLinks returned were fetched: a kept result mixes `prev`'s links with `next`'s (new shots, a
  * download link `prev` lacked), so it is as old as the older of the two answers; otherwise as old as `next`.
@@ -87,6 +86,10 @@ export function linksFetchedAt(prevFetchedAt: number | undefined, fetchedAt: num
   return prevFetchedAt !== undefined && !stale(prevFetchedAt, now) ? Math.min(prevFetchedAt, fetchedAt) : fetchedAt;
 }
 
+/**
+ * `next`, but with `prev`'s signed links (the source, and each shot's url and download link by key) while `prev`'s
+ * are fresh, so an image doesn't reload on every poll. A shot `prev` lacks, or a download link it lacks, comes from `next`.
+ */
 export function keepLinks(prev: Shoot | undefined, next: Shoot, prevFetchedAt: number, now = Date.now()): Shoot {
   if (!prev || stale(prevFetchedAt, now)) return next;
   const old = new Map(prev.shots.map((s) => [s.key, s]));

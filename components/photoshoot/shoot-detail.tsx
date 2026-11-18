@@ -11,14 +11,15 @@ import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ListSkeleton, LoadError } from "@/components/settings/shared";
 import { useShootPrices } from "@/components/shell/use-plan-credits";
-import { sharedAt, sharedResponse, stale } from "@/components/workspace/use-job";
+import { sharedAt, sharedResponse } from "@/components/workspace/use-job";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
+import { stale } from "@/lib/signed-links";
 import { dayDate } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { shootUrl } from "./api";
 import { refundLine, shootBadge, shootTitle, stagingSummary, waitLine } from "./labels";
 import { pressAndShow, pressErrorText } from "./press";
-import { downloadLink, retryRequest, shootSteps } from "./shoot";
+import { downloadLink, retryRequest, shootSteps, stepsDone } from "./shoot";
 import { useShoot } from "./use-shoots";
 
 const CARD = "rounded-2xl border border-border bg-card px-5 py-4 shadow-sm";
@@ -155,18 +156,18 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
       <PageHeader title={title}>
         <span className="flex flex-wrap items-center gap-2">
           <time dateTime={shoot.createdAt}>{dayDate(shoot.createdAt)}</time>
-          <StatusBadge status={shoot.status}>{shootBadge(shoot)}</StatusBadge>
+          <StatusBadge status={shoot.status}>{shootBadge(shoot, prices.unlimited)}</StatusBadge>
         </span>
       </PageHeader>
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-3">
-          {sawRunning ? <JobProgress title={waitLine(shoot.input.tier)} steps={steps} job={job} /> : null}
+          {sawRunning ? <JobProgress title={waitLine(shoot.input.tier)} steps={steps} value={stepsDone(steps)} job={job} /> : null}
 
           {shoot.status === "FAILED" ? (
             <div className={`${CARD} flex flex-col gap-2`}>
               <h2 className="text-lg font-semibold">This photoshoot didn&apos;t work</h2>
-              <p className="text-sm text-muted-foreground">{refundLine(shoot.credits)}</p>
+              <p className="text-sm text-muted-foreground">{refundLine(shoot.credits, prices.unlimited)}</p>
             </div>
           ) : null}
 
@@ -223,7 +224,7 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
           <section aria-labelledby="staging-summary" className={`${CARD} flex flex-col gap-3`}>
             <h2 id="staging-summary" className="text-lg font-semibold">Staging summary</h2>
             <dl className="flex flex-col gap-2 text-sm">
-              {stagingSummary(shoot.input, shoot.credits).map((row) => (
+              {stagingSummary(shoot.input, shoot.credits, prices.unlimited).map((row) => (
                 <div key={row.label} className="flex flex-col gap-0.5">
                   <dt className="text-muted-foreground">{row.label}</dt>
                   <dd className="break-words">{row.value}</dd>

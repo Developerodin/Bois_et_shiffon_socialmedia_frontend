@@ -2,7 +2,8 @@
 
 import { useCallback } from "react";
 import type { BrandAssetsView } from "@/shared";
-import { JOB_INTERVALS, putShared, sharedAt, stale, useJob } from "@/components/workspace/use-job";
+import { JOB_INTERVALS, putShared, sharedAt, useJob } from "@/components/workspace/use-job";
+import { stale } from "@/lib/signed-links";
 import { brandLookUrl } from "./api";
 
 const pick = (d: never) => d as BrandAssetsView;

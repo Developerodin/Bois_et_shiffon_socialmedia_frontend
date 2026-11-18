@@ -3,7 +3,8 @@ import { ApiError, errorMessage } from "@/components/settings/api";
 import { refusalOf } from "@/lib/paywall";
 import { requestId } from "@/lib/net";
 import { loadPlanCredits } from "@/lib/plan-credits";
-import { fetchShared, putShared, sharedAt, sharedResponse, stale } from "@/components/workspace/use-job";
+import { stale } from "@/lib/signed-links";
+import { fetchShared, putShared, sharedAt, sharedResponse } from "@/components/workspace/use-job";
 import { photoshootApi, shootUrl, shootsUrl } from "./api";
 import { prependShoot } from "./shoot";
 
@@ -34,6 +35,14 @@ export function makePresser(
     }
   };
 }
+
+// ponytail: a fixed pause, not a per-shoot lock. The presser clears its id on success, so a press right after one that
+// succeeded is a new shoot and a new charge. Generate / Try again stay off this long after a success so a held Enter's
+// repeat (or a click that lands just after the answer) can't press again. A deliberate press after it is a new shoot.
+export const PRESS_COOLDOWN_MS = 1500;
+
+/** The second (or later) click of a double-click: ignored, so it never presses a paid button again. */
+export const isRepeatClick = (e: { detail: number }): boolean => e.detail > 1;
 
 // One presser per brand for the page's life, like the phone's module state: leaving the studio and coming back
 // still reuses an unanswered id. Ceiling: one small entry per brand pressed in this tab; nothing is evicted.

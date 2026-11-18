@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo } from "react";
 import type { Shoot } from "@/shared";
-import { JOB_INTERVALS, SIGNED_LINK_STALE_MS, sharedAt, stale, useJob } from "@/components/workspace/use-job";
+import { JOB_INTERVALS, sharedAt, useJob } from "@/components/workspace/use-job";
+import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { shootUrl, shootsUrl } from "./api";
 import { keepLinks, linksFetchedAt } from "./shoot";
 

@@ -42,9 +42,10 @@ export function PhotoGrid(props: Props) {
         <legend className="sr-only">{label}</legend>
         <div className={GRID}>
           {photos.map((p) => (
+            // Chosen: the border and the check; the ring is for keyboard focus only (primary and ring are one colour).
             <label
               key={p.key}
-              className="cursor-pointer rounded-xl ring-offset-2 ring-offset-background has-[:checked]:ring-2 has-[:checked]:ring-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
+              className="cursor-pointer rounded-xl border-2 border-transparent ring-offset-2 ring-offset-background has-[:checked]:border-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
             >
               <input type="radio" name={name} value={p.key} checked={selected === p.key} onChange={() => onSelect(p.key)} className="peer sr-only" />
               <span className="relative block aspect-[4/5]">

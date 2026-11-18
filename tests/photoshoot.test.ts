@@ -2,10 +2,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { Shoot, ShootRequest } from "@/shared";
 import { ApiError } from "@/components/settings/api";
 import { NetworkError } from "@/lib/net";
-import { stale } from "@/components/workspace/use-job";
+import { stale } from "@/lib/signed-links";
 import { shootUrl, shootsUrl } from "@/components/photoshoot/api";
 import { LABELS, refundLine, shootBadge, shootTitle, stagingSummary, waitLine } from "@/components/photoshoot/labels";
-import { makePresser, pressErrorText } from "@/components/photoshoot/press";
+import { isRepeatClick, makePresser, pressErrorText } from "@/components/photoshoot/press";
 import {
   DEFAULT_FASHION,
   DEFAULT_PRODUCT,
@@ -18,6 +18,7 @@ import {
   prependShoot,
   retryRequest,
   shootSteps,
+  stepsDone,
   toRequest,
 } from "@/components/photoshoot/shoot";
 
@@ -247,18 +248,25 @@ describe("urls and ids", () => {
 
 describe("studio text", () => {
   it("badges a shoot by status with its credits", () => {
-    expect(shootBadge(shoot({ status: "RUNNING", credits: 4 }))).toBe("Processing · 4 credits");
-    expect(shootBadge(shoot({ status: "DONE" }))).toBe("Ready");
-    expect(shootBadge(shoot({ status: "FAILED", credits: 1 }))).toBe("Didn't work · 1 credit refunded");
-    // An unlimited workspace is charged nothing: no amount.
-    expect(shootBadge(shoot({ status: "RUNNING", credits: 0 }))).toBe("Processing");
-    expect(shootBadge(shoot({ status: "FAILED", credits: 0 }))).toBe("Didn't work");
+    expect(shootBadge(shoot({ status: "RUNNING", credits: 4 }), false)).toBe("Processing · 4 credits");
+    expect(shootBadge(shoot({ status: "DONE" }), false)).toBe("Ready");
+    expect(shootBadge(shoot({ status: "FAILED", credits: 1 }), false)).toBe("Didn't work · 1 credit refunded");
+    // Nothing recorded as charged: no amount.
+    expect(shootBadge(shoot({ status: "RUNNING", credits: 0 }), false)).toBe("Processing");
+    expect(shootBadge(shoot({ status: "FAILED", credits: 0 }), false)).toBe("Didn't work");
+  });
+
+  it("shows an unlimited workspace no amount, though the shoot records its tier's price", () => {
+    expect(shootBadge(shoot({ status: "RUNNING", credits: 4 }), true)).toBe("Processing");
+    expect(shootBadge(shoot({ status: "DONE", credits: 4 }), true)).toBe("Ready");
+    expect(shootBadge(shoot({ status: "FAILED", credits: 4 }), true)).toBe("Didn't work");
+    expect(refundLine(4, true)).toBe("Try again, or pick another quality.");
   });
 
   it("says the refund in the phone's words", () => {
-    expect(refundLine(24)).toBe("Your 24 credits are back. Try again, or pick another quality.");
-    expect(refundLine(1)).toBe("Your 1 credit is back. Try again, or pick another quality.");
-    expect(refundLine(0)).toBe("Try again, or pick another quality.");
+    expect(refundLine(24, false)).toBe("Your 24 credits are back. Try again, or pick another quality.");
+    expect(refundLine(1, false)).toBe("Your 1 credit is back. Try again, or pick another quality.");
+    expect(refundLine(0, false)).toBe("Try again, or pick another quality.");
   });
 });
 
@@ -285,27 +293,53 @@ describe("pressErrorText", () => {
 
 describe("stagingSummary", () => {
   it("lists a product shoot's format, scene, brief and cost", () => {
-    expect(stagingSummary({ ...PRODUCT, brief: "  " }, 4)).toEqual([
+    expect(stagingSummary({ ...PRODUCT, brief: "  " }, 4, false)).toEqual([
       { label: "Format", value: "1:1 format" },
       { label: "Scene style", value: "Studio" },
       { label: "Creative brief", value: "No art direction: staged as the scene style describes." },
       { label: "Creation cost", value: "4 credits" },
     ]);
-    expect(stagingSummary({ ...PRODUCT, scene: "custom", brief: "Marble, morning light" }, 1)[1].value).toBe("Custom");
-    expect(stagingSummary({ ...PRODUCT, scene: "custom", brief: "Marble, morning light" }, 1).slice(2)).toEqual([
+    expect(stagingSummary({ ...PRODUCT, scene: "custom", brief: "Marble, morning light" }, 1, false)[1].value).toBe("Custom");
+    expect(stagingSummary({ ...PRODUCT, scene: "custom", brief: "Marble, morning light" }, 1, false).slice(2)).toEqual([
       { label: "Creative brief", value: "Marble, morning light" },
       { label: "Creation cost", value: "1 credit" },
     ]);
   });
   it("lists a fashion shoot's format, model, pose, background and cost", () => {
-    expect(stagingSummary(FASHION, 24)).toEqual([
+    expect(stagingSummary(FASHION, 24, false)).toEqual([
       { label: "Format", value: "4:5 format" },
       { label: "Model & styling", value: "A model chosen for the garment" },
       { label: "Pose", value: "Three-quarter" },
       { label: "Background setting", value: "Urban street" },
       { label: "Creation cost", value: "24 credits" },
     ]);
-    expect(stagingSummary({ ...FASHION, model: "editorial" }, 24)[1].value).toBe("Inès · editorial styling");
+    expect(stagingSummary({ ...FASHION, model: "editorial" }, 24, false)[1].value).toBe("Inès · editorial styling");
+  });
+});
+
+describe("stagingSummary, unlimited", () => {
+  it("leaves out the cost for a workspace that paid nothing", () => {
+    expect(stagingSummary(PRODUCT, 4, true).map((r) => r.label)).toEqual(["Format", "Scene style", "Creative brief"]);
+    expect(stagingSummary(FASHION, 24, true).map((r) => r.label)).toEqual(["Format", "Model & styling", "Pose", "Background setting"]);
+  });
+});
+
+describe("stepsDone", () => {
+  it("fills the bar by the steps done: a third while running, full when done", () => {
+    expect(stepsDone(shootSteps(null))).toBe(0);
+    expect(Math.round(stepsDone(shootSteps(shoot({ status: "RUNNING" }))))).toBe(33);
+    expect(Math.round(stepsDone(shootSteps(shoot({ status: "FAILED" }))))).toBe(33);
+    expect(stepsDone(shootSteps(shoot({ status: "DONE" })))).toBe(100);
+  });
+});
+
+describe("isRepeatClick", () => {
+  it("ignores the second click of a double-click, not a single click or a keyboard press", () => {
+    expect(isRepeatClick({ detail: 2 })).toBe(true);
+    expect(isRepeatClick({ detail: 3 })).toBe(true);
+    expect(isRepeatClick({ detail: 1 })).toBe(false);
+    // Enter or Space on a button fires a click with detail 0.
+    expect(isRepeatClick({ detail: 0 })).toBe(false);
   });
 });
 

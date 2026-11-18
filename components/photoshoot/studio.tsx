@@ -14,7 +14,7 @@ import { withPrice } from "@/lib/plan-credits";
 import { CurrentShoot } from "./current-shoot";
 import { FashionSetup } from "./fashion-setup";
 import { PastShoots } from "./past-shoots";
-import { pressAndShow, pressErrorText } from "./press";
+import { PRESS_COOLDOWN_MS, isRepeatClick, pressAndShow, pressErrorText } from "./press";
 import { ProductSetup } from "./product-setup";
 import { DEFAULT_FASHION, DEFAULT_PRODUCT, generateBlocker, toRequest, type ShootKind } from "./shoot";
 
@@ -43,7 +43,7 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
   const [currentId, setCurrentId] = useState(initialShootId);
   const [pressing, setPressing] = useState(false);
   const [error, setError] = useState<{ from: "generate" | "retry"; text: string } | null>(null);
-  // A second click in the same frame, before `pressing` disables the button.
+  // A second click in the same frame, before `pressing` disables the button; held for PRESS_COOLDOWN_MS after a success.
   const pressingRef = useRef(false);
   // The page remounts the studio on a brand switch, so this also covers "the brand changed".
   const alive = useRef(true);
@@ -64,8 +64,10 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
     pressingRef.current = true;
     setPressing(true);
     setError(null);
+    let succeeded = false;
     try {
       const shoot = await pressAndShow(workspaceId, brandId, r);
+      succeeded = true;
       if (!alive.current) return;
       setCurrentId(shoot.id);
       // In the URL so a reload still shows it; tied to the brand, which the page checks.
@@ -74,8 +76,13 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
       const text = pressErrorText(e);
       if (alive.current && text) setError({ from, text });
     } finally {
-      pressingRef.current = false;
-      if (alive.current) setPressing(false);
+      const release = () => {
+        pressingRef.current = false;
+        if (alive.current) setPressing(false);
+      };
+      // Errors re-enable at once; a success waits out the cooldown (see PRESS_COOLDOWN_MS).
+      if (succeeded) setTimeout(release, PRESS_COOLDOWN_MS);
+      else release();
     }
   }
 
@@ -112,8 +119,8 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
                     type="button"
                     disabled={pressing || blocker !== null}
                     aria-describedby={blocker ? "generate-blocker" : undefined}
-                    onClick={() => {
-                      if (blocker === null) void press(toRequest(kind, setup), "generate");
+                    onClick={(e) => {
+                      if (blocker === null && !isRepeatClick(e)) void press(toRequest(kind, setup), "generate");
                     }}
                   >
                     {pressing ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}

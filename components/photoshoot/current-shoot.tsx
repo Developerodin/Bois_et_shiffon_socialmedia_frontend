@@ -7,11 +7,13 @@ import type { ShootRequest } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { JobProgress } from "@/components/ui/job-progress";
 import { useShootPrices } from "@/components/shell/use-plan-credits";
-import { sharedAt, stale } from "@/components/workspace/use-job";
+import { sharedAt } from "@/components/workspace/use-job";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
+import { stale } from "@/lib/signed-links";
 import { shootUrl } from "./api";
 import { refundLine, shootTitle, waitLine } from "./labels";
-import { retryRequest, shootSteps } from "./shoot";
+import { isRepeatClick } from "./press";
+import { retryRequest, shootSteps, stepsDone } from "./shoot";
 import { useShoot } from "./use-shoots";
 
 const CARD = "rounded-2xl border border-border bg-card px-5 py-4 shadow-sm";
@@ -31,7 +33,7 @@ export function CurrentShoot({ workspaceId, brandId, shootId, onRetry, pressing,
 }) {
   const job = useShoot(workspaceId, brandId, shootId);
   const { data: shoot, failed, status } = job;
-  const { priceOf, blocker: priceBlocker } = useShootPrices(workspaceId);
+  const { priceOf, blocker: priceBlocker, unlimited } = useShootPrices(workspaceId);
   const steps = useMemo(() => shootSteps(shoot), [shoot]);
 
   // The refund puts credits back: the chip in the top bar reads them again.
@@ -55,7 +57,7 @@ export function CurrentShoot({ workspaceId, brandId, shootId, onRetry, pressing,
   return (
     <div className="flex flex-col gap-3">
       {/* Stays mounted on DONE and FAILED, so its live region announces the end. */}
-      <JobProgress title={shoot ? waitLine(shoot.input.tier) : "Preparing your photos"} steps={steps} job={job} />
+      <JobProgress title={shoot ? waitLine(shoot.input.tier) : "Preparing your photos"} steps={steps} value={stepsDone(steps)} job={job} />
 
       {shoot?.status === "DONE" ? (
         <div className={`${CARD} flex flex-col gap-4`}>
@@ -87,7 +89,7 @@ export function CurrentShoot({ workspaceId, brandId, shootId, onRetry, pressing,
       {shoot?.status === "FAILED" ? (
         <div className={`${CARD} flex flex-col items-start gap-3`}>
           <h3 className="text-lg font-semibold">This photoshoot didn&apos;t work</h3>
-          <p className="text-sm text-muted-foreground">{refundLine(shoot.credits)}</p>
+          <p className="text-sm text-muted-foreground">{refundLine(shoot.credits, unlimited)}</p>
           {onRetry ? (
             <>
               <Button
@@ -95,7 +97,9 @@ export function CurrentShoot({ workspaceId, brandId, shootId, onRetry, pressing,
                 variant="secondary"
                 disabled={pressing || priceBlocker !== null}
                 aria-describedby={priceBlocker ? "retry-blocker" : undefined}
-                onClick={() => onRetry(retryRequest(shoot))}
+                onClick={(e) => {
+                  if (!isRepeatClick(e)) onRetry(retryRequest(shoot));
+                }}
               >
                 {withPrice("Try again", priceOf(shoot.input.tier))}
               </Button>

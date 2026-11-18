@@ -8,7 +8,7 @@ import { dayDate } from "@/lib/time";
 import { shootBadge, shootTitle } from "./labels";
 
 /** One past shoot, linking to its page: its first photo (the source photo until it has one), title, date and status. */
-export const ShootCard = memo(function ShootCard({ shoot }: { shoot: Shoot }) {
+export const ShootCard = memo(function ShootCard({ shoot, unlimited }: { shoot: Shoot; unlimited: boolean }) {
   const image = (shoot.status === "DONE" && shoot.shots[0]?.url) || shoot.sourceUrl;
   return (
     <Link
@@ -22,7 +22,7 @@ export const ShootCard = memo(function ShootCard({ shoot }: { shoot: Shoot }) {
       <span className="flex flex-col items-start gap-1 px-1 pt-2">
         <span className="w-full truncate text-sm font-medium">{shootTitle(shoot.input)}</span>
         <time dateTime={shoot.createdAt} className="text-xs text-muted-foreground">{dayDate(shoot.createdAt)}</time>
-        <StatusBadge status={shoot.status}>{shootBadge(shoot)}</StatusBadge>
+        <StatusBadge status={shoot.status}>{shootBadge(shoot, unlimited)}</StatusBadge>
       </span>
     </Link>
   );
