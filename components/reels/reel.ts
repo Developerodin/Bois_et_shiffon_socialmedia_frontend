@@ -147,3 +147,8 @@ export function slotStandIns(keys: readonly string[], plan: ReelPlan): boolean[]
   const standIns = new Set(plan.scenes.filter((s) => s.standIn).map((s) => s.photoKey));
   return keys.map((k) => standIns.has(k));
 }
+
+/** After a save the server refused as changed (409) and the reel was re-read: the edit restarts from the re-read version, keys kept, so "save again" works. Any other time, or another scene count, the edit is returned as it was. */
+export function adoptRefusedVersion<E extends { version: number; keys: readonly string[] }>(edit: E, refused: boolean, version: number, scenes: number): E {
+  return refused && edit.keys.length === scenes && edit.version !== version ? { ...edit, version } : edit;
+}

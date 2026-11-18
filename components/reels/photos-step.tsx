@@ -5,7 +5,8 @@ import dynamic from "next/dynamic";
 import { ArrowDown, ArrowUp, Loader2 } from "lucide-react";
 import type { LibraryPhoto, ReelDetail } from "@/shared";
 import { Button } from "@/components/ui/button";
-import { editLock, slotStandIns, swapScenes } from "./reel";
+import { CHANGED_ELSEWHERE } from "./plan-stream";
+import { adoptRefusedVersion, editLock, slotStandIns, swapScenes } from "./reel";
 import type { ReelSave } from "./use-reel-save";
 
 // The picker is only fetched when a photo is first changed, so it stays out of the reel page's first load.
@@ -34,6 +35,8 @@ export const PhotosStep = memo(function PhotosStep({ workspaceId, brandId, detai
   const [moved, setMoved] = useState("");
   // The reel page's save error is shared by every step: show it here only after this step's own Save press.
   const [tried, setTried] = useState(false);
+  // Set when this step's save failed; settled once the save (and its re-read) ends.
+  const [failed, setFailed] = useState(false);
   const [focus, setFocus] = useState<{ slot: number; dir: Dir; n: number } | null>(null);
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   // Photos picked this session, for display until the saved reel brings their links.
@@ -49,6 +52,13 @@ export const PhotosStep = memo(function PhotosStep({ workspaceId, brandId, detai
   if (edit && edit.keys.length !== plan.scenes.length) {
     setEdit(null);
     setNote("The plan changed: pick the photos again.");
+  }
+
+  // After a refused (409) save, the re-read plan is the one the person saves onto: adopt its version, keys kept.
+  if (edit && failed && !save.saving) {
+    setFailed(false);
+    const next = adoptRefusedVersion(edit, save.error === CHANGED_ELSEWHERE, detail.version, plan.scenes.length);
+    if (next !== edit) setEdit(next);
   }
 
   const planKeys = plan.scenes.map((s) => s.photoKey);
@@ -87,6 +97,7 @@ export const PhotosStep = memo(function PhotosStep({ workspaceId, brandId, detai
     save.clear();
     const out = await save.save(edit.version, { ...plan, scenes: plan.scenes.map((s, i) => ({ ...s, photoKey: edit.keys[i] ?? s.photoKey })) });
     if (out) setEdit(null);
+    else setFailed(true);
   }
 
   const btn = (slot: number, dir: Dir) => (el: HTMLButtonElement | null) => {

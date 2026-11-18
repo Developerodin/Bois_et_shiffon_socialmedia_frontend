@@ -5,7 +5,7 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, countByStage, slotStandIns, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { BUILT_STEPS, adoptRefusedVersion, countByStage, slotStandIns, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
@@ -80,6 +80,16 @@ describe("stepState photos", () => {
     expect(stepState("photos", detail({ plan: null }))).toBe("None");
     expect(stepState("photos", detail())).toBe("Done");
     expect(stepState("photos", detail({ plan: { ...plan, scenes: [{ ...plan.scenes[0], standIn: true }] } }))).toBe("Needs a photo");
+  });
+});
+
+describe("adoptRefusedVersion", () => {
+  const edit = { version: 3, keys: ["a", "b"] };
+  it("takes the re-read version only after a refusal with the same scene count", () => {
+    expect(adoptRefusedVersion(edit, true, 5, 2)).toEqual({ version: 5, keys: ["a", "b"] });
+    expect(adoptRefusedVersion(edit, false, 5, 2)).toBe(edit);
+    expect(adoptRefusedVersion(edit, true, 5, 3)).toBe(edit);
+    expect(adoptRefusedVersion(edit, true, 3, 2)).toBe(edit);
   });
 });
 
