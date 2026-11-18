@@ -21,6 +21,8 @@ export const MAX_RECORDING_SECONDS = 15;
 export const MAX_RECORDING_BYTES = 1024 * 1024; // 15 s of AAC at 128 kbps is ~250 KB
 export const MAX_CLONE_BYTES = 4 * 1024 * 1024;
 export const REEL_DURATION_CHIPS = [20, 30] as const;
+export const WORDS_PER_SECOND = 2; // R11: "38 words · ~19 sec"
+export const wordCount = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
 
 /** Every content status the database has; the phone's narrower union is assignable to it. */
 export type ContentStatus = "PLANNED" | "BRIEF_READY" | "DRAFT_REVIEW" | "REVIEWED" | "AWAITING_APPROVAL" | "APPROVED" | "SCHEDULED" | "PUBLISHED" | "REJECTED" | "BLOCKED" | "CANCELLED";
@@ -32,9 +34,16 @@ export type ReelTemplateOption = { id: string; seconds: number; preview: Templat
 export type ReelVoiceOption = { id: string; name: string; gender: "female" | "male" | "neutral" | "clone"; sampleUrl: string | null; clone: boolean; mine: boolean };
 /** A voice from ElevenLabs' public library ("library:<id>"); traits are ElevenLabs' own words (e.g. "middle_aged"). */
 export type LibraryVoice = { id: string; name: string; gender: string | null; age: string | null; accent: string | null; language: string | null; useCase: string | null; previewUrl: string | null };
+// The library's filter values (ElevenLabs' own words). The phone's voices.tsx keeps its own copy (no characters_animation); keep in step.
+export const LIBRARY_FILTERS = {
+  language: ["fr", "en", "de", "es", "it", "pt", "nl"],
+  gender: ["female", "male", "neutral"],
+  age: ["young", "middle_aged", "old"],
+  useCase: ["social_media", "advertisement", "narrative_story", "conversational", "informative_educational", "characters_animation"],
+} as const;
 export type LibraryFilters = { language?: string; gender?: string; age?: string; useCase?: string; search?: string; page?: number };
-/** What cloning needs: whether this person may (workspace admins), its price, the cap, the reading length, the consent text. */
-export type CloningInfo = { allowed: boolean; credits: number; max: number; seconds: { min: number; max: number }; consent: string };
+/** What cloning needs: whether this person may (workspace admins), its price, the cap, the reading length, the consent text and its version (sent back with a clone). */
+export type CloningInfo = { allowed: boolean; credits: number; max: number; seconds: { min: number; max: number }; consent: string; consentVersion: string };
 export type Presenter = { id: string; name: string; status: "RUNNING" | "DONE" | "FAILED"; sheet: { key: string; url: string } | null };
 /** A trait group (gender, age…) and its options, id → English label (the app shows its own words when it has them). */
 export type PresenterTrait = { id: string; options: Record<string, string> };
