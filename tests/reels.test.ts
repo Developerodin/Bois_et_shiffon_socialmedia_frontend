@@ -5,7 +5,7 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, adoptRefusedVersion, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { BUILT_STEPS, adoptRefusedVersion, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
@@ -111,6 +111,14 @@ describe("script helpers", () => {
     expect(sampleAction("a", "a", "http://x")).toBe("stop");
     expect(sampleAction("a", "b", "https://x")).toBe("play");
     expect(sampleAction(null, "b", "data:audio/mp3;base64,AA")).toBe("refuse");
+  });
+  it("takeLanded: the saved plan still has this take on the scene, and the scene wasn't dropped", () => {
+    const out = (recordingId: string | undefined, droppedRecordings?: number[]) => ({ plan: { ...plan, scenes: [{ ...plan.scenes[0], recordingId }] }, droppedRecordings });
+    expect(takeLanded(out("t1"), 0, "t1")).toBe(true);
+    expect(takeLanded(out("t1", [1]), 0, "t1")).toBe(false);
+    expect(takeLanded(out(undefined), 0, "t1")).toBe(false);
+    expect(takeLanded(out("t0"), 0, "t1")).toBe(false);
+    expect(takeLanded(out("t1"), 3, "t1")).toBe(false);
   });
 });
 

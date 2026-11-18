@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useState } from "react";
 import dynamic from "next/dynamic";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mic } from "lucide-react";
 import { VOICE_TEXT_MAX, type ReelDetail } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,12 +15,15 @@ import { VoiceRow } from "./voice-row";
 import { GENDER_LABELS } from "./voices";
 
 const VoicesSheet = dynamic(() => import("./voices-sheet").then((m) => m.VoicesSheet), { ssr: false });
+const RecordDialog = dynamic(() => import("./record-dialog").then((m) => m.RecordDialog), { ssr: false });
 
 /**
  * The Script & voice step: the reel's voice, one text box per scene, and each scene's own recording. Text edits stay
  * here until Save script, which sends one save with the version the edit started from and trimmed texts (the server
  * keeps a take only when its text still matches). Memoised: the page passes it stable props, so stream frames skip it.
- * Change voice opens the Voices sheet (mounted on first open, then kept). The record and clone dialogs (Task 9) join with their own buttons.
+ * Change voice opens the Voices sheet (mounted on first open, then kept). Record opens the record dialog for one scene,
+ * mounted only while that scene is chosen (closing it turns the microphone off). A scene whose text has unsaved edits
+ * can't be recorded: the take is checked against the saved text.
  */
 export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detail, canCreate, save, chatBusy }: {
   workspaceId: string;
@@ -37,6 +40,8 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
   const [dropped, setDropped] = useState<string[]>([]);
   const [voicesMounted, setVoicesMounted] = useState(false);
   const [voicesOpen, setVoicesOpen] = useState(false);
+  const [recordScene, setRecordScene] = useState<number | null>(null);
+  const closeRecord = useCallback(() => setRecordScene(null), []);
   // Task 9 opens the clone dialog here; the sheet shows no Clone button until it exists.
   const openClone = useCallback(() => undefined, []);
 
@@ -99,11 +104,16 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
         <VoicesSheet workspaceId={workspaceId} brandId={brandId} detail={detail} save={save} open={voicesOpen} onOpenChange={setVoicesOpen} onClone={openClone} />
       ) : null}
 
+      {recordScene !== null && editable ? (
+        <RecordDialog workspaceId={workspaceId} brandId={brandId} detail={detail} scene={recordScene} save={save} onClose={closeRecord} />
+      ) : null}
+
       <ol className="flex flex-col gap-3">
         {plan.scenes.map((s, i) => {
           const id = `script-${i}`;
           const problem = edit ? problems[i] ?? null : null;
           const recorded = !!s.recordingId;
+          const sceneDirty = texts[i] !== planTexts[i];
           return (
             <li key={i} className="flex flex-col gap-2 rounded-2xl border border-border bg-card px-4 py-4 shadow-sm">
               <label htmlFor={id} className="text-sm font-medium">Scene {i + 1} voiceover</label>
@@ -120,12 +130,18 @@ export const ScriptStep = memo(function ScriptStep({ workspaceId, brandId, detai
               {problem ? <p id={`${id}-problem`} className="text-xs text-destructive">{problem}</p> : null}
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 {recorded ? <span>{`Recorded · ${(s.recordingSeconds ?? 0).toFixed(1)} s`}</span> : <span>Uses the voice above</span>}
+                {editable ? (
+                  <Button type="button" variant="outline" size="sm" disabled={busy || sceneDirty} aria-label={recorded ? `Record scene ${i + 1} again` : `Record scene ${i + 1}`} onClick={() => setRecordScene(i)}>
+                    <Mic className="size-4" aria-hidden="true" />
+                    {recorded ? "Record again" : "Record"}
+                  </Button>
+                ) : null}
                 {recorded && editable ? (
                   <Button type="button" variant="ghost" size="sm" disabled={busy || dirty} onClick={() => void remove(i)}>Remove</Button>
                 ) : null}
               </div>
               {recorded ? <p className="text-xs text-muted-foreground">Editing this text drops its recording.</p> : null}
-              {recorded && editable && dirty ? <p className="text-xs text-muted-foreground">Save your script changes before recording.</p> : null}
+              {editable && (sceneDirty || (recorded && dirty)) ? <p className="text-xs text-muted-foreground">Save your script changes before recording.</p> : null}
             </li>
           );
         })}

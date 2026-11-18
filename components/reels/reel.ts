@@ -1,4 +1,4 @@
-import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, wordCount, type ReelDetail, type ReelOptions, type ReelPlan, type ReelScene, type ReelSummary } from "@/shared";
+import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, wordCount, type PlanResult, type ReelDetail, type ReelOptions, type ReelPlan, type ReelScene, type ReelSummary } from "@/shared";
 import { stale } from "@/lib/signed-links";
 import { starterProduct } from "./labels";
 
@@ -161,6 +161,10 @@ export const recordedScenes = (scenes: readonly ReelScene[], texts: readonly str
 /** One line per scene whose take the server dropped on a save (scene numbers, 1-based). */
 export const droppedRecordings = (dropped: readonly number[] | undefined): string[] =>
   (dropped ?? []).map((n) => `Scene ${n}'s recording was removed: its text changed. Record it again if you want.`);
+
+/** Whether a saved take stayed on its scene (0-based): the server drops it when the text moved on meanwhile. */
+export const takeLanded = (out: Pick<PlanResult, "plan" | "droppedRecordings">, scene: number, recordingId: string): boolean =>
+  !(out.droppedRecordings ?? []).includes(scene + 1) && out.plan.scenes[scene]?.recordingId === recordingId;
 
 /** A voice sample plays only from a secure link; blob: is for a take the person just made. */
 export const playableSample = (url: string): boolean => /^(https|blob):/i.test(url);
