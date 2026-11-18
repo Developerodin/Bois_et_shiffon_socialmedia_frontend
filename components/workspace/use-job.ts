@@ -9,7 +9,7 @@ export type Intervals = readonly (readonly [untilMs: number, everyMs: number])[]
 export const JOB_INTERVALS = {
   always: [[Infinity, 6_000]],
   reelRender: [[120_000, 5_000], [600_000, 10_000], [Infinity, 30_000]],
-  photoshoot: [[Infinity, 5_000]],
+  photoshoot: [[120_000, 5_000], [600_000, 10_000], [Infinity, 30_000]],
   photoshootList: [[Infinity, 10_000]],
   preview: [[Infinity, 10_000]],
   storyRender: [[60_000, 3_000], [Infinity, 10_000]],

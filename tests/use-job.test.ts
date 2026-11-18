@@ -21,6 +21,9 @@ describe("nextDelay", () => {
     expect(nextDelay(JOB_INTERVALS.reelRender, 0, 0, false)).toBe(5_000);
     expect(nextDelay(JOB_INTERVALS.reelRender, 130_000, 0, false)).toBe(10_000);
     expect(nextDelay(JOB_INTERVALS.reelRender, 700_000, 0, false)).toBe(30_000);
+    expect(nextDelay(JOB_INTERVALS.photoshoot, 0, 0, false)).toBe(5_000);
+    expect(nextDelay(JOB_INTERVALS.photoshoot, 130_000, 0, false)).toBe(10_000);
+    expect(nextDelay(JOB_INTERVALS.photoshoot, 700_000, 0, false)).toBe(30_000);
   });
 
   it("doubles per error up to a minute", () => {
