@@ -73,6 +73,10 @@ export function shootSteps(shoot: Shoot | null): JobStep[] {
 /** How far the bar under the steps goes, in percent: the share of steps done. */
 export const stepsDone = (steps: readonly JobStep[]): number => (steps.filter((s) => s.state === "done").length / steps.length) * 100;
 
+/** Whether a shoot other than `trackedId` (the one "This shoot" polls on its own) is running. */
+export const runningBesides = (shoots: readonly Shoot[], trackedId: string | null): boolean =>
+  shoots.some((s) => s.status === "RUNNING" && s.id !== trackedId);
+
 export function countByKind(shoots: readonly Shoot[]): { all: number; product: number; fashion: number } {
   const product = shoots.filter((s) => s.kind === "product").length;
   return { all: shoots.length, product, fashion: shoots.length - product };
@@ -88,7 +92,8 @@ export function linksFetchedAt(prevFetchedAt: number | undefined, fetchedAt: num
 
 /**
  * `next`, but with `prev`'s signed links (the source, and each shot's url and download link by key) while `prev`'s
- * are fresh, so an image doesn't reload on every poll. A shot `prev` lacks, or a download link it lacks, comes from `next`.
+ * are fresh, so an image doesn't reload on every poll. A shot `prev` lacks, or a link it lacks (a download link, or a
+ * url the list left unsigned), comes from `next`.
  */
 export function keepLinks(prev: Shoot | undefined, next: Shoot, prevFetchedAt: number, now = Date.now()): Shoot {
   if (!prev || stale(prevFetchedAt, now)) return next;
@@ -99,8 +104,9 @@ export function keepLinks(prev: Shoot | undefined, next: Shoot, prevFetchedAt: n
     shots: next.shots.map((s) => {
       const o = old.get(s.key);
       if (!o) return s;
+      const url = o.url ?? s.url;
       const downloadUrl = o.downloadUrl ?? s.downloadUrl;
-      return { ...s, url: o.url, ...(downloadUrl ? { downloadUrl } : {}) };
+      return { ...s, ...(url ? { url } : {}), ...(downloadUrl ? { downloadUrl } : {}) };
     }),
   };
 }
@@ -116,10 +122,9 @@ export const prependShoot = (shoots: readonly Shoot[], shoot: Shoot): Shoot[] =>
 
 /**
  * The shoot page's save control: the attachment link only `GET …/photoshoots/{id}` signs, else (an answer without one,
- * e.g. the create call's) the image itself in a new tab.
+ * e.g. the create call's) the image itself in a new tab. Null for a shot with neither (the list signs only the first).
  */
-export function downloadLink(shot: Shoot["shots"][number]): { href: string; label: string; newTab: boolean } {
-  return shot.downloadUrl
-    ? { href: shot.downloadUrl, label: "Download photo", newTab: false }
-    : { href: shot.url, label: "Open full size", newTab: true };
+export function downloadLink(shot: Shoot["shots"][number]): { href: string; label: string; newTab: boolean } | null {
+  if (shot.downloadUrl) return { href: shot.downloadUrl, label: "Download photo", newTab: false };
+  return shot.url ? { href: shot.url, label: "Open full size", newTab: true } : null;
 }

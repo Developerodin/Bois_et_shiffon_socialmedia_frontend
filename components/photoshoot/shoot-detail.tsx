@@ -122,6 +122,10 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
       fresh = again;
     }
     const link = downloadLink(fresh);
+    if (!link) {
+      setSaveError("Couldn't get this photo. Try again.");
+      return;
+    }
     // The attachment link saves the file and leaves the page in place.
     if (link.newTab) window.open(link.href, "_blank", "noopener");
     else window.location.assign(link.href);

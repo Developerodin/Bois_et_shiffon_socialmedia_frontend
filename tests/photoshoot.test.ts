@@ -19,6 +19,7 @@ import {
   linksFetchedAt,
   prependShoot,
   retryRequest,
+  runningBesides,
   shootSteps,
   stepsDone,
   toRequest,
@@ -257,6 +258,24 @@ describe("keepLinks", () => {
   it("takes the new answer when there is no earlier one", () => {
     expect(keepLinks(undefined, next, 0, MIN)).toBe(next);
   });
+
+  it("fills the shots the list left unsigned from the shoot read, and keeps them when the list reads again", () => {
+    const listed = shoot({ shots: [{ key: "a", url: "a-old" }, { key: "b" }] });
+    const opened = shoot({ shots: [{ key: "a", url: "a-new" }, { key: "b", url: "b-new" }] });
+    const kept = keepLinks(listed, opened, 0, MIN);
+    expect(kept.shots).toEqual([{ key: "a", url: "a-old" }, { key: "b", url: "b-new" }]);
+    expect(keepLinks(kept, listed, 0, MIN).shots).toEqual([{ key: "a", url: "a-old" }, { key: "b", url: "b-new" }]);
+  });
+});
+
+describe("runningBesides", () => {
+  it("sees a running shoot other than the one tracked", () => {
+    const a = shoot({ id: "a" });
+    const b = shoot({ id: "b", status: "DONE" });
+    expect(runningBesides([a, b], "a")).toBe(false);
+    expect(runningBesides([a, b], null)).toBe(true);
+    expect(runningBesides([a, shoot({ id: "c" })], "a")).toBe(true);
+  });
 });
 
 describe("linksFetchedAt", () => {
@@ -395,5 +414,8 @@ describe("downloadLink", () => {
   });
   it("opens the image in a new tab without one", () => {
     expect(downloadLink({ key: "k", url: "https://cdn/a" })).toEqual({ href: "https://cdn/a", label: "Open full size", newTab: true });
+  });
+  it("has nothing to offer for a shot the list left unsigned", () => {
+    expect(downloadLink({ key: "k" })).toBeNull();
   });
 });

@@ -17,7 +17,10 @@ export type ShootRequest =
   | { kind: "product"; tier: ShootTier; sourceKey: string; ratio: (typeof PRODUCT_RATIOS)[number]; scene: (typeof SCENES)[number]; brief: string }
   | { kind: "fashion"; tier: ShootTier; sourceKey: string; ratio: (typeof FASHION_RATIOS)[number]; model?: (typeof MODELS)[number]; pose: (typeof POSES)[number]; background: (typeof BACKGROUNDS)[number] };
 export type ShootStatus = "RUNNING" | "DONE" | "FAILED";
-/** One photoshoot (server shoot.ts shootView): links are signed for an hour. */
+/**
+ * One photoshoot (server shoot.ts shootView): links are signed for an hour. The list signs only the source and the
+ * first shot (what a card shows), so a shot's `url` can be missing there; the single read and the create answer sign every shot.
+ */
 export type Shoot = {
   id: string;
   kind: ShootRequest["kind"];
@@ -28,7 +31,7 @@ export type Shoot = {
   failed: boolean;
   createdAt: string;
   sourceUrl: string;
-  shots: { key: string; url: string; downloadUrl?: string }[];
+  shots: { key: string; url?: string; downloadUrl?: string }[];
 };
 
 /**
