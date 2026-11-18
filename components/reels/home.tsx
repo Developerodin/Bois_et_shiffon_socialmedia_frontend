@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import type { ReelTemplateOption } from "@/shared";
+import type { ReelOptions, ReelTemplateOption } from "@/shared";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
@@ -13,16 +14,19 @@ import { fetchShared } from "@/components/workspace/use-job";
 import type { Opportunity } from "@/components/workspace/content-panels";
 import { openPaywall } from "@/lib/paywall";
 import { navFor } from "@/lib/nav";
-import { reelsUrl } from "./api";
+import { errorMessage } from "@/components/settings/api";
+import { reelOptionsUrl, reelsApi, reelsUrl } from "./api";
 import { PLAN_REFUSAL, TEMPLATE_LABELS, presenterState } from "./labels";
 import { TOO_LONG, type CreateBody } from "./plan-stream";
-import { starters } from "./reel";
+import { pressLabel, usePaidPress } from "./paid-press";
+import { optionBusy, starters } from "./reel";
 import { StartCard } from "./start-card";
 import { useReelIdeas, useReelOptions } from "./use-reels";
 import { useReelStream } from "./use-reel-stream";
 import { YourReels } from "./your-reels";
 
 const IdeasDialog = dynamic(() => import("./ideas-dialog").then((m) => m.IdeasDialog), { ssr: false });
+const PresenterDialog = dynamic(() => import("./presenter-dialog").then((m) => m.PresenterDialog), { ssr: false });
 
 /**
  * The reels home: plan a new reel (from a prompt, an idea or a template), the brand's presenters and templates, and
@@ -99,7 +103,7 @@ export function ReelsHome({ workspaceId, brandId, canCreate }: { workspaceId: st
   );
 }
 
-/** Presenters (read only here) and templates, each with Preview and, for a role that can, Use. */
+/** Presenters (with Make a presenter and Remove for a role that can) and templates, each with Preview and, for a role that can, Use and Preview with my photos. */
 function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
   workspaceId: string;
   brandId: string;
@@ -107,11 +111,28 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
   sending: boolean;
   onUse: (templateId: string) => void;
 }) {
-  const { data } = useReelOptions(workspaceId, brandId);
+  const { data, reload } = useReelOptions(workspaceId, brandId);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMounted, setDialogMounted] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
   // One preview video at a time: Preview on another template swaps this one back to its poster.
   const [playing, setPlaying] = useState<string | null>(null);
   const presenters = data?.presenters ?? [];
   const templates = data?.templates ?? [];
+
+  async function remove(id: string) {
+    if (removing) return;
+    setRemoving(id);
+    setRemoveError(null);
+    try {
+      await reelsApi.removePresenter(workspaceId, brandId, id);
+    } catch (e) {
+      setRemoveError(errorMessage(e));
+    }
+    await reload().catch(() => undefined);
+    setRemoving(null);
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -121,11 +142,34 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
             {presenters.map((p) => (
               <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
                 <span className="min-w-0 truncate font-medium">{p.name}</span>
-                <span className="shrink-0 text-muted-foreground">{presenterState(p, data?.presenterCredits ?? 0)}</span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <span className="text-muted-foreground">{presenterState(p, data?.presenterCredits ?? 0)}</span>
+                  {canCreate && p.status !== "RUNNING" ? (
+                    <Button type="button" variant="ghost" size="sm" disabled={removing !== null} onClick={() => void remove(p.id)} aria-label={`Remove ${p.name}`}>
+                      Remove
+                    </Button>
+                  ) : null}
+                </span>
               </li>
             ))}
           </ul>
         ) : null}
+        <p role="alert" className="text-sm text-destructive empty:hidden">{removeError}</p>
+        {canCreate && data ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="self-start"
+            onClick={() => {
+              setDialogMounted(true);
+              setDialogOpen(true);
+            }}
+          >
+            Make a presenter
+          </Button>
+        ) : null}
+        {dialogMounted && data ? <PresenterDialog workspaceId={workspaceId} brandId={brandId} options={data} open={dialogOpen} onOpenChange={setDialogOpen} /> : null}
       </PageSection>
 
       <PageSection id="templates" title="Templates">
@@ -133,7 +177,7 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
           <ul className="grid grid-cols-2 gap-3">
             {templates.map((t) => (
               <li key={t.id}>
-                <TemplateCard template={t} playing={playing === t.id} onPreview={() => setPlaying(t.id)} canUse={canCreate} disabled={sending} onUse={() => onUse(t.id)} />
+                <TemplateCard workspaceId={workspaceId} brandId={brandId} options={data} template={t} playing={playing === t.id} onPreview={() => setPlaying(t.id)} canUse={canCreate} disabled={sending} onUse={() => onUse(t.id)} />
               </li>
             ))}
           </ul>
@@ -143,7 +187,10 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
   );
 }
 
-function TemplateCard({ template, playing, onPreview, canUse, disabled, onUse }: {
+function TemplateCard({ workspaceId, brandId, options, template, playing, onPreview, canUse, disabled, onUse }: {
+  workspaceId: string;
+  brandId: string;
+  options: ReelOptions | null;
   template: ReelTemplateOption;
   playing: boolean;
   onPreview: () => void;
@@ -153,6 +200,9 @@ function TemplateCard({ template, playing, onPreview, canUse, disabled, onUse }:
 }) {
   const label = TEMPLATE_LABELS[template.id] ?? { title: template.id, subtitle: "" };
   const preview = template.preview;
+  const plan = usePlan(workspaceId);
+  const paid = usePaidPress(workspaceId, { reread: () => fetchShared(reelOptionsUrl(workspaceId, brandId), true) });
+  const busy = optionBusy(options, { templateId: template.id });
   return (
     <div className="flex flex-col gap-2">
       <div className="aspect-[4/5] overflow-hidden rounded-xl bg-muted">
@@ -179,6 +229,28 @@ function TemplateCard({ template, playing, onPreview, canUse, disabled, onUse }:
           </Button>
         ) : null}
       </div>
+      {template.own ? <p className="text-xs text-muted-foreground">Made with your photos</p> : null}
+      {canUse && options ? (
+        <div className="flex flex-col items-start gap-1">
+          {options.canPreview ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!plan.loaded || paid.pressing || busy}
+              onClick={(e) => void paid.press(e, () => reelsApi.preview(workspaceId, brandId, template.id))}
+            >
+              {paid.pressing ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}
+              {pressLabel("Preview with my photos", plan, options.previewCredits)}
+            </Button>
+          ) : (
+            <p className="text-xs text-muted-foreground">Add product photos to preview templates with them.</p>
+          )}
+          {template.making ? <p className="text-xs text-muted-foreground">Making your preview. It takes a few minutes.</p> : null}
+          {template.failed && !template.making ? <p className="text-xs text-muted-foreground">Your last preview didn&apos;t work. You weren&apos;t charged for it.</p> : null}
+          <p role="alert" className="text-xs text-destructive empty:hidden">{paid.error}</p>
+        </div>
+      ) : null}
     </div>
   );
 }
