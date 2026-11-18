@@ -48,7 +48,7 @@ export default async function LibraryPage() {
       workspaceId={shell.activeWorkspaceId}
       brandId={shell.activeBrandId}
       canEdit={perms.has("context.edit")}
-      canUpload={perms.has("publish.execute")}
+      canUpload={perms.has("content.create")}
     />
   );
 }
