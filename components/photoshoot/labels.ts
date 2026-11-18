@@ -43,3 +43,20 @@ export function shootBadge(shoot: Pick<Shoot, "status" | "credits">): string {
 /** Under "This photoshoot didn't work": the refund, then what to do. */
 export const refundLine = (n: number): string =>
   `${n > 0 ? `Your ${creditsText(n)} ${n === 1 ? "is" : "are"} back. ` : ""}Try again, or pick another quality.`;
+
+/** The shoot page's staging summary, in the phone's words (detail screen): what was asked for and what it cost. */
+export function stagingSummary(input: ShootRequest, credits: number): { label: string; value: string }[] {
+  const format = { label: "Format", value: `${input.ratio} format` };
+  const cost = { label: "Creation cost", value: creditsText(credits) };
+  if (input.kind === "product") {
+    const brief = input.brief.trim() || "No art direction: staged as the scene style describes.";
+    return [format, { label: "Scene style", value: LABELS.scenes[input.scene] }, { label: "Creative brief", value: brief }, cost];
+  }
+  return [
+    format,
+    { label: "Model & styling", value: input.model ? LABELS.models[input.model] : "A model chosen for the garment" },
+    { label: "Pose", value: LABELS.poses[input.pose] },
+    { label: "Background setting", value: LABELS.backgrounds[input.background] },
+    cost,
+  ];
+}

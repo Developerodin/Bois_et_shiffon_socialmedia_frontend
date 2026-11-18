@@ -2,7 +2,10 @@ import type { Shoot, ShootRequest } from "@/shared";
 import { ApiError, errorMessage } from "@/components/settings/api";
 import { refusalOf } from "@/lib/paywall";
 import { requestId } from "@/lib/net";
-import { photoshootApi } from "./api";
+import { loadPlanCredits } from "@/lib/plan-credits";
+import { fetchShared, putShared, sharedAt, sharedResponse, stale } from "@/components/workspace/use-job";
+import { photoshootApi, shootUrl, shootsUrl } from "./api";
+import { prependShoot } from "./shoot";
 
 /**
  * Generate / Try again / Variation: sends `request` with a request id. The last press that got no answer (timeout,
@@ -42,6 +45,28 @@ export function pressShoot(w: string, b: string, r: ShootRequest): Promise<Shoot
   let press = pressers.get(scope);
   if (!press) pressers.set(scope, (press = makePresser((req, id) => photoshootApi.create(w, b, req, id))));
   return press(r);
+}
+
+/** A shoot just created shows at once: on its own URL, and first in the list (which then polls, as it holds a RUNNING shoot). */
+function showCreated(w: string, b: string, shoot: Shoot) {
+  putShared(shootUrl(w, b, shoot.id), { shoot });
+  const list = shootsUrl(w, b);
+  const old = sharedResponse(list) as { shoots: Shoot[] } | undefined;
+  // No list read yet, or one whose links have expired (putting it would date them now): read it again instead.
+  // A read already out may predate the shoot, so this one waits for it and goes after.
+  if (old && !stale(sharedAt(list))) putShared(list, { shoots: prependShoot(old.shoots, shoot) });
+  else void fetchShared(list, true).catch(() => undefined);
+}
+
+/**
+ * Generate / Try again (studio) and Variation (shoot page): presses, shows the new shoot everywhere at once, and reads
+ * the balance again after the charge. Rejects with the press's error; the caller shows it with pressErrorText.
+ */
+export async function pressAndShow(w: string, b: string, r: ShootRequest): Promise<Shoot> {
+  const shoot = await pressShoot(w, b, r);
+  showCreated(w, b, shoot);
+  void loadPlanCredits(w, true);
+  return shoot;
 }
 
 /** What to say when a press fails: null for a 402 that opened the paywall (it says it), else the server's sentence or a generic one. */

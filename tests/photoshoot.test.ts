@@ -4,12 +4,13 @@ import { ApiError } from "@/components/settings/api";
 import { NetworkError } from "@/lib/net";
 import { stale } from "@/components/workspace/use-job";
 import { shootUrl, shootsUrl } from "@/components/photoshoot/api";
-import { LABELS, refundLine, shootBadge, shootTitle, waitLine } from "@/components/photoshoot/labels";
+import { LABELS, refundLine, shootBadge, shootTitle, stagingSummary, waitLine } from "@/components/photoshoot/labels";
 import { makePresser, pressErrorText } from "@/components/photoshoot/press";
 import {
   DEFAULT_FASHION,
   DEFAULT_PRODUCT,
   countByKind,
+  downloadLink,
   generateBlocker,
   isShootId,
   keepLinks,
@@ -279,5 +280,40 @@ describe("pressErrorText", () => {
     expect(pressErrorText(new ApiError(402, "Payment required"))).toBe("Payment required");
     expect(pressErrorText(new ApiError(503, "Photoshoots are paused for now."))).toBe("Photoshoots are paused for now.");
     expect(pressErrorText(new Error("boom"))).toBe("Something went wrong. Try again.");
+  });
+});
+
+describe("stagingSummary", () => {
+  it("lists a product shoot's format, scene, brief and cost", () => {
+    expect(stagingSummary({ ...PRODUCT, brief: "  " }, 4)).toEqual([
+      { label: "Format", value: "1:1 format" },
+      { label: "Scene style", value: "Studio" },
+      { label: "Creative brief", value: "No art direction: staged as the scene style describes." },
+      { label: "Creation cost", value: "4 credits" },
+    ]);
+    expect(stagingSummary({ ...PRODUCT, scene: "custom", brief: "Marble, morning light" }, 1)[1].value).toBe("Custom");
+    expect(stagingSummary({ ...PRODUCT, scene: "custom", brief: "Marble, morning light" }, 1).slice(2)).toEqual([
+      { label: "Creative brief", value: "Marble, morning light" },
+      { label: "Creation cost", value: "1 credit" },
+    ]);
+  });
+  it("lists a fashion shoot's format, model, pose, background and cost", () => {
+    expect(stagingSummary(FASHION, 24)).toEqual([
+      { label: "Format", value: "4:5 format" },
+      { label: "Model & styling", value: "A model chosen for the garment" },
+      { label: "Pose", value: "Three-quarter" },
+      { label: "Background setting", value: "Urban street" },
+      { label: "Creation cost", value: "24 credits" },
+    ]);
+    expect(stagingSummary({ ...FASHION, model: "editorial" }, 24)[1].value).toBe("Inès · editorial styling");
+  });
+});
+
+describe("downloadLink", () => {
+  it("downloads the attachment link when the shoot read gave one", () => {
+    expect(downloadLink({ key: "k", url: "https://cdn/a", downloadUrl: "https://cdn/a?dl=1" })).toEqual({ href: "https://cdn/a?dl=1", label: "Download photo", newTab: false });
+  });
+  it("opens the image in a new tab without one", () => {
+    expect(downloadLink({ key: "k", url: "https://cdn/a" })).toEqual({ href: "https://cdn/a", label: "Open full size", newTab: true });
   });
 });

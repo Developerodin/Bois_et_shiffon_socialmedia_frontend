@@ -110,3 +110,13 @@ export const isShootId = (s: unknown): s is string => typeof s === "string" && S
 
 /** The list with `shoot` first (a shoot just created), any older copy of it dropped. */
 export const prependShoot = (shoots: readonly Shoot[], shoot: Shoot): Shoot[] => [shoot, ...shoots.filter((s) => s.id !== shoot.id)];
+
+/**
+ * The shoot page's save control: the attachment link only `GET …/photoshoots/{id}` signs, else (an answer without one,
+ * e.g. the create call's) the image itself in a new tab.
+ */
+export function downloadLink(shot: Shoot["shots"][number]): { href: string; label: string; newTab: boolean } {
+  return shot.downloadUrl
+    ? { href: shot.downloadUrl, label: "Download photo", newTab: false }
+    : { href: shot.url, label: "Open full size", newTab: true };
+}

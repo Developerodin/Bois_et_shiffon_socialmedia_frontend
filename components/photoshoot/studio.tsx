@@ -3,38 +3,25 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import type { Shoot, ShootRequest } from "@/shared";
+import type { ShootRequest } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { useShootPrices } from "@/components/shell/use-plan-credits";
-import { fetchShared, putShared, sharedAt, sharedResponse, stale } from "@/components/workspace/use-job";
 import { navFor } from "@/lib/nav";
-import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
-import { shootUrl, shootsUrl } from "./api";
+import { withPrice } from "@/lib/plan-credits";
 import { CurrentShoot } from "./current-shoot";
 import { FashionSetup } from "./fashion-setup";
 import { PastShoots } from "./past-shoots";
-import { pressErrorText, pressShoot } from "./press";
+import { pressAndShow, pressErrorText } from "./press";
 import { ProductSetup } from "./product-setup";
-import { DEFAULT_FASHION, DEFAULT_PRODUCT, generateBlocker, prependShoot, toRequest, type ShootKind } from "./shoot";
+import { DEFAULT_FASHION, DEFAULT_PRODUCT, generateBlocker, toRequest, type ShootKind } from "./shoot";
 
 const KINDS = [
   { value: "product", label: "Product" },
   { value: "fashion", label: "Fashion" },
 ] as const;
-
-/** A shoot just created shows at once: on its own URL, and first in the list (which then polls, as it holds a RUNNING shoot). */
-function showCreated(w: string, b: string, shoot: Shoot) {
-  putShared(shootUrl(w, b, shoot.id), { shoot });
-  const list = shootsUrl(w, b);
-  const old = sharedResponse(list) as { shoots: Shoot[] } | undefined;
-  // No list read yet, or one whose links have expired (putting it would date them now): read it again instead.
-  // A read already out may predate the shoot, so this one waits for it and goes after.
-  if (old && !stale(sharedAt(list))) putShared(list, { shoots: prependShoot(old.shoots, shoot) });
-  else void fetchShared(list, true).catch(() => undefined);
-}
 
 /**
  * The photoshoot studio: the setup for a product or a fashion shoot, the shoot just started, and past shoots.
@@ -78,9 +65,7 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
     setPressing(true);
     setError(null);
     try {
-      const shoot = await pressShoot(workspaceId, brandId, r);
-      showCreated(workspaceId, brandId, shoot);
-      void loadPlanCredits(workspaceId, true);
+      const shoot = await pressAndShow(workspaceId, brandId, r);
       if (!alive.current) return;
       setCurrentId(shoot.id);
       // In the URL so a reload still shows it; tied to the brand, which the page checks.
