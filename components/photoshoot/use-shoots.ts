@@ -46,12 +46,15 @@ export function useShoots(w: string, b: string) {
   return { data, failed, slow, status, reload };
 }
 
-/** One photoshoot, with download links; polls while it runs. A 403 or 404 stops polling (`status` says which). */
+/**
+ * One photoshoot, with download links; polls while it runs. A 403 or 404 stops polling (`status` says which).
+ * `linksAt`: when the links in `data` were fetched (kept links can be older than the last read; 0 with no data).
+ */
 export function useShoot(w: string, b: string, id: string) {
   const url = shootUrl(w, b, id);
   const pick = useMemo(() => (d: never) => steady((d as { shoot: Shoot }).shoot, sharedAt(url)), [url]);
   const { data, failed, slow, status, reload } = useJob(url, { pick, done: oneDone, intervals: JOB_INTERVALS.photoshoot, stopOn: STOP_ON });
   const one = useMemo(() => (data ? [data] : null), [data]);
   useRereadWhenStale(one, reload);
-  return { data, failed, slow, status, reload };
+  return { data, failed, slow, status, reload, linksAt: one ? linksAt(one) : 0 };
 }

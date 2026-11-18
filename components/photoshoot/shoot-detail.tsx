@@ -58,7 +58,7 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
   const router = useRouter();
   const url = shootUrl(workspaceId, brandId, shootId);
   const job = useShoot(workspaceId, brandId, shootId);
-  const { data: shoot, failed, status, reload } = job;
+  const { data: shoot, failed, status, reload, linksAt } = job;
   const prices = useShootPrices(workspaceId);
   const steps = useMemo(() => shootSteps(shoot), [shoot]);
   const [selected, setSelected] = useState(0);
@@ -88,7 +88,8 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
   if (status === 404) return <ShootNotFound />;
 
   // Links cached over 50 minutes ago may have expired: no photos or links until the read that replaces them lands.
-  const linksOk = shoot !== null && !stale(sharedAt(url));
+  // By the age of the links shown, which keepLinks can hold from before the last read.
+  const linksOk = shoot !== null && !stale(linksAt);
   if (!linksOk) {
     return (
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -109,7 +110,7 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
     setSaveError("");
     let fresh = s;
     // The page may have sat past the links' hour: read the shoot again and save from the new links.
-    if (stale(sharedAt(url))) {
+    if (stale(linksAt)) {
       await reload();
       if (!alive.current) return;
       const again = (sharedResponse(url) as { shoot: Shoot } | undefined)?.shoot.shots.find((x) => x.key === s.key);
@@ -130,16 +131,21 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
     pressingRef.current = true;
     setPressing(true);
     setError("");
+    let succeeded = false;
     try {
       const next = await pressAndShow(workspaceId, brandId, retryRequest(from));
       if (!alive.current) return;
+      // The button stays off until the studio replaces this page: the presser cleared its id, so another press charges again.
+      succeeded = true;
       router.push(`/photoshoot?${new URLSearchParams({ shoot: next.id, b: brandId })}`);
     } catch (e) {
       const text = pressErrorText(e);
       if (alive.current && text) setError(text);
     } finally {
-      pressingRef.current = false;
-      if (alive.current) setPressing(false);
+      if (!succeeded) {
+        pressingRef.current = false;
+        if (alive.current) setPressing(false);
+      }
     }
   }
 
@@ -188,8 +194,9 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
                       aria-pressed={i === index}
                       onClick={() => setSelected(i)}
                       className={cn(
-                        "block w-full rounded-xl ring-offset-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        i === index && "ring-2 ring-primary",
+                        // Selection is the border; the ring is for keyboard focus only (primary and ring are one colour).
+                        "block w-full rounded-xl border-2 ring-offset-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        i === index ? "border-primary" : "border-transparent",
                       )}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element -- signed storage links; next/image needs each host allowed */}
@@ -225,7 +232,8 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
             </dl>
           </section>
 
-          {canCreate ? (
+          {/* As on the phone, only a finished shoot offers Variation. */}
+          {canCreate && shoot.status === "DONE" ? (
             <div className="flex flex-col items-start gap-2">
               <Button
                 type="button"
