@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { JOB_INTERVALS, fetchShared, nextDelay, putShared, sharedAt, sharedResponse, subscribeShared } from "@/components/workspace/use-job";
+import { JOB_INTERVALS, SIGNED_LINK_STALE_MS, fetchShared, nextDelay, putShared, sharedAt, sharedResponse, stale, subscribeShared } from "@/components/workspace/use-job";
 
 const fetchMock = vi.fn();
 const json = (body: unknown, status = 200) =>
@@ -30,6 +30,15 @@ describe("nextDelay", () => {
 
   it("waits a minute when rate limited", () => {
     expect(nextDelay(JOB_INTERVALS.storyRender, 0, 0, true)).toBe(60_000);
+  });
+});
+
+describe("stale", () => {
+  it("is true once an answer's signed links are 50 minutes old", () => {
+    const MIN = 60_000;
+    expect(SIGNED_LINK_STALE_MS).toBe(50 * MIN);
+    expect(stale(0, 49 * MIN)).toBe(false);
+    expect(stale(0, 51 * MIN)).toBe(true);
   });
 });
 

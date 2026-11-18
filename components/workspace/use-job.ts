@@ -79,6 +79,14 @@ export function putShared(url: string, d: unknown): void {
 /** When `url` last got an answer (0: never). */
 export const sharedAt = (url: string): number => fetchedAt.get(url) ?? 0;
 
+/** Signed links last an hour; an answer holding them is read again once it is 50 minutes old (as the phone does). */
+export const SIGNED_LINK_STALE_MS = 50 * 60_000;
+
+/** Whether an answer fetched at `fetchedAtMs` holds links too old to show. */
+export function stale(fetchedAtMs: number, now = Date.now()): boolean {
+  return now - fetchedAtMs >= SIGNED_LINK_STALE_MS;
+}
+
 export function subscribeShared(url: string, fn: (d: unknown) => void): () => void {
   const set = listeners.get(url) ?? new Set();
   listeners.set(url, set.add(fn));
@@ -91,13 +99,15 @@ const visible = () => document.visibilityState === "visible";
  * Poll `url` until `done(data)` (forever without `done`), on the shared per-URL cache: panels on one URL share one
  * request. Backs off on errors, waits a minute when rate limited, pauses while the tab is hidden and fetches as soon
  * as it's visible. `slow` turns on once `capMs` has passed into the running episode without the job being done; polling goes on.
- * `pick`, `done` and `intervals` must be stable (module-level or memoised), or every render restarts the polling.
+ * `pick`, `done`, `intervals` and `stopOn` must be stable (module-level or memoised), or every render restarts the polling.
+ * `stopOn`: HTTP statuses that end polling (a 404 won't turn into a 200 by asking again); `failed` stays on until a
+ * success, e.g. from `reload`. `status` is the last error's HTTP status (0: no answer; null: no error, or not an HTTP one).
  * A new `url` starts over: data from the cache (or none), no errors, the clock and `slow` reset.
  */
 export function useJob<T>(
   url: string,
-  { pick, done, intervals, capMs }: { pick: (d: never) => T; done?: (data: T) => boolean; intervals: Intervals; capMs?: number },
-): { data: T | null; failed: boolean; slow: boolean; reload: () => Promise<void> } {
+  { pick, done, intervals, capMs, stopOn }: { pick: (d: never) => T; done?: (data: T) => boolean; intervals: Intervals; capMs?: number; stopOn?: readonly number[] },
+): { data: T | null; failed: boolean; slow: boolean; status: number | null; reload: () => Promise<void> } {
   const cached = () => {
     const d = sharedResponse(url);
     return d === undefined ? null : pick(d as never);
@@ -105,6 +115,7 @@ export function useJob<T>(
   const [data, setData] = useState<T | null>(cached);
   const [failed, setFailed] = useState(false);
   const [slow, setSlow] = useState(false);
+  const [status, setStatus] = useState<number | null>(null);
   // The URL `data`, `failed` and `slow` belong to: on a new URL, reset them before anything uses the old job's state.
   const [shownUrl, setShownUrl] = useState(url);
   if (shownUrl !== url) {
@@ -112,11 +123,13 @@ export function useJob<T>(
     setData(cached());
     setFailed(false);
     setSlow(false);
+    setStatus(null);
   }
   const startedAt = useRef(0);
   const errors = useRef(0);
   const rateLimited = useRef(false);
   const finished = data !== null && done !== undefined && done(data);
+  const stopped = failed && status !== null && stopOn !== undefined && stopOn.includes(status);
 
   useEffect(() => {
     startedAt.current = Date.now();
@@ -138,6 +151,7 @@ export function useJob<T>(
     errors.current += 1;
     rateLimited.current = e instanceof ApiError && e.status === 429;
     setFailed(true);
+    setStatus(e instanceof ApiError ? e.status : null);
   }, []);
 
   // Any success on this URL (ours or another panel's) brings the data and clears the error backoff.
@@ -145,6 +159,7 @@ export function useJob<T>(
     const off = subscribeShared(url, (d) => {
       setData(pick(d as never));
       setFailed(false);
+      setStatus(null);
       errors.current = 0;
       rateLimited.current = false;
     });
@@ -155,7 +170,7 @@ export function useJob<T>(
   }, [url, pick]);
 
   useEffect(() => {
-    if (finished) return;
+    if (finished || stopped) return;
     let alive = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
     // Each poll() starts a new chain; an older chain still awaiting its response doesn't schedule again.
@@ -183,7 +198,7 @@ export function useJob<T>(
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", onShow);
     };
-  }, [url, intervals, finished, onError]);
+  }, [url, intervals, finished, stopped, onError]);
 
   useEffect(() => {
     if (finished || capMs === undefined) return;
@@ -193,7 +208,7 @@ export function useJob<T>(
 
   const reload = useCallback(() => fetchShared(url, true).then(() => undefined, onError), [url, onError]);
 
-  return { data, failed, slow: slow && !finished, reload };
+  return { data, failed, slow: slow && !finished, status, reload };
 }
 
 /** Poll a brand API path every 6 s; `reload` refetches now. Starts from the last response any panel got. */

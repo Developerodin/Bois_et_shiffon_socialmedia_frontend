@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { paywallCopy } from "@/components/shell/paywall-dialog";
-import { agentRunPrice, creditsLabel, withPrice, workspaceIdOf, type Subscription } from "@/lib/plan-credits";
+import { agentRunPrice, creditsLabel, creditsText, shootPrice, withPrice, workspaceIdOf, type Subscription } from "@/lib/plan-credits";
 
 const bare: Subscription = { plan: null, unlimited: false, plans: [] };
 const prices = { manualRun: 5, siteAudit: 10, storyWrite: 2, reelPerSecond: 1, presenterPerSecond: 3 };
@@ -15,6 +15,24 @@ describe("agentRunPrice", () => {
     const sub = { ...bare, prices, freeAgents: ["quality"] };
     expect(agentRunPrice(sub, "scout")).toBe(5);
     expect(agentRunPrice(sub, "quality")).toBe(0);
+  });
+});
+
+describe("shootPrice", () => {
+  it("shows no price without a subscription or on an unlimited workspace", () => {
+    expect(shootPrice(null, "base")).toBeNull();
+    expect(shootPrice({ ...bare, unlimited: true }, "ultra")).toBeNull();
+  });
+  it("charges the tier's credits, even from a server without prices", () => {
+    expect(shootPrice(bare, "base")).toBe(4);
+    expect(shootPrice({ ...bare, prices }, "ultra")).toBe(24);
+  });
+});
+
+describe("creditsText", () => {
+  it("counts credits", () => {
+    expect(creditsText(1)).toBe("1 credit");
+    expect(creditsText(24)).toBe("24 credits");
   });
 });
 

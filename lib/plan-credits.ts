@@ -1,4 +1,5 @@
 import { request } from "@/components/settings/api";
+import { SHOOT_CREDITS, type ShootTier } from "@/shared";
 
 export type Subscription = {
   plan: { id: string; credits: number; renewsAt: string } | null;
@@ -68,13 +69,19 @@ export function loadPlanCredits(workspaceId: string, force = false): Promise<voi
   return p;
 }
 
+/** Credits a new photoshoot on `tier` costs; null (show no price) when the subscription isn't read or the workspace is unlimited. */
+export function shootPrice(sub: Subscription | null, tier: ShootTier): number | null {
+  if (!sub || sub.unlimited) return null;
+  return SHOOT_CREDITS[tier];
+}
+
 /** Credits a manual run of `agentKey` costs; null (show no price) when the subscription isn't read, the server is too old, or the workspace is unlimited. */
 export function agentRunPrice(sub: Subscription | null, agentKey: string): number | null {
   if (!sub || sub.unlimited || !sub.prices) return null;
   return sub.freeAgents?.includes(agentKey) ? 0 : sub.prices.manualRun;
 }
 
-const creditsText = (n: number) => `${n} ${n === 1 ? "credit" : "credits"}`;
+export const creditsText = (n: number) => `${n} ${n === 1 ? "credit" : "credits"}`;
 
 /** "Run now · 5 credits": the visible words first, so the accessible name still starts with them. A free or unknown price adds nothing. */
 export const withPrice = (label: string, price: number | null): string => (price ? `${label} · ${creditsText(price)}` : label);

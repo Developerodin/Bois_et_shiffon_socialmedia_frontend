@@ -15,6 +15,7 @@ function walk(dir: string): string[] {
 describe("toneOf", () => {
   it("maps workflow statuses to tones", () => {
     expect(toneOf("PUBLISHED")).toBe("good");
+    expect(toneOf("DONE")).toBe("good");
     expect(toneOf("PENDING_VERIFY")).toBe("warn");
     expect(toneOf("FAILED")).toBe("bad");
     expect(toneOf("RUNNING")).toBe("info");

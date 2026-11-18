@@ -5,7 +5,7 @@ const group = (tone: Tone, names: string) => names.split(" ").map((n) => [n, ton
 /** The one status-to-tone map. Anything not listed is muted. */
 export const STATUS_TONE: Readonly<Record<string, Tone>> = Object.fromEntries([
   ...group("info", "AWAITING_APPROVAL SCHEDULED PUBLISHING RUNNING"),
-  ...group("good", "APPROVED PUBLISHED SUCCEEDED SUCCESS ACTIVE ACCEPTED RECOMMEND CONFIRMED"),
+  ...group("good", "APPROVED PUBLISHED SUCCEEDED SUCCESS ACTIVE ACCEPTED RECOMMEND CONFIRMED DONE"),
   ...group("warn", "CHECK HOLD PENDING_VERIFY PARTIAL QUEUED INVITED PENDING WARN ESCALATED FELL_BACK"),
   ...group("bad", "BLOCKED REJECTED FAILED EXPIRED ERROR"),
 ]);
