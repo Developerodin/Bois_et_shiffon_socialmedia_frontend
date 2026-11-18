@@ -16,7 +16,7 @@ import { useSample } from "./use-sample";
 import { useVoiceLibrary } from "./use-voice-library";
 import { useVoices } from "./use-reels";
 import { VoiceRow } from "./voice-row";
-import { GENDER_LABELS, LIBRARY_LABELS, LIBRARY_TITLES, canManageClone, languageName } from "./voices";
+import { GENDER_LABELS, LIBRARY_LABELS, LIBRARY_TITLES, canManageClone, languageName, planWithVoice } from "./voices";
 
 // Copy: the phone's voices.* (mobile reels.json).
 type Tab = "ours" | "library" | "clone";
@@ -131,7 +131,7 @@ export function VoicesSheet({ workspaceId, brandId, detail, save, open, onOpenCh
   async function use() {
     if (!picked || !plan) return;
     setTried(true);
-    const out = await save.save(detail.version, { ...plan, voice: picked.id, voiceName: picked.name.slice(0, 80) });
+    const out = await save.save(detail.version, planWithVoice(plan, picked));
     if (out) close(false);
   }
 
@@ -256,7 +256,7 @@ function LibraryTab({ library, current, onPick, sample }: {
       {result ? (
         <ul className={`flex flex-col gap-2 ${loading ? "opacity-60" : ""}`} aria-busy={loading}>
           {result.voices.map((v) => (
-            <Choice key={v.id} name={v.name} checked={current === v.id} disabled={!result.usable} onPick={() => onPick({ id: v.id, name: v.name })}>
+            <Choice key={v.id} name={v.name} checked={current === v.id} onPick={() => onPick({ id: v.id, name: v.name })}>
               <VoiceRow
                 name={v.name}
                 detail={libraryTraits(v)}

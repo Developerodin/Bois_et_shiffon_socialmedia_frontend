@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { LIBRARY_FILTERS, type CloningInfo, type LibraryVoice, type ReelVoiceOption } from "@/shared";
 import { ApiError } from "@/components/settings/api";
-import { GENDER_LABELS, LIBRARY_LABELS, LIBRARY_TITLES, TRAIT_TITLES, canManageClone, cloneRetry, defaultLibraryLanguage, isAbort, languageName, libraryNarrowed, libraryQuery, mergeLibraryPage, readingLanguage } from "@/components/reels/voices";
+import type { ReelPlan } from "@/shared";
+import { LIBRARY_WAIT_MS, isLatest, libraryWait, nextLibraryPage, planWithVoice, showLibraryError, GENDER_LABELS, LIBRARY_LABELS, LIBRARY_TITLES, TRAIT_TITLES, canManageClone, cloneRetry, defaultLibraryLanguage, isAbort, languageName, libraryNarrowed, libraryQuery, mergeLibraryPage, readingLanguage } from "@/components/reels/voices";
 
 const lv = (id: string) => ({ id }) as LibraryVoice;
 const voice = (over: Partial<ReelVoiceOption>): ReelVoiceOption => ({ id: "v", name: "V", gender: "clone", sampleUrl: null, clone: true, mine: false, ...over });
@@ -83,5 +84,39 @@ describe("labels", () => {
     expect(Object.keys(LIBRARY_TITLES).sort()).toEqual(["age", "gender", "language", "useCase"]);
     expect(Object.keys(TRAIT_TITLES)).toHaveLength(7);
     expect(GENDER_LABELS.clone).toBe("Cloned voice");
+  });
+});
+
+describe("library request sequencing", () => {
+  it("waits 300 ms only for a select change", () => {
+    expect(libraryWait(false)).toBe(LIBRARY_WAIT_MS);
+    expect(LIBRARY_WAIT_MS).toBe(300);
+    expect(libraryWait(true)).toBe(0);
+  });
+  it("lets only the newest request land", () => {
+    const a = {}, b = {};
+    expect(isLatest(a, a)).toBe(true);
+    expect(isLatest(b, a)).toBe(false);
+    expect(isLatest(null, a)).toBe(false);
+  });
+  it("shows a failure only for the newest request and never an abort", () => {
+    const a = {}, b = {};
+    expect(showLibraryError(a, a, new Error("x"))).toBe(true);
+    expect(showLibraryError(b, a, new Error("x"))).toBe(false);
+    expect(showLibraryError(a, a, new DOMException("x", "AbortError"))).toBe(false);
+  });
+  it("asks for page 0 with nothing shown and the next page after", () => {
+    expect(nextLibraryPage(null)).toBe(0);
+    expect(nextLibraryPage({ page: 0 })).toBe(1);
+    expect(nextLibraryPage({ page: 3 })).toBe(4);
+  });
+});
+describe("planWithVoice", () => {
+  const plan = { voice: "a", voiceName: "A", title: "t", scenes: [] } as unknown as ReelPlan;
+  it("sets the voice and caps its name at 80", () => {
+    const out = planWithVoice(plan, { id: "library:x", name: "n".repeat(100) });
+    expect(out.voice).toBe("library:x");
+    expect(out.voiceName).toHaveLength(80);
+    expect(out.title).toBe("t");
   });
 });

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { LibraryVoice } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
 import { voicesApi } from "./api";
-import { defaultLibraryLanguage, isAbort, libraryNarrowed, mergeLibraryPage } from "./voices";
+import { defaultLibraryLanguage, isLatest, libraryNarrowed, libraryWait, mergeLibraryPage, nextLibraryPage, showLibraryError } from "./voices";
 
 type Result = { voices: LibraryVoice[]; more: boolean; usable: boolean; page: number };
 
@@ -35,19 +35,19 @@ export function useVoiceLibrary(w: string, b: string, active: boolean, planLangu
     setLoading(true);
     setLoadingMore(false);
     setError(null);
-    const wait = skipWait.current ? 0 : 300;
+    const wait = libraryWait(skipWait.current);
     skipWait.current = false;
     const timer = setTimeout(() => {
       const c = new AbortController();
       ctl.current = c;
       voicesApi.library(w, b, { language, gender, age, useCase, search, page: 0 }, c.signal).then(
         (r) => {
-          if (ctl.current !== c) return;
+          if (!isLatest(ctl.current, c)) return;
           setResult({ ...r, page: 0 });
           setLoading(false);
         },
         (e: unknown) => {
-          if (ctl.current !== c || isAbort(e)) return;
+          if (!showLibraryError(ctl.current, c, e)) return;
           setError(errorMessage(e));
           setLoading(false);
         },
@@ -75,17 +75,17 @@ export function useVoiceLibrary(w: string, b: string, active: boolean, planLangu
     if (!result?.more || loading || loadingMore) return;
     const c = new AbortController();
     ctl.current = c;
-    const page = result.page + 1;
+    const page = nextLibraryPage(result);
     setLoadingMore(true);
     setError(null);
     voicesApi.library(w, b, { language, gender, age, useCase, search, page }, c.signal).then(
       (r) => {
-        if (ctl.current !== c) return;
+        if (!isLatest(ctl.current, c)) return;
         setResult((prev) => (prev ? { ...r, voices: mergeLibraryPage(prev.voices, r.voices), page } : prev));
         setLoadingMore(false);
       },
       (e: unknown) => {
-        if (ctl.current !== c || isAbort(e)) return;
+        if (!showLibraryError(ctl.current, c, e)) return;
         setError(errorMessage(e));
         setLoadingMore(false);
       },

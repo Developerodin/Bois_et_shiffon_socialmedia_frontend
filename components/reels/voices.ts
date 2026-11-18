@@ -1,4 +1,4 @@
-import { LIBRARY_FILTERS, type CloningInfo, type LibraryFilters, type LibraryVoice, type ReelVoiceOption } from "@/shared";
+import { LIBRARY_FILTERS, type ReelPlan, type CloningInfo, type LibraryFilters, type LibraryVoice, type ReelVoiceOption } from "@/shared";
 import { ApiError } from "@/components/settings/api";
 
 // The phone's English (mobile src/i18n/locales/en/reels.json): keep the words in step. Kept out of labels.ts, which every reel page loads.
@@ -90,3 +90,19 @@ export function languageName(code: string): string {
 
 /** Whether the person may rename or delete this voice: a clone that is theirs, or any clone when cloning is allowed to them. */
 export const canManageClone = (v: ReelVoiceOption, cloning: CloningInfo | null): boolean => v.clone && (v.mine || !!cloning?.allowed);
+
+/** How long a library read waits: the first read, Search, Clear and Try again go at once; a select change waits for the next one. */
+export const LIBRARY_WAIT_MS = 300;
+export const libraryWait = (immediate: boolean): number => (immediate ? 0 : LIBRARY_WAIT_MS);
+
+/** Whether `mine` is still the newest request (a newer one, or a filter change, replaced it): only then may its answer land. */
+export const isLatest = <T>(latest: T | null, mine: T): boolean => latest === mine;
+
+/** Whether a failed library read is shown: only the newest request's, and never an abort. */
+export const showLibraryError = <T>(latest: T | null, mine: T, e: unknown): boolean => isLatest(latest, mine) && !isAbort(e);
+
+/** The page More voices asks for: the one after the last shown (a new set of filters always starts at 0). */
+export const nextLibraryPage = (shown: { page: number } | null): number => (shown ? shown.page + 1 : 0);
+
+/** The plan Use this voice saves: the chosen voice, its name capped as plan.ts caps it (library names aren't checked). */
+export const planWithVoice = (plan: ReelPlan, voice: { id: string; name: string }): ReelPlan => ({ ...plan, voice: voice.id, voiceName: voice.name.slice(0, 80) });
