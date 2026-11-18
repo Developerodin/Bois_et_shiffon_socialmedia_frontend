@@ -12,6 +12,12 @@ import { PLAN_REFUSAL } from "./labels";
 export const pressLabel = (label: string, plan: { loaded: boolean; unlimited: boolean }, credits: number): string =>
   plan.loaded ? withPrice(label, plan.unlimited ? null : credits) : "Reading prices…";
 
+/** Waits (ms) before each retry of a failed read; after the last the button stays off, since a press may have started. */
+export const REREAD_RETRY_MS = [2_000, 5_000, 15_000] as const;
+/** The wait before retry number `attempt` (0 = after the first failed read); null once they are used up. */
+export const rereadDelay = (attempt: number): number | null => REREAD_RETRY_MS[attempt] ?? null;
+const UNREAD = "Couldn't check whether that went through. Reload the page to see.";
+
 export type PressResult = { ok: true; value: unknown } | { ok: false; error: unknown };
 
 /**
@@ -60,13 +66,28 @@ export function usePaidPress(w: string, opts: { reread: () => Promise<unknown> }
         busy.current = false;
         if (alive.current) setPressing(false);
       };
-      // Held until the read lands: a refusal charged nothing, so it frees the button at once.
+      // Held until the read lands: a refusal charged nothing, so it frees the button at once. A read that fails (offline,
+      // a gateway page) is tried again after REREAD_RETRY_MS; if none lands the button stays off (see rereadDelay).
       if (result.ok || !refused(result.error)) {
         const cooldown = result.ok;
-        void Promise.resolve()
-          .then(() => reread.current())
-          .catch(() => undefined)
-          .then(() => (cooldown ? void setTimeout(release, PRESS_COOLDOWN_MS) : release()));
+        void (async () => {
+          for (let attempt = 0; ; attempt++) {
+            try {
+              await reread.current();
+              break;
+            } catch {
+              const delay = rereadDelay(attempt);
+              if (delay === null || !alive.current) {
+                if (alive.current) setError(UNREAD);
+                return;
+              }
+              await new Promise((r) => setTimeout(r, delay));
+              if (!alive.current) return;
+            }
+          }
+          if (cooldown) setTimeout(release, PRESS_COOLDOWN_MS);
+          else release();
+        })();
       } else release();
       return result;
     },
