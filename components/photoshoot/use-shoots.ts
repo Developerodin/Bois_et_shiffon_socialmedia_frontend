@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import type { Shoot } from "@/shared";
-import { JOB_INTERVALS, sharedAt, useJob } from "@/components/workspace/use-job";
+import { JOB_INTERVALS, fetchShared, sharedAt, useJob } from "@/components/workspace/use-job";
 import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { shootUrl, shootsUrl } from "./api";
 import { keepLinks, linksFetchedAt, runningBesides } from "./shoot";
@@ -49,6 +49,20 @@ export function useShoots(w: string, b: string, trackedId: string | null = null)
   const { data, failed, slow, status, reload } = useJob(url, { pick, done, intervals: JOB_INTERVALS.photoshootList, stopOn: STOP_ON });
   useRereadWhenStale(data, reload);
   return { data, failed, slow, status, reload };
+}
+
+/** How long after a failed list read readListAgain tries once more. */
+export const LIST_RETRY_MS = 5000;
+
+/**
+ * Reads the brand's list again, and once more after LIST_RETRY_MS if that read fails. CurrentShoot uses it when its
+ * shoot ends: the list doesn't poll for that shoot, so a lost read would leave its card RUNNING until links go stale.
+ */
+export function readListAgain(w: string, b: string) {
+  const list = shootsUrl(w, b);
+  void fetchShared(list, true).catch(() => {
+    setTimeout(() => void fetchShared(list, true).catch(() => undefined), LIST_RETRY_MS);
+  });
 }
 
 /**

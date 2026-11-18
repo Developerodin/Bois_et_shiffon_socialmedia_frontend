@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Shoot, ShootRequest } from "@/shared";
 import { ApiError } from "@/components/settings/api";
 import { NetworkError } from "@/lib/net";
@@ -7,7 +7,8 @@ import { photoshootApi, shootUrl, shootsUrl } from "@/components/photoshoot/api"
 import { fetchShared } from "@/components/workspace/use-job";
 import { loadPlanCredits } from "@/lib/plan-credits";
 import { LABELS, refundLine, shootBadge, shootTitle, stagingSummary, waitLine } from "@/components/photoshoot/labels";
-import { isRepeatClick, makePresser, pressAndShow, pressErrorText } from "@/components/photoshoot/press";
+import { REREAD_AFTER_UNKNOWN_MS, isRepeatClick, makePresser, pressAndShow, pressErrorText } from "@/components/photoshoot/press";
+import { LIST_RETRY_MS, readListAgain } from "@/components/photoshoot/use-shoots";
 import {
   DEFAULT_FASHION,
   DEFAULT_PRODUCT,
@@ -27,6 +28,10 @@ import {
 
 vi.mock("@/components/workspace/use-job", async (orig) => ({ ...(await orig<object>()), fetchShared: vi.fn(async () => undefined) }));
 vi.mock("@/lib/plan-credits", async (orig) => ({ ...(await orig<object>()), loadPlanCredits: vi.fn(async () => undefined) }));
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 const PRODUCT: ShootRequest = { kind: "product", tier: "base", sourceKey: "k1", ratio: "1:1", scene: "studio", brief: "" };
 const FASHION: ShootRequest = { kind: "fashion", tier: "ultra", sourceKey: "g1", ratio: "4:5", pose: "threeQuarter", background: "urbanStreet" };
@@ -109,6 +114,34 @@ describe("press reuses the id only after no answer", () => {
     expect(idOf(send, 1)).not.toBe(idOf(send, 0));
   });
 
+  it("retries once with a new id after 409 request.idTaken (a refunded try under the kept id)", async () => {
+    const send = vi.fn()
+      .mockRejectedValueOnce(new ApiError(500, "failed"))
+      .mockRejectedValueOnce(new ApiError(409, "That request was already tried. Start again.", "request.idTaken"))
+      .mockResolvedValueOnce(shoot());
+    const press = presser(send);
+    await expect(press(PRODUCT)).rejects.toBeInstanceOf(ApiError);
+    await expect(press(PRODUCT)).resolves.toEqual(shoot());
+    expect(send).toHaveBeenCalledTimes(3);
+    expect(idOf(send, 1)).toBe(idOf(send, 0));
+    expect(idOf(send, 2)).not.toBe(idOf(send, 1));
+  });
+
+  it("retries a 409 request.idTaken only once", async () => {
+    const taken = new ApiError(409, "That request id is already used.", "request.idTaken");
+    const send = vi.fn().mockRejectedValue(taken);
+    const press = presser(send);
+    await expect(press(PRODUCT)).rejects.toBe(taken);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(idOf(send, 1)).not.toBe(idOf(send, 0));
+  });
+
+  it("does not retry another 409", async () => {
+    const send = vi.fn().mockRejectedValue(new ApiError(409, "full", "library.full"));
+    await expect(presser(send)(PRODUCT)).rejects.toBeInstanceOf(ApiError);
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   it("gives two overlapping presses of the same request one id (recorded before the send)", async () => {
     const send = vi.fn(() => new Promise<Shoot>(() => {}));
     const press = presser(send);
@@ -133,6 +166,23 @@ describe("pressAndShow after a failed press", () => {
     create.mockRestore();
   });
 
+  it("reads the list and the balance once more later, with one timer for repeated presses", async () => {
+    vi.useFakeTimers();
+    vi.mocked(fetchShared).mockClear();
+    vi.mocked(loadPlanCredits).mockClear();
+    const create = vi.spyOn(photoshootApi, "create").mockRejectedValue(new ApiError(504, "gateway"));
+    await expect(pressAndShow("w-later", "b1", PRODUCT)).rejects.toBeInstanceOf(ApiError);
+    await expect(pressAndShow("w-later", "b1", PRODUCT)).rejects.toBeInstanceOf(ApiError);
+    expect(fetchShared).toHaveBeenCalledTimes(2);
+    expect(loadPlanCredits).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(REREAD_AFTER_UNKNOWN_MS);
+    expect(fetchShared).toHaveBeenCalledTimes(3);
+    expect(fetchShared).toHaveBeenLastCalledWith(shootsUrl("w-later", "b1"), true);
+    expect(loadPlanCredits).toHaveBeenCalledTimes(3);
+    expect(loadPlanCredits).toHaveBeenLastCalledWith("w-later", true);
+    create.mockRestore();
+  });
+
   it("reads nothing again after a refusal (nothing was charged)", async () => {
     vi.mocked(fetchShared).mockClear();
     vi.mocked(loadPlanCredits).mockClear();
@@ -141,6 +191,30 @@ describe("pressAndShow after a failed press", () => {
     expect(fetchShared).not.toHaveBeenCalled();
     expect(loadPlanCredits).not.toHaveBeenCalled();
     create.mockRestore();
+  });
+});
+
+describe("readListAgain", () => {
+  it("reads the list once more after a failed read, and only once", async () => {
+    vi.useFakeTimers();
+    vi.mocked(fetchShared).mockClear();
+    vi.mocked(fetchShared).mockRejectedValue(new ApiError(0, "offline"));
+    readListAgain("w-again", "b1");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetchShared).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(LIST_RETRY_MS * 3);
+    expect(fetchShared).toHaveBeenCalledTimes(2);
+    expect(fetchShared).toHaveBeenLastCalledWith(shootsUrl("w-again", "b1"), true);
+    vi.mocked(fetchShared).mockReset();
+    vi.mocked(fetchShared).mockResolvedValue(undefined);
+  });
+
+  it("does not read again after a read that worked", async () => {
+    vi.useFakeTimers();
+    vi.mocked(fetchShared).mockClear();
+    readListAgain("w-again", "b2");
+    await vi.advanceTimersByTimeAsync(LIST_RETRY_MS * 3);
+    expect(fetchShared).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -11,13 +11,17 @@ import { prependShoot } from "./shoot";
 /** The server answered a press with a refusal, so it charged nothing (see shouldKeepRequestId, shared/photoshoot.ts). */
 const refused = (e: unknown): boolean => e instanceof ApiError && !shouldKeepRequestId(e.status);
 
+/** The server already used (and refunded) this id: a kept id after a 5xx whose shoot the server had failed. */
+const idTaken = (e: unknown): boolean => e instanceof ApiError && e.status === 409 && e.code === "request.idTaken";
+
 /**
  * Generate / Try again / Variation: sends `request` with a request id. The last press whose outcome is unknown keeps
  * its id: no answer (timeout, offline, a gateway page: request() throws those as ApiError status 0) or a server error
  * (5xx, maybe after the charge). Pressing again for the same request reuses it and the server returns that shoot
  * instead of charging twice. Success, or a refusal (4xx), clears it: the next press is a new shoot. The same request
  * is matched whatever order its fields come in (shootRequestKey). The id is recorded before sending, so two
- * overlapping presses share it. Every error is rethrown for the caller to show.
+ * overlapping presses share it. A 409 `request.idTaken` (the kept id's try was refunded) is retried once, silently,
+ * with a new id; never twice, so it can't loop. Every other error is rethrown for the caller to show.
  * Same rule as the phone's startShoot (mobile src/ui/photoshoot/start.ts): keep the two in step.
  */
 export function makePresser(
@@ -25,9 +29,9 @@ export function makePresser(
   newId: () => string = requestId,
 ): (r: ShootRequest) => Promise<Shoot> {
   let unanswered: { key: string; id: string } | null = null;
-  return async (r) => {
+  const press = async (r: ShootRequest, retried: boolean): Promise<Shoot> => {
     const key = shootRequestKey(r);
-    const id = unanswered?.key === key ? unanswered.id : newId();
+    const id = !retried && unanswered?.key === key ? unanswered.id : newId();
     const mine = (unanswered = { key, id });
     try {
       const shoot = await send(r, id);
@@ -35,9 +39,11 @@ export function makePresser(
       return shoot;
     } catch (e) {
       if (refused(e) && unanswered === mine) unanswered = null;
+      if (!retried && idTaken(e)) return press(r, true);
       throw e;
     }
   };
+  return (r) => press(r, false);
 }
 
 // ponytail: a fixed pause, not a per-shoot lock. The presser clears its id on success, so a press right after one that
@@ -71,21 +77,36 @@ function showCreated(w: string, b: string, shoot: Shoot) {
   else void fetchShared(list, true).catch(() => undefined);
 }
 
+/** How long after a press with an unknown outcome the list and balance are read once more. */
+export const REREAD_AFTER_UNKNOWN_MS = 15_000;
+
+// One timer for the tab: a later unknown press replaces it rather than stacking another. Ceiling: an unknown press for
+// another brand within 15 s drops the first brand's late read (its list reads again when next opened).
+let rereadTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Reads the list and the balance now, and once more later: a timed-out or 504 press may still be inside createShoot. */
+function readAfterUnknown(w: string, b: string) {
+  const read = () => {
+    void fetchShared(shootsUrl(w, b), true).catch(() => undefined);
+    void loadPlanCredits(w, true);
+  };
+  read();
+  clearTimeout(rereadTimer);
+  rereadTimer = setTimeout(read, REREAD_AFTER_UNKNOWN_MS);
+}
+
 /**
  * Generate / Try again (studio) and Variation (shoot page): presses, shows the new shoot everywhere at once, and reads
  * the balance again after the charge. A press whose outcome is unknown may still have started (and charged) a shoot,
- * so the list and the balance are read again then too. Rejects with the press's error; the caller shows it with
- * pressErrorText.
+ * so the list and the balance are read again then too, and once more 15 s later (with nothing running the list
+ * doesn't poll). Rejects with the press's error; the caller shows it with pressErrorText.
  */
 export async function pressAndShow(w: string, b: string, r: ShootRequest): Promise<Shoot> {
   let shoot: Shoot;
   try {
     shoot = await pressShoot(w, b, r);
   } catch (e) {
-    if (!refused(e)) {
-      void fetchShared(shootsUrl(w, b), true).catch(() => undefined);
-      void loadPlanCredits(w, true);
-    }
+    if (!refused(e)) readAfterUnknown(w, b);
     throw e;
   }
   showCreated(w, b, shoot);

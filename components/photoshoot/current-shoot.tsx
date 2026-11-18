@@ -7,14 +7,14 @@ import type { Shoot, ShootRequest } from "@/shared";
 import { Button } from "@/components/ui/button";
 import { JobProgress } from "@/components/ui/job-progress";
 import { useShootPrices } from "@/components/shell/use-plan-credits";
-import { fetchShared, sharedAt, sharedResponse } from "@/components/workspace/use-job";
+import { sharedAt, sharedResponse } from "@/components/workspace/use-job";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { stale } from "@/lib/signed-links";
 import { shootUrl, shootsUrl } from "./api";
 import { refundLine, shootTitle, waitLine } from "./labels";
 import { isRepeatClick } from "./press";
 import { retryRequest, shootSteps, stepsDone } from "./shoot";
-import { useShoot } from "./use-shoots";
+import { readListAgain, useShoot } from "./use-shoots";
 
 const CARD = "rounded-2xl border border-border bg-card px-5 py-4 shadow-sm";
 
@@ -44,11 +44,12 @@ export function CurrentShoot({ workspaceId, brandId, shootId, onRetry, pressing,
 
   // The list doesn't poll for this shoot (useShoots trackedId): once it ends, read the list again so its card does too.
   // Also when the list has no answer yet, or one without it: a read already out may predate the end (fresh goes after it).
+  // A failed read is tried once more (readListAgain).
   useEffect(() => {
     if (shootStatus !== "DONE" && shootStatus !== "FAILED") return;
     const list = shootsUrl(workspaceId, brandId);
     const listed = (sharedResponse(list) as { shoots: Shoot[] } | undefined)?.shoots.find((s) => s.id === shootId);
-    if (!listed || listed.status === "RUNNING") void fetchShared(list, true).catch(() => undefined);
+    if (!listed || listed.status === "RUNNING") readListAgain(workspaceId, brandId);
   }, [shootStatus, workspaceId, brandId, shootId]);
 
   if (failed && (status === 403 || status === 404)) {
