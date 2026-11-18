@@ -1,4 +1,4 @@
-import { REEL_DURATION_CHIPS, type ReelDetail, type ReelSummary } from "@/shared";
+import { REEL_DURATION_CHIPS, reelStage, type ReelDetail, type ReelSummary } from "@/shared";
 import { stale } from "@/lib/signed-links";
 
 /** The reel page's steps, in order (spec §5.3). Pure: no React. */
@@ -7,14 +7,14 @@ export type ReelStep = (typeof REEL_STEPS)[number];
 // 3b adds presenter, photos, script; 3c adds video, review, publish.
 export const BUILT_STEPS: readonly ReelStep[] = ["plan", "storyboard"];
 
-const RUNNING = ["VOICE", "CLIPS", "JOIN"];
-const running = (d: ReelDetail) => RUNNING.includes(d.renders[0]?.step ?? "");
+/** Whether the reel's latest render is running: the shared rule (reelStage), applied to the detail's newest render. */
+export const rendering = (d: ReelDetail): boolean => reelStage({ render: d.renders[0] ?? null, videoUrl: d.videoUrl }) === "processing";
 
 /** Where a reel opens: the first thing still to do (spec §5.3). Not clamped to the built steps; see reachable. */
 export function defaultStep(d: ReelDetail | null): ReelStep {
   if (!d?.plan) return "plan";
   if (d.plan.scenes.some((s) => s.standIn)) return "photos";
-  if (running(d) || d.renders[0]?.step === "FAILED") return "video";
+  if (rendering(d) || d.renders[0]?.step === "FAILED") return "video";
   if (d.videoUrl) return "review";
   return "storyboard";
 }
@@ -37,7 +37,7 @@ export function stepState(step: ReelStep, d: ReelDetail | null): string {
   if (step !== "storyboard") return "";
   if (!d?.plan) return "None";
   if (d.plan.scenes.some((s) => s.standIn)) return "Needs a photo";
-  if (running(d)) return "Making…";
+  if (rendering(d)) return "Making…";
   return d.videoUrl ? "Done" : "Ready";
 }
 
@@ -55,8 +55,8 @@ export function starters(ideas: { id: string; title: string }[], productTitles: 
 }
 
 export function countByStage(reels: ReelSummary[]): { all: number; ready: number; processing: number } {
-  const render = (r: ReelSummary) => RUNNING.includes(r.render?.step ?? "");
-  return { all: reels.length, ready: reels.filter((r) => !render(r) && r.videoUrl).length, processing: reels.filter(render).length };
+  const count = (stage: string) => reels.filter((r) => reelStage(r) === stage).length;
+  return { all: reels.length, ready: count("ready"), processing: count("processing") };
 }
 
 // cuid (phone-made) or UUID (web-made); only keeps path-ish input out of the URL, the server decides existence.

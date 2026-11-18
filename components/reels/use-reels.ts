@@ -1,21 +1,20 @@
 "use client";
 
 import { useMemo } from "react";
-import { isReelIdea, type ReelDetail, type ReelOptions, type ReelSummary } from "@/shared";
+import { isReelIdea, reelStage, type ReelDetail, type ReelOptions, type ReelSummary } from "@/shared";
 import { JOB_INTERVALS, sharedAt, useJob } from "@/components/workspace/use-job";
 import { createLinkCache, useRereadWhenStale } from "@/components/workspace/use-steady-links";
 import { stale } from "@/lib/signed-links";
 import type { Opportunity } from "@/components/workspace/content-panels";
 import { opportunitiesUrl, reelOptionsUrl, reelUrl, reelsUrl } from "./api";
-import { keepReelLinks } from "./reel";
+import { keepReelLinks, rendering } from "./reel";
 
 // One link cache per type (the list's summaries, the page's detail): see createLinkCache for the ceiling.
 const summaries = createLinkCache<ReelSummary>((r) => r.id, keepReelLinks);
 const details = createLinkCache<ReelDetail>((d) => d.item.id, keepReelLinks);
 
 const STOP_ON = [403, 404] as const;
-const RENDER_STEPS = ["VOICE", "CLIPS", "JOIN"];
-const processing = (r: ReelSummary) => RENDER_STEPS.includes(r.render?.step ?? "");
+const processing = (r: ReelSummary) => reelStage(r) === "processing";
 
 /** The brand's reels, newest first; polls while one is processing, and reads again when the shown links near their hour. */
 export function useReels(w: string, b: string) {
@@ -31,7 +30,7 @@ export function useReels(w: string, b: string) {
 export function useReel(w: string, b: string, id: string) {
   const url = reelUrl(w, b, id);
   const pick = useMemo(() => (d: never) => details.steady(d as ReelDetail, sharedAt(url)), [url]);
-  const done = useMemo(() => (d: ReelDetail) => !RENDER_STEPS.includes(d.renders[0]?.step ?? "") && !stale(details.linksAt([d])), []);
+  const done = useMemo(() => (d: ReelDetail) => !rendering(d) && !stale(details.linksAt([d])), []);
   const { data, failed, status, reload } = useJob(url, { pick, done, intervals: JOB_INTERVALS.reelRender, stopOn: STOP_ON });
   useRereadWhenStale(data ? details.linksAt([data]) : null, reload);
   return { data, failed, status, reload };
