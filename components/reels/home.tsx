@@ -14,14 +14,13 @@ import { fetchShared } from "@/components/workspace/use-job";
 import type { Opportunity } from "@/components/workspace/content-panels";
 import { openPaywall } from "@/lib/paywall";
 import { navFor } from "@/lib/nav";
-import { errorMessage } from "@/components/settings/api";
 import { reelOptionsUrl, reelsApi, reelsUrl } from "./api";
 import { PLAN_REFUSAL, TEMPLATE_LABELS, presenterState } from "./labels";
 import { TOO_LONG, type CreateBody } from "./plan-stream";
 import { pressLabel, usePaidPress } from "./paid-press";
 import { optionBusy, starters } from "./reel";
 import { StartCard } from "./start-card";
-import { useReelIdeas, useReelOptions } from "./use-reels";
+import { useReelIdeas, useReelOptions, usePresenterRemove } from "./use-reels";
 import { useReelStream } from "./use-reel-stream";
 import { YourReels } from "./your-reels";
 
@@ -112,27 +111,13 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
   onUse: (templateId: string) => void;
 }) {
   const { data, reload } = useReelOptions(workspaceId, brandId);
+  const { removing, error: removeError, remove } = usePresenterRemove(workspaceId, brandId, reload);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMounted, setDialogMounted] = useState(false);
-  const [removing, setRemoving] = useState<string | null>(null);
-  const [removeError, setRemoveError] = useState<string | null>(null);
   // One preview video at a time: Preview on another template swaps this one back to its poster.
   const [playing, setPlaying] = useState<string | null>(null);
   const presenters = data?.presenters ?? [];
   const templates = data?.templates ?? [];
-
-  async function remove(id: string) {
-    if (removing) return;
-    setRemoving(id);
-    setRemoveError(null);
-    try {
-      await reelsApi.removePresenter(workspaceId, brandId, id);
-    } catch (e) {
-      setRemoveError(errorMessage(e));
-    }
-    await reload().catch(() => undefined);
-    setRemoving(null);
-  }
 
   return (
     <div className="flex flex-col gap-6">

@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { isReelIdea, reelStage, type CloningInfo, type ReelDetail, type ReelOptions, type ReelSummary, type ReelVoiceOption } from "@/shared";
 import { JOB_INTERVALS, sharedAt, useJob } from "@/components/workspace/use-job";
 import { createLinkCache, useRereadWhenStale } from "@/components/workspace/use-steady-links";
 import { stale } from "@/lib/signed-links";
 import type { Opportunity } from "@/components/workspace/content-panels";
-import { opportunitiesUrl, reelOptionsUrl, reelUrl, reelsUrl, voicesUrl } from "./api";
+import { errorMessage } from "@/components/settings/api";
+import { opportunitiesUrl, reelOptionsUrl, reelUrl, reelsApi, reelsUrl, voicesUrl } from "./api";
 import { keepReelLinks, optionsMaking, rendering } from "./reel";
 
 // One link cache per type (the list's summaries, the page's detail): see createLinkCache for the ceiling.
@@ -45,6 +46,25 @@ export function useReelOptions(w: string, b: string) {
   const { data, failed, reload } = useJob(url, { pick: identity, done, intervals: JOB_INTERVALS.reelOptions });
   useRereadWhenStale(data ? sharedAt(url) : null, reload);
   return { data, failed, reload };
+}
+
+/** Removes a presenter, one at a time, then reads the options again. Shared by the reels home and the Presenter step. */
+export function usePresenterRemove(w: string, b: string, reload: () => Promise<unknown>) {
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const remove = useCallback(async (id: string) => {
+    if (removing) return;
+    setRemoving(id);
+    setError(null);
+    try {
+      await reelsApi.removePresenter(w, b, id);
+    } catch (e) {
+      setError(errorMessage(e));
+    }
+    await reload().catch(() => undefined);
+    setRemoving(null);
+  }, [w, b, reload, removing]);
+  return { removing, error, remove };
 }
 
 const pickVoices = (d: never) => d as { voices: ReelVoiceOption[]; cloning: CloningInfo };

@@ -44,7 +44,8 @@ describe("defaultStep", () => {
 
 describe("reachable and stepFrom", () => {
   it("keeps a built step, else storyboard with a plan, else plan", () => {
-    expect(BUILT_STEPS).toEqual(["plan", "storyboard"]);
+    expect(BUILT_STEPS).toEqual(["plan", "presenter", "storyboard"]);
+    expect(reachable("presenter", detail())).toBe("presenter");
     expect(reachable("plan", detail())).toBe("plan");
     expect(reachable("storyboard", detail())).toBe("storyboard");
     expect(reachable("video", detail())).toBe("storyboard");
@@ -70,6 +71,14 @@ describe("stepState", () => {
     expect(stepState("storyboard", detail({ renders: [render("VOICE")] }))).toBe("Making…");
     expect(stepState("storyboard", detail({ videoUrl: "u" }))).toBe("Done");
     expect(stepState("storyboard", detail())).toBe("Ready");
+  });
+});
+
+describe("stepState presenter", () => {
+  it("words the presenter step", () => {
+    expect(stepState("presenter", detail({ plan: null }))).toBe("None");
+    expect(stepState("presenter", detail())).toBe("No presenter");
+    expect(stepState("presenter", detail({ plan: { ...plan, presenter: "pr1" } }))).toBe("Done");
   });
 });
 

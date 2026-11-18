@@ -10,6 +10,7 @@ import { StepsRail } from "@/components/ui/steps-rail";
 import { ListSkeleton, LoadError } from "@/components/settings/shared";
 import { STEP_LABELS } from "./labels";
 import { PlanStep, usePlanChat } from "./plan-step";
+import { PresenterStep } from "./presenter-step";
 import { useReelSave } from "./use-reel-save";
 import { BUILT_STEPS, stepFrom, stepState } from "./reel";
 import { StoryboardStep } from "./storyboard-step";
@@ -52,7 +53,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
   const { data: options } = useReelOptions(workspaceId, brandId);
   const chat = usePlanChat(workspaceId, brandId, reelId);
   // One save lock for the whole page: the steps that edit the plan (Photos, Script) take it from here (Tasks 6-7 pass it down).
-  useReelSave(workspaceId, brandId, reelId);
+  const save = useReelSave(workspaceId, brandId, reelId);
   const step = stepFrom(stepParam, detail);
   const [scene, setScene] = useState(0);
   const [watching, setWatching] = useState(false);
@@ -103,6 +104,9 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
         <section aria-labelledby="reel-step" className="flex min-w-0 flex-col gap-4">
           <h2 id="reel-step" className="text-lg font-semibold">{STEP_LABELS[step]}</h2>
           {step === "plan" ? <PlanStep detail={detail} options={options} canCreate={canCreate} chat={chat} /> : null}
+          {step === "presenter" ? (
+            <PresenterStep workspaceId={workspaceId} brandId={brandId} detail={detail} options={options} canCreate={canCreate} chat={chat} save={save} />
+          ) : null}
           {step === "storyboard" ? (
             <StoryboardStep detail={detail} options={options} current={index} onSelect={(i) => { setScene(i); setWatching(false); }} onWatch={() => setWatching(true)} />
           ) : null}
