@@ -9,13 +9,14 @@ import { cn } from "@/lib/utils";
 
 type Step<T extends string> = { id: T; label: string; state: string; href: string };
 
-function StepList<T extends string>({ steps, current, onPick }: { steps: readonly Step<T>[]; current: T; onPick?: () => void }) {
+function StepList<T extends string>({ steps, current, replace, onPick }: { steps: readonly Step<T>[]; current: T; replace?: boolean; onPick?: () => void }) {
   return (
     <ol className="space-y-1">
       {steps.map((s, i) => (
         <li key={s.id}>
           <Link
             href={s.href}
+            replace={replace}
             aria-current={s.id === current ? "step" : undefined}
             onClick={onPick}
             className={cn(
@@ -38,15 +39,16 @@ function StepList<T extends string>({ steps, current, onPick }: { steps: readonl
  * The steps of a flow as links, the current one marked `aria-current="step"` and each step's state as text.
  * From `md` up it is a list; below `md` it is a "Step N of M" button that opens the same list in a sheet.
  * The sheet's list is mounted only once the button has been pressed, so a phone-width page does not carry it twice.
+ * `replace`: a step change replaces the history entry instead of adding one.
  */
-export function StepsRail<T extends string>({ label, steps, current }: { label: string; steps: readonly Step<T>[]; current: T }) {
+export function StepsRail<T extends string>({ label, steps, current, replace }: { label: string; steps: readonly Step<T>[]; current: T; replace?: boolean }) {
   const [open, setOpen] = useState(false);
   const index = Math.max(0, steps.findIndex((s) => s.id === current));
   const name = steps[index]?.label ?? "";
   return (
     <>
       <nav aria-label={label} className="hidden md:block">
-        <StepList steps={steps} current={current} />
+        <StepList steps={steps} current={current} replace={replace} />
       </nav>
       <div className="md:hidden">
         <Button type="button" variant="outline" className="w-full justify-between" onClick={() => setOpen(true)}>
@@ -60,7 +62,7 @@ export function StepsRail<T extends string>({ label, steps, current }: { label: 
             <SheetTitle>{label}</SheetTitle>
             <SheetDescription className="sr-only">Pick a step to go to it.</SheetDescription>
             <nav aria-label={label} className="mt-4">
-              <StepList steps={steps} current={current} onPick={() => setOpen(false)} />
+              <StepList steps={steps} current={current} replace={replace} onPick={() => setOpen(false)} />
             </nav>
           </SheetContent>
         </Sheet>

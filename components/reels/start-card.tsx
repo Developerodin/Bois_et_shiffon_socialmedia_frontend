@@ -11,8 +11,8 @@ import { STAGE_LABELS } from "./labels";
 import type { CreateBody } from "./plan-stream";
 import type { Starter } from "./reel";
 
-/** The plan as it streams in: its title and one line per scene. Memoised: a draft line re-renders only this. */
-const Draft = memo(function Draft({ draft }: { draft: DraftSoFar }) {
+/** The plan as it streams in: its title and one line per scene. Memoised: a draft line re-renders only this. Also the reel page's Plan step. */
+export const Draft = memo(function Draft({ draft }: { draft: DraftSoFar }) {
   return (
     <div className="flex flex-col gap-2">
       {draft.title ? <p className="text-sm font-medium">{draft.title}</p> : null}
