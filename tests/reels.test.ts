@@ -5,7 +5,7 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, countByStage, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { BUILT_STEPS, countByStage, slotStandIns, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
@@ -44,8 +44,9 @@ describe("defaultStep", () => {
 
 describe("reachable and stepFrom", () => {
   it("keeps a built step, else storyboard with a plan, else plan", () => {
-    expect(BUILT_STEPS).toEqual(["plan", "presenter", "storyboard"]);
+    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "storyboard"]);
     expect(reachable("presenter", detail())).toBe("presenter");
+    expect(reachable("photos", detail())).toBe("photos");
     expect(reachable("plan", detail())).toBe("plan");
     expect(reachable("storyboard", detail())).toBe("storyboard");
     expect(reachable("video", detail())).toBe("storyboard");
@@ -54,7 +55,7 @@ describe("reachable and stepFrom", () => {
   });
   it("reads a URL param, falling back to the default step", () => {
     expect(stepFrom("plan", detail())).toBe("plan");
-    expect(stepFrom("photos", detail())).toBe("storyboard");
+    expect(stepFrom("photos", detail())).toBe("photos");
     expect(stepFrom(undefined, detail())).toBe("storyboard");
     expect(stepFrom("nonsense", null)).toBe("plan");
   });
@@ -71,6 +72,23 @@ describe("stepState", () => {
     expect(stepState("storyboard", detail({ renders: [render("VOICE")] }))).toBe("Making…");
     expect(stepState("storyboard", detail({ videoUrl: "u" }))).toBe("Done");
     expect(stepState("storyboard", detail())).toBe("Ready");
+  });
+});
+
+describe("stepState photos", () => {
+  it("words the photos step", () => {
+    expect(stepState("photos", detail({ plan: null }))).toBe("None");
+    expect(stepState("photos", detail())).toBe("Done");
+    expect(stepState("photos", detail({ plan: { ...plan, scenes: [{ ...plan.scenes[0], standIn: true }] } }))).toBe("Needs a photo");
+  });
+});
+
+describe("slotStandIns", () => {
+  const two = { ...plan, scenes: [{ ...plan.scenes[0], photoKey: "a", standIn: true }, { ...plan.scenes[0], photoKey: "b", standIn: false }] };
+  it("follows the photo: moving a stand-in photo moves the flag, a different photo clears it", () => {
+    expect(slotStandIns(["a", "b"], two)).toEqual([true, false]);
+    expect(slotStandIns(["b", "a"], two)).toEqual([false, true]);
+    expect(slotStandIns(["c", "b"], two)).toEqual([false, false]);
   });
 });
 

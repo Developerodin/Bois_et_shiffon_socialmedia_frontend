@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import Link from "next/link";
 import { Play } from "lucide-react";
 import { VIDEO_MODEL_NAMES, type ReelDetail, type ReelOptions } from "@/shared";
 import { Button } from "@/components/ui/button";
@@ -8,10 +9,12 @@ import { presenterName } from "./reel";
 const plural = (n: number, one: string) => (n === 1 ? `1 ${one}` : `${n} ${one}s`);
 
 /** The Storyboard step, read-only: the plan's facts and each scene. Takes the reel and options as props; the page owns the preview. */
-export function StoryboardStep({ detail, options, current, onSelect, onWatch }: {
+export function StoryboardStep({ detail, options, current, photosHref, onSelect, onWatch }: {
   detail: ReelDetail;
   options: ReelOptions | null | undefined;
   current: number;
+  /** The Photos step's address, for the stand-in scenes' "Pick photos" link. */
+  photosHref: string;
   onSelect: (index: number) => void;
   onWatch: () => void;
 }) {
@@ -51,7 +54,10 @@ export function StoryboardStep({ detail, options, current, onSelect, onWatch }: 
                   {s.onScreenText ? <p>On screen: {s.onScreenText}</p> : null}
                   {s.voiceText ? <p>{s.voiceText}</p> : null}
                   {model ? <p className="text-xs text-muted-foreground">{model}</p> : null}
-                  {s.standIn ? <p className="text-xs text-destructive">This photo shows something else. Pick the right one before making the video.</p> : null}
+                  {s.standIn ? <p className="text-xs text-destructive">
+                      Stand-in: this photo doesn&apos;t show what the scene talks about.{" "}
+                      <Link href={photosHref} replace className="rounded-full font-medium underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Pick photos</Link>
+                    </p> : null}
                 </div>
               </li>
               {next ? <li aria-hidden="true" className="px-4 text-center text-xs text-muted-foreground">{next}</li> : null}

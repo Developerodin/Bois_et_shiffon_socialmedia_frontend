@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { PlanResult, ReelDetail, ReelPlan } from "@/shared";
 import { ApiError, errorMessage } from "@/components/settings/api";
 import { fetchShared, putShared, sharedResponse } from "@/components/workspace/use-job";
@@ -49,7 +49,8 @@ export function useReelSave(w: string, b: string, reelId: string) {
 
   const clear = useCallback(() => setError(null), []);
 
-  return { saving, error, save, clear };
+  // Stable between renders unless saving/error change, so memoised steps given it don't re-render on every stream frame.
+  return useMemo(() => ({ saving, error, save, clear }), [saving, error, save, clear]);
 }
 
 export type ReelSave = ReturnType<typeof useReelSave>;

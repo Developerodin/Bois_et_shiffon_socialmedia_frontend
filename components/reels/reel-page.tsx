@@ -10,6 +10,7 @@ import { StepsRail } from "@/components/ui/steps-rail";
 import { ListSkeleton, LoadError } from "@/components/settings/shared";
 import { STEP_LABELS } from "./labels";
 import { PlanStep, usePlanChat } from "./plan-step";
+import { PhotosStep } from "./photos-step";
 import { PresenterStep } from "./presenter-step";
 import { useReelSave } from "./use-reel-save";
 import { BUILT_STEPS, stepFrom, stepState } from "./reel";
@@ -59,6 +60,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
   const [watching, setWatching] = useState(false);
   const title = detail?.item.title;
 
+  const stepHref = (s: string) => `/reels/${encodeURIComponent(reelId)}?step=${s}&b=${encodeURIComponent(brandId)}`;
   const steps = useMemo(() => BUILT_STEPS.map((s) => ({
     id: s,
     label: STEP_LABELS[s],
@@ -107,8 +109,11 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
           {step === "presenter" ? (
             <PresenterStep workspaceId={workspaceId} brandId={brandId} detail={detail} options={options} canCreate={canCreate} chat={chat} save={save} />
           ) : null}
+          {step === "photos" ? (
+            <PhotosStep workspaceId={workspaceId} brandId={brandId} detail={detail} canCreate={canCreate} save={save} chatBusy={chat.stream.sending} />
+          ) : null}
           {step === "storyboard" ? (
-            <StoryboardStep detail={detail} options={options} current={index} onSelect={(i) => { setScene(i); setWatching(false); }} onWatch={() => setWatching(true)} />
+            <StoryboardStep photosHref={stepHref("photos")} detail={detail} options={options} current={index} onSelect={(i) => { setScene(i); setWatching(false); }} onWatch={() => setWatching(true)} />
           ) : null}
         </section>
 

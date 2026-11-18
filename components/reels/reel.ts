@@ -5,8 +5,8 @@ import { starterProduct } from "./labels";
 /** The reel page's steps, in order (spec §5.3). Pure: no React. */
 export const REEL_STEPS = ["plan", "presenter", "photos", "script", "storyboard", "video", "review", "publish"] as const;
 export type ReelStep = (typeof REEL_STEPS)[number];
-// 3b adds photos, script; 3c adds video, review, publish.
-export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "storyboard"];
+// 3b adds script; 3c adds video, review, publish.
+export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "storyboard"];
 
 /** Whether the reel's latest render is running: the shared rule (reelStage), applied to the detail's newest render. */
 export const rendering = (d: ReelDetail): boolean => reelStage({ render: d.renders[0] ?? null, videoUrl: d.videoUrl }) === "processing";
@@ -36,9 +36,10 @@ export function stepFrom(param: unknown, d: ReelDetail | null): ReelStep {
 export function stepState(step: ReelStep, d: ReelDetail | null): string {
   if (step === "plan") return d?.plan ? "Done" : "None";
   if (step === "presenter") return !d?.plan ? "None" : d.plan.presenter === "none" ? "No presenter" : "Done";
-  if (step !== "storyboard") return "";
+  if (step !== "storyboard" && step !== "photos") return "";
   if (!d?.plan) return "None";
   if (d.plan.scenes.some((s) => s.standIn)) return "Needs a photo";
+  if (step === "photos") return "Done";
   if (rendering(d)) return "Making…";
   return d.videoUrl ? "Done" : "Ready";
 }
@@ -139,4 +140,10 @@ export function sceneProblems(texts: readonly string[], recorded: readonly boole
 export function sceneCount(text: string): string {
   const n = wordCount(text);
   return `${n === 1 ? "1 word" : `${n} words`} · ~${Math.round(n / WORDS_PER_SECOND)} s`;
+}
+
+/** Per slot, whether its photo is one of the plan's stand-ins: the server's flag follows the photo (carryStandIns), so only a different photo clears it. */
+export function slotStandIns(keys: readonly string[], plan: ReelPlan): boolean[] {
+  const standIns = new Set(plan.scenes.filter((s) => s.standIn).map((s) => s.photoKey));
+  return keys.map((k) => standIns.has(k));
 }
