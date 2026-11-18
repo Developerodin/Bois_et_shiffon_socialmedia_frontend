@@ -3,9 +3,11 @@ import type { Shoot, ShootRequest } from "@/shared";
 import { ApiError } from "@/components/settings/api";
 import { NetworkError } from "@/lib/net";
 import { stale } from "@/lib/signed-links";
-import { shootUrl, shootsUrl } from "@/components/photoshoot/api";
+import { photoshootApi, shootUrl, shootsUrl } from "@/components/photoshoot/api";
+import { fetchShared } from "@/components/workspace/use-job";
+import { loadPlanCredits } from "@/lib/plan-credits";
 import { LABELS, refundLine, shootBadge, shootTitle, stagingSummary, waitLine } from "@/components/photoshoot/labels";
-import { isRepeatClick, makePresser, pressErrorText } from "@/components/photoshoot/press";
+import { isRepeatClick, makePresser, pressAndShow, pressErrorText } from "@/components/photoshoot/press";
 import {
   DEFAULT_FASHION,
   DEFAULT_PRODUCT,
@@ -21,6 +23,9 @@ import {
   stepsDone,
   toRequest,
 } from "@/components/photoshoot/shoot";
+
+vi.mock("@/components/workspace/use-job", async (orig) => ({ ...(await orig<object>()), fetchShared: vi.fn(async () => undefined) }));
+vi.mock("@/lib/plan-credits", async (orig) => ({ ...(await orig<object>()), loadPlanCredits: vi.fn(async () => undefined) }));
 
 const PRODUCT: ShootRequest = { kind: "product", tier: "base", sourceKey: "k1", ratio: "1:1", scene: "studio", brief: "" };
 const FASHION: ShootRequest = { kind: "fashion", tier: "ultra", sourceKey: "g1", ratio: "4:5", pose: "threeQuarter", background: "urbanStreet" };
@@ -71,7 +76,23 @@ describe("press reuses the id only after no answer", () => {
     expect(idOf(send, 1)).not.toBe(idOf(send, 0));
   });
 
-  it.each([402, 503, 429])("takes a new id after the server answered %i", async (status) => {
+  it.each([500, 502, 503])("reuses the id after a server error %i (the shoot may have been charged)", async (status) => {
+    const send = vi.fn().mockRejectedValueOnce(new ApiError(status, "failed")).mockResolvedValueOnce(shoot());
+    const press = presser(send);
+    await expect(press(PRODUCT)).rejects.toBeInstanceOf(ApiError);
+    await press(PRODUCT);
+    expect(idOf(send, 1)).toBe(idOf(send, 0));
+  });
+
+  it("reuses the id for the same request with its fields in another order (a shoot's stored input)", async () => {
+    const send = vi.fn().mockRejectedValueOnce(new ApiError(0, "timeout")).mockResolvedValueOnce(shoot());
+    const press = presser(send);
+    await expect(press(PRODUCT)).rejects.toBeInstanceOf(ApiError);
+    await press(JSON.parse('{"brief":"","scene":"studio","ratio":"1:1","sourceKey":"k1","tier":"base","kind":"product"}'));
+    expect(idOf(send, 1)).toBe(idOf(send, 0));
+  });
+
+  it.each([402, 409, 429])("takes a new id after the server answered %i", async (status) => {
     const send = vi.fn().mockRejectedValueOnce(new ApiError(status, "no")).mockResolvedValueOnce(shoot());
     const press = presser(send);
     await expect(press(PRODUCT)).rejects.toBeInstanceOf(ApiError);
@@ -94,6 +115,31 @@ describe("press reuses the id only after no answer", () => {
     void press(PRODUCT);
     expect(send).toHaveBeenCalledTimes(2);
     expect(idOf(send, 1)).toBe(idOf(send, 0));
+  });
+});
+
+describe("pressAndShow after a failed press", () => {
+  it.each([
+    ["no answer", new ApiError(0, "timeout")],
+    ["a server error", new ApiError(502, "failed")],
+  ])("reads the list and the balance again after %s (the shoot may have started)", async (_, error) => {
+    vi.mocked(fetchShared).mockClear();
+    vi.mocked(loadPlanCredits).mockClear();
+    const create = vi.spyOn(photoshootApi, "create").mockRejectedValueOnce(error);
+    await expect(pressAndShow("w-unknown", `b-${error.status}`, PRODUCT)).rejects.toBe(error);
+    expect(fetchShared).toHaveBeenCalledWith(shootsUrl("w-unknown", `b-${error.status}`), true);
+    expect(loadPlanCredits).toHaveBeenCalledWith("w-unknown", true);
+    create.mockRestore();
+  });
+
+  it("reads nothing again after a refusal (nothing was charged)", async () => {
+    vi.mocked(fetchShared).mockClear();
+    vi.mocked(loadPlanCredits).mockClear();
+    const create = vi.spyOn(photoshootApi, "create").mockRejectedValueOnce(new ApiError(402, "no credits"));
+    await expect(pressAndShow("w-refused", "b1", PRODUCT)).rejects.toBeInstanceOf(ApiError);
+    expect(fetchShared).not.toHaveBeenCalled();
+    expect(loadPlanCredits).not.toHaveBeenCalled();
+    create.mockRestore();
   });
 });
 

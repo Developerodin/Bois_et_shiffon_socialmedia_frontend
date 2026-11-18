@@ -1,4 +1,4 @@
-import type { Shoot, ShootRequest } from "@/shared";
+import { shootRequestKey, shouldKeepRequestId, type Shoot, type ShootRequest } from "@/shared";
 import { ApiError, errorMessage } from "@/components/settings/api";
 import { refusalOf } from "@/lib/paywall";
 import { requestId } from "@/lib/net";
@@ -8,12 +8,16 @@ import { fetchShared, putShared, sharedAt, sharedResponse } from "@/components/w
 import { photoshootApi, shootUrl, shootsUrl } from "./api";
 import { prependShoot } from "./shoot";
 
+/** The server answered a press with a refusal, so it charged nothing (see shouldKeepRequestId, shared/photoshoot.ts). */
+const refused = (e: unknown): boolean => e instanceof ApiError && !shouldKeepRequestId(e.status);
+
 /**
- * Generate / Try again / Variation: sends `request` with a request id. The last press that got no answer (timeout,
- * offline: request() throws those as ApiError status 0) keeps its id, so pressing again for the same request reuses
- * it and the server returns that shoot instead of charging twice. Success, or any answer from the server, clears it:
- * the next press is a new shoot. The id is recorded before sending, so two overlapping presses share it.
- * Every error is rethrown for the caller to show.
+ * Generate / Try again / Variation: sends `request` with a request id. The last press whose outcome is unknown keeps
+ * its id: no answer (timeout, offline, a gateway page: request() throws those as ApiError status 0) or a server error
+ * (5xx, maybe after the charge). Pressing again for the same request reuses it and the server returns that shoot
+ * instead of charging twice. Success, or a refusal (4xx), clears it: the next press is a new shoot. The same request
+ * is matched whatever order its fields come in (shootRequestKey). The id is recorded before sending, so two
+ * overlapping presses share it. Every error is rethrown for the caller to show.
  * Same rule as the phone's startShoot (mobile src/ui/photoshoot/start.ts): keep the two in step.
  */
 export function makePresser(
@@ -22,7 +26,7 @@ export function makePresser(
 ): (r: ShootRequest) => Promise<Shoot> {
   let unanswered: { key: string; id: string } | null = null;
   return async (r) => {
-    const key = JSON.stringify(r);
+    const key = shootRequestKey(r);
     const id = unanswered?.key === key ? unanswered.id : newId();
     const mine = (unanswered = { key, id });
     try {
@@ -30,7 +34,7 @@ export function makePresser(
       if (unanswered === mine) unanswered = null;
       return shoot;
     } catch (e) {
-      if (e instanceof ApiError && e.status > 0 && unanswered === mine) unanswered = null; // the server answered
+      if (refused(e) && unanswered === mine) unanswered = null;
       throw e;
     }
   };
@@ -69,10 +73,21 @@ function showCreated(w: string, b: string, shoot: Shoot) {
 
 /**
  * Generate / Try again (studio) and Variation (shoot page): presses, shows the new shoot everywhere at once, and reads
- * the balance again after the charge. Rejects with the press's error; the caller shows it with pressErrorText.
+ * the balance again after the charge. A press whose outcome is unknown may still have started (and charged) a shoot,
+ * so the list and the balance are read again then too. Rejects with the press's error; the caller shows it with
+ * pressErrorText.
  */
 export async function pressAndShow(w: string, b: string, r: ShootRequest): Promise<Shoot> {
-  const shoot = await pressShoot(w, b, r);
+  let shoot: Shoot;
+  try {
+    shoot = await pressShoot(w, b, r);
+  } catch (e) {
+    if (!refused(e)) {
+      void fetchShared(shootsUrl(w, b), true).catch(() => undefined);
+      void loadPlanCredits(w, true);
+    }
+    throw e;
+  }
   showCreated(w, b, shoot);
   void loadPlanCredits(w, true);
   return shoot;

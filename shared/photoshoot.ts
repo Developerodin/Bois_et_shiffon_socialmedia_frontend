@@ -30,3 +30,18 @@ export type Shoot = {
   sourceUrl: string;
   shots: { key: string; url: string; downloadUrl?: string }[];
 };
+
+/**
+ * After a Generate fails with `status`, whether the next press for the same request reuses its request id. Kept when
+ * the outcome is unknown: no answer (status 0: timeout, offline) or a server error (5xx: a gateway page, or a route
+ * that failed after the charge). Reusing it is safe: the server returns that shoot, or a 409 if it was refunded.
+ * Any other answer (402, 409, 429...) means this press left no charge standing, so the next press is a new shoot.
+ * Used by the web's makePresser and the phone's startShoot.
+ */
+export const shouldKeepRequestId = (status: number): boolean => status === 0 || status >= 500;
+
+/**
+ * The same request as one string whatever order its fields come in (a shoot's stored input comes back in database
+ * key order), so a retry of the same setup reuses its request id. The request is flat, so sorting the top keys is enough.
+ */
+export const shootRequestKey = (r: ShootRequest): string => JSON.stringify(r, Object.keys(r).sort());
