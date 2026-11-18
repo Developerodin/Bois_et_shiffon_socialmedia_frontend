@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Shoot, ShootRequest } from "@/shared";
 import { ApiError } from "@/components/settings/api";
 import { NetworkError } from "@/lib/net";
+import { stale } from "@/components/workspace/use-job";
 import { shootUrl, shootsUrl } from "@/components/photoshoot/api";
 import { LABELS, shootTitle, waitLine } from "@/components/photoshoot/labels";
 import { makePresser } from "@/components/photoshoot/press";
@@ -12,6 +13,7 @@ import {
   generateBlocker,
   isShootId,
   keepLinks,
+  linksFetchedAt,
   retryRequest,
   shootSteps,
   toRequest,
@@ -208,16 +210,35 @@ describe("keepLinks", () => {
   });
 });
 
+describe("linksFetchedAt", () => {
+  const MIN = 60_000;
+  it("dates kept links by the older answer, so a stale next answer + fresh prev still reads again", () => {
+    // prev (the list) fetched at 50 min, next (a cached detail with its download link) fetched at 0; now 55 min.
+    expect(linksFetchedAt(50 * MIN, 0, 55 * MIN)).toBe(0);
+    expect(stale(linksFetchedAt(50 * MIN, 0, 55 * MIN), 55 * MIN)).toBe(true);
+  });
+  it("keeps the earlier time when the new answer is newer", () => {
+    expect(linksFetchedAt(10 * MIN, 30 * MIN, 30 * MIN)).toBe(10 * MIN);
+  });
+  it("takes the new answer's time when prev is missing or stale", () => {
+    expect(linksFetchedAt(undefined, 30 * MIN, 30 * MIN)).toBe(30 * MIN);
+    expect(linksFetchedAt(0, 55 * MIN, 55 * MIN)).toBe(55 * MIN);
+  });
+});
+
 describe("urls and ids", () => {
   it("builds the endpoints with encoded parts", () => {
     expect(shootsUrl("w 1", "b/2")).toBe("/api/v1/workspaces/w%201/brands/b%2F2/photoshoots");
     expect(shootUrl("w", "b", "x/y")).toBe("/api/v1/workspaces/w/brands/b/photoshoots/x%2Fy");
   });
-  it("accepts a shoot id (a cuid) and nothing else", () => {
-    expect(isShootId("cm3k9x0a10000abcd1234efgh")).toBe(true);
+  it("accepts a shoot id (a UUID) and nothing else", () => {
+    const id = crypto.randomUUID();
+    expect(isShootId(id)).toBe(true);
+    expect(isShootId(id.toUpperCase())).toBe(true);
+    expect(isShootId(id.slice(1))).toBe(false);
     expect(isShootId("../admin")).toBe(false);
     expect(isShootId("")).toBe(false);
     expect(isShootId(undefined)).toBe(false);
-    expect(isShootId(["cm3k9x0a10000abcd1234efgh"])).toBe(false);
+    expect(isShootId([id])).toBe(false);
   });
 });

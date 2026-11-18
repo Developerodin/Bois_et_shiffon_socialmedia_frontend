@@ -79,6 +79,14 @@ export function countByKind(shoots: readonly Shoot[]): { all: number; product: n
  * `next`, but with `prev`'s signed links (the source, and each shot's url and download link by key) while `prev`'s
  * are fresh, so an image doesn't reload on every poll. A shot `prev` lacks, or a download link it lacks, comes from `next`.
  */
+/**
+ * When the links keepLinks returned were fetched: a kept result mixes `prev`'s links with `next`'s (new shots, a
+ * download link `prev` lacked), so it is as old as the older of the two answers; otherwise as old as `next`.
+ */
+export function linksFetchedAt(prevFetchedAt: number | undefined, fetchedAt: number, now = Date.now()): number {
+  return prevFetchedAt !== undefined && !stale(prevFetchedAt, now) ? Math.min(prevFetchedAt, fetchedAt) : fetchedAt;
+}
+
 export function keepLinks(prev: Shoot | undefined, next: Shoot, prevFetchedAt: number, now = Date.now()): Shoot {
   if (!prev || stale(prevFetchedAt, now)) return next;
   const old = new Map(prev.shots.map((s) => [s.key, s]));
@@ -94,8 +102,8 @@ export function keepLinks(prev: Shoot | undefined, next: Shoot, prevFetchedAt: n
   };
 }
 
-// Shoot ids are Prisma cuid()s: lowercase letters and digits. Anything else in ?shoot= or [id] is not one.
-const SHOOT_ID = /^[a-z0-9]{20,40}$/;
+// Shoot ids are UUIDs: the server uses the create call's requestId (a UUID) as the id. Anything else in ?shoot= or [id] is not one.
+const SHOOT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Whether a URL value (`?shoot=`, `[id]`) can be a shoot id. */
 export const isShootId = (s: unknown): s is string => typeof s === "string" && SHOOT_ID.test(s);

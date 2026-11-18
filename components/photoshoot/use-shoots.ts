@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 import type { Shoot } from "@/shared";
 import { JOB_INTERVALS, SIGNED_LINK_STALE_MS, sharedAt, stale, useJob } from "@/components/workspace/use-job";
 import { shootUrl, shootsUrl } from "./api";
-import { keepLinks } from "./shoot";
+import { keepLinks, linksFetchedAt } from "./shoot";
 
 // The links each shoot is shown with and when they were fetched, shared by the list and the shoot page so one shoot's
 // images don't reload as the views poll. Ceiling: one entry per shoot seen in this tab, never evicted.
@@ -14,8 +14,7 @@ const shown = new Map<string, { shoot: Shoot; at: number }>();
 function steady(next: Shoot, fetchedAt: number): Shoot {
   const prev = shown.get(next.id);
   const shoot = keepLinks(prev?.shoot, next, prev?.at ?? 0);
-  // Kept links are as old as the earlier answer; new ones as old as this answer.
-  shown.set(next.id, { shoot, at: prev && !stale(prev.at) ? prev.at : fetchedAt });
+  shown.set(next.id, { shoot, at: linksFetchedAt(prev?.at, fetchedAt) });
   return shoot;
 }
 
