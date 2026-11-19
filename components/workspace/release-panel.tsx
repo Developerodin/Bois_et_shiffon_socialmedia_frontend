@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
+import { publishCalls } from "@/components/workspace/release";
 import { CLIENT_TAG } from "@/lib/net";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -36,7 +37,8 @@ type Campaign = { kind: "offer" | "campaign" | "priority"; name: string; offer: 
 type Release = {
   latestVersion: number | null;
   approvalValid: boolean;
-  requirements: { provider: string | null; needsImage: boolean; minImages: number; maxImages: number; needsVideo: boolean; needsBoard: boolean; frames?: [number, number] };
+  /** `studio`: a reel made in the app; it posts its own video, so no link is asked. An older server sends none. */
+  requirements: { provider: string | null; needsImage: boolean; minImages: number; maxImages: number; needsVideo: boolean; needsBoard: boolean; frames?: [number, number]; studio?: boolean };
   /** A story marked to be posted by hand, and when it is due. */
   byHand?: boolean;
   scheduledFor?: string | null;
@@ -64,9 +66,13 @@ const notGoingOut = (d: Release) =>
     return a.status === "PUBLISHING" || (a.status === "SCHEDULED" && due < 60_000 && due > -10 * 60_000);
   });
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Try again.");
+const browserZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-/** Approve the exact draft shown above, then publish or schedule it, with a full history. */
-export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: string[] | null; onChanged: () => void }) {
+/**
+ * Approve the exact draft shown above, then publish or schedule it, with a full history. `approveFirst`: one press
+ * approves a version awaiting approval and then publishes it (the reel page; the phone does the same).
+ */
+export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[] | null; onChanged: () => void; approveFirst?: boolean }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
   const { data, failed: loadError, slow, reload } = useJob(url, { pick: asRelease, done: notGoingOut, intervals: JOB_INTERVALS.publishing, capMs: 600_000 });
   // The hook's own mount poll is the first fetch; only a real change of status or version needs a fresh one.
@@ -78,11 +84,35 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
     void reload();
   }, [status, version, reload]);
 
+  // A post that was going out has gone out (or stopped): the parent's status follows now, not on its next read.
+  const goingOut = data ? !notGoingOut(data) : false;
+  const wasGoingOut = useRef(goingOut);
+  useEffect(() => {
+    if (wasGoingOut.current && !goingOut) onChanged();
+    wasGoingOut.current = goingOut;
+  }, [goingOut, onChanged]);
+
   async function act(body: Record<string, unknown>) {
     await request<Release>(url, { method: "POST", body: JSON.stringify(body) });
     await reload();
     // The post's status lives in the parent's list: refresh it now, not on its next poll.
     onChanged();
+  }
+
+  // Approve (when awaiting approval) then publish, in order. One read of each afterwards, also after an error; the
+  // status this leaves is noted first, so the status effect above doesn't read the release again for it.
+  async function approveAndPublish(body: Record<string, unknown>) {
+    let reached = status;
+    try {
+      for (const call of publishCalls(version!, status, body)) {
+        await request<Release>(url, { method: "POST", body: JSON.stringify(call) });
+        reached = call.action === "decide" ? "APPROVED" : "SCHEDULED";
+      }
+    } finally {
+      seen.current = `${reached}:${version}`;
+      await reload();
+      onChanged();
+    }
   }
 
   if (!data || !perms) {
@@ -106,7 +136,9 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
   const issues = ["AWAITING_APPROVAL", "APPROVED", "SCHEDULED"].includes(status) ? data.productIssues : [];
   const refused = issues.some((i) => i.refuses);
   const allOverridable = issues.every((i) => !i.refuses || i.overridable);
-  const decideProps = { version: version!, issues, canOverride, onDecide: (verdict: Decision["verdict"], note: string, extra: object) => act({ action: "decide", version, verdict, note, ...extra }) };
+  // A studio reel's approval never books a post of its own (on the first account, at an old time): publishing does that.
+  const noAutoPublish = data.requirements.studio ? { noAutoPublish: true } : {};
+  const decideProps = { version: version!, issues, canOverride, onDecide: (verdict: Decision["verdict"], note: string, extra: object) => act({ action: "decide", version, verdict, note, ...(verdict === "APPROVED" ? noAutoPublish : {}), ...extra }) };
 
   return (
     <section aria-labelledby="release-h" className="flex flex-col gap-4 rounded-xl border border-border p-4">
@@ -123,7 +155,17 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
           ))}
         </ul>
       )}
-      {status === "AWAITING_APPROVAL" && version !== null ? (
+      {/* The reel page passes approveFirst; the Overview doesn't. First in the chain, so the form keeps its state across the approval. */}
+      {approveFirst && !refused && version !== null && (status === "AWAITING_APPROVAL" || (status === "APPROVED" && data.approvalValid)) ? (
+        // A blocking check: the page says why above, and there is no form.
+        qualityBlocked ? null : (status === "APPROVED" || canApprove) && canPublish ? (
+          <PublishForm base={base} data={data} version={version} approving={status === "AWAITING_APPROVAL"} onPublish={approveAndPublish} />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {canPublish ? "Your role can't approve reels, so it can't publish this one." : "Your role can't publish reels. Someone who can publish will post it."}
+          </p>
+        )
+      ) : status === "AWAITING_APPROVAL" && version !== null ? (
         canApprove ? (
           <ApproveForm {...decideProps} blocked={qualityBlocked} />
         ) : (
@@ -144,7 +186,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
       ) : status === "APPROVED" && data.approvalValid && data.requirements.frames ? (
         canPublish ? (
           <>
-            <PublishForm base={base} data={data} version={version!} onPublish={(b) => act({ action: "publish", version, ...b })} />
+            <PublishForm base={base} data={data} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
             <StoryByHand base={base} id={id} data={data} onAct={act} />
           </>
         ) : (
@@ -154,7 +196,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
         )
       ) : status === "APPROVED" && data.approvalValid ? (
         canPublish ? (
-          <PublishForm base={base} data={data} version={version!} onPublish={(b) => act({ action: "publish", version, ...b })} />
+          <PublishForm base={base} data={data} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
         ) : (
           <p className="text-sm text-muted-foreground">Approved. Someone who can publish will post it.</p>
         )
@@ -269,8 +311,11 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
   );
 }
 
-function PublishForm({ base, data, version, onPublish }: { base: string; data: Release; version: number; onPublish: (b: Record<string, unknown>) => Promise<void> }) {
+/** approving: the press approves draft v`version` first (approveFirst). */
+function PublishForm({ base, data, version, approving, onPublish }: { base: string; data: Release; version: number; approving: boolean; onPublish: (b: Record<string, unknown>) => Promise<void> }) {
   const { requirements: req, accounts } = data;
+  // A studio reel posts its own video: no link to ask for.
+  const needsLink = req.needsVideo && !req.studio;
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const boards = data.boards?.[accountId];
   const [boardId, setBoardId] = useState("");
@@ -305,7 +350,7 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
   if (!accounts.length) {
     return (
       <p className="text-sm">
-        Approved. Connect an account for {name} to publish it.{" "}
+        {approving ? `Connect an account for ${name} to publish it.` : `Approved. Connect an account for ${name} to publish it.`}{" "}
         <Link href="/settings?tab=connections" className="font-medium underline underline-offset-2">Open Connections</Link>
       </p>
     );
@@ -317,7 +362,7 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
     (imageCount < req.minImages && (req.minImages > 1 ? `Add at least ${req.minImages} images` : "Add an image")) ||
     (imageCount > req.maxImages && (req.maxImages ? `At most ${req.maxImages} images` : "Reels take a video link, not images")) ||
     (!allHttps && "Image links must start with https://") ||
-    (req.needsVideo && video?.protocol !== "https:" && "Add a public https video link") ||
+    (needsLink && video?.protocol !== "https:" && "Add a public https video link") ||
     (later && !runAt && "Pick a date and time") ||
     null;
 
@@ -350,7 +395,7 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
         ...(req.needsBoard ? { boardId } : {}),
         ...(imageLinks.length ? { imageLinks } : {}),
         ...(uploads.length ? { mediaKeys: uploads.map((u) => u.key) } : {}),
-        ...(req.needsVideo ? { videoUrl: videoUrl.trim() } : {}),
+        ...(needsLink ? { videoUrl: videoUrl.trim() } : {}),
         ...(later ? { runAt: new Date(runAt).toISOString() } : {}),
       });
       setConfirming(false);
@@ -364,7 +409,7 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
 
   return (
     <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); void go(); }} onChange={() => setConfirming(false)}>
-      <p className="text-sm text-muted-foreground">Draft v{version} is approved. Choose where and when it goes out.</p>
+      <p className="text-sm text-muted-foreground">{approving ? `Publishing approves draft v${version} first.` : `Draft v${version} is approved. Choose where and when it goes out.`}</p>
       {accounts.length > 1 ? (
         <fieldset className="flex flex-col gap-1.5">
           <legend className="mb-1.5 text-sm font-medium">{name} account</legend>
@@ -396,7 +441,7 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
         </div>
       )}
 
-      {req.needsVideo && (
+      {needsLink && (
         <div className="flex flex-col gap-1.5">
           <label htmlFor="pub-video" className="text-sm font-medium">Video link</label>
           <Input id="pub-video" type="url" inputMode="url" placeholder="https://…/reel.mp4" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="h-11" aria-describedby="pub-video-help" />
@@ -450,7 +495,10 @@ function PublishForm({ base, data, version, onPublish }: { base: string; data: R
           ))}
         </div>
         {later && (
-          <Input type="datetime-local" aria-label="Publish date and time" value={runAt} min={nowLocalInput()} onChange={(e) => setRunAt(e.target.value)} className="h-11 w-fit" />
+          <div className="flex flex-wrap items-center gap-3">
+            <Input type="datetime-local" aria-label="Publish date and time" value={runAt} min={nowLocalInput()} onChange={(e) => setRunAt(e.target.value)} className="h-11 w-fit" />
+            <span className="text-sm text-muted-foreground">Time zone: {zoneCity(browserZone())}</span>
+          </div>
         )}
       </fieldset>
 
