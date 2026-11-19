@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight, Package, RefreshCw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Package, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -249,7 +249,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
       /* The page scrolls, not this box (a second scrollbar otherwise): from lg up the column heads stick to the top
           edge of <main>, the negative top cancelling its padding. Below lg the table can be wider than its box (636 px at its narrowest), so
           it scrolls sideways there; overflow-x auto makes this box the heads' scroller, so they don't stick below lg. */
-      <div aria-busy={!shown} className={cn("-mx-5 overflow-x-auto transition-opacity lg:overflow-x-clip motion-reduce:transition-none", !shown && "opacity-60")}>
+      <div aria-busy={!shown} className="-mx-5 overflow-x-auto lg:overflow-x-clip">
         <table className="w-full text-left text-sm">
           <thead className="sticky -top-4 z-10 border-b border-border bg-card text-xs text-muted-foreground sm:-top-6">
             <tr>
@@ -259,8 +259,20 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
               <th scope="col" className="px-3 py-3 sm:px-5 font-medium">Stock</th>
               {canEdit ? <th scope="col" className="px-3 py-3 sm:px-5"><span className="sr-only">Actions</span></th> : null}
             </tr>
+            {/* A bar under the heads pulses while a page loads; it sticks with them, so it shows wherever the reader is. */}
+            <tr aria-hidden="true">
+              <td colSpan={canEdit ? 5 : 4} className="p-0">
+                <div className={cn("h-0.5", !shown && "animate-pulse bg-primary motion-reduce:animate-none")} />
+              </td>
+            </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          {/* The old rows fade and stop taking clicks until the new page lands (an Edit there would open a stale row). */}
+          <tbody
+            className={cn(
+              "divide-y divide-border transition-opacity motion-reduce:transition-none",
+              !shown && "pointer-events-none opacity-40",
+            )}
+          >
             {rows.products.map((p) => (
               <tr key={p.id}>
                 <td className="px-3 py-2 sm:px-5">
@@ -311,9 +323,16 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
       )}
       {paging && rows?.products.length ? (
         <nav aria-label="Product pages" className="flex flex-wrap items-center justify-between gap-3 pt-1">
-          <p className="text-sm text-muted-foreground tabular-nums">
-            Showing {count((paging.page - 1) * paging.limit + 1)}–{count((paging.page - 1) * paging.limit + rows.products.length)} of {count(paging.total)}
-          </p>
+          {shown ? (
+            <p className="text-sm text-muted-foreground tabular-nums">
+              Showing {count((paging.page - 1) * paging.limit + 1)}–{count((paging.page - 1) * paging.limit + rows.products.length)} of {count(paging.total)}
+            </p>
+          ) : (
+            <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground tabular-nums">
+              <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+              Loading page {count(page)}…
+            </p>
+          )}
           {paging.totalPages > 1 ? (
             <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" disabled={at <= 1} onClick={() => turn(at - 1)}>
