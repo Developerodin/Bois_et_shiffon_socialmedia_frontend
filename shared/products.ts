@@ -32,3 +32,14 @@ export const byExternalId = (a: { externalId: string | null }, b: { externalId: 
 export type SyncReason = "not-a-feed" | "partial" | "failed" | "shopify-refused";
 /** A brand's last catalogue sync (BrandProfile.catalogSync). `error` is the message the web shows; `reason` lets the app say it in the person's language. */
 export type CatalogSync = { at: string; source: "WEBSITE" | "SHOPIFY" | null; count: number; error: string | null; reason?: SyncReason | null };
+
+/**
+ * "12 in stock" / "In stock" / "Out of stock" / "Unknown". A count of 0 or less with inStock true is a store that
+ * doesn't track that item's inventory or keeps selling it: it's for sale, so "In stock". Shared so the Products table
+ * and the chat say the same thing.
+ */
+export function stockLabel(p: { inStock: boolean | null; stockQuantity: number | null }) {
+  if (p.stockQuantity !== null && p.stockQuantity > 0) return `${p.stockQuantity} in stock`;
+  if (p.inStock !== null) return p.inStock ? "In stock" : "Out of stock";
+  return p.stockQuantity !== null ? "Out of stock" : "Unknown";
+}

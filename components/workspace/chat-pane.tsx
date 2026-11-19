@@ -20,9 +20,15 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
   listAgents: () => "Checked the agents",
   startAgent: (i) => `Offered to start the ${String(i?.agentKey ?? "")} agent`,
   webSearch: () => "Searched the web",
+  catalogueSummary: () => "Looked over your catalogue",
+  findProducts: (i) => (i?.q ? `Searched your products for “${String(i.q)}”` : "Looked through your products"),
 };
 
-type Props = { workspaceId: string; brandId: string };
+/**
+ * `page`: the nav id of the page open (CHAT_PAGES), sent with each message so the reply can lean on it; `pageLabel`
+ * names it in the composer. `wide`: the expanded panel, which centres the conversation in a reading column.
+ */
+type Props = { workspaceId: string; brandId: string; page?: string | null; pageLabel?: string | null; wide?: boolean };
 
 type Thread = { id: string; messages: UIMessage[] };
 
@@ -165,6 +171,9 @@ function ChatSession({
   initial,
   onNew,
   slots,
+  page,
+  pageLabel,
+  wide,
 }: Props & {
   api: string;
   initial: Thread;
@@ -172,6 +181,12 @@ function ChatSession({
   slots: ChatSlots;
 }) {
   const [input, setInput] = useState("");
+  // useChat keeps the transport it was first given, so the page is read through a ref when a message is sent.
+  const pageRef = useRef(page);
+  useEffect(() => {
+    pageRef.current = page;
+  }, [page]);
+  const column = wide ? "mx-auto w-full max-w-3xl" : "";
   const endRef = useRef<HTMLDivElement>(null);
   // Follow the reply only while the person is at the bottom; scrolling up to reread stops it, sending resumes it.
   const stick = useRef(true);
@@ -183,7 +198,7 @@ function ChatSession({
       headers: { "X-Client": CLIENT_TAG },
       // The server keeps the history; send only the newest message.
       prepareSendMessagesRequest: ({ messages: all, id }) => ({
-        body: { id, message: all[all.length - 1] },
+        body: { id, message: all[all.length - 1], page: pageRef.current ?? undefined },
       }),
     }),
   });
@@ -230,9 +245,9 @@ function ChatSession({
         </p>
         {messages.length === 0 ? (
           // Centred in the space above the box, so a tall panel has no empty stretch over a cluster at the bottom.
-          <div className="my-auto">{slots.empty(send)}</div>
+          <div className={cn("my-auto", column)}>{slots.empty(send)}</div>
         ) : (
-          <ol className="flex flex-col gap-5">
+          <ol className={cn("flex flex-col gap-5", column)}>
             {/* Replies saved before ids were generated have an empty id: fall back to the position. */}
             {messages.map((m, n) => (
               <li key={m.id || `msg-${n}`} className={cn("flex flex-col gap-2", m.role === "user" && "items-end")}>
@@ -310,7 +325,7 @@ function ChatSession({
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-2 px-3 pb-3">
+      <form onSubmit={onSubmit} className={cn("flex shrink-0 flex-col gap-2 px-3 pb-3", column)}>
         <label htmlFor="chat-input" className="sr-only">
           Message Espanda
         </label>
@@ -329,9 +344,17 @@ function ChatSession({
             className="block max-h-48 min-h-14 w-full resize-none rounded-t-2xl bg-transparent px-3.5 pt-3 pb-1 text-base outline-none [field-sizing:content] placeholder:text-muted-foreground sm:text-sm"
           />
           <div className="flex items-center justify-between gap-2 px-3.5 pb-2.5">
-            <p id="chat-hint" className="text-xs text-muted-foreground">
-              Enter to send · Shift+Enter for a new line
-            </p>
+            <div className="flex min-w-0 items-center gap-2">
+              {/* Which page Espanda is told about (the server names it from its own list). */}
+              {pageLabel ? (
+                <span className="truncate rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground" title="Espanda knows which page you're on">
+                  Context: {pageLabel}
+                </span>
+              ) : null}
+              <p id="chat-hint" className="shrink-0 text-xs text-muted-foreground">
+                Enter to send<span className="sr-only">, Shift+Enter for a new line</span>
+              </p>
+            </div>
             {busy ? (
               <Button type="button" variant="secondary" size="icon" onClick={() => void stop()} aria-label="Stop" className="size-8 shrink-0 rounded-full active:translate-y-px">
                 <Square aria-hidden="true" />

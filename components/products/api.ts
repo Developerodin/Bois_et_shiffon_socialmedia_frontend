@@ -1,6 +1,8 @@
 // Client-side contract for the products API (app/api/v1/.../brands/[brandId]/products). Keep in sync with the routes.
 import { request } from "@/components/settings/api";
 import type { CatalogSync } from "@/shared";
+/** Shared with the server (the chat says the same thing). */
+export { stockLabel } from "@/shared";
 
 export type { CatalogSync };
 
@@ -54,16 +56,6 @@ export const productsApi = {
   /** `queued: false` when a sync was already queued or running. */
   sync: (w: string, b: string) => request<{ queued: boolean }>(`${base(w, b)}/sync`, { method: "POST" }),
 };
-
-/**
- * "12 in stock" / "In stock" / "Out of stock" / "Unknown". A count of 0 or less with inStock true is a store that
- * doesn't track that item's inventory or keeps selling it: it's for sale, so "In stock".
- */
-export function stockLabel(p: Pick<Product, "inStock" | "stockQuantity">) {
-  if (p.stockQuantity !== null && p.stockQuantity > 0) return `${p.stockQuantity} in stock`;
-  if (p.inStock !== null) return p.inStock ? "In stock" : "Out of stock";
-  return p.stockQuantity !== null ? "Out of stock" : "Unknown";
-}
 
 /** A small rendition for list thumbnails: Shopify's CDN resizes on request (feeds store 1200 px); other hosts as is. */
 export function thumbUrl(url: string, px: number) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import {
   Bot,
@@ -8,12 +8,16 @@ import {
   FileSearch,
   Gauge,
   Lightbulb,
-  Megaphone,
+  Maximize2,
+  Minimize2,
+  PackageSearch,
+  PackageX,
   PenLine,
   Search,
   Sparkles,
   SquarePen,
   Swords,
+  Tag,
   Target,
   Users,
   X,
@@ -23,6 +27,7 @@ import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { ChatPane, type ChatSlots } from "@/components/workspace/chat-pane";
 import { assistantDocks, navFor } from "@/lib/nav";
+import { CHAT_PAGES, isChatPage } from "@/shared";
 import { cn } from "@/lib/utils";
 
 /** A starter card: what it says, and the fuller question it sends. */
@@ -30,9 +35,8 @@ type Suggestion = { icon: LucideIcon; title: string; hint: string; ask: string }
 
 /**
  * Starters for the page being viewed. Only things the chat can really answer: it reads the strategy documents, the
- * SEO / AI-visibility reports and the agents, and searches the web. It can't see products, prices or campaigns, so
- * those pages get starters that ask the person for the specifics instead of pretending to know them.
- * ponytail: keyed by nav id; give the chat a products tool before offering catalogue analysis here.
+ * SEO / AI-visibility reports, the product catalogue and the agents, and searches the web. It can't see campaigns or
+ * posts, so content pages get starters that ask the person for the specifics instead of pretending to know them.
  */
 const GENERAL: Suggestion[] = [
   { icon: CalendarRange, title: "Plan my next 30 days", hint: "A content and marketing plan from your strategy.", ask: "Plan my next 30 days of marketing." },
@@ -46,9 +50,9 @@ const BY_PAGE: Record<string, Suggestion[]> = {
     { icon: Users, title: "Who is my customer?", hint: "Your audience, from your business documents.", ask: "Who is my customer?" },
   ],
   products: [
-    { icon: Megaphone, title: "Promote a product", hint: "Post ideas and angles for one product.", ask: "Give me ideas to promote one of my products. Ask me which product first." },
-    { icon: PenLine, title: "Write a product description", hint: "In your brand voice; paste the details.", ask: "Help me write a product description in my brand voice. Ask me for the product details first." },
-    { icon: CalendarRange, title: "Plan a product launch", hint: "A short launch plan across your channels.", ask: "Plan a launch for a new product. Ask me about the product first." },
+    { icon: PackageSearch, title: "Explore my catalogue", hint: "What you sell, by category and range.", ask: "Give me an overview of my product catalogue: what I sell, the main categories and anything that stands out." },
+    { icon: Tag, title: "Analyse my pricing", hint: "Price ranges, the median and outliers.", ask: "Analyse my pricing: ranges, the median, and the products priced far above or below the rest." },
+    { icon: PackageX, title: "What's out of stock?", hint: "Out of stock, and stock we can't confirm.", ask: "Which of my products are out of stock, and which have unknown stock?" },
   ],
   performance: [
     { icon: Gauge, title: "Explain my scores", hint: "Your SEO and AI-visibility reports in plain words.", ask: "Explain my latest SEO and AI-visibility reports in plain words." },
@@ -102,6 +106,22 @@ export function AssistantPanel(p: Props) {
   const ref = useRef<HTMLElement>(null);
   const wasOpen = useRef(false);
   const shown = docked || open;
+  // Expanded: a wide reading view over the page, for long answers and tables. Not remembered between pages.
+  const [expanded, setExpanded] = useState(false);
+  const collapse = useCallback(() => {
+    setExpanded(false);
+    requestAnimationFrame(() => document.getElementById(EXPAND_ID)?.focus());
+  }, []);
+  // Hidden (drawer closed, window narrowed) or another page: back to the column, so it never reopens expanded.
+  useEffect(() => {
+    if (shown) return;
+    // Hiding makes the panel inert: move focus out first, or it falls to the page's body.
+    if (ref.current?.contains(document.activeElement)) document.getElementById(ASSISTANT_TOGGLE_ID)?.focus();
+    setExpanded(false);
+  }, [shown]);
+  useEffect(() => {
+    setExpanded(false);
+  }, [pathname]);
 
   // Going docked closes the drawer, so it doesn't reappear on its own when the window narrows again.
   useEffect(() => {
@@ -112,15 +132,17 @@ export function AssistantPanel(p: Props) {
     ref.current?.toggleAttribute("inert", !shown);
   }, [shown]);
 
-  // Escape closes the drawer even when focus has moved to the page behind it.
+  // Escape collapses the wide view first, then closes the drawer, even when focus has moved to the page behind it.
   useEffect(() => {
-    if (!open || docked) return;
+    if (!expanded && (!open || docked)) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !e.defaultPrevented) setOpen(false);
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if (expanded) collapse();
+      else setOpen(false);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, docked, setOpen]);
+  }, [expanded, open, docked, setOpen, collapse]);
 
   useEffect(() => {
     if (open && !docked) ref.current?.focus();
@@ -130,23 +152,35 @@ export function AssistantPanel(p: Props) {
 
   return (
     <>
-      {open && !docked ? (
-        <div aria-hidden="true" className="fixed inset-0 z-40 bg-overlay" onClick={() => setOpen(false)} />
+      {(open && !docked) || expanded ? (
+        <div aria-hidden="true" className="fixed inset-0 z-40 bg-overlay" onClick={() => (expanded ? collapse() : setOpen(false))} />
       ) : null}
+      {/* Holds the docked column's place while the panel floats expanded, so the page doesn't reflow under it. */}
+      {docked && expanded ? <div aria-hidden="true" className="hidden w-80 shrink-0 xl:block" /> : null}
       <aside
         ref={ref}
         tabIndex={-1}
         aria-label="Espanda"
-        role={docked ? undefined : "dialog"}
+        role={docked && !expanded ? undefined : "dialog"}
         onKeyDown={(e) => {
-          if (e.key === "Escape" && !docked) setOpen(false);
+          if (e.key !== "Escape") return;
+          if (expanded) {
+            // Marked handled, so the document listener doesn't also close the drawer.
+            e.preventDefault();
+            collapse();
+          } else if (!docked) {
+            e.preventDefault();
+            setOpen(false);
+          }
         }}
+        // The same element in every state (classes only), so the conversation and a streaming reply carry on.
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex h-full w-80 shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
+          "fixed inset-y-0 right-0 z-50 flex h-full shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
+          expanded ? "w-[min(56rem,100vw)]" : "w-80",
           // Docked it sits beside the page: the page's own 12 px edge is the gap, so no left padding of its own, and it
           // starts under the 72 px top bar (+12 px) so its top edge lines up with the page's cards, not the bar.
-          docked && "xl:static xl:z-auto xl:translate-x-0 xl:pt-21 xl:pl-0",
-          open ? "translate-x-0" : "translate-x-full",
+          docked && !expanded && "xl:static xl:z-auto xl:translate-x-0 xl:pt-21 xl:pl-0",
+          open || expanded ? "translate-x-0" : "translate-x-full",
         )}
       >
         <button
@@ -159,14 +193,25 @@ export function AssistantPanel(p: Props) {
         </button>
         {/* A card like every other panel (DESIGN_SYSTEM §4): white, bordered, on the page background, not painted onto it. */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-          <Body {...p} docked={docked} page={navFor(pathname).activeId} />
+          <Body {...p} docked={docked} page={navFor(pathname).activeId} expanded={expanded} onExpand={() => (expanded ? collapse() : setExpanded(true))} />
         </div>
       </aside>
     </>
   );
 }
 
-function Body({ workspaceId, brandId, brandName, canCreateBrand, docked, page }: Props & { docked: boolean; page: string | null }) {
+const EXPAND_ID = "assistant-expand";
+
+function Body({
+  workspaceId,
+  brandId,
+  brandName,
+  canCreateBrand,
+  docked,
+  page,
+  expanded,
+  onExpand,
+}: Props & { docked: boolean; page: string | null; expanded: boolean; onExpand: () => void }) {
   const title = <h2 className="text-lg leading-tight font-semibold text-foreground">Espanda</h2>;
   const mark = (
     <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
@@ -202,16 +247,33 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked, page }:
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={onNew}
-          disabled={busy || empty}
-          aria-label="New conversation"
-          title="New conversation"
-          className={cn("grid size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px disabled:opacity-50 disabled:hover:bg-transparent mr-8", docked && "xl:mr-0")}
-        >
-          <SquarePen className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
-        </button>
+        <div className={cn("mr-8 flex shrink-0 items-center gap-1", docked && "xl:mr-0")}>
+          {/* From md up (a phone's drawer is already full width), and always while expanded so it can be collapsed. */}
+          <button
+            id={EXPAND_ID}
+            type="button"
+            onClick={onExpand}
+            aria-pressed={expanded}
+            aria-label={expanded ? "Collapse chat" : "Expand chat"}
+            title={expanded ? "Collapse chat" : "Expand chat"}
+            className={cn(
+              "size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px",
+              expanded ? "grid" : "hidden md:grid",
+            )}
+          >
+            {expanded ? <Minimize2 className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : <Maximize2 className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />}
+          </button>
+          <button
+            type="button"
+            onClick={onNew}
+            disabled={busy || empty}
+            aria-label="New conversation"
+            title="New conversation"
+            className="grid size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px disabled:opacity-50 disabled:hover:bg-transparent"
+          >
+            <SquarePen className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
+          </button>
+        </div>
       </div>
     ),
     empty: (send) => (
@@ -221,7 +283,7 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked, page }:
           <p className="text-base text-foreground">What would you like to work on?</p>
           {/* What it can and can't do, said once: it reads, searches and offers; people decide. */}
           <p className="text-sm leading-relaxed text-muted-foreground">
-            I read your strategy documents and site reports, search the web, and can offer to start agents. I never publish.
+            I read your strategy documents, site reports and products, search the web, and can offer to start agents. I never publish.
           </p>
         </div>
         <section aria-labelledby="chat-suggestions" className="flex flex-col gap-2">
@@ -254,7 +316,15 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked, page }:
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <ChatPane key={`${workspaceId}:${brandId}`} workspaceId={workspaceId} brandId={brandId} {...slots} />
+      <ChatPane
+        key={`${workspaceId}:${brandId}`}
+        workspaceId={workspaceId}
+        brandId={brandId}
+        page={isChatPage(page) ? page : null}
+        pageLabel={isChatPage(page) ? CHAT_PAGES[page] : null}
+        wide={expanded}
+        {...slots}
+      />
     </div>
   );
 }
