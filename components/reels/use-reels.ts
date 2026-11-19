@@ -8,7 +8,7 @@ import { stale } from "@/lib/signed-links";
 import type { Opportunity } from "@/components/workspace/content-panels";
 import { errorMessage } from "@/components/settings/api";
 import { opportunitiesUrl, reelOptionsUrl, reelUrl, reelsApi, reelsUrl, voicesUrl } from "./api";
-import { keepReelLinks, optionsMaking, rendering } from "./reel";
+import { RENDER_SLOW_MS, keepReelLinks, optionsMaking, rendering } from "./reel";
 
 // One link cache per type (the list's summaries, the page's detail): see createLinkCache for the ceiling.
 const summaries = createLinkCache<ReelSummary>((r) => r.id, keepReelLinks);
@@ -27,13 +27,11 @@ export function useReels(w: string, b: string) {
   return { data, failed, status, reload };
 }
 
-/** How long a render runs before the Video step says it's taking longer than usual (polling goes on). */
-export const RENDER_SLOW_MS = 15 * 60_000;
-
 /**
- * One reel in full; polls while a render runs. A 403 or 404 stops polling (`status` says which). `slow`: a render has
- * run for RENDER_SLOW_MS. The wait for the checks after a render isn't polled here: the Review step drives its own,
- * with an end, so a check run that never lands can't keep every open tab polling.
+ * One reel in full; polls while a render runs. A 403 or 404 stops polling (`status` says which). `slow`: this page has
+ * polled a render for RENDER_SLOW_MS (the Video step also counts from the render's start: renderLong). The wait for
+ * the checks after a render isn't polled here: the Review step drives its own, with an end, so a check run that never
+ * lands can't keep every open tab polling.
  */
 export function useReel(w: string, b: string, id: string) {
   const url = reelUrl(w, b, id);

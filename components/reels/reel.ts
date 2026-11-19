@@ -8,8 +8,8 @@ import { RENDER_STAGES, starterProduct } from "./labels";
 /** The reel page's steps, in order (spec §5.3). Pure: no React. */
 export const REEL_STEPS = ["plan", "presenter", "photos", "script", "storyboard", "video", "review", "publish"] as const;
 export type ReelStep = (typeof REEL_STEPS)[number];
-// 3c adds video, review, publish.
-export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "script", "storyboard"];
+// 3c adds review and publish next.
+export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "script", "storyboard", "video"];
 
 /** A reel's page, on a step when given. */
 export const reelHref = (id: string, brandId: string, step?: ReelStep): string => `/reels/${id}?b=${brandId}${step ? `&step=${step}` : ""}`;
@@ -75,6 +75,24 @@ export function renderSteps(d: ReelDetail): JobStep[] {
   const n = d.plan?.scenes.length ?? 0;
   const at = rendering(d) ? RENDER_ORDER.indexOf(d.renders[0]!.step as (typeof RENDER_ORDER)[number]) : -1;
   return RENDER_ORDER.map((stage, i) => ({ label: RENDER_STAGES[stage](n), state: i < at ? "done" : i === at ? "active" : "waiting" }));
+}
+
+/** How long a render runs before the Video step says it's taking longer than usual (polling goes on). */
+export const RENDER_SLOW_MS = 15 * 60_000;
+
+/** A running render started more than RENDER_SLOW_MS before `now`: counted from its own start, so a page opened late says so at once. */
+export function renderLong(d: ReelDetail, now: number): boolean {
+  if (!rendering(d)) return false;
+  const started = Date.parse(d.renders[0]!.createdAt);
+  return Number.isFinite(started) && now - started > RENDER_SLOW_MS;
+}
+
+/** Why Make video is off, or null: stand-in photos, an edit lock, or a plan chat or save that would move the version under the press. */
+export function makeVideoBlock(d: ReelDetail, chatBusy: boolean, saving: boolean): string | null {
+  if (d.plan?.scenes.some((s) => s.standIn)) return "A scene's photo shows something else. Pick the right one before making the video.";
+  const lock = editLock(d);
+  if (lock) return lock;
+  return chatBusy || saving ? "Wait for the plan to finish saving." : null;
 }
 
 /** What to do with a refused render press: read the reel again, and whether the version already has its video (go to Review). */

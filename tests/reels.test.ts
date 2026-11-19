@@ -5,7 +5,7 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { BUILT_STEPS, RENDER_SLOW_MS, makeVideoBlock, renderLong, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, failureText, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
@@ -44,14 +44,15 @@ describe("defaultStep", () => {
 
 describe("reachable and stepFrom", () => {
   it("keeps a built step, else storyboard with a plan, else plan", () => {
-    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "script", "storyboard"]);
+    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "script", "storyboard", "video"]);
     expect(reachable("presenter", detail())).toBe("presenter");
     expect(reachable("photos", detail())).toBe("photos");
     expect(reachable("plan", detail())).toBe("plan");
     expect(reachable("storyboard", detail())).toBe("storyboard");
-    expect(reachable("video", detail())).toBe("storyboard");
-    expect(reachable("video", detail({ plan: null }))).toBe("plan");
-    expect(reachable("video", null)).toBe("plan");
+    expect(reachable("video", detail())).toBe("video");
+    expect(reachable("review", detail())).toBe("storyboard");
+    expect(reachable("review", detail({ plan: null }))).toBe("plan");
+    expect(reachable("review", null)).toBe("plan");
   });
   it("reads a URL param, falling back to the default step", () => {
     expect(stepFrom("plan", detail())).toBe("plan");
@@ -292,6 +293,34 @@ describe("editLock", () => {
     expect(editLock(detail())).toBeNull();
   });
 });
+describe("renderLong", () => {
+  const started = Date.parse("2026-11-19T10:00:00Z");
+  const running = (step: "CLIPS" | "DONE" | "FAILED") => detail({ renders: [{ ...render(step), createdAt: new Date(started).toISOString() }] });
+  it("counts from the render's start, so a reload late into a render says so at once", () => {
+    expect(RENDER_SLOW_MS).toBe(15 * MIN);
+    expect(renderLong(running("CLIPS"), started + 20 * MIN)).toBe(true);
+    expect(renderLong(running("CLIPS"), started + 15 * MIN)).toBe(false);
+    expect(renderLong(running("CLIPS"), started + MIN)).toBe(false);
+  });
+  it("is false with no running render or an unreadable start", () => {
+    expect(renderLong(running("DONE"), started + 20 * MIN)).toBe(false);
+    expect(renderLong(running("FAILED"), started + 20 * MIN)).toBe(false);
+    expect(renderLong(detail(), started + 20 * MIN)).toBe(false);
+    expect(renderLong(detail({ renders: [render("CLIPS")] }), started + 20 * MIN)).toBe(false);
+  });
+});
+
+describe("makeVideoBlock", () => {
+  const standIn = detail({ plan: { ...plan, scenes: [{ ...plan.scenes[0], standIn: true }] } });
+  it("says why Make video is off: stand-ins, a lock, then a chat or save in flight", () => {
+    expect(makeVideoBlock(standIn, false, false)).toBe("A scene's photo shows something else. Pick the right one before making the video.");
+    expect(makeVideoBlock(detail({ item: { id: "r1", title: "T", status: "SCHEDULED", postUrl: null, scheduledFor: null } }), false, false)).toBe("This reel is already scheduled or posted.");
+    expect(makeVideoBlock(detail(), true, false)).toBe("Wait for the plan to finish saving.");
+    expect(makeVideoBlock(detail(), false, true)).toBe("Wait for the plan to finish saving.");
+    expect(makeVideoBlock(detail(), false, false)).toBeNull();
+  });
+});
+
 describe("options helpers", () => {
   it("optionsMaking", () => {
     expect(optionsMaking(opts())).toBe(false);

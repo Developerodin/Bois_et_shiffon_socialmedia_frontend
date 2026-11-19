@@ -18,6 +18,7 @@ import { ScriptStep } from "./script-step";
 import { useReelSave } from "./use-reel-save";
 import { BUILT_STEPS, reelHref, renderNews, rendering, stepFrom, stepState, type ReelStep } from "./reel";
 import { StoryboardStep } from "./storyboard-step";
+import { VideoStep } from "./video-step";
 import { useReel, useReelOptions } from "./use-reels";
 
 function BackLink() {
@@ -54,7 +55,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
   /** The person's permissions on this brand. Passed as is to the steps that need more than one (Publish). */
   perms: readonly string[];
 }) {
-  const { data: detail, failed, status, reload } = useReel(workspaceId, brandId, reelId);
+  const { data: detail, failed, slow, status, reload } = useReel(workspaceId, brandId, reelId);
   const { data: options } = useReelOptions(workspaceId, brandId);
   const chat = usePlanChat(workspaceId, brandId, reelId);
   // One save lock for the whole page: the steps that edit the plan (Photos, Script) take it from here.
@@ -74,7 +75,6 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
 
   // Stable while the reel and brand stay, so `go` can go to memoised steps (the plan chat re-renders this page per frame).
   const stepHref = useCallback((s: ReelStep) => reelHref(reelId, brandId, s), [reelId, brandId]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- for the Video, Review and Publish steps; drop this line once one takes it
   const go = useCallback((s: ReelStep) => router.replace(stepHref(s)), [router, stepHref]);
   const steps = useMemo(() => BUILT_STEPS.map((s) => ({
     id: s,
@@ -128,8 +128,9 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
       </a>
       <BackLink />
       <PageHeader title={detail.item.title} />
-      {/* Always in the page (sr-only while empty, so it takes no room), so the line is announced when it fills in. */}
-      <p aria-live="polite" className={ended ? "text-sm font-medium" : "sr-only"}>{ended}</p>
+      {/* Always in the page (sr-only while empty, so it takes no room), so the line is announced when it fills in. On the
+          Video step it is only announced: the step shows the same news itself and moves focus to Review your reel. */}
+      <p aria-live="polite" className={ended && step !== "video" ? "text-sm font-medium" : "sr-only"}>{ended}</p>
 
       {/* lg: rail | editor | preview. md–lg: rail | editor, the preview under the editor. Below md: menu, editor, preview. */}
       <div className="grid items-start gap-6 md:grid-cols-[12rem_minmax(0,1fr)] lg:grid-cols-[12rem_minmax(0,1fr)_minmax(0,20rem)]">
@@ -148,7 +149,35 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
             <ScriptStep workspaceId={workspaceId} brandId={brandId} detail={detail} canCreate={canCreate} save={save} chatBusy={chat.stream.sending} />
           ) : null}
           {step === "storyboard" ? (
-            <StoryboardStep photosHref={stepHref("photos")} detail={detail} options={options} current={index} onSelect={(i) => { setScene(i); setWatching(false); }} onWatch={() => setWatching(true)} />
+            <StoryboardStep
+              workspaceId={workspaceId}
+              brandId={brandId}
+              photosHref={stepHref("photos")}
+              detail={detail}
+              options={options}
+              canCreate={canCreate}
+              chatBusy={chat.stream.sending}
+              saving={save.saving}
+              go={go}
+              current={index}
+              onSelect={(i) => { setScene(i); setWatching(false); }}
+              onWatch={() => setWatching(true)}
+            />
+          ) : null}
+          {step === "video" ? (
+            <VideoStep
+              workspaceId={workspaceId}
+              brandId={brandId}
+              detail={detail}
+              slow={slow}
+              failed={failed}
+              reload={reload}
+              ended={ended}
+              canCreate={canCreate}
+              chatBusy={chat.stream.sending}
+              saving={save.saving}
+              go={go}
+            />
           ) : null}
         </section>
 

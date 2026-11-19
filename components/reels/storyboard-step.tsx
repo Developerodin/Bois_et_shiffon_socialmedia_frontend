@@ -1,17 +1,31 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { Play } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 import { VIDEO_MODEL_NAMES, type ReelDetail, type ReelOptions } from "@/shared";
 import { Button } from "@/components/ui/button";
+import { usePlan } from "@/components/shell/use-plan-credits";
+import { creditsText } from "@/lib/plan-credits";
 import { JOIN_LABELS } from "./labels";
-import { presenterName } from "./reel";
+import { makeVideoBlock, presenterName, rendering, type ReelStep } from "./reel";
+import { useRenderPress } from "./use-render-press";
 
 const plural = (n: number, one: string) => (n === 1 ? `1 ${one}` : `${n} ${one}s`);
 
-/** The Storyboard step, read-only: the plan's facts and each scene. Takes the reel and options as props; the page owns the preview. */
-export function StoryboardStep({ detail, options, current, photosHref, onSelect, onWatch }: {
+const LINK = "rounded-full font-medium underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+/**
+ * The Storyboard step: the plan's facts and each scene, and Make video (See progress while one is made). Takes the reel
+ * and options as props; the page owns the preview.
+ */
+export function StoryboardStep({ workspaceId, brandId, detail, options, canCreate, chatBusy, saving, go, current, photosHref, onSelect, onWatch }: {
+  workspaceId: string;
+  brandId: string;
   detail: ReelDetail;
   options: ReelOptions | null | undefined;
+  canCreate: boolean;
+  chatBusy: boolean;
+  saving: boolean;
+  go: (s: ReelStep) => void;
   current: number;
   /** The Photos step's address, for the stand-in scenes' "Pick photos" link. */
   photosHref: string;
@@ -56,7 +70,7 @@ export function StoryboardStep({ detail, options, current, photosHref, onSelect,
                   {model ? <p className="text-xs text-muted-foreground">{model}</p> : null}
                   {s.standIn ? <p className="text-xs text-destructive">
                       Stand-in: this photo doesn&apos;t show what the scene talks about.{" "}
-                      <Link href={photosHref} replace className="rounded-full font-medium underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Pick photos</Link>
+                      <Link href={photosHref} replace className={LINK}>Pick photos</Link>
                     </p> : null}
                 </div>
               </li>
@@ -65,7 +79,45 @@ export function StoryboardStep({ detail, options, current, photosHref, onSelect,
           );
         })}
       </ol>
-      <p className="text-sm text-muted-foreground">Make the video in the Espanda app for now.</p>
+      {rendering(detail) ? (
+        <Button type="button" variant="outline" className="self-start" onClick={() => go("video")}>See progress</Button>
+      ) : !detail.videoUrl && canCreate ? (
+        <MakeVideo workspaceId={workspaceId} brandId={brandId} detail={detail} chatBusy={chatBusy} saving={saving} go={go} photosHref={photosHref} />
+      ) : null}
+    </div>
+  );
+}
+
+/** Make video: the page's only primary. Its own component so the press hook mounts only when it can be pressed. */
+function MakeVideo({ workspaceId, brandId, detail, chatBusy, saving, go, photosHref }: {
+  workspaceId: string;
+  brandId: string;
+  detail: ReelDetail;
+  chatBusy: boolean;
+  saving: boolean;
+  go: (s: ReelStep) => void;
+  photosHref: string;
+}) {
+  const { unlimited } = usePlan(workspaceId);
+  const { label, ready, pressing, error, press } = useRenderPress(workspaceId, brandId, detail, go);
+  const block = makeVideoBlock(detail, chatBusy, saving);
+  const standIn = detail.plan?.scenes.some((s) => s.standIn) ?? false;
+  return (
+    <div className="flex flex-col items-start gap-2">
+      <Button type="button" disabled={!ready || pressing || !!block} onClick={press}>
+        {pressing ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}
+        {label("Make video")}
+      </Button>
+      {block ? (
+        <p className="text-sm text-muted-foreground">
+          {block}
+          {standIn ? <>{" "}<Link href={photosHref} replace className={LINK}>Pick photos</Link></> : null}
+        </p>
+      ) : null}
+      {!unlimited && detail.price !== null ? (
+        <p className="text-sm text-muted-foreground">Current balance: {creditsText(detail.credits)} · {creditsText(detail.price)} will be reserved</p>
+      ) : null}
+      <p role="alert" className="text-sm text-destructive empty:hidden">{error}</p>
     </div>
   );
 }
