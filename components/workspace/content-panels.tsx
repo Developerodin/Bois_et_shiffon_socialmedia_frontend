@@ -8,7 +8,7 @@ import { ListSkeleton } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { ChecksList } from "@/components/ui/checks-list";
-import { reelHref } from "@/components/reels/reel";
+import { reelHref } from "@/components/reels/href";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";

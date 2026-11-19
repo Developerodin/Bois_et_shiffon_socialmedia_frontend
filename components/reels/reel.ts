@@ -10,8 +10,8 @@ export const REEL_STEPS = ["plan", "presenter", "photos", "script", "storyboard"
 export type ReelStep = (typeof REEL_STEPS)[number];
 export const BUILT_STEPS: readonly ReelStep[] = REEL_STEPS;
 
-/** A reel's page, on a step when given. */
-export const reelHref = (id: string, brandId: string, step?: ReelStep): string => `/reels/${id}?b=${brandId}${step ? `&step=${step}` : ""}`;
+// In its own import-free module so links from outside the reel page (the Overview) don't pull this file in.
+export { reelHref } from "./href";
 
 /** Whether the reel's latest render is running: the shared rule (reelStage), applied to the detail's newest render. */
 export const rendering = (d: ReelDetail): boolean => reelStage({ render: d.renders[0] ?? null, videoUrl: d.videoUrl }) === "processing";
