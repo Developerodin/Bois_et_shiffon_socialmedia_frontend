@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ADMIN_PAGE_SIZE, NO_WORKSPACE, type ActivitySort, type AdminActivityList } from "@/shared";
+import { Pagination } from "@/components/ui/pagination";
 import { ActivityPickers } from "@/components/admin/activity-pickers";
-import { Ago, Empty, fxOf, Money, Pager, period as periodOf, PERIODS, Segmented, Table, withQuery } from "@/components/admin/ui";
+import { Ago, Empty, fxOf, Money, period as periodOf, PERIODS, Segmented, Table, withQuery } from "@/components/admin/ui";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverFetch } from "@/lib/server-fetch";
 
@@ -64,7 +65,7 @@ export default async function AdminActivity({ searchParams }: { searchParams: Pr
           <Money key="s" usd={r.usd} fx={fx} />,
         ])}
       />
-      <Pager page={page} hasMore={a.next !== null} pages={a.pages} href={(n) => withQuery("/admin/activity", current, { page: n > 1 ? String(n) : undefined })} />
+      <Pagination label="Pages of activity" page={page} totalPages={a.pages} total={a.total} pageSize={ADMIN_PAGE_SIZE} shown={a.rows.length} link={withQuery("/admin/activity", current, { page: undefined })} />
     </>
   );
 }

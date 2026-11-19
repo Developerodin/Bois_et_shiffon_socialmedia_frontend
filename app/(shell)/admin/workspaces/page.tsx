@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { type AdminWorkspaces, type WorkspaceSort } from "@/shared";
-import { Ago, day, Empty, fxOf, Money, Pager, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
+import { ADMIN_PAGE_SIZE, type AdminWorkspaces, type WorkspaceSort } from "@/shared";
+import { Pagination } from "@/components/ui/pagination";
+import { Ago, day, Empty, fxOf, Money, SearchBox, Segmented, Table, withQuery } from "@/components/admin/ui";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverFetch } from "@/lib/server-fetch";
 
@@ -59,7 +60,7 @@ export default async function AdminWorkspaces({ searchParams }: { searchParams: 
           <Ago key="a" at={x.lastActive} />,
         ])}
       />
-      <Pager page={page} hasMore={w.next !== null} pages={w.pages} href={(p) => withQuery("/admin/workspaces", current, { page: p > 1 ? String(p) : undefined })} />
+      <Pagination label="Pages of workspaces" page={page} totalPages={w.pages} total={w.total} pageSize={ADMIN_PAGE_SIZE} shown={w.rows.length} link={withQuery("/admin/workspaces", current, { page: undefined })} />
     </>
   );
 }

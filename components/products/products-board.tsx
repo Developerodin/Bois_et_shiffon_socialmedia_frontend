@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight, Loader2, Package, RefreshCw } from "lucide-react";
+import { Package, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -14,7 +14,7 @@ import { PAGE_SIZES, productsApi, stockLabel, thumbUrl, type FullProduct, type P
 import { CampaignsSection } from "@/components/products/campaigns";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
-import { pageItems } from "@/lib/page-items";
+import { Pagination } from "@/components/ui/pagination";
 import { timeAgo } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/shared";
@@ -207,8 +207,6 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
     // While the next page loads, the last one stays in place, dimmed, so the table doesn't jump.
     const rows = shown ?? table?.data ?? null;
     const paging = rows?.pagination ?? null;
-    // The page asked for, highlighted at once while its rows load (the served page once they have).
-    const at = shown ? (paging?.page ?? page) : page;
     body = (
       <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -322,65 +320,18 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
       </div>
       )}
       {paging && rows?.products.length ? (
-        <nav aria-label="Product pages" className="flex flex-wrap items-center justify-between gap-3 pt-1">
-          {shown ? (
-            <p className="text-sm text-muted-foreground tabular-nums">
-              Showing {count((paging.page - 1) * paging.limit + 1)}–{count((paging.page - 1) * paging.limit + rows.products.length)} of {count(paging.total)}
-            </p>
-          ) : (
-            <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground tabular-nums">
-              <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
-              Loading page {count(page)}…
-            </p>
-          )}
-          {paging.totalPages > 1 ? (
-            <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" disabled={at <= 1} onClick={() => turn(at - 1)}>
-                <ChevronLeft aria-hidden="true" />
-                Previous
-              </Button>
-              {/* Page numbers from sm up; a phone gets "3 of 28" between the arrows. */}
-              <span className="px-2 text-sm text-muted-foreground tabular-nums sm:hidden">
-                {at} of {paging.totalPages}
-              </span>
-              <span className="hidden items-center gap-1 sm:flex">
-                {pageItems(at, paging.totalPages).map((it, i) =>
-                  it === "gap" ? (
-                    <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-muted-foreground">
-                      …
-                    </span>
-                  ) : (
-                    <Button
-                      key={it}
-                      size="sm"
-                      variant={it === at ? "default" : "ghost"}
-                      aria-label={`Page ${it}`}
-                      aria-current={it === at ? "page" : undefined}
-                      className="min-w-9 tabular-nums"
-                      onClick={() => it !== at && turn(it)}
-                    >
-                      {it}
-                    </Button>
-                  ),
-                )}
-              </span>
-              <Button variant="outline" size="sm" disabled={at >= paging.totalPages} onClick={() => turn(at + 1)}>
-                Next
-                <ChevronRight aria-hidden="true" />
-              </Button>
-            </div>
-          ) : null}
-          <label className="flex shrink-0 items-center gap-2 text-sm whitespace-nowrap text-muted-foreground">
-            Rows per page
-            <select value={limit} onChange={(e) => go({ limit: Number(e.target.value), page: 1 })} className={cn(selectClass, "w-auto")}>
-              {PAGE_SIZES.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
-        </nav>
+        <Pagination
+          label="Product pages"
+          page={paging.page}
+          loading={shown ? null : page}
+          totalPages={paging.totalPages}
+          total={paging.total}
+          pageSize={shown ? paging.limit : limit}
+          shown={rows.products.length}
+          onPage={turn}
+          sizes={PAGE_SIZES}
+          onSize={(n) => go({ limit: n, page: 1 })}
+        />
       ) : null}
       </div>
     );

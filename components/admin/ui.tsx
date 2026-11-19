@@ -124,23 +124,6 @@ export function SearchBox({ placeholder, value, hidden = {} }: { placeholder: st
 /** The small outlined pill used for pager links and filter buttons. */
 export const pillButton = "rounded-full border border-border px-3 py-1.5 text-xs hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-/** Previous / next page links under a list, with "Page 2 of 7" when the total is known. */
-export function Pager({ page, hasMore, href, pages }: { page: number; hasMore: boolean; href: (page: number) => string; pages?: number }) {
-  if (page === 1 && !hasMore) return null;
-  const link = pillButton;
-  return (
-    <nav aria-label="Pages" className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-      {/* Plain links, like the filters: see components/admin/segmented-links.tsx. */}
-      {page > 1 ? <a className={link} href={href(page - 1)}>Previous</a> : <span />}
-      <span>
-        Page {page}
-        {pages ? ` of ${pages.toLocaleString("en")}` : ""}
-      </span>
-      {hasMore ? <a className={link} href={href(page + 1)}>Next</a> : <span />}
-    </nav>
-  );
-}
-
 /** Keyset paging for newest-first logs (`?before=` the last row shown): back to the newest, or on to older rows. */
 export function CursorPager({ newest, older }: { newest?: string; older?: string }) {
   if (!newest && !older) return null;

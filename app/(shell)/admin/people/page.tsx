@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/ui/status-badge";
-import type { AdminPeople } from "@/shared";
-import { Ago, day, Empty, Pager, SearchBox, Table, withQuery } from "@/components/admin/ui";
+import { ADMIN_PAGE_SIZE, type AdminPeople } from "@/shared";
+import { Pagination } from "@/components/ui/pagination";
+import { Ago, day, Empty, SearchBox, Table, withQuery } from "@/components/admin/ui";
 import { PageHeader } from "@/components/ui/page-header";
 import { serverFetch } from "@/lib/server-fetch";
 
@@ -54,7 +55,7 @@ export default async function AdminPeople({ searchParams }: { searchParams: Prom
           <span key="j" className="whitespace-nowrap">{day(u.createdAt)}</span>,
         ])}
       />
-      <Pager page={page} hasMore={p.next !== null} pages={p.pages} href={(n) => withQuery("/admin/people", current, { page: n > 1 ? String(n) : undefined })} />
+      <Pagination label="Pages of people" page={page} totalPages={p.pages} total={p.total} pageSize={ADMIN_PAGE_SIZE} shown={p.rows.length} link={withQuery("/admin/people", current, { page: undefined })} />
     </>
   );
 }
