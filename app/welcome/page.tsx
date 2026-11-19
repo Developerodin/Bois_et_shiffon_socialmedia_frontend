@@ -27,26 +27,29 @@ export default async function WelcomePage({
 
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
-      <header className="flex items-center justify-between px-6 py-5 sm:px-10">
-        <EspandaLogo height={28} priority />
-        <nav className="flex flex-wrap items-center justify-end gap-x-5 text-sm text-muted-foreground">
-          {shell.brands.length > 0 || resume ? (
-            <Link href="/" className="inline-block py-2 hover:text-foreground">
-              Go to the app
-            </Link>
-          ) : canCreate ? (
-            <Link href="/settings" className="inline-block py-2 hover:text-foreground">
-              Invite your team first
-            </Link>
-          ) : null}
-          {/* Every person has their own workspace plus any they were invited to: a way back to those. */}
-          {shell.workspaces
-            .filter((w) => w.id !== workspaceId)
-            .map((w) => (
-              <OpenWorkspaceButton key={w.id} workspaceId={w.id} name={w.name} />
-            ))}
-          <SignOutButton className="py-2 hover:text-foreground" />
-        </nav>
+      {/* Capped at the content's width, so at wide screens the logo lines up with the form, not the window edge. */}
+      <header className="px-6 py-5 sm:px-10">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6">
+          <EspandaLogo height={28} priority />
+          <nav className="flex flex-wrap items-center justify-end gap-x-5 text-sm text-muted-foreground">
+            {shell.brands.length > 0 || resume ? (
+              <Link href="/" className="inline-block py-2 hover:text-foreground">
+                Go to the app
+              </Link>
+            ) : canCreate ? (
+              <Link href="/settings" className="inline-block py-2 hover:text-foreground">
+                Invite your team first
+              </Link>
+            ) : null}
+            {/* Every person has their own workspace plus any they were invited to: a way back to those. */}
+            {shell.workspaces
+              .filter((w) => w.id !== workspaceId)
+              .map((w) => (
+                <OpenWorkspaceButton key={w.id} workspaceId={w.id} name={w.name} />
+              ))}
+            <SignOutButton className="py-2 hover:text-foreground" />
+          </nav>
+        </div>
       </header>
       <main className="flex flex-1 items-center px-6 pb-16 pt-6 sm:px-10">
         {workspaceId ? (

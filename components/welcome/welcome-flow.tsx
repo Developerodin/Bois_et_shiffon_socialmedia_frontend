@@ -3,7 +3,21 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Loader2 } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  EyeOff,
+  FileSearch,
+  Gauge,
+  LayoutGrid,
+  Loader2,
+  Package,
+  Quote,
+  ShieldCheck,
+  Target,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { fetchEvents, type AgentEvent } from "@/components/agents/api";
 import {
   createBrand,
@@ -19,10 +33,20 @@ import { keepPolling, settleCheck, type CheckState } from "@/components/welcome/
 import { readable } from "@/lib/agent-message";
 import { brandNameFromWebsite, normalizeWebsite } from "@/shared";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
+import { plainSummary } from "@/lib/plain-summary";
 import { clock } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
-const DOCS = ["Product information", "Marketing strategy", "Competitor analysis", "Brand voice", "Content strategy"];
+/** The five documents Research writes (titles match the server's), with what each holds (its GUIDANCE, in short). */
+const DOC_META: { title: string; does: string; icon: LucideIcon }[] = [
+  { title: "Product information", does: "What you sell, materials, prices and services", icon: Package },
+  { title: "Marketing strategy", does: "Positioning, customers and what sets you apart", icon: Target },
+  { title: "Competitor analysis", does: "Who else sells to your customers, with sources", icon: Users },
+  { title: "Brand voice", does: "How you sound, and the words to use and avoid", icon: Quote },
+  { title: "Content strategy", does: "Content pillars, formats and a posting mix", icon: LayoutGrid },
+];
+const DOCS = DOC_META.map((d) => d.title);
+const SCORES = { title: "SEO and AI search scores", does: "How easily Google and AI assistants find you", icon: Gauge };
 const POLL_MS = 2000;
 /** Past this, offer a way out; the agent keeps reading in the background. */
 const SLOW_AFTER_S = 5 * 60;
@@ -115,75 +139,123 @@ function AddressStep({
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="mx-auto flex w-full max-w-3xl flex-col">
-      <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
-        <label htmlFor="website">What&rsquo;s your website?</label>
-      </h1>
-      <p id="website-help" className="mt-3 max-w-[60ch] text-muted-foreground">
-        We read it and write five strategy documents your agents work from: product, marketing strategy, competitors,
-        brand voice and content. We also score it for SEO and AI search. It takes a few minutes.
-      </p>
-
-      <div className="group mt-12">
-        <div className="flex items-baseline gap-3">
-          <span aria-hidden="true" className="shrink-0 font-mono text-sm text-muted-foreground sm:text-base">
-            https://
-          </span>
-          <input
-            id="website"
-            name="website"
-            inputMode="url"
-            autoComplete="url"
-            autoCapitalize="none"
-            spellCheck={false}
-            autoFocus
-            placeholder="yourbrand.com"
-            value={address}
-            onChange={(e) => {
-              setAddress(e.target.value.replace(/^https?:\/\//i, ""));
-              setError(null);
-            }}
-            aria-describedby="website-help website-error"
-            aria-invalid={!!error}
-            className={cn(
-              "min-w-0 flex-1 bg-transparent font-display font-medium tracking-tight text-foreground outline-none placeholder:text-muted-foreground/40",
-              address.length > 22 ? "text-2xl sm:text-4xl" : address.length > 14 ? "text-3xl sm:text-5xl" : "text-4xl sm:text-6xl",
-            )}
-          />
-        </div>
-        {/* The brass baseline: hairline at rest, full brass rule while focused. */}
-        <div className="relative mt-3 h-0.5 bg-border">
-          <div className="absolute inset-0 origin-left scale-x-0 bg-primary transition-transform duration-300 ease-out group-focus-within:scale-x-100 motion-reduce:transition-none" />
-        </div>
-        <p id="website-error" role="alert" className="mt-3 min-h-5 text-sm text-destructive">
-          {error}
+    <form
+      onSubmit={onSubmit}
+      noValidate
+      className="mx-auto grid w-full max-w-6xl gap-14 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)] lg:gap-20"
+    >
+      <div className="flex min-w-0 flex-col">
+        <h1 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
+          <label htmlFor="website">What&rsquo;s your website?</label>
+        </h1>
+        <p id="website-help" className="mt-3 max-w-[52ch] text-muted-foreground">
+          We read it and draft the strategy your agents work from, then score it for SEO and AI search. It takes a few
+          minutes.
         </p>
-      </div>
 
-      <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <label className="flex flex-col gap-1.5 text-sm sm:w-72">
-          <span className="text-muted-foreground">Brand name</span>
+        <div className="group mt-12">
+          <div className="flex items-baseline gap-2">
+            <span aria-hidden="true" className="shrink-0 text-lg text-muted-foreground sm:text-2xl">
+              https://
+            </span>
+            <input
+              id="website"
+              name="website"
+              inputMode="url"
+              autoComplete="url"
+              autoCapitalize="none"
+              spellCheck={false}
+              autoFocus
+              placeholder="yourbrand.com"
+              value={address}
+              onChange={(e) => {
+                setAddress(e.target.value.replace(/^https?:\/\//i, ""));
+                setError(null);
+              }}
+              aria-describedby="website-help website-error"
+              aria-invalid={!!error}
+              className={cn(
+                "min-w-0 flex-1 bg-transparent font-display font-medium tracking-tight text-foreground outline-none placeholder:text-muted-foreground/50",
+                address.length > 22 ? "text-2xl sm:text-4xl" : address.length > 14 ? "text-3xl sm:text-5xl" : "text-4xl sm:text-6xl",
+              )}
+            />
+          </div>
+          {/* The brass baseline: hairline at rest, full brass rule while focused. */}
+          <div className="relative mt-3 h-0.5 bg-border">
+            <div className="absolute inset-0 origin-left scale-x-0 bg-primary transition-transform duration-300 ease-out group-focus-within:scale-x-100 motion-reduce:transition-none" />
+          </div>
+          <div className="mt-3 min-h-5 text-sm">
+            <p id="website-error" role="alert" className="text-destructive">
+              {error}
+            </p>
+            {!error && website && (
+              <p className="rise-in text-muted-foreground">
+                We&rsquo;ll start at <span className="font-medium text-foreground">{website.replace(/^https?:\/\//, "")}</span>
+              </p>
+            )}
+          </div>
+        </div>
+
+        <label htmlFor="brand-name" className="mt-4 text-sm font-medium">
+          Brand name
+        </label>
+        {/* The name sits beside the button it goes with, so the eye doesn't cross an empty gap to find the action. */}
+        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
+            id="brand-name"
             value={brandName}
             onChange={(e) => {
               setNameTouched(true);
               setName(e.target.value);
             }}
-            placeholder="Filled in from your website"
+            placeholder="Your brand"
             maxLength={80}
-            className="h-10 rounded-md border border-input bg-card px-3 text-base text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            autoComplete="organization"
+            aria-describedby="brand-help"
+            className="h-11 rounded-full border border-input bg-card px-4 text-base text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring sm:w-72"
           />
-        </label>
-        <Button type="submit" size="lg" disabled={pending} className="self-start sm:self-auto">
-          {pending ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}
-          {pending ? "Starting…" : "Read my website"}
-          {pending ? null : <ArrowRight aria-hidden="true" />}
-        </Button>
+          <Button type="submit" size="lg" disabled={pending} className="self-start sm:self-auto">
+            {pending ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}
+            {pending ? "Starting…" : "Read my website"}
+            {pending ? null : <ArrowRight aria-hidden="true" />}
+          </Button>
+        </div>
+        <p id="brand-help" className="mt-2 text-sm text-muted-foreground">
+          Filled in from your website. Change it if it&rsquo;s not right.
+        </p>
+        <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <li className="flex items-center gap-2">
+            <FileSearch className="size-4" aria-hidden="true" /> Up to 8 public pages
+          </li>
+          <li className="flex items-center gap-2">
+            <ShieldCheck className="size-4" aria-hidden="true" /> Follows your robots.txt
+          </li>
+          <li className="flex items-center gap-2">
+            <EyeOff className="size-4" aria-hidden="true" /> Nothing is posted
+          </li>
+        </ul>
       </div>
 
-      <p className="mt-16 text-xs text-muted-foreground">
-        We read up to 8 public pages and follow your site&rsquo;s robots.txt. Nothing is posted anywhere.
-      </p>
+      {/* The same list the next screen fills in as each document is drafted. */}
+      <section aria-labelledby="outcome-heading" className="min-w-0 lg:pt-1.5">
+        <h2 id="outcome-heading" className="text-sm font-medium text-muted-foreground">
+          What you&rsquo;ll get
+        </h2>
+        <ul className="mt-4 flex flex-col gap-4">
+          {[...DOC_META, SCORES].map((d, i) => (
+            <li key={d.title} className="rise-in flex items-start gap-3" style={{ animationDelay: `${i * 40}ms` }}>
+              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent" aria-hidden="true">
+                <d.icon className="size-4 text-accent-foreground" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-medium">{d.title}</span>
+                <span className="block text-sm text-muted-foreground">{d.does}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-6 text-sm text-muted-foreground">Drafts until your team confirms them.</p>
+      </section>
     </form>
   );
 }
@@ -243,7 +315,8 @@ function ReadingRoom({
           fetchContextDocs(workspaceId, brandId, ctrl.signal),
         ]);
         if (ev.events.length) cursor.current = ev.events[ev.events.length - 1].id;
-        const mine = ev.events.filter((e) => e.runId === runId);
+        // This reading's own lines, plus the site checks' (they run beside it under their own runs).
+        const mine = ev.events.filter((e) => e.runId === runId || e.agentKey in CHECK_KEYS);
         // Overlapping ticks (slow fetch, dev double-effect) can return the same events twice.
         if (mine.length) setEvents((prev) => [...prev, ...mine.filter((e) => !prev.some((p) => p.id === e.id))]);
         const site = ev.events.filter((e) => e.agentKey in CHECK_KEYS);
@@ -278,18 +351,45 @@ function ReadingRoom({
   }, [events.length]);
 
   // A doc counts for this run when its latest version is newer than the run's first log line.
-  const runStart = events[0] ? new Date(events[0].createdAt).getTime() - 1000 : startedAt - 60_000;
-  const docStates: DocState[] = useMemo(() => {
-    const drafted = DOCS.map((title) => {
-      const entry = docs?.docs.find((d) => d.title === title);
-      return !!entry?.latest && new Date(entry.latest.createdAt).getTime() >= runStart;
-    });
-    const firstOpen = drafted.indexOf(false);
-    return drafted.map((d, i) => (d ? "drafted" : status === "RUNNING" && i === firstOpen ? "drafting" : "waiting"));
-  }, [docs, runStart, status]);
+  const firstOwn = events.find((e) => e.runId === runId);
+  const runStart = firstOwn ? new Date(firstOwn.createdAt).getTime() - 1000 : startedAt - 60_000;
+  // Site-check lines from an earlier reading of this brand stay out.
+  const feed = useMemo(
+    () =>
+      events
+        .filter((e) => e.runId === runId || new Date(e.createdAt).getTime() >= runStart)
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt)),
+    [events, runId, runStart],
+  );
+  const own = useMemo(() => feed.filter((e) => e.runId === runId), [feed, runId]);
+  // Research writes the five in parallel ("Drafting <title>" for each), so several can be drafting at once.
+  const docStates: DocState[] = useMemo(
+    () =>
+      DOCS.map((title) => {
+        const entry = docs?.docs.find((d) => d.title === title);
+        if (entry?.latest && new Date(entry.latest.createdAt).getTime() >= runStart) return "drafted";
+        return !finished && own.some((e) => e.message === `Drafting ${title}`) ? "drafting" : "waiting";
+      }),
+    [docs, runStart, finished, own],
+  );
+  const pagesRead = own.filter((e) => e.level === "INFO" && /^Read /.test(e.message)).length;
+  // Reading is over once Research says how many pages it read (or found), or starts drafting.
+  const readDone =
+    status === "SUCCEEDED" || own.some((e) => /^(Read|Found) \d+ page|^Couldn't find/.test(e.message)) || docStates.some((s) => s !== "waiting");
+  const drafted = docStates.filter((s) => s === "drafted").length;
+  // A finished check's score, from its last line ("SEO report ready — 84/100, …"). Shown as reported, never estimated.
+  const scores = Object.fromEntries(
+    CHECKS.map((c) => {
+      const line = [...feed].reverse().find((e) => e.agentKey === c.key && e.level === "SUCCESS" && /\d{1,3}\/100/.test(e.message));
+      return [c.key, line ? Number(line.message.match(/(\d{1,3})\/100/)![1]) : null];
+    }),
+  );
+  const scored = CHECKS.filter((c) => shown[c.key] === "done" || shown[c.key] === "failed").length;
+  const progress = ((readDone ? 1 : 0) + drafted + scored) / (1 + DOCS.length + CHECKS.length);
 
-  const failure = [...events].reverse().find((e) => e.level === "ERROR");
-  const host = new URL(website).hostname.replace(/^www\./, "");
+  const failure = [...own].reverse().find((e) => e.level === "ERROR");
+  const siteHost = new URL(website).host;
+  const host = siteHost.replace(/^www\./, "");
 
   async function retry() {
     setRetrying(true);
@@ -306,34 +406,83 @@ function ReadingRoom({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-6">
-        <h1 className="font-display text-4xl font-medium tracking-tight break-all sm:text-5xl">{host}</h1>
-        <p aria-live="polite" className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
-          {active ? <span className="size-2 rounded-full bg-primary motion-safe:animate-pulse" aria-hidden="true" /> : null}
-          {statusLabel({ mismatch, status, polling, unreachable: fails >= 3, started: events.length > 0 })}
-          {active ? ` · ${clock(elapsed)}` : null}
-        </p>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+      <header className="flex flex-col gap-6">
+        <div className="flex items-center gap-4">
+          <SiteIcon host={siteHost} letter={host[0]} />
+          <div className="min-w-0">
+            <h1 className="font-display text-3xl font-medium tracking-tight break-all sm:text-4xl">{host}</h1>
+            <p aria-live="polite" className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+              {active ? <span className="status-pulse size-2 rounded-full bg-primary" aria-hidden="true" /> : null}
+              {status === "SUCCEEDED" ? <Check className="size-4 text-success" aria-hidden="true" /> : null}
+              {statusLabel({ mismatch, status, polling, unreachable: fails >= 3, started: events.length > 0 })}
+              {active ? <span className="font-mono tabular-nums">· {clock(elapsed)}</span> : null}
+            </p>
+          </div>
+        </div>
+
+        {/* Real steps only: the site read, each document drafted, each score settled. Nothing is estimated. */}
+        <div>
+          <div
+            role="progressbar"
+            aria-label="Reading progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(progress * 100)}
+            className="h-1.5 overflow-hidden rounded-full bg-muted"
+          >
+            <div
+              className="h-full origin-left rounded-full bg-primary transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+              style={{ transform: `scaleX(${Math.max(progress, active ? 0.02 : 0)})` }}
+            />
+          </div>
+          <ol className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+            <Track
+              label="Read your site"
+              state={readDone ? "done" : active ? "active" : "waiting"}
+              detail={pagesRead ? `${pagesRead} ${pagesRead === 1 ? "page" : "pages"} read` : readDone ? "Read" : "Opening pages"}
+            />
+            <Track
+              label="Draft your strategy"
+              state={drafted === DOCS.length ? "done" : readDone && active ? "active" : "waiting"}
+              detail={`${drafted} of ${DOCS.length} drafted`}
+            />
+            <Track
+              label="Score it for search"
+              state={scored === CHECKS.length ? "done" : CHECKS.some((c) => shown[c.key] === "running") ? "active" : "waiting"}
+              detail={`${scored} of ${CHECKS.length} scored`}
+            />
+          </ol>
+        </div>
       </header>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <section aria-labelledby="log-heading" className="min-w-0">
-          <h2 id="log-heading" className="text-sm font-medium text-muted-foreground">
-            What the agent is doing
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <section aria-labelledby="log-heading" className="min-w-0 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+          <h2 id="log-heading" className="flex items-center gap-2 text-sm font-semibold">
+            Live from the agents
+            {active && <span className="status-pulse size-1.5 rounded-full bg-primary" aria-hidden="true" />}
           </h2>
-          <ol className="mt-4 flex max-h-[26rem] flex-col gap-1.5 overflow-y-auto text-sm leading-relaxed">
-            {events.length === 0 && <li className="text-muted-foreground">Waiting for the first page…</li>}
-            {events.map((e) => (
-              <li key={e.id} className="flex gap-3">
-                <time className="shrink-0 tabular-nums text-muted-foreground/70" dateTime={e.createdAt}>
+          <ol className="mt-3 flex max-h-[30rem] flex-col gap-2 overflow-y-auto text-sm leading-relaxed">
+            {feed.length === 0 && (
+              <li className="text-muted-foreground">
+                <span className={cn(active && "typing-cursor")}>Opening {host}</span>
+              </li>
+            )}
+            {feed.map((e, i) => (
+              <li key={e.id} className="log-line-in flex gap-3">
+                <time className="w-16 shrink-0 font-mono text-xs leading-6 tabular-nums text-muted-foreground" dateTime={e.createdAt}>
                   {new Date(e.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </time>
+                <span className="mt-0.5 h-5 w-14 shrink-0 rounded-md bg-muted text-center font-mono text-[11px] leading-5 text-muted-foreground">
+                  {AGENT_TAG[e.agentKey] ?? e.agentKey}
+                </span>
                 <span
                   className={cn(
                     "min-w-0 break-words",
                     e.level === "ERROR" && "text-destructive",
-                    e.level === "WARN" && "text-warning",
-                    e.level === "SUCCESS" && "text-success",
+                    e.level === "WARN" && "text-warning-ink",
+                    e.level === "SUCCESS" && "text-success-ink",
+                    active && i === feed.length - 1 && "typing-cursor",
                   )}
                 >
                   {readable(e.message)}
@@ -344,31 +493,73 @@ function ReadingRoom({
           </ol>
         </section>
 
-        <section aria-labelledby="docs-heading">
-          <h2 id="docs-heading" className="text-sm font-medium text-muted-foreground">
-            Your strategy documents
-          </h2>
-          <ul className="mt-4 divide-y divide-border border-y border-border">
-            {DOCS.map((title, i) => (
-              <li key={title} className="flex items-center justify-between gap-4 py-3.5">
-                <span className={cn("text-base", docStates[i] === "waiting" && "text-muted-foreground")}>{title}</span>
-                <DocStatus state={docStates[i]} />
-              </li>
-            ))}
-          </ul>
+        <div className="flex min-w-0 flex-col gap-6">
+          <section aria-labelledby="docs-heading" className="rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+            <h2 id="docs-heading" className="text-sm font-semibold">
+              Your strategy documents
+            </h2>
+            <ul className="mt-3 flex flex-col gap-4">
+              {DOC_META.map((d, i) => {
+                const state = docStates[i];
+                const summary = state === "drafted" ? plainSummary(docs?.docs.find((x) => x.title === d.title)?.latest?.markdown) : null;
+                return (
+                  <li key={d.title} className="flex items-start gap-3">
+                    <span
+                      className={cn("grid size-8 shrink-0 place-items-center rounded-lg", state === "waiting" ? "bg-muted" : "bg-accent")}
+                      aria-hidden="true"
+                    >
+                      <d.icon className={cn("size-4", state === "waiting" ? "text-muted-foreground" : "text-accent-foreground")} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className={cn("text-sm font-medium", state === "waiting" && "text-muted-foreground")}>{d.title}</span>
+                        <DocStatus state={state} />
+                      </div>
+                      {state === "drafting" && (
+                        <div className="mt-2 flex flex-col gap-1.5" aria-hidden="true">
+                          <span className="h-2 w-full rounded-full bg-muted motion-safe:animate-pulse" />
+                          <span className="h-2 w-2/3 rounded-full bg-muted motion-safe:animate-pulse" />
+                        </div>
+                      )}
+                      {summary && <p className="rise-in mt-1 line-clamp-2 text-sm text-muted-foreground">{summary}</p>}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
 
-          <h2 id="checks-heading" className="mt-8 text-sm font-medium text-muted-foreground">
-            Site scores
-          </h2>
-          <ul aria-labelledby="checks-heading" className="mt-4 divide-y divide-border border-y border-border">
-            {CHECKS.map((c) => (
-              <li key={c.key} className="flex items-center justify-between gap-4 py-3.5">
-                <span className={cn("text-base", shown[c.key] === "waiting" && "text-muted-foreground")}>{c.title}</span>
-                <CheckStatus state={shown[c.key]} />
-              </li>
-            ))}
-          </ul>
-        </section>
+          <section aria-labelledby="checks-heading" className="rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+            <h2 id="checks-heading" className="text-sm font-semibold">
+              Site scores
+            </h2>
+            <ul className="mt-3 flex flex-col gap-4">
+              {CHECKS.map((c) => {
+                const score = shown[c.key] === "done" ? scores[c.key] : null;
+                return (
+                  <li key={c.key}>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className={cn("text-sm font-medium", shown[c.key] === "waiting" && "text-muted-foreground")}>{c.title}</span>
+                      {score !== null ? (
+                        <span className="rise-in font-mono text-sm tabular-nums">
+                          <span className="text-base font-semibold">{score}</span>
+                          <span className="text-muted-foreground">/100</span>
+                        </span>
+                      ) : (
+                        <CheckStatus state={shown[c.key]} />
+                      )}
+                    </div>
+                    {score !== null && (
+                      <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+                        <div className="grow-x h-full rounded-full bg-primary" style={{ width: `${score}%` }} />
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        </div>
       </div>
 
       {status === "SUCCEEDED" && (
@@ -437,6 +628,48 @@ function ReadingRoom({
         </div>
       )}
     </div>
+  );
+}
+
+const AGENT_TAG: Record<string, string> = { research: "Research", seo: "SEO", geo: "GEO" };
+
+/** The site's own favicon; its first letter when the site has none or blocks it. */
+function SiteIcon({ host, letter }: { host: string; letter: string | undefined }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-border bg-card shadow-sm" aria-hidden="true">
+      {failed ? (
+        <span className="font-display text-xl font-medium">{letter?.toUpperCase()}</span>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element -- any site's favicon, unknown size and host
+        <img src={`https://${host}/favicon.ico`} alt="" className="size-6 object-contain" onError={() => setFailed(true)} />
+      )}
+    </span>
+  );
+}
+
+function Track({ label, detail, state }: { label: string; detail: string; state: "waiting" | "active" | "done" }) {
+  return (
+    <li className="flex items-center gap-3">
+      <span
+        className={cn(
+          "grid size-6 shrink-0 place-items-center rounded-full border",
+          state === "done" && "border-success bg-success text-card",
+          state === "active" && "border-primary",
+          state === "waiting" && "border-border",
+        )}
+        aria-hidden="true"
+      >
+        {state === "done" ? <Check className="size-3.5" /> : state === "active" ? <span className="status-pulse size-2 rounded-full bg-primary" /> : null}
+      </span>
+      <span className="min-w-0">
+        <span className={cn("block font-medium", state === "waiting" && "text-muted-foreground")}>{label}</span>
+        <span className="block text-xs text-muted-foreground">
+          <span className="sr-only">{state === "done" ? "Done. " : state === "active" ? "In progress. " : "Not started. "}</span>
+          {detail}
+        </span>
+      </span>
+    </li>
   );
 }
 
