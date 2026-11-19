@@ -26,11 +26,9 @@ type Props = { workspaceId: string; brandId: string };
 
 type Thread = { id: string; messages: UIMessage[] };
 
-/** What the host supplies: the header, the intro above the conversation and the empty state. */
+/** What the host supplies: the header and the empty state. */
 export type ChatSlots = {
   header: (s: { busy: boolean; empty: boolean; onNew: () => void }) => ReactNode;
-  /** Rendered at the top of the scrolling body, above the conversation. */
-  intro: ReactNode;
   empty: (send: (text: string) => void) => ReactNode;
 };
 
@@ -63,7 +61,7 @@ function chatError(error: Error) {
 }
 
 /** Loads the person's latest conversation for this brand, then hands over to the live session. */
-export function ChatPane({ header, intro, empty, ...props }: Props & ChatSlots) {
+export function ChatPane({ header, empty, ...props }: Props & ChatSlots) {
   // The thread remembers which business it was loaded for, so a switch can never show or send into the old one,
   // not even for a render while the new fetch is slow or failing.
   const [loaded, setLoaded] = useState<{ base: string; thread: Thread } | null>(null);
@@ -100,9 +98,8 @@ export function ChatPane({ header, intro, empty, ...props }: Props & ChatSlots) 
       <div className="flex h-full min-h-0 flex-col">
         {header({ busy: false, empty: true, onNew: () => {} })}
         <div className="flex flex-1 flex-col gap-4 bg-background p-6" role="status" aria-label="Loading chat">
-          {intro}
-          <div className="h-4 w-3/4 animate-pulse rounded-lg bg-muted motion-reduce:animate-none" />
-          <div className="h-4 w-1/2 animate-pulse rounded-lg bg-muted motion-reduce:animate-none" />
+          <div className="h-4 w-3/4 animate-pulse rounded-lg bg-border motion-reduce:animate-none" />
+          <div className="h-4 w-1/2 animate-pulse rounded-lg bg-border motion-reduce:animate-none" />
         </div>
       </div>
     );
@@ -114,7 +111,7 @@ export function ChatPane({ header, intro, empty, ...props }: Props & ChatSlots) 
       api={base}
       initial={initial}
       onNew={() => setLoaded({ base, thread: { id: crypto.randomUUID(), messages: [] } })}
-      slots={{ header, intro, empty }}
+      slots={{ header, empty }}
     />
   );
 }
@@ -176,6 +173,8 @@ function ChatSession({
 }) {
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  // Follow the reply only while the person is at the bottom; scrolling up to reread stops it, sending resumes it.
+  const stick = useRef(true);
   const { messages, sendMessage, status, error, stop, regenerate, clearError } = useChat({
     id: initial.id,
     messages: initial.messages,
@@ -192,12 +191,13 @@ function ChatSession({
   const failure = error ? chatError(error) : null;
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    if (stick.current) endRef.current?.scrollIntoView({ block: "end" });
   }, [messages]);
 
   function send(text: string) {
     const t = text.trim();
     if (!t || busy) return;
+    stick.current = true;
     clearError();
     void sendMessage({ text: t });
     setInput("");
@@ -217,8 +217,13 @@ function ChatSession({
     <div className="flex h-full min-h-0 flex-col">
       {slots.header({ busy, empty: messages.length === 0, onNew })}
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-background p-6">
-        {slots.intro}
+      <div
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-background p-6"
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+        }}
+      >
         {/* Announce the finished reply once, not every streamed token. */}
         <p role="status" className="sr-only">
           {status === "ready" && messages.at(-1)?.role === "assistant" ? "Reply finished" : ""}
@@ -234,7 +239,7 @@ function ChatSession({
                 {m.parts.map((part, i) => {
                   if (part.type === "text") {
                     return m.role === "user" ? (
-                      <p key={i} className="max-w-[85%] whitespace-pre-wrap rounded-2xl bg-muted px-3.5 py-2 text-sm">
+                      <p key={i} className="max-w-[85%] whitespace-pre-wrap rounded-2xl bg-card px-3.5 py-2 text-sm">
                         {part.text}
                       </p>
                     ) : (
@@ -284,7 +289,7 @@ function ChatSession({
           </ol>
         )}
         {failure && (
-          <div role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
+          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
             <span className="min-w-0 flex-1">{failure.text}</span>
             {failure.retry && (
               <Button size="sm" variant="outline" onClick={() => void regenerate()}>
@@ -296,7 +301,7 @@ function ChatSession({
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-2 border-t border-border bg-card p-4">
+      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-2 bg-background p-4">
         <label htmlFor="chat-input" className="sr-only">
           Message Espanda
         </label>
@@ -325,7 +330,7 @@ function ChatSession({
           )}
         </div>
         <p id="chat-hint" className="px-1 text-xs text-muted-foreground">
-          Enter to send, Shift+Enter for a new line. Espanda reads your documents and reports and can offer to start agents; it never publishes.
+          Enter to send, Shift+Enter for a new line.
         </p>
       </form>
     </div>

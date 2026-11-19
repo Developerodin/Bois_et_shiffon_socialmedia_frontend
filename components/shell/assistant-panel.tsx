@@ -99,7 +99,7 @@ export function AssistantPanel(p: Props) {
 }
 
 function Body({ workspaceId, brandId, brandName, canCreateBrand, docked }: Props & { docked: boolean }) {
-  // One line, the same 72 px as the top bar, so the panel and the page share a horizon.
+  // The same 72 px as the top bar, so the panel and the page share a horizon.
   const title = <h2 className="text-lg font-semibold text-foreground">Espanda</h2>;
 
   if (!brandId) {
@@ -116,7 +116,13 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked }: Props
   const slots: ChatSlots = {
     header: ({ busy, empty, onNew }) => (
       <div className="flex h-18 shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-6">
-        {title}
+        {/* The business under the name, so the empty body has no stray line at its top. */}
+        <div className="min-w-0">
+          {title}
+          <p className="truncate text-xs text-muted-foreground">
+            Working on <span className="text-foreground">{brandName ?? "your business"}</span>
+          </p>
+        </div>
         <button
           type="button"
           onClick={onNew}
@@ -129,15 +135,11 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked }: Props
         </button>
       </div>
     ),
-    // Plain text, not a box: it isn't a control, and the top bar's breadcrumb names the business too.
-    intro: (
-      <p className="shrink-0 truncate text-sm text-muted-foreground">
-        Working on <span className="text-foreground">{brandName ?? "your business"}</span>
-      </p>
-    ),
     empty: (send) => (
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-muted-foreground">Ask about your business, your drafts or what to do next.</p>
+        <p className="text-sm text-muted-foreground">
+          Ask about your business, your drafts or what to do next. Espanda reads your documents and reports and can offer to start agents; it never publishes.
+        </p>
         <ul className="flex flex-col gap-2">
           {SUGGESTIONS.map((s) => (
             <li key={s}>
