@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ReelDetail } from "@/shared";
+import type { CaptionCue, ReelDetail } from "@/shared";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -16,7 +16,8 @@ import { PhotosStep } from "./photos-step";
 import { PresenterStep } from "./presenter-step";
 import { ScriptStep } from "./script-step";
 import { useReelSave } from "./use-reel-save";
-import { BUILT_STEPS, reelHref, renderNews, rendering, stepFrom, stepState, type ReelStep } from "./reel";
+import { BUILT_STEPS, reelHref, renderNews, rendering, stepFrom, stepState, toWebVtt, type ReelStep } from "./reel";
+import { ReviewStep } from "./review-step";
 import { StoryboardStep } from "./storyboard-step";
 import { VideoStep } from "./video-step";
 import { useReel, useReelOptions } from "./use-reels";
@@ -31,6 +32,20 @@ function BackLink() {
       Back to reels
     </Link>
   );
+}
+
+/** The cues as a WebVTT `blob:` link for the preview's captions track, revoked when the cues change and on unmount. */
+function useCaptionsUrl(cues: CaptionCue[] | null | undefined): string | undefined {
+  const vtt = useMemo(() => (cues?.length ? toWebVtt(cues) : null), [cues]);
+  const [url, setUrl] = useState<string>();
+  // Keyed on the text, not the array: same cues, same URL, so a poll doesn't reload the track.
+  useEffect(() => {
+    if (!vtt) return setUrl(undefined);
+    const u = URL.createObjectURL(new Blob([vtt], { type: "text/vtt" }));
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [vtt]);
+  return url;
 }
 
 /** An id that names no reel of this brand, one this role can't read, or not a reel id at all. */
@@ -63,7 +78,6 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
   const router = useRouter();
   const step = stepFrom(stepParam, detail);
   const [scene, setScene] = useState(0);
-  const [watching, setWatching] = useState(false);
   const title = detail?.item.title;
   // Viewers see every step's content, with no Make video, Try again, caption edit or Check again; Download approves.
   const can = useMemo(() => ({
@@ -72,6 +86,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
     publish: perms.includes("publish.execute"),
   }), [perms]);
   const canCreate = can.create;
+  const captionsUrl = useCaptionsUrl(detail?.captions);
 
   // Stable while the reel and brand stay, so `go` can go to memoised steps (the plan chat re-renders this page per frame).
   const stepHref = useCallback((s: ReelStep) => reelHref(reelId, brandId, s), [reelId, brandId]);
@@ -116,7 +131,8 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
   const scenes = detail.plan?.scenes ?? [];
   const index = Math.min(scene, Math.max(scenes.length - 1, 0));
   const shown = scenes[index];
-  const showVideo = watching && !!detail.videoUrl;
+  // The Review step shows the video (with captions); every other step shows the chosen scene's photo.
+  const showVideo = step === "review" && !!detail.videoUrl;
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -160,8 +176,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
               saving={save.saving}
               go={go}
               current={index}
-              onSelect={(i) => { setScene(i); setWatching(false); }}
-              onWatch={() => setWatching(true)}
+              onSelect={setScene}
             />
           ) : null}
           {step === "video" ? (
@@ -179,6 +194,9 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
               go={go}
             />
           ) : null}
+          {step === "review" ? (
+            <ReviewStep workspaceId={workspaceId} brandId={brandId} detail={detail} reload={reload} canCreate={canCreate} canApprove={can.approve} go={go} />
+          ) : null}
         </section>
 
         <section id="reel-preview" tabIndex={-1} aria-label="Preview" className="min-w-0 focus-visible:outline-none md:col-start-2 lg:col-start-3 lg:row-start-1">
@@ -188,10 +206,11 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
             alt={shown?.shot ?? ""}
             // The rendered video carries no on-screen text (only the "Made with AI" mark), so the overlay is hidden over it.
             onScreenText={showVideo ? undefined : shown?.onScreenText}
+            captionsUrl={showVideo ? captionsUrl : undefined}
+            captionsLang={detail.plan?.language ?? "en"}
+            noDownload={showVideo}
           />
-          {showVideo ? (
-            <Button type="button" variant="outline" size="sm" className="mx-auto mt-3 flex" onClick={() => setWatching(false)}>Show the scenes</Button>
-          ) : scenes.length > 1 ? (
+          {showVideo ? null : scenes.length > 1 ? (
             <div className="mt-3 flex items-center justify-center gap-3">
               <Button type="button" variant="outline" size="icon" aria-label="Previous scene" disabled={index === 0} onClick={() => setScene(index - 1)}>
                 <ChevronLeft className="size-4" aria-hidden="true" />

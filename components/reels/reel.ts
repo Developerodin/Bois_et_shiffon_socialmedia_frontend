@@ -8,8 +8,8 @@ import { RENDER_STAGES, starterProduct } from "./labels";
 /** The reel page's steps, in order (spec §5.3). Pure: no React. */
 export const REEL_STEPS = ["plan", "presenter", "photos", "script", "storyboard", "video", "review", "publish"] as const;
 export type ReelStep = (typeof REEL_STEPS)[number];
-// 3c adds review and publish next.
-export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "script", "storyboard", "video"];
+// 3c adds publish next.
+export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "script", "storyboard", "video", "review"];
 
 /** A reel's page, on a step when given. */
 export const reelHref = (id: string, brandId: string, step?: ReelStep): string => `/reels/${id}?b=${brandId}${step ? `&step=${step}` : ""}`;
@@ -67,6 +67,15 @@ export function stepState(step: ReelStep, d: ReelDetail | null): string {
 
 /** A video exists, in review, and its checks haven't come in yet. */
 export const awaitingChecks = (d: ReelDetail): boolean => !!d.videoUrl && !d.checks && d.item.status === "DRAFT_REVIEW";
+
+/** The Review step's wait for the checks: one automatic recheck (creators), the slow line with Check again, and the end of its polling. */
+export const CHECK_AUTO_MS = 90_000;
+export const CHECK_SLOW_MS = 150_000;
+export const CHECK_WAIT_MS = 10 * 60_000;
+
+/** The wait before the Review step reads the reel again, `elapsed` ms into its wait for the checks (spec §5.8): 5 s for 2 minutes, then 10 s; null from CHECK_WAIT_MS on (it stops). */
+export const checksPollDelay = (elapsed: number): number | null =>
+  elapsed >= CHECK_WAIT_MS ? null : elapsed < 120_000 ? 5_000 : 10_000;
 
 const RENDER_ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
 

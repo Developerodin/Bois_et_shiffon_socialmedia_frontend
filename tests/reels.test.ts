@@ -5,7 +5,7 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, RENDER_SLOW_MS, makeVideoBlock, renderLong, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { BUILT_STEPS, CHECK_AUTO_MS, CHECK_SLOW_MS, CHECK_WAIT_MS, checksPollDelay, RENDER_SLOW_MS, makeVideoBlock, renderLong, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, failureText, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
@@ -26,6 +26,17 @@ const summary = (over: Partial<ReelSummary> = {}): ReelSummary => ({
   id: "r1", title: "T", status: "DRAFT_REVIEW", version: 1, postUrl: null, createdAt: "", render: null, seconds: 20, price: 10, thumbUrl: null, videoUrl: null, ...over,
 });
 
+describe("checksPollDelay", () => {
+  it("reads every 5 s for 2 minutes, then every 10 s, and stops at 10 minutes", () => {
+    expect([CHECK_AUTO_MS, CHECK_SLOW_MS, CHECK_WAIT_MS]).toEqual([90_000, 150_000, 10 * MIN]);
+    expect(checksPollDelay(0)).toBe(5_000);
+    expect(checksPollDelay(2 * MIN - 1)).toBe(5_000);
+    expect(checksPollDelay(2 * MIN)).toBe(10_000);
+    expect(checksPollDelay(10 * MIN - 1)).toBe(10_000);
+    expect(checksPollDelay(10 * MIN)).toBeNull();
+  });
+});
+
 describe("defaultStep", () => {
   it("starts at the plan with no reel read yet or no plan", () => {
     expect(defaultStep(null)).toBe("plan");
@@ -44,15 +55,16 @@ describe("defaultStep", () => {
 
 describe("reachable and stepFrom", () => {
   it("keeps a built step, else storyboard with a plan, else plan", () => {
-    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "script", "storyboard", "video"]);
+    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "script", "storyboard", "video", "review"]);
     expect(reachable("presenter", detail())).toBe("presenter");
     expect(reachable("photos", detail())).toBe("photos");
     expect(reachable("plan", detail())).toBe("plan");
     expect(reachable("storyboard", detail())).toBe("storyboard");
     expect(reachable("video", detail())).toBe("video");
-    expect(reachable("review", detail())).toBe("storyboard");
-    expect(reachable("review", detail({ plan: null }))).toBe("plan");
-    expect(reachable("review", null)).toBe("plan");
+    expect(reachable("review", detail())).toBe("review");
+    expect(reachable("publish", detail())).toBe("storyboard");
+    expect(reachable("publish", detail({ plan: null }))).toBe("plan");
+    expect(reachable("publish", null)).toBe("plan");
   });
   it("reads a URL param, falling back to the default step", () => {
     expect(stepFrom("plan", detail())).toBe("plan");

@@ -17,7 +17,7 @@ const LINK = "rounded-full font-medium underline underline-offset-4 focus-visibl
  * The Storyboard step: the plan's facts and each scene, and Make video (See progress while one is made). Takes the reel
  * and options as props; the page owns the preview.
  */
-export function StoryboardStep({ workspaceId, brandId, detail, options, canCreate, chatBusy, saving, go, current, photosHref, onSelect, onWatch }: {
+export function StoryboardStep({ workspaceId, brandId, detail, options, canCreate, chatBusy, saving, go, current, photosHref, onSelect }: {
   workspaceId: string;
   brandId: string;
   detail: ReelDetail;
@@ -30,7 +30,6 @@ export function StoryboardStep({ workspaceId, brandId, detail, options, canCreat
   /** The Photos step's address, for the stand-in scenes' "Pick photos" link. */
   photosHref: string;
   onSelect: (index: number) => void;
-  onWatch: () => void;
 }) {
   const plan = detail.plan;
   if (!plan) return null;
@@ -40,7 +39,7 @@ export function StoryboardStep({ workspaceId, brandId, detail, options, canCreat
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">{facts}</p>
       {detail.videoUrl ? (
-        <Button type="button" variant="outline" className="self-start" onClick={onWatch}>
+        <Button type="button" variant="outline" className="self-start" onClick={() => go("review")}>
           <Play className="size-4" aria-hidden="true" />
           Watch the video
         </Button>
