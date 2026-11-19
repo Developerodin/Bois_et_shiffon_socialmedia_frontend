@@ -30,13 +30,21 @@ export type FullProduct = Product & { description: string | null };
 /** `running`: a sync is queued or running for the brand. */
 export type CatalogStatus = { source: "WEBSITE" | "SHOPIFY" | null; catalogSync: CatalogSync | null; running: boolean };
 export type Catalogue = CatalogStatus & { products: Product[] };
+/** The page sizes the server accepts (PRODUCT_PAGE_SIZES). */
+export const PAGE_SIZES = [20, 50, 100] as const;
+export type PageQuery = { page: number; limit: number; q: string; stock: "" | "in" | "out" };
+/** `pagination.page` is the page served, which the server clamps to the last one. */
+export type ProductPage = Catalogue & { pagination: { page: number; limit: number; total: number; totalPages: number } };
 
 const base = (w: string, b: string) => `/api/v1/workspaces/${encodeURIComponent(w)}/brands/${encodeURIComponent(b)}/products`;
 const one = (w: string, b: string, id: string) => `${base(w, b)}/${encodeURIComponent(id)}`;
 const json = (method: string, body: unknown): RequestInit => ({ method, body: JSON.stringify(body) });
 
 export const productsApi = {
+  /** The whole list: Campaigns' picker needs every product. The table reads `page`. */
   list: (w: string, b: string) => request<Catalogue>(base(w, b)),
+  page: (w: string, b: string, { page, limit, q, stock }: PageQuery) =>
+    request<ProductPage>(`${base(w, b)}?${new URLSearchParams({ page: String(page), limit: String(limit), ...(q ? { q } : {}), ...(stock ? { stock } : {}) })}`),
   /** The sync status alone: what the board polls while a sync runs. */
   status: (w: string, b: string) => request<CatalogStatus>(`${base(w, b)}?status=1`),
   get: (w: string, b: string, id: string) => request<{ product: FullProduct }>(one(w, b, id)),

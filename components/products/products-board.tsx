@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Package, RefreshCw } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ChevronLeft, ChevronRight, Package, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -9,10 +10,11 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { productsApi, stockLabel, thumbUrl, type FullProduct, type Product } from "@/components/products/api";
+import { PAGE_SIZES, productsApi, stockLabel, thumbUrl, type FullProduct, type PageQuery, type Product, type ProductPage } from "@/components/products/api";
 import { CampaignsSection } from "@/components/products/campaigns";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
+import { pageItems } from "@/lib/page-items";
 import { timeAgo } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/shared";
@@ -37,11 +39,20 @@ function price(p: Product) {
  * `canManageCommercial` (commercial.manage): may set campaigns, offers and priorities.
  */
 type Props = { workspaceId: string; brandId: string; canEdit: boolean; canVouch: boolean; canManageCommercial: boolean };
-// ponytail: the whole catalogue loads once and is searched here, 50 rows drawn at a time; page on the server past a few thousand.
-const PAGE = 50;
 const count = (n: number) => n.toLocaleString();
-/** What "In stock" in the filter means: the same as stockLabel's in-stock wordings. */
-const inStock = (p: Product) => (p.stockQuantity !== null && p.stockQuantity > 0) || (p.stockQuantity === null && p.inStock === true);
+
+/**
+ * The table's place, read from the URL so refresh, Back/Forward and a shared link keep it. Anything unexpected falls
+ * back to the default (page 1, 50 rows, no search, all stock) rather than an error.
+ */
+function readQuery(sp: URLSearchParams): PageQuery {
+  return {
+    page: Math.min(100_000, Math.max(1, Math.floor(Number(sp.get("page"))) || 1)),
+    limit: PAGE_SIZES.find((n) => n === Number(sp.get("limit"))) ?? 50,
+    q: (sp.get("q") ?? "").trim().slice(0, 200),
+    stock: (["in", "out"] as const).find((v) => v === sp.get("stock")) ?? "",
+  };
+}
 
 export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canManageCommercial }: Props) {
   const fetcher = useCallback(() => productsApi.list(workspaceId, brandId), [workspaceId, brandId]);
@@ -50,9 +61,68 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   const [removing, setRemoving] = useState<Product | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
-  const [stock, setStock] = useState<"" | "in" | "out">("");
-  const [limit, setLimit] = useState(PAGE);
+
+  // The table pages on the server (?page=); the full list above still feeds Campaigns and the empty state.
+  const router = useRouter();
+  const pathname = usePathname();
+  const { page, limit, q, stock } = readQuery(useSearchParams());
+  const key = `${page}|${limit}|${q}|${stock}`;
+  const [table, setTable] = useState<{ key: string; data: ProductPage } | null>(null);
+  const [tableError, setTableError] = useState<{ key: string; message: string } | null>(null);
+  const [tableNonce, setTableNonce] = useState(0);
+  const [search, setSearch] = useState(q);
+
+  /** Moves the table: page, size and filter changes push (Back undoes them); typing replaces. Defaults leave the URL. */
+  const go = useCallback(
+    (next: Partial<PageQuery>, how: "push" | "replace" = "push") => {
+      const sp = new URLSearchParams(window.location.search);
+      const to = { ...readQuery(sp), ...next };
+      const set = (name: string, value: string, fallback: string) => (value === fallback ? sp.delete(name) : sp.set(name, value));
+      set("page", String(to.page), "1");
+      set("limit", String(to.limit), "50");
+      set("q", to.q.trim(), "");
+      set("stock", to.stock, "");
+      router[how](sp.size ? `${pathname}?${sp}` : pathname, { scroll: false });
+    },
+    [router, pathname],
+  );
+
+  // A newer page, size or filter cancels the reply still on its way, so a slow page can't land over a newer one.
+  useEffect(() => {
+    let cancelled = false;
+    productsApi.page(workspaceId, brandId, { page, limit, q, stock }).then(
+      (data) => {
+        if (cancelled) return;
+        setTable({ key, data });
+        // Past the end (a shared link, or the last row on the last page deleted): show the last page there is.
+        if (data.pagination.page !== page) go({ page: data.pagination.page }, "replace");
+      },
+      (err: unknown) => !cancelled && setTableError({ key, message: errorMessage(err, "Couldn't load this page. Try again.") }),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [workspaceId, brandId, page, limit, q, stock, key, tableNonce, go]);
+
+  // Typing settles for 300 ms before the search goes to the URL, back to page 1.
+  useEffect(() => {
+    if (search.trim() === q) return;
+    const t = setTimeout(() => go({ q: search, page: 1 }, "replace"), 300);
+    return () => clearTimeout(t);
+  }, [search, q, go]);
+  // Back/Forward changed the search: show it in the box.
+  useEffect(() => {
+    setSearch((s) => (s.trim() === q ? s : q));
+  }, [q]);
+
+  const reloadAll = useCallback(() => {
+    reload();
+    setTableNonce((n) => n + 1);
+  }, [reload]);
+  const turn = (to: number) => {
+    go({ page: to });
+    document.getElementById("catalogue")?.scrollIntoView({ block: "start" });
+  };
 
   const data = state.kind === "ready" ? state.data : null;
   const lastSync = data?.catalogSync ?? null;
@@ -66,11 +136,11 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
       const status = await productsApi.status(workspaceId, brandId).catch(() => null);
       if ((status && !status.running) || Date.now() - started > 180_000) {
         setSyncing(false);
-        reload();
+        reloadAll();
       }
     }, 4000);
     return () => clearInterval(timer);
-  }, [syncing, workspaceId, brandId, reload]);
+  }, [syncing, workspaceId, brandId, reloadAll]);
 
   async function syncNow() {
     setError(null);
@@ -108,11 +178,12 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
       />
     );
   else {
-    const q = query.trim().toLowerCase();
-    const all = state.data.products;
-    const matches = all.filter(
-      (p) => (!q || p.title.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q)) && (!stock || (stock === "in") === inStock(p)),
-    );
+    const all = state.data.products.length;
+    const shown = table?.key === key ? table.data : null;
+    const failed = tableError?.key === key ? tableError.message : null;
+    // While the next page loads, the last one stays in place, dimmed, so the table doesn't jump.
+    const rows = shown ?? table?.data ?? null;
+    const paging = rows?.pagination ?? null;
     body = (
       <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -120,20 +191,14 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           type="search"
           aria-label="Search products"
           placeholder="Search by name or SKU"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setLimit(PAGE);
-          }}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           className="w-full sm:max-w-xs"
         />
         <select
           aria-label="Filter by stock"
           value={stock}
-          onChange={(e) => {
-            setStock(e.target.value as typeof stock);
-            setLimit(PAGE);
-          }}
+          onChange={(e) => go({ stock: e.target.value as PageQuery["stock"], page: 1 })}
           className={cn(selectClass, "w-full sm:w-auto")}
         >
           <option value="">All stock</option>
@@ -141,13 +206,27 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           <option value="out">Out of stock or unknown</option>
         </select>
         <p className="ml-auto text-sm text-muted-foreground" aria-live="polite">
-          {matches.length === all.length ? `${count(all.length)} products` : `${count(matches.length)} of ${count(all.length)} products`}
+          {(q || stock) && shown ? `${count(shown.pagination.total)} of ${count(all)} products` : `${count(all)} products`}
         </p>
       </div>
-      {/* Scrolls inside the card so the column heads stay in view over a long catalogue. */}
-      <div className="-mx-5 max-h-[calc(100dvh-14rem)] overflow-auto">
+      {failed ? (
+        <LoadError message={failed} onRetry={() => setTableNonce((n) => n + 1)} />
+      ) : !rows ? (
+        <ListSkeleton label="Loading products" />
+      ) : rows.products.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <p className="text-sm text-muted-foreground">No products match this search and filter.</p>
+          <Button variant="outline" size="sm" onClick={() => (setSearch(""), go({ q: "", stock: "", page: 1 }))}>
+            Clear search and filter
+          </Button>
+        </div>
+      ) : (
+      /* The page scrolls, not this box (a second scrollbar otherwise): from lg up the column heads stick to the top
+          edge of <main>, the negative top cancelling its padding. Below lg the table can be wider than its box (636 px at its narrowest), so
+          it scrolls sideways there; overflow-x auto makes this box the heads' scroller, so they don't stick below lg. */
+      <div aria-busy={!shown} className={cn("-mx-5 overflow-x-auto transition-opacity lg:overflow-x-clip motion-reduce:transition-none", !shown && "opacity-60")}>
         <table className="w-full text-left text-sm">
-          <thead className="sticky top-0 z-10 border-b border-border bg-card text-xs text-muted-foreground">
+          <thead className="sticky -top-4 z-10 border-b border-border bg-card text-xs text-muted-foreground sm:-top-6">
             <tr>
               <th scope="col" className="px-3 py-3 sm:px-5 font-medium">Product</th>
               <th scope="col" className="hidden px-3 py-3 sm:px-5 font-medium md:table-cell">SKU</th>
@@ -157,7 +236,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {matches.slice(0, limit).map((p) => (
+            {rows.products.map((p) => (
               <tr key={p.id}>
                 <td className="px-3 py-2 sm:px-5">
                   <div className="flex items-center gap-3">
@@ -192,7 +271,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
                   {p.source === "MANUAL" && p.stockCheckedAt ? <p className="text-xs whitespace-nowrap text-muted-foreground">checked {timeAgo(p.stockCheckedAt)}</p> : null}
                 </td>
                 {canEdit ? (
-                  <td className="px-3 py-2 sm:px-5 text-right whitespace-nowrap">
+                  <td className="px-3 py-2 sm:px-5 text-right">
                     <Button size="sm" variant="ghost" onClick={() => void edit(p)}>Edit</Button>
                     {p.source === "MANUAL" ? (
                       <Button size="sm" variant="ghost" onClick={() => setRemoving(p)}>Delete</Button>
@@ -204,10 +283,60 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           </tbody>
         </table>
       </div>
-      {matches.length > limit ? (
-        <Button variant="outline" className="self-center" onClick={() => setLimit((n) => n + PAGE)}>
-          Show {Math.min(PAGE, matches.length - limit)} more
-        </Button>
+      )}
+      {paging && rows?.products.length ? (
+        <nav aria-label="Product pages" className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <p className="text-sm text-muted-foreground tabular-nums">
+            Showing {count((paging.page - 1) * paging.limit + 1)}–{count((paging.page - 1) * paging.limit + rows.products.length)} of {count(paging.total)}
+          </p>
+          {paging.totalPages > 1 ? (
+            <div className="flex items-center gap-1">
+              <Button variant="outline" size="sm" disabled={paging.page <= 1} onClick={() => turn(paging.page - 1)}>
+                <ChevronLeft aria-hidden="true" />
+                Previous
+              </Button>
+              {/* Page numbers from sm up; a phone gets "3 of 28" between the arrows. */}
+              <span className="px-2 text-sm text-muted-foreground tabular-nums sm:hidden">
+                {paging.page} of {paging.totalPages}
+              </span>
+              <span className="hidden items-center gap-1 sm:flex">
+                {pageItems(paging.page, paging.totalPages).map((it, i) =>
+                  it === "gap" ? (
+                    <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-muted-foreground">
+                      …
+                    </span>
+                  ) : (
+                    <Button
+                      key={it}
+                      size="sm"
+                      variant={it === paging.page ? "default" : "ghost"}
+                      aria-label={`Page ${it}`}
+                      aria-current={it === paging.page ? "page" : undefined}
+                      className="min-w-9 tabular-nums"
+                      onClick={() => it !== paging.page && turn(it)}
+                    >
+                      {it}
+                    </Button>
+                  ),
+                )}
+              </span>
+              <Button variant="outline" size="sm" disabled={paging.page >= paging.totalPages} onClick={() => turn(paging.page + 1)}>
+                Next
+                <ChevronRight aria-hidden="true" />
+              </Button>
+            </div>
+          ) : null}
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            Rows per page
+            <select value={limit} onChange={(e) => go({ limit: Number(e.target.value), page: 1 })} className={selectClass}>
+              {PAGE_SIZES.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+        </nav>
       ) : null}
       </div>
     );
@@ -266,7 +395,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           onClose={() => setEditing(null)}
           onSaved={() => {
             setEditing(null);
-            reload();
+            reloadAll();
           }}
         />
       ) : null}
@@ -278,7 +407,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
         confirmLabel="Delete"
         onConfirm={async () => {
           await productsApi.remove(workspaceId, brandId, removing!.id);
-          reload();
+          reloadAll();
         }}
       />
     </div>
