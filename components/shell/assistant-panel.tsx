@@ -142,27 +142,30 @@ export function AssistantPanel(p: Props) {
           if (e.key === "Escape" && !docked) setOpen(false);
         }}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex h-full w-80 shrink-0 flex-col border-l border-border bg-background outline-none transition-transform motion-reduce:transition-none",
-          docked && "xl:static xl:z-auto xl:translate-x-0 xl:border-l-0",
+          "fixed inset-y-0 right-0 z-50 flex h-full w-80 shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
+          // Docked it sits beside the page: the page's own 12 px edge is the gap, so no left padding of its own.
+          docked && "xl:static xl:z-auto xl:translate-x-0 xl:pl-0",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className={cn("absolute top-5 right-4 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
+          className={cn("absolute top-7 right-6 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
         >
           <X className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
           <span className="sr-only">Close</span>
         </button>
-        <Body {...p} docked={docked} page={navFor(pathname).activeId} />
+        {/* A card like every other panel (DESIGN_SYSTEM §4): white, bordered, on the page background, not painted onto it. */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <Body {...p} docked={docked} page={navFor(pathname).activeId} />
+        </div>
       </aside>
     </>
   );
 }
 
 function Body({ workspaceId, brandId, brandName, canCreateBrand, docked, page }: Props & { docked: boolean; page: string | null }) {
-  // The same 72 px as the top bar, so the panel and the page share a horizon.
   const title = <h2 className="text-lg leading-tight font-semibold text-foreground">Espanda</h2>;
   const mark = (
     <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
@@ -174,11 +177,11 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked, page }:
   if (!brandId) {
     return (
       <div className="flex h-full min-h-0 flex-col">
-        <div className="flex h-18 shrink-0 items-center gap-3 border-b border-border bg-card px-6">
+        <div className="flex h-16 shrink-0 items-center gap-3 px-5">
           {mark}
           {title}
         </div>
-        <div className="min-h-0 flex-1 bg-background p-6">
+        <div className="min-h-0 flex-1 px-5 pb-5">
           <p className="text-sm text-muted-foreground">{canCreateBrand ? "Create a business to start a conversation." : "Ask a workspace admin to add a business."}</p>
         </div>
       </div>
@@ -187,7 +190,7 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked, page }:
 
   const slots: ChatSlots = {
     header: ({ busy, empty, onNew }) => (
-      <div className="flex h-18 shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-6">
+      <div className="flex h-16 shrink-0 items-center justify-between gap-3 px-5">
         {/* The business under the name, so the empty body has no stray line at its top. */}
         <div className="flex min-w-0 items-center gap-3">
           {mark}

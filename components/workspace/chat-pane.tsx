@@ -97,7 +97,7 @@ export function ChatPane({ header, empty, ...props }: Props & ChatSlots) {
     return (
       <div className="flex h-full min-h-0 flex-col">
         {header({ busy: false, empty: true, onNew: () => {} })}
-        <div className="flex flex-1 flex-col gap-4 bg-background p-6" role="status" aria-label="Loading chat">
+        <div className="flex flex-1 flex-col gap-4 px-5 py-4" role="status" aria-label="Loading chat">
           <div className="h-4 w-3/4 animate-pulse rounded-lg bg-border motion-reduce:animate-none" />
           <div className="h-4 w-1/2 animate-pulse rounded-lg bg-border motion-reduce:animate-none" />
         </div>
@@ -218,7 +218,7 @@ function ChatSession({
       {slots.header({ busy, empty: messages.length === 0, onNew })}
 
       <div
-        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-background p-6"
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-4"
         onScroll={(e) => {
           const el = e.currentTarget;
           stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
@@ -310,7 +310,7 @@ function ChatSession({
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-2 bg-background p-4">
+      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-2 px-3 pb-3">
         <label htmlFor="chat-input" className="sr-only">
           Message Espanda
         </label>
