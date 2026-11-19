@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Package, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -63,7 +63,6 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   const [error, setError] = useState<string | null>(null);
 
   // The table pages on the server (?page=); the full list above still feeds Campaigns and the empty state.
-  const router = useRouter();
   const pathname = usePathname();
   const { page, limit, q, stock } = readQuery(useSearchParams());
   const key = `${page}|${limit}|${q}|${stock}`;
@@ -82,9 +81,11 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
       set("limit", String(to.limit), "50");
       set("q", to.q.trim(), "");
       set("stock", to.stock, "");
-      router[how](sp.size ? `${pathname}?${sp}` : pathname, { scroll: false });
+      // Native history, not router.push: Next syncs useSearchParams from it without re-rendering the page on the
+      // server, which cost ~3 s a click (the page reloads the shell). The board fetches its own data.
+      window.history[how === "push" ? "pushState" : "replaceState"](null, "", sp.size ? `${pathname}?${sp}` : pathname);
     },
-    [router, pathname],
+    [pathname],
   );
 
   // A newer page, size or filter cancels the reply still on its way, so a slow page can't land over a newer one.

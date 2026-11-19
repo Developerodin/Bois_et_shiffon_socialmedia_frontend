@@ -34,7 +34,7 @@ export type Catalogue = CatalogStatus & { products: Product[] };
 export const PAGE_SIZES = [20, 50, 100] as const;
 export type PageQuery = { page: number; limit: number; q: string; stock: "" | "in" | "out" };
 /** `pagination.page` is the page served, which the server clamps to the last one. */
-export type ProductPage = Catalogue & { pagination: { page: number; limit: number; total: number; totalPages: number } };
+export type ProductPage = { products: Product[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
 
 const base = (w: string, b: string) => `/api/v1/workspaces/${encodeURIComponent(w)}/brands/${encodeURIComponent(b)}/products`;
 const one = (w: string, b: string, id: string) => `${base(w, b)}/${encodeURIComponent(id)}`;
