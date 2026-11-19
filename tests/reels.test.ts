@@ -112,17 +112,17 @@ describe("defaultStep", () => {
 });
 
 describe("reachable and stepFrom", () => {
-  it("keeps a built step, else storyboard with a plan, else plan", () => {
-    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "script", "storyboard", "video", "review"]);
+  it("keeps every step now that all are built", () => {
+    expect(BUILT_STEPS).toEqual(["plan", "presenter", "photos", "script", "storyboard", "video", "review", "publish"]);
     expect(reachable("presenter", detail())).toBe("presenter");
     expect(reachable("photos", detail())).toBe("photos");
     expect(reachable("plan", detail())).toBe("plan");
     expect(reachable("storyboard", detail())).toBe("storyboard");
     expect(reachable("video", detail())).toBe("video");
     expect(reachable("review", detail())).toBe("review");
-    expect(reachable("publish", detail())).toBe("storyboard");
-    expect(reachable("publish", detail({ plan: null }))).toBe("plan");
-    expect(reachable("publish", null)).toBe("plan");
+    expect(reachable("publish", detail())).toBe("publish");
+    expect(reachable("publish", detail({ plan: null }))).toBe("publish");
+    expect(reachable("publish", null)).toBe("publish");
   });
   it("reads a URL param, falling back to the default step", () => {
     expect(stepFrom("plan", detail())).toBe("plan");

@@ -8,8 +8,7 @@ import { RENDER_STAGES, starterProduct } from "./labels";
 /** The reel page's steps, in order (spec §5.3). Pure: no React. */
 export const REEL_STEPS = ["plan", "presenter", "photos", "script", "storyboard", "video", "review", "publish"] as const;
 export type ReelStep = (typeof REEL_STEPS)[number];
-// 3c adds publish next.
-export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "script", "storyboard", "video", "review"];
+export const BUILT_STEPS: readonly ReelStep[] = REEL_STEPS;
 
 /** A reel's page, on a step when given. */
 export const reelHref = (id: string, brandId: string, step?: ReelStep): string => `/reels/${id}?b=${brandId}${step ? `&step=${step}` : ""}`;

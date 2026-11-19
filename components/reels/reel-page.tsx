@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { CaptionCue, ReelDetail } from "@/shared";
@@ -21,6 +22,9 @@ import { ReviewStep } from "./review-step";
 import { StoryboardStep } from "./storyboard-step";
 import { VideoStep } from "./video-step";
 import { useReel, useReelOptions } from "./use-reels";
+
+// Loaded when the step opens: the release panel stays out of the page's first load.
+const PublishStep = dynamic(() => import("./publish-step").then((m) => m.PublishStep), { ssr: false, loading: () => <ListSkeleton label="Loading publishing" /> });
 
 function BackLink() {
   return (
@@ -196,6 +200,9 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
           ) : null}
           {step === "review" ? (
             <ReviewStep workspaceId={workspaceId} brandId={brandId} detail={detail} reload={reload} canCreate={canCreate} canApprove={can.approve} go={go} />
+          ) : null}
+          {step === "publish" ? (
+            <PublishStep workspaceId={workspaceId} brandId={brandId} detail={detail} perms={perms} onChanged={reload} />
           ) : null}
         </section>
 
