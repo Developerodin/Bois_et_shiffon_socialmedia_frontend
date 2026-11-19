@@ -60,6 +60,8 @@ export type ReelSummary = {
 };
 export type ChatTurn = { role: "user" | "assistant"; text: string; at: string; requestId?: string };
 export type CheckResult = { check: string; status: "pass" | "warn" | "blocker"; note: string };
+/** One caption line over [start, end) seconds from the video's start. */
+export type CaptionCue = { start: number; end: number; text: string };
 export type ReelDetail = {
   item: { id: string; title: string; status: ContentStatus; postUrl: string | null; scheduledFor: string | null };
   version: number; plan: ReelPlan | null; price: number | null;
@@ -70,6 +72,8 @@ export type ReelDetail = {
   caption: { caption?: string; hashtags?: string[] } | null; videoUrl: string | null;
   // The video's media key: the source a story frame uses for this reel.
   videoKey: string | null;
+  // The spoken lines timed as the join cut each scene; null until a video exists.
+  captions: CaptionCue[] | null;
   checks: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
   // softened: joins (scene n → n+1) the seam check turned into a dissolve because the two shots didn't match.
   // credits: what that attempt was charged (refunded if it failed); null when unknown.

@@ -32,6 +32,7 @@ export type ErrorCode =
   | "clone.challengeExpired"
   | "reel.stillPlanning"
   | "render.alreadyDone"
+  | "draft.changed"
   | "request.idTaken"
   | "csrf.crossOrigin"
   | "paid.pausedForClient";

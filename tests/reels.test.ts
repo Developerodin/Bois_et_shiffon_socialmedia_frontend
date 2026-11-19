@@ -18,7 +18,7 @@ const MIN = 60_000;
 const plan = { title: "T", presenter: "none", template: "spotlight", voice: "coral", scenes: [{ photoKey: "p1", shot: "s", direction: "d", onScreenText: "", voiceText: "v" }], caption: "c", hashtags: [] };
 const detail = (over: Partial<ReelDetail> = {}): ReelDetail => ({
   item: { id: "r1", title: "T", status: "DRAFT_REVIEW", postUrl: null, scheduledFor: null },
-  version: 1, plan, price: 10, seconds: 20, sceneSeconds: [10], aiDisclosure: null, caption: null,
+  version: 1, plan, price: 10, seconds: 20, sceneSeconds: [10], aiDisclosure: null, caption: null, captions: null,
   videoUrl: null, videoKey: null, checks: null, renders: [], chat: [], credits: 0, photoUrls: {}, ...over,
 });
 const render = (step: "VOICE" | "CLIPS" | "JOIN" | "DONE" | "FAILED") => ({ id: "x", versionId: "v", attempt: 1, step, failure: null, softened: [], videoKey: null, credits: null, createdAt: "" });

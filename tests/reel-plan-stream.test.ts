@@ -13,7 +13,7 @@ const deps = (over: { alive?: () => boolean } = {}): Deps => {
 
 const detail = (version: number, chat: ChatTurn[] = [], id = "r1"): ReelDetail => ({
   item: { id, title: "T", status: "DRAFT_REVIEW", postUrl: null, scheduledFor: null },
-  version, plan: null, price: null, seconds: null, sceneSeconds: [], aiDisclosure: null, caption: null,
+  version, plan: null, price: null, seconds: null, sceneSeconds: [], aiDisclosure: null, caption: null, captions: null,
   videoUrl: null, videoKey: null, checks: null, renders: [], chat, credits: 0, photoUrls: {},
 });
 const answered = (version: number, requestId: string) =>
