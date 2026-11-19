@@ -1114,7 +1114,7 @@ function DocView(p: {
       <BackBar onBack={p.onBack} title={p.entry.title} />
       <div className="px-6 py-6">
         {/* Keyed by document: switching documents must never carry one document's edit into another. */}
-        <DocPane key={p.entry.kind} entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} canEdit={p.canEdit} canConfirm={p.canConfirm} />
+        <DocPane key={p.entry.kind} entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} canEdit={p.canEdit} canConfirm={p.canConfirm} autoReview />
       </div>
     </div>
   );

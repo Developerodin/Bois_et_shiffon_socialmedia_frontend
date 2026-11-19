@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ExternalLink, FileText, Loader2, Pencil } from "lucide-react";
 import {
   confirmContextDoc,
@@ -26,6 +26,9 @@ type Props = {
   /** Hide the write controls from people whose role can't use them (default: shown). */
   canEdit?: boolean;
   canConfirm?: boolean;
+  /** Opened by the person to read it: a draft is marked reviewed on opening (once per version). Off where the pane
+   *  only shows a default document nobody picked. */
+  autoReview?: boolean;
 };
 
 function formatDate(iso: string) {
@@ -66,6 +69,7 @@ export function DocPane({
   onStale,
   canEdit = true,
   canConfirm: mayConfirm = true,
+  autoReview = false,
 }: Props) {
   const { latest } = entry;
   const [editing, setEditing] = useState(false);
@@ -169,6 +173,15 @@ export function DocPane({
   }
 
   const canConfirm = mayConfirm && latest?.status === "DRAFT" && !editing;
+
+  // Opening a draft to read it is the review: mark it reviewed straight away, once per version. A failure shows the
+  // usual error and leaves the Mark reviewed button to try again.
+  const reviewed = useRef<number | null>(null);
+  useEffect(() => {
+    if (!autoReview || !canConfirm || busy || !latest || reviewed.current === latest.version) return;
+    reviewed.current = latest.version;
+    void onConfirm();
+  });
 
   return (
     <article
