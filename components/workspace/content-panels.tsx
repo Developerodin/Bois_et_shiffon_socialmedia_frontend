@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, toneOf } from "@/lib/status";
 import { safeHttpUrl, type CheckResult } from "@/shared";
+import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -152,6 +153,28 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
   const { data, failed, reload } = useBrandData(base, "opportunities", pick as (d: never) => Opportunity[]);
   const [filter, setFilter] = useState<"open" | "all">("open");
   const [error, setError] = useState<string | null>(null);
+  // Translate: while on, the shown ideas in the team language (machine translation, display only), until Show original.
+  const [translateOn, setTranslateOn] = useState(false);
+  const [translations, setTranslations] = useState<Map<string, TranslatedIdea>>(new Map());
+  const [translating, setTranslating] = useState(false);
+  const shownIds = (data ?? []).filter((o) => (filter === "all" ? true : o.status === "NEW" || o.status === "SHORTLISTED")).map((o) => o.id).join(",");
+  useEffect(() => {
+    if (!translateOn || !shownIds) return;
+    let cancelled = false;
+    setTranslating(true);
+    translateIdeas(base, shownIds.split(",")).then(
+      (m) => !cancelled && setTranslations(m),
+      (e: unknown) => {
+        if (cancelled) return;
+        setTranslateOn(false);
+        setError(errorMessage(e, "Couldn't translate the ideas. Try again."));
+      },
+    ).finally(() => !cancelled && setTranslating(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [translateOn, shownIds, base]);
+  const translated = translateOn ? translations : null;
   const perms = usePerms(base);
   const canDecide = perms?.includes("content.create");
   const [planning, setPlanning] = useState<string | null>(null);
@@ -181,11 +204,12 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
     setError(null);
     setPlanned(false);
     try {
+      await ensureWorkLanguage(base);
       const { run } = await request<{ run: { id: string } }>(`${base}/agents/planner/runs`, { method: "POST", body: "{}" });
       setPlanning(run.id);
       if (workspaceId) void loadPlanCredits(workspaceId, true);
     } catch (e) {
-      setError(errorMessage(e, "Couldn't start the Planner. Try again."));
+      if (!isRunCancelled(e)) setError(errorMessage(e, "Couldn't start the Planner. Try again."));
     }
   }
 
@@ -206,7 +230,6 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
   if (!data) return failed ? <LoadFailed what="ideas" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading ideas…</p>;
   const shown = data.filter((o) => (filter === "all" ? true : o.status === "NEW" || o.status === "SHORTLISTED"));
   const shortlisted = data.filter((o) => o.status === "SHORTLISTED").length;
-
   return (
     <div className="flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 text-xs">
@@ -222,13 +245,23 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
           )}
           {planning && <RunWatch base={base} runId={planning} onFailed={planFailed} onDone={planDone} />}
         </span>
-        <div role="tablist" aria-label="Filter ideas" className="flex rounded-md bg-muted p-0.5">
-          {(["open", "all"] as const).map((f) => (
-            <button key={f} role="tab" type="button" aria-selected={filter === f} onClick={() => setFilter(f)} className={cn("rounded px-2 py-1", filter === f ? "bg-background text-foreground" : "text-muted-foreground")}>
-              {f === "open" ? "To decide" : "All"}
-            </button>
-          ))}
-        </div>
+        <span className="flex items-center gap-2">
+          {shown.length > 0 && (
+            <TranslateToggle
+              on={translateOn && !translating}
+              busy={translating}
+              onTranslate={() => (setError(null), setTranslateOn(true))}
+              onOriginal={() => setTranslateOn(false)}
+            />
+          )}
+          <div role="tablist" aria-label="Filter ideas" className="flex rounded-md bg-muted p-0.5">
+            {(["open", "all"] as const).map((f) => (
+              <button key={f} role="tab" type="button" aria-selected={filter === f} onClick={() => setFilter(f)} className={cn("rounded px-2 py-1", filter === f ? "bg-background text-foreground" : "text-muted-foreground")}>
+                {f === "open" ? "To decide" : "All"}
+              </button>
+            ))}
+          </div>
+        </span>
       </div>
       {error && <p role="alert" className="px-4 pt-3 text-sm text-destructive">{error}</p>}
       {planned && (
@@ -264,11 +297,11 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
                 {o.timing && <span className="text-muted-foreground">{o.timing}</span>}
                 {o.status !== "NEW" && <span className="rounded-full border border-border px-2 py-0.5 text-muted-foreground">{o.status === "SHORTLISTED" ? "Shortlisted" : o.status === "PLANNED" ? "Planned" : "Dismissed"}</span>}
               </div>
-              <p className="text-sm font-medium">{o.title}</p>
-              <p className="text-sm text-muted-foreground">{o.summary}</p>
+              <p className="text-sm font-medium">{translated?.get(o.id)?.title ?? o.title}</p>
+              <p className="text-sm text-muted-foreground">{translated?.get(o.id)?.summary ?? o.summary}</p>
               <p className="text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">Why: </span>
-                {o.reason}
+                {translated?.get(o.id)?.reason ?? o.reason}
               </p>
               <p className="text-xs text-muted-foreground">{o.channels.map((c) => CHANNEL_LABEL[c] ?? c).join(" · ")}</p>
               {o.sources.length > 0 && (
@@ -426,11 +459,12 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
     setError(null);
     setRanOut(false);
     try {
+      await ensureWorkLanguage(base);
       const { run } = await request<{ run: { id: string } }>(`${base}/agents/${encodeURIComponent(key)}/runs`, { method: "POST", body: "{}" });
       setStarted({ key, runId: run.id });
       if (workspaceId) void loadPlanCredits(workspaceId, true);
     } catch (e) {
-      setError(errorMessage(e, "Couldn't start the agent. Try again."));
+      if (!isRunCancelled(e)) setError(errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
       setPending(false);
     }

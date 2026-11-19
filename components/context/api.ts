@@ -5,6 +5,7 @@ import type { RunStatus } from "@/components/agents/api";
 import type { ContextRequest } from "@/shared";
 import { request } from "@/components/settings/api";
 import { SLOW_MS } from "@/lib/net";
+import { brandBase, ensureWorkLanguage } from "@/components/languages/languages";
 
 export type ContextDocKind =
   | "product-information"
@@ -44,9 +45,6 @@ function ws(workspaceId: string) {
   return `/api/v1/workspaces/${encodeURIComponent(workspaceId)}`;
 }
 
-function brandBase(workspaceId: string, brandId: string) {
-  return `${ws(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
-}
 
 export function createBrand(
   workspaceId: string,
@@ -104,7 +102,9 @@ export function confirmContextDoc(
   );
 }
 
-export function startResearch(workspaceId: string, brandId: string) {
+/** Starts Research; asks for the team language first if the business has none yet (throws RunCancelled on Cancel). */
+export async function startResearch(workspaceId: string, brandId: string) {
+  await ensureWorkLanguage(brandBase(workspaceId, brandId));
   return request<{ run: { id: string; status: RunStatus } }>(
     `${brandBase(workspaceId, brandId)}/agents/research/runs`,
     { method: "POST", body: JSON.stringify({}) },

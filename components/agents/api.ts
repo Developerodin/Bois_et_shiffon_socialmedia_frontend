@@ -33,6 +33,7 @@ export type AgentEvent = {
 
 // One fetch helper for the app: it surfaces the server's own explanation (problem detail).
 import { request } from "@/components/settings/api";
+import { ensureWorkLanguage } from "@/components/languages/languages";
 
 export { ApiError } from "@/components/settings/api";
 
@@ -44,7 +45,9 @@ export function fetchAgents(workspaceId: string, brandId: string, signal?: Abort
   return request<{ agents: AgentSummary[] }>(`${base(workspaceId, brandId)}/agents`, { signal });
 }
 
-export function startRun(workspaceId: string, brandId: string, agentKey: string) {
+/** Starts a run; asks for the team language first if the business has none yet (throws RunCancelled on Cancel). */
+export async function startRun(workspaceId: string, brandId: string, agentKey: string) {
+  await ensureWorkLanguage(base(workspaceId, brandId));
   return request<{ run: { id: string; status: string } }>(
     `${base(workspaceId, brandId)}/agents/${encodeURIComponent(agentKey)}/runs`,
     { method: "POST" },

@@ -9,6 +9,7 @@ import {
   type ContextDocEntry,
 } from "@/components/context/api";
 import { DocStateBadge } from "@/components/context/doc-state";
+import { brandBase, translateDoc, TranslateToggle } from "@/components/languages/languages";
 import { Markdown } from "@/components/context/markdown";
 import { okToDiscard, setUnsaved } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,11 @@ export function DocPane({
   const [conflict, setConflict] = useState(false);
   const [busy, setBusy] = useState<"save" | "confirm" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Translate: this version in the team language (machine translation, display only). A newer version shows the
+  // original again; Edit always starts from the original.
+  const [translation, setTranslation] = useState<{ version: number; markdown: string } | null>(null);
+  const [translating, setTranslating] = useState(false);
+  const translated = translation && translation.version === latest?.version ? translation.markdown : null;
   const dirty = editing && draft !== base.markdown;
   const newest = latest?.version ?? null;
   useEffect(() => {
@@ -174,6 +180,19 @@ export function DocPane({
 
   const canConfirm = mayConfirm && latest?.status === "DRAFT" && !editing;
 
+  async function onTranslate() {
+    if (!latest) return;
+    setTranslating(true);
+    setError(null);
+    try {
+      setTranslation({ version: latest.version, markdown: await translateDoc(brandBase(workspaceId, brandId), entry.kind, latest.version) });
+    } catch (err) {
+      setError(err instanceof ProblemError ? err.message : "Couldn't translate the document. Try again.");
+    } finally {
+      setTranslating(false);
+    }
+  }
+
   // Opening a draft to read it is the review: mark it reviewed straight away, once per version. A failure shows the
   // usual error and leaves the Mark reviewed button to try again.
   const reviewed = useRef<number | null>(null);
@@ -239,6 +258,9 @@ export function DocPane({
                 {busy === "confirm" ? "Marking…" : "Mark reviewed"}
               </Button>
             ) : null}
+            {latest ? (
+              <TranslateToggle on={!!translated} busy={translating} onTranslate={() => void onTranslate()} onOriginal={() => setTranslation(null)} />
+            ) : null}
           </div>
         ) : null}
       </header>
@@ -289,7 +311,7 @@ export function DocPane({
           </div>
         </div>
       ) : latest ? (
-        <Markdown source={latest.markdown} />
+        <Markdown source={translated ?? latest.markdown} />
       ) : (
         <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-border px-6 py-10">
           <FileText className="size-5 text-primary" aria-hidden="true" />

@@ -1,4 +1,6 @@
 /** Brand look and photo library: GET/PATCH …/brands/:b/assets, POST …/brands/:b/media (library=1). */
+import type { ContentLanguage } from "./languages";
+
 export type StoredImage = { key: string; url: string };
 
 export const TONES = [
@@ -36,9 +38,9 @@ export type BrandAssetsView = {
   /** `foundWebsite`: a brand made without a website whose own site the online lookup found, for the owner to accept. */
   summary: { tagline: string | null; tags: string[]; audience: string | null; strengths: string | null; foundWebsite: string | null } | null;
   /** The owner's A10 choices; null fields = not chosen yet. */
-  preferences: { tones: Tone[] | null; contentLanguage: "fr" | "en" | null };
+  preferences: { tones: Tone[] | null; contentLanguage: ContentLanguage | null };
 };
-export type BrandDetailsEdit = { colors?: string[]; tagline?: string; audience?: string; tones?: Tone[]; contentLanguage?: "fr" | "en"; removeUpload?: string };
+export type BrandDetailsEdit = { colors?: string[]; tagline?: string; audience?: string; tones?: Tone[]; contentLanguage?: ContentLanguage; removeUpload?: string };
 
 export const MAX_COLORS = 5;
 /** A cap so the profile's JSON list stays small; a table if brands need bigger libraries. */

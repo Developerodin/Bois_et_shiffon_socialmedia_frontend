@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
+import { isRunCancelled } from "@/components/languages/languages";
 
 // Poll only while research is in flight; one manager per brand makes 3s cheap.
 const RESEARCH_POLL_MS = 3000;
@@ -139,8 +140,9 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
     } catch (err) {
       setRerun({
         pending: false,
-        error:
-          err instanceof ProblemError && err.status === 403
+        error: isRunCancelled(err)
+          ? null
+          : err instanceof ProblemError && err.status === 403
             ? "You do not have permission to run research for this brand."
             : err instanceof ProblemError
               ? err.message

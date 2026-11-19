@@ -5,6 +5,7 @@ export * from "./content-limits";
 export * from "./offers";
 export * from "./products";
 export * from "./chat-pages";
+export * from "./languages";
 export * from "./api/shell";
 export * from "./permissions";
 export * from "./api/admin";

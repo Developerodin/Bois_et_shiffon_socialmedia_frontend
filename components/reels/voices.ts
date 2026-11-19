@@ -93,14 +93,8 @@ export const reusableChallenge = (e: ChallengeEntry | null, lang: string, now: n
 export const readableChallenge = (e: ChallengeEntry | null, now: number): e is ChallengeEntry =>
   !!e && !e.used && now - e.at <= CHALLENGE_TTL_MS / 2;
 
-/** "fr" as "French"; the code itself if the browser can't name it. */
-export function languageName(code: string): string {
-  try {
-    return new Intl.DisplayNames(["en"], { type: "language" }).of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
+/** "fr" as "French" (one helper, in shared/). */
+export { languageName } from "@/shared";
 
 /** Whether the person may rename or delete this voice: a clone that is theirs, or any clone when cloning is allowed to them. */
 export const canManageClone = (v: ReelVoiceOption, cloning: CloningInfo | null): boolean => v.clone && (v.mine || !!cloning?.allowed);

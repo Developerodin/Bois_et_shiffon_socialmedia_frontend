@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { PageViewTracker } from "@/components/page-view-tracker";
 import { AssistantPanel } from "@/components/shell/assistant-panel";
 import { AssistantProvider } from "@/components/shell/assistant-state";
+import { LanguageDialog } from "@/components/languages/languages";
 import { PaywallDialog } from "@/components/shell/paywall-dialog";
 import { MobileNav, Sidebar } from "@/components/shell/sidebar";
 import { TopBar } from "@/components/shell/top-bar";
@@ -58,6 +59,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
       </AssistantProvider>
       <PageViewTracker workspaceId={workspaceId} brandId={shell.activeBrandId} />
       <PaywallDialog workspaceId={workspaceId} />
+      <LanguageDialog />
     </div>
   );
 }

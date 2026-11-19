@@ -12,6 +12,7 @@ import { Markdown } from "@/components/context/markdown";
 import { Button } from "@/components/ui/button";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
+import { isRunCancelled } from "@/components/languages/languages";
 
 const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) => string> = {
   listDocuments: () => "Checked your strategy documents",
@@ -137,6 +138,7 @@ function StartAgent({ workspaceId, brandId, agentKey }: { workspaceId: string; b
       setState("started");
       void loadPlanCredits(workspaceId, true);
     } catch (e) {
+      if (isRunCancelled(e)) return setState("idle");
       setState({
         error: e instanceof Error ? e.message : "Could not start the agent.",
       });

@@ -48,6 +48,7 @@ import { readable } from "@/lib/agent-message";
 import { safeHttpUrl } from "@/shared";
 import { timeAgo } from "@/lib/time";
 import { plainSummary } from "@/lib/plain-summary";
+import { isRunCancelled } from "@/components/languages/languages";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
@@ -1175,6 +1176,7 @@ function AgentView({
       onRan();
       void loadPlanCredits(workspaceId, true);
     } catch (e) {
+      if (isRunCancelled(e)) return;
       setError(e instanceof ApiError && e.status === 403 ? "Your role can't run agents. Ask an owner or admin." : errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
       setPending(false);
@@ -1423,7 +1425,7 @@ function AgentsFeed({
       onRan();
       void loadPlanCredits(workspaceId, true);
     } catch (e) {
-      setError(errorMessage(e, "Couldn't start the agent. Try again."));
+      if (!isRunCancelled(e)) setError(errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
       setBusy(null);
     }

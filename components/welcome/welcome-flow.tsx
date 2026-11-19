@@ -36,6 +36,7 @@ import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { plainSummary } from "@/lib/plain-summary";
 import { clock } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { isRunCancelled } from "@/components/languages/languages";
 
 /** The five documents Research writes (titles match the server's), with what each holds (its GUIDANCE, in short). */
 const DOC_META: { title: string; does: string; icon: LucideIcon }[] = [
@@ -399,7 +400,7 @@ function ReadingRoom({
       onRetry(run.id);
       void loadPlanCredits(workspaceId, true);
     } catch (err) {
-      setRetryError(err instanceof ProblemError ? err.message : "Couldn't restart. Check your connection and try again.");
+      if (!isRunCancelled(err)) setRetryError(err instanceof ProblemError ? err.message : "Couldn't restart. Check your connection and try again.");
     } finally {
       setRetrying(false);
     }

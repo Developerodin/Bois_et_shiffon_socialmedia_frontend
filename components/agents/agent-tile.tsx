@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { isRunCancelled } from "@/components/languages/languages";
 
 const STATUS_LABEL: Record<RunStatus, string> = {
   QUEUED: "Queued",
@@ -55,7 +56,7 @@ export function AgentTile({ agent, workspaceId, brandId, onRunStarted }: Props) 
       onRunStarted();
       void loadPlanCredits(workspaceId, true);
     } catch (err) {
-      setError(errorMessage(err, "Could not start a run. Try again."));
+      if (!isRunCancelled(err)) setError(errorMessage(err, "Could not start a run. Try again."));
     } finally {
       setPending(false);
     }

@@ -7,13 +7,14 @@ import { PageHeader } from "@/components/ui/page-header";
 import { settingsApi } from "@/components/settings/api";
 import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { InvitationsTab } from "@/components/settings/invitations-tab";
+import { LanguagesTab } from "@/components/settings/languages-tab";
 import { MembersTab } from "@/components/settings/members-tab";
 import { ProjectAccessTab } from "@/components/settings/project-access-tab";
 import { RolesTab } from "@/components/settings/roles-tab";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
 
-type TabKey = "project" | "members" | "roles" | "invitations" | "connections";
+type TabKey = "project" | "members" | "roles" | "invitations" | "connections" | "languages";
 
 const TABS: { key: TabKey; label: string; needs: string }[] = [
   { key: "project", label: "Project access", needs: "brand.read" },
@@ -21,6 +22,7 @@ const TABS: { key: TabKey; label: string; needs: string }[] = [
   { key: "roles", label: "Roles", needs: "roles.read" },
   { key: "invitations", label: "Invitations", needs: "invitations.manage" },
   { key: "connections", label: "Connections", needs: "brand.read" },
+  { key: "languages", label: "Languages", needs: "brand.read" },
 ];
 
 type Props = {
@@ -49,9 +51,9 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
   // Members and workspace invitations take workspace roles; project roles are picked in Project access.
   const roleList = roles.state.kind === "ready" ? roles.state.data.filter((r) => r.scope === "WORKSPACE") : [];
 
-  // Project access and Connections are per brand, so they only show with a brand selected.
+  // Project access, Connections and Languages are per brand, so they only show with a brand selected.
   const visible = can
-    ? TABS.filter((t) => can.has(t.needs) && ((t.key !== "connections" && t.key !== "project") || brandId))
+    ? TABS.filter((t) => can.has(t.needs) && ((t.key !== "connections" && t.key !== "project" && t.key !== "languages") || brandId))
     : [];
   const [active, setActiveState] = useState<TabKey | null>(TABS.find((t) => t.key === initialTab)?.key ?? null);
   // The tab lives in the URL (replace, not push) so a reload or a shared link lands on the same one.
@@ -140,6 +142,8 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
             <RolesTab workspaceId={workspaceId} can={can!} roles={roles} />
           ) : current.key === "invitations" ? (
             <InvitationsTab workspaceId={workspaceId} roles={roleList} />
+          ) : current.key === "languages" ? (
+            <LanguagesTab key={brandId} workspaceId={workspaceId} brandId={brandId!} canEdit={can!.has("context.edit")} />
           ) : (
             <ConnectionsTab
               workspaceId={workspaceId}
@@ -156,7 +160,7 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <PageHeader title="Settings">
-        Who works on this project and the workspace, what each role can do, who is waiting to join, and which accounts this project has connected.
+        Who works on this project and the workspace, what each role can do, who is waiting to join, which accounts this project has connected, and which languages its agents write in.
       </PageHeader>
       {body}
     </div>
