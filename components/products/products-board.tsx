@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Package, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -88,22 +88,43 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
     [pathname],
   );
 
+  // Pages already asked for, by query: turning back is instant, and a click on a page being prefetched reuses that
+  // request. Cleared whenever the catalogue changes (reloadAll). ponytail: unbounded, fine for the few dozen pages a
+  // session visits; cap it if catalogues reach thousands of pages.
+  const pages = useRef(new Map<string, Promise<ProductPage>>());
+  const fetchPage = useCallback(
+    (at: PageQuery) => {
+      const k = `${workspaceId}|${brandId}|${at.page}|${at.limit}|${at.q}|${at.stock}`;
+      let p = pages.current.get(k);
+      if (!p) {
+        p = productsApi.page(workspaceId, brandId, at);
+        pages.current.set(k, p);
+        p.catch(() => pages.current.delete(k)); // a failed page is asked again, not remembered
+      }
+      return p;
+    },
+    [workspaceId, brandId],
+  );
+
   // A newer page, size or filter cancels the reply still on its way, so a slow page can't land over a newer one.
   useEffect(() => {
     let cancelled = false;
-    productsApi.page(workspaceId, brandId, { page, limit, q, stock }).then(
+    fetchPage({ page, limit, q, stock }).then(
       (data) => {
         if (cancelled) return;
         setTable({ key, data });
         // Past the end (a shared link, or the last row on the last page deleted): show the last page there is.
-        if (data.pagination.page !== page) go({ page: data.pagination.page }, "replace");
+        if (data.pagination.page !== page) return go({ page: data.pagination.page }, "replace");
+        // The pages either side load in the background, so Next and Previous show at once.
+        for (const n of [page + 1, page - 1])
+          if (n >= 1 && n <= data.pagination.totalPages) fetchPage({ page: n, limit, q, stock }).catch(() => {});
       },
       (err: unknown) => !cancelled && setTableError({ key, message: errorMessage(err, "Couldn't load this page. Try again.") }),
     );
     return () => {
       cancelled = true;
     };
-  }, [workspaceId, brandId, page, limit, q, stock, key, tableNonce, go]);
+  }, [fetchPage, page, limit, q, stock, key, tableNonce, go]);
 
   // Typing settles for 300 ms before the search goes to the URL, back to page 1.
   useEffect(() => {
@@ -117,6 +138,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   }, [q]);
 
   const reloadAll = useCallback(() => {
+    pages.current.clear();
     reload();
     setTableNonce((n) => n + 1);
   }, [reload]);
@@ -185,6 +207,8 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
     // While the next page loads, the last one stays in place, dimmed, so the table doesn't jump.
     const rows = shown ?? table?.data ?? null;
     const paging = rows?.pagination ?? null;
+    // The page asked for, highlighted at once while its rows load (the served page once they have).
+    const at = shown ? (paging?.page ?? page) : page;
     body = (
       <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -292,16 +316,16 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           </p>
           {paging.totalPages > 1 ? (
             <div className="flex items-center gap-1">
-              <Button variant="outline" size="sm" disabled={paging.page <= 1} onClick={() => turn(paging.page - 1)}>
+              <Button variant="outline" size="sm" disabled={at <= 1} onClick={() => turn(at - 1)}>
                 <ChevronLeft aria-hidden="true" />
                 Previous
               </Button>
               {/* Page numbers from sm up; a phone gets "3 of 28" between the arrows. */}
               <span className="px-2 text-sm text-muted-foreground tabular-nums sm:hidden">
-                {paging.page} of {paging.totalPages}
+                {at} of {paging.totalPages}
               </span>
               <span className="hidden items-center gap-1 sm:flex">
-                {pageItems(paging.page, paging.totalPages).map((it, i) =>
+                {pageItems(at, paging.totalPages).map((it, i) =>
                   it === "gap" ? (
                     <span key={`gap-${i}`} aria-hidden="true" className="px-1 text-muted-foreground">
                       …
@@ -310,18 +334,18 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
                     <Button
                       key={it}
                       size="sm"
-                      variant={it === paging.page ? "default" : "ghost"}
+                      variant={it === at ? "default" : "ghost"}
                       aria-label={`Page ${it}`}
-                      aria-current={it === paging.page ? "page" : undefined}
+                      aria-current={it === at ? "page" : undefined}
                       className="min-w-9 tabular-nums"
-                      onClick={() => it !== paging.page && turn(it)}
+                      onClick={() => it !== at && turn(it)}
                     >
                       {it}
                     </Button>
                   ),
                 )}
               </span>
-              <Button variant="outline" size="sm" disabled={paging.page >= paging.totalPages} onClick={() => turn(paging.page + 1)}>
+              <Button variant="outline" size="sm" disabled={at >= paging.totalPages} onClick={() => turn(at + 1)}>
                 Next
                 <ChevronRight aria-hidden="true" />
               </Button>
