@@ -9,7 +9,7 @@ import { MainArea } from "@/components/workspace/main-area";
 import { featuresOn } from "@/lib/features";
 import { getShell } from "@/lib/server-fetch";
 
-/** The Refined workspace frame: sidebar | top bar over the page | the Espanda panel. */
+/** The Refined workspace frame: sidebar | top bar over (the page | the Espanda panel). */
 export default async function ShellLayout({ children }: { children: React.ReactNode }) {
   const shell = await getShell();
   const workspaceId = shell.activeWorkspaceId;
@@ -46,10 +46,15 @@ export default async function ShellLayout({ children }: { children: React.ReactN
               </Suspense>
             }
           />
-          <MainArea>{children}</MainArea>
+          {/* The top bar spans the page and the Espanda column, so its controls sit at the window's right edge. */}
+          <div className="flex min-h-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <MainArea>{children}</MainArea>
+            </div>
+            {/* A platform-only account has no workspace, so no conversation to hold. */}
+            {workspaceId ? <AssistantPanel workspaceId={workspaceId} brandId={shell.activeBrandId} brandName={brandName} canCreateBrand={canCreateBrand} /> : null}
+          </div>
         </div>
-        {/* A platform-only account has no workspace, so no conversation to hold. */}
-        {workspaceId ? <AssistantPanel workspaceId={workspaceId} brandId={shell.activeBrandId} brandName={brandName} canCreateBrand={canCreateBrand} /> : null}
       </AssistantProvider>
       <PageViewTracker workspaceId={workspaceId} brandId={shell.activeBrandId} />
       <PaywallDialog workspaceId={workspaceId} />

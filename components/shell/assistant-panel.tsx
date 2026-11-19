@@ -177,12 +177,9 @@ export function AssistantPanel(p: Props) {
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-full shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
           expanded ? "w-[min(56rem,100vw)]" : "w-80",
-          // Docked it sits beside the page: the page's own 12 px edge is the gap, so no left padding of its own, and it
-          // starts under the 72 px top bar (+12 px) so its top edge lines up with the page's cards, not the bar. The bar's
-          // white carries on over the column's top 72 px, so the bar spans the window instead of leaving a grey notch.
-          docked &&
-            !expanded &&
-            "xl:static xl:z-auto xl:translate-x-0 xl:pt-21 xl:pl-0 xl:bg-[linear-gradient(to_bottom,var(--card)_4.5rem,var(--background)_4.5rem)]",
+          // Docked it sits beside the page, under the top bar (layout.tsx): the page's own 12 px edge is the gap, so no
+          // left padding of its own, and its top edge lines up with the page's cards.
+          docked && !expanded && "xl:static xl:z-auto xl:translate-x-0 xl:pl-0",
           open || expanded ? "translate-x-0" : "translate-x-full",
         )}
       >
