@@ -12,6 +12,6 @@ export default async function ReelsPage() {
 
   return (
     // Remount on brand switch: a plan streaming for the old brand never opens its reel here.
-    <ReelsHome key={brandId} workspaceId={workspaceId} brandId={brandId} canCreate={perms.has("content.create")} />
+    <ReelsHome key={brandId} workspaceId={workspaceId} brandId={brandId} canCreate={perms.has("content.create")} canPublish={perms.has("publish.execute")} />
   );
 }

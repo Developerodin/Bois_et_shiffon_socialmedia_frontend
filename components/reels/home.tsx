@@ -32,7 +32,7 @@ const PresenterDialog = dynamic(() => import("./presenter-dialog").then((m) => m
  * The reels home: plan a new reel (from a prompt, an idea or a template), the brand's presenters and templates, and
  * its reels. A plan streams here and opens the reel's Plan step once it is saved.
  */
-export function ReelsHome({ workspaceId, brandId, canCreate }: { workspaceId: string; brandId: string; canCreate: boolean }) {
+export function ReelsHome({ workspaceId, brandId, canCreate, canPublish }: { workspaceId: string; brandId: string; canCreate: boolean; canPublish: boolean }) {
   const router = useRouter();
   const { stage, draft, sending, error, create } = useReelStream(workspaceId, brandId);
   const { data: ideas, reload: reloadIdeas } = useReelIdeas(workspaceId, brandId);
@@ -96,7 +96,7 @@ export function ReelsHome({ workspaceId, brandId, canCreate }: { workspaceId: st
         <SideColumn workspaceId={workspaceId} brandId={brandId} canCreate={canCreate} sending={sending} onUse={(templateId) => void start({ templateId })} />
       </div>
 
-      <YourReels workspaceId={workspaceId} brandId={brandId} />
+      <YourReels workspaceId={workspaceId} brandId={brandId} canPublish={canPublish} />
 
       {ideasMounted ? <IdeasDialog open={ideasOpen} onOpenChange={setIdeasOpen} ideas={ideas ?? []} disabled={sending} onUse={pickIdea} /> : null}
     </div>

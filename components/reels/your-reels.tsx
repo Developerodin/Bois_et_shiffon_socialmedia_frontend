@@ -1,23 +1,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { reelStage } from "@/shared";
+import dynamic from "next/dynamic";
+import { reelStage, type ReelSummary } from "@/shared";
+import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ListSkeleton, LoadError } from "@/components/settings/shared";
 import { sharedAt } from "@/components/workspace/use-job";
 import { stale } from "@/lib/signed-links";
 import { reelsUrl } from "./api";
-import { countByStage } from "./reel";
+import { countByStage, postLinkWanted } from "./reel";
 import { ReelCard } from "./reel-card";
 import { useReels } from "./use-reels";
+
+const PostLinkDialog = dynamic(() => import("./post-link-dialog").then((m) => m.PostLinkDialog), { ssr: false });
 
 type Filter = "all" | "ready" | "processing";
 
 /** The brand's reels, newest first, filtered by stage; each card opens its reel. */
-export function YourReels({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
+export function YourReels({ workspaceId, brandId, canPublish }: { workspaceId: string; brandId: string; canPublish: boolean }) {
   const { data, failed, reload } = useReels(workspaceId, brandId);
   const [filter, setFilter] = useState<Filter>("all");
+  // The dialog loads on the first press; `linking` is the reel it is open for.
+  const [linking, setLinking] = useState<ReelSummary | null>(null);
+  const [linkMounted, setLinkMounted] = useState(false);
   const counts = useMemo(() => countByStage(data ?? []), [data]);
   const shown = useMemo(() => (data ?? []).filter((r) => filter === "all" || reelStage(r) === filter), [data, filter]);
   // Links cached over 50 minutes ago may have expired: show nothing until the read that replaces them lands.
@@ -52,9 +59,25 @@ export function YourReels({ workspaceId, brandId }: { workspaceId: string; brand
         {shown.map((r) => (
           <li key={r.id}>
             <ReelCard reel={r} brandId={brandId} />
+            {canPublish && postLinkWanted(r) ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-1"
+                aria-label={`Posted ${r.title}? Add the link`}
+                onClick={() => {
+                  setLinkMounted(true);
+                  setLinking(r);
+                }}
+              >
+                Posted it? Add link
+              </Button>
+            ) : null}
           </li>
         ))}
       </ul>
+      {linkMounted ? <PostLinkDialog workspaceId={workspaceId} brandId={brandId} reel={linking} onClose={() => setLinking(null)} onSaved={() => void reload()} /> : null}
     </PageSection>
   );
 }
