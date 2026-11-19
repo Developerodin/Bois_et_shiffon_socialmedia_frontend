@@ -5,7 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
-import { Check, Globe, Loader2, Play, Square, TriangleAlert, Wrench } from "lucide-react";
+import { ArrowUp, Check, Globe, Loader2, Play, Square, TriangleAlert, Wrench } from "lucide-react";
 import { startRun } from "@/components/agents/api";
 import { CLIENT_TAG, isOffline, NET_MESSAGE, send } from "@/lib/net";
 import { Markdown } from "@/components/context/markdown";
@@ -224,7 +224,8 @@ function ChatSession({
           {status === "ready" && messages.at(-1)?.role === "assistant" ? "Reply finished" : ""}
         </p>
         {messages.length === 0 ? (
-          slots.empty(send)
+          // Pushed down to sit just above the box, where the eye already is when about to ask.
+          <div className="mt-auto">{slots.empty(send)}</div>
         ) : (
           <ol className="flex flex-col gap-5">
             {/* Replies saved before ids were generated have an empty id: fall back to the position. */}
@@ -295,28 +296,37 @@ function ChatSession({
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-3 border-t border-border bg-card p-4">
+      <form onSubmit={onSubmit} className="flex shrink-0 flex-col gap-2 border-t border-border bg-card p-4">
         <label htmlFor="chat-input" className="sr-only">
           Message Espanda
         </label>
-        <textarea
-          id="chat-input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={onKey}
-          placeholder="Ask Espanda anything…"
-          className="h-24 w-full resize-none rounded-2xl border border-input bg-card p-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
-        />
-        {busy ? (
-          <Button type="button" variant="secondary" onClick={() => void stop()} className="h-11 w-full rounded-2xl active:translate-y-px">
-            <Square aria-hidden="true" /> Stop
-          </Button>
-        ) : (
-          // Disabled reads as "not yet" (muted), not as a faded primary.
-          <Button type="submit" disabled={!input.trim()} className="h-11 w-full rounded-2xl active:translate-y-px disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
-            Send message
-          </Button>
-        )}
+        <div className="relative">
+          {/* Grows with the text (field-sizing) between two lines and ~8; browsers without it keep two lines and scroll.
+              16 px below sm so iOS Safari doesn't zoom in on focus. */}
+          <textarea
+            id="chat-input"
+            rows={2}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKey}
+            aria-describedby="chat-hint"
+            placeholder="Ask Espanda anything…"
+            className="block max-h-48 min-h-16 w-full resize-none rounded-2xl border border-input bg-card py-3 pr-14 pl-3 text-base outline-none [field-sizing:content] placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring sm:text-sm"
+          />
+          {busy ? (
+            <Button type="button" variant="secondary" size="icon" onClick={() => void stop()} aria-label="Stop" className="absolute right-2 bottom-2 size-9 rounded-xl active:translate-y-px">
+              <Square aria-hidden="true" />
+            </Button>
+          ) : (
+            // Disabled reads as "not yet" (muted), not as a faded primary.
+            <Button type="submit" size="icon" disabled={!input.trim()} aria-label="Send message" className="absolute right-2 bottom-2 size-9 rounded-xl active:translate-y-px disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
+              <ArrowUp aria-hidden="true" />
+            </Button>
+          )}
+        </div>
+        <p id="chat-hint" className="px-1 text-xs text-muted-foreground">
+          Enter to send, Shift+Enter for a new line. Espanda reads your documents and reports and can offer to start agents; it never publishes.
+        </p>
       </form>
     </div>
   );

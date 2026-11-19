@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
-import { MessageCircle, SquarePen, X } from "lucide-react";
+import { ArrowRight, SquarePen, X } from "lucide-react";
 import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { ChatPane, type ChatSlots } from "@/components/workspace/chat-pane";
@@ -68,7 +68,7 @@ export function AssistantPanel(p: Props) {
   return (
     <>
       {open && !docked ? (
-        <div aria-hidden="true" className="fixed inset-0 z-40 bg-black/50" onClick={() => setOpen(false)} />
+        <div aria-hidden="true" className="fixed inset-0 z-40 bg-overlay" onClick={() => setOpen(false)} />
       ) : null}
       <aside
         ref={ref}
@@ -87,7 +87,7 @@ export function AssistantPanel(p: Props) {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className={cn("absolute top-4 right-4 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
+          className={cn("absolute top-5 right-4 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
         >
           <X className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
           <span className="sr-only">Close</span>
@@ -99,16 +99,13 @@ export function AssistantPanel(p: Props) {
 }
 
 function Body({ workspaceId, brandId, brandName, canCreateBrand, docked }: Props & { docked: boolean }) {
-  const title = <h2 className="text-xl/[26px] font-semibold text-foreground">Espanda</h2>;
-  const subtitle = <p className="text-sm text-muted-foreground">Your team, one conversation</p>;
+  // One line, the same 72 px as the top bar, so the panel and the page share a horizon.
+  const title = <h2 className="text-lg font-semibold text-foreground">Espanda</h2>;
 
   if (!brandId) {
     return (
       <div className="flex h-full min-h-0 flex-col">
-        <div className="flex h-30 shrink-0 flex-col justify-center gap-0.5 border-b border-border bg-card px-6">
-          {title}
-          {subtitle}
-        </div>
+        <div className="flex h-18 shrink-0 items-center border-b border-border bg-card px-6">{title}</div>
         <div className="min-h-0 flex-1 bg-background p-6">
           <p className="text-sm text-muted-foreground">{canCreateBrand ? "Create a business to start a conversation." : "Ask a workspace admin to add a business."}</p>
         </div>
@@ -118,11 +115,8 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked }: Props
 
   const slots: ChatSlots = {
     header: ({ busy, empty, onNew }) => (
-      <div className="flex h-30 shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-6">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          {title}
-          {subtitle}
-        </div>
+      <div className="flex h-18 shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-6">
+        {title}
         <button
           type="button"
           onClick={onNew}
@@ -135,34 +129,25 @@ function Body({ workspaceId, brandId, brandName, canCreateBrand, docked }: Props
         </button>
       </div>
     ),
+    // Plain text, not a box: it isn't a control, and the top bar's breadcrumb names the business too.
     intro: (
-      <div className="flex shrink-0 flex-col gap-3">
-        <div className="w-full rounded-2xl bg-accent px-4 py-3">
-          <p className="text-xs/[18px] text-muted-foreground">Business context</p>
-          <p className="truncate text-sm text-foreground">{brandName ?? "Your business"}</p>
-        </div>
-        <p className="text-xs/[18px] text-muted-foreground">Espanda reads your documents and reports, and can offer to start agents. It never publishes.</p>
-      </div>
+      <p className="shrink-0 truncate text-sm text-muted-foreground">
+        Working on <span className="text-foreground">{brandName ?? "your business"}</span>
+      </p>
     ),
     empty: (send) => (
-      <div className="flex flex-col gap-4">
-        <span className="grid size-9 place-items-center rounded-xl bg-card text-primary-strong" aria-hidden="true">
-          <MessageCircle className="size-5" strokeWidth={SHELL_STROKE} />
-        </span>
-        <div>
-          <p className="text-sm font-semibold text-foreground">Espanda</p>
-          <p className="text-sm text-muted-foreground">Ask about your business, your drafts or what to do next.</p>
-        </div>
-        <p className="text-xs/[18px] text-muted-foreground">A good place to start</p>
-        <ul className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm text-muted-foreground">Ask about your business, your drafts or what to do next.</p>
+        <ul className="flex flex-col gap-2">
           {SUGGESTIONS.map((s) => (
             <li key={s}>
               <button
                 type="button"
                 onClick={() => send(s)}
-                className="flex h-12 w-full items-center rounded-2xl bg-card px-4 text-left text-sm text-primary-strong transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
+                className="flex min-h-12 w-full items-center justify-between gap-3 rounded-2xl bg-card px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px"
               >
                 {s}
+                <ArrowRight className="size-4 shrink-0 text-muted-foreground" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               </button>
             </li>
           ))}

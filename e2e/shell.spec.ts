@@ -71,9 +71,9 @@ test.describe("owner", () => {
     const names = (await page.getByRole("menuitem").allInnerTexts()).map((t) => t.trim());
     await page.keyboard.press("Escape");
 
-    // The switcher shows the business's initial, then its name; the panel's chip names the business it is talking about.
+    // The switcher shows the business's initial, then its name; the panel's "Working on" line names the business it is talking about.
     const showing = (name: string) => expect(switcher).toHaveText(new RegExp(`${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
-    const chip = panel(page).getByText("Business context", { exact: true }).locator("xpath=..");
+    const chip = panel(page).getByText("Working on", { exact: false });
     const choose = async (i: number) => {
       await switcher.click();
       await page.getByRole("menuitem").nth(i).click();
