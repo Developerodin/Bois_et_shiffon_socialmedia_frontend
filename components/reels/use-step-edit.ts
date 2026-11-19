@@ -27,10 +27,13 @@ export function useStepEdit<T>(detail: ReelDetail, save: ReelSave, scenes: numbe
     setNote(droppedNote);
   }
 
-  if (edit && failed && !save.saving) {
+  // Always settled once the save ends, edit or not: a stale flag would later move a new edit onto a newer version.
+  if (failed && !save.saving) {
     setFailed(false);
-    const next = adoptRefusedVersion(edit, save.errorCode === REEL_CHANGED, detail.version, scenes ?? 0);
-    if (next !== edit) setEdit(next);
+    if (edit) {
+      const next = adoptRefusedVersion(edit, save.errorCode === REEL_CHANGED, detail.version, scenes ?? 0);
+      if (next !== edit) setEdit(next);
+    }
   }
 
   const change = (items: T[]) => {
@@ -43,7 +46,8 @@ export function useStepEdit<T>(detail: ReelDetail, save: ReelSave, scenes: numbe
     setTried(true);
     save.clear();
     const out = await save.save(version, plan);
-    if (!out) setFailed(true);
+    // Only an edit has a version to adopt; a send with none (Script's Remove) leaves nothing to settle.
+    if (!out && edit) setFailed(true);
     return out;
   }
 
