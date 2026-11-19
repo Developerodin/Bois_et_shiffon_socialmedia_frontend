@@ -5,7 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
-import { ArrowUp, Check, Globe, Loader2, Play, Square, TriangleAlert, Wrench } from "lucide-react";
+import { ArrowUp, Check, Globe, Loader2, Play, Sparkles, Square, TriangleAlert, Wrench } from "lucide-react";
 import { startRun } from "@/components/agents/api";
 import { CLIENT_TAG, isOffline, NET_MESSAGE, send } from "@/lib/net";
 import { Markdown } from "@/components/context/markdown";
@@ -229,17 +229,26 @@ function ChatSession({
           {status === "ready" && messages.at(-1)?.role === "assistant" ? "Reply finished" : ""}
         </p>
         {messages.length === 0 ? (
-          // Pushed down to sit just above the box, where the eye already is when about to ask.
-          <div className="mt-auto">{slots.empty(send)}</div>
+          // Centred in the space above the box, so a tall panel has no empty stretch over a cluster at the bottom.
+          <div className="my-auto">{slots.empty(send)}</div>
         ) : (
           <ol className="flex flex-col gap-5">
             {/* Replies saved before ids were generated have an empty id: fall back to the position. */}
             {messages.map((m, n) => (
               <li key={m.id || `msg-${n}`} className={cn("flex flex-col gap-2", m.role === "user" && "items-end")}>
+                {/* Replies carry who's speaking; the person's own messages are the tinted bubbles on the right. */}
+                {m.role === "assistant" ? (
+                  <p className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                    <span aria-hidden="true" className="grid size-6 place-items-center rounded-lg bg-accent text-accent-foreground">
+                      <Sparkles className="size-3.5" strokeWidth={SHELL_STROKE} />
+                    </span>
+                    Espanda
+                  </p>
+                ) : null}
                 {m.parts.map((part, i) => {
                   if (part.type === "text") {
                     return m.role === "user" ? (
-                      <p key={i} className="max-w-[85%] whitespace-pre-wrap rounded-2xl bg-card px-3.5 py-2 text-sm">
+                      <p key={i} className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-accent px-3.5 py-2 text-sm text-foreground">
                         {part.text}
                       </p>
                     ) : (
@@ -305,7 +314,8 @@ function ChatSession({
         <label htmlFor="chat-input" className="sr-only">
           Message Espanda
         </label>
-        <div className="relative">
+        {/* One card for the box, the hint and the button: the ring lights the whole card while typing. */}
+        <div className="flex flex-col rounded-2xl border border-input bg-card shadow-sm transition-shadow focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring">
           {/* Grows with the text (field-sizing) between two lines and ~8; browsers without it keep two lines and scroll.
               16 px below sm so iOS Safari doesn't zoom in on focus. */}
           <textarea
@@ -316,22 +326,24 @@ function ChatSession({
             onKeyDown={onKey}
             aria-describedby="chat-hint"
             placeholder="Ask Espanda anything…"
-            className="block max-h-48 min-h-16 w-full resize-none rounded-2xl border border-input bg-card py-3 pr-14 pl-3 text-base outline-none [field-sizing:content] placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring sm:text-sm"
+            className="block max-h-48 min-h-14 w-full resize-none rounded-t-2xl bg-transparent px-3.5 pt-3 pb-1 text-base outline-none [field-sizing:content] placeholder:text-muted-foreground sm:text-sm"
           />
-          {busy ? (
-            <Button type="button" variant="secondary" size="icon" onClick={() => void stop()} aria-label="Stop" className="absolute right-2 bottom-2 size-9 rounded-xl active:translate-y-px">
-              <Square aria-hidden="true" />
-            </Button>
-          ) : (
-            // Disabled reads as "not yet" (muted), not as a faded primary.
-            <Button type="submit" size="icon" disabled={!input.trim()} aria-label="Send message" className="absolute right-2 bottom-2 size-9 rounded-xl active:translate-y-px disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
-              <ArrowUp aria-hidden="true" />
-            </Button>
-          )}
+          <div className="flex items-center justify-between gap-2 px-3.5 pb-2.5">
+            <p id="chat-hint" className="text-xs text-muted-foreground">
+              Enter to send · Shift+Enter for a new line
+            </p>
+            {busy ? (
+              <Button type="button" variant="secondary" size="icon" onClick={() => void stop()} aria-label="Stop" className="size-8 shrink-0 rounded-full active:translate-y-px">
+                <Square aria-hidden="true" />
+              </Button>
+            ) : (
+              // Disabled reads as "not yet" (muted), not as a faded primary.
+              <Button type="submit" size="icon" disabled={!input.trim()} aria-label="Send message" className="size-8 shrink-0 rounded-full active:translate-y-px disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100">
+                <ArrowUp aria-hidden="true" />
+              </Button>
+            )}
+          </div>
         </div>
-        <p id="chat-hint" className="px-1 text-xs text-muted-foreground">
-          Enter to send, Shift+Enter for a new line.
-        </p>
       </form>
     </div>
   );
