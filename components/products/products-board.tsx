@@ -326,9 +326,9 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
               </Button>
             </div>
           ) : null}
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <label className="flex shrink-0 items-center gap-2 text-sm whitespace-nowrap text-muted-foreground">
             Rows per page
-            <select value={limit} onChange={(e) => go({ limit: Number(e.target.value), page: 1 })} className={selectClass}>
+            <select value={limit} onChange={(e) => go({ limit: Number(e.target.value), page: 1 })} className={cn(selectClass, "w-auto")}>
               {PAGE_SIZES.map((n) => (
                 <option key={n} value={n}>
                   {n}
