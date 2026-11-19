@@ -1,4 +1,4 @@
-import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, REEL_SENDABLE, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, wordCount, type CaptionCue, type CheckResult, type PlanResult, type ReelDetail, type ReelOptions, type ReelPlan, type ReelScene, type ReelSummary } from "@/shared";
+import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, REEL_SENDABLE, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, shouldKeepRequestId, wordCount, type CaptionCue, type CheckResult, type PlanResult, type ReelDetail, type ReelOptions, type ReelPlan, type ReelScene, type ReelSummary } from "@/shared";
 import { ApiError, type Connection } from "@/components/settings/api";
 import type { JobStep } from "@/components/ui/job-progress";
 import { creditsText } from "@/lib/plan-credits";
@@ -167,6 +167,18 @@ export function sendBlock(d: ReelDetail): string | null {
   return "This reel can't be sent in its current state.";
 }
 
+/** Why Download and Continue to Publish are off on the Review step, or null: an unsaved caption edit first, then sendBlock. */
+export function reviewBlock(d: ReelDetail, captionDirty: boolean): string | null {
+  return captionDirty ? "Save or discard the caption first." : sendBlock(d);
+}
+
+/**
+ * After a failed send (Download's approve): whether to read the reel again before the button comes back. No answer or a
+ * server error (the approval may have committed), and a 409 (the status moved); not other refusals, which changed nothing.
+ */
+export const rereadAfterSend = (e: unknown): boolean =>
+  !(e instanceof ApiError) || shouldKeepRequestId(e.status) || e.status === 409;
+
 /** The checks to show: the saved results, then a warning per join the seam check softened in the render that made this video. */
 export function reviewChecks(d: ReelDetail): CheckResult[] {
   if (!d.checks) return [];
@@ -175,10 +187,7 @@ export function reviewChecks(d: ReelDetail): CheckResult[] {
   return [...d.checks.results, ...softened];
 }
 
-export const REEL_HASHTAGS_MAX = 5;
-export const REEL_CAPTION_MAX = 2200;
-
-/** Tags typed as text: split on spaces and commas, one # each, no repeats. The caller checks the count against REEL_HASHTAGS_MAX. */
+/** Tags typed as text: split on spaces and commas, one # each, no repeats. The caller checks the count against CAPTION_LIMITS.hashtagsMax. */
 export const parseHashtags = (text: string): string[] =>
   [...new Set(text.split(/[\s,]+/).map((t) => t.replace(/^#+/, "")).filter(Boolean))].map((t) => `#${t}`);
 

@@ -5,7 +5,7 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, CHECK_AUTO_MS, CHECK_SLOW_MS, CHECK_WAIT_MS, checksPollDelay, pollChecks, RENDER_SLOW_MS, makeVideoBlock, renderLong, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { BUILT_STEPS, CHECK_AUTO_MS, CHECK_SLOW_MS, CHECK_WAIT_MS, checksPollDelay, pollChecks, RENDER_SLOW_MS, makeVideoBlock, renderLong, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, reviewBlock, rereadAfterSend, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, failureText, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
@@ -558,6 +558,29 @@ describe("sendBlock", () => {
     for (const status of ["CANCELLED", "REVIEWED", "PLANNED", "BRIEF_READY"]) {
       expect(sendBlock(withStatus(status, { checks: pass }))).toBe("This reel can't be sent in its current state.");
     }
+  });
+});
+
+describe("reviewBlock", () => {
+  const ready = detail({ videoUrl: "u", checks: { overall: "PASS", results: [] }, item: { ...detail().item, status: "AWAITING_APPROVAL" } });
+  it("holds Download and Continue to Publish while the caption has unsaved changes", () => {
+    expect(reviewBlock(ready, true)).toBe("Save or discard the caption first.");
+    expect(reviewBlock(ready, false)).toBeNull();
+  });
+  it("otherwise says what sendBlock says", () => {
+    const checking = detail({ videoUrl: "u", item: { ...detail().item, status: "DRAFT_REVIEW" } });
+    expect(reviewBlock(checking, false)).toBe(sendBlock(checking));
+  });
+});
+
+describe("rereadAfterSend", () => {
+  it("reads the reel again after no answer, a server error or a 409, not after another refusal", () => {
+    expect(rereadAfterSend(new ApiError(0, "offline"))).toBe(true);
+    expect(rereadAfterSend(new ApiError(502, "bad gateway"))).toBe(true);
+    expect(rereadAfterSend(new Error("network"))).toBe(true);
+    expect(rereadAfterSend(new ApiError(409, "not waiting"))).toBe(true);
+    expect(rereadAfterSend(new ApiError(403, "role"))).toBe(false);
+    expect(rereadAfterSend(new ApiError(400, "no"))).toBe(false);
   });
 });
 

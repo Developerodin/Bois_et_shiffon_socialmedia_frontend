@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
-import { safeHttpUrl, type ReelDetail } from "@/shared";
+import { CAPTION_LIMITS, safeHttpUrl, type ReelDetail } from "@/shared";
 import { ApiError, errorMessage } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { ChecksList } from "@/components/ui/checks-list";
@@ -12,8 +12,8 @@ import { fetchShared } from "@/components/workspace/use-job";
 import { isRepeatClick } from "@/lib/presser";
 import { reelUrl, reelsApi } from "./api";
 import {
-  CHECK_AUTO_MS, CHECK_SLOW_MS, REEL_CAPTION_MAX, REEL_HASHTAGS_MAX, adoptRefusedVersion, awaitingChecks, editLock,
-  parseHashtags, pollChecks, postTextLength, reviewChecks, sendBlock, type ReelStep,
+  CHECK_AUTO_MS, CHECK_SLOW_MS, adoptRefusedVersion, awaitingChecks, editLock, parseHashtags, pollChecks, postTextLength,
+  rereadAfterSend, reviewBlock, reviewChecks, type ReelStep,
 } from "./reel";
 import { DRAFT_CHANGED, saveErrorText } from "./use-reel-save";
 
@@ -23,7 +23,8 @@ const CARD = "flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 
  * The Review step (the phone's R07): the transcript, the checks (waiting for them itself), the caption and hashtags,
  * the specs, Download (approves) and Continue to Publish. The page shows the video, with captions, in the preview.
  * Memoised: the page passes only `detail`, primitives and stable callbacks. A caption save doesn't take the plan's
- * save lock (it goes through the content route), so it has its own in-flight flag here.
+ * save lock (it goes through the content route), so it has its own in-flight flag here. An unsaved caption edit holds
+ * Download (it would approve the saved caption) and Continue to Publish (leaving the step drops the typed text).
  */
 export const ReviewStep = memo(function ReviewStep({ workspaceId, brandId, detail, reload, canCreate, canApprove, go }: {
   workspaceId: string;
@@ -36,8 +37,9 @@ export const ReviewStep = memo(function ReviewStep({ workspaceId, brandId, detai
 }) {
   const [savingCaption, setSavingCaption] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [captionDirty, setCaptionDirty] = useState(false);
   const plan = detail.plan;
-  const block = sendBlock(detail);
+  const block = reviewBlock(detail, captionDirty);
   const voices = (plan?.scenes ?? []).map((s) => s.voiceText).filter(Boolean);
   const specs = [detail.seconds !== null ? `${detail.seconds} s` : null, "9:16 vertical", plan?.voiceName ?? "Voiceover"].filter(Boolean).join(" · ");
 
@@ -60,7 +62,7 @@ export const ReviewStep = memo(function ReviewStep({ workspaceId, brandId, detai
       <section aria-labelledby="review-caption" className={CARD}>
         <h3 id="review-caption" className="font-medium">Caption</h3>
         {canCreate ? (
-          <CaptionEdit workspaceId={workspaceId} brandId={brandId} detail={detail} saving={savingCaption} setSaving={setSavingCaption} downloading={downloading} />
+          <CaptionEdit workspaceId={workspaceId} brandId={brandId} detail={detail} saving={savingCaption} setSaving={setSavingCaption} downloading={downloading} setDirty={setCaptionDirty} />
         ) : (
           <>
             <p className="whitespace-pre-wrap text-sm">{detail.caption?.caption ?? ""}</p>
@@ -185,13 +187,15 @@ type CaptionEditState = { version: number; caption: string; tags: string };
  * Caption and hashtags, saved through the content route with the version the edit started from. A save that lost a
  * race (draft.changed) keeps the text, says so, and moves the edit to the re-read version, so the next press saves.
  */
-function CaptionEdit({ workspaceId, brandId, detail, saving, setSaving, downloading }: {
+function CaptionEdit({ workspaceId, brandId, detail, saving, setSaving, downloading, setDirty }: {
   workspaceId: string;
   brandId: string;
   detail: ReelDetail;
   saving: boolean;
   setSaving: (v: boolean) => void;
   downloading: boolean;
+  /** Tells the step whether there are unsaved changes, so it can hold Download and Continue to Publish. */
+  setDirty: (v: boolean) => void;
 }) {
   const [edit, setEdit] = useState<CaptionEditState | null>(null);
   const [error, setError] = useState("");
@@ -203,9 +207,15 @@ function CaptionEdit({ workspaceId, brandId, detail, saving, setSaving, download
   const length = postTextLength(caption, detail.aiDisclosure, tags);
   const dirty = !!edit && (caption !== savedCaption || tags.join(" ") !== savedTags.join(" "));
   const lock = editLock(detail);
-  const reason = tags.length > REEL_HASHTAGS_MAX ? `A reel takes at most ${REEL_HASHTAGS_MAX} hashtags.`
-    : length > REEL_CAPTION_MAX ? `The post is over ${REEL_CAPTION_MAX} characters. Shorten the caption or the hashtags.`
+  const { hashtagsMax, captionMax } = CAPTION_LIMITS;
+  // The caption limit is checked against the whole posted text (caption, AI line, tags), as Instagram counts it.
+  const reason = tags.length > hashtagsMax ? `A reel takes at most ${hashtagsMax} hashtags.`
+    : length > captionMax ? `The post is over ${captionMax} characters. Shorten the caption or the hashtags.`
     : lock ?? (downloading ? "Wait for the download to start." : null);
+
+  useEffect(() => {
+    setDirty(dirty);
+  }, [dirty, setDirty]);
 
   const change = (next: Partial<Pick<CaptionEditState, "caption" | "tags">>) =>
     setEdit({ version: edit?.version ?? detail.version, caption, tags: tagsText, ...next });
@@ -243,17 +253,20 @@ function CaptionEdit({ workspaceId, brandId, detail, saving, setSaving, download
         aria-describedby="review-caption-length"
         onChange={(e) => change({ caption: e.target.value })}
       />
-      <p id="review-caption-length" className="text-xs text-muted-foreground">{length} of {REEL_CAPTION_MAX}</p>
+      <p id="review-caption-length" className="text-xs text-muted-foreground">{length} of {captionMax}</p>
       <div className="flex flex-col gap-1">
         <label htmlFor="review-hashtags" className="text-sm font-medium">Hashtags (separated by spaces)</label>
         <Input id="review-hashtags" className="rounded-xl" value={tagsText} disabled={off} aria-describedby="review-hashtags-count" onChange={(e) => change({ tags: e.target.value })} />
-        <p id="review-hashtags-count" className="text-xs text-muted-foreground">{tags.length} of {REEL_HASHTAGS_MAX}</p>
+        <p id="review-hashtags-count" className="text-xs text-muted-foreground">{tags.length} of {hashtagsMax}</p>
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" variant="outline" disabled={saving || !dirty || reason !== null} onClick={() => void saveCaption()}>
           {saving ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}
           Save caption
         </Button>
+        {dirty ? (
+          <Button type="button" variant="ghost" disabled={saving} onClick={() => { setEdit(null); setError(""); }}>Discard</Button>
+        ) : null}
         {dirty && reason ? <p className="text-sm text-muted-foreground">{reason}</p> : lock ? <p className="text-sm text-muted-foreground">{lock}</p> : null}
       </div>
       <p className="text-xs text-muted-foreground">Saving the caption runs the checks again.</p>
@@ -288,7 +301,8 @@ function DownloadButton({ workspaceId, brandId, detail, blocked, downloading, se
       else window.location.assign(u.href);
       await fetchShared(url, true).catch(() => undefined);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) await fetchShared(url, true).catch(() => undefined);
+      // No answer or a 5xx may have approved it; a 409 means the status moved. Read before the button comes back.
+      if (rereadAfterSend(err)) await fetchShared(url, true).catch(() => undefined);
       setError(errorMessage(err));
     } finally {
       busy.current = false;
