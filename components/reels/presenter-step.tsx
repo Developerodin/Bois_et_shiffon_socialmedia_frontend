@@ -62,7 +62,8 @@ export function PresenterStep({ workspaceId, brandId, detail, options, canCreate
   const gone = plan.presenter !== "none" && !!options && presenterChoice(plan, options) !== plan.presenter;
   const chosen = done.find((p) => p.id === value);
   const busy = sending || save.saving;
-  const shown = via === "chat" ? chatError : save.error;
+  // The page-wide save error only when this step pressed save; another step's error isn't this step's to show.
+  const shown = via === "chat" ? chatError : via === "save" ? save.error : null;
 
   async function use() {
     if (!plan) return;
