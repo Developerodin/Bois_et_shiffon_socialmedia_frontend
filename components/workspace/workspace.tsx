@@ -946,14 +946,20 @@ function Home({
           {built.map((a) => {
             const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
             const running = a.lastRun?.status === "RUNNING" || a.lastRun?.status === "QUEUED";
+            const state = running ? "running" : a.lastRun?.status === "FAILED" && !nothingToDo(a) ? "failed" : "ready";
+            // SEO and GEO show their latest score on the tile (no need to open them); running or failed still says so.
+            const report = a.key === "seo" ? reports?.seo : a.key === "geo" ? reports?.geo : null;
+            const score = state === "ready" && report ? `${report.score}/100` : null;
             return (
               <li key={a.key}>
                 <AgentFolder
                   icon={meta.icon}
                   tint={meta.tint}
                   name={a.name}
-                  status={agentStatus(a)}
-                  state={running ? "running" : a.lastRun?.status === "FAILED" && !nothingToDo(a) ? "failed" : "ready"}
+                  status={score ?? agentStatus(a)}
+                  strong={!!score}
+                  title={score ? `${a.name} score ${score} · ${agentStatus(a)}` : undefined}
+                  state={state}
                   onClick={() => onOpen({ kind: "agent", key: a.key })}
                 />
               </li>
@@ -1032,6 +1038,7 @@ function AgentFolder({
   tint,
   name,
   status,
+  strong,
   state,
   title,
   onClick,
@@ -1040,6 +1047,8 @@ function AgentFolder({
   tint: string;
   name: string;
   status: string;
+  /** A figure (a score) rather than a state: set in the foreground colour so it reads at a glance. */
+  strong?: boolean;
   state: "ready" | "running" | "failed" | "locked";
   title?: string;
   onClick?: () => void;
@@ -1071,7 +1080,7 @@ function AgentFolder({
         )}
       </span>
       <span className={cn("w-full truncate text-xs font-medium", locked && "text-muted-foreground")}>{name}</span>
-      <span className={cn("w-full truncate text-[11px] text-muted-foreground", state === "failed" && "text-destructive")}>{status}</span>
+      <span className={cn("w-full truncate text-[11px] text-muted-foreground", strong && "font-semibold text-foreground tabular-nums", state === "failed" && "text-destructive")}>{status}</span>
     </button>
   );
 }
