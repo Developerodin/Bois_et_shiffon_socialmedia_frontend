@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
+import { ConfirmDialog } from "@/components/settings/shared";
 import { useBrandLook } from "@/components/library/use-brand-look";
 import { usePlan } from "@/components/shell/use-plan-credits";
 import { fetchShared } from "@/components/workspace/use-job";
@@ -114,6 +115,8 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
   const { removing, error: removeError, remove } = usePresenterRemove(workspaceId, brandId, reload);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMounted, setDialogMounted] = useState(false);
+  // A finished presenter cost credits and may be in reels, so its Remove asks first; a failed one goes at once.
+  const [confirming, setConfirming] = useState<{ id: string; name: string } | null>(null);
   // One preview video at a time: Preview on another template swaps this one back to its poster.
   const [playing, setPlaying] = useState<string | null>(null);
   const presenters = data?.presenters ?? [];
@@ -130,7 +133,7 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
                 <span className="flex shrink-0 items-center gap-2">
                   <span className="text-muted-foreground">{presenterState(p, data?.presenterCredits ?? 0)}</span>
                   {canCreate && p.status !== "RUNNING" ? (
-                    <Button type="button" variant="ghost" size="sm" disabled={removing !== null} onClick={() => void remove(p.id)} aria-label={`Remove ${p.name}`}>
+                    <Button type="button" variant="ghost" size="sm" disabled={removing !== null} onClick={() => (p.status === "DONE" ? setConfirming({ id: p.id, name: p.name }) : void remove(p.id))} aria-label={`Remove ${p.name}`}>
                       Remove
                     </Button>
                   ) : null}
@@ -140,6 +143,14 @@ function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
           </ul>
         ) : null}
         <p role="alert" className="text-sm text-destructive empty:hidden">{removeError}</p>
+        <ConfirmDialog
+          open={confirming !== null}
+          onOpenChange={(o) => { if (!o) setConfirming(null); }}
+          title={confirming ? `Remove ${confirming.name}?` : ""}
+          description="The presenter is removed from this brand. Reels using them need another presenter. This can't be undone."
+          confirmLabel="Remove"
+          onConfirm={async () => { if (confirming) await remove(confirming.id); }}
+        />
         {canCreate && data ? (
           <Button
             type="button"
