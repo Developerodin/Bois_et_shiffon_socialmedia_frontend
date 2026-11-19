@@ -12,8 +12,8 @@ import { fetchShared } from "@/components/workspace/use-job";
 import { isRepeatClick } from "@/lib/presser";
 import { reelUrl, reelsApi } from "./api";
 import {
-  CHECK_AUTO_MS, CHECK_SLOW_MS, REEL_CAPTION_MAX, REEL_HASHTAGS_MAX, adoptRefusedVersion, awaitingChecks, checksPollDelay, editLock,
-  parseHashtags, postTextLength, reviewChecks, sendBlock, type ReelStep,
+  CHECK_AUTO_MS, CHECK_SLOW_MS, REEL_CAPTION_MAX, REEL_HASHTAGS_MAX, adoptRefusedVersion, awaitingChecks, editLock,
+  parseHashtags, pollChecks, postTextLength, reviewChecks, sendBlock, type ReelStep,
 } from "./reel";
 import { DRAFT_CHANGED, saveErrorText } from "./use-reel-save";
 
@@ -117,18 +117,8 @@ function Checks({ workspaceId, brandId, detail, reload, canCreate }: {
 
   useEffect(() => {
     if (!waiting) return;
-    const start = Date.now();
-    let poll: ReturnType<typeof setTimeout> | undefined;
-    const next = () => {
-      const delay = checksPollDelay(Date.now() - start);
-      if (delay === null) return setEnded(true);
-      poll = setTimeout(() => {
-        // A hidden tab skips the read, as useJob pauses; the wait goes on.
-        if (!document.hidden) void reload();
-        next();
-      }, delay);
-    };
-    next();
+    // A hidden tab skips the read, as useJob pauses; the wait goes on.
+    const stopPolling = pollChecks(reload, () => setEnded(true), () => document.hidden);
     const slowTimer = canCreate ? setTimeout(() => setSlow(true), CHECK_SLOW_MS) : undefined;
     const autoTimer = canCreate && !autoTried.current ? setTimeout(() => {
       autoTried.current = true;
@@ -137,7 +127,7 @@ function Checks({ workspaceId, brandId, detail, reload, canCreate }: {
     }, CHECK_AUTO_MS) : undefined;
     // Reset in the clean-up: before the next wait (version moved, Check again) and when the checks land.
     return () => {
-      clearTimeout(poll);
+      stopPolling();
       clearTimeout(slowTimer);
       clearTimeout(autoTimer);
       setSlow(false);

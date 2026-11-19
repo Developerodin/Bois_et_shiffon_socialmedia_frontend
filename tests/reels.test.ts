@@ -5,7 +5,7 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, CHECK_AUTO_MS, CHECK_SLOW_MS, CHECK_WAIT_MS, checksPollDelay, RENDER_SLOW_MS, makeVideoBlock, renderLong, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { BUILT_STEPS, CHECK_AUTO_MS, CHECK_SLOW_MS, CHECK_WAIT_MS, checksPollDelay, pollChecks, RENDER_SLOW_MS, makeVideoBlock, renderLong, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
 import { chipMessage, failureText, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
@@ -34,6 +34,64 @@ describe("checksPollDelay", () => {
     expect(checksPollDelay(2 * MIN)).toBe(10_000);
     expect(checksPollDelay(10 * MIN - 1)).toBe(10_000);
     expect(checksPollDelay(10 * MIN)).toBeNull();
+  });
+});
+
+describe("pollChecks", () => {
+  it("starts the next wait only once the read settles", async () => {
+    vi.useFakeTimers();
+    let settle: () => void = () => undefined;
+    const read = vi.fn(() => new Promise<void>((r) => { settle = r; }));
+    const stop = pollChecks(read, () => undefined);
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(read).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(30_000); // the read is still out: no second one
+    expect(read).toHaveBeenCalledTimes(1);
+    settle();
+    await vi.advanceTimersByTimeAsync(4_999);
+    expect(read).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(read).toHaveBeenCalledTimes(2);
+    stop();
+  });
+  it("keeps going after a failed read, and skips a read when told to", async () => {
+    vi.useFakeTimers();
+    let hidden = false;
+    const read = vi.fn(() => Promise.reject(new Error("x")));
+    const stop = pollChecks(read, () => undefined, () => hidden);
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(read).toHaveBeenCalledTimes(2);
+    hidden = true;
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(read).toHaveBeenCalledTimes(2);
+    stop();
+  });
+  it("counts its 10 minutes from the start, not stretched by slow reads, and ends when the read out then settles", async () => {
+    vi.useFakeTimers();
+    const onEnd = vi.fn();
+    // 3-minute reads: out at 0:05, 3:15, 6:25 and 9:35 (5 s, then 10 s, after each settles); the last settles at 12:35.
+    const read = vi.fn(() => new Promise<void>((r) => setTimeout(r, 3 * MIN)));
+    pollChecks(read, onEnd);
+    await vi.advanceTimersByTimeAsync(12 * MIN + 34_999);
+    expect(read).toHaveBeenCalledTimes(4);
+    expect(onEnd).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(20 * MIN);
+    expect(read).toHaveBeenCalledTimes(4);
+  });
+  it("does nothing after stop, even when a read settles later", async () => {
+    vi.useFakeTimers();
+    let settle: () => void = () => undefined;
+    const onEnd = vi.fn();
+    const read = vi.fn(() => new Promise<void>((r) => { settle = r; }));
+    const stop = pollChecks(read, onEnd);
+    await vi.advanceTimersByTimeAsync(5_000);
+    stop();
+    settle();
+    await vi.advanceTimersByTimeAsync(20 * MIN);
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(onEnd).not.toHaveBeenCalled();
   });
 });
 

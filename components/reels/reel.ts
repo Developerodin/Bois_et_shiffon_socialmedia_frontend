@@ -77,6 +77,32 @@ export const CHECK_WAIT_MS = 10 * 60_000;
 export const checksPollDelay = (elapsed: number): number | null =>
   elapsed >= CHECK_WAIT_MS ? null : elapsed < 120_000 ? 5_000 : 10_000;
 
+/**
+ * The Review step's wait for the checks: `read` on checksPollDelay, its clock counted from this call (slow reads don't
+ * stretch the 2- and 10-minute marks), then `onEnd`. The next wait starts only once a read settles, so a read slower
+ * than the interval never queues another behind it (fetchShared's fresh reads queue rather than join). `skip` (a hidden
+ * tab) passes a tick without reading. Returns the stop: nothing runs after it, even when a read settles later.
+ */
+export function pollChecks(read: () => Promise<unknown>, onEnd: () => void, skip: () => boolean = () => false): () => void {
+  const start = Date.now();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let stopped = false;
+  const next = () => {
+    if (stopped) return;
+    const delay = checksPollDelay(Date.now() - start);
+    if (delay === null) return onEnd();
+    timer = setTimeout(() => {
+      if (skip()) return next();
+      read().catch(() => undefined).finally(next);
+    }, delay);
+  };
+  next();
+  return () => {
+    stopped = true;
+    clearTimeout(timer);
+  };
+}
+
 const RENDER_ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
 
 /** The running render's three stages for the progress list; every stage waits when none is running. */
