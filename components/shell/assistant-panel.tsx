@@ -9,7 +9,7 @@ import { ChatPane, type ChatSlots } from "@/components/workspace/chat-pane";
 import { assistantDocks } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-const SUGGESTIONS = ["What should I focus on this week?", "Summarise what my agents did recently."];
+const SUGGESTIONS = ["Plan my next 30 days", "Who is my customer?", "How do I compare with my competitors?"];
 
 const XL = "(min-width: 1280px)";
 const subscribe = (cb: () => void) => {

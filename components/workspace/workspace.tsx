@@ -47,6 +47,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
 import { safeHttpUrl } from "@/shared";
 import { timeAgo } from "@/lib/time";
+import { plainSummary } from "@/lib/plain-summary";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
@@ -351,6 +352,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         ) : (
           <Home
             workspaceId={workspaceId}
+            base={base}
+            docs={docs}
             user={user}
             agents={agents}
             agentsFailed={failed.agents}
@@ -453,27 +456,6 @@ const PRESETS: Preset<PanelId>[] = [
 function safeSite(website: string | null) {
   const u = safeHttpUrl(website);
   return u ? { href: u.href, host: u.hostname.replace(/^www\./, "") } : null;
-}
-
-function plainSummary(markdown: string | undefined) {
-  if (!markdown) return null;
-  // First real sentence of the doc: skip headings and source lists, drop "(Sources: …)" and bare URLs.
-  const clean = (l: string) =>
-    l
-      .replace(/^[-*\d.\s]+/, "")
-      .replace(/\((?:sources?)\b[^)]*\)/gi, "")
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-      .replace(/https?:\/\/\S+/g, "")
-      .replace(/\*\*|__|`/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  return (
-    markdown
-      .split("\n")
-      .filter((l) => !l.trim().startsWith("#"))
-      .map(clean)
-      .find((l) => l.length > 60 && !/^sources?\b/i.test(l)) ?? null
-  );
 }
 
 function docBadge(entry: ContextDocEntry, researching: boolean) {
@@ -713,8 +695,41 @@ function agentStatus(a: AgentSummary | undefined) {
   return "Ready";
 }
 
+/**
+ * Today items hidden with "Not now" (for a day) or read (for good), per business in this browser. Blocked storage just
+ * means they come back on reload. ponytail: entries are never pruned; one small entry per item and document version.
+ */
+function useTodayMarks(base: string) {
+  const key = `today-marks:${base}`;
+  const [marks, setMarks] = useState<Record<string, number>>({});
+  // Read after mount: the server render has no localStorage.
+  useEffect(() => {
+    try {
+      setMarks(JSON.parse(localStorage.getItem(key) ?? "{}") ?? {});
+    } catch {
+      setMarks({});
+    }
+  }, [key]);
+  const mark = useCallback(
+    (id: string) =>
+      setMarks((m) => {
+        const next = { ...m, [id]: Date.now() };
+        try {
+          localStorage.setItem(key, JSON.stringify(next));
+        } catch {
+          // Storage blocked: hidden until the page reloads.
+        }
+        return next;
+      }),
+    [key],
+  );
+  return { marks, mark };
+}
+
 function Home({
   workspaceId,
+  base,
+  docs,
   user,
   agents,
   agentsFailed,
@@ -729,6 +744,8 @@ function Home({
   due,
 }: {
   workspaceId: string;
+  base: string;
+  docs: ContextDocsResponse | null;
   /** The card for stories due to be posted by hand (people who can publish only). */
   due: React.ReactNode;
   user: Props["user"];
@@ -746,8 +763,25 @@ function Home({
 }) {
   const first = firstNameOf(user.name);
   const scoutPrice = useRunPrice(workspaceId, "scout");
+  const { marks, mark } = useTodayMarks(base);
   const tasks = useMemo(() => {
     const list: { id: string; done: boolean; label: string; detail?: string; action: React.ReactNode }[] = [];
+    // Finished work comes first. Keyed by version, so a redrafted strategy shows up again.
+    const strategy = docs?.docs.find((d) => d.kind === "marketing-strategy")?.latest;
+    if (strategy) {
+      const id = `read:${strategy.id}`;
+      list.push({
+        id,
+        done: !!marks[id],
+        label: "Your Marketing Strategy",
+        detail: "Ready to read",
+        action: (
+          <Button size="sm" onClick={() => { mark(id); onOpen({ kind: "doc", doc: "marketing-strategy" }); }}>
+            Read it
+          </Button>
+        ),
+      });
+    }
     const run = (key: string, label: string, done: boolean) =>
       list.push({ id: key, done, label, detail: done ? undefined : "Not run yet", action: <Button size="sm" variant="secondary" onClick={() => onOpen({ kind: "agent", key })}>Open</Button> });
     if (reports) {
@@ -833,10 +867,10 @@ function Home({
       });
     }
     return list;
-  }, [reports, connections, pipeline, canRun, onOpen, onShowPanel, scoutPrice]);
+  }, [docs, marks, mark, reports, connections, pipeline, canRun, onOpen, onShowPanel, scoutPrice]);
 
   const done = tasks.filter((t) => t.done).length;
-  const open = tasks.filter((t) => !t.done);
+  const open = tasks.filter((t) => !t.done && !(Date.now() - (marks[t.id] ?? 0) < DAY_MS));
   const built = (agents ?? []).filter((a) => a.key !== "systems-check");
 
   return (
@@ -873,6 +907,9 @@ function Home({
                   <span className="font-medium">{t.label}</span>
                   {t.detail && <span className="text-muted-foreground"> · {t.detail}</span>}
                 </p>
+                <Button size="sm" variant="ghost" onClick={() => mark(t.id)}>
+                  Not now
+                </Button>
                 {t.action}
               </li>
               );
@@ -883,7 +920,7 @@ function Home({
             <ListSkeleton label="Loading your tasks" rows={2} />
           </div>
         ) : today.failed ? null : (
-          <p className="mt-4 text-sm text-muted-foreground">{tasks.length ? "All done for today." : "Nothing to do today."}</p>
+          <p className="mt-4 text-sm text-muted-foreground">{!tasks.length ? "Nothing to do today." : done === tasks.length ? "All done for today." : "The rest is set aside until tomorrow."}</p>
         )}
         {today.failed && !(today.loading && open.length === 0) && (
           <div className="mt-2">
