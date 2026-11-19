@@ -231,7 +231,8 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
         </p>
       ) : null}
       <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
-      {data ? <CampaignsSection workspaceId={workspaceId} brandId={brandId} products={data.products} canManage={canManageCommercial} /> : null}
+      {/* Campaigns pick products, so they wait until there are some. */}
+      {data?.products.length ? <CampaignsSection workspaceId={workspaceId} brandId={brandId} products={data.products} canManage={canManageCommercial} /> : null}
       {inCard ? (
         <PageSection id="catalogue" title="Catalogue">
           {body}

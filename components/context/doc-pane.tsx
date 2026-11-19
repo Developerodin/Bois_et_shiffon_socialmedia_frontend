@@ -173,7 +173,7 @@ export function DocPane({
   return (
     <article
       aria-labelledby="doc-title"
-      className="flex min-w-0 flex-col gap-6 rounded-2xl border border-border bg-card p-6 sm:p-8"
+      className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-5 sm:p-6"
     >
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">

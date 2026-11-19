@@ -168,25 +168,42 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
   const current = docs.find((d) => d.kind === selected) ?? docs[0];
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-8">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
       <PageHeader eyebrow="Strategy documents" title="Brand context">
-        Agents use the latest version of each document as soon as Research
-        writes it. Fix anything it got wrong and agents pick up your edit on
-        their next run.
+        Agents work from the latest version of each document. Fix anything
+        Research got wrong; agents use your edit on their next run.
       </PageHeader>
 
       {state.kind === "loading" ? (
-        <div className="grid gap-4 md:grid-cols-[16rem_1fr]" aria-busy="true">
-          <div className="h-72 animate-pulse rounded-2xl border border-border bg-card motion-reduce:animate-none" />
-          <div className="h-96 animate-pulse rounded-2xl border border-border bg-card motion-reduce:animate-none" />
+        // The loaded layout's shape in grey: the status row, five document rows, the document.
+        <div role="status" aria-busy="true" className="flex flex-col gap-5">
           <span className="sr-only">Loading brand context</span>
+          <div className="h-12 rounded-2xl bg-border motion-safe:animate-pulse" />
+          <div className="grid gap-5 md:grid-cols-[15rem_1fr]">
+            <div className="hidden flex-col gap-1 md:flex">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-center justify-between gap-3 px-3 py-2.5">
+                  <div className="h-3.5 w-28 rounded bg-border motion-safe:animate-pulse" />
+                  <div className="h-4 w-12 rounded-full bg-border motion-safe:animate-pulse" />
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-6">
+              <div className="h-6 w-48 rounded bg-border motion-safe:animate-pulse" />
+              <div className="h-3 w-64 rounded bg-border motion-safe:animate-pulse" />
+              {[100, 92, 96, 70, 100, 88, 60].map((w, i) => (
+                <div key={i} className="mt-2 h-3 rounded bg-border motion-safe:animate-pulse" style={{ width: `${w}%` }} />
+              ))}
+            </div>
+          </div>
         </div>
       ) : state.kind === "error" ? (
         <ServiceUnavailable onRetry={() => void loadOnce()} />
       ) : (
         <>
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-card px-5 py-4">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+          {/* One row: where Research is, how much is reviewed, and the next step. */}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-2.5">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
               <span className="flex items-center gap-2" aria-live="polite">
                 {researchActive ? (
                   <Loader2
@@ -215,7 +232,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
                 {docs.length || 5} reviewed
               </span>
             </div>
-            <div className="flex flex-col items-end gap-1">
+            <div className="flex flex-wrap items-center gap-2">
               {can("agents.run") ? (
               <Button
                 variant="outline"
@@ -231,31 +248,22 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
                 {withPrice("Re-run research", researchPrice)}
               </Button>
               ) : null}
-              {rerun.error ? (
-                <span role="alert" className="text-xs text-destructive">
-                  {rerun.error}
-                </span>
+              {researchStatus === "SUCCEEDED" ? (
+                <Button asChild size="sm">
+                  <Link href="/">
+                    Get post ideas <ArrowRight aria-hidden="true" />
+                  </Link>
+                </Button>
               ) : null}
             </div>
+            {rerun.error ? (
+              <span role="alert" className="w-full text-right text-xs text-destructive">
+                {rerun.error}
+              </span>
+            ) : null}
           </div>
 
-          {researchStatus === "SUCCEEDED" ? (
-            <div className="flex flex-col gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm">
-                <span className="font-medium">Next: get post ideas.</span>{" "}
-                <span className="text-muted-foreground">
-                  Your workspace has the ideas, calendar and drafts. Agents already use these documents.
-                </span>
-              </p>
-              <Button asChild size="sm" className="self-start sm:self-auto">
-                <Link href="/">
-                  Go to workspace <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-            </div>
-          ) : null}
-
-          <div className="grid gap-6 md:grid-cols-[16rem_1fr]">
+          <div className="grid gap-5 md:grid-cols-[15rem_1fr]">
             {/* Mobile: compact select */}
             <label className="flex flex-col gap-1.5 text-sm md:hidden">
               <span className="text-xs text-muted-foreground">Document</span>
@@ -274,7 +282,7 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
 
             {/* Desktop: list */}
             <nav aria-label="Context documents" className="hidden md:block">
-              <ul className="flex flex-col gap-1.5">
+              <ul className="flex flex-col gap-1">
                 {docs.map((d) => {
                   const active = d.kind === current?.kind;
                   return (
@@ -284,13 +292,13 @@ export function ContextBoard({ workspaceId, brandId }: Props) {
                         onClick={() => d.kind !== current?.kind && okToDiscard() && setSelected(d.kind)}
                         aria-current={active ? "true" : undefined}
                         className={cn(
-                          "flex w-full flex-col items-start gap-1.5 rounded-xl border px-4 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          "flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                           active
                             ? "border-primary/50 bg-primary/10"
                             : "border-transparent hover:border-border hover:bg-card",
                         )}
                       >
-                        <span className="text-sm font-medium text-foreground">
+                        <span className="min-w-0 truncate text-sm font-medium text-foreground">
                           {d.title}
                         </span>
                         <DocStateBadge entry={d} />
