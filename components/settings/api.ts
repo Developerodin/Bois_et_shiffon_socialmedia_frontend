@@ -216,7 +216,7 @@ export const settingsApi = {
     request<void>(`${brand(w, b)}/invitations/${encodeURIComponent(id)}`, { method: "DELETE" }),
 
   connections: (w: string, b: string) =>
-    request<{ providers: ProviderInfo[]; connections: Connection[] }>(`${brand(w, b)}/connections`),
+    request<{ providers: ProviderInfo[]; connections: Connection[] }>(connectionsUrl(w, b)),
   startConnect: (w: string, b: string, provider: Provider) =>
     request<{ url: string }>(`${brand(w, b)}/connections/start`, json("POST", { provider })),
   disconnect: (w: string, b: string, id: string) =>
@@ -247,6 +247,8 @@ export type AiModelSettings = {
 };
 
 const brand = (w: string, b: string) => `${ws(w)}/brands/${encodeURIComponent(b)}`;
+/** The brand's connected accounts: read by Settings and by the reel's Publish step. */
+export const connectionsUrl = (w: string, b: string) => `${brand(w, b)}/connections`;
 
 export type ProjectPeople = {
   viaWorkspace: { userId: string; name: string | null; email: string; role: string }[];

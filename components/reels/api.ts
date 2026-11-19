@@ -1,16 +1,16 @@
-import type { CloningInfo, LibraryFilters, LibraryVoice, PlanResult, ReelPlan, ReelVoiceOption } from "@/shared";
+import type { CloningInfo, LibraryFilters, LibraryVoice, PlanResult, ReelPlan, ReelVoiceOption, RenderStep } from "@/shared";
 import { request } from "@/components/settings/api";
 import { CLIENT_TAG, SLOW_MS } from "@/lib/net";
 import { libraryQuery } from "./voices";
 
 const enc = encodeURIComponent;
 
-const brand = (w: string, b: string) => `/api/v1/workspaces/${enc(w)}/brands/${enc(b)}`;
-export const reelsUrl = (w: string, b: string) => `${brand(w, b)}/reels`;
+export const brandUrl = (w: string, b: string) => `/api/v1/workspaces/${enc(w)}/brands/${enc(b)}`;
+export const reelsUrl = (w: string, b: string) => `${brandUrl(w, b)}/reels`;
 export const reelUrl = (w: string, b: string, id: string) => `${reelsUrl(w, b)}/${enc(id)}`;
 export const reelOptionsUrl = (w: string, b: string) => `${reelsUrl(w, b)}/options`;
-export const opportunitiesUrl = (w: string, b: string) => `${brand(w, b)}/opportunities`;
-export const voicesUrl = (w: string, b: string) => `${brand(w, b)}/voices`;
+export const opportunitiesUrl = (w: string, b: string) => `${brandUrl(w, b)}/opportunities`;
+export const voicesUrl = (w: string, b: string) => `${brandUrl(w, b)}/voices`;
 export const voiceLibraryUrl = (w: string, b: string, q: string) => `${voicesUrl(w, b)}/library${q ? `?${q}` : ""}`;
 export const presentersUrl = (w: string, b: string) => `${reelsUrl(w, b)}/presenters`;
 export const previewsUrl = (w: string, b: string) => `${reelsUrl(w, b)}/previews`;
@@ -39,6 +39,25 @@ export const reelsApi = {
     request<{ id: string }>(presentersUrl(w, b), { method: "POST", body: JSON.stringify(body) }),
   removePresenter: (w: string, b: string, id: string) => request<void>(`${presentersUrl(w, b)}/${enc(id)}`, { method: "DELETE" }),
   preview: (w: string, b: string, templateId: string) => request<{ id: string }>(previewsUrl(w, b), { method: "POST", body: JSON.stringify({ templateId }) }),
+  /** Make video / Try again. Never sends `again`: the server answers a running render instead of charging twice, and refuses (409 render.alreadyDone) a version that already has a video. */
+  render: (w: string, b: string, id: string, version: number) =>
+    request<{ render: { id: string; step: RenderStep; attempt: number } }>(reelUrl(w, b, id), { method: "POST", body: JSON.stringify({ action: "render", version }) }),
+  /** Download: the route's `send` action, which approves a version awaiting approval. Named as the phone names it. */
+  download: (w: string, b: string, id: string, version: number) =>
+    request<{ videoUrl: string; downloadUrl: string }>(reelUrl(w, b, id), { method: "POST", body: JSON.stringify({ action: "send", version, how: "download" }) }),
+  /** Starts the checks again when they never landed ("none": nothing to check). */
+  recheck: (w: string, b: string, id: string) =>
+    request<{ status: "started" | "checking" | "none" }>(reelUrl(w, b, id), { method: "POST", body: JSON.stringify({ action: "recheck" }) }),
+  /** "Posted it? Add link": the post's address, for a reel posted by hand. */
+  registerLink: (w: string, b: string, id: string, url: string) =>
+    request<{ ok: true }>(reelUrl(w, b, id), { method: "POST", body: JSON.stringify({ action: "register-link", url }) }),
+  /**
+   * Caption and hashtags, through the shared content route (a new version; the checks run again). 409 draft.changed:
+   * a newer version was saved since `version`. The route defaults hook and script, and for a reel the server takes them
+   * from the plan, so the web sends neither (the phone still sends them, and needs no change).
+   */
+  editCaption: (w: string, b: string, id: string, version: number, caption: string, hashtags: string[]) =>
+    request<unknown>(`${brandUrl(w, b)}/content/${enc(id)}`, { method: "POST", body: JSON.stringify({ action: "edit", version, body: { caption, hashtags } }) }),
 };
 
 export const voicesApi = {

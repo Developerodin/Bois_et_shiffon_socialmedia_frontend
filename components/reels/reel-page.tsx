@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { ReelDetail } from "@/shared";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
@@ -14,7 +16,7 @@ import { PhotosStep } from "./photos-step";
 import { PresenterStep } from "./presenter-step";
 import { ScriptStep } from "./script-step";
 import { useReelSave } from "./use-reel-save";
-import { BUILT_STEPS, stepFrom, stepState } from "./reel";
+import { BUILT_STEPS, reelHref, renderNews, rendering, stepFrom, stepState, type ReelStep } from "./reel";
 import { StoryboardStep } from "./storyboard-step";
 import { useReel, useReelOptions } from "./use-reels";
 
@@ -44,30 +46,57 @@ export function ReelNotFound() {
  * One reel: the steps rail, the current step, and the preview. Reads the reel and the options once here and hands
  * them down; the step comes from `?step=` (or the first thing still to do), clamped to the built steps.
  */
-export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCreate }: {
+export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms }: {
   workspaceId: string;
   brandId: string;
   reelId: string;
   step: string | undefined;
-  canCreate: boolean;
+  /** The person's permissions on this brand. Passed as is to the steps that need more than one (Publish). */
+  perms: readonly string[];
 }) {
   const { data: detail, failed, status, reload } = useReel(workspaceId, brandId, reelId);
   const { data: options } = useReelOptions(workspaceId, brandId);
   const chat = usePlanChat(workspaceId, brandId, reelId);
   // One save lock for the whole page: the steps that edit the plan (Photos, Script) take it from here.
   const save = useReelSave(workspaceId, brandId, reelId);
+  const router = useRouter();
   const step = stepFrom(stepParam, detail);
   const [scene, setScene] = useState(0);
   const [watching, setWatching] = useState(false);
   const title = detail?.item.title;
+  // Viewers see every step's content, with no Make video, Try again, caption edit or Check again; Download approves.
+  const can = useMemo(() => ({
+    create: perms.includes("content.create"),
+    approve: perms.includes("content.approve"),
+    publish: perms.includes("publish.execute"),
+  }), [perms]);
+  const canCreate = can.create;
 
-  const stepHref = (s: string) => `/reels/${encodeURIComponent(reelId)}?step=${s}&b=${encodeURIComponent(brandId)}`;
+  // Stable while the reel and brand stay, so `go` can go to memoised steps (the plan chat re-renders this page per frame).
+  const stepHref = useCallback((s: ReelStep) => reelHref(reelId, brandId, s), [reelId, brandId]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- for the Video, Review and Publish steps; drop this line once one takes it
+  const go = useCallback((s: ReelStep) => router.replace(stepHref(s)), [router, stepHref]);
   const steps = useMemo(() => BUILT_STEPS.map((s) => ({
     id: s,
     label: STEP_LABELS[s],
     state: stepState(s, detail),
-    href: `/reels/${encodeURIComponent(reelId)}?step=${s}&b=${encodeURIComponent(brandId)}`,
-  })), [detail, reelId, brandId]);
+    href: stepHref(s),
+  })), [detail, stepHref]);
+
+  // A render that ends, said once wherever the person is (and handed to the Video step, which moves focus on it).
+  // Cleared when a render starts, so the next one is announced too.
+  const [ended, setEnded] = useState<string | null>(null);
+  const prev = useRef<ReelDetail | null>(null);
+  useEffect(() => {
+    if (!detail) return;
+    const before = prev.current?.item.id === detail.item.id ? prev.current : null;
+    prev.current = detail;
+    if (rendering(detail)) setEnded(null);
+    else {
+      const news = renderNews(before, detail);
+      if (news) setEnded(news);
+    }
+  }, [detail]);
 
   useEffect(() => {
     if (title) document.title = `${STEP_LABELS[step]} · ${title} · Reels · Espanda`;
@@ -99,6 +128,8 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, canCre
       </a>
       <BackLink />
       <PageHeader title={detail.item.title} />
+      {/* Always in the page (sr-only while empty, so it takes no room), so the line is announced when it fills in. */}
+      <p aria-live="polite" className={ended ? "text-sm font-medium" : "sr-only"}>{ended}</p>
 
       {/* lg: rail | editor | preview. md–lg: rail | editor, the preview under the editor. Below md: menu, editor, preview. */}
       <div className="grid items-start gap-6 md:grid-cols-[12rem_minmax(0,1fr)] lg:grid-cols-[12rem_minmax(0,1fr)_minmax(0,20rem)]">

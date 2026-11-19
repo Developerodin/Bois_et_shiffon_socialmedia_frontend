@@ -27,14 +27,21 @@ export function useReels(w: string, b: string) {
   return { data, failed, status, reload };
 }
 
-/** One reel in full; polls while a render runs. A 403 or 404 stops polling (`status` says which). */
+/** How long a render runs before the Video step says it's taking longer than usual (polling goes on). */
+export const RENDER_SLOW_MS = 15 * 60_000;
+
+/**
+ * One reel in full; polls while a render runs. A 403 or 404 stops polling (`status` says which). `slow`: a render has
+ * run for RENDER_SLOW_MS. The wait for the checks after a render isn't polled here: the Review step drives its own,
+ * with an end, so a check run that never lands can't keep every open tab polling.
+ */
 export function useReel(w: string, b: string, id: string) {
   const url = reelUrl(w, b, id);
   const pick = useMemo(() => (d: never) => details.steady(d as ReelDetail, sharedAt(url)), [url]);
   const done = useMemo(() => (d: ReelDetail) => !rendering(d) && !stale(details.linksAt([d])), []);
-  const { data, failed, status, reload } = useJob(url, { pick, done, intervals: JOB_INTERVALS.reelRender, stopOn: STOP_ON });
+  const { data, failed, slow, status, reload } = useJob(url, { pick, done, intervals: JOB_INTERVALS.reelRender, capMs: RENDER_SLOW_MS, stopOn: STOP_ON });
   useRereadWhenStale(data ? details.linksAt([data]) : null, reload);
-  return { data, failed, status, reload };
+  return { data, failed, slow, status, reload };
 }
 
 const identity = (d: never) => d as ReelOptions;

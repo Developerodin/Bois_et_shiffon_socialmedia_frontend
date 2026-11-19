@@ -6,6 +6,7 @@ import { Film } from "lucide-react";
 import { reelStage, type ReelStage, type ReelSummary } from "@/shared";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Tone } from "@/lib/status";
+import { reelHref } from "./reel";
 
 const STAGE_BADGE: Record<ReelStage, { label: string; tone: Tone }> = {
   draft: { label: "Draft", tone: "muted" },
@@ -26,7 +27,7 @@ export const ReelCard = memo(function ReelCard({ reel, brandId }: { reel: ReelSu
   const b = badge(reel);
   return (
     <Link
-      href={`/reels/${encodeURIComponent(reel.id)}?b=${encodeURIComponent(brandId)}`}
+      href={reelHref(reel.id, brandId)}
       className="block rounded-xl ring-offset-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span className="block aspect-[9/16]">

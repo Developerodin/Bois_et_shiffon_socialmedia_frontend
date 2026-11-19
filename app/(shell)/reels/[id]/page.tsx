@@ -23,7 +23,7 @@ export default async function OneReelPage({ params, searchParams }: { params: Pr
       brandId={brandId}
       reelId={id}
       step={typeof q.step === "string" ? q.step : undefined}
-      canCreate={perms.has("content.create")}
+      perms={[...perms]}
     />
   );
 }
