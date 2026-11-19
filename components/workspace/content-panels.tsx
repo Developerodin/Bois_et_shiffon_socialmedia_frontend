@@ -6,6 +6,7 @@ import { errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
+import { ChecksList } from "@/components/ui/checks-list";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
@@ -14,7 +15,7 @@ import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, toneOf } from "@/lib/status";
-import { safeHttpUrl } from "@/shared";
+import { safeHttpUrl, type CheckResult } from "@/shared";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -31,7 +32,6 @@ export type Opportunity = {
   sources: { url: string; title: string }[];
   status: "NEW" | "SHORTLISTED" | "DISMISSED" | "PLANNED";
 };
-type Check = { check: string; status: "pass" | "warn" | "blocker"; note: string };
 export type ContentItem = {
   id: string;
   title: string;
@@ -51,7 +51,7 @@ export type ContentItem = {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
     byPerson: boolean;
-    check: { overall: "PASS" | "WARN" | "BLOCKER"; results: Check[] } | null;
+    check: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
     review: { verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null } | null;
   } | null;
 };
@@ -708,21 +708,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
               <h2 id="qc-h" className="text-sm font-semibold">
                 Quality check · {item.latest.check.overall === "PASS" ? "passed" : item.latest.check.overall === "WARN" ? "passed with notes" : "needs fixes"}
               </h2>
-              <ul className="mt-3 flex flex-col gap-2 text-sm">
-                {item.latest.check.results.map((r, i) => (
-                  <li key={i} className="flex gap-2">
-                    {r.status === "pass" ? (
-                      <Check className="mt-0.5 size-4 shrink-0 text-success" aria-label="Pass" />
-                    ) : (
-                      <TriangleAlert className={cn("mt-0.5 size-4 shrink-0", r.status === "blocker" ? "text-destructive" : "text-warning")} aria-label={r.status === "blocker" ? "Blocker" : "Warning"} />
-                    )}
-                    <span>
-                      <span className="font-medium">{r.check}: </span>
-                      <span className="text-muted-foreground">{r.note}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <ChecksList results={item.latest.check.results} />
             </section>
           )}
 
