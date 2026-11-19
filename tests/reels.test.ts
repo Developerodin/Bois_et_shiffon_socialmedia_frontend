@@ -453,8 +453,12 @@ describe("sendBlock", () => {
     expect(sendBlock(withStatus("AWAITING_APPROVAL", { checks: pass }))).toBeNull();
     expect(sendBlock(withStatus("APPROVED", { checks: pass }))).toBeNull();
   });
-  it("falls back to the checking sentence for any other status", () => {
-    expect(sendBlock(withStatus("FAILED", { checks: pass }))).toBe(checking);
+  it("never says checking when no check can be running", () => {
+    expect(sendBlock(detail())).toBe("Make the video first. Download and Publish open once it's made.");
+    expect(sendBlock(withStatus("BLOCKED", { checks: pass }))).toBe("A check found a problem (see Checks). Fix it in the caption, or ask for changes.");
+    for (const status of ["CANCELLED", "REVIEWED", "PLANNED", "BRIEF_READY"]) {
+      expect(sendBlock(withStatus(status, { checks: pass }))).toBe("This reel can't be sent in its current state.");
+    }
   });
 });
 

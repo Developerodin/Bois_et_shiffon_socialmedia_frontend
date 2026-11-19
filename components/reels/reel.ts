@@ -108,7 +108,11 @@ export function sendBlock(d: ReelDetail): string | null {
   if (awaitingChecks(d)) return CHECKING;
   if (d.checks && status === "DRAFT_REVIEW") return "Changes were asked for (see the history under Publish). Change the caption or the plan and it's checked again.";
   if (status === "REJECTED") return "This reel was rejected. Change the caption or the plan to send it through review again.";
-  return REEL_SENDABLE.includes(status) ? null : CHECKING;
+  if (REEL_SENDABLE.includes(status)) return null;
+  // No check can be running from here on, so never say "Checking…".
+  if (status === "DRAFT_REVIEW") return "Make the video first. Download and Publish open once it's made.";
+  if (status === "BLOCKED") return "A check found a problem (see Checks). Fix it in the caption, or ask for changes.";
+  return "This reel can't be sent in its current state.";
 }
 
 /** The checks to show: the saved results, then a warning per join the seam check softened in the render that made this video. */
