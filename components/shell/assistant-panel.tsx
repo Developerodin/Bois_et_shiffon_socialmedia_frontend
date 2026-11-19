@@ -143,8 +143,9 @@ export function AssistantPanel(p: Props) {
         }}
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-full w-80 shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
-          // Docked it sits beside the page: the page's own 12 px edge is the gap, so no left padding of its own.
-          docked && "xl:static xl:z-auto xl:translate-x-0 xl:pl-0",
+          // Docked it sits beside the page: the page's own 12 px edge is the gap, so no left padding of its own, and it
+          // starts under the 72 px top bar (+12 px) so its top edge lines up with the page's cards, not the bar.
+          docked && "xl:static xl:z-auto xl:translate-x-0 xl:pt-21 xl:pl-0",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
