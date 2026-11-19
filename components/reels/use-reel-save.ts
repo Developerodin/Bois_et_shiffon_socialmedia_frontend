@@ -10,9 +10,12 @@ import { CHANGED_ELSEWHERE } from "./plan-stream";
 /** The server's code for a save refused because the plan moved on. */
 export const REEL_CHANGED = "reel.changed";
 
-/** What to show for a failed save; only reel.changed (the plan moved on) gets the keep-your-text sentence. */
+/** The server's code for a caption save refused because the draft moved on. */
+export const DRAFT_CHANGED = "draft.changed";
+
+/** What to show for a failed save; only reel.changed or draft.changed (it moved on) gets the keep-your-text sentence. */
 export const saveErrorText = (e: unknown): string =>
-  e instanceof ApiError && e.code === REEL_CHANGED ? CHANGED_ELSEWHERE : errorMessage(e);
+  e instanceof ApiError && (e.code === REEL_CHANGED || e.code === DRAFT_CHANGED) ? CHANGED_ELSEWHERE : errorMessage(e);
 
 /**
  * Saves the plan, one save at a time. Held once by the reel page and passed down, so every step and dialog shares one

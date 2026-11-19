@@ -31,7 +31,7 @@ export function useStepEdit<T>(detail: ReelDetail, save: ReelSave, scenes: numbe
   if (failed && !save.saving) {
     setFailed(false);
     if (edit) {
-      const next = adoptRefusedVersion(edit, save.errorCode === REEL_CHANGED, detail.version, scenes ?? 0);
+      const next = adoptRefusedVersion(edit, save.errorCode === REEL_CHANGED, detail.version);
       if (next !== edit) setEdit(next);
     }
   }

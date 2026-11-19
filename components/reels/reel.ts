@@ -1,12 +1,18 @@
-import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, wordCount, type PlanResult, type ReelDetail, type ReelOptions, type ReelPlan, type ReelScene, type ReelSummary } from "@/shared";
+import { MAX_SCENE_WORDS, REEL_DURATION_CHIPS, REEL_SENDABLE, VOICE_TEXT_MAX, WORDS_PER_SECOND, reelStage, wordCount, type CaptionCue, type CheckResult, type PlanResult, type ReelDetail, type ReelOptions, type ReelPlan, type ReelScene, type ReelSummary } from "@/shared";
+import { ApiError, type Connection } from "@/components/settings/api";
+import type { JobStep } from "@/components/ui/job-progress";
+import { creditsText } from "@/lib/plan-credits";
 import { stale } from "@/lib/signed-links";
-import { starterProduct } from "./labels";
+import { RENDER_STAGES, starterProduct } from "./labels";
 
 /** The reel page's steps, in order (spec §5.3). Pure: no React. */
 export const REEL_STEPS = ["plan", "presenter", "photos", "script", "storyboard", "video", "review", "publish"] as const;
 export type ReelStep = (typeof REEL_STEPS)[number];
 // 3c adds video, review, publish.
 export const BUILT_STEPS: readonly ReelStep[] = ["plan", "presenter", "photos", "script", "storyboard"];
+
+/** A reel's page, on a step when given. */
+export const reelHref = (id: string, brandId: string, step?: ReelStep): string => `/reels/${id}?b=${brandId}${step ? `&step=${step}` : ""}`;
 
 /** Whether the reel's latest render is running: the shared rule (reelStage), applied to the detail's newest render. */
 export const rendering = (d: ReelDetail): boolean => reelStage({ render: d.renders[0] ?? null, videoUrl: d.videoUrl }) === "processing";
@@ -37,12 +43,115 @@ export function stepState(step: ReelStep, d: ReelDetail | null): string {
   if (step === "plan") return d?.plan ? "Done" : "None";
   if (step === "presenter") return !d?.plan ? "None" : d.plan.presenter === "none" ? "No presenter" : "Done";
   if (step === "script") return d?.plan ? "Done" : "None";
+  if (step === "video") {
+    if (d && rendering(d)) return "Making…";
+    if (d?.videoUrl) return "Done";
+    return d?.renders[0]?.step === "FAILED" ? "Didn't work" : "None";
+  }
+  if (step === "review") {
+    if (!d?.videoUrl) return "None";
+    return ["APPROVED", "SCHEDULED", "PUBLISHED"].includes(d.item.status) ? "Done" : "Ready";
+  }
+  if (step === "publish") {
+    if (d?.item.status === "PUBLISHED") return "Posted";
+    if (d?.item.status === "SCHEDULED") return "Scheduled";
+    return d?.videoUrl ? "Ready" : "None";
+  }
   if (step !== "storyboard" && step !== "photos") return "";
   if (!d?.plan) return "None";
   if (d.plan.scenes.some((s) => s.standIn)) return "Needs a photo";
   if (step === "photos") return "Done";
   if (rendering(d)) return "Making…";
   return d.videoUrl ? "Done" : "Ready";
+}
+
+/** A video exists, in review, and its checks haven't come in yet. */
+export const awaitingChecks = (d: ReelDetail): boolean => !!d.videoUrl && !d.checks && d.item.status === "DRAFT_REVIEW";
+
+const RENDER_ORDER = ["VOICE", "CLIPS", "JOIN"] as const;
+
+/** The running render's three stages for the progress list; every stage waits when none is running. */
+export function renderSteps(d: ReelDetail): JobStep[] {
+  const n = d.plan?.scenes.length ?? 0;
+  const at = rendering(d) ? RENDER_ORDER.indexOf(d.renders[0]!.step as (typeof RENDER_ORDER)[number]) : -1;
+  return RENDER_ORDER.map((stage, i) => ({ label: RENDER_STAGES[stage](n), state: i < at ? "done" : i === at ? "active" : "waiting" }));
+}
+
+/** What to do with a refused render press: read the reel again, and whether the version already has its video (go to Review). */
+export function renderRefusal(e: unknown): { reread: boolean; review: boolean } {
+  if (!(e instanceof ApiError) || e.status !== 409) return { reread: false, review: false };
+  return { reread: true, review: e.code === "render.alreadyDone" };
+}
+
+/** The line to say when a render that was running has ended between two reads, else null. */
+export function renderNews(prev: ReelDetail | null, next: ReelDetail): string | null {
+  if (!prev || !rendering(prev)) return null;
+  const step = next.renders[0]?.step;
+  if (step === "DONE") return "Your reel is ready.";
+  if (step === "FAILED") return "The video couldn't be made. Your credits are back.";
+  return null;
+}
+
+/** After a failed try: the price now, when it differs from what the last try cost. */
+export function retryPriceNote(d: ReelDetail, unlimited: boolean): string | null {
+  const credits = d.renders[0]?.credits;
+  if (unlimited || typeof credits !== "number" || typeof d.price !== "number" || credits === d.price) return null;
+  return `Making it again costs ${creditsText(d.price)} now; the last try cost ${creditsText(credits)}.`;
+}
+
+const CHECKING = "Checking the reel… Download and Publish open when the checks are done.";
+
+/** Why Download and Publish are off, or null. A reel sent back or rejected says so instead of "checking". */
+export function sendBlock(d: ReelDetail): string | null {
+  const status = d.item.status;
+  if (d.checks?.overall === "BLOCKER") return "A check found a problem (see Checks). Fix it in the caption, or ask for changes.";
+  if (awaitingChecks(d)) return CHECKING;
+  if (d.checks && status === "DRAFT_REVIEW") return "Changes were asked for (see the history under Publish). Change the caption or the plan and it's checked again.";
+  if (status === "REJECTED") return "This reel was rejected. Change the caption or the plan to send it through review again.";
+  return REEL_SENDABLE.includes(status) ? null : CHECKING;
+}
+
+/** The checks to show: the saved results, then a warning per join the seam check softened in the render that made this video. */
+export function reviewChecks(d: ReelDetail): CheckResult[] {
+  if (!d.checks) return [];
+  const made = d.renders.find((r) => r.step === "DONE" && r.videoKey === d.videoKey);
+  const softened = (made?.softened ?? []).map((n): CheckResult => ({ check: `Scene ${n} → ${n + 1}`, status: "warn", note: "The two shots didn't quite match, so they blend with a dissolve" }));
+  return [...d.checks.results, ...softened];
+}
+
+export const REEL_HASHTAGS_MAX = 5;
+export const REEL_CAPTION_MAX = 2200;
+
+/** Tags typed as text: split on spaces and commas, one # each, no repeats. The caller checks the count against REEL_HASHTAGS_MAX. */
+export const parseHashtags = (text: string): string[] =>
+  [...new Set(text.split(/[\s,]+/).map((t) => t.replace(/^#+/, "")).filter(Boolean))].map((t) => `#${t}`);
+
+/** The posted text's length, joined as the server's postText does (caption, the AI line, the tags, a blank line between). */
+export const postTextLength = (caption: string, aiLine: string | null, tags: readonly string[]): number =>
+  [caption.trim(), aiLine, tags.join(" ")].filter(Boolean).join("\n\n").length;
+
+const vttTime = (seconds: number): string => {
+  const ms = Math.round(seconds * 1000);
+  const p = (n: number, w = 2) => String(n).padStart(w, "0");
+  return `${p(Math.floor(ms / 3_600_000))}:${p(Math.floor(ms / 60_000) % 60)}:${p(Math.floor(ms / 1000) % 60)}.${p(ms % 1000, 3)}`;
+};
+
+/** The caption cues as WebVTT. Text is escaped, so a spoken line can't add a timing line or a tag. */
+export const toWebVtt = (cues: readonly CaptionCue[]): string =>
+  "WEBVTT\n\n" + cues.map((c, i) => {
+    const text = c.text.replace(/\s+/g, " ").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return `${i + 1}\n${vttTime(c.start)} --> ${vttTime(c.end)}\n${text}\n\n`;
+  }).join("");
+
+/** An approved reel with no post link yet (the phone's results screen asks for one). */
+export const postLinkWanted = (r: ReelSummary): boolean => r.status === "APPROVED" && !r.postUrl;
+
+/** Which Instagram account a reel would go to: the first active one, else a lapsed one, else none. */
+export function instagramState(cs: readonly Pick<Connection, "provider" | "status" | "displayName">[]): { state: "active"; name: string } | { state: "expired" } | { state: "none" } {
+  const ig = cs.filter((c) => c.provider === "INSTAGRAM");
+  const active = ig.find((c) => c.status === "ACTIVE");
+  if (active) return { state: "active", name: active.displayName };
+  return ig.length ? { state: "expired" } : { state: "none" };
 }
 
 /** The length chips worth offering: those more than 5 seconds from the current length. */
@@ -69,14 +178,15 @@ export const isReelId = (s: unknown): s is string => typeof s === "string" && /^
 /**
  * `next`, but with `prev`'s signed links while `prev`'s are fresh, so a picture or video doesn't reload on every poll:
  * the summary's thumb and video, or the detail's video and each photo by key. Only while it is the same reel and
- * version (and the same video file); anything new comes from `next`.
+ * version (the detail's video link: the same video file, whatever the version); anything new comes from `next`.
  */
 export function keepReelLinks<T extends ReelSummary | ReelDetail>(prev: T | undefined, next: T, prevAt: number, now = Date.now()): T {
   if (!prev || stale(prevAt, now)) return next;
   if ("item" in next) {
     const p = prev as ReelDetail;
-    if (p.item.id !== next.item.id || p.version !== next.version) return next;
-    const photoUrls = Object.fromEntries(Object.entries(next.photoUrls).map(([k, u]) => [k, p.photoUrls[k] ?? u]));
+    if (p.item.id !== next.item.id) return next;
+    // A caption save moves the version, not the file: the video link follows its key, photos follow the version.
+    const photoUrls = p.version === next.version ? Object.fromEntries(Object.entries(next.photoUrls).map(([k, u]) => [k, p.photoUrls[k] ?? u])) : next.photoUrls;
     const videoUrl = next.videoUrl && p.videoUrl && p.videoKey === next.videoKey ? p.videoUrl : next.videoUrl;
     return { ...next, photoUrls, videoUrl };
   }
@@ -149,9 +259,9 @@ export function slotStandIns(keys: readonly string[], plan: ReelPlan): boolean[]
   return keys.map((k) => standIns.has(k));
 }
 
-/** After a save the server refused as changed (409) and the reel was re-read: the edit restarts from the re-read version, its items kept, so "save again" works. Any other time, or another scene count, the edit is returned as it was. */
-export function adoptRefusedVersion<E extends { version: number; items: readonly unknown[] }>(edit: E, refused: boolean, version: number, scenes: number): E {
-  return refused && edit.items.length === scenes && edit.version !== version ? { ...edit, version } : edit;
+/** After a save the server refused as changed (409) and the reel was re-read: the edit restarts from the re-read version, its content kept, so "save again" works. Any other time the edit is returned as it was. */
+export function adoptRefusedVersion<E extends { version: number }>(edit: E, refused: boolean, version: number): E {
+  return refused && edit.version !== version ? { ...edit, version } : edit;
 }
 
 /** Per scene, whether its take still goes with its text: the server keeps a take only on an exact match with the trimmed saved text. */

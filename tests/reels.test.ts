@@ -5,8 +5,8 @@ import { SIGNED_LINK_STALE_MS, stale } from "@/lib/signed-links";
 import { isRepeatClick, makePresser, pressErrorText, refused } from "@/lib/presser";
 import * as photoshootPress from "@/components/photoshoot/press";
 import { createLinkCache } from "@/components/workspace/use-steady-links";
-import { BUILT_STEPS, adoptRefusedVersion, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
-import { chipMessage, presenterState, starterProduct } from "@/components/reels/labels";
+import { BUILT_STEPS, adoptRefusedVersion, awaitingChecks, instagramState, parseHashtags, postLinkWanted, postTextLength, reelHref, renderNews, renderRefusal, renderSteps, retryPriceNote, reviewChecks, sendBlock, toWebVtt, countByStage, droppedRecordings, playableSample, recordedScenes, sampleAction, slotStandIns, takeLanded, editLock, optionBusy, optionsMaking, presenterChoice, presenterName, sceneCount, sceneProblems, swapScenes, defaultStep, durationChips, isReelId, keepReelLinks, reachable, starters, stepFrom, stepState } from "@/components/reels/reel";
+import { chipMessage, failureText, presenterState, starterProduct } from "@/components/reels/labels";
 import { CHANGED_ELSEWHERE } from "@/components/reels/plan-stream";
 import { saveErrorText } from "@/components/reels/use-reel-save";
 import { reelOptionsUrl, reelUrl, reelsUrl } from "@/components/reels/api";
@@ -123,12 +123,11 @@ describe("script helpers", () => {
 });
 
 describe("adoptRefusedVersion", () => {
-  const edit = { version: 3, items: ["a", "b"] };
-  it("takes the re-read version only after a refusal with the same scene count", () => {
-    expect(adoptRefusedVersion(edit, true, 5, 2)).toEqual({ version: 5, items: ["a", "b"] });
-    expect(adoptRefusedVersion(edit, false, 5, 2)).toBe(edit);
-    expect(adoptRefusedVersion(edit, true, 5, 3)).toBe(edit);
-    expect(adoptRefusedVersion(edit, true, 3, 2)).toBe(edit);
+  const edit = { version: 3, caption: "x" };
+  it("takes the re-read version only after a refusal that moved it", () => {
+    expect(adoptRefusedVersion(edit, true, 5)).toEqual({ version: 5, caption: "x" });
+    expect(adoptRefusedVersion(edit, false, 5)).toBe(edit);
+    expect(adoptRefusedVersion(edit, true, 3)).toBe(edit);
   });
 });
 
@@ -226,7 +225,9 @@ describe("keepReelLinks", () => {
     const next = detail({ videoUrl: "new-v", videoKey: "k1", photoUrls: { a: "new-a", c: "new-c" } });
     expect(keepReelLinks(prev, next, 0, MIN)).toMatchObject({ videoUrl: "old-v", photoUrls: { a: "old-a", c: "new-c" } });
     expect(keepReelLinks(prev, { ...next, videoKey: "k2" }, 0, MIN).videoUrl).toBe("new-v");
-    expect(keepReelLinks(prev, { ...next, version: 2 }, 0, MIN)).toMatchObject({ videoUrl: "new-v", photoUrls: { a: "new-a" } });
+    // A caption save moves the version, not the file: the video link stays, the photos are re-read.
+    expect(keepReelLinks(prev, { ...next, version: 2 }, 0, MIN)).toMatchObject({ videoUrl: "old-v", photoUrls: { a: "new-a" } });
+    expect(keepReelLinks(prev, { ...next, version: 2, videoKey: "k2" }, 0, MIN).videoUrl).toBe("new-v");
   });
 });
 
@@ -347,7 +348,181 @@ describe("scene editing helpers", () => {
 describe("saveErrorText", () => {
   it("only reel.changed gets the keep-your-text sentence", () => {
     expect(saveErrorText(new ApiError(409, "This plan changed in the meantime. Reload and try again.", "reel.changed"))).toBe(CHANGED_ELSEWHERE);
+    expect(saveErrorText(new ApiError(409, "Someone changed this.", "draft.changed"))).toBe(CHANGED_ELSEWHERE);
     expect(saveErrorText(new ApiError(409, "A newer version exists. Review it first."))).toBe("A newer version exists. Review it first.");
     expect(saveErrorText(new ApiError(400, "Scene 2 is too long."))).toBe("Scene 2 is too long.");
+  });
+});
+
+describe("reelHref", () => {
+  it("opens a reel, on a step when given", () => {
+    expect(reelHref("r1", "b1")).toBe("/reels/r1?b=b1");
+    expect(reelHref("r1", "b1", "review")).toBe("/reels/r1?b=b1&step=review");
+  });
+});
+
+describe("stepState video, review, publish", () => {
+  const withStatus = (status: ReelDetail["item"]["status"], over: Partial<ReelDetail> = {}) => detail({ item: { ...detail().item, status }, ...over });
+  it("words the video step, the video first", () => {
+    expect(stepState("video", detail({ renders: [render("CLIPS")] }))).toBe("Making…");
+    expect(stepState("video", detail({ videoUrl: "u", renders: [render("DONE")] }))).toBe("Done");
+    expect(stepState("video", detail({ renders: [render("FAILED")] }))).toBe("Didn't work");
+    expect(stepState("video", detail({ videoUrl: "u", renders: [render("FAILED")] }))).toBe("Done");
+    expect(stepState("video", detail())).toBe("None");
+  });
+  it("words the review step", () => {
+    expect(stepState("review", detail())).toBe("None");
+    for (const status of ["APPROVED", "SCHEDULED", "PUBLISHED"] as const) {
+      expect(stepState("review", withStatus(status, { videoUrl: "u" }))).toBe("Done");
+    }
+    expect(stepState("review", detail({ videoUrl: "u" }))).toBe("Ready");
+  });
+  it("words the publish step", () => {
+    expect(stepState("publish", withStatus("PUBLISHED", { videoUrl: "u" }))).toBe("Posted");
+    expect(stepState("publish", withStatus("SCHEDULED", { videoUrl: "u" }))).toBe("Scheduled");
+    expect(stepState("publish", detail({ videoUrl: "u" }))).toBe("Ready");
+    expect(stepState("publish", detail())).toBe("None");
+  });
+});
+
+describe("awaitingChecks", () => {
+  const checks = { overall: "PASS" as const, results: [] };
+  it("is a video in review with no checks yet", () => {
+    expect(awaitingChecks(detail({ videoUrl: "u" }))).toBe(true);
+    expect(awaitingChecks(detail({ videoUrl: "u", checks }))).toBe(false);
+    expect(awaitingChecks(detail({ videoUrl: "u", item: { ...detail().item, status: "AWAITING_APPROVAL" } }))).toBe(false);
+    expect(awaitingChecks(detail())).toBe(false);
+  });
+});
+
+describe("renderSteps", () => {
+  it("marks the running stage", () => {
+    expect(renderSteps(detail({ renders: [render("CLIPS")] }))).toEqual([
+      { label: "Preparing 1 scene", state: "done" },
+      { label: "Rendering video frames", state: "active" },
+      { label: "Adding audio", state: "waiting" },
+    ]);
+    expect(renderSteps(detail({ renders: [render("VOICE")] })).map((s) => s.state)).toEqual(["active", "waiting", "waiting"]);
+    expect(renderSteps(detail({ renders: [render("JOIN")] })).map((s) => s.state)).toEqual(["done", "done", "active"]);
+  });
+  it("says scenes for other counts", () => {
+    const two = { ...plan, scenes: [plan.scenes[0]!, plan.scenes[0]!] };
+    expect(renderSteps(detail({ plan: two, renders: [render("VOICE")] }))[0]!.label).toBe("Preparing 2 scenes");
+  });
+});
+
+describe("renderRefusal", () => {
+  it("sends a finished version to review, re-reads any other 409", () => {
+    expect(renderRefusal(new ApiError(409, "x", "render.alreadyDone"))).toEqual({ reread: true, review: true });
+    expect(renderRefusal(new ApiError(409, "x"))).toEqual({ reread: true, review: false });
+    for (const e of [new ApiError(400, "x"), new ApiError(0, "x"), new Error("x"), null]) {
+      expect(renderRefusal(e)).toEqual({ reread: false, review: false });
+    }
+  });
+});
+
+describe("renderNews", () => {
+  it("speaks only when a running render ends", () => {
+    expect(renderNews(detail({ renders: [render("CLIPS")] }), detail({ renders: [render("DONE")] }))).toBe("Your reel is ready.");
+    expect(renderNews(detail({ renders: [render("JOIN")] }), detail({ renders: [render("FAILED")] }))).toBe("The video couldn't be made. Your credits are back.");
+    expect(renderNews(detail({ renders: [render("DONE")] }), detail({ renders: [render("DONE")] }))).toBeNull();
+    expect(renderNews(null, detail({ renders: [render("DONE")] }))).toBeNull();
+  });
+});
+
+describe("retryPriceNote", () => {
+  const failed = (credits: number | null) => detail({ price: 24, renders: [{ ...render("FAILED"), credits }] });
+  it("notes a changed price only", () => {
+    expect(retryPriceNote(failed(20), false)).toBe("Making it again costs 24 credits now; the last try cost 20 credits.");
+    expect(retryPriceNote(failed(24), false)).toBeNull();
+    expect(retryPriceNote(failed(null), false)).toBeNull();
+    expect(retryPriceNote(failed(20), true)).toBeNull();
+    expect(retryPriceNote(detail({ price: null, renders: [{ ...render("FAILED"), credits: 20 }] }), false)).toBeNull();
+  });
+});
+
+describe("sendBlock", () => {
+  const checking = "Checking the reel… Download and Publish open when the checks are done.";
+  const withStatus = (status: string, over: Partial<ReelDetail> = {}) => detail({ videoUrl: "u", item: { ...detail().item, status: status as ReelDetail["item"]["status"] }, ...over });
+  const pass = { overall: "PASS" as const, results: [] };
+  it("names why Download and Publish are off", () => {
+    expect(sendBlock(withStatus("AWAITING_APPROVAL", { checks: { overall: "BLOCKER", results: [] } }))).toBe("A check found a problem (see Checks). Fix it in the caption, or ask for changes.");
+    expect(sendBlock(withStatus("DRAFT_REVIEW"))).toBe(checking);
+    expect(sendBlock(withStatus("DRAFT_REVIEW", { checks: pass }))).toBe("Changes were asked for (see the history under Publish). Change the caption or the plan and it's checked again.");
+    expect(sendBlock(withStatus("REJECTED", { checks: pass }))).toBe("This reel was rejected. Change the caption or the plan to send it through review again.");
+    expect(sendBlock(withStatus("AWAITING_APPROVAL", { checks: pass }))).toBeNull();
+    expect(sendBlock(withStatus("APPROVED", { checks: pass }))).toBeNull();
+  });
+  it("falls back to the checking sentence for any other status", () => {
+    expect(sendBlock(withStatus("FAILED", { checks: pass }))).toBe(checking);
+  });
+});
+
+describe("reviewChecks", () => {
+  const checks = { overall: "WARN" as const, results: [{ check: "Caption", status: "pass" as const, note: "ok" }] };
+  it("adds a warning per softened join of the video's own render", () => {
+    const own = { ...render("DONE"), videoKey: "k1", softened: [2] };
+    const rows = reviewChecks(detail({ checks, videoKey: "k1", renders: [own] }));
+    expect(rows).toHaveLength(2);
+    expect(rows[1]).toEqual({ check: "Scene 2 → 3", status: "warn", note: "The two shots didn't quite match, so they blend with a dissolve" });
+  });
+  it("ignores another video's render", () => {
+    const other = { ...render("DONE"), videoKey: "k0", softened: [2] };
+    expect(reviewChecks(detail({ checks, videoKey: "k1", renders: [other] }))).toHaveLength(1);
+  });
+  it("is empty without checks", () => {
+    expect(reviewChecks(detail())).toEqual([]);
+  });
+});
+
+describe("parseHashtags and postTextLength", () => {
+  it("splits, strips, dedupes and prefixes", () => {
+    expect(parseHashtags("#oak, wood  #oak ##table")).toEqual(["#oak", "#wood", "#table"]);
+    expect(parseHashtags("")).toEqual([]);
+    expect(parseHashtags("a b c d e f")).toHaveLength(6);
+  });
+  it("measures the post as the server joins it", () => {
+    expect(postTextLength("Hi", "Made with AI.", ["#a", "#b"])).toBe(24);
+    expect(postTextLength("Hi", null, [])).toBe(2);
+    expect(postTextLength("  Hi  ", null, [])).toBe(2);
+  });
+});
+
+describe("toWebVtt", () => {
+  it("writes escaped cues with timestamps", () => {
+    expect(toWebVtt([{ start: 0, end: 4, text: "Hi & <b>\nthere" }, { start: 61.5, end: 3725, text: "x" }]))
+      .toBe("WEBVTT\n\n1\n00:00:00.000 --> 00:00:04.000\nHi &amp; &lt;b&gt; there\n\n2\n00:01:01.500 --> 01:02:05.000\nx\n\n");
+  });
+  it("can't be made to forge a timing line", () => {
+    const out = toWebVtt([{ start: 0, end: 1, text: "a --> 00:00:00.000 --> 99:00:00.000" }]);
+    expect(out.match(/-->/g)).toHaveLength(1);
+  });
+});
+
+describe("postLinkWanted", () => {
+  it("wants a link for an approved reel with none", () => {
+    expect(postLinkWanted(summary({ status: "APPROVED" }))).toBe(true);
+    expect(postLinkWanted(summary({ status: "APPROVED", postUrl: "https://x" }))).toBe(false);
+    expect(postLinkWanted(summary({ status: "PUBLISHED" }))).toBe(false);
+  });
+});
+
+describe("failureText", () => {
+  it("words each failure kind, filling the scene", () => {
+    expect(failureText({ kind: "scene", scene: 3, stoppedAt: "CLIPS" })).toBe("Scene 3 couldn't be animated. Your credits are back. Try again, or pick another photo for it.");
+    expect(failureText({ kind: "slow", stoppedAt: "JOIN" })).toBe("The video took too long to make. Your credits are back. Try again.");
+    expect(failureText({ kind: "unavailable", stoppedAt: "VOICE" })).toContain("unavailable");
+    expect(failureText({ kind: "voiceDeleted", stoppedAt: "VOICE" })).toContain("voice");
+    expect(failureText({ kind: "other", stoppedAt: "VOICE" })).toContain("Something went wrong");
+  });
+});
+
+describe("instagramState", () => {
+  it("finds the active Instagram account, else expired, else none", () => {
+    expect(instagramState([{ provider: "INSTAGRAM", status: "ACTIVE", displayName: "Shop" }])).toEqual({ state: "active", name: "Shop" });
+    expect(instagramState([{ provider: "INSTAGRAM", status: "ERROR", displayName: "Shop" }, { provider: "INSTAGRAM", status: "ACTIVE", displayName: "Two" }])).toEqual({ state: "active", name: "Two" });
+    expect(instagramState([{ provider: "INSTAGRAM", status: "ERROR", displayName: "Shop" }])).toEqual({ state: "expired" });
+    expect(instagramState([{ provider: "META", status: "ACTIVE", displayName: "FB" }])).toEqual({ state: "none" });
+    expect(instagramState([])).toEqual({ state: "none" });
   });
 });

@@ -1,4 +1,4 @@
-import type { PlanStage, Presenter, Transition } from "@/shared";
+import type { PlanStage, Presenter, RenderFailure, Transition } from "@/shared";
 import type { ReelStep } from "./reel";
 
 // The phone's English (mobile src/i18n/locales/en/reels.json): keep the words in step.
@@ -18,6 +18,31 @@ export const STAGE_LABELS: Record<PlanStage, string> = {
   writing: "Writing the script",
   directing: "Choosing a video model for each scene",
 };
+
+/** The render's running stages (the phone's generating.*), N being the plan's scene count. */
+export const RENDER_STAGES: Record<RenderFailure["stoppedAt"], (scenes: number) => string> = {
+  VOICE: (n) => `Preparing ${n} ${n === 1 ? "scene" : "scenes"}`,
+  CLIPS: () => "Rendering video frames",
+  JOIN: () => "Adding audio",
+};
+
+/** Where a failed render stopped, by the same stages (the phone's videoFailed.details.stages). */
+export const STOPPED_AT: Record<RenderFailure["stoppedAt"], string> = {
+  VOICE: "Voiceover",
+  CLIPS: "Video scenes",
+  JOIN: "Joining the scenes",
+};
+
+/** A failed render in words, from its kind only: never the provider's text. */
+export function failureText(f: RenderFailure): string {
+  switch (f.kind) {
+    case "unavailable": return "Video making is unavailable right now. Your credits are back. Please try again later.";
+    case "slow": return "The video took too long to make. Your credits are back. Try again.";
+    case "scene": return `Scene ${f.scene ?? 1} couldn't be animated. Your credits are back. Try again, or pick another photo for it.`;
+    case "voiceDeleted": return "This reel's voice isn't available any more. Your credits are back. Pick another voice and try again.";
+    default: return "Something went wrong while making the video. Your credits are back. Try again.";
+  }
+}
 
 export const JOIN_LABELS: Record<Transition, string> = {
   match: "Match cut: this shot ends where the next begins",
