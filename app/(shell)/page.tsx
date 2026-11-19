@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Workspace } from "@/components/workspace/workspace";
 import { getShell } from "@/lib/server-fetch";
+import { featureOn } from "@/lib/features";
 import { navFor } from "@/lib/nav";
 
 export const metadata = { title: navFor("/").title };
@@ -27,6 +28,7 @@ export default async function WorkspacePage() {
       brandId={shell.activeBrandId}
       brandName={brand.displayName}
       website={brand.websiteUrl}
+      reelsOn={featureOn("reels", shell.activeWorkspaceId)}
       user={shell.user}
     />
   );

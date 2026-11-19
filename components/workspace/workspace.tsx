@@ -98,6 +98,8 @@ type Props = {
   brandId: string;
   brandName: string;
   website: string | null;
+  /** Reels are on for this workspace: a studio reel in the Overview links to its page. */
+  reelsOn: boolean;
   user: { name?: string | null; email?: string | null; image?: string | null };
 };
 
@@ -122,7 +124,7 @@ function viewSearch(v: View) {
   return s ? `?${s}` : window.location.pathname;
 }
 
-export function Workspace({ workspaceId, brandId, brandName, website, user }: Props) {
+export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, user }: Props) {
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
@@ -329,7 +331,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, user }: Pr
         ) : view.kind === "competitor" ? (
           <CompetitorView base={base} id={view.id} onBack={back} />
         ) : view.kind === "content" ? (
-          <ContentView base={base} id={view.id} onBack={back} />
+          <ContentView base={base} id={view.id} onBack={back} reelsOn={reelsOn} brandId={brandId} />
         ) : view.kind === "agent" ? (
           <AgentView
             agentKey={view.key}

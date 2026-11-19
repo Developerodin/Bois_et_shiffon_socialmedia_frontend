@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { ChecksList } from "@/components/ui/checks-list";
+import { reelHref } from "@/components/reels/reel";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
@@ -47,6 +49,8 @@ export type ContentItem = {
   /** Stories: planned to be posted by hand at `scheduledFor`, and the first rendered frame (signed link). */
   byHand?: boolean;
   firstFrameUrl?: string | null;
+  /** Made in the reels studio: its plan, video and caption are changed in Reels. */
+  studio?: boolean;
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
@@ -569,7 +573,7 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   );
 }
 
-export function ContentView({ base, id, onBack }: { base: string; id: string; onBack: () => void }) {
+export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: string; id: string; onBack: () => void; reelsOn: boolean; brandId: string }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const item = data?.find((i) => i.id === id);
@@ -577,7 +581,7 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
   const perms = usePerms(base);
   useEffect(() => setEditing(false), [id]);
   const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";
-  const canEdit = perms?.includes("content.create") && !locked;
+  const canEdit = perms?.includes("content.create") && !locked && !item?.studio;
   const brief = (item?.brief ?? {}) as { goal?: string; audience?: string; keyMessage?: string; products?: string[]; cta?: string; visual?: string; questions?: string[]; angle?: string };
   const b = item?.latest?.body;
 
@@ -649,7 +653,18 @@ export function ContentView({ base, id, onBack }: { base: string; id: string; on
             )}
           </section>
 
-          {!editing && <NextStep base={base} item={item} perms={perms} onEdit={() => setEditing(true)} />}
+          {item.studio ? (
+            <section aria-label="Made in Reels" className="flex flex-col items-start gap-3 rounded-xl border border-border p-4">
+              <p className="text-sm">Made in Reels. Change its plan, video and caption there.</p>
+              {reelsOn ? (
+                <Button size="sm" asChild>
+                  <Link href={reelHref(item.id, brandId)}>Open in Reels</Link>
+                </Button>
+              ) : null}
+            </section>
+          ) : (
+            !editing && <NextStep base={base} item={item} perms={perms} onEdit={() => setEditing(true)} />
+          )}
 
           {item.channel === "INSTAGRAM_STORY" ? (
             <StoryFrames base={base} item={item} />
