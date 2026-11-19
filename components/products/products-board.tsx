@@ -14,6 +14,7 @@ import { CampaignsSection } from "@/components/products/campaigns";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { timeAgo } from "@/lib/time";
+import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/shared";
 
 const SOURCE_LINE = {
@@ -38,6 +39,9 @@ function price(p: Product) {
 type Props = { workspaceId: string; brandId: string; canEdit: boolean; canVouch: boolean; canManageCommercial: boolean };
 // ponytail: the whole catalogue loads once and is searched here, 50 rows drawn at a time; page on the server past a few thousand.
 const PAGE = 50;
+const count = (n: number) => n.toLocaleString();
+/** What "In stock" in the filter means: the same as stockLabel's in-stock wordings. */
+const inStock = (p: Product) => (p.stockQuantity !== null && p.stockQuantity > 0) || (p.stockQuantity === null && p.inStock === true);
 
 export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canManageCommercial }: Props) {
   const fetcher = useCallback(() => productsApi.list(workspaceId, brandId), [workspaceId, brandId]);
@@ -47,6 +51,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [stock, setStock] = useState<"" | "in" | "out">("");
   const [limit, setLimit] = useState(PAGE);
 
   const data = state.kind === "ready" ? state.data : null;
@@ -104,7 +109,10 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
     );
   else {
     const q = query.trim().toLowerCase();
-    const matches = q ? state.data.products.filter((p) => p.title.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q)) : state.data.products;
+    const all = state.data.products;
+    const matches = all.filter(
+      (p) => (!q || p.title.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q)) && (!stock || (stock === "in") === inStock(p)),
+    );
     body = (
       <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -117,65 +125,74 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
             setQuery(e.target.value);
             setLimit(PAGE);
           }}
-          className="max-w-xs"
+          className="w-full sm:max-w-xs"
         />
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          {matches.length === state.data.products.length ? `${matches.length} products` : `${matches.length} of ${state.data.products.length} products`}
+        <select
+          aria-label="Filter by stock"
+          value={stock}
+          onChange={(e) => {
+            setStock(e.target.value as typeof stock);
+            setLimit(PAGE);
+          }}
+          className={cn(selectClass, "w-full sm:w-auto")}
+        >
+          <option value="">All stock</option>
+          <option value="in">In stock</option>
+          <option value="out">Out of stock or unknown</option>
+        </select>
+        <p className="ml-auto text-sm text-muted-foreground" aria-live="polite">
+          {matches.length === all.length ? `${count(all.length)} products` : `${count(matches.length)} of ${count(all.length)} products`}
         </p>
       </div>
-      <div className="-mx-5 overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="border-b border-border text-xs text-muted-foreground">
+      {/* Scrolls inside the card so the column heads stay in view over a long catalogue. */}
+      <div className="-mx-5 max-h-[calc(100dvh-14rem)] overflow-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="sticky top-0 z-10 border-b border-border bg-card text-xs text-muted-foreground">
             <tr>
-              <th scope="col" className="px-5 py-3 font-medium">Product</th>
-              <th scope="col" className="px-5 py-3 font-medium">SKU</th>
-              <th scope="col" className="px-5 py-3 font-medium">Price</th>
-              <th scope="col" className="px-5 py-3 font-medium">Stock</th>
-              <th scope="col" className="px-5 py-3 font-medium">Product facts</th>
-              {canEdit ? <th scope="col" className="px-5 py-3"><span className="sr-only">Actions</span></th> : null}
+              <th scope="col" className="px-3 py-3 sm:px-5 font-medium">Product</th>
+              <th scope="col" className="hidden px-3 py-3 sm:px-5 font-medium md:table-cell">SKU</th>
+              <th scope="col" className="px-3 py-3 sm:px-5 text-right font-medium">Price</th>
+              <th scope="col" className="px-3 py-3 sm:px-5 font-medium">Stock</th>
+              {canEdit ? <th scope="col" className="px-3 py-3 sm:px-5"><span className="sr-only">Actions</span></th> : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {matches.slice(0, limit).map((p) => (
               <tr key={p.id}>
-                <td className="px-5 py-3">
+                <td className="px-3 py-2 sm:px-5">
                   <div className="flex items-center gap-3">
                     {p.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element -- store images come from any host; next/image needs each one allowed
-                      <img src={thumbUrl(p.imageUrl, 80)} alt="" loading="lazy" className="size-10 shrink-0 rounded-lg bg-muted object-cover" />
+                      <img src={thumbUrl(p.imageUrl, 64)} alt="" loading="lazy" className="size-8 shrink-0 rounded-md bg-muted object-cover" />
                     ) : (
-                      <span className="size-10 shrink-0 rounded-lg bg-muted" aria-hidden="true" />
+                      <span className="size-8 shrink-0 rounded-md bg-muted" aria-hidden="true" />
                     )}
                     <div className="min-w-0">
                       {safeHttpUrl(p.url) ? (
-                        <a href={safeHttpUrl(p.url)!.href} target="_blank" rel="noopener noreferrer" className="font-medium text-foreground hover:underline">
+                        <a href={safeHttpUrl(p.url)!.href} target="_blank" rel="noopener noreferrer" className="line-clamp-2 font-medium text-foreground hover:underline">
                           {p.title}
                         </a>
                       ) : (
-                        <p className="font-medium text-foreground">{p.title}</p>
+                        <p className="line-clamp-2 font-medium text-foreground">{p.title}</p>
                       )}
-                      {p.source === "MANUAL" ? <p className="text-xs text-muted-foreground">Added by hand</p> : null}
+                      {/* The facts a person added; nothing when there are none, rather than a filler line on every row. */}
+                      {p.source === "MANUAL" || p.materials || p.dimensions ? (
+                        <p className="truncate text-xs text-muted-foreground">
+                          {[p.source === "MANUAL" ? "Added by hand" : null, p.materials, p.dimensions].filter(Boolean).join(", ")}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </td>
-                <td className="px-5 py-3 text-muted-foreground">{p.sku ?? "—"}</td>
-                <td className="px-5 py-3 whitespace-nowrap tabular-nums">{price(p)}</td>
-                <td className="px-5 py-3">
+                <td className="hidden px-3 py-2 sm:px-5 whitespace-nowrap text-muted-foreground md:table-cell">{p.sku ?? "—"}</td>
+                <td className="px-3 py-2 sm:px-5 text-right whitespace-nowrap tabular-nums">{price(p)}</td>
+                <td className="px-3 py-2 sm:px-5">
                   <p className="whitespace-nowrap">{stockLabel(p)}</p>
-                  {p.stockCheckedAt ? <p className="text-xs whitespace-nowrap text-muted-foreground">checked {timeAgo(p.stockCheckedAt)}</p> : null}
-                </td>
-                <td className="px-5 py-3 text-muted-foreground">
-                  {p.materials || p.dimensions ? (
-                    <>
-                      {p.materials ? <p>{p.materials}</p> : null}
-                      {p.dimensions ? <p className="text-xs">{p.dimensions}</p> : null}
-                    </>
-                  ) : (
-                    <span>Not added yet</span>
-                  )}
+                  {/* Synced stock is as of the last sync (shown once, in the header); only a hand-set check gets its own time. */}
+                  {p.source === "MANUAL" && p.stockCheckedAt ? <p className="text-xs whitespace-nowrap text-muted-foreground">checked {timeAgo(p.stockCheckedAt)}</p> : null}
                 </td>
                 {canEdit ? (
-                  <td className="px-5 py-3 text-right whitespace-nowrap">
+                  <td className="px-3 py-2 sm:px-5 text-right whitespace-nowrap">
                     <Button size="sm" variant="ghost" onClick={() => void edit(p)}>Edit</Button>
                     {p.source === "MANUAL" ? (
                       <Button size="sm" variant="ghost" onClick={() => setRemoving(p)}>Delete</Button>
@@ -197,11 +214,15 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <div className="flex w-full flex-col gap-5">
       <PageHeader
         title="Products"
         actions={
-          canEdit ? (
+          <>
+            {data?.source && lastSync && !lastSync.error && !syncing ? (
+              <span className="self-center text-sm text-muted-foreground">Synced {timeAgo(lastSync.at)}</span>
+            ) : null}
+            {canEdit ? (
             <>
               {data?.source ? (
                 <Button variant="outline" onClick={syncNow} disabled={syncing}>
@@ -211,17 +232,13 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
               ) : null}
               <Button onClick={() => setEditing("new")}>Add product</Button>
             </>
-          ) : null
+            ) : null}
+          </>
         }
       >
         {data ? (
           <>
             {data.source ? SOURCE_LINE[data.source] : "No synced source"}
-            {syncing
-              ? " · Syncing…"
-              : lastSync && !lastSync.error && lastSync.source
-                ? ` · Last synced ${timeAgo(lastSync.at)}, ${lastSync.count} product${lastSync.count === 1 ? "" : "s"}`
-                : ""}
           </>
         ) : null}
       </PageHeader>

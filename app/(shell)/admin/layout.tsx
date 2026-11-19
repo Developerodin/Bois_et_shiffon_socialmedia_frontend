@@ -7,11 +7,11 @@ import { getShell } from "@/lib/server-fetch";
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   if (!(await getShell()).isPlatformAdmin) notFound();
   return (
-    <div className="mx-auto grid max-w-[96rem] gap-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-10 lg:py-2">
+    <div className="mx-auto grid max-w-[96rem] gap-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-6 lg:py-2">
       <aside className="lg:border-r lg:border-border lg:pr-4">
         <AdminNav />
       </aside>
-      <div className="flex min-w-0 flex-col gap-10">{children}</div>
+      <div className="flex min-w-0 flex-col gap-6">{children}</div>
     </div>
   );
 }

@@ -154,7 +154,7 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
   }
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8">
+    <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <PageHeader title="Settings">
         Who works on this project and the workspace, what each role can do, who is waiting to join, and which accounts this project has connected.
       </PageHeader>

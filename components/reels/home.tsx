@@ -67,7 +67,7 @@ export function ReelsHome({ workspaceId, brandId, canCreate, canPublish }: { wor
   }
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <PageHeader title={navFor("/reels").title}>Plan, make and post short videos for your business.</PageHeader>
 
       {locked ? (

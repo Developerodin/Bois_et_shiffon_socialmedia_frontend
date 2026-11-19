@@ -53,7 +53,7 @@ export function AgentsBoard({ workspaceId, brandId }: Props) {
   }, [load]);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-10">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
       <section className="flex flex-col gap-5">
         <PageHeader title="Your agents">
           Each one works on the active brand. Run one now, or watch the log below.

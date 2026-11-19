@@ -37,7 +37,7 @@ export default async function AdminWorkspaceOverview({ params }: { params: Promi
         <SpendChart days={spend.days} fx={fx} title={`${d.workspace.name}: spend per day, last 30 days`} />
       </Section>
 
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-6">
         <Section id="activity" title="Latest activity">
           <LogTable kind="audit" rows={activity.rows.slice(0, 8)} fx={fx} />
           <Link href={`${base}/logs`} className={more}>

@@ -55,7 +55,7 @@ function useCaptionsUrl(cues: CaptionCue[] | null | undefined): string | undefin
 /** An id that names no reel of this brand, one this role can't read, or not a reel id at all. */
 export function ReelNotFound() {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <BackLink />
       <PageHeader title="Couldn't load this reel">It may have been made for another business.</PageHeader>
     </div>
@@ -124,7 +124,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
   if (status === 403 || status === 404) return <ReelNotFound />;
   if (!detail) {
     return (
-      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5">
         <BackLink />
         <PageHeader title="Reel" />
         {failed ? <LoadError message="Couldn't load this reel." onRetry={() => void reload()} /> : <ListSkeleton label="Loading reel" />}
@@ -139,7 +139,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
   const showVideo = step === "review" && !!detail.videoUrl;
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <a
         href="#reel-preview"
         className="sr-only rounded-full focus:not-sr-only focus:self-start focus:px-3 focus:py-1 focus:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

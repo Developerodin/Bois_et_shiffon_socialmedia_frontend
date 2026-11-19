@@ -13,7 +13,7 @@ export default async function ContextPage() {
 
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
     return (
-      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+      <div className="mx-auto flex max-w-5xl flex-col gap-5">
         <EmptyState
           size="hero"
           icon={Library}

@@ -22,7 +22,7 @@ export default async function AdminWorkspaceLayout({ children, params }: { child
       <PageHeader title={ws.name} crumbs={[{ href: "/admin/workspaces", label: "Workspaces" }, { label: ws.name }]}>
         {ws.owner?.email ?? "No owner"} · since {day(ws.createdAt)} · read-only; this visit is recorded in the workspace’s audit log.
       </PageHeader>
-      <div className="-mt-4 flex flex-col gap-8">
+      <div className="-mt-4 flex flex-col gap-6">
         <TabLinks
           label="Workspace"
           tabs={[

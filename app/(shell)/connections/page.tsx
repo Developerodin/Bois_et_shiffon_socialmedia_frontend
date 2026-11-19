@@ -56,7 +56,7 @@ export default async function ConnectionsPage({
       : null;
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8">
+    <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <PageHeader title="Connections">
         The accounts this business has connected, and what each one lets the agents do.
       </PageHeader>

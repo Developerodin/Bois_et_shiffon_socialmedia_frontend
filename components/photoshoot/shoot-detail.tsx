@@ -39,7 +39,7 @@ function BackLink() {
 /** An id that names no shoot of this brand (or isn't a shoot id at all). */
 export function ShootNotFound() {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <BackLink />
       <PageHeader title="Photoshoot not found">It may have been made for another business.</PageHeader>
     </div>
@@ -93,7 +93,7 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
   const linksOk = shoot !== null && !stale(linksAt);
   if (!linksOk) {
     return (
-      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5">
         <BackLink />
         <PageHeader title={shoot ? shootTitle(shoot.input) : "Photoshoot"} />
         {failed ? <LoadError message="Couldn't load this photoshoot." onRetry={() => void reload()} /> : <ListSkeleton label="Loading photoshoot" />}
@@ -155,7 +155,7 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
   }
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <BackLink />
       <PageHeader title={title}>
         <span className="flex flex-wrap items-center gap-2">

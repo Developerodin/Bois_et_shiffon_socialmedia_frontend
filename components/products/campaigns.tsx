@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { PageSection } from "@/components/ui/page-section";
 import { Textarea } from "@/components/ui/textarea";
-import { campaignsApi, type Campaign, type CampaignBody, type CampaignKind, type Product } from "@/components/products/api";
+import { campaignsApi, thumbUrl, type Campaign, type CampaignBody, type CampaignKind, type Product } from "@/components/products/api";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { byExternalId, groupKey, offerPercents, productName, REMOVED_PRODUCT_NAME, zoneCity } from "@/shared";
@@ -32,7 +32,7 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
   const groups = useMemo(() => {
     const byKey = new Map<string, Product[]>();
     for (const p of products) byKey.set(groupKey(p), [...(byKey.get(groupKey(p)) ?? []), p]);
-    return [...byKey.values()].map((g) => [...g].sort(byExternalId)[0]!).map((rep) => ({ id: rep.id, name: productName(rep.title) })).sort((a, b) => a.name.localeCompare(b.name));
+    return [...byKey.values()].map((g) => [...g].sort(byExternalId)[0]!).map((rep) => ({ id: rep.id, name: productName(rep.title), imageUrl: rep.imageUrl })).sort((a, b) => a.name.localeCompare(b.name));
   }, [products]);
   const categories = useMemo(() => [...new Set(products.flatMap((p) => (p.category ? [p.category] : [])))].sort(), [products]);
 
@@ -51,22 +51,25 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
     ...state.data.campaigns.filter(ended),
   ];
 
+  // Empty, the card is its header alone (one line); dialogs sit outside it so they don't count as a body.
   return (
+    <>
     <PageSection
       id="campaigns"
       title="Campaigns and offers"
       className="flex flex-col gap-3"
       description={
         <>
-          {timeZone ? `Times are in ${zoneLabel(timeZone)}.` : "No timezone set yet: it's asked for on the first save."}{" "}
+          <span aria-live="polite" className="block text-foreground empty:hidden">{notice}</span>
+          {list.length ? null : "No campaigns, offers or standing priorities yet. "}
+          {timeZone ? `Times are in ${zoneLabel(timeZone)}.` : null}{" "}
           {canManage && timeZone ? (
             <button type="button" className="underline underline-offset-2 hover:text-foreground" onClick={() => setZoneOpen(true)}>Change</button>
           ) : null}
         </>
       }
-      actions={canManage ? <Button onClick={() => setEditing("new")}>New campaign</Button> : null}
+      actions={canManage ? <Button variant="outline" onClick={() => setEditing("new")}>New campaign</Button> : null}
     >
-      <p aria-live="polite" className="text-sm empty:hidden">{notice}</p>
       {list.length ? (
         <ul className="-mx-5 divide-y divide-border">
           {list.map((c) => (
@@ -91,10 +94,8 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="text-sm text-muted-foreground">No campaigns, offers or standing priorities yet.</p>
-      )}
-      <p className="text-xs text-muted-foreground">New campaigns are planned at the next Generate calendar run. Someone who can run agents can run it now.</p>
+      ) : null}
+    </PageSection>
       {editing !== null ? (
         <CampaignDialog
           campaign={editing === "new" ? null : editing}
@@ -134,7 +135,7 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
           reload();
         }}
       />
-    </PageSection>
+    </>
   );
 }
 
@@ -182,7 +183,7 @@ function CampaignDialog({
 }: {
   campaign: Campaign | null;
   timeZone: string | null;
-  groups: { id: string; name: string }[];
+  groups: { id: string; name: string; imageUrl?: string | null }[];
   categories: string[];
   onClose: () => void;
   /** `zone`: set the brand timezone first (the first save). */
@@ -202,7 +203,7 @@ function CampaignDialog({
   const [error, setError] = useState<string | null>(null);
   // Saved ids with no loaded row (archived since, or a store switch) stay ticked so an unrelated edit keeps them.
   const known = new Set(groups.map((g) => g.id));
-  const rows = [...groups, ...(campaign?.productIds ?? []).filter((id) => !known.has(id)).map((id) => ({ id, name: REMOVED_PRODUCT_NAME }))];
+  const rows = [...groups, ...(campaign?.productIds ?? []).filter((id) => !known.has(id)).map((id) => ({ id, name: REMOVED_PRODUCT_NAME, imageUrl: null }))];
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const [search, setSearch] = useState("");
   const q = search.trim().toLowerCase();
@@ -242,7 +243,9 @@ function CampaignDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{campaign ? `Edit ${campaign.name}` : "New campaign"}</DialogTitle>
-          <DialogDescription>{timeZone ? `Times are in ${zoneLabel(timeZone)}.` : "Times are in the brand's timezone, set below."}</DialogDescription>
+          <DialogDescription>
+            {timeZone ? `Times are in ${zoneLabel(timeZone)}.` : "Times are in the brand's timezone, set below."} Posts for it are planned at the next Generate calendar run; someone who can run agents can run it now.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="flex flex-col gap-4">
           {campaign?.affectedPosts.length ? (
@@ -324,8 +327,14 @@ function CampaignDialog({
               {shown.length ? (
                 shown.map((p) => (
                   <label key={p.id} className="flex min-h-9 items-center gap-2 text-sm">
-                    <input type="checkbox" checked={productIds.includes(p.id)} onChange={() => setProductIds((l) => toggle(l, p.id))} className="size-4 accent-primary" />
-                    {p.name}
+                    <input type="checkbox" checked={productIds.includes(p.id)} onChange={() => setProductIds((l) => toggle(l, p.id))} className="size-4 shrink-0 accent-primary" />
+                    {p.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- store images come from any host
+                      <img src={thumbUrl(p.imageUrl, 64)} alt="" loading="lazy" className="size-7 shrink-0 rounded-md bg-muted object-cover" />
+                    ) : (
+                      <span className="size-7 shrink-0 rounded-md bg-muted" aria-hidden="true" />
+                    )}
+                    <span className="min-w-0 truncate">{p.name}</span>
                   </label>
                 ))
               ) : (

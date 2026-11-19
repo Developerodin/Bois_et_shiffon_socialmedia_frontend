@@ -97,7 +97,7 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
   }
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <PageHeader
         title={navFor("/library").title}
         actions={

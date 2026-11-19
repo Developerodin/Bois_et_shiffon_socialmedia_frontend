@@ -40,7 +40,7 @@ export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
 
   return (
     <div className="sticky top-0 z-30 bg-card">
-      <header className="flex h-18 items-center gap-3 px-4 sm:px-8">
+      <header className="flex h-18 items-center gap-3 px-4 sm:px-6">
         {nav}
         <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
           <ol className="flex min-w-0 items-center gap-1 text-sm">
@@ -89,7 +89,7 @@ export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
             }
           }}
           className={cn("border-t border-border bg-background", logsOpen ? "block" : "hidden")}>
-          <div className="max-h-[38vh] overflow-hidden px-8 py-2">{logsOpen && <AgentLog key={brandId} workspaceId={workspaceId} brandId={brandId} compact />}</div>
+          <div className="max-h-[38vh] overflow-hidden px-6 py-2">{logsOpen && <AgentLog key={brandId} workspaceId={workspaceId} brandId={brandId} compact />}</div>
         </div>
       )}
     </div>

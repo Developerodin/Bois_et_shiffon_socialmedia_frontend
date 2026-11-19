@@ -98,7 +98,7 @@ export function Studio({ workspaceId, brandId, canCreate, canUpload, initialShoo
   ) : null;
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <PageHeader title={navFor("/photoshoot").title}>Create product photos and style apparel on models.</PageHeader>
 
       {canCreate ? (
