@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { isOffline } from "@/lib/net";
 
 /** A page failed to render. Offline gets its own words and retries by itself once the connection is back. */
-export default function PageError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+/** `inline` is passed by app/(shell)/error.tsx so the failure renders inside the shell; Next itself never sets it. */
+export default function PageError({ error, reset, inline }: { error: Error & { digest?: string }; reset: () => void; inline?: boolean }) {
   const [offline, setOffline] = useState(false);
   useEffect(() => {
     console.error(error);
@@ -19,11 +20,12 @@ export default function PageError({ error, reset }: { error: Error & { digest?: 
   }, [error, reset]);
 
   return offline ? (
-    <ErrorScreen icon={WifiOff} code="Offline" title="You’re offline." description="This page needs a connection. It loads again by itself as soon as you’re back.">
+    <ErrorScreen inline={inline} icon={WifiOff} code="Offline" title="You’re offline." description="This page needs a connection. It loads again by itself as soon as you’re back.">
       <Button onClick={reset}>Try again</Button>
     </ErrorScreen>
   ) : (
     <ErrorScreen
+      inline={inline}
       icon={TriangleAlert}
       code="Error"
       title="This page didn’t load."

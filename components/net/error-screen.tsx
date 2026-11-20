@@ -7,6 +7,7 @@ export function ErrorScreen({
   title,
   description,
   reference,
+  inline = false,
   children,
 }: {
   icon: LucideIcon;
@@ -15,10 +16,13 @@ export function ErrorScreen({
   description: string;
   /** Error digest: lets support find the server log line. */
   reference?: string;
+  /** Inside the shell (sidebar and top bar stay): fills the content area instead of the whole screen. */
+  inline?: boolean;
   children: React.ReactNode;
 }) {
+  const Wrapper = inline ? "div" : "main";
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-background px-6 py-16 text-foreground">
+    <Wrapper className={inline ? "flex items-center justify-center px-6 py-16 text-foreground" : "flex min-h-dvh items-center justify-center bg-background px-6 py-16 text-foreground"}>
       <div className="surface-glow flex w-full max-w-xl flex-col items-start gap-5 rounded-2xl border border-border px-8 py-12 sm:px-12">
         <span className="inline-flex size-12 items-center justify-center rounded-full border border-border bg-muted text-primary" aria-hidden="true">
           <Icon className="size-5" />
@@ -29,6 +33,6 @@ export function ErrorScreen({
         <div className="flex flex-wrap gap-3">{children}</div>
         {reference ? <p className="text-xs text-muted-foreground">Reference: {reference}</p> : null}
       </div>
-    </main>
+    </Wrapper>
   );
 }
