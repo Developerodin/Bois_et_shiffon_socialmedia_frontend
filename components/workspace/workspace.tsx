@@ -45,7 +45,7 @@ import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
-import { safeHttpUrl } from "@/shared";
+import { safeHttpUrl, STATUS_GROUPS } from "@/shared";
 import { timeAgo } from "@/lib/time";
 import { plainSummary } from "@/lib/plain-summary";
 import { isRunCancelled } from "@/components/languages/languages";
@@ -253,7 +253,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
 
   const pickOpps = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "NEW" && o.decision === "RECOMMEND").length, []);
   const pickItems = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "AWAITING_APPROVAL").length, []);
-  const pickToWrite = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "PLANNED" || i.status === "BRIEF_READY" || i.status === "DRAFT_REVIEW").length, []);
+  const pickToWrite = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => (STATUS_GROUPS.toWrite as readonly string[]).includes(i.status)).length, []);
   const pickShortlisted = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "SHORTLISTED").length, []);
   const ideas = useBrandData(base, "opportunities", pickOpps as (d: never) => number);
   const shortlistedQ = useBrandData(base, "opportunities", pickShortlisted as (d: never) => number);
