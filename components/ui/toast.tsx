@@ -65,7 +65,7 @@ export function Toaster() {
     <div
       role="status"
       aria-live="polite"
-      className="pointer-events-none fixed bottom-0 right-0 z-[70] flex w-full max-w-sm flex-col gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pr-[max(1rem,env(safe-area-inset-right))]"
+      className="pointer-events-none fixed bottom-0 right-0 z-[70] flex w-full max-w-sm flex-col gap-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-lg:pb-[max(4.5rem,env(safe-area-inset-bottom))] pr-[max(1rem,env(safe-area-inset-right))]"
     >
       {list.map((t) => (
         <ToastItem key={t.id} t={t} />
