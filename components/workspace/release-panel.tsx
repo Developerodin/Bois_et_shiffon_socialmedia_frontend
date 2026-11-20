@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CalendarClock, Check, CircleAlert, Download, ExternalLink, ImageUp, Send, ShieldCheck, Undo2, X } from "lucide-react";
 import { ApiError, request } from "@/components/settings/api";
+import { useUnsavedGuard } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -232,11 +233,14 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
 /** approved: the post is already approved but an issue now stops it (only "Approve anyway" or "Ask for changes"). */
 function ApproveForm({ version, blocked, issues, canOverride, approved = false, onDecide }: { version: number; blocked: boolean; issues: ProductIssue[]; canOverride: boolean; approved?: boolean; onDecide: (v: Decision["verdict"], note: string, extra: object) => Promise<void> }) {
   // An issue only a rewrite fixes (a wrong price, a changed or withdrawn offer): the note starts with what to fix.
-  const [note, setNote] = useState(() => issues.filter((i) => i.refuses && !i.overridable).map((i) => i.message).join("\n"));
+  const startNote = issues.filter((i) => i.refuses && !i.overridable).map((i) => i.message).join("\n");
+  const [note, setNote] = useState(startNote);
   const [pending, setPending] = useState<Decision["verdict"] | "OVERRIDE" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmReject, setConfirmReject] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
+  // A note the person typed (or edited from the prefilled one) is lost on leaving.
+  useUnsavedGuard(note.trim() !== "" && note !== startNote);
   const refused = issues.some((i) => i.refuses);
   const unavailable = issues.some((i) => i.refuses && i.kind === "availability");
   const wrongPrice = issues.some((i) => i.refuses && i.kind === "price");
@@ -353,6 +357,8 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
   const image = safeHttpUrl(imageLinks[0] ?? "");
   const allHttps = imageLinks.every((l) => safeHttpUrl(l)?.protocol === "https:");
   const video = safeHttpUrl(videoUrl.trim());
+  // Typed links, a chosen time or an upload in progress are lost on leaving (uploaded files wait for Publish).
+  useUnsavedGuard(uploading || uploads.length > 0 || imageUrl !== "" || videoUrl !== "" || runAt !== "");
 
   useEffect(() => {
     if (boards?.length && !boards.some((b) => b.id === boardId)) setBoardId(boards[0].id);

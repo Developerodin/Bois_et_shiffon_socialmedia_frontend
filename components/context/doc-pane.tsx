@@ -11,7 +11,7 @@ import {
 import { DocStateBadge } from "@/components/context/doc-state";
 import { brandBase, translateDoc, TranslateToggle } from "@/components/languages/languages";
 import { Markdown } from "@/components/context/markdown";
-import { okToDiscard, setUnsaved } from "@/components/context/unsaved";
+import { okToDiscard, useUnsavedGuard } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { safeHttpUrl } from "@/shared";
@@ -95,34 +95,8 @@ export function DocPane({
   }, [conflict, newest, base.version]);
 
   // Unsaved text: closing or reloading the tab asks first, and so does anything in the app that would close the
-  // editor (okToDiscard). In-app links are caught here before Next.js handles them.
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    const onLink = (e: MouseEvent) => {
-      const a = (e.target as Element | null)?.closest("a[href]");
-      // SVG links (no string href), downloads and "#" links don't leave the page.
-      if (!(a instanceof HTMLAnchorElement) || a.hasAttribute("download") || a.getAttribute("href") === "#") return;
-      if (a.target === "_blank" || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const to = new URL(a.href, window.location.href);
-      if (to.origin !== window.location.origin) return; // a full page load: beforeunload asks
-      // Same page (a #hash, or another view of the workspace): the page stays mounted, and the workspace asks
-      // itself when its view changes, so asking here too would ask twice.
-      if (to.pathname === window.location.pathname) return;
-      if (!okToDiscard()) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-    setUnsaved(true);
-    window.addEventListener("beforeunload", warn);
-    document.addEventListener("click", onLink, true);
-    return () => {
-      setUnsaved(false);
-      window.removeEventListener("beforeunload", warn);
-      document.removeEventListener("click", onLink, true);
-    };
-  }, [dirty]);
+  // editor (okToDiscard).
+  useUnsavedGuard(dirty);
 
   function startEdit() {
     setDraft(latest?.markdown ?? "");
