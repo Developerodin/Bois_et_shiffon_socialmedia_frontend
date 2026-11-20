@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw } from "lucide-react";
+import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw, X } from "lucide-react";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { Button } from "@/components/ui/button";
@@ -447,6 +447,10 @@ export function PanelLayout<Id extends string>({
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => hide(id))}>Hide panel</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
+                        {/* Same as Hide panel: it comes back from Layout. */}
+                        <Button variant="ghost" size="icon" className="size-7" aria-label={`Close ${p.title} panel`} title="Close panel" onClick={() => announce(id, () => hide(id))}>
+                          <X aria-hidden="true" />
+                        </Button>
                       </div>
                     </header>
                     {!collapsed && wide && <div className="min-h-0 flex-1 overflow-y-auto">{p.render()}</div>}
