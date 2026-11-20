@@ -193,7 +193,8 @@ export function PanelLayout<Id extends string>({
       detail: "Bring it back any time from Layout.",
       tone: "success",
       ms: 8000,
-      action: { label: "Undo", onAction: () => commit(JSON.stringify(layoutRef.current) === after ? before : withPanel(layoutRef.current, id)) },
+      // Through announce, like any panel change: focus goes to the panel's head and the live region says where it is.
+      action: { label: "Undo", onAction: () => announce(id, () => commit(JSON.stringify(layoutRef.current) === after ? before : withPanel(layoutRef.current, id))) },
     });
   };
   const show = (id: Id) => {
@@ -355,6 +356,7 @@ export function PanelLayout<Id extends string>({
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Panels</DropdownMenuLabel>
         {/* Hiding here leaves focus in this open menu (its trap); on close Radix returns it to Layout. Intended. */}
+        {/* No Undo toast for a hide here: ticking the checkbox again brings the panel back. */}
         {panels.map((p) => (
           <DropdownMenuCheckboxItem key={p.id} checked={visible.includes(p.id)} onCheckedChange={(on) => (on ? show(p.id) : announce(p.id, () => hide(p.id)))} onSelect={(e) => e.preventDefault()}>
             {p.title}
