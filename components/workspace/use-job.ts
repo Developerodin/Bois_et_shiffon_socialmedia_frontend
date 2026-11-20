@@ -97,10 +97,11 @@ const visible = () => document.visibilityState === "visible";
  * `stopOn`: HTTP statuses that end polling (a 404 won't turn into a 200 by asking again); `failed` stays on until a
  * success, e.g. from `reload`. `status` is the last error's HTTP status (0: no answer; null: no error, or not an HTTP one).
  * A new `url` starts over: data from the cache (or none), no errors, the clock and `slow` reset.
+ * `off`: don't fetch (e.g. the person's role can't read it); answers other panels get still arrive.
  */
 export function useJob<T>(
   url: string,
-  { pick, done, intervals, capMs, stopOn }: { pick: (d: never) => T; done?: (data: T) => boolean; intervals: Intervals; capMs?: number; stopOn?: readonly number[] },
+  { pick, done, intervals, capMs, stopOn, off }: { pick: (d: never) => T; done?: (data: T) => boolean; intervals: Intervals; capMs?: number; stopOn?: readonly number[]; off?: boolean },
 ): { data: T | null; failed: boolean; slow: boolean; status: number | null; reload: () => Promise<void> } {
   const cached = () => {
     const d = sharedResponse(url);
@@ -164,7 +165,7 @@ export function useJob<T>(
   }, [url, pick]);
 
   useEffect(() => {
-    if (finished || stopped) return;
+    if (finished || stopped || off) return;
     let alive = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
     // Each poll() starts a new chain; an older chain still awaiting its response doesn't schedule again.
@@ -192,7 +193,7 @@ export function useJob<T>(
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", onShow);
     };
-  }, [url, intervals, finished, stopped, onError]);
+  }, [url, intervals, finished, stopped, off, onError]);
 
   useEffect(() => {
     if (finished || capMs === undefined) return;
@@ -205,8 +206,8 @@ export function useJob<T>(
   return { data, failed, slow: slow && !finished, status, reload };
 }
 
-/** Poll a brand API path every 6 s; `reload` refetches now. Starts from the last response any panel got. */
-export function useBrandData<T>(base: string, path: string, pick: (d: never) => T) {
-  const { data, failed, reload } = useJob(`${base}/${path}`, { pick, intervals: JOB_INTERVALS.always });
+/** Poll a brand API path every 6 s; `reload` refetches now. Starts from the last response any panel got. `on`: false doesn't fetch. */
+export function useBrandData<T>(base: string, path: string, pick: (d: never) => T, on = true) {
+  const { data, failed, reload } = useJob(`${base}/${path}`, { pick, intervals: JOB_INTERVALS.always, off: !on });
   return { data, failed, reload };
 }

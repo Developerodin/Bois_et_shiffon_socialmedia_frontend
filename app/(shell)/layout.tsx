@@ -16,6 +16,8 @@ export default async function ShellLayout({ children }: { children: React.ReactN
   const workspaceId = shell.activeWorkspaceId;
   const canCreateBrand = shell.workspacePermissions.includes("brand.create");
   const brandName = shell.brands.find((b) => b.id === shell.activeBrandId)?.displayName ?? null;
+  // The assistant and Translate need agents.read on the business (a client reviewer has neither); with no business picked, as before.
+  const agents = !shell.activeBrandId || shell.brandPermissions.includes("agents.read");
 
   const sidebarProps = {
     brands: shell.brands,
@@ -25,6 +27,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
     canCreateBrand,
     platformAdmin: shell.isPlatformAdmin,
     features: featuresOn(workspaceId),
+    perms: shell.brandPermissions,
     user: { ...shell.user, roleLabel: shell.roleLabel },
   };
 
@@ -41,6 +44,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
             brandName={brandName}
             workspaceId={workspaceId}
             brandId={shell.activeBrandId}
+            agents={agents}
             nav={
               <Suspense fallback={null}>
                 <MobileNav {...sidebarProps} />
@@ -53,7 +57,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
               <MainArea>{children}</MainArea>
             </div>
             {/* A platform-only account has no workspace, so no conversation to hold. */}
-            {workspaceId ? <AssistantPanel workspaceId={workspaceId} brandId={shell.activeBrandId} brandName={brandName} canCreateBrand={canCreateBrand} /> : null}
+            {workspaceId && agents ? <AssistantPanel workspaceId={workspaceId} brandId={shell.activeBrandId} brandName={brandName} canCreateBrand={canCreateBrand} /> : null}
           </div>
         </div>
       </AssistantProvider>

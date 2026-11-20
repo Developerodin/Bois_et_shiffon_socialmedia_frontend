@@ -14,6 +14,8 @@ export type NavEntry = {
   blurb?: string;
   /** Shown only while this flag is on for the workspace. */
   feature?: WebFeature;
+  /** Shown only to roles holding this permission on the business (the page and its API check it too). */
+  perm?: string;
   /** The assistant is a drawer, not a docked column, on this page: it needs the full width. */
   undocksAssistant?: true;
 };
@@ -22,7 +24,7 @@ export const NAV: readonly NavEntry[] = [
   { id: "overview", label: "Overview", href: "/", group: "main" },
   { id: "context", label: "Business context", href: "/context", group: "main" },
   { id: "products", label: "Products", href: "/products", group: "main" },
-  { id: "connections", label: "Connections", href: "/connections", group: "main" },
+  { id: "connections", label: "Connections", href: "/connections", group: "main", perm: "inbox.read" },
   { id: "automations", label: "Automations", href: "/automations", group: "main", feature: "automations" },
 
   { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },
@@ -30,7 +32,7 @@ export const NAV: readonly NavEntry[] = [
   { id: "reels", label: "Reels", href: "/reels", group: "create", feature: "reels", undocksAssistant: true },
   { id: "studio", label: "Studio", href: "/studio", group: "create", feature: "stories" },
 
-  { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox" },
+  { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox", perm: "inbox.read" },
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
@@ -52,9 +54,12 @@ export const NAV: readonly NavEntry[] = [
 
 type SidebarGroup = { id: "main" | "create" | "customers"; label: string | null; entries: NavEntry[] };
 
-/** The sidebar's lists: the main one, then Create and Customers, each only when one of its entries is enabled. */
-export function sidebarGroups(enabled: readonly WebFeature[]): SidebarGroup[] {
-  const shown = (e: NavEntry) => !e.feature || enabled.includes(e.feature);
+/**
+ * The sidebar's lists: the main one, then Create and Customers, each only when one of its entries is enabled.
+ * `perms`: the role's permissions on the business; entries needing one it lacks are left out (none given: no filter).
+ */
+export function sidebarGroups(enabled: readonly WebFeature[], perms?: readonly string[]): SidebarGroup[] {
+  const shown = (e: NavEntry) => (!e.feature || enabled.includes(e.feature)) && (!e.perm || !perms || perms.includes(e.perm));
   const groups: SidebarGroup[] = [
     { id: "main", label: null, entries: NAV.filter((e) => e.group === "main" && shown(e)) },
     { id: "create", label: "Create", entries: NAV.filter((e) => e.group === "create" && shown(e)) },

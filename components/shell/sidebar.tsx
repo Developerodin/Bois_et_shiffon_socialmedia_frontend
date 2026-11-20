@@ -34,13 +34,15 @@ type Props = {
   platformAdmin: boolean;
   /** Decided on the server (lib/features.ts is server-only) and passed down as data. */
   features: readonly WebFeature[];
+  /** The role's permissions on the active business: visibility only, the pages and API check them. */
+  perms: readonly string[];
   user: { name?: string | null; email?: string | null; image?: string | null; roleLabel?: string | null };
 };
 
 const row =
   "flex items-center gap-3 rounded-2xl text-sm transition-colors active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, user }: Props) {
+function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, perms, user }: Props) {
   const pathname = usePathname();
   const panel = useSearchParams().get("panel");
 
@@ -86,7 +88,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
         </nav>
       ) : (
       <nav aria-label="Workspace" className="mt-6 min-h-0 flex-1 overflow-y-auto pb-4">
-        {sidebarGroups(features).map((g) => (
+        {sidebarGroups(features, perms).map((g) => (
           <div key={g.id} className={g.label ? "mt-6" : undefined}>
             {g.label ? <p className="mb-2 px-5 text-xs text-muted-foreground">{g.label}</p> : null}
             <ul className="mr-7 ml-5">

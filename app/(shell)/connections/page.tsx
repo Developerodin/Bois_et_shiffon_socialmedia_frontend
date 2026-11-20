@@ -34,7 +34,8 @@ export default async function ConnectionsPage({
   }
 
   const perms = new Set(shell.brandPermissions);
-  if (!perms.has("brand.read")) {
+  // The accounts list needs inbox.read (the people who answer customers): a client reviewer doesn't see it.
+  if (!perms.has("inbox.read")) {
     return (
       <div className="mx-auto max-w-5xl">
         <EmptyState

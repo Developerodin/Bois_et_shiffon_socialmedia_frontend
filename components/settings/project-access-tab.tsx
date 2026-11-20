@@ -97,7 +97,7 @@ export function ProjectAccessTab({ workspaceId, brandId, canManage }: Props) {
                 <span className="text-sm">{p.role.name}</span>
               )}
               {canManage ? (
-                <Button variant="ghost" size="icon" aria-label={`Remove ${p.name ?? p.email} from this project`} onClick={() => setRemoving({ id: p.id, label: p.name ?? p.email, invite: false })} className="text-muted-foreground hover:text-destructive">
+                <Button variant="ghost" size="icon" aria-label={`Remove ${p.name ?? p.email} from this project`} onClick={() => setRemoving({ id: p.id, label: p.name ?? p.email ?? "this person", invite: false })} className="text-muted-foreground hover:text-destructive">
                   <Trash2 />
                 </Button>
               ) : null}
@@ -181,11 +181,12 @@ export function ProjectAccessTab({ workspaceId, brandId, canManage }: Props) {
   );
 }
 
-function Person({ name, email, note }: { name: string | null; email: string; note?: string }) {
+/** `email`: absent for people who don't manage the project. */
+function Person({ name, email, note }: { name: string | null; email?: string; note?: string }) {
   return (
     <div className="min-w-0">
-      <p className="truncate font-medium text-foreground">{name ?? email}</p>
-      <p className="truncate text-xs text-muted-foreground">{note ?? (name ? email : "")}</p>
+      <p className="truncate font-medium text-foreground">{name ?? email ?? "Unnamed member"}</p>
+      <p className="truncate text-xs text-muted-foreground">{note ?? (name ? (email ?? "") : "")}</p>
     </div>
   );
 }

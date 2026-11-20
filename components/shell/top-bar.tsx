@@ -10,13 +10,14 @@ import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { assistantDocks, navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
-type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null; nav?: ReactNode };
+/** `agents`: the role reads agents on this business (agents.read): the assistant and the Logs drawer are for those roles. */
+type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null; nav?: ReactNode; agents: boolean };
 
 const LOGS_KEY = "ws.logsOpen";
 export const TOPBAR_SLOT_ID = "topbar-slot";
 
 /** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (wherever the assistant isn't docked: below 1280 px, or a page that doesn't dock it) the assistant toggle on the right. */
-export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
+export function TopBar({ brandName, workspaceId, brandId, nav, agents }: Props) {
   const pathname = usePathname();
   const { title, brandScoped } = navFor(pathname);
   const { open: assistantOpen, setOpen: setAssistantOpen } = useAssistant();
@@ -62,15 +63,15 @@ export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
           {workspaceId && <CreditsChip workspaceId={workspaceId} />}
           {/* The Overview's panel layout portals its Layout menu here (one header band instead of two). */}
           <div id={TOPBAR_SLOT_ID} className="contents" />
-          {brandId && (
+          {brandId && agents && (
             <button type="button" id="logs-toggle" onClick={toggleLogs} onKeyDown={(e) => e.key === "Escape" && logsOpen && toggleLogs()} aria-expanded={logsOpen} aria-controls="agent-log-drawer" className={cn(tool, logsOpen && "bg-accent text-primary-strong")}>
               <SquareTerminal className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               <span className="sr-only sm:not-sr-only">Logs</span>
               <ChevronUp className={cn("size-4 transition-transform motion-reduce:transition-none", !logsOpen && "rotate-180")} strokeWidth={SHELL_STROKE} aria-hidden="true" />
             </button>
           )}
-          {/* Same condition as the layout's AssistantPanel: no workspace, no panel to open. */}
-          {workspaceId && (
+          {/* Same condition as the layout's AssistantPanel: no workspace (or a role without agents.read), no panel to open. */}
+          {workspaceId && agents && (
             <button type="button" id={ASSISTANT_TOGGLE_ID} onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, assistantDocks(pathname) && "xl:hidden")}>
               <MessageCircle className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               <span className="sr-only sm:not-sr-only">Espanda</span>
@@ -79,7 +80,7 @@ export function TopBar({ brandName, workspaceId, brandId, nav }: Props) {
         </div>
       </header>
 
-      {workspaceId && brandId && (
+      {workspaceId && brandId && agents && (
         <div
           id="agent-log-drawer"
           onKeyDown={(e) => {

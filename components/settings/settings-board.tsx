@@ -21,7 +21,7 @@ const TABS: { key: TabKey; label: string; needs: string }[] = [
   { key: "members", label: "Members", needs: "members.read" },
   { key: "roles", label: "Roles", needs: "roles.read" },
   { key: "invitations", label: "Invitations", needs: "invitations.manage" },
-  { key: "connections", label: "Connections", needs: "brand.read" },
+  { key: "connections", label: "Connections", needs: "inbox.read" },
   { key: "languages", label: "Languages", needs: "brand.read" },
 ];
 

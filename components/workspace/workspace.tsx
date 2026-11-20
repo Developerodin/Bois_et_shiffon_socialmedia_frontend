@@ -204,23 +204,31 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const canRun = !!perms?.includes("agents.run");
   const canEditDocs = !!perms?.includes("context.edit");
   const canConfirmDocs = !!perms?.includes("context.confirm");
+  // What this role may read (a client reviewer: no agents, documents or accounts). Nothing it can't read is asked for,
+  // so nothing it can't read shows as failed; those sections are left out.
+  const canAgents = !!perms?.includes("agents.read");
+  const canReports = !!perms?.includes("analytics.read");
+  const canAccounts = !!perms?.includes("inbox.read");
   // A failed load keeps what was already shown; a block shows its error only while it has nothing to show.
   const loadReports = useCallback(
-    () =>
-      request<{ seo: Report; geo: Report }>(`${base}/audit-reports`).then(
+    async () => {
+      if (!canReports) return;
+      return request<{ seo: Report; geo: Report }>(`${base}/audit-reports`).then(
         (r) => {
           setReports(r);
           mark("reports", false);
         },
         () => mark("reports", true),
-      ),
-    [base, mark],
+      );
+    },
+    [base, mark, canReports],
   );
   const refreshAgents = useCallback(() => fetchAgents(workspaceId, brandId).then((a) => setAgents(a.agents)), [workspaceId, brandId]);
 
   // Each request gives up after 30 s (lib/net.ts), so a hung one can't stall the poll.
   const loadDocsAndAgents = useCallback(
     async (signal?: AbortSignal) => {
+      if (!canAgents) return;
       const [d, a] = await Promise.allSettled([fetchContextDocs(workspaceId, brandId, signal), fetchAgents(workspaceId, brandId, signal)]);
       if (signal?.aborted) return;
       if (d.status === "fulfilled") setDocs(d.value);
@@ -228,22 +236,25 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       mark("docs", d.status === "rejected");
       mark("agents", a.status === "rejected");
     },
-    [workspaceId, brandId, mark],
+    [workspaceId, brandId, mark, canAgents],
   );
-  // Everything the Overview loads up front; Retry calls it again.
+  // Everything the Overview loads up front, once the role is known; Retry calls it again.
   const loadAll = useCallback(
-    (signal?: AbortSignal) => {
+    async (signal?: AbortSignal) => {
+      if (!perms) return;
       void loadReports();
-      settingsApi.connections(workspaceId, brandId).then(
-        (c) => {
-          setConnections(c.connections);
-          mark("connections", false);
-        },
-        () => mark("connections", true),
-      );
+      if (canAccounts) {
+        settingsApi.connections(workspaceId, brandId).then(
+          (c) => {
+            setConnections(c.connections);
+            mark("connections", false);
+          },
+          () => mark("connections", true),
+        );
+      }
       return loadDocsAndAgents(signal);
     },
-    [workspaceId, brandId, loadReports, loadDocsAndAgents, mark],
+    [perms, workspaceId, brandId, loadReports, loadDocsAndAgents, mark, canAccounts],
   );
 
   // Docs and agents are polled; the poll carries on through failures.
@@ -280,10 +291,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const ideasToDecide = ideas.data, awaiting = awaitingQ.data, toWrite = toWriteQ.data, shortlisted = shortlistedQ.data;
   const pipeline = ideasToDecide == null || awaiting == null || toWrite == null || shortlisted == null ? null : { ideasToDecide, awaiting, toWrite, shortlisted };
   const pipelineFailed = [ideas, awaitingQ, toWriteQ, shortlistedQ].some((q) => q.data == null && q.failed);
-  // Today is built from the reports, the connections and the pipeline counts.
+  // Today is built from the reports, the connections and the pipeline counts (the ones this role can read).
   const today = {
-    failed: (!reports && failed.reports) || (!connections && failed.connections) || pipelineFailed,
-    loading: (!reports && !failed.reports) || (!connections && !failed.connections) || (!pipeline && !pipelineFailed),
+    failed: (canReports && !reports && failed.reports) || (canAccounts && !connections && failed.connections) || pipelineFailed,
+    loading: !perms || (canReports && !reports && !failed.reports) || (canAccounts && !connections && !failed.connections) || (!pipeline && !pipelineFailed),
   };
   const reloadIdeas = ideas.reload, reloadContent = awaitingQ.reload;
   const retry = useCallback(() => {
@@ -328,6 +339,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
           onOpenResearch={() => open({ kind: "agent", key: "research", run: true })}
           canEdit={canEditDocs}
           canRun={canRun}
+          show={{ docs: canAgents, competitors: canReports, accounts: canAccounts }}
         />
       ),
     },
@@ -390,6 +402,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
             onShowPanel={showPanel}
             onRetry={retry}
             due={perms?.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={showPanel} /> : null}
+            showAgents={canAgents}
           />
         ),
     },
@@ -397,13 +410,13 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       id: "analytics",
       title: "Analytics",
       icon: <Gauge />,
-      render: () => <AnalyticsPanel reports={reports} failed={failed.reports} onRetry={retry} onOpenAgent={(key) => open({ kind: "agent", key })} />,
+      render: () => (canReports || !perms ? <AnalyticsPanel reports={reports} failed={failed.reports} onRetry={retry} onOpenAgent={(key) => open({ kind: "agent", key })} /> : <NotForRole what="reports" />),
     },
     {
       id: "feed",
       title: "Agents feed",
       icon: <ListChecks />,
-      render: () => <AgentsFeed agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} canRun={canRun} onRan={refreshAgents} onOpen={open} />,
+      render: () => !canAgents && perms ? <NotForRole what="the agents" /> : <AgentsFeed agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} canRun={canRun} onRan={refreshAgents} onOpen={open} />,
     },
     {
       id: "ideas",
@@ -423,7 +436,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       icon: <Users />,
       render: () => <CompetitorsPanel base={base} onOpen={(id) => open({ kind: "competitor", id })} onFind={() => open({ kind: "agent", key: "competitors" })} />,
     },
-    { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> },
+    { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => (canAgents ? <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> : perms ? <NotForRole what="the Agent Log" /> : null) },
   ];
 
   const outOfCredits = agents?.some((a) => a.lastRun?.error?.includes("AI credits used up"));
@@ -442,6 +455,11 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
 }
 
 const NONE_FAILED = { docs: false, agents: false, reports: false, connections: false };
+
+/** A panel this role can't read (e.g. a client reviewer and the agents): said plainly, never as a failed load. */
+function NotForRole({ what }: { what: string }) {
+  return <p className="p-5 text-sm text-muted-foreground">Your role doesn&rsquo;t include {what}.</p>;
+}
 
 const PANEL_IDS = ["context", "home", "ideas", "content", "competitors", "analytics", "feed", "log"] as const;
 type PanelId = (typeof PANEL_IDS)[number];
@@ -552,9 +570,12 @@ function ContextPane({
   onOpenResearch,
   canEdit,
   canRun,
+  show,
 }: {
   base: string;
   onOpenResearch: () => void;
+  /** The sections this role can read: documents (agents.read), competitors (analytics.read), accounts (inbox.read). */
+  show: { docs: boolean; competitors: boolean; accounts: boolean };
   /** Editing the brand needs context.edit; re-reading the site starts an agent run (agents.run). */
   canEdit: boolean;
   canRun: boolean;
@@ -627,6 +648,7 @@ function ContextPane({
           )}
         </section>
 
+        {show.docs && (
         <section aria-labelledby="docs-h" className="px-5 py-4">
           <h2 id="docs-h" className="flex items-center gap-2 text-sm font-semibold">
             Documents <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{docs?.docs.filter((d) => d.latest).length ?? 0}</span>
@@ -655,7 +677,9 @@ function ContextPane({
           </ul>
           </LoadGate>
         </section>
+        )}
 
+        {show.competitors && (
         <section aria-labelledby="comp-h" className="px-5 py-4">
           <h2 id="comp-h" className="flex items-center gap-2 text-sm font-semibold">
             Competitors {reportsReady && <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{competitors.length}</span>}
@@ -678,7 +702,9 @@ function ContextPane({
           )}
           </LoadGate>
         </section>
+        )}
 
+        {show.accounts && (
         <section aria-labelledby="conn-h" className="px-5 pb-6 pt-4">
           <h2 id="conn-h" className="text-sm font-semibold">
             Accounts
@@ -699,6 +725,7 @@ function ContextPane({
           )}
           </LoadGate>
         </section>
+        )}
       </div>
     </div>
   );
@@ -768,9 +795,12 @@ function Home({
   onShowPanel,
   onRetry,
   due,
+  showAgents,
 }: {
   workspaceId: string;
   base: string;
+  /** The agents section, for roles that can read agents. */
+  showAgents: boolean;
   docs: ContextDocsResponse | null;
   /** The card for stories due to be posted by hand (people who can publish only). */
   due: React.ReactNode;
@@ -976,6 +1006,7 @@ function Home({
         )}
       </section>
 
+      {showAgents && (
       <section aria-labelledby="agents-h" className="px-5 pb-10">
         <div className="flex items-center justify-between">
           <h2 id="agents-h" className="text-base font-semibold">
@@ -1029,6 +1060,7 @@ function Home({
           </ul>
         </details>
       </section>
+      )}
     </div>
   );
 }

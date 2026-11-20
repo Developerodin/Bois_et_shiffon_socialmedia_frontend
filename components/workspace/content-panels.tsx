@@ -190,7 +190,8 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
     const s = d.agents.find((a) => a.key === "planner")?.lastRun?.status;
     return s === "RUNNING" || s === "QUEUED";
   }, []);
-  const plannerRunning = useBrandData(base, "agents", pickPlanner as (d: never) => boolean).data === true;
+  // Only for roles that can read agents (a client reviewer can't): never asked, so never a failure here.
+  const plannerRunning = useBrandData(base, "agents", pickPlanner as (d: never) => boolean, !!perms?.includes("agents.read")).data === true;
   const workspaceId = workspaceIdOf(base);
   const planPrice = useRunPrice(workspaceId, "planner");
   const scoutPrice = useRunPrice(workspaceId, "scout");
@@ -250,7 +251,8 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
           {planning && <RunWatch base={base} runId={planning} onFailed={planFailed} onDone={planDone} />}
         </span>
         <span className="flex items-center gap-2">
-          {shown.length > 0 && (
+          {/* Translate is an AI call behind agents.read: a client reviewer doesn't get it. */}
+          {shown.length > 0 && perms?.includes("agents.read") && (
             <TranslateToggle
               on={translateOn && !translating}
               busy={translating}

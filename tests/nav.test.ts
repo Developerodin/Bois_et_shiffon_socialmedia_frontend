@@ -73,6 +73,13 @@ describe("sidebarGroups", () => {
     expect(ids(g[1])).toEqual(["inbox"]);
   });
 
+  it("leaves out Connections and Inbox for a role without inbox.read (a client reviewer)", () => {
+    const g = sidebarGroups(["inbox"], ["brand.read", "analytics.read", "content.approve", "content.download"]);
+    expect(g.map((x) => x.id)).toEqual(["main"]);
+    expect(ids(g[0])).toEqual(["overview", "context", "products"]);
+    expect(ids(sidebarGroups(["inbox"], ["brand.read", "inbox.read"])[1])).toEqual(["inbox"]);
+  });
+
   it("gates Studio on stories", () => {
     expect(ids(sidebarGroups(["stories"])[1])).toEqual(["studio"]);
   });

@@ -250,9 +250,10 @@ const brand = (w: string, b: string) => `${ws(w)}/brands/${encodeURIComponent(b)
 /** The brand's connected accounts: read by Settings and by the reel's Publish step. */
 export const connectionsUrl = (w: string, b: string) => `${brand(w, b)}/connections`;
 
+/** Emails (and invitations) come only to people who manage the project (project.members.manage). */
 export type ProjectPeople = {
-  viaWorkspace: { userId: string; name: string | null; email: string; role: string }[];
-  people: { id: string; userId: string; name: string | null; email: string; role: { id: string; name: string } }[];
+  viaWorkspace: { userId: string; name: string | null; email?: string; role: string }[];
+  people: { id: string; userId: string; name: string | null; email?: string; role: { id: string; name: string } }[];
   invitations: { id: string; email: string; role: { id: string; name: string }; expiresAt: string }[];
   roles: { id: string; name: string; description: string | null }[];
 };
