@@ -142,7 +142,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceI
 
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading reports" />;
-  else if (state.kind === "forbidden") body = <EmptyState icon={Gauge} title="You can't see performance" description="Your role can't see performance." />;
+  else if (state.kind === "forbidden") body = <EmptyState icon={Gauge} title="You can't see performance" description="Ask a workspace owner for access." />;
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
   else {
     const { seo, geo } = state.data;

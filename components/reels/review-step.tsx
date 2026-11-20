@@ -84,11 +84,11 @@ export const ReviewStep = memo(function ReviewStep({ workspaceId, brandId, detai
             <ApproveButton workspaceId={workspaceId} brandId={brandId} detail={detail} blocked={!!block || savingCaption} busy={downloading} setBusy={setDownloading} />
           ) : null}
           {canApprove ? (
-            <DownloadButton workspaceId={workspaceId} brandId={brandId} detail={detail} blocked={!actions.download || !!block || savingCaption} downloading={downloading} setDownloading={setDownloading} />
+            <DownloadButton workspaceId={workspaceId} brandId={brandId} detail={detail} blocked={!actions.download || !!block || savingCaption} describedBy={actions.downloadWhy ? "download-why" : undefined} downloading={downloading} setDownloading={setDownloading} />
           ) : null}
           <Button type="button" disabled={!!block} onClick={() => go("publish")}>Continue to Publish</Button>
         </div>
-        {actions.downloadWhy ? <p className="text-sm text-muted-foreground">{actions.downloadWhy}</p> : null}
+        {actions.downloadWhy ? <p id="download-why" className="text-sm text-muted-foreground">{actions.downloadWhy}</p> : null}
         {block ? <p className="text-sm text-muted-foreground">{block}</p> : null}
       </div>
 
@@ -321,11 +321,12 @@ function ApproveButton({ workspaceId, brandId, detail, blocked, busy: working, s
 }
 
 /** Download: reads the status fresh and calls `send` only if the reel is already approved, so it never approves. Then the browser saves the file from its link. */
-function DownloadButton({ workspaceId, brandId, detail, blocked, downloading, setDownloading }: {
+function DownloadButton({ workspaceId, brandId, detail, blocked, describedBy, downloading, setDownloading }: {
   workspaceId: string;
   brandId: string;
   detail: ReelDetail;
   blocked: boolean;
+  describedBy?: string;
   downloading: boolean;
   setDownloading: (v: boolean) => void;
 }) {
@@ -361,7 +362,7 @@ function DownloadButton({ workspaceId, brandId, detail, blocked, downloading, se
 
   return (
     <>
-      <Button type="button" variant="outline" disabled={blocked || downloading} onClick={(e) => void press(e)}>
+      <Button type="button" variant="outline" disabled={blocked || downloading} aria-describedby={describedBy} onClick={(e) => void press(e)}>
         {downloading ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <Download className="size-4" aria-hidden="true" />}
         Download video
       </Button>

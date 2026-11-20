@@ -78,22 +78,28 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
     }
   }
 
-  async function remove(p: LibraryPhoto) {
+  /** True when the photo is gone. */
+  async function remove(p: LibraryPhoto): Promise<boolean> {
     setStatus("");
     setError("");
     setBusyKey(p.key);
     try {
       set(await libraryApi.edit(workspaceId, brandId, { removeUpload: p.key }));
       setStatus(`Removed ${p.title}.`);
+      return true;
     } catch (err) {
       setError(errorMessage(err));
+      return false;
     } finally {
       // Flushed first: "Add photos" is disabled while busy, and a disabled button can't take focus.
       flushSync(() => setBusyKey(null));
-      // The removed tile's button is gone; land on "Add photos", or on the section heading for a role that can't add.
-      if (addRef.current) addRef.current.focus();
-      else focusSectionHeading("photos");
     }
+  }
+
+  // The removed tile's button is gone; land on "Add photos", or on the section heading for a role that can't add.
+  function focusAfterRemove() {
+    if (addRef.current) addRef.current.focus();
+    else focusSectionHeading("photos");
   }
 
   return (
@@ -137,6 +143,7 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
               label={source === "website" ? "Website photos" : "Uploads"}
               empty={EMPTY[source]}
               onRemove={source === "uploads" && canEdit ? remove : undefined}
+              afterRemove={focusAfterRemove}
               // While a batch uploads, "" holds every remove button disabled (no photo has an empty key).
               busyKey={uploading ? "" : busyKey}
             />
@@ -149,11 +156,13 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
 }
 
 /** Asks before a photo is deleted. The "confirming" state lives here, so opening the dialog re-renders this wrapper but not the memoized grid. */
-function RemovableGrid({ onRemove, ...grid }: { photos: LibraryPhoto[]; label: string; empty: { title: string; body: string }; onRemove?: (p: LibraryPhoto) => Promise<void>; busyKey: string | null }) {
+function RemovableGrid({ onRemove, afterRemove, ...grid }: { photos: LibraryPhoto[]; label: string; empty: { title: string; body: string }; onRemove?: (p: LibraryPhoto) => Promise<boolean>; afterRemove: () => void; busyKey: string | null }) {
   const [confirming, setConfirming] = useState<LibraryPhoto | null>(null);
+  const lastTitle = useRef<string | null>(null);
+  const deleted = useRef(false);
   return (
     <>
-      <PhotoGrid mode="browse" {...grid} onRemove={onRemove ? setConfirming : undefined} />
+      <PhotoGrid mode="browse" {...grid} onRemove={onRemove ? (p) => { lastTitle.current = p.title; deleted.current = false; setConfirming(p); } : undefined} />
       <ConfirmDialog
         open={confirming !== null}
         onOpenChange={(open) => {
@@ -163,7 +172,13 @@ function RemovableGrid({ onRemove, ...grid }: { photos: LibraryPhoto[]; label: s
         description={confirming ? `${confirming.title} is removed from your uploads. This can't be undone.` : ""}
         confirmLabel="Delete photo"
         onConfirm={async () => {
-          if (confirming && onRemove) await onRemove(confirming);
+          if (confirming && onRemove) deleted.current = await onRemove(confirming);
+        }}
+        // The dialog has no trigger element, so focus would fall to <body>: place it ourselves.
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          if (deleted.current) afterRemove();
+          else [...document.querySelectorAll<HTMLButtonElement>("button[aria-label^='Remove ']")].find((b) => b.getAttribute("aria-label") === `Remove ${lastTitle.current}`)?.focus();
         }}
       />
     </>

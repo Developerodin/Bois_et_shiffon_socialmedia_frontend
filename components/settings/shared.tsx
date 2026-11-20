@@ -61,6 +61,7 @@ export function ConfirmDialog({
   description,
   confirmLabel,
   onConfirm,
+  onCloseAutoFocus,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -68,6 +69,8 @@ export function ConfirmDialog({
   description: string;
   confirmLabel: string;
   onConfirm: () => Promise<void>;
+  /** Where focus goes when it closes; preventDefault() to place it yourself (a dialog opened from code has no trigger to return to). */
+  onCloseAutoFocus?: (event: Event) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +96,7 @@ export function ConfirmDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent>
+      <DialogContent onCloseAutoFocus={onCloseAutoFocus}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

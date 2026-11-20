@@ -38,7 +38,7 @@ export default async function AdminOverview() {
         <Stat href="/admin/spend?tests=1" label="Test runs, last 30 days" value={dollars(usd30(o.tests))} hint={`${o.tests.calls30.toLocaleString("en")} calls`} />
       </div>
 
-      <Section id="trend" title="Spend per day, last 30 days" description="Customers only (test runs left out): AI calls plus other paid APIs. The table below has each day’s split.">
+      <Section id="trend" title="Spend per day, last 30 days" description="Customers only (test runs left out): AI calls plus other paid APIs. Open Show as a table below the chart for each day’s split.">
         <SpendChart days={spend.days} fx={fx} title="Customer spend per day, last 30 days" />
       </Section>
 
