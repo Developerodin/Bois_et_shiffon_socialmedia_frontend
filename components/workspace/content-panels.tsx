@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { createPortal } from "react-dom";
 import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { ChecksList } from "@/components/ui/checks-list";
 import { reelHref } from "@/components/reels/href";
@@ -20,7 +21,7 @@ import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
 import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { TONE_CLASS, toneOf } from "@/lib/status";
+import { TONE_CLASS, toneOf, type Tone } from "@/lib/status";
 import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
 import { filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
 import { dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
@@ -231,7 +232,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
     }
   }
 
-  if (!data) return failed ? <LoadFailed what="ideas" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading ideas…</p>;
+  if (!data) return failed ? <LoadFailed what="ideas" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading ideas" rows={3} /></div>;
   const shown = data.filter((o) => (filter === "all" ? true : o.status === "NEW" || o.status === "SHORTLISTED"));
   const shortlisted = data.filter((o) => o.status === "SHORTLISTED").length;
   return (
@@ -260,13 +261,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
               onOriginal={() => setTranslateOn(false)}
             />
           )}
-          <div role="tablist" aria-label="Filter ideas" className="flex rounded-md bg-muted p-0.5">
-            {(["open", "all"] as const).map((f) => (
-              <button key={f} role="tab" type="button" aria-selected={filter === f} onClick={() => setFilter(f)} className={cn("rounded px-2 py-1", filter === f ? "bg-background text-foreground" : "text-muted-foreground")}>
-                {f === "open" ? "To decide" : "All"}
-              </button>
-            ))}
-          </div>
+          <SegmentedRadios label="Filter ideas" name="ideas-filter" value={filter} onChange={setFilter} options={[{ value: "open", label: "To decide" }, { value: "all", label: "All" }]} />
         </span>
       </div>
       {error && <p role="alert" className="px-4 pt-3 text-sm text-destructive">{error}</p>}
@@ -290,15 +285,15 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
           <p className="text-sm text-muted-foreground">{data.length ? "No open ideas. Switch to All to see past ones." : "No ideas yet. The Opportunities agent finds what to post about."}</p>
           {perms.includes("agents.run") && (
             <Button size="sm" variant="secondary" onClick={onRunScout}>
-              {withPrice("Find ideas", scoutPrice)}
+              {withPrice("Get ideas", scoutPrice)}
             </Button>
           )}
         </div>
       ) : (
         <ul className="divide-y divide-border">
           {shown.map((o) => (
-            <li key={o.id} className={cn("flex flex-col gap-2 px-4 py-3.5", o.status === "DISMISSED" && "opacity-60")}>
-              <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            <li key={o.id} className="flex flex-col gap-2 px-4 py-3.5">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
                 <StatusBadge status={o.decision}>{DECISION[o.decision]}</StatusBadge>
                 {o.timing && <span className="text-muted-foreground">{o.timing}</span>}
                 {o.status !== "NEW" && <span className="rounded-full border border-border px-2 py-0.5 text-muted-foreground">{o.status === "SHORTLISTED" ? "Shortlisted" : o.status === "PLANNED" ? "Planned" : "Dismissed"}</span>}
@@ -334,13 +329,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
                 <div className="flex gap-2 pt-1">
                   {o.status === "SHORTLISTED" ? (
                     <>
-                      {/* The next step from here. The Planner plans every shortlisted idea in one run, and says so. */}
-                      {perms.includes("agents.run") && (
-                        <Button size="sm" onClick={() => void plan()} disabled={!!planning || plannerRunning}>
-                          {planning || plannerRunning ? <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> : null}
-                          {planning || plannerRunning ? "Planning posts…" : withPrice(shortlisted === 1 ? "Plan into posts" : `Plan all ${shortlisted} shortlisted`, planPrice)}
-                        </Button>
-                      )}
+                      {/* The pinned bar above is the one place to plan: the Planner plans every shortlisted idea in one run. */}
                       <Button size="sm" variant="secondary" onClick={() => set(o.id, "NEW")} disabled={!!deciding}>
                         {deciding?.id === o.id ? "Removing…" : "Remove from shortlist"}
                       </Button>
@@ -388,8 +377,10 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const canExport = perms.includes("content.download");
   // Campaign names for the filter, read once (the calendar's poll doesn't carry them); without them the filter just isn't offered.
   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
+  const [campaignsFailed, setCampaignsFailed] = useState(false);
   useEffect(() => {
-    request<{ campaigns: { id: string; name: string }[] }>(`${base}/campaigns`).then((r) => setCampaigns(r.campaigns), () => {});
+    setCampaignsFailed(false);
+    request<{ campaigns: { id: string; name: string }[] }>(`${base}/campaigns`).then((r) => setCampaigns(r.campaigns), () => setCampaignsFailed(true));
   }, [base]);
   const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
   // The posts of the month last shown in Month, so its channels and campaigns can be filtered on too.
@@ -423,7 +414,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   );
   // Opens the new post in the post view, like a calendar row.
   const newPost = <NewPostDialog base={base} canCreate={perms.includes("content.create")} onCreated={onOpen} />;
-  if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
+  if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading calendar" rows={3} /></div>;
   // Month never shows this: past months come from their own read. The switch stays, so a brand with only old posts gets there.
   if (!data.length && view === "list") {
     return (
@@ -447,7 +438,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   for (const i of [...data, ...monthItems]) if (i.campaign && !named.has(i.campaign.id)) named.set(i.campaign.id, i.campaign.name);
   const campaignOptions = [...named].map(([id, name]) => ({ id, name }));
   const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
-  const sel = cn(selectClass, "h-8 w-auto text-xs");
+  const sel = cn(selectClass, "h-8 w-auto text-xs pointer-coarse:h-11");
   const filters = (
     <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2" role="group" aria-label="Filter posts">
       {viewSwitch}
@@ -466,6 +457,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           {filter.campaignId && !campaignOptions.some((c) => c.id === filter.campaignId) && <option value={filter.campaignId}>This campaign</option>}
         </select>
       )}
+      {campaignsFailed && <p className="text-xs text-muted-foreground">Couldn&rsquo;t load campaigns.</p>}
       <select aria-label="Owner" value={filter.owner ?? ""} onChange={(e) => set({ owner: (e.target.value || undefined) as CalendarFilter["owner"] })} className={sel}>
         <option value="">Anyone</option>
         {(me || filter.owner === "me") && <option value="me" disabled={!me}>Mine</option>}
@@ -520,13 +512,13 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
                       i.firstFrameUrl ? <img src={i.firstFrameUrl} alt="" className="aspect-[9/16] w-9 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-9 shrink-0 rounded bg-muted" />
                     )}
                     <span className="flex min-w-0 flex-1 flex-col gap-1">
-                    <span className="flex items-center justify-between gap-2 text-[11px]">
+                    <span className="flex items-center justify-between gap-2 text-xs">
                       <span className="text-muted-foreground">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
                       <StatusBadge status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>
                     </span>
                     <span className="text-sm">{i.title}</span>
-                    <span className="text-[11px] text-muted-foreground">{ownerLabel(i.owner)}</span>
-                    {i.byHand && i.scheduledFor && <span className="text-[11px] font-medium text-primary">Post by hand &middot; {dayTime(i.scheduledFor)}</span>}
+                    <span className="text-xs text-muted-foreground">{ownerLabel(i.owner)}</span>
+                    {i.byHand && i.scheduledFor && <span className="text-xs font-medium text-primary">Post by hand &middot; {dayTime(i.scheduledFor)}</span>}
                     </span>
                   </button>
                 </li>
@@ -542,6 +534,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
 type RangeAnswer = { items: ContentItem[]; truncated?: boolean };
 const pickRange = (d: RangeAnswer) => d;
 const MORE_AFTER = 3;
+/** The month's chips are coloured by status: this says what each colour is, since colour alone is not a label. */
+const LEGEND: readonly (readonly [Tone, string])[] = [["info", "Awaiting approval · Scheduled"], ["good", "Approved · Published"], ["warn", "Needs a look"], ["bad", "Blocked · Rejected"], ["muted", "To write"]];
 const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
 
 /**
@@ -549,7 +543,8 @@ const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
  * the cell's button: the title, plus a short time once the cell is over 140 px wide (a time ate narrow chips).
  */
 function PostChip({ item, onOpen }: { item: ContentItem; onOpen?: (id: string) => void }) {
-  const tone = cn("flex w-full min-w-0 items-center gap-1 rounded border px-1 py-0.5 text-left text-[11px] leading-tight", TONE_CLASS[toneOf(item.publishIssue ?? item.status)]);
+  const tone = cn("flex w-full min-w-0 items-center gap-1 rounded border px-1 py-0.5 text-left text-xs leading-tight", TONE_CLASS[toneOf(item.publishIssue ?? item.status)]);
+  const status = statusText(item); // once per chip: the title and the screen-reader text both use it
   if (!onOpen) {
     const time = item.scheduledFor ? shortTime(item.scheduledFor) : null;
     return (
@@ -560,9 +555,9 @@ function PostChip({ item, onOpen }: { item: ContentItem; onOpen?: (id: string) =
     );
   }
   return (
-    <button type="button" onClick={() => onOpen(item.id)} title={item.title} className={cn(tone, "hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring")}>
+    <button type="button" onClick={() => onOpen(item.id)} title={`${item.title} · ${status}`} className={cn(tone, "hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring")}>
       <span className="truncate">{item.title}</span>
-      <span className="sr-only">, {statusText(item)}</span>
+      <span className="sr-only">, {status}</span>
     </button>
   );
 }
@@ -658,7 +653,7 @@ function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }:
                   }}
                   className="flex w-full flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                 >
-                  <span className="flex items-center justify-between gap-2 text-[11px]">
+                  <span className="flex items-center justify-between gap-2 text-xs">
                     <span className="text-muted-foreground">
                       {time && <span className="tabular-nums">{time} &middot; </span>}
                       {CHANNEL_LABEL[i.channel] ?? i.channel}
@@ -816,15 +811,15 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
                         className="@container/cell flex h-full min-h-14 w-full flex-col items-stretch rounded-lg p-1 text-left align-top hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]/month:min-h-24"
                       >
                         {/* Only the number of a day outside the month is dimmed: its posts read as usual. */}
-                        <span aria-hidden className={cn("block text-[11px]", d.getMonth() !== month.m && "text-muted-foreground opacity-60", k === today && "font-semibold text-primary opacity-100")}>{d.getDate()}</span>
+                        <span aria-hidden className={cn("block text-xs", d.getMonth() !== month.m && "text-muted-foreground", k === today && "font-semibold text-primary")}>{d.getDate()}</span>
                         {posts.length > 0 && (
                           <>
                             {/* Wide panel: the posts as chips. Narrow (under 520 px): a count. */}
                             <span className="mt-0.5 hidden flex-col gap-0.5 @min-[520px]/month:flex">
                               {posts.slice(0, MORE_AFTER).map((i) => <PostChip key={i.id} item={i} />)}
-                              {posts.length > MORE_AFTER && <span className="px-1 text-[11px] text-muted-foreground">+{posts.length - MORE_AFTER} more</span>}
+                              {posts.length > MORE_AFTER && <span className="px-1 text-xs text-muted-foreground">+{posts.length - MORE_AFTER} more</span>}
                             </span>
-                            <span className="mt-0.5 block truncate text-[11px] text-primary @min-[520px]/month:hidden">{postCount(posts.length)}</span>
+                            <span className="mt-0.5 block truncate text-xs text-primary @min-[520px]/month:hidden">{postCount(posts.length)}</span>
                           </>
                         )}
                       </button>
@@ -835,6 +830,11 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
             ))}
           </tbody>
         </table>
+        <ul aria-label="Status colours" className="mt-2 flex flex-wrap gap-1.5 text-xs">
+          {LEGEND.map(([tone, label]) => (
+            <li key={label} className={cn("rounded border px-1 py-0.5", TONE_CLASS[tone])}>{label}</li>
+          ))}
+        </ul>
       </LoadGate>
       {pop && popDay && (
         <DayPopover key={pop.key} label={dayLabel(popDay)} posts={byDay.get(pop.key) ?? []} open={pop.open} at={pop.at} cell={popCell} onClose={closeDay} onExited={popExited} onOpen={onOpen} />
@@ -993,7 +993,7 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
         {item.latest?.byPerson && <span className="ml-2 font-normal text-muted-foreground">edited by a person</span>}
       </h2>
       {!data ? (
-        failed ? <LoadFailed what="the frames" onRetry={reload} className="mt-2" /> : <p className="mt-2 text-sm text-muted-foreground">Loading frames…</p>
+        failed ? <LoadFailed what="the frames" onRetry={reload} className="mt-2" /> : <div className="mt-2 min-h-24"><ListSkeleton label="Loading frames" rows={1} /></div>
       ) : (
         <>
           {data.rendering && (
@@ -1034,20 +1034,16 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
         </p>
       )}
       <p className="mt-3 text-xs text-muted-foreground">Edit on the phone. The frames here are what you approve.</p>
-      {/* In the body: the peek is a containing block for fixed children (its translate), which would trap the overlay at 560 px. */}
-      {zoom?.url &&
-        createPortal(
-        <div role="dialog" aria-modal="true" aria-label={`Frame ${zoom.n}`} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setZoom(null)}>
-          <div className="relative max-h-full" onClick={(e) => e.stopPropagation()}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- a signed storage link */}
-            <img src={zoom.url} alt={`Frame ${zoom.n} full size`} className="max-h-[90vh] w-auto rounded-lg" />
-            <Button size="sm" variant="secondary" className="absolute right-2 top-2" onClick={() => setZoom(null)} autoFocus>
-              <X aria-hidden /> Close
-            </Button>
-          </div>
-        </div>,
-          document.body,
-        )}
+      {/* Radix portals this to the body: the peek is a containing block for fixed children (its translate). */}
+      <Dialog open={!!zoom?.url} onOpenChange={(o) => !o && setZoom(null)}>
+        <DialogContent aria-describedby={undefined} className="w-auto max-w-[calc(100%-2rem)] p-3 sm:p-3">
+          <DialogTitle className="sr-only">Frame {zoom?.n}</DialogTitle>
+          {zoom?.url && (
+            // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
+            <img src={zoom.url} alt={`Frame ${zoom.n} full size`} className="max-h-[85vh] w-auto rounded-lg" />
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
@@ -1087,9 +1083,11 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
   const canAssign = perms.includes("content.create");
   const [owners, setOwners] = useState<{ id: string; name: string | null }[]>([]);
   const [ownerError, setOwnerError] = useState<string | null>(null);
+  const [ownersFailed, setOwnersFailed] = useState(false);
   useEffect(() => {
     if (!canAssign) return;
-    request<{ owners: { id: string; name: string | null }[] }>(`${base}/content/owners`).then((r) => setOwners(r.owners), () => {});
+    setOwnersFailed(false);
+    request<{ owners: { id: string; name: string | null }[] }>(`${base}/content/owners`).then((r) => setOwners(r.owners), () => setOwnersFailed(true));
   }, [canAssign, base]);
   const [assigning, setAssigning] = useState(false);
   useEffect(() => setOwnerError(null), [id]);
@@ -1115,12 +1113,12 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
           ) : lookup === "failed" ? (
             <LoadFailed what="this post" onRetry={() => setTries((n) => n + 1)} className="p-6" />
           ) : (
-            <p className="p-6 text-sm text-muted-foreground">Loading…</p>
+            <div className="min-h-48 p-6"><ListSkeleton label="Loading post" rows={3} /></div>
           )
         ) : failed ? (
           <LoadFailed what="this post" onRetry={reload} className="p-6" />
         ) : (
-          <p className="p-6 text-sm text-muted-foreground">Loading…</p>
+          <div className="min-h-48 p-6"><ListSkeleton label="Loading post" rows={3} /></div>
         )
       ) : (
         <div className="flex flex-col gap-6 px-6 py-6">
@@ -1134,12 +1132,13 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
             {canAssign ? (
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
                 <label htmlFor="post-owner" className="text-muted-foreground">Owner</label>
-                <select id="post-owner" disabled={assigning} value={item.owner?.id ?? ""} onChange={(e) => assign(e.target.value || null)} className={cn(selectClass, "h-8 w-auto text-sm")}>
+                <select id="post-owner" disabled={assigning} value={item.owner?.id ?? ""} onChange={(e) => assign(e.target.value || null)} className={cn(selectClass, "h-8 w-auto text-sm pointer-coarse:h-11")}>
                   <option value="">Unassigned</option>
                   {item.owner && !owners.some((o) => o.id === item.owner!.id) && <option value={item.owner.id}>{item.owner.name ?? "Unnamed"}</option>}
                   {owners.map((o) => <option key={o.id} value={o.id}>{o.name ?? "Unnamed"}</option>)}
                 </select>
                 {ownerError && <span role="alert" className="text-xs text-destructive">{ownerError}</span>}
+                {ownersFailed && <span className="text-xs text-muted-foreground">Couldn&rsquo;t load owners.</span>}
               </div>
             ) : (
               <p className="mt-1 text-sm text-muted-foreground">Owner: {ownerLabel(item.owner)}</p>
