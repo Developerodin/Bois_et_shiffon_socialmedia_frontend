@@ -1,6 +1,6 @@
 /** What the app shell and its pages read about the signed-in person: GET /api/v1/me/shell. */
 export type ShellResponse = {
-  user: { name: string | null; email: string; image: string | null };
+  user: { id: string; name: string | null; email: string; image: string | null };
   workspaces: { id: string; name: string; slug: string }[];
   brands: {
     id: string;
