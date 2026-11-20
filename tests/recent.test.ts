@@ -1,3 +1,5 @@
+import { safeHref } from "@/components/ui/toast";
+import { viewToSearch } from "@/lib/workspace-view";
 import { describe, expect, it } from "vitest";
 import { clearAllRecent, entryToView, isReopenKey, pushRecent, readRecent, recentKey, writeRecent, RECENT_MAX, type RKey, type RecentEntry } from "@/lib/recent";
 
@@ -98,5 +100,14 @@ describe("R key", () => {
     for (const o of [{ key: "x" }, { ctrlKey: true }, { metaKey: true }, { altKey: true }, { repeat: true }, { isComposing: true }, { defaultPrevented: true }, { inBlockedTarget: true }]) {
       expect(isReopenKey({ ...base, ...o })).toBe(false);
     }
+  });
+});
+
+describe("Reopen link", () => {
+  it("is an in-app path naming only the item", () => {
+    const href = `/${viewToSearch(entryToView({ kind: "agent", id: "planner" }), "", "/")}`;
+    expect(href).toBe("/?agent=planner");
+    expect(safeHref(href)).toBe(href);
+    expect(`/${viewToSearch(entryToView({ kind: "post", id: "abc" }), "", "/")}`).toBe("/?post=abc");
   });
 });

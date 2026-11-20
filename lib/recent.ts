@@ -100,7 +100,7 @@ export function clearAllRecent(s: Store | null = store()): void {
 }
 
 /** Where typing happens: R there is a letter, and menus and dialogs have their own keys. */
-export const R_BLOCKED_TARGET = "input, textarea, select, [contenteditable], [role=textbox], [role=menu], [role=dialog]";
+export const R_BLOCKED_TARGET = "input, textarea, select, [contenteditable], [role=textbox], [role=menu], [role=dialog], [role=alertdialog]";
 
 export type RKey = { key: string; defaultPrevented: boolean; repeat: boolean; isComposing: boolean; ctrlKey: boolean; metaKey: boolean; altKey: boolean; inBlockedTarget: boolean };
 

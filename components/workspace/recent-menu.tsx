@@ -42,7 +42,7 @@ function rowFor(entry: RecentEntry, p: Props, competitors: Competitors): Row {
   } else if (entry.kind === "post") {
     const items = (sharedResponse(`${p.base}/content`) as { items?: ContentItem[] } | undefined)?.items;
     name = items?.find((i) => i.id === entry.id)?.title;
-    gone = !!items && !items.some((i) => i.id === entry.id);
+    // Never gone: the list is only the calendar window, older posts still open (the peek says so on a real 404).
   } else {
     if (competitors.state === "loading") pending = true;
     else if (competitors.state === "loaded") {

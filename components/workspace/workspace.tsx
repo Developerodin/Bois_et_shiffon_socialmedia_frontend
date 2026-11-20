@@ -144,6 +144,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   }, []);
   const [failed, setFailed] = useState(NONE_FAILED);
   const mark = useCallback((k: keyof typeof NONE_FAILED, v: boolean) => setFailed((f) => (f[k] === v ? f : { ...f, [k]: v })), []);
+  // The last item the person closed, for Reopen (the toast's button, and R). Cleared when anything else is shown, and on a brand switch.
+  const lastClosed = useRef<RecentEntry | null>(null);
   const viewNow = useRef(view);
   viewNow.current = view;
   // The panel ?panel= last brought into view, so a later URL change (opening a post) doesn't bring it back.
@@ -167,6 +169,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         window.history.pushState(null, "", viewSearch(viewNow.current));
         return;
       }
+      lastClosed.current = null;
       setView(v);
     }
     // ?panel= shows that panel (e.g. Menu → Content calendar) once, and stays in the URL: the sidebar reads it to
@@ -305,10 +308,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   // change asks first when an editor has unsaved work (okToDiscard); closing is opening home.
   const open = useCallback((v: View) => {
     if (!okToDiscard()) return;
+    // Anything shown now makes an older close stale: R must not bring it back.
+    lastClosed.current = null;
     setView(v);
   }, []);
-  // The last item the person closed, for Reopen (the toast's button, and R). Cleared on a brand switch.
-  const lastClosed = useRef<RecentEntry | null>(null);
   useEffect(() => () => void (lastClosed.current = null), [brandId]);
   const peekNow = useRef<PeekItem | null>(null);
   const reopen = useCallback(() => {
