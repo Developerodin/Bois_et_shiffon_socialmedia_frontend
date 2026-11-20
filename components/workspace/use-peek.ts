@@ -12,7 +12,7 @@ const EXIT_FALLBACK_MS = 300;
 /**
  * The peek for `item` (null when nothing is open). After closing, the last item stays as `shown` until the slide out
  * ends, then unmounts; `live` is false meanwhile, so the caller renders that snapshot without auto-run. Focus moves into
- * the peek on open and back to what opened it on close.
+ * the peek's title on open and back to what opened it on close.
  */
 export function usePeek(item: PeekItem | null) {
   const ref = useRef<HTMLElement | null>(null);
@@ -37,9 +37,10 @@ export function usePeek(item: PeekItem | null) {
     const a = document.activeElement;
     // Opening another item from inside the peek keeps the first opener.
     if (a instanceof HTMLElement && a !== document.body && !ref.current?.contains(a)) {
-      opener.current = { el: a, head: a.closest("section")?.querySelector<HTMLElement>("[id^='panel-head-']")?.id ?? null };
+      const panel = a.closest<HTMLElement>("[data-panel]")?.dataset.panel;
+      opener.current = { el: a, head: panel ? "panel-head-" + panel : null };
     }
-    ref.current?.focus({ preventScroll: true });
+    ref.current?.querySelector<HTMLElement>("[data-peek-title]")?.focus({ preventScroll: true });
   }, [key]);
 
   const wasLive = useRef(live);

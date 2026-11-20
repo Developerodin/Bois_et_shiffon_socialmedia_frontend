@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useId, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useId, useState, type ReactNode, type RefObject } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { SHELL_STROKE } from "@/components/shell/icon";
@@ -24,7 +24,7 @@ type Props = {
 // ponytail: not Sheet. Sheet is a modal Radix dialog fixed to the viewport (focus trap, scrim that eats clicks); the peek
 // sits inside the Overview, next to the assistant, and leaves the board usable behind it.
 /** A side peek over the right of the Overview: the open post, document, agent or competitor. */
-export const Peek = memo(function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asideRef, children }: Props) {
+export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asideRef, children }: Props) {
   const titleId = useId();
   // Mounted off-screen, then slid in: the style is read first so the browser has a start for the transition.
   const [entered, setEntered] = useState(false);
@@ -41,7 +41,6 @@ export const Peek = memo(function Peek({ open, title, crumb, onClose, onExited, 
         ref={asideRef}
         role="region"
         aria-labelledby={titleId}
-        tabIndex={-1}
         // Esc closes the peek only when nothing inside used it first (a menu, the story zoom), and is then used up so
         // the assistant's own Esc listener on the document doesn't also act.
         onKeyDown={(e) => {
@@ -53,14 +52,14 @@ export const Peek = memo(function Peek({ open, title, crumb, onClose, onExited, 
           if (e.target === e.currentTarget && e.propertyName === "transform" && !open) onExited();
         }}
         className={cn(
-          "absolute inset-y-0 right-0 z-20 flex w-full flex-col overflow-y-auto border-l border-border bg-background shadow-xl outline-none transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(560px,100%)]",
+          "absolute inset-y-0 right-0 z-20 flex w-full flex-col overflow-y-auto border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(560px,100%)]",
           shown ? "translate-x-0" : "translate-x-full",
         )}
       >
         <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-border bg-background px-5 py-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs text-muted-foreground">{crumb}</p>
-            <h2 id={titleId} className="truncate text-sm font-semibold">
+            <h2 id={titleId} data-peek-title tabIndex={-1} className="truncate text-sm font-semibold focus:outline-none">
               {title}
             </h2>
           </div>
@@ -82,4 +81,4 @@ export const Peek = memo(function Peek({ open, title, crumb, onClose, onExited, 
       </aside>
     </>
   );
-});
+}

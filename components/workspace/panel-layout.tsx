@@ -334,6 +334,7 @@ export function PanelLayout<Id extends string>({
                 return (
                   <section
                     key={id}
+                    data-panel={id}
                     aria-label={p.title}
                     className={cn("flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm", collapsed ? "flex-none" : "flex-1")}
                   >

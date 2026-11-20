@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { createContext, useContext, useEffect } from "react";
 
 // Several editors can hold unsaved work at once (a post's caption and its release form), so each registers under its
 // own symbol: one clearing can't clear another's warning. Before closing an editor, these ask first: Cancel, choosing
@@ -53,9 +53,13 @@ export function registerUnsaved(owner: symbol) {
   };
 }
 
+/** True around editors that are closing (the Overview peek sliding out): their work was already agreed to be discarded. */
+export const UnsavedGuardOff = createContext(false);
+
 /** Registers this editor's unsaved state (own owner, cleared on unmount) and guards the tab and in-app links. */
 export function useUnsavedGuard(isDirty: boolean) {
-  useEffect(() => (isDirty ? registerUnsaved(Symbol("unsaved")) : undefined), [isDirty]);
+  const off = useContext(UnsavedGuardOff);
+  useEffect(() => (isDirty && !off ? registerUnsaved(Symbol("unsaved")) : undefined), [isDirty, off]);
 }
 
 /** Whether the shared tab and link guards are attached (for tests). */

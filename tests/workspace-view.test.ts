@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { RUN_ID_PATTERN } from "@/shared";
-import { forgetOpenItem, parseViewParts, peekCrumb, peekKey, peekTitle, takeForgetOpenItem, viewFromSearch, viewToSearch } from "@/lib/workspace-view";
+import { agentLabel, namesItem, parseViewParts, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, withoutOpenItem } from "@/lib/workspace-view";
 
 describe("workspace view URL", () => {
   it("round-trips an agent's run", () => {
@@ -68,7 +68,7 @@ describe("peek labels", () => {
     expect(peekTitle({ kind: "content", id: "p1" }, "Spring launch")).toBe("Spring launch");
     expect(peekTitle({ kind: "content", id: "p1" }, null)).toBe("Post");
     expect(peekTitle({ kind: "doc", doc: "brand-voice" }, "  ")).toBe("Document");
-    expect(peekTitle({ kind: "agent", key: "seo" }, undefined)).toBe("seo");
+    expect(peekTitle({ kind: "agent", key: "competitors" }, undefined)).toBe("Competitors agent");
     expect(peekTitle({ kind: "competitor", id: "c1" }, null)).toBe("Competitor");
   });
   it("keys an item by kind and id", () => {
@@ -78,12 +78,31 @@ describe("peek labels", () => {
   });
 });
 
+describe("agent label", () => {
+  it("reads as a name, never the raw key", () => {
+    expect(agentLabel("competitors")).toBe("Competitors agent");
+    expect(agentLabel("content-ideas")).toBe("Content ideas agent");
+    expect(agentLabel("")).toBe("Agent");
+  });
+});
+
 describe("brand switch", () => {
-  it("drops the open item once, only for a switch on the Overview", () => {
-    forgetOpenItem("/reels");
-    expect(takeForgetOpenItem()).toBe(false);
-    forgetOpenItem("/");
-    expect(takeForgetOpenItem()).toBe(true);
-    expect(takeForgetOpenItem()).toBe(false);
+  it("drops the open item from the Overview's URL and keeps the rest", () => {
+    expect(withoutOpenItem("?post=p1&panel=content", "/")).toBe("?panel=content");
+    expect(withoutOpenItem("?agent=seo&runId=r1", "/")).toBe("/");
+  });
+  it("leaves the URL alone when nothing is open or the page isn't the Overview", () => {
+    expect(withoutOpenItem("?panel=content", "/")).toBeNull();
+    expect(withoutOpenItem("", "/")).toBeNull();
+    expect(withoutOpenItem("?post=p1", "/reels")).toBeNull();
+  });
+});
+
+describe("item named in the URL", () => {
+  it("tells a bad item link from no item", () => {
+    expect(namesItem("?doc=secrets")).toBe(true);
+    expect(namesItem("?agent=Bad")).toBe(true);
+    expect(namesItem("?panel=content&cf_need=overdue")).toBe(false);
+    expect(namesItem("?runId=r1")).toBe(false);
   });
 });

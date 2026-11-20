@@ -29,7 +29,7 @@ import { AgentLog } from "@/components/agents/agent-log";
 import { fetchAgents, startRun, type AgentSummary } from "@/components/agents/api";
 import { DocPane } from "@/components/context/doc-pane";
 import { fetchContextDocs, type ContextDocEntry, type ContextDocKind, type ContextDocsResponse } from "@/components/context/api";
-import { okToDiscard } from "@/components/context/unsaved";
+import { okToDiscard, UnsavedGuardOff } from "@/components/context/unsaved";
 import { ApiError, errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
@@ -54,7 +54,7 @@ import { filterFromSearch, filterToSearch, isBlocked, isOverdue, isThisWeek, wit
 import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
 import { nothingToDo } from "@/lib/agent-runs";
-import { peekCrumb, peekKey, peekTitle, takeForgetOpenItem, viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
+import { agreedToDrop, namesItem, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
 import { plainSummary } from "@/lib/plain-summary";
 import { isRunCancelled } from "@/components/languages/languages";
 
@@ -151,12 +151,14 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   // which already matches the open view and so changes nothing.
   const query = useSearchParams().toString();
   useEffect(() => {
-    // The brand just changed: the URL still names the old brand's item, so start with nothing open.
-    if (takeForgetOpenItem()) window.history.replaceState(null, "", viewSearch({ kind: "home" }));
+    // A brand switch took the item out of the URL after the person agreed to leave: don't ask again.
+    const agreed = agreedToDrop(window.location.search || window.location.pathname);
     const v = viewFromUrl();
+    // A link naming an item that isn't valid: replace it with the clean URL, so Back doesn't return to it.
+    if (v.kind === "home" && namesItem(window.location.search)) window.history.replaceState(null, "", viewSearch(v));
     if (viewSearch(v) !== viewSearch(viewNow.current)) {
       // An open document with unsaved edits asks first; staying puts its URL back.
-      if (!okToDiscard()) {
+      if (!agreed && !okToDiscard()) {
         window.history.pushState(null, "", viewSearch(viewNow.current));
         return;
       }
@@ -407,6 +409,13 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     peekItem = { view, title: peekTitle(view, known), crumb: peekCrumb(view), fullPageHref: post?.studio && reelsOn ? reelHref(post.id, brandId) : undefined };
   }
   const peek = usePeek(peekItem);
+  // Until its list has loaded, a document or agent shows a skeleton: never "Ready" and a Run button for an agent not
+  // yet known. Once the list arrives the Overview re-renders and the view gets the real entry; an unknown one closes.
+  const peekLoading = (
+    <div className="px-6 py-6">
+      <ListSkeleton label="Loading" rows={3} />
+    </div>
+  );
   // `live` is false while the closed item slides out: that snapshot never auto-runs an agent.
   const peekView = (v: View, live: boolean) =>
     v.kind === "doc" ? (
@@ -424,13 +433,18 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
           onStale={() => fetchContextDocs(workspaceId, brandId).then(setDocs)}
         />
       ) : (
-        <p className="p-6 text-sm text-muted-foreground">Loading…</p>
+        peekLoading
       )
     ) : v.kind === "competitor" ? (
       <CompetitorView base={base} canRun={canRun} id={v.id} />
     ) : v.kind === "content" ? (
       <ContentView base={base} perms={perms} id={v.id} reelsOn={reelsOn} brandId={brandId} />
     ) : v.kind === "agent" ? (
+      !canAgents ? (
+        <NotForRole what="the agents" />
+      ) : !agents?.some((a) => a.key === v.key) ? (
+        peekLoading
+      ) : (
       <AgentView
         agentKey={v.key}
         autoRun={live && v.run && canRun}
@@ -447,6 +461,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         onOpenPosts={() => showPanel("content")}
         onShowPanel={showPanel}
       />
+      )
     ) : null;
 
   const outOfCredits = agents?.some((a) => a.lastRun?.error?.includes("AI credits used up"));
@@ -462,7 +477,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         {peek.shown && (
           <Peek open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={close} onExited={peek.onExited} asideRef={peek.ref}>
             {/* Keyed by item: a replaced item remounts fresh, never carrying one item's state into another. */}
-            <Fragment key={peekKey(peek.shown.view)}>{peekView(peek.shown.view, peek.live)}</Fragment>
+            {/* While it slides out, the closed item's editors no longer count as unsaved: the person already agreed. */}
+            <UnsavedGuardOff value={!peek.live}>
+              <Fragment key={peekKey(peek.shown.view)}>{peekView(peek.shown.view, peek.live)}</Fragment>
+            </UnsavedGuardOff>
           </Peek>
         )}
       </div>

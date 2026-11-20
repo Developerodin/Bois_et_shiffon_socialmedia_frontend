@@ -8,6 +8,7 @@ export type View =
   | { kind: "content"; id: string }
   | { kind: "competitor"; id: string };
 
+const ITEM_PARAMS = ["post", "doc", "agent", "competitor"];
 /** A post's or competitor's id as the server makes them (cuid-like). */
 const ITEM_ID = /^[A-Za-z0-9_-]{1,64}$/;
 /** An agent key's shape. There's no static list of agents: the Overview drops unknown ones once the list loads. */
@@ -28,7 +29,7 @@ export function parseViewParts(kind: string, id: string): View {
 /** The open item lives in the URL (?post=, ?doc=, ?agent=[&runId=], ?competitor=). */
 export function viewFromSearch(search: string): View {
   const q = new URLSearchParams(search);
-  for (const kind of ["post", "doc", "agent", "competitor"]) {
+  for (const kind of ITEM_PARAMS) {
     const id = q.get(kind);
     if (!id) continue;
     const v = parseViewParts(kind, id);
@@ -84,6 +85,12 @@ export function peekCrumb(v: View): string {
   }
 }
 
+/** An agent's key as a readable name until its real one loads: "content-ideas" → "Content ideas agent". */
+export function agentLabel(key: string): string {
+  const words = key.replace(/-+/g, " ").trim();
+  return words ? `${words[0].toUpperCase()}${words.slice(1)} agent` : "Agent";
+}
+
 /** The peek's title: the item's name when the Overview knows it, else what kind of thing it is. */
 export function peekTitle(v: View, known: string | null | undefined): string {
   const name = known?.trim();
@@ -94,7 +101,7 @@ export function peekTitle(v: View, known: string | null | undefined): string {
     case "doc":
       return "Document";
     case "agent":
-      return v.key;
+      return agentLabel(v.key);
     case "competitor":
       return "Competitor";
     case "home":
@@ -102,17 +109,36 @@ export function peekTitle(v: View, known: string | null | undefined): string {
   }
 }
 
-// Set when the active brand changes on the Overview ("/"). The Overview is keyed by brand, so the next one to mount is
-// the new brand's: it drops the old brand's item from the URL instead of opening it there. Clearing the URL at the
-// switch itself would make the old Overview ask about unsaved work a second time. Ceiling: picking the brand that is
-// already active remounts nothing, so the flag waits for the next Overview mount (at worst Today shows instead of a
-// linked item once).
-let forgetOpen = false;
-export function forgetOpenItem(pathname: string) {
-  if (pathname === "/") forgetOpen = true;
+/** The URL names an item, valid or not: one that parses to home was a bad link, and is replaced rather than kept in history. */
+export function namesItem(search: string): boolean {
+  const q = new URLSearchParams(search);
+  return ITEM_PARAMS.some((k) => q.has(k));
 }
-export function takeForgetOpenItem(): boolean {
-  const f = forgetOpen;
-  forgetOpen = false;
-  return f;
+
+/**
+ * The Overview's URL without its open item, or null when there's nothing to drop (no item, or not the Overview). A brand
+ * switch uses it: the item belongs to the old brand, and the new brand's Overview must not open it.
+ */
+export function withoutOpenItem(search: string, pathname: string): string | null {
+  if (pathname !== "/" || !namesItem(search)) return null;
+  return viewToSearch({ kind: "home" }, search, pathname);
+}
+
+// The URL dropOpenItem just wrote. The Overview reads it once, on the URL change that write causes, and doesn't ask
+// about unsaved work again: the person already agreed in the switcher. Set only on the Overview, where that read follows.
+let agreedUrl: string | null = null;
+
+/** After the person agreed to leave (a brand or workspace switch): takes the open item out of the URL. */
+export function dropOpenItem() {
+  const next = withoutOpenItem(window.location.search, window.location.pathname);
+  if (next === null) return;
+  agreedUrl = next;
+  window.history.replaceState(null, "", next);
+}
+
+/** True once when `url` is the one dropOpenItem wrote; always clears it. */
+export function agreedToDrop(url: string): boolean {
+  const ok = agreedUrl === url;
+  agreedUrl = null;
+  return ok;
 }

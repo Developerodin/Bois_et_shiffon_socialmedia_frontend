@@ -6,7 +6,6 @@ import type { ContextDocKind, ContextRequest } from "@/shared";
 import { request } from "@/components/settings/api";
 import { SLOW_MS } from "@/lib/net";
 import { brandBase, ensureWorkLanguage } from "@/components/languages/languages";
-import { forgetOpenItem } from "@/lib/workspace-view";
 
 // The kinds live in shared/ so the Overview's URL check and the API agree on one list.
 export { DOC_KINDS, type ContextDocKind } from "@/shared";
@@ -56,11 +55,8 @@ export function createBrand(
 }
 
 /** Make a workspace (and optionally one of its brands) the active one; the server sets the cookies. */
-export async function setActiveContext(body: ContextRequest) {
-  const r = await request<{ ok: true }>("/api/v1/me/context", { method: "POST", body: JSON.stringify(body) });
-  // An item open on the Overview belongs to the old brand: the new brand's Overview starts with nothing open.
-  forgetOpenItem(window.location.pathname);
-  return r;
+export function setActiveContext(body: ContextRequest) {
+  return request<{ ok: true }>("/api/v1/me/context", { method: "POST", body: JSON.stringify(body) });
 }
 
 export function fetchContextDocs(
