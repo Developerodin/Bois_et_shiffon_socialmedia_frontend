@@ -2,7 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { clearActionToasts, toast } from "@/components/ui/toast";
+import { clearActionToasts } from "@/components/ui/toast";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -58,7 +58,8 @@ import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
 import { nothingToDo } from "@/lib/agent-runs";
 import { cachedPost, knownName } from "@/components/workspace/known-name";
-import { entryToView, isReopenKey, R_BLOCKED_TARGET, recentKey, viewToEntry, writeRecent, type RecentEntry } from "@/lib/recent";
+import { recentKey, viewToEntry, writeRecent } from "@/lib/recent";
+import { useReopen } from "@/components/workspace/use-reopen";
 import { agreedToDrop, namesItem, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
 import { plainSummary } from "@/lib/plain-summary";
 import { isRunCancelled } from "@/components/languages/languages";
@@ -145,10 +146,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   }, []);
   const [failed, setFailed] = useState(NONE_FAILED);
   const mark = useCallback((k: keyof typeof NONE_FAILED, v: boolean) => setFailed((f) => (f[k] === v ? f : { ...f, [k]: v })), []);
-  // The last item the person closed, for Reopen (the toast's button, and R). Cleared when anything else is shown (the page keys Workspace by brand, so a switch starts fresh).
-  const lastClosed = useRef<RecentEntry | null>(null);
   const viewNow = useRef(view);
   viewNow.current = view;
+  // open / close / Reopen / R; the last closed item resets with the brand because the page keys Workspace by brand.
+  const { open, close, forgetClosed, peekNow } = useReopen(setView, viewNow);
   // The panel ?panel= last brought into view, so a later URL change (opening a post) doesn't bring it back.
   const shownPanel = useRef<string | null>(null);
   // Set when a view is dropped for being unknown: its URL replaces the bad one instead of adding a history entry.
@@ -171,7 +172,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         window.history.pushState(null, "", viewSearch(viewNow.current));
         return;
       }
-      lastClosed.current = null;
+      forgetClosed();
       setView(v);
     }
     // ?panel= shows that panel (e.g. Menu → Content calendar) once, and stays in the URL: the sidebar reads it to
@@ -182,7 +183,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     const cf = filterFromSearch(new URLSearchParams(window.location.search));
     setCalFilter((old) => (filterToSearch(old) === filterToSearch(cf) ? old : cf));
     setUrlRead(true);
-  }, [query]);
+  }, [query, forgetClosed]);
   useEffect(() => {
     // Until the URL has been read, writing it would erase a deep link.
     if (!urlRead) return;
@@ -306,39 +307,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     void reloadContent();
   }, [loadAll, reloadIdeas, reloadContent]);
 
-  // Posts, documents, agents and competitors open in the side peek; the board behind stays as it is. Every view
-  // change asks first when an editor has unsaved work (okToDiscard); closing is opening home.
-  const open = useCallback((v: View) => {
-    if (!okToDiscard()) return;
-    // Anything shown now makes an older close stale: R must not bring it back.
-    lastClosed.current = null;
-    setView(v);
-  }, []);
-  const peekNow = useRef<PeekItem | null>(null);
-  const reopen = useCallback(() => {
-    const e = lastClosed.current;
-    lastClosed.current = null;
-    if (e) open(entryToView(e));
-  }, [open]);
-  const close = useCallback(() => {
-    const cur = peekNow.current;
-    if (!okToDiscard()) return;
-    setView({ kind: "home" });
-    const entry = cur && viewToEntry(cur.view, Date.now());
-    if (!entry) return;
-    lastClosed.current = entry;
-    toast({ title: `Closed ${cur.title}`, tone: "success", ms: 6000, action: { label: "Reopen", onAction: reopen } });
-  }, [reopen]);
-  // R reopens the last closed item, unless the person is typing or something else already handled the key.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (viewNow.current.kind !== "home" || !lastClosed.current) return;
-      const t = e.target;
-      if (isReopenKey({ key: e.key, defaultPrevented: e.defaultPrevented, repeat: e.repeat, isComposing: e.isComposing, ctrlKey: e.ctrlKey, metaKey: e.metaKey, altKey: e.altKey, inBlockedTarget: t instanceof Element && !!t.closest(R_BLOCKED_TARGET) })) reopen();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [reopen]);
+  // Posts, documents, agents and competitors open in the side peek; the board behind stays as it is.
   // Recording what was opened: once per item, and only once it has resolved (a 404 or a mistyped link isn't history).
   // Documents and agents resolve when they are in the loaded list; posts and competitors when their view loaded them.
   // Nothing is kept without a user id. ponytail: Recent is per brand and entries stay (30 days) until sign-out or TTL.
@@ -355,8 +324,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   }, [rKey, viewId, resolved]);
   const [topSlot, setTopSlot] = useState<HTMLElement | null>(null);
   useEffect(() => setTopSlot(document.getElementById(TOPBAR_SLOT_ID)), []);
-  // Buttons that point at a panel bring it into view; they never add it to the saved board (the sidebar's ?panel=
-  // does, through `focus`). A revealed panel can sit under the peek, so an open peek closes first (asking about unsaved work).
+  // Buttons that point at a panel bring it into view: a collapsed or absent one is expanded or added (saved), then
+  // scrolled to and flashed (panel-layout's reveal; the sidebar's ?panel= goes through `focus`). A revealed panel can sit under the peek, so an open peek closes first (asking about unsaved work).
   const revealRef = useRef<((id: PanelId) => void) | null>(null);
   const revealPanel = (id: PanelId) => {
     if (viewNow.current.kind !== "home") {
@@ -365,7 +334,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     }
     revealRef.current?.(id);
   };
-  // Toasts with a button (Expand, Add to board) do nothing once this page is gone.
+  // Toasts with a button (Reopen) do nothing once this page is gone.
   useEffect(() => clearActionToasts, []);
 
   const panels: PanelDef<PanelId>[] = [
