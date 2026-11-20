@@ -12,6 +12,7 @@ import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AccountMenu } from "@/components/workspace/account-menu";
 import type { WebFeature } from "@/lib/features";
+import { AGENT_ORDER_KEY, applyOrder, move, parseOrder } from "@/lib/agent-order";
 import { NAV, navFor, sidebarGroups, type NavEntry } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +53,24 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
   if (pathname === "/" && panel === "competitors") activeId = "drift";
   if (pathname === "/performance") activeId = "surge";
   const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));
+
+  // The person can reorder their agents by dragging, or with Alt+Up/Down on a focused row. Read after mount so the
+  // server render and the first client render match.
+  const [order, setOrder] = useState<string[] | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setOrder(parseOrder(localStorage.getItem(AGENT_ORDER_KEY)));
+    } catch {}
+  }, []);
+  const agents = applyOrder(NAV.filter((e) => e.group === "agent"), order);
+  const reorder = (from: number, to: number) => {
+    const next = move(agents, from, to).map((e) => e.id);
+    setOrder(next);
+    try {
+      localStorage.setItem(AGENT_ORDER_KEY, JSON.stringify(next));
+    } catch {}
+  };
 
   return (
     <>
@@ -114,16 +133,41 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
 
         <p className="mt-6 mb-2 px-5 text-xs text-muted-foreground">Your agents</p>
         <ul className="mx-5">
-          {NAV.filter((e) => e.group === "agent").map((e) => {
+          {agents.map((e, i) => {
             const on = isActive(e);
             return (
-              <li key={e.id}>
+              <li
+                key={e.id}
+                draggable
+                onDragStart={(ev) => {
+                  setDragId(e.id);
+                  ev.dataTransfer.effectAllowed = "move";
+                  ev.dataTransfer.setData("text/plain", e.id);
+                }}
+                onDragOver={(ev) => {
+                  if (dragId) ev.preventDefault();
+                }}
+                onDrop={(ev) => {
+                  ev.preventDefault();
+                  if (dragId) reorder(agents.findIndex((a) => a.id === dragId), i);
+                  setDragId(null);
+                }}
+                onDragEnd={() => setDragId(null)}
+                className={cn("cursor-grab active:cursor-grabbing", dragId === e.id && "opacity-50")}
+              >
                 <Link
                   href={e.href}
+                  draggable={false}
                   aria-current={on ? "page" : undefined}
+                  aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
+                  onKeyDown={(ev) => {
+                    if (!ev.altKey || (ev.key !== "ArrowUp" && ev.key !== "ArrowDown")) return;
+                    ev.preventDefault();
+                    reorder(i, ev.key === "ArrowUp" ? i - 1 : i + 1);
+                  }}
                   className={cn(row, "h-[52px] px-2", on ? "bg-accent" : "hover:bg-muted")}
                 >
-                  <Image src={`/agents/${e.id}.svg`} alt="" width={36} height={36} className="size-9 shrink-0" />
+                  <Image src={`/agents/${e.id}.svg`} alt="" width={36} height={36} draggable={false} className="size-9 shrink-0" />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
                       <span className="truncate font-medium text-foreground">{e.label}</span>
