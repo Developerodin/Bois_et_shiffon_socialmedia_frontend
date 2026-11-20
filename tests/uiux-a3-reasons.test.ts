@@ -15,6 +15,7 @@ describe("disabled buttons say why in visible text", () => {
   it("Draft post explains the missing photo", () => {
     const src = read("components/workspace/new-post-dialog.tsx");
     expect(src).toContain("Choose a photo to draft the post.");
-    expect(src).toContain("aria-required");
+    expect(src).not.toContain("aria-required");
+    expect(src).toContain('aria-describedby={photo ? undefined : "photo-required"}');
   });
 });

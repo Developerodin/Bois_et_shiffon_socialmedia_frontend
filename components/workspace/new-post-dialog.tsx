@@ -87,17 +87,19 @@ export function NewPostDialog({ base, canCreate, onCreated }: { base: string; ca
               <div className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element -- a signed library preview */}
                 {photo && <img src={photo.url} alt={photo.title} className="size-14 rounded-md border border-border object-cover" />}
-                <Button type="button" size="sm" variant="secondary" onClick={() => setPicking(true)} aria-required={!photo} aria-describedby={photo ? undefined : "photo-required"}>
+                <Button type="button" size="sm" variant="secondary" onClick={() => setPicking(true)}>
                   {photo ? "Change photo" : "Choose photo"}
                 </Button>
               </div>
               {!photo && <p id="photo-required" className="text-xs font-normal text-muted-foreground">Choose a photo to draft the post.</p>}
             </div>
-            <label className="flex flex-col gap-1.5 text-sm font-medium">
-              Direction <span className="font-normal text-muted-foreground">(optional)</span>
-              <Textarea value={direction} maxLength={DIRECTION_MAX} onChange={(e) => setDirection(e.target.value)} placeholder="Anything the writer should know" />
-              <span className="self-end text-xs font-normal text-muted-foreground">{direction.length}/{DIRECTION_MAX}</span>
-            </label>
+            <div className="flex flex-col gap-1.5 text-sm font-medium">
+              <label htmlFor="new-post-direction">
+                Direction <span className="font-normal text-muted-foreground">(optional)</span>
+              </label>
+              <Textarea id="new-post-direction" value={direction} maxLength={DIRECTION_MAX} onChange={(e) => setDirection(e.target.value)} placeholder="Anything the writer should know" aria-describedby="direction-count" />
+              <span id="direction-count" className="self-end text-xs font-normal text-muted-foreground">{direction.length}/{DIRECTION_MAX}</span>
+            </div>
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
             <p className="text-sm text-muted-foreground">Cost: included in your plan</p>
           </div>
@@ -105,7 +107,7 @@ export function NewPostDialog({ base, canCreate, onCreated }: { base: string; ca
             <Button type="button" variant="outline" disabled={busy} onClick={() => change(false)}>
               Cancel
             </Button>
-            <Button type="button" disabled={!photo || busy} onClick={() => void submit()}>
+            <Button type="button" disabled={!photo || busy} aria-describedby={photo ? undefined : "photo-required"} onClick={() => void submit()}>
               {busy && <LoaderCircle aria-hidden="true" className="animate-spin motion-reduce:animate-none" />}
               {busy ? "Drafting…" : "Draft post"}
             </Button>
