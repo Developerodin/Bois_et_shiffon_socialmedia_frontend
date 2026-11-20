@@ -29,7 +29,7 @@ type Attempt = {
   frames?: number;
   progress?: { i: number; state: "publishing" | "published" | "not-posted" }[];
 };
-type Decision = { id: string; verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null; by: string; at: string; current: boolean; version: number | null; override: string[] | null };
+type Decision = { id: string; verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null; by: string; byClient?: boolean; at: string; current: boolean; version: number | null; override: string[] | null };
 /** A gate issue: a linked product (availability, price) or the post's offer. `overridable`: "Approve anyway" can cover it. */
 type ProductIssue = { productId?: string; campaignId?: string; kind: "availability" | "price" | "offer"; message: string; refuses: boolean; overridable: boolean };
 /** The post's campaign; times are brand wall-clock strings, `ends` null for a standing priority. */
@@ -714,6 +714,7 @@ function History({ data, canPublish, onSettle, onAct }: { data: Release; canPubl
                 <span className="font-medium">{d.by}</span> {VERDICT[d.verdict]} {d.version ? `v${d.version}` : "an earlier draft"}
                 {d.override && ` anyway: ${d.override.join(", ")}`}
                 <span className="text-muted-foreground"> · {dayTime(d.at)}</span>
+                {d.byClient && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{d.verdict === "APPROVED" ? "Approved by client" : "Client"}</span>}
                 {d.verdict === "APPROVED" && !d.current && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">no longer valid</span>}
               </span>
               {d.note && <span className="text-muted-foreground">&ldquo;{d.note}&rdquo;</span>}
