@@ -22,6 +22,19 @@ describe("saved layout", () => {
     expect(l.columns[0].size).toBe(1);
     expect(l.collapsed).toEqual(["b"]);
   });
+
+  it("loads a layout saved before panel heights existed", () => {
+    const l = sanitize({ columns: [{ id: "1", size: 1, panels: ["a", "b"] }], collapsed: [] }, ids, fallback);
+    expect(l.columns[0].panels).toEqual(["a", "b"]);
+    expect(l.heights).toEqual({});
+  });
+
+  it("keeps good panel heights and drops bad or unknown ones", () => {
+    const l = sanitize({ columns: [{ id: "1", size: 1, panels: ["a", "b", "c"] }], collapsed: [], heights: { a: 1.5, b: -1, c: "2", zzz: 3 } }, ids, fallback);
+    expect(l.heights).toEqual({ a: 1.5 });
+    expect(sanitize({ columns: [{ id: "1", size: 1, panels: ["a"] }], collapsed: [], heights: "nope" }, ids, fallback).heights).toEqual({});
+    expect(sanitize({ columns: [{ id: "1", size: 1, panels: ["a"] }], collapsed: [], heights: { a: Infinity } }, ids, fallback).heights).toEqual({});
+  });
 });
 
 describe("layout announcement", () => {

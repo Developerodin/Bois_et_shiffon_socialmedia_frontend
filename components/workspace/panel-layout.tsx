@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw, X } from "lucide-react";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
@@ -17,20 +17,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
+import { arrow, drag, KEY_STEP, split } from "@/components/workspace/resize";
 
 /**
  * VS Code-style free layout: columns of stacked panels. Drag a panel by its header to another
  * column, onto another panel (inserts before it) or to the right edge (new column); drag the
- * dividers to resize; every move also has a keyboard path in the panel's menu.
- * ponytail: columns resize horizontally only; stacked panels share a column's height equally
- * (or collapse to their header). Add vertical splitters if people ask for them.
+ * dividers to resize (between columns, and between two expanded panels in a column); every move
+ * also has a keyboard path in the panel's menu.
+ * ponytail: a panel's height is a weight against its column's other expanded panels, so moving it to
+ * another column (or hiding it) drops its weight back to 1; there's no pixel-exact height to keep.
  */
 export type PanelDef<Id extends string> = { id: Id; title: string; icon: ReactNode; render: () => ReactNode; actions?: ReactNode };
 type Column<Id extends string> = { id: string; size: number; panels: Id[] };
-export type Layout<Id extends string> = { columns: Column<Id>[]; collapsed: Id[] };
+/** `heights`: each expanded panel's share of its column's height (flex-grow), 1 when missing. */
+export type Layout<Id extends string> = { columns: Column<Id>[]; collapsed: Id[]; heights?: Partial<Record<Id, number>> };
 export type Preset<Id extends string> = { name: string; description: string; layout: Layout<Id> };
 
 const MIN_PX = 240;
+// A panel dragged smaller keeps its header (44 px), a 120 px body and its borders.
+const MIN_PANEL_PX = 166;
 // Matches Tailwind's lg breakpoint. Only the layout on screen renders panels: rendering both (one hidden
 // by CSS) would mount every panel twice, double the polling, duplicate element ids and split edit state.
 // A panel shown in the side preview (`previewing`) is left out of the board while it's there, so it isn't mounted twice.
@@ -66,7 +71,9 @@ export function sanitize<Id extends string>(raw: unknown, ids: Id[], fallback: L
   const columns = l.columns
     .map((c) => ({ id: String(c.id ?? colId()), size: Number(c.size) > 0 ? Number(c.size) : 1, panels: (c.panels ?? []).filter((p) => ids.includes(p) && !seen.has(p) && seen.add(p)) }))
     .filter((c) => c.panels.length);
-  return columns.length ? { columns, collapsed: (l.collapsed ?? []).filter((p) => ids.includes(p)) } : fallback;
+  // Saved before panel heights existed, or a bad weight: missing, so 1.
+  const heights = Object.fromEntries(Object.entries(l.heights ?? {}).filter(([p, w]) => ids.includes(p as Id) && typeof w === "number" && w > 0 && Number.isFinite(w))) as Layout<Id>["heights"];
+  return columns.length ? { columns, collapsed: (l.collapsed ?? []).filter((p) => ids.includes(p)), heights } : fallback;
 }
 
 /** What a screen reader hears after a panel is moved or hidden (WCAG 4.1.3). */
@@ -153,7 +160,12 @@ export function PanelLayout<Id extends string>({
   );
 
   const visible = layout.columns.flatMap((c) => c.panels);
-  const remove = (l: Layout<Id>, id: Id): Layout<Id> => ({ ...l, columns: l.columns.map((c) => ({ ...c, panels: c.panels.filter((p) => p !== id) })) });
+  // Also drops the panel's height weight: it means nothing next to the panels of another column.
+  const remove = (l: Layout<Id>, id: Id): Layout<Id> => ({
+    ...l,
+    columns: l.columns.map((c) => ({ ...c, panels: c.panels.filter((p) => p !== id) })),
+    heights: Object.fromEntries(Object.entries(l.heights ?? {}).filter(([p]) => p !== id)) as Layout<Id>["heights"],
+  });
 
   const move = (id: Id, target: { column: number; before?: Id } | "new-column", fromLayout = layout) => {
     const l = remove(fromLayout, id);
@@ -213,45 +225,40 @@ export function PanelLayout<Id extends string>({
   const toggleCollapse = (id: Id) =>
     commit({ ...layout, collapsed: layout.collapsed.includes(id) ? layout.collapsed.filter((p) => p !== id) : [...layout.collapsed, id] });
 
-  // Divider drag: move size between the two neighbouring columns.
-  const startResize = (index: number, e: React.PointerEvent) => {
-    const row = rowRef.current;
-    if (!row) return;
+  // A divider between two neighbours (columns side by side, or expanded panels in a column) moves size from one to
+  // the other, their total unchanged. `set` writes the two new sizes into a layout.
+  type Pair = { a: number; b: number; set: (l: Layout<Id>, na: number, nb: number) => Layout<Id> };
+  const colPair = (i: number): Pair => ({
+    a: layout.columns[i].size,
+    b: layout.columns[i + 1].size,
+    set: (l, na, nb) => ({ ...l, columns: l.columns.map((c, j) => (j === i ? { ...c, size: na } : j === i + 1 ? { ...c, size: nb } : c)) }),
+  });
+  const weight = (id: Id) => layout.heights?.[id] ?? 1;
+  const panelPair = (x: Id, y: Id): Pair => ({ a: weight(x), b: weight(y), set: (l, na, nb) => ({ ...l, heights: { ...l.heights, [x]: na, [y]: nb } }) });
+  // Pixels per unit of a panel pair, from the two sections either side of the separator.
+  const panelPx = (el: HTMLElement, p: Pair) => ((el.previousElementSibling as HTMLElement).offsetHeight + (el.nextElementSibling as HTMLElement).offsetHeight) / (p.a + p.b);
+  // Drag: the layout follows the pointer and is saved on release.
+  const startResize = ({ a, b, set }: Pair, pxPerUnit: number, minPx: number, axis: "x" | "y", e: React.PointerEvent) =>
+    drag(
+      e,
+      axis,
+      (px) => setLayout((l) => set(l, ...split(a, b, px / pxPerUnit, minPx / pxPerUnit))),
+      () =>
+        setLayout((l) => {
+          try {
+            localStorage.setItem(storageKey, JSON.stringify(l));
+          } catch {
+            // ignore
+          }
+          return l;
+        }),
+    );
+  // Arrow keys: a step of the pair's total, never below `min` (in the pair's units).
+  const nudge = ({ a, b, set }: Pair, min: number, axis: "x" | "y", e: React.KeyboardEvent) => {
+    const dir = arrow(e.key, axis);
+    if (!dir) return;
     e.preventDefault();
-    const total = layout.columns.reduce((s, c) => s + c.size, 0);
-    const pxPerUnit = row.clientWidth / total;
-    const a = layout.columns[index];
-    const b = layout.columns[index + 1];
-    const startX = e.clientX;
-    const min = MIN_PX / pxPerUnit;
-    const onMove = (ev: PointerEvent) => {
-      const delta = (ev.clientX - startX) / pxPerUnit;
-      const na = Math.max(min, Math.min(a.size + b.size - min, a.size + delta));
-      setLayout((l) => ({ ...l, columns: l.columns.map((c, i) => (i === index ? { ...c, size: na } : i === index + 1 ? { ...c, size: a.size + b.size - na } : c)) }));
-    };
-    const onUp = () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      setLayout((l) => {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(l));
-        } catch {
-          // ignore
-        }
-        return l;
-      });
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-  };
-  const nudge = (index: number, e: React.KeyboardEvent) => {
-    const step = e.key === "ArrowLeft" ? -0.08 : e.key === "ArrowRight" ? 0.08 : 0;
-    if (!step) return;
-    e.preventDefault();
-    const a = layout.columns[index];
-    const b = layout.columns[index + 1];
-    const na = Math.max(0.3, Math.min(a.size + b.size - 0.3, a.size + step * (a.size + b.size)));
-    commit({ ...layout, columns: layout.columns.map((c, i) => (i === index ? { ...c, size: na } : i === index + 1 ? { ...c, size: a.size + b.size - na } : c)) });
+    commit(set(layout, ...split(a, b, dir * KEY_STEP * (a + b), min)));
   };
 
   const onDrop = (target: { column: number; before?: Id } | "new-column") => (e: React.DragEvent) => {
@@ -428,16 +435,34 @@ export function PanelLayout<Id extends string>({
               onDragLeave={() => setDropHint(null)}
               onDrop={onDrop({ column: ci })}
             >
-              {col.panels.filter((id) => id !== previewing).map((id) => {
+              {col.panels.filter((id) => id !== previewing).map((id, pi, onBoard) => {
                 const p = def(id);
                 const collapsed = layout.collapsed.includes(id);
                 const hint = `before-${id}`;
+                // A separator only between two expanded panels (the previewed one isn't on the board).
+                const above = pi > 0 && !collapsed && !layout.collapsed.includes(onBoard[pi - 1]) ? panelPair(onBoard[pi - 1], id) : null;
                 return (
+                  <Fragment key={id}>
+                  {above && (
+                    <div
+                      role="separator"
+                      aria-orientation="horizontal"
+                      aria-label="Resize panels"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round((above.a / (above.a + above.b)) * 100)}
+                      tabIndex={0}
+                      onPointerDown={(e) => startResize(above, panelPx(e.currentTarget, above), MIN_PANEL_PX, "y", e)}
+                      onKeyDown={(e) => nudge(above, MIN_PANEL_PX / panelPx(e.currentTarget, above), "y", e)}
+                      // Fills the gap between the two cards (the negative margins cancel the column's gap around it).
+                      className="relative -my-3 h-3 shrink-0 cursor-row-resize outline-none after:absolute after:inset-x-4 after:top-1/2 after:h-0.5 after:-translate-y-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary"
+                    />
+                  )}
                   <section
-                    key={id}
                     data-panel={id}
                     aria-label={p.title}
-                    className={cn("flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm", collapsed ? "flex-none" : "flex-1")}
+                    className={cn("flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm", collapsed && "flex-none")}
+                    style={collapsed ? undefined : { flex: `${weight(id)} 1 0%` }}
                   >
                     <header
                       draggable
@@ -508,6 +533,7 @@ export function PanelLayout<Id extends string>({
                     </header>
                     {!collapsed && wide && <div className="min-h-0 flex-1 overflow-y-auto">{p.render()}</div>}
                   </section>
+                  </Fragment>
                 );
               })}
             </div>
@@ -520,8 +546,8 @@ export function PanelLayout<Id extends string>({
                 aria-valuemax={100}
                 aria-valuenow={Math.round((col.size / (col.size + layout.columns[ci + 1].size)) * 100)}
                 tabIndex={0}
-                onPointerDown={(e) => startResize(ci, e)}
-                onKeyDown={(e) => nudge(ci, e)}
+                onPointerDown={(e) => rowRef.current && startResize(colPair(ci), rowRef.current.clientWidth / layout.columns.reduce((s, c) => s + c.size, 0), MIN_PX, "x", e)}
+                onKeyDown={(e) => nudge(colPair(ci), 0.3, "x", e)}
                 // The gap between cards is the handle; a line shows only on hover or keyboard focus.
                 className="relative w-3 shrink-0 cursor-col-resize outline-none after:absolute after:inset-y-4 after:left-1/2 after:w-0.5 after:-translate-x-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary"
               />
