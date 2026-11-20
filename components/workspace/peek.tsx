@@ -36,7 +36,7 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
     return () => cancelAnimationFrame(f);
   }, [asideRef]);
   const shown = open && entered;
-  const [width, resize] = usePeekWidth();
+  const { width, max, resize } = usePeekWidth();
   return (
     <>
       <div aria-hidden="true" className={cn("pointer-events-none absolute inset-0 z-20 bg-foreground/5 transition-opacity duration-200 motion-reduce:transition-none", shown ? "opacity-100" : "opacity-0")} />
@@ -57,7 +57,7 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
         // The width is set by style, so a drag never jumps; only the slide (transform) is transitioned.
         style={{ "--peek-w": `${width}px` } as CSSProperties}
         className={cn(
-          "absolute inset-y-0 right-0 z-20 flex w-full flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(var(--peek-w),100%)]",
+          "absolute inset-y-0 right-0 z-20 flex w-full flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(var(--peek-w),75vw,100%)]",
           shown ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -66,8 +66,8 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize preview"
-          aria-valuemin={400}
-          aria-valuemax={1000}
+          aria-valuemin={Math.min(400, max)}
+          aria-valuemax={max}
           aria-valuenow={width}
           tabIndex={0}
           onPointerDown={(e) => {
@@ -82,7 +82,7 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
             resize(width - dir * Math.round(width * KEY_STEP));
           }}
           onDoubleClick={() => resize(PEEK_WIDTH)}
-          className="absolute inset-y-0 left-0 z-20 hidden w-3 -translate-x-1/2 cursor-col-resize outline-none after:absolute after:inset-y-4 after:left-1/2 after:w-0.5 after:-translate-x-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary lg:block"
+          className="absolute inset-y-0 left-0 z-20 hidden w-3 -translate-x-1/2 cursor-col-resize touch-none outline-none after:absolute after:inset-y-4 after:left-1/2 after:w-0.5 after:-translate-x-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary lg:block"
         />
         {/* The scroller is inside the sheet, so the edge handle stays put while the content scrolls. */}
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { arrow, KEY_STEP, split } from "@/components/workspace/resize";
-import { clampPeekWidth, PEEK_WIDTH } from "@/components/workspace/use-peek";
+import { clampPeekWidth, PEEK_WIDTH, peekMax } from "@/components/workspace/use-peek";
 
 describe("moving size between two neighbours", () => {
   it("moves the delta from one to the other and keeps the total", () => {
@@ -15,6 +15,21 @@ describe("moving size between two neighbours", () => {
     const [a, b] = split(2, 0.5, 3, 0.4);
     expect(b).toBeCloseTo(0.4);
     expect(a + b).toBeCloseTo(2.5);
+  });
+
+  it("a pair shorter than two minimums floors at half each: moves the right way, never negative", () => {
+    // 0.5 total, min 0.3 (under 2 x min): growing a stops at half, shrinking a too.
+    const [a, b] = split(0.2, 0.3, 1, 0.3);
+    expect(a).toBeCloseTo(0.25);
+    expect(b).toBeCloseTo(0.25);
+    expect(split(0.2, 0.3, -1, 0.3)[0]).toBeCloseTo(0.25);
+    // a already under the minimum: a push the right way grows it, never past half.
+    expect(split(0.1, 0.4, 0.05, 0.3)[0]).toBeCloseTo(0.25);
+    // Total under one minimum: still never negative.
+    const [c, d] = split(0.1, 0.1, -5, 0.3);
+    expect(c).toBeGreaterThan(0);
+    expect(d).toBeGreaterThan(0);
+    expect(c + d).toBeCloseTo(0.2);
   });
 
   it("an arrow key moves one step of the pair's total, in the axis's direction", () => {
@@ -36,6 +51,11 @@ describe("side preview width", () => {
     expect(clampPeekWidth(100, 1600)).toBe(400);
     expect(clampPeekWidth(5000, 2000)).toBe(1000);
     expect(clampPeekWidth(1000, 1200)).toBe(900);
+  });
+
+  it("its cap follows the viewport", () => {
+    expect(peekMax(1200)).toBe(900);
+    expect(peekMax(2000)).toBe(1000);
   });
 
   it("falls back to the default for a bad saved value", () => {

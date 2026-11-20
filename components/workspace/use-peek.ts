@@ -5,23 +5,30 @@ import { peekKey, type View } from "@/lib/workspace-view";
 
 export const PEEK_WIDTH = 560;
 const WIDTH_KEY = "peek.width.v1";
-/** The peek's width: 400 px up to the smaller of 1000 px and 75% of the viewport (the cap wins on a narrow one). */
-export const clampPeekWidth = (w: number, viewport: number) => Math.round(Math.min(1000, viewport * 0.75, Math.max(400, Number.isFinite(w) ? w : PEEK_WIDTH)));
+/** The widest the peek gets: the smaller of 1000 px and 75% of the viewport. */
+export const peekMax = (viewport: number) => Math.round(Math.min(1000, viewport * 0.75));
+/** The peek's width: 400 px up to `peekMax` (the cap wins on a narrow viewport). */
+export const clampPeekWidth = (w: number, viewport: number) => Math.round(Math.min(peekMax(viewport), Math.max(400, Number.isFinite(w) ? w : PEEK_WIDTH)));
 
 /**
  * The peek's width on wide screens, remembered per browser (read after mount, so the first render matches the server's).
- * `resize` clamps to the viewport and saves, unless `save` is false (mid-drag).
- * ponytail: clamped when set or read, not when the window shrinks later; the sheet's CSS caps it at 100% meanwhile.
+ * `width` is the saved width clamped to the current window (re-clamped when it resizes; the saved one is kept, so a
+ * window made wide again gets it back), `max` the real cap. `resize` clamps and saves, unless `save` is false (mid-drag).
  */
 export function usePeekWidth() {
-  const [width, setWidth] = useState(PEEK_WIDTH);
+  const [wanted, setWidth] = useState(PEEK_WIDTH);
+  const [viewport, setViewport] = useState<number | null>(null);
   useEffect(() => {
     try {
       const saved = localStorage.getItem(WIDTH_KEY);
-      if (saved) setWidth(clampPeekWidth(Number(saved), window.innerWidth));
+      if (saved) setWidth(clampPeekWidth(Number(saved), Infinity));
     } catch {
       // storage blocked: the default width
     }
+    const onResize = () => setViewport(window.innerWidth);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
   const resize = useCallback((w: number, save = true) => {
     const next = clampPeekWidth(w, window.innerWidth);
@@ -33,7 +40,7 @@ export function usePeekWidth() {
       // ignore
     }
   }, []);
-  return [width, resize] as const;
+  return { width: viewport ? clampPeekWidth(wanted, viewport) : wanted, max: viewport ? peekMax(viewport) : 1000, resize };
 }
 
 /** What the peek shows: the open item, its title and breadcrumb, and a full page when there is one (studio reels). */
