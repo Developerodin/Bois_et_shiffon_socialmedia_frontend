@@ -19,7 +19,7 @@ There are no defaults: a missing value stops the run. Never commit them.
 
 | Variable | Account |
 | --- | --- |
-| `E2E_OWNER_EMAIL`, `E2E_OWNER_PASSWORD` | Owner of a workspace with at least two businesses, one of which has an earlier Espanda conversation for this person (the brand-switch test starts from it). |
+| `E2E_OWNER_EMAIL`, `E2E_OWNER_PASSWORD` | Owner of a workspace with at least two businesses, one of which has an earlier Bois & Chiffons conversation for this person (the brand-switch test starts from it). |
 | `E2E_VIEWER_EMAIL`, `E2E_VIEWER_PASSWORD` | Workspace role **Member** with the project role **Viewer** on that workspace's businesses (what accepting a project invitation as Viewer gives you). |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | A platform admin (`User.isPlatformAdmin`), no workspace needed. |
 

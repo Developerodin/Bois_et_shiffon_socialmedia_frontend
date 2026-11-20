@@ -13,7 +13,7 @@ const MORE = ["Calendar", "Performance", "Agent log", "Settings"];
 const sidebar = (page: Page) => page.getByRole("navigation", { name: "Workspace" });
 /** A sidebar row by its label; agent rows also read their "Soon" tag and role. */
 const navLink = (page: Page, name: string) => sidebar(page).getByRole("link", { name: new RegExp(`^${name}( |$)`) });
-const panel = (page: Page) => page.getByRole("complementary", { name: "Espanda" });
+const panel = (page: Page) => page.getByRole("complementary", { name: "Bois & Chiffons" });
 const accountMenu = (page: Page) => page.getByRole("button", { name: "Account menu" });
 
 async function openAccountMenu(page: Page) {
@@ -61,7 +61,7 @@ test.describe("owner", () => {
     await expect(page.getByRole("heading", { name: "Agents", level: 2 })).toBeVisible();
     await expect(page.getByRole("region", { name: "Chat", exact: true })).toHaveCount(0);
     await expect(panel(page).getByRole("textbox")).toBeVisible();
-    await expect(page.getByRole("textbox", { name: /^Message (Espanda|your CMO)$/ })).toHaveCount(1);
+    await expect(page.getByRole("textbox", { name: /^Message (Bois & Chiffons|your CMO)$/ })).toHaveCount(1);
   });
 
   test("switching business moves the panel to the new business and drops the old thread", async ({ page }) => {
@@ -93,7 +93,7 @@ test.describe("owner", () => {
         messages = (await items.allInnerTexts()).map((t) => t.trim()).filter(Boolean);
       }
     }
-    expect(from, "a business with an earlier Espanda conversation").toBeGreaterThanOrEqual(0);
+    expect(from, "a business with an earlier Bois & Chiffons conversation").toBeGreaterThanOrEqual(0);
 
     const to = names.findIndex((n) => n !== names[from]);
     expect(to).toBeGreaterThanOrEqual(0);
@@ -155,7 +155,7 @@ test.describe("1100 px window", () => {
     await page.goto("/connections");
     await expect(page.getByRole("main")).toBeVisible();
     await expect(panel(page)).toBeHidden();
-    await page.getByRole("button", { name: "Espanda", exact: true }).click();
+    await page.getByRole("button", { name: "Bois & Chiffons", exact: true }).click();
     const sheet = page.getByRole("dialog");
     await expect(sheet).toBeVisible();
     await expect(sheet.getByRole("textbox")).toBeVisible();
