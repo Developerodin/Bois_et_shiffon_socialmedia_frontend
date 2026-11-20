@@ -492,7 +492,7 @@ export function PanelLayout<Id extends string>({
                 );
               })}
             </div>
-            {ci < layout.columns.length - 1 && !offScreen(layout.columns[ci + 1]) && (
+            {ci < layout.columns.length - 1 && !offScreen(col) && !offScreen(layout.columns[ci + 1]) && (
               <div
                 role="separator"
                 aria-orientation="vertical"

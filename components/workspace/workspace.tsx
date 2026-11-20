@@ -156,6 +156,13 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const replaceUrl = useRef(false);
   // The last full URL (path or search) the page accepted, to put back when the person stays on an unsaved document.
   const acceptedUrl = useRef<string | null>(null);
+  // True while the URL change being handled came from browser Back/Forward (the entry the person went to must stay).
+  const popped = useRef(false);
+  useEffect(() => {
+    const onPop = () => void (popped.current = true);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   // Open what the URL names: on load (deep link, refresh), on Back/Forward, and on links to "/" while a view is open
   // (the sidebar's Overview). Next.js updates the search params for all of these, and for our own pushState below,
@@ -172,7 +179,11 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       // An open document with unsaved edits asks first; staying puts the accepted URL back (in place of the new
       // entry), and the effect run that follows finds nothing to change.
       if (!agreed && !okToDiscard()) {
-        window.history.replaceState(null, "", acceptedUrl.current ?? viewSearch(viewNow.current));
+        // After Back/Forward, push: replacing would overwrite the entry they went back to.
+        const back = acceptedUrl.current ?? viewSearch(viewNow.current);
+        if (popped.current) window.history.pushState(null, "", back);
+        else window.history.replaceState(null, "", back);
+        popped.current = false;
         return;
       }
       forgetClosed();
@@ -185,6 +196,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     shownPanel.current = panel;
     const cf = filterFromSearch(new URLSearchParams(window.location.search));
     setCalFilter((old) => (filterToSearch(old) === filterToSearch(cf) ? old : cf));
+    popped.current = false;
     acceptedUrl.current = window.location.search || window.location.pathname;
     setUrlRead(true);
   }, [query, forgetClosed]);
@@ -1309,8 +1321,8 @@ function AgentView({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // A run started here replaces the one the link named: from then on show the latest run.
-  const [started, setStarted] = useState(false);
-  const shownRun = started ? undefined : runId;
+  const [startedFor, setStartedFor] = useState<string | null | undefined>(null);
+  const shownRun = startedFor === runId ? undefined : runId;
   const running = agent?.lastRun?.status === "RUNNING" || agent?.lastRun?.status === "QUEUED";
   const price = useRunPrice(workspaceId, agentKey);
 
@@ -1319,7 +1331,7 @@ function AgentView({
     setError(null);
     try {
       await startRun(workspaceId, brandId, agentKey);
-      setStarted(true);
+      setStartedFor(runId);
       onRan();
       void loadPlanCredits(workspaceId, true);
     } catch (e) {

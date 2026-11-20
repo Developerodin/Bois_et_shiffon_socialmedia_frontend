@@ -87,8 +87,8 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
     setOrder(next);
     try {
       localStorage.setItem(AGENT_ORDER_KEY, JSON.stringify(next));
+      window.dispatchEvent(new Event("agent-order"));
     } catch {}
-    window.dispatchEvent(new Event("agent-order"));
   };
 
   return (

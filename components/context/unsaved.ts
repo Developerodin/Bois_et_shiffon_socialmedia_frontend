@@ -36,9 +36,13 @@ const onLink = (e: MouseEvent) => {
   }
 };
 /** Sign-out only, after the person agreed to discard: drop the tab guard so the browser doesn't ask a second time. */
-// ponytail: stays off if the sign-out then fails (the next dirty/clean change re-syncs it); fine for a rare error path.
 export function releaseUnloadGuard() {
   window.removeEventListener("beforeunload", warn);
+}
+/** A sign-out that failed: put the shared guards back (releaseUnloadGuard left `attached` true, so syncGuards alone would do nothing). */
+export function restoreUnloadGuard() {
+  attached = false;
+  syncGuards();
 }
 function syncGuards() {
   if (dirty.size > 0 === attached) return;

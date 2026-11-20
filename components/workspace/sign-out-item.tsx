@@ -4,7 +4,7 @@ import { useState } from "react";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { okToDiscard, releaseUnloadGuard } from "@/components/context/unsaved";
+import { okToDiscard, releaseUnloadGuard, restoreUnloadGuard } from "@/components/context/unsaved";
 import { clearAllRecent } from "@/lib/recent";
 
 /**
@@ -13,11 +13,14 @@ import { clearAllRecent } from "@/lib/recent";
  * an item closes the menu and removes the form first), and the server action's cookie removal didn't stick.
  * What this browser remembered of what the person opened (Recent) goes first: the next person must not see it.
  */
-const signOutNow = () => {
+const signOutNow = (onFail: () => void) => {
   if (!okToDiscard()) return false;
   releaseUnloadGuard();
   clearAllRecent();
-  void signOut({ redirectTo: "/login" });
+  signOut({ redirectTo: "/login" }).catch(() => {
+    restoreUnloadGuard();
+    onFail();
+  });
   return true;
 };
 
@@ -30,7 +33,7 @@ export function SignOutItem() {
       disabled={pending}
       onSelect={(e) => {
         e.preventDefault();
-        if (signOutNow()) setPending(true);
+        if (signOutNow(() => setPending(false))) setPending(true);
       }}
     >
       <LogOut aria-hidden="true" /> {pending ? "Signing out…" : "Sign out"}
@@ -47,7 +50,7 @@ export function SignOutButton({ className }: { className?: string }) {
       className={className}
       disabled={pending}
       onClick={() => {
-        if (signOutNow()) setPending(true);
+        if (signOutNow(() => setPending(false))) setPending(true);
       }}
     >
       {pending ? "Signing out…" : "Sign out"}
