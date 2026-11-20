@@ -43,7 +43,7 @@ function syncGuards() {
   document[act]("click", onLink as EventListener, true);
 }
 
-/** Marks `owner` dirty and attaches the shared guards; returns what the hook runs on unmount. */
+/** The register function behind `useUnsavedGuard` (exported only so a test can drive it without React): marks `owner` dirty, attaches the shared guards, returns the cleanup. */
 export function registerUnsaved(owner: symbol) {
   setUnsaved(owner, true);
   syncGuards();
@@ -61,6 +61,3 @@ export function useUnsavedGuard(isDirty: boolean) {
   const off = useContext(UnsavedGuardOff);
   useEffect(() => (isDirty && !off ? registerUnsaved(Symbol("unsaved")) : undefined), [isDirty, off]);
 }
-
-/** Whether the shared tab and link guards are attached (for tests). */
-export const guardsAttached = () => attached;

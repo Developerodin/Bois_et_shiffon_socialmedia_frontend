@@ -1,10 +1,22 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { guardsAttached, okToDiscard, registerUnsaved, setUnsaved } from "@/components/context/unsaved";
+import { okToDiscard, registerUnsaved, setUnsaved } from "@/components/context/unsaved";
 
 const confirm = vi.fn(() => false);
 const listeners = { add: vi.fn(), remove: vi.fn() };
-vi.stubGlobal("window", { confirm, addEventListener: listeners.add, removeEventListener: listeners.remove });
-vi.stubGlobal("document", { addEventListener: listeners.add, removeEventListener: listeners.remove });
+// A tiny event target, so a test can dispatch beforeunload and see whether the guard answers.
+const handlers = new Map<string, (e: unknown) => void>();
+const target = {
+  addEventListener: (type: string, fn: unknown, ...rest: unknown[]) => (listeners.add(type, fn, ...rest), handlers.set(type, fn as (e: unknown) => void)),
+  removeEventListener: (type: string, fn: unknown, ...rest: unknown[]) => (listeners.remove(type, fn, ...rest), handlers.delete(type)),
+};
+vi.stubGlobal("window", { confirm, ...target });
+vi.stubGlobal("document", target);
+// True when closing the tab would warn: dispatches beforeunload through whatever the code attached.
+const guardsAttached = () => {
+  const e = { preventDefault: vi.fn() };
+  handlers.get("beforeunload")?.(e);
+  return e.preventDefault.mock.calls.length > 0;
+};
 
 const a = Symbol("caption");
 const b = Symbol("release");
