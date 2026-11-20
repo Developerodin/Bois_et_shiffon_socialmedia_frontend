@@ -400,7 +400,7 @@ export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner 
       )}
       <select aria-label="Owner" value={filter.owner ?? ""} onChange={(e) => set({ owner: (e.target.value || undefined) as CalendarFilter["owner"] })} className={sel}>
         <option value="">Anyone</option>
-        {me && <option value="me">Mine</option>}
+        {(me || filter.owner === "me") && <option value="me" disabled={!me}>Mine</option>}
         <option value="none">Unassigned</option>
       </select>
       <select aria-label="Needs action" value={filter.need ?? ""} onChange={(e) => set({ need: (e.target.value || undefined) as CalendarFilter["need"] })} className={sel}>
@@ -430,41 +430,41 @@ export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner 
   }
   return (
     <div>
-    {filters}
-    <ol className="flex flex-col">
-      {[...groups].map(([k, list]) => (
-        <li key={k}>
-          <p className="sticky top-0 z-[1] bg-background/95 px-4 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">{k === "unscheduled" ? "No date" : day(list[0].scheduledFor!)}</p>
-          <ul className="divide-y divide-border">
-            {list.map((i) => (
-              <li key={i.id}>
-                <button type="button" onClick={() => onOpen(i.id)} className="flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
-                  {i.channel === "INSTAGRAM_STORY" && (
-                    // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
-                    i.firstFrameUrl ? <img src={i.firstFrameUrl} alt="" className="aspect-[9/16] w-9 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-9 shrink-0 rounded bg-muted" />
-                  )}
-                  <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="flex items-center justify-between gap-2 text-[11px]">
-                    <span className="text-muted-foreground">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
-                    {i.publishIssue ? (
-                      <StatusBadge status={i.publishIssue}>{PUBLISH_ISSUE[i.publishIssue]}</StatusBadge>
-                    ) : (
-                      <StatusBadge status={i.status}>
-                        {i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status)}
-                      </StatusBadge>
+      {filters}
+      <ol className="flex flex-col">
+        {[...groups].map(([k, list]) => (
+          <li key={k}>
+            <p className="sticky top-0 z-[1] bg-background/95 px-4 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">{k === "unscheduled" ? "No date" : day(list[0].scheduledFor!)}</p>
+            <ul className="divide-y divide-border">
+              {list.map((i) => (
+                <li key={i.id}>
+                  <button type="button" onClick={() => onOpen(i.id)} className="flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                    {i.channel === "INSTAGRAM_STORY" && (
+                      // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
+                      i.firstFrameUrl ? <img src={i.firstFrameUrl} alt="" className="aspect-[9/16] w-9 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-9 shrink-0 rounded bg-muted" />
                     )}
-                  </span>
-                  <span className="text-sm">{i.title}</span>
-                  <span className="text-[11px] text-muted-foreground">{i.owner?.name ?? "Unassigned"}</span>
-                  {i.byHand && i.scheduledFor && <span className="text-[11px] font-medium text-primary">Post by hand &middot; {dayTime(i.scheduledFor)}</span>}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </li>
-      ))}
-    </ol>
+                    <span className="flex min-w-0 flex-1 flex-col gap-1">
+                    <span className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="text-muted-foreground">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
+                      {i.publishIssue ? (
+                        <StatusBadge status={i.publishIssue}>{PUBLISH_ISSUE[i.publishIssue]}</StatusBadge>
+                      ) : (
+                        <StatusBadge status={i.status}>
+                          {i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status)}
+                        </StatusBadge>
+                      )}
+                    </span>
+                    <span className="text-sm">{i.title}</span>
+                    <span className="text-[11px] text-muted-foreground">{i.owner?.name ?? "Unassigned"}</span>
+                    {i.byHand && i.scheduledFor && <span className="text-[11px] font-medium text-primary">Post by hand &middot; {dayTime(i.scheduledFor)}</span>}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -706,9 +706,17 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
     if (!canAssign) return;
     request<{ owners: { id: string; name: string | null }[] }>(`${base}/content/owners`).then((r) => setOwners(r.owners), () => {});
   }, [canAssign, base]);
+  const [assigning, setAssigning] = useState(false);
+  useEffect(() => setOwnerError(null), [id]);
   const assign = (userId: string | null) => {
     setOwnerError(null);
-    request(`${base}/content/${encodeURIComponent(id)}`, { method: "POST", body: JSON.stringify({ action: "setOwner", userId }) }).then(reload, (e) => setOwnerError(errorMessage(e)));
+    setAssigning(true);
+    // Refresh the source the post came from: the list, or the by-id lookup for a post outside the window.
+    const refresh = () => (listed ? reload() : request<{ items: ContentItem[] }>(`${base}/content?id=${encodeURIComponent(id)}`).then((r) => setOutside(r.items[0] ?? null)));
+    request(`${base}/content/${encodeURIComponent(id)}`, { method: "POST", body: JSON.stringify({ action: "setOwner", userId }) })
+      .then(refresh)
+      .catch((e) => setOwnerError(errorMessage(e)))
+      .finally(() => setAssigning(false));
   };
   const brief = (item?.brief ?? {}) as { goal?: string; audience?: string; keyMessage?: string; products?: string[]; cta?: string; visual?: string; questions?: string[]; angle?: string };
   const b = item?.latest?.body;
@@ -747,7 +755,7 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
             {canAssign ? (
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
                 <label htmlFor="post-owner" className="text-muted-foreground">Owner</label>
-                <select id="post-owner" value={item.owner?.id ?? ""} onChange={(e) => assign(e.target.value || null)} className={cn(selectClass, "h-8 w-auto text-sm")}>
+                <select id="post-owner" disabled={assigning} value={item.owner?.id ?? ""} onChange={(e) => assign(e.target.value || null)} className={cn(selectClass, "h-8 w-auto text-sm")}>
                   <option value="">Unassigned</option>
                   {item.owner && !owners.some((o) => o.id === item.owner!.id) && <option value={item.owner.id}>{item.owner.name ?? "Unnamed"}</option>}
                   {owners.map((o) => <option key={o.id} value={o.id}>{o.name ?? "Unnamed"}</option>)}

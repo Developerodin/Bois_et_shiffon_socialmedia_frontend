@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, type CalendarItem } from "@/lib/calendar-filter";
+import { filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, withFilter, type CalendarItem } from "@/lib/calendar-filter";
 
 const now = new Date("2026-11-20T12:00:00Z");
 const past = "2026-11-19T12:00:00Z";
@@ -33,6 +33,19 @@ describe("isBlocked", () => {
     expect(isBlocked(item({ latest: { check: { overall: "WARN" } } }))).toBe(false);
     expect(isBlocked(item())).toBe(false);
   });
+  it("ignores finished posts", () => {
+    expect(isBlocked(item({ status: "PUBLISHED", latest: { check: { overall: "BLOCKER" } } }))).toBe(false);
+    expect(isBlocked(item({ status: "REVIEWED", publishIssue: "CHECK" }))).toBe(false);
+  });
+});
+
+describe("isThisWeek", () => {
+  it("is an unfinished post due within seven days", () => {
+    expect(isThisWeek(item({ scheduledFor: soon }), now)).toBe(true);
+    expect(isThisWeek(item({ status: "PUBLISHED", scheduledFor: soon }), now)).toBe(false);
+    expect(isThisWeek(item({ scheduledFor: far }), now)).toBe(false);
+    expect(isThisWeek(item({ scheduledFor: past }), now)).toBe(false);
+  });
 });
 
 describe("filterItems", () => {
@@ -59,6 +72,7 @@ describe("filterItems", () => {
     expect(ids({ need: "blocked" })).toEqual(["4"]);
     expect(ids({ need: "week" })).toEqual(["1"]);
   });
+  it("keeps everything for owner me when me is unknown", () => expect(filterItems(items, { owner: "me" }, null, now).map((i) => i.id)).toEqual(["1", "2", "3", "4", "5"]));
   it("combines filters", () => expect(ids({ channel: "INSTAGRAM_POST", owner: "none" })).toEqual(["3"]));
 });
 
@@ -66,6 +80,13 @@ describe("URL", () => {
   it("round trips", () => {
     const f = { channel: "INSTAGRAM_POST", status: "awaiting", campaignId: "c1", owner: "me", need: "week" } as const;
     expect(filterFromSearch(new URLSearchParams(filterToSearch(f)))).toEqual(f);
+  });
+  it("withFilter keeps post= and panel= and replaces cf_ params", () => {
+    const q = new URLSearchParams(withFilter("?post=p1&panel=content&cf_need=week", { owner: "me" }));
+    expect(q.get("post")).toBe("p1");
+    expect(q.get("panel")).toBe("content");
+    expect(q.get("cf_need")).toBeNull();
+    expect(q.get("cf_owner")).toBe("me");
   });
   it("writes nothing for an empty filter and drops unknown values", () => {
     expect(filterToSearch({})).toBe("");

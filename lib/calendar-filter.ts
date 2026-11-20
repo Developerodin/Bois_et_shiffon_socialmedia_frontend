@@ -27,6 +27,7 @@ export function isOverdue(i: Pick<CalendarItem, "status" | "scheduledFor" | "byH
 }
 
 export function isBlocked(i: Pick<CalendarItem, "status" | "publishIssue" | "latest">): boolean {
+  if (PUBLISHED.includes(i.status)) return false;
   return i.status === "BLOCKED" || i.latest?.check?.overall === "BLOCKER" || !!i.publishIssue;
 }
 
@@ -40,7 +41,7 @@ export function filterItems<T extends CalendarItem>(items: T[], f: CalendarFilte
       (!f.channel || i.channel === f.channel) &&
       (!f.status || (STATUS_GROUPS[f.status] as readonly string[]).includes(i.status)) &&
       (!f.campaignId || i.campaignId === f.campaignId) &&
-      (f.owner !== "me" || (!!me && i.owner?.id === me)) &&
+      (f.owner !== "me" || !me || i.owner?.id === me) &&
       (f.owner !== "none" || i.owner == null) &&
       (f.need !== "overdue" || isOverdue(i, now)) &&
       (f.need !== "blocked" || isBlocked(i)) &&
