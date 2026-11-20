@@ -27,3 +27,18 @@ export function groupByDay<T extends { scheduledFor: string | null }>(items: T[]
   }
   return groups;
 }
+
+/** Where an arrow key moves focus in a 7-wide day grid of `length` cells: the new index, or null at an edge or for another key. */
+export function gridStep(i: number, key: string, length: number): number | null {
+  const by = key === "ArrowLeft" ? -1 : key === "ArrowRight" ? 1 : key === "ArrowUp" ? -7 : key === "ArrowDown" ? 7 : 0;
+  return by && i + by >= 0 && i + by < length ? i + by : null;
+}
+
+/** A day popover's left edge: under its cell, moved left as needed to stay inside the container, never past its left edge. */
+export const popoverLeft = (cellLeft: number, width: number, containerWidth: number) => Math.max(0, Math.min(cellLeft, containerWidth - width));
+
+/** A compact 24-hour time ("14:30") for a month cell, or null at midnight (a date with no time). */
+export function shortTime(iso: string): string | null {
+  const at = new Date(iso);
+  return at.getHours() || at.getMinutes() ? at.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }) : null;
+}

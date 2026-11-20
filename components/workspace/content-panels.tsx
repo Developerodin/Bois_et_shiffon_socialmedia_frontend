@@ -22,7 +22,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, toneOf } from "@/lib/status";
 import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
 import { filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
-import { dayKey, gridRange, groupByDay, monthGrid } from "@/lib/calendar-month";
+import { dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 
 /* ───────────── shared types + data ───────────── */
@@ -553,34 +553,146 @@ const pickRange = (d: RangeAnswer) => d;
 const MORE_AFTER = 3;
 const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
 
-/** One post in a month cell or the No date strip: time (unless midnight) and title, in its status tone. Opens like a list row. */
-function PostChip({ item, onOpen }: { item: ContentItem; onOpen: (id: string) => void }) {
-  const at = item.scheduledFor ? new Date(item.scheduledFor) : null;
-  const time = at && (at.getHours() || at.getMinutes()) ? at.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : null;
+/**
+ * One post in its status tone. In the No date strip it's a button that opens the post. In a month cell it sits inside
+ * the cell's button: the title, plus a short time once the cell is over 140 px wide (a time ate narrow chips).
+ */
+function PostChip({ item, onOpen }: { item: ContentItem; onOpen?: (id: string) => void }) {
+  const tone = cn("flex w-full min-w-0 items-center gap-1 rounded border px-1 py-0.5 text-left text-[11px] leading-tight", TONE_CLASS[toneOf(item.publishIssue ?? item.status)]);
+  if (!onOpen) {
+    const time = item.scheduledFor ? shortTime(item.scheduledFor) : null;
+    return (
+      <span className={tone}>
+        {time && <span className="hidden shrink-0 tabular-nums @min-[140px]/cell:inline">{time}</span>}
+        <span className="truncate">{item.title}</span>
+      </span>
+    );
+  }
   return (
-    <button
-      type="button"
-      onClick={() => onOpen(item.id)}
-      title={item.title}
-      className={cn("flex w-full min-w-0 items-center gap-1 rounded border px-1 py-0.5 text-left text-[11px] leading-tight hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", TONE_CLASS[toneOf(item.publishIssue ?? item.status)])}
-    >
-      {time && <span className="shrink-0 tabular-nums">{time}</span>}
+    <button type="button" onClick={() => onOpen(item.id)} title={item.title} className={cn(tone, "hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring")}>
       <span className="truncate">{item.title}</span>
       <span className="sr-only">, {statusText(item)}</span>
     </button>
   );
 }
 
+const POPOVER_W = 288; // w-72
+// The close animation is 150 ms; the popover unmounts after this (under reduced motion it is hidden at once meanwhile).
+const POPOVER_EXIT_MS = 200;
+
+/**
+ * A day's posts in a popover under its cell: time, channel, title and status, each opening the post. Focus moves in on
+ * open; Esc, the close button or a press outside close it, and the caller gives focus back to the cell. Fades and
+ * scales in from 0.96 with a 4 px slide from the cell (opacity and transform only), and back out on close.
+ * ponytail: not Radix Popover (not installed); always opens below its cell (the panel scrolls to it). Flip it above
+ * if the bottom rows feel cramped.
+ */
+function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }: {
+  label: string;
+  posts: ContentItem[];
+  open: boolean;
+  at: { left: number; top: number };
+  cell: () => HTMLElement | null | undefined;
+  onClose: () => void;
+  onExited: () => void;
+  onOpen: (id: string) => void;
+}) {
+  const titleId = useId();
+  const box = useRef<HTMLDivElement>(null);
+  const head = useRef<HTMLHeadingElement>(null);
+  // Mounted in the closed pose, then opened on the next frame so the transition has a start.
+  const [entered, setEntered] = useState(false);
+  useEffect(() => {
+    head.current?.focus({ preventScroll: true });
+    const f = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(f);
+  }, []);
+  useEffect(() => {
+    if (open) return;
+    const t = setTimeout(onExited, POPOVER_EXIT_MS);
+    return () => clearTimeout(t);
+  }, [open, onExited]);
+  // A press outside closes it; a press on its own cell is left to the cell's click, which toggles it.
+  useEffect(() => {
+    if (!open) return;
+    const down = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (!box.current?.contains(t) && !cell()?.contains(t)) onClose();
+    };
+    document.addEventListener("pointerdown", down);
+    return () => document.removeEventListener("pointerdown", down);
+  }, [open, cell, onClose]);
+  const shown = open && entered;
+  return (
+    <div
+      ref={box}
+      role="dialog"
+      aria-labelledby={titleId}
+      // Esc is used up here, so a side preview around the calendar doesn't close as well.
+      onKeyDown={(e) => {
+        if (e.key !== "Escape") return;
+        e.preventDefault();
+        onClose();
+      }}
+      style={{ left: at.left, top: at.top, width: POPOVER_W }}
+      className={cn(
+        "absolute z-20 flex max-h-80 max-w-full origin-top-left flex-col gap-1 overflow-y-auto rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-lg transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
+        shown ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-1 scale-[0.96] opacity-0",
+      )}
+    >
+      <div className="flex items-center gap-2 pl-2">
+        <h4 id={titleId} ref={head} tabIndex={-1} className="mr-auto text-xs font-semibold focus-visible:outline-none">
+          {posts.length ? <>{label} &middot; {postCount(posts.length)}</> : `Nothing on ${label}`}
+        </h4>
+        <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Close this day" onClick={onClose}>
+          <X aria-hidden className="size-4" />
+        </Button>
+      </div>
+      {posts.length > 0 && (
+        <ul className="flex flex-col">
+          {posts.map((i) => {
+            const time = i.scheduledFor && shortTime(i.scheduledFor) ? new Date(i.scheduledFor).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : null;
+            return (
+              <li key={i.id}>
+                {/* Closed first, so focus is back on the cell when the post opens: the preview returns focus there. */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpen(i.id);
+                  }}
+                  className="flex w-full flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                >
+                  <span className="flex items-center justify-between gap-2 text-[11px]">
+                    <span className="text-muted-foreground">
+                      {time && <span className="tabular-nums">{time} &middot; </span>}
+                      {CHANNEL_LABEL[i.channel] ?? i.channel}
+                    </span>
+                    <StatusBadge status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>
+                  </span>
+                  <span className="text-sm">{i.title}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /**
  * The calendar as a month grid (weeks start Monday). Dated posts come from their own read of the grid's dates (?from&to,
- * so past months show); undated ones are the list's. The same filters apply. "+N more" (or a day's count on a narrow
- * panel) shows that day's posts under the grid.
+ * so past months show); undated ones are the list's. The same filters apply. Each day is a button that opens its posts
+ * in a popover; arrow keys move between days (the grid is one tab stop).
  * ponytail: no drag to reschedule, no week view, no new post from a day (the new post dialog has no date): not asked for yet.
  */
 function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: string; filter: CalendarFilter; me: string | null; undated: ContentItem[]; onOpen: (id: string) => void; onItems: (items: ContentItem[]) => void }) {
   const [month, setMonth] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }));
-  // The day whose posts show under the grid (its key), if any.
-  const [picked, setPicked] = useState<string | null>(null);
+  // The day whose popover shows (its key) and where; `open` is false while it closes.
+  const [pop, setPop] = useState<{ key: string; open: boolean; at: { left: number; top: number } } | null>(null);
+  // The day last focused: it holds the grid's one tab stop.
+  const [cursor, setCursor] = useState<string | null>(null);
   const grid = useMemo(() => monthGrid(month.y, month.m), [month]);
   const { from, to } = gridRange(grid);
   // A month that is all past changes rarely: polled slower. ponytail: one cached read per month looked at, polled while Month is open.
@@ -598,29 +710,37 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
   }, [itemsKey, onItems]);
   const today = dayKey(new Date());
   const headId = useId();
-  const monthHead = useRef<HTMLHeadingElement>(null);
-  const dayHead = useRef<HTMLHeadingElement>(null);
-  // A picked day's section takes focus, so its posts are next; closing it puts focus back on the month.
-  useEffect(() => {
-    if (picked) dayHead.current?.focus();
-  }, [picked]);
-  const unpick = () => {
-    setPicked(null);
-    monthHead.current?.focus();
+  const wrap = useRef<HTMLDivElement>(null);
+  const cellOf = useCallback((k: string) => wrap.current?.querySelector<HTMLElement>(`[data-day="${k}"]`), []);
+  const openDay = (k: string, el: HTMLElement) => {
+    const box = wrap.current!.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    setPop({ key: k, open: true, at: { left: popoverLeft(r.left - box.left, POPOVER_W, box.width), top: r.bottom - box.top + 4 } });
   };
+  // Closing gives focus back to the day's cell.
+  const closeDay = useCallback(() => {
+    if (!pop?.open) return;
+    cellOf(pop.key)?.focus();
+    setPop({ ...pop, open: false });
+  }, [pop, cellOf]);
+  const popCell = useCallback(() => (pop ? cellOf(pop.key) : null), [pop, cellOf]);
+  const popExited = useCallback(() => setPop((p) => (p && !p.open ? null : p)), []);
   const show = (y: number, m: number) => {
     setMonth({ y: new Date(y, m, 1).getFullYear(), m: new Date(y, m, 1).getMonth() });
-    setPicked(null);
+    setPop(null);
   };
   const go = (by: number) => show(month.y, month.m + by);
   const inMonth = grid.filter((d) => d.getMonth() === month.m).reduce((n, d) => n + (byDay.get(dayKey(d))?.length ?? 0), 0);
   const weeks = Array.from({ length: grid.length / 7 }, (_, w) => grid.slice(w * 7, w * 7 + 7));
-  const pickedDay = picked ? grid.find((d) => dayKey(d) === picked) : undefined;
-  const pickedPosts = picked ? (byDay.get(picked) ?? []) : [];
+  const keys = grid.map(dayKey);
+  // The tab stop: the day last focused if it's on this grid, else today if shown, else the 1st.
+  const stop = cursor && keys.includes(cursor) ? cursor : keys.includes(today) ? today : dayKey(new Date(month.y, month.m, 1));
+  const dayLabel = (d: Date) => d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  const popDay = pop ? grid[keys.indexOf(pop.key)] : undefined;
   return (
-    <div className="@container flex flex-col gap-2 px-4 py-3" onKeyDown={(e) => picked && e.key === "Escape" && unpick()}>
+    <div ref={wrap} className="@container/month relative flex flex-col gap-2 px-4 py-3">
       <div className="flex items-center gap-1">
-        <h3 id={headId} ref={monthHead} tabIndex={-1} className="mr-auto text-sm font-semibold focus-visible:outline-none">
+        <h3 id={headId} tabIndex={-1} className="mr-auto text-sm font-semibold focus-visible:outline-none">
           {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
         </h3>
         <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Previous month" onClick={() => go(-1)}>
@@ -658,41 +778,57 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody
+            // Arrow keys move between days, a week up or down; the focused day becomes the grid's tab stop.
+            onKeyDown={(e) => {
+              const k = (e.target as HTMLElement).dataset.day;
+              const n = k ? gridStep(keys.indexOf(k), e.key, keys.length) : null;
+              if (n === null) return;
+              e.preventDefault();
+              cellOf(keys[n])?.focus();
+            }}
+          >
             {weeks.map((week) => (
               <tr key={dayKey(week[0])}>
                 {week.map((d) => {
                   const k = dayKey(d);
                   const posts = byDay.get(k) ?? [];
+                  const isOpen = pop?.key === k && pop.open;
                   return (
                     <td
                       key={k}
                       className={cn(
-                        "h-14 rounded-lg border border-border p-1 align-top @min-[520px]:h-24",
+                        "h-14 rounded-lg border border-border p-0 align-top @min-[520px]/month:h-24",
                         d.getDay() % 6 === 0 && "bg-muted/40",
-                        picked === k && "bg-primary/5",
+                        isOpen && "bg-primary/5",
                         k === today && "ring-2 ring-inset ring-primary",
                       )}
                     >
-                      {/* Only the number of a day outside the month is dimmed: its posts read as usual. */}
-                      <span aria-hidden className={cn("block text-[11px]", d.getMonth() !== month.m && "text-muted-foreground opacity-60", k === today && "font-semibold text-primary opacity-100")}>{d.getDate()}</span>
-                      <span className="sr-only">{`${d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}, ${postCount(posts.length)}`}</span>
-                      {posts.length > 0 && (
-                        <>
-                          {/* Wide panel: the posts as chips. Narrow (under 520 px): a count that shows the day under the grid. */}
-                          <div className="mt-0.5 hidden flex-col gap-0.5 @min-[520px]:flex">
-                            {posts.slice(0, MORE_AFTER).map((i) => <PostChip key={i.id} item={i} onOpen={onOpen} />)}
-                            {posts.length > MORE_AFTER && (
-                              <button type="button" aria-expanded={picked === k} onClick={() => setPicked((p) => (p === k ? null : k))} className="rounded px-1 text-left text-[11px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                                +{posts.length - MORE_AFTER} more
-                              </button>
-                            )}
-                          </div>
-                          <button type="button" aria-expanded={picked === k} onClick={() => setPicked((p) => (p === k ? null : k))} className="mt-0.5 block w-full truncate rounded text-left text-[11px] text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]:hidden">
-                            {postCount(posts.length)}
-                          </button>
-                        </>
-                      )}
+                      {/* The whole cell is the button that opens the day's popover. */}
+                      <button
+                        type="button"
+                        data-day={k}
+                        tabIndex={k === stop ? 0 : -1}
+                        aria-label={`${dayLabel(d)}, ${postCount(posts.length)}`}
+                        aria-haspopup="dialog"
+                        aria-expanded={isOpen}
+                        onFocus={() => setCursor(k)}
+                        onClick={(e) => (isOpen ? closeDay() : openDay(k, e.currentTarget))}
+                        className="@container/cell flex h-full min-h-14 w-full flex-col items-stretch rounded-lg p-1 text-left align-top hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]/month:min-h-24"
+                      >
+                        {/* Only the number of a day outside the month is dimmed: its posts read as usual. */}
+                        <span aria-hidden className={cn("block text-[11px]", d.getMonth() !== month.m && "text-muted-foreground opacity-60", k === today && "font-semibold text-primary opacity-100")}>{d.getDate()}</span>
+                        {posts.length > 0 && (
+                          <>
+                            {/* Wide panel: the posts as chips. Narrow (under 520 px): a count. */}
+                            <span className="mt-0.5 hidden flex-col gap-0.5 @min-[520px]/month:flex">
+                              {posts.slice(0, MORE_AFTER).map((i) => <PostChip key={i.id} item={i} />)}
+                              {posts.length > MORE_AFTER && <span className="px-1 text-[11px] text-muted-foreground">+{posts.length - MORE_AFTER} more</span>}
+                            </span>
+                            <span className="mt-0.5 block truncate text-[11px] text-primary @min-[520px]/month:hidden">{postCount(posts.length)}</span>
+                          </>
+                        )}
+                      </button>
                     </td>
                   );
                 })}
@@ -700,26 +836,10 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
             ))}
           </tbody>
         </table>
-        {pickedDay && (
-          <section aria-labelledby={`${headId}-day`} className="flex flex-col gap-1 rounded-2xl border border-border p-3">
-            <div className="flex items-center gap-2">
-              <h4 id={`${headId}-day`} ref={dayHead} tabIndex={-1} className="mr-auto text-xs font-semibold focus-visible:outline-none">
-                {pickedDay.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "long" })} &middot; {postCount(pickedPosts.length)}
-              </h4>
-              <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Close this day" onClick={unpick}>
-                <X aria-hidden className="size-4" />
-              </Button>
-            </div>
-            <ul className="flex flex-col gap-1">
-              {pickedPosts.map((i) => (
-                <li key={i.id}>
-                  <PostChip item={i} onOpen={onOpen} />
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
       </LoadGate>
+      {pop && popDay && (
+        <DayPopover key={pop.key} label={dayLabel(popDay)} posts={byDay.get(pop.key) ?? []} open={pop.open} at={pop.at} cell={popCell} onClose={closeDay} onExited={popExited} onOpen={onOpen} />
+      )}
     </div>
   );
 }

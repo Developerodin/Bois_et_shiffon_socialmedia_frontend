@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { dayKey, gridRange, groupByDay, monthGrid } from "@/lib/calendar-month";
+import { dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
 
 // A zone with DST, so a day that is 23 or 25 hours long is in play.
 beforeAll(() => {
@@ -63,5 +63,31 @@ describe("groupByDay", () => {
     const g = groupByDay(items);
     expect([...g.keys()]).toEqual(["unscheduled", "2026-11-20", "2026-11-21"]);
     expect(g.get("2026-11-20")!.map((i) => i.id)).toEqual(["a", "c"]);
+  });
+});
+
+describe("day grid keys", () => {
+  it("moves a day left or right and a week up or down, and stops at the edges", () => {
+    expect(gridStep(10, "ArrowRight", 42)).toBe(11);
+    expect(gridStep(10, "ArrowLeft", 42)).toBe(9);
+    expect(gridStep(10, "ArrowDown", 42)).toBe(17);
+    expect(gridStep(10, "ArrowUp", 42)).toBe(3);
+    expect(gridStep(0, "ArrowLeft", 42)).toBeNull();
+    expect(gridStep(3, "ArrowUp", 42)).toBeNull();
+    expect(gridStep(40, "ArrowDown", 42)).toBeNull();
+    expect(gridStep(10, "Enter", 42)).toBeNull();
+  });
+});
+
+describe("day popover", () => {
+  it("sits under its cell, moved left to stay inside, never past the left edge", () => {
+    expect(popoverLeft(100, 288, 800)).toBe(100);
+    expect(popoverLeft(700, 288, 800)).toBe(512);
+    expect(popoverLeft(100, 288, 200)).toBe(0);
+  });
+
+  it("a cell shows a compact 24-hour time, none at midnight", () => {
+    expect(shortTime(new Date(2026, 10, 23, 14, 30).toISOString())).toMatch(/^14.30$/);
+    expect(shortTime(new Date(2026, 10, 23, 0, 0).toISOString())).toBeNull();
   });
 });
