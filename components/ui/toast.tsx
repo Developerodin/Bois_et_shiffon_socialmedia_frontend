@@ -64,10 +64,13 @@ export const safeHref = (href: string | undefined) => (href && href.length > 0 &
 
 const subscribe = (l: () => void) => (listeners.add(l), () => void listeners.delete(l));
 const snapshot = () => toasts;
+// One shared empty list for the server render: a new [] on every call makes React think the store keeps changing.
+const NO_TOASTS: readonly Toast[] = [];
+const serverSnapshot = () => NO_TOASTS;
 
 /** Stacks toasts bottom-right, above the phone's home bar. Mount once, in the shell. */
 export function Toaster() {
-  const list = useSyncExternalStore(subscribe, snapshot, () => []);
+  const list = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   return (
     <div
       role="status"
