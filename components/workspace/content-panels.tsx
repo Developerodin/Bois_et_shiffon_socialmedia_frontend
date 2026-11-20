@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
@@ -416,26 +416,23 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       // ignore
     }
   };
-  // A day picked in Month ("+N more", or a cell on a narrow panel): List, scrolled to that day.
-  const [jump, setJump] = useState<string | null>(null);
-  const listRef = useRef<HTMLOListElement>(null);
-  useEffect(() => {
-    if (view !== "list" || !jump) return;
-    // ponytail: the list holds open posts + 30 days, so a day of an older month has no group and the list stays at the top.
-    listRef.current?.querySelector(`[data-day="${jump}"]`)?.scrollIntoView({ block: "start" });
-    setJump(null);
-  }, [view, jump]);
-  const openDay = (k: string) => {
-    pickView("list");
-    setJump(k);
-  };
+  const viewSwitch = (
+    <div role="tablist" aria-label="Calendar view" className="flex rounded-md bg-muted p-0.5 text-xs">
+      {(["list", "month"] as const).map((v) => (
+        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("rounded px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", view === v ? "bg-background text-foreground" : "text-muted-foreground")}>
+          {v === "list" ? "List" : "Month"}
+        </button>
+      ))}
+    </div>
+  );
   // Opens the new post in the post view, like a calendar row.
   const newPost = <NewPostDialog base={base} canCreate={perms.includes("content.create")} onCreated={onOpen} />;
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
-  // Month still shows with an empty list: past months come from their own read.
+  // Month never shows this: past months come from their own read. The switch stays, so a brand with only old posts gets there.
   if (!data.length && view === "list") {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
+        {viewSwitch}
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
         <div className="flex gap-2">
           <Button size="sm" variant="secondary" onClick={onRunPlanner}>
@@ -446,6 +443,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       </div>
     );
   }
+  // ponytail: channel and campaign options come from the list (open posts + 30 days); in Month, a past month's other
+  // channels or campaigns aren't offered. Merge in the month's read if that's missed.
   const channels = [...new Set(data.map((i) => i.channel))];
   const used = new Set(data.map((i) => i.campaignId));
   const campaignOptions = campaigns.filter((c) => used.has(c.id));
@@ -453,13 +452,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const sel = cn(selectClass, "h-8 w-auto text-xs");
   const filters = (
     <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2" role="group" aria-label="Filter posts">
-      <div role="tablist" aria-label="Calendar view" className="flex rounded-md bg-muted p-0.5 text-xs">
-        {(["list", "month"] as const).map((v) => (
-          <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("rounded px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", view === v ? "bg-background text-foreground" : "text-muted-foreground")}>
-            {v === "list" ? "List" : "Month"}
-          </button>
-        ))}
-      </div>
+      {viewSwitch}
       <select aria-label="Channel" value={filter.channel ?? ""} onChange={(e) => set({ channel: e.target.value || undefined })} className={sel}>
         <option value="">All channels</option>
         {channels.map((c) => <option key={c} value={c}>{CHANNEL_LABEL[c] ?? c}</option>)}
@@ -494,7 +487,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     return (
       <div>
         {filters}
-        <MonthView base={base} filter={filter} me={me} undated={shown.filter((i) => !i.scheduledFor)} onOpen={onOpen} onDay={openDay} />
+        <MonthView base={base} filter={filter} me={me} undated={shown.filter((i) => !i.scheduledFor)} onOpen={onOpen} />
       </div>
     );
   }
@@ -516,9 +509,9 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   return (
     <div>
       {filters}
-      <ol ref={listRef} className="flex flex-col">
+      <ol className="flex flex-col">
         {[...groups].map(([k, list]) => (
-          <li key={k} data-day={k}>
+          <li key={k}>
             <p className="sticky top-0 z-[1] bg-background/95 px-4 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">{k === "unscheduled" ? "No date" : day(list[0].scheduledFor!)}</p>
             <ul className="divide-y divide-border">
               {list.map((i) => (
@@ -548,7 +541,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   );
 }
 
-const pickItems = (d: { items: ContentItem[] }) => d.items;
+type RangeAnswer = { items: ContentItem[]; truncated?: boolean };
+const pickRange = (d: RangeAnswer) => d;
 const MORE_AFTER = 3;
 const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
 
@@ -572,31 +566,57 @@ function PostChip({ item, onOpen }: { item: ContentItem; onOpen: (id: string) =>
 
 /**
  * The calendar as a month grid (weeks start Monday). Dated posts come from their own read of the grid's dates (?from&to,
- * so past months show); undated ones are the list's. The same filters apply.
+ * so past months show); undated ones are the list's. The same filters apply. "+N more" (or a day's count on a narrow
+ * panel) shows that day's posts under the grid.
  * ponytail: no drag to reschedule, no week view, no new post from a day (the new post dialog has no date): not asked for yet.
  */
-function MonthView({ base, filter, me, undated, onOpen, onDay }: { base: string; filter: CalendarFilter; me: string | null; undated: ContentItem[]; onOpen: (id: string) => void; onDay: (key: string) => void }) {
+function MonthView({ base, filter, me, undated, onOpen }: { base: string; filter: CalendarFilter; me: string | null; undated: ContentItem[]; onOpen: (id: string) => void }) {
   const [month, setMonth] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }));
+  // The day whose posts show under the grid (its key), if any.
+  const [picked, setPicked] = useState<string | null>(null);
   const grid = useMemo(() => monthGrid(month.y, month.m), [month]);
   const { from, to } = gridRange(grid);
-  // ponytail: polled like the list (every 6 s) while Month is open; one cached read per month looked at.
-  const { data, failed, reload } = useBrandData(base, `content?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, pickItems as (d: never) => ContentItem[]);
-  const byDay = useMemo(() => groupByDay(data ? filterItems(data, filter, me, new Date()) : []), [data, filter, me]);
+  // A month that is all past changes rarely: polled slower. ponytail: one cached read per month looked at, polled while Month is open.
+  const past = new Date(to).getTime() <= Date.now();
+  const { data, failed, reload } = useJob(`${base}/content?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, {
+    pick: pickRange as (d: never) => RangeAnswer,
+    intervals: past ? JOB_INTERVALS.preview : JOB_INTERVALS.always,
+  });
+  const byDay = useMemo(() => groupByDay(data ? filterItems(data.items, filter, me, new Date()) : []), [data, filter, me]);
   const today = dayKey(new Date());
-  const go = (by: number) => setMonth(({ y, m }) => ({ y: new Date(y, m + by, 1).getFullYear(), m: new Date(y, m + by, 1).getMonth() }));
+  const headId = useId();
+  const monthHead = useRef<HTMLHeadingElement>(null);
+  const dayHead = useRef<HTMLHeadingElement>(null);
+  // A picked day's section takes focus, so its posts are next; closing it puts focus back on the month.
+  useEffect(() => {
+    if (picked) dayHead.current?.focus();
+  }, [picked]);
+  const unpick = () => {
+    setPicked(null);
+    monthHead.current?.focus();
+  };
+  const show = (y: number, m: number) => {
+    setMonth({ y: new Date(y, m, 1).getFullYear(), m: new Date(y, m, 1).getMonth() });
+    setPicked(null);
+  };
+  const go = (by: number) => show(month.y, month.m + by);
   const inMonth = grid.filter((d) => d.getMonth() === month.m).reduce((n, d) => n + (byDay.get(dayKey(d))?.length ?? 0), 0);
   const weeks = Array.from({ length: grid.length / 7 }, (_, w) => grid.slice(w * 7, w * 7 + 7));
+  const pickedDay = picked ? grid.find((d) => dayKey(d) === picked) : undefined;
+  const pickedPosts = picked ? (byDay.get(picked) ?? []) : [];
   return (
-    <div className="@container flex flex-col gap-2 px-4 py-3">
+    <div className="@container flex flex-col gap-2 px-4 py-3" onKeyDown={(e) => picked && e.key === "Escape" && unpick()}>
       <div className="flex items-center gap-1">
-        <h3 className="mr-auto text-sm font-semibold">{new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}</h3>
+        <h3 id={headId} ref={monthHead} tabIndex={-1} className="mr-auto text-sm font-semibold focus-visible:outline-none">
+          {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+        </h3>
         <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Previous month" onClick={() => go(-1)}>
           <ChevronLeft aria-hidden className="size-4" />
         </Button>
         <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Next month" onClick={() => go(1)}>
           <ChevronRight aria-hidden className="size-4" />
         </Button>
-        <Button size="sm" variant="outline" onClick={() => setMonth({ y: new Date().getFullYear(), m: new Date().getMonth() })}>
+        <Button size="sm" variant="outline" onClick={() => show(new Date().getFullYear(), new Date().getMonth())}>
           Today
         </Button>
       </div>
@@ -612,7 +632,8 @@ function MonthView({ base, filter, me, undated, onOpen, onDay }: { base: string;
       )}
       <LoadGate ready={!!data} failed={failed} what="this month" onRetry={reload}>
         {inMonth === 0 && <p className="text-xs text-muted-foreground">Nothing planned this month</p>}
-        <table className="w-full table-fixed border-separate border-spacing-1 text-xs">
+        {data?.truncated && <p className="text-xs text-muted-foreground">Showing the first 500 posts of this range</p>}
+        <table aria-labelledby={headId} className="w-full table-fixed border-separate border-spacing-1 text-xs">
           <thead>
             <tr>
               {grid.slice(0, 7).map((d) => (
@@ -636,24 +657,25 @@ function MonthView({ base, filter, me, undated, onOpen, onDay }: { base: string;
                       className={cn(
                         "h-14 rounded-lg border border-border p-1 align-top @min-[520px]:h-24",
                         d.getDay() % 6 === 0 && "bg-muted/40",
-                        d.getMonth() !== month.m && "text-muted-foreground opacity-60",
+                        picked === k && "bg-primary/5",
                         k === today && "ring-2 ring-inset ring-primary",
                       )}
                     >
-                      <span aria-hidden className={cn("block text-[11px]", k === today && "font-semibold text-primary")}>{d.getDate()}</span>
+                      {/* Only the number of a day outside the month is dimmed: its posts read as usual. */}
+                      <span aria-hidden className={cn("block text-[11px]", d.getMonth() !== month.m && "text-muted-foreground opacity-60", k === today && "font-semibold text-primary opacity-100")}>{d.getDate()}</span>
                       <span className="sr-only">{`${d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}, ${postCount(posts.length)}`}</span>
                       {posts.length > 0 && (
                         <>
-                          {/* Wide panel: the posts as chips. Narrow (under 520 px): a count that opens the day in the list. */}
+                          {/* Wide panel: the posts as chips. Narrow (under 520 px): a count that shows the day under the grid. */}
                           <div className="mt-0.5 hidden flex-col gap-0.5 @min-[520px]:flex">
                             {posts.slice(0, MORE_AFTER).map((i) => <PostChip key={i.id} item={i} onOpen={onOpen} />)}
                             {posts.length > MORE_AFTER && (
-                              <button type="button" onClick={() => onDay(k)} className="rounded px-1 text-left text-[11px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                              <button type="button" aria-expanded={picked === k} onClick={() => setPicked(k)} className="rounded px-1 text-left text-[11px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                                 +{posts.length - MORE_AFTER} more
                               </button>
                             )}
                           </div>
-                          <button type="button" onClick={() => onDay(k)} className="mt-0.5 block w-full truncate rounded text-left text-[11px] text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]:hidden">
+                          <button type="button" aria-expanded={picked === k} onClick={() => setPicked(k)} className="mt-0.5 block w-full truncate rounded text-left text-[11px] text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]:hidden">
                             {postCount(posts.length)}
                           </button>
                         </>
@@ -665,6 +687,25 @@ function MonthView({ base, filter, me, undated, onOpen, onDay }: { base: string;
             ))}
           </tbody>
         </table>
+        {pickedDay && (
+          <section aria-labelledby={`${headId}-day`} className="flex flex-col gap-1 rounded-2xl border border-border p-3">
+            <div className="flex items-center gap-2">
+              <h4 id={`${headId}-day`} ref={dayHead} tabIndex={-1} className="mr-auto text-xs font-semibold focus-visible:outline-none">
+                {pickedDay.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "long" })} &middot; {postCount(pickedPosts.length)}
+              </h4>
+              <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Close this day" onClick={unpick}>
+                <X aria-hidden className="size-4" />
+              </Button>
+            </div>
+            <ul className="flex flex-col gap-1">
+              {pickedPosts.map((i) => (
+                <li key={i.id}>
+                  <PostChip item={i} onOpen={onOpen} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </LoadGate>
     </div>
   );
