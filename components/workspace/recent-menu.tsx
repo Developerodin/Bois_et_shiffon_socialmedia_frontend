@@ -33,10 +33,10 @@ function rowFor(entry: RecentEntry, p: Props, competitors: Competitors): Row {
   let pending = false;
   let name = entry.kind === "competitor" ? undefined : knownName(view, p);
   if (entry.kind === "doc") {
-    gone = !!p.docs && p.canAgents && !p.docs.docs.some((d) => d.kind === entry.id);
+    gone = !p.canAgents || (!!p.docs && !p.docs.docs.some((d) => d.kind === entry.id));
     pending = !p.docs && p.canAgents;
   } else if (entry.kind === "agent") {
-    gone = !!p.agents && p.canAgents && !p.agents.some((a) => a.key === entry.id);
+    gone = !p.canAgents || (!!p.agents && !p.agents.some((a) => a.key === entry.id));
     pending = !p.agents && p.canAgents;
   } else if (entry.kind === "competitor") {
     // Its own fresh fetch, not the shared cache: the menu may open before the competitors panel has loaded.

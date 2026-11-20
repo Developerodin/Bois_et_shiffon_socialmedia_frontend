@@ -58,10 +58,21 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
   // server render and the first client render match.
   const [order, setOrder] = useState<string[] | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  // The desktop sidebar and the phone sheet are two instances: "agent-order" (same tab) and `storage` (other tabs)
+  // make each re-read the saved order.
   useEffect(() => {
-    try {
-      setOrder(parseOrder(localStorage.getItem(AGENT_ORDER_KEY)));
-    } catch {}
+    const read = () => {
+      try {
+        setOrder(parseOrder(localStorage.getItem(AGENT_ORDER_KEY)));
+      } catch {}
+    };
+    read();
+    window.addEventListener("agent-order", read);
+    window.addEventListener("storage", read);
+    return () => {
+      window.removeEventListener("agent-order", read);
+      window.removeEventListener("storage", read);
+    };
   }, []);
   // Moving a row down re-inserts the focused link, which drops focus: put it back after the move.
   const links = useRef(new Map<string, HTMLAnchorElement>());
@@ -77,6 +88,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
     try {
       localStorage.setItem(AGENT_ORDER_KEY, JSON.stringify(next));
     } catch {}
+    window.dispatchEvent(new Event("agent-order"));
   };
 
   return (

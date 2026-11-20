@@ -6,6 +6,7 @@ import { clearToasts, toast } from "@/components/ui/toast";
 import { JOB_INTERVALS, sharedAt, useJob } from "@/components/workspace/use-job";
 import { finishedRuns, takeBaseline } from "@/lib/agent-runs";
 import { readable } from "@/lib/agent-message";
+import { viewToSearch } from "@/lib/workspace-view";
 
 const pickAgents = (d: { agents: AgentSummary[] }) => d.agents;
 const STOP_ON = [403] as const;
@@ -54,7 +55,9 @@ export function AgentWatcher({ workspaceId, brandId }: { workspaceId: string; br
       toast({
         title: r.status === "done" ? `${r.name} finished` : `${r.name} needs a look`,
         detail: r.status === "failed" && r.error ? readable(r.error) : undefined,
-        href: `/?agent=${encodeURIComponent(r.key)}&runId=${encodeURIComponent(r.runId)}`,
+        // On the Overview the link keeps its filters and ?panel=. ponytail: fixed when the toast is made, so a person who
+        // has since left the Overview gets those too; harmless there (the Overview ignores what it doesn't know).
+        href: window.location.pathname === "/" ? `/${viewToSearch({ kind: "agent", key: r.key, runId: r.runId }, window.location.search, "/")}` : `/?agent=${encodeURIComponent(r.key)}&runId=${encodeURIComponent(r.runId)}`,
         tone: r.status === "done" ? "success" : "warning",
       });
     }
