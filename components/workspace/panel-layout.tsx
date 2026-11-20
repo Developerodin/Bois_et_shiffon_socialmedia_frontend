@@ -15,7 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 /**
@@ -86,7 +85,7 @@ export function PanelLayout<Id extends string>({
   storageKey: string;
   /** Bring this panel into view (re-shown if hidden, selected on phones); change `n` to re-trigger. */
   focus?: { id: Id; n: number };
-  /** Filled with a function that points at a panel without changing the saved layout: scrolls to it and flashes it when it's showing, otherwise offers (in a toast) to expand or add it. */
+  /** Filled with a function that points at a panel: scrolls to it and flashes it, expanding or adding it first (saved) when it isn't showing. */
   revealRef?: { current: ((id: Id) => void) | null };
 }) {
   const ids = panels.map((p) => p.id);
@@ -246,21 +245,32 @@ export function PanelLayout<Id extends string>({
     setLayout((l) => withPanel(l, focus.id));
   }, [focus]);
 
+  // Scrolls to a showing panel and flashes it. After an expand or add, it waits for the render that shows it.
+  const revealAfter = useRef<Id | null>(null);
+  const scrollAndFlash = (id: Id) => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById(`panel-head-${id}`)?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+    const el = document.querySelector(`[data-panel="${id}"]`);
+    if (!el || reduce) return;
+    endFlash();
+    el.classList.add(...FLASH);
+    flash.current = { el, timer: setTimeout(endFlash, FLASH_MS) };
+  };
+  useEffect(() => {
+    const id = revealAfter.current;
+    if (!id) return;
+    revealAfter.current = null;
+    scrollAndFlash(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
+
   if (revealRef)
     revealRef.current = (id: Id) => {
-      const title = panels.find((p) => p.id === id)?.title ?? id;
       if (!window.matchMedia(WIDE).matches) return setMobilePanel(id);
-      const l = layoutRef.current;
-      const plan = revealPlan(l, id);
-      if (plan === "expand") return toast({ title: `${title} is collapsed`, tone: "warning", action: { label: "Expand", onAction: () => commit(withPanel(layoutRef.current, id)) }, ms: 15_000 });
-      if (plan === "add") return toast({ title: `${title} isn't on your board`, tone: "warning", action: { label: "Add to board", onAction: () => commit(withPanel(layoutRef.current, id)) }, ms: 15_000 });
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      document.getElementById(`panel-head-${id}`)?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
-      const el = document.querySelector(`[data-panel="${id}"]`);
-      if (!el || reduce) return;
-      endFlash();
-      el.classList.add(...FLASH);
-      flash.current = { el, timer: setTimeout(endFlash, FLASH_MS) };
+      // A button that points at a panel opens it: a collapsed one is expanded, a missing one is added (and saved).
+      if (revealPlan(layoutRef.current, id) === "scroll") return scrollAndFlash(id);
+      revealAfter.current = id;
+      commit(withPanel(layoutRef.current, id));
     };
 
   // After a move the panel's <section> remounts in its new column, so Radix's focus return target is gone:
