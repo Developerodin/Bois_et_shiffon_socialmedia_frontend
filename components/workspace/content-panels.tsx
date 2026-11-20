@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
+import { LoadFailed } from "@/components/ui/load-failed";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
@@ -75,17 +76,7 @@ export type ContentItem = {
 
 export { useBrandData };
 
-/** A load failed with nothing to show. No padding of its own: callers place it. `message` replaces the default line. */
-export function LoadFailed({ what, onRetry, message, className }: { what: string; onRetry: () => void; message?: string; className?: string }) {
-  return (
-    <div role="alert" className={cn("flex flex-wrap items-center gap-2 text-sm text-muted-foreground", className)}>
-      {message ?? <>Couldn&rsquo;t load {what}. Try again.</>}
-      <Button size="sm" variant="outline" onClick={onRetry}>
-        Try again
-      </Button>
-    </div>
-  );
-}
+export { LoadFailed };
 
 /**
  * A polled block: a skeleton until the first load, LoadFailed if that failed, then the content. A refresh that fails
