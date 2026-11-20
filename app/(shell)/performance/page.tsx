@@ -13,6 +13,7 @@ export default async function PerformancePage() {
       <div className="mx-auto max-w-5xl">
         <EmptyState
           size="hero"
+          headingLevel="h1"
           icon={Gauge}
           title="Pick a brand to see its performance."
           description="SEO and AI-visibility reports are per brand. Choose one from the switcher above."

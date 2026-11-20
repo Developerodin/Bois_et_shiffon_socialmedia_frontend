@@ -14,6 +14,7 @@ export default async function AgentsPage() {
       <div className="mx-auto max-w-5xl">
         <EmptyState
           size="hero"
+          headingLevel="h1"
           icon={Bot}
           title="Pick a brand to meet its agents."
           description="Agents run per brand. Choose a brand from the switcher above to see their status and live log."

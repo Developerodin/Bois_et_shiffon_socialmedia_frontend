@@ -225,8 +225,8 @@ export function ShootDetail({ workspaceId, brandId, shootId, canCreate }: {
         </div>
 
         <div className="flex flex-col gap-3">
-          <section aria-labelledby="staging-summary" className={`${CARD} flex flex-col gap-3`}>
-            <h2 id="staging-summary" className="text-lg font-semibold">Staging summary</h2>
+          <section aria-labelledby="shoot-details" className={`${CARD} flex flex-col gap-3`}>
+            <h2 id="shoot-details" className="text-lg font-semibold">Shoot details</h2>
             <dl className="flex flex-col gap-2 text-sm">
               {stagingSummary(shoot.input, shoot.credits, prices.unlimited).map((row) => (
                 <div key={row.label} className="flex flex-col gap-0.5">

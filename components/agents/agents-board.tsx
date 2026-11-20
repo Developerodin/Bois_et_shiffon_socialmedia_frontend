@@ -70,7 +70,7 @@ export function AgentsBoard({ workspaceId, brandId }: Props) {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="h-44 animate-pulse rounded-2xl border border-border bg-card motion-reduce:animate-none"
+                className="h-44 animate-pulse rounded-2xl bg-border motion-reduce:animate-none"
               />
             ))}
             <span className="sr-only">Loading agents</span>

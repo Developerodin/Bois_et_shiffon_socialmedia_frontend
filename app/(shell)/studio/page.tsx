@@ -8,6 +8,8 @@ export default function Page() {
   return (
     <ComingSoon
       icon={Sparkles}
+      backHref="/"
+      backLabel="Back to Overview"
       title="Where briefs become finished posts."
       description="Briefs, references, variants, drafts, checks, comments and approval, all in one workspace."
     />
