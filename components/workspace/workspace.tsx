@@ -46,6 +46,7 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
 import { safeHttpUrl, STATUS_GROUPS } from "@/shared";
+import { filterFromSearch, filterToSearch, isBlocked, isOverdue, isThisWeek, withFilter, type CalendarFilter } from "@/lib/calendar-filter";
 import { timeAgo } from "@/lib/time";
 import { plainSummary } from "@/lib/plain-summary";
 import { isRunCancelled } from "@/components/languages/languages";
@@ -95,6 +96,11 @@ function firstNameOf(name: string | null | undefined) {
 
 const POLL_MS = 5000;
 
+// Today's "Needs action" counts. Numbers, so a poll that changes nothing doesn't re-render Today.
+const pickOverdue = (d: { items: ContentItem[] }) => { const now = new Date(); return d.items.filter((i) => isOverdue(i, now)).length; };
+const pickBlocked = (d: { items: ContentItem[] }) => d.items.filter((i) => isBlocked(i)).length;
+const pickWeek = (d: { items: ContentItem[] }) => { const now = new Date(); return d.items.filter((i) => isThisWeek(i, now)).length; };
+
 type Props = {
   workspaceId: string;
   brandId: string;
@@ -102,7 +108,7 @@ type Props = {
   website: string | null;
   /** Reels are on for this workspace: a studio reel in the Overview links to its page. */
   reelsOn: boolean;
-  user: { name?: string | null; email?: string | null; image?: string | null };
+  user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
 };
 
 /** The open item lives in the URL (?post=, ?doc=, ?agent=, ?competitor=) so Refresh, Back and shared links work. */
@@ -134,6 +140,13 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const [view, setView] = useState<View>({ kind: "home" });
   const [focus, setFocus] = useState<{ id: PanelId; n: number } | undefined>();
   const [urlRead, setUrlRead] = useState(false);
+  // The calendar's filters live in the URL (cf_ params) so a filtered view can be shared or refreshed.
+  const [calFilter, setCalFilter] = useState<CalendarFilter>({});
+  const changeFilter = useCallback((f: CalendarFilter) => {
+    setCalFilter(f);
+    const q = withFilter(window.location.search, f);
+    window.history.replaceState(null, "", q ? `?${q}` : window.location.pathname);
+  }, []);
   const [failed, setFailed] = useState(NONE_FAILED);
   const mark = useCallback((k: keyof typeof NONE_FAILED, v: boolean) => setFailed((f) => (f[k] === v ? f : { ...f, [k]: v })), []);
   const viewNow = useRef(view);
@@ -163,6 +176,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     const panel = new URLSearchParams(window.location.search).get("panel");
     if (panel && panel !== shownPanel.current && (PANEL_IDS as readonly string[]).includes(panel)) setFocus((f) => ({ id: panel as PanelId, n: (f?.n ?? 0) + 1 }));
     shownPanel.current = panel;
+    const cf = filterFromSearch(new URLSearchParams(window.location.search));
+    setCalFilter((old) => (filterToSearch(old) === filterToSearch(cf) ? old : cf));
     setUrlRead(true);
   }, [query]);
   useEffect(() => {
@@ -255,6 +270,9 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const pickItems = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => i.status === "AWAITING_APPROVAL").length, []);
   const pickToWrite = useCallback((d: { items: ContentItem[] }) => d.items.filter((i) => (STATUS_GROUPS.toWrite as readonly string[]).includes(i.status)).length, []);
   const pickShortlisted = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "SHORTLISTED").length, []);
+  const overdueQ = useBrandData(base, "content", pickOverdue as (d: never) => number);
+  const blockedQ = useBrandData(base, "content", pickBlocked as (d: never) => number);
+  const weekQ = useBrandData(base, "content", pickWeek as (d: never) => number);
   const ideas = useBrandData(base, "opportunities", pickOpps as (d: never) => number);
   const shortlistedQ = useBrandData(base, "opportunities", pickShortlisted as (d: never) => number);
   const awaitingQ = useBrandData(base, "content", pickItems as (d: never) => number);
@@ -362,6 +380,11 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
             reports={reports}
             connections={connections}
             pipeline={pipeline}
+            needs={{ overdue: overdueQ.data ?? 0, blocked: blockedQ.data ?? 0, week: weekQ.data ?? 0 }}
+            onOpenCalendar={(need) => {
+              changeFilter({ need });
+              showPanel("content");
+            }}
             canRun={canRun}
             onOpen={open}
             onShowPanel={showPanel}
@@ -392,7 +415,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       id: "content",
       title: "Content calendar",
       icon: <CalendarDays />,
-      render: () => <ContentPanel base={base} onOpen={(id) => open({ kind: "content", id })} onRunPlanner={() => open({ kind: "agent", key: "planner" })} />,
+      render: () => <ContentPanel base={base} me={user.id ?? null} filter={calFilter} onFilter={changeFilter} onOpen={(id) => open({ kind: "content", id })} onRunPlanner={() => open({ kind: "agent", key: "planner" })} />,
     },
     {
       id: "competitors",
@@ -738,6 +761,8 @@ function Home({
   reports,
   connections,
   pipeline,
+  needs,
+  onOpenCalendar,
   canRun,
   onOpen,
   onShowPanel,
@@ -758,6 +783,9 @@ function Home({
   reports: { seo: Report; geo: Report } | null;
   connections: Connection[] | null;
   pipeline: { ideasToDecide: number; awaiting: number; toWrite: number; shortlisted: number } | null;
+  /** Posts needing action, from the calendar: past their date, blocked, and due in the next 7 days. */
+  needs: { overdue: number; blocked: number; week: number };
+  onOpenCalendar: (need: NonNullable<CalendarFilter["need"]>) => void;
   canRun: boolean;
   onOpen: (v: View) => void;
   onShowPanel: (id: PanelId) => void;
@@ -854,6 +882,24 @@ function Home({
         ),
       });
     }
+    for (const [need, label, detail] of [
+      ["overdue", "Overdue posts", "past their date"],
+      ["blocked", "Blocked posts", "stuck on a problem"],
+      ["week", "Posts in the next 7 days", "coming up"],
+    ] as const) {
+      if (!needs[need]) continue;
+      list.push({
+        id: `need-${need}`,
+        done: false,
+        label,
+        detail: `${needs[need]} ${detail}`,
+        action: (
+          <Button size="sm" variant="secondary" onClick={() => onOpenCalendar(need)}>
+            Open calendar
+          </Button>
+        ),
+      });
+    }
     if (connections) {
       list.push({
         id: "connect",
@@ -868,7 +914,7 @@ function Home({
       });
     }
     return list;
-  }, [docs, marks, mark, reports, connections, pipeline, canRun, onOpen, onShowPanel, scoutPrice]);
+  }, [docs, marks, mark, reports, connections, pipeline, needs, onOpenCalendar, canRun, onOpen, onShowPanel, scoutPrice]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done && !(Date.now() - (marks[t.id] ?? 0) < DAY_MS));

@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
-import { ListSkeleton } from "@/components/settings/shared";
+import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { ChecksList } from "@/components/ui/checks-list";
@@ -17,7 +17,8 @@ import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, toneOf } from "@/lib/status";
-import { safeHttpUrl, type CheckResult } from "@/shared";
+import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
+import { filterItems, type CalendarFilter } from "@/lib/calendar-filter";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 
 /* ───────────── shared types + data ───────────── */
@@ -52,6 +53,9 @@ export type ContentItem = {
   firstFrameUrl?: string | null;
   /** Made in the reels studio: its plan, video and caption are changed in Reels. */
   studio?: boolean;
+  campaignId?: string | null;
+  /** Who looks after the post; older servers omit it (read as unassigned). */
+  owner?: { id: string; name: string | null } | null;
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
@@ -349,10 +353,19 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
 
 /* ───────────── Content (calendar) panel ───────────── */
 
-export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onOpen: (id: string) => void; onRunPlanner: () => void }) {
+const STATUS_GROUP_LABEL: Record<keyof typeof STATUS_GROUPS, string> = { toWrite: "To write", awaiting: "Awaiting approval", approved: "Approved", scheduled: "Scheduled", published: "Published" };
+const NEED_LABEL = { overdue: "Overdue", blocked: "Blocked", week: "Next 7 days" } as const;
+
+export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner }: { base: string; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
-  if (!data) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
+  // Campaign names for the filter, read once (the calendar's poll doesn't carry them); without them the filter just isn't offered.
+  const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    request<{ campaigns: { id: string; name: string }[] }>(`${base}/campaigns`).then((r) => setCampaigns(r.campaigns), () => {});
+  }, [base]);
+  const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
+  if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
   if (!data.length) {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
@@ -363,13 +376,61 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
       </div>
     );
   }
+  const channels = [...new Set(data.map((i) => i.channel))];
+  const used = new Set(data.map((i) => i.campaignId));
+  const campaignOptions = campaigns.filter((c) => used.has(c.id));
+  const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
+  const sel = cn(selectClass, "h-8 w-auto text-xs");
+  const filters = (
+    <div className="flex flex-wrap gap-2 border-b border-border px-4 py-2" role="group" aria-label="Filter posts">
+      <select aria-label="Channel" value={filter.channel ?? ""} onChange={(e) => set({ channel: e.target.value || undefined })} className={sel}>
+        <option value="">All channels</option>
+        {channels.map((c) => <option key={c} value={c}>{CHANNEL_LABEL[c] ?? c}</option>)}
+      </select>
+      <select aria-label="Status" value={filter.status ?? ""} onChange={(e) => set({ status: (e.target.value || undefined) as CalendarFilter["status"] })} className={sel}>
+        <option value="">Any status</option>
+        {(Object.keys(STATUS_GROUPS) as (keyof typeof STATUS_GROUPS)[]).map((g) => <option key={g} value={g}>{STATUS_GROUP_LABEL[g]}</option>)}
+      </select>
+      {(campaignOptions.length > 0 || filter.campaignId) && (
+        <select aria-label="Campaign" value={filter.campaignId ?? ""} onChange={(e) => set({ campaignId: e.target.value || undefined })} className={sel}>
+          <option value="">Any campaign</option>
+          {campaignOptions.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {filter.campaignId && !campaignOptions.some((c) => c.id === filter.campaignId) && <option value={filter.campaignId}>This campaign</option>}
+        </select>
+      )}
+      <select aria-label="Owner" value={filter.owner ?? ""} onChange={(e) => set({ owner: (e.target.value || undefined) as CalendarFilter["owner"] })} className={sel}>
+        <option value="">Anyone</option>
+        {me && <option value="me">Mine</option>}
+        <option value="none">Unassigned</option>
+      </select>
+      <select aria-label="Needs action" value={filter.need ?? ""} onChange={(e) => set({ need: (e.target.value || undefined) as CalendarFilter["need"] })} className={sel}>
+        <option value="">Needs action: any</option>
+        {(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => <option key={n} value={n}>{NEED_LABEL[n]}</option>)}
+      </select>
+    </div>
+  );
+  if (!shown.length) {
+    return (
+      <div>
+        {filters}
+        <div className="flex flex-col items-start gap-3 p-4">
+          <p className="text-sm text-muted-foreground">No posts match these filters</p>
+          <Button size="sm" variant="secondary" onClick={() => onFilter({})}>
+            Clear filters
+          </Button>
+        </div>
+      </div>
+    );
+  }
   const groups = new Map<string, ContentItem[]>();
-  for (const i of data) {
+  for (const i of shown) {
     // Group by the viewer's local date ("en-CA" is YYYY-MM-DD), not the UTC one.
     const k = i.scheduledFor ? new Date(i.scheduledFor).toLocaleDateString("en-CA") : "unscheduled";
     groups.set(k, [...(groups.get(k) ?? []), i]);
   }
   return (
+    <div>
+    {filters}
     <ol className="flex flex-col">
       {[...groups].map(([k, list]) => (
         <li key={k}>
@@ -394,6 +455,7 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
                     )}
                   </span>
                   <span className="text-sm">{i.title}</span>
+                  <span className="text-[11px] text-muted-foreground">{i.owner?.name ?? "Unassigned"}</span>
                   {i.byHand && i.scheduledFor && <span className="text-[11px] font-medium text-primary">Post by hand &middot; {dayTime(i.scheduledFor)}</span>}
                   </span>
                 </button>
@@ -403,6 +465,7 @@ export function ContentPanel({ base, onOpen, onRunPlanner }: { base: string; onO
         </li>
       ))}
     </ol>
+    </div>
   );
 }
 
@@ -635,6 +698,18 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
   useEffect(() => setEditing(false), [id]);
   const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";
   const canEdit = perms?.includes("content.create") && !locked && !item?.studio;
+  // Who can own a post, read once when the person may reassign (a plain fetch: the 6 s poll must not carry it).
+  const canAssign = !!perms?.includes("content.create");
+  const [owners, setOwners] = useState<{ id: string; name: string | null }[]>([]);
+  const [ownerError, setOwnerError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!canAssign) return;
+    request<{ owners: { id: string; name: string | null }[] }>(`${base}/content/owners`).then((r) => setOwners(r.owners), () => {});
+  }, [canAssign, base]);
+  const assign = (userId: string | null) => {
+    setOwnerError(null);
+    request(`${base}/content/${encodeURIComponent(id)}`, { method: "POST", body: JSON.stringify({ action: "setOwner", userId }) }).then(reload, (e) => setOwnerError(errorMessage(e)));
+  };
   const brief = (item?.brief ?? {}) as { goal?: string; audience?: string; keyMessage?: string; products?: string[]; cta?: string; visual?: string; questions?: string[]; angle?: string };
   const b = item?.latest?.body;
 
@@ -669,6 +744,19 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
             </p>
             <h1 className="mt-1 font-display text-2xl font-medium tracking-tight">{item.title}</h1>
             {item.opportunity && <p className="mt-1 text-sm text-muted-foreground">From the idea: {item.opportunity.title}</p>}
+            {canAssign ? (
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                <label htmlFor="post-owner" className="text-muted-foreground">Owner</label>
+                <select id="post-owner" value={item.owner?.id ?? ""} onChange={(e) => assign(e.target.value || null)} className={cn(selectClass, "h-8 w-auto text-sm")}>
+                  <option value="">Unassigned</option>
+                  {item.owner && !owners.some((o) => o.id === item.owner!.id) && <option value={item.owner.id}>{item.owner.name ?? "Unnamed"}</option>}
+                  {owners.map((o) => <option key={o.id} value={o.id}>{o.name ?? "Unnamed"}</option>)}
+                </select>
+                {ownerError && <span role="alert" className="text-xs text-destructive">{ownerError}</span>}
+              </div>
+            ) : (
+              <p className="mt-1 text-sm text-muted-foreground">Owner: {item.owner?.name ?? "Unassigned"}</p>
+            )}
             {item.publishIssue && (
               <p role="status" className={cn("mt-2 flex items-start gap-2 rounded-lg px-3 py-2 text-sm", TONE_CLASS[toneOf(item.publishIssue)])}>
                 <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
