@@ -1,7 +1,8 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { clearActionToasts } from "@/components/ui/toast";
+import { clearActionToasts, toast } from "@/components/ui/toast";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -40,6 +41,8 @@ import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competi
 import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Peek } from "@/components/workspace/peek";
+import { RecentMenu } from "@/components/workspace/recent-menu";
+import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
 import { sharedResponse } from "@/components/workspace/use-job";
 import { reelHref } from "@/components/reels/href";
@@ -55,6 +58,7 @@ import { filterFromSearch, filterToSearch, isBlocked, isOverdue, isThisWeek, wit
 import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
 import { nothingToDo } from "@/lib/agent-runs";
+import { entryToView, isReopenKey, R_BLOCKED_TARGET, recentKey, viewToEntry, writeRecent, type RecentEntry } from "@/lib/recent";
 import { agreedToDrop, namesItem, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
 import { plainSummary } from "@/lib/plain-summary";
 import { isRunCancelled } from "@/components/languages/languages";
@@ -303,7 +307,44 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     if (!okToDiscard()) return;
     setView(v);
   }, []);
-  const close = useCallback(() => open({ kind: "home" }), [open]);
+  // The last item the person closed, for Reopen (the toast's button, and R). Cleared on a brand switch.
+  const lastClosed = useRef<RecentEntry | null>(null);
+  useEffect(() => () => void (lastClosed.current = null), [brandId]);
+  const peekNow = useRef<PeekItem | null>(null);
+  const reopen = useCallback(() => {
+    const e = lastClosed.current;
+    lastClosed.current = null;
+    if (e) open(entryToView(e));
+  }, [open]);
+  const close = useCallback(() => {
+    const cur = peekNow.current;
+    if (!okToDiscard()) return;
+    setView({ kind: "home" });
+    const entry = cur && viewToEntry(cur.view, Date.now());
+    if (!entry) return;
+    lastClosed.current = entry;
+    // The toast's href is the same item's URL, so its text is a link to it too.
+    toast({ title: `Closed ${cur.title}`, tone: "success", ms: 6000, href: `/${viewToSearch(entryToView(entry), "", "/")}`, action: { label: "Reopen", onAction: reopen } });
+  }, [reopen]);
+  // R reopens the last closed item, unless the person is typing or something else already handled the key.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (viewNow.current.kind !== "home" || !lastClosed.current) return;
+      const t = e.target;
+      if (isReopenKey({ key: e.key, defaultPrevented: e.defaultPrevented, repeat: e.repeat, isComposing: e.isComposing, ctrlKey: e.ctrlKey, metaKey: e.metaKey, altKey: e.altKey, inBlockedTarget: t instanceof Element && !!t.closest(R_BLOCKED_TARGET) })) reopen();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [reopen]);
+  // Recording what was opened: once per item, not per render. Nothing is kept without a user id.
+  const rKey = recentKey(workspaceId, brandId, user.id);
+  const viewId = peekKey(view);
+  useEffect(() => {
+    const entry = viewToEntry(viewNow.current, Date.now());
+    if (rKey && entry) writeRecent(rKey, entry);
+  }, [rKey, viewId]);
+  const [topSlot, setTopSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setTopSlot(document.getElementById(TOPBAR_SLOT_ID)), []);
   // Buttons that point at a panel bring it into view; they never add it to the saved board (the sidebar's ?panel=
   // does, through `focus`). A revealed panel can sit under the peek, so an open peek closes first (asking about unsaved work).
   const revealRef = useRef<((id: PanelId) => void) | null>(null);
@@ -419,6 +460,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       : post?.title;
     peekItem = { view, title: peekTitle(view, known), crumb: peekCrumb(view), fullPageHref: post?.studio && reelsOn ? reelHref(post.id, brandId) : undefined };
   }
+  peekNow.current = peekItem;
   const peek = usePeek(peekItem);
   // Until its list has loaded, a document or agent shows a skeleton: never "Ready" and a Run button for an agent not
   // yet known. Once the list arrives the Overview re-renders and the view gets the real entry; an unknown one closes.
@@ -483,6 +525,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
           <span className="font-medium">Agents are paused:</span> the AI service is out of credits. You can still write and edit drafts, approve and publish. Once credits are added, press Run on the agent again.
         </p>
       )}
+      {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={open} />, topSlot)}
       <div className="relative min-h-0 flex-1">
         <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} />
         {peek.shown && (
