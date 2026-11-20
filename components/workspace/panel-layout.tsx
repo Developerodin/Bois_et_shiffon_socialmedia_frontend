@@ -71,8 +71,8 @@ export function sanitize<Id extends string>(raw: unknown, ids: Id[], fallback: L
   const columns = l.columns
     .map((c) => ({ id: String(c.id ?? colId()), size: Number(c.size) > 0 ? Number(c.size) : 1, panels: (c.panels ?? []).filter((p) => ids.includes(p) && !seen.has(p) && seen.add(p)) }))
     .filter((c) => c.panels.length);
-  // Saved before panel heights existed, or a bad weight: missing, so 1.
-  const heights = Object.fromEntries(Object.entries(l.heights ?? {}).filter(([p, w]) => ids.includes(p as Id) && typeof w === "number" && w > 0 && Number.isFinite(w))) as Layout<Id>["heights"];
+  // Saved before panel heights existed, or a bad weight (not a number, or too small to be a real share): missing, so 1.
+  const heights = Object.fromEntries(Object.entries(l.heights ?? {}).filter(([p, w]) => ids.includes(p as Id) && typeof w === "number" && w >= 0.05 && Number.isFinite(w))) as Layout<Id>["heights"];
   return columns.length ? { columns, collapsed: (l.collapsed ?? []).filter((p) => ids.includes(p)), heights } : fallback;
 }
 
@@ -169,6 +169,9 @@ export function PanelLayout<Id extends string>({
 
   const move = (id: Id, target: { column: number; before?: Id } | "new-column", fromLayout = layout) => {
     const l = remove(fromLayout, id);
+    // Within its own column the panel keeps its height weight; into another it starts at 1.
+    const w = fromLayout.heights?.[id];
+    if (target !== "new-column" && w !== undefined && fromLayout.columns[target.column]?.panels.includes(id)) l.heights = { ...l.heights, [id]: w };
     if (target === "new-column") return commit({ ...l, columns: [...l.columns, { id: colId(), size: 1, panels: [id] }] });
     const columns = l.columns.map((c, i) => {
       if (i !== target.column) return c;
@@ -455,7 +458,7 @@ export function PanelLayout<Id extends string>({
                       onPointerDown={(e) => startResize(above, panelPx(e.currentTarget, above), MIN_PANEL_PX, "y", e)}
                       onKeyDown={(e) => nudge(above, MIN_PANEL_PX / panelPx(e.currentTarget, above), "y", e)}
                       // Fills the gap between the two cards (the negative margins cancel the column's gap around it).
-                      className="relative -my-3 h-3 shrink-0 cursor-row-resize outline-none after:absolute after:inset-x-4 after:top-1/2 after:h-0.5 after:-translate-y-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary"
+                      className="relative -my-3 h-3 shrink-0 cursor-row-resize touch-none outline-none after:absolute after:inset-x-4 after:top-1/2 after:h-0.5 after:-translate-y-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary"
                     />
                   )}
                   <section
@@ -549,7 +552,7 @@ export function PanelLayout<Id extends string>({
                 onPointerDown={(e) => rowRef.current && startResize(colPair(ci), rowRef.current.clientWidth / layout.columns.reduce((s, c) => s + c.size, 0), MIN_PX, "x", e)}
                 onKeyDown={(e) => nudge(colPair(ci), 0.3, "x", e)}
                 // The gap between cards is the handle; a line shows only on hover or keyboard focus.
-                className="relative w-3 shrink-0 cursor-col-resize outline-none after:absolute after:inset-y-4 after:left-1/2 after:w-0.5 after:-translate-x-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary"
+                className="relative w-3 shrink-0 cursor-col-resize touch-none outline-none after:absolute after:inset-y-4 after:left-1/2 after:w-0.5 after:-translate-x-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary"
               />
             )}
           </div>

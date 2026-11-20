@@ -34,6 +34,7 @@ describe("saved layout", () => {
     expect(l.heights).toEqual({ a: 1.5 });
     expect(sanitize({ columns: [{ id: "1", size: 1, panels: ["a"] }], collapsed: [], heights: "nope" }, ids, fallback).heights).toEqual({});
     expect(sanitize({ columns: [{ id: "1", size: 1, panels: ["a"] }], collapsed: [], heights: { a: Infinity } }, ids, fallback).heights).toEqual({});
+    expect(sanitize({ columns: [{ id: "1", size: 1, panels: ["a", "b"] }], collapsed: [], heights: { a: 0.01, b: 0.05 } }, ids, fallback).heights).toEqual({ b: 0.05 });
   });
 });
 

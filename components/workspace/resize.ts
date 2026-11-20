@@ -3,9 +3,13 @@
 /** One arrow-key press moves this share of the two neighbours' total. */
 export const KEY_STEP = 0.08;
 
-/** Moves `delta` from b to a, keeping each at least `min` and their total unchanged. */
+/**
+ * Moves `delta` from b to a, keeping each at least `min` and their total unchanged. A pair too short for two
+ * minimums gets half each as its floor, so it still moves the right way and never goes negative.
+ */
 export function split(a: number, b: number, delta: number, min: number): [number, number] {
-  const na = Math.max(min, Math.min(a + b - min, a + delta));
+  const m = Math.min(min, (a + b) / 2);
+  const na = Math.max(m, Math.min(a + b - m, a + delta));
   return [na, a + b - na];
 }
 
@@ -13,16 +17,29 @@ export function split(a: number, b: number, delta: number, min: number): [number
 export const arrow = (key: string, axis: "x" | "y") =>
   key === (axis === "x" ? "ArrowLeft" : "ArrowUp") ? -1 : key === (axis === "x" ? "ArrowRight" : "ArrowDown") ? 1 : 0;
 
-/** Follows a pointer drag: `onMove` gets how far (px) it has gone along the axis, `onEnd` runs once on release. */
-export function drag(e: { clientX: number; clientY: number; preventDefault: () => void }, axis: "x" | "y", onMove: (px: number) => void, onEnd: () => void) {
+/**
+ * Follows a primary-button pointer drag on a handle: `onMove` gets how far (px) it has gone along the axis, `onEnd` runs
+ * once when it ends. The handle captures the pointer, so the drag also ends on cancel or lost capture (a blur, alt-tab).
+ * Handles need `touch-none` so a touch drag isn't taken for a scroll.
+ */
+export function drag(
+  e: { button: number; pointerId: number; clientX: number; clientY: number; currentTarget: Element; preventDefault: () => void },
+  axis: "x" | "y",
+  onMove: (px: number) => void,
+  onEnd: () => void,
+) {
+  if (e.button !== 0) return;
   e.preventDefault();
+  const el = e.currentTarget;
   const start = axis === "x" ? e.clientX : e.clientY;
   const move = (ev: PointerEvent) => onMove((axis === "x" ? ev.clientX : ev.clientY) - start);
-  const up = () => {
-    window.removeEventListener("pointermove", move);
-    window.removeEventListener("pointerup", up);
+  const end = () => {
+    el.removeEventListener("pointermove", move as EventListener);
+    for (const t of ["pointerup", "pointercancel", "lostpointercapture"]) el.removeEventListener(t, end);
+    if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
     onEnd();
   };
-  window.addEventListener("pointermove", move);
-  window.addEventListener("pointerup", up);
+  el.setPointerCapture(e.pointerId);
+  el.addEventListener("pointermove", move as EventListener);
+  for (const t of ["pointerup", "pointercancel", "lostpointercapture"]) el.addEventListener(t, end);
 }
