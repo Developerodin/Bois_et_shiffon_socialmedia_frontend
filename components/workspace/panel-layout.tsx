@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 /**
@@ -178,7 +179,23 @@ export function PanelLayout<Id extends string>({
     if (to >= layout.columns.length) return move(id, "new-column");
     move(id, { column: to });
   };
-  const hide = (id: Id) => commit({ ...remove(layout, id), collapsed: layout.collapsed.filter((p) => p !== id) });
+  const hidden = (id: Id) => ({ ...remove(layout, id), collapsed: layout.collapsed.filter((p) => p !== id) });
+  const hide = (id: Id) => commit(hidden(id));
+  // Closing (X or Hide panel) offers Undo: back where it was if nothing else changed since, else back on the board.
+  const close = (id: Id) => {
+    const before = layout;
+    const next = hidden(id);
+    commit(next);
+    // What commit saved (it drops emptied columns), to tell whether the board changed again before Undo.
+    const after = JSON.stringify({ ...next, columns: next.columns.filter((c) => c.panels.length) });
+    toast({
+      title: `${def(id).title} closed`,
+      detail: "Bring it back any time from Layout.",
+      tone: "success",
+      ms: 8000,
+      action: { label: "Undo", onAction: () => commit(JSON.stringify(layoutRef.current) === after ? before : withPanel(layoutRef.current, id)) },
+    });
+  };
   const show = (id: Id) => {
     const last = layout.columns.length - 1;
     if (last < 0) return commit({ ...layout, columns: [{ id: colId(), size: 1, panels: [id] }] });
@@ -478,11 +495,11 @@ export function PanelLayout<Id extends string>({
                             {onOpenInPeek && <DropdownMenuItem onSelect={() => { suppressReturn.current = true; onOpenInPeek(id); }}>Open in preview</DropdownMenuItem>}
                             <DropdownMenuItem onSelect={() => toggleCollapse(id)}>{collapsed ? "Expand" : "Collapse"}</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onSelect={() => fromMenu(id, () => hide(id))}>Hide panel</DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => fromMenu(id, () => close(id))}>Hide panel</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                         {/* Same as Hide panel: it comes back from Layout. */}
-                        <Button variant="ghost" size="icon" className="size-7" aria-label={`Close ${p.title} panel`} title="Close panel" onClick={() => announce(id, () => hide(id))}>
+                        <Button variant="ghost" size="icon" className="size-7" aria-label={`Close ${p.title} panel`} title="Close panel" onClick={() => announce(id, () => close(id))}>
                           <X aria-hidden="true" />
                         </Button>
                       </div>
