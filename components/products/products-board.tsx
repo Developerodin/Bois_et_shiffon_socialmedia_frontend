@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Package, RefreshCw } from "lucide-react";
+import { Loader2, Package, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PAGE_SIZES, productsApi, stockLabel, thumbUrl, type FullProduct, type PageQuery, type Product, type ProductPage } from "@/components/products/api";
 import { CampaignsSection } from "@/components/products/campaigns";
+import { okToDiscard, useUnsavedGuard } from "@/components/context/unsaved";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { Pagination } from "@/components/ui/pagination";
@@ -175,15 +176,11 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
     }
   }
 
-  // The list leaves descriptions out; editing reads the whole product first.
-  async function edit(p: Product) {
-    setError(null);
-    try {
-      setEditing((await productsApi.get(workspaceId, brandId, p.id)).product);
-    } catch (err) {
-      setError(errorMessage(err));
-    }
-  }
+  // The list leaves descriptions out; editing reads the whole product first. Stable, so memoized rows don't re-render.
+  const loadFull = useCallback(
+    async (p: Product) => (await productsApi.get(workspaceId, brandId, p.id)).product,
+    [workspaceId, brandId],
+  );
 
   // Empty and error states are boxes of their own, so only the skeleton and the table go in the card.
   const inCard = state.kind === "loading" || (state.kind === "ready" && state.data.products.length > 0);
@@ -272,48 +269,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
             )}
           >
             {rows.products.map((p) => (
-              <tr key={p.id}>
-                <td className="px-3 py-2 sm:px-5">
-                  <div className="flex items-center gap-3">
-                    {p.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- store images come from any host; next/image needs each one allowed
-                      <img src={thumbUrl(p.imageUrl, 64)} alt="" loading="lazy" className="size-8 shrink-0 rounded-md bg-muted object-cover" />
-                    ) : (
-                      <span className="size-8 shrink-0 rounded-md bg-muted" aria-hidden="true" />
-                    )}
-                    <div className="min-w-0">
-                      {safeHttpUrl(p.url) ? (
-                        <a href={safeHttpUrl(p.url)!.href} target="_blank" rel="noopener noreferrer" className="line-clamp-2 font-medium text-foreground hover:underline">
-                          {p.title}
-                        </a>
-                      ) : (
-                        <p className="line-clamp-2 font-medium text-foreground">{p.title}</p>
-                      )}
-                      {/* The facts a person added; nothing when there are none, rather than a filler line on every row. */}
-                      {p.source === "MANUAL" || p.materials || p.dimensions ? (
-                        <p className="truncate text-xs text-muted-foreground">
-                          {[p.source === "MANUAL" ? "Added by hand" : null, p.materials, p.dimensions].filter(Boolean).join(", ")}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-                </td>
-                <td className="hidden px-3 py-2 sm:px-5 whitespace-nowrap text-muted-foreground md:table-cell">{p.sku ?? "—"}</td>
-                <td className="px-3 py-2 sm:px-5 text-right whitespace-nowrap tabular-nums">{price(p)}</td>
-                <td className="px-3 py-2 sm:px-5">
-                  <p className="whitespace-nowrap">{stockLabel(p)}</p>
-                  {/* Synced stock is as of the last sync (shown once, in the header); only a hand-set check gets its own time. */}
-                  {p.source === "MANUAL" && p.stockCheckedAt ? <p className="text-xs whitespace-nowrap text-muted-foreground">checked {timeAgo(p.stockCheckedAt)}</p> : null}
-                </td>
-                {canEdit ? (
-                  <td className="px-3 py-2 sm:px-5 text-right">
-                    <Button size="sm" variant="ghost" onClick={() => void edit(p)}>Edit</Button>
-                    {p.source === "MANUAL" ? (
-                      <Button size="sm" variant="ghost" onClick={() => setRemoving(p)}>Delete</Button>
-                    ) : null}
-                  </td>
-                ) : null}
-              </tr>
+              <ProductRow key={p.id} p={p} canEdit={canEdit} load={loadFull} onLoaded={setEditing} onRemove={setRemoving} />
             ))}
           </tbody>
         </table>
@@ -423,6 +379,87 @@ const STORE_TEXT = [
 ] as const;
 type FieldKey = (typeof PERSON)[number][0] | (typeof STORE_TEXT)[number][0] | "description" | "price" | "currency" | "stock";
 
+/**
+ * One row. The Edit loading flag and a failed load live here, so a click re-renders this row only (memo + stable props).
+ */
+const ProductRow = memo(function ProductRow({
+  p,
+  canEdit,
+  load,
+  onLoaded,
+  onRemove,
+}: {
+  p: Product;
+  canEdit: boolean;
+  load: (p: Product) => Promise<FullProduct>;
+  onLoaded: (p: FullProduct) => void;
+  onRemove: (p: Product) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  async function edit() {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      onLoaded(await load(p));
+    } catch (err) {
+      setLoadError(errorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <tr>
+      <td className="px-3 py-2 sm:px-5">
+        <div className="flex items-center gap-3">
+          {p.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- store images come from any host; next/image needs each one allowed
+            <img src={thumbUrl(p.imageUrl, 64)} alt="" loading="lazy" className="size-8 shrink-0 rounded-md bg-muted object-cover" />
+          ) : (
+            <span className="size-8 shrink-0 rounded-md bg-muted" aria-hidden="true" />
+          )}
+          <div className="min-w-0">
+            {safeHttpUrl(p.url) ? (
+              <a href={safeHttpUrl(p.url)!.href} target="_blank" rel="noopener noreferrer" className="line-clamp-2 font-medium text-foreground hover:underline">
+                {p.title}
+              </a>
+            ) : (
+              <p className="line-clamp-2 font-medium text-foreground">{p.title}</p>
+            )}
+            {/* The facts a person added; nothing when there are none, rather than a filler line on every row. */}
+            {p.source === "MANUAL" || p.materials || p.dimensions ? (
+              <p className="truncate text-xs text-muted-foreground">
+                {[p.source === "MANUAL" ? "Added by hand" : null, p.materials, p.dimensions].filter(Boolean).join(", ")}
+              </p>
+            ) : null}
+            {loadError ? <p className="text-xs text-destructive">{loadError}</p> : null}
+          </div>
+        </div>
+      </td>
+      <td className="hidden px-3 py-2 sm:px-5 whitespace-nowrap text-muted-foreground md:table-cell">{p.sku ?? "—"}</td>
+      <td className="px-3 py-2 sm:px-5 text-right whitespace-nowrap tabular-nums">{price(p)}</td>
+      <td className="px-3 py-2 sm:px-5">
+        <p className="whitespace-nowrap">{stockLabel(p)}</p>
+        {/* Synced stock is as of the last sync (shown once, in the header); only a hand-set check gets its own time. */}
+        {p.source === "MANUAL" && p.stockCheckedAt ? <p className="text-xs whitespace-nowrap text-muted-foreground">checked {timeAgo(p.stockCheckedAt)}</p> : null}
+      </td>
+      {canEdit ? (
+        <td className="px-3 py-2 sm:px-5 text-right">
+          <Button size="sm" variant="ghost" aria-label={`Edit ${p.title}`} disabled={loading} onClick={() => void edit()}>
+            {loading ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
+            Edit
+          </Button>
+          {p.source === "MANUAL" ? (
+            <Button size="sm" variant="ghost" aria-label={`Delete ${p.title}`} onClick={() => onRemove(p)}>Delete</Button>
+          ) : null}
+        </td>
+      ) : null}
+    </tr>
+  );
+});
+
 /** Edit a product: the person-owned fields on a synced row, every field on one added by hand. */
 function ProductDialog({
   workspaceId,
@@ -456,6 +493,10 @@ function ProductDialog({
   }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Closing with typed changes asks first; the guard also covers in-app links and the tab.
+  const [initial] = useState(form);
+  useUnsavedGuard((Object.keys(form) as FieldKey[]).some((k) => form[k] !== initial[k]));
+  const close = () => okToDiscard() && onClose();
   const set = (k: FieldKey) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -495,7 +536,7 @@ function ProductDialog({
   );
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && close()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{product ? product.title : "Add a product"}</DialogTitle>
@@ -537,7 +578,7 @@ function ProductDialog({
           )}
           <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={close} disabled={busy}>Cancel</Button>
             <Button type="submit" disabled={busy || (!manual && !canVouch)}>{busy ? "Saving…" : "Save"}</Button>
           </DialogFooter>
         </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { okToDiscard, useUnsavedGuard } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -87,8 +88,8 @@ export function CampaignsSection({ workspaceId, brandId, products, canManage }: 
               </div>
               {canManage ? (
                 <div className="whitespace-nowrap">
-                  <Button size="sm" variant="ghost" onClick={() => setEditing(c)}>Edit</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setWithdrawing(c)}>Withdraw</Button>
+                  <Button size="sm" variant="ghost" aria-label={`Edit ${c.name}`} onClick={() => setEditing(c)}>Edit</Button>
+                  <Button size="sm" variant="ghost" aria-label={`Withdraw ${c.name}`} onClick={() => setWithdrawing(c)}>Withdraw</Button>
                 </div>
               ) : null}
             </li>
@@ -201,6 +202,11 @@ function CampaignDialog({
   const [zone, setZone] = useState(timeZone ? null : browserZone());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Closing with typed changes asks first; the guard also covers in-app links and the tab.
+  const snapshot = JSON.stringify([kind, name, startDate, startTime, endDate, endTime, productIds, picked, offer, percent, code, zone]);
+  const [initial] = useState(snapshot);
+  useUnsavedGuard(snapshot !== initial);
+  const close = () => okToDiscard() && onClose();
   // Saved ids with no loaded row (archived since, or a store switch) stay ticked so an unrelated edit keeps them.
   const known = new Set(groups.map((g) => g.id));
   const rows = [...groups, ...(campaign?.productIds ?? []).filter((id) => !known.has(id)).map((id) => ({ id, name: REMOVED_PRODUCT_NAME, imageUrl: null }))];
@@ -239,7 +245,7 @@ function CampaignDialog({
 
   const label = "flex flex-col gap-1.5 text-sm";
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && close()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{campaign ? `Edit ${campaign.name}` : "New campaign"}</DialogTitle>
@@ -345,7 +351,7 @@ function CampaignDialog({
           </fieldset>
           <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={close} disabled={busy}>Cancel</Button>
             <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
           </DialogFooter>
         </form>
