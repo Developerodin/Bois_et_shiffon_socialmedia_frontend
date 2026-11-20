@@ -107,7 +107,8 @@ function Panel({ id, title, report, agent, exportUrl, children }: { id: string; 
   );
 }
 
-export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
+/** `canReadAgents`: agents.read (from the shell). Without it the agents list is a 403, so it isn't watched. */
+export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceId: string; brandId: string; canReadAgents: boolean }) {
   const reportsUrl = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}/audit-reports`;
   const fetcher = useCallback(() => request<{ seo: Report | null; geo: Report | null }>(reportsUrl), [reportsUrl]);
   const { state, reload } = useLoad(fetcher);
@@ -115,6 +116,7 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
   // A finished SEO or GEO run means a new report: watch the two agents' latest runs and reload when one changes.
   const runs = useRef<string | null>(null);
   useEffect(() => {
+    if (!canReadAgents) return;
     const ctrl = new AbortController();
     const check = () => {
       if (document.visibilityState !== "visible") return;
@@ -133,7 +135,7 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
       ctrl.abort();
       clearInterval(t);
     };
-  }, [workspaceId, brandId, reload]);
+  }, [workspaceId, brandId, reload, canReadAgents]);
 
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading reports" />;

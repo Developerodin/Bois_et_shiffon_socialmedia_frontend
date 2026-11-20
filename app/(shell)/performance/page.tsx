@@ -21,5 +21,5 @@ export default async function PerformancePage() {
     );
   }
 
-  return <AuditBoard key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} />;
+  return <AuditBoard key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} canReadAgents={shell.brandPermissions.includes("agents.read")} />;
 }
