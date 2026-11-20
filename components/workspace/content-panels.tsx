@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
+import { Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
@@ -606,9 +606,14 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   const [zoom, setZoom] = useState<StoryFrameView | null>(null);
   useEffect(() => {
     if (!zoom) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setZoom(null);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Capture phase, and used up: Esc closes the zoom first, not the side peek around it.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      e.preventDefault();
+      setZoom(null);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [zoom]);
   const body = item.latest?.body as unknown as { frames?: { label?: string; headline?: string; body?: string }[]; cta?: string; link?: string } | undefined;
   const link = body?.link ? safeHttpUrl(body.link) : null;
@@ -675,7 +680,7 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   );
 }
 
-export function ContentView({ base, perms, id, onBack, reelsOn, brandId }: { base: string; perms: string[]; id: string; onBack: () => void; reelsOn: boolean; brandId: string }) {
+export function ContentView({ base, perms, id, reelsOn, brandId }: { base: string; perms: string[]; id: string; reelsOn: boolean; brandId: string }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   // A post outside the calendar window (an old one, opened from a link) isn't in the list: ask for it by id, once per id.
@@ -727,12 +732,6 @@ export function ContentView({ base, perms, id, onBack, reelsOn, brandId }: { bas
 
   return (
     <div>
-      <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background px-4 py-3">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          <ArrowLeft aria-hidden="true" /> Workspace
-        </Button>
-        <span className="truncate text-sm text-muted-foreground">/ {item?.title ?? "Post"}</span>
-      </div>
       {!item ? (
         data ? (
           lookup === "done" ? (
