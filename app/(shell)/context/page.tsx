@@ -15,11 +15,12 @@ export default async function ContextPage() {
     return (
       <div className="mx-auto flex max-w-5xl flex-col gap-5">
         <EmptyState
+          headingLevel="h1"
           size="hero"
           icon={Library}
           eyebrow="Brand context"
           title="No brand yet. Add one and the agents get to work."
-          description="Give us a name and a website. The Research agent drafts five strategy documents; you confirm them, and every agent works from what you confirmed."
+          description="Give us a name and a website. The Research agent drafts five strategy documents; you review them, and agents work from the latest version."
         />
         {shell.activeWorkspaceId ? (
           <div>
@@ -37,6 +38,7 @@ export default async function ContextPage() {
     return (
       <div className="mx-auto flex max-w-5xl flex-col gap-5">
         <EmptyState
+          headingLevel="h1"
           size="hero"
           icon={Library}
           eyebrow="Brand context"

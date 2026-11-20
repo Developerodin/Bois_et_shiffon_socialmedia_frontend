@@ -255,7 +255,7 @@ function AddressStep({
             </li>
           ))}
         </ul>
-        <p className="mt-6 text-sm text-muted-foreground">Drafts until your team confirms them.</p>
+        <p className="mt-6 text-sm text-muted-foreground">Agents use them straight away. Review them when you can.</p>
       </section>
     </form>
   );

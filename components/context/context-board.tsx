@@ -48,8 +48,6 @@ export function ContextBoard({ workspaceId, brandId, perms }: Props) {
   const can = (p: string) => perms.includes(p);
   const researchPrice = useRunPrice(workspaceId, "research");
   const [state, setState] = useState<LoadState>({ kind: "loading" });
-  // Whether the person picked the document shown (not the default first one): only then does opening it review it.
-  const [picked, setPicked] = useState(false);
   const [selected, setSelected] = useState<ContextDocKind>(
     "product-information",
   );
@@ -282,7 +280,7 @@ export function ContextBoard({ workspaceId, brandId, perms }: Props) {
               <span className="text-xs text-muted-foreground">Document</span>
               <select
                 value={current?.kind}
-                onChange={(e) => okToDiscard() && (setPicked(true), setSelected(e.target.value as ContextDocKind))}
+                onChange={(e) => okToDiscard() && setSelected(e.target.value as ContextDocKind)}
                 className="h-10 rounded-md border border-input bg-card px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {docs.map((d) => (
@@ -302,7 +300,7 @@ export function ContextBoard({ workspaceId, brandId, perms }: Props) {
                     <li key={d.kind}>
                       <button
                         type="button"
-                        onClick={() => d.kind !== current?.kind && okToDiscard() && (setPicked(true), setSelected(d.kind))}
+                        onClick={() => d.kind !== current?.kind && okToDiscard() && setSelected(d.kind)}
                         aria-current={active ? "true" : undefined}
                         className={cn(
                           "flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -331,7 +329,6 @@ export function ContextBoard({ workspaceId, brandId, perms }: Props) {
                 researchActive={researchActive}
                 canEdit={can("context.edit")}
                 canConfirm={can("context.confirm")}
-                autoReview={picked}
                 onChanged={onDocChanged}
                 onStale={() => void load()}
               />

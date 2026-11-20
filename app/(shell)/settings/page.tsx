@@ -17,6 +17,7 @@ export default async function SettingsPage({
     return (
       <div className="mx-auto max-w-5xl">
         <EmptyState
+          headingLevel="h1"
           size="hero"
           icon={Settings}
           title="Pick a workspace to manage it."
