@@ -74,7 +74,7 @@ const browserZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
  * Approve the exact draft shown above, then publish or schedule it, with a full history. `approveFirst`: one press
  * approves a version awaiting approval and then publishes it (the reel page; the phone does the same).
  */
-export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[] | null; onChanged: () => void; approveFirst?: boolean }) {
+export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false, pinLink }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[] | null; onChanged: () => void; approveFirst?: boolean; /** A Pinterest pin's destination, so the approver sees where it leads. */ pinLink?: string | null }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
   const { data, failed: loadError, slow, reload } = useJob(url, { pick: asRelease, done: notGoingOut, intervals: JOB_INTERVALS.publishing, capMs: 600_000 });
   // The hook's own mount poll is the first fetch; only a real change of status or version needs a fresh one.
@@ -146,6 +146,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
     <section aria-labelledby="release-h" className="flex flex-col gap-4 rounded-xl border border-border p-4">
       <h2 id="release-h" className="text-sm font-semibold">Approval and publishing</h2>
       {data.campaign && <p className="text-sm">{campaignLine(data.campaign)}</p>}
+      {pinLink && <p className="break-all text-sm"><span className="text-muted-foreground">This pin leads to</span> {pinLink}</p>}
       {issues.length > 0 && (
         <ul aria-label="Issues" className="flex flex-col gap-1 rounded-lg border border-border p-3 text-sm">
           {issues.map((i) => (

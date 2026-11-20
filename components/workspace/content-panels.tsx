@@ -58,7 +58,7 @@ export type ContentItem = {
   owner?: { id: string; name: string | null } | null;
   latest: {
     version: number;
-    body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string };
+    body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string };
     byPerson: boolean;
     check: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
     review: { verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null } | null;
@@ -868,6 +868,7 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
                   <ol className="list-decimal pl-5">{b.script.map((s, i) => <li key={i}>{s}</li>)}</ol>
                 )}
                 {b.altText && <p className="text-xs text-muted-foreground">Alt text: {b.altText}</p>}
+                {item.channel === "PINTEREST_PIN" && b.pinLink && <p className="break-all text-xs text-muted-foreground">Link: {b.pinLink}</p>}
               </div>
             )}
           </section>
@@ -882,7 +883,7 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
             </section>
           )}
 
-          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} />
+          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} />
         </div>
       )}
     </div>

@@ -46,6 +46,7 @@ function TextDraftEditor({ url, item, onSaved, onCancel }: { url: string; item: 
   const [script, setScript] = useState((start.script ?? []).join("\n"));
   const [pinTitle, setPinTitle] = useState(start.pinTitle ?? "");
   const [altText, setAltText] = useState(start.altText ?? "");
+  const [pinLink, setPinLink] = useState(start.pinLink ?? "");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [discarding, setDiscarding] = useState(false);
@@ -61,11 +62,13 @@ function TextDraftEditor({ url, item, onSaved, onCancel }: { url: string; item: 
     script: lines(script),
     pinTitle,
     altText,
+    // Only a pin has one; "" tells the server to take it off.
+    ...(ch === "PINTEREST_PIN" ? { pinLink: pinLink.trim() } : {}),
   };
   // Hashtags are added under the caption when it posts (server/services/publishing.ts postText), so they count too.
   const tagText = body.hashtags.map((h) => `#${h.replace(/^#*/, "")}`).join(" ");
   const postLength = caption.trim().length + (tagText ? tagText.length + 2 : 0);
-  const dirty = JSON.stringify(body) !== JSON.stringify({ ...EMPTY, ...start, hashtags: start.hashtags ?? [], slides: start.slides ?? [], script: start.script ?? [] });
+  const dirty = JSON.stringify(body) !== JSON.stringify({ ...EMPTY, ...(ch === "PINTEREST_PIN" ? { pinLink: "" } : {}), ...start, hashtags: start.hashtags ?? [], slides: start.slides ?? [], script: start.script ?? [] });
 
   // Leaving the page with unsaved text asks first.
   useEffect(() => {
@@ -118,6 +121,13 @@ function TextDraftEditor({ url, item, onSaved, onCancel }: { url: string; item: 
         <div className={field}>
           <span className="flex justify-between"><label htmlFor="ed-pin" className={label}>Pin title</label>{count(pinTitle.length, 100)}</span>
           <Input id="ed-pin" value={pinTitle} onChange={(e) => setPinTitle(e.target.value)} className="h-11" />
+        </div>
+      )}
+      {ch === "PINTEREST_PIN" && (
+        <div className={field}>
+          <label htmlFor="ed-pin-link" className={label}>Link <span className="font-normal text-muted-foreground">(where the pin leads)</span></label>
+          <Input id="ed-pin-link" type="url" inputMode="url" placeholder="https://" value={pinLink} onChange={(e) => setPinLink(e.target.value)} className="h-11" />
+          <p className="text-xs text-muted-foreground">Leave empty to lead to the brand&rsquo;s website.</p>
         </div>
       )}
       {ch !== "PINTEREST_PIN" && ch !== "THREADS_POST" && (
