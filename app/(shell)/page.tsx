@@ -6,7 +6,7 @@ import { navFor } from "@/lib/nav";
 
 export const metadata = { title: navFor("/").title };
 
-/** The workspace: one screen with Context, Today and Agents (Okara pattern); the chat is the shell's Espanda panel. */
+/** The workspace: one screen with Context, Today and Agents (Okara pattern); the chat is the shell's Bois & Chiffons panel. */
 export default async function WorkspacePage() {
   const shell = await getShell();
 

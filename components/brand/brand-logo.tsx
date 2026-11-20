@@ -2,16 +2,15 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * The Espanda logo, the same artwork as the phone app (apps/mobile/assets/figma/espanda-logo.png). Two files: the
- * original for light surfaces, and a copy with light lettering for dark ones (public/brand/); globals.css shows
- * the one that matches the theme. `height` in px; the width follows the artwork (1501 × 438).
+ * The Bois & Chiffons wordmark. Two files in public/brand/: black lettering for light surfaces, white lettering for
+ * dark ones; globals.css shows the one that matches the theme. `height` in px; the width follows the artwork (1024 × 301).
  */
-export function EspandaLogo({ height = 28, className, priority }: { height?: number; className?: string; priority?: boolean }) {
-  const width = Math.round((height * 1501) / 438);
+export function BrandLogo({ height = 28, className, priority }: { height?: number; className?: string; priority?: boolean }) {
+  const width = Math.round((height * 1024) / 301);
   return (
     <span className={cn("inline-block", className)} style={{ width, height }}>
-      <Image src="/brand/espanda-logo-dark.png" alt="Espanda" width={width} height={height} priority={priority} className="logo-on-dark" />
-      <Image src="/brand/espanda-logo.png" alt="Espanda" width={width} height={height} priority={priority} className="logo-on-light" />
+      <Image src="/brand/bnc-logo-white.png" alt="Bois & Chiffons" width={width} height={height} priority={priority} className="logo-on-dark" />
+      <Image src="/brand/bnc-logo-black.png" alt="Bois & Chiffons" width={width} height={height} priority={priority} className="logo-on-light" />
     </span>
   );
 }

@@ -74,7 +74,7 @@ export function TopBar({ brandName, workspaceId, brandId, nav, agents }: Props) 
           {workspaceId && agents && (
             <button type="button" id={ASSISTANT_TOGGLE_ID} onClick={() => setAssistantOpen(!assistantOpen)} aria-haspopup="dialog" aria-expanded={assistantOpen} className={cn(tool, assistantDocks(pathname) && "xl:hidden")}>
               <MessageCircle className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
-              <span className="sr-only sm:not-sr-only">Espanda</span>
+              <span className="sr-only sm:not-sr-only">Bois & Chiffons</span>
             </button>
           )}
         </div>

@@ -12,7 +12,7 @@ import { MainArea } from "@/components/workspace/main-area";
 import { featuresOn } from "@/lib/features";
 import { getShell } from "@/lib/server-fetch";
 
-/** The Refined workspace frame: sidebar | top bar over (the page | the Espanda panel). */
+/** The Refined workspace frame: sidebar | top bar over (the page | the Bois & Chiffons panel). */
 export default async function ShellLayout({ children }: { children: React.ReactNode }) {
   const shell = await getShell();
   const workspaceId = shell.activeWorkspaceId;
@@ -53,7 +53,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
               </Suspense>
             }
           />
-          {/* The top bar spans the page and the Espanda column, so its controls sit at the window's right edge. */}
+          {/* The top bar spans the page and the Bois & Chiffons column, so its controls sit at the window's right edge. */}
           <div className="flex min-h-0 flex-1">
             <div className="flex min-w-0 flex-1 flex-col">
               <MainArea>{children}</MainArea>

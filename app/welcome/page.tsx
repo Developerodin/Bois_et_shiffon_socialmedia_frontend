@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SignOutButton } from "@/components/workspace/sign-out-item";
-import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { PaywallDialog } from "@/components/shell/paywall-dialog";
 import { OpenWorkspaceButton } from "@/components/welcome/open-workspace-button";
 import { WelcomeFlow } from "@/components/welcome/welcome-flow";
@@ -30,7 +30,7 @@ export default async function WelcomePage({
       {/* Capped at the content's width, so at wide screens the logo lines up with the form, not the window edge. */}
       <header className="px-6 py-5 sm:px-10">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6">
-          <EspandaLogo height={28} priority />
+          <BrandLogo height={28} priority />
           <nav className="flex flex-wrap items-center justify-end gap-x-5 text-sm text-muted-foreground">
             {shell.brands.length > 0 || resume ? (
               <Link href="/" className="inline-block py-2 hover:text-foreground">

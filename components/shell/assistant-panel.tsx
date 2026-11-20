@@ -92,7 +92,7 @@ function useWide() {
 type Props = { workspaceId: string; brandId: string | null; brandName: string | null; canCreateBrand: boolean };
 
 /**
- * The Espanda chat: a 320 px column from 1280 px up on docked pages (assistantDocks), a right-hand drawer (opened from
+ * The Bois & Chiffons chat: a 320 px column from 1280 px up on docked pages (assistantDocks), a right-hand drawer (opened from
  * the top bar) below that and on pages that don't dock it. One element serves both, so the conversation, a typed draft
  * and an in-flight reply survive the switch.
  * Narrow and closed, the drawer is off-screen and inert. Open, it takes focus, Escape or the scrim closes it and
@@ -160,7 +160,7 @@ export function AssistantPanel(p: Props) {
       <aside
         ref={ref}
         tabIndex={-1}
-        aria-label="Espanda"
+        aria-label="Bois & Chiffons"
         role={docked && !expanded ? undefined : "dialog"}
         onKeyDown={(e) => {
           if (e.key !== "Escape") return;
@@ -212,7 +212,7 @@ function Body({
   expanded,
   onExpand,
 }: Props & { docked: boolean; page: string | null; expanded: boolean; onExpand: () => void }) {
-  const title = <h2 className="text-lg leading-tight font-semibold text-foreground">Espanda</h2>;
+  const title = <h2 className="text-lg leading-tight font-semibold text-foreground">Bois & Chiffons</h2>;
   const mark = (
     <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
       <Sparkles className="size-4.5" strokeWidth={SHELL_STROKE} />

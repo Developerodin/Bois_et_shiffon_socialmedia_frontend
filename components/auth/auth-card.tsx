@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { Input } from "@/components/ui/input";
 
 /** Centered card under the logo, for the account pages (reset password, invitation). */
@@ -14,7 +14,7 @@ export function AuthCard({
 }) {
   return (
     <main className="relative flex min-h-dvh flex-col items-center justify-center gap-8 bg-background px-6 py-12">
-      <EspandaLogo height={28} priority />
+      <BrandLogo height={28} priority />
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
         <h1 className="font-display text-2xl font-semibold text-foreground">{title}</h1>
         {description ? <p className="mt-2 text-sm text-muted-foreground">{description}</p> : null}

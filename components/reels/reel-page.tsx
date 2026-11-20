@@ -118,7 +118,7 @@ export function ReelPage({ workspaceId, brandId, reelId, step: stepParam, perms 
   }, [detail]);
 
   useEffect(() => {
-    if (title) document.title = `${STEP_LABELS[step]} · ${title} · Reels · Espanda`;
+    if (title) document.title = `${STEP_LABELS[step]} · ${title} · Reels · Bois & Chiffons`;
   }, [step, title]);
 
   if (status === 403 || status === 404) return <ReelNotFound />;

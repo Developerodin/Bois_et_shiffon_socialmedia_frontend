@@ -259,7 +259,7 @@ function ChatSession({
                     <span aria-hidden="true" className="grid size-6 place-items-center rounded-lg bg-accent text-accent-foreground">
                       <Sparkles className="size-3.5" strokeWidth={SHELL_STROKE} />
                     </span>
-                    Espanda
+                    Bois &amp; Chiffons
                   </p>
                 ) : null}
                 {m.parts.map((part, i) => {
@@ -329,7 +329,7 @@ function ChatSession({
 
       <form onSubmit={onSubmit} className={cn("flex shrink-0 flex-col gap-2 px-3 pb-3", column)}>
         <label htmlFor="chat-input" className="sr-only">
-          Message Espanda
+          Message Bois & Chiffons
         </label>
         {/* One card for the box, the hint and the button: the ring lights the whole card while typing. */}
         <div className="flex flex-col rounded-2xl border border-input bg-card shadow-sm transition-shadow focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring">
@@ -342,14 +342,14 @@ function ChatSession({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
             aria-describedby="chat-hint"
-            placeholder="Ask Espanda anything…"
+            placeholder="Ask Bois & Chiffons anything…"
             className="block max-h-48 min-h-14 w-full resize-none rounded-t-2xl bg-transparent px-3.5 pt-3 pb-1 text-base outline-none [field-sizing:content] placeholder:text-muted-foreground sm:text-sm"
           />
           <div className="flex items-center justify-between gap-2 px-3.5 pb-2.5">
             <div className="flex min-w-0 items-center gap-2">
-              {/* Which page Espanda is told about (the server names it from its own list). */}
+              {/* Which page Bois & Chiffons is told about (the server names it from its own list). */}
               {pageLabel ? (
-                <span className="truncate rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground" title="Espanda knows which page you're on">
+                <span className="truncate rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground" title="Bois & Chiffons knows which page you're on">
                   Context: {pageLabel}
                 </span>
               ) : null}

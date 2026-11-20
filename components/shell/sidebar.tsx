@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Camera, Clapperboard, FileText, Images, Inbox, LayoutDashboard, Menu, Package, Plug, PenSquare, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
-import { EspandaLogo } from "@/components/brand/espanda-logo";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
 import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
@@ -94,8 +94,8 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
   return (
     <>
       <div className="px-5 pt-8">
-        <Link href="/" aria-label="Espanda, Overview" className="inline-block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <EspandaLogo height={33} priority />
+        <Link href="/" aria-label="Bois & Chiffons, Overview" className="inline-block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <BrandLogo height={33} priority />
         </Link>
       </div>
       <div className="mt-6 px-5">

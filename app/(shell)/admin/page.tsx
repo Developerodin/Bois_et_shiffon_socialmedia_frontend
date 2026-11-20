@@ -27,7 +27,7 @@ export default async function AdminOverview() {
   return (
     <>
       <PageHeader eyebrow="Platform admin" title="Overview">
-        Every workspace on Espanda. Read-only: opening a workspace or a person adds an entry to the audit log.
+        Every workspace on Bois & Chiffons. Read-only: opening a workspace or a person adds an entry to the audit log.
       </PageHeader>
 
       {/* Customers and the test set apart: test runs can cost hundreds of times what customers do. */}

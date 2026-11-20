@@ -16,7 +16,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Espanda", template: "%s · Espanda" },
+  title: { default: "Bois & Chiffons", template: "%s · Bois & Chiffons" },
   description: "Your AI marketing team: research, ideas, drafts and checks, approved by you.",
 };
 
