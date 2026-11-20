@@ -1312,6 +1312,7 @@ function AgentView({
             <RunEvents
               workspaceId={workspaceId}
               brandId={brandId}
+              agentKey={agentKey}
               runId={(runId ?? agent?.lastRun?.id)!}
               again={runId ? undefined : `${agent?.lastRun?.id}:${agent?.lastRun?.status}`}
             />

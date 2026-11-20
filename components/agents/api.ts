@@ -68,10 +68,12 @@ export function fetchEvents(
   after: string | null,
   signal?: AbortSignal,
   runId?: string,
+  agentKey?: string,
 ) {
   const params = new URLSearchParams({ limit: "100" });
   if (after) params.set("after", after);
   if (runId) params.set("runId", runId);
+  if (agentKey) params.set("agentKey", agentKey);
   return request<{ events: AgentEvent[] }>(
     `${base(workspaceId, brandId)}/agent-events?${params.toString()}`,
     { signal },

@@ -1,4 +1,5 @@
 import type { ContextDocKind } from "@/components/context/api";
+import { RUN_ID_PATTERN } from "@/shared";
 
 /** What the Overview has open. `run` starts the agent on open; `runId` shows one finished run's events. */
 export type View =
@@ -8,8 +9,6 @@ export type View =
   | { kind: "content"; id: string }
   | { kind: "competitor"; id: string };
 
-/** What the server accepts as a run id (agent-events?runId=). */
-export const RUN_ID = /^[A-Za-z0-9_-]{1,40}$/;
 
 /** The open item lives in the URL (?post=, ?doc=, ?agent=[&runId=], ?competitor=). */
 export function viewFromSearch(search: string): View {
@@ -17,7 +16,7 @@ export function viewFromSearch(search: string): View {
   const post = q.get("post"), doc = q.get("doc"), agent = q.get("agent"), competitor = q.get("competitor"), runId = q.get("runId");
   if (post) return { kind: "content", id: post };
   if (doc) return { kind: "doc", doc: doc as ContextDocKind };
-  if (agent) return { kind: "agent", key: agent, ...(runId && RUN_ID.test(runId) ? { runId } : {}) };
+  if (agent) return { kind: "agent", key: agent, ...(runId && RUN_ID_PATTERN.test(runId) ? { runId } : {}) };
   if (competitor) return { kind: "competitor", id: competitor };
   return { kind: "home" };
 }

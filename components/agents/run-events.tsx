@@ -3,27 +3,28 @@
 import { useEffect, useState } from "react";
 import { AgentEventRow } from "@/components/agents/agent-log";
 import { fetchEvents, type AgentEvent } from "@/components/agents/api";
-import { RUN_ID } from "@/lib/workspace-view";
+import { RUN_ID_PATTERN } from "@/shared";
 
 /** Where an event's entity lives in the app: only types we know, never a path taken from the event's own text. */
 const hrefFor = (e: AgentEvent) => (e.entityType === "ContentItem" && e.entityId ? `?post=${encodeURIComponent(e.entityId)}` : undefined);
 
 /**
- * What one run did, oldest first (the server sends at most 200). One read; read again when `again` changes, which
+ * What one run of this agent did, oldest first (the server sends at most 200). One read; read again when `again` changes, which
  * is how a run still going is picked up when it finishes. Event text is shown as plain text.
+ * ponytail: the first 200 events only (a longer run is cut); upgrade: page by `after` like the Agent Log.
  */
-export function RunEvents({ workspaceId, brandId, runId, again }: { workspaceId: string; brandId: string; runId: string; again?: string }) {
+export function RunEvents({ workspaceId, brandId, agentKey, runId, again }: { workspaceId: string; brandId: string; agentKey: string; runId: string; again?: string }) {
   const [state, setState] = useState<{ runId: string; events: AgentEvent[] } | "failed" | null>(null);
 
   useEffect(() => {
-    if (!RUN_ID.test(runId)) return;
+    if (!RUN_ID_PATTERN.test(runId)) return;
     const ctrl = new AbortController();
-    fetchEvents(workspaceId, brandId, null, ctrl.signal, runId).then(
+    fetchEvents(workspaceId, brandId, null, ctrl.signal, runId, agentKey).then(
       (d) => !ctrl.signal.aborted && setState({ runId, events: d.events ?? [] }),
       () => !ctrl.signal.aborted && setState("failed"),
     );
     return () => ctrl.abort();
-  }, [workspaceId, brandId, runId, again]);
+  }, [workspaceId, brandId, agentKey, runId, again]);
 
   const events = state && state !== "failed" && state.runId === runId ? state.events : null;
   if (state === "failed" && !events) return <p className="text-sm text-muted-foreground">Couldn&rsquo;t load what it did.</p>;
