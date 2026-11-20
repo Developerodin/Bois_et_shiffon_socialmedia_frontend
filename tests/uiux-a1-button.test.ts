@@ -7,8 +7,8 @@ const read = (f: string) => fs.readFileSync(path.join(process.cwd(), f), "utf8")
 describe("touch size and motion classes", () => {
   it("Button grows on coarse pointers", () => {
     const src = read("components/ui/button.tsx");
-    expect(src).toContain("pointer-coarse:h-11");
-    expect(src).toContain("pointer-coarse:size-11");
+    expect(src).toContain("pointer-coarse:min-h-11");
+    expect(src).toContain("pointer-coarse:min-w-11");
   });
 
   it("inner boxes are rounder-than-nothing but below the 16 px card corner", () => {
