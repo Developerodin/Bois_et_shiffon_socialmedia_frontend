@@ -204,7 +204,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
         canPublish ? (
           <>
             <PublishForm base={base} data={data} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
-            <PostedByHand onAct={act} />
+            <PostedByHand studio={!!data.requirements.studio} onAct={act} />
           </>
         ) : (
           <p className="text-sm text-muted-foreground">Approved. Someone who can publish will post it.</p>
@@ -618,7 +618,8 @@ function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data
 }
 
 /** An approved post someone put up themselves: says so, with the post's link if they have it. The server checks the link and shows its refusal as sent. */
-function PostedByHand({ onAct }: { onAct: (body: Record<string, unknown>) => Promise<void> }) {
+/** `studio`: a studio reel needs its link (its results are followed from it), as on the phone. */
+function PostedByHand({ studio, onAct }: { studio: boolean; onAct: (body: Record<string, unknown>) => Promise<void> }) {
   const [link, setLink] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -639,8 +640,8 @@ function PostedByHand({ onAct }: { onAct: (body: Record<string, unknown>) => Pro
     <div className="flex flex-col gap-2 border-t border-border pt-4">
       <h3 className="text-sm font-medium">Posted it yourself?</h3>
       <div className="flex flex-wrap items-center gap-2">
-        <Input type="url" inputMode="url" aria-label="Post link (optional)" placeholder="Post link (optional)" value={link} onChange={(e) => setLink(e.target.value)} className="h-9 w-64 max-w-full" />
-        <Button variant="outline" disabled={pending} onClick={save}>
+        <Input type="url" inputMode="url" aria-label={studio ? "Post link" : "Post link (optional)"} placeholder={studio ? "Post link (required)" : "Post link (optional)"} required={studio} value={link} onChange={(e) => setLink(e.target.value)} className="h-9 w-64 max-w-full" />
+        <Button variant="outline" disabled={pending || (studio && !link.trim())} onClick={save}>
           <Check aria-hidden /> {pending ? "Saving…" : "I posted it"}
         </Button>
       </div>
