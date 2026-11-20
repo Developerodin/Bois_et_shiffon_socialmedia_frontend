@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { setActiveContext } from "@/components/context/api";
+import { dropOpenItem } from "@/lib/workspace-view";
 import { okToDiscard } from "@/components/context/unsaved";
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 
@@ -25,7 +26,11 @@ export function WorkspaceItems({
       value={activeWorkspaceId ?? ""}
       onValueChange={(id) => {
         if (!okToDiscard()) return;
-        void setActiveContext({ workspaceId: id }).then(() => router.refresh(), () => {});
+        void setActiveContext({ workspaceId: id }).then(() => {
+          // The new workspace's Overview must not open the old brand's item.
+          dropOpenItem();
+          router.refresh();
+        }, () => {});
       }}
     >
       {workspaces.map((ws) => (

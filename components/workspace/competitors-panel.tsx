@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
-import { ArrowLeft, Coins, ExternalLink, Loader2, Plus, RotateCw, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { Coins, ExternalLink, Loader2, Plus, RotateCw, Trash2 } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { LoadFailed, useBrandData } from "@/components/workspace/content-panels";
@@ -204,18 +204,16 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
   );
 }
 
-export function CompetitorView({ base, canRun, id, onBack }: { base: string; canRun: boolean; id: string; onBack: () => void }) {
+export function CompetitorView({ base, canRun, id, onLoaded }: { base: string; canRun: boolean; id: string; onLoaded?: () => void }) {
   const { data, failed, reload } = useCompetitors(base);
   const c = data?.competitors.find((x) => x.id === id);
+  const found = !!c;
+  useEffect(() => {
+    if (found) onLoaded?.();
+  }, [found, onLoaded]);
   const a = c?.audit;
   return (
     <div>
-      <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background px-4 py-3">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          <ArrowLeft aria-hidden="true" /> Workspace
-        </Button>
-        <span className="truncate text-sm text-muted-foreground">/ {c?.name ?? "Competitor"}</span>
-      </div>
       {!data ? (
         failed ? <LoadFailed what="competitors" onRetry={() => void reload()} className="p-6" /> : <p className="p-6 text-sm text-muted-foreground">Loading…</p>
       ) : !c ? (

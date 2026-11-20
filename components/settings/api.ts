@@ -2,6 +2,7 @@
 // (docs/superpowers/specs/2026-10-21-rbac-api-contract.md). Keep in sync with the route handlers.
 import { NetworkError, send, type SendInit } from "@/lib/net";
 import { openPaywall, refusalOf } from "@/lib/paywall";
+import { clearAllRecent } from "@/lib/recent";
 
 export class ApiError extends Error {
   constructor(
@@ -162,6 +163,7 @@ export function redirectToLogin() {
   const { pathname, search } = window.location;
   if (PUBLIC_PAGES.some((p) => pathname.startsWith(p))) return;
   redirecting = true;
+  clearAllRecent(); // the next person on this browser must not see what this one opened
   window.location.assign(`/login?expired=1&next=${encodeURIComponent(pathname + search)}`);
 }
 

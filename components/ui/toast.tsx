@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type ToastTone = "success" | "warning";
-export type ToastInput = { title: string; detail?: string; /** An in-app path ("/..."); anything else is ignored. */ href?: string; tone: ToastTone };
+export type ToastInput = { title: string; detail?: string; /** An in-app path ("/..."); anything else is ignored. */ href?: string; tone: ToastTone; /** A button on the toast: pressing it runs the callback and dismisses the toast. */ action?: { label: string; onAction(): void }; /** How long it stays, in ms (default 10 s). */ ms?: number };
 type Toast = ToastInput & { id: number };
 
 const MAX = 3;
@@ -28,6 +28,20 @@ export function clearToasts() {
   toasts = [];
   emit();
 }
+/** Remove the toasts that carry a button (the page that offered the action is gone, so it would do nothing). */
+export function clearActionToasts() {
+  if (!toasts.some((t) => t.action)) return;
+  toasts = toasts.filter((t) => !t.action);
+  emit();
+}
+/** Press a toast's button: dismiss it, then run its callback. */
+export function runToastAction(id: number) {
+  const t = toasts.find((x) => x.id === id);
+  dismiss(id);
+  t?.action?.onAction();
+}
+/** How long a toast stays. */
+export const toastMs = (t: Pick<ToastInput, "ms">) => t.ms ?? DISMISS_MS;
 /** The toasts now showing. */
 export const currentToasts = () => toasts;
 const dismiss = (id: number) => {
@@ -63,11 +77,12 @@ export function Toaster() {
 function ToastItem({ t }: { t: Toast }) {
   const router = useRouter();
   const [paused, setPaused] = useState(false);
+  const ms = toastMs(t);
   useEffect(() => {
     if (paused) return;
-    const timer = setTimeout(() => dismiss(t.id), DISMISS_MS);
+    const timer = setTimeout(() => dismiss(t.id), ms);
     return () => clearTimeout(timer);
-  }, [paused, t.id]);
+  }, [paused, t.id, ms]);
   const href = safeHref(t.href);
   const body = (
     <>
@@ -100,6 +115,15 @@ function ToastItem({ t }: { t: Toast }) {
       ) : (
         <div className="min-w-0 flex-1 px-3 py-2">{body}</div>
       )}
+      {t.action ? (
+        <button
+          type="button"
+          onClick={() => runToastAction(t.id)}
+          className="shrink-0 self-center rounded-xl px-3 py-2 text-sm font-medium text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {t.action.label}
+        </button>
+      ) : null}
       <button
         type="button"
         aria-label="Dismiss"

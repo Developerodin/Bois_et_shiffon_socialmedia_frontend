@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { CircleAlert } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
+import { useUnsavedGuard } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,12 +72,7 @@ function TextDraftEditor({ url, item, onSaved, onCancel }: { url: string; item: 
   const dirty = JSON.stringify(body) !== JSON.stringify({ ...EMPTY, ...(ch === "PINTEREST_PIN" ? { pinLink: "" } : {}), ...start, hashtags: start.hashtags ?? [], slides: start.slides ?? [], script: start.script ?? [] });
 
   // Leaving the page with unsaved text asks first.
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+  useUnsavedGuard(dirty);
 
   async function save(e: React.FormEvent) {
     e.preventDefault();

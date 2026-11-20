@@ -7,6 +7,7 @@ import { getProviders, getSession, signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { clearAllRecent } from "@/lib/recent";
 
 const ERRORS: Record<string, string> = {
   invalid: "Email or password is incorrect.",
@@ -49,6 +50,8 @@ export function LoginForm({ next, error, expired, notice }: { next: string; erro
 
   useEffect(() => {
     let live = true;
+    // Expired session (from a server fetch or a redirect): what was opened here is not for the next person.
+    if (expired) clearAllRecent();
     void getProviders().then((p) => live && setGoogle(Boolean(p?.google)), () => {});
     // Already signed in: go where they were headed. Not after an "expired" bounce, so a half-valid session can't loop.
     if (!expired) void getSession().then((s) => live && s?.user && router.replace(next), () => {});

@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { clearActionToasts } from "@/components/ui/toast";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ArrowLeft,
   CalendarDays,
   Check,
   ChevronRight,
@@ -30,7 +31,7 @@ import { AgentLog } from "@/components/agents/agent-log";
 import { fetchAgents, startRun, type AgentSummary } from "@/components/agents/api";
 import { DocPane } from "@/components/context/doc-pane";
 import { fetchContextDocs, type ContextDocEntry, type ContextDocKind, type ContextDocsResponse } from "@/components/context/api";
-import { okToDiscard } from "@/components/context/unsaved";
+import { okToDiscard, UnsavedGuardOff } from "@/components/context/unsaved";
 import { ApiError, errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
@@ -39,6 +40,11 @@ import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
 import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
+import { Peek } from "@/components/workspace/peek";
+import { RecentMenu } from "@/components/workspace/recent-menu";
+import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
+import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
+import { reelHref } from "@/components/reels/href";
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { NAV } from "@/lib/nav";
@@ -51,7 +57,10 @@ import { filterFromSearch, filterToSearch, isBlocked, isOverdue, isThisWeek, wit
 import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
 import { nothingToDo } from "@/lib/agent-runs";
-import { viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
+import { cachedPost, knownName } from "@/components/workspace/known-name";
+import { recentKey, viewToEntry, writeRecent } from "@/lib/recent";
+import { useReopen } from "@/components/workspace/use-reopen";
+import { agreedToDrop, namesItem, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
 import { plainSummary } from "@/lib/plain-summary";
 import { isRunCancelled } from "@/components/languages/languages";
 
@@ -124,6 +133,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
   const [connections, setConnections] = useState<Connection[] | null>(null);
+  // ponytail: one peek at a time, so one `view`. Two peeks side by side would turn this into a list of views.
   const [view, setView] = useState<View>({ kind: "home" });
   const [focus, setFocus] = useState<{ id: PanelId; n: number } | undefined>();
   const [urlRead, setUrlRead] = useState(false);
@@ -138,6 +148,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const mark = useCallback((k: keyof typeof NONE_FAILED, v: boolean) => setFailed((f) => (f[k] === v ? f : { ...f, [k]: v })), []);
   const viewNow = useRef(view);
   viewNow.current = view;
+  // open / close / Reopen / R; the last closed item resets with the brand because the page keys Workspace by brand.
+  const { open, close, forgetClosed, peekNow } = useReopen(setView, viewNow);
   // The panel ?panel= last brought into view, so a later URL change (opening a post) doesn't bring it back.
   const shownPanel = useRef<string | null>(null);
   // Set when a view is dropped for being unknown: its URL replaces the bad one instead of adding a history entry.
@@ -148,15 +160,20 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   // which already matches the open view and so changes nothing.
   const query = useSearchParams().toString();
   useEffect(() => {
+    // A brand switch took the item out of the URL after the person agreed to leave: don't ask again. ponytail: matched
+    // by URL string (agreedToDrop), so a URL changed in between just asks again; a flag on the switch would be exact.
+    const agreed = agreedToDrop(window.location.search || window.location.pathname);
     const v = viewFromUrl();
+    // A link naming an item that isn't valid: replace it with the clean URL, so Back doesn't return to it.
+    if (v.kind === "home" && namesItem(window.location.search)) window.history.replaceState(null, "", viewSearch(v));
     if (viewSearch(v) !== viewSearch(viewNow.current)) {
       // An open document with unsaved edits asks first; staying puts its URL back.
-      if (!okToDiscard()) {
+      if (!agreed && !okToDiscard()) {
         window.history.pushState(null, "", viewSearch(viewNow.current));
         return;
       }
+      forgetClosed();
       setView(v);
-      if (v.kind !== "home") setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
     }
     // ?panel= shows that panel (e.g. Menu → Content calendar) once, and stays in the URL: the sidebar reads it to
     // keep Wave and Drift selected.
@@ -166,7 +183,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     const cf = filterFromSearch(new URLSearchParams(window.location.search));
     setCalFilter((old) => (filterToSearch(old) === filterToSearch(cf) ? old : cf));
     setUrlRead(true);
-  }, [query]);
+  }, [query, forgetClosed]);
   useEffect(() => {
     // Until the URL has been read, writing it would erase a deep link.
     if (!urlRead) return;
@@ -290,18 +307,35 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     void reloadContent();
   }, [loadAll, reloadIdeas, reloadContent]);
 
-  // Leaving a document with unsaved edits asks first (okToDiscard), for every view change in the workspace.
-  const back = () => {
-    if (okToDiscard()) setView({ kind: "home" });
+  // Posts, documents, agents and competitors open in the side peek; the board behind stays as it is.
+  // Recording what was opened: once per item, and only once it has resolved (a 404 or a mistyped link isn't history).
+  // Documents and agents resolve when they are in the loaded list; posts and competitors when their view loaded them.
+  // Nothing is kept without a user id. ponytail: Recent is per brand and entries stay (30 days) until sign-out or TTL.
+  const rKey = recentKey(workspaceId, brandId, user.id);
+  const viewId = peekKey(view);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
+  const resolved =
+    view.kind === "doc" ? !!docs?.docs.some((d) => d.kind === view.doc)
+    : view.kind === "agent" ? !!agents?.some((a) => a.key === view.key)
+    : loadedId === viewId;
+  useEffect(() => {
+    const entry = viewToEntry(viewNow.current, Date.now());
+    if (rKey && entry && resolved) writeRecent(rKey, entry);
+  }, [rKey, viewId, resolved]);
+  const [topSlot, setTopSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setTopSlot(document.getElementById(TOPBAR_SLOT_ID)), []);
+  // Buttons that point at a panel bring it into view: a collapsed or absent one is expanded or added (saved), then
+  // scrolled to and flashed (panel-layout's reveal; the sidebar's ?panel= goes through `focus`). A revealed panel can sit under the peek, so an open peek closes first (asking about unsaved work).
+  const revealRef = useRef<((id: PanelId) => void) | null>(null);
+  const revealPanel = (id: PanelId) => {
+    if (viewNow.current.kind !== "home") {
+      if (!okToDiscard()) return;
+      setView({ kind: "home" });
+    }
+    revealRef.current?.(id);
   };
-  // Docs and agents open in the "Today & agents" panel (it's re-shown by the layout if hidden).
-  const open = (v: View) => {
-    if (!okToDiscard()) return;
-    setView(v);
-    setFocus((f) => ({ id: "home", n: (f?.n ?? 0) + 1 }));
-  };
-  // Brings a panel into view, adding it to the layout if it's hidden.
-  const showPanel = (id: PanelId) => setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }));
+  // Toasts with a button (Reopen) do nothing once this page is gone.
+  useEffect(() => clearActionToasts, []);
 
   const panels: PanelDef<PanelId>[] = [
     {
@@ -333,42 +367,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       id: "home",
       title: "Today & agents",
       icon: <ScanSearch />,
-      render: () =>
-        view.kind === "doc" && docs && docs.docs.some((d) => d.kind === view.doc) ? (
-          <DocView
-            entry={docs.docs.find((d) => d.kind === view.doc)!}
-            workspaceId={workspaceId}
-            brandId={brandId}
-            researchActive={docs.research?.status === "QUEUED" || docs.research?.status === "RUNNING"}
-            onBack={back}
-            canEdit={canEditDocs}
-            canConfirm={canConfirmDocs}
-            onChanged={(entry) => setDocs((d) => d && { ...d, docs: d.docs.map((x) => (x.kind === entry.kind ? entry : x)) })}
-            onStale={() => fetchContextDocs(workspaceId, brandId).then(setDocs)}
-          />
-        ) : view.kind === "competitor" ? (
-          <CompetitorView base={base} canRun={canRun} id={view.id} onBack={back} />
-        ) : view.kind === "content" ? (
-          <ContentView base={base} perms={perms} id={view.id} onBack={back} reelsOn={reelsOn} brandId={brandId} />
-        ) : view.kind === "agent" ? (
-          <AgentView
-            agentKey={view.key}
-            autoRun={view.run && canRun}
-            runId={view.runId}
-            canRun={canRun}
-            perms={perms}
-            agent={agents?.find((a) => a.key === view.key) ?? null}
-            report={view.key === "seo" ? reports?.seo ?? null : view.key === "geo" ? reports?.geo ?? null : null}
-            docs={docs}
-            workspaceId={workspaceId}
-            brandId={brandId}
-            onBack={back}
-            onOpenDoc={(doc) => open({ kind: "doc", doc })}
-            onRan={refreshAgents}
-            onOpenPosts={() => showPanel("content")}
-            onShowPanel={showPanel}
-          />
-        ) : (
+      render: () => (
           <Home
             workspaceId={workspaceId}
             base={base}
@@ -383,17 +382,17 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
             needs={{ overdue: overdueQ.data ?? 0, blocked: blockedQ.data ?? 0, week: weekQ.data ?? 0 }}
             onOpenCalendar={(need) => {
               changeFilter({ need });
-              showPanel("content");
+              revealPanel("content");
             }}
             canRun={canRun}
             canCreate={canCreate}
             onOpen={open}
-            onShowPanel={showPanel}
+            onShowPanel={revealPanel}
             onRetry={retry}
-            due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={showPanel} /> : null}
+            due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={revealPanel} /> : null}
             showAgents={canAgents}
           />
-        ),
+      ),
     },
     {
       id: "analytics",
@@ -411,7 +410,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       id: "ideas",
       title: "Ideas",
       icon: <Compass />,
-      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => showPanel("content")} />,
+      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => revealPanel("content")} />,
     },
     {
       id: "content",
@@ -428,6 +427,70 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => (canAgents ? <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> : <NotForRole what="the Agent Log" />) },
   ];
 
+  // The peek's title: documents and agents from state, posts and competitors from the lists their panels already
+  // fetched (the shared cache; nothing new is polled for a title), else a plain fallback.
+  let peekItem: PeekItem | null = null;
+  if (view.kind !== "home") {
+    const post = view.kind === "content" ? cachedPost(base, view.id) : undefined;
+    peekItem = { view, title: peekTitle(view, knownName(view, { docs, agents, base })), crumb: peekCrumb(view), fullPageHref: post?.studio && reelsOn ? reelHref(post.id, brandId) : undefined };
+  }
+  peekNow.current = peekItem;
+  const peek = usePeek(peekItem);
+  // Until its list has loaded, a document or agent shows a skeleton: never "Ready" and a Run button for an agent not
+  // yet known. Once the list arrives the Overview re-renders and the view gets the real entry; an unknown one closes.
+  const peekLoading = (
+    <div className="px-6 py-6">
+      <ListSkeleton label="Loading" rows={3} />
+    </div>
+  );
+  // `live` is false while the closed item slides out: that snapshot never auto-runs an agent.
+  const peekView = (v: View, live: boolean) =>
+    v.kind === "doc" ? (
+      !canAgents ? (
+        <NotForRole what="documents" />
+      ) : docs?.docs.some((d) => d.kind === v.doc) ? (
+        <DocView
+          entry={docs.docs.find((d) => d.kind === v.doc)!}
+          workspaceId={workspaceId}
+          brandId={brandId}
+          researchActive={docs.research?.status === "QUEUED" || docs.research?.status === "RUNNING"}
+          canEdit={canEditDocs}
+          canConfirm={canConfirmDocs}
+          onChanged={(entry) => setDocs((d) => d && { ...d, docs: d.docs.map((x) => (x.kind === entry.kind ? entry : x)) })}
+          onStale={() => fetchContextDocs(workspaceId, brandId).then(setDocs)}
+        />
+      ) : (
+        peekLoading
+      )
+    ) : v.kind === "competitor" ? (
+      <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
+    ) : v.kind === "content" ? (
+      <ContentView base={base} perms={perms} id={v.id} reelsOn={reelsOn} brandId={brandId} onLoaded={() => setLoadedId(peekKey(v))} />
+    ) : v.kind === "agent" ? (
+      !canAgents ? (
+        <NotForRole what="the agents" />
+      ) : !agents?.some((a) => a.key === v.key) ? (
+        peekLoading
+      ) : (
+      <AgentView
+        agentKey={v.key}
+        autoRun={live && v.run && canRun}
+        runId={v.runId}
+        canRun={canRun}
+        perms={perms}
+        agent={agents?.find((a) => a.key === v.key) ?? null}
+        report={v.key === "seo" ? reports?.seo ?? null : v.key === "geo" ? reports?.geo ?? null : null}
+        docs={docs}
+        workspaceId={workspaceId}
+        brandId={brandId}
+        onOpenDoc={(doc) => open({ kind: "doc", doc })}
+        onRan={refreshAgents}
+        onOpenPosts={() => revealPanel("content")}
+        onShowPanel={revealPanel}
+      />
+      )
+    ) : null;
+
   const outOfCredits = agents?.some((a) => a.lastRun?.error?.includes("AI credits used up"));
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -436,8 +499,18 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
           <span className="font-medium">Agents are paused:</span> the AI service is out of credits. You can still write and edit drafts, approve and publish. Once credits are added, press Run on the agent again.
         </p>
       )}
-      <div className="min-h-0 flex-1">
-        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} />
+      {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={open} />, topSlot)}
+      <div className="relative min-h-0 flex-1">
+        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} />
+        {peek.shown && (
+          <Peek open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={close} onExited={peek.onExited} asideRef={peek.ref}>
+            {/* Keyed by item: a replaced item remounts fresh, never carrying one item's state into another. */}
+            {/* While it slides out, the closed item's editors no longer count as unsaved: the person already agreed. */}
+            <UnsavedGuardOff value={!peek.live}>
+              <Fragment key={peekKey(peek.shown.view)}>{peekView(peek.shown.view, peek.live)}</Fragment>
+            </UnsavedGuardOff>
+          </Peek>
+        )}
       </div>
     </div>
   );
@@ -1159,23 +1232,11 @@ function AgentFolder({
 
 /* ───────────── Centre: document and agent views ───────────── */
 
-function BackBar({ onBack, title }: { onBack: () => void; title: string }) {
-  return (
-    <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background px-4 py-3">
-      <Button variant="ghost" size="sm" onClick={onBack}>
-        <ArrowLeft aria-hidden="true" /> Workspace
-      </Button>
-      <span className="truncate text-sm text-muted-foreground">/ {title}</span>
-    </div>
-  );
-}
-
 function DocView(p: {
   entry: ContextDocEntry;
   workspaceId: string;
   brandId: string;
   researchActive: boolean;
-  onBack: () => void;
   onChanged: (e: ContextDocEntry) => void;
   onStale: () => void;
   canEdit: boolean;
@@ -1183,7 +1244,6 @@ function DocView(p: {
 }) {
   return (
     <div>
-      <BackBar onBack={p.onBack} title={p.entry.title} />
       <div className="px-6 py-6">
         {/* Keyed by document: switching documents must never carry one document's edit into another. */}
         <DocPane key={p.entry.kind} entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} canEdit={p.canEdit} canConfirm={p.canConfirm} autoReview />
@@ -1210,7 +1270,6 @@ function AgentView({
   docs,
   workspaceId,
   brandId,
-  onBack,
   onOpenDoc,
   onRan,
   autoRun,
@@ -1235,7 +1294,6 @@ function AgentView({
   docs: ContextDocsResponse | null;
   workspaceId: string;
   brandId: string;
-  onBack: () => void;
   onOpenDoc: (k: ContextDocKind) => void;
   onRan: () => void;
 }) {
@@ -1273,7 +1331,6 @@ function AgentView({
 
   return (
     <div>
-      <BackBar onBack={onBack} title={agent?.name ?? agentKey} />
       <div className="flex flex-col gap-6 px-6 py-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>

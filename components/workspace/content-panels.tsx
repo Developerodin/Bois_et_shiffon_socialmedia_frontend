@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
@@ -606,9 +607,14 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   const [zoom, setZoom] = useState<StoryFrameView | null>(null);
   useEffect(() => {
     if (!zoom) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setZoom(null);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Capture phase, and used up: Esc closes the zoom first, not the side peek around it.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      e.preventDefault();
+      setZoom(null);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [zoom]);
   const body = item.latest?.body as unknown as { frames?: { label?: string; headline?: string; body?: string }[]; cta?: string; link?: string } | undefined;
   const link = body?.link ? safeHttpUrl(body.link) : null;
@@ -660,7 +666,9 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
         </p>
       )}
       <p className="mt-3 text-xs text-muted-foreground">Edit on the phone. The frames here are what you approve.</p>
-      {zoom?.url && (
+      {/* In the body: the peek is a containing block for fixed children (its translate), which would trap the overlay at 560 px. */}
+      {zoom?.url &&
+        createPortal(
         <div role="dialog" aria-modal="true" aria-label={`Frame ${zoom.n}`} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setZoom(null)}>
           <div className="relative max-h-full" onClick={(e) => e.stopPropagation()}>
             {/* eslint-disable-next-line @next/next/no-img-element -- a signed storage link */}
@@ -669,13 +677,14 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
               <X aria-hidden /> Close
             </Button>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </section>
   );
 }
 
-export function ContentView({ base, perms, id, onBack, reelsOn, brandId }: { base: string; perms: string[]; id: string; onBack: () => void; reelsOn: boolean; brandId: string }) {
+export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { base: string; perms: string[]; id: string; reelsOn: boolean; brandId: string; onLoaded?: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   // A post outside the calendar window (an old one, opened from a link) isn't in the list: ask for it by id, once per id.
@@ -698,6 +707,10 @@ export function ContentView({ base, perms, id, onBack, reelsOn, brandId }: { bas
     };
   }, [missing, base, id, tries]);
   const item = listed ?? (outside?.id === id ? outside : undefined);
+  const found = !!item;
+  useEffect(() => {
+    if (found) onLoaded?.();
+  }, [found, onLoaded]);
   const [editing, setEditing] = useState(false);
   useEffect(() => setEditing(false), [id]);
   const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";
@@ -727,12 +740,6 @@ export function ContentView({ base, perms, id, onBack, reelsOn, brandId }: { bas
 
   return (
     <div>
-      <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background px-4 py-3">
-        <Button variant="ghost" size="sm" onClick={onBack}>
-          <ArrowLeft aria-hidden="true" /> Workspace
-        </Button>
-        <span className="truncate text-sm text-muted-foreground">/ {item?.title ?? "Post"}</span>
-      </div>
       {!item ? (
         data ? (
           lookup === "done" ? (

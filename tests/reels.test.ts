@@ -457,6 +457,7 @@ describe("reelHref", () => {
   it("opens a reel, on a step when given", () => {
     expect(reelHref("r1", "b1")).toBe("/reels/r1?b=b1");
     expect(reelHref("r1", "b1", "review")).toBe("/reels/r1?b=b1&step=review");
+    expect(reelHref("a/b", "c d")).toBe("/reels/a%2Fb?b=c%20d");
   });
 });
 

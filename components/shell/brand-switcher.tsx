@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Plus } from "lucide-react";
 import { setActiveContext } from "@/components/context/api";
+import { dropOpenItem } from "@/lib/workspace-view";
 import { okToDiscard } from "@/components/context/unsaved";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -88,10 +89,14 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
           <DropdownMenuItem
             key={brand.id}
             onSelect={() => {
+              // The active brand again: nothing changes, so nothing is closed or asked.
+              if (brand.id === active.id) return;
               if (!okToDiscard()) return;
               setTarget(brand.id);
               startSwitch(async () => {
                 await setActiveContext({ workspaceId, brandId: brand.id });
+                // The Overview remounts for the new brand (keyed by brand); its URL must not name the old brand's item.
+                dropOpenItem();
                 router.refresh();
               });
             }}

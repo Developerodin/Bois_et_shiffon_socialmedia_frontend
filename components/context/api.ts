@@ -2,19 +2,13 @@
 // Keep these types in sync with the route handlers under app/api/v1.
 
 import type { RunStatus } from "@/components/agents/api";
-import type { ContextRequest } from "@/shared";
+import type { ContextDocKind, ContextRequest } from "@/shared";
 import { request } from "@/components/settings/api";
 import { SLOW_MS } from "@/lib/net";
 import { brandBase, ensureWorkLanguage } from "@/components/languages/languages";
 
-export type ContextDocKind =
-  | "product-information"
-  | "marketing-strategy"
-  | "competitor-analysis"
-  | "brand-voice"
-  | "content-strategy";
-
-export const DOC_KINDS: ContextDocKind[] = ["product-information", "marketing-strategy", "competitor-analysis", "brand-voice", "content-strategy"];
+// The kinds live in shared/ so the Overview's URL check and the API agree on one list.
+export { DOC_KINDS, type ContextDocKind } from "@/shared";
 
 export type ContextDoc = {
   id: string;

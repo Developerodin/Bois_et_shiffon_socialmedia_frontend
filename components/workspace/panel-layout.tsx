@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw } from "lucide-react";
+import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw, X } from "lucide-react";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,21 @@ const useWide = () => useSyncExternalStore(subscribeWide, () => window.matchMedi
 let seq = 0;
 const colId = () => `c${Date.now().toString(36)}${seq++}`;
 
+/** What bringing a panel into view needs: nothing but a scroll, an expand, or adding it to a column. */
+export function revealPlan<Id extends string>(layout: Layout<Id>, id: Id): "scroll" | "expand" | "add" {
+  if (!layout.columns.some((c) => c.panels.includes(id))) return "add";
+  return layout.collapsed.includes(id) ? "expand" : "scroll";
+}
+/** The layout with this panel expanded and, if it was in no column, put at the top of the second column. */
+export function withPanel<Id extends string>(l: Layout<Id>, id: Id): Layout<Id> {
+  const open = { ...l, collapsed: l.collapsed.filter((p) => p !== id) };
+  if (l.columns.some((c) => c.panels.includes(id))) return open;
+  const columns = open.columns.length ? open.columns.map((c, i) => (i === Math.min(1, open.columns.length - 1) ? { ...c, panels: [id, ...c.panels] } : c)) : [{ id: colId(), size: 1, panels: [id] }];
+  return { ...open, columns };
+}
+const FLASH = ["outline", "outline-2", "outline-primary", "outline-offset-2"];
+const FLASH_MS = 1200;
+
 export function sanitize<Id extends string>(raw: unknown, ids: Id[], fallback: Layout<Id>): Layout<Id> {
   const l = raw as Layout<Id> | null;
   if (!l || !Array.isArray(l.columns)) return fallback;
@@ -63,12 +78,15 @@ export function PanelLayout<Id extends string>({
   presets,
   storageKey,
   focus,
+  revealRef,
 }: {
   panels: PanelDef<Id>[];
   presets: Preset<Id>[];
   storageKey: string;
   /** Bring this panel into view (re-shown if hidden, selected on phones); change `n` to re-trigger. */
   focus?: { id: Id; n: number };
+  /** Filled with a function that points at a panel: scrolls to it and flashes it, expanding or adding it first (saved) when it isn't showing. */
+  revealRef?: { current: ((id: Id) => void) | null };
 }) {
   const ids = panels.map((p) => p.id);
   const [layout, setLayout] = useState<Layout<Id>>(presets[0].layout);
@@ -100,6 +118,17 @@ export function PanelLayout<Id extends string>({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
+
+  const layoutRef = useRef(layout);
+  layoutRef.current = layout;
+  const flash = useRef<{ el: Element; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const endFlash = () => {
+    if (!flash.current) return;
+    clearTimeout(flash.current.timer);
+    flash.current.el.classList.remove(...FLASH);
+    flash.current = null;
+  };
+  useEffect(() => endFlash, []);
 
   const commit = useCallback(
     (next: Layout<Id>) => {
@@ -213,14 +242,36 @@ export function PanelLayout<Id extends string>({
   useEffect(() => {
     if (!focus) return;
     setMobilePanel(focus.id);
-    setLayout((l) => {
-      const shown = l.columns.some((c) => c.panels.includes(focus.id));
-      const open = { ...l, collapsed: l.collapsed.filter((p) => p !== focus.id) };
-      if (shown) return open;
-      const columns = open.columns.length ? open.columns.map((c, i) => (i === Math.min(1, open.columns.length - 1) ? { ...c, panels: [focus.id, ...c.panels] } : c)) : [{ id: colId(), size: 1, panels: [focus.id] }];
-      return { ...open, columns };
-    });
+    setLayout((l) => withPanel(l, focus.id));
   }, [focus]);
+
+  // Scrolls to a showing panel and flashes it. After an expand or add, it waits for the render that shows it.
+  const revealAfter = useRef<Id | null>(null);
+  const scrollAndFlash = (id: Id) => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById(`panel-head-${id}`)?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+    const el = document.querySelector(`[data-panel="${id}"]`);
+    if (!el || reduce) return;
+    endFlash();
+    el.classList.add(...FLASH);
+    flash.current = { el, timer: setTimeout(endFlash, FLASH_MS) };
+  };
+  useEffect(() => {
+    const id = revealAfter.current;
+    if (!id) return;
+    revealAfter.current = null;
+    scrollAndFlash(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
+
+  if (revealRef)
+    revealRef.current = (id: Id) => {
+      if (!window.matchMedia(WIDE).matches) return setMobilePanel(id);
+      // A button that points at a panel opens it: a collapsed one is expanded, a missing one is added (and saved).
+      if (revealPlan(layoutRef.current, id) === "scroll") return scrollAndFlash(id);
+      revealAfter.current = id;
+      commit(withPanel(layoutRef.current, id));
+    };
 
   // After a move the panel's <section> remounts in its new column, so Radix's focus return target is gone:
   // focus its header button here (or Layout when hidden); the panel menu's own focus return is turned off.
@@ -334,6 +385,7 @@ export function PanelLayout<Id extends string>({
                 return (
                   <section
                     key={id}
+                    data-panel={id}
                     aria-label={p.title}
                     className={cn("flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm", collapsed ? "flex-none" : "flex-1")}
                   >
@@ -395,6 +447,10 @@ export function PanelLayout<Id extends string>({
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => hide(id))}>Hide panel</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
+                        {/* Same as Hide panel: it comes back from Layout. */}
+                        <Button variant="ghost" size="icon" className="size-7" aria-label={`Close ${p.title} panel`} title="Close panel" onClick={() => announce(id, () => hide(id))}>
+                          <X aria-hidden="true" />
+                        </Button>
                       </div>
                     </header>
                     {!collapsed && wide && <div className="min-h-0 flex-1 overflow-y-auto">{p.render()}</div>}
