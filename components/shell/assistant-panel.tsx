@@ -176,7 +176,7 @@ export function AssistantPanel(p: Props) {
         // The same element in every state (classes only), so the conversation and a streaming reply carry on.
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-full shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
-          expanded ? "w-[min(56rem,100vw)]" : "w-80",
+          expanded ? "w-[min(56rem,100vw)]" : "w-full sm:w-80",
           // Docked it sits beside the page, under the top bar (layout.tsx): the page's own 12 px edge is the gap, so no
           // left padding of its own, and its top edge lines up with the page's cards.
           docked && !expanded && "xl:static xl:z-auto xl:translate-x-0 xl:pl-0",
@@ -186,7 +186,7 @@ export function AssistantPanel(p: Props) {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className={cn("absolute top-7 right-6 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
+          className={cn("absolute top-7 right-6 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted pointer-coarse:size-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
         >
           <X className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
           <span className="sr-only">Close</span>
@@ -258,7 +258,7 @@ function Body({
             title={expanded ? "Collapse chat" : "Expand chat"}
             className={cn(
               "size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px",
-              expanded ? "grid" : "hidden md:grid",
+              expanded ? "grid" : "hidden sm:grid",
             )}
           >
             {expanded ? <Minimize2 className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : <Maximize2 className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />}
