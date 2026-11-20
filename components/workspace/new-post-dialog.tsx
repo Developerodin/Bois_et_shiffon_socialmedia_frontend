@@ -87,17 +87,19 @@ export function NewPostDialog({ base, canCreate, onCreated }: { base: string; ca
               <div className="flex items-center gap-3">
                 {/* eslint-disable-next-line @next/next/no-img-element -- a signed library preview */}
                 {photo && <img src={photo.url} alt={photo.title} className="size-14 rounded-md border border-border object-cover" />}
-                <Button type="button" size="sm" variant="secondary" onClick={() => setPicking(true)}>
+                <Button type="button" size="sm" variant="secondary" onClick={() => setPicking(true)} aria-required={!photo} aria-describedby={photo ? undefined : "photo-required"}>
                   {photo ? "Change photo" : "Choose photo"}
                 </Button>
               </div>
+              {!photo && <p id="photo-required" className="text-xs font-normal text-muted-foreground">Choose a photo to draft the post.</p>}
             </div>
             <label className="flex flex-col gap-1.5 text-sm font-medium">
               Direction <span className="font-normal text-muted-foreground">(optional)</span>
               <Textarea value={direction} maxLength={DIRECTION_MAX} onChange={(e) => setDirection(e.target.value)} placeholder="Anything the writer should know" />
+              <span className="self-end text-xs font-normal text-muted-foreground">{direction.length}/{DIRECTION_MAX}</span>
             </label>
-            <p className="text-sm text-muted-foreground">Cost: included in your plan</p>
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+            <p className="text-sm text-muted-foreground">Cost: included in your plan</p>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" disabled={busy} onClick={() => change(false)}>

@@ -13,6 +13,7 @@ import { publishCalls } from "@/components/workspace/release";
 import { downloadFile } from "@/lib/download";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { BY_HAND_STEPS, safeHttpUrl, zoneCity } from "@/shared";
 
@@ -285,9 +286,10 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
       </p>
       <div className="flex flex-col gap-1.5">
         <label htmlFor="approval-note" className="text-sm font-medium">
-          Note <span className="font-normal text-muted-foreground">({issues.length ? "needed to approve anyway, ask for changes or reject" : "needed to request changes or reject"})</span>
+          Note
         </label>
-        <Textarea id="approval-note" ref={noteRef} value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={overrideShown ? 500 : 2000} aria-invalid={Boolean(error)} aria-describedby={error ? "approval-error" : undefined} />
+        <p id="approval-note-help" className="text-xs text-muted-foreground">{issues.length ? "Needed to approve anyway, ask for changes or reject." : "Needed to request changes or reject."}</p>
+        <Textarea id="approval-note" ref={noteRef} value={note} onChange={(e) => setNote(e.target.value)} rows={2} maxLength={overrideShown ? 500 : 2000} aria-invalid={Boolean(error)} aria-describedby={error ? "approval-note-help approval-error" : "approval-note-help"} />
         {error && <p id="approval-error" role="alert" className="text-sm text-destructive">{error}</p>}
       </div>
       {issues.some((i) => i.kind !== "offer") && (
@@ -303,12 +305,12 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
       <div className="flex flex-wrap gap-2">
         {/* With "Approve anyway" on offer, the plain approve (which would be refused) steps aside. */}
         {!approved && !overrideShown && (
-          <Button onClick={() => run("APPROVED")} disabled={pending !== null || blocked || refused} title={blocked ? "Fix the quality blockers first" : refused ? "An issue stops this post" : undefined}>
+          <Button onClick={() => run("APPROVED")} disabled={pending !== null || blocked || refused} aria-describedby={blocked || refused ? "approve-why" : undefined}>
             <Check aria-hidden /> {pending === "APPROVED" ? "Approving…" : `Approve v${version}`}
           </Button>
         )}
         {overrideShown && (
-          <Button onClick={() => run("OVERRIDE")} disabled={pending !== null || blocked} title="Approve with the issue; your note is recorded">
+          <Button onClick={() => run("OVERRIDE")} disabled={pending !== null || blocked} aria-describedby="override-why">
             <Check aria-hidden /> {pending === "OVERRIDE" ? "Approving…" : "Approve anyway"}
           </Button>
         )}
@@ -326,6 +328,10 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
           </Button>
         )}
       </div>
+      {!approved && !overrideShown && (blocked || refused) && (
+        <p id="approve-why" className="text-xs text-muted-foreground">{blocked ? "Fix the quality blockers first." : "An issue stops this post."}</p>
+      )}
+      {overrideShown && <p id="override-why" className="text-xs text-muted-foreground">Approves with the issue; your note is recorded.</p>}
     </div>
   );
 }
@@ -507,14 +513,7 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
       )}
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1.5 text-sm font-medium">When</legend>
-        <div role="radiogroup" className="flex w-fit rounded-lg bg-muted p-0.5 text-sm">
-          {([false, true] as const).map((l) => (
-            <button key={String(l)} type="button" role="radio" aria-checked={later === l} onClick={() => { setLater(l); setConfirming(false); }} className={cn("min-h-9 rounded-md px-3", later === l ? "bg-background font-medium text-foreground shadow-sm" : "text-muted-foreground")}>
-              {l ? "Schedule" : "Now"}
-            </button>
-          ))}
-        </div>
+        <SegmentedRadios label="When" name="publish-when" value={later ? "later" : "now"} onChange={(v) => { setLater(v === "later"); setConfirming(false); }} options={[{ value: "now", label: "Now" }, { value: "later", label: "Schedule" }]} />
         {later && (
           <div className="flex flex-wrap items-center gap-3">
             <Input type="datetime-local" aria-label="Publish date and time" value={runAt} min={nowLocalInput()} onChange={(e) => setRunAt(e.target.value)} className="h-11 w-fit" />
