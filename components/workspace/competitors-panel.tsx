@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Coins, ExternalLink, Loader2, Plus, RotateCw, Trash2 } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
@@ -204,9 +204,13 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
   );
 }
 
-export function CompetitorView({ base, canRun, id }: { base: string; canRun: boolean; id: string }) {
+export function CompetitorView({ base, canRun, id, onLoaded }: { base: string; canRun: boolean; id: string; onLoaded?: () => void }) {
   const { data, failed, reload } = useCompetitors(base);
   const c = data?.competitors.find((x) => x.id === id);
+  const found = !!c;
+  useEffect(() => {
+    if (found) onLoaded?.();
+  }, [found, onLoaded]);
   const a = c?.audit;
   return (
     <div>

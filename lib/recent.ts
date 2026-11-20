@@ -46,6 +46,7 @@ export function parseRecent(raw: unknown, now: number): RecentEntry[] {
     if (typeof kind !== "string" || typeof id !== "string" || typeof at !== "number" || !Number.isFinite(at)) continue;
     if (at > now + 60_000 || now - at > RECENT_TTL_MS) continue;
     if (parseViewParts(kind, id).kind === "home") continue;
+    if (out.some((o) => o.kind === kind && o.id === id)) continue; // a hand-edited store may repeat an item
     out.push({ kind: kind as RecentEntry["kind"], id, at });
   }
   return out;
@@ -100,19 +101,10 @@ export function clearAllRecent(s: Store | null = store()): void {
 }
 
 /** Where typing happens: R there is a letter, and menus and dialogs have their own keys. */
-export const R_BLOCKED_TARGET = "input, textarea, select, [contenteditable], [role=textbox], [role=menu], [role=dialog], [role=alertdialog]";
+export const R_BLOCKED_TARGET = "input, textarea, select, [contenteditable], [role=textbox], [role=menu], [role=listbox], [role=combobox], [role=searchbox], [role=dialog], [role=alertdialog]";
 
 export type RKey = { key: string; defaultPrevented: boolean; repeat: boolean; isComposing: boolean; ctrlKey: boolean; metaKey: boolean; altKey: boolean; inBlockedTarget: boolean };
 
 /** Whether this key press means "reopen the last closed item" (the caller checks that nothing is open and something was closed). */
 export const isReopenKey = (e: RKey) =>
   e.key.toLowerCase() === "r" && !e.defaultPrevented && !e.repeat && !e.isComposing && !e.ctrlKey && !e.metaKey && !e.altKey && !e.inBlockedTarget;
-
-/** "3 min ago", "2 h ago", "5 d ago". */
-export function ago(at: number, now: number): string {
-  const s = Math.max(0, Math.round((now - at) / 1000));
-  if (s < 60) return "just now";
-  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)} h ago`;
-  return `${Math.floor(s / 86400)} d ago`;
-}

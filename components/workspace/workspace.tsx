@@ -44,7 +44,6 @@ import { Peek } from "@/components/workspace/peek";
 import { RecentMenu } from "@/components/workspace/recent-menu";
 import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
-import { sharedResponse } from "@/components/workspace/use-job";
 import { reelHref } from "@/components/reels/href";
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
@@ -58,6 +57,7 @@ import { filterFromSearch, filterToSearch, isBlocked, isOverdue, isThisWeek, wit
 import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
 import { nothingToDo } from "@/lib/agent-runs";
+import { cachedPost, knownName } from "@/components/workspace/known-name";
 import { entryToView, isReopenKey, R_BLOCKED_TARGET, recentKey, viewToEntry, writeRecent, type RecentEntry } from "@/lib/recent";
 import { agreedToDrop, namesItem, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
 import { plainSummary } from "@/lib/plain-summary";
@@ -132,6 +132,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
   const [connections, setConnections] = useState<Connection[] | null>(null);
+  // ponytail: one peek at a time, so one `view`. Two peeks side by side would turn this into a list of views.
   const [view, setView] = useState<View>({ kind: "home" });
   const [focus, setFocus] = useState<{ id: PanelId; n: number } | undefined>();
   const [urlRead, setUrlRead] = useState(false);
@@ -144,7 +145,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   }, []);
   const [failed, setFailed] = useState(NONE_FAILED);
   const mark = useCallback((k: keyof typeof NONE_FAILED, v: boolean) => setFailed((f) => (f[k] === v ? f : { ...f, [k]: v })), []);
-  // The last item the person closed, for Reopen (the toast's button, and R). Cleared when anything else is shown, and on a brand switch.
+  // The last item the person closed, for Reopen (the toast's button, and R). Cleared when anything else is shown (the page keys Workspace by brand, so a switch starts fresh).
   const lastClosed = useRef<RecentEntry | null>(null);
   const viewNow = useRef(view);
   viewNow.current = view;
@@ -158,7 +159,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   // which already matches the open view and so changes nothing.
   const query = useSearchParams().toString();
   useEffect(() => {
-    // A brand switch took the item out of the URL after the person agreed to leave: don't ask again.
+    // A brand switch took the item out of the URL after the person agreed to leave: don't ask again. ponytail: matched
+    // by URL string (agreedToDrop), so a URL changed in between just asks again; a flag on the switch would be exact.
     const agreed = agreedToDrop(window.location.search || window.location.pathname);
     const v = viewFromUrl();
     // A link naming an item that isn't valid: replace it with the clean URL, so Back doesn't return to it.
@@ -312,7 +314,6 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     lastClosed.current = null;
     setView(v);
   }, []);
-  useEffect(() => () => void (lastClosed.current = null), [brandId]);
   const peekNow = useRef<PeekItem | null>(null);
   const reopen = useCallback(() => {
     const e = lastClosed.current;
@@ -326,8 +327,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     const entry = cur && viewToEntry(cur.view, Date.now());
     if (!entry) return;
     lastClosed.current = entry;
-    // The toast's href is the same item's URL, so its text is a link to it too.
-    toast({ title: `Closed ${cur.title}`, tone: "success", ms: 6000, href: `/${viewToSearch(entryToView(entry), "", "/")}`, action: { label: "Reopen", onAction: reopen } });
+    toast({ title: `Closed ${cur.title}`, tone: "success", ms: 6000, action: { label: "Reopen", onAction: reopen } });
   }, [reopen]);
   // R reopens the last closed item, unless the person is typing or something else already handled the key.
   useEffect(() => {
@@ -339,13 +339,20 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [reopen]);
-  // Recording what was opened: once per item, not per render. Nothing is kept without a user id.
+  // Recording what was opened: once per item, and only once it has resolved (a 404 or a mistyped link isn't history).
+  // Documents and agents resolve when they are in the loaded list; posts and competitors when their view loaded them.
+  // Nothing is kept without a user id. ponytail: Recent is per brand and entries stay (30 days) until sign-out or TTL.
   const rKey = recentKey(workspaceId, brandId, user.id);
   const viewId = peekKey(view);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
+  const resolved =
+    view.kind === "doc" ? !!docs?.docs.some((d) => d.kind === view.doc)
+    : view.kind === "agent" ? !!agents?.some((a) => a.key === view.key)
+    : loadedId === viewId;
   useEffect(() => {
     const entry = viewToEntry(viewNow.current, Date.now());
-    if (rKey && entry) writeRecent(rKey, entry);
-  }, [rKey, viewId]);
+    if (rKey && entry && resolved) writeRecent(rKey, entry);
+  }, [rKey, viewId, resolved]);
   const [topSlot, setTopSlot] = useState<HTMLElement | null>(null);
   useEffect(() => setTopSlot(document.getElementById(TOPBAR_SLOT_ID)), []);
   // Buttons that point at a panel bring it into view; they never add it to the saved board (the sidebar's ?panel=
@@ -455,13 +462,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   // fetched (the shared cache; nothing new is polled for a title), else a plain fallback.
   let peekItem: PeekItem | null = null;
   if (view.kind !== "home") {
-    const post = view.kind === "content" ? (sharedResponse(`${base}/content`) as { items?: ContentItem[] } | undefined)?.items?.find((i) => i.id === view.id) : undefined;
-    const known =
-      view.kind === "doc" ? docs?.docs.find((d) => d.kind === view.doc)?.title
-      : view.kind === "agent" ? agents?.find((a) => a.key === view.key)?.name
-      : view.kind === "competitor" ? (sharedResponse(`${base}/competitors`) as { competitors?: { id: string; name: string }[] } | undefined)?.competitors?.find((c) => c.id === view.id)?.name
-      : post?.title;
-    peekItem = { view, title: peekTitle(view, known), crumb: peekCrumb(view), fullPageHref: post?.studio && reelsOn ? reelHref(post.id, brandId) : undefined };
+    const post = view.kind === "content" ? cachedPost(base, view.id) : undefined;
+    peekItem = { view, title: peekTitle(view, knownName(view, { docs, agents, base })), crumb: peekCrumb(view), fullPageHref: post?.studio && reelsOn ? reelHref(post.id, brandId) : undefined };
   }
   peekNow.current = peekItem;
   const peek = usePeek(peekItem);
@@ -492,9 +494,9 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         peekLoading
       )
     ) : v.kind === "competitor" ? (
-      <CompetitorView base={base} canRun={canRun} id={v.id} />
+      <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
     ) : v.kind === "content" ? (
-      <ContentView base={base} perms={perms} id={v.id} reelsOn={reelsOn} brandId={brandId} />
+      <ContentView base={base} perms={perms} id={v.id} reelsOn={reelsOn} brandId={brandId} onLoaded={() => setLoadedId(peekKey(v))} />
     ) : v.kind === "agent" ? (
       !canAgents ? (
         <NotForRole what="the agents" />

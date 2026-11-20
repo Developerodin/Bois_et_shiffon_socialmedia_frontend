@@ -1,7 +1,8 @@
 import { safeHref } from "@/components/ui/toast";
 import { viewToSearch } from "@/lib/workspace-view";
 import { describe, expect, it } from "vitest";
-import { clearAllRecent, entryToView, isReopenKey, pushRecent, readRecent, recentKey, writeRecent, RECENT_MAX, type RKey, type RecentEntry } from "@/lib/recent";
+import { clearAllRecent, entryToView, isReopenKey, pushRecent, R_BLOCKED_TARGET, readRecent, recentKey, writeRecent, RECENT_MAX, type RKey, type RecentEntry } from "@/lib/recent";
+import { timeAgo } from "@/lib/time";
 
 const NOW = 1_800_000_000_000;
 const day = 24 * 3600 * 1000;
@@ -109,5 +110,26 @@ describe("Reopen link", () => {
     expect(href).toBe("/?agent=planner");
     expect(safeHref(href)).toBe(href);
     expect(`/${viewToSearch(entryToView({ kind: "post", id: "abc" }), "", "/")}`).toBe("/?post=abc");
+  });
+});
+
+describe("recent hardening", () => {
+  it("drops repeated items from a hand-edited store, keeping the first", () => {
+    const raw = [e("a", NOW), { kind: "post", id: "a", at: NOW - 1000 }, e("b", NOW - 2000)];
+    expect(readRecent("k", NOW, fakeStore({ k: JSON.stringify(raw) })).map((x) => x.id)).toEqual(["a", "b"]);
+  });
+
+  it("blocks R inside listboxes, comboboxes and search boxes", () => {
+    for (const role of ["listbox", "combobox", "searchbox"]) expect(R_BLOCKED_TARGET).toContain(`[role=${role}]`);
+  });
+});
+
+describe("timeAgo with epoch ms", () => {
+  it("reads minutes, hours and days from a timestamp", () => {
+    expect(timeAgo(NOW - 5000, NOW)).toBe("just now");
+    expect(timeAgo(NOW - 3 * 60_000, NOW)).toBe("3 min ago");
+    expect(timeAgo(NOW - 2 * 3600_000, NOW)).toBe("2 h ago");
+    expect(timeAgo(NOW - 5 * day, NOW)).toBe("5 d ago");
+    expect(timeAgo(null)).toBeNull();
   });
 });
