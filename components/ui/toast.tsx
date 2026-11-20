@@ -34,8 +34,12 @@ const dismiss = (id: number) => {
   toasts = toasts.filter((t) => t.id !== id);
   emit();
 };
-/** Only paths inside the app ("/x"): not "//host", and not "/\host" (browsers read a backslash as a slash). */
-export const safeHref = (href: string | undefined) => (href && href.startsWith("/") && !href.startsWith("//") && !href.startsWith("/\\") ? href : undefined);
+/**
+ * Only paths inside the app: "/" then a letter, digit, "?" or "#" ("//host" and "/\host" leave it: browsers read a
+ * backslash as a slash), and no control character anywhere (browsers drop a tab or newline inside a URL, so a tab
+ * after the first slash would make "//host").
+ */
+export const safeHref = (href: string | undefined) => (href && href.length > 0 && (href === "/" || /^\/[A-Za-z0-9?#]/.test(href)) && !/[\u0000-\u001f\u007f]/.test(href) ? href : undefined);
 
 const subscribe = (l: () => void) => (listeners.add(l), () => void listeners.delete(l));
 const snapshot = () => toasts;

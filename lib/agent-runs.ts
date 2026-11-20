@@ -14,6 +14,15 @@ export function baselineOf(agents: readonly AgentSummary[]): string | null {
   return best;
 }
 
+/**
+ * The watcher's baseline from an answer, or undefined when the answer is not usable yet: one the shared cache got
+ * before the watcher mounted (a panel's earlier poll) says nothing about what finished since, and a baseline taken
+ * from it would toast every older run. `answeredAt`/`mountedAt` are browser clock times of the same clock.
+ */
+export function takeBaseline(agents: readonly AgentSummary[], answeredAt: number, mountedAt: number): string | null | undefined {
+  return answeredAt >= mountedAt ? baselineOf(agents) : undefined;
+}
+
 const going = (s: string) => s === "QUEUED" || s === "RUNNING";
 
 /**

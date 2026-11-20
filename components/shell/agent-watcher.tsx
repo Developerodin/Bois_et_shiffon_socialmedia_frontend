@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import { agentsUrl, type AgentSummary } from "@/components/agents/api";
 import { clearToasts, toast } from "@/components/ui/toast";
-import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
-import { baselineOf, finishedRuns } from "@/lib/agent-runs";
+import { JOB_INTERVALS, sharedAt, useJob } from "@/components/workspace/use-job";
+import { finishedRuns, takeBaseline } from "@/lib/agent-runs";
 import { readable } from "@/lib/agent-message";
 
 const pickAgents = (d: { agents: AgentSummary[] }) => d.agents;
@@ -20,19 +20,22 @@ const KEEP = 50;
  */
 export function AgentWatcher({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
-  const { data } = useJob(agentsUrl(base), { pick: pickAgents as (d: never) => AgentSummary[], intervals: JOB_INTERVALS.agentWatch, stopOn: STOP_ON });
+  const url = agentsUrl(base);
+  const { data } = useJob(url, { pick: pickAgents as (d: never) => AgentSummary[], intervals: JOB_INTERVALS.agentWatch, stopOn: STOP_ON });
   const prev = useRef<AgentSummary[] | null>(null);
   const baseline = useRef<string | null | undefined>(undefined);
+  const mountedAt = useRef(Date.now());
 
   // Keyed by brand in the layout: switching brands unmounts this, and the old brand's toasts go with it.
   useEffect(() => clearToasts, []);
 
   useEffect(() => {
     if (!data) return;
-    // The first answer only sets what counts as new, in the server's time.
+    // The first answer fetched after this mounted only sets what counts as new, in the server's time. One already in
+    // the shared cache when it mounted is skipped: it would set a baseline older than runs that finished since.
     if (baseline.current === undefined) {
-      baseline.current = baselineOf(data);
-      prev.current = data;
+      baseline.current = takeBaseline(data, sharedAt(url), mountedAt.current);
+      if (baseline.current !== undefined) prev.current = data;
       return;
     }
     const runs = finishedRuns(prev.current, data, baseline.current);
@@ -58,7 +61,7 @@ export function AgentWatcher({ workspaceId, brandId }: { workspaceId: string; br
     try {
       localStorage.setItem(storeKey, JSON.stringify(seen.slice(-KEEP)));
     } catch {}
-  }, [data, workspaceId, brandId]);
+  }, [data, url, workspaceId, brandId]);
 
   return null;
 }

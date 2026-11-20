@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AgentSummary, RunStatus } from "@/components/agents/api";
-import { baselineOf, finishedRuns, nothingToDo } from "@/lib/agent-runs";
+import { baselineOf, finishedRuns, nothingToDo, takeBaseline } from "@/lib/agent-runs";
 
 const agent = (key: string, id: string, status: RunStatus, finishedAt: string | null = null, error: string | null = null): AgentSummary => ({
   key,
@@ -68,5 +68,18 @@ describe("finishedRuns", () => {
   it("ignores runs still going and agents without a run", () => {
     const next = [agent("a", "1", "RUNNING"), { ...agent("b", "2", "RUNNING"), lastRun: null }];
     expect(finishedRuns([], next, T1)).toEqual([]);
+  });
+});
+
+describe("takeBaseline", () => {
+  const runs = [agent("a", "1", "SUCCEEDED", T1)];
+  it("takes the baseline from an answer fetched at or after the mount", () => {
+    expect(takeBaseline(runs, 2000, 1000)).toBe(T1);
+    expect(takeBaseline(runs, 1000, 1000)).toBe(T1);
+    expect(takeBaseline([], 2000, 1000)).toBeNull();
+  });
+  it("skips a cached answer from before the mount (undefined, so the watcher waits and no old run is toasted)", () => {
+    expect(takeBaseline(runs, 999, 1000)).toBeUndefined();
+    expect(takeBaseline([], 0, 1000)).toBeUndefined();
   });
 });

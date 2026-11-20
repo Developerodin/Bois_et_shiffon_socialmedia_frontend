@@ -6,7 +6,7 @@ describe("safeHref", () => {
     for (const h of ["/", "/agents", "/?agent=seo&runId=r1", "/posts?post=1"]) expect(safeHref(h)).toBe(h);
   });
   it("drops anything that could leave the app", () => {
-    for (const h of ["//evil.com", "/\\evil.com", "https://evil.com", "javascript:alert(1)", "evil", "", undefined]) expect(safeHref(h)).toBeUndefined();
+    for (const h of ["//evil.com", "/\\evil.com", "/\t/evil.com", "/\n/evil.com", "/a\nb", "/ x", "/.evil", "https://evil.com", "javascript:alert(1)", "evil", "", undefined]) expect(safeHref(h)).toBeUndefined();
   });
 });
 
