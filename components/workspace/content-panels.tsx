@@ -648,7 +648,7 @@ function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }:
         <h4 id={titleId} ref={head} tabIndex={-1} className="mr-auto text-xs font-semibold focus-visible:outline-none">
           {posts.length ? <>{label} &middot; {postCount(posts.length)}</> : `Nothing on ${label}`}
         </h4>
-        <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Close this day" onClick={onClose}>
+        <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Close this day" onClick={onClose}>
           <X aria-hidden className="size-4" />
         </Button>
       </div>
@@ -747,10 +747,10 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
         <h3 id={headId} tabIndex={-1} className="mr-auto text-sm font-semibold focus-visible:outline-none">
           {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
         </h3>
-        <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Previous month" onClick={() => go(-1)}>
+        <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Previous month" onClick={() => go(-1)}>
           <ChevronLeft aria-hidden className="size-4" />
         </Button>
-        <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Next month" onClick={() => go(1)}>
+        <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Next month" onClick={() => go(1)}>
           <ChevronRight aria-hidden className="size-4" />
         </Button>
         <Button size="sm" variant="outline" onClick={() => show(new Date().getFullYear(), new Date().getMonth())}>
