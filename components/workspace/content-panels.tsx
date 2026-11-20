@@ -60,6 +60,8 @@ export type ContentItem = {
   /** Made in the reels studio: its plan, video and caption are changed in Reels. */
   studio?: boolean;
   campaignId?: string | null;
+  /** The campaign's name with the post, so an ended or archived one from an older month can still be named; older servers omit it. */
+  campaign?: { id: string; name: string } | null;
   /** Who looks after the post; older servers omit it (read as unassigned). */
   owner?: { id: string; name: string | null } | null;
   latest: {
@@ -401,6 +403,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
   // The posts of the month last shown in Month, so its channels and campaigns can be filtered on too.
   const [monthItems, setMonthItems] = useState<ContentItem[]>([]);
+  useEffect(() => setMonthItems([]), [base]);
   // List or Month, remembered per browser; read after mount so the server render and the first client render agree.
   const [view, setView] = useState<CalendarView>("list");
   useEffect(() => {
@@ -448,7 +451,10 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   // Options from the list (open posts + 30 days) and the month last shown, so an older month's channel or campaign can be picked.
   const channels = [...new Set([...data, ...monthItems].map((i) => i.channel))];
   const used = new Set([...data, ...monthItems].map((i) => i.campaignId));
-  const campaignOptions = campaigns.filter((c) => used.has(c.id));
+  // The campaigns list names the live ones; a post's own campaign names one that ended or was archived.
+  const named = new Map(campaigns.filter((c) => used.has(c.id)).map((c) => [c.id, c.name]));
+  for (const i of [...data, ...monthItems]) if (i.campaign && !named.has(i.campaign.id)) named.set(i.campaign.id, i.campaign.name);
+  const campaignOptions = [...named].map(([id, name]) => ({ id, name }));
   const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
   const sel = cn(selectClass, "h-8 w-auto text-xs");
   const filters = (
@@ -584,9 +590,12 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
     intervals: past ? JOB_INTERVALS.preview : JOB_INTERVALS.always,
   });
   const byDay = useMemo(() => groupByDay(data ? filterItems(data.items, filter, me, new Date()) : []), [data, filter, me]);
+  // Reported only when what the filters list changes (a post, its channel or campaign), not on every poll.
+  const itemsKey = data?.items.map((i) => `${i.id}:${i.channel}:${i.campaign?.id ?? i.campaignId ?? ""}`).join() ?? null;
   useEffect(() => {
     if (data) onItems(data.items);
-  }, [data, onItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemsKey, onItems]);
   const today = dayKey(new Date());
   const headId = useId();
   const monthHead = useRef<HTMLHeadingElement>(null);
