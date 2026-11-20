@@ -4,6 +4,7 @@ import { useState } from "react";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { okToDiscard, releaseUnloadGuard } from "@/components/context/unsaved";
 import { clearAllRecent } from "@/lib/recent";
 
 /**
@@ -13,8 +14,11 @@ import { clearAllRecent } from "@/lib/recent";
  * What this browser remembered of what the person opened (Recent) goes first: the next person must not see it.
  */
 const signOutNow = () => {
+  if (!okToDiscard()) return false;
+  releaseUnloadGuard();
   clearAllRecent();
-  return signOut({ redirectTo: "/login" });
+  void signOut({ redirectTo: "/login" });
+  return true;
 };
 
 /** "Sign out" in a dropdown menu. The menu stays open (preventDefault) until the page leaves. */
@@ -26,8 +30,7 @@ export function SignOutItem() {
       disabled={pending}
       onSelect={(e) => {
         e.preventDefault();
-        setPending(true);
-        void signOutNow();
+        if (signOutNow()) setPending(true);
       }}
     >
       <LogOut aria-hidden="true" /> {pending ? "Signing out…" : "Sign out"}
@@ -44,8 +47,7 @@ export function SignOutButton({ className }: { className?: string }) {
       className={className}
       disabled={pending}
       onClick={() => {
-        setPending(true);
-        void signOutNow();
+        if (signOutNow()) setPending(true);
       }}
     >
       {pending ? "Signing out…" : "Sign out"}

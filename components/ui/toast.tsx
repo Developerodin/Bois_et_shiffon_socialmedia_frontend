@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -75,7 +75,6 @@ export function Toaster() {
 }
 
 function ToastItem({ t }: { t: Toast }) {
-  const router = useRouter();
   const [paused, setPaused] = useState(false);
   const ms = toastMs(t);
   useEffect(() => {
@@ -102,16 +101,14 @@ function ToastItem({ t }: { t: Toast }) {
       )}
     >
       {href ? (
-        <button
-          type="button"
-          onClick={() => {
-            dismiss(t.id);
-            router.push(href);
-          }}
+        // A real link, so the unsaved-changes guard (which watches link clicks) covers it.
+        <Link
+          href={href}
+          onClick={() => dismiss(t.id)}
           className="min-w-0 flex-1 rounded-xl px-3 py-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {body}
-        </button>
+        </Link>
       ) : (
         <div className="min-w-0 flex-1 px-3 py-2">{body}</div>
       )}

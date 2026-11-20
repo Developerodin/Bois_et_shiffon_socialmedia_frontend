@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent, type ReactNode, type RefObject } from
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { createBrand, ProblemError, setActiveContext } from "@/components/context/api";
+import { okToDiscard } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -48,7 +49,7 @@ export function NewBrandDialog({ workspaceId, trigger, open: openProp, onOpenCha
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
+    if (pending || !okToDiscard()) return;
     setPending(true);
     setError(null);
     try {
