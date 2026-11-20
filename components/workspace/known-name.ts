@@ -18,6 +18,7 @@ export function knownName(view: View, from: { docs: ContextDocsResponse | null; 
       return (sharedResponse(`${from.base}/competitors`) as { competitors?: { id: string; name: string }[] } | undefined)?.competitors?.find((c) => c.id === view.id)?.name;
     case "content":
       return cachedPost(from.base, view.id)?.title;
+    case "panel":
     case "home":
       return undefined;
   }

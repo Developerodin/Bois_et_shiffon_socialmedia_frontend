@@ -22,6 +22,7 @@ export function viewToEntry(v: View, at: number): RecentEntry | null {
       return { kind: "agent", id: v.key, at };
     case "competitor":
       return { kind: "competitor", id: v.id, at };
+    case "panel": // Recent is items only
     case "home":
       return null;
   }

@@ -79,6 +79,7 @@ export function PanelLayout<Id extends string>({
   storageKey,
   focus,
   revealRef,
+  onOpenInPeek,
 }: {
   panels: PanelDef<Id>[];
   presets: Preset<Id>[];
@@ -87,6 +88,8 @@ export function PanelLayout<Id extends string>({
   focus?: { id: Id; n: number };
   /** Filled with a function that points at a panel: scrolls to it and flashes it, expanding or adding it first (saved) when it isn't showing. */
   revealRef?: { current: ((id: Id) => void) | null };
+  /** Show a panel in the side preview without changing the layout: adds a drop zone on the right edge and a menu item. */
+  onOpenInPeek?: (id: Id) => void;
 }) {
   const ids = panels.map((p) => p.id);
   const [layout, setLayout] = useState<Layout<Id>>(presets[0].layout);
@@ -95,6 +98,7 @@ export function PanelLayout<Id extends string>({
   const [dropHint, setDropHint] = useState<string | null>(null);
   const [hintSeen, setHintSeen] = useState(true);
   const dragging = useRef<Id | null>(null);
+  const [dragOn, setDragOn] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
   // A panel moved or hidden from a menu: once the new layout renders, focus follows it and the live region says where.
   const pending = useRef<{ id: Id; title: string } | null>(null);
@@ -232,6 +236,17 @@ export function PanelLayout<Id extends string>({
     dragging.current = null;
     if (id && ids.includes(id)) move(id, target);
   };
+  const dropInPeek = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDropHint(null);
+    const id = dragging.current ?? (e.dataTransfer.getData("text/panel") as Id);
+    dragging.current = null;
+    setDragOn(false);
+    if (!id || !ids.includes(id)) return;
+    // Focus the panel's header so the peek's close returns there (the drag leaves focus on the page).
+    document.getElementById(`panel-head-${id}`)?.focus();
+    onOpenInPeek?.(id);
+  };
   const allow = (hint: string) => (e: React.DragEvent) => {
     if (!dragging.current) return;
     e.preventDefault();
@@ -368,7 +383,7 @@ export function PanelLayout<Id extends string>({
       </div>
 
       {/* Panels are cards on the page background: separation comes from the gaps, not hairlines. */}
-      <div ref={rowRef} className="hidden min-h-0 flex-1 py-3 pl-3 lg:flex">
+      <div ref={rowRef} className="relative hidden min-h-0 flex-1 py-3 pl-3 lg:flex">
         {layout.columns.map((col, ci) => (
           // A column whose panels are all collapsed shrinks to a header-wide strip instead of holding its share.
           <div key={col.id} className="flex min-h-0 min-w-0" style={{ flex: col.panels.every((p) => layout.collapsed.includes(p)) ? "0 0 15rem" : `${col.size} 1 0%` }}>
@@ -393,11 +408,13 @@ export function PanelLayout<Id extends string>({
                       draggable
                       onDragStart={(e) => {
                         dragging.current = id;
+                        setDragOn(true);
                         e.dataTransfer.setData("text/panel", id);
                         e.dataTransfer.effectAllowed = "move";
                       }}
                       onDragEnd={() => {
                         dragging.current = null;
+                        setDragOn(false);
                         setDropHint(null);
                       }}
                       onDragOver={(e) => {
@@ -442,6 +459,7 @@ export function PanelLayout<Id extends string>({
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => shift(id, -1))}>Move left</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => shift(id, 1))}>Move right</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => move(id, "new-column"))}>Open in its own column</DropdownMenuItem>
+                            {onOpenInPeek && <DropdownMenuItem onSelect={() => onOpenInPeek(id)}>Open in preview</DropdownMenuItem>}
                             <DropdownMenuItem onSelect={() => toggleCollapse(id)}>{collapsed ? "Expand" : "Collapse"}</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => hide(id))}>Hide panel</DropdownMenuItem>
@@ -483,6 +501,20 @@ export function PanelLayout<Id extends string>({
           className={cn("w-3 shrink-0", dropHint === "new-column" && "w-24 bg-primary/10")}
           aria-hidden="true"
         />
+        {/* While a header is dragged: drop here to show the panel in the side preview (layout unchanged). It sits over the new-column strip; "Open in its own column" in the menu still works. */}
+        {onOpenInPeek && dragOn && (
+          <div
+            onDragOver={allow("peek")}
+            onDragLeave={() => setDropHint(null)}
+            onDrop={dropInPeek}
+            className={cn(
+              "absolute inset-y-3 right-3 z-10 flex w-24 items-center justify-center rounded-2xl border-2 border-dashed border-primary p-2 text-center text-xs font-medium text-primary",
+              dropHint === "peek" ? "bg-primary/10" : "bg-background/80",
+            )}
+          >
+            Open in preview
+          </div>
+        )}
       </div>
     </div>
   );

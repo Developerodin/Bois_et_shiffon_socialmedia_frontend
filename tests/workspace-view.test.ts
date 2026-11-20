@@ -106,3 +106,28 @@ describe("item named in the URL", () => {
     expect(namesItem("?runId=r1")).toBe(false);
   });
 });
+
+describe("panel in the peek (?peek=)", () => {
+  it("opens a known panel and drops an unknown one", () => {
+    expect(viewFromSearch("?peek=analytics")).toEqual({ kind: "panel", id: "analytics" });
+    expect(viewFromSearch("?peek=nope")).toEqual({ kind: "home" });
+    expect(namesItem("?peek=nope")).toBe(true);
+  });
+  it("round-trips and keeps ?panel= apart", () => {
+    expect(viewToSearch({ kind: "panel", id: "feed" }, "?panel=content", "/")).toBe("?panel=content&peek=feed");
+    expect(viewToSearch({ kind: "home" }, "?peek=feed&panel=content", "/")).toBe("?panel=content");
+    expect(viewFromSearch("?panel=content")).toEqual({ kind: "home" });
+  });
+  it("comes after the other item parameters", () => {
+    expect(viewFromSearch("?peek=feed&competitor=c1")).toEqual({ kind: "competitor", id: "c1" });
+  });
+  it("is dropped with the open item", () => {
+    expect(withoutOpenItem("?peek=feed&panel=log", "/")).toBe("?panel=log");
+  });
+  it("has a crumb, a fallback title and a stable key", () => {
+    const v = { kind: "panel", id: "log" } as const;
+    expect(peekCrumb(v)).toBe("Panel");
+    expect(peekTitle(v, "Activity")).toBe("Activity");
+    expect(peekKey(v)).toBe("panel:log");
+  });
+});
