@@ -154,6 +154,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   const shownPanel = useRef<string | null>(null);
   // Set when a view is dropped for being unknown: its URL replaces the bad one instead of adding a history entry.
   const replaceUrl = useRef(false);
+  // The last full URL (path or search) the page accepted, to put back when the person stays on an unsaved document.
+  const acceptedUrl = useRef<string | null>(null);
 
   // Open what the URL names: on load (deep link, refresh), on Back/Forward, and on links to "/" while a view is open
   // (the sidebar's Overview). Next.js updates the search params for all of these, and for our own pushState below,
@@ -167,9 +169,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     // A link naming an item that isn't valid: replace it with the clean URL, so Back doesn't return to it.
     if (v.kind === "home" && namesItem(window.location.search)) window.history.replaceState(null, "", viewSearch(v));
     if (viewSearch(v) !== viewSearch(viewNow.current)) {
-      // An open document with unsaved edits asks first; staying puts its URL back.
+      // An open document with unsaved edits asks first; staying puts the accepted URL back (in place of the new
+      // entry), and the effect run that follows finds nothing to change.
       if (!agreed && !okToDiscard()) {
-        window.history.pushState(null, "", viewSearch(viewNow.current));
+        window.history.replaceState(null, "", acceptedUrl.current ?? viewSearch(viewNow.current));
         return;
       }
       forgetClosed();
@@ -182,6 +185,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     shownPanel.current = panel;
     const cf = filterFromSearch(new URLSearchParams(window.location.search));
     setCalFilter((old) => (filterToSearch(old) === filterToSearch(cf) ? old : cf));
+    acceptedUrl.current = window.location.search || window.location.pathname;
     setUrlRead(true);
   }, [query, forgetClosed]);
   useEffect(() => {
@@ -193,6 +197,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     if (replaceUrl.current) window.history.replaceState(null, "", next);
     else window.history.pushState(null, "", next);
     replaceUrl.current = false;
+    acceptedUrl.current = next;
   }, [view, urlRead]);
   // A ?doc= or ?agent= that names nothing shows home and drops the bad parameter, once the lists have loaded.
   useEffect(() => {
@@ -1303,6 +1308,9 @@ function AgentView({
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // A run started here replaces the one the link named: from then on show the latest run.
+  const [started, setStarted] = useState(false);
+  const shownRun = started ? undefined : runId;
   const running = agent?.lastRun?.status === "RUNNING" || agent?.lastRun?.status === "QUEUED";
   const price = useRunPrice(workspaceId, agentKey);
 
@@ -1311,6 +1319,7 @@ function AgentView({
     setError(null);
     try {
       await startRun(workspaceId, brandId, agentKey);
+      setStarted(true);
       onRan();
       void loadPlanCredits(workspaceId, true);
     } catch (e) {
@@ -1367,15 +1376,15 @@ function AgentView({
           </div>
         )}
 
-        {(runId ?? agent?.lastRun?.id) && (
+        {(shownRun ?? agent?.lastRun?.id) && (
           <section aria-labelledby="did-h" className="flex flex-col gap-3">
             <h2 id="did-h" className="text-base font-semibold">What it did</h2>
             <RunEvents
               workspaceId={workspaceId}
               brandId={brandId}
               agentKey={agentKey}
-              runId={(runId ?? agent?.lastRun?.id)!}
-              again={runId ? undefined : `${agent?.lastRun?.id}:${agent?.lastRun?.status}`}
+              runId={(shownRun ?? agent?.lastRun?.id)!}
+              again={shownRun ? undefined : `${agent?.lastRun?.id}:${agent?.lastRun?.status}`}
             />
           </section>
         )}

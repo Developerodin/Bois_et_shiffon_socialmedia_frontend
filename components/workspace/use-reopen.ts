@@ -3,7 +3,7 @@ import { okToDiscard } from "@/components/context/unsaved";
 import { toast } from "@/components/ui/toast";
 import type { PeekItem } from "@/components/workspace/use-peek";
 import { entryToView, isReopenKey, R_BLOCKED_TARGET, viewToEntry, type RecentEntry } from "@/lib/recent";
-import type { View } from "@/lib/workspace-view";
+import { peekKey, type View } from "@/lib/workspace-view";
 
 /**
  * Opening and closing the peek, and Reopen. Every view change asks first when an editor has unsaved work
@@ -16,12 +16,13 @@ export function useReopen(setView: (v: View) => void, viewNow: MutableRefObject<
   const forgetClosed = useCallback(() => void (lastClosed.current = null), []);
   const open = useCallback(
     (v: View) => {
-      if (!okToDiscard()) return;
+      // Opening the item that's already open keeps its editor, so there's nothing to discard.
+      if (peekKey(v) !== peekKey(viewNow.current) && !okToDiscard()) return;
       // Anything shown now makes an older close stale: R must not bring it back.
       lastClosed.current = null;
       setView(v);
     },
-    [setView],
+    [setView, viewNow],
   );
   const reopen = useCallback(() => {
     const e = lastClosed.current;
