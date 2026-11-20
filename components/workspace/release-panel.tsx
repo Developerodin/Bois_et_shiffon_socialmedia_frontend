@@ -233,7 +233,8 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
 /** approved: the post is already approved but an issue now stops it (only "Approve anyway" or "Ask for changes"). */
 function ApproveForm({ version, blocked, issues, canOverride, approved = false, onDecide }: { version: number; blocked: boolean; issues: ProductIssue[]; canOverride: boolean; approved?: boolean; onDecide: (v: Decision["verdict"], note: string, extra: object) => Promise<void> }) {
   // An issue only a rewrite fixes (a wrong price, a changed or withdrawn offer): the note starts with what to fix.
-  const startNote = issues.filter((i) => i.refuses && !i.overridable).map((i) => i.message).join("\n");
+  // Fixed at mount: a poll that changes the issues mustn't make an untouched note count as unsaved.
+  const [startNote] = useState(() => issues.filter((i) => i.refuses && !i.overridable).map((i) => i.message).join("\n"));
   const [note, setNote] = useState(startNote);
   const [pending, setPending] = useState<Decision["verdict"] | "OVERRIDE" | null>(null);
   const [error, setError] = useState<string | null>(null);

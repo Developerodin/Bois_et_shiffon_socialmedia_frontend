@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Camera, Clapperboard, FileText, Images, Inbox, LayoutDashboard, Menu, Package, Plug, PenSquare, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
 import { EspandaLogo } from "@/components/brand/espanda-logo";
@@ -63,6 +63,13 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
       setOrder(parseOrder(localStorage.getItem(AGENT_ORDER_KEY)));
     } catch {}
   }, []);
+  // Moving a row down re-inserts the focused link, which drops focus: put it back after the move.
+  const links = useRef(new Map<string, HTMLAnchorElement>());
+  const refocus = useRef<string | null>(null);
+  useEffect(() => {
+    if (refocus.current) links.current.get(refocus.current)?.focus();
+    refocus.current = null;
+  }, [order]);
   const agents = applyOrder(NAV.filter((e) => e.group === "agent"), order);
   const reorder = (from: number, to: number) => {
     const next = move(agents, from, to).map((e) => e.id);
@@ -157,12 +164,14 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
               >
                 <Link
                   href={e.href}
+                  ref={(el) => void (el ? links.current.set(e.id, el) : links.current.delete(e.id))}
                   draggable={false}
                   aria-current={on ? "page" : undefined}
                   aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
                   onKeyDown={(ev) => {
                     if (!ev.altKey || (ev.key !== "ArrowUp" && ev.key !== "ArrowDown")) return;
                     ev.preventDefault();
+                    refocus.current = e.id;
                     reorder(i, ev.key === "ArrowUp" ? i - 1 : i + 1);
                   }}
                   className={cn(row, "h-[52px] px-2", on ? "bg-accent" : "hover:bg-muted")}
