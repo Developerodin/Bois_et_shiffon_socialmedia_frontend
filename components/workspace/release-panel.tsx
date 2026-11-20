@@ -13,6 +13,7 @@ import { publishCalls } from "@/components/workspace/release";
 import { downloadFile } from "@/lib/download";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { ListSkeleton } from "@/components/settings/shared";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { BY_HAND_STEPS, safeHttpUrl, zoneCity } from "@/shared";
@@ -455,7 +456,7 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
         <div className="flex flex-col gap-1.5">
           <label htmlFor="pub-board" className="text-sm font-medium">Board</label>
           {boards === undefined ? (
-            <p className="text-sm text-muted-foreground">Loading boards…</p>
+            <ListSkeleton label="Loading boards" rows={2} />
           ) : boards === null ? (
             <p className="text-sm text-destructive">Couldn&rsquo;t load boards from Pinterest. Reconnect the account and try again.</p>
           ) : boards.length === 0 ? (

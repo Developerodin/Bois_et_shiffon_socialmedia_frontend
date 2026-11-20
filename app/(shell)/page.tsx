@@ -15,7 +15,7 @@ export default async function WorkspacePage() {
   // First run: no brand yet → the website step.
   if (shell.activeWorkspaceId && shell.brands.length === 0) redirect("/welcome");
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
-    return <p className="p-10 text-muted-foreground">Pick a business from the switcher in the sidebar.</p>;
+    return <p className="p-10 text-muted-foreground">Pick a business from the menu.</p>;
   }
 
   // The shell lists only brands in the active workspace, and the active brand is one of them.

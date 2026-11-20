@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { setActiveContext } from "@/components/context/api";
 import { dropOpenItem } from "@/lib/workspace-view";
+import { toast } from "@/components/ui/toast";
 import { okToDiscard } from "@/components/context/unsaved";
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 
@@ -30,7 +31,7 @@ export function WorkspaceItems({
           // The new workspace's Overview must not open the old brand's item.
           dropOpenItem();
           router.refresh();
-        }, () => {});
+        }, () => toast({ title: "Couldn't switch workspace", detail: "Try again.", tone: "warning" }));
       }}
     >
       {workspaces.map((ws) => (

@@ -89,9 +89,9 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
         <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-border bg-background px-5 py-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs text-muted-foreground">{crumb}</p>
-            <h2 id={titleId} data-peek-title tabIndex={-1} className="truncate text-sm font-semibold focus:outline-none">
+            <p id={titleId} data-peek-title tabIndex={-1} className="truncate text-sm font-semibold focus:outline-none">
               {title}
-            </h2>
+            </p>
           </div>
           {fullPageHref && (
             <Button variant="ghost" size="sm" asChild>
@@ -101,7 +101,7 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
           <button
             type="button"
             onClick={onClose}
-            className="flex size-8 shrink-0 items-center justify-center rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            className="flex size-8 shrink-0 items-center justify-center rounded-sm pointer-coarse:size-11 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             <X className="h-4 w-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
             <span className="sr-only">Close</span>

@@ -34,6 +34,7 @@ import { fetchContextDocs, type ContextDocEntry, type ContextDocKind, type Conte
 import { okToDiscard, UnsavedGuardOff } from "@/components/context/unsaved";
 import { ApiError, errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
+import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
@@ -522,6 +523,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
           <span className="font-medium">Agents are paused:</span> the AI service is out of credits. You can still write and edit drafts, approve and publish. Once credits are added, press Run on the agent again.
         </p>
       )}
+      {/* The Overview's heading whichever panels are on the board (the greeting in Home is a paragraph). */}
+      <h1 className="sr-only">Overview</h1>
       {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={open} />, topSlot)}
       <div className="relative min-h-0 flex-1">
         <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} onOpenInPeek={(id) => open({ kind: "panel", id })} previewing={view.kind === "panel" ? view.id : null} />
@@ -695,7 +698,7 @@ function ContextPane({
           <div className="flex items-baseline justify-between gap-2">
             <h2 className="font-display text-lg font-medium">{brandName}</h2>
             {canEdit && (
-              <button type="button" onClick={() => { setSiteSaved(false); setEditing(true); }} className="inline-block py-1 text-xs text-muted-foreground hover:text-foreground">
+              <button type="button" onClick={() => { setSiteSaved(false); setEditing(true); }} aria-label="Edit business details" className="inline-block rounded py-1 text-xs text-muted-foreground hover:text-foreground pointer-coarse:min-h-11 pointer-coarse:py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 Edit
               </button>
             )}
@@ -721,7 +724,7 @@ function ContextPane({
           {!show.docs ? null : summary ? (
             <>
               <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-muted-foreground">{summary}</p>
-              <button type="button" onClick={() => onOpenDoc("product-information")} className="mt-1 py-1 text-xs font-medium hover:underline">
+              <button type="button" onClick={() => onOpenDoc("product-information")} className="mt-1 rounded py-1 text-xs font-medium hover:underline pointer-coarse:min-h-11 pointer-coarse:py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 View more
               </button>
             </>
@@ -798,7 +801,7 @@ function ContextPane({
             <ul className="mt-2 flex flex-wrap gap-1.5">
               {connections.map((c) => (
                 <li key={c.id} className={cn("rounded-full border px-2.5 py-0.5 text-xs", c.status === "ACTIVE" ? "border-border" : "border-destructive/50 text-destructive")}>
-                  {c.displayName}
+                  {c.status === "ACTIVE" ? c.displayName : <Link href="/settings?tab=connections" className="rounded underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{c.displayName} · reconnect</Link>}
                 </li>
               ))}
             </ul>
@@ -1040,9 +1043,9 @@ function Home({
 
   return (
     <div className="flex flex-col">
-      <h1 className="px-5 pt-6 font-display text-2xl font-medium tracking-tight">
+      <p className="px-5 pt-6 font-display text-2xl font-medium tracking-tight">
         {first ? `Welcome, ${first}.` : "Welcome."}
-      </h1>
+      </p>
 
       <section aria-labelledby="today-h" className="px-5 pb-8 pt-5">
         <div className="flex items-center justify-between gap-4">
@@ -1472,20 +1475,7 @@ function AnalyticsPanel({ reports, failed, onRetry, onOpenAgent }: { reports: { 
   const questions = tab === "geo" ? ((report?.metrics.questions ?? []) as { question: string; mentioned: boolean; branded?: boolean }[]) : [];
   return (
     <div className="flex flex-col gap-4 p-4">
-      <div role="tablist" aria-label="Report" className="grid grid-cols-2 rounded-lg bg-muted p-1 text-sm">
-        {(["seo", "geo"] as const).map((t) => (
-          <button
-            key={t}
-            role="tab"
-            type="button"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
-            className={cn("rounded-md py-1.5 font-medium", tab === t ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
-          >
-            {t === "seo" ? "SEO" : "AI visibility (GEO)"}
-          </button>
-        ))}
-      </div>
+      <SegmentedRadios label="Report" name="analytics-report" value={tab} onChange={setTab} options={[{ value: "seo", label: "SEO" }, { value: "geo", label: "AI visibility (GEO)" }]} />
       <LoadGate ready={!!reports} failed={failed} what="your reports" onRetry={onRetry} rows={2}>
       {!report ? (
         <div className="flex flex-col items-start gap-3">
@@ -1530,6 +1520,7 @@ function AnalyticsPanel({ reports, failed, onRetry, onOpenAgent }: { reports: { 
               ))}
             </ul>
           )}
+          {questions.length > 0 && <p className="text-xs text-muted-foreground">Green: mentioned · Amber: not mentioned · Grey: names the brand</p>}
           <p className="text-sm leading-relaxed">{report.summary}</p>
           <Findings findings={report.findings as Parameters<typeof Findings>[0]["findings"]} />
         </>
@@ -1660,12 +1651,16 @@ function AgentsFeed({
 
 function LearningNotes({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
   const [notes, setNotes] = useState<{ id: string; title: string; body: string; createdAt: string }[] | null>(null);
-  useEffect(() => {
+  const [failed, setFailed] = useState(false);
+  const load = useCallback(() => {
+    setFailed(false);
     request<{ notes: { id: string; title: string; body: string; createdAt: string }[] }>(
       `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}/learning-notes`,
-    ).then((d) => setNotes(d.notes), () => setNotes([]));
+    ).then((d) => setNotes(d.notes), () => setFailed(true));
   }, [workspaceId, brandId]);
-  if (!notes) return <p className="text-sm text-muted-foreground">Loading notes…</p>;
+  useEffect(load, [load]);
+  if (failed) return <LoadFailed what="learning notes" onRetry={load} />;
+  if (!notes) return <ListSkeleton label="Loading notes" rows={2} />;
   if (!notes.length) return <p className="text-sm text-muted-foreground">No learning notes yet. Run the Analyst to write the first one.</p>;
   return (
     <section aria-labelledby="notes-h" className="flex flex-col gap-4">
