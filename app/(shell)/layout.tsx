@@ -1,11 +1,13 @@
 import { Suspense } from "react";
 import { PageViewTracker } from "@/components/page-view-tracker";
+import { AgentWatcher } from "@/components/shell/agent-watcher";
 import { AssistantPanel } from "@/components/shell/assistant-panel";
 import { AssistantProvider } from "@/components/shell/assistant-state";
 import { LanguageDialog } from "@/components/languages/languages";
 import { PaywallDialog } from "@/components/shell/paywall-dialog";
 import { MobileNav, Sidebar } from "@/components/shell/sidebar";
 import { TopBar } from "@/components/shell/top-bar";
+import { Toaster } from "@/components/ui/toast";
 import { MainArea } from "@/components/workspace/main-area";
 import { featuresOn } from "@/lib/features";
 import { getShell } from "@/lib/server-fetch";
@@ -61,6 +63,10 @@ export default async function ShellLayout({ children }: { children: React.ReactN
           </div>
         </div>
       </AssistantProvider>
+      {workspaceId && shell.activeBrandId && shell.brandPermissions.includes("agents.read") ? (
+        <AgentWatcher key={shell.activeBrandId} workspaceId={workspaceId} brandId={shell.activeBrandId} />
+      ) : null}
+      <Toaster />
       <PageViewTracker workspaceId={workspaceId} brandId={shell.activeBrandId} />
       <PaywallDialog workspaceId={workspaceId} />
       <LanguageDialog />

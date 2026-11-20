@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { fetchEvents, type AgentEvent, type AgentEventLevel } from "@/components/agents/api";
 import { ServiceUnavailable } from "@/components/agents/service-unavailable";
@@ -139,23 +140,7 @@ export function AgentLog({ workspaceId, brandId, compact = false }: Props) {
           ) : (
             <ol>
               {events.map((e) => (
-                <li key={e.id} className="log-line-in grid grid-cols-[auto_auto_1fr] gap-x-3">
-                  <time dateTime={e.createdAt} className="text-white/50 tabular-nums">
-                    {formatTime(e.createdAt)}
-                  </time>
-                  <span className={cn("w-16 font-semibold", LOG_LEVEL_ON_DARK[e.level])}>
-                    {e.level}
-                  </span>
-                  <span className="min-w-0 break-words">
-                    <span className="text-white/50">[{e.agentKey}]</span>{" "}
-                    <span className={e.level === "INFO" ? undefined : LOG_LEVEL_ON_DARK[e.level]} title={e.message}>
-                      {readable(e.message)}
-                    </span>
-                    {e.entityType ? (
-                      <span className="ml-2 text-white/50">→ {e.entityType}</span>
-                    ) : null}
-                  </span>
-                </li>
+                <AgentEventRow key={e.id} event={e} />
               ))}
             </ol>
           )}
@@ -165,6 +150,34 @@ export function AgentLog({ workspaceId, brandId, compact = false }: Props) {
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * One line of the log: time, level, agent, message. All text is plain (a message may come from crawled pages);
+ * `href` (only from a known entity type) makes the entity a link.
+ */
+export function AgentEventRow({ event: e, href }: { event: AgentEvent; href?: string }) {
+  return (
+    <li className="log-line-in grid grid-cols-[auto_auto_1fr] gap-x-3">
+      <time dateTime={e.createdAt} className="text-white/50 tabular-nums">
+        {formatTime(e.createdAt)}
+      </time>
+      <span className={cn("w-16 font-semibold", LOG_LEVEL_ON_DARK[e.level])}>{e.level}</span>
+      <span className="min-w-0 break-words">
+        <span className="text-white/50">[{e.agentKey}]</span>{" "}
+        <span className={e.level === "INFO" ? undefined : LOG_LEVEL_ON_DARK[e.level]} title={e.message}>
+          {readable(e.message)}
+        </span>
+        {e.entityType ? (
+          href ? (
+            <Link href={href} className="ml-2 text-white/70 underline underline-offset-2">→ {e.entityType}</Link>
+          ) : (
+            <span className="ml-2 text-white/50">→ {e.entityType}</span>
+          )
+        ) : null}
+      </span>
+    </li>
   );
 }
 

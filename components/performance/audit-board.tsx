@@ -120,7 +120,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceI
     const ctrl = new AbortController();
     const check = () => {
       if (document.visibilityState !== "visible") return;
-      fetchAgents(workspaceId, brandId, ctrl.signal).then(
+      fetchAgents(workspaceId, brandId).then(
         ({ agents }) => {
           const now = agents.filter((a) => a.key === "seo" || a.key === "geo").map((a) => `${a.lastRun?.id}:${a.lastRun?.status}`).join();
           if (runs.current !== null && runs.current !== now) reload();

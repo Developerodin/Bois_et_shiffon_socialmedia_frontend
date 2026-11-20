@@ -34,6 +34,7 @@ export type AgentEvent = {
 // One fetch helper for the app: it surfaces the server's own explanation (problem detail).
 import { request } from "@/components/settings/api";
 import { ensureWorkLanguage } from "@/components/languages/languages";
+import { fetchShared } from "@/components/workspace/use-job";
 
 export { ApiError } from "@/components/settings/api";
 
@@ -41,8 +42,15 @@ function base(workspaceId: string, brandId: string) {
   return `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
 }
 
-export function fetchAgents(workspaceId: string, brandId: string, signal?: AbortSignal) {
-  return request<{ agents: AgentSummary[] }>(`${base(workspaceId, brandId)}/agents`, { signal });
+/** The agents list's URL: the key the shared per-URL cache (use-job) holds it under. */
+export const agentsUrl = (brandBase: string) => `${brandBase}/agents`;
+
+/**
+ * The brand's agents, from the shared per-URL request: the Overview, the agents board, the post panels and the
+ * shell's watcher all join one request. `fresh`: a reload after a change (a run just started).
+ */
+export function fetchAgents(workspaceId: string, brandId: string, fresh = false) {
+  return fetchShared(agentsUrl(base(workspaceId, brandId)), fresh) as Promise<{ agents: AgentSummary[] }>;
 }
 
 /** Starts a run; asks for the team language first if the business has none yet (throws RunCancelled on Cancel). */
@@ -59,9 +67,11 @@ export function fetchEvents(
   brandId: string,
   after: string | null,
   signal?: AbortSignal,
+  runId?: string,
 ) {
   const params = new URLSearchParams({ limit: "100" });
   if (after) params.set("after", after);
+  if (runId) params.set("runId", runId);
   return request<{ events: AgentEvent[] }>(
     `${base(workspaceId, brandId)}/agent-events?${params.toString()}`,
     { signal },

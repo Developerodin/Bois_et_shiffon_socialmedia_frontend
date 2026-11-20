@@ -27,7 +27,7 @@ export function AgentsBoard({ workspaceId, brandId }: Props) {
   const load = useCallback(
     async (signal?: AbortSignal) => {
       try {
-        const data = await fetchAgents(workspaceId, brandId, signal);
+        const data = await fetchAgents(workspaceId, brandId);
         setState({ kind: "ready", agents: data.agents ?? [] });
       } catch (err) {
         if (signal?.aborted) return;

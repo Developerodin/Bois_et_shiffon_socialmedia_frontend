@@ -49,12 +49,14 @@ import { readable } from "@/lib/agent-message";
 import { CONNECTIONS_READ, safeHttpUrl, STATUS_GROUPS } from "@/shared";
 import { filterFromSearch, filterToSearch, isBlocked, isOverdue, isThisWeek, withFilter, type CalendarFilter } from "@/lib/calendar-filter";
 import { timeAgo } from "@/lib/time";
+import { RunEvents } from "@/components/agents/run-events";
+import { nothingToDo } from "@/lib/agent-runs";
+import { viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
 import { plainSummary } from "@/lib/plain-summary";
 import { isRunCancelled } from "@/components/languages/languages";
 
 type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
-type View = { kind: "home" } | { kind: "doc"; doc: ContextDocKind } | { kind: "agent"; key: string; run?: boolean } | { kind: "content"; id: string } | { kind: "competitor"; id: string };
 
 /** Agents shown as tiles. Built ones come from the API; planned ones are locked (Okara shows locked tiles too). */
 const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
@@ -114,26 +116,8 @@ type Props = {
   perms: string[];
 };
 
-/** The open item lives in the URL (?post=, ?doc=, ?agent=, ?competitor=) so Refresh, Back and shared links work. */
-function viewFromUrl(): View {
-  const q = new URLSearchParams(window.location.search);
-  const post = q.get("post"), doc = q.get("doc"), agent = q.get("agent"), competitor = q.get("competitor");
-  if (post) return { kind: "content", id: post };
-  if (doc) return { kind: "doc", doc: doc as ContextDocKind };
-  if (agent) return { kind: "agent", key: agent };
-  if (competitor) return { kind: "competitor", id: competitor };
-  return { kind: "home" };
-}
-function viewSearch(v: View) {
-  const q = new URLSearchParams(window.location.search);
-  for (const k of ["post", "doc", "agent", "competitor"]) q.delete(k);
-  if (v.kind === "content") q.set("post", v.id);
-  if (v.kind === "doc") q.set("doc", v.doc);
-  if (v.kind === "agent") q.set("agent", v.key);
-  if (v.kind === "competitor") q.set("competitor", v.id);
-  const s = q.toString();
-  return s ? `?${s}` : window.location.pathname;
-}
+const viewFromUrl = () => viewFromSearch(window.location.search);
+const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
 export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, user, perms }: Props) {
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
@@ -226,13 +210,13 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     },
     [base, mark, canReports],
   );
-  const refreshAgents = useCallback(() => fetchAgents(workspaceId, brandId).then((a) => setAgents(a.agents)), [workspaceId, brandId]);
+  const refreshAgents = useCallback(() => fetchAgents(workspaceId, brandId, true).then((a) => setAgents(a.agents)), [workspaceId, brandId]);
 
   // Each request gives up after 30 s (lib/net.ts), so a hung one can't stall the poll.
   const loadDocsAndAgents = useCallback(
     async (signal?: AbortSignal) => {
       if (!canAgents) return;
-      const [d, a] = await Promise.allSettled([fetchContextDocs(workspaceId, brandId, signal), fetchAgents(workspaceId, brandId, signal)]);
+      const [d, a] = await Promise.allSettled([fetchContextDocs(workspaceId, brandId, signal), fetchAgents(workspaceId, brandId)]);
       if (signal?.aborted) return;
       if (d.status === "fulfilled") setDocs(d.value);
       if (a.status === "fulfilled") setAgents(a.value.agents);
@@ -370,6 +354,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
           <AgentView
             agentKey={view.key}
             autoRun={view.run && canRun}
+            runId={view.runId}
             canRun={canRun}
             perms={perms}
             agent={agents?.find((a) => a.key === view.key) ?? null}
@@ -738,7 +723,6 @@ function ContextPane({
 /* ───────────── Centre: home ───────────── */
 
 /** "No new drafts to check" and friends: the agent ran fine and found no work. Not a failure. */
-const nothingToDo = (a: AgentSummary | undefined) => a?.lastRun?.status === "FAILED" && /^(No |Nothing )/.test(a.lastRun.error ?? "");
 
 function agentStatus(a: AgentSummary | undefined) {
   const s = a?.lastRun?.status;
@@ -1230,12 +1214,15 @@ function AgentView({
   onOpenDoc,
   onRan,
   autoRun,
+  runId,
   onOpenPosts,
   onShowPanel,
   canRun,
   perms,
 }: {
   agentKey: string;
+  /** A run to show what it did (from the "agent finished" toast); without it, the latest run. */
+  runId?: string;
   onShowPanel: (id: PanelId) => void;
   /** The role may run agents; without it the Run button is hidden. */
   canRun: boolean;
@@ -1317,6 +1304,18 @@ function AgentView({
               <Button size="sm" onClick={() => onShowPanel(AGENT_NEXT[agentKey].panel!)}>{AGENT_NEXT[agentKey].label}</Button>
             )}
           </div>
+        )}
+
+        {(runId ?? agent?.lastRun?.id) && (
+          <section aria-labelledby="did-h" className="flex flex-col gap-3">
+            <h2 id="did-h" className="text-base font-semibold">What it did</h2>
+            <RunEvents
+              workspaceId={workspaceId}
+              brandId={brandId}
+              runId={(runId ?? agent?.lastRun?.id)!}
+              again={runId ? undefined : `${agent?.lastRun?.id}:${agent?.lastRun?.status}`}
+            />
+          </section>
         )}
 
         {report && (
