@@ -45,7 +45,7 @@ function Plot({ days, totals, fx, W, ariaLabel, className }: { days: Day[]; tota
       {[0, top / 2, top].map((t) => (
         <g key={t}>
           <line x1={M.left} x2={W - M.right} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth={1} strokeDasharray={t === 0 ? undefined : "2 4"} />
-          <text x={M.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="fill-muted-foreground text-[10px] tabular-nums">
+          <text x={M.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="fill-muted-foreground text-xs tabular-nums">
             {usd(t)}
           </text>
         </g>
@@ -61,7 +61,7 @@ function Plot({ days, totals, fx, W, ariaLabel, className }: { days: Day[]; tota
             <rect x={M.left + i * band} y={M.top} width={band} height={plotH} fill="transparent" />
             {v > 0 ? <path d={column(x, y(v), barW, Math.max(h, 1.5))} className="grow-y fill-[var(--chart-1)] transition-opacity group-hover:opacity-75 motion-reduce:transition-none" style={{ animationDelay: `${Math.min(i * 12, 360)}ms` }} /> : null}
             {i === peak ? (
-              <text x={Math.min(Math.max(x + barW / 2, M.left + 16), W - M.right - 16)} y={y(v) - 6} textAnchor="middle" className="fill-foreground text-[10px] font-medium tabular-nums">
+              <text x={Math.min(Math.max(x + barW / 2, M.left + 16), W - M.right - 16)} y={y(v) - 6} textAnchor="middle" className="fill-foreground text-xs font-medium tabular-nums">
                 {usd(v)}
               </text>
             ) : null}
@@ -69,7 +69,7 @@ function Plot({ days, totals, fx, W, ariaLabel, className }: { days: Day[]; tota
         );
       })}
       {xTicks.map((i) => (
-        <text key={i} x={M.left + i * band + band / 2} y={H - 6} textAnchor={i === 0 ? "start" : i === days.length - 1 ? "end" : "middle"} className="fill-muted-foreground text-[10px]">
+        <text key={i} x={M.left + i * band + band / 2} y={H - 6} textAnchor={i === 0 ? "start" : i === days.length - 1 ? "end" : "middle"} className="fill-muted-foreground text-xs">
           {label(days[i].day)}
         </text>
       ))}

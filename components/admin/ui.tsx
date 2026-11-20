@@ -32,7 +32,7 @@ export function Ago({ at }: { at: Date | string | null | undefined }) {
 
 /** An empty cell: a quiet dash, read out as "none". */
 export const Empty = () => (
-  <span className="text-muted-foreground/60" aria-label="none">
+  <span className="text-muted-foreground" aria-label="none">
     -
   </span>
 );

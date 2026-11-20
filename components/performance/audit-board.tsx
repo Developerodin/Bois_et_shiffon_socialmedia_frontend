@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Gauge, Sparkles } from "lucide-react";
+import { ChevronRight, Gauge, Sparkles } from "lucide-react";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { fetchAgents } from "@/components/agents/api";
@@ -27,6 +27,7 @@ type Report = {
 type PageSpeed = { performance: number; seo: number; accessibility: number; bestPractices: number; lcpMs: number | null };
 type Question = { question: string; mentioned: boolean; branded?: boolean; brands: string[] };
 
+const SEVERITY_LABEL: Record<Severity, string> = { critical: "Critical", high: "High", medium: "Medium", low: "Low" };
 const TONE: Record<Severity, "bad" | "warn" | "muted"> = { critical: "bad", high: "bad", medium: "warn", low: "muted" };
 const scoreTone = (n: number) => (n >= 80 ? "text-success" : n >= 50 ? "text-warning" : "text-destructive");
 
@@ -49,10 +50,11 @@ export function Findings({ findings }: { findings: Finding[] }) {
         <li key={f.id} className="py-4">
           <details className="group">
             <summary className="flex cursor-pointer list-none items-start gap-3">
+              <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true" />
               <span className="mt-0.5 w-5 shrink-0 text-right font-mono text-xs text-muted-foreground">{i + 1}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge tone={TONE[f.severity]}>{f.severity}</StatusBadge>
+                  <StatusBadge tone={TONE[f.severity]}>{SEVERITY_LABEL[f.severity]}</StatusBadge>
                   <span className="text-xs text-muted-foreground">{f.category}</span>
                 </div>
                 <p className="mt-1 font-medium">{f.title}</p>
@@ -140,7 +142,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceI
 
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading reports" />;
-  else if (state.kind === "forbidden") body = <EmptyState icon={Gauge} title="You can't see performance" description="Your role doesn't include analytics.read." />;
+  else if (state.kind === "forbidden") body = <EmptyState icon={Gauge} title="You can't see performance" description="Your role can't see performance." />;
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
   else {
     const { seo, geo } = state.data;

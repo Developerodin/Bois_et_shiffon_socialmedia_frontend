@@ -35,10 +35,10 @@ export default async function AdminOverview() {
         <Stat href="/admin/workspaces" label="Workspaces" value={o.workspaceCount.toLocaleString("en")} hint={`${o.users.toLocaleString("en")} people`} />
         <Stat href="/admin/spend" label="Customer spend, last 30 days" value={dollars(c30)} hint={[rupees(c30, fx), `all time ${dollars(o.customers.aiUsd + o.customers.apiUsd)}`].filter(Boolean).join(" · ")} />
         <Stat href="/admin/logs?log=calls" label="AI calls, last 30 days" value={o.customers.calls30.toLocaleString("en")} hint={`${o.customers.apiCalls30.toLocaleString("en")} other paid API calls`} />
-        <Stat href="/admin/spend?tests=1" label="Test runs, last 30 days" value={dollars(usd30(o.tests))} hint={`${o.tests.calls30.toLocaleString("en")} calls (npm run eval)`} />
+        <Stat href="/admin/spend?tests=1" label="Test runs, last 30 days" value={dollars(usd30(o.tests))} hint={`${o.tests.calls30.toLocaleString("en")} calls`} />
       </div>
 
-      <Section id="trend" title="Spend per day, last 30 days" description="Customers only (test runs left out): AI calls plus other paid APIs. Hover a day for the split.">
+      <Section id="trend" title="Spend per day, last 30 days" description="Customers only (test runs left out): AI calls plus other paid APIs. The table below has each day’s split.">
         <SpendChart days={spend.days} fx={fx} title="Customer spend per day, last 30 days" />
       </Section>
 
@@ -71,7 +71,7 @@ export default async function AdminOverview() {
 
       <footer className="max-w-prose border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
         Spend is list price from the usage ledger{fx ? `, in rupees at ₹${fx.rate.toFixed(2)} per dollar` : ""}.
-        {o.unpriced ? ` ${o.unpriced.toLocaleString("en")} AI calls from before costs were stored aren’t counted; the usage report (npm run usage -w server) prices them from their tokens.` : ""}
+        {o.unpriced ? ` ${o.unpriced.toLocaleString("en")} AI calls from before costs were stored aren’t counted.` : ""}
       </footer>
     </>
   );

@@ -28,7 +28,7 @@ export default async function AdminWorkspaceRoles({ params }: { params: Promise<
           r.permissions.length ? (
             <div key="p" className="flex max-w-xl flex-wrap gap-1">
               {r.permissions.map((p) => (
-                <span key={p} title={DESCRIPTION.get(p) ?? p} className="rounded-md border border-border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">
+                <span key={p} title={DESCRIPTION.get(p) ?? p} className="rounded-md border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                   {p}
                 </span>
               ))}
