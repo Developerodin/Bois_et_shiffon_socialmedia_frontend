@@ -37,8 +37,10 @@ export function usePeek(item: PeekItem | null) {
     const a = document.activeElement;
     // Opening another item from inside the peek keeps the first opener.
     if (a instanceof HTMLElement && a !== document.body && !ref.current?.contains(a)) {
+      // From the Recent menu the focused element is a menu item that is about to unmount: the opener is the Recent button.
+      const el = a.closest("[role=menu]") ? document.getElementById("recent-menu") : a;
       const panel = a.closest<HTMLElement>("[data-panel]")?.dataset.panel;
-      opener.current = { el: a, head: panel ? "panel-head-" + panel : null };
+      opener.current = { el: el ?? a, head: panel ? "panel-head-" + panel : null };
     }
     ref.current?.querySelector<HTMLElement>("[data-peek-title]")?.focus({ preventScroll: true });
   }, [key]);
@@ -53,7 +55,7 @@ export function usePeek(item: PeekItem | null) {
     const a = document.activeElement;
     if (!a || a === document.body || ref.current?.contains(a)) {
       const o = opener.current;
-      const back = o?.el.isConnected ? o.el : (o?.head ? document.getElementById(o.head) : null) ?? document.getElementById("layout-menu");
+      const back = o?.el.isConnected ? o.el : (o?.head ? document.getElementById(o.head) : null) ?? document.getElementById("layout-menu") ?? document.querySelector<HTMLElement>("[id^=panel-head-]");
       back?.focus();
     }
     opener.current = null;

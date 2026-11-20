@@ -49,7 +49,7 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
           onClose();
         }}
         onTransitionEnd={(e) => {
-          if (e.target === e.currentTarget && e.propertyName === "transform" && !open) onExited();
+          if (e.target === e.currentTarget && (e.propertyName === "transform" || e.propertyName === "translate") && !open) onExited();
         }}
         className={cn(
           "absolute inset-y-0 right-0 z-20 flex w-full flex-col overflow-y-auto border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(560px,100%)]",

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
@@ -665,7 +666,9 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
         </p>
       )}
       <p className="mt-3 text-xs text-muted-foreground">Edit on the phone. The frames here are what you approve.</p>
-      {zoom?.url && (
+      {/* In the body: the peek is a containing block for fixed children (its translate), which would trap the overlay at 560 px. */}
+      {zoom?.url &&
+        createPortal(
         <div role="dialog" aria-modal="true" aria-label={`Frame ${zoom.n}`} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setZoom(null)}>
           <div className="relative max-h-full" onClick={(e) => e.stopPropagation()}>
             {/* eslint-disable-next-line @next/next/no-img-element -- a signed storage link */}
@@ -674,13 +677,14 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
               <X aria-hidden /> Close
             </Button>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </section>
   );
 }
 
-export function ContentView({ base, perms, id, reelsOn, brandId }: { base: string; perms: string[]; id: string; reelsOn: boolean; brandId: string }) {
+export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { base: string; perms: string[]; id: string; reelsOn: boolean; brandId: string; onLoaded?: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   // A post outside the calendar window (an old one, opened from a link) isn't in the list: ask for it by id, once per id.
@@ -703,6 +707,10 @@ export function ContentView({ base, perms, id, reelsOn, brandId }: { base: strin
     };
   }, [missing, base, id, tries]);
   const item = listed ?? (outside?.id === id ? outside : undefined);
+  const found = !!item;
+  useEffect(() => {
+    if (found) onLoaded?.();
+  }, [found, onLoaded]);
   const [editing, setEditing] = useState(false);
   useEffect(() => setEditing(false), [id]);
   const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";
