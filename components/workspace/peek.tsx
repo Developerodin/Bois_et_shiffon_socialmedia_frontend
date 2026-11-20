@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useId, useState, type ReactNode, type RefObject } from "react";
+import { useEffect, useId, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { arrow, drag, KEY_STEP } from "@/components/workspace/resize";
+import { PEEK_WIDTH, usePeekWidth } from "@/components/workspace/use-peek";
 
 type Props = {
   /** False while sliding out: the snapshot still shows, the board behind is no longer dimmed. */
@@ -34,6 +36,7 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
     return () => cancelAnimationFrame(f);
   }, [asideRef]);
   const shown = open && entered;
+  const [width, resize] = usePeekWidth();
   return (
     <>
       <div aria-hidden="true" className={cn("pointer-events-none absolute inset-0 z-20 bg-foreground/5 transition-opacity duration-200 motion-reduce:transition-none", shown ? "opacity-100" : "opacity-0")} />
@@ -51,11 +54,38 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
         onTransitionEnd={(e) => {
           if (e.target === e.currentTarget && (e.propertyName === "transform" || e.propertyName === "translate") && !open) onExited();
         }}
+        // The width is set by style, so a drag never jumps; only the slide (transform) is transitioned.
+        style={{ "--peek-w": `${width}px` } as CSSProperties}
         className={cn(
-          "absolute inset-y-0 right-0 z-20 flex w-full flex-col overflow-y-auto border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(560px,100%)]",
+          "absolute inset-y-0 right-0 z-20 flex w-full flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(var(--peek-w),100%)]",
           shown ? "translate-x-0" : "translate-x-full",
         )}
       >
+        {/* Wide screens: drag the left edge or use the arrow keys to resize; double-click for the default width. */}
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize preview"
+          aria-valuemin={400}
+          aria-valuemax={1000}
+          aria-valuenow={width}
+          tabIndex={0}
+          onPointerDown={(e) => {
+            const start = width;
+            let last = start;
+            drag(e, "x", (px) => resize((last = start - px), false), () => resize(last));
+          }}
+          onKeyDown={(e) => {
+            const dir = arrow(e.key, "x");
+            if (!dir) return;
+            e.preventDefault();
+            resize(width - dir * Math.round(width * KEY_STEP));
+          }}
+          onDoubleClick={() => resize(PEEK_WIDTH)}
+          className="absolute inset-y-0 left-0 z-20 hidden w-3 -translate-x-1/2 cursor-col-resize outline-none after:absolute after:inset-y-4 after:left-1/2 after:w-0.5 after:-translate-x-1/2 after:rounded-full after:bg-transparent after:transition-colors after:content-[''] hover:after:bg-primary focus-visible:after:bg-primary lg:block"
+        />
+        {/* The scroller is inside the sheet, so the edge handle stays put while the content scrolls. */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-border bg-background px-5 py-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs text-muted-foreground">{crumb}</p>
@@ -78,6 +108,7 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
           </button>
         </div>
         {children}
+        </div>
       </aside>
     </>
   );
