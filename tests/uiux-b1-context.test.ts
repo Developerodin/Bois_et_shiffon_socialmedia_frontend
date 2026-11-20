@@ -7,7 +7,9 @@ const read = (p: string) => fs.readFileSync(path.join(process.cwd(), p), "utf8")
 describe("brand context copy and review-on-open", () => {
   const pane = read("components/context/doc-pane.tsx");
   it("opening a document does not confirm it", () => {
-    expect(pane).not.toContain("reviewed.current");
+    // Confirming happens only from the Mark reviewed click handler, never from an effect.
+    const calls = [...pane.matchAll(/onConfirm\(/g)].map((m) => pane.slice(Math.max(0, m.index! - 40), m.index!));
+    expect(calls.filter((c) => !/onClick=\{\(\) => void $|async function $/.test(c))).toEqual([]);
     expect(pane).not.toContain("does not change what agents use until you confirm it");
     expect(pane).toContain("Agents use it from their next run.");
   });

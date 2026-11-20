@@ -84,6 +84,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
         /* storage blocked: stay on Settings */
       }
       if (back) {
+        url.searchParams.delete("tab");
         router.replace(`${back}${url.search}`);
         return;
       }

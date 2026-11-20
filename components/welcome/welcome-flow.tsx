@@ -652,7 +652,6 @@ function ReadingRoom({
 
 const AGENT_TAG: Record<string, string> = { research: "Research", seo: "SEO", geo: "GEO" };
 
-/** The site's own favicon; its first letter when the site has none or blocks it. */
 // The 2 s clock sits outside the aria-live status so it is not re-announced on every tick.
 function ElapsedClock({ elapsed }: { elapsed: number }) {
   return (
@@ -662,6 +661,7 @@ function ElapsedClock({ elapsed }: { elapsed: number }) {
   );
 }
 
+/** The site's own favicon; its first letter when the site has none or blocks it. */
 function SiteIcon({ host, letter }: { host: string; letter: string | undefined }) {
   const [failed, setFailed] = useState(false);
   return (

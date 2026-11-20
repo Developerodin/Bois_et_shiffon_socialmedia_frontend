@@ -243,7 +243,7 @@ function ModelDialog({ model, onClose, onSaved }: { model: AiModel | null; onClo
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-1" checked={m.evalCandidate} onChange={(e) => set("evalCandidate", e.target.checked)} />
             <span>
-              Compare in tests <span className="text-muted-foreground">(include it when the models are compared against the test set)</span>
+              Compare in tests <span className="text-muted-foreground">(include in model comparisons)</span>
             </span>
           </label>
           <label className="flex flex-col gap-1.5 text-sm">

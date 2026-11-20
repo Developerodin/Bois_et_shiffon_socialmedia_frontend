@@ -12,6 +12,7 @@ import {
   type MemberStatus,
   type Role,
 } from "@/components/settings/api";
+import { undoRoleChange } from "@/components/settings/role-undo";
 import { toast } from "@/components/ui/toast";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -68,7 +69,10 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
           tone: "success",
           action: {
             label: "Undo",
-            onAction: () => void changeRole({ ...member, role: { ...member.role, id: roleId } }, member.role.id, false),
+            onAction: () => {
+              const undo = undoRoleChange(member, roleId);
+              void changeRole(undo.member, undo.roleId, false);
+            },
           },
         });
       reload();
