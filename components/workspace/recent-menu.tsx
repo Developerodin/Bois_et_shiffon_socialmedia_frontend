@@ -81,7 +81,7 @@ export function RecentMenu(p: Props) {
           <span className="sr-only sm:not-sr-only">Recent</span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72" onCloseAutoFocus={(e) => picked.current && e.preventDefault()}>
+      <DropdownMenuContent data-recent align="end" className="w-72" onCloseAutoFocus={(e) => picked.current && e.preventDefault()}>
         <DropdownMenuLabel>Recently opened</DropdownMenuLabel>
         {list.length === 0 ? (
           <p className="px-2 py-2 text-sm text-muted-foreground">Nothing opened yet.</p>

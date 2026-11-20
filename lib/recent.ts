@@ -22,6 +22,7 @@ export function viewToEntry(v: View, at: number): RecentEntry | null {
       return { kind: "agent", id: v.key, at };
     case "competitor":
       return { kind: "competitor", id: v.id, at };
+    case "panel": // Recent is items only
     case "home":
       return null;
   }
@@ -45,7 +46,7 @@ export function parseRecent(raw: unknown, now: number): RecentEntry[] {
     const { kind, id, at } = r as Record<string, unknown>;
     if (typeof kind !== "string" || typeof id !== "string" || typeof at !== "number" || !Number.isFinite(at)) continue;
     if (at > now + 60_000 || now - at > RECENT_TTL_MS) continue;
-    if (parseViewParts(kind, id).kind === "home") continue;
+    if (!["post", "doc", "agent", "competitor"].includes(kind) || parseViewParts(kind, id).kind === "home") continue; // ?peek= parses too, but panels aren't items
     if (out.some((o) => o.kind === kind && o.id === id)) continue; // a hand-edited store may repeat an item
     out.push({ kind: kind as RecentEntry["kind"], id, at });
   }

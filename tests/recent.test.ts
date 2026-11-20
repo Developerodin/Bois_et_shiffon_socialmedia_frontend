@@ -1,7 +1,7 @@
 import { safeHref } from "@/components/ui/toast";
 import { viewToSearch } from "@/lib/workspace-view";
 import { describe, expect, it } from "vitest";
-import { clearAllRecent, entryToView, isReopenKey, pushRecent, R_BLOCKED_TARGET, readRecent, recentKey, writeRecent, RECENT_MAX, type RKey, type RecentEntry } from "@/lib/recent";
+import { clearAllRecent, entryToView, parseRecent, viewToEntry, isReopenKey, pushRecent, R_BLOCKED_TARGET, readRecent, recentKey, writeRecent, RECENT_MAX, type RKey, type RecentEntry } from "@/lib/recent";
 import { timeAgo } from "@/lib/time";
 
 const NOW = 1_800_000_000_000;
@@ -131,5 +131,19 @@ describe("timeAgo with epoch ms", () => {
     expect(timeAgo(NOW - 2 * 3600_000, NOW)).toBe("2 h ago");
     expect(timeAgo(NOW - 5 * day, NOW)).toBe("5 d ago");
     expect(timeAgo(null)).toBeNull();
+  });
+});
+
+describe("viewToEntry for a panel", () => {
+  it("is not recorded", () => {
+    expect(viewToEntry({ kind: "panel", id: "feed" }, 1)).toBeNull();
+  });
+});
+
+describe("recent kinds", () => {
+  it("keeps only item kinds: a stored panel preview is dropped", () => {
+    const now = 1_800_000_000_000;
+    const out = parseRecent([{ kind: "peek", id: "feed", at: now }, { kind: "post", id: "p1", at: now }], now);
+    expect(out).toEqual([{ kind: "post", id: "p1", at: now }]);
   });
 });

@@ -32,6 +32,7 @@ export type Preset<Id extends string> = { name: string; description: string; lay
 const MIN_PX = 240;
 // Matches Tailwind's lg breakpoint. Only the layout on screen renders panels: rendering both (one hidden
 // by CSS) would mount every panel twice, double the polling, duplicate element ids and split edit state.
+// (Previewing a panel via onOpenInPeek knowingly renders that one panel twice.)
 const WIDE = "(min-width: 1024px)";
 const subscribeWide = (cb: () => void) => {
   const m = window.matchMedia(WIDE);
@@ -79,6 +80,7 @@ export function PanelLayout<Id extends string>({
   storageKey,
   focus,
   revealRef,
+  onOpenInPeek,
 }: {
   panels: PanelDef<Id>[];
   presets: Preset<Id>[];
@@ -87,6 +89,8 @@ export function PanelLayout<Id extends string>({
   focus?: { id: Id; n: number };
   /** Filled with a function that points at a panel: scrolls to it and flashes it, expanding or adding it first (saved) when it isn't showing. */
   revealRef?: { current: ((id: Id) => void) | null };
+  /** Show a panel in the side preview without changing the layout: adds a drop zone on the right edge and a menu item. */
+  onOpenInPeek?: (id: Id) => void;
 }) {
   const ids = panels.map((p) => p.id);
   const [layout, setLayout] = useState<Layout<Id>>(presets[0].layout);
@@ -95,6 +99,7 @@ export function PanelLayout<Id extends string>({
   const [dropHint, setDropHint] = useState<string | null>(null);
   const [hintSeen, setHintSeen] = useState(true);
   const dragging = useRef<Id | null>(null);
+  const [dragOn, setDragOn] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
   // A panel moved or hidden from a menu: once the new layout renders, focus follows it and the live region says where.
   const pending = useRef<{ id: Id; title: string } | null>(null);
@@ -230,7 +235,20 @@ export function PanelLayout<Id extends string>({
     setDropHint(null);
     const id = dragging.current ?? (e.dataTransfer.getData("text/panel") as Id);
     dragging.current = null;
+    // A cross-column drop remounts the dragged section, so its dragend never fires.
+    setDragOn(false);
     if (id && ids.includes(id)) move(id, target);
+  };
+  const dropInPeek = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDropHint(null);
+    const id = dragging.current ?? (e.dataTransfer.getData("text/panel") as Id);
+    dragging.current = null;
+    setDragOn(false);
+    if (!id || !ids.includes(id)) return;
+    // Focus the panel's header so the peek's close returns there (the drag leaves focus on the page).
+    document.getElementById(`panel-head-${id}`)?.focus();
+    onOpenInPeek?.(id);
   };
   const allow = (hint: string) => (e: React.DragEvent) => {
     if (!dragging.current) return;
@@ -368,7 +386,7 @@ export function PanelLayout<Id extends string>({
       </div>
 
       {/* Panels are cards on the page background: separation comes from the gaps, not hairlines. */}
-      <div ref={rowRef} className="hidden min-h-0 flex-1 py-3 pl-3 lg:flex">
+      <div ref={rowRef} className="relative hidden min-h-0 flex-1 py-3 pl-3 lg:flex">
         {layout.columns.map((col, ci) => (
           // A column whose panels are all collapsed shrinks to a header-wide strip instead of holding its share.
           <div key={col.id} className="flex min-h-0 min-w-0" style={{ flex: col.panels.every((p) => layout.collapsed.includes(p)) ? "0 0 15rem" : `${col.size} 1 0%` }}>
@@ -393,11 +411,13 @@ export function PanelLayout<Id extends string>({
                       draggable
                       onDragStart={(e) => {
                         dragging.current = id;
+                        setDragOn(true);
                         e.dataTransfer.setData("text/panel", id);
                         e.dataTransfer.effectAllowed = "move";
                       }}
                       onDragEnd={() => {
                         dragging.current = null;
+                        setDragOn(false);
                         setDropHint(null);
                       }}
                       onDragOver={(e) => {
@@ -434,7 +454,7 @@ export function PanelLayout<Id extends string>({
                               <MoreHorizontal aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" onCloseAutoFocus={(e) => {
+                          <DropdownMenuContent align="end" data-panel={id} onCloseAutoFocus={(e) => {
                               if (!suppressReturn.current) return;
                               e.preventDefault();
                               suppressReturn.current = false;
@@ -442,6 +462,7 @@ export function PanelLayout<Id extends string>({
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => shift(id, -1))}>Move left</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => shift(id, 1))}>Move right</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => move(id, "new-column"))}>Open in its own column</DropdownMenuItem>
+                            {onOpenInPeek && <DropdownMenuItem onSelect={() => { suppressReturn.current = true; onOpenInPeek(id); }}>Open in preview</DropdownMenuItem>}
                             <DropdownMenuItem onSelect={() => toggleCollapse(id)}>{collapsed ? "Expand" : "Collapse"}</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => hide(id))}>Hide panel</DropdownMenuItem>
@@ -483,6 +504,20 @@ export function PanelLayout<Id extends string>({
           className={cn("w-3 shrink-0", dropHint === "new-column" && "w-24 bg-primary/10")}
           aria-hidden="true"
         />
+        {/* While a header is dragged: drop in the top-right corner to show the panel in the side preview (layout unchanged). Only that box wins; the new-column strip below it still takes drops. */}
+        {onOpenInPeek && dragOn && (
+          <div
+            onDragOver={allow("peek")}
+            onDragLeave={() => setDropHint(null)}
+            onDrop={dropInPeek}
+            className={cn(
+              "absolute right-3 top-3 z-30 flex h-30 w-50 items-center justify-center rounded-2xl border-2 border-dashed border-primary p-2 text-center text-xs font-medium text-primary",
+              dropHint === "peek" ? "bg-primary/10" : "bg-background/80",
+            )}
+          >
+            Open in preview
+          </div>
+        )}
       </div>
     </div>
   );

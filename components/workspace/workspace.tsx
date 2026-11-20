@@ -60,7 +60,7 @@ import { nothingToDo } from "@/lib/agent-runs";
 import { cachedPost, knownName } from "@/components/workspace/known-name";
 import { recentKey, viewToEntry, writeRecent } from "@/lib/recent";
 import { useReopen } from "@/components/workspace/use-reopen";
-import { agreedToDrop, namesItem, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, type View } from "@/lib/workspace-view";
+import { agreedToDrop, namesItem, peekCrumb, peekKey, peekTitle, PANEL_IDS, viewFromSearch, viewToSearch, type PanelId, type View } from "@/lib/workspace-view";
 import { plainSummary } from "@/lib/plain-summary";
 import { isRunCancelled } from "@/components/languages/languages";
 
@@ -432,7 +432,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   let peekItem: PeekItem | null = null;
   if (view.kind !== "home") {
     const post = view.kind === "content" ? cachedPost(base, view.id) : undefined;
-    peekItem = { view, title: peekTitle(view, knownName(view, { docs, agents, base })), crumb: peekCrumb(view), fullPageHref: post?.studio && reelsOn ? reelHref(post.id, brandId) : undefined };
+    peekItem = { view, title: peekTitle(view, view.kind === "panel" ? panels.find((p) => p.id === view.id)?.title : knownName(view, { docs, agents, base })), crumb: peekCrumb(view), fullPageHref: post?.studio && reelsOn ? reelHref(post.id, brandId) : undefined };
   }
   peekNow.current = peekItem;
   const peek = usePeek(peekItem);
@@ -462,6 +462,9 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       ) : (
         peekLoading
       )
+    ) : v.kind === "panel" ? (
+      // ponytail: the panel renders on the board and here: duplicate heading ids (aria-labelledby points at the board copy), separate local state, doubled polling. Collapse it on the board if that ever matters.
+      panels.find((p) => p.id === v.id)?.render()
     ) : v.kind === "competitor" ? (
       <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
     ) : v.kind === "content" ? (
@@ -501,7 +504,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       )}
       {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={open} />, topSlot)}
       <div className="relative min-h-0 flex-1">
-        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} />
+        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} onOpenInPeek={(id) => open({ kind: "panel", id })} />
         {peek.shown && (
           <Peek open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={close} onExited={peek.onExited} asideRef={peek.ref}>
             {/* Keyed by item: a replaced item remounts fresh, never carrying one item's state into another. */}
@@ -522,9 +525,6 @@ const NONE_FAILED = { docs: false, agents: false, reports: false, connections: f
 function NotForRole({ what }: { what: string }) {
   return <p className="p-5 text-sm text-muted-foreground">Your role doesn&rsquo;t include {what}.</p>;
 }
-
-const PANEL_IDS = ["context", "home", "ideas", "content", "competitors", "analytics", "feed", "log"] as const;
-type PanelId = (typeof PANEL_IDS)[number];
 
 const PRESETS: Preset<PanelId>[] = [
   {
