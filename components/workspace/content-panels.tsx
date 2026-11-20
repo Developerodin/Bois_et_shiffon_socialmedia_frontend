@@ -604,7 +604,11 @@ function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }:
   const [entered, setEntered] = useState(false);
   useEffect(() => {
     head.current?.focus({ preventScroll: true });
-    const f = requestAnimationFrame(() => setEntered(true));
+    // Bring it into view (a bottom-row day in a short panel would otherwise open out of sight).
+    const f = requestAnimationFrame(() => {
+      setEntered(true);
+      box.current?.scrollIntoView({ block: "nearest" });
+    });
     return () => cancelAnimationFrame(f);
   }, []);
   useEffect(() => {
@@ -636,7 +640,7 @@ function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }:
       }}
       style={{ left: at.left, top: at.top, width: POPOVER_W }}
       className={cn(
-        "absolute z-20 flex max-h-80 max-w-full origin-top-left flex-col gap-1 overflow-y-auto rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-lg transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
+        "absolute z-20 flex max-h-80 max-w-full origin-top-left flex-col gap-1 overflow-y-auto rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-lg transition-[opacity,translate,scale] duration-150 ease-out motion-reduce:transition-none",
         shown ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-1 scale-[0.96] opacity-0",
       )}
     >
@@ -782,6 +786,10 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
             // Arrow keys move between days, a week up or down; the focused day becomes the grid's tab stop.
             onKeyDown={(e) => {
               const k = (e.target as HTMLElement).dataset.day;
+              if (e.key === "Escape" && pop?.open) {
+                e.preventDefault();
+                return closeDay();
+              }
               const n = k ? gridStep(keys.indexOf(k), e.key, keys.length) : null;
               if (n === null) return;
               e.preventDefault();

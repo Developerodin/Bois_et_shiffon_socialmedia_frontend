@@ -32,7 +32,8 @@ export function drag(
   e.preventDefault();
   const el = e.currentTarget;
   const start = axis === "x" ? e.clientX : e.clientY;
-  const move = (ev: PointerEvent) => onMove((axis === "x" ? ev.clientX : ev.clientY) - start);
+  // No button held any more (released outside the window while capture stayed): finish the drag.
+  const move = (ev: PointerEvent) => (ev.buttons ? onMove((axis === "x" ? ev.clientX : ev.clientY) - start) : end());
   const end = () => {
     el.removeEventListener("pointermove", move as EventListener);
     for (const t of ["pointerup", "pointercancel", "lostpointercapture"]) el.removeEventListener(t, end);
