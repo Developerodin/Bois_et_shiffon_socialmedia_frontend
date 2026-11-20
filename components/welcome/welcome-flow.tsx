@@ -176,12 +176,12 @@ function AddressStep({
               aria-describedby="website-help website-error"
               aria-invalid={!!error}
               className={cn(
-                "min-w-0 flex-1 bg-transparent font-display font-medium tracking-tight text-foreground outline-none placeholder:text-muted-foreground/50",
+                "min-w-0 flex-1 bg-transparent font-display font-medium tracking-tight text-foreground outline-none placeholder:text-muted-foreground",
                 address.length > 22 ? "text-2xl sm:text-4xl" : address.length > 14 ? "text-3xl sm:text-5xl" : "text-4xl sm:text-6xl",
               )}
             />
           </div>
-          {/* The brass baseline: hairline at rest, full brass rule while focused. */}
+          {/* The accent baseline: hairline at rest, full accent rule while focused. */}
           <div className="relative mt-3 h-0.5 bg-border">
             <div className="absolute inset-0 origin-left scale-x-0 bg-primary transition-transform duration-300 ease-out group-focus-within:scale-x-100 motion-reduce:transition-none" />
           </div>
@@ -288,7 +288,9 @@ function ReadingRoom({
   const [misses, setMisses] = useState(0);
   const [fails, setFails] = useState(0);
   const cursor = useRef<string | null>(null);
-  const logEnd = useRef<HTMLLIElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  // Follow the newest line only while the reader is already at the bottom (as agent-log does).
+  const stickToBottom = useRef(true);
 
   // The brand's research run isn't the one in the URL (an old link, or someone started another reading).
   // Two polls in a row, so one odd response doesn't stop the screen.
@@ -348,8 +350,19 @@ function ReadingRoom({
   }, [workspaceId, brandId, runId, polling]);
 
   useEffect(() => {
-    logEnd.current?.scrollIntoView({ block: "nearest" });
+    // Scrolls the list itself (moving the element into view also moved the page). One layout read per batch of lines, not per line.
+    if (!stickToBottom.current) return;
+    const id = requestAnimationFrame(() => {
+      const el = listRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    });
+    return () => cancelAnimationFrame(id);
   }, [events.length]);
+
+  function onLogScroll() {
+    const el = listRef.current;
+    if (el) stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
+  }
 
   // A doc counts for this run when its latest version is newer than the run's first log line.
   const firstOwn = events.find((e) => e.runId === runId);
@@ -413,12 +426,14 @@ function ReadingRoom({
           <SiteIcon host={siteHost} letter={host[0]} />
           <div className="min-w-0">
             <h1 className="font-display text-3xl font-medium tracking-tight break-all sm:text-4xl">{host}</h1>
-            <p aria-live="polite" className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-              {active ? <span className="status-pulse size-2 rounded-full bg-primary" aria-hidden="true" /> : null}
-              {status === "SUCCEEDED" ? <Check className="size-4 text-success" aria-hidden="true" /> : null}
-              {statusLabel({ mismatch, status, polling, unreachable: fails >= 3, started: events.length > 0 })}
-              {active ? <span className="font-mono tabular-nums">· {clock(elapsed)}</span> : null}
-            </p>
+            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+              <p aria-live="polite" className="flex items-center gap-2">
+                {active ? <span className="status-pulse size-2 rounded-full bg-primary" aria-hidden="true" /> : null}
+                {status === "SUCCEEDED" ? <Check className="size-4 text-success" aria-hidden="true" /> : null}
+                {statusLabel({ mismatch, status, polling, unreachable: fails >= 3, started: events.length > 0 })}
+              </p>
+              {active ? <ElapsedClock elapsed={elapsed} /> : null}
+            </div>
           </div>
         </div>
 
@@ -463,7 +478,11 @@ function ReadingRoom({
             Live from the agents
             {active && <span className="status-pulse size-1.5 rounded-full bg-primary" aria-hidden="true" />}
           </h2>
-          <ol className="mt-3 flex max-h-[30rem] flex-col gap-2 overflow-y-auto text-sm leading-relaxed">
+          <ol
+            ref={listRef}
+            onScroll={onLogScroll}
+            className="mt-3 flex max-h-[30rem] flex-col gap-2 overflow-y-auto text-sm leading-relaxed"
+          >
             {feed.length === 0 && (
               <li className="text-muted-foreground">
                 <span className={cn(active && "typing-cursor")}>Opening {host}</span>
@@ -490,7 +509,6 @@ function ReadingRoom({
                 </span>
               </li>
             ))}
-            <li ref={logEnd} aria-hidden="true" />
           </ol>
         </section>
 
@@ -635,6 +653,15 @@ function ReadingRoom({
 const AGENT_TAG: Record<string, string> = { research: "Research", seo: "SEO", geo: "GEO" };
 
 /** The site's own favicon; its first letter when the site has none or blocks it. */
+// The 2 s clock sits outside the aria-live status so it is not re-announced on every tick.
+function ElapsedClock({ elapsed }: { elapsed: number }) {
+  return (
+    <span aria-hidden="true" className="font-mono tabular-nums">
+      · {clock(elapsed)}
+    </span>
+  );
+}
+
 function SiteIcon({ host, letter }: { host: string; letter: string | undefined }) {
   const [failed, setFailed] = useState(false);
   return (
