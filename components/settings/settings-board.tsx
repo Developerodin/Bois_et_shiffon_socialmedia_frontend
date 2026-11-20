@@ -100,7 +100,7 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
         <div
           role="tablist"
           aria-label="Workspace settings"
-          className="flex gap-1 self-start rounded-full border border-border bg-card p-1"
+          className="flex max-w-full gap-1 self-start overflow-x-auto rounded-full border border-border bg-card p-1"
         >
           {visible.map((t, i) => {
             const selected = t.key === current.key;
@@ -118,7 +118,7 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
                 onClick={() => setActive(t.key)}
                 onKeyDown={(e) => onTabKey(e, i)}
                 className={cn(
-                  "rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   selected
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground",

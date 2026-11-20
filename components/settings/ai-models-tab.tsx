@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import { errorMessage, settingsApi, type AiModel, type AiModelSettings, type AiTierName } from "@/components/settings/api";
+import { toast } from "@/components/ui/toast";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 
@@ -98,7 +99,7 @@ export function AiModelsTab() {
       <PageSection
         id="ai-models"
         title="AI models"
-        description="Which model each tier uses, and what every model costs. This applies to all workspaces, within a minute. Test a model before moving a tier to it: npm run eval -w server -- --models <name>."
+        description="Which model each tier uses, and what every model costs. This applies to all workspaces, within a minute."
         className="flex flex-col gap-6"
       >
         {inCard ? body : null}
@@ -133,6 +134,7 @@ function TierRow({ tier, models, onSaved }: { tier: AiModelSettings["tiers"][num
     setError(null);
     try {
       onSaved(await settingsApi.saveAiTier({ tier: tier.tier, model, backup: backup || null }));
+      toast({ title: "Tier saved", detail: "All workspaces use it within a minute.", tone: "success" });
     } catch (err) {
       setError(errorMessage(err, "Couldn't save the tier."));
     } finally {
@@ -241,7 +243,7 @@ function ModelDialog({ model, onClose, onSaved }: { model: AiModel | null; onClo
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-1" checked={m.evalCandidate} onChange={(e) => set("evalCandidate", e.target.checked)} />
             <span>
-              Compare in tests <span className="text-muted-foreground">(npm run eval -- --models all)</span>
+              Compare in tests <span className="text-muted-foreground">(include it when the models are compared against the test set)</span>
             </span>
           </label>
           <label className="flex flex-col gap-1.5 text-sm">

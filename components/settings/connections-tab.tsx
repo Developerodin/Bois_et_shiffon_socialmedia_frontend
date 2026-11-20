@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CircleAlert, CircleCheck, Plug, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +15,7 @@ import {
   type Provider,
   type ProviderInfo,
 } from "@/components/settings/api";
+import { CONNECT_RETURN_KEY, connectReturnPath } from "@/lib/connect-return";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ConfirmDialog,
@@ -45,6 +47,7 @@ type Props = {
 export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Props) {
   const fetcher = useCallback(() => settingsApi.connections(workspaceId, brandId), [workspaceId, brandId]);
   const { state, reload } = useLoad(fetcher);
+  const router = useRouter();
   const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Connection | null>(null);
@@ -70,16 +73,36 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
   useEffect(() => {
     if (!notice) return;
     const url = new URL(window.location.href);
+    // The callback lands on Settings. If Connect started on the Connections page, go back there with the same result.
+    // The remembered value is removed after one read, so a refresh does not bounce again.
+    if (url.pathname === "/settings") {
+      let back: "/connections" | null = null;
+      try {
+        back = connectReturnPath(window.sessionStorage.getItem(CONNECT_RETURN_KEY));
+        window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
+      } catch {
+        /* storage blocked: stay on Settings */
+      }
+      if (back) {
+        router.replace(`${back}${url.search}`);
+        return;
+      }
+    }
     url.searchParams.delete("connected");
     url.searchParams.delete("connectError");
     window.history.replaceState(window.history.state, "", url);
-  }, [notice]);
+  }, [notice, router]);
 
   async function connect({ provider, kind }: ProviderInfo) {
     if (kind === "token") return setShopifyOpen(true);
     setBusy(provider);
     setError(null);
     try {
+      try {
+        window.sessionStorage.setItem(CONNECT_RETURN_KEY, window.location.pathname);
+      } catch {
+        /* storage blocked: the callback lands on Settings as before */
+      }
       const { url } = await settingsApi.startConnect(workspaceId, brandId, provider);
       window.location.assign(url); // full-page redirect to the provider's consent screen
     } catch (err) {
@@ -108,7 +131,10 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                   <p className="mt-0.5 text-sm text-muted-foreground">{PURPOSE[p.provider]}</p>
                 </div>
                 {!p.configured ? (
-                  <StatusBadge tone="muted">Not set up</StatusBadge>
+                  <div className="flex flex-col items-end gap-1 text-right">
+                    <StatusBadge tone="muted">Not set up</StatusBadge>
+                    <span className="text-xs text-muted-foreground">Needs app keys on the server. Ask your platform admin.</span>
+                  </div>
                 ) : canManage ? (
                   <Button
                     size="sm"
@@ -166,14 +192,6 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
 
   return (
     <div className="flex flex-col gap-5">
-      <PageSection
-        id="connections"
-        title="Connected accounts"
-        description="This brand's own channel accounts. Tokens are stored encrypted and never shown."
-        className={state.kind === "ready" ? "pb-0" : undefined}
-      >
-        {inCard ? body : null}
-      </PageSection>
       {banner && (
         <div
           role={banner.kind === "error" ? "alert" : "status"}
@@ -205,6 +223,14 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
           </button>
         </div>
       )}
+      <PageSection
+        id="connections"
+        title="Connected accounts"
+        description="This brand's own channel accounts. Tokens are stored encrypted and never shown."
+        className={state.kind === "ready" ? "pb-0" : undefined}
+      >
+        {inCard ? body : null}
+      </PageSection>
       {inCard ? null : body}
       <ConfirmDialog
         open={removing !== null}

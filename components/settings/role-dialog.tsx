@@ -152,6 +152,7 @@ export function RoleDialog({ workspaceId, role, catalog, onRetryCatalog, onClose
                       <label
                         key={p.key}
                         htmlFor={`${id}-${p.key}`}
+                        title={p.key}
                         className="flex cursor-pointer items-start gap-2.5 text-sm"
                       >
                         <input
@@ -162,10 +163,7 @@ export function RoleDialog({ workspaceId, role, catalog, onRetryCatalog, onClose
                           className="mt-0.5 size-4 shrink-0 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         />
                         <span>
-                          <span className="block font-mono text-xs text-foreground">{p.key}</span>
-                          <span className="block text-xs text-muted-foreground">
-                            {p.description}
-                          </span>
+                          <span className="block text-sm text-foreground">{p.description}</span>
                         </span>
                       </label>
                     ))}

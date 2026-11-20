@@ -12,6 +12,7 @@ import {
   type MemberStatus,
   type Role,
 } from "@/components/settings/api";
+import { toast } from "@/components/ui/toast";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ConfirmDialog,
@@ -49,14 +50,27 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
   const iAmPrimary = state.kind === "ready" && state.data.members.some((m) => m.isPrimaryOwner && m.userId === me);
   const manage = can.has("members.manage") && roles.length > 0;
 
-  async function changeRole(member: Member, roleId: string) {
+  // Undo re-sends the old role (last write wins): if someone else changed it meanwhile, Undo overwrites that too.
+  // The toast outlives this tab for up to 10 s; the call is then harmless (it only writes that role again).
+  async function changeRole(member: Member, roleId: string, offerUndo = true) {
     if (roleId === member.role.id) return;
     setPending(member.id);
     setStatus(null);
     try {
       await settingsApi.updateMember(workspaceId, member.id, roleId);
       const role = roles.find((r) => r.id === roleId);
-      setStatus({ ok: true, text: `${member.name ?? member.email} is now ${role?.name ?? "updated"}.` });
+      const who = member.name ?? member.email;
+      setStatus({ ok: true, text: `${who} is now ${role?.name ?? "updated"}.` });
+      if (offerUndo)
+        toast({
+          title: "Role changed",
+          detail: `${who} is now ${role?.name ?? "updated"}`,
+          tone: "success",
+          action: {
+            label: "Undo",
+            onAction: () => void changeRole({ ...member, role: { ...member.role, id: roleId } }, member.role.id, false),
+          },
+        });
       reload();
       onRolesChanged();
     } catch (err) {
@@ -119,7 +133,7 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading members" />;
   else if (state.kind === "forbidden")
-    body = <EmptyState icon={Users} title="You can't view members" description="Your role doesn't include members.read." />;
+    body = <EmptyState icon={Users} title="You can't view members" description="Your role can't see the member list." />;
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
   else if (state.data.members.length === 0)
     body = <EmptyState icon={Users} title="No members yet" description="Invite someone from the Invitations tab." />;
@@ -183,6 +197,12 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
 
   return (
     <div className="flex flex-col gap-5">
+      <p
+        aria-live="polite"
+        className={status?.ok ? "text-sm text-success empty:hidden" : "text-sm text-destructive empty:hidden"}
+      >
+        {status?.text}
+      </p>
       <PageSection
         id="members"
         title="Members"
@@ -191,12 +211,6 @@ export function MembersTab({ workspaceId, can, roles, onRolesChanged }: Props) {
       >
         {inCard ? body : null}
       </PageSection>
-      <p
-        aria-live="polite"
-        className={status?.ok ? "text-sm text-success empty:hidden" : "text-sm text-destructive empty:hidden"}
-      >
-        {status?.text}
-      </p>
       {inCard ? null : body}
       <ConfirmDialog
         open={handingOver !== null}
