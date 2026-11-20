@@ -93,12 +93,13 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
 
   return (
     <>
-      <div className="px-5 pt-8">
+      {/* Same 72 px band as the top bar (h-18), so the wordmark lines up with the breadcrumb. */}
+      <div className="flex h-18 shrink-0 items-center px-5">
         <Link href="/" aria-label="Bois & Chiffons, Overview" className="inline-block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <BrandLogo height={33} priority />
+          <BrandLogo height={46} priority />
         </Link>
       </div>
-      <div className="mt-6 px-5">
+      <div className="mt-3 px-5">
         <BrandSwitcher
           workspaceId={activeWorkspaceId}
           brands={brands}
