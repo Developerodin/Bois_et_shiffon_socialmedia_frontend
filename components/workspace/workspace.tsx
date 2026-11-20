@@ -463,7 +463,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         peekLoading
       )
     ) : v.kind === "panel" ? (
-      // ponytail: the panel renders on the board and here: duplicate heading ids (aria-labelledby points at the board copy), separate local state, doubled polling. Collapse it on the board if that ever matters.
+      // The board leaves this panel out while it is here (PanelLayout `previewing`), so it is mounted once.
       panels.find((p) => p.id === v.id)?.render()
     ) : v.kind === "competitor" ? (
       <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
@@ -504,7 +504,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       )}
       {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={open} />, topSlot)}
       <div className="relative min-h-0 flex-1">
-        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} onOpenInPeek={(id) => open({ kind: "panel", id })} />
+        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} onOpenInPeek={(id) => open({ kind: "panel", id })} previewing={view.kind === "panel" ? view.id : null} />
         {peek.shown && (
           <Peek open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={close} onExited={peek.onExited} asideRef={peek.ref}>
             {/* Keyed by item: a replaced item remounts fresh, never carrying one item's state into another. */}

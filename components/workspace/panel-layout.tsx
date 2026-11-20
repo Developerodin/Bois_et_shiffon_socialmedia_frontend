@@ -32,7 +32,7 @@ export type Preset<Id extends string> = { name: string; description: string; lay
 const MIN_PX = 240;
 // Matches Tailwind's lg breakpoint. Only the layout on screen renders panels: rendering both (one hidden
 // by CSS) would mount every panel twice, double the polling, duplicate element ids and split edit state.
-// (Previewing a panel via onOpenInPeek knowingly renders that one panel twice.)
+// A panel shown in the side preview (`previewing`) is left out of the board while it's there, so it isn't mounted twice.
 const WIDE = "(min-width: 1024px)";
 const subscribeWide = (cb: () => void) => {
   const m = window.matchMedia(WIDE);
@@ -81,6 +81,7 @@ export function PanelLayout<Id extends string>({
   focus,
   revealRef,
   onOpenInPeek,
+  previewing,
 }: {
   panels: PanelDef<Id>[];
   presets: Preset<Id>[];
@@ -91,6 +92,8 @@ export function PanelLayout<Id extends string>({
   revealRef?: { current: ((id: Id) => void) | null };
   /** Show a panel in the side preview without changing the layout: adds a drop zone on the right edge and a menu item. */
   onOpenInPeek?: (id: Id) => void;
+  /** The panel open in the side preview: not rendered on the board meanwhile (the saved layout is untouched). */
+  previewing?: Id | null;
 }) {
   const ids = panels.map((p) => p.id);
   const [layout, setLayout] = useState<Layout<Id>>(presets[0].layout);
@@ -389,14 +392,15 @@ export function PanelLayout<Id extends string>({
       <div ref={rowRef} className="relative hidden min-h-0 flex-1 py-3 pl-3 lg:flex">
         {layout.columns.map((col, ci) => (
           // A column whose panels are all collapsed shrinks to a header-wide strip instead of holding its share.
-          <div key={col.id} className="flex min-h-0 min-w-0" style={{ flex: col.panels.every((p) => layout.collapsed.includes(p)) ? "0 0 15rem" : `${col.size} 1 0%` }}>
+          // ponytail: a column left empty by the preview is hidden; the separator before it can show at the edge.
+          <div key={col.id} className={cn("flex min-h-0 min-w-0", col.panels.every((p) => p === previewing) && "hidden")} style={{ flex: col.panels.every((p) => layout.collapsed.includes(p)) ? "0 0 15rem" : `${col.size} 1 0%` }}>
             <div
               className={cn("flex min-h-0 min-w-0 flex-1 flex-col gap-3 rounded-2xl", dropHint === `col-${ci}` && "bg-primary/5")}
               onDragOver={allow(`col-${ci}`)}
               onDragLeave={() => setDropHint(null)}
               onDrop={onDrop({ column: ci })}
             >
-              {col.panels.map((id) => {
+              {col.panels.filter((id) => id !== previewing).map((id) => {
                 const p = def(id);
                 const collapsed = layout.collapsed.includes(id);
                 const hint = `before-${id}`;
