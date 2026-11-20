@@ -129,12 +129,17 @@ export function namesItem(search: string): boolean {
 }
 
 /**
- * The Overview's URL without its open item, or null when there's nothing to drop (no item, or not the Overview). A brand
- * switch uses it: the item belongs to the old brand, and the new brand's Overview must not open it.
+ * The Overview's URL without what belongs to the old brand (the open item, and the calendar's campaign filter), or null
+ * when there's nothing to drop (or not the Overview). A brand switch uses it: the new brand's Overview must not open
+ * that item or filter by a campaign it doesn't have. The other cf_ filters stay.
  */
 export function withoutOpenItem(search: string, pathname: string): string | null {
-  if (pathname !== "/" || !namesItem(search)) return null;
-  return viewToSearch({ kind: "home" }, search, pathname);
+  if (pathname !== "/") return null;
+  const q = new URLSearchParams(search);
+  const hadCampaign = q.has("cf_campaignId");
+  q.delete("cf_campaignId");
+  if (!namesItem(search) && !hadCampaign) return null;
+  return viewToSearch({ kind: "home" }, q.toString(), pathname);
 }
 
 // The URL dropOpenItem just wrote. The Overview reads it once, on the URL change that write causes, and doesn't ask

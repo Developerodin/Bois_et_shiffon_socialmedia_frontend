@@ -91,6 +91,10 @@ describe("brand switch", () => {
     expect(withoutOpenItem("?post=p1&panel=content", "/")).toBe("?panel=content");
     expect(withoutOpenItem("?agent=seo&runId=r1", "/")).toBe("/");
   });
+  it("drops the old brand's campaign filter, open item or not, and keeps other filters", () => {
+    expect(withoutOpenItem("?cf_campaignId=c1&cf_status=draft", "/")).toBe("?cf_status=draft");
+    expect(withoutOpenItem("?post=p1&cf_campaignId=c1", "/")).toBe("/");
+  });
   it("leaves the URL alone when nothing is open or the page isn't the Overview", () => {
     expect(withoutOpenItem("?panel=content", "/")).toBeNull();
     expect(withoutOpenItem("", "/")).toBeNull();
