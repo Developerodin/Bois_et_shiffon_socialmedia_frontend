@@ -610,7 +610,19 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
 export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: string; id: string; onBack: () => void; reelsOn: boolean; brandId: string }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
-  const item = data?.find((i) => i.id === id);
+  // A post outside the calendar window (an old one, opened from a link) isn't in the list: ask for it by id, once per id.
+  const [outside, setOutside] = useState<ContentItem | null>(null);
+  const listed = data?.find((i) => i.id === id);
+  const missing = !!data && !listed;
+  useEffect(() => {
+    if (!missing) return;
+    let live = true;
+    request<{ items: ContentItem[] }>(`${base}/content?id=${encodeURIComponent(id)}`).then((r) => live && setOutside(r.items[0] ?? null), () => {});
+    return () => {
+      live = false;
+    };
+  }, [missing, base, id]);
+  const item = listed ?? (outside?.id === id ? outside : undefined);
   const [editing, setEditing] = useState(false);
   const perms = usePerms(base);
   useEffect(() => setEditing(false), [id]);
