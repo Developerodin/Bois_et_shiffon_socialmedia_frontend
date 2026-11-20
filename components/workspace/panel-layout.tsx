@@ -415,8 +415,11 @@ export function PanelLayout<Id extends string>({
               key={id}
               type="button"
               onClick={() => setMobilePanel(id)}
-              aria-current={activeMobile === id ? "page" : undefined}
-              className={cn("flex min-w-20 flex-1 flex-col items-center gap-0.5 px-2 py-2 text-xs", activeMobile === id ? "text-foreground" : "text-muted-foreground")}
+              aria-pressed={activeMobile === id}
+              className={cn(
+                "flex min-w-20 flex-1 flex-col items-center gap-0.5 border-t-2 px-2 py-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                activeMobile === id ? "border-primary font-medium text-primary-strong" : "border-transparent text-muted-foreground",
+              )}
             >
               {def(id).icon}
               {def(id).title}
@@ -468,18 +471,6 @@ export function PanelLayout<Id extends string>({
                     style={collapsed ? undefined : { flex: `${weight(id)} 1 0%` }}
                   >
                     <header
-                      draggable
-                      onDragStart={(e) => {
-                        dragging.current = id;
-                        setDragOn(true);
-                        e.dataTransfer.setData("text/panel", id);
-                        e.dataTransfer.effectAllowed = "move";
-                      }}
-                      onDragEnd={() => {
-                        dragging.current = null;
-                        setDragOn(false);
-                        setDropHint(null);
-                      }}
                       onDragOver={(e) => {
                         allow(hint)(e);
                         e.stopPropagation();
@@ -489,28 +480,47 @@ export function PanelLayout<Id extends string>({
                         onDrop({ column: ci, before: id })(e);
                       }}
                       className={cn(
-                        "group flex h-11 shrink-0 cursor-grab items-center gap-2 px-3 active:cursor-grabbing",
+                        "group flex h-11 shrink-0 items-center gap-2 px-3",
                         !collapsed && "border-b border-border",
                         dropHint === hint && "shadow-[inset_0_2px_0_0_var(--primary)]",
                       )}
                     >
-                      <GripVertical className="size-4 text-muted-foreground/50 group-hover:text-muted-foreground" aria-hidden="true" />
-                      <button
-                        type="button"
-                        id={`panel-head-${id}`}
-                        onClick={() => toggleCollapse(id)}
-                        aria-expanded={!collapsed}
-                        className="flex min-w-0 items-center gap-1.5 rounded py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      {/* Only the grip and title start a drag: the buttons beside them must stay clickable. */}
+                      <div
+                        draggable
+                        onDragStart={(e) => {
+                          dragging.current = id;
+                          setDragOn(true);
+                          e.dataTransfer.setData("text/panel", id);
+                          e.dataTransfer.effectAllowed = "move";
+                        }}
+                        onDragEnd={() => {
+                          dragging.current = null;
+                          setDragOn(false);
+                          setDropHint(null);
+                        }}
+                        className="flex min-w-0 cursor-grab items-center gap-2 active:cursor-grabbing"
                       >
-                        {collapsed ? <ChevronRight className="size-3.5" aria-hidden="true" /> : <ChevronDown className="size-3.5" aria-hidden="true" />}
-                        <span className="text-muted-foreground [&_svg]:size-4">{p.icon}</span>
-                        <span className="truncate">{p.title}</span>
-                      </button>
-                      <div className="ml-auto flex items-center gap-0.5">
+                        <GripVertical className="size-4 shrink-0 text-muted-foreground/50 group-hover:text-muted-foreground" aria-hidden="true" />
+                        <h2 className="min-w-0">
+                          <button
+                            type="button"
+                            id={`panel-head-${id}`}
+                            onClick={() => toggleCollapse(id)}
+                            aria-expanded={!collapsed}
+                            className="flex min-w-0 items-center gap-1.5 rounded py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            {collapsed ? <ChevronRight className="size-3.5" aria-hidden="true" /> : <ChevronDown className="size-3.5" aria-hidden="true" />}
+                            <span className="text-muted-foreground [&_svg]:size-4">{p.icon}</span>
+                            <span className="truncate">{p.title}</span>
+                          </button>
+                        </h2>
+                      </div>
+                      <div className="ml-auto flex items-center gap-1.5">
                         {p.actions}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-7" aria-label={`${p.title} panel options`}>
+                            <Button variant="ghost" size="icon" className="size-8" aria-label={`${p.title} panel options`}>
                               <MoreHorizontal aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -529,7 +539,7 @@ export function PanelLayout<Id extends string>({
                           </DropdownMenuContent>
                         </DropdownMenu>
                         {/* Same as Hide panel: it comes back from Layout. */}
-                        <Button variant="ghost" size="icon" className="size-7" aria-label={`Close ${p.title} panel`} title="Close panel" onClick={() => announce(id, () => close(id))}>
+                        <Button variant="ghost" size="icon" className="size-8" aria-label={`Close ${p.title} panel`} title="Close panel" onClick={() => announce(id, () => close(id))}>
                           <X aria-hidden="true" />
                         </Button>
                       </div>
