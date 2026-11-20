@@ -463,8 +463,9 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         peekLoading
       )
     ) : v.kind === "panel" ? (
-      // The board leaves this panel out while it is here (PanelLayout `previewing`), so it is mounted once.
-      panels.find((p) => p.id === v.id)?.render()
+      // The board leaves this panel out while it is here (PanelLayout `previewing`), so it is mounted once. While the
+      // peek slides out the panel is back on the board, so the sliding copy is left empty.
+      live ? panels.find((p) => p.id === v.id)?.render() : null
     ) : v.kind === "competitor" ? (
       <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
     ) : v.kind === "content" ? (

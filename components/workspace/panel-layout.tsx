@@ -168,9 +168,12 @@ export function PanelLayout<Id extends string>({
   };
 
   const columnOf = (id: Id) => layout.columns.findIndex((c) => c.panels.includes(id));
+  // A column holding only the panel open in the side preview isn't on screen: moves and dividers skip it.
+  const offScreen = (c: { panels: Id[] }) => c.panels.every((p) => p === previewing);
   const shift = (id: Id, dir: -1 | 1) => {
     const from = columnOf(id);
-    const to = from + dir;
+    let to = from + dir;
+    while (to >= 0 && to < layout.columns.length && offScreen(layout.columns[to])) to += dir;
     if (to < 0) return commit({ ...remove(layout, id), columns: [{ id: colId(), size: 1, panels: [id] }, ...remove(layout, id).columns] });
     if (to >= layout.columns.length) return move(id, "new-column");
     move(id, { column: to });
@@ -283,11 +286,16 @@ export function PanelLayout<Id extends string>({
     revealAfter.current = null;
     scrollAndFlash(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout]);
+  }, [layout, previewing]);
 
   if (revealRef)
     revealRef.current = (id: Id) => {
       if (!window.matchMedia(WIDE).matches) return setMobilePanel(id);
+      // The panel is in the preview, which the caller is closing: it is back on the board after the next render.
+      if (id === previewing) {
+        revealAfter.current = id;
+        return;
+      }
       // A button that points at a panel opens it: a collapsed one is expanded, a missing one is added (and saved).
       if (revealPlan(layoutRef.current, id) === "scroll") return scrollAndFlash(id);
       revealAfter.current = id;
@@ -371,7 +379,7 @@ export function PanelLayout<Id extends string>({
 
       {/* Phones and small tablets: one panel at a time with tabs (Okara pattern). */}
       <div className="flex min-h-0 flex-1 flex-col lg:hidden">
-        <div className="min-h-0 flex-1 overflow-y-auto">{!wide && activeMobile && def(activeMobile).render()}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto">{!wide && activeMobile && activeMobile !== previewing && def(activeMobile).render()}</div>
         <nav aria-label="Panels" className="flex shrink-0 overflow-x-auto border-t border-border">
           {ids.map((id) => (
             <button
@@ -392,8 +400,9 @@ export function PanelLayout<Id extends string>({
       <div ref={rowRef} className="relative hidden min-h-0 flex-1 py-3 pl-3 lg:flex">
         {layout.columns.map((col, ci) => (
           // A column whose panels are all collapsed shrinks to a header-wide strip instead of holding its share.
-          // ponytail: a column left empty by the preview is hidden; the separator before it can show at the edge.
-          <div key={col.id} className={cn("flex min-h-0 min-w-0", col.panels.every((p) => p === previewing) && "hidden")} style={{ flex: col.panels.every((p) => layout.collapsed.includes(p)) ? "0 0 15rem" : `${col.size} 1 0%` }}>
+          // A column left empty by the preview is hidden, with the divider before it (its neighbours can't be resized
+          // against each other until the preview closes).
+          <div key={col.id} className={cn("flex min-h-0 min-w-0", offScreen(col) && "hidden")} style={{ flex: col.panels.filter((p) => p !== previewing).every((p) => layout.collapsed.includes(p)) ? "0 0 15rem" : `${col.size} 1 0%` }}>
             <div
               className={cn("flex min-h-0 min-w-0 flex-1 flex-col gap-3 rounded-2xl", dropHint === `col-${ci}` && "bg-primary/5")}
               onDragOver={allow(`col-${ci}`)}
@@ -483,7 +492,7 @@ export function PanelLayout<Id extends string>({
                 );
               })}
             </div>
-            {ci < layout.columns.length - 1 && (
+            {ci < layout.columns.length - 1 && !offScreen(layout.columns[ci + 1]) && (
               <div
                 role="separator"
                 aria-orientation="vertical"
