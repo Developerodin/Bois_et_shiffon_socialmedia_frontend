@@ -31,3 +31,9 @@ export const PERMISSIONS = [
 ] as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[number][0];
+
+/**
+ * Reading a business's connected accounts: people who answer customers, publish (they pick the account) or manage
+ * the accounts. Any one of these is enough; a client reviewer holds none.
+ */
+export const CONNECTIONS_READ = ["inbox.read", "publish.execute", "integrations.manage"] as const satisfies readonly PermissionKey[];

@@ -12,16 +12,18 @@ import { MembersTab } from "@/components/settings/members-tab";
 import { ProjectAccessTab } from "@/components/settings/project-access-tab";
 import { RolesTab } from "@/components/settings/roles-tab";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
+import { CONNECTIONS_READ } from "@/shared";
 import { cn } from "@/lib/utils";
 
 type TabKey = "project" | "members" | "roles" | "invitations" | "connections" | "languages";
 
-const TABS: { key: TabKey; label: string; needs: string }[] = [
+/** `needs`: one key, or any one of several. */
+const TABS: { key: TabKey; label: string; needs: string | readonly string[] }[] = [
   { key: "project", label: "Project access", needs: "brand.read" },
   { key: "members", label: "Members", needs: "members.read" },
   { key: "roles", label: "Roles", needs: "roles.read" },
   { key: "invitations", label: "Invitations", needs: "invitations.manage" },
-  { key: "connections", label: "Connections", needs: "inbox.read" },
+  { key: "connections", label: "Connections", needs: CONNECTIONS_READ },
   { key: "languages", label: "Languages", needs: "brand.read" },
 ];
 
@@ -53,7 +55,7 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
 
   // Project access, Connections and Languages are per brand, so they only show with a brand selected.
   const visible = can
-    ? TABS.filter((t) => can.has(t.needs) && ((t.key !== "connections" && t.key !== "project" && t.key !== "languages") || brandId))
+    ? TABS.filter((t) => (typeof t.needs === "string" ? can.has(t.needs) : t.needs.some((k) => can.has(k))) && ((t.key !== "connections" && t.key !== "project" && t.key !== "languages") || brandId))
     : [];
   const [active, setActiveState] = useState<TabKey | null>(TABS.find((t) => t.key === initialTab)?.key ?? null);
   // The tab lives in the URL (replace, not push) so a reload or a shared link lands on the same one.

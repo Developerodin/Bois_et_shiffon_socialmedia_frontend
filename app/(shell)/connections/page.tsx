@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
 import { PageHeader } from "@/components/ui/page-header";
 import { navFor } from "@/lib/nav";
+import { CONNECTIONS_READ } from "@/shared";
 
 export const metadata = { title: navFor("/connections").title };
 
@@ -34,8 +35,8 @@ export default async function ConnectionsPage({
   }
 
   const perms = new Set(shell.brandPermissions);
-  // The accounts list needs inbox.read (the people who answer customers): a client reviewer doesn't see it.
-  if (!perms.has("inbox.read")) {
+  // The accounts list is for people who answer customers, publish or manage accounts: a client reviewer doesn't see it.
+  if (!CONNECTIONS_READ.some((k) => perms.has(k))) {
     return (
       <div className="mx-auto max-w-5xl">
         <EmptyState

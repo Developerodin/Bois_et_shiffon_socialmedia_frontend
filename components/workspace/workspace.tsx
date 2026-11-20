@@ -45,7 +45,7 @@ import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
-import { safeHttpUrl, STATUS_GROUPS } from "@/shared";
+import { CONNECTIONS_READ, safeHttpUrl, STATUS_GROUPS } from "@/shared";
 import { filterFromSearch, filterToSearch, isBlocked, isOverdue, isThisWeek, withFilter, type CalendarFilter } from "@/lib/calendar-filter";
 import { timeAgo } from "@/lib/time";
 import { plainSummary } from "@/lib/plain-summary";
@@ -208,7 +208,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   // so nothing it can't read shows as failed; those sections are left out.
   const canAgents = !!perms?.includes("agents.read");
   const canReports = !!perms?.includes("analytics.read");
-  const canAccounts = !!perms?.includes("inbox.read");
+  const canAccounts = CONNECTIONS_READ.some((k) => perms?.includes(k));
   // A failed load keeps what was already shown; a block shows its error only while it has nothing to show.
   const loadReports = useCallback(
     async () => {
@@ -574,7 +574,7 @@ function ContextPane({
 }: {
   base: string;
   onOpenResearch: () => void;
-  /** The sections this role can read: documents (agents.read), competitors (analytics.read), accounts (inbox.read). */
+  /** The sections this role can read: documents (agents.read), competitors (analytics.read), accounts (CONNECTIONS_READ). */
   show: { docs: boolean; competitors: boolean; accounts: boolean };
   /** Editing the brand needs context.edit; re-reading the site starts an agent run (agents.run). */
   canEdit: boolean;

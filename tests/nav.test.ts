@@ -78,6 +78,12 @@ describe("sidebarGroups", () => {
     expect(g.map((x) => x.id)).toEqual(["main"]);
     expect(ids(g[0])).toEqual(["overview", "context", "products"]);
     expect(ids(sidebarGroups(["inbox"], ["brand.read", "inbox.read"])[1])).toEqual(["inbox"]);
+    // Publishers pick their account and account managers manage them: either one sees Connections, not the Inbox.
+    for (const key of ["publish.execute", "integrations.manage"]) {
+      const g = sidebarGroups(["inbox"], ["brand.read", key]);
+      expect(ids(g[0])).toContain("connections");
+      expect(g.map((x) => x.id)).toEqual(["main"]);
+    }
   });
 
   it("gates Studio on stories", () => {
