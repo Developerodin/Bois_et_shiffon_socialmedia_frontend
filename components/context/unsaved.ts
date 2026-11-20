@@ -43,16 +43,20 @@ function syncGuards() {
   document[act]("click", onLink as EventListener, true);
 }
 
+/** Marks `owner` dirty and attaches the shared guards; returns what the hook runs on unmount. */
+export function registerUnsaved(owner: symbol) {
+  setUnsaved(owner, true);
+  syncGuards();
+  return () => {
+    setUnsaved(owner, false);
+    syncGuards();
+  };
+}
+
 /** Registers this editor's unsaved state (own owner, cleared on unmount) and guards the tab and in-app links. */
 export function useUnsavedGuard(isDirty: boolean) {
-  useEffect(() => {
-    if (!isDirty) return;
-    const owner = Symbol("unsaved");
-    setUnsaved(owner, true);
-    syncGuards();
-    return () => {
-      setUnsaved(owner, false);
-      syncGuards();
-    };
-  }, [isDirty]);
+  useEffect(() => (isDirty ? registerUnsaved(Symbol("unsaved")) : undefined), [isDirty]);
 }
+
+/** Whether the shared tab and link guards are attached (for tests). */
+export const guardsAttached = () => attached;

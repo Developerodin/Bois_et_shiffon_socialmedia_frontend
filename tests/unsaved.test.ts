@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { okToDiscard, setUnsaved } from "@/components/context/unsaved";
+import { guardsAttached, okToDiscard, registerUnsaved, setUnsaved } from "@/components/context/unsaved";
 
 const confirm = vi.fn(() => false);
-vi.stubGlobal("window", { confirm });
+const listeners = { add: vi.fn(), remove: vi.fn() };
+vi.stubGlobal("window", { confirm, addEventListener: listeners.add, removeEventListener: listeners.remove });
+vi.stubGlobal("document", { addEventListener: listeners.add, removeEventListener: listeners.remove });
 
 const a = Symbol("caption");
 const b = Symbol("release");
@@ -41,5 +43,28 @@ describe("unsaved changes, per editor", () => {
     confirm.mockReturnValueOnce(true);
     setUnsaved(a, true);
     expect(okToDiscard()).toBe(true);
+  });
+
+  it("unmounting one editor leaves the other's warning and the guards in place", () => {
+    const offA = registerUnsaved(a);
+    const offB = registerUnsaved(b);
+    expect(guardsAttached()).toBe(true);
+    offA();
+    expect(guardsAttached()).toBe(true);
+    expect(okToDiscard()).toBe(false);
+    offB();
+    expect(guardsAttached()).toBe(false);
+    expect(okToDiscard()).toBe(true);
+  });
+
+  it("attaches the guards once for two editors and removes them once", () => {
+    listeners.add.mockClear();
+    listeners.remove.mockClear();
+    const offA = registerUnsaved(a);
+    const offB = registerUnsaved(b);
+    expect(listeners.add).toHaveBeenCalledTimes(2); // beforeunload + click, once each
+    offA();
+    offB();
+    expect(listeners.remove).toHaveBeenCalledTimes(2);
   });
 });

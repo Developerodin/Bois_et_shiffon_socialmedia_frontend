@@ -358,7 +358,7 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
   const allHttps = imageLinks.every((l) => safeHttpUrl(l)?.protocol === "https:");
   const video = safeHttpUrl(videoUrl.trim());
   // Typed links, a chosen time or an upload in progress are lost on leaving (uploaded files wait for Publish).
-  useUnsavedGuard(uploading || uploads.length > 0 || imageUrl !== "" || videoUrl !== "" || runAt !== "");
+  useUnsavedGuard(uploading || uploads.length > 0 || imageUrl !== "" || videoUrl !== "" || (later && runAt !== ""));
 
   useEffect(() => {
     if (boards?.length && !boards.some((b) => b.id === boardId)) setBoardId(boards[0].id);
