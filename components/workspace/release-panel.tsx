@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { publishCalls } from "@/components/workspace/release";
-import { CLIENT_TAG } from "@/lib/net";
+import { downloadFile } from "@/lib/download";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -533,27 +533,7 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
  * An approved story posted by a person: when it is due (Today shows it from then on), the frames as one zip, then
  * "I posted it" with the story's link if they have it.
  */
-// Fetched first (not a plain link) so a refusal shows its message here instead of downloading as a file.
-// ponytail: the whole zip sits in memory as a blob; five long clips make a few hundred MB.
-async function downloadStoryFrames(base: string, id: string) {
-  const res = await fetch(`${base}/stories/${encodeURIComponent(id)}/package?format=zip`, {
-    cache: "no-store",
-    headers: { "X-Client": CLIENT_TAG },
-  });
-  if (!res.ok) {
-    const p = (await res.json().catch(() => null)) as { detail?: string; title?: string } | null;
-    throw new ApiError(res.status, p?.detail || p?.title || "The download didn’t start. Try again.");
-  }
-  const blob = await res.blob().catch(() => {
-    throw new ApiError(0, "The download stopped partway. Try again.");
-  });
-  const href = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = href;
-  a.download = `story-${id}.zip`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(href), 60_000);
-}
+const downloadStoryFrames = (base: string, id: string) => downloadFile(`${base}/stories/${encodeURIComponent(id)}/package?format=zip`, `story-${id}.zip`);
 
 /** An approved story's frames as a zip, for someone who can download but not publish (content.download, e.g. a client reviewer). */
 function DownloadFrames({ base, id }: { base: string; id: string }) {

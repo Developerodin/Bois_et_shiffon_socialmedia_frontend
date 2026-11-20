@@ -7,6 +7,7 @@ import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { ChecksList } from "@/components/ui/checks-list";
 import { reelHref } from "@/components/reels/href";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
@@ -362,6 +363,7 @@ const NEED_LABEL = { overdue: "Overdue", blocked: "Blocked", week: "Next 7 days"
 export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner }: { base: string; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
+  const canExport = !!usePerms(base)?.includes("content.download");
   // Campaign names for the filter, read once (the calendar's poll doesn't carry them); without them the filter just isn't offered.
   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
   useEffect(() => {
@@ -415,7 +417,10 @@ export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner 
         <option value="">Needs action: any</option>
         {(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => <option key={n} value={n}>{NEED_LABEL[n]}</option>)}
       </select>
-      <span className="ml-auto">{newPost}</span>
+      <span className="ml-auto flex items-center gap-2">
+        {canExport && <ExportCsvButton url={`${base}/content/export`} filename={`calendar-${new Date().toLocaleDateString("en-CA")}.csv`} />}
+        {newPost}
+      </span>
     </div>
   );
   if (!shown.length) {

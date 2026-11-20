@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Gauge, Sparkles } from "lucide-react";
+import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { fetchAgents } from "@/components/agents/api";
 import { request } from "@/components/settings/api";
@@ -75,14 +76,21 @@ export function Findings({ findings }: { findings: Finding[] }) {
   );
 }
 
-function Panel({ id, title, report, agent, children }: { id: string; title: string; report: Report | null; agent: string; children?: React.ReactNode }) {
+function Panel({ id, title, report, agent, exportUrl, children }: { id: string; exportUrl: string; title: string; report: Report | null; agent: string; children?: React.ReactNode }) {
   return (
     <PageSection
       id={id}
       title={title}
       className="flex flex-col gap-5"
       description={report ? `Last run ${formatDate(report.createdAt)}` : undefined}
-      actions={report ? <Score label="out of 100" value={report.score} big /> : undefined}
+      actions={
+        report ? (
+          <div className="flex items-center gap-4">
+            <ExportCsvButton url={exportUrl} filename={`${id}-findings-${new Date().toLocaleDateString("en-CA")}.csv`} />
+            <Score label="out of 100" value={report.score} big />
+          </div>
+        ) : undefined
+      }
     >
       {report ? (
         <>
@@ -100,10 +108,8 @@ function Panel({ id, title, report, agent, children }: { id: string; title: stri
 }
 
 export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
-  const fetcher = useCallback(
-    () => request<{ seo: Report | null; geo: Report | null }>(`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}/audit-reports`),
-    [workspaceId, brandId],
-  );
+  const reportsUrl = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}/audit-reports`;
+  const fetcher = useCallback(() => request<{ seo: Report | null; geo: Report | null }>(reportsUrl), [reportsUrl]);
   const { state, reload } = useLoad(fetcher);
 
   // A finished SEO or GEO run means a new report: watch the two agents' latest runs and reload when one changes.
@@ -140,7 +146,7 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
     const competitors = (geo?.metrics.competitors ?? []) as { name: string; mentions: number }[];
     body = (
       <div className="grid gap-6 xl:grid-cols-2">
-        <Panel id="seo" title="SEO health" report={seo} agent="SEO">
+        <Panel id="seo" title="SEO health" report={seo} agent="SEO" exportUrl={`${reportsUrl}/export?kind=SEO`}>
           {ps && (
             <div className="flex flex-wrap gap-8 rounded-xl bg-muted/40 px-5 py-4">
               <Score label="Performance (mobile)" value={ps.performance} />
@@ -150,7 +156,7 @@ export function AuditBoard({ workspaceId, brandId }: { workspaceId: string; bran
             </div>
           )}
         </Panel>
-        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO">
+        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO" exportUrl={`${reportsUrl}/export?kind=GEO`}>
           {geo && (
             <div className="flex flex-col gap-4 rounded-xl bg-muted/40 px-5 py-4">
               <div className="flex flex-wrap gap-8">
