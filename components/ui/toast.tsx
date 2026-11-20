@@ -19,9 +19,16 @@ const emit = () => listeners.forEach((l) => l());
 
 /** Show a toast (the newest three stay). Title, detail are plain text. */
 export function toast(t: ToastInput) {
-  toasts = [...toasts, { ...t, id: nextId++ }].slice(-MAX);
+  const id = nextId++;
+  toasts = [...toasts, { ...t, id }].slice(-MAX);
   emit();
+  return id;
 }
+/** Remove one toast by the id `toast` returned (no-op if it is already gone). */
+export const dismissToast = (id: number) => {
+  toasts = toasts.filter((t) => t.id !== id);
+  emit();
+};
 /** Remove every toast (the watcher does this when it goes: its toasts belong to the brand it watched). */
 export function clearToasts() {
   if (toasts.length === 0) return;

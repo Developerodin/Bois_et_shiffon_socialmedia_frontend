@@ -11,7 +11,8 @@ import { CLIENT_TAG, isOffline, NET_MESSAGE, send } from "@/lib/net";
 import { Markdown } from "@/components/context/markdown";
 import { Button } from "@/components/ui/button";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
-import { toast } from "@/components/ui/toast";
+import { dismissToast, toast } from "@/components/ui/toast";
+import { restoreThread } from "@/lib/chat-undo";
 import { cn } from "@/lib/utils";
 import { isRunCancelled } from "@/components/languages/languages";
 
@@ -100,6 +101,10 @@ export function ChatPane({ header, empty, ...props }: Props & ChatSlots) {
     };
   }, [base]);
 
+  // The Undo toast of this pane: it goes with the pane, since its action would act on a chat that is gone.
+  const undoToast = useRef<number | null>(null);
+  useEffect(() => () => { if (undoToast.current !== null) dismissToast(undoToast.current); }, []);
+
   const initial = loaded?.base === base ? loaded.thread : null;
   if (!initial) {
     return (
@@ -118,12 +123,14 @@ export function ChatPane({ header, empty, ...props }: Props & ChatSlots) {
       {...props}
       api={base}
       initial={initial}
-      onNew={() => {
+      onNew={(live) => {
         // Ceiling: Undo lasts 8 s and only swaps what this component shows. If a message was already sent in the new
         // thread, Undo shows the old thread but the server's latest is the new one (a reload shows the new one).
-        const prev = loaded;
+        // `live` is the old thread as it stands now (messages sent since it loaded included).
+        const prev = { base, thread: { ...initial, messages: live } };
         setLoaded({ base, thread: { id: crypto.randomUUID(), messages: [] } });
-        toast({ title: "New conversation", tone: "success", ms: 8000, action: { label: "Undo", onAction: () => setLoaded(prev) } });
+        if (undoToast.current !== null) dismissToast(undoToast.current);
+        undoToast.current = toast({ title: "New conversation", tone: "success", ms: 8000, action: { label: "Undo", onAction: () => setLoaded((cur) => restoreThread(cur, prev)) } });
       }}
       slots={{ header, empty }}
     />
@@ -186,7 +193,7 @@ function ChatSession({
 }: Props & {
   api: string;
   initial: Thread;
-  onNew: () => void;
+  onNew: (messages: UIMessage[]) => void;
   slots: ChatSlots;
 }) {
   const [input, setInput] = useState("");
@@ -239,7 +246,7 @@ function ChatSession({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {slots.header({ busy, empty: messages.length === 0, onNew })}
+      {slots.header({ busy, empty: messages.length === 0, onNew: () => onNew(messages) })}
 
       <div
         className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 py-4"
