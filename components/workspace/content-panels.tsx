@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
-import { errorMessage, request } from "@/components/settings/api";
+import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
@@ -611,17 +611,24 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   // A post outside the calendar window (an old one, opened from a link) isn't in the list: ask for it by id, once per id.
+  // lookup: loading until answered; "done" with no post is a 404, "failed" shows a retry.
   const [outside, setOutside] = useState<ContentItem | null>(null);
+  const [lookup, setLookup] = useState<"loading" | "done" | "failed">("loading");
+  const [tries, setTries] = useState(0);
   const listed = data?.find((i) => i.id === id);
   const missing = !!data && !listed;
   useEffect(() => {
     if (!missing) return;
     let live = true;
-    request<{ items: ContentItem[] }>(`${base}/content?id=${encodeURIComponent(id)}`).then((r) => live && setOutside(r.items[0] ?? null), () => {});
+    setLookup("loading");
+    request<{ items: ContentItem[] }>(`${base}/content?id=${encodeURIComponent(id)}`).then(
+      (r) => live && (setOutside(r.items[0] ?? null), setLookup("done")),
+      (e) => live && (e instanceof ApiError && e.status === 404 ? (setOutside(null), setLookup("done")) : setLookup("failed")),
+    );
     return () => {
       live = false;
     };
-  }, [missing, base, id]);
+  }, [missing, base, id, tries]);
   const item = listed ?? (outside?.id === id ? outside : undefined);
   const [editing, setEditing] = useState(false);
   const perms = usePerms(base);
@@ -641,7 +648,13 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
       </div>
       {!item ? (
         data ? (
-          <p className="p-6 text-sm text-muted-foreground">This post no longer exists.</p>
+          lookup === "done" ? (
+            <p className="p-6 text-sm text-muted-foreground">This post no longer exists.</p>
+          ) : lookup === "failed" ? (
+            <LoadFailed what="this post" onRetry={() => setTries((n) => n + 1)} className="p-6" />
+          ) : (
+            <p className="p-6 text-sm text-muted-foreground">Loading…</p>
+          )
         ) : failed ? (
           <LoadFailed what="this post" onRetry={reload} className="p-6" />
         ) : (
