@@ -85,7 +85,7 @@ export function LoginForm({ next, error, expired, notice }: { next: string; erro
         {google ? "New here? Continue with Google to create your account." : "Use the email and password from your invitation."}
       </p>
       {notice && !message ? (
-        <p role="status" className="rise-in mt-6 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm text-success" style={rise(3)}>
+        <p role="status" className="rise-in mt-6 rounded-md border border-success/40 bg-success/10 px-3 py-2 text-sm text-success-ink" style={rise(3)}>
           {notice}
         </p>
       ) : null}

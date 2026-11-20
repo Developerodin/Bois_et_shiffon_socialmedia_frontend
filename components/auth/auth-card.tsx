@@ -15,7 +15,7 @@ export function AuthCard({
   return (
     <main className="relative flex min-h-dvh flex-col items-center justify-center gap-8 bg-background px-6 py-12">
       <BrandLogo height={28} priority />
-      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 shadow-sm">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
         <h1 className="font-display text-2xl font-semibold text-foreground">{title}</h1>
         {description ? <p className="mt-2 text-sm text-muted-foreground">{description}</p> : null}
         <div className="mt-6">{children}</div>
@@ -69,7 +69,7 @@ export function PasswordFields({
           value={password}
           onChange={(e) => onPassword(e.target.value)}
           aria-describedby="password-hint"
-          className="mt-1"
+          className="mt-1.5 h-11"
         />
         <span id="password-hint" className="mt-1 block text-xs text-muted-foreground">
           At least {MIN_PASSWORD} characters.
@@ -84,7 +84,7 @@ export function PasswordFields({
           autoComplete="new-password"
           value={confirm}
           onChange={(e) => onConfirm(e.target.value)}
-          className="mt-1"
+          className="mt-1.5 h-11"
         />
       </label>
     </>

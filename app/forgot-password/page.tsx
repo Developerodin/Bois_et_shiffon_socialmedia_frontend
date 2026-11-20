@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1"
+              className="mt-1.5 h-11"
             />
           </label>
           <p aria-live="polite" className="text-sm text-destructive empty:hidden">

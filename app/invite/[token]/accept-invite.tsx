@@ -136,7 +136,7 @@ export function AcceptInvite({ token }: { token: string }) {
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1"
+                className="mt-1.5 h-11"
               />
             </label>
             <PasswordFields
