@@ -410,7 +410,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       id: "ideas",
       title: "Ideas",
       icon: <Compass />,
-      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => revealPanel("content")} />,
+      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => revealPanel("content")} onOpenPost={(id) => open({ kind: "content", id })} />,
     },
     {
       id: "content",
@@ -489,6 +489,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         onOpenDoc={(doc) => open({ kind: "doc", doc })}
         onRan={refreshAgents}
         onOpenPosts={() => revealPanel("content")}
+        onOpenPost={(id) => open({ kind: "content", id })}
         onShowPanel={revealPanel}
       />
       )
@@ -1275,6 +1276,7 @@ function AgentView({
   autoRun,
   runId,
   onOpenPosts,
+  onOpenPost,
   onShowPanel,
   canRun,
   perms,
@@ -1289,6 +1291,7 @@ function AgentView({
   /** Start a run on open (one-click "Get ideas" from Today). */
   autoRun?: boolean;
   onOpenPosts: () => void;
+  onOpenPost?: (id: string) => void;
   agent: AgentSummary | null;
   report: Report;
   docs: ContextDocsResponse | null;
@@ -1411,6 +1414,7 @@ function AgentView({
               perms={perms}
               onRunScout={() => void run()}
               onOpenPosts={onOpenPosts}
+              onOpenPost={onOpenPost}
             />
           </div>
         )}

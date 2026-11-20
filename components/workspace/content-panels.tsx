@@ -48,6 +48,8 @@ export type ContentItem = {
   pillar: string | null;
   brief: Record<string, unknown> | null;
   opportunity: { title: string } | null;
+  /** The idea this post was planned from, if any. */
+  opportunityId?: string | null;
   /** The last publish went wrong: FAILED = not posted (reason in publishError), CHECK = may have posted. */
   publishIssue: "FAILED" | "CHECK" | null;
   publishError: string | null;
@@ -147,9 +149,18 @@ const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekd
 /* ───────────── Ideas panel ───────────── */
 
 /** `perms`: the person's permissions on this brand (the shell's brandPermissions), here and in the panels below. */
-export function IdeasPanel({ base, perms, onRunScout, onOpenPosts }: { base: string; perms: string[]; onRunScout: () => void; onOpenPosts?: () => void }) {
+/** Idea id → the first post planned from it (stable, so the shared content poll doesn't re-pick each render). */
+export function pickPostByIdea(d: { items?: ContentItem[] }): Map<string, string> {
+  const m = new Map<string, string>();
+  for (const i of d.items ?? []) if (i.opportunityId && !m.has(i.opportunityId)) m.set(i.opportunityId, i.id);
+  return m;
+}
+
+export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }: { base: string; perms: string[]; onRunScout: () => void; onOpenPosts?: () => void; onOpenPost?: (id: string) => void }) {
   const pick = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities, []);
   const { data, failed, reload } = useBrandData(base, "opportunities", pick as (d: never) => Opportunity[]);
+  // A planned idea links to the post made from it: read from the calendar's own (shared) list, no extra request.
+  const postByIdea = useBrandData(base, "content", pickPostByIdea as (d: never) => Map<string, string>, !!onOpenPost).data;
   const [filter, setFilter] = useState<"open" | "all">("open");
   const [error, setError] = useState<string | null>(null);
   // Translate: while on, the shown ideas in the team language (machine translation, display only), until Show original.
@@ -231,7 +242,8 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts }: { base: str
   const shortlisted = data.filter((o) => o.status === "SHORTLISTED").length;
   return (
     <div className="flex flex-col">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 text-xs">
+      {/* Pinned, so the next step (Plan posts) stays in view while scrolling the ideas. */}
+      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-card px-4 py-2 text-xs">
         <span className="flex flex-wrap items-center gap-2 text-muted-foreground">
           {shortlisted} shortlisted
           {shortlisted > 0 && perms.includes("agents.run") ? (
@@ -315,12 +327,30 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts }: { base: str
                   ))}
                 </ul>
               )}
+              {o.status === "PLANNED" && (postByIdea?.get(o.id) && onOpenPost ? (
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" onClick={() => onOpenPost(postByIdea.get(o.id)!)}>Open post</Button>
+                </div>
+              ) : onOpenPosts ? (
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" variant="secondary" onClick={onOpenPosts}>Open posts</Button>
+                </div>
+              ) : null)}
               {o.status !== "PLANNED" && canDecide && (
                 <div className="flex gap-2 pt-1">
                   {o.status === "SHORTLISTED" ? (
-                    <Button size="sm" variant="secondary" onClick={() => set(o.id, "NEW")} disabled={!!deciding}>
-                      {deciding?.id === o.id ? "Removing…" : "Remove from shortlist"}
-                    </Button>
+                    <>
+                      {/* The next step from here. The Planner plans every shortlisted idea in one run, and says so. */}
+                      {perms.includes("agents.run") && (
+                        <Button size="sm" onClick={() => void plan()} disabled={!!planning || plannerRunning}>
+                          {planning || plannerRunning ? <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> : null}
+                          {planning || plannerRunning ? "Planning posts…" : withPrice(shortlisted === 1 ? "Plan into posts" : `Plan all ${shortlisted} shortlisted`, planPrice)}
+                        </Button>
+                      )}
+                      <Button size="sm" variant="secondary" onClick={() => set(o.id, "NEW")} disabled={!!deciding}>
+                        {deciding?.id === o.id ? "Removing…" : "Remove from shortlist"}
+                      </Button>
+                    </>
                   ) : o.status === "DISMISSED" ? (
                     <Button size="sm" variant="ghost" onClick={() => set(o.id, "NEW")} disabled={!!deciding}>
                       {deciding?.id === o.id ? "Restoring…" : "Undo dismiss"}
