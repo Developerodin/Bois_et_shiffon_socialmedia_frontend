@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Check, Images, Loader2, X } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
@@ -30,8 +31,8 @@ type Props = { photos: LibraryPhoto[]; label: string; empty: { title: string; bo
   | { mode: "pick"; name: string; selected: string | null; onSelect: (key: string) => void }
 );
 
-/** The library's photos as 4:5 tiles: to look at (and remove uploads), or to choose one with radios. */
-export function PhotoGrid(props: Props) {
+/** The library's photos as 4:5 tiles: to look at (and remove uploads), or to choose one with radios. Memoized so a confirm dialog opening above it doesn't re-render every tile. */
+export const PhotoGrid = memo(function PhotoGrid(props: Props) {
   const { photos, label, empty } = props;
   if (photos.length === 0) return <EmptyState icon={Images} title={empty.title} description={empty.body} />;
 
@@ -57,7 +58,7 @@ export function PhotoGrid(props: Props) {
                   </span>
                 ) : null}
               </span>
-              <span className="block truncate px-1 py-2 text-center text-xs">{p.title}</span>
+              <span title={p.title} className="block truncate px-1 py-2 text-center text-xs">{p.title}</span>
             </label>
           ))}
         </div>
@@ -81,7 +82,7 @@ export function PhotoGrid(props: Props) {
                   aria-label={`Remove ${p.title}`}
                   disabled={busyKey !== null}
                   onClick={() => onRemove(p)}
-                  className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                  className="absolute right-2 top-2 inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
                 >
                   {busyKey === p.key ? (
                     <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
@@ -91,10 +92,10 @@ export function PhotoGrid(props: Props) {
                 </button>
               ) : null}
             </div>
-            <figcaption className="truncate pt-2 text-center text-xs">{p.title}</figcaption>
+            <figcaption title={p.title} className="truncate pt-2 text-center text-xs">{p.title}</figcaption>
           </figure>
         </li>
       ))}
     </ul>
   );
-}
+});

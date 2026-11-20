@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { focusSectionHeading, PageSection } from "@/components/ui/page-section";
 import { PageSkeleton } from "@/components/ui/page-skeleton";
 import { errorMessage } from "@/components/settings/api";
-import { LoadError } from "@/components/settings/shared";
+import { ConfirmDialog, LoadError } from "@/components/settings/shared";
 import { navFor } from "@/lib/nav";
 import { libraryPhotos, siteLabel, type LibraryPhoto } from "@/shared";
 import { initialSource, libraryApi, photoCount, pickUploads } from "./api";
@@ -132,8 +132,7 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
             ) : null}
             <SourceSwitch name="library-source" value={source} counts={{ website: lib.website.length, uploads: lib.uploads.length }} onChange={setPicked} />
             <StatusLines status={status} error={error} />
-            <PhotoGrid
-              mode="browse"
+            <RemovableGrid
               photos={shown}
               label={source === "website" ? "Website photos" : "Uploads"}
               empty={EMPTY[source]}
@@ -146,5 +145,27 @@ export function LibraryBoard({ workspaceId, brandId, canEdit, canUpload }: Props
         <BrandLook workspaceId={workspaceId} brandId={brandId} view={view} canEdit={canEdit} set={set} />
       </div>
     </div>
+  );
+}
+
+/** Asks before a photo is deleted. The "confirming" state lives here, so opening the dialog re-renders this wrapper but not the memoized grid. */
+function RemovableGrid({ onRemove, ...grid }: { photos: LibraryPhoto[]; label: string; empty: { title: string; body: string }; onRemove?: (p: LibraryPhoto) => Promise<void>; busyKey: string | null }) {
+  const [confirming, setConfirming] = useState<LibraryPhoto | null>(null);
+  return (
+    <>
+      <PhotoGrid mode="browse" {...grid} onRemove={onRemove ? setConfirming : undefined} />
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirming(null);
+        }}
+        title="Delete this photo from the library?"
+        description={confirming ? `${confirming.title} is removed from your uploads. This can't be undone.` : ""}
+        confirmLabel="Delete photo"
+        onConfirm={async () => {
+          if (confirming && onRemove) await onRemove(confirming);
+        }}
+      />
+    </>
   );
 }
