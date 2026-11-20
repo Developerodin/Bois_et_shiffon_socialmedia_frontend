@@ -501,14 +501,14 @@ export function PanelLayout<Id extends string>({
           className={cn("w-3 shrink-0", dropHint === "new-column" && "w-24 bg-primary/10")}
           aria-hidden="true"
         />
-        {/* While a header is dragged: drop here to show the panel in the side preview (layout unchanged). It sits over the new-column strip; "Open in its own column" in the menu still works. */}
+        {/* While a header is dragged: drop in the top-right corner to show the panel in the side preview (layout unchanged). Only that box wins; the new-column strip below it still takes drops. */}
         {onOpenInPeek && dragOn && (
           <div
             onDragOver={allow("peek")}
             onDragLeave={() => setDropHint(null)}
             onDrop={dropInPeek}
             className={cn(
-              "absolute inset-y-3 right-3 z-10 flex w-24 items-center justify-center rounded-2xl border-2 border-dashed border-primary p-2 text-center text-xs font-medium text-primary",
+              "absolute right-3 top-3 z-10 flex h-30 w-50 items-center justify-center rounded-2xl border-2 border-dashed border-primary p-2 text-center text-xs font-medium text-primary",
               dropHint === "peek" ? "bg-primary/10" : "bg-background/80",
             )}
           >
