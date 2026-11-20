@@ -16,7 +16,6 @@ import { DocPane } from "@/components/context/doc-pane";
 import { docState, DocStateBadge } from "@/components/context/doc-state";
 import { okToDiscard } from "@/components/context/unsaved";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
-import { usePerms } from "@/components/workspace/content-panels";
 import { Button } from "@/components/ui/button";
 import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
@@ -40,12 +39,12 @@ const RESEARCH_LABEL = {
   FAILED: "Research failed",
 } as const;
 
-type Props = { workspaceId: string; brandId: string };
+/** `perms`: the person's permissions on this brand, from the shell. */
+type Props = { workspaceId: string; brandId: string; perms: string[] };
 
-export function ContextBoard({ workspaceId, brandId }: Props) {
-  // Hide what this role can't do (the server refuses it anyway); null while loading counts as no.
-  const perms = usePerms(`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`);
-  const can = (p: string) => !!perms?.includes(p);
+export function ContextBoard({ workspaceId, brandId, perms }: Props) {
+  // Hide what this role can't do (the server refuses it anyway).
+  const can = (p: string) => perms.includes(p);
   const researchPrice = useRunPrice(workspaceId, "research");
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   // Whether the person picked the document shown (not the default first one): only then does opening it review it.

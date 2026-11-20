@@ -69,15 +69,6 @@ export type ContentItem = {
 
 export { useBrandData };
 
-/** The signed-in person's permissions on this brand; [] if they couldn't be loaded. */
-export function usePerms(base: string) {
-  const [perms, setPerms] = useState<string[] | null>(null);
-  useEffect(() => {
-    request<{ permissions: string[] }>(`${base.split("/brands/")[0]}/my-permissions?brandId=${base.split("/brands/")[1]}`).then((p) => setPerms(p.permissions), () => setPerms([]));
-  }, [base]);
-  return perms;
-}
-
 /** A load failed with nothing to show. No padding of its own: callers place it. `message` replaces the default line. */
 export function LoadFailed({ what, onRetry, message, className }: { what: string; onRetry: () => void; message?: string; className?: string }) {
   return (
@@ -154,7 +145,8 @@ const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekd
 
 /* ───────────── Ideas panel ───────────── */
 
-export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; onRunScout: () => void; onOpenPosts?: () => void }) {
+/** `perms`: the person's permissions on this brand (the shell's brandPermissions), here and in the panels below. */
+export function IdeasPanel({ base, perms, onRunScout, onOpenPosts }: { base: string; perms: string[]; onRunScout: () => void; onOpenPosts?: () => void }) {
   const pick = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities, []);
   const { data, failed, reload } = useBrandData(base, "opportunities", pick as (d: never) => Opportunity[]);
   const [filter, setFilter] = useState<"open" | "all">("open");
@@ -181,8 +173,7 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
     };
   }, [translateOn, shownIds, base]);
   const translated = translateOn ? translations : null;
-  const perms = usePerms(base);
-  const canDecide = perms?.includes("content.create");
+  const canDecide = perms.includes("content.create");
   const [planning, setPlanning] = useState<string | null>(null);
   const [planned, setPlanned] = useState(false);
   // The idea being updated and the status it is moving to, so its button can say so.
@@ -360,10 +351,10 @@ export function IdeasPanel({ base, onRunScout, onOpenPosts }: { base: string; on
 const STATUS_GROUP_LABEL: Record<keyof typeof STATUS_GROUPS, string> = { toWrite: "To write", awaiting: "Awaiting approval", approved: "Approved", scheduled: "Scheduled", published: "Published" };
 const NEED_LABEL = { overdue: "Overdue", blocked: "Blocked", week: "Next 7 days" } as const;
 
-export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner }: { base: string; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void }) {
+export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
-  const canExport = !!usePerms(base)?.includes("content.download");
+  const canExport = perms.includes("content.download");
   // Campaign names for the filter, read once (the calendar's poll doesn't carry them); without them the filter just isn't offered.
   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
   useEffect(() => {
@@ -371,7 +362,7 @@ export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner 
   }, [base]);
   const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
   // Opens the new post in the post view, like a calendar row.
-  const newPost = <NewPostDialog base={base} onCreated={onOpen} />;
+  const newPost = <NewPostDialog base={base} canCreate={perms.includes("content.create")} onCreated={onOpen} />;
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
   if (!data.length) {
     return (
@@ -684,7 +675,7 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   );
 }
 
-export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: string; id: string; onBack: () => void; reelsOn: boolean; brandId: string }) {
+export function ContentView({ base, perms, id, onBack, reelsOn, brandId }: { base: string; perms: string[]; id: string; onBack: () => void; reelsOn: boolean; brandId: string }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   // A post outside the calendar window (an old one, opened from a link) isn't in the list: ask for it by id, once per id.
@@ -708,7 +699,6 @@ export function ContentView({ base, id, onBack, reelsOn, brandId }: { base: stri
   }, [missing, base, id, tries]);
   const item = listed ?? (outside?.id === id ? outside : undefined);
   const [editing, setEditing] = useState(false);
-  const perms = usePerms(base);
   useEffect(() => setEditing(false), [id]);
   const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";
   const canEdit = perms?.includes("content.create") && !locked && !item?.studio;

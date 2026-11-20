@@ -39,6 +39,7 @@ export default async function ContextPage() {
       key={shell.activeBrandId}
       workspaceId={shell.activeWorkspaceId}
       brandId={shell.activeBrandId}
+      perms={shell.brandPermissions}
     />
   );
 }

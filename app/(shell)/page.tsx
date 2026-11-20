@@ -30,6 +30,7 @@ export default async function WorkspacePage() {
       website={brand.websiteUrl}
       reelsOn={featureOn("reels", shell.activeWorkspaceId)}
       user={shell.user}
+      perms={shell.brandPermissions}
     />
   );
 }

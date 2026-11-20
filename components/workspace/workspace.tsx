@@ -37,7 +37,7 @@ import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
-import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, usePerms, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
+import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
@@ -110,6 +110,8 @@ type Props = {
   /** Reels are on for this workspace: a studio reel in the Overview links to its page. */
   reelsOn: boolean;
   user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
+  /** The person's permissions on this brand, from the shell (read with the page, so no fetch here can fail on its own). */
+  perms: string[];
 };
 
 /** The open item lives in the URL (?post=, ?doc=, ?agent=, ?competitor=) so Refresh, Back and shared links work. */
@@ -133,7 +135,7 @@ function viewSearch(v: View) {
   return s ? `?${s}` : window.location.pathname;
 }
 
-export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, user }: Props) {
+export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, user, perms }: Props) {
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
@@ -200,16 +202,16 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   }, [view, docs, agents]);
 
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
-  // What the person's role may do; null until known. Write controls show only for roles the API would accept.
-  const perms = usePerms(base);
-  const canRun = !!perms?.includes("agents.run");
-  const canEditDocs = !!perms?.includes("context.edit");
-  const canConfirmDocs = !!perms?.includes("context.confirm");
+  // What the person's role may do. Write controls show only for roles the API would accept.
+  const canRun = perms.includes("agents.run");
+  const canCreate = perms.includes("content.create");
+  const canEditDocs = perms.includes("context.edit");
+  const canConfirmDocs = perms.includes("context.confirm");
   // What this role may read (a client reviewer: no agents, documents or accounts). Nothing it can't read is asked for,
   // so nothing it can't read shows as failed; those sections are left out.
-  const canAgents = !!perms?.includes("agents.read");
-  const canReports = !!perms?.includes("analytics.read");
-  const canAccounts = CONNECTIONS_READ.some((k) => perms?.includes(k));
+  const canAgents = perms.includes("agents.read");
+  const canReports = perms.includes("analytics.read");
+  const canAccounts = CONNECTIONS_READ.some((k) => perms.includes(k));
   // A failed load keeps what was already shown; a block shows its error only while it has nothing to show.
   const loadReports = useCallback(
     async () => {
@@ -239,10 +241,9 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     },
     [workspaceId, brandId, mark, canAgents],
   );
-  // Everything the Overview loads up front, once the role is known; Retry calls it again.
+  // Everything the Overview loads up front; Retry calls it again.
   const loadAll = useCallback(
     async (signal?: AbortSignal) => {
-      if (!perms) return;
       void loadReports();
       if (canAccounts) {
         settingsApi.connections(workspaceId, brandId).then(
@@ -255,7 +256,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       }
       return loadDocsAndAgents(signal);
     },
-    [perms, workspaceId, brandId, loadReports, loadDocsAndAgents, mark, canAccounts],
+    [workspaceId, brandId, loadReports, loadDocsAndAgents, mark, canAccounts],
   );
 
   // Docs and agents are polled; the poll carries on through failures.
@@ -295,7 +296,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
   // Today is built from the reports, the connections and the pipeline counts (the ones this role can read).
   const today = {
     failed: (canReports && !reports && failed.reports) || (canAccounts && !connections && failed.connections) || pipelineFailed,
-    loading: !perms || (canReports && !reports && !failed.reports) || (canAccounts && !connections && !failed.connections) || (!pipeline && !pipelineFailed),
+    loading: (canReports && !reports && !failed.reports) || (canAccounts && !connections && !failed.connections) || (!pipeline && !pipelineFailed),
   };
   const reloadIdeas = ideas.reload, reloadContent = awaitingQ.reload;
   const retry = useCallback(() => {
@@ -362,14 +363,15 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
             onStale={() => fetchContextDocs(workspaceId, brandId).then(setDocs)}
           />
         ) : view.kind === "competitor" ? (
-          <CompetitorView base={base} id={view.id} onBack={back} />
+          <CompetitorView base={base} canRun={canRun} id={view.id} onBack={back} />
         ) : view.kind === "content" ? (
-          <ContentView base={base} id={view.id} onBack={back} reelsOn={reelsOn} brandId={brandId} />
+          <ContentView base={base} perms={perms} id={view.id} onBack={back} reelsOn={reelsOn} brandId={brandId} />
         ) : view.kind === "agent" ? (
           <AgentView
             agentKey={view.key}
             autoRun={view.run && canRun}
             canRun={canRun}
+            perms={perms}
             agent={agents?.find((a) => a.key === view.key) ?? null}
             report={view.key === "seo" ? reports?.seo ?? null : view.key === "geo" ? reports?.geo ?? null : null}
             docs={docs}
@@ -399,10 +401,11 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
               showPanel("content");
             }}
             canRun={canRun}
+            canCreate={canCreate}
             onOpen={open}
             onShowPanel={showPanel}
             onRetry={retry}
-            due={perms?.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={showPanel} /> : null}
+            due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={showPanel} /> : null}
             showAgents={canAgents}
           />
         ),
@@ -411,33 +414,33 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       id: "analytics",
       title: "Analytics",
       icon: <Gauge />,
-      render: () => (canReports || !perms ? <AnalyticsPanel reports={reports} failed={failed.reports} onRetry={retry} onOpenAgent={(key) => open({ kind: "agent", key })} /> : <NotForRole what="reports" />),
+      render: () => (canReports ? <AnalyticsPanel reports={reports} failed={failed.reports} onRetry={retry} onOpenAgent={(key) => open({ kind: "agent", key })} /> : <NotForRole what="reports" />),
     },
     {
       id: "feed",
       title: "Agents feed",
       icon: <ListChecks />,
-      render: () => !canAgents && perms ? <NotForRole what="the agents" /> : <AgentsFeed agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} canRun={canRun} onRan={refreshAgents} onOpen={open} />,
+      render: () => !canAgents ? <NotForRole what="the agents" /> : <AgentsFeed agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} canRun={canRun} onRan={refreshAgents} onOpen={open} />,
     },
     {
       id: "ideas",
       title: "Ideas",
       icon: <Compass />,
-      render: () => <IdeasPanel base={base} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => showPanel("content")} />,
+      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => showPanel("content")} />,
     },
     {
       id: "content",
       title: "Content calendar",
       icon: <CalendarDays />,
-      render: () => <ContentPanel base={base} me={user.id ?? null} filter={calFilter} onFilter={changeFilter} onOpen={(id) => open({ kind: "content", id })} onRunPlanner={() => open({ kind: "agent", key: "planner" })} />,
+      render: () => <ContentPanel base={base} perms={perms} me={user.id ?? null} filter={calFilter} onFilter={changeFilter} onOpen={(id) => open({ kind: "content", id })} onRunPlanner={() => open({ kind: "agent", key: "planner" })} />,
     },
     {
       id: "competitors",
       title: "Competitors",
       icon: <Users />,
-      render: () => <CompetitorsPanel base={base} onOpen={(id) => open({ kind: "competitor", id })} onFind={() => open({ kind: "agent", key: "competitors" })} />,
+      render: () => <CompetitorsPanel base={base} canRun={canRun} onOpen={(id) => open({ kind: "competitor", id })} onFind={() => open({ kind: "agent", key: "competitors" })} />,
     },
-    { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => (canAgents ? <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> : perms ? <NotForRole what="the Agent Log" /> : null) },
+    { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => (canAgents ? <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> : <NotForRole what="the Agent Log" />) },
   ];
 
   const outOfCredits = agents?.some((a) => a.lastRun?.error?.includes("AI credits used up"));
@@ -792,6 +795,7 @@ function Home({
   needs,
   onOpenCalendar,
   canRun,
+  canCreate,
   onOpen,
   onShowPanel,
   onRetry,
@@ -818,6 +822,7 @@ function Home({
   needs: { overdue: number; blocked: number; week: number };
   onOpenCalendar: (need: NonNullable<CalendarFilter["need"]>) => void;
   canRun: boolean;
+  canCreate: boolean;
   onOpen: (v: View) => void;
   onShowPanel: (id: PanelId) => void;
 }) {
@@ -898,7 +903,7 @@ function Home({
             <Button size="sm" variant="secondary" onClick={() => onShowPanel("content")}>
               Open posts
             </Button>
-            <NewPostDialog base={base} onCreated={(id) => onOpen({ kind: "content", id })} />
+            <NewPostDialog base={base} canCreate={canCreate} onCreated={(id) => onOpen({ kind: "content", id })} />
           </div>
         ),
       });
@@ -948,7 +953,7 @@ function Home({
       });
     }
     return list;
-  }, [base, docs, marks, mark, reports, connections, pipeline, needs, onOpenCalendar, canRun, onOpen, onShowPanel, scoutPrice]);
+  }, [base, docs, marks, mark, reports, connections, pipeline, needs, onOpenCalendar, canRun, canCreate, onOpen, onShowPanel, scoutPrice]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done && !(Date.now() - (marks[t.id] ?? 0) < DAY_MS));
@@ -1228,11 +1233,13 @@ function AgentView({
   onOpenPosts,
   onShowPanel,
   canRun,
+  perms,
 }: {
   agentKey: string;
   onShowPanel: (id: PanelId) => void;
   /** The role may run agents; without it the Run button is hidden. */
   canRun: boolean;
+  perms: string[];
   /** Start a run on open (one-click "Get ideas" from Today). */
   autoRun?: boolean;
   onOpenPosts: () => void;
@@ -1344,6 +1351,7 @@ function AgentView({
             <IdeasPanel
               key={agent?.lastRun?.finishedAt ?? "none"}
               base={`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`}
+              perms={perms}
               onRunScout={() => void run()}
               onOpenPosts={onOpenPosts}
             />

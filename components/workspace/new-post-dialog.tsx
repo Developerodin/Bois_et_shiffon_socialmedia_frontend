@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { Textarea } from "@/components/ui/textarea";
-import { usePerms } from "@/components/workspace/content-panels";
 import { workspaceIdOf } from "@/lib/plan-credits";
 import { CONTENT_GOALS, CONTENT_GOAL_LABELS, type ContentGoal, type LibraryPhoto } from "@/shared";
 
@@ -17,8 +16,7 @@ type Channel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL";
 const DIRECTION_MAX = 500;
 
 /** "New post" for people who can create content: a product photo, a goal and a note, then the Creator drafts it and it opens. */
-export function NewPostDialog({ base, onCreated }: { base: string; onCreated: (id: string) => void }) {
-  const perms = usePerms(base);
+export function NewPostDialog({ base, canCreate, onCreated }: { base: string; canCreate: boolean; onCreated: (id: string) => void }) {
   const workspaceId = workspaceIdOf(base);
   const brandId = base.split("/brands/")[1];
   const [open, setOpen] = useState(false);
@@ -32,7 +30,7 @@ export function NewPostDialog({ base, onCreated }: { base: string; onCreated: (i
   // One id per opening: a double click or a retry after a dropped answer returns the same post instead of a second one.
   const [requestId, setRequestId] = useState("");
 
-  if (!perms?.includes("content.create") || !workspaceId || !brandId) return null;
+  if (!canCreate || !workspaceId || !brandId) return null;
 
   function change(next: boolean) {
     if (next) {

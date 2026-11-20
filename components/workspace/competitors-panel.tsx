@@ -4,7 +4,7 @@ import { useCallback, useState, type FormEvent } from "react";
 import { ArrowLeft, Coins, ExternalLink, Loader2, Plus, RotateCw, Trash2 } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
-import { LoadFailed, useBrandData, usePerms } from "@/components/workspace/content-panels";
+import { LoadFailed, useBrandData } from "@/components/workspace/content-panels";
 import { ScoreRing } from "@/components/workspace/score-ring";
 import { readable } from "@/lib/agent-message";
 import { cn } from "@/lib/utils";
@@ -82,8 +82,7 @@ function FreshAudit({ base, c, credits, onDone }: { base: string; c: Competitor;
 }
 
 /** agents.run gates adding, auditing and removing: the routes refuse those without it. */
-export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpen: (id: string) => void; onFind: () => void }) {
-  const canRun = usePerms(base)?.includes("agents.run");
+export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: string; canRun: boolean; onOpen: (id: string) => void; onFind: () => void }) {
   const { data, failed, reload } = useCompetitors(base);
   const [adding, setAdding] = useState(false);
   const [addPending, setAddPending] = useState(false);
@@ -205,8 +204,7 @@ export function CompetitorsPanel({ base, onOpen, onFind }: { base: string; onOpe
   );
 }
 
-export function CompetitorView({ base, id, onBack }: { base: string; id: string; onBack: () => void }) {
-  const canRun = usePerms(base)?.includes("agents.run");
+export function CompetitorView({ base, canRun, id, onBack }: { base: string; canRun: boolean; id: string; onBack: () => void }) {
   const { data, failed, reload } = useCompetitors(base);
   const c = data?.competitors.find((x) => x.id === id);
   const a = c?.audit;
