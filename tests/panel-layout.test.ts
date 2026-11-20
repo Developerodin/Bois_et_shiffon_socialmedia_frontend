@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { layoutMessage, sanitize, type Layout } from "@/components/workspace/panel-layout";
+import { layoutMessage, revealPlan, sanitize, withPanel, type Layout } from "@/components/workspace/panel-layout";
 
 type Id = "a" | "b" | "c";
 const ids: Id[] = ["a", "b", "c"];
@@ -36,5 +36,28 @@ describe("layout announcement", () => {
 
   it("says hidden when no column holds the panel", () => {
     expect(layoutMessage("Context", cols(["a"], ["b"]), "c")).toBe("Context hidden");
+  });
+});
+
+describe("revealing a panel", () => {
+  const l: Layout<Id> = { columns: [{ id: "1", size: 1, panels: ["a"] }, { id: "2", size: 1, panels: ["b"] }], collapsed: ["b"] };
+
+  it("scrolls to a shown panel, offers to expand a collapsed one and to add an absent one", () => {
+    expect(revealPlan(l, "a")).toBe("scroll");
+    expect(revealPlan(l, "b")).toBe("expand");
+    expect(revealPlan(l, "c")).toBe("add");
+  });
+
+  it("a shown panel needs no layout change: planning leaves the layout object untouched", () => {
+    const before = JSON.stringify(l);
+    revealPlan(l, "a");
+    expect(JSON.stringify(l)).toBe(before);
+  });
+
+  it("Expand and Add to board produce the layout that is committed", () => {
+    expect(withPanel(l, "b")).toEqual({ ...l, collapsed: [] });
+    const added = withPanel(l, "c");
+    expect(added.columns[1].panels).toEqual(["c", "b"]);
+    expect(added.collapsed).toEqual(["b"]);
   });
 });

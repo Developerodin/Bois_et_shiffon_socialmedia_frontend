@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
 /**
@@ -42,6 +43,21 @@ const useWide = () => useSyncExternalStore(subscribeWide, () => window.matchMedi
 let seq = 0;
 const colId = () => `c${Date.now().toString(36)}${seq++}`;
 
+/** What bringing a panel into view needs: nothing but a scroll, an expand, or adding it to a column. */
+export function revealPlan<Id extends string>(layout: Layout<Id>, id: Id): "scroll" | "expand" | "add" {
+  if (!layout.columns.some((c) => c.panels.includes(id))) return "add";
+  return layout.collapsed.includes(id) ? "expand" : "scroll";
+}
+/** The layout with this panel expanded and, if it was in no column, put at the top of the second column. */
+export function withPanel<Id extends string>(l: Layout<Id>, id: Id): Layout<Id> {
+  const open = { ...l, collapsed: l.collapsed.filter((p) => p !== id) };
+  if (l.columns.some((c) => c.panels.includes(id))) return open;
+  const columns = open.columns.length ? open.columns.map((c, i) => (i === Math.min(1, open.columns.length - 1) ? { ...c, panels: [id, ...c.panels] } : c)) : [{ id: colId(), size: 1, panels: [id] }];
+  return { ...open, columns };
+}
+const FLASH = ["outline", "outline-2", "outline-primary", "outline-offset-2"];
+const FLASH_MS = 1200;
+
 export function sanitize<Id extends string>(raw: unknown, ids: Id[], fallback: Layout<Id>): Layout<Id> {
   const l = raw as Layout<Id> | null;
   if (!l || !Array.isArray(l.columns)) return fallback;
@@ -63,12 +79,15 @@ export function PanelLayout<Id extends string>({
   presets,
   storageKey,
   focus,
+  revealRef,
 }: {
   panels: PanelDef<Id>[];
   presets: Preset<Id>[];
   storageKey: string;
   /** Bring this panel into view (re-shown if hidden, selected on phones); change `n` to re-trigger. */
   focus?: { id: Id; n: number };
+  /** Filled with a function that points at a panel without changing the saved layout: scrolls to it and flashes it when it's showing, otherwise offers (in a toast) to expand or add it. */
+  revealRef?: { current: ((id: Id) => void) | null };
 }) {
   const ids = panels.map((p) => p.id);
   const [layout, setLayout] = useState<Layout<Id>>(presets[0].layout);
@@ -100,6 +119,17 @@ export function PanelLayout<Id extends string>({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageKey]);
+
+  const layoutRef = useRef(layout);
+  layoutRef.current = layout;
+  const flash = useRef<{ el: Element; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const endFlash = () => {
+    if (!flash.current) return;
+    clearTimeout(flash.current.timer);
+    flash.current.el.classList.remove(...FLASH);
+    flash.current = null;
+  };
+  useEffect(() => endFlash, []);
 
   const commit = useCallback(
     (next: Layout<Id>) => {
@@ -213,14 +243,25 @@ export function PanelLayout<Id extends string>({
   useEffect(() => {
     if (!focus) return;
     setMobilePanel(focus.id);
-    setLayout((l) => {
-      const shown = l.columns.some((c) => c.panels.includes(focus.id));
-      const open = { ...l, collapsed: l.collapsed.filter((p) => p !== focus.id) };
-      if (shown) return open;
-      const columns = open.columns.length ? open.columns.map((c, i) => (i === Math.min(1, open.columns.length - 1) ? { ...c, panels: [focus.id, ...c.panels] } : c)) : [{ id: colId(), size: 1, panels: [focus.id] }];
-      return { ...open, columns };
-    });
+    setLayout((l) => withPanel(l, focus.id));
   }, [focus]);
+
+  if (revealRef)
+    revealRef.current = (id: Id) => {
+      const title = panels.find((p) => p.id === id)?.title ?? id;
+      if (!window.matchMedia(WIDE).matches) return setMobilePanel(id);
+      const l = layoutRef.current;
+      const plan = revealPlan(l, id);
+      if (plan === "expand") return toast({ title: `${title} is collapsed`, tone: "warning", action: { label: "Expand", onAction: () => commit(withPanel(layoutRef.current, id)) }, ms: 15_000 });
+      if (plan === "add") return toast({ title: `${title} isn't on your board`, tone: "warning", action: { label: "Add to board", onAction: () => commit(withPanel(layoutRef.current, id)) }, ms: 15_000 });
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.getElementById(`panel-head-${id}`)?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+      const el = document.querySelector(`[data-panel="${id}"]`);
+      if (!el || reduce) return;
+      endFlash();
+      el.classList.add(...FLASH);
+      flash.current = { el, timer: setTimeout(endFlash, FLASH_MS) };
+    };
 
   // After a move the panel's <section> remounts in its new column, so Radix's focus return target is gone:
   // focus its header button here (or Layout when hidden); the panel menu's own focus return is turned off.

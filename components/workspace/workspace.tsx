@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { clearActionToasts } from "@/components/ui/toast";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -303,8 +304,18 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     setView(v);
   }, []);
   const close = useCallback(() => open({ kind: "home" }), [open]);
-  // Brings a panel into view, adding it to the layout if it's hidden.
-  const showPanel = (id: PanelId) => setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }));
+  // Buttons that point at a panel bring it into view; they never add it to the saved board (the sidebar's ?panel=
+  // does, through `focus`). A revealed panel can sit under the peek, so an open peek closes first (asking about unsaved work).
+  const revealRef = useRef<((id: PanelId) => void) | null>(null);
+  const revealPanel = (id: PanelId) => {
+    if (viewNow.current.kind !== "home") {
+      if (!okToDiscard()) return;
+      setView({ kind: "home" });
+    }
+    revealRef.current?.(id);
+  };
+  // Toasts with a button (Expand, Add to board) do nothing once this page is gone.
+  useEffect(() => clearActionToasts, []);
 
   const panels: PanelDef<PanelId>[] = [
     {
@@ -351,14 +362,14 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
             needs={{ overdue: overdueQ.data ?? 0, blocked: blockedQ.data ?? 0, week: weekQ.data ?? 0 }}
             onOpenCalendar={(need) => {
               changeFilter({ need });
-              showPanel("content");
+              revealPanel("content");
             }}
             canRun={canRun}
             canCreate={canCreate}
             onOpen={open}
-            onShowPanel={showPanel}
+            onShowPanel={revealPanel}
             onRetry={retry}
-            due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={showPanel} /> : null}
+            due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={revealPanel} /> : null}
             showAgents={canAgents}
           />
       ),
@@ -379,7 +390,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       id: "ideas",
       title: "Ideas",
       icon: <Compass />,
-      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => showPanel("content")} />,
+      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => revealPanel("content")} />,
     },
     {
       id: "content",
@@ -458,8 +469,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         brandId={brandId}
         onOpenDoc={(doc) => open({ kind: "doc", doc })}
         onRan={refreshAgents}
-        onOpenPosts={() => showPanel("content")}
-        onShowPanel={showPanel}
+        onOpenPosts={() => revealPanel("content")}
+        onShowPanel={revealPanel}
       />
       )
     ) : null;
@@ -473,7 +484,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         </p>
       )}
       <div className="relative min-h-0 flex-1">
-        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} />
+        <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} />
         {peek.shown && (
           <Peek open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={close} onExited={peek.onExited} asideRef={peek.ref}>
             {/* Keyed by item: a replaced item remounts fresh, never carrying one item's state into another. */}
