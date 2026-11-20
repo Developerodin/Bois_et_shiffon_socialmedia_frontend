@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { Check, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
@@ -22,6 +22,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, toneOf } from "@/lib/status";
 import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
 import { filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
+import { dayKey, gridRange, groupByDay, monthGrid } from "@/lib/calendar-month";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 
 /* ───────────── shared types + data ───────────── */
@@ -381,6 +382,12 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
 
 const STATUS_GROUP_LABEL: Record<keyof typeof STATUS_GROUPS, string> = { toWrite: "To write", awaiting: "Awaiting approval", approved: "Approved", scheduled: "Scheduled", published: "Published" };
 const NEED_LABEL = { overdue: "Overdue", blocked: "Blocked", week: "Next 7 days" } as const;
+const VIEW_KEY = "cal.view.v1";
+type CalendarView = "list" | "month";
+
+/** A post's status as its badge and chip say it. */
+const statusText = (i: ContentItem) =>
+  i.publishIssue ? PUBLISH_ISSUE[i.publishIssue] : i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status);
 
 export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
@@ -392,10 +399,41 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     request<{ campaigns: { id: string; name: string }[] }>(`${base}/campaigns`).then((r) => setCampaigns(r.campaigns), () => {});
   }, [base]);
   const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
+  // List or Month, remembered per browser; read after mount so the server render and the first client render agree.
+  const [view, setView] = useState<CalendarView>("list");
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(VIEW_KEY) === "month") setView("month");
+    } catch {
+      // storage blocked: List
+    }
+  }, []);
+  const pickView = (v: CalendarView) => {
+    setView(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      // ignore
+    }
+  };
+  // A day picked in Month ("+N more", or a cell on a narrow panel): List, scrolled to that day.
+  const [jump, setJump] = useState<string | null>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    if (view !== "list" || !jump) return;
+    // ponytail: the list holds open posts + 30 days, so a day of an older month has no group and the list stays at the top.
+    listRef.current?.querySelector(`[data-day="${jump}"]`)?.scrollIntoView({ block: "start" });
+    setJump(null);
+  }, [view, jump]);
+  const openDay = (k: string) => {
+    pickView("list");
+    setJump(k);
+  };
   // Opens the new post in the post view, like a calendar row.
   const newPost = <NewPostDialog base={base} canCreate={perms.includes("content.create")} onCreated={onOpen} />;
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
-  if (!data.length) {
+  // Month still shows with an empty list: past months come from their own read.
+  if (!data.length && view === "list") {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
@@ -415,6 +453,13 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const sel = cn(selectClass, "h-8 w-auto text-xs");
   const filters = (
     <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2" role="group" aria-label="Filter posts">
+      <div role="tablist" aria-label="Calendar view" className="flex rounded-md bg-muted p-0.5 text-xs">
+        {(["list", "month"] as const).map((v) => (
+          <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("rounded px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", view === v ? "bg-background text-foreground" : "text-muted-foreground")}>
+            {v === "list" ? "List" : "Month"}
+          </button>
+        ))}
+      </div>
       <select aria-label="Channel" value={filter.channel ?? ""} onChange={(e) => set({ channel: e.target.value || undefined })} className={sel}>
         <option value="">All channels</option>
         {channels.map((c) => <option key={c} value={c}>{CHANNEL_LABEL[c] ?? c}</option>)}
@@ -445,6 +490,14 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       </span>
     </div>
   );
+  if (view === "month") {
+    return (
+      <div>
+        {filters}
+        <MonthView base={base} filter={filter} me={me} undated={shown.filter((i) => !i.scheduledFor)} onOpen={onOpen} onDay={openDay} />
+      </div>
+    );
+  }
   if (!shown.length) {
     return (
       <div>
@@ -458,18 +511,14 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       </div>
     );
   }
-  const groups = new Map<string, ContentItem[]>();
-  for (const i of shown) {
-    // Group by the viewer's local date ("en-CA" is YYYY-MM-DD), not the UTC one.
-    const k = i.scheduledFor ? new Date(i.scheduledFor).toLocaleDateString("en-CA") : "unscheduled";
-    groups.set(k, [...(groups.get(k) ?? []), i]);
-  }
+  // Grouped by the viewer's local date, not the UTC one.
+  const groups = groupByDay(shown);
   return (
     <div>
       {filters}
-      <ol className="flex flex-col">
+      <ol ref={listRef} className="flex flex-col">
         {[...groups].map(([k, list]) => (
-          <li key={k}>
+          <li key={k} data-day={k}>
             <p className="sticky top-0 z-[1] bg-background/95 px-4 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">{k === "unscheduled" ? "No date" : day(list[0].scheduledFor!)}</p>
             <ul className="divide-y divide-border">
               {list.map((i) => (
@@ -482,13 +531,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
                     <span className="flex min-w-0 flex-1 flex-col gap-1">
                     <span className="flex items-center justify-between gap-2 text-[11px]">
                       <span className="text-muted-foreground">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
-                      {i.publishIssue ? (
-                        <StatusBadge status={i.publishIssue}>{PUBLISH_ISSUE[i.publishIssue]}</StatusBadge>
-                      ) : (
-                        <StatusBadge status={i.status}>
-                          {i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status)}
-                        </StatusBadge>
-                      )}
+                      <StatusBadge status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>
                     </span>
                     <span className="text-sm">{i.title}</span>
                     <span className="text-[11px] text-muted-foreground">{ownerLabel(i.owner)}</span>
@@ -501,6 +544,128 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           </li>
         ))}
       </ol>
+    </div>
+  );
+}
+
+const pickItems = (d: { items: ContentItem[] }) => d.items;
+const MORE_AFTER = 3;
+const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
+
+/** One post in a month cell or the No date strip: time (unless midnight) and title, in its status tone. Opens like a list row. */
+function PostChip({ item, onOpen }: { item: ContentItem; onOpen: (id: string) => void }) {
+  const at = item.scheduledFor ? new Date(item.scheduledFor) : null;
+  const time = at && (at.getHours() || at.getMinutes()) ? at.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : null;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(item.id)}
+      title={item.title}
+      className={cn("flex w-full min-w-0 items-center gap-1 rounded border px-1 py-0.5 text-left text-[11px] leading-tight hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", TONE_CLASS[toneOf(item.publishIssue ?? item.status)])}
+    >
+      {time && <span className="shrink-0 tabular-nums">{time}</span>}
+      <span className="truncate">{item.title}</span>
+      <span className="sr-only">, {statusText(item)}</span>
+    </button>
+  );
+}
+
+/**
+ * The calendar as a month grid (weeks start Monday). Dated posts come from their own read of the grid's dates (?from&to,
+ * so past months show); undated ones are the list's. The same filters apply.
+ * ponytail: no drag to reschedule, no week view, no new post from a day (the new post dialog has no date): not asked for yet.
+ */
+function MonthView({ base, filter, me, undated, onOpen, onDay }: { base: string; filter: CalendarFilter; me: string | null; undated: ContentItem[]; onOpen: (id: string) => void; onDay: (key: string) => void }) {
+  const [month, setMonth] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }));
+  const grid = useMemo(() => monthGrid(month.y, month.m), [month]);
+  const { from, to } = gridRange(grid);
+  // ponytail: polled like the list (every 6 s) while Month is open; one cached read per month looked at.
+  const { data, failed, reload } = useBrandData(base, `content?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, pickItems as (d: never) => ContentItem[]);
+  const byDay = useMemo(() => groupByDay(data ? filterItems(data, filter, me, new Date()) : []), [data, filter, me]);
+  const today = dayKey(new Date());
+  const go = (by: number) => setMonth(({ y, m }) => ({ y: new Date(y, m + by, 1).getFullYear(), m: new Date(y, m + by, 1).getMonth() }));
+  const inMonth = grid.filter((d) => d.getMonth() === month.m).reduce((n, d) => n + (byDay.get(dayKey(d))?.length ?? 0), 0);
+  const weeks = Array.from({ length: grid.length / 7 }, (_, w) => grid.slice(w * 7, w * 7 + 7));
+  return (
+    <div className="@container flex flex-col gap-2 px-4 py-3">
+      <div className="flex items-center gap-1">
+        <h3 className="mr-auto text-sm font-semibold">{new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}</h3>
+        <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Previous month" onClick={() => go(-1)}>
+          <ChevronLeft aria-hidden className="size-4" />
+        </Button>
+        <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Next month" onClick={() => go(1)}>
+          <ChevronRight aria-hidden className="size-4" />
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => setMonth({ y: new Date().getFullYear(), m: new Date().getMonth() })}>
+          Today
+        </Button>
+      </div>
+      {undated.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1 text-xs">
+          <span className="mr-1 text-muted-foreground">No date &middot; {undated.length}</span>
+          {undated.map((i) => (
+            <span key={i.id} className="max-w-48">
+              <PostChip item={i} onOpen={onOpen} />
+            </span>
+          ))}
+        </div>
+      )}
+      <LoadGate ready={!!data} failed={failed} what="this month" onRetry={reload}>
+        {inMonth === 0 && <p className="text-xs text-muted-foreground">Nothing planned this month</p>}
+        <table className="w-full table-fixed border-separate border-spacing-1 text-xs">
+          <thead>
+            <tr>
+              {grid.slice(0, 7).map((d) => (
+                <th key={d.getDay()} scope="col" className="pb-0.5 text-left font-medium text-muted-foreground">
+                  <abbr title={d.toLocaleDateString(undefined, { weekday: "long" })} className="no-underline">
+                    {d.toLocaleDateString(undefined, { weekday: "short" })}
+                  </abbr>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {weeks.map((week) => (
+              <tr key={dayKey(week[0])}>
+                {week.map((d) => {
+                  const k = dayKey(d);
+                  const posts = byDay.get(k) ?? [];
+                  return (
+                    <td
+                      key={k}
+                      className={cn(
+                        "h-14 rounded-lg border border-border p-1 align-top @min-[520px]:h-24",
+                        d.getDay() % 6 === 0 && "bg-muted/40",
+                        d.getMonth() !== month.m && "text-muted-foreground opacity-60",
+                        k === today && "ring-2 ring-inset ring-primary",
+                      )}
+                    >
+                      <span aria-hidden className={cn("block text-[11px]", k === today && "font-semibold text-primary")}>{d.getDate()}</span>
+                      <span className="sr-only">{`${d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}, ${postCount(posts.length)}`}</span>
+                      {posts.length > 0 && (
+                        <>
+                          {/* Wide panel: the posts as chips. Narrow (under 520 px): a count that opens the day in the list. */}
+                          <div className="mt-0.5 hidden flex-col gap-0.5 @min-[520px]:flex">
+                            {posts.slice(0, MORE_AFTER).map((i) => <PostChip key={i.id} item={i} onOpen={onOpen} />)}
+                            {posts.length > MORE_AFTER && (
+                              <button type="button" onClick={() => onDay(k)} className="rounded px-1 text-left text-[11px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                                +{posts.length - MORE_AFTER} more
+                              </button>
+                            )}
+                          </div>
+                          <button type="button" onClick={() => onDay(k)} className="mt-0.5 block w-full truncate rounded text-left text-[11px] text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]:hidden">
+                            {postCount(posts.length)}
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </LoadGate>
     </div>
   );
 }
