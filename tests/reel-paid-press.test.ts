@@ -7,7 +7,7 @@ describe("pressLabel", () => {
   });
   it("shows the price, singular for one", () => {
     expect(pressLabel("Create presenter", { loaded: true, unlimited: false }, 5)).toBe("Create presenter · 5 credits");
-    expect(pressLabel("Preview with my photos", { loaded: true, unlimited: false }, 1)).toBe("Preview with my photos · 1 credit");
+    expect(pressLabel("Make a preview with my photos", { loaded: true, unlimited: false }, 1)).toBe("Make a preview with my photos · 1 credit");
   });
   it("shows no price on an unlimited plan", () => {
     expect(pressLabel("Create presenter", { loaded: true, unlimited: true }, 5)).toBe("Create presenter");

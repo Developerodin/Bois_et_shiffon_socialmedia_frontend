@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { fetchShared } from "@/components/workspace/use-job";
 import { isRepeatClick } from "@/lib/presser";
 import { reelUrl, reelsApi } from "./api";
+import { downloadIfApproved, reelActions } from "./reel-actions";
 import {
   CHECK_AUTO_MS, CHECK_SLOW_MS, adoptRefusedVersion, awaitingChecks, editLock, parseHashtags, pollChecks, postTextLength,
   rereadAfterSend, reviewBlock, reviewChecks, type ReelStep,
@@ -21,10 +22,10 @@ const CARD = "flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 
 
 /**
  * The Review step (the phone's R07): the transcript, the checks (waiting for them itself), the caption and hashtags,
- * the specs, Download (approves) and Continue to Publish. The page shows the video, with captions, in the preview.
+ * the specs, Approve, Download (only once approved) and Continue to Publish. The page shows the video, with captions, in the preview.
  * Memoised: the page passes only `detail`, primitives and stable callbacks. A caption save doesn't take the plan's
  * save lock (it goes through the content route), so it has its own in-flight flag here. An unsaved caption edit holds
- * Download (it would approve the saved caption) and Continue to Publish (leaving the step drops the typed text).
+ * Approve and Download (it would approve the saved caption) and Continue to Publish (leaving the step drops the typed text).
  */
 export const ReviewStep = memo(function ReviewStep({ workspaceId, brandId, detail, reload, canCreate, canApprove, go }: {
   workspaceId: string;
@@ -40,6 +41,7 @@ export const ReviewStep = memo(function ReviewStep({ workspaceId, brandId, detai
   const [captionDirty, setCaptionDirty] = useState(false);
   const plan = detail.plan;
   const block = reviewBlock(detail, captionDirty);
+  const actions = reelActions(detail.item.status, canApprove);
   const voices = (plan?.scenes ?? []).map((s) => s.voiceText).filter(Boolean);
   const specs = [detail.seconds !== null ? `${detail.seconds} s` : null, "9:16 vertical", plan?.voiceName ?? "Voiceover"].filter(Boolean).join(" · ");
 
@@ -78,14 +80,15 @@ export const ReviewStep = memo(function ReviewStep({ workspaceId, brandId, detai
 
       <div className="flex flex-col items-start gap-2">
         <div className="flex flex-wrap items-center gap-3">
+          {actions.approve ? (
+            <ApproveButton workspaceId={workspaceId} brandId={brandId} detail={detail} blocked={!!block || savingCaption} busy={downloading} setBusy={setDownloading} />
+          ) : null}
           {canApprove ? (
-            <DownloadButton workspaceId={workspaceId} brandId={brandId} detail={detail} blocked={!!block || savingCaption} downloading={downloading} setDownloading={setDownloading} />
+            <DownloadButton workspaceId={workspaceId} brandId={brandId} detail={detail} blocked={!actions.download || !!block || savingCaption} downloading={downloading} setDownloading={setDownloading} />
           ) : null}
           <Button type="button" disabled={!!block} onClick={() => go("publish")}>Continue to Publish</Button>
         </div>
-        {canApprove ? <p className="text-sm text-muted-foreground">Downloading approves this version.</p> : (
-          <p className="text-sm text-muted-foreground">Your role can&apos;t approve reels, so Download (which approves) isn&apos;t here.</p>
-        )}
+        {actions.downloadWhy ? <p className="text-sm text-muted-foreground">{actions.downloadWhy}</p> : null}
         {block ? <p className="text-sm text-muted-foreground">{block}</p> : null}
       </div>
 
@@ -275,7 +278,49 @@ function CaptionEdit({ workspaceId, brandId, detail, saving, setSaving, download
   );
 }
 
-/** Download: the route's `send` (approves a version awaiting approval), then the browser saves the file from its link. */
+/** Approve: the route's `send` approves a version awaiting approval. It stays on the page; Download opens once the reread shows the new status. */
+function ApproveButton({ workspaceId, brandId, detail, blocked, busy: working, setBusy }: {
+  workspaceId: string;
+  brandId: string;
+  detail: ReelDetail;
+  blocked: boolean;
+  busy: boolean;
+  setBusy: (v: boolean) => void;
+}) {
+  const [error, setError] = useState("");
+  const busy = useRef(false);
+
+  async function press(e: { detail: number }) {
+    if (isRepeatClick(e) || busy.current) return;
+    busy.current = true;
+    setBusy(true);
+    setError("");
+    const url = reelUrl(workspaceId, brandId, detail.item.id);
+    try {
+      await reelsApi.send(workspaceId, brandId, detail.item.id, detail.version);
+      await fetchShared(url, true).catch(() => undefined);
+    } catch (err) {
+      // No answer or a 5xx may have approved it; a 409 means the status moved. Read before the button comes back.
+      if (rereadAfterSend(err)) await fetchShared(url, true).catch(() => undefined);
+      setError(errorMessage(err));
+    } finally {
+      busy.current = false;
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <Button type="button" disabled={blocked || working} onClick={(e) => void press(e)}>
+        {working ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}
+        Approve
+      </Button>
+      <p role="alert" className="basis-full text-sm text-destructive empty:hidden">{error}</p>
+    </>
+  );
+}
+
+/** Download: reads the status fresh and calls `send` only if the reel is already approved, so it never approves. Then the browser saves the file from its link. */
 function DownloadButton({ workspaceId, brandId, detail, blocked, downloading, setDownloading }: {
   workspaceId: string;
   brandId: string;
@@ -294,15 +339,19 @@ function DownloadButton({ workspaceId, brandId, detail, blocked, downloading, se
     setError("");
     const url = reelUrl(workspaceId, brandId, detail.item.id);
     try {
-      const { downloadUrl } = await reelsApi.download(workspaceId, brandId, detail.item.id, detail.version);
-      const u = safeHttpUrl(downloadUrl);
-      if (!u) setError("Couldn't start the download. Try again.");
-      // The link's attachment header saves the file without leaving the page.
-      else window.location.assign(u.href);
-      await fetchShared(url, true).catch(() => undefined);
+      const fresh = (await fetchShared(url, true)) as ReelDetail;
+      const sent = await downloadIfApproved(
+        async () => fresh.item.status,
+        () => reelsApi.send(workspaceId, brandId, detail.item.id, fresh.version),
+      );
+      if (!sent) setError("Approve it first to download.");
+      else {
+        const u = safeHttpUrl(sent.downloadUrl);
+        if (!u) setError("Couldn't start the download. Try again.");
+        // The link's attachment header saves the file without leaving the page.
+        else window.location.assign(u.href);
+      }
     } catch (err) {
-      // No answer or a 5xx may have approved it; a 409 means the status moved. Read before the button comes back.
-      if (rereadAfterSend(err)) await fetchShared(url, true).catch(() => undefined);
       setError(errorMessage(err));
     } finally {
       busy.current = false;

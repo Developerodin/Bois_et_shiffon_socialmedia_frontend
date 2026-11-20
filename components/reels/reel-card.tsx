@@ -33,7 +33,7 @@ export const ReelCard = memo(function ReelCard({ reel, brandId }: { reel: ReelSu
       <span className="block aspect-[9/16]">
         {reel.thumbUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed storage links; next/image needs each host allowed
-          <img src={reel.thumbUrl} alt={reel.title} loading="lazy" decoding="async" className="size-full rounded-xl bg-muted object-cover" />
+          <img src={reel.thumbUrl} alt="" loading="lazy" decoding="async" className="size-full rounded-xl bg-muted object-cover" />
         ) : (
           <span className="flex size-full items-center justify-center rounded-xl bg-muted text-muted-foreground">
             <Film className="size-6" aria-hidden="true" />

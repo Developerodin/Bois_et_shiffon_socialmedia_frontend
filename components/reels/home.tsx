@@ -103,7 +103,7 @@ export function ReelsHome({ workspaceId, brandId, canCreate, canPublish }: { wor
   );
 }
 
-/** Presenters (with Make a presenter and Remove for a role that can) and templates, each with Preview and, for a role that can, Use and Preview with my photos. */
+/** Presenters (with Make a presenter and Remove for a role that can) and templates, each with Play sample and, for a role that can, Use and Make a preview with my photos. */
 function SideColumn({ workspaceId, brandId, canCreate, sending, onUse }: {
   workspaceId: string;
   brandId: string;
@@ -215,8 +215,8 @@ function TemplateCard({ workspaceId, brandId, options, template, playing, onPrev
       </div>
       <div className="flex flex-wrap gap-2">
         {preview && !playing ? (
-          <Button type="button" variant="ghost" size="sm" onClick={onPreview} aria-label={`Preview ${label.title}`}>
-            Preview
+          <Button type="button" variant="ghost" size="sm" onClick={onPreview} aria-label={`Play sample, ${label.title}`}>
+            Play sample
           </Button>
         ) : null}
         {canUse ? (
@@ -233,11 +233,12 @@ function TemplateCard({ workspaceId, brandId, options, template, playing, onPrev
               type="button"
               variant="outline"
               size="sm"
+              className="h-auto min-h-8 whitespace-normal py-1.5 text-left"
               disabled={!plan.loaded || paid.pressing || busy}
               onClick={(e) => void paid.press(e, () => reelsApi.preview(workspaceId, brandId, template.id))}
             >
               {paid.pressing ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : null}
-              {pressLabel("Preview with my photos", plan, options.previewCredits)}
+              {pressLabel("Make a preview with my photos", plan, options.previewCredits)}
             </Button>
           ) : (
             <p className="text-xs text-muted-foreground">Add product photos to preview templates with them.</p>

@@ -21,7 +21,7 @@ const UNREAD = "Couldn't check whether that went through. Reload the page to see
 export type PressResult = { ok: true; value: unknown } | { ok: false; error: unknown };
 
 /**
- * Every paid reel button (Make a presenter, Preview with my photos, Clone voice, and Make video and Try again through
+ * Every paid reel button (Make a presenter, Make a preview with my photos, Clone voice, and Make video and Try again through
  * useRenderPress) goes through this one hook:
  * no plan opens the paywall and sends nothing; a repeat click or a press while one is out is ignored; the balance is read
  * again after any answer; an answer that may still have charged (not a refusal) reads `reread` and keeps the button off

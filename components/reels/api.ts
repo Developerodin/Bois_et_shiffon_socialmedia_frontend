@@ -42,8 +42,8 @@ export const reelsApi = {
   /** Make video / Try again. Never sends `again`: the server answers a running render instead of charging twice, and refuses (409 render.alreadyDone) a version that already has a video. */
   render: (w: string, b: string, id: string, version: number) =>
     request<{ render: { id: string; step: RenderStep; attempt: number } }>(reelUrl(w, b, id), { method: "POST", body: JSON.stringify({ action: "render", version }) }),
-  /** Download: the route's `send` action, which approves a version awaiting approval. Named as the phone names it. */
-  download: (w: string, b: string, id: string, version: number) =>
+  /** The route's `send` action: approves a version awaiting approval, else returns the signed links. Approve calls it for the first, Download only for the second (see reel-actions.ts). */
+  send: (w: string, b: string, id: string, version: number) =>
     request<{ videoUrl: string; downloadUrl: string }>(reelUrl(w, b, id), { method: "POST", body: JSON.stringify({ action: "send", version, how: "download" }) }),
   /** Starts the checks again when they never landed ("none": nothing to check). */
   recheck: (w: string, b: string, id: string) =>
