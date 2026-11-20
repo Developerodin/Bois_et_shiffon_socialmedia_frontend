@@ -399,6 +399,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     request<{ campaigns: { id: string; name: string }[] }>(`${base}/campaigns`).then((r) => setCampaigns(r.campaigns), () => {});
   }, [base]);
   const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
+  // The posts of the month last shown in Month, so its channels and campaigns can be filtered on too.
+  const [monthItems, setMonthItems] = useState<ContentItem[]>([]);
   // List or Month, remembered per browser; read after mount so the server render and the first client render agree.
   const [view, setView] = useState<CalendarView>("list");
   useEffect(() => {
@@ -443,10 +445,9 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       </div>
     );
   }
-  // ponytail: channel and campaign options come from the list (open posts + 30 days); in Month, a past month's other
-  // channels or campaigns aren't offered. Merge in the month's read if that's missed.
-  const channels = [...new Set(data.map((i) => i.channel))];
-  const used = new Set(data.map((i) => i.campaignId));
+  // Options from the list (open posts + 30 days) and the month last shown, so an older month's channel or campaign can be picked.
+  const channels = [...new Set([...data, ...monthItems].map((i) => i.channel))];
+  const used = new Set([...data, ...monthItems].map((i) => i.campaignId));
   const campaignOptions = campaigns.filter((c) => used.has(c.id));
   const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
   const sel = cn(selectClass, "h-8 w-auto text-xs");
@@ -487,7 +488,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     return (
       <div>
         {filters}
-        <MonthView base={base} filter={filter} me={me} undated={shown.filter((i) => !i.scheduledFor)} onOpen={onOpen} />
+        <MonthView base={base} filter={filter} me={me} undated={shown.filter((i) => !i.scheduledFor)} onOpen={onOpen} onItems={setMonthItems} />
       </div>
     );
   }
@@ -570,7 +571,7 @@ function PostChip({ item, onOpen }: { item: ContentItem; onOpen: (id: string) =>
  * panel) shows that day's posts under the grid.
  * ponytail: no drag to reschedule, no week view, no new post from a day (the new post dialog has no date): not asked for yet.
  */
-function MonthView({ base, filter, me, undated, onOpen }: { base: string; filter: CalendarFilter; me: string | null; undated: ContentItem[]; onOpen: (id: string) => void }) {
+function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: string; filter: CalendarFilter; me: string | null; undated: ContentItem[]; onOpen: (id: string) => void; onItems: (items: ContentItem[]) => void }) {
   const [month, setMonth] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }));
   // The day whose posts show under the grid (its key), if any.
   const [picked, setPicked] = useState<string | null>(null);
@@ -583,6 +584,9 @@ function MonthView({ base, filter, me, undated, onOpen }: { base: string; filter
     intervals: past ? JOB_INTERVALS.preview : JOB_INTERVALS.always,
   });
   const byDay = useMemo(() => groupByDay(data ? filterItems(data.items, filter, me, new Date()) : []), [data, filter, me]);
+  useEffect(() => {
+    if (data) onItems(data.items);
+  }, [data, onItems]);
   const today = dayKey(new Date());
   const headId = useId();
   const monthHead = useRef<HTMLHeadingElement>(null);
@@ -670,12 +674,12 @@ function MonthView({ base, filter, me, undated, onOpen }: { base: string; filter
                           <div className="mt-0.5 hidden flex-col gap-0.5 @min-[520px]:flex">
                             {posts.slice(0, MORE_AFTER).map((i) => <PostChip key={i.id} item={i} onOpen={onOpen} />)}
                             {posts.length > MORE_AFTER && (
-                              <button type="button" aria-expanded={picked === k} onClick={() => setPicked(k)} className="rounded px-1 text-left text-[11px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                              <button type="button" aria-expanded={picked === k} onClick={() => setPicked((p) => (p === k ? null : k))} className="rounded px-1 text-left text-[11px] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                                 +{posts.length - MORE_AFTER} more
                               </button>
                             )}
                           </div>
-                          <button type="button" aria-expanded={picked === k} onClick={() => setPicked(k)} className="mt-0.5 block w-full truncate rounded text-left text-[11px] text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]:hidden">
+                          <button type="button" aria-expanded={picked === k} onClick={() => setPicked((p) => (p === k ? null : k))} className="mt-0.5 block w-full truncate rounded text-left text-[11px] text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]:hidden">
                             {postCount(posts.length)}
                           </button>
                         </>
