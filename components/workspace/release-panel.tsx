@@ -74,7 +74,7 @@ const browserZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
  * Approve the exact draft shown above, then publish or schedule it, with a full history. `approveFirst`: one press
  * approves a version awaiting approval and then publishes it (the reel page; the phone does the same).
  */
-export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false, pinLink }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[] | null; onChanged: () => void; approveFirst?: boolean; /** A Pinterest pin's destination, so the approver sees where it leads. */ pinLink?: string | null }) {
+export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false, pinLink }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[]; onChanged: () => void; approveFirst?: boolean; /** A Pinterest pin's destination, so the approver sees where it leads. */ pinLink?: string | null }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
   const { data, failed: loadError, slow, reload } = useJob(url, { pick: asRelease, done: notGoingOut, intervals: JOB_INTERVALS.publishing, capMs: 600_000 });
   // The hook's own mount poll is the first fetch; only a real change of status or version needs a fresh one.
@@ -117,7 +117,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
     }
   }
 
-  if (!data || !perms) {
+  if (!data) {
     return (
       <section className="flex flex-wrap items-center gap-2 rounded-xl border border-border p-4 text-sm text-muted-foreground">
         {loadError ? (
@@ -190,7 +190,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
         canPublish ? (
           <>
             <PublishForm base={base} data={data} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
-            <StoryByHand base={base} id={id} data={data} onAct={act} />
+            <StoryByHand base={base} id={id} data={data} canDownload={perms.includes("content.download")} onAct={act} />
           </>
         ) : (
           <>
@@ -560,7 +560,7 @@ function DownloadFrames({ base, id }: { base: string; id: string }) {
   );
 }
 
-function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data: Release; onAct: (body: Record<string, unknown>) => Promise<void> }) {
+function StoryByHand({ base, id, data, canDownload, onAct }: { base: string; id: string; data: Release; canDownload: boolean; onAct: (body: Record<string, unknown>) => Promise<void> }) {
   const [at, setAt] = useState("");
   const [link, setLink] = useState("");
   const [pending, setPending] = useState<string | null>(null);
@@ -601,9 +601,11 @@ function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data
         )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" disabled={pending !== null} onClick={() => run("zip", download)}>
-          <Download aria-hidden /> {pending === "zip" ? "Preparing…" : "Download frames"}
-        </Button>
+        {canDownload && (
+          <Button variant="outline" disabled={pending !== null} onClick={() => run("zip", download)}>
+            <Download aria-hidden /> {pending === "zip" ? "Preparing…" : "Download frames"}
+          </Button>
+        )}
         <Input type="url" inputMode="url" aria-label="Story link (optional)" placeholder="Story link (optional)" value={link} onChange={(e) => setLink(e.target.value)} className="h-9 w-64 max-w-full" />
         <Button disabled={pending !== null} onClick={() => run("posted", () => onAct({ action: "postedByHand", ...(link.trim() ? { url: link.trim() } : {}) }))}>
           <Check aria-hidden /> {pending === "posted" ? "Saving…" : "I posted it"}

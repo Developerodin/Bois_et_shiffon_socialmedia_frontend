@@ -33,6 +33,20 @@ export default async function ContextPage() {
     );
   }
 
+  if (!shell.brandPermissions.includes("agents.read")) {
+    return (
+      <div className="mx-auto flex max-w-5xl flex-col gap-5">
+        <EmptyState
+          size="hero"
+          icon={Library}
+          eyebrow="Brand context"
+          title="Your role doesn't include the business context."
+          description="Ask someone who manages this brand if you need it."
+        />
+      </div>
+    );
+  }
+
   return (
     <ContextBoard
       // Remount on brand switch so polling and selection reset cleanly.

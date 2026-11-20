@@ -23,7 +23,7 @@ export type NavEntry = {
 
 export const NAV: readonly NavEntry[] = [
   { id: "overview", label: "Overview", href: "/", group: "main" },
-  { id: "context", label: "Business context", href: "/context", group: "main" },
+  { id: "context", label: "Business context", href: "/context", group: "main", perm: ["agents.read"] },
   { id: "products", label: "Products", href: "/products", group: "main" },
   { id: "connections", label: "Connections", href: "/connections", group: "main", perm: CONNECTIONS_READ },
   { id: "automations", label: "Automations", href: "/automations", group: "main", feature: "automations" },

@@ -184,7 +184,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts }: { base: str
     return s === "RUNNING" || s === "QUEUED";
   }, []);
   // Only for roles that can read agents (a client reviewer can't): never asked, so never a failure here.
-  const plannerRunning = useBrandData(base, "agents", pickPlanner as (d: never) => boolean, !!perms?.includes("agents.read")).data === true;
+  const plannerRunning = useBrandData(base, "agents", pickPlanner as (d: never) => boolean, !!perms.includes("agents.read")).data === true;
   const workspaceId = workspaceIdOf(base);
   const planPrice = useRunPrice(workspaceId, "planner");
   const scoutPrice = useRunPrice(workspaceId, "scout");
@@ -233,7 +233,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts }: { base: str
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 text-xs">
         <span className="flex flex-wrap items-center gap-2 text-muted-foreground">
           {shortlisted} shortlisted
-          {shortlisted > 0 && perms?.includes("agents.run") ? (
+          {shortlisted > 0 && perms.includes("agents.run") ? (
             <Button size="sm" onClick={() => void plan()} disabled={!!planning || plannerRunning}>
               {planning || plannerRunning ? <LoaderCircle aria-hidden className="size-4 animate-spin motion-reduce:animate-none" /> : null}
               {planning || plannerRunning ? "Planning posts…" : withPrice(`Plan posts from ${shortlisted === 1 ? "this idea" : `these ${shortlisted} ideas`}`, planPrice)}
@@ -245,7 +245,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts }: { base: str
         </span>
         <span className="flex items-center gap-2">
           {/* Translate is an AI call behind agents.read: a client reviewer doesn't get it. */}
-          {shown.length > 0 && perms?.includes("agents.read") && (
+          {shown.length > 0 && perms.includes("agents.read") && (
             <TranslateToggle
               on={translateOn && !translating}
               busy={translating}
@@ -281,7 +281,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts }: { base: str
       {shown.length === 0 ? (
         <div className="flex flex-col items-start gap-3 p-4">
           <p className="text-sm text-muted-foreground">{data.length ? "No open ideas. Switch to All to see past ones." : "No ideas yet. The Opportunities agent finds what to post about."}</p>
-          {perms?.includes("agents.run") && (
+          {perms.includes("agents.run") && (
             <Button size="sm" variant="secondary" onClick={onRunScout}>
               {withPrice("Find ideas", scoutPrice)}
             </Button>
@@ -491,7 +491,7 @@ function nextStep(i: ContentItem): { text: string; agent?: { key: string; label:
   return null;
 }
 
-function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentItem; perms: string[] | null; onEdit: () => void }) {
+function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentItem; perms: string[]; onEdit: () => void }) {
   const step = nextStep(item);
   // The agent we started, until the post moves on (status, version or check changes).
   const at = `${item.status}:${item.latest?.version ?? 0}:${item.latest?.check ? 1 : 0}`;
@@ -518,9 +518,9 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
     setRanOut(true);
   }, []);
   if (!step) return null;
-  const canRun = perms?.includes("agents.run");
+  const canRun = perms.includes("agents.run");
   const story = item.channel === "INSTAGRAM_STORY";
-  const canEdit = perms?.includes("content.create") && !story;
+  const canEdit = perms.includes("content.create") && !story;
 
   async function run(key: string) {
     setPending(true);
@@ -560,7 +560,7 @@ function NextStep({ base, item, perms, onEdit }: { base: string; item: ContentIt
             </Button>
           )}
           {story && step.edit && <p className="text-sm text-muted-foreground">Edit it on the phone.</p>}
-          {perms && !(step.agent && canRun) && !(step.edit && canEdit) && !(story && step.edit) && (
+          {!(step.agent && canRun) && !(step.edit && canEdit) && !(story && step.edit) && (
             <p className="text-sm text-muted-foreground">Your role can&rsquo;t do this step. Someone who runs agents or edits content will pick it up.</p>
           )}
         </div>
@@ -701,9 +701,9 @@ export function ContentView({ base, perms, id, onBack, reelsOn, brandId }: { bas
   const [editing, setEditing] = useState(false);
   useEffect(() => setEditing(false), [id]);
   const locked = item?.status === "SCHEDULED" || item?.status === "PUBLISHED" || item?.status === "REVIEWED";
-  const canEdit = perms?.includes("content.create") && !locked && !item?.studio;
+  const canEdit = perms.includes("content.create") && !locked && !item?.studio;
   // Who can own a post, read once when the person may reassign (a plain fetch: the 6 s poll must not carry it).
-  const canAssign = !!perms?.includes("content.create");
+  const canAssign = perms.includes("content.create");
   const [owners, setOwners] = useState<{ id: string; name: string | null }[]>([]);
   const [ownerError, setOwnerError] = useState<string | null>(null);
   useEffect(() => {

@@ -76,7 +76,7 @@ describe("sidebarGroups", () => {
   it("leaves out Connections and Inbox for a role without inbox.read (a client reviewer)", () => {
     const g = sidebarGroups(["inbox"], ["brand.read", "analytics.read", "content.approve", "content.download"]);
     expect(g.map((x) => x.id)).toEqual(["main"]);
-    expect(ids(g[0])).toEqual(["overview", "context", "products"]);
+    expect(ids(g[0])).toEqual(["overview", "products"]);
     expect(ids(sidebarGroups(["inbox"], ["brand.read", "inbox.read"])[1])).toEqual(["inbox"]);
     // Publishers pick their account and account managers manage them: either one sees Connections, not the Inbox.
     for (const key of ["publish.execute", "integrations.manage"]) {
@@ -84,6 +84,11 @@ describe("sidebarGroups", () => {
       expect(ids(g[0])).toContain("connections");
       expect(g.map((x) => x.id)).toEqual(["main"]);
     }
+  });
+
+  it("shows Business context only to roles that read agents", () => {
+    expect(ids(sidebarGroups([], ["brand.read"])[0])).not.toContain("context");
+    expect(ids(sidebarGroups([], ["brand.read", "agents.read"])[0])).toContain("context");
   });
 
   it("gates Studio on stories", () => {

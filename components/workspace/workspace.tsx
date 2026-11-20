@@ -638,7 +638,7 @@ function ContextPane({
               {site.host} <ExternalLink className="size-3" aria-hidden="true" />
             </a>
           )}
-          {summary ? (
+          {!show.docs ? null : summary ? (
             <>
               <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-muted-foreground">{summary}</p>
               <button type="button" onClick={() => onOpenDoc("product-information")} className="mt-1 py-1 text-xs font-medium hover:underline">

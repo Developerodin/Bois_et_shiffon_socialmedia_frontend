@@ -30,6 +30,7 @@ const RETRY_MS = 15_000;
 type LoadState =
   | { kind: "loading" }
   | { kind: "ready"; data: ContextDocsResponse }
+  | { kind: "forbidden" }
   | { kind: "error" };
 
 const RESEARCH_LABEL = {
@@ -67,6 +68,11 @@ export function ContextBoard({ workspaceId, brandId, perms }: Props) {
         setState({ kind: "ready", data });
       } catch (err) {
         if (signal?.aborted) return;
+        // A 403 is the role, not an outage: no retry banner, no polling.
+        if (err instanceof ProblemError && err.status === 403) {
+          setState({ kind: "forbidden" });
+          return;
+        }
         console.error("[context] failed to load docs", err);
         // Keep showing stale data if a background poll fails.
         setState((prev) => (prev.kind === "ready" ? prev : { kind: "error" }));
@@ -200,6 +206,10 @@ export function ContextBoard({ workspaceId, brandId, perms }: Props) {
             </div>
           </div>
         </div>
+      ) : state.kind === "forbidden" ? (
+        <p role="status" className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+          Your role doesn&rsquo;t include the business context.
+        </p>
       ) : state.kind === "error" ? (
         <ServiceUnavailable onRetry={() => void loadOnce()} />
       ) : (
