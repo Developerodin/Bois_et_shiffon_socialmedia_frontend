@@ -46,7 +46,7 @@ export default async function LoginPage({
           {/* Entrance: the form's parts settle in top to bottom (rise-in, ~40 ms apart), then the example morning on the
               left plays. Nothing waits on it: every field works from the first frame. */}
           <div className="rise-in" style={rise(0)}>
-            <BrandLogo height={34} priority />
+            <BrandLogo height={48} priority />
           </div>
           <div className="mt-10 w-full max-w-sm">
             <h1 id="signin-h" className="rise-in font-display text-4xl font-medium tracking-tight text-balance" style={rise(1)}>
