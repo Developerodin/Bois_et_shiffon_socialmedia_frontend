@@ -463,7 +463,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
         peekLoading
       )
     ) : v.kind === "panel" ? (
-      // ponytail: the panel renders on the board and here (two pollers for it); collapse it on the board if that ever matters.
+      // ponytail: the panel renders on the board and here: duplicate heading ids (aria-labelledby points at the board copy), separate local state, doubled polling. Collapse it on the board if that ever matters.
       panels.find((p) => p.id === v.id)?.render()
     ) : v.kind === "competitor" ? (
       <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />

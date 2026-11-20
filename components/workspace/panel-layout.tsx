@@ -32,6 +32,7 @@ export type Preset<Id extends string> = { name: string; description: string; lay
 const MIN_PX = 240;
 // Matches Tailwind's lg breakpoint. Only the layout on screen renders panels: rendering both (one hidden
 // by CSS) would mount every panel twice, double the polling, duplicate element ids and split edit state.
+// (Previewing a panel via onOpenInPeek knowingly renders that one panel twice.)
 const WIDE = "(min-width: 1024px)";
 const subscribeWide = (cb: () => void) => {
   const m = window.matchMedia(WIDE);
@@ -234,6 +235,8 @@ export function PanelLayout<Id extends string>({
     setDropHint(null);
     const id = dragging.current ?? (e.dataTransfer.getData("text/panel") as Id);
     dragging.current = null;
+    // A cross-column drop remounts the dragged section, so its dragend never fires.
+    setDragOn(false);
     if (id && ids.includes(id)) move(id, target);
   };
   const dropInPeek = (e: React.DragEvent) => {
@@ -451,7 +454,7 @@ export function PanelLayout<Id extends string>({
                               <MoreHorizontal aria-hidden="true" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" onCloseAutoFocus={(e) => {
+                          <DropdownMenuContent align="end" data-panel={id} onCloseAutoFocus={(e) => {
                               if (!suppressReturn.current) return;
                               e.preventDefault();
                               suppressReturn.current = false;
@@ -459,7 +462,7 @@ export function PanelLayout<Id extends string>({
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => shift(id, -1))}>Move left</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => shift(id, 1))}>Move right</DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => move(id, "new-column"))}>Open in its own column</DropdownMenuItem>
-                            {onOpenInPeek && <DropdownMenuItem onSelect={() => onOpenInPeek(id)}>Open in preview</DropdownMenuItem>}
+                            {onOpenInPeek && <DropdownMenuItem onSelect={() => { suppressReturn.current = true; onOpenInPeek(id); }}>Open in preview</DropdownMenuItem>}
                             <DropdownMenuItem onSelect={() => toggleCollapse(id)}>{collapsed ? "Expand" : "Collapse"}</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onSelect={() => fromMenu(id, () => hide(id))}>Hide panel</DropdownMenuItem>
@@ -508,7 +511,7 @@ export function PanelLayout<Id extends string>({
             onDragLeave={() => setDropHint(null)}
             onDrop={dropInPeek}
             className={cn(
-              "absolute right-3 top-3 z-10 flex h-30 w-50 items-center justify-center rounded-2xl border-2 border-dashed border-primary p-2 text-center text-xs font-medium text-primary",
+              "absolute right-3 top-3 z-30 flex h-30 w-50 items-center justify-center rounded-2xl border-2 border-dashed border-primary p-2 text-center text-xs font-medium text-primary",
               dropHint === "peek" ? "bg-primary/10" : "bg-background/80",
             )}
           >

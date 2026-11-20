@@ -38,7 +38,7 @@ export function usePeek(item: PeekItem | null) {
     // Opening another item from inside the peek keeps the first opener.
     if (a instanceof HTMLElement && a !== document.body && !ref.current?.contains(a)) {
       // From the Recent menu the focused element is a menu item that is about to unmount: the opener is the Recent button.
-      const el = a.closest("[role=menu]") ? document.getElementById("recent-menu") : a;
+      const el = a.closest("[data-recent]") ? document.getElementById("recent-menu") : a;
       const panel = a.closest<HTMLElement>("[data-panel]")?.dataset.panel;
       opener.current = { el: el ?? a, head: panel ? "panel-head-" + panel : null };
     }
