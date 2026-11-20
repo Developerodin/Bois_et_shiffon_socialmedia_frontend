@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AgentLog } from "@/components/agents/agent-log";
 import { AgentTile } from "@/components/agents/agent-tile";
 import { fetchAgents, type AgentSummary } from "@/components/agents/api";
@@ -24,30 +24,36 @@ type LoadState =
 export function AgentsBoard({ workspaceId, brandId }: Props) {
   const [state, setState] = useState<LoadState>({ kind: "loading" });
 
-  const load = useCallback(
-    async (signal?: AbortSignal) => {
-      try {
-        const data = await fetchAgents(workspaceId, brandId);
-        setState({ kind: "ready", agents: data.agents ?? [] });
-      } catch (err) {
-        if (signal?.aborted) return;
-        console.error("[agents] failed to load agents", err);
-        setState({ kind: "error" });
-      }
-    },
-    [workspaceId, brandId],
-  );
+  // False once the board is gone: no state is set by an answer that arrives after that.
+  const live = useRef(true);
+  useEffect(() => {
+    live.current = true;
+    return () => {
+      live.current = false;
+    };
+  }, []);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await fetchAgents(workspaceId, brandId);
+      if (live.current) setState({ kind: "ready", agents: data.agents ?? [] });
+    } catch (err) {
+      if (!live.current) return;
+      console.error("[agents] failed to load agents", err);
+      setState({ kind: "error" });
+    }
+  }, [workspaceId, brandId]);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let stopped = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const tick = async () => {
-      await load(controller.signal);
-      if (!controller.signal.aborted) timer = setTimeout(tick, AGENTS_POLL_MS);
+      await load();
+      if (!stopped) timer = setTimeout(tick, AGENTS_POLL_MS);
     };
     void tick();
     return () => {
-      controller.abort();
+      stopped = true;
       if (timer) clearTimeout(timer);
     };
   }, [load]);

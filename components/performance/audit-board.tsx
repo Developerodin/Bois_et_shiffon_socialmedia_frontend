@@ -117,11 +117,12 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceI
   const runs = useRef<string | null>(null);
   useEffect(() => {
     if (!canReadAgents) return;
-    const ctrl = new AbortController();
+    let live = true;
     const check = () => {
       if (document.visibilityState !== "visible") return;
       fetchAgents(workspaceId, brandId).then(
         ({ agents }) => {
+          if (!live) return;
           const now = agents.filter((a) => a.key === "seo" || a.key === "geo").map((a) => `${a.lastRun?.id}:${a.lastRun?.status}`).join();
           if (runs.current !== null && runs.current !== now) reload();
           runs.current = now;
@@ -132,7 +133,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceI
     check();
     const t = setInterval(check, 6000);
     return () => {
-      ctrl.abort();
+      live = false;
       clearInterval(t);
     };
   }, [workspaceId, brandId, reload, canReadAgents]);

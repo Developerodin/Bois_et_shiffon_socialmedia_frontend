@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { agentsUrl, type AgentSummary } from "@/components/agents/api";
-import { toast } from "@/components/ui/toast";
+import { clearToasts, toast } from "@/components/ui/toast";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { baselineOf, finishedRuns } from "@/lib/agent-runs";
 import { readable } from "@/lib/agent-message";
@@ -23,6 +23,9 @@ export function AgentWatcher({ workspaceId, brandId }: { workspaceId: string; br
   const { data } = useJob(agentsUrl(base), { pick: pickAgents as (d: never) => AgentSummary[], intervals: JOB_INTERVALS.agentWatch, stopOn: STOP_ON });
   const prev = useRef<AgentSummary[] | null>(null);
   const baseline = useRef<string | null | undefined>(undefined);
+
+  // Keyed by brand in the layout: switching brands unmounts this, and the old brand's toasts go with it.
+  useEffect(() => clearToasts, []);
 
   useEffect(() => {
     if (!data) return;

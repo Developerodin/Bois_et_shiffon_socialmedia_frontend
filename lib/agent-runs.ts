@@ -18,7 +18,7 @@ const going = (s: string) => s === "QUEUED" || s === "RUNNING";
 
 /**
  * The runs that finished between two polls, each once: one seen going that has now finished, or one never seen that
- * finished after `baseline` (the first poll's newest time). A run already finished in `prev` is not repeated.
+ * finished after `baseline` (the first poll's newest time; null when that poll had no runs, so any finished run is new). A run already finished in `prev` is not repeated.
  */
 export function finishedRuns(prev: readonly AgentSummary[] | null, next: readonly AgentSummary[], baseline: string | null): FinishedRun[] {
   const out: FinishedRun[] = [];
@@ -28,7 +28,7 @@ export function finishedRuns(prev: readonly AgentSummary[] | null, next: readonl
     const before = prev?.find((p) => p.key === a.key)?.lastRun;
     if (before?.id === run.id) {
       if (!going(before.status)) continue;
-    } else if (!(run.finishedAt && baseline && run.finishedAt > baseline)) continue;
+    } else if (!(run.finishedAt && (baseline === null || run.finishedAt > baseline))) continue;
     const status = run.status === "SUCCEEDED" ? "done" : nothingToDo(a) ? "idle" : "failed";
     out.push({ key: a.key, name: a.name, runId: run.id, status, ...(status === "failed" && run.error ? { error: run.error } : {}) });
   }

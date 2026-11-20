@@ -22,12 +22,20 @@ export function toast(t: ToastInput) {
   toasts = [...toasts, { ...t, id: nextId++ }].slice(-MAX);
   emit();
 }
+/** Remove every toast (the watcher does this when it goes: its toasts belong to the brand it watched). */
+export function clearToasts() {
+  if (toasts.length === 0) return;
+  toasts = [];
+  emit();
+}
+/** The toasts now showing. */
+export const currentToasts = () => toasts;
 const dismiss = (id: number) => {
   toasts = toasts.filter((t) => t.id !== id);
   emit();
 };
-/** Only paths inside the app ("/x", not "//host"). */
-export const safeHref = (href: string | undefined) => (href && href.startsWith("/") && !href.startsWith("//") ? href : undefined);
+/** Only paths inside the app ("/x"): not "//host", and not "/\host" (browsers read a backslash as a slash). */
+export const safeHref = (href: string | undefined) => (href && href.startsWith("/") && !href.startsWith("//") && !href.startsWith("/\\") ? href : undefined);
 
 const subscribe = (l: () => void) => (listeners.add(l), () => void listeners.delete(l));
 const snapshot = () => toasts;

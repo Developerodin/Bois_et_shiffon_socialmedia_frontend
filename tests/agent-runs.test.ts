@@ -53,6 +53,12 @@ describe("finishedRuns", () => {
     expect(finishedRuns([], [agent("a", "1", "SUCCEEDED", T1)], T1)).toEqual([]);
   });
 
+  it("with no baseline (the first poll had no runs), any run that has finished since is new", () => {
+    expect(finishedRuns(null, [agent("a", "1", "SUCCEEDED", T1)], null).map((r) => r.runId)).toEqual(["1"]);
+    expect(finishedRuns([{ ...agent("a", "1", "SUCCEEDED"), lastRun: null }], [agent("a", "1", "FAILED", T1, "boom")], null).map((r) => r.status)).toEqual(["failed"]);
+    expect(finishedRuns(null, [agent("a", "1", "RUNNING")], null)).toEqual([]);
+  });
+
   it("counts an unseen run that finished after the baseline", () => {
     const prev = [agent("a", "1", "SUCCEEDED", T1)];
     const next = [agent("a", "9", "SUCCEEDED", T2)];
