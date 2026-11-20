@@ -42,6 +42,8 @@ type Release = {
   /** A story marked to be posted by hand, and when it is due. */
   byHand?: boolean;
   scheduledFor?: string | null;
+  /** The link of a post someone posted by hand, once recorded. An older server sends none. */
+  postUrl?: string | null;
   accounts: { id: string; displayName: string }[];
   boards?: Record<string, { id: string; name: string }[] | null>;
   decisions: Decision[];
@@ -196,7 +198,10 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
         )
       ) : status === "APPROVED" && data.approvalValid ? (
         canPublish ? (
-          <PublishForm base={base} data={data} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
+          <>
+            <PublishForm base={base} data={data} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
+            <PostedByHand onAct={act} />
+          </>
         ) : (
           <p className="text-sm text-muted-foreground">Approved. Someone who can publish will post it.</p>
         )
@@ -209,6 +214,11 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
       ) : status === "REJECTED" ? (
         <p className="text-sm text-muted-foreground">Rejected. Editing the draft sends it back through review.</p>
       ) : null}
+      {status === "PUBLISHED" && safeHttpUrl(data.postUrl) && (
+        <a href={safeHttpUrl(data.postUrl)!.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium underline-offset-2 hover:underline">
+          Posted by hand <ExternalLink aria-hidden className="size-3.5" />
+        </a>
+      )}
       <History data={data} canPublish={canPublish} onSettle={(attemptId, action, link) => act({ action, attemptId, ...(link ? { url: link } : {}) })} onAct={act} />
       {slow && <p className="text-sm text-muted-foreground">Still not confirmed. Check the account to see whether it posted.</p>}
     </section>
@@ -591,6 +601,38 @@ function StoryByHand({ base, id, data, onAct }: { base: string; id: string; data
       <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
         {BY_HAND_STEPS.map((s) => <li key={s}>{s}</li>)}
       </ol>
+      {error && <p role="alert" className="flex items-start gap-2 text-sm text-destructive"><CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />{error}</p>}
+    </div>
+  );
+}
+
+/** An approved post someone put up themselves: says so, with the post's link if they have it. The server checks the link and shows its refusal as sent. */
+function PostedByHand({ onAct }: { onAct: (body: Record<string, unknown>) => Promise<void> }) {
+  const [link, setLink] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save() {
+    setPending(true);
+    setError(null);
+    try {
+      await onAct({ action: "postedByHand", ...(link.trim() ? { url: link.trim() } : {}) });
+    } catch (e) {
+      setError(errText(e));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2 border-t border-border pt-4">
+      <h3 className="text-sm font-medium">Posted it yourself?</h3>
+      <div className="flex flex-wrap items-center gap-2">
+        <Input type="url" inputMode="url" aria-label="Post link (optional)" placeholder="Post link (optional)" value={link} onChange={(e) => setLink(e.target.value)} className="h-9 w-64 max-w-full" />
+        <Button variant="outline" disabled={pending} onClick={save}>
+          <Check aria-hidden /> {pending ? "Saving…" : "I posted it"}
+        </Button>
+      </div>
       {error && <p role="alert" className="flex items-start gap-2 text-sm text-destructive"><CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />{error}</p>}
     </div>
   );
