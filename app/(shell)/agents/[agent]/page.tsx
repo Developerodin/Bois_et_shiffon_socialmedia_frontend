@@ -20,8 +20,8 @@ export default async function AgentPage({ params }: { params: Promise<{ agent: s
     <ComingSoon
       icon={Bot}
       mark={`/agents/${entry.id}.svg`}
-      title={entry.label}
-      description={`${entry.role} agent. ${entry.blurb ?? "It is not on the web yet, and arrives in a later release."}`}
+      title={entry.role ?? entry.label}
+      description={entry.blurb ?? `${entry.label} is not on the web yet, and arrives in a later release.`}
       backHref="/"
       backLabel="Back to Overview"
     />

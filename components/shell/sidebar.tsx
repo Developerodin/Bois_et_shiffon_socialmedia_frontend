@@ -172,7 +172,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                   setDragId(null);
                 }}
                 onDragEnd={() => setDragId(null)}
-                className={cn("cursor-grab active:cursor-grabbing", dragId === e.id && "opacity-50")}
+                className={cn("active:cursor-grabbing", dragId === e.id && "opacity-50")}
               >
                 <Link
                   href={e.href}
@@ -225,7 +225,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
 /** Desktop (768 px and up): the fixed sidebar. Below that the same body lives in MobileNav's sheet. */
 export function Sidebar(props: Props) {
   return (
-    <aside aria-label="Workspace" className="hidden h-full w-[232px] shrink-0 flex-col bg-card md:flex">
+    <aside aria-label="Sidebar" className="hidden h-full w-[232px] shrink-0 flex-col bg-card md:flex">
       <SidebarBody {...props} />
     </aside>
   );

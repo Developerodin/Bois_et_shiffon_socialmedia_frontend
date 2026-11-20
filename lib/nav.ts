@@ -37,15 +37,15 @@ export const NAV: readonly NavEntry[] = [
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
-  { id: "wave", label: "Wave", href: "/?panel=content", group: "agent", role: "Content & marketing" },
+  { id: "wave", label: "Wave", href: "/?panel=content", group: "agent", role: "Content calendar" },
   // Echo has no web inbox yet; it points at Connections until one exists.
   { id: "echo", label: "Echo", href: "/settings?tab=connections", group: "agent", role: "Communication", soon: true },
   { id: "pulse", label: "Pulse", href: "/agents/pulse", group: "agent", role: "Finance", soon: true },
   { id: "hum", label: "Hum", href: "/agents/hum", group: "agent", role: "Admin & access", soon: true },
-  { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "Growth & scale" },
-  { id: "drift", label: "Drift", href: "/?panel=competitors", group: "agent", role: "Discovery" },
+  { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "Performance" },
+  { id: "drift", label: "Drift", href: "/?panel=competitors", group: "agent", role: "Competitors" },
 
-  { id: "calendar", label: "Calendar", href: "/?panel=content", group: "more" },
+  { id: "calendar", label: "Content calendar", href: "/?panel=content", group: "more" },
   { id: "performance", label: "Performance", href: "/performance", group: "more" },
   { id: "agent-log", label: "Agent log", href: "/agents", group: "more" },
   { id: "settings", label: "Settings", href: "/settings", group: "more" },

@@ -82,7 +82,7 @@ export function peekKey(v: View): string {
 export function peekCrumb(v: View): string {
   switch (v.kind) {
     case "content":
-      return "Calendar › Post";
+      return "Content calendar › Post";
     case "doc":
       return "Context › Document";
     case "agent":

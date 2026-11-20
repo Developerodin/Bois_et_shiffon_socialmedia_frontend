@@ -59,7 +59,7 @@ describe("workspace view validation", () => {
 
 describe("peek labels", () => {
   it("names where each item lives", () => {
-    expect(peekCrumb({ kind: "content", id: "p1" })).toBe("Calendar › Post");
+    expect(peekCrumb({ kind: "content", id: "p1" })).toBe("Content calendar › Post");
     expect(peekCrumb({ kind: "doc", doc: "brand-voice" })).toBe("Context › Document");
     expect(peekCrumb({ kind: "agent", key: "seo" })).toBe("Agents");
     expect(peekCrumb({ kind: "competitor", id: "c1" })).toBe("Competitors");

@@ -92,11 +92,11 @@ const TASK_ICON: Record<string, LucideIcon> = {
   connect: Plug,
 };
 /** The agents the sidebar marks "Soon": one list, so the Overview counts match it. */
-const PLANNED: { key: string; name: string; icon: LucideIcon; does: string }[] = NAV.filter((e) => e.group === "agent" && e.soon).map((e) => ({
+const PLANNED: { key: string; name: string; persona: string; icon: LucideIcon }[] = NAV.filter((e) => e.group === "agent" && e.soon).map((e) => ({
   key: e.id,
-  name: e.label,
+  name: e.role ?? e.label, // the role is the name in the Overview; the sidebar's persona is only a subtitle
+  persona: e.label,
   icon: Lock,
-  does: e.role ?? "Coming soon",
 }));
 
 /** "Platform Admin" and the like are role names, not a first name to greet. */
@@ -374,6 +374,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
           connectionsFailed={failed.connections}
           onOpenDoc={(doc) => open({ kind: "doc", doc })}
           onOpenResearch={() => open({ kind: "agent", key: "research", run: true })}
+          onOpenCompetitors={() => revealPanel("competitors")}
           canEdit={canEditDocs}
           canRun={canRun}
           show={{ docs: canAgents, competitors: canReports, accounts: canAccounts }}
@@ -649,12 +650,14 @@ function ContextPane({
   connectionsFailed,
   onOpenDoc,
   onOpenResearch,
+  onOpenCompetitors,
   canEdit,
   canRun,
   show,
 }: {
   base: string;
   onOpenResearch: () => void;
+  onOpenCompetitors: () => void;
   /** The sections this role can read: documents (agents.read), competitors (analytics.read), accounts (CONNECTIONS_READ). */
   show: { docs: boolean; competitors: boolean; accounts: boolean };
   /** Editing the brand needs context.edit; re-reading the site starts an agent run (agents.run). */
@@ -732,7 +735,7 @@ function ContextPane({
         {show.docs && (
         <section aria-labelledby="docs-h" className="px-5 py-4">
           <h2 id="docs-h" className="flex items-center gap-2 text-sm font-semibold">
-            Documents <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{docs?.docs.filter((d) => d.latest).length ?? 0}</span>
+            Documents <span className="rounded-full bg-muted px-1.5 text-xs font-normal text-muted-foreground">{docs?.docs.filter((d) => d.latest).length ?? 0}</span>
           </h2>
           <LoadGate ready={!!docs} failed={docsFailed} what="your documents" onRetry={onRetry} rows={2} className="mt-2">
           {/* Rows bleed into the padding so their hover fills edge to edge while the text lines up with the headings. */}
@@ -763,12 +766,12 @@ function ContextPane({
         {show.competitors && (
         <section aria-labelledby="comp-h" className="px-5 py-4">
           <h2 id="comp-h" className="flex items-center gap-2 text-sm font-semibold">
-            Competitors {reportsReady && <span className="rounded-full bg-muted px-1.5 text-[11px] font-normal text-muted-foreground">{competitors.length}</span>}
+            Competitors {reportsReady && <span className="rounded-full bg-muted px-1.5 text-xs font-normal text-muted-foreground">{competitors.length}</span>}
           </h2>
           <LoadGate ready={reportsReady} failed={reportsFailed} what="competitors" onRetry={onRetry} rows={1} className="mt-2">
           {competitors.length ? (
             <>
-              <p className="mt-1 text-xs text-muted-foreground">Brands AI assistants recommend instead of you. Audit them in the Competitors panel.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Brands AI assistants recommend instead of you. Audit them in the{" "}<button type="button" onClick={onOpenCompetitors} className="rounded font-medium underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Competitors panel</button>.</p>
               <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
                 {competitors.map((c) => (
                   <li key={c.name} className="flex min-w-0 items-center gap-2 text-sm">
@@ -934,7 +937,7 @@ function Home({
         id: "scout",
         done: false,
         label: "Get post ideas for your brand",
-        detail: "Scout reads your documents and the season",
+        detail: "Opportunities reads your documents and the season",
         action: (
           <Button size="sm" onClick={() => onOpen({ kind: "agent", key: "scout", run: true })}>
             {withPrice("Get ideas", scoutPrice)}
@@ -1061,18 +1064,18 @@ function Home({
             {open.slice(0, 5).map((t) => {
               const Icon = TASK_ICON[t.id] ?? FileText;
               return (
-              <li key={t.id} className="flex items-center gap-3 px-4 py-3">
+              <li key={t.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
                 <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent" aria-hidden="true">
                   <Icon className="size-4 text-accent-foreground" />
                 </span>
-                <p className="min-w-0 flex-1 truncate text-sm">
+                <p className="min-w-[12rem] flex-1 line-clamp-2 text-sm">
                   <span className="font-medium">{t.label}</span>
                   {t.detail && <span className="text-muted-foreground"> · {t.detail}</span>}
                 </p>
+                {t.action}
                 <Button size="sm" variant="ghost" onClick={() => mark(t.id)}>
                   Not now
                 </Button>
-                {t.action}
               </li>
               );
             })}
@@ -1121,7 +1124,7 @@ function Home({
                   name={a.name}
                   status={score ?? agentStatus(a)}
                   strong={!!score}
-                  title={score ? `${a.name} score ${score} · ${agentStatus(a)}` : undefined}
+                  title={score ? `${a.name} score ${score} · ${agentStatus(a)}` : agentStatus(a)}
                   state={state}
                   onClick={() => onOpen({ kind: "agent", key: a.key })}
                 />
@@ -1139,7 +1142,7 @@ function Home({
           <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-x-3 gap-y-5">
             {PLANNED.map((p) => (
               <li key={p.key}>
-                <AgentFolder icon={p.icon} tint="text-muted-foreground" name={p.name} status={p.does} state="locked" title={p.does} />
+                <AgentFolder icon={p.icon} tint="text-muted-foreground" name={p.name} status={p.persona} state="locked" />
               </li>
             ))}
           </ul>
@@ -1244,7 +1247,7 @@ function AgentFolder({
         )}
       </span>
       <span className={cn("w-full truncate text-xs font-medium", locked && "text-muted-foreground")}>{name}</span>
-      <span className={cn("w-full truncate text-[11px] text-muted-foreground", strong && "font-semibold text-foreground tabular-nums", state === "failed" && "text-destructive")}>{status}</span>
+      <span className={cn("w-full truncate text-xs text-muted-foreground", strong && "font-semibold text-foreground tabular-nums", state === "failed" && "text-destructive")}>{status}</span>
     </button>
   );
 }
@@ -1265,7 +1268,7 @@ function DocView(p: {
     <div>
       <div className="px-6 py-6">
         {/* Keyed by document: switching documents must never carry one document's edit into another. */}
-        <DocPane key={p.entry.kind} entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} canEdit={p.canEdit} canConfirm={p.canConfirm} autoReview />
+        <DocPane key={p.entry.kind} entry={p.entry} workspaceId={p.workspaceId} brandId={p.brandId} researchActive={p.researchActive} onChanged={p.onChanged} onStale={p.onStale} canEdit={p.canEdit} canConfirm={p.canConfirm} />
       </div>
     </div>
   );
@@ -1626,8 +1629,8 @@ function AgentsFeed({
               <Icon className={cn("size-4", meta.tint)} aria-hidden="true" />
             </span>
             <button type="button" onClick={() => onOpen({ kind: "agent", key: a.key })} className="min-w-0 flex-1 text-left">
-              <span className="block text-xs font-semibold">{a.name} agent</span>
-              <span className="block truncate text-sm text-muted-foreground">{feedLine(a.key, a, reports, docs)}</span>
+              <span className="block text-sm font-semibold">{a.name} agent</span>
+              <span className={cn("block truncate text-xs", a.lastRun?.status === "FAILED" ? "text-destructive" : "text-muted-foreground")}>{feedLine(a.key, a, reports, docs)}</span>
             </button>
             {(canRun || running) && (
               <FeedRunButton workspaceId={workspaceId} agent={a} disabled={!canRun || running || busy === a.key} spinning={running || busy === a.key} onRun={() => run(a.key)} />
@@ -1641,10 +1644,10 @@ function AgentsFeed({
             <p.icon className="size-4 text-muted-foreground" aria-hidden="true" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-xs font-semibold">{p.name} agent</span>
-            <span className="block truncate text-sm text-muted-foreground">{p.does}</span>
+            <span className="block text-sm font-semibold">{p.name} agent</span>
+            <span className="block truncate text-xs text-muted-foreground">{p.persona}</span>
           </span>
-          <span className="flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
             <Lock className="size-3" aria-hidden="true" /> Soon
           </span>
         </li>
