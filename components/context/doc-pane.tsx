@@ -27,8 +27,6 @@ type Props = {
   /** Hide the write controls from people whose role can't use them (default: shown). */
   canEdit?: boolean;
   canConfirm?: boolean;
-  /** Ignored: opening a document never marks it reviewed. Delete once the Overview stops passing it (Task A2). */
-  autoReview?: boolean;
 };
 
 function formatDate(iso: string) {

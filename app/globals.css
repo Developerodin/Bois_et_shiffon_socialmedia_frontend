@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /*
- * Espanda light theme. One token set, hex values. Contrast pairs: ink on canvas and surface, primary-foreground on
+ * Bois & Chiffons light theme. One token set, hex values. Contrast pairs: ink on canvas and surface, primary-foreground on
  * primary, primary-strong and the status colours as text on surface;
  * status text on tints uses the -ink tokens.
  */
@@ -105,7 +105,7 @@
   font-family: var(--font-inter), system-ui, sans-serif;
 }
 
-/* The Espanda logo (components/brand/espanda-logo.tsx): its lettering is black, so the light artwork is the one shown. */
+/* The Bois & Chiffons logo (components/brand/brand-logo.tsx): its lettering is black, so the light artwork is the one shown. */
 .logo-on-dark { display: none; }
 .logo-on-light { display: block; }
 
