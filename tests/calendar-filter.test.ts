@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, withFilter, type CalendarItem } from "@/lib/calendar-filter";
+import { filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, ownerLabel, withFilter, type CalendarItem } from "@/lib/calendar-filter";
 
 const now = new Date("2026-11-20T12:00:00Z");
 const past = "2026-11-19T12:00:00Z";
@@ -74,6 +74,16 @@ describe("filterItems", () => {
   });
   it("keeps everything for owner me when me is unknown", () => expect(filterItems(items, { owner: "me" }, null, now).map((i) => i.id)).toEqual(["1", "2", "3", "4", "5"]));
   it("combines filters", () => expect(ids({ channel: "INSTAGRAM_POST", owner: "none" })).toEqual(["3"]));
+});
+
+describe("ownerLabel", () => {
+  it("says Unassigned only for posts the Unassigned filter keeps", () => {
+    expect(ownerLabel(null)).toBe("Unassigned");
+    expect(ownerLabel(undefined)).toBe("Unassigned");
+    expect(ownerLabel({ id: "u1", name: "Ann" })).toBe("Ann");
+    expect(ownerLabel({ id: "u2", name: null })).toBe("A team member");
+    expect(ownerLabel({ id: "u2", name: "" })).toBe("A team member");
+  });
 });
 
 describe("URL", () => {

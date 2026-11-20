@@ -35,6 +35,11 @@ export function isThisWeek(i: Pick<CalendarItem, "status" | "scheduledFor">, now
   return inNextWeek(i.scheduledFor, now) && !PUBLISHED.includes(i.status);
 }
 
+/** The owner line, matching the Unassigned filter: no owner is "Unassigned"; an owner the server sent no name for is still someone. */
+export function ownerLabel(owner: CalendarItem["owner"]): string {
+  return owner == null ? "Unassigned" : owner.name || "A team member";
+}
+
 export function filterItems<T extends CalendarItem>(items: T[], f: CalendarFilter, me: string | null, now: Date): T[] {
   return items.filter(
     (i) =>

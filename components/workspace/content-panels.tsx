@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, toneOf } from "@/lib/status";
 import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
-import { filterItems, type CalendarFilter } from "@/lib/calendar-filter";
+import { filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 
 /* ───────────── shared types + data ───────────── */
@@ -460,7 +460,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
                       )}
                     </span>
                     <span className="text-sm">{i.title}</span>
-                    <span className="text-[11px] text-muted-foreground">{i.owner?.name ?? "Unassigned"}</span>
+                    <span className="text-[11px] text-muted-foreground">{ownerLabel(i.owner)}</span>
                     {i.byHand && i.scheduledFor && <span className="text-[11px] font-medium text-primary">Post by hand &middot; {dayTime(i.scheduledFor)}</span>}
                     </span>
                   </button>
@@ -767,7 +767,7 @@ export function ContentView({ base, perms, id, onBack, reelsOn, brandId }: { bas
                 {ownerError && <span role="alert" className="text-xs text-destructive">{ownerError}</span>}
               </div>
             ) : (
-              <p className="mt-1 text-sm text-muted-foreground">Owner: {item.owner?.name ?? "Unassigned"}</p>
+              <p className="mt-1 text-sm text-muted-foreground">Owner: {ownerLabel(item.owner)}</p>
             )}
             {item.publishIssue && (
               <p role="status" className={cn("mt-2 flex items-start gap-2 rounded-lg px-3 py-2 text-sm", TONE_CLASS[toneOf(item.publishIssue)])}>
