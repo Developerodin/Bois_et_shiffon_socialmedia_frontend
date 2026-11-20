@@ -9,6 +9,7 @@ import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { ChecksList } from "@/components/ui/checks-list";
 import { reelHref } from "@/components/reels/href";
+import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
@@ -367,14 +368,19 @@ export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner 
     request<{ campaigns: { id: string; name: string }[] }>(`${base}/campaigns`).then((r) => setCampaigns(r.campaigns), () => {});
   }, [base]);
   const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
+  // Opens the new post in the post view, like a calendar row.
+  const newPost = <NewPostDialog base={base} onCreated={onOpen} />;
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading calendar…</p>;
   if (!data.length) {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
-        <Button size="sm" variant="secondary" onClick={onRunPlanner}>
-          Plan posts
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="secondary" onClick={onRunPlanner}>
+            Plan posts
+          </Button>
+          {newPost}
+        </div>
       </div>
     );
   }
@@ -384,7 +390,7 @@ export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner 
   const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
   const sel = cn(selectClass, "h-8 w-auto text-xs");
   const filters = (
-    <div className="flex flex-wrap gap-2 border-b border-border px-4 py-2" role="group" aria-label="Filter posts">
+    <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2" role="group" aria-label="Filter posts">
       <select aria-label="Channel" value={filter.channel ?? ""} onChange={(e) => set({ channel: e.target.value || undefined })} className={sel}>
         <option value="">All channels</option>
         {channels.map((c) => <option key={c} value={c}>{CHANNEL_LABEL[c] ?? c}</option>)}
@@ -409,6 +415,7 @@ export function ContentPanel({ base, me, filter, onFilter, onOpen, onRunPlanner 
         <option value="">Needs action: any</option>
         {(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => <option key={n} value={n}>{NEED_LABEL[n]}</option>)}
       </select>
+      <span className="ml-auto">{newPost}</span>
     </div>
   );
   if (!shown.length) {

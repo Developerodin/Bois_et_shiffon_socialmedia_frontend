@@ -38,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
 import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, usePerms, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
+import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Markdown } from "@/components/context/markdown";
 import { PanelLayout, type PanelDef, type Preset } from "@/components/workspace/panel-layout";
 import { NAV } from "@/lib/nav";
@@ -893,9 +894,12 @@ function Home({
         label: "Write your planned posts",
         detail: `${pipeline.toWrite} to brief and draft`,
         action: (
-          <Button size="sm" variant="secondary" onClick={() => onShowPanel("content")}>
-            Open posts
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => onShowPanel("content")}>
+              Open posts
+            </Button>
+            <NewPostDialog base={base} onCreated={(id) => onOpen({ kind: "content", id })} />
+          </div>
         ),
       });
     }
@@ -944,7 +948,7 @@ function Home({
       });
     }
     return list;
-  }, [docs, marks, mark, reports, connections, pipeline, needs, onOpenCalendar, canRun, onOpen, onShowPanel, scoutPrice]);
+  }, [base, docs, marks, mark, reports, connections, pipeline, needs, onOpenCalendar, canRun, onOpen, onShowPanel, scoutPrice]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done && !(Date.now() - (marks[t.id] ?? 0) < DAY_MS));

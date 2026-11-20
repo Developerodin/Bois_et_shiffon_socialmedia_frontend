@@ -2,6 +2,7 @@ export * from "./website";
 export * from "./shell-cookies";
 export * from "./by-hand-steps";
 export * from "./content-limits";
+export * from "./content-goals";
 export * from "./offers";
 export * from "./products";
 export * from "./chat-pages";
