@@ -185,7 +185,7 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
                   </thead>
                   <tbody className="divide-y divide-border">
                     {campaigns.map((c) => (
-                      <tr key={`${c.accountId}:${c.campaignId}`}>
+                      <tr key={`${c.accountId}:${c.campaignId}:${c.currency}`}>
                         <td className="max-w-72 truncate px-5 py-2.5 font-medium">{c.campaignName}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums">{money(c.spend, c.currency)}</td>
                         <td className="px-3 py-2.5 text-right tabular-nums">{whole(c.purchases)}</td>
@@ -247,8 +247,10 @@ function AdAccountPicker({ workspaceId, brandId, onSaved }: { workspaceId: strin
     if (!id) return;
     const conn = accounts.find((c) => c.id === id);
     try {
-      const d = await request<{ accounts: { id: string; name: string; currency: string; timeZone: string }[] }>(`${base}/meta-ads/accounts?connectionId=${encodeURIComponent(id)}`);
-      const a = d.accounts.find((x) => x.name === conn?.displayName);
+      // The login can read several accounts; the connection is one of them. Match it by id when the server says which
+      // (`connectionAccountId`); names aren't unique, so the name match is only a fallback for an older server.
+      const d = await request<{ accounts: { id: string; name: string; currency: string; timeZone: string }[]; connectionAccountId?: string }>(`${base}/meta-ads/accounts?connectionId=${encodeURIComponent(id)}`);
+      const a = d.connectionAccountId ? d.accounts.find((x) => x.id === d.connectionAccountId) : d.accounts.find((x) => x.name === conn?.displayName);
       setLive({ id, text: a ? `Reports in ${a.currency}, ${a.timeZone} days.` : "Meta doesn't list this account as active any more." });
     } catch (e) {
       setError(errorMessage(e, "Couldn't read the ad accounts. Try again."));
@@ -278,7 +280,7 @@ function AdAccountPicker({ workspaceId, brandId, onSaved }: { workspaceId: strin
         <Button size="sm" disabled={busy || !picked} onClick={() => void save()}>{busy ? "Saving…" : "Use this account"}</Button>
       </div>
       {live?.id === picked ? <p className="text-xs text-muted-foreground">{live.text}</p> : null}
-      <p className="text-xs text-muted-foreground">The first sync reads the last 90 days.</p>
+      <p className="text-xs text-muted-foreground">The first sync reads the last 180 days.</p>
       {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
