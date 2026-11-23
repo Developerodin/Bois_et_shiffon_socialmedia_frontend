@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/ui/page-header";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { selectClass } from "@/components/settings/shared";
+import { navFor } from "@/lib/nav";
 import { brandBase } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { TaskBoard } from "@/components/tasks/task-board";
@@ -50,7 +51,7 @@ export function TasksPage({ workspaceId, brandId }: { workspaceId: string; brand
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
-      <PageHeader title="Projects & tasks">Work on this business across content, the website and SEO.</PageHeader>
+      <PageHeader title={navFor("/tasks").title}>Work on this business across content, the website and SEO.</PageHeader>
       <div className="flex flex-wrap items-center gap-3">
         <SegmentedRadios label="Area" name="task-area" value={area} onChange={setArea} options={AREA_TABS} />
         {layout === "list" ? (

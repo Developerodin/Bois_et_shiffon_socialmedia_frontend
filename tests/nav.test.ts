@@ -121,9 +121,11 @@ describe("tasks nav", () => {
     expect(beat(["tasks"], ["tasks.read"])).toMatchObject({ href: "/tasks", role: "Projects & tasks", soon: false });
   });
 
-  it("adds Projects & tasks, Website and SEO to the main list behind the flag and tasks.read", () => {
+  it("adds Website and SEO to the main list behind the flag and tasks.read, and titles /tasks", () => {
     expect(ids(sidebarGroups(["tasks"], ["brand.read"])[0])).not.toContain("website");
-    expect(ids(sidebarGroups(["tasks"], ["brand.read", "tasks.read"])[0]).slice(-3)).toEqual(["tasks", "website", "seo"]);
+    expect(ids(sidebarGroups(["tasks"], ["brand.read", "tasks.read"])[0]).slice(-2)).toEqual(["website", "seo"]);
+    expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("tasks");
+    expect(NAV.find((e) => e.id === "tasks")?.group).not.toBe("more");
     expect(navFor("/tasks").title).toBe("Projects & tasks");
   });
 });

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Camera, Clapperboard, FileText, Globe, Images, Inbox, LayoutDashboard, ListTodo, Menu, Package, Plug, PenSquare, Search, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
+import { Camera, Clapperboard, FileText, Globe, Images, Inbox, LayoutDashboard, Menu, Package, Plug, PenSquare, Search, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils";
 
 const NAV_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, products: Package, connections: Plug,
   automations: Workflow,
-  tasks: ListTodo,
   website: Globe,
   seo: Search,
   library: Images,
@@ -56,8 +55,8 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
   if (pathname === "/" && panel === "content") activeId = "wave";
   if (pathname === "/" && panel === "competitors") activeId = "drift";
   if (pathname === "/performance") activeId = "surge";
-  // /tasks is three entries told apart by ?area=.
-  if (pathname === "/tasks") activeId = search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "tasks";
+  // /tasks is told apart by ?area=: Website, SEO, else Beat's Projects & tasks slot.
+  if (pathname === "/tasks") activeId = search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
   const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));
 
   // The person can reorder their agents by dragging, or with Alt+Up/Down on a focused row. Read after mount so the

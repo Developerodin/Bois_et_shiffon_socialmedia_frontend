@@ -9,7 +9,8 @@ export type NavEntry = {
   id: string;
   label: string;
   href: string;
-  group: "main" | "create" | "customers" | "agent" | "more" | "admin";
+  /** "page": titled by navFor but listed nowhere (its link is elsewhere, e.g. an agent slot). */
+  group: "main" | "create" | "customers" | "agent" | "more" | "admin" | "page";
   role?: string;
   soon?: boolean;
   blurb?: string;
@@ -30,7 +31,9 @@ export const NAV: readonly NavEntry[] = [
   { id: "connections", label: "Connections", href: "/connections", group: "main", perm: CONNECTIONS_READ },
   { id: "automations", label: "Automations", href: "/automations", group: "main", feature: "automations" },
   // One page (/tasks) under three names: the area comes from the query, which navFor ignores, so /tasks reads as the first.
-  { id: "tasks", label: "Projects & tasks", href: "/tasks", group: "main", feature: "tasks", perm: TASKS_READ },
+  // Its own link is the Beat slot (agentEntries); this entry only gives the page its title. Not "more": the account
+  // menu lists those without checking flags.
+  { id: "tasks", label: "Projects & tasks", href: "/tasks", group: "page", feature: "tasks", perm: TASKS_READ },
   { id: "website", label: "Website", href: "/tasks?area=website", group: "main", feature: "tasks", perm: TASKS_READ },
   { id: "seo", label: "SEO", href: "/tasks?area=seo", group: "main", feature: "tasks", perm: TASKS_READ },
 
