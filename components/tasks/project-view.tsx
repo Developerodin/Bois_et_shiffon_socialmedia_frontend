@@ -16,6 +16,7 @@ import { navFor } from "@/lib/nav";
 import { recentKey } from "@/lib/recent";
 import { brandBase } from "@/lib/tasks-api";
 import { Milestones } from "@/components/tasks/milestones";
+import { NewTaskButton } from "@/components/tasks/new-task-dialog";
 import { ProjectHeader } from "@/components/tasks/project-header";
 import { TaskList, useTasksChanged } from "@/components/tasks/task-list";
 import { TaskPeek } from "@/components/tasks/task-view";
@@ -70,7 +71,10 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
             <h2 id="project-tasks" className="text-base font-medium">
               Tasks
             </h2>
-            <SegmentedRadios label="Which tasks" name="project-task-view" value={view} onChange={setView} options={TASK_VIEWS} />
+            <div className="flex flex-wrap items-center gap-2">
+              <SegmentedRadios label="Which tasks" name="project-task-view" value={view} onChange={setView} options={TASK_VIEWS} />
+              {canManage ? <NewTaskButton base={base} projectId={project.id} /> : null}
+            </div>
           </div>
           <TaskList base={base} view={view} area="" workProjectId={project.id} empty={view === "open" ? "No open tasks in this project." : "Nothing finished in the last 30 days."} />
         </section>

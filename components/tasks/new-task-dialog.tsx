@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { usePathname } from "next/navigation";
+import { Plus } from "lucide-react";
 import { TASK_AREAS, TASK_PRIORITIES, type TaskDto, type TaskPersonDto, type WorkProjectDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
 import { selectClass } from "@/components/settings/shared";
@@ -225,5 +227,33 @@ export function NewTaskDialog({ base, open, projectId, onOpenChange, onCreated }
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * "New task" on a page that lists tasks (tasks.manage): the dialog, then the new task opens in this page's peek. On a
+ * project's page it starts in that project. The lists refresh themselves from the create (tasksApi announces it).
+ */
+export function NewTaskButton({ base, projectId }: { base: string; projectId?: string }) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  return (
+    <>
+      <Button size="sm" onClick={() => setOpen(true)}>
+        <Plus className="size-4" aria-hidden="true" />
+        New task
+      </Button>
+      <NewTaskDialog
+        base={base}
+        projectId={projectId}
+        open={open}
+        onOpenChange={setOpen}
+        onCreated={(t) => {
+          const q = new URLSearchParams(window.location.search);
+          q.set("task", t.id);
+          window.history.pushState(null, "", `${pathname}?${q}`);
+        }}
+      />
+    </>
   );
 }

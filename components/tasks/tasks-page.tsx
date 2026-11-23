@@ -11,6 +11,7 @@ import { navFor } from "@/lib/nav";
 import { recentKey } from "@/lib/recent";
 import { brandBase } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
+import { NewTaskButton } from "@/components/tasks/new-task-dialog";
 import { TaskBoard } from "@/components/tasks/task-board";
 import { TaskList } from "@/components/tasks/task-list";
 import { TaskPeek } from "@/components/tasks/task-view";
@@ -69,9 +70,12 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
       <PageHeader
         title={navFor("/tasks").title}
         actions={
-          <Button asChild size="sm" variant="outline">
-            <Link href="/projects">{navFor("/projects").title}</Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild size="sm" variant="outline">
+              <Link href="/projects">{navFor("/projects").title}</Link>
+            </Button>
+            {perms.includes("tasks.manage") ? <NewTaskButton base={base} /> : null}
+          </div>
         }
       >
         Work on this business across content, the website and SEO.
