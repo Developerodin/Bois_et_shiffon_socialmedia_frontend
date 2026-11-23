@@ -21,8 +21,9 @@ type Props = {
   fullPageHref?: string;
   asideRef: RefObject<HTMLElement | null>;
   /**
-   * "board" (default): over the right of the Overview's own wrapper. "page": fixed to the window's right edge, for a page
-   * that scrolls in the shell's main area (/tasks), where an absolute peek would scroll away with the page.
+   * "board" (default): over the right of the Overview's own wrapper. "page": fixed to the window's right edge below the
+   * top bar (h-18, so its menus stay reachable), for a page that scrolls in the shell's main area (/tasks), where an
+   * absolute peek would scroll away with the page.
    */
   placement?: "board" | "page";
   children: ReactNode;
@@ -42,10 +43,11 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
   }, [asideRef]);
   const shown = open && entered;
   const { width, max, resize } = usePeekWidth();
-  const place = placement === "page" ? "fixed z-40" : "absolute z-20";
+  // The scrim and the sheet share the placement; the top bar is sticky z-30, so a page peek sits under its menus.
+  const page = placement === "page";
   return (
     <>
-      <div aria-hidden="true" className={cn("pointer-events-none inset-0 bg-foreground/5 transition-opacity duration-200 motion-reduce:transition-none", place, shown ? "opacity-100" : "opacity-0")} />
+      <div aria-hidden="true" className={cn("pointer-events-none bg-foreground/5 transition-opacity duration-200 motion-reduce:transition-none", page ? "fixed inset-x-0 bottom-0 top-18 z-20" : "absolute inset-0 z-20", shown ? "opacity-100" : "opacity-0")} />
       <aside
         ref={asideRef}
         role="region"
@@ -63,8 +65,8 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
         // The width is set by style, so a drag never jumps; only the slide (transform) is transitioned.
         style={{ "--peek-w": `${width}px` } as CSSProperties}
         className={cn(
-          "inset-y-0 right-0 flex w-full flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(var(--peek-w),75vw,100%)]",
-          place,
+          "right-0 flex w-full flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(var(--peek-w),75vw,100%)]",
+          page ? "fixed bottom-0 top-18 z-20" : "absolute inset-y-0 z-20",
           shown ? "translate-x-0" : "translate-x-full",
         )}
       >

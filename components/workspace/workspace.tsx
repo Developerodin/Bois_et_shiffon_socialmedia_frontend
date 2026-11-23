@@ -122,6 +122,8 @@ type Props = {
   website: string | null;
   /** Reels are on for this workspace: a studio reel in the Overview links to its page. */
   reelsOn: boolean;
+  /** The tasks flag is on for this workspace: without it a ?task= link is a bad link. */
+  tasksOn: boolean;
   user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
   /** The person's permissions on this brand, from the shell (read with the page, so no fetch here can fail on its own). */
   perms: string[];
@@ -130,7 +132,7 @@ type Props = {
 const viewFromUrl = () => viewFromSearch(window.location.search);
 const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
-export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, user, perms }: Props) {
+export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, user, perms }: Props) {
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
@@ -213,13 +215,14 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     replaceUrl.current = false;
     acceptedUrl.current = next;
   }, [view, urlRead]);
-  // A ?doc= or ?agent= that names nothing shows home and drops the bad parameter, once the lists have loaded.
+  // A ?doc= or ?agent= that names nothing shows home and drops the bad parameter, once the lists have loaded; so does a
+  // ?task= while the tasks flag is off.
   useEffect(() => {
-    const unknown = (view.kind === "doc" && !!docs && !docs.docs.some((d) => d.kind === view.doc)) || (view.kind === "agent" && !!agents && !agents.some((a) => a.key === view.key));
+    const unknown = (view.kind === "task" && !tasksOn) || (view.kind === "doc" && !!docs && !docs.docs.some((d) => d.kind === view.doc)) || (view.kind === "agent" && !!agents && !agents.some((a) => a.key === view.key));
     if (!unknown) return;
     replaceUrl.current = true;
     setView({ kind: "home" });
-  }, [view, docs, agents]);
+  }, [view, docs, agents, tasksOn]);
 
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
   // What the person's role may do. Write controls show only for roles the API would accept.
@@ -489,7 +492,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     ) : v.kind === "competitor" ? (
       <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
     ) : v.kind === "task" ? (
-      perms.includes("tasks.read") ? (
+      !tasksOn ? null : perms.includes("tasks.read") ? (
         <TaskView base={base} id={v.id} perms={perms} userId={user.id} onLoaded={() => setLoadedId(peekKey(v))} />
       ) : (
         <NotForRole what="tasks" />

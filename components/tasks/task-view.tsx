@@ -20,7 +20,7 @@ import { putShared } from "@/components/workspace/use-job";
 import { writeRecent } from "@/lib/recent";
 import { tasksApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
-import { parseViewParts, peekCrumb, peekKey, peekTitle, viewToSearch, type View } from "@/lib/workspace-view";
+import { agreedToDrop, parseViewParts, peekCrumb, peekKey, peekTitle, viewToSearch, type View } from "@/lib/workspace-view";
 import { PersonSelect, TaskActions } from "@/components/tasks/task-actions";
 import { TaskAttachments } from "@/components/tasks/task-attachments";
 import { TaskChecklist } from "@/components/tasks/task-checklist";
@@ -90,9 +90,6 @@ const WEBSITE = "WEBSITE";
  */
 export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; id: string; perms: string[]; userId: string | null | undefined; onLoaded?: (t: TaskDetailDto) => void }) {
   const canManage = perms.includes("tasks.manage");
-  // ponytail: a client reviewer is the one role without agents.read (as the shell treats the assistant); the web has no
-  // "is a client" flag. The server ignores shareWithClient from a client, so a wrong guess only shows a toggle that does nothing.
-  const staff = perms.includes("agents.read");
   const [task, setTask] = useState<TaskDetailDto | null>(null);
   const [loadError, setLoadError] = useState<"gone" | "failed" | null>(null);
   const [people, setPeople] = useState<TaskPersonDto[] | null>(null);
@@ -133,22 +130,6 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
     };
   }, [base]);
 
-  const projectId = task?.project?.id ?? null;
-  const [clientVisible, setClientVisible] = useState<{ projectId: string; on: boolean } | null>(null);
-  // Whether a client can see the task, for the comments' "Share with client" (staff only). ponytail: read from the
-  // task's project ("Visible to client"); a task a client reviews outside a shared project isn't known to the web yet.
-  useEffect(() => {
-    if (!projectId || !staff) return;
-    let alive = true;
-    tasksApi.project(base, projectId).then(
-      (p) => alive && setClientVisible({ projectId, on: p.clientVisible }),
-      () => {},
-    );
-    return () => {
-      alive = false;
-    };
-  }, [base, projectId, staff]);
-
   if (!task) {
     if (loadError === "gone") return <EmptyState icon={SearchX} title="Task not found" description="It was deleted, or it isn't shared with you." className="py-10" />;
     if (loadError === "failed") return <LoadFailed what="this task" onRetry={load} className="px-5 py-6" />;
@@ -180,7 +161,8 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
       {website ? <WebsiteChecks base={base} task={task} people={people} canEditPhotos={canEditPhotos} onChanged={show} /> : null}
       <TaskChecklist base={base} task={task} canEdit={mine} />
       <TaskAttachments base={base} task={task} roles={website ? ["OTHER"] : ["BEFORE", "AFTER", "OTHER"]} canEdit={canEditPhotos} />
-      <TaskComments base={base} taskId={task.id} staff={staff} clientVisible={!!projectId && clientVisible?.projectId === projectId && clientVisible.on} />
+      {/* Both flags come from the server: whether some client can see the task, and whether the reader is one. */}
+      <TaskComments base={base} taskId={task.id} staff={!task.viewerIsClient} clientVisible={task.clientVisible} />
     </div>
   );
 }
@@ -369,6 +351,8 @@ export function TaskPeek({ base, perms, userId, recentKey }: { base: string; per
   const [loaded, setLoaded] = useState<{ id: string; title: string } | null>(null);
   // The open task as the URL effect last accepted it, and that URL (put back when the person stays on unsaved edits).
   const shownRef = useRef<string | null>(null);
+  // Recent records a task once per opening, not on every reload (tasks:changed reads it again).
+  const recorded = useRef<string | null>(null);
   const accepted = useRef<string | null>(null);
 
   const hrefFor = useCallback(
@@ -386,9 +370,12 @@ export function TaskPeek({ base, perms, userId, recentKey }: { base: string; per
     const next = v?.kind === "task" ? v.id : null;
     // A bad task link: drop it, so Back doesn't return to it.
     if (raw !== null && !next) return void router.replace(hrefFor(null), { scroll: false });
+    // A brand or workspace switch took the task out of the URL after the person agreed to leave: don't ask again.
+    const agreed = agreedToDrop(window.location.search || window.location.pathname);
     if (next !== shownRef.current) {
-      if (!okToDiscard()) return void router.replace(accepted.current ?? hrefFor(shownRef.current), { scroll: false });
+      if (!agreed && !okToDiscard()) return void router.replace(accepted.current ?? hrefFor(shownRef.current), { scroll: false });
       shownRef.current = next;
+      recorded.current = null;
       setShownId(next);
     }
     accepted.current = `${pathname}${query ? `?${query}` : ""}`;
@@ -398,6 +385,7 @@ export function TaskPeek({ base, perms, userId, recentKey }: { base: string; per
     if (!okToDiscard()) return;
     // The view first, so the URL change that follows finds nothing to ask about.
     shownRef.current = null;
+    recorded.current = null;
     setShownId(null);
     router.push(hrefFor(null), { scroll: false });
   };
@@ -407,7 +395,8 @@ export function TaskPeek({ base, perms, userId, recentKey }: { base: string; per
   const peek = usePeek(item);
   const onLoaded = (t: TaskDetailDto) => {
     setLoaded({ id: t.id, title: t.title });
-    if (recentKey) writeRecent(recentKey, { kind: "task", id: t.id, at: Date.now() });
+    if (recentKey && recorded.current !== t.id) writeRecent(recentKey, { kind: "task", id: t.id, at: Date.now() });
+    recorded.current = t.id;
   };
 
   if (!peek.shown || peek.shown.view.kind !== "task") return null;

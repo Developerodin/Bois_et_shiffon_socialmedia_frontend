@@ -57,6 +57,7 @@ export function TaskComments({ base, taskId, staff, clientVisible }: { base: str
       setNow(Date.now());
       setBody("");
       setShare(false);
+      window.dispatchEvent(new Event(TASKS_CHANGED));
     } catch (e) {
       setError(errorMessage(e, "Couldn't post the comment. Try again."));
     } finally {

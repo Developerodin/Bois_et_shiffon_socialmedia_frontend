@@ -142,6 +142,11 @@ export function namesItem(search: string): boolean {
  * that item or filter by a campaign it doesn't have. The other cf_ filters stay.
  */
 export function withoutOpenItem(search: string, pathname: string): string | null {
+  // The task pages open a task peek too (?task=); nothing else of theirs belongs to a brand.
+  if (pathname === "/tasks" || pathname.startsWith("/projects/")) {
+    if (!new URLSearchParams(search).has("task")) return null;
+    return viewToSearch({ kind: "home" }, search, pathname);
+  }
   if (pathname !== "/") return null;
   const q = new URLSearchParams(search);
   const hadCampaign = q.has("cf_campaignId");
@@ -151,7 +156,8 @@ export function withoutOpenItem(search: string, pathname: string): string | null
 }
 
 // The URL dropOpenItem just wrote. The Overview reads it once, on the URL change that write causes, and doesn't ask
-// about unsaved work again: the person already agreed in the switcher. Set only on the Overview, where that read follows.
+// about unsaved work again: the person already agreed in the switcher. Set only on the Overview and the task pages
+// (TaskPeek), where that read follows.
 let agreedUrl: string | null = null;
 
 /** After the person agreed to leave (a brand or workspace switch): takes the open item out of the URL. */

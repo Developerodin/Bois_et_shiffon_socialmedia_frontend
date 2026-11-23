@@ -161,4 +161,10 @@ describe("task in the peek (?task=)", () => {
     expect(parseRecent([{ kind: "task", id: "a/b", at: 1 }], 1)).toEqual([]);
     expect(withoutOpenItem("?task=t1&panel=log", "/")).toBe("?panel=log");
   });
+  it("a brand switch drops the open task on the task pages too", () => {
+    expect(withoutOpenItem("?area=website&task=t1", "/tasks")).toBe("?area=website");
+    expect(withoutOpenItem("?task=t1", "/projects/p1")).toBe("/projects/p1");
+    expect(withoutOpenItem("?area=seo", "/tasks")).toBeNull();
+    expect(withoutOpenItem("?task=t1", "/reels")).toBeNull();
+  });
 });

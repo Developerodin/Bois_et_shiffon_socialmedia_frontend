@@ -1,5 +1,5 @@
-import type { PostRow, TaskAction, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto, WorkProjectDetailDto } from "@/shared";
-import { request } from "@/components/settings/api";
+import type { PostRow, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto } from "@/shared";
+import { ApiError, request } from "@/components/settings/api";
 
 const enc = encodeURIComponent;
 
@@ -38,6 +38,35 @@ export const tasksApi = {
   /** Append-only. A staff comment stays internal unless `shareWithClient`; a client's never is. */
   comment: (base: string, id: string, body: string, shareWithClient: boolean) =>
     request<{ comment: TaskCommentDto }>(`${base}/tasks/${enc(id)}/comments`, { method: "POST", body: JSON.stringify({ body, shareWithClient }) }).then((d) => d.comment),
-  /** The task's project, read for its "Visible to client" switch. */
-  project: (base: string, projectId: string) => request<{ project: WorkProjectDetailDto }>(`${base}/work-projects/${enc(projectId)}`).then((d) => d.project),
+  uploadScreenshot,
 };
+
+const UPLOAD_FAILED = "Couldn't upload the photo. Try again.";
+
+/**
+ * A screenshot onto a task through the story upload flow, the one that makes VERIFIED photo uploads: a slot
+ * (content.create; the person confirms they may use the file by uploading it), the browser PUTs the file straight to
+ * storage, the server reads it back and checks it, then it is attached (the owner with content.create, or tasks.manage).
+ * A refusal at any step throws with the server's message. ponytail: an upload that fails after the slot leaves a
+ * PENDING row; the daily purge removes those after 7 days.
+ */
+async function uploadScreenshot(base: string, taskId: string, file: File, role: "BEFORE" | "AFTER" | "OTHER"): Promise<TaskAttachmentDto> {
+  const slot = await request<{ uploadId: string; url: string; headers: Record<string, string> }>(`${base}/stories/uploads`, {
+    method: "POST",
+    body: JSON.stringify({ kind: "photo", contentType: file.type, bytes: file.size, rightsConfirmed: true }),
+  });
+  let put: Response;
+  try {
+    put = await fetch(slot.url, { method: "PUT", body: file, headers: slot.headers });
+  } catch {
+    throw new ApiError(0, UPLOAD_FAILED); // offline, or storage refused the browser (CORS)
+  }
+  if (!put.ok) throw new ApiError(put.status, UPLOAD_FAILED);
+  const checked = await request<{ status: "VERIFIED" } | { status: "REJECTED"; reason: string }>(`${base}/stories/uploads/${enc(slot.uploadId)}`, { method: "POST" });
+  if (checked.status !== "VERIFIED") throw new ApiError(400, checked.reason);
+  const d = await request<{ attachment: TaskAttachmentDto }>(`${base}/tasks/${enc(taskId)}/attachments`, {
+    method: "POST",
+    body: JSON.stringify({ mediaUploadId: slot.uploadId, role }),
+  });
+  return d.attachment;
+}
