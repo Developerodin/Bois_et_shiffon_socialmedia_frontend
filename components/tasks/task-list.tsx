@@ -119,7 +119,7 @@ function Pages({ base, query }: { base: string; query: string }) {
   };
 
   if (!tasks.length && !posts.length) {
-    return <EmptyState icon={ListTodo} title="Nothing here" description="No tasks in this view. Try another view or area." className="py-10" />;
+    return <EmptyState icon={ListTodo} title="Nothing here" description="No tasks in this view. Try another view or area." className="py-6" />;
   }
 
   return (

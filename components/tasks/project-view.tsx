@@ -48,7 +48,7 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
     } else if (failed) body = <LoadFailed what="this project" onRetry={refresh} className="py-6" />;
     else body = <ListSkeleton label="Loading project" rows={4} />;
     return (
-      <div className="mx-auto flex max-w-6xl flex-col gap-5">
+      <div className="mx-auto flex max-w-6xl flex-col gap-4">
         <PageHeader title={navFor("/projects").title} crumbs={crumbs} />
         {body}
       </div>
@@ -56,7 +56,7 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-5">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4">
       <PageHeader title={project.name} crumbs={[...crumbs, { label: project.name }]} />
       {failed ? (
         <p role="status" className="-mt-2 text-xs text-muted-foreground">
@@ -64,10 +64,10 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
         </p>
       ) : null}
       <ProjectHeader base={base} project={project} canManage={canManage} onSaved={(p) => putShared(url, { project: p })} />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <section aria-labelledby="project-tasks" className="flex min-w-0 flex-col gap-3 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <section aria-labelledby="project-tasks" className="flex min-w-0 flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="project-tasks" className="text-lg font-medium">
+            <h2 id="project-tasks" className="text-base font-medium">
               Tasks
             </h2>
             <SegmentedRadios label="Which tasks" name="project-task-view" value={view} onChange={setView} options={TASK_VIEWS} />
@@ -85,8 +85,8 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
 /** The linked campaign's posts in the calendar window (up to 50); each opens in the Overview's post peek. */
 function CampaignPosts({ name, posts }: { name: string; posts: PostRow[] }) {
   return (
-    <section aria-labelledby="project-posts" className="flex flex-col gap-3 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
-      <h2 id="project-posts" className="text-lg font-medium">
+    <section aria-labelledby="project-posts" className="flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
+      <h2 id="project-posts" className="text-base font-medium">
         Posts in {name}
       </h2>
       {posts.length ? (

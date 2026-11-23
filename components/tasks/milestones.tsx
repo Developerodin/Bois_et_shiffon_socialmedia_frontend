@@ -59,8 +59,8 @@ export function Milestones({ base, projectId, milestones, canEdit, onChanged }: 
   };
 
   return (
-    <section aria-labelledby={ids.h} className="flex flex-col gap-3 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
-      <h2 id={ids.h} className="text-lg font-medium">
+    <section aria-labelledby={ids.h} className="flex min-w-0 flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
+      <h2 id={ids.h} className="text-base font-medium">
         Milestones
       </h2>
       {items.length ? (
@@ -116,7 +116,7 @@ export function Milestones({ base, projectId, milestones, canEdit, onChanged }: 
             <label htmlFor={ids.due} className="sr-only">
               Due
             </label>
-            <Input id={ids.due} className="w-auto" type="date" value={dueOn} disabled={busy} onChange={(e) => setDueOn(e.target.value)} />
+            <Input id={ids.due} className="w-auto min-w-0 flex-1 basis-36" type="date" value={dueOn} disabled={busy} onChange={(e) => setDueOn(e.target.value)} />
             <Button type="submit" size="sm" variant="outline" disabled={busy}>
               Add
             </Button>

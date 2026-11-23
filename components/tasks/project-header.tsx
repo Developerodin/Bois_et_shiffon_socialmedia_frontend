@@ -79,9 +79,9 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
   );
 
   return (
-    <section aria-label="About this project" className="flex flex-col gap-4 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+    <section aria-label="About this project" className="flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
       {project.description ? <p className="whitespace-pre-wrap text-sm">{project.description}</p> : null}
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
         {canManage
           ? row(
               "Owner",
@@ -106,16 +106,11 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
           ? row("Starts", <DateField id={ids.starts} value={project.startsOn} disabled={busy} onSave={(v) => void save({ startsOn: v })} />, ids.starts)
           : row("Starts", dueLabel(project.startsOn))}
         {canManage ? row("Due", <DateField id={ids.due} value={project.dueOn} disabled={busy} onSave={(v) => void save({ dueOn: v })} />, ids.due) : row("Due", dueLabel(project.dueOn))}
-      </dl>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <ProjectProgress progress={project.progress} label="Project progress" />
-        <div className="flex flex-col gap-1 text-sm">
-          {canManage && campaigns ? (
-            <>
-              <label htmlFor={ids.campaign} className="text-xs text-muted-foreground">
-                Campaign
-              </label>
-              {/* A campaign has one project at most; picking one that has another is refused, and the reason shows. */}
+        <div className="flex flex-col gap-1">
+          <dt className="text-xs text-muted-foreground">{canManage && campaigns ? <label htmlFor={ids.campaign}>Campaign</label> : "Campaign"}</dt>
+          <dd className="flex min-w-0 flex-col gap-1 text-sm">
+            {canManage && campaigns ? (
+              // A campaign has one project at most; picking one that has another is refused, and the reason shows.
               <select id={ids.campaign} value={project.campaignId ?? ""} disabled={busy} onChange={(e) => void save({ campaignId: e.target.value || null })} className={cn(selectClass, "pointer-coarse:h-11")}>
                 <option value="">None</option>
                 {project.campaign && !campaigns.some((c) => c.id === project.campaign!.id) ? <option value={project.campaign.id}>{project.campaign.name}</option> : null}
@@ -125,31 +120,33 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
                   </option>
                 ))}
               </select>
-            </>
-          ) : (
-            <span className="text-muted-foreground">Campaign</span>
-          )}
-          {project.campaign ? (
-            <Link href={campaignHref(project.campaign.id)} className="self-start text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              {canManage && campaigns ? "Its posts in the calendar" : project.campaign.name}
-            </Link>
-          ) : canManage && campaigns ? null : (
-            "None"
-          )}
+            ) : null}
+            {project.campaign ? (
+              <Link href={campaignHref(project.campaign.id)} className="self-start truncate text-xs text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                {canManage && campaigns ? "Its posts in the calendar" : project.campaign.name}
+              </Link>
+            ) : canManage && campaigns ? null : (
+              "None"
+            )}
+          </dd>
         </div>
-      </div>
-      <ul aria-label="Tasks by status" className="flex flex-wrap gap-2">
-        {BOARD_COLUMNS.map((s) => (
-          <li key={s}>
-            <StatusBadge status={s}>
-              {STATUS_LABEL[s]}: {project.taskCounts[s] ?? 0}
-            </StatusBadge>
-          </li>
-        ))}
-      </ul>
-      {canManage ? (
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
+      </dl>
+      {/* Progress, counts by status and sharing on one line; they wrap under each other on a narrow screen. */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <div className="min-w-40 flex-1">
+          <ProjectProgress progress={project.progress} label="Project progress" />
+        </div>
+        <ul aria-label="Tasks by status" className="flex flex-wrap gap-1.5">
+          {BOARD_COLUMNS.map((s) => (
+            <li key={s}>
+              <StatusBadge status={s}>
+                {STATUS_LABEL[s]}: {project.taskCounts[s] ?? 0}
+              </StatusBadge>
+            </li>
+          ))}
+        </ul>
+        {canManage ? (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <button
               id={ids.share}
               type="button"
@@ -168,12 +165,12 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
             <label htmlFor={ids.share} className="text-sm font-medium">
               Visible to client
             </label>
+            <span id={ids.shareHint} className="text-xs text-muted-foreground">
+              Client reviewers see it and every task in it.
+            </span>
           </div>
-          <p id={ids.shareHint} className="text-xs text-muted-foreground">
-            The business&rsquo;s client reviewers see this project and every task in it.
-          </p>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
       {error ? (
         <p role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
