@@ -43,6 +43,7 @@ import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandDa
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Peek } from "@/components/workspace/peek";
 import { TaskView } from "@/components/tasks/task-view";
+import { TodayTasks } from "@/components/tasks/today-tasks";
 import { RecentMenu } from "@/components/workspace/recent-menu";
 import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
@@ -413,6 +414,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
             onShowPanel={revealPanel}
             onRetry={retry}
             due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={revealPanel} /> : null}
+            taskGroups={tasksOn && perms.includes("tasks.read") ? <TodayTasks base={base} onOpen={(id) => open({ kind: "task", id })} /> : null}
             showAgents={canAgents}
           />
       ),
@@ -892,6 +894,7 @@ function Home({
   onShowPanel,
   onRetry,
   due,
+  taskGroups,
   showAgents,
 }: {
   workspaceId: string;
@@ -901,6 +904,8 @@ function Home({
   docs: ContextDocsResponse | null;
   /** The card for stories due to be posted by hand (people who can publish only). */
   due: React.ReactNode;
+  /** Today's task groups (flag `tasks`, tasks.read), above the post rows. */
+  taskGroups: React.ReactNode;
   user: Props["user"];
   agents: AgentSummary[] | null;
   agentsFailed: boolean;
@@ -1071,6 +1076,7 @@ function Home({
             </span>
           )}
         </div>
+        {taskGroups}
         {due}
         {open.length > 0 ? (
           <ul className="mt-4 divide-y divide-border rounded-xl border border-border">

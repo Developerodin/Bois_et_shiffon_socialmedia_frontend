@@ -1,4 +1,4 @@
-import type { PostRow, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto, WorkProjectDetailDto, WorkProjectDto, WorkProjectMilestoneDto } from "@/shared";
+import type { NotificationPageDto, PostRow, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto, WorkProjectDetailDto, WorkProjectDto, WorkProjectMilestoneDto } from "@/shared";
 import { ApiError, request } from "@/components/settings/api";
 
 const enc = encodeURIComponent;
@@ -39,6 +39,18 @@ export const tasksApi = {
   comment: (base: string, id: string, body: string, shareWithClient: boolean) =>
     request<{ comment: TaskCommentDto }>(`${base}/tasks/${enc(id)}/comments`, { method: "POST", body: JSON.stringify({ body, shareWithClient }) }).then((d) => d.comment),
   uploadScreenshot,
+};
+
+/** The person's notifications in the current workspace: the /me routes read it from X-Workspace-Id. */
+const inWorkspace = (workspaceId: string) => ({ "X-Workspace-Id": workspaceId });
+export const notificationsApi = {
+  /** Newest first, 20 a page. */
+  page: (workspaceId: string, cursor?: string) =>
+    request<NotificationPageDto>(`/api/v1/me/notifications${cursor ? `?cursor=${enc(cursor)}` : ""}`, { headers: inWorkspace(workspaceId) }),
+  /** Unread, counted up to 100. */
+  count: (workspaceId: string) => request<{ count: number }>("/api/v1/me/notifications/count", { headers: inWorkspace(workspaceId) }).then((d) => d.count),
+  read: (workspaceId: string, which: { ids: string[] } | { all: true }) =>
+    request<{ updated: number }>("/api/v1/me/notifications/read", { method: "POST", body: JSON.stringify(which), headers: inWorkspace(workspaceId) }),
 };
 
 /** GET work-projects: 30 a page, soonest due first; archived ones only with status=ARCHIVED. */

@@ -35,7 +35,10 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
     try {
       raw = localStorage.getItem(TASKS_VIEW_KEY);
     } catch {}
-    setSaved(readSaved(raw));
+    // A link to one view (Today's group headers: ?view=approvals) shows that list, for this visit only.
+    const linked = TASK_LIST_VIEWS.find((v) => v.value === search.get("view"))?.value;
+    setSaved(linked ? { view: linked, layout: "list" } : readSaved(raw));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read once on mount, like the saved choice
   }, []);
   const { view, layout } = saved ?? readSaved(null);
 

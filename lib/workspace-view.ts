@@ -65,6 +65,19 @@ export function viewToSearch(v: View, search: string, pathname: string): string 
   return s ? `?${s}` : pathname;
 }
 
+/** The pages with a task peek of their own (the Overview, /tasks, a project page). */
+const hasTaskPeek = (pathname: string) => pathname === "/" || pathname === "/tasks" || pathname.startsWith("/projects/");
+
+/**
+ * Where a task opens from the shell (the bell, search, quick create): this page's side peek when it has one (replacing
+ * the item open there), else the /tasks page's.
+ */
+export function taskHref(pathname: string, search: string, id: string): string {
+  if (!hasTaskPeek(pathname)) return `/tasks?task=${encodeURIComponent(id)}`;
+  const s = viewToSearch({ kind: "task", id }, search, pathname);
+  return `${pathname}${s}`;
+}
+
 /** One item, whatever run it shows: a replaced item remounts fresh, a new runId on the same agent doesn't. */
 export function peekKey(v: View): string {
   switch (v.kind) {
