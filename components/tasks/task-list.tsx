@@ -14,7 +14,7 @@ import { CHANNEL_LABEL, STATUS_LABEL as POST_STATUS_LABEL } from "@/lib/post-lab
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { listsCare, onTasksChanged, tasksApi, type TaskPage, type TaskTeam } from "@/lib/tasks-api";
 import { shallowClick } from "@/lib/workspace-view";
-import { PersonSelect } from "@/components/tasks/task-actions";
+import { NO_CHOICE, PersonSelect } from "@/components/tasks/task-actions";
 import { AREA_LABEL, dueLabel, ownerFromValue, ownerLabel, ownerValue, PRIORITY_LABEL, STATUS_LABEL, tasksQuery, type AreaParam, type SourceParam, type TaskListView } from "@/components/tasks/task-views";
 
 const pickPage = (d: TaskPage) => d;
@@ -108,9 +108,11 @@ function Pages({ base, query, empty, assign }: { base: string; query: string; em
   // A fresh read shows the saved owners itself.
   useEffect(() => setOwners((o) => (Object.values(o).some((r) => r.saved) ? Object.fromEntries(Object.entries(o).filter(([, r]) => !r.saved)) : o)), [data]);
   const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
-  const [bulkOwner, setBulkOwner] = useState("");
+  // NO_CHOICE until an owner is picked: Assign stays off, so it can never unassign by default.
+  const [bulkOwner, setBulkOwner] = useState(NO_CHOICE);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [bulkError, setBulkError] = useState("");
+  const [bulkNote, setBulkNote] = useState("");
 
   if (!data) {
     return failed ? (
@@ -167,13 +169,15 @@ function Pages({ base, query, empty, assign }: { base: string; query: string; em
     });
   const tooMany = picked.length > ASSIGN_MAX ? `Pick ${ASSIGN_MAX} tasks or fewer.` : "";
   const assignPicked = async () => {
-    if (!picked.length || tooMany || bulkBusy) return;
+    if (!picked.length || tooMany || bulkBusy || bulkOwner === NO_CHOICE) return;
     setBulkBusy(true);
     setBulkError("");
+    setBulkNote("");
     try {
-      await tasksApi.assign(base, { ids: picked, ...ownerFromValue(bulkOwner) });
+      const { skipped } = await tasksApi.assign(base, { ids: picked, ...ownerFromValue(bulkOwner) });
       setSelected(new Set());
-      setBulkOwner("");
+      setBulkOwner(NO_CHOICE);
+      if (skipped > 0) setBulkNote(skipped === 1 ? "1 finished task was left as it was." : `${skipped} finished tasks were left as they were.`);
     } catch (e) {
       // A 409 names the task that can't take this owner; nothing was changed.
       setBulkError(errorMessage(e, "Couldn't assign the tasks. Try again."));
@@ -194,6 +198,11 @@ function Pages({ base, query, empty, assign }: { base: string; query: string; em
           Couldn&rsquo;t refresh. Showing the last update.
         </p>
       ) : null}
+      {bulkNote ? (
+        <p role="status" className="text-xs text-muted-foreground">
+          {bulkNote}
+        </p>
+      ) : null}
       {assign && picked.length ? (
         <div role="group" aria-label="Selected tasks" className="flex flex-col gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2">
           <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -203,9 +212,9 @@ function Pages({ base, query, empty, assign }: { base: string; query: string; em
             </span>
             <label className="flex min-w-0 items-center gap-2">
               <span className="shrink-0 text-muted-foreground">Assign to</span>
-              <PersonSelect value={bulkOwner} people={assign.people} roles={assign.roles} empty="Unassigned" disabled={bulkBusy} className="h-8 w-auto min-w-0 max-w-[12rem] text-sm" onChange={setBulkOwner} />
+              <PersonSelect value={bulkOwner} people={assign.people} roles={assign.roles} empty="Unassigned" placeholder="Choose owner…" disabled={bulkBusy} className="h-8 w-auto min-w-0 max-w-[12rem] text-sm" onChange={setBulkOwner} />
             </label>
-            <Button size="sm" disabled={bulkBusy || !!tooMany} onClick={() => void assignPicked()}>
+            <Button size="sm" disabled={bulkBusy || !!tooMany || bulkOwner === NO_CHOICE} onClick={() => void assignPicked()}>
               {bulkBusy ? "Assigning…" : "Assign"}
             </Button>
             <span aria-hidden="true" className="text-muted-foreground">

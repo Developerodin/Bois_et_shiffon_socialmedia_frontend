@@ -111,11 +111,12 @@ export const tasksApi = {
     request<TaskProposalsDto>(`${base}/tasks/from-note`, { method: "POST", body: JSON.stringify({ text }), timeoutMs: SLOW_MS }).then((d) => d.proposals),
   /**
    * tasks.manage + tasks.all. One owner (a person, a role, or nobody) for up to 100 tasks, all or nothing: a refusal is
-   * a 409 whose message names the task. Announced once.
+   * a 409 whose message names the task. `skipped`: done or cancelled tasks left as they were (0 from older servers).
+   * Announced once.
    */
   assign: (base: string, body: { ids: string[] } & ({ ownerId: string | null } | { ownerRoleId: string })) =>
     announce(
-      request<{ tasks: TaskDto[] }>(`${base}/tasks/assign`, { method: "POST", body: JSON.stringify(body) }).then((d) => d.tasks),
+      request<{ tasks: TaskDto[]; skipped?: number }>(`${base}/tasks/assign`, { method: "POST", body: JSON.stringify(body) }).then((d) => ({ tasks: d.tasks, skipped: d.skipped ?? 0 })),
       () => ({ kind: "task" }),
     ),
   /** tasks.manage. Up to 20, all or nothing; the same requestId again returns the first rows instead of making more. */

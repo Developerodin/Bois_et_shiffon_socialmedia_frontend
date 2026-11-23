@@ -52,8 +52,10 @@ export function ownerPeople(people: TaskPersonDto[] | null, all: boolean, userId
 /**
  * A select of the people who read the brand's tasks: staff, plus clients when `withClients` (the reviewer pickers).
  * `roles` (owner pickers, tasks.all) adds a Roles group whose values are `role:<id>` (ownerValue / ownerFromValue);
- * `currentRole` stays pickable when the roles failed to load.
+ * `currentRole` stays pickable when the roles failed to load. `placeholder` adds a first "no choice yet" option whose
+ * value is NO_CHOICE (distinct from `empty`, which is the "nobody" value "").
  */
+export const NO_CHOICE = "?";
 export function PersonSelect(p: {
   id?: string;
   value: string;
@@ -63,6 +65,7 @@ export function PersonSelect(p: {
   currentRole?: { id: string; name: string } | null;
   withClients?: boolean;
   empty: string;
+  placeholder?: string;
   disabled?: boolean;
   className?: string;
   "aria-label"?: string;
@@ -72,6 +75,11 @@ export function PersonSelect(p: {
   if (p.currentRole && !roles.some((r) => r.id === p.currentRole!.id)) roles.unshift(p.currentRole);
   return (
     <select id={p.id} aria-label={p["aria-label"]} value={p.value} disabled={p.disabled} onChange={(e) => p.onChange(e.target.value)} className={cn(selectClass, "pointer-coarse:h-11", p.className)}>
+      {p.placeholder ? (
+        <option value={NO_CHOICE} disabled>
+          {p.placeholder}
+        </option>
+      ) : null}
       <option value="">{p.people ? p.empty : "Loading people…"}</option>
       {personOptions(p.people, p.current, !!p.withClients).map((o) => (
         <option key={o.id} value={o.id}>
