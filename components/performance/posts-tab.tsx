@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CHANNEL_LABEL } from "@/lib/post-labels";
+import { brandBase } from "@/lib/tasks-api";
 import { dayDate, timeAgo } from "@/lib/time";
 
 // ---- mirror of server DTO — replace with synced type at merge ------------------------------------------------------
@@ -52,7 +53,7 @@ type PostsInsightsDto = { posts: PostWithMetricsDto[] };
 
 // ---- shared with ads-tab (move next to lib/data-api.ts at merge) ---------------------------------------------------
 
-export const brandApi = (w: string, b: string) => `/api/v1/workspaces/${encodeURIComponent(w)}/brands/${encodeURIComponent(b)}`;
+export const brandApi = brandBase;
 export const rangeQuery = (from: string, to: string) => `from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
 
 /** Data screens don't poll: they load once and again when the window gets focus. */
