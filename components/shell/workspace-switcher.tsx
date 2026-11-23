@@ -29,7 +29,8 @@ export function WorkspaceItems({
         if (!okToDiscard()) return;
         void setActiveContext({ workspaceId: id }).then(() => {
           // The new workspace's Overview must not open the old brand's item.
-          dropOpenItem();
+          const away = dropOpenItem();
+          if (away) router.replace(away);
           router.refresh();
         }, () => toast({ title: "Couldn't switch workspace", detail: "Try again.", tone: "warning" }));
       }}

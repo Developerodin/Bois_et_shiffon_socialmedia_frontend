@@ -6,21 +6,29 @@ import { ChevronRight, ChevronUp, MessageCircle, SquareTerminal } from "lucide-r
 import { AgentLog } from "@/components/agents/agent-log";
 import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { CreditsChip } from "@/components/shell/credits-chip";
+import { NotificationBell } from "@/components/shell/notification-bell";
+import { QuickCreate } from "@/components/shell/quick-create";
+import { SearchBox } from "@/components/shell/search-box";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { assistantDocks, navFor } from "@/lib/nav";
+import { brandBase } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 
-/** `agents`: the role reads agents on this business (agents.read): the assistant and the Logs drawer are for those roles. */
-type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null; nav?: ReactNode; agents: boolean };
+/**
+ * `agents`: the role reads agents on this business (agents.read): the assistant and the Logs drawer are for those roles.
+ * `features`: the web flags on for this workspace; `perms`: the role's keys on the active business.
+ */
+type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null; nav?: ReactNode; agents: boolean; features: readonly string[]; perms: readonly string[] };
 
 const LOGS_KEY = "ws.logsOpen";
 export const TOPBAR_SLOT_ID = "topbar-slot";
 
 /** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (wherever the assistant isn't docked: below 1280 px, or a page that doesn't dock it) the assistant toggle on the right. */
-export function TopBar({ brandName, workspaceId, brandId, nav, agents }: Props) {
+export function TopBar({ brandName, workspaceId, brandId, nav, agents, features, perms }: Props) {
   const pathname = usePathname();
   const { title, brandScoped } = navFor(pathname);
   const { open: assistantOpen, setOpen: setAssistantOpen } = useAssistant();
+  const tasksOn = features.includes("tasks");
   const [logsOpen, setLogsOpen] = useState(false);
   useEffect(() => {
     try {
@@ -60,7 +68,12 @@ export function TopBar({ brandName, workspaceId, brandId, nav, agents }: Props) 
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
+          {/* Search and "+" work on the active business; the "+" offers only what the role may create. */}
+          {tasksOn && workspaceId && brandId && perms.includes("brand.read") && <SearchBox base={brandBase(workspaceId, brandId)} />}
+          {tasksOn && workspaceId && brandId && <QuickCreate base={brandBase(workspaceId, brandId)} perms={perms} />}
           {workspaceId && <CreditsChip workspaceId={workspaceId} />}
+          {/* Notifications are per person across the workspace's businesses; the server lists only tasks they can see. */}
+          {tasksOn && workspaceId && <NotificationBell workspaceId={workspaceId} brandId={brandId} />}
           {/* The Overview's panel layout portals its Layout menu here (one header band instead of two). */}
           <div id={TOPBAR_SLOT_ID} className="contents" />
           {brandId && agents && (

@@ -47,6 +47,8 @@ export default async function ShellLayout({ children }: { children: React.ReactN
             workspaceId={workspaceId}
             brandId={shell.activeBrandId}
             agents={agents}
+            features={sidebarProps.features}
+            perms={sidebarProps.perms}
             nav={
               <Suspense fallback={null}>
                 <MobileNav {...sidebarProps} />

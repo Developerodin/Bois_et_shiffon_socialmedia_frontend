@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const nav = vi.hoisted(() => ({ notFound: vi.fn() }));
 vi.mock("next/navigation", () => nav);
 
-import { featureOn, featuresOn, requireFeature } from "@/lib/features";
+import { WEB_FEATURE_LIST, featureOn, featuresOn, requireFeature } from "@/lib/features";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -48,6 +48,14 @@ describe("featuresOn", () => {
     expect(featuresOn("w1")).toEqual(["library"]);
     expect(featuresOn("w2")).toEqual([]);
     expect(featuresOn(null)).toEqual([]);
+  });
+});
+
+describe("WEB_FEATURE_LIST", () => {
+  it("features list includes tasks", () => {
+    expect(WEB_FEATURE_LIST).toContain("tasks");
+    vi.stubEnv("WEB_FEATURE_WORKSPACES", "tasks:w1");
+    expect(featureOn("tasks", "w1")).toBe(true);
   });
 });
 

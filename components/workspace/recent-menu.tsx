@@ -26,6 +26,8 @@ type Props = {
 
 type Row = { entry: RecentEntry; title: string; gone: boolean };
 
+const KIND_LABEL: Record<RecentEntry["kind"], string> = { post: "Post", doc: "Document", agent: "Agent", competitor: "Competitor", task: "Task" };
+
 /** Adds to `knownName` only what Recent needs: a placeholder while a list loads, and `gone` once a readable list lacks it. */
 function rowFor(entry: RecentEntry, p: Props, competitors: Competitors): Row {
   const view = entryToView(entry);
@@ -46,7 +48,7 @@ function rowFor(entry: RecentEntry, p: Props, competitors: Competitors): Row {
       gone = !name && !competitors.names.has(entry.id);
     }
   }
-  // Posts are never gone: the list is only the calendar window, older posts still open (the peek says so on a real 404).
+  // Posts and tasks are never gone: their lists are pages, older ones still open (the peek says so on a real 404).
   return { entry, title: pending ? "…" : peekTitle(view, name), gone };
 }
 
@@ -95,7 +97,7 @@ export function RecentMenu(p: Props) {
                 }} className="flex-col items-start gap-0">
                 <span className="max-w-full truncate">{r.title}</span>
                 <span className="text-xs text-muted-foreground">
-                  {e.kind === "post" ? "Post" : e.kind === "doc" ? "Document" : e.kind === "agent" ? "Agent" : "Competitor"} · {r.gone ? "No longer available" : timeAgo(e.at, now)}
+                  {KIND_LABEL[e.kind]} · {r.gone ? "No longer available" : timeAgo(e.at, now)}
                 </span>
               </DropdownMenuItem>
             );

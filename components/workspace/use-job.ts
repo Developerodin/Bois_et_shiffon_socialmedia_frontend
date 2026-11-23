@@ -19,6 +19,8 @@ export const JOB_INTERVALS = {
   storyRender: [[60_000, 3_000], [Infinity, 10_000]],
   // Publishing gives up after 10 minutes: the caller passes capMs: 600_000.
   publishing: [[Infinity, 5_000]],
+  // Task lists, Today's task groups and the bell: people change tasks by hand, so a minute is fresh enough.
+  tasks: [[Infinity, 60_000]],
 } as const satisfies Record<string, Intervals>;
 
 const MAX_DELAY_MS = 60_000;

@@ -26,6 +26,7 @@ import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
 import { filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
 import { dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
+import { CHANNEL_LABEL, STATUS_LABEL } from "@/lib/post-labels";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -116,27 +117,7 @@ export function LoadGate({
   );
 }
 
-export const CHANNEL_LABEL: Record<string, string> = {
-  INSTAGRAM_POST: "Instagram post",
-  INSTAGRAM_CAROUSEL: "Instagram carousel",
-  INSTAGRAM_REEL: "Instagram Reel",
-  INSTAGRAM_STORY: "Instagram story",
-  FACEBOOK_POST: "Facebook",
-  PINTEREST_PIN: "Pinterest",
-  THREADS_POST: "Threads",
-};
-export const STATUS_LABEL: Record<string, string> = {
-  PLANNED: "Planned",
-  BRIEF_READY: "Brief ready",
-  DRAFT_REVIEW: "Draft in review",
-  AWAITING_APPROVAL: "Awaiting approval",
-  APPROVED: "Approved",
-  SCHEDULED: "Scheduled",
-  PUBLISHED: "Published",
-  REVIEWED: "Reviewed",
-  REJECTED: "Rejected",
-  BLOCKED: "Blocked",
-};
+export { CHANNEL_LABEL, STATUS_LABEL };
 const PUBLISH_ISSUE = { FAILED: "Not posted", CHECK: "Check needed" };
 const DECISION: Record<Opportunity["decision"], string> = { RECOMMEND: "Recommend", HOLD: "Hold", REJECT: "Reject" };
 const day = (iso: string) => new Date(iso).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });

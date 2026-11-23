@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { RUN_ID_PATTERN } from "@/shared";
+import { entryToView, parseRecent, viewToEntry } from "@/lib/recent";
 import { agentLabel, namesItem, parseViewParts, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, withoutOpenItem } from "@/lib/workspace-view";
 
 describe("workspace view URL", () => {
@@ -133,5 +134,42 @@ describe("panel in the peek (?peek=)", () => {
     expect(peekCrumb(v)).toBe("Panel");
     expect(peekTitle(v, "Activity")).toBe("Activity");
     expect(peekKey(v)).toBe("panel:log");
+  });
+});
+
+describe("task in the peek (?task=)", () => {
+  it("task param parses and survives Recent", () => {
+    const v = viewFromSearch("?view=mine&task=cm_t-1");
+    expect(v).toEqual({ kind: "task", id: "cm_t-1" });
+    expect(viewToSearch(v, "?area=website", "/tasks")).toBe("?area=website&task=cm_t-1");
+    expect(viewToSearch({ kind: "home" }, "?area=website&task=cm_t-1", "/tasks")).toBe("?area=website");
+    const entry = viewToEntry(v, 1_800_000_000_000);
+    expect(entry).toEqual({ kind: "task", id: "cm_t-1", at: 1_800_000_000_000 });
+    const [back] = parseRecent([entry], 1_800_000_000_000);
+    expect(back).toEqual(entry);
+    expect(entryToView(back)).toEqual(v);
+    expect(peekKey(v)).toBe("task:cm_t-1");
+    expect(peekCrumb(v)).toBe("Tasks › Task");
+    expect(peekTitle(v, null)).toBe("Task");
+    expect(peekTitle(v, "Fix the menu")).toBe("Fix the menu");
+  });
+  it("bad task id is a bad link", () => {
+    expect(viewFromSearch("?task=a%2Fb")).toEqual({ kind: "home" });
+    expect(viewFromSearch(`?task=${"x".repeat(65)}`)).toEqual({ kind: "home" });
+    expect(viewFromSearch("?task=")).toEqual({ kind: "home" });
+    expect(namesItem("?task=a%2Fb")).toBe(true);
+    expect(parseRecent([{ kind: "task", id: "a/b", at: 1 }], 1)).toEqual([]);
+    expect(withoutOpenItem("?task=t1&panel=log", "/")).toBe("?panel=log");
+  });
+  it("a brand switch leaves a project's page for the projects list", () => {
+    expect(withoutOpenItem("", "/projects/p1")).toBe("/projects");
+    expect(withoutOpenItem("?view=open", "/projects/p1")).toBe("/projects");
+    expect(withoutOpenItem("", "/projects")).toBeNull();
+  });
+  it("a brand switch drops the open task on the task pages too", () => {
+    expect(withoutOpenItem("?area=website&task=t1", "/tasks")).toBe("?area=website");
+    expect(withoutOpenItem("?task=t1", "/projects/p1")).toBe("/projects");
+    expect(withoutOpenItem("?area=seo", "/tasks")).toBeNull();
+    expect(withoutOpenItem("?task=t1", "/reels")).toBeNull();
   });
 });

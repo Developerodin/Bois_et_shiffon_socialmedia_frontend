@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ChevronRight, Gauge, Sparkles } from "lucide-react";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { fetchAgents } from "@/components/agents/api";
-import { request } from "@/components/settings/api";
+import { errorMessage, request } from "@/components/settings/api";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ListSkeleton, LoadError, formatDate, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,8 @@ export function Score({ label, value, big }: { label: string; value: number | nu
   );
 }
 
-export function Findings({ findings }: { findings: Finding[] }) {
+/** `action`: shown under each finding's row (Make a task). */
+export function Findings({ findings, action }: { findings: Finding[]; action?: (f: Finding) => ReactNode }) {
   if (!findings.length) return <p className="text-sm text-muted-foreground">No issues found.</p>;
   return (
     <ol className="flex flex-col divide-y divide-border">
@@ -72,13 +74,70 @@ export function Findings({ findings }: { findings: Finding[] }) {
               ) : null}
             </div>
           </details>
+          {action ? <div className="ml-8 mt-2">{action(f)}</div> : null}
         </li>
       ))}
     </ol>
   );
 }
 
-function Panel({ id, title, report, agent, exportUrl, children }: { id: string; exportUrl: string; title: string; report: Report | null; agent: string; children?: React.ReactNode }) {
+/** The task a finding has (made now, or the open one it already had), or null before asking. */
+type FindingTaskMade = { taskId: string; existed: boolean } | null;
+
+/** The finding's task control: "Make a task" until the server answers, then "Open task", which opens it in the tasks page's peek. */
+export function findingTaskLink(made: FindingTaskMade): { label: string; href: string | null } {
+  return made ? { label: "Open task", href: `/tasks?task=${encodeURIComponent(made.taskId)}` } : { label: "Make a task", href: null };
+}
+
+/**
+ * "Make a task" on one finding (flag tasks, tasks.manage): POST returns the finding's open task if it has one (existed),
+ * else a new one. A 409 means an older audit's open task holds this finding's number; its message says to close that first.
+ */
+function FindingTask({ url }: { url: string }) {
+  const [made, setMade] = useState<FindingTaskMade>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const link = findingTaskLink(made);
+
+  const make = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const d = await request<{ task: { id: string }; existed: boolean }>(url, { method: "POST" });
+      setMade({ taskId: d.task.id, existed: d.existed });
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't make the task. Try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-start gap-1">
+      {link.href ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link href={link.href}>{link.label}</Link>
+          </Button>
+          <span role="status" className="text-xs text-muted-foreground">
+            {made?.existed ? "This finding already has an open task." : "Task made."}
+          </span>
+        </div>
+      ) : (
+        <Button size="sm" variant="outline" disabled={busy} onClick={() => void make()}>
+          {busy ? "Making…" : link.label}
+        </Button>
+      )}
+      {error ? (
+        <p role="alert" className="text-xs text-destructive">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function Panel({ id, title, report, agent, exportUrl, findingTaskUrl, children }: { id: string; exportUrl: string; title: string; report: Report | null; agent: string; findingTaskUrl?: (reportId: string, findingId: string) => string; children?: React.ReactNode }) {
   return (
     <PageSection
       id={id}
@@ -98,7 +157,10 @@ function Panel({ id, title, report, agent, exportUrl, children }: { id: string; 
         <>
           <p className="text-sm leading-relaxed">{report.summary}</p>
           {children}
-          <Findings findings={report.findings} />
+          <Findings
+            findings={report.findings}
+            action={findingTaskUrl ? (f) => <FindingTask key={`${report.id}:${f.id}`} url={findingTaskUrl(report.id, f.id)} /> : undefined}
+          />
         </>
       ) : (
         <p className="text-sm text-muted-foreground">
@@ -109,9 +171,13 @@ function Panel({ id, title, report, agent, exportUrl, children }: { id: string; 
   );
 }
 
-/** `canReadAgents`: agents.read (from the shell). Without it the agents list is a 403, so it isn't watched. */
-export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceId: string; brandId: string; canReadAgents: boolean }) {
+/**
+ * `canReadAgents`: agents.read (from the shell). Without it the agents list is a 403, so it isn't watched.
+ * `canMakeTasks`: the tasks flag is on and the role holds tasks.manage; each finding then gets "Make a task".
+ */
+export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks = false }: { workspaceId: string; brandId: string; canReadAgents: boolean; canMakeTasks?: boolean }) {
   const reportsUrl = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}/audit-reports`;
+  const findingTaskUrl = canMakeTasks ? (reportId: string, findingId: string) => `${reportsUrl}/${encodeURIComponent(reportId)}/findings/${encodeURIComponent(findingId)}/task` : undefined;
   const fetcher = useCallback(() => request<{ seo: Report | null; geo: Report | null }>(reportsUrl), [reportsUrl]);
   const { state, reload } = useLoad(fetcher);
 
@@ -151,7 +217,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceI
     const competitors = (geo?.metrics.competitors ?? []) as { name: string; mentions: number }[];
     body = (
       <div className="grid gap-6 xl:grid-cols-2">
-        <Panel id="seo" title="SEO health" report={seo} agent="SEO" exportUrl={`${reportsUrl}/export?kind=SEO`}>
+        <Panel id="seo" title="SEO health" report={seo} agent="SEO" exportUrl={`${reportsUrl}/export?kind=SEO`} findingTaskUrl={findingTaskUrl}>
           {ps && (
             <div className="flex flex-wrap gap-8 rounded-xl bg-muted/40 px-5 py-4">
               <Score label="Performance (mobile)" value={ps.performance} />
@@ -161,7 +227,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents }: { workspaceI
             </div>
           )}
         </Panel>
-        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO" exportUrl={`${reportsUrl}/export?kind=GEO`}>
+        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO" exportUrl={`${reportsUrl}/export?kind=GEO`} findingTaskUrl={findingTaskUrl}>
           {geo && (
             <div className="flex flex-col gap-4 rounded-xl bg-muted/40 px-5 py-4">
               <div className="flex flex-wrap gap-8">

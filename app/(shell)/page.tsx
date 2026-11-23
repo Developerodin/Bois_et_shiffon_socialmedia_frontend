@@ -29,6 +29,7 @@ export default async function WorkspacePage() {
       brandName={brand.displayName}
       website={brand.websiteUrl}
       reelsOn={featureOn("reels", shell.activeWorkspaceId)}
+      tasksOn={featureOn("tasks", shell.activeWorkspaceId)}
       user={shell.user}
       perms={shell.brandPermissions}
     />

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NAV, navFor, sidebarGroups } from "@/lib/nav";
+import { NAV, agentEntries, navFor, sidebarGroups } from "@/lib/nav";
 
 describe("NAV", () => {
   it("lists the agents in order", () => {
@@ -48,9 +48,9 @@ describe("navFor", () => {
   });
 });
 
-describe("sidebarGroups", () => {
-  const ids = (g: { entries: { id: string }[] }) => g.entries.map((e) => e.id);
+const ids = (g: { entries: { id: string }[] }) => g.entries.map((e) => e.id);
 
+describe("sidebarGroups", () => {
   it("shows only the main list with no flags", () => {
     const g = sidebarGroups([]);
     expect(g.map((x) => x.id)).toEqual(["main"]);
@@ -110,5 +110,27 @@ describe("navFor, coming routes", () => {
     expect(navFor("/library").title).toBe("Brand & photos");
     expect(navFor("/photoshoot").title).toBe("Photoshoot");
     expect(navFor("/automations").title).toBe("Automations");
+  });
+});
+
+describe("tasks nav", () => {
+  it("turns the Beat slot into Projects & tasks only with the flag and tasks.read", () => {
+    const beat = (f: Parameters<typeof agentEntries>[0], p?: string[]) => agentEntries(f, p).find((e) => e.id === "beat");
+    expect(beat([])).toMatchObject({ href: "/agents/beat", soon: true });
+    expect(beat(["tasks"], ["brand.read"])).toMatchObject({ href: "/agents/beat", soon: true });
+    expect(beat(["tasks"], ["tasks.read"])).toMatchObject({ href: "/tasks", role: "Projects & tasks", soon: false });
+  });
+
+  it("adds Website and SEO to the main list behind the flag and tasks.read, and titles /tasks", () => {
+    expect(ids(sidebarGroups(["tasks"], ["brand.read"])[0])).not.toContain("website");
+    expect(ids(sidebarGroups(["tasks"], ["brand.read", "tasks.read"])[0]).slice(-2)).toEqual(["website", "seo"]);
+    expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("tasks");
+    expect(NAV.find((e) => e.id === "tasks")?.group).not.toBe("more");
+    expect(navFor("/tasks").title).toBe("Projects & tasks");
+  });
+  it("titles /projects and a project page Projects without listing it", () => {
+    expect(navFor("/projects").title).toBe("Projects");
+    expect(navFor("/projects/p1").title).toBe("Projects");
+    expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("projects");
   });
 });

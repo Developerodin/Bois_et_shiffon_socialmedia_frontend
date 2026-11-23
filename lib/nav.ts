@@ -9,7 +9,8 @@ export type NavEntry = {
   id: string;
   label: string;
   href: string;
-  group: "main" | "create" | "customers" | "agent" | "more" | "admin";
+  /** "page": titled by navFor but listed nowhere (its link is elsewhere, e.g. an agent slot). */
+  group: "main" | "create" | "customers" | "agent" | "more" | "admin" | "page";
   role?: string;
   soon?: boolean;
   blurb?: string;
@@ -21,12 +22,22 @@ export type NavEntry = {
   undocksAssistant?: true;
 };
 
+const TASKS_READ = ["tasks.read"] as const;
+
 export const NAV: readonly NavEntry[] = [
   { id: "overview", label: "Overview", href: "/", group: "main" },
   { id: "context", label: "Business context", href: "/context", group: "main", perm: ["agents.read"] },
   { id: "products", label: "Products", href: "/products", group: "main" },
   { id: "connections", label: "Connections", href: "/connections", group: "main", perm: CONNECTIONS_READ },
   { id: "automations", label: "Automations", href: "/automations", group: "main", feature: "automations" },
+  // One page (/tasks) under three names: the area comes from the query, which navFor ignores, so /tasks reads as the first.
+  // Its own link is the Beat slot (agentEntries); this entry only gives the page its title. Not "more": the account
+  // menu lists those without checking flags.
+  { id: "tasks", label: "Projects & tasks", href: "/tasks", group: "page", feature: "tasks", perm: TASKS_READ },
+  // Its link is on the tasks page; the sidebar highlights Beat's slot on it.
+  { id: "projects", label: "Projects", href: "/projects", group: "page", feature: "tasks", perm: TASKS_READ },
+  { id: "website", label: "Website", href: "/tasks?area=website", group: "main", feature: "tasks", perm: TASKS_READ },
+  { id: "seo", label: "SEO", href: "/tasks?area=seo", group: "main", feature: "tasks", perm: TASKS_READ },
 
   { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },
   { id: "photoshoot", label: "Photoshoot", href: "/photoshoot", group: "create", feature: "photoshoot" },
@@ -67,6 +78,17 @@ export function sidebarGroups(enabled: readonly WebFeature[], perms?: readonly s
     { id: "customers", label: "Customers", entries: NAV.filter((e) => e.group === "customers" && shown(e)) },
   ];
   return groups.filter((g) => g.id === "main" || g.entries.length > 0);
+}
+
+/**
+ * The agents as the sidebar lists them. With the tasks flag and tasks.read, Beat's "Projects & team" slot opens
+ * Projects & tasks instead of its coming-soon page.
+ */
+export function agentEntries(enabled: readonly WebFeature[], perms?: readonly string[]): NavEntry[] {
+  const tasks = enabled.includes("tasks") && (!perms || TASKS_READ.some((p) => perms.includes(p)));
+  return NAV.filter((e) => e.group === "agent").map((e) =>
+    e.id === "beat" && tasks ? { ...e, role: "Projects & tasks", href: "/tasks", soon: false } : e,
+  );
 }
 
 const hrefPath = (href: string) => href.split(/[?#]/)[0] || "/";

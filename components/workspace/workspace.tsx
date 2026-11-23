@@ -42,6 +42,8 @@ import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competi
 import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Peek } from "@/components/workspace/peek";
+import { TaskView } from "@/components/tasks/task-view";
+import { TodayTasks } from "@/components/tasks/today-tasks";
 import { RecentMenu } from "@/components/workspace/recent-menu";
 import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
@@ -121,6 +123,8 @@ type Props = {
   website: string | null;
   /** Reels are on for this workspace: a studio reel in the Overview links to its page. */
   reelsOn: boolean;
+  /** The tasks flag is on for this workspace: without it a ?task= link is a bad link. */
+  tasksOn: boolean;
   user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
   /** The person's permissions on this brand, from the shell (read with the page, so no fetch here can fail on its own). */
   perms: string[];
@@ -129,7 +133,7 @@ type Props = {
 const viewFromUrl = () => viewFromSearch(window.location.search);
 const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
-export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, user, perms }: Props) {
+export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, user, perms }: Props) {
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
@@ -212,13 +216,14 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
     replaceUrl.current = false;
     acceptedUrl.current = next;
   }, [view, urlRead]);
-  // A ?doc= or ?agent= that names nothing shows home and drops the bad parameter, once the lists have loaded.
+  // A ?doc= or ?agent= that names nothing shows home and drops the bad parameter, once the lists have loaded; so does a
+  // ?task= while the tasks flag is off.
   useEffect(() => {
-    const unknown = (view.kind === "doc" && !!docs && !docs.docs.some((d) => d.kind === view.doc)) || (view.kind === "agent" && !!agents && !agents.some((a) => a.key === view.key));
+    const unknown = (view.kind === "task" && !tasksOn) || (view.kind === "doc" && !!docs && !docs.docs.some((d) => d.kind === view.doc)) || (view.kind === "agent" && !!agents && !agents.some((a) => a.key === view.key));
     if (!unknown) return;
     replaceUrl.current = true;
     setView({ kind: "home" });
-  }, [view, docs, agents]);
+  }, [view, docs, agents, tasksOn]);
 
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
   // What the person's role may do. Write controls show only for roles the API would accept.
@@ -409,6 +414,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
             onShowPanel={revealPanel}
             onRetry={retry}
             due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={revealPanel} /> : null}
+            taskGroups={tasksOn && perms.includes("tasks.read") ? <TodayTasks base={base} onOpen={(id) => open({ kind: "task", id })} /> : null}
             showAgents={canAgents}
           />
       ),
@@ -487,6 +493,12 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       live ? panels.find((p) => p.id === v.id)?.render() : null
     ) : v.kind === "competitor" ? (
       <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
+    ) : v.kind === "task" ? (
+      !tasksOn ? null : perms.includes("tasks.read") ? (
+        <TaskView base={base} id={v.id} perms={perms} userId={user.id} onLoaded={() => setLoadedId(peekKey(v))} />
+      ) : (
+        <NotForRole what="tasks" />
+      )
     ) : v.kind === "content" ? (
       <ContentView base={base} perms={perms} id={v.id} reelsOn={reelsOn} brandId={brandId} onLoaded={() => setLoadedId(peekKey(v))} />
     ) : v.kind === "agent" ? (
@@ -882,6 +894,7 @@ function Home({
   onShowPanel,
   onRetry,
   due,
+  taskGroups,
   showAgents,
 }: {
   workspaceId: string;
@@ -891,6 +904,8 @@ function Home({
   docs: ContextDocsResponse | null;
   /** The card for stories due to be posted by hand (people who can publish only). */
   due: React.ReactNode;
+  /** Today's task groups (flag `tasks`, tasks.read), above the post rows. */
+  taskGroups: React.ReactNode;
   user: Props["user"];
   agents: AgentSummary[] | null;
   agentsFailed: boolean;
@@ -1061,6 +1076,7 @@ function Home({
             </span>
           )}
         </div>
+        {taskGroups}
         {due}
         {open.length > 0 ? (
           <ul className="mt-4 divide-y divide-border rounded-xl border border-border">
