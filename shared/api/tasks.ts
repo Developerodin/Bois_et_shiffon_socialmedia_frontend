@@ -97,6 +97,13 @@ export type SearchResultDto = {
 /** GET search: up to 5 hits per kind, best match first; a kind the viewer can't read is always empty. */
 export type SearchResultsDto = { tasks: SearchResultDto[]; projects: SearchResultDto[]; posts: SearchResultDto[]; products: SearchResultDto[]; campaigns: SearchResultDto[] };
 
+/**
+ * POST tasks/from-note: what the model proposes from a pasted note; nothing is stored. `ownerId` is set only when the
+ * note named someone who reads the brand's tasks; the person edits these, then sends the kept ones to POST tasks/batch.
+ */
+export type TaskProposalDto = { title: string; description?: string; areas: string[]; ownerId?: string; dueOn?: string; priority: string };
+export type TaskProposalsDto = { proposals: TaskProposalDto[] };
+
 /** One checklist line of a task; done when `doneAt` is set. */
 export type TaskChecklistItemDto = { id: string; text: string; position: number; doneAt: string | null; doneById: string | null };
 
