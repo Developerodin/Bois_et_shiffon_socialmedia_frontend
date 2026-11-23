@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { CAPTION_LIMITS } from "@/shared";
+import { CAPTION_LIMITS, CHANNEL_TEXT_MAX } from "@/shared";
 import type { ContentItem } from "@/components/workspace/content-panels";
 
 type Body = NonNullable<ContentItem["latest"]>["body"];
 const EMPTY: Body = { hook: "", caption: "", hashtags: [], slides: [], script: [], pinTitle: "", altText: "" };
-// Limits shared with server/content/rules.ts: Threads 500, LinkedIn 3,000, X 280; Pinterest's publish limit is 500.
-const CAPTION_MAX: Record<string, number> = { THREADS_POST: CAPTION_LIMITS.threadsMax, PINTEREST_PIN: 500, LINKEDIN_POST: CAPTION_LIMITS.linkedinMax, X_POST: CAPTION_LIMITS.xMax };
+// Limits shared with server/content/rules.ts and the publish check; Pinterest's 500 is the editor's own.
+const CAPTION_MAX: Record<string, number> = { ...CHANNEL_TEXT_MAX, PINTEREST_PIN: 500 };
 const HASHTAGS_MAX = CAPTION_LIMITS.hashtagsMax;
 const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
 
@@ -81,8 +81,9 @@ function TextDraftEditor({ url, item, onSaved, onCancel }: { url: string; item: 
       captionRef.current?.focus();
       return;
     }
-    if (body.hashtags.length > HASHTAGS_MAX) {
-      setError(`Use ${HASHTAGS_MAX} hashtags at most.`);
+    // Instagram allows 5; elsewhere more is only a warning (server/content/rules.ts), shown by the counter turning red.
+    if (ch.startsWith("INSTAGRAM") && body.hashtags.length > HASHTAGS_MAX) {
+      setError(`Instagram allows ${HASHTAGS_MAX} hashtags at most.`);
       return;
     }
     setPending(true);
