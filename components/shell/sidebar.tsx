@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Camera, Clapperboard, FileText, Images, Inbox, LayoutDashboard, Menu, Package, Plug, PenSquare, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
+import { Camera, Clapperboard, FileText, Globe, Images, Inbox, LayoutDashboard, ListTodo, Menu, Package, Plug, PenSquare, Search, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
@@ -13,11 +13,14 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { AccountMenu } from "@/components/workspace/account-menu";
 import type { WebFeature } from "@/lib/features";
 import { AGENT_ORDER_KEY, applyOrder, move, parseOrder } from "@/lib/agent-order";
-import { NAV, navFor, sidebarGroups, type NavEntry } from "@/lib/nav";
+import { agentEntries, navFor, sidebarGroups, type NavEntry } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 const NAV_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, products: Package, connections: Plug,
   automations: Workflow,
+  tasks: ListTodo,
+  website: Globe,
+  seo: Search,
   library: Images,
   photoshoot: Camera,
   reels: Clapperboard,
@@ -45,13 +48,16 @@ const row =
 
 function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, perms, user }: Props) {
   const pathname = usePathname();
-  const panel = useSearchParams().get("panel");
+  const search = useSearchParams();
+  const panel = search.get("panel");
 
   // Agents that point at a page or panel are selected by where you are; Echo's stand-in destination never is.
   let activeId = navFor(pathname).activeId;
   if (pathname === "/" && panel === "content") activeId = "wave";
   if (pathname === "/" && panel === "competitors") activeId = "drift";
   if (pathname === "/performance") activeId = "surge";
+  // /tasks is three entries told apart by ?area=.
+  if (pathname === "/tasks") activeId = search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "tasks";
   const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));
 
   // The person can reorder their agents by dragging, or with Alt+Up/Down on a focused row. Read after mount so the
@@ -81,7 +87,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
     if (refocus.current) links.current.get(refocus.current)?.focus();
     refocus.current = null;
   }, [order]);
-  const agents = applyOrder(NAV.filter((e) => e.group === "agent"), order);
+  const agents = applyOrder(agentEntries(features, perms), order);
   const reorder = (from: number, to: number) => {
     const next = move(agents, from, to).map((e) => e.id);
     setOrder(next);
