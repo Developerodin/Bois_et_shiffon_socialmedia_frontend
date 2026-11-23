@@ -1,4 +1,6 @@
-import { inNextWeek, STATUS_GROUPS } from "@/shared";
+import { inNextWeek, isBlocked, isOverdue, STATUS_GROUPS } from "@/shared";
+
+export { isBlocked, isOverdue };
 
 /** The parts of a calendar post the filters read; ContentItem satisfies it. */
 export type CalendarItem = {
@@ -17,19 +19,7 @@ export type CalendarItem = {
 export type StatusGroup = keyof typeof STATUS_GROUPS;
 export type CalendarFilter = { channel?: string; status?: StatusGroup; campaignId?: string; owner?: "me" | "none"; need?: "overdue" | "blocked" | "week" };
 
-const PIPELINE: readonly string[] = [...STATUS_GROUPS.toWrite, ...STATUS_GROUPS.awaiting, ...STATUS_GROUPS.approved];
 const PUBLISHED: readonly string[] = STATUS_GROUPS.published;
-
-/** Date passed while still in the pipeline; a by-hand story is overdue whatever its status. */
-export function isOverdue(i: Pick<CalendarItem, "status" | "scheduledFor" | "byHand">, now: Date): boolean {
-  if (!i.scheduledFor || new Date(i.scheduledFor).getTime() >= now.getTime()) return false;
-  return !!i.byHand || PIPELINE.includes(i.status);
-}
-
-export function isBlocked(i: Pick<CalendarItem, "status" | "publishIssue" | "latest">): boolean {
-  if (PUBLISHED.includes(i.status)) return false;
-  return i.status === "BLOCKED" || i.latest?.check?.overall === "BLOCKER" || !!i.publishIssue;
-}
 
 export function isThisWeek(i: Pick<CalendarItem, "status" | "scheduledFor">, now: Date): boolean {
   return inNextWeek(i.scheduledFor, now) && !PUBLISHED.includes(i.status);
