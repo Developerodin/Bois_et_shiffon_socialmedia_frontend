@@ -148,7 +148,7 @@ export function NoteToTasksDialog({ base, open, all, userId, onOpenChange }: { b
           <ul className="flex flex-col gap-3">
             {failed ? <li className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. Owners can be set after the tasks are made.</li> : null}
             {rows.map((r, i) => (
-              <ProposalEditor key={r.key} n={i + 1} row={r} people={ownerPeople(people, all, userId)} roles={all ? roles : undefined} onChange={(p) => edit(r.key, p)} />
+              <ProposalEditor key={r.key} n={i + 1} row={r} people={ownerPeople(people, all, userId)} roles={roles} onChange={(p) => edit(r.key, p)} />
             ))}
           </ul>
         )}

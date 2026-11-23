@@ -192,7 +192,7 @@ export function NewTaskDialog({ base, open, projectId, all, userId, onOpenChange
               <label htmlFor={ids.owner} className="text-sm font-medium">
                 Owner
               </label>
-              <PersonSelect id={ids.owner} value={form.ownerId} people={ownerPeople(people, all, userId)} roles={all ? roles : undefined} empty="Unassigned" onChange={(v) => set("ownerId", v)} />
+              <PersonSelect id={ids.owner} value={form.ownerId} people={ownerPeople(people, all, userId)} roles={roles} empty="Unassigned" onChange={(v) => set("ownerId", v)} />
               {failed ? <p className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. You can assign the task after it&rsquo;s made.</p> : null}
             </div>
             {open ? (

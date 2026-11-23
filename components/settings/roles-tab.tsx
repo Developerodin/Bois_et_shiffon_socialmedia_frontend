@@ -91,7 +91,7 @@ export function RolesTab({ workspaceId, can, roles }: Props) {
                 <span className="mr-2 text-xs text-muted-foreground">
                   {r.memberCount} {r.memberCount === 1 ? "member" : "members"}
                 </span>
-                {editBuiltIn && r.isSystem && r.slug !== "owner" ? (
+                {editBuiltIn && r.isSystem && r.slug !== "owner" && r.slug !== "admin" ? (
                   <Button variant="ghost" size="icon" aria-label={`Edit ${r.name} permissions`} onClick={() => setEditing(r)}>
                     <Pencil />
                   </Button>
