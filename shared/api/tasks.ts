@@ -94,6 +94,9 @@ export type SearchResultDto = {
   title: string;
 };
 
+/** GET search: up to 5 hits per kind, best match first; a kind the viewer can't read is always empty. */
+export type SearchResultsDto = { tasks: SearchResultDto[]; projects: SearchResultDto[]; posts: SearchResultDto[]; products: SearchResultDto[]; campaigns: SearchResultDto[] };
+
 /** One checklist line of a task; done when `doneAt` is set. */
 export type TaskChecklistItemDto = { id: string; text: string; position: number; doneAt: string | null; doneById: string | null };
 
