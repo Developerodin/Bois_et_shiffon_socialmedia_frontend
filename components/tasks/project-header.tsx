@@ -33,9 +33,22 @@ const campaignHref = (id: string) => `/?panel=content&cf_campaignId=${encodeURIC
  * The project's facts: owner, dates, status, progress, the linked campaign and task counts by status. With tasks.manage
  * the owner, dates and status are edited in place (each change saves that one field), and "Visible to client" shares the
  * project with the business's client reviewers; unsharing is refused while a client reviews one of its tasks, and the
- * server's reason shows here. `perms` only hides controls; the server decides.
+ * server's reason shows here. Changing the owner, sharing and archiving need tasks.all (`canAdmin`): without it the owner
+ * and sharing show as text and Archived isn't offered. `perms` only hides controls; the server decides.
  */
-export function ProjectHeader({ base, project, canManage, onSaved }: { base: string; project: WorkProjectDetailDto; canManage: boolean; onSaved: (p: WorkProjectDetailDto) => void }) {
+export function ProjectHeader({
+  base,
+  project,
+  canManage,
+  canAdmin,
+  onSaved,
+}: {
+  base: string;
+  project: WorkProjectDetailDto;
+  canManage: boolean;
+  canAdmin: boolean;
+  onSaved: (p: WorkProjectDetailDto) => void;
+}) {
   const [people, setPeople] = useState<TaskPersonDto[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -82,7 +95,7 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
     <section aria-label="About this project" className="flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
       {project.description ? <p className="whitespace-pre-wrap text-sm">{project.description}</p> : null}
       <dl className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-        {canManage
+        {canManage && canAdmin
           ? row(
               "Owner",
               <PersonSelect id={ids.owner} value={project.owner?.id ?? ""} people={people} current={project.owner} empty="No owner" disabled={busy} onChange={(v) => void save({ ownerId: v || null })} />,
@@ -93,7 +106,7 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
           ? row(
               "Status",
               <select id={ids.status} value={project.status} disabled={busy} onChange={(e) => void save({ status: e.target.value })} className={cn(selectClass, "pointer-coarse:h-11")}>
-                {WORK_PROJECT_STATUSES.map((s) => (
+                {WORK_PROJECT_STATUSES.filter((s) => canAdmin || s !== "ARCHIVED" || project.status === s).map((s) => (
                   <option key={s} value={s}>
                     {PROJECT_STATUS_LABEL[s] ?? s}
                   </option>
@@ -145,7 +158,7 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
             </li>
           ))}
         </ul>
-        {canManage ? (
+        {canManage && canAdmin ? (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <button
               id={ids.share}
@@ -169,6 +182,8 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
               Client reviewers see it and every task in it.
             </span>
           </div>
+        ) : canManage ? (
+          <span className="text-sm text-muted-foreground">{project.clientVisible ? "Visible to client" : "Not visible to client"}</span>
         ) : null}
       </div>
       {error ? (

@@ -8,7 +8,7 @@ import { ApiError, authApi, errorMessage, type PublicInvitation } from "@/compon
 
 type State =
   | { kind: "loading" }
-  | { kind: "invalid" }
+  | { kind: "invalid"; reason?: string }
   | { kind: "error" }
   | { kind: "ready"; invite: PublicInvitation }
   | { kind: "done" };
@@ -28,7 +28,9 @@ export function AcceptInvite({ token }: { token: string }) {
       (invite) => !cancelled && setState({ kind: "ready", invite }),
       (err: unknown) => {
         if (cancelled) return;
-        setState(err instanceof ApiError && err.status === 404 ? { kind: "invalid" } : { kind: "error" });
+        // 409: the inviter can no longer give this role; the server says so.
+        if (err instanceof ApiError && err.status === 409) setState({ kind: "invalid", reason: err.message });
+        else setState(err instanceof ApiError && err.status === 404 ? { kind: "invalid" } : { kind: "error" });
       },
     );
     return () => {
@@ -50,7 +52,7 @@ export function AcceptInvite({ token }: { token: string }) {
     return (
       <AuthCard
         title="Invitation not valid"
-        description="This invitation link is invalid, has expired, or has already been used. Ask the person who invited you for a new one."
+        description={state.reason ?? "This invitation link is invalid, has expired, or has already been used. Ask the person who invited you for a new one."}
       >
         <AuthLink href="/login">Go to sign in</AuthLink>
       </AuthCard>
