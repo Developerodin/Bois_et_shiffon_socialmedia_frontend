@@ -14,7 +14,7 @@ export const CHAT_PAGES = {
   reels: "Reels",
   studio: "Studio",
   inbox: "Inbox",
-  performance: "Performance",
+  performance: "SEO & GEO reports",
   "agent-log": "Agent log",
   settings: "Settings",
 } as const;

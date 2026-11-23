@@ -25,8 +25,8 @@ export type TaskDto = {
   completedAt: string | null;
   workProjectId: string | null;
   contentItemId: string | null;
-  /** The audit finding this task came from (SEO), its pages when made, and when an audit stopped finding it. */
-  findingKind: string | null;
+  /** The audit (SEO or GEO) this task came from, the finding's pages when made, and when an audit stopped finding it. */
+  findingKind: "SEO" | "GEO" | null;
   findingUrls: string[];
   findingClearedAt: string | null;
   createdAt: string;
