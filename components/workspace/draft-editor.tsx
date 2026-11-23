@@ -13,8 +13,8 @@ import type { ContentItem } from "@/components/workspace/content-panels";
 
 type Body = NonNullable<ContentItem["latest"]>["body"];
 const EMPTY: Body = { hook: "", caption: "", hashtags: [], slides: [], script: [], pinTitle: "", altText: "" };
-// Limits shared with server/content/rules.ts and the publish check; Pinterest's 500 is the editor's own.
-const CAPTION_MAX: Record<string, number> = { ...CHANNEL_TEXT_MAX, PINTEREST_PIN: 500 };
+// Limits shared with server/content/rules.ts and the publish check (Pinterest's is checked in rules only).
+const CAPTION_MAX: Record<string, number> = { ...CHANNEL_TEXT_MAX, PINTEREST_PIN: CAPTION_LIMITS.pinDescriptionMax };
 const HASHTAGS_MAX = CAPTION_LIMITS.hashtagsMax;
 const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
 
