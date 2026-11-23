@@ -1,4 +1,4 @@
-import type { PostRow, TaskAction, TaskDetailDto, TaskDto } from "@/shared";
+import type { PostRow, TaskAction, TaskDetailDto, TaskDto, TaskPersonDto } from "@/shared";
 import { request } from "@/components/settings/api";
 
 const enc = encodeURIComponent;
@@ -18,9 +18,11 @@ export const tasksApi = {
   /** A refusal is a 409 whose message says why; the caller shows it. */
   act: (base: string, id: string, body: TaskActionBody) =>
     request<{ task: TaskDetailDto }>(`${base}/tasks/${enc(id)}`, { method: "POST", body: JSON.stringify(body) }).then((d) => d.task),
-  /**
-   * People who can be picked as a reviewer: the brand's people as the post owner picker lists them (needs content.create).
-   * ponytail: there is no tasks-specific people list yet; the server still refuses a reviewer who can't see the task.
-   */
-  people: (base: string) => request<{ owners: { id: string; name: string | null }[] }>(`${base}/content/owners`).then((d) => d.owners),
+  /** One task with its checklist lines and photos; 404 when it is gone or hidden from this person. */
+  get: (base: string, id: string) => request<{ task: TaskDetailDto }>(`${base}/tasks/${enc(id)}`).then((d) => d.task),
+  /** tasks.manage. Send only the fields that changed: two people editing one task overwrite per field, last write wins. */
+  patch: (base: string, id: string, fields: Record<string, unknown>) =>
+    request<{ task: TaskDetailDto }>(`${base}/tasks/${enc(id)}`, { method: "PATCH", body: JSON.stringify(fields) }).then((d) => d.task),
+  /** People who read the brand's tasks (tasks.read): the owner, reviewer and "waiting on" pickers. */
+  people: (base: string) => request<{ people: TaskPersonDto[] }>(`${base}/tasks/people`).then((d) => d.people),
 };

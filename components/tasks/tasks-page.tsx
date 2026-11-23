@@ -6,10 +6,12 @@ import { PageHeader } from "@/components/ui/page-header";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { selectClass } from "@/components/settings/shared";
 import { navFor } from "@/lib/nav";
+import { recentKey } from "@/lib/recent";
 import { brandBase } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { TaskBoard } from "@/components/tasks/task-board";
 import { TaskList } from "@/components/tasks/task-list";
+import { TaskPeek } from "@/components/tasks/task-view";
 import { AREA_TABS, areaParam, readSaved, TASK_LIST_VIEWS, TASKS_VIEW_KEY, type AreaParam, type TaskLayout, type TaskListView } from "@/components/tasks/task-views";
 
 const LAYOUTS = [
@@ -17,8 +19,8 @@ const LAYOUTS = [
   { value: "board", label: "Board" },
 ] as const;
 
-/** /tasks: area tabs (from ?area=, so the Website and SEO nav links land on theirs), a view, and List or Board. */
-export function TasksPage({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
+/** /tasks: area tabs (from ?area=, so the Website and SEO nav links land on theirs), a view, List or Board, and the task peek (?task=). */
+export function TasksPage({ workspaceId, brandId, userId, canManage }: { workspaceId: string; brandId: string; userId: string; canManage: boolean }) {
   const base = brandBase(workspaceId, brandId);
   const router = useRouter();
   const pathname = usePathname();
@@ -78,6 +80,7 @@ export function TasksPage({ workspaceId, brandId }: { workspaceId: string; brand
           <TaskList base={base} view={view} area={area} />
         </section>
       )}
+      <TaskPeek base={base} canManage={canManage} recentKey={recentKey(workspaceId, brandId, userId)} />
     </div>
   );
 }

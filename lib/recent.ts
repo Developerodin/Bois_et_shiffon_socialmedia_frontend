@@ -1,7 +1,8 @@
 import { parseViewParts, type View } from "@/lib/workspace-view";
 
-/** One opened item. `kind` is the URL parameter name (post, doc, agent, competitor); `id` is its value. */
-export type RecentEntry = { kind: "post" | "doc" | "agent" | "competitor"; id: string; at: number };
+/** One opened item. `kind` is the URL parameter name (post, doc, agent, competitor, task); `id` is its value. */
+export type RecentEntry = { kind: (typeof RECENT_KINDS)[number]; id: string; at: number };
+const RECENT_KINDS = ["post", "doc", "agent", "competitor", "task"] as const;
 
 export const RECENT_MAX = 8;
 const RECENT_TTL_MS = 30 * 24 * 3600 * 1000;
@@ -22,6 +23,8 @@ export function viewToEntry(v: View, at: number): RecentEntry | null {
       return { kind: "agent", id: v.key, at };
     case "competitor":
       return { kind: "competitor", id: v.id, at };
+    case "task":
+      return { kind: "task", id: v.id, at };
     case "panel": // Recent is items only
     case "home":
       return null;
@@ -46,7 +49,7 @@ export function parseRecent(raw: unknown, now: number): RecentEntry[] {
     const { kind, id, at } = r as Record<string, unknown>;
     if (typeof kind !== "string" || typeof id !== "string" || typeof at !== "number" || !Number.isFinite(at)) continue;
     if (at > now + 60_000 || now - at > RECENT_TTL_MS) continue;
-    if (!["post", "doc", "agent", "competitor"].includes(kind) || parseViewParts(kind, id).kind === "home") continue; // ?peek= parses too, but panels aren't items
+    if (!(RECENT_KINDS as readonly string[]).includes(kind) || parseViewParts(kind, id).kind === "home") continue; // ?peek= parses too, but panels aren't items
     if (out.some((o) => o.kind === kind && o.id === id)) continue; // a hand-edited store may repeat an item
     out.push({ kind: kind as RecentEntry["kind"], id, at });
   }

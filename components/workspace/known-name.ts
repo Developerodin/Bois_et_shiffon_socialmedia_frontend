@@ -18,6 +18,8 @@ export function knownName(view: View, from: { docs: ContextDocsResponse | null; 
       return (sharedResponse(`${from.base}/competitors`) as { competitors?: { id: string; name: string }[] } | undefined)?.competitors?.find((c) => c.id === view.id)?.name;
     case "content":
       return cachedPost(from.base, view.id)?.title;
+    case "task": // the task peek puts each task it loads here (TaskView); until then, "Task"
+      return (sharedResponse(`${from.base}/tasks/${encodeURIComponent(view.id)}`) as { task?: { title: string } } | undefined)?.task?.title;
     case "panel":
     case "home":
       return undefined;

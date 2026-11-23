@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useState } from "react";
 import Link from "next/link";
-import type { TaskDto } from "@/shared";
+import type { TaskDto, TaskPersonDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
 import { selectClass } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
@@ -180,7 +180,7 @@ function Card({ task, busy, dragging, onDrag, onMove }: { task: TaskDto; busy: b
 
 /** Sending a task for review: pick who reviews it (the current reviewer is preselected). */
 function ReviewerDialog({ base, task, onClose, onSend }: { base: string; task: TaskDto; onClose: () => void; onSend: (reviewerId: string) => Promise<void> }) {
-  const [people, setPeople] = useState<{ id: string; name: string | null }[] | null>(null);
+  const [people, setPeople] = useState<TaskPersonDto[] | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [reviewerId, setReviewerId] = useState(task.reviewer && !task.reviewer.gone ? task.reviewer.id : "");
   const [sending, setSending] = useState(false);
@@ -200,7 +200,7 @@ function ReviewerDialog({ base, task, onClose, onSend }: { base: string; task: T
 
   // The current reviewer stays pickable even when the people list couldn't load or leaves them out.
   const options = [...(people ?? [])];
-  if (task.reviewer && !task.reviewer.gone && !options.some((p) => p.id === task.reviewer!.id)) options.unshift({ id: task.reviewer.id, name: task.reviewer.name });
+  if (task.reviewer && !task.reviewer.gone && !options.some((p) => p.id === task.reviewer!.id)) options.unshift(task.reviewer);
 
   const send = async () => {
     setSending(true);
@@ -224,7 +224,7 @@ function ReviewerDialog({ base, task, onClose, onSend }: { base: string; task: T
             <option value="">{people || loadError ? "Pick a reviewer" : "Loading people…"}</option>
             {options.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name ?? "A team member"}
+                {p.name}
               </option>
             ))}
           </select>

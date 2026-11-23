@@ -42,6 +42,7 @@ import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competi
 import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Peek } from "@/components/workspace/peek";
+import { TaskView } from "@/components/tasks/task-view";
 import { RecentMenu } from "@/components/workspace/recent-menu";
 import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
@@ -487,6 +488,12 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       live ? panels.find((p) => p.id === v.id)?.render() : null
     ) : v.kind === "competitor" ? (
       <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
+    ) : v.kind === "task" ? (
+      perms.includes("tasks.read") ? (
+        <TaskView base={base} id={v.id} canManage={perms.includes("tasks.manage")} onLoaded={() => setLoadedId(peekKey(v))} />
+      ) : (
+        <NotForRole what="tasks" />
+      )
     ) : v.kind === "content" ? (
       <ContentView base={base} perms={perms} id={v.id} reelsOn={reelsOn} brandId={brandId} onLoaded={() => setLoadedId(peekKey(v))} />
     ) : v.kind === "agent" ? (

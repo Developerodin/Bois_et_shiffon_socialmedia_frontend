@@ -20,13 +20,18 @@ type Props = {
   /** A page of its own for the item (studio reels); the others have none. */
   fullPageHref?: string;
   asideRef: RefObject<HTMLElement | null>;
+  /**
+   * "board" (default): over the right of the Overview's own wrapper. "page": fixed to the window's right edge, for a page
+   * that scrolls in the shell's main area (/tasks), where an absolute peek would scroll away with the page.
+   */
+  placement?: "board" | "page";
   children: ReactNode;
 };
 
 // ponytail: not Sheet. Sheet is a modal Radix dialog fixed to the viewport (focus trap, scrim that eats clicks); the peek
 // sits inside the Overview, next to the assistant, and leaves the board usable behind it.
-/** A side peek over the right of the Overview: the open post, document, agent or competitor. */
-export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asideRef, children }: Props) {
+/** A side peek over the right of the Overview (the open post, document, agent, competitor or task), or of a tasks page. */
+export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asideRef, placement = "board", children }: Props) {
   const titleId = useId();
   // Mounted off-screen, then slid in: the style is read first so the browser has a start for the transition.
   const [entered, setEntered] = useState(false);
@@ -37,9 +42,10 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
   }, [asideRef]);
   const shown = open && entered;
   const { width, max, resize } = usePeekWidth();
+  const place = placement === "page" ? "fixed z-40" : "absolute z-20";
   return (
     <>
-      <div aria-hidden="true" className={cn("pointer-events-none absolute inset-0 z-20 bg-foreground/5 transition-opacity duration-200 motion-reduce:transition-none", shown ? "opacity-100" : "opacity-0")} />
+      <div aria-hidden="true" className={cn("pointer-events-none inset-0 bg-foreground/5 transition-opacity duration-200 motion-reduce:transition-none", place, shown ? "opacity-100" : "opacity-0")} />
       <aside
         ref={asideRef}
         role="region"
@@ -57,7 +63,8 @@ export function Peek({ open, title, crumb, onClose, onExited, fullPageHref, asid
         // The width is set by style, so a drag never jumps; only the slide (transform) is transitioned.
         style={{ "--peek-w": `${width}px` } as CSSProperties}
         className={cn(
-          "absolute inset-y-0 right-0 z-20 flex w-full flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(var(--peek-w),75vw,100%)]",
+          "inset-y-0 right-0 flex w-full flex-col border-l border-border bg-background shadow-xl transition-transform duration-200 ease-out motion-reduce:transition-none lg:w-[min(var(--peek-w),75vw,100%)]",
+          place,
           shown ? "translate-x-0" : "translate-x-full",
         )}
       >

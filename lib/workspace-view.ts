@@ -11,17 +11,18 @@ export type View =
   | { kind: "agent"; key: string; run?: boolean; runId?: string }
   | { kind: "content"; id: string }
   | { kind: "competitor"; id: string }
+  | { kind: "task"; id: string }
   | { kind: "panel"; id: PanelId };
 
 // ?peek= is a panel shown in the peek; not ?panel=, which puts a panel on the board.
-const ITEM_PARAMS = ["post", "doc", "agent", "competitor", "peek"];
-/** A post's or competitor's id as the server makes them (cuid-like). */
+const ITEM_PARAMS = ["post", "doc", "agent", "competitor", "task", "peek"];
+/** A post's, competitor's or task's id as the server makes them (cuid-like). */
 const ITEM_ID = /^[A-Za-z0-9_-]{1,64}$/;
 /** An agent key's shape. There's no static list of agents: the Overview drops unknown ones once the list loads. */
 const AGENT_KEY = /^[a-z][a-z0-9-]{0,39}$/;
 
 /**
- * The view for a URL parameter name (post, doc, agent, competitor) and its value, or home when either is unknown or
+ * The view for a URL parameter name (post, doc, agent, competitor, task) and its value, or home when either is unknown or
  * malformed. Never sets `run`: a link, a reload or Recent must not start a paid run.
  */
 export function parseViewParts(kind: string, id: string): View {
@@ -29,11 +30,12 @@ export function parseViewParts(kind: string, id: string): View {
   if (kind === "doc" && (DOC_KINDS as readonly string[]).includes(id)) return { kind: "doc", doc: id as ContextDocKind };
   if (kind === "agent" && AGENT_KEY.test(id)) return { kind: "agent", key: id };
   if (kind === "competitor" && ITEM_ID.test(id)) return { kind: "competitor", id };
+  if (kind === "task" && ITEM_ID.test(id)) return { kind: "task", id };
   if (kind === "peek" && (PANEL_IDS as readonly string[]).includes(id)) return { kind: "panel", id: id as PanelId };
   return { kind: "home" };
 }
 
-/** The open item lives in the URL (?post=, ?doc=, ?agent=[&runId=], ?competitor=, ?peek=). */
+/** The open item lives in the URL (?post=, ?doc=, ?agent=[&runId=], ?competitor=, ?task=, ?peek=). */
 export function viewFromSearch(search: string): View {
   const q = new URLSearchParams(search);
   for (const kind of ITEM_PARAMS) {
@@ -49,7 +51,7 @@ export function viewFromSearch(search: string): View {
 /** The URL's search for a view, keeping the parameters that aren't about the view (filters, ?panel=). */
 export function viewToSearch(v: View, search: string, pathname: string): string {
   const q = new URLSearchParams(search);
-  for (const k of ["post", "doc", "agent", "competitor", "peek", "runId"]) q.delete(k);
+  for (const k of [...ITEM_PARAMS, "runId"]) q.delete(k);
   if (v.kind === "content") q.set("post", v.id);
   if (v.kind === "doc") q.set("doc", v.doc);
   if (v.kind === "agent") {
@@ -57,6 +59,7 @@ export function viewToSearch(v: View, search: string, pathname: string): string 
     if (v.runId) q.set("runId", v.runId);
   }
   if (v.kind === "competitor") q.set("competitor", v.id);
+  if (v.kind === "task") q.set("task", v.id);
   if (v.kind === "panel") q.set("peek", v.id);
   const s = q.toString();
   return s ? `?${s}` : pathname;
@@ -67,6 +70,7 @@ export function peekKey(v: View): string {
   switch (v.kind) {
     case "content":
     case "competitor":
+    case "task":
     case "panel":
       return `${v.kind}:${v.id}`;
     case "doc":
@@ -89,6 +93,8 @@ export function peekCrumb(v: View): string {
       return "Agents";
     case "competitor":
       return "Competitors";
+    case "task":
+      return "Tasks › Task";
     case "panel":
       return "Panel";
     case "home":
@@ -115,6 +121,8 @@ export function peekTitle(v: View, known: string | null | undefined): string {
       return agentLabel(v.key);
     case "competitor":
       return "Competitor";
+    case "task":
+      return "Task";
     case "panel":
       return "Panel";
     case "home":
