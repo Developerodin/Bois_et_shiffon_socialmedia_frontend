@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { projectsApi, tasksApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { PersonSelect } from "@/components/tasks/task-actions";
-import { dueLabel, ownerLabel, progressLabel, progressPercent, PROJECT_STATUS_LABEL, STATUS_LABEL } from "@/components/tasks/task-views";
+import { BOARD_COLUMNS, dueLabel, ownerLabel, progressLabel, progressPercent, PROJECT_STATUS_LABEL, STATUS_LABEL } from "@/components/tasks/task-views";
 
 /** A project's progress: a bar and "3 of 8 done" (cancelled tasks don't count). */
 export function ProjectProgress({ progress, label }: { progress: { done: number; total: number }; label: string }) {
@@ -28,8 +28,6 @@ export function ProjectProgress({ progress, label }: { progress: { done: number;
 
 /** The campaign's posts in the Overview's calendar, filtered to this campaign. */
 const campaignHref = (id: string) => `/?panel=content&cf_campaignId=${encodeURIComponent(id)}`;
-
-const TASK_STATUSES = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"] as const;
 
 /**
  * The project's facts: owner, dates, status, progress, the linked campaign and task counts by status. With tasks.manage
@@ -141,7 +139,7 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
         </div>
       </div>
       <ul aria-label="Tasks by status" className="flex flex-wrap gap-2">
-        {TASK_STATUSES.map((s) => (
+        {BOARD_COLUMNS.map((s) => (
           <li key={s}>
             <StatusBadge status={s}>
               {STATUS_LABEL[s]}: {project.taskCounts[s] ?? 0}
