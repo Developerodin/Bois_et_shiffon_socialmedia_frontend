@@ -25,6 +25,8 @@ type Report = {
   findings: Finding[];
   metrics: Record<string, unknown>;
   createdAt: string;
+  /** Finding id → its open task's id (staff with tasks.read only). */
+  openTasks?: Record<string, string>;
 };
 type PageSpeed = { performance: number; seo: number; accessibility: number; bestPractices: number; lcpMs: number | null };
 type Question = { question: string; mentioned: boolean; branded?: boolean; brands: string[] };
@@ -97,8 +99,8 @@ export function findingTaskLink(made: FindingTaskMade): { label: string; href: s
  * "Make a task" on one finding (flag tasks, tasks.manage): POST returns the finding's open task if it has one (existed),
  * else a new one. A 409 means an older audit's open task holds this finding's number; its message says to close that first.
  */
-function FindingTask({ url }: { url: string }) {
-  const [made, setMade] = useState<FindingTaskMade>(null);
+function FindingTask({ url, taskId }: { url: string; taskId?: string }) {
+  const [made, setMade] = useState<FindingTaskMade>(taskId ? { taskId, existed: true } : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const link = findingTaskLink(made);
@@ -123,9 +125,11 @@ function FindingTask({ url }: { url: string }) {
           <Button asChild size="sm" variant="outline">
             <Link href={link.href}>{link.label}</Link>
           </Button>
-          <span role="status" className="text-xs text-muted-foreground">
-            {made?.existed ? "This finding already has an open task." : "Task made."}
-          </span>
+          {made && !(taskId && made.taskId === taskId) ? (
+            <span role="status" className="text-xs text-muted-foreground">
+              {made.existed ? "This finding already has an open task." : "Task made."}
+            </span>
+          ) : null}
         </div>
       ) : (
         <Button size="sm" variant="outline" disabled={busy} onClick={() => void make()}>
@@ -145,7 +149,7 @@ function FindingTask({ url }: { url: string }) {
  * "Make all tasks": a task for every finding of this report that hasn't got one (the server skips findings with an open
  * task, and ones a person cancelled), then a link to them on the Performance tab.
  */
-function MakeAllTasks({ url, kind, onStale }: { url: string; kind: "SEO" | "GEO"; onStale: () => void }) {
+function MakeAllTasks({ url, kind, onStale, onMade }: { url: string; kind: "SEO" | "GEO"; onStale: () => void; onMade: () => void }) {
   const [made, setMade] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -155,6 +159,7 @@ function MakeAllTasks({ url, kind, onStale }: { url: string; kind: "SEO" | "GEO"
     setError("");
     try {
       setMade((await request<{ made: number }>(url, { method: "POST" })).made);
+      onMade(); // reload, so each finding shows its task
     } catch (e) {
       setError(errorMessage(e, "Couldn't make the tasks. Try again."));
       // A newer report replaced this one (404): show it.
@@ -207,7 +212,7 @@ function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl
       actions={
         report ? (
           <>
-            {findingTaskUrl && report.findings.length ? <MakeAllTasks key={report.id} url={`${reportsUrl}/${encodeURIComponent(report.id)}/tasks`} kind={report.kind} onStale={onStale} /> : null}
+            {findingTaskUrl && report.findings.length ? <MakeAllTasks key={report.id} url={`${reportsUrl}/${encodeURIComponent(report.id)}/tasks`} kind={report.kind} onStale={onStale} onMade={onStale} /> : null}
             <ExportCsvButton url={exportUrl} label="Export to Excel" filename={`${id}-findings-${new Date().toLocaleDateString("en-CA")}.xlsx`} />
           </>
         ) : undefined
@@ -219,7 +224,7 @@ function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl
           {children}
           <Findings
             findings={report.findings}
-            action={findingTaskUrl ? (f) => <FindingTask key={`${report.id}:${f.id}`} url={findingTaskUrl(report.id, f.id)} /> : undefined}
+            action={findingTaskUrl ? (f) => <FindingTask key={`${report.id}:${f.id}:${report.openTasks?.[f.id] ?? ""}`} url={findingTaskUrl(report.id, f.id)} taskId={report.openTasks?.[f.id]} /> : undefined}
           />
         </>
       ) : (

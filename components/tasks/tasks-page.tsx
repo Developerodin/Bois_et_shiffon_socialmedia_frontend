@@ -36,23 +36,28 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
   const source = sourceParam(search.get("source"), area);
   // Read after mount so the server render and the first client render match.
   const [saved, setSaved] = useState<{ view: TaskListView; layout: TaskLayout } | null>(null);
+  // The saved choice, read once after mount.
   useEffect(() => {
     let raw: string | null = null;
     try {
       raw = localStorage.getItem(TASKS_VIEW_KEY);
     } catch {}
-    // A link to one view (Today's group headers: ?view=approvals) shows that list, for this visit only. Then the
-    // parameter leaves the URL (no history entry), so a reload or a shared link shows the person's own choice.
-    const linked = TASK_LIST_VIEWS.find((v) => v.value === search.get("view"))?.value;
-    setSaved(linked ? { view: linked, layout: "list" } : readSaved(raw));
-    if (search.has("view")) {
-      const q = new URLSearchParams(search.toString());
-      q.delete("view");
-      const s = q.toString();
-      navigate(router, s ? `${pathname}?${s}` : pathname, pathname, "replace");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- read once on mount, like the saved choice
+    setSaved((s) => s ?? readSaved(raw));
   }, []);
+  // A link to one view (Today's group headers: ?view=approvals, the sidebar's Performance: ?view=open) shows that list,
+  // for this visit only, each time a link brings one, also when this page is already open (the sidebar from Website).
+  // Then the parameter leaves the URL (no history entry), so a reload or a shared link shows the person's own choice.
+  const viewParam = search.get("view");
+  useEffect(() => {
+    if (viewParam === null) return;
+    const linked = TASK_LIST_VIEWS.find((v) => v.value === viewParam)?.value;
+    if (linked) setSaved((s) => ({ view: linked, layout: s?.layout ?? "list" }));
+    const q = new URLSearchParams(search.toString());
+    q.delete("view");
+    const s = q.toString();
+    navigate(router, s ? `${pathname}?${s}` : pathname, pathname, "replace");
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs when a link brings a view, not on other URL changes
+  }, [viewParam]);
   const { view, layout } = saved ?? readSaved(null);
 
   const remember = (next: { view: TaskListView; layout: TaskLayout }) => {
