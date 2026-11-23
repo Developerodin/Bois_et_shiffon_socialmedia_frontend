@@ -124,6 +124,8 @@ export const CHANNEL_LABEL: Record<string, string> = {
   FACEBOOK_POST: "Facebook",
   PINTEREST_PIN: "Pinterest",
   THREADS_POST: "Threads",
+  LINKEDIN_POST: "LinkedIn",
+  X_POST: "X",
 };
 export const STATUS_LABEL: Record<string, string> = {
   PLANNED: "Planned",
