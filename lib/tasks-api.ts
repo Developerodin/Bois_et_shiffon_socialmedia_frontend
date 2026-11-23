@@ -129,6 +129,8 @@ export const projectsQuery = (status: string) => (status ? `work-projects?status
 
 /** Work projects and their milestones. Every write needs tasks.manage; a refusal throws with the server's message. */
 export const projectsApi = {
+  /** The first page (30, soonest due first): the task's Project picker. */
+  first: (base: string) => request<ProjectPage>(`${base}/work-projects`),
   page: (base: string, query: string, cursor: string) => request<ProjectPage>(`${base}/${query}${query.includes("?") ? "&" : "?"}cursor=${enc(cursor)}`),
   /** With a requestId, a retry returns the project the first request made. */
   create: (base: string, body: { name: string; requestId: string }) =>

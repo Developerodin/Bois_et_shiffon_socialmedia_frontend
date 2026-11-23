@@ -119,4 +119,10 @@ export function progressPercent(p: { done: number; total: number }): number {
   return p.total ? Math.round((p.done / p.total) * 100) : 0;
 }
 
+/** "Check again in 4 weeks": the person's own today plus 28 days, as YYYY-MM-DD. */
+export function recheckDay(now: Date): string {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 28);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export const PROJECT_STATUS_LABEL: Record<string, string> = { ACTIVE: "Active", DONE: "Done", ARCHIVED: "Archived" };

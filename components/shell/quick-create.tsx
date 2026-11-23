@@ -15,6 +15,17 @@ import { postHref, samePage, taskHref } from "@/lib/workspace-view";
 
 type Kind = "task" | "post" | "project" | "note";
 
+/** On a project's page, its id: a task made there starts in that project. */
+export function projectIdOf(pathname: string): string | undefined {
+  const m = /^\/projects\/([^/]+)$/.exec(pathname);
+  if (!m) return undefined;
+  try {
+    return decodeURIComponent(m[1]);
+  } catch {
+    return undefined;
+  }
+}
+
 /** The "+" menu's items, each with the key its server route needs; an item the role can't use isn't offered. */
 export function quickCreateItems(perms: readonly string[]): { kind: Kind; label: string }[] {
   const manage = perms.includes("tasks.manage");
@@ -59,7 +70,7 @@ export function QuickCreate({ base, perms }: { base: string; perms: readonly str
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <NewTaskDialog base={base} {...dialog("task")} onCreated={(t) => go(taskHref(pathname, window.location.search, t.id))} />
+      <NewTaskDialog base={base} projectId={projectIdOf(pathname)} {...dialog("task")} onCreated={(t) => go(taskHref(pathname, window.location.search, t.id))} />
       <NewPostDialog base={base} canCreate={perms.includes("content.create")} {...dialog("post")} onCreated={(id) => go(postHref(pathname, window.location.search, id))} />
       <Dialog {...dialog("project")}>
         <DialogContent>

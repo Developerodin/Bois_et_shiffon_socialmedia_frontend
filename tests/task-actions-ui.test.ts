@@ -106,3 +106,32 @@ describe("person pickers", () => {
     expect(personOptions([], { id: "u9", name: "Old", gone: true, client: false }, false)).toEqual([{ id: "u9", label: "Old (no longer on this business)" }]);
   });
 });
+
+describe("missing task controls", () => {
+  it("a task's project and linked post are edited like its other fields", () => {
+    const t = task({ workProjectId: "w1", contentItemId: null });
+    expect(draftOf(t)).toMatchObject({ workProjectId: "w1", contentItemId: "" });
+    expect(changedFields(t, { workProjectId: "w1" })).toEqual({});
+    expect(changedFields(t, { workProjectId: "" })).toEqual({ workProjectId: null });
+    expect(changedFields(t, { workProjectId: "w2", contentItemId: "p1" })).toEqual({ workProjectId: "w2", contentItemId: "p1" });
+  });
+  it("marking an SEO task done offers a recheck in 4 weeks, to a manager", () => {
+    const html = (over: Partial<TaskDetailDto>, canManage: boolean) =>
+      renderToStaticMarkup(createElement(TaskActions, { base: "/api/x", task: task({ status: "IN_PROGRESS", actions: ["markDone"], ...over }), people: [], canManage, onChanged: () => {} }));
+    expect(html({ areas: ["SEO"] }, true)).toMatch(/checked=""[^>]*\/?>When marked done, check again in 4 weeks/);
+    expect(html({ areas: ["SEO"] }, false)).not.toContain("check again");
+    expect(html({ areas: ["WEBSITE"] }, true)).not.toContain("check again");
+  });
+  it("the recheck day is 28 days from the person's today", async () => {
+    const { recheckDay } = await import("@/components/tasks/task-views");
+    expect(recheckDay(new Date(2026, 10, 23, 23, 30))).toBe("2026-12-21");
+    expect(recheckDay(new Date(2026, 1, 1))).toBe("2026-03-01");
+  });
+  it("a task made on a project's page starts in that project", async () => {
+    const { projectIdOf } = await import("@/components/shell/quick-create");
+    expect(projectIdOf("/projects/w1")).toBe("w1");
+    expect(projectIdOf("/projects")).toBeUndefined();
+    expect(projectIdOf("/tasks")).toBeUndefined();
+    expect(projectIdOf("/projects/%E0%A4")).toBeUndefined();
+  });
+});

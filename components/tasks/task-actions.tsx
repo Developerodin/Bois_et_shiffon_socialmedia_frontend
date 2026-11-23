@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { tasksApi, type TaskActionBody } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
+import { recheckDay } from "@/components/tasks/task-views";
 
 export const ACTION_LABEL: Record<TaskAction, string> = {
   start: "Start",
@@ -64,27 +65,39 @@ export function PersonSelect(p: {
  * The status buttons this person may press, straight from `task.actions` (the server's answer; nothing is decided here).
  * A refusal comes back as the server's message and shows as text. tasksApi announces every success (`tasks:changed`).
  * `noPeople`: the viewer may not list the business's people (a client reviewer), so no person pickers show.
+ * Marking an SEO task done offers "Check again in 4 weeks" (on by default) to a manager: the recheck day is a PATCH,
+ * which needs tasks.manage, sent after the action succeeds.
  */
-export function TaskActions({ base, task, people, onChanged, hide = [], noPeople = false }: { base: string; task: TaskDetailDto; people: TaskPersonDto[] | null; onChanged: (t: TaskDetailDto) => void; hide?: TaskAction[]; noPeople?: boolean }) {
+export function TaskActions(props: { base: string; task: TaskDetailDto; people: TaskPersonDto[] | null; onChanged: (t: TaskDetailDto) => void; hide?: TaskAction[]; noPeople?: boolean; canManage?: boolean }) {
+  const { base, task, people, onChanged, hide = [], noPeople = false, canManage = false } = props;
   const [form, setForm] = useState<TaskAction | null>(null);
   const [text, setText] = useState("");
   const [personId, setPersonId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [recheck, setRecheck] = useState(true);
   const textId = useId();
   const personSelectId = useId();
   const whyId = useId();
   const readsId = useId();
   const shown = TASK_ACTIONS.filter((a) => task.actions.includes(a) && !hide.includes(a));
   if (!shown.length && !error) return null;
+  const offerRecheck = canManage && shown.includes("markDone") && task.areas.includes("SEO");
 
   async function run(body: TaskActionBody) {
     setBusy(true);
     setError("");
     try {
-      const next = await tasksApi.act(base, task.id, body);
+      let next = await tasksApi.act(base, task.id, body);
       setForm(null);
       setText("");
+      if (body.action === "markDone" && offerRecheck && recheck) {
+        try {
+          next = await tasksApi.patch(base, task.id, { recheckOn: recheckDay(new Date()) });
+        } catch (e) {
+          setError(errorMessage(e, "Marked done, but couldn't set the day to check again. Set it in the task's fields."));
+        }
+      }
       onChanged(next);
     } catch (e) {
       setError(errorMessage(e, "Couldn't do that. Try again."));
@@ -121,6 +134,12 @@ export function TaskActions({ base, task, people, onChanged, hide = [], noPeople
           </Button>
         ))}
       </div>
+      {offerRecheck ? (
+        <label className="flex items-center gap-2 text-sm pointer-coarse:min-h-11">
+          <input type="checkbox" className="size-4 accent-primary" checked={recheck} disabled={busy} onChange={(e) => setRecheck(e.target.checked)} />
+          When marked done, check again in 4 weeks
+        </label>
+      ) : null}
       {form ? (
         <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3">
           {(form === "submitForReview" || form === "block") && !noPeople ? (

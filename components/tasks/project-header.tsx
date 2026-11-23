@@ -3,7 +3,7 @@
 import { useEffect, useId, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { WORK_PROJECT_STATUSES, type TaskPersonDto, type WorkProjectDetailDto } from "@/shared";
-import { errorMessage } from "@/components/settings/api";
+import { errorMessage, request } from "@/components/settings/api";
 import { selectClass } from "@/components/settings/shared";
 import { Input } from "@/components/ui/input";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -41,7 +41,9 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
   const [people, setPeople] = useState<TaskPersonDto[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const ids = { owner: useId(), status: useId(), starts: useId(), due: useId(), share: useId(), shareHint: useId() };
+  const ids = { owner: useId(), status: useId(), starts: useId(), due: useId(), campaign: useId(), share: useId(), shareHint: useId() };
+  // The brand's campaigns for the Campaign picker; null while loading or when they couldn't be read.
+  const [campaigns, setCampaigns] = useState<{ id: string; name: string }[] | null>(null);
 
   useEffect(() => {
     if (!canManage) return;
@@ -49,6 +51,10 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
     tasksApi.people(base).then(
       (p) => alive && setPeople(p),
       () => alive && setPeople([]),
+    );
+    request<{ campaigns: { id: string; name: string }[] }>(`${base}/campaigns`).then(
+      (r) => alive && setCampaigns(r.campaigns),
+      () => alive && setCampaigns(null),
     );
     return () => {
       alive = false;
@@ -105,16 +111,34 @@ export function ProjectHeader({ base, project, canManage, onSaved }: { base: str
       </dl>
       <div className="grid gap-4 sm:grid-cols-2">
         <ProjectProgress progress={project.progress} label="Project progress" />
-        <p className="text-sm">
-          <span className="text-muted-foreground">Campaign: </span>
-          {project.campaign ? (
-            <Link href={campaignHref(project.campaign.id)} className="text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-              {project.campaign.name}
-            </Link>
+        <div className="flex flex-col gap-1 text-sm">
+          {canManage && campaigns ? (
+            <>
+              <label htmlFor={ids.campaign} className="text-xs text-muted-foreground">
+                Campaign
+              </label>
+              {/* A campaign has one project at most; picking one that has another is refused, and the reason shows. */}
+              <select id={ids.campaign} value={project.campaignId ?? ""} disabled={busy} onChange={(e) => void save({ campaignId: e.target.value || null })} className={cn(selectClass, "pointer-coarse:h-11")}>
+                <option value="">None</option>
+                {project.campaign && !campaigns.some((c) => c.id === project.campaign!.id) ? <option value={project.campaign.id}>{project.campaign.name}</option> : null}
+                {campaigns.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </>
           ) : (
+            <span className="text-muted-foreground">Campaign</span>
+          )}
+          {project.campaign ? (
+            <Link href={campaignHref(project.campaign.id)} className="self-start text-foreground underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              {canManage && campaigns ? "Its posts in the calendar" : project.campaign.name}
+            </Link>
+          ) : canManage && campaigns ? null : (
             "None"
           )}
-        </p>
+        </div>
       </div>
       <ul aria-label="Tasks by status" className="flex flex-wrap gap-2">
         {TASK_STATUSES.map((s) => (

@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { TASK_AREAS, TASK_PRIORITIES, type TaskDto, type TaskPersonDto } from "@/shared";
+import { TASK_AREAS, TASK_PRIORITIES, type TaskDto, type TaskPersonDto, type WorkProjectDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
 import { selectClass } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { tasksApi } from "@/lib/tasks-api";
+import { projectsApi, tasksApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { PersonSelect } from "@/components/tasks/task-actions";
 import { AREA_LABEL, PRIORITY_LABEL } from "@/components/tasks/task-views";
@@ -61,26 +61,64 @@ export function useTaskPeople(base: string, open: boolean): { people: TaskPerson
   return { people, failed };
 }
 
-const EMPTY = { title: "", description: "", areas: [] as string[], priority: "NORMAL", ownerId: "", dueOn: "" };
+/** The brand's projects for the Project picker, loaded once per opening; null while loading or when it failed. */
+function useProjects(base: string, open: boolean): WorkProjectDto[] | null {
+  const [projects, setProjects] = useState<WorkProjectDto[] | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    projectsApi.first(base).then(
+      (p) => live && setProjects(p.projects),
+      () => live && setProjects([]),
+    );
+    return () => {
+      live = false;
+    };
+  }, [base, open]);
+  return projects;
+}
 
 /**
- * Quick create → Task (tasks.manage): title, areas, priority, owner, due date and a description. One requestId per
- * opening, so a double click or a retry after a dropped answer returns the first task instead of a second.
+ * The project a task belongs to. ponytail: lists the first 30 open projects (soonest due first); the task's own project
+ * stays pickable when it isn't among them. Add a search here if businesses run more projects than that.
  */
-export function NewTaskDialog({ base, open, onOpenChange, onCreated }: { base: string; open: boolean; onOpenChange: (o: boolean) => void; onCreated: (t: TaskDto) => void }) {
+export function ProjectSelect({ id, base, value, current, onChange }: { id: string; base: string; value: string; current?: { id: string; name: string } | null; onChange: (id: string) => void }) {
+  const projects = useProjects(base, true);
+  const options: { id: string; name: string }[] = [...(projects ?? [])];
+  if (current && !options.some((p) => p.id === current.id)) options.unshift(current);
+  return (
+    <select id={id} value={value} onChange={(e) => onChange(e.target.value)} className={cn(selectClass, "pointer-coarse:h-11")}>
+      <option value="">{projects ? "No project" : "Loading projects…"}</option>
+      {options.map((p) => (
+        <option key={p.id} value={p.id}>
+          {p.name}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+const EMPTY = { title: "", description: "", areas: [] as string[], priority: "NORMAL", ownerId: "", dueOn: "", workProjectId: "" };
+
+/**
+ * Quick create → Task (tasks.manage): title, areas, priority, owner, due date, project and a description; `projectId`
+ * (made from a project's page) starts it in that project. One requestId per opening, so a double click or a retry
+ * after a dropped answer returns the first task instead of a second.
+ */
+export function NewTaskDialog({ base, open, projectId, onOpenChange, onCreated }: { base: string; open: boolean; projectId?: string; onOpenChange: (o: boolean) => void; onCreated: (t: TaskDto) => void }) {
   const [form, setForm] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [requestId, setRequestId] = useState("");
   const { people, failed } = useTaskPeople(base, open);
-  const ids = { title: useId(), description: useId(), priority: useId(), owner: useId(), due: useId(), why: useId(), form: useId() };
+  const ids = { title: useId(), description: useId(), priority: useId(), owner: useId(), due: useId(), project: useId(), why: useId(), form: useId() };
 
   useEffect(() => {
     if (!open) return;
-    setForm(EMPTY);
+    setForm({ ...EMPTY, workProjectId: projectId ?? "" });
     setError("");
     setRequestId(crypto.randomUUID());
-  }, [open]);
+  }, [open, projectId]);
 
   const set = <K extends keyof typeof EMPTY>(k: K, v: (typeof EMPTY)[K]) => setForm((f) => ({ ...f, [k]: v }));
   const invalid = !form.title.trim() ? "Give the task a title." : !form.areas.length ? "Pick at least one area." : "";
@@ -98,6 +136,7 @@ export function NewTaskDialog({ base, open, onOpenChange, onCreated }: { base: s
         ...(form.description.trim() ? { description: form.description.trim() } : {}),
         ...(form.ownerId ? { ownerId: form.ownerId } : {}),
         ...(form.dueOn ? { dueOn: form.dueOn } : {}),
+        ...(form.workProjectId ? { workProjectId: form.workProjectId } : {}),
       });
       onOpenChange(false);
       onCreated(task);
@@ -150,6 +189,14 @@ export function NewTaskDialog({ base, open, onOpenChange, onCreated }: { base: s
               <PersonSelect id={ids.owner} value={form.ownerId} people={people} empty="Unassigned" onChange={(v) => set("ownerId", v)} />
               {failed ? <p className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. You can assign the task after it&rsquo;s made.</p> : null}
             </div>
+            {open ? (
+              <div className="flex flex-col gap-1.5 sm:col-span-2">
+                <label htmlFor={ids.project} className="text-sm font-medium">
+                  Project <span className="font-normal text-muted-foreground">(optional)</span>
+                </label>
+                <ProjectSelect id={ids.project} base={base} value={form.workProjectId} onChange={(v) => set("workProjectId", v)} />
+              </div>
+            ) : null}
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor={ids.description} className="text-sm font-medium">
