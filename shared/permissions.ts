@@ -28,6 +28,10 @@ export const PERMISSIONS = [
   ["inbox.read", "customers", "Read customer messages and reviews"],
   ["analytics.read", "analytics", "See performance, learning notes and reports"],
   ["commercial.manage", "commercial", "Set product priorities, campaigns and offers"],
+  // crm.read / ads.read: business figures (Shopify orders and sales; Meta ad spend, results and budgets). Staff who run
+  // the project only: not Creator, Approver, Viewer or Client reviewer. Editing budgets, FX and VAT is commercial.manage.
+  ["crm.read", "crm", "See orders and sales totals"],
+  ["ads.read", "ads", "See ad spend, results and budgets"],
   ["tasks.read", "tasks", "See tasks and projects, and comment"],
   ["tasks.manage", "tasks", "Create tasks and edit your own"],
   // tasks.all: see and assign every task of the project. Without it, someone sees only the tasks they own (or their

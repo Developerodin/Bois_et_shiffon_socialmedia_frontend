@@ -21,3 +21,4 @@ export * from "./context-docs";
 export * from "./tasks";
 export * from "./needs-action";
 export * from "./api/tasks";
+export * from "./data-sources";
