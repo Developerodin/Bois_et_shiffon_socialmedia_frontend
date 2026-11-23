@@ -1,6 +1,7 @@
 import { Lock, Plug } from "lucide-react";
 import { ConnectionsTab } from "@/components/settings/connections-tab";
 import { EmptyState } from "@/components/ui/empty-state";
+import { featureOn } from "@/lib/features";
 import { getShell } from "@/lib/server-fetch";
 import { PageHeader } from "@/components/ui/page-header";
 import { navFor } from "@/lib/nav";
@@ -68,6 +69,7 @@ export default async function ConnectionsPage({
         brandId={shell.activeBrandId}
         canManage={perms.has("integrations.manage")}
         notice={notice}
+        showAds={featureOn("ads", shell.activeWorkspaceId)}
       />
     </div>
   );

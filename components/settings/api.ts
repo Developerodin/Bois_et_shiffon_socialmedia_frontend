@@ -260,7 +260,7 @@ export type ProjectPeople = {
   roles: { id: string; name: string; description: string | null }[];
 };
 
-export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "GOOGLE_BUSINESS" | "REDDIT" | "PINTEREST" | "SHOPIFY";
+export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "GOOGLE_BUSINESS" | "REDDIT" | "PINTEREST" | "SHOPIFY" | "META_ADS";
 /** `kind`: "oauth" signs in on the platform; "token" (Shopify) takes a pasted Admin API token in a dialog. */
 export type ProviderInfo = { provider: Provider; label: string; configured: boolean; kind: "oauth" | "token" };
 export type Connection = {

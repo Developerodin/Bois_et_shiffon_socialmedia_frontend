@@ -33,9 +33,11 @@ type Props = {
   /** From ?tab=; anything that is not a tab is ignored. */
   initialTab?: string;
   notice: { kind: "ok" | "error"; text: string; names?: string[] } | null;
+  /** The `ads` flag, for the Connections tab's Meta Ads card. */
+  showAds?: boolean;
 };
 
-export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Props) {
+export function SettingsBoard({ workspaceId, brandId, initialTab, notice, showAds = false }: Props) {
   const permsFetcher = useCallback(
     // With a project open: workspace role plus that project's role.
     () => settingsApi.myPermissions(workspaceId, brandId).then((d) => new Set(d.permissions ?? [])),
@@ -152,6 +154,7 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice }: Prop
               brandId={brandId!}
               canManage={can!.has("integrations.manage")}
               notice={notice}
+              showAds={showAds}
             />
           )}
         </div>

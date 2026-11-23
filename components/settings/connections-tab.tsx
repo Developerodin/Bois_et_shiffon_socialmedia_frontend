@@ -34,6 +34,7 @@ const PURPOSE: Record<Provider, string> = {
   REDDIT: "Find relevant conversations and post approved replies.",
   PINTEREST: "Publish approved Pins to your boards and read saves and clicks.",
   SHOPIFY: "Sync your products, prices and stock from your Shopify store.",
+  META_ADS: "Read ad spend, purchases and ROAS from your Meta ad accounts. Its own login, asking for ad reading only.",
 };
 
 type Props = {
@@ -42,9 +43,11 @@ type Props = {
   canManage: boolean;
   /** Result of the OAuth round-trip, read from the URL by the parent. */
   notice: { kind: "ok" | "error"; text: string; names?: string[] } | null;
+  /** The `ads` flag: only then is the Meta Ads card listed. */
+  showAds?: boolean;
 };
 
-export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Props) {
+export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAds = false }: Props) {
   const fetcher = useCallback(() => settingsApi.connections(workspaceId, brandId), [workspaceId, brandId]);
   const { state, reload } = useLoad(fetcher);
   const router = useRouter();
@@ -122,7 +125,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
   else
     body = (
       <ul className="-mx-5 divide-y divide-border">
-        {state.data.providers.map((p) => {
+        {state.data.providers.filter((p) => showAds || p.provider !== "META_ADS").map((p) => {
           const accounts = state.data.connections.filter((c) => c.provider === p.provider && !gone.has(c.id));
           return (
             <li key={p.provider} className="flex flex-col gap-3 px-5 py-4">
@@ -168,7 +171,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice }: Prop
                   {c.status !== "ACTIVE" && (
                     <p className="basis-full text-xs text-muted-foreground">
                       {c.lastError ?? "This account's access stopped working."}
-                      {c.provider === "SHOPIFY" ? "" : " Posts to it fail until you press Reconnect."}
+                      {c.provider === "SHOPIFY" || c.provider === "META_ADS" ? "" : " Posts to it fail until you press Reconnect."}
                     </p>
                   )}
                   {canManage && (

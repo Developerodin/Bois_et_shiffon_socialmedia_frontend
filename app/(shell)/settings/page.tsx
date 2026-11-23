@@ -1,6 +1,7 @@
 import { Settings } from "lucide-react";
 import { SettingsBoard } from "@/components/settings/settings-board";
 import { EmptyState } from "@/components/ui/empty-state";
+import { featureOn } from "@/lib/features";
 import { getShell } from "@/lib/server-fetch";
 import { navFor } from "@/lib/nav";
 
@@ -42,6 +43,7 @@ export default async function SettingsPage({
       brandId={shell.activeBrandId ?? null}
       initialTab={q.tab}
       notice={notice}
+      showAds={featureOn("ads", shell.activeWorkspaceId)}
     />
   );
 }
