@@ -208,7 +208,7 @@ function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl
         report ? (
           <>
             {findingTaskUrl && report.findings.length ? <MakeAllTasks key={report.id} url={`${reportsUrl}/${encodeURIComponent(report.id)}/tasks`} kind={report.kind} onStale={onStale} /> : null}
-            <ExportCsvButton url={exportUrl} filename={`${id}-findings-${new Date().toLocaleDateString("en-CA")}.csv`} />
+            <ExportCsvButton url={exportUrl} label="Export to Excel" filename={`${id}-findings-${new Date().toLocaleDateString("en-CA")}.xlsx`} />
           </>
         ) : undefined
       }
