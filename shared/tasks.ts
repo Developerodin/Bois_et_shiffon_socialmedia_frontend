@@ -23,8 +23,8 @@ export type TaskRow = {
   recheckOn: string | null;
 };
 
-export type ActorRole = { userId: string; isOwner: boolean; isReviewer: boolean; canManage: boolean; soleStaff: boolean };
-export type ActionInput = { reviewerId?: string; reason?: string; now: string };
+export type ActorRole = { userId: string; isOwner: boolean; isReviewer: boolean; canManage: boolean; soleStaff: boolean; isBlockedOn: boolean };
+export type ActionInput = { reviewerId?: string; reason?: string; blockedOnId?: string; now: string };
 export type ActionResult = { ok: true; patch: Partial<TaskRow> & { status?: string } } | { ok: false; reason: string };
 
 const no = (reason: string): ActionResult => ({ ok: false, reason });
@@ -65,9 +65,9 @@ function run(task: TaskRow, action: TaskAction, actor: ActorRole, input: ActionI
       if (!isOpen(task.status)) return no("Only an open task can be blocked.");
       if (task.blockedReason) return no("Already blocked.");
       if (!dry && !reason) return no("Say what it is waiting on.");
-      return { ok: true, patch: { blockedReason: reason ?? null, blockedOnId: null } };
+      return { ok: true, patch: { blockedReason: reason ?? null, blockedOnId: input.blockedOnId ?? null } };
     case "unblock":
-      if (!mine) return no("Only the owner or a manager can unblock this task.");
+      if (!mine && !actor.isBlockedOn) return no("Only the owner, a manager or the person it waits on can unblock this task.");
       return task.blockedReason ? { ok: true, patch: { ...CLEAR_BLOCK } } : no("Not blocked.");
     case "checkedLive":
       if (!mine) return no("Only the owner or a manager can mark this checked live.");
