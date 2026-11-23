@@ -18,7 +18,7 @@ import { Peek } from "@/components/workspace/peek";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
 import { putShared } from "@/components/workspace/use-job";
 import { writeRecent } from "@/lib/recent";
-import { onTasksChanged, searchBrand, tasksApi } from "@/lib/tasks-api";
+import { onTasksChanged, searchBrand, tasksApi, type TaskTeam } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { agreedToDrop, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, type View, viewToSearch } from "@/lib/workspace-view";
 import { PersonSelect, TaskActions } from "@/components/tasks/task-actions";
@@ -28,9 +28,9 @@ import { TaskChecklist } from "@/components/tasks/task-checklist";
 import { TaskComments } from "@/components/tasks/task-comments";
 import { FindingTag } from "@/components/tasks/task-list";
 import { WebsiteChecks, WebsiteFacts, WebsiteInputs } from "@/components/tasks/website-fields";
-import { AREA_LABEL, dueLabel, ownerLabel, peekReaction, PRIORITY_LABEL, STATUS_LABEL } from "@/components/tasks/task-views";
+import { AREA_LABEL, dueLabel, ownerFromValue, ownerLabel, ownerValue, peekReaction, PRIORITY_LABEL, STATUS_LABEL } from "@/components/tasks/task-views";
 
-/** The task fields a manager edits in the peek, as form values ("" for none). */
+/** The task fields a manager edits in the peek, as form values ("" for none; ownerId is the owner picker's value, ownerValue). */
 export type TaskDraft = {
   title: string;
   description: string;
@@ -53,7 +53,7 @@ export const draftOf = (t: TaskDto): TaskDraft => ({
   priority: t.priority,
   areas: t.areas,
   dueOn: t.dueOn ?? "",
-  ownerId: t.owner?.id ?? "",
+  ownerId: ownerValue(t),
   reviewerId: t.reviewer?.id ?? "",
   url: t.url ?? "",
   changeKind: t.changeKind ?? "",
@@ -78,7 +78,9 @@ export function changedFields(t: TaskDto, edits: Partial<TaskDraft>): Record<str
     const v = edits[k];
     if (v === undefined) continue;
     const next = wire(k, v);
-    if (!same(next, wire(k, now[k]))) out[k] = next;
+    if (same(next, wire(k, now[k]))) continue;
+    if (k === "ownerId") Object.assign(out, ownerFromValue(typeof next === "string" ? next : ""));
+    else out[k] = next;
   }
   return out;
 }
@@ -99,6 +101,7 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
   const [task, setTask] = useState<TaskDetailDto | null>(null);
   const [loadError, setLoadError] = useState<"gone" | "failed" | null>(null);
   const [people, setPeople] = useState<TaskPersonDto[] | null>(null);
+  const [roles, setRoles] = useState<TaskTeam["roles"]>([]);
   const [peopleFailed, setPeopleFailed] = useState(false);
   // A client reviewer may not list the business's people (403): no person pickers for them.
   const [noPeople, setNoPeople] = useState(false);
@@ -132,8 +135,12 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
   );
   useEffect(() => {
     let alive = true;
-    tasksApi.people(base).then(
-      (p) => alive && setPeople(p),
+    tasksApi.team(base).then(
+      (t) => {
+        if (!alive) return;
+        setPeople(t.people);
+        setRoles(t.roles);
+      },
       (e) => {
         if (!alive) return;
         setPeople([]);
@@ -174,7 +181,7 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
       ) : null}
       <TaskActions base={base} task={task} people={people} noPeople={noPeople} canManage={canManage} draftReviewerId={draftReviewerId} onChanged={show} hide={website ? ["checkedLive"] : []} />
       {peopleFailed ? <p className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. Close and open the task to try again.</p> : null}
-      {canManage ? <TaskFields key={task.id} base={base} task={task} people={people} onSaved={show} onDraftReviewer={setDraftReviewerId} /> : <TaskFacts task={task} />}
+      {canManage ? <TaskFields key={task.id} base={base} task={task} people={people} roles={roles} canAssign={perms.includes("tasks.all")} onSaved={show} onDraftReviewer={setDraftReviewerId} /> : <TaskFacts task={task} />}
       {website ? <WebsiteChecks base={base} task={task} people={people} canEditPhotos={canEditPhotos} onChanged={show} /> : null}
       <TaskChecklist base={base} task={task} canEdit={mine} />
       <TaskAttachments base={base} task={task} roles={website ? ["OTHER"] : ["BEFORE", "AFTER", "OTHER"]} canEdit={canEditPhotos} />
@@ -199,7 +206,7 @@ function TaskFacts({ task }: { task: TaskDetailDto }) {
       <h2 className="text-lg font-medium">{task.title}</h2>
       {task.description ? <p className="whitespace-pre-wrap text-sm">{task.description}</p> : null}
       <dl className="flex flex-col gap-2 text-sm">
-        {row("Owner", ownerLabel(task.owner))}
+        {row("Owner", ownerLabel(task.owner, task.ownerRole))}
         {row("Reviewer", task.reviewer ? ownerLabel(task.reviewer) : "None")}
         {row("Due", dueLabel(task.dueOn))}
         {row("Priority", PRIORITY_LABEL[task.priority] ?? task.priority)}
@@ -225,12 +232,17 @@ function TaskFields({
   base,
   task,
   people,
+  roles,
+  canAssign,
   onSaved,
   onDraftReviewer,
 }: {
   base: string;
   task: TaskDetailDto;
   people: TaskPersonDto[] | null;
+  roles: TaskTeam["roles"];
+  /** tasks.all: the owner is a picker (people and roles); without it, text. */
+  canAssign: boolean;
   onSaved: (t: TaskDetailDto) => void;
   /** The reviewer as edited here and not yet saved (undefined when untouched, saved or on a new task). */
   onDraftReviewer: (id: string | undefined) => void;
@@ -317,12 +329,19 @@ function TaskFields({
           </label>
           <Input id={ids.due} type="date" value={draft.dueOn} onChange={(e) => set("dueOn", e.target.value)} />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={ids.owner} className={fieldLabel}>
-            Owner
-          </label>
-          <PersonSelect id={ids.owner} value={draft.ownerId} people={people} current={task.owner} empty="Unassigned" onChange={(v) => set("ownerId", v)} />
-        </div>
+        {canAssign ? (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={ids.owner} className={fieldLabel}>
+              Owner
+            </label>
+            <PersonSelect id={ids.owner} value={draft.ownerId} people={people} current={task.owner} roles={roles} currentRole={task.ownerRole} empty="Unassigned" onChange={(v) => set("ownerId", v)} />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            <span className={fieldLabel}>Owner</span>
+            <span className="flex min-h-9 items-center text-sm">{ownerLabel(task.owner, task.ownerRole)}</span>
+          </div>
+        )}
         <div className="flex flex-col gap-1.5">
           <label htmlFor={ids.reviewer} className={fieldLabel}>
             Reviewer

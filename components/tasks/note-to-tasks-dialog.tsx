@@ -8,13 +8,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-import { tasksApi } from "@/lib/tasks-api";
-import { PersonSelect } from "@/components/tasks/task-actions";
+import { tasksApi, type BatchTask } from "@/lib/tasks-api";
+import { ownerPeople, PersonSelect } from "@/components/tasks/task-actions";
 import { AreaChecks, PrioritySelect, useTaskPeople } from "@/components/tasks/new-task-dialog";
+import { ownerFromValue } from "@/components/tasks/task-views";
 
 const NOTE_MAX = 8_000;
 
-/** One proposal as the person edits it: form values ("" for none) and whether it is kept. */
+/** One proposal as the person edits it: form values ("" for none; ownerId is the owner picker's value) and whether it is kept. */
 export type ProposalRow = { key: string; keep: boolean; title: string; description: string; areas: string[]; ownerId: string; dueOn: string; priority: string };
 
 /** A proposal as an editable row. The model's areas and priority are kept only when they are ones a task can have. */
@@ -30,7 +31,7 @@ export const rowOf = (p: TaskProposalDto, i: number): ProposalRow => ({
 });
 
 /** POST tasks/batch's body: the kept rows only, blank optional fields left out. */
-export function batchBody(requestId: string, rows: ProposalRow[]): { requestId: string; tasks: TaskProposalDto[] } {
+export function batchBody(requestId: string, rows: ProposalRow[]): { requestId: string; tasks: BatchTask[] } {
   return {
     requestId,
     tasks: rows
@@ -40,7 +41,8 @@ export function batchBody(requestId: string, rows: ProposalRow[]): { requestId: 
         ...(r.description.trim() ? { description: r.description.trim() } : {}),
         areas: r.areas,
         priority: r.priority,
-        ...(r.ownerId ? { ownerId: r.ownerId } : {}),
+        // Not blank, so a person's id or a role: never `ownerId: null`.
+        ...(r.ownerId ? (ownerFromValue(r.ownerId) as { ownerId: string } | { ownerRoleId: string }) : {}),
         ...(r.dueOn ? { dueOn: r.dueOn } : {}),
       })),
   };
@@ -67,15 +69,16 @@ function whyNot(rows: ProposalRow[]): string {
 /**
  * Quick create → Tasks from a note (tasks.manage): paste a note, the model proposes up to 20 tasks (nothing is stored),
  * the person edits, unticks or keeps each, then Create sends the kept ones in one batch. The model's text shows as
- * plain text in form fields, never as HTML.
+ * plain text in form fields, never as HTML. Without tasks.all (`all`) a task's owner can only be the person or nobody,
+ * so a proposed owner who is someone else is dropped.
  */
-export function NoteToTasksDialog({ base, open, onOpenChange }: { base: string; open: boolean; onOpenChange: (o: boolean) => void }) {
+export function NoteToTasksDialog({ base, open, all, userId, onOpenChange }: { base: string; open: boolean; all: boolean; userId: string; onOpenChange: (o: boolean) => void }) {
   const [note, setNote] = useState("");
   const [rows, setRows] = useState<ProposalRow[] | null>(null);
   const [busy, setBusy] = useState<"" | "reading" | "creating">("");
   const [error, setError] = useState("");
   const [session, setSession] = useState(noteSession);
-  const { people, failed } = useTaskPeople(base, open && rows !== null);
+  const { people, roles, failed } = useTaskPeople(base, open && all && rows !== null);
   const ids = { note: useId(), count: useId(), why: useId() };
 
   useEffect(() => {
@@ -91,7 +94,7 @@ export function NoteToTasksDialog({ base, open, onOpenChange }: { base: string; 
     setBusy("reading");
     setError("");
     try {
-      setRows((await tasksApi.fromNote(base, note)).map(rowOf));
+      setRows((await tasksApi.fromNote(base, note)).map(rowOf).map((r) => (all || r.ownerId === userId ? r : { ...r, ownerId: "" })));
     } catch (e) {
       // 502/503 (the model failed, or isn't set up) and the hourly limit come with a message for the person.
       setError(errorMessage(e, "Couldn't read the note. Try again."));
@@ -145,7 +148,7 @@ export function NoteToTasksDialog({ base, open, onOpenChange }: { base: string; 
           <ul className="flex flex-col gap-3">
             {failed ? <li className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. Owners can be set after the tasks are made.</li> : null}
             {rows.map((r, i) => (
-              <ProposalEditor key={r.key} n={i + 1} row={r} people={people} onChange={(p) => edit(r.key, p)} />
+              <ProposalEditor key={r.key} n={i + 1} row={r} people={ownerPeople(people, all, userId)} roles={all ? roles : undefined} onChange={(p) => edit(r.key, p)} />
             ))}
           </ul>
         )}
@@ -184,7 +187,7 @@ export function NoteToTasksDialog({ base, open, onOpenChange }: { base: string; 
   );
 }
 
-function ProposalEditor({ n, row, people, onChange }: { n: number; row: ProposalRow; people: Parameters<typeof PersonSelect>[0]["people"]; onChange: (p: Partial<ProposalRow>) => void }) {
+function ProposalEditor({ n, row, people, roles, onChange }: { n: number; row: ProposalRow; people: Parameters<typeof PersonSelect>[0]["people"]; roles?: Parameters<typeof PersonSelect>[0]["roles"]; onChange: (p: Partial<ProposalRow>) => void }) {
   const ids = { title: useId(), description: useId(), priority: useId(), owner: useId(), due: useId() };
   return (
     <li className="flex flex-col gap-3 rounded-xl border border-border p-4">
@@ -212,7 +215,7 @@ function ProposalEditor({ n, row, people, onChange }: { n: number; row: Proposal
               <label htmlFor={ids.owner} className="text-sm font-medium">
                 Owner
               </label>
-              <PersonSelect id={ids.owner} value={row.ownerId} people={people} empty="Unassigned" onChange={(ownerId) => onChange({ ownerId })} />
+              <PersonSelect id={ids.owner} value={row.ownerId} people={people} roles={roles} empty="Unassigned" onChange={(ownerId) => onChange({ ownerId })} />
             </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor={ids.due} className="text-sm font-medium">

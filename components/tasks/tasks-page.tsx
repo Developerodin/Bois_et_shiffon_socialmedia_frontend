@@ -11,7 +11,7 @@ import { navFor } from "@/lib/nav";
 import { recentKey } from "@/lib/recent";
 import { brandBase } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
-import { NewTaskButton } from "@/components/tasks/new-task-dialog";
+import { NewTaskButton, useTaskPeople } from "@/components/tasks/new-task-dialog";
 import { TaskBoard } from "@/components/tasks/task-board";
 import { TaskList } from "@/components/tasks/task-list";
 import { TaskPeek } from "@/components/tasks/task-view";
@@ -25,7 +25,8 @@ const LAYOUTS = [
 
 /**
  * /tasks: area tabs (from ?area=, so the Website and Performance nav links land on theirs), on Performance a filter by
- * report (?source=seo|geo), a view, List or Board, and the task peek (?task=).
+ * report (?source=seo|geo), a view, List or Board, and the task peek (?task=). With tasks.all the page opens on all open
+ * tasks, and a manager with it assigns from the list (people and roles read once here).
  */
 export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId: string; brandId: string; userId: string; perms: string[] }) {
   const base = brandBase(workspaceId, brandId);
@@ -34,6 +35,10 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
   const search = useSearchParams();
   const area = areaParam(search.get("area"));
   const source = sourceParam(search.get("source"), area);
+  const all = perms.includes("tasks.all");
+  const canAssign = all && perms.includes("tasks.manage");
+  const fallback: TaskListView = all ? "open" : "mine";
+  const team = useTaskPeople(base, canAssign);
   // Read after mount so the server render and the first client render match.
   const [saved, setSaved] = useState<{ view: TaskListView; layout: TaskLayout } | null>(null);
   // The saved choice, read once after mount.
@@ -42,7 +47,8 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
     try {
       raw = localStorage.getItem(TASKS_VIEW_KEY);
     } catch {}
-    setSaved((s) => s ?? readSaved(raw));
+    setSaved((s) => s ?? readSaved(raw, fallback));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read once after mount; the permissions don't change on this page
   }, []);
   // A link to one view (Today's group headers: ?view=approvals, the sidebar's Performance: ?view=open) shows that list,
   // for this visit only, each time a link brings one, also when this page is already open (the sidebar from Website).
@@ -58,7 +64,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
     navigate(router, s ? `${pathname}?${s}` : pathname, pathname, "replace");
     // eslint-disable-next-line react-hooks/exhaustive-deps -- runs when a link brings a view, not on other URL changes
   }, [viewParam]);
-  const { view, layout } = saved ?? readSaved(null);
+  const { view, layout } = saved ?? readSaved(null, fallback);
 
   const remember = (next: { view: TaskListView; layout: TaskLayout }) => {
     setSaved(next);
@@ -89,7 +95,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
             <Button asChild size="sm" variant="outline">
               <Link href="/projects">{navFor("/projects").title}</Link>
             </Button>
-            {perms.includes("tasks.manage") ? <NewTaskButton base={base} /> : null}
+            {perms.includes("tasks.manage") ? <NewTaskButton base={base} all={all} userId={userId} /> : null}
           </div>
         }
       >
@@ -119,7 +125,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
         <TaskBoard base={base} area={area} source={source} />
       ) : (
         <section className="rounded-2xl border border-border bg-card px-5 py-2 shadow-sm">
-          <TaskList base={base} view={view} area={area} source={source} />
+          <TaskList base={base} view={view} area={area} source={source} assign={canAssign ? team : undefined} />
         </section>
       )}
       <TaskPeek base={base} perms={perms} userId={userId} recentKey={recentKey(workspaceId, brandId, userId)} />

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TaskDto } from "@/shared";
-import { AREA_TABS, boardMove, ownerLabel, readSaved, sourceParam, tasksQuery } from "@/components/tasks/task-views";
+import { AREA_TABS, boardMove, ownerFromValue, ownerLabel, ownerValue, readSaved, sourceParam, tasksQuery } from "@/components/tasks/task-views";
 
 const task = (over: Partial<TaskDto> = {}): TaskDto => ({
   id: "t1",
@@ -27,6 +27,7 @@ const task = (over: Partial<TaskDto> = {}): TaskDto => ({
   createdAt: "2026-11-20T10:00:00.000Z",
   updatedAt: "2026-11-20T10:00:00.000Z",
   owner: { id: "u1", name: "Ana", gone: false, client: false },
+  ownerRole: null,
   reviewer: null,
   blockedOn: null,
   project: null,
@@ -72,6 +73,33 @@ describe("ownerLabel", () => {
     expect(ownerLabel({ id: "u1", name: "Ana", gone: true, client: false })).toBe("No longer on this business");
     expect(ownerLabel(null)).toBe("Unassigned");
   });
+
+  it("names the role when a role holds the task", () => {
+    expect(ownerLabel(null, { name: "Creators" })).toBe("Creators");
+    expect(ownerLabel(null, null)).toBe("Unassigned");
+  });
+});
+
+describe("owner picker value", () => {
+  const ana = { id: "u1", name: "Ana", gone: false, client: false };
+  it("is the person's id, role:<id> for a role, or blank", () => {
+    expect(ownerValue({ owner: ana, ownerRole: null })).toBe("u1");
+    expect(ownerValue({ owner: null, ownerRole: { id: "r1", name: "Creators" } })).toBe("role:r1");
+    expect(ownerValue({ owner: null, ownerRole: null })).toBe("");
+  });
+
+  it("goes back as exactly one owner key", () => {
+    expect(ownerFromValue("u1")).toEqual({ ownerId: "u1" });
+    expect(ownerFromValue("role:r1")).toEqual({ ownerRoleId: "r1" });
+    expect(ownerFromValue("")).toEqual({ ownerId: null });
+  });
+
+  it("round-trips", () => {
+    for (const t of [{ owner: ana, ownerRole: null }, { owner: null, ownerRole: { id: "r1", name: "Creators" } }]) {
+      const v = ownerFromValue(ownerValue(t));
+      expect("ownerRoleId" in v ? v.ownerRoleId : v.ownerId).toBe(t.ownerRole?.id ?? t.owner?.id);
+    }
+  });
 });
 
 describe("readSaved", () => {
@@ -79,6 +107,12 @@ describe("readSaved", () => {
     expect(readSaved(null)).toEqual({ view: "mine", layout: "list" });
     expect(readSaved("{")).toEqual({ view: "mine", layout: "list" });
     expect(readSaved(JSON.stringify({ view: "nope", layout: "grid" }))).toEqual({ view: "mine", layout: "list" });
+  });
+
+  it("falls back to the given view: All open with tasks.all", () => {
+    expect(readSaved(null, "open")).toEqual({ view: "open", layout: "list" });
+    expect(readSaved(JSON.stringify({ layout: "board" }), "open")).toEqual({ view: "open", layout: "board" });
+    expect(readSaved(JSON.stringify({ view: "mine" }), "open")).toEqual({ view: "mine", layout: "list" });
   });
 
   it("keeps a saved view and layout", () => {

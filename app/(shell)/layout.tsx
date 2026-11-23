@@ -46,6 +46,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
             brandName={brandName}
             workspaceId={workspaceId}
             brandId={shell.activeBrandId}
+            userId={shell.user.id}
             agents={agents}
             features={sidebarProps.features}
             perms={sidebarProps.perms}

@@ -49,13 +49,14 @@ export type TaskLayout = "list" | "board";
 /** The view and layout remembered per browser. Bump the version when the stored shape changes. */
 export const TASKS_VIEW_KEY = "tasks.view.v1";
 
-export function readSaved(raw: string | null): { view: TaskListView; layout: TaskLayout } {
+/** `fallback`: the view with no saved choice (TasksPage: "open" with tasks.all, else "mine"). */
+export function readSaved(raw: string | null, fallback: TaskListView = "mine"): { view: TaskListView; layout: TaskLayout } {
   let v: { view?: unknown; layout?: unknown } = {};
   try {
     v = raw ? (JSON.parse(raw) as typeof v) ?? {} : {};
   } catch {}
   return {
-    view: TASK_LIST_VIEWS.some((o) => o.value === v.view) ? (v.view as TaskListView) : "mine",
+    view: TASK_LIST_VIEWS.some((o) => o.value === v.view) ? (v.view as TaskListView) : fallback,
     layout: v.layout === "board" ? "board" : "list",
   };
 }
@@ -82,9 +83,23 @@ export const PRIORITY_LABEL: Record<string, string> = { LOW: "Low", NORMAL: "Nor
 export const BOARD_COLUMNS = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"] as const;
 export type BoardStatus = (typeof BOARD_COLUMNS)[number];
 
-export function ownerLabel(owner: TaskPersonDto | null): string {
-  if (!owner) return "Unassigned";
+/** A person's name; for a task's owner pass its `ownerRole` too, which names the role ("Creators") when it holds the task. */
+export function ownerLabel(owner: TaskPersonDto | null, role?: { name: string } | null): string {
+  if (!owner) return role ? role.name : "Unassigned";
   return owner.gone ? "No longer on this business" : owner.name;
+}
+
+/** An owner picker's value is a person's id, `role:<id>` for a role, or "" for nobody. */
+const ROLE_VALUE = "role:";
+export const roleValue = (roleId: string) => `${ROLE_VALUE}${roleId}`;
+
+export function ownerValue(t: { owner: { id: string } | null; ownerRole: { id: string; name: string } | null }): string {
+  return t.ownerRole ? roleValue(t.ownerRole.id) : (t.owner?.id ?? "");
+}
+
+/** The picker's value as a write takes it: one owner key (the server clears the other when one is set). */
+export function ownerFromValue(v: string): { ownerId: string | null } | { ownerRoleId: string } {
+  return v.startsWith(ROLE_VALUE) ? { ownerRoleId: v.slice(ROLE_VALUE.length) } : { ownerId: v || null };
 }
 
 /** A due day (YYYY-MM-DD) as "24 Nov", read as a calendar day so no time zone shifts it. */

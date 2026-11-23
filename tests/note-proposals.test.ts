@@ -25,6 +25,11 @@ describe("tasks from a note", () => {
     expect(body.tasks[1]).toEqual({ title: "Fix the menu", description: "Top nav", areas: ["CONTENT"], priority: "NORMAL", ownerId: "u1", dueOn: "2026-11-30" });
   });
 
+  it("sends a picked role as ownerRoleId", () => {
+    const body = batchBody("r1", [row("Shoot", true, { ownerId: "role:r1" })]);
+    expect(body.tasks[0]).toEqual({ title: "Shoot", areas: ["CONTENT"], priority: "NORMAL", ownerRoleId: "r1" });
+  });
+
   it("same requestId reused on retry", async () => {
     fetchMock.mockResolvedValueOnce(json({ title: "Failed", detail: "Something broke" }, 500)).mockResolvedValueOnce(json({ tasks: [] }, 201));
     const session = noteSession();

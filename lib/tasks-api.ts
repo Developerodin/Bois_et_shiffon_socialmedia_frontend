@@ -10,6 +10,12 @@ export const brandBase = (w: string, b: string) => `/api/v1/workspaces/${enc(w)}
 /** GET tasks?view=…: a page of 50; `posts` only on page 1 of view=mine for content work. */
 export type TaskPage = { tasks: TaskDto[]; posts?: PostRow[]; nextCursor: string | null };
 
+/** One task of POST tasks/batch: a proposal as edited, owned by a person or (tasks.all) a role. */
+export type BatchTask = TaskProposalDto & { ownerRoleId?: string };
+
+/** GET tasks/people: the people, and the project roles a task can be assigned to (empty without tasks.all). */
+export type TaskTeam = { people: TaskPersonDto[]; roles: { id: string; name: string }[] };
+
 /** POST tasks/:id. `reason` goes with requestChanges and block, `note` with approve. */
 /** `shareWithClient`: a staff reviewer's note or reason reaches the client only with it. */
 export type TaskActionBody = { action: TaskAction; reviewerId?: string; reason?: string; note?: string; blockedOnId?: string; shareWithClient?: boolean };
@@ -43,6 +49,8 @@ export const listsCare = (d: TasksChanged) => d.kind !== "comment";
 const patchItem = (base: string, id: string, itemId: string, body: { text?: string; done?: boolean; position?: number }) =>
   request<{ item: TaskChecklistItemDto }>(`${base}/tasks/${enc(id)}/checklist/${enc(itemId)}`, { method: "PATCH", body: JSON.stringify(body) }).then((d) => d.item);
 
+const team = (base: string) => request<TaskTeam>(`${base}/tasks/people`).then((d) => ({ people: d.people, roles: d.roles ?? [] }));
+
 export const tasksApi = {
   /** `query` from tasksQuery(); the next page of the same query with `cursor`. */
   page: (base: string, query: string, cursor: string) => request<TaskPage>(`${base}/${query}&cursor=${enc(cursor)}`),
@@ -64,7 +72,9 @@ export const tasksApi = {
    * People who read the brand's tasks (tasks.read), `client` marking client reviewers: the reviewer pickers offer them,
    * the owner, "waiting on" and project owner pickers don't. A client reviewer asking gets 403.
    */
-  people: (base: string) => request<{ people: TaskPersonDto[] }>(`${base}/tasks/people`).then((d) => d.people),
+  people: (base: string) => team(base).then((d) => d.people),
+  /** The same people with the roles a task can go to (`roles` empty without tasks.all): the owner pickers. */
+  team,
   /** Checklist lines: the task's owner or tasks.manage. */
   addItem: (base: string, id: string, text: string) =>
     announce(
@@ -99,8 +109,17 @@ export const tasksApi = {
   /** tasks.manage. Proposals only, nothing stored; 502/503 carry a message for the person. Slow: the model reads the note. */
   fromNote: (base: string, text: string) =>
     request<TaskProposalsDto>(`${base}/tasks/from-note`, { method: "POST", body: JSON.stringify({ text }), timeoutMs: SLOW_MS }).then((d) => d.proposals),
+  /**
+   * tasks.manage + tasks.all. One owner (a person, a role, or nobody) for up to 100 tasks, all or nothing: a refusal is
+   * a 409 whose message names the task. Announced once.
+   */
+  assign: (base: string, body: { ids: string[] } & ({ ownerId: string | null } | { ownerRoleId: string })) =>
+    announce(
+      request<{ tasks: TaskDto[] }>(`${base}/tasks/assign`, { method: "POST", body: JSON.stringify(body) }).then((d) => d.tasks),
+      () => ({ kind: "task" }),
+    ),
   /** tasks.manage. Up to 20, all or nothing; the same requestId again returns the first rows instead of making more. */
-  batch: (base: string, body: { requestId: string; tasks: TaskProposalDto[] }) =>
+  batch: (base: string, body: { requestId: string; tasks: BatchTask[] }) =>
     announce(
       request<{ tasks: TaskDto[] }>(`${base}/tasks/batch`, { method: "POST", body: JSON.stringify(body) }).then((d) => d.tasks),
       () => ({ kind: "task" }),

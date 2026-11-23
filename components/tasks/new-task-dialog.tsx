@@ -10,10 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { projectsApi, tasksApi } from "@/lib/tasks-api";
+import { projectsApi, tasksApi, type TaskTeam } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
-import { PersonSelect } from "@/components/tasks/task-actions";
-import { AREA_LABEL, PRIORITY_LABEL } from "@/components/tasks/task-views";
+import { ownerPeople, PersonSelect } from "@/components/tasks/task-actions";
+import { AREA_LABEL, ownerFromValue, PRIORITY_LABEL } from "@/components/tasks/task-views";
 
 /** The areas as checkboxes; at least one is needed (the caller says so). */
 export function AreaChecks({ value, onChange, legend = "Areas" }: { value: string[]; onChange: (areas: string[]) => void; legend?: string }) {
@@ -44,23 +44,26 @@ export function PrioritySelect({ id, value, onChange }: { id: string; value: str
   );
 }
 
-/** The owner picker's people (tasks/people), loaded once per opening; null while loading or when it failed. */
-export function useTaskPeople(base: string, open: boolean): { people: TaskPersonDto[] | null; failed: boolean } {
-  const [people, setPeople] = useState<TaskPersonDto[] | null>(null);
+/**
+ * The owner picker's people and roles (tasks/people; roles only with tasks.all), loaded once per opening; people is
+ * null while loading or when it failed.
+ */
+export function useTaskPeople(base: string, open: boolean): { people: TaskPersonDto[] | null; roles: TaskTeam["roles"]; failed: boolean } {
+  const [team, setTeam] = useState<TaskTeam | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     if (!open) return;
     let live = true;
     setFailed(false);
-    tasksApi.people(base).then(
-      (p) => live && setPeople(p),
+    tasksApi.team(base).then(
+      (t) => live && setTeam(t),
       () => live && setFailed(true),
     );
     return () => {
       live = false;
     };
   }, [base, open]);
-  return { people, failed };
+  return { people: team?.people ?? null, roles: team?.roles ?? [], failed };
 }
 
 /** The brand's projects for the Project picker, loaded once per opening; null while loading or when it failed. */
@@ -105,14 +108,15 @@ const EMPTY = { title: "", description: "", areas: [] as string[], priority: "NO
 /**
  * Quick create → Task (tasks.manage): title, areas, priority, owner, due date, project and a description; `projectId`
  * (made from a project's page) starts it in that project. One requestId per opening, so a double click or a retry
- * after a dropped answer returns the first task instead of a second.
+ * after a dropped answer returns the first task instead of a second. The owner can be anyone or a role with tasks.all
+ * (`all`), else only "Me" or nobody.
  */
-export function NewTaskDialog({ base, open, projectId, onOpenChange, onCreated }: { base: string; open: boolean; projectId?: string; onOpenChange: (o: boolean) => void; onCreated: (t: TaskDto) => void }) {
+export function NewTaskDialog({ base, open, projectId, all, userId, onOpenChange, onCreated }: { base: string; open: boolean; projectId?: string; all: boolean; userId: string; onOpenChange: (o: boolean) => void; onCreated: (t: TaskDto) => void }) {
   const [form, setForm] = useState(EMPTY);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [requestId, setRequestId] = useState("");
-  const { people, failed } = useTaskPeople(base, open);
+  const { people, roles, failed } = useTaskPeople(base, open && all);
   const ids = { title: useId(), description: useId(), priority: useId(), owner: useId(), due: useId(), project: useId(), why: useId(), form: useId() };
 
   useEffect(() => {
@@ -136,7 +140,7 @@ export function NewTaskDialog({ base, open, projectId, onOpenChange, onCreated }
         areas: form.areas,
         priority: form.priority,
         ...(form.description.trim() ? { description: form.description.trim() } : {}),
-        ...(form.ownerId ? { ownerId: form.ownerId } : {}),
+        ...(form.ownerId ? ownerFromValue(form.ownerId) : {}),
         ...(form.dueOn ? { dueOn: form.dueOn } : {}),
         ...(form.workProjectId ? { workProjectId: form.workProjectId } : {}),
       });
@@ -188,7 +192,7 @@ export function NewTaskDialog({ base, open, projectId, onOpenChange, onCreated }
               <label htmlFor={ids.owner} className="text-sm font-medium">
                 Owner
               </label>
-              <PersonSelect id={ids.owner} value={form.ownerId} people={people} empty="Unassigned" onChange={(v) => set("ownerId", v)} />
+              <PersonSelect id={ids.owner} value={form.ownerId} people={ownerPeople(people, all, userId)} roles={all ? roles : undefined} empty="Unassigned" onChange={(v) => set("ownerId", v)} />
               {failed ? <p className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. You can assign the task after it&rsquo;s made.</p> : null}
             </div>
             {open ? (
@@ -234,7 +238,7 @@ export function NewTaskDialog({ base, open, projectId, onOpenChange, onCreated }
  * "New task" on a page that lists tasks (tasks.manage): the dialog, then the new task opens in this page's peek. On a
  * project's page it starts in that project. The lists refresh themselves from the create (tasksApi announces it).
  */
-export function NewTaskButton({ base, projectId }: { base: string; projectId?: string }) {
+export function NewTaskButton({ base, projectId, all, userId }: { base: string; projectId?: string; all: boolean; userId: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   return (
@@ -246,6 +250,8 @@ export function NewTaskButton({ base, projectId }: { base: string; projectId?: s
       <NewTaskDialog
         base={base}
         projectId={projectId}
+        all={all}
+        userId={userId}
         open={open}
         onOpenChange={setOpen}
         onCreated={(t) => {

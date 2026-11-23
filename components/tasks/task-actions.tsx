@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { tasksApi, type TaskActionBody } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { shareToggleShown } from "@/components/tasks/task-comments";
-import { recheckDay } from "@/components/tasks/task-views";
+import { recheckDay, roleValue } from "@/components/tasks/task-views";
 
 export const ACTION_LABEL: Record<TaskAction, string> = {
   start: "Start",
@@ -22,10 +22,11 @@ export const ACTION_LABEL: Record<TaskAction, string> = {
   checkedLive: "Checked on live site",
   cancel: "Cancel task",
   reopen: "Reopen",
+  take: "Take it",
 };
 
 /** The main way forward from each status gets the filled button; the rest are outlined. */
-const PRIMARY: TaskAction[] = ["start", "submitForReview", "approve", "markDone", "reopen"];
+const PRIMARY: TaskAction[] = ["take", "start", "submitForReview", "approve", "markDone", "reopen"];
 /** These ask for something first (a reviewer, a reason, an optional note) in a short form under the buttons. */
 const WITH_FORM: TaskAction[] = ["submitForReview", "approve", "requestChanges", "block"];
 
@@ -39,25 +40,53 @@ export function personOptions(people: TaskPersonDto[] | null, current: TaskPerso
   return options.map((o) => ({ id: o.id, label: o.gone ? `${o.name} (no longer on this business)` : o.client ? `${o.name} (client)` : o.name }));
 }
 
-/** A select of the people who read the brand's tasks: staff, plus clients when `withClients` (the reviewer pickers). */
+/**
+ * A new task's owner choices: everyone with tasks.all; without it only the person themself, as "Me" (the server
+ * refuses any other owner). "Unassigned" is the picker's empty option.
+ */
+export function ownerPeople(people: TaskPersonDto[] | null, all: boolean, userId: string | null | undefined): TaskPersonDto[] | null {
+  if (all) return people;
+  return userId ? [{ id: userId, name: "Me", gone: false, client: false }] : [];
+}
+
+/**
+ * A select of the people who read the brand's tasks: staff, plus clients when `withClients` (the reviewer pickers).
+ * `roles` (owner pickers, tasks.all) adds a Roles group whose values are `role:<id>` (ownerValue / ownerFromValue);
+ * `currentRole` stays pickable when the roles failed to load.
+ */
 export function PersonSelect(p: {
-  id: string;
+  id?: string;
   value: string;
   people: TaskPersonDto[] | null;
   current?: TaskPersonDto | null;
+  roles?: { id: string; name: string }[];
+  currentRole?: { id: string; name: string } | null;
   withClients?: boolean;
   empty: string;
   disabled?: boolean;
+  className?: string;
+  "aria-label"?: string;
   onChange: (id: string) => void;
 }) {
+  const roles = [...(p.roles ?? [])];
+  if (p.currentRole && !roles.some((r) => r.id === p.currentRole!.id)) roles.unshift(p.currentRole);
   return (
-    <select id={p.id} value={p.value} disabled={p.disabled} onChange={(e) => p.onChange(e.target.value)} className={cn(selectClass, "pointer-coarse:h-11")}>
+    <select id={p.id} aria-label={p["aria-label"]} value={p.value} disabled={p.disabled} onChange={(e) => p.onChange(e.target.value)} className={cn(selectClass, "pointer-coarse:h-11", p.className)}>
       <option value="">{p.people ? p.empty : "Loading people…"}</option>
       {personOptions(p.people, p.current, !!p.withClients).map((o) => (
         <option key={o.id} value={o.id}>
           {o.label}
         </option>
       ))}
+      {roles.length ? (
+        <optgroup label="Roles">
+          {roles.map((r) => (
+            <option key={r.id} value={roleValue(r.id)}>
+              {r.name}
+            </option>
+          ))}
+        </optgroup>
+      ) : null}
     </select>
   );
 }

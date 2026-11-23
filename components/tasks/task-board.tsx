@@ -150,7 +150,7 @@ function Card({ task, busy, dragging, onDrag, onMove }: { task: TaskDto; busy: b
         {task.title}
       </Link>
       <p className="text-xs text-muted-foreground">
-        {ownerLabel(task.owner)} · {dueLabel(task.dueOn)}
+        {ownerLabel(task.owner, task.ownerRole)} · {dueLabel(task.dueOn)}
         {task.areas.length ? ` · ${task.areas.map((a) => AREA_LABEL[a] ?? a).join(", ")}` : ""}
       </p>
       {task.blockedReason || task.findingKind ? (

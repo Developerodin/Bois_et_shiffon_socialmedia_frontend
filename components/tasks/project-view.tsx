@@ -73,7 +73,7 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
             </h2>
             <div className="flex flex-wrap items-center gap-2">
               <SegmentedRadios label="Which tasks" name="project-task-view" value={view} onChange={setView} options={TASK_VIEWS} />
-              {canManage ? <NewTaskButton base={base} projectId={project.id} /> : null}
+              {canManage ? <NewTaskButton base={base} projectId={project.id} all={perms.includes("tasks.all")} userId={userId} /> : null}
             </div>
           </div>
           <TaskList base={base} view={view} area="" workProjectId={project.id} empty={view === "open" ? "No open tasks in this project." : "Nothing finished in the last 30 days."} />

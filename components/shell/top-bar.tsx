@@ -18,13 +18,13 @@ import { cn } from "@/lib/utils";
  * `agents`: the role reads agents on this business (agents.read): the assistant and the Logs drawer are for those roles.
  * `features`: the web flags on for this workspace; `perms`: the role's keys on the active business.
  */
-type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null; nav?: ReactNode; agents: boolean; features: readonly string[]; perms: readonly string[] };
+type Props = { brandName: string | null; workspaceId: string | null; brandId: string | null; userId: string; nav?: ReactNode; agents: boolean; features: readonly string[]; perms: readonly string[] };
 
 const LOGS_KEY = "ws.logsOpen";
 export const TOPBAR_SLOT_ID = "topbar-slot";
 
 /** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (wherever the assistant isn't docked: below 1280 px, or a page that doesn't dock it) the assistant toggle on the right. */
-export function TopBar({ brandName, workspaceId, brandId, nav, agents, features, perms }: Props) {
+export function TopBar({ brandName, workspaceId, brandId, userId, nav, agents, features, perms }: Props) {
   const pathname = usePathname();
   const { title, brandScoped } = navFor(pathname);
   const { open: assistantOpen, setOpen: setAssistantOpen } = useAssistant();
@@ -70,7 +70,7 @@ export function TopBar({ brandName, workspaceId, brandId, nav, agents, features,
         <div className="flex shrink-0 items-center gap-1">
           {/* Search and "+" work on the active business; the "+" offers only what the role may create. */}
           {tasksOn && workspaceId && brandId && perms.includes("brand.read") && <SearchBox base={brandBase(workspaceId, brandId)} />}
-          {tasksOn && workspaceId && brandId && <QuickCreate base={brandBase(workspaceId, brandId)} perms={perms} />}
+          {tasksOn && workspaceId && brandId && <QuickCreate base={brandBase(workspaceId, brandId)} perms={perms} userId={userId} />}
           {workspaceId && <CreditsChip workspaceId={workspaceId} />}
           {/* Notifications are per person across the workspace's businesses; the server lists only tasks they can see. */}
           {tasksOn && workspaceId && <NotificationBell workspaceId={workspaceId} brandId={brandId} />}

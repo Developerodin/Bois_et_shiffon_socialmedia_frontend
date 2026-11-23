@@ -30,6 +30,7 @@ const task = (over: Partial<TaskDetailDto> = {}): TaskDetailDto => ({
   createdAt: "2026-11-23T10:00:00.000Z",
   updatedAt: "2026-11-23T10:00:00.000Z",
   owner: { id: "u1", name: "Ana", gone: false, client: false },
+  ownerRole: null,
   reviewer: { id: "u2", name: "Ben", gone: false, client: false },
   blockedOn: null,
   project: null,
@@ -88,6 +89,11 @@ describe("task edits", () => {
     expect(changedFields(t, { areas: ["SEO", "WEBSITE"] })).toEqual({ areas: ["SEO", "WEBSITE"] });
     expect(changedFields(t, { ownerId: "u1" })).toEqual({});
     expect(changedFields(t, { ownerId: "" })).toEqual({ ownerId: null });
+    expect(changedFields(t, { ownerId: "role:r1" })).toEqual({ ownerRoleId: "r1" });
+    const r = task({ owner: null, ownerRole: { id: "r1", name: "Creators" } });
+    expect(draftOf(r).ownerId).toBe("role:r1");
+    expect(changedFields(r, { ownerId: "role:r1" })).toEqual({});
+    expect(changedFields(r, { ownerId: "u1" })).toEqual({ ownerId: "u1" });
     expect(changedFields(t, { description: "  " })).toEqual({});
   });
   it("treats blank website fields as cleared", () => {

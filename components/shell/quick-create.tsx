@@ -39,11 +39,12 @@ export function quickCreateItems(perms: readonly string[]): { kind: Kind; label:
 }
 
 /** The top bar's "+" (flag `tasks`): a new task, post, project or tasks from a note on the active business. */
-export function QuickCreate({ base, perms }: { base: string; perms: readonly string[] }) {
+export function QuickCreate({ base, perms, userId }: { base: string; perms: readonly string[]; userId: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const [which, setWhich] = useState<Kind | null>(null);
   const items = quickCreateItems(perms);
+  const all = perms.includes("tasks.all");
   if (!items.length) return null;
 
   const dialog = (k: Kind) => ({ open: which === k, onOpenChange: (o: boolean) => setWhich(o ? k : null) });
@@ -70,7 +71,7 @@ export function QuickCreate({ base, perms }: { base: string; perms: readonly str
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <NewTaskDialog base={base} projectId={projectIdOf(pathname)} {...dialog("task")} onCreated={(t) => go(taskHref(pathname, window.location.search, t.id))} />
+      <NewTaskDialog base={base} projectId={projectIdOf(pathname)} all={all} userId={userId} {...dialog("task")} onCreated={(t) => go(taskHref(pathname, window.location.search, t.id))} />
       <NewPostDialog base={base} canCreate={perms.includes("content.create")} {...dialog("post")} onCreated={(id) => go(postHref(pathname, window.location.search, id))} />
       <Dialog {...dialog("project")}>
         <DialogContent>
@@ -81,7 +82,7 @@ export function QuickCreate({ base, perms }: { base: string; perms: readonly str
           <NewProject base={base} onCreated={() => setWhich(null)} />
         </DialogContent>
       </Dialog>
-      <NoteToTasksDialog base={base} {...dialog("note")} />
+      <NoteToTasksDialog base={base} all={all} userId={userId} {...dialog("note")} />
     </>
   );
 }
