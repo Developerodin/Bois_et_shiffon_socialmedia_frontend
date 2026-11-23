@@ -37,6 +37,9 @@ export type TaskDto = {
   actions: TaskAction[];
 };
 
+/** A post of yours that needs action, listed with GET tasks?view=mine (first page, content work only). */
+export type PostRow = { id: string; title: string; channel: string; status: string; scheduledFor: string | null };
+
 /** GET tasks?view=today: counts and the first few of each list. */
 export type TodayDto = {
   mine: { count: number; tasks: TaskDto[] };
