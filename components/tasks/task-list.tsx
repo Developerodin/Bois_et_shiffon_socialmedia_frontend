@@ -12,8 +12,8 @@ import { LoadFailed } from "@/components/ui/load-failed";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CHANNEL_LABEL, STATUS_LABEL as POST_STATUS_LABEL } from "@/lib/post-labels";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
-import { tasksApi, type TaskPage } from "@/lib/tasks-api";
-import { AREA_LABEL, dueLabel, ownerLabel, PRIORITY_LABEL, STATUS_LABEL, TASKS_CHANGED, tasksQuery, type AreaParam, type TaskListView } from "@/components/tasks/task-views";
+import { listsCare, onTasksChanged, tasksApi, type TaskPage } from "@/lib/tasks-api";
+import { AREA_LABEL, dueLabel, ownerLabel, PRIORITY_LABEL, STATUS_LABEL, tasksQuery, type AreaParam, type TaskListView } from "@/components/tasks/task-views";
 
 const pickPage = (d: TaskPage) => d;
 
@@ -28,12 +28,9 @@ export function useTaskHref(): (id: string) => string {
   };
 }
 
-/** Reload `reload` whenever a task changes elsewhere on the page (a board move, the peek). */
+/** Reload `reload` whenever a task changes elsewhere on the page (a board move, the peek); a new comment doesn't count. */
 export function useTasksChanged(reload: () => void) {
-  useEffect(() => {
-    window.addEventListener(TASKS_CHANGED, reload);
-    return () => window.removeEventListener(TASKS_CHANGED, reload);
-  }, [reload]);
+  useEffect(() => onTasksChanged((d) => listsCare(d) && reload()), [reload]);
 }
 
 const th = "px-3 py-2 text-left text-xs font-medium text-muted-foreground";

@@ -18,7 +18,7 @@ import { Peek } from "@/components/workspace/peek";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
 import { putShared } from "@/components/workspace/use-job";
 import { writeRecent } from "@/lib/recent";
-import { tasksApi } from "@/lib/tasks-api";
+import { onTasksChanged, tasksApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { agreedToDrop, parseViewParts, peekCrumb, peekKey, peekTitle, viewToSearch, type View } from "@/lib/workspace-view";
 import { PersonSelect, TaskActions } from "@/components/tasks/task-actions";
@@ -26,7 +26,7 @@ import { TaskAttachments } from "@/components/tasks/task-attachments";
 import { TaskChecklist } from "@/components/tasks/task-checklist";
 import { TaskComments } from "@/components/tasks/task-comments";
 import { WebsiteChecks, WebsiteFacts, WebsiteInputs } from "@/components/tasks/website-fields";
-import { AREA_LABEL, dueLabel, ownerLabel, PRIORITY_LABEL, STATUS_LABEL, TASKS_CHANGED } from "@/components/tasks/task-views";
+import { AREA_LABEL, dueLabel, ownerLabel, peekReaction, PRIORITY_LABEL, STATUS_LABEL } from "@/components/tasks/task-views";
 
 /** The task fields a manager edits in the peek, as form values ("" for none). */
 export type TaskDraft = {
@@ -110,11 +110,16 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
     tasksApi.get(base, id).then(show, (e) => setLoadError(e instanceof ApiError && e.status === 404 ? "gone" : "failed"));
   }, [base, id, show]);
   useEffect(load, [load]);
-  // A move on the board or list behind, or this peek's own action: read the task again.
-  useEffect(() => {
-    window.addEventListener(TASKS_CHANGED, load);
-    return () => window.removeEventListener(TASKS_CHANGED, load);
-  }, [load]);
+  // A move on the board behind, or a write here: show the task the write returned, else read it again.
+  useEffect(
+    () =>
+      onTasksChanged((d) => {
+        const r = peekReaction(d, id);
+        if (r === "show" && d.task) show(d.task);
+        else if (r === "reload") load();
+      }),
+    [id, load, show],
+  );
   useEffect(() => {
     let alive = true;
     tasksApi.people(base).then(
@@ -224,7 +229,6 @@ function TaskFields({ base, task, people, onSaved }: { base: string; task: TaskD
       const next = await tasksApi.patch(base, task.id, changed);
       setEdits({});
       onSaved(next);
-      window.dispatchEvent(new Event(TASKS_CHANGED));
     } catch (e) {
       setError(errorMessage(e, "Couldn't save. Try again."));
     } finally {

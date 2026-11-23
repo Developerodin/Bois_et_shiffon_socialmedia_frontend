@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { tasksApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { TaskAttachments } from "@/components/tasks/task-attachments";
-import { TASKS_CHANGED } from "@/components/tasks/task-views";
 import type { TaskDraft } from "@/components/tasks/task-view";
 
 export const CHANGE_KIND_LABEL: Record<string, string> = {
@@ -114,7 +113,6 @@ export function WebsiteChecks(p: { base: string; task: TaskDetailDto; people: Ta
     setError("");
     try {
       p.onChanged(await tasksApi.act(base, task.id, { action: "checkedLive" }));
-      window.dispatchEvent(new Event(TASKS_CHANGED));
     } catch (e) {
       setError(errorMessage(e, "Couldn't mark it checked. Try again."));
     } finally {

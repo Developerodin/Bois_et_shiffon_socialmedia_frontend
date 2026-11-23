@@ -5,7 +5,6 @@ import { Upload, X } from "lucide-react";
 import type { TaskAttachmentDto, TaskDetailDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
 import { tasksApi } from "@/lib/tasks-api";
-import { TASKS_CHANGED } from "@/components/tasks/task-views";
 
 export const ROLE_LABEL: Record<string, string> = { BEFORE: "Before", AFTER: "After", OTHER: "Photo" };
 
@@ -33,7 +32,6 @@ export function TaskAttachments({ base, task, roles, canEdit, slots }: { base: s
       setError(errorMessage(e, "Couldn't remove the screenshot. Try again."));
     } finally {
       setBusyId(null);
-      window.dispatchEvent(new Event(TASKS_CHANGED));
     }
   };
 
@@ -48,7 +46,6 @@ export function TaskAttachments({ base, task, roles, canEdit, slots }: { base: s
       setError(errorMessage(e, "Couldn't upload the photo. Try again."));
     } finally {
       setUploading(null);
-      window.dispatchEvent(new Event(TASKS_CHANGED));
     }
   };
 

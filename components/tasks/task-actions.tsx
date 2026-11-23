@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { tasksApi, type TaskActionBody } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
-import { TASKS_CHANGED } from "@/components/tasks/task-views";
 
 export const ACTION_LABEL: Record<TaskAction, string> = {
   start: "Start",
@@ -54,7 +53,7 @@ export function PersonSelect(p: {
 
 /**
  * The status buttons this person may press, straight from `task.actions` (the server's answer; nothing is decided here).
- * A refusal comes back as the server's message and shows as text. Every success fires `tasks:changed`.
+ * A refusal comes back as the server's message and shows as text. tasksApi announces every success (`tasks:changed`).
  */
 export function TaskActions({ base, task, people, onChanged, hide = [] }: { base: string; task: TaskDetailDto; people: TaskPersonDto[] | null; onChanged: (t: TaskDetailDto) => void; hide?: TaskAction[] }) {
   const [form, setForm] = useState<TaskAction | null>(null);
@@ -76,7 +75,6 @@ export function TaskActions({ base, task, people, onChanged, hide = [] }: { base
       setForm(null);
       setText("");
       onChanged(next);
-      window.dispatchEvent(new Event(TASKS_CHANGED));
     } catch (e) {
       setError(errorMessage(e, "Couldn't do that. Try again."));
     } finally {

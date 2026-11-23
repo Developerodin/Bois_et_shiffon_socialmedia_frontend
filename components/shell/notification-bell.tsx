@@ -8,12 +8,10 @@ import { setActiveContext } from "@/components/context/api";
 import { okToDiscard } from "@/components/context/unsaved";
 import { errorMessage } from "@/components/settings/api";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
-import { TASKS_CHANGED } from "@/components/tasks/task-views";
-import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
 import { JOB_INTERVALS } from "@/components/workspace/use-job";
-import { notificationsApi } from "@/lib/tasks-api";
+import { listsCare, notificationsApi, onTasksChanged } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { samePage, taskHref } from "@/lib/workspace-view";
 
@@ -57,8 +55,8 @@ export function notificationText(n: NotificationDto): string {
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 /**
- * The top bar's bell (flag `tasks`): unread count polled every minute while the tab is visible, again on focus and
- * after any task change here; the menu lists the latest 20 with "Mark all read". Opening one opens its task, switching
+ * The top bar's bell (flag `tasks`): unread count polled every minute while the tab is visible, again when it is shown
+ * and after any task change here; the menu lists the latest 20 with "Mark all read". Opening one opens its task, switching
  * business first (asking about unsaved work) when it belongs to another one.
  * ponytail: only the first 20 are listed; older ones stay reachable through the task lists.
  */
@@ -86,15 +84,14 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
       timer = setTimeout(loop, POLL_MS);
     };
     loop();
-    // Shown again, focused again, or a task changed here (an action may have assigned or reviewed one): count now.
+    // Shown again, or a task changed here (an action may have assigned or reviewed one): count now. Not on focus too:
+    // switching back to the tab fires both, and one count is enough.
     document.addEventListener("visibilitychange", loop);
-    window.addEventListener("focus", loop);
-    window.addEventListener(TASKS_CHANGED, loop);
+    const off = onTasksChanged((d) => listsCare(d) && loop());
     return () => {
       clearTimeout(timer);
       document.removeEventListener("visibilitychange", loop);
-      window.removeEventListener("focus", loop);
-      window.removeEventListener(TASKS_CHANGED, loop);
+      off();
     };
   }, [refresh]);
 
@@ -158,14 +155,18 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[min(22rem,calc(100vw-2rem))]">
-        <div className="flex items-center justify-between gap-2 pr-1">
-          <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-          {list?.some((n) => !n.readAt) ? (
-            <Button type="button" size="sm" variant="ghost" onClick={() => void markAll()}>
-              Mark all read
-            </Button>
-          ) : null}
-        </div>
+        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        {/* A menu item, so the arrow keys reach it; the menu stays open to show them read. */}
+        {list?.some((n) => !n.readAt) ? (
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              void markAll();
+            }}
+          >
+            Mark all read
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         {listError ? (
           <p role="alert" className="px-2 py-3 text-sm text-destructive">

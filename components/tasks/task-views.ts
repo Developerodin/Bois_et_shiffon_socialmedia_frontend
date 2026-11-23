@@ -1,5 +1,6 @@
 /** The /tasks page's vocabulary and rules, kept free of React so they can be tested. */
 import type { TaskAction, TaskDto, TaskPersonDto } from "@/shared";
+import type { TasksChanged } from "@/lib/tasks-api";
 
 export const TASK_LIST_VIEWS = [
   { value: "mine", label: "Mine" },
@@ -98,8 +99,15 @@ export function boardMove(task: TaskDto, to: BoardStatus): { action: TaskAction 
   return { refused: NOT_YOURS };
 }
 
-/** Fired after a task changes here, so other lists of tasks on the page reload. */
-export const TASKS_CHANGED = "tasks:changed";
+/**
+ * What an open task peek does about a change: show the task the write returned (no second read), read it again, or
+ * nothing (a comment, which its comment list handles, or another task).
+ */
+export function peekReaction(d: TasksChanged, id: string): "show" | "reload" | "skip" {
+  if (d.kind === "comment") return "skip";
+  if (d.taskId && d.taskId !== id) return "skip";
+  return d.task && d.task.id === id ? "show" : "reload";
+}
 
 /** A project's progress (done of all but cancelled) as words: "3 of 8 done", or "No tasks yet". */
 export function progressLabel(p: { done: number; total: number }): string {

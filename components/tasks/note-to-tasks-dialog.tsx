@@ -11,7 +11,6 @@ import { toast } from "@/components/ui/toast";
 import { tasksApi } from "@/lib/tasks-api";
 import { PersonSelect } from "@/components/tasks/task-actions";
 import { AreaChecks, PrioritySelect, useTaskPeople } from "@/components/tasks/new-task-dialog";
-import { TASKS_CHANGED } from "@/components/tasks/task-views";
 
 const NOTE_MAX = 8_000;
 
@@ -106,7 +105,6 @@ export function NoteToTasksDialog({ base, open, onOpenChange }: { base: string; 
     setError("");
     try {
       const made = await session.create(base, rows);
-      window.dispatchEvent(new Event(TASKS_CHANGED));
       onOpenChange(false);
       toast({ title: made.length === 1 ? "1 task created" : `${made.length} tasks created`, href: "/tasks", tone: "success" });
     } catch (e) {

@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { tasksApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { PersonSelect } from "@/components/tasks/task-actions";
-import { AREA_LABEL, PRIORITY_LABEL, TASKS_CHANGED } from "@/components/tasks/task-views";
+import { AREA_LABEL, PRIORITY_LABEL } from "@/components/tasks/task-views";
 
 /** The areas as checkboxes; at least one is needed (the caller says so). */
 export function AreaChecks({ value, onChange, legend = "Areas" }: { value: string[]; onChange: (areas: string[]) => void; legend?: string }) {
@@ -99,7 +99,6 @@ export function NewTaskDialog({ base, open, onOpenChange, onCreated }: { base: s
         ...(form.ownerId ? { ownerId: form.ownerId } : {}),
         ...(form.dueOn ? { dueOn: form.dueOn } : {}),
       });
-      window.dispatchEvent(new Event(TASKS_CHANGED));
       onOpenChange(false);
       onCreated(task);
     } catch (e) {

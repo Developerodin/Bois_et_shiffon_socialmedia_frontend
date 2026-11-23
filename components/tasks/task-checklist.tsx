@@ -7,7 +7,6 @@ import { errorMessage } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { tasksApi } from "@/lib/tasks-api";
-import { TASKS_CHANGED } from "@/components/tasks/task-views";
 
 /** Lines in order; positions can tie (two quick adds), so the id breaks the tie the same way every time. */
 const ordered = (items: TaskChecklistItemDto[]) => [...items].sort((a, b) => a.position - b.position || a.id.localeCompare(b.id));
@@ -16,8 +15,8 @@ const iconButton = "flex size-8 shrink-0 items-center justify-center rounded-md 
 
 /**
  * The task's checklist: tick, add, move up or down, remove. `canEdit` only hides the controls from people the server
- * would refuse (it allows the owner and tasks.manage); the server still decides. Every write fires `tasks:changed`, and
- * the peek reads the task again, so the list shows what was saved.
+ * would refuse (it allows the owner and tasks.manage); the server still decides. tasksApi announces each saved write
+ * (`tasks:changed`) and the peek reads the task again, so the list shows what was saved.
  */
 export function TaskChecklist({ base, task, canEdit }: { base: string; task: TaskDetailDto; canEdit: boolean }) {
   const [text, setText] = useState("");
@@ -38,7 +37,6 @@ export function TaskChecklist({ base, task, canEdit }: { base: string; task: Tas
       return false;
     } finally {
       setBusy(false);
-      window.dispatchEvent(new Event(TASKS_CHANGED));
     }
   }
 
@@ -53,7 +51,8 @@ export function TaskChecklist({ base, task, canEdit }: { base: string; task: Tas
     const next = [...items];
     const [it] = next.splice(from, 1);
     next.splice(to, 0, it);
-    void write(() => Promise.all(next.map((x, i) => (x.position === i ? null : tasksApi.patchItem(base, task.id, x.id, { position: i })))));
+    const positions = next.flatMap((x, i) => (x.position === i ? [] : [{ itemId: x.id, position: i }]));
+    void write(() => tasksApi.reorderItems(base, task.id, positions));
   };
 
   return (

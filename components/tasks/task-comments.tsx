@@ -5,9 +5,8 @@ import type { TaskCommentDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { tasksApi } from "@/lib/tasks-api";
+import { onTasksChanged, tasksApi } from "@/lib/tasks-api";
 import { timeAgo } from "@/lib/time";
-import { TASKS_CHANGED } from "@/components/tasks/task-views";
 
 /** "Share with client" is for staff, and only on a task a client can see; elsewhere it would share with nobody. */
 export const shareToggleShown = (p: { staff: boolean; clientVisible: boolean }) => p.staff && p.clientVisible;
@@ -40,10 +39,8 @@ export function TaskComments({ base, taskId, staff, clientVisible }: { base: str
     );
   }, [base, taskId]);
   useEffect(load, [load]);
-  useEffect(() => {
-    window.addEventListener(TASKS_CHANGED, load);
-    return () => window.removeEventListener(TASKS_CHANGED, load);
-  }, [load]);
+  // Its own new comment is already on the list; an action on this task (an approval) may have added one.
+  useEffect(() => onTasksChanged((d) => d.kind !== "comment" && (!d.taskId || d.taskId === taskId) && load()), [load, taskId]);
 
   const showShare = shareToggleShown({ staff, clientVisible });
   const text = body.trim();
@@ -57,7 +54,6 @@ export function TaskComments({ base, taskId, staff, clientVisible }: { base: str
       setNow(Date.now());
       setBody("");
       setShare(false);
-      window.dispatchEvent(new Event(TASKS_CHANGED));
     } catch (e) {
       setError(errorMessage(e, "Couldn't post the comment. Try again."));
     } finally {

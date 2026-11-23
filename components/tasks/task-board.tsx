@@ -20,7 +20,6 @@ import {
   dueLabel,
   ownerLabel,
   STATUS_LABEL,
-  TASKS_CHANGED,
   tasksQuery,
   type AreaParam,
   type BoardStatus,
@@ -66,7 +65,6 @@ export function TaskBoard({ base, area }: { base: string; area: AreaParam }) {
     setMessage("");
     try {
       await tasksApi.act(base, task.id, body);
-      window.dispatchEvent(new Event(TASKS_CHANGED));
     } catch (e) {
       setMessage(`“${task.title}”: ${errorMessage(e, "Couldn't move it. Try again.")}`);
     } finally {
