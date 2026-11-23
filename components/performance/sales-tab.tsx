@@ -36,7 +36,7 @@ function SalesNumbers({ base, range, source }: { base: string; range: DateRange;
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(() => request<SalesSummary>(`${base}/sales/summary?from=${from}&to=${to}`), [base, from, to]);
   const { state, reload } = useLoad(fetcher);
-  useReloadOnFocus(reload);
+  useReloadOnFocus(reload, state);
 
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading sales" />;

@@ -67,7 +67,7 @@ export function PostsTab({ workspaceId, brandId, from, to }: { workspaceId: stri
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
-  useReloadOnFocus(reload);
+  useReloadOnFocus(reload, state);
 
   if (state.kind === "loading") return <ListSkeleton label="Loading post results" />;
   if (state.kind === "forbidden") return <EmptyState icon={BarChart3} title="You can't see post results" description="Ask a workspace owner for access." />;

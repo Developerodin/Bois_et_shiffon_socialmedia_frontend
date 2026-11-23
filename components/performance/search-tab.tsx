@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { brandApi, change, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type GoogleSite, type SearchPages, type SearchSummary, type SearchTotals } from "@/lib/data-api";
 
 const num = (n: number) => n.toLocaleString();
-const pct = (ctr: number) => `${(ctr * 100).toFixed(1)}%`;
+const pct = (ctr: number | null) => (ctr == null ? "—" : `${(ctr * 100).toFixed(1)}%`);
 const pos = (p: number | null) => (p == null ? "—" : p.toFixed(1));
 const DAY = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
 const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
@@ -48,7 +48,7 @@ function SearchNumbers({ base, range, source, onChangeSite }: { base: string; ra
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
-  useReloadOnFocus(reload);
+  useReloadOnFocus(reload, state);
 
   const header = (
     <div className="flex flex-col gap-1">

@@ -1,7 +1,7 @@
 // The Performance data tabs' routes, DTOs and shared helpers.
 // Mirror of server shared/data-sources.ts (and shared/api/search.ts, shared/api/sales.ts) — replace with the synced type at merge.
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { brandBase } from "@/lib/tasks-api";
 
 export type DataSourceKind = "SEARCH_CONSOLE" | "POST_METRICS" | "SHOPIFY_ORDERS" | "META_ADS";
@@ -24,8 +24,8 @@ export type DataSourceDto = {
 /** GET data-sources. `timeZone`: the brand's zone for the date presets, if the server sends it (else the browser's). */
 export type DataSourcesResponse = { sources: DataSourceDto[]; timeZone?: string | null };
 
-/** `position` = positionSum / impressions, null with no impressions; `ctr` 0–1. */
-export type SearchTotals = { clicks: number; impressions: number; ctr: number; position: number | null };
+/** `ctr` 0–1 and `position` (impression-weighted), both null with no impressions. */
+export type SearchTotals = { clicks: number; impressions: number; ctr: number | null; position: number | null };
 export type SearchSummary = { totals: SearchTotals; previous: SearchTotals; days: (SearchTotals & { day: string })[] };
 export type SearchPage = SearchTotals & { page: string };
 export type SearchPages = { pages: SearchPage[]; nextCursor: string | null };
@@ -48,11 +48,22 @@ export const KIND_SLUG: Record<DataSourceKind, string> = {
 export const brandApi = brandBase;
 export const rangeQuery = (from: string, to: string) => `from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
 
-/** Data screens don't poll: they load once and again when the window gets focus back. */
-export function useReloadOnFocus(reload: () => void) {
+/** A focus within this long of the last load doesn't load again (switching windows back and forth). */
+const FOCUS_FRESH_MS = 60_000;
+
+/** Data screens don't poll: they load once and again when the window gets focus back, unless they loaded in the last minute. */
+export function useReloadOnFocus(reload: () => void, state: { kind: string }) {
+  const loadedAt = useRef(0);
   useEffect(() => {
-    window.addEventListener("focus", reload);
-    return () => window.removeEventListener("focus", reload);
+    if (state.kind === "ready") loadedAt.current = Date.now();
+  }, [state]);
+  useEffect(() => {
+    const onFocus = () => {
+      if (Date.now() - loadedAt.current < FOCUS_FRESH_MS) return;
+      reload();
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [reload]);
 }
 

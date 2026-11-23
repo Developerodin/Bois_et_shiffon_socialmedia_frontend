@@ -125,7 +125,7 @@ export function AdsTab({ workspaceId, brandId, from, to, canManage = false }: { 
     [base, range],
   );
   const { state, reload } = useLoad(fetcher);
-  useReloadOnFocus(reload);
+  useReloadOnFocus(reload, state);
 
   if (state.kind === "loading") return <ListSkeleton label="Loading ad results" />;
   if (state.kind === "forbidden") return <EmptyState icon={Megaphone} title="You can't see ad results" description="Ask a workspace owner for access." />;

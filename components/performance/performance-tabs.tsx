@@ -41,7 +41,7 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
   const base = brandApi(workspaceId, brandId);
   const fetcher = useCallback(() => request<DataSourcesResponse>(`${base}/data-sources`), [base]);
   const { state, reload } = useLoad(isData ? fetcher : null);
-  useReloadOnFocus(reload);
+  useReloadOnFocus(reload, state);
 
   function select(tab: PerformanceTab) {
     setActive(tab);
