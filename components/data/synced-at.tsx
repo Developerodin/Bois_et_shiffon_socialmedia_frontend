@@ -5,20 +5,22 @@ import Link from "next/link";
 import { RefreshCw } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
-import { REASON_TEXT, type DataSourceDto } from "@/lib/data-api";
+import { type DataSourceDto } from "@/lib/data-api";
 import { timeAgo } from "@/lib/time";
 
 /**
  * "Updated 3 h ago" from the source's last success, what a failed or stopped sync means, and Sync now. Sync now only
  * queues a job (POST …/sync); the numbers change when it has run, on the next load or window focus. `queued: false`
  * = synced in the last 5 minutes or already queued; 429 = 3 presses this hour (the server's message says so).
- * `name` tells several sources of one kind apart (two ad accounts).
+ * `name` tells several sources of one kind apart (two ad accounts). The reason's text is the server's fixed one
+ * (`lastResult.error`, shared DATA_SYNC_ERRORS); `reason` only picks the tone and the Connections link.
  */
 export function SyncedAt({ source, syncUrl, name }: { source: DataSourceDto; syncUrl: string; name?: string }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ text: string; error: boolean } | null>(null);
   const okAt = source.lastResult?.okAt ?? null;
   const reason = source.lastResult?.reason ?? null;
+  const reasonText = source.lastResult?.error ?? null;
 
   const sync = async () => {
     setBusy(true);
@@ -43,9 +45,9 @@ export function SyncedAt({ source, syncUrl, name }: { source: DataSourceDto; syn
           {busy ? "Queuing…" : "Sync now"}
         </Button>
       </div>
-      {reason ? (
+      {reason && reasonText ? (
         <p className={reason === "partial" ? "text-muted-foreground" : "text-warning"}>
-          {REASON_TEXT[reason]}{" "}
+          {reasonText}{" "}
           {reason === "reconnect" || reason === "permission" ? (
             <Link href="/connections" className="font-medium underline underline-offset-2 print:hidden">
               Open Connections

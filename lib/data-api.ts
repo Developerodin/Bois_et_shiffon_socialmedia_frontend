@@ -6,7 +6,7 @@ import { brandBase } from "@/lib/tasks-api";
 
 export type DataSourceKind = "SEARCH_CONSOLE" | "POST_METRICS" | "SHOPIFY_ORDERS" | "META_ADS";
 /** Why the last sync didn't fully succeed. */
-export type DataSyncReason = "reconnect" | "permission" | "partial" | "failed" | "rate-limited";
+export type DataSyncReason = "reconnect" | "permission" | "partial" | "failed" | "rate_limited";
 /** `okAt`: the last successful sync ("Updated …"); `error`: the server's fixed text for `reason`. */
 export type DataSyncResult = { at: string; okAt: string | null; reason: DataSyncReason | null; count: number; error: string | null };
 export type DataSourceDto = {
@@ -66,15 +66,6 @@ export function useReloadOnFocus(reload: () => void, state: { kind: string }) {
     return () => window.removeEventListener("focus", onFocus);
   }, [reload]);
 }
-
-/** What a failed or stopped sync means and what to do, keyed by the server's fixed reason. */
-export const REASON_TEXT: Record<DataSyncReason, string> = {
-  reconnect: "The connection needs signing in again. Reconnect it in Connections.",
-  permission: "The account didn't allow reading these numbers. Reconnect it and allow access.",
-  partial: "Some days are still loading.",
-  "rate-limited": "The provider asked us to slow down; the next sync picks up the rest.",
-  failed: "The last sync failed. Try Sync now, or wait for tomorrow's.",
-};
 
 // ---- Date range: brand-local YYYY-MM-DD days carried in ?from&to ----
 
