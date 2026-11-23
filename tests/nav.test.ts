@@ -40,11 +40,11 @@ describe("navFor", () => {
   it("falls back to Overview for unknown paths", () => {
     expect(navFor("/totally/unknown")).toEqual({ activeId: null, title: "Overview", brandScoped: true });
   });
-  it("keeps the Performance page over Surge", () => {
+  it("keeps the SEO & GEO reports page over Surge", () => {
     expect(navFor("/performance").activeId).toBe("performance");
   });
   it("ignores the query string", () => {
-    expect(navFor("/performance?x=1").title).toBe("Performance");
+    expect(navFor("/performance?x=1").title).toBe("SEO & GEO reports");
   });
 });
 
@@ -127,6 +127,7 @@ describe("tasks nav", () => {
     expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("tasks");
     expect(NAV.find((e) => e.id === "tasks")?.group).not.toBe("more");
     expect(navFor("/tasks").title).toBe("Projects & tasks");
+    expect(NAV.find((e) => e.id === "seo")).toMatchObject({ label: "Performance", href: "/tasks?area=seo" });
   });
   it("titles /projects and a project page Projects without listing it", () => {
     expect(navFor("/projects").title).toBe("Projects");

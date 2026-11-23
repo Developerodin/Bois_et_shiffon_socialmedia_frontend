@@ -37,7 +37,7 @@ export const NAV: readonly NavEntry[] = [
   // Its link is on the tasks page; the sidebar highlights Beat's slot on it.
   { id: "projects", label: "Projects", href: "/projects", group: "page", feature: "tasks", perm: TASKS_READ },
   { id: "website", label: "Website", href: "/tasks?area=website", group: "main", feature: "tasks", perm: TASKS_READ },
-  { id: "seo", label: "SEO", href: "/tasks?area=seo", group: "main", feature: "tasks", perm: TASKS_READ },
+  { id: "seo", label: "Performance", href: "/tasks?area=seo", group: "main", feature: "tasks", perm: TASKS_READ },
 
   { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },
   { id: "photoshoot", label: "Photoshoot", href: "/photoshoot", group: "create", feature: "photoshoot" },
@@ -53,11 +53,11 @@ export const NAV: readonly NavEntry[] = [
   { id: "echo", label: "Echo", href: "/settings?tab=connections", group: "agent", role: "Communication", soon: true },
   { id: "pulse", label: "Pulse", href: "/agents/pulse", group: "agent", role: "Finance", soon: true },
   { id: "hum", label: "Hum", href: "/agents/hum", group: "agent", role: "Admin & access", soon: true },
-  { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "Performance" },
+  { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "SEO & GEO reports" },
   { id: "drift", label: "Drift", href: "/?panel=competitors", group: "agent", role: "Competitors" },
 
   { id: "calendar", label: "Content calendar", href: "/?panel=content", group: "more" },
-  { id: "performance", label: "Performance", href: "/performance", group: "more" },
+  { id: "performance", label: "SEO & GEO reports", href: "/performance", group: "more" },
   { id: "agent-log", label: "Agent log", href: "/agents", group: "more" },
   { id: "settings", label: "Settings", href: "/settings", group: "more" },
 
@@ -93,7 +93,7 @@ export function agentEntries(enabled: readonly WebFeature[], perms?: readonly st
 
 const hrefPath = (href: string) => href.split(/[?#]/)[0] || "/";
 
-/** Agents share paths with pages (Surge and Performance), so on a tie the page wins. */
+/** Agents share paths with pages (Surge and SEO & GEO reports), so on a tie the page wins. */
 const rank = (e: NavEntry) => (e.group === "agent" ? 0 : 1);
 
 /**
