@@ -160,8 +160,13 @@ function Pages({ base, query, empty, assign }: { base: string; query: string; em
   // Ticks on rows the list no longer shows (reassigned out of this view) don't count.
   const picked = assign ? tasks.filter((t) => selected.has(t.id)).map((t) => t.id) : [];
   const allPicked = tasks.length > 0 && picked.length === tasks.length;
+  // A new selection clears the last assign's note.
+  const select = (next: ReadonlySet<string> | ((s: ReadonlySet<string>) => ReadonlySet<string>)) => {
+    setBulkNote("");
+    setSelected(next);
+  };
   const tick = (id: string, on: boolean) =>
-    setSelected((s) => {
+    select((s) => {
       const n = new Set(s);
       if (on) n.add(id);
       else n.delete(id);
@@ -177,7 +182,7 @@ function Pages({ base, query, empty, assign }: { base: string; query: string; em
       const { skipped } = await tasksApi.assign(base, { ids: picked, ...ownerFromValue(bulkOwner) });
       setSelected(new Set());
       setBulkOwner(NO_CHOICE);
-      if (skipped > 0) setBulkNote(skipped === 1 ? "1 finished task was left as it was." : `${skipped} finished tasks were left as they were.`);
+      if (skipped > 0) setBulkNote(skipped === 1 ? "1 done or cancelled task was left as it was." : `${skipped} done or cancelled tasks were left as they were.`);
     } catch (e) {
       // A 409 names the task that can't take this owner; nothing was changed.
       setBulkError(errorMessage(e, "Couldn't assign the tasks. Try again."));
@@ -220,7 +225,7 @@ function Pages({ base, query, empty, assign }: { base: string; query: string; em
             <span aria-hidden="true" className="text-muted-foreground">
               ·
             </span>
-            <Button size="sm" variant="ghost" disabled={bulkBusy} onClick={() => setSelected(new Set())}>
+            <Button size="sm" variant="ghost" disabled={bulkBusy} onClick={() => select(new Set())}>
               Clear
             </Button>
           </div>
@@ -247,7 +252,7 @@ function Pages({ base, query, empty, assign }: { base: string; query: string; em
                       ref={(el) => {
                         if (el) el.indeterminate = picked.length > 0 && !allPicked;
                       }}
-                      onChange={(e) => setSelected(new Set(e.target.checked ? tasks.map((t) => t.id) : []))}
+                      onChange={(e) => select(new Set(e.target.checked ? tasks.map((t) => t.id) : []))}
                     />
                   </label>
                 </th>
