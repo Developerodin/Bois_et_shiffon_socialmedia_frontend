@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { CHANNEL_LABEL, STATUS_LABEL as POST_STATUS_LABEL } from "@/components/workspace/content-panels";
+import { CHANNEL_LABEL, STATUS_LABEL as POST_STATUS_LABEL } from "@/lib/post-labels";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { tasksApi, type TaskPage } from "@/lib/tasks-api";
 import { AREA_LABEL, dueLabel, ownerLabel, PRIORITY_LABEL, STATUS_LABEL, TASKS_CHANGED, tasksQuery, type AreaParam, type TaskListView } from "@/components/tasks/task-views";

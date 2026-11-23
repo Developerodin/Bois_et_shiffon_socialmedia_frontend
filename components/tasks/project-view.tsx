@@ -10,7 +10,7 @@ import { LoadFailed } from "@/components/ui/load-failed";
 import { PageHeader } from "@/components/ui/page-header";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { CHANNEL_LABEL, STATUS_LABEL as POST_STATUS_LABEL } from "@/components/workspace/content-panels";
+import { CHANNEL_LABEL, STATUS_LABEL as POST_STATUS_LABEL } from "@/lib/post-labels";
 import { JOB_INTERVALS, putShared, useJob } from "@/components/workspace/use-job";
 import { navFor } from "@/lib/nav";
 import { recentKey } from "@/lib/recent";
