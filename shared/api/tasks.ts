@@ -82,5 +82,8 @@ export type TaskChecklistItemDto = { id: string; text: string; position: number;
 /** A comment as the viewer may read it (a client never gets `internal` ones). `author` is null for SYSTEM comments. */
 export type TaskCommentDto = { id: string; kind: string; body: string; author: TaskPersonDto | null; byClient: boolean; internal: boolean; createdAt: string };
 
-/** A brand photo on a task: a before/after screenshot or other. */
-export type TaskAttachmentDto = { id: string; mediaUploadId: string; role: string; createdById: string; createdAt: string };
+/** A brand photo on a task: a before/after screenshot or other. `url` is a signed link, valid for an hour. */
+export type TaskAttachmentDto = { id: string; mediaUploadId: string; role: string; createdById: string; createdAt: string; url: string };
+
+/** GET tasks/:id (and the task an action or edit returns): the list row plus its checklist lines and photos. */
+export type TaskDetailDto = TaskDto & { checklistItems: TaskChecklistItemDto[]; attachments: TaskAttachmentDto[] };
