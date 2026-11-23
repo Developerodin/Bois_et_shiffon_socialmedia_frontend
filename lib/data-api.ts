@@ -99,14 +99,25 @@ export function zoneToday(timeZone: string | null | undefined, now = new Date())
   }
 }
 
-export const presetRange = (days: number, today: string): DateRange => ({ from: addDays(today, -(days - 1)), to: today });
+/**
+ * The day the presets end on: yesterday in the brand's zone, or the source's `syncedThrough` when that is earlier.
+ * Today is partial for Sales and missing for Ads (Meta syncs to yesterday) and Search (Google lags 2–3 days), so a
+ * range ending today always pulled the totals down against the full previous period.
+ */
+export function presetEnd(today: string, syncedThrough?: string | null): string {
+  const yesterday = addDays(today, -1);
+  return syncedThrough && syncedThrough < yesterday ? syncedThrough : yesterday;
+}
 
-/** The range in the URL when it is real, in order and at most 90 days; else the last 28 days. */
-export function readRange(params: URLSearchParams, today: string): DateRange {
+/** The `days` days ending on `end`, both counted; the server compares with the same number of days before. */
+export const presetRange = (days: number, end: string): DateRange => ({ from: addDays(end, -(days - 1)), to: end });
+
+/** The range in the URL when it is real, in order and at most 90 days; else the 28 days ending on `end`. */
+export function readRange(params: URLSearchParams, end: string): DateRange {
   const from = params.get("from") ?? "";
   const to = params.get("to") ?? "";
   const ok = DAY.test(from) && DAY.test(to) && !Number.isNaN(ms(from)) && !Number.isNaN(ms(to)) && from <= to && rangeDays({ from, to }) <= MAX_DAYS;
-  return ok ? { from, to } : presetRange(DEFAULT_DAYS, today);
+  return ok ? { from, to } : presetRange(DEFAULT_DAYS, end);
 }
 
 /** The same URL with this range in it, other parameters kept. */

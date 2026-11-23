@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { change, presetRange, rangeDays, readRange, withRange, zoneToday } from "@/lib/data-api";
+import { change, presetEnd, presetRange, rangeDays, readRange, withRange, zoneToday } from "@/lib/data-api";
 
 const today = "2026-11-23";
 const params = (href: string) => new URL(href).searchParams;
@@ -22,6 +22,21 @@ describe("date range in the URL", () => {
     const r = presetRange(90, today);
     expect(rangeDays(r)).toBe(90);
     expect(readRange(params(withRange("https://app.test/", r)), today)).toEqual(r);
+  });
+});
+
+describe("presetEnd", () => {
+  it("ends yesterday, or on the last synced day when that is earlier", () => {
+    expect(presetEnd(today)).toBe("2026-11-22");
+    expect(presetEnd(today, null)).toBe("2026-11-22");
+    expect(presetEnd(today, "2026-11-20")).toBe("2026-11-20");
+    expect(presetEnd(today, today)).toBe("2026-11-22");
+  });
+
+  it("keeps the preset's length when the end moves back", () => {
+    const r = presetRange(28, presetEnd(today, "2026-11-20"));
+    expect(r).toEqual({ from: "2026-10-24", to: "2026-11-20" });
+    expect(rangeDays(r)).toBe(28);
   });
 });
 

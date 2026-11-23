@@ -9,7 +9,7 @@ import { SearchTab } from "@/components/performance/search-tab";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { PageHeader } from "@/components/ui/page-header";
-import { brandApi, readRange, useReloadOnFocus, withRange, zoneToday, type DataSourcesResponse, type DateRange } from "@/lib/data-api";
+import { brandApi, presetEnd, presetRange, rangeDays, readRange, useReloadOnFocus, withRange, zoneToday, type DataSourcesResponse, type DateRange } from "@/lib/data-api";
 import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +34,8 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
   reports: ReactNode;
 }) {
   const [active, setActive] = useState<PerformanceTab>(tabs.find((t) => t === initialTab) ?? tabs[0]);
-  const [picked, setPicked] = useState<DateRange | null>(null);
+  /** The preset's length once one is pressed: each tab ends it on its own presetEnd. */
+  const [picked, setPicked] = useState<number | null>(null);
   const tabRefs = useRef<Partial<Record<PerformanceTab, HTMLButtonElement | null>>>({});
   const isData = active !== "reports";
 
@@ -70,15 +71,15 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
     else if (state.kind === "error") panel = <LoadError message={state.message} onRetry={reload} />;
     else {
       const { sources, timeZone } = state.data;
-      const today = zoneToday(timeZone);
-      const range = picked ?? readRange(new URLSearchParams({ from: initialRange.from ?? "", to: initialRange.to ?? "" }), today);
+      const source = (kind: string) => sources.find((s) => s.kind === kind);
+      const end = presetEnd(zoneToday(timeZone), active === "search" ? source("SEARCH_CONSOLE")?.syncedThrough : null);
+      const range = picked ? presetRange(picked, end) : readRange(new URLSearchParams({ from: initialRange.from ?? "", to: initialRange.to ?? "" }), end);
       const changeRange = (r: DateRange) => {
-        setPicked(r);
+        setPicked(rangeDays(r));
         window.history.replaceState(window.history.state, "", withRange(window.location.href, r));
       };
-      const source = (kind: string) => sources.find((s) => s.kind === kind);
       rangeLine = rangeLabel(range);
-      filter = <DateRangeFilter range={range} today={today} onChange={changeRange} />;
+      filter = <DateRangeFilter range={range} end={end} onChange={changeRange} />;
       const props = { workspaceId, brandId, canManage, onSourceChanged: reload, range };
       panel =
         active === "search" ? <SearchTab {...props} source={source("SEARCH_CONSOLE")} />
