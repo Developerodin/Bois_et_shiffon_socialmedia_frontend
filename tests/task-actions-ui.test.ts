@@ -72,6 +72,11 @@ describe("task edits", () => {
     expect(changedFields(t, { ownerId: "" })).toEqual({ ownerId: null });
     expect(changedFields(t, { description: "  " })).toEqual({});
   });
+  it("treats blank website fields as cleared", () => {
+    const t = task({ url: "https://shop.example/menu" });
+    expect(changedFields(t, { url: "https://shop.example/menu", previewUrl: "", changeKind: "" })).toEqual({});
+    expect(changedFields(t, { url: "", changeKind: "MENU" })).toEqual({ url: null, changeKind: "MENU" });
+  });
   it("reads the editable fields off a task", () => {
     const d = draftOf(task({ description: "x" }));
     expect(d).toMatchObject({ title: "Fix the menu", description: "x", priority: "NORMAL", areas: ["WEBSITE"], dueOn: "", ownerId: "u1", reviewerId: "u2" });

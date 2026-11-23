@@ -1,4 +1,4 @@
-import type { PostRow, TaskAction, TaskDetailDto, TaskDto, TaskPersonDto } from "@/shared";
+import type { PostRow, TaskAction, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto, WorkProjectDetailDto } from "@/shared";
 import { request } from "@/components/settings/api";
 
 const enc = encodeURIComponent;
@@ -25,4 +25,19 @@ export const tasksApi = {
     request<{ task: TaskDetailDto }>(`${base}/tasks/${enc(id)}`, { method: "PATCH", body: JSON.stringify(fields) }).then((d) => d.task),
   /** People who read the brand's tasks (tasks.read): the owner, reviewer and "waiting on" pickers. */
   people: (base: string) => request<{ people: TaskPersonDto[] }>(`${base}/tasks/people`).then((d) => d.people),
+  /** Checklist lines: the task's owner or tasks.manage. */
+  addItem: (base: string, id: string, text: string) =>
+    request<{ item: TaskChecklistItemDto }>(`${base}/tasks/${enc(id)}/checklist`, { method: "POST", body: JSON.stringify({ text }) }).then((d) => d.item),
+  patchItem: (base: string, id: string, itemId: string, body: { text?: string; done?: boolean; position?: number }) =>
+    request<{ item: TaskChecklistItemDto }>(`${base}/tasks/${enc(id)}/checklist/${enc(itemId)}`, { method: "PATCH", body: JSON.stringify(body) }).then((d) => d.item),
+  removeItem: (base: string, id: string, itemId: string) => request<void>(`${base}/tasks/${enc(id)}/checklist/${enc(itemId)}`, { method: "DELETE" }),
+  /** Takes a photo off the task; the upload itself stays in the library. */
+  removeAttachment: (base: string, id: string, attachmentId: string) => request<void>(`${base}/tasks/${enc(id)}/attachments/${enc(attachmentId)}`, { method: "DELETE" }),
+  /** Oldest first, the newest 200; a client never gets internal ones. */
+  comments: (base: string, id: string) => request<{ comments: TaskCommentDto[] }>(`${base}/tasks/${enc(id)}/comments`).then((d) => d.comments),
+  /** Append-only. A staff comment stays internal unless `shareWithClient`; a client's never is. */
+  comment: (base: string, id: string, body: string, shareWithClient: boolean) =>
+    request<{ comment: TaskCommentDto }>(`${base}/tasks/${enc(id)}/comments`, { method: "POST", body: JSON.stringify({ body, shareWithClient }) }).then((d) => d.comment),
+  /** The task's project, read for its "Visible to client" switch. */
+  project: (base: string, projectId: string) => request<{ project: WorkProjectDetailDto }>(`${base}/work-projects/${enc(projectId)}`).then((d) => d.project),
 };

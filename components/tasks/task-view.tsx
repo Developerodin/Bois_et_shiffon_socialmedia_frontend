@@ -22,10 +22,26 @@ import { tasksApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { parseViewParts, peekCrumb, peekKey, peekTitle, viewToSearch, type View } from "@/lib/workspace-view";
 import { PersonSelect, TaskActions } from "@/components/tasks/task-actions";
+import { TaskAttachments } from "@/components/tasks/task-attachments";
+import { TaskChecklist } from "@/components/tasks/task-checklist";
+import { TaskComments } from "@/components/tasks/task-comments";
+import { WebsiteChecks, WebsiteFacts, WebsiteInputs } from "@/components/tasks/website-fields";
 import { AREA_LABEL, dueLabel, ownerLabel, PRIORITY_LABEL, STATUS_LABEL, TASKS_CHANGED } from "@/components/tasks/task-views";
 
 /** The task fields a manager edits in the peek, as form values ("" for none). */
-export type TaskDraft = { title: string; description: string; priority: string; areas: string[]; dueOn: string; ownerId: string; reviewerId: string };
+export type TaskDraft = {
+  title: string;
+  description: string;
+  priority: string;
+  areas: string[];
+  dueOn: string;
+  ownerId: string;
+  reviewerId: string;
+  url: string;
+  changeKind: string;
+  acceptanceCriteria: string;
+  previewUrl: string;
+};
 
 export const draftOf = (t: TaskDto): TaskDraft => ({
   title: t.title,
@@ -35,6 +51,10 @@ export const draftOf = (t: TaskDto): TaskDraft => ({
   dueOn: t.dueOn ?? "",
   ownerId: t.owner?.id ?? "",
   reviewerId: t.reviewer?.id ?? "",
+  url: t.url ?? "",
+  changeKind: t.changeKind ?? "",
+  acceptanceCriteria: t.acceptanceCriteria ?? "",
+  previewUrl: t.previewUrl ?? "",
 });
 
 // A form value as PATCH takes it: blank optional fields clear (null), the title and priority are sent as typed.
@@ -60,11 +80,19 @@ export function changedFields(t: TaskDto, edits: Partial<TaskDraft>): Record<str
 /** The URL the shared cache keeps a task's detail under: the peek's title reads it (knownName). */
 export const taskUrl = (base: string, id: string) => `${base}/tasks/${encodeURIComponent(id)}`;
 
+const WEBSITE = "WEBSITE";
+
 /**
- * One task in the side peek: status, blocked note, the actions the server lists for this person, and the fields
- * (editable with tasks.manage; Save sends only what changed, and unsaved edits ask before the peek closes).
+ * One task in the side peek: status, blocked note, the actions the server lists for this person, the fields (editable
+ * with tasks.manage; Save sends only what changed, and unsaved edits ask before the peek closes), website fields and
+ * screenshots, the checklist and comments. `perms` (the shell's brand permissions) only hides controls the server
+ * would refuse; it decides every write.
  */
-export function TaskView({ base, id, canManage, onLoaded }: { base: string; id: string; canManage: boolean; onLoaded?: (t: TaskDetailDto) => void }) {
+export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; id: string; perms: string[]; userId: string | null | undefined; onLoaded?: (t: TaskDetailDto) => void }) {
+  const canManage = perms.includes("tasks.manage");
+  // ponytail: a client reviewer is the one role without agents.read (as the shell treats the assistant); the web has no
+  // "is a client" flag. The server ignores shareWithClient from a client, so a wrong guess only shows a toggle that does nothing.
+  const staff = perms.includes("agents.read");
   const [task, setTask] = useState<TaskDetailDto | null>(null);
   const [loadError, setLoadError] = useState<"gone" | "failed" | null>(null);
   const [people, setPeople] = useState<TaskPersonDto[] | null>(null);
@@ -105,6 +133,22 @@ export function TaskView({ base, id, canManage, onLoaded }: { base: string; id: 
     };
   }, [base]);
 
+  const projectId = task?.project?.id ?? null;
+  const [clientVisible, setClientVisible] = useState<{ projectId: string; on: boolean } | null>(null);
+  // Whether a client can see the task, for the comments' "Share with client" (staff only). ponytail: read from the
+  // task's project ("Visible to client"); a task a client reviews outside a shared project isn't known to the web yet.
+  useEffect(() => {
+    if (!projectId || !staff) return;
+    let alive = true;
+    tasksApi.project(base, projectId).then(
+      (p) => alive && setClientVisible({ projectId, on: p.clientVisible }),
+      () => {},
+    );
+    return () => {
+      alive = false;
+    };
+  }, [base, projectId, staff]);
+
   if (!task) {
     if (loadError === "gone") return <EmptyState icon={SearchX} title="Task not found" description="It was deleted, or it isn't shared with you." className="py-10" />;
     if (loadError === "failed") return <LoadFailed what="this task" onRetry={load} className="px-5 py-6" />;
@@ -115,6 +159,9 @@ export function TaskView({ base, id, canManage, onLoaded }: { base: string; id: 
     );
   }
 
+  const website = task.areas.includes(WEBSITE);
+  const mine = canManage || (!!userId && task.owner?.id === userId);
+  const canEditPhotos = canManage || (!!userId && task.owner?.id === userId && perms.includes("content.create"));
   return (
     <div className="flex flex-col gap-5 px-5 py-4">
       <div className="flex flex-wrap items-center gap-1">
@@ -127,9 +174,13 @@ export function TaskView({ base, id, canManage, onLoaded }: { base: string; id: 
           <span className="font-medium">Waiting on{task.blockedOn ? ` ${ownerLabel(task.blockedOn)}` : ""}:</span> {task.blockedReason}
         </p>
       ) : null}
-      <TaskActions base={base} task={task} people={people} onChanged={show} />
+      <TaskActions base={base} task={task} people={people} onChanged={show} hide={website ? ["checkedLive"] : []} />
       {peopleFailed ? <p className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. Close and open the task to try again.</p> : null}
       {canManage ? <TaskFields key={task.id} base={base} task={task} people={people} onSaved={show} /> : <TaskFacts task={task} />}
+      {website ? <WebsiteChecks base={base} task={task} people={people} canEditPhotos={canEditPhotos} onChanged={show} /> : null}
+      <TaskChecklist base={base} task={task} canEdit={mine} />
+      <TaskAttachments base={base} task={task} roles={website ? ["OTHER"] : ["BEFORE", "AFTER", "OTHER"]} canEdit={canEditPhotos} />
+      <TaskComments base={base} taskId={task.id} staff={staff} clientVisible={!!projectId && clientVisible?.projectId === projectId && clientVisible.on} />
     </div>
   );
 }
@@ -157,6 +208,7 @@ function TaskFacts({ task }: { task: TaskDetailDto }) {
         {row("Project", task.project?.name ?? "None")}
         {task.post ? row("Post", <PostLink post={task.post} />) : null}
       </dl>
+      {task.areas.includes(WEBSITE) ? <WebsiteFacts task={task} /> : null}
     </div>
   );
 }
@@ -266,6 +318,7 @@ function TaskFields({ base, task, people, onSaved }: { base: string; task: TaskD
           <PersonSelect id={ids.reviewer} value={draft.reviewerId} people={people} current={task.reviewer} empty="No reviewer" onChange={(v) => set("reviewerId", v)} />
         </div>
       </div>
+      {draft.areas.includes(WEBSITE) ? <WebsiteInputs draft={draft} set={set} /> : null}
       <dl className="flex flex-col gap-2 text-sm">
         <div className="flex gap-3">
           <dt className="w-24 shrink-0 text-muted-foreground">Project</dt>
@@ -308,7 +361,7 @@ function TaskFields({ base, task, people, onSaved }: { base: string; task: TaskD
  * The task peek on a page of its own (/tasks; the project pages later): opens on `?task=<id>`, asks about unsaved edits
  * before switching or closing, records the task in Recent once it loads. The Overview has its own peek and renders TaskView.
  */
-export function TaskPeek({ base, canManage, recentKey }: { base: string; canManage: boolean; recentKey: string | null }) {
+export function TaskPeek({ base, perms, userId, recentKey }: { base: string; perms: string[]; userId: string; recentKey: string | null }) {
   const router = useRouter();
   const pathname = usePathname();
   const query = useSearchParams().toString();
@@ -361,7 +414,7 @@ export function TaskPeek({ base, canManage, recentKey }: { base: string; canMana
   return (
     <Peek placement="page" open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} onClose={close} onExited={peek.onExited} asideRef={peek.ref}>
       <UnsavedGuardOff value={!peek.live}>
-        <TaskView key={peekKey(peek.shown.view)} base={base} id={peek.shown.view.id} canManage={canManage} onLoaded={onLoaded} />
+        <TaskView key={peekKey(peek.shown.view)} base={base} id={peek.shown.view.id} perms={perms} userId={userId} onLoaded={onLoaded} />
       </UnsavedGuardOff>
     </Peek>
   );

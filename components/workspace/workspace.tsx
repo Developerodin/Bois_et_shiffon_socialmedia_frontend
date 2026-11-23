@@ -490,7 +490,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, u
       <CompetitorView base={base} canRun={canRun} id={v.id} onLoaded={() => setLoadedId(peekKey(v))} />
     ) : v.kind === "task" ? (
       perms.includes("tasks.read") ? (
-        <TaskView base={base} id={v.id} canManage={perms.includes("tasks.manage")} onLoaded={() => setLoadedId(peekKey(v))} />
+        <TaskView base={base} id={v.id} perms={perms} userId={user.id} onLoaded={() => setLoadedId(peekKey(v))} />
       ) : (
         <NotForRole what="tasks" />
       )

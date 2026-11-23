@@ -20,7 +20,7 @@ const LAYOUTS = [
 ] as const;
 
 /** /tasks: area tabs (from ?area=, so the Website and SEO nav links land on theirs), a view, List or Board, and the task peek (?task=). */
-export function TasksPage({ workspaceId, brandId, userId, canManage }: { workspaceId: string; brandId: string; userId: string; canManage: boolean }) {
+export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId: string; brandId: string; userId: string; perms: string[] }) {
   const base = brandBase(workspaceId, brandId);
   const router = useRouter();
   const pathname = usePathname();
@@ -80,7 +80,7 @@ export function TasksPage({ workspaceId, brandId, userId, canManage }: { workspa
           <TaskList base={base} view={view} area={area} />
         </section>
       )}
-      <TaskPeek base={base} canManage={canManage} recentKey={recentKey(workspaceId, brandId, userId)} />
+      <TaskPeek base={base} perms={perms} userId={userId} recentKey={recentKey(workspaceId, brandId, userId)} />
     </div>
   );
 }
