@@ -14,6 +14,7 @@ import { loadPlanCredits, withPrice } from "@/lib/plan-credits";
 import { dismissToast, toast } from "@/components/ui/toast";
 import { restoreThread } from "@/lib/chat-undo";
 import { cn } from "@/lib/utils";
+import { CHANNEL_LABEL } from "@/lib/post-labels";
 import { isRunCancelled } from "@/components/languages/languages";
 
 const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) => string> = {
@@ -25,6 +26,11 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
   webSearch: () => "Searched the web",
   catalogueSummary: () => "Looked over your catalogue",
   findProducts: (i) => (i?.q ? `Searched your products for “${String(i.q)}”` : "Looked through your products"),
+  listPosts: (i) => {
+    // Own keys only: the input is the model's, shown even when the server rejected it.
+    const label = Object.hasOwn(CHANNEL_LABEL, String(i?.channel)) ? CHANNEL_LABEL[String(i?.channel)] : null;
+    return label ? `Checked your ${label} posts` : "Checked your posts";
+  },
 };
 
 /**
