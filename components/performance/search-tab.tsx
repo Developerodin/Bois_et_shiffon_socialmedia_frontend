@@ -194,7 +194,7 @@ function SitePicker({ workspaceId, brandId, current, onSaved, onCancel }: { work
     setBusy(true);
     setError("");
     try {
-      await request(`${base}/data-sources/${KIND_SLUG.SEARCH_CONSOLE}`, { method: "PUT", body: JSON.stringify({ connectionId: google.id, siteUrl: site }) });
+      await request<{ source: DataSourceDto }>(`${base}/data-sources/${KIND_SLUG.SEARCH_CONSOLE}`, { method: "PUT", body: JSON.stringify({ connectionId: google.id, siteUrl: site }) });
       onSaved();
     } catch (e) {
       setError(errorMessage(e, "Couldn't save the site. Try again."));

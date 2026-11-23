@@ -114,7 +114,7 @@ function TurnOnOrders({ workspaceId, brandId, onDone }: { workspaceId: string; b
     setBusy(true);
     setError("");
     try {
-      await request(`${brandApi(workspaceId, brandId)}/data-sources/${KIND_SLUG.SHOPIFY_ORDERS}`, { method: "PUT", body: JSON.stringify({ connectionId: shop.id }) });
+      await request<{ source: DataSourceDto }>(`${brandApi(workspaceId, brandId)}/data-sources/${KIND_SLUG.SHOPIFY_ORDERS}`, { method: "PUT", body: JSON.stringify({ connectionId: shop.id }) });
       onDone();
     } catch (e) {
       setError(errorMessage(e, "Couldn't turn on orders. Try again."));

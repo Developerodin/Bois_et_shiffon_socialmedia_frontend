@@ -213,7 +213,7 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
 
 /**
  * Owners choose which connected Meta ad account (one connection per account) feeds the tab. GET meta-ads/accounts
- * reads Meta's live list so the choice shows its currency and zone, or that it is no longer readable; PUT checks it
+ * reads Meta's live list so the choice shows its currency and zone, or that it is no longer readable; PUT data-sources/meta-ads checks it
  * again. 409 (reconnect, not readable) and 429 (too many tries) show the server's message.
  */
 function AdAccountPicker({ workspaceId, brandId, onSaved }: { workspaceId: string; brandId: string; onSaved: () => void }) {
@@ -260,7 +260,7 @@ function AdAccountPicker({ workspaceId, brandId, onSaved }: { workspaceId: strin
     setBusy(true);
     setError("");
     try {
-      await request(`${base}/meta-ads/accounts`, { method: "PUT", body: JSON.stringify({ connectionId: picked }) });
+      await request<{ source: DataSourceDto }>(`${base}/data-sources/${KIND_SLUG.META_ADS}`, { method: "PUT", body: JSON.stringify({ connectionId: picked }) });
       onSaved();
     } catch (e) {
       setError(errorMessage(e, "Couldn't choose the ad account. Try again."));
