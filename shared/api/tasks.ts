@@ -77,12 +77,16 @@ export type WorkProjectDetailDto = WorkProjectDto & {
 export type NotificationDto = {
   id: string;
   kind: string;
+  /** The task's brand: opening it may switch brand. */
+  brandId: string;
   taskId: string | null;
   taskTitle: string | null;
   actor: TaskPersonDto | null;
   readAt: string | null;
   createdAt: string;
 };
+
+export type NotificationPageDto = { notifications: NotificationDto[]; nextCursor: string | null };
 
 export type SearchResultDto = {
   kind: "task" | "project" | "post" | "product" | "campaign";
