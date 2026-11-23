@@ -29,7 +29,7 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
   listPosts: (i) => {
     // Own keys only: the input is the model's, shown even when the server rejected it.
     const label = Object.hasOwn(CHANNEL_LABEL, String(i?.channel)) ? CHANNEL_LABEL[String(i?.channel)] : null;
-    return label ? `Checked your ${label} posts` : "Checked your posts";
+    return label ? `Checked your posts: ${label}` : "Checked your posts";
   },
 };
 
