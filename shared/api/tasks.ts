@@ -1,7 +1,10 @@
 import type { TaskAction } from "../tasks";
 
-/** A person on a task; `gone` when the account no longer exists or can't see it. */
-export type TaskPersonDto = { id: string; name: string; gone: boolean };
+/**
+ * A person on a task; `gone` when the account no longer exists or can't see it; `client` when they are a client
+ * reviewer on the brand (owner, blocked-on and project-owner pickers list staff only).
+ */
+export type TaskPersonDto = { id: string; name: string; gone: boolean; client: boolean };
 
 export type TaskDto = {
   id: string;
