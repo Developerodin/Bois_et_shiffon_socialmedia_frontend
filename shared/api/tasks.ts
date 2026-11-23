@@ -17,8 +17,15 @@ export type TaskDto = {
   acceptanceCriteria: string | null;
   previewUrl: string | null;
   checkedLiveAt: string | null;
+  checkedLiveById: string | null;
   recheckOn: string | null;
   completedAt: string | null;
+  workProjectId: string | null;
+  contentItemId: string | null;
+  /** The audit finding this task came from (SEO), its pages when made, and when an audit stopped finding it. */
+  findingKind: string | null;
+  findingUrls: string[];
+  findingClearedAt: string | null;
   createdAt: string;
   updatedAt: string;
   owner: TaskPersonDto | null;
