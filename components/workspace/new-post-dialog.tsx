@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoaderCircle, Plus } from "lucide-react";
 import { LibraryPicker } from "@/components/library/library-picker";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
@@ -15,8 +15,11 @@ import { CONTENT_GOALS, CONTENT_GOAL_LABELS, type ContentGoal, type LibraryPhoto
 type Channel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL";
 const DIRECTION_MAX = 500;
 
-/** "New post" for people who can create content: a product photo, a goal and a note, then the Creator drafts it and it opens. */
-export function NewPostDialog({ base, canCreate, onCreated }: { base: string; canCreate: boolean; onCreated: (id: string) => void }) {
+/**
+ * "New post" for people who can create content: a product photo, a goal and a note, then the Creator drafts it and it opens.
+ * With `open`/`onOpenChange` (the top bar's quick create) the caller opens it and no "New post" button shows.
+ */
+export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOpenChange }: { base: string; canCreate: boolean; onCreated: (id: string) => void; open?: boolean; onOpenChange?: (o: boolean) => void }) {
   const workspaceId = workspaceIdOf(base);
   const brandId = base.split("/brands/")[1];
   const [open, setOpen] = useState(false);
@@ -29,19 +32,28 @@ export function NewPostDialog({ base, canCreate, onCreated }: { base: string; ca
   const [error, setError] = useState("");
   // One id per opening: a double click or a retry after a dropped answer returns the same post instead of a second one.
   const [requestId, setRequestId] = useState("");
+  const controlled = openProp !== undefined;
+  const shown = controlled ? openProp : open;
+
+  function reset() {
+    setChannel("INSTAGRAM_POST");
+    setGoal("newArrival");
+    setPhoto(null);
+    setDirection("");
+    setError("");
+    setRequestId(crypto.randomUUID());
+  }
+  // Opened by the caller: start fresh, as the button does.
+  useEffect(() => {
+    if (controlled && openProp) reset();
+  }, [controlled, openProp]);
 
   if (!canCreate || !workspaceId || !brandId) return null;
 
   function change(next: boolean) {
-    if (next) {
-      setChannel("INSTAGRAM_POST");
-      setGoal("newArrival");
-      setPhoto(null);
-      setDirection("");
-      setError("");
-      setRequestId(crypto.randomUUID());
-    }
-    setOpen(next);
+    if (next) reset();
+    if (controlled) onOpenChange?.(next);
+    else setOpen(next);
   }
 
   async function submit() {
@@ -53,7 +65,7 @@ export function NewPostDialog({ base, canCreate, onCreated }: { base: string; ca
         method: "POST",
         body: JSON.stringify({ channel, goal, product: { title: photo.title.trim() || "Product", photoKey: photo.key }, ...(direction.trim() ? { direction: direction.trim() } : {}), requestId }),
       });
-      setOpen(false);
+      change(false);
       onCreated(id);
     } catch (e) {
       setError(e instanceof ApiError && e.status === 429 ? "You've written 60 posts today. Try again tomorrow." : errorMessage(e, "Couldn't start the post. Try again."));
@@ -64,11 +76,13 @@ export function NewPostDialog({ base, canCreate, onCreated }: { base: string; ca
 
   return (
     <>
-      <Button size="sm" onClick={() => change(true)}>
-        <Plus aria-hidden="true" />
-        New post
-      </Button>
-      <Dialog open={open} onOpenChange={(o) => !busy && change(o)}>
+      {controlled ? null : (
+        <Button size="sm" onClick={() => change(true)}>
+          <Plus aria-hidden="true" />
+          New post
+        </Button>
+      )}
+      <Dialog open={shown} onOpenChange={(o) => !busy && change(o)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>New product post</DialogTitle>

@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/toast";
 import { JOB_INTERVALS } from "@/components/workspace/use-job";
 import { notificationsApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
-import { taskHref } from "@/lib/workspace-view";
+import { samePage, taskHref } from "@/lib/workspace-view";
 
 /** The server counts unread up to 100; past 99 the badge says so instead of a number it doesn't know. */
 const CAP = 100;
@@ -138,7 +138,7 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
     }
     const href = taskHref(pathname, window.location.search, n.taskId);
     // Leaving this page for /tasks: ask about unsaved work here (a page with a peek asks itself when its URL changes).
-    if (!href.startsWith(`${pathname}?`) && !okToDiscard()) return;
+    if (!samePage(href, pathname) && !okToDiscard()) return;
     router.push(href, { scroll: false });
   };
 

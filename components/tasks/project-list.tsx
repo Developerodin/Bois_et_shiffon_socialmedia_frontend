@@ -127,9 +127,10 @@ function Pages({ base, query }: { base: string; query: string }) {
 
 /**
  * Start a project by name (tasks.manage), then open it to fill in the rest. One requestId per attempt: a retry after a lost
- * answer returns the project the first request made; a new one is drawn once it succeeds.
+ * answer returns the project the first request made; a new one is drawn once it succeeds. `onCreated` runs before the
+ * new project opens (the top bar's quick create closes its dialog).
  */
-function NewProject({ base }: { base: string }) {
+export function NewProject({ base, onCreated }: { base: string; onCreated?: () => void }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -146,6 +147,7 @@ function NewProject({ base }: { base: string }) {
     try {
       const p = await projectsApi.create(base, { name: n, requestId: requestId.current });
       requestId.current = null;
+      onCreated?.();
       router.push(`/projects/${encodeURIComponent(p.id)}`);
     } catch (e) {
       setError(errorMessage(e, "Couldn't start the project. Try again."));

@@ -1,5 +1,6 @@
-import type { NotificationPageDto, PostRow, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto, WorkProjectDetailDto, WorkProjectDto, WorkProjectMilestoneDto } from "@/shared";
+import type { NotificationPageDto, PostRow, SearchResultsDto, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto, TaskProposalDto, TaskProposalsDto, WorkProjectDetailDto, WorkProjectDto, WorkProjectMilestoneDto } from "@/shared";
 import { ApiError, request } from "@/components/settings/api";
+import { SLOW_MS } from "@/lib/net";
 
 const enc = encodeURIComponent;
 
@@ -39,7 +40,19 @@ export const tasksApi = {
   comment: (base: string, id: string, body: string, shareWithClient: boolean) =>
     request<{ comment: TaskCommentDto }>(`${base}/tasks/${enc(id)}/comments`, { method: "POST", body: JSON.stringify({ body, shareWithClient }) }).then((d) => d.comment),
   uploadScreenshot,
+  /** tasks.manage. With a requestId (one per dialog opening), a retry returns the task the first request made. */
+  create: (base: string, body: Record<string, unknown> & { requestId: string }) =>
+    request<{ task: TaskDto }>(`${base}/tasks`, { method: "POST", body: JSON.stringify(body) }).then((d) => d.task),
+  /** tasks.manage. Proposals only, nothing stored; 502/503 carry a message for the person. Slow: the model reads the note. */
+  fromNote: (base: string, text: string) =>
+    request<TaskProposalsDto>(`${base}/tasks/from-note`, { method: "POST", body: JSON.stringify({ text }), timeoutMs: SLOW_MS }).then((d) => d.proposals),
+  /** tasks.manage. Up to 20, all or nothing; the same requestId again returns the first rows instead of making more. */
+  batch: (base: string, body: { requestId: string; tasks: TaskProposalDto[] }) =>
+    request<{ tasks: TaskDto[] }>(`${base}/tasks/batch`, { method: "POST", body: JSON.stringify(body) }).then((d) => d.tasks),
 };
+
+/** Top-bar search (brand.read): 2–100 characters, 5 per kind; 30 a minute per person (429 past that). */
+export const searchBrand = (base: string, q: string, signal?: AbortSignal) => request<SearchResultsDto>(`${base}/search?q=${enc(q)}`, { signal });
 
 /** The person's notifications in the current workspace: the /me routes read it from X-Workspace-Id. */
 const inWorkspace = (workspaceId: string) => ({ "X-Workspace-Id": workspaceId });

@@ -78,6 +78,14 @@ export function taskHref(pathname: string, search: string, id: string): string {
   return `${pathname}${s}`;
 }
 
+/** Where a post opens from the shell: the Overview's peek (keeping the Overview's other parameters when already there). */
+export function postHref(pathname: string, search: string, id: string): string {
+  return pathname === "/" ? `/${viewToSearch({ kind: "content", id }, search, "/")}` : `/?post=${encodeURIComponent(id)}`;
+}
+
+/** `href` stays on `pathname` (only its query changes): no page is left, so nothing needs asking before it. */
+export const samePage = (href: string, pathname: string) => href === pathname || href.startsWith(`${pathname}?`);
+
 /** One item, whatever run it shows: a replaced item remounts fresh, a new runId on the same agent doesn't. */
 export function peekKey(v: View): string {
   switch (v.kind) {

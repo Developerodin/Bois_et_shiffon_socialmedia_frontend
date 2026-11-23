@@ -7,8 +7,11 @@ import { AgentLog } from "@/components/agents/agent-log";
 import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { CreditsChip } from "@/components/shell/credits-chip";
 import { NotificationBell } from "@/components/shell/notification-bell";
+import { QuickCreate } from "@/components/shell/quick-create";
+import { SearchBox } from "@/components/shell/search-box";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { assistantDocks, navFor } from "@/lib/nav";
+import { brandBase } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,7 +24,7 @@ const LOGS_KEY = "ws.logsOpen";
 export const TOPBAR_SLOT_ID = "topbar-slot";
 
 /** 72 px bar: breadcrumb on the left, the Logs drawer toggle and (wherever the assistant isn't docked: below 1280 px, or a page that doesn't dock it) the assistant toggle on the right. */
-export function TopBar({ brandName, workspaceId, brandId, nav, agents, features }: Props) {
+export function TopBar({ brandName, workspaceId, brandId, nav, agents, features, perms }: Props) {
   const pathname = usePathname();
   const { title, brandScoped } = navFor(pathname);
   const { open: assistantOpen, setOpen: setAssistantOpen } = useAssistant();
@@ -65,6 +68,9 @@ export function TopBar({ brandName, workspaceId, brandId, nav, agents, features 
         </nav>
 
         <div className="flex shrink-0 items-center gap-1">
+          {/* Search and "+" work on the active business; the "+" offers only what the role may create. */}
+          {tasksOn && workspaceId && brandId && perms.includes("brand.read") && <SearchBox base={brandBase(workspaceId, brandId)} />}
+          {tasksOn && workspaceId && brandId && <QuickCreate base={brandBase(workspaceId, brandId)} perms={perms} />}
           {workspaceId && <CreditsChip workspaceId={workspaceId} />}
           {/* Notifications are per person across the workspace's businesses; the server lists only tasks they can see. */}
           {tasksOn && workspaceId && <NotificationBell workspaceId={workspaceId} brandId={brandId} />}
