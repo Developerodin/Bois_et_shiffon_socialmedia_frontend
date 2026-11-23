@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ListTodo } from "lucide-react";
@@ -51,11 +51,37 @@ function Pages({ base, query }: { base: string; query: string }) {
   const [cursor, setCursor] = useState<string | null | undefined>(undefined);
   const [loadingMore, setLoadingMore] = useState(false);
   const [moreError, setMoreError] = useState("");
+  // How many pages after the first are shown, and a counter that makes an older read of them stale.
+  const extraPages = useRef(0);
+  const gen = useRef(0);
   const refresh = useCallback(() => {
+    gen.current += 1;
+    extraPages.current = 0;
     setMore([]);
     setCursor(undefined);
     void reload();
   }, [reload]);
+  // The 60 s poll refreshes page 1 only: a task added there pushes its last row onto page 2, between page 1 and the
+  // page 2 already shown, so it would never show. Read the shown pages again from the fresh page 1 instead of dropping
+  // them (dropping would pull the rows out from under someone scrolled down).
+  // ponytail: one request per shown page each minute; fine for a few pages, a "rows up to here" query past that.
+  useEffect(() => {
+    const pages = extraPages.current;
+    if (!data || !pages) return;
+    const mine = ++gen.current;
+    void (async () => {
+      const rows: TaskDto[] = [];
+      let c = data.nextCursor;
+      for (let i = 0; i < pages && c; i++) {
+        const page = await tasksApi.page(base, query, c);
+        rows.push(...page.tasks);
+        c = page.nextCursor;
+      }
+      if (gen.current !== mine) return; // a refresh or "Show more" since: theirs wins
+      setMore(rows);
+      setCursor(c);
+    })().catch(() => {}); // keep what's shown; the next poll tries again
+  }, [data, base, query]);
   useTasksChanged(refresh);
   const taskHref = useTaskHref();
 
@@ -78,8 +104,11 @@ function Pages({ base, query }: { base: string; query: string }) {
     if (!next) return;
     setLoadingMore(true);
     setMoreError("");
+    const mine = ++gen.current;
     try {
       const page = await tasksApi.page(base, query, next);
+      if (gen.current !== mine) return; // the pages were read again meanwhile; this one may overlap them
+      extraPages.current += 1;
       setMore((m) => [...m, ...page.tasks]);
       setCursor(page.nextCursor);
     } catch (e) {
