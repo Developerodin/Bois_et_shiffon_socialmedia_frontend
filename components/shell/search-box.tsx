@@ -3,7 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Search } from "lucide-react";
-import type { SearchResultDto, SearchResultsDto } from "@/shared";
+import { SEARCH_MAX as MAX, SEARCH_MIN as MIN, type SearchResultDto, type SearchResultsDto } from "@/shared";
 import { okToDiscard } from "@/components/context/unsaved";
 import { ApiError, errorMessage } from "@/components/settings/api";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
@@ -20,8 +20,6 @@ const KINDS = [
   { key: "campaigns", label: "Campaigns" },
 ] as const;
 const DEBOUNCE_MS = 250;
-const MIN = 3;
-const MAX = 100;
 
 /** The results in kind order (tasks, projects, posts, products, campaigns), kinds with nothing left out. */
 export function groupResults(r: SearchResultsDto): { label: string; items: SearchResultDto[] }[] {

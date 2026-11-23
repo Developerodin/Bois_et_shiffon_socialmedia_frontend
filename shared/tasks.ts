@@ -6,6 +6,15 @@ export const TASK_PRIORITIES = ["LOW", "NORMAL", "HIGH", "URGENT"] as const;
 export const WORK_PROJECT_STATUSES = ["ACTIVE", "DONE", "ARCHIVED"] as const;
 export const WEBSITE_CHANGE_KINDS = ["PRODUCT_PAGE", "COLLECTION", "MENU", "HOMEPAGE", "LANDING_PAGE", "BUG", "CORRECTION", "OTHER"] as const;
 
+/** The task list's views (GET tasks `view=`); Done shows the last DONE_DAYS days. */
+export const TASK_VIEWS = ["mine", "approvals", "due-today", "overdue", "blocked", "open", "done"] as const;
+export type TaskView = (typeof TASK_VIEWS)[number];
+export const DONE_DAYS = 30;
+
+/** Top-bar search: shorter (trimmed) answers empty, since trigrams need 3; longer is a 400. */
+export const SEARCH_MIN = 3;
+export const SEARCH_MAX = 100;
+
 export const TASK_ACTIONS = ["start", "submitForReview", "approve", "requestChanges", "markDone", "block", "unblock", "checkedLive", "cancel", "reopen"] as const;
 export type TaskAction = (typeof TASK_ACTIONS)[number];
 
@@ -26,9 +35,10 @@ export type TaskRow = {
 
 export type ActorRole = { userId: string; isOwner: boolean; isReviewer: boolean; canManage: boolean; soleStaff: boolean; isBlockedOn: boolean };
 export type ActionInput = { reviewerId?: string; reason?: string; blockedOnId?: string; now: string };
-export type ActionResult = { ok: true; patch: Partial<TaskRow> & { status?: string } } | { ok: false; reason: string };
+/** `code`: the stable code the same refusal carries elsewhere (PATCH), so clients see one shape. */
+export type ActionResult = { ok: true; patch: Partial<TaskRow> & { status?: string } } | { ok: false; reason: string; code?: string };
 
-const no = (reason: string): ActionResult => ({ ok: false, reason });
+const no = (reason: string, code?: string): ActionResult => ({ ok: false, reason, ...(code ? { code } : {}) });
 const isOpen = (s: string) => (OPEN_TASK_STATUSES as readonly string[]).includes(s);
 const CLEAR_BLOCK = { blockedReason: null, blockedOnId: null } as const;
 
@@ -44,7 +54,7 @@ function run(task: TaskRow, action: TaskAction, actor: ActorRole, input: ActionI
       if (task.status !== "TODO" && task.status !== "IN_PROGRESS") return no("Only a task in progress can be sent for review.");
       const reviewerId = input.reviewerId ?? task.reviewerId;
       if (!reviewerId) return dry ? { ok: true, patch: { status: "IN_REVIEW" } } : no("Pick a reviewer.");
-      if (reviewerId === task.ownerId && !actor.soleStaff) return no("The reviewer can't be the owner.");
+      if (reviewerId === task.ownerId && !actor.soleStaff) return no("The reviewer can't be the owner.", "task.reviewerIsOwner");
       return { ok: true, patch: { status: "IN_REVIEW", reviewerId } };
     }
     case "approve":
@@ -57,6 +67,7 @@ function run(task: TaskRow, action: TaskAction, actor: ActorRole, input: ActionI
       if (!dry && !reason) return no("Say what needs to change.");
       return { ok: true, patch: { status: "IN_PROGRESS" } };
     case "markDone":
+      // clearFindings (server/seo/finding-tasks.ts) closes tasks with a raw UPDATE of these same fields: keep the two in step.
       if (!mine) return no("Only the owner or a manager can finish this task.");
       if (task.reviewerId) return no("A reviewed task is finished by the reviewer's approval.");
       if (task.status !== "TODO" && task.status !== "IN_PROGRESS") return no("Only an open task can be finished.");

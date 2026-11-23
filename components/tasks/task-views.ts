@@ -1,17 +1,19 @@
 /** The /tasks page's vocabulary and rules, kept free of React so they can be tested. */
-import type { TaskAction, TaskDto, TaskPersonDto } from "@/shared";
+import { DONE_DAYS, TASK_VIEWS, type TaskAction, type TaskDto, type TaskPersonDto, type TaskView } from "@/shared";
 import type { TasksChanged } from "@/lib/tasks-api";
 
-export const TASK_LIST_VIEWS = [
-  { value: "mine", label: "Mine" },
-  { value: "approvals", label: "Approvals" },
-  { value: "due-today", label: "Due today" },
-  { value: "overdue", label: "Overdue" },
-  { value: "blocked", label: "Blocked" },
-  { value: "open", label: "All open" },
-  { value: "done", label: "Done (30 days)" },
-] as const;
-export type TaskListView = (typeof TASK_LIST_VIEWS)[number]["value"];
+const VIEW_LABEL: Record<TaskView, string> = {
+  mine: "Mine",
+  approvals: "Approvals",
+  "due-today": "Due today",
+  overdue: "Overdue",
+  blocked: "Blocked",
+  open: "All open",
+  done: `Done (${DONE_DAYS} days)`,
+};
+/** The server's list views (shared TASK_VIEWS), in its order. */
+export const TASK_LIST_VIEWS = TASK_VIEWS.map((value) => ({ value, label: VIEW_LABEL[value] }));
+export type TaskListView = TaskView;
 
 /** Area tabs; the value is the lower-case `?area=` the nav links use ("" is All). */
 export const AREA_TABS = [

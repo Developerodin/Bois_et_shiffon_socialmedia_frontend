@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SearchX } from "lucide-react";
-import { TASK_AREAS, TASK_PRIORITIES, type TaskDetailDto, type TaskDto, type TaskPersonDto } from "@/shared";
+import { SEARCH_MAX, SEARCH_MIN, TASK_AREAS, TASK_PRIORITIES, type TaskDetailDto, type TaskDto, type TaskPersonDto } from "@/shared";
 import { okToDiscard, UnsavedGuardOff, useUnsavedGuard } from "@/components/context/unsaved";
 import { ApiError, errorMessage } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
@@ -101,6 +101,8 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
   const [peopleFailed, setPeopleFailed] = useState(false);
   // A client reviewer may not list the business's people (403): no person pickers for them.
   const [noPeople, setNoPeople] = useState(false);
+  // A reviewer picked in the unsaved fields, so "Send for review" starts from it (TaskFields reports it; a new task resets it).
+  const [draftReviewerId, setDraftReviewerId] = useState<string | undefined>();
   const onLoadedRef = useRef(onLoaded);
   onLoadedRef.current = onLoaded;
 
@@ -168,9 +170,9 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
           <span className="font-medium">Waiting on{task.blockedOn ? ` ${ownerLabel(task.blockedOn)}` : ""}:</span> {task.blockedReason}
         </p>
       ) : null}
-      <TaskActions base={base} task={task} people={people} noPeople={noPeople} canManage={canManage} onChanged={show} hide={website ? ["checkedLive"] : []} />
+      <TaskActions base={base} task={task} people={people} noPeople={noPeople} canManage={canManage} draftReviewerId={draftReviewerId} onChanged={show} hide={website ? ["checkedLive"] : []} />
       {peopleFailed ? <p className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. Close and open the task to try again.</p> : null}
-      {canManage ? <TaskFields key={task.id} base={base} task={task} people={people} onSaved={show} /> : <TaskFacts task={task} />}
+      {canManage ? <TaskFields key={task.id} base={base} task={task} people={people} onSaved={show} onDraftReviewer={setDraftReviewerId} /> : <TaskFacts task={task} />}
       {website ? <WebsiteChecks base={base} task={task} people={people} canEditPhotos={canEditPhotos} onChanged={show} /> : null}
       <TaskChecklist base={base} task={task} canEdit={mine} />
       <TaskAttachments base={base} task={task} roles={website ? ["OTHER"] : ["BEFORE", "AFTER", "OTHER"]} canEdit={canEditPhotos} />
@@ -217,8 +219,22 @@ function PostLink({ post }: { post: { id: string; title: string } }) {
 }
 
 /** The editable fields (tasks.manage). Edits are kept per field, so a reload of the task underneath keeps what was typed. */
-function TaskFields({ base, task, people, onSaved }: { base: string; task: TaskDetailDto; people: TaskPersonDto[] | null; onSaved: (t: TaskDetailDto) => void }) {
+function TaskFields({
+  base,
+  task,
+  people,
+  onSaved,
+  onDraftReviewer,
+}: {
+  base: string;
+  task: TaskDetailDto;
+  people: TaskPersonDto[] | null;
+  onSaved: (t: TaskDetailDto) => void;
+  /** The reviewer as edited here and not yet saved (undefined when untouched, saved or on a new task). */
+  onDraftReviewer: (id: string | undefined) => void;
+}) {
   const [edits, setEdits] = useState<Partial<TaskDraft>>({});
+  useEffect(() => onDraftReviewer(edits.reviewerId), [edits.reviewerId, onDraftReviewer]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const ids = { title: useId(), description: useId(), priority: useId(), due: useId(), owner: useId(), reviewer: useId(), project: useId(), why: useId() };
@@ -344,11 +360,9 @@ function TaskFields({ base, task, people, onSaved }: { base: string; task: TaskD
   );
 }
 
-const POST_SEARCH_MIN = 3;
-
 /**
- * "Linked post": the post this task is about, picked from the top-bar search's post results (3 letters or more), or
- * removed. Saved with the task's other fields.
+ * "Linked post": the post this task is about, picked from the search's posts (3 letters or more; `kind: "post"` reads
+ * only posts, on its own limit, not the top bar's), or removed. Saved with the task's other fields.
  */
 function LinkedPost({ base, value, current, onChange }: { base: string; value: string; current: { id: string; title: string } | null; onChange: (id: string) => void }) {
   const [q, setQ] = useState("");
@@ -358,10 +372,10 @@ function LinkedPost({ base, value, current, onChange }: { base: string; value: s
   const inputId = useId();
   const term = q.trim();
   useEffect(() => {
-    if (term.length < POST_SEARCH_MIN) return setFound(null);
+    if (term.length < SEARCH_MIN) return setFound(null);
     const ctrl = new AbortController();
     const t = setTimeout(() => {
-      searchBrand(base, term.slice(0, 100), ctrl.signal).then(
+      searchBrand(base, term.slice(0, SEARCH_MAX), ctrl.signal, "post").then(
         (r) => {
           setFound(r.posts);
           setSearchError("");
@@ -389,7 +403,7 @@ function LinkedPost({ base, value, current, onChange }: { base: string; value: s
           </Button>
         ) : null}
       </div>
-      <Input id={inputId} type="search" value={q} maxLength={100} placeholder="Find a post: type at least 3 letters" onChange={(e) => setQ(e.target.value)} />
+      <Input id={inputId} type="search" value={q} maxLength={SEARCH_MAX} placeholder="Find a post: type at least 3 letters" onChange={(e) => setQ(e.target.value)} />
       {searchError ? <p className="text-xs text-muted-foreground">{searchError}</p> : null}
       {found ? (
         found.length ? (

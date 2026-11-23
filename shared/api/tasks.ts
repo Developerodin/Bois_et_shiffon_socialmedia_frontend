@@ -80,6 +80,8 @@ export type WorkProjectDetailDto = WorkProjectDto & {
 export type NotificationDto = {
   id: string;
   kind: string;
+  /** Unread notices come grouped by kind and business: how many this row stands for (1 for a single one). */
+  count: number;
   /** The task's brand: opening it may switch brand. */
   brandId: string;
   taskId: string | null;

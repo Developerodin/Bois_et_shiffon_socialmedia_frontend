@@ -35,9 +35,28 @@ export function BellBadge({ count }: { count: number }) {
   );
 }
 
-/** What happened, in words. The task's title shows beside it as text (never as HTML). */
+/** What happened, in words. The task's title shows beside it as text (never as HTML). A group says how many. */
 export function notificationText(n: NotificationDto): string {
   const who = n.actor ? n.actor.name : "Someone";
+  const c = n.count;
+  if (c > 1) {
+    switch (n.kind) {
+      case "TASK_ASSIGNED":
+        return `${c} tasks assigned to you`;
+      case "REVIEW_REQUESTED":
+        return `${c} tasks waiting for your review`;
+      case "TASK_OVERDUE":
+        return `${c} of your tasks are overdue`;
+      case "TASK_RECHECK":
+        return `${c} tasks to recheck`;
+      case "TASK_APPROVED":
+        return `${c} of your tasks were approved`;
+      case "TASK_CHANGES_REQUESTED":
+        return `Changes asked for on ${c} of your tasks`;
+      default:
+        return `${c} task updates`;
+    }
+  }
   switch (n.kind) {
     case "TASK_ASSIGNED":
       return `${who} assigned you a task`;
@@ -47,10 +66,17 @@ export function notificationText(n: NotificationDto): string {
       return "A task of yours is overdue";
     case "TASK_RECHECK":
       return "Time to recheck a task";
+    case "TASK_APPROVED":
+      return `${who} approved your task`;
+    case "TASK_CHANGES_REQUESTED":
+      return `${who} asked for changes to your task`;
     default:
       return "A task changed";
   }
 }
+
+/** The task list a group of notices opens: review requests go to Approvals, the rest to My tasks (overdue to Overdue). */
+export const groupView = (kind: string) => (kind === "REVIEW_REQUESTED" ? "approvals" : kind === "TASK_OVERDUE" ? "overdue" : "mine");
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
@@ -115,25 +141,29 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
   };
 
   const openOne = async (n: NotificationDto) => {
+    const group = n.count > 1;
     if (!n.readAt) {
       // Fire and forget: opening the task matters more than the badge, which the next poll corrects.
-      void notificationsApi.read(workspaceId, { ids: [n.id] }).then(refresh, () => undefined);
+      const which = group ? { group: { kind: n.kind, brandId: n.brandId, upTo: n.createdAt } } : { ids: [n.id] };
+      void notificationsApi.read(workspaceId, which).then(refresh, () => undefined);
       setList((l) => l?.map((x) => (x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x)) ?? l);
     }
     if (!n.taskId) return;
+    // A group opens the list it is about; a single notice opens its task.
+    const target = group ? `/tasks?view=${groupView(n.kind)}` : `/tasks?task=${encodeURIComponent(n.taskId)}`;
     if (n.brandId !== brandId) {
-      // Another business: the same guard the business switcher uses, then its /tasks page opens the task.
+      // Another business: the same guard the business switcher uses, then its /tasks page opens the task or list.
       if (!okToDiscard()) return;
       try {
         await setActiveContext({ workspaceId, brandId: n.brandId });
       } catch {
         return toast({ title: "Couldn't switch business", detail: "Try again.", tone: "warning" });
       }
-      router.push(`/tasks?task=${encodeURIComponent(n.taskId)}`);
+      router.push(target);
       router.refresh();
       return;
     }
-    const href = taskHref(pathname, window.location.search, n.taskId);
+    const href = group ? target : taskHref(pathname, window.location.search, n.taskId);
     // Leaving this page for /tasks: ask about unsaved work here (a page with a peek asks itself when its URL changes).
     if (!samePage(href, pathname) && !okToDiscard()) return;
     router.push(href, { scroll: false });
@@ -189,7 +219,7 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
                     {notificationText(n)}
                   </span>
                 </span>
-                {n.taskTitle ? <span className="line-clamp-2 text-sm text-muted-foreground">{n.taskTitle}</span> : null}
+                {n.taskTitle && n.count === 1 ? <span className="line-clamp-2 text-sm text-muted-foreground">{n.taskTitle}</span> : null}
                 <span className="text-xs text-muted-foreground">{when(n.createdAt)}</span>
               </DropdownMenuItem>
             ))}

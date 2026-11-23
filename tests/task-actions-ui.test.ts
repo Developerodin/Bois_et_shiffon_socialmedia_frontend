@@ -61,6 +61,22 @@ describe("task actions", () => {
   });
 });
 
+describe("action forms", () => {
+  it("a reviewer's note or reason goes to the client only when shared", async () => {
+    const { formBody } = await import("@/components/tasks/task-actions");
+    expect(formBody("approve", { text: " ok ", personId: "", share: false })).toEqual({ action: "approve", note: "ok" });
+    expect(formBody("approve", { text: "", personId: "", share: true })).toEqual({ action: "approve", shareWithClient: true });
+    expect(formBody("requestChanges", { text: "Fix it", personId: "", share: true })).toEqual({ action: "requestChanges", reason: "Fix it", shareWithClient: true });
+    expect(formBody("submitForReview", { text: "", personId: "u2", share: true })).toEqual({ action: "submitForReview", reviewerId: "u2" });
+    expect(formBody("block", { text: "Photos", personId: "u3", share: true })).toEqual({ action: "block", reason: "Photos", blockedOnId: "u3" });
+  });
+  it("the list views are the server's, Done labelled with its days", async () => {
+    const { TASK_LIST_VIEWS } = await import("@/components/tasks/task-views");
+    expect(TASK_LIST_VIEWS.map((v) => v.value)).toEqual(["mine", "approvals", "due-today", "overdue", "blocked", "open", "done"]);
+    expect(TASK_LIST_VIEWS.at(-1)!.label).toBe("Done (30 days)");
+  });
+});
+
 describe("task edits", () => {
   it("sends only the fields that changed", () => {
     const t = task({ title: "A", dueOn: "2026-11-30", areas: ["WEBSITE"] });

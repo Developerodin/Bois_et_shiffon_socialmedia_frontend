@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { tasksApi, type TaskActionBody } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
+import { shareToggleShown } from "@/components/tasks/task-comments";
 import { recheckDay } from "@/components/tasks/task-views";
 
 export const ACTION_LABEL: Record<TaskAction, string> = {
@@ -62,24 +63,47 @@ export function PersonSelect(p: {
 }
 
 /**
+ * What a form's send button posts. A staff reviewer's note or reason stays with the team unless `share` (the server
+ * makes it internal otherwise); `share` is only offered where shareToggleShown says so.
+ */
+export function formBody(form: TaskAction, f: { text: string; personId: string; share: boolean }): TaskActionBody {
+  const text = f.text.trim();
+  const shared = f.share ? { shareWithClient: true } : {};
+  if (form === "submitForReview") return { action: form, reviewerId: f.personId };
+  if (form === "approve") return { action: form, ...(text ? { note: text } : {}), ...shared };
+  if (form === "requestChanges") return { action: form, reason: text, ...shared };
+  return { action: "block", reason: text, ...(f.personId ? { blockedOnId: f.personId } : {}) };
+}
+
+/**
  * The status buttons this person may press, straight from `task.actions` (the server's answer; nothing is decided here).
  * A refusal comes back as the server's message and shows as text. tasksApi announces every success (`tasks:changed`).
  * `noPeople`: the viewer may not list the business's people (a client reviewer), so no person pickers show.
  * Marking an SEO task done offers "Check again in 4 weeks" (on by default) to a manager: the recheck day is a PATCH,
  * which needs tasks.manage, sent after the action succeeds.
+ * `draftReviewerId`: a reviewer picked in the task's unsaved fields, which "Send for review" starts from.
  */
-export function TaskActions(props: { base: string; task: TaskDetailDto; people: TaskPersonDto[] | null; onChanged: (t: TaskDetailDto) => void; hide?: TaskAction[]; noPeople?: boolean; canManage?: boolean }) {
-  const { base, task, people, onChanged, hide = [], noPeople = false, canManage = false } = props;
+export function TaskActions(props: {
+  base: string;
+  task: TaskDetailDto;
+  people: TaskPersonDto[] | null;
+  onChanged: (t: TaskDetailDto) => void;
+  hide?: TaskAction[];
+  noPeople?: boolean;
+  canManage?: boolean;
+  draftReviewerId?: string;
+}) {
+  const { base, task, people, onChanged, hide = [], noPeople = false, canManage = false, draftReviewerId } = props;
   const [form, setForm] = useState<TaskAction | null>(null);
   const [text, setText] = useState("");
   const [personId, setPersonId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [recheck, setRecheck] = useState(true);
+  const [share, setShare] = useState(false);
   const textId = useId();
   const personSelectId = useId();
   const whyId = useId();
-  const readsId = useId();
   const shown = TASK_ACTIONS.filter((a) => task.actions.includes(a) && !hide.includes(a));
   if (!shown.length && !error) return null;
   const offerRecheck = canManage && shown.includes("markDone") && task.areas.includes("SEO");
@@ -111,18 +135,17 @@ export function TaskActions(props: { base: string; task: TaskDetailDto; people: 
     if (!WITH_FORM.includes(a)) return void run({ action: a });
     setForm(a);
     setText("");
-    setPersonId(a === "submitForReview" && task.reviewer && !task.reviewer.gone ? task.reviewer.id : "");
+    setShare(false);
+    setPersonId(a === "submitForReview" ? draftReviewerId || (task.reviewer && !task.reviewer.gone ? task.reviewer.id : "") : "");
   };
 
   const trimmed = text.trim();
   // What the form's send button is waiting for, shown as text beside it.
   const missing = form === "submitForReview" && !personId ? "Pick a reviewer first." : (form === "requestChanges" || form === "block") && !trimmed ? (form === "block" ? "Say what it is waiting on." : "Say what needs to change.") : "";
+  const offerShare = (form === "approve" || form === "requestChanges") && shareToggleShown({ staff: !task.viewerIsClient, clientVisible: task.clientVisible });
   const send = () => {
     if (!form || missing) return;
-    if (form === "submitForReview") return void run({ action: form, reviewerId: personId });
-    if (form === "approve") return void run({ action: form, ...(trimmed ? { note: trimmed } : {}) });
-    if (form === "requestChanges") return void run({ action: form, reason: trimmed });
-    void run({ action: "block", reason: trimmed, ...(personId ? { blockedOnId: personId } : {}) });
+    void run(formBody(form, { text, personId, share: offerShare && share }));
   };
 
   return (
@@ -164,21 +187,14 @@ export function TaskActions(props: { base: string; task: TaskDetailDto; people: 
               <label htmlFor={textId} className="text-sm font-medium">
                 {form === "approve" ? "Note (optional)" : form === "block" ? "What is it waiting on?" : "What needs to change?"}
               </label>
-              {/* The approval note and the reason for changes are kept as comments the client can see. */}
-              {task.clientVisible && (form === "approve" || form === "requestChanges") ? (
-                <p id={readsId} className="text-xs text-muted-foreground">
-                  The client can read this.
-                </p>
+              <Textarea id={textId} value={text} maxLength={4_000} disabled={busy} onChange={(e) => setText(e.target.value)} className="min-h-20" />
+              {/* Kept as a comment: only the team sees it unless shared, like any staff comment. */}
+              {offerShare ? (
+                <label className="flex items-center gap-2 text-sm pointer-coarse:min-h-11">
+                  <input type="checkbox" className="size-4 accent-primary" checked={share} disabled={busy} onChange={(e) => setShare(e.target.checked)} />
+                  Share with client
+                </label>
               ) : null}
-              <Textarea
-                id={textId}
-                value={text}
-                maxLength={4_000}
-                disabled={busy}
-                aria-describedby={task.clientVisible && (form === "approve" || form === "requestChanges") ? readsId : undefined}
-                onChange={(e) => setText(e.target.value)}
-                className="min-h-20"
-              />
             </>
           ) : null}
           <div className="flex flex-wrap items-center justify-end gap-2">

@@ -11,7 +11,8 @@ export const brandBase = (w: string, b: string) => `/api/v1/workspaces/${enc(w)}
 export type TaskPage = { tasks: TaskDto[]; posts?: PostRow[]; nextCursor: string | null };
 
 /** POST tasks/:id. `reason` goes with requestChanges and block, `note` with approve. */
-export type TaskActionBody = { action: TaskAction; reviewerId?: string; reason?: string; note?: string; blockedOnId?: string };
+/** `shareWithClient`: a staff reviewer's note or reason reaches the client only with it. */
+export type TaskActionBody = { action: TaskAction; reviewerId?: string; reason?: string; note?: string; blockedOnId?: string; shareWithClient?: boolean };
 
 /** Fired after a task write here succeeds, so other lists of tasks on the page (and the bell) read again. */
 export const TASKS_CHANGED = "tasks:changed";
@@ -106,18 +107,22 @@ export const tasksApi = {
     ),
 };
 
-/** Top-bar search (brand.read): 3–100 characters, 5 per kind; 30 a minute per person (429 past that). */
-export const searchBrand = (base: string, q: string, signal?: AbortSignal) => request<SearchResultsDto>(`${base}/search?q=${enc(q)}`, { signal });
+/**
+ * Top-bar search (brand.read): 3–100 characters, 5 per kind; 30 a minute per person (429 past that). `kind: "post"`
+ * reads posts only, on its own 30 a minute (the task panel's post picker).
+ */
+export const searchBrand = (base: string, q: string, signal?: AbortSignal, kind?: "post") =>
+  request<SearchResultsDto>(`${base}/search?q=${enc(q)}${kind ? `&kind=${kind}` : ""}`, { signal });
 
 /** The person's notifications in the current workspace: the /me routes read it from X-Workspace-Id. */
 const inWorkspace = (workspaceId: string) => ({ "X-Workspace-Id": workspaceId });
 export const notificationsApi = {
-  /** Newest first, 20 a page. */
+  /** Unread grouped by kind and business first (each with its count), then read ones newest first, 20 a page. */
   page: (workspaceId: string, cursor?: string) =>
     request<NotificationPageDto>(`/api/v1/me/notifications${cursor ? `?cursor=${enc(cursor)}` : ""}`, { headers: inWorkspace(workspaceId) }),
   /** Unread, counted up to 100. */
   count: (workspaceId: string) => request<{ count: number }>("/api/v1/me/notifications/count", { headers: inWorkspace(workspaceId) }).then((d) => d.count),
-  read: (workspaceId: string, which: { ids: string[] } | { all: true }) =>
+  read: (workspaceId: string, which: { ids: string[] } | { all: true } | { group: { kind: string; brandId: string; upTo: string } }) =>
     request<{ updated: number }>("/api/v1/me/notifications/read", { method: "POST", body: JSON.stringify(which), headers: inWorkspace(workspaceId) }),
 };
 

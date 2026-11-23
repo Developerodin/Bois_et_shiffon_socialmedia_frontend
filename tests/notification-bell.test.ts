@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { BellBadge, badgeLabel, notificationText } from "@/components/shell/notification-bell";
+import { BellBadge, badgeLabel, groupView, notificationText } from "@/components/shell/notification-bell";
 import { taskHref } from "@/lib/workspace-view";
 
 describe("notification bell", () => {
@@ -15,11 +15,18 @@ describe("notification bell", () => {
   });
 
   it("says what happened as plain words", () => {
-    const n = { id: "n1", brandId: "b1", taskId: "t1", taskTitle: "<b>Fix</b>", actor: { id: "u1", name: "Ana", gone: false, client: false }, readAt: null, createdAt: "2026-11-23T10:00:00.000Z" };
+    const n = { id: "n1", count: 1, brandId: "b1", taskId: "t1", taskTitle: "<b>Fix</b>", actor: { id: "u1", name: "Ana", gone: false, client: false }, readAt: null, createdAt: "2026-11-23T10:00:00.000Z" };
     expect(notificationText({ ...n, kind: "TASK_ASSIGNED" })).toBe("Ana assigned you a task");
     expect(notificationText({ ...n, kind: "REVIEW_REQUESTED" })).toBe("Ana asked you to review a task");
     expect(notificationText({ ...n, kind: "TASK_OVERDUE" })).toBe("A task of yours is overdue");
     expect(notificationText({ ...n, kind: "TASK_RECHECK", actor: null })).toBe("Time to recheck a task");
+    expect(notificationText({ ...n, kind: "TASK_APPROVED" })).toBe("Ana approved your task");
+    expect(notificationText({ ...n, kind: "TASK_CHANGES_REQUESTED" })).toBe("Ana asked for changes to your task");
+    expect(notificationText({ ...n, kind: "TASK_OVERDUE", count: 3 })).toBe("3 of your tasks are overdue");
+    expect(notificationText({ ...n, kind: "REVIEW_REQUESTED", count: 2 })).toBe("2 tasks waiting for your review");
+    expect(groupView("REVIEW_REQUESTED")).toBe("approvals");
+    expect(groupView("TASK_OVERDUE")).toBe("overdue");
+    expect(groupView("TASK_ASSIGNED")).toBe("mine");
   });
 });
 
