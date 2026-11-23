@@ -35,7 +35,7 @@ export function useTasksChanged(reload: () => void) {
 }
 
 /** The report a task came from ("SEO" or "GEO"), as a small tag; nothing for a task made by hand. */
-export function FindingTag({ kind }: { kind: string | null }) {
+export function FindingTag({ kind }: { kind: TaskDto["findingKind"] }) {
   if (!kind) return null;
   return <span className="shrink-0 rounded-[8px] bg-accent px-2 text-xs text-accent-foreground">{kind}</span>;
 }

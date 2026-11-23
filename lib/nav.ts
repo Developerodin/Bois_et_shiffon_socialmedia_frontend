@@ -37,7 +37,7 @@ export const NAV: readonly NavEntry[] = [
   // Its link is on the tasks page; the sidebar highlights Beat's slot on it.
   { id: "projects", label: "Projects", href: "/projects", group: "page", feature: "tasks", perm: TASKS_READ },
   { id: "website", label: "Website", href: "/tasks?area=website", group: "main", feature: "tasks", perm: TASKS_READ },
-  { id: "seo", label: "Performance", href: "/tasks?area=seo", group: "main", feature: "tasks", perm: TASKS_READ },
+  { id: "seo", label: "Performance", href: "/tasks?area=seo&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
 
   { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },
   { id: "photoshoot", label: "Photoshoot", href: "/photoshoot", group: "create", feature: "photoshoot" },

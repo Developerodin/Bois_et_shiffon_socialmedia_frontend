@@ -8,7 +8,7 @@ const AGENTS = ["Spark", "Beat", "Wave", "Echo", "Pulse", "Hum", "Surge", "Drift
 // lib/nav.ts: the four placeholder agents, plus Echo (no web inbox yet).
 const SOON = ["Spark", "Beat", "Echo", "Pulse", "Hum"];
 const CONNECT_BUTTON = /^(re)?connect\b|^disconnect\b/i;
-const MORE = ["Calendar", "Performance", "Agent log", "Settings"];
+const MORE = ["Calendar", "SEO & GEO reports", "Agent log", "Settings"];
 
 const sidebar = (page: Page) => page.getByRole("navigation", { name: "Workspace" });
 /** A sidebar row by its label; agent rows also read their "Soon" tag and role. */
