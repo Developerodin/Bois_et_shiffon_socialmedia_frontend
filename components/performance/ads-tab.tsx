@@ -42,6 +42,9 @@ function Totals({ now, prev }: { now: AdsTotals; prev: AdsTotals | undefined }) 
  * otherwise. `sources`: the META_ADS sources from PerformanceTabs' data-sources load. `canManage` (integrations.manage):
  * with no ad account chosen yet, pick one of the connected Meta ad accounts; `onSourceChanged` reloads the sources.
  */
+const DAY = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
+
 export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; sources: DataSourceDto[]; canManage: boolean; onSourceChanged: () => void }) {
   const base = brandApi(workspaceId, brandId);
   const { from, to } = days;
@@ -88,7 +91,7 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
       <PageSection
         id="ads"
         title="Meta Ads"
-        description={currencies ? `In the ad account's currency: ${currencies}. Before = ${summary.previousRange.from} to ${summary.previousRange.to}.` : undefined}
+        description={currencies ? `In the ad account's currency: ${currencies}. Before = ${dayLabel(summary.previousRange.from)} to ${dayLabel(summary.previousRange.to)}.` : undefined}
         actions={empty ? undefined : <ExportCsvButton url={`${base}/ads/export?format=xlsx&${range}`} label="Export Excel" filename={`ads-${from}-${to}.xlsx`} />}
         className="flex flex-col gap-4"
       >
