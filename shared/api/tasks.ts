@@ -72,3 +72,12 @@ export type SearchResultDto = {
   id: string;
   title: string;
 };
+
+/** One checklist line of a task; done when `doneAt` is set. */
+export type TaskChecklistItemDto = { id: string; text: string; position: number; doneAt: string | null; doneById: string | null };
+
+/** A comment as the viewer may read it (a client never gets `internal` ones). `author` is null for SYSTEM comments. */
+export type TaskCommentDto = { id: string; kind: string; body: string; author: TaskPersonDto | null; byClient: boolean; internal: boolean; createdAt: string };
+
+/** A brand photo on a task: a before/after screenshot or other. */
+export type TaskAttachmentDto = { id: string; mediaUploadId: string; role: string; createdById: string; createdAt: string };
