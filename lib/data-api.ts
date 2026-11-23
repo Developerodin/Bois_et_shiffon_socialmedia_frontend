@@ -1,20 +1,27 @@
-// The Performance data tabs' routes and DTOs.
+// The Performance data tabs' routes, DTOs and shared helpers.
 // Mirror of server shared/data-sources.ts (and shared/api/search.ts, shared/api/sales.ts) — replace with the synced type at merge.
 
+import { useEffect } from "react";
+import { brandBase } from "@/lib/tasks-api";
+
 export type DataSourceKind = "SEARCH_CONSOLE" | "POST_METRICS" | "SHOPIFY_ORDERS" | "META_ADS";
-export type SyncReason = "reconnect" | "permission" | "partial" | "failed" | "rate-limited" | null;
+/** Why the last sync didn't fully succeed. */
+export type DataSyncReason = "reconnect" | "permission" | "partial" | "failed" | "rate-limited";
+/** `okAt`: the last successful sync ("Updated …"); `error`: the server's fixed text for `reason`. */
+export type DataSyncResult = { at: string; okAt: string | null; reason: DataSyncReason | null; count: number; error: string | null };
 export type DataSourceDto = {
+  id: string;
   kind: DataSourceKind;
-  /** Site URL or shop domain; only for people with integrations.manage. */
-  label?: string;
+  /** Site URL, shop domain or ad account name; only for people with integrations.manage. */
+  label?: string | null;
   status: "ACTIVE" | "ERROR" | "OFF";
-  /** `okAt`: the last successful sync ("Updated …"). */
-  lastResult: { at: string; okAt?: string | null; reason: SyncReason; count?: number; error?: string | null } | null;
+  lastResult: DataSyncResult | null;
+  /** "YYYY-MM-DD", the last provider day held contiguously. */
   syncedThrough: string | null;
-  /** The zone the provider's days are in when it isn't the brand's (Search Console: Pacific time). */
+  /** The zone the provider's days are in when it says (Search Console: Pacific; Meta Ads: the account's). */
   reportsInZone: string | null;
 };
-/** GET data-sources. `timeZone`: the brand's zone, for the date presets (the browser's when absent). */
+/** GET data-sources. `timeZone`: the brand's zone for the date presets, if the server sends it (else the browser's). */
 export type DataSourcesResponse = { sources: DataSourceDto[]; timeZone?: string | null };
 
 /** `position` = positionSum / impressions, null with no impressions; `ctr` 0–1. */
@@ -29,7 +36,7 @@ export type SalesTotals = { orders: number; gross: string; discounts: string; ne
 export type SalesCurrency = { currency: string; totals: SalesTotals; previous: SalesTotals; days: (SalesTotals & { day: string })[] };
 export type SalesSummary = { currencies: SalesCurrency[] };
 
-/** URL slugs of the kinds, as the PUT routes name them (data-sources/search-console, …/shopify-orders). */
+/** URL slugs of the kinds (data-sources/:kind/sync, PUT data-sources/search-console, …). */
 export const KIND_SLUG: Record<DataSourceKind, string> = {
   SEARCH_CONSOLE: "search-console",
   POST_METRICS: "post-metrics",
@@ -37,8 +44,20 @@ export const KIND_SLUG: Record<DataSourceKind, string> = {
   META_ADS: "meta-ads",
 };
 
+/** The brand's API root the data routes hang off. */
+export const brandApi = brandBase;
+export const rangeQuery = (from: string, to: string) => `from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+
+/** Data screens don't poll: they load once and again when the window gets focus back. */
+export function useReloadOnFocus(reload: () => void) {
+  useEffect(() => {
+    window.addEventListener("focus", reload);
+    return () => window.removeEventListener("focus", reload);
+  }, [reload]);
+}
+
 /** What a failed or stopped sync means and what to do, keyed by the server's fixed reason. */
-export const REASON_TEXT: Record<Exclude<SyncReason, null>, string> = {
+export const REASON_TEXT: Record<DataSyncReason, string> = {
   reconnect: "The connection needs signing in again. Reconnect it in Connections.",
   permission: "The account didn't allow reading these numbers. Reconnect it and allow access.",
   partial: "Some days are still loading.",
@@ -88,8 +107,8 @@ export function withRange(href: string, r: DateRange): string {
 }
 
 /** "+12%" / "−3%" against the previous period; null when there is nothing to compare with. */
-export function change(now: number, before: number): string | null {
-  if (!before) return null;
-  const p = Math.round(((now - before) / before) * 100);
+export function change(now: number | null | undefined, before: number | null | undefined): string | null {
+  if (now == null || before == null || before === 0) return null;
+  const p = Math.round(((now - before) / Math.abs(before)) * 100);
   return `${p > 0 ? "+" : p < 0 ? "−" : ""}${Math.abs(p)}%`;
 }

@@ -3,15 +3,14 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { Table } from "@/components/admin/table";
-import { Stat, useFocusReload } from "@/components/data/shared";
+import { Stat } from "@/components/data/shared";
 import { SyncedAt } from "@/components/data/synced-at";
 import { connectionsUrl, errorMessage, request, type Connection } from "@/components/settings/api";
 import { ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
-import { brandBase } from "@/lib/tasks-api";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
-import { change, KIND_SLUG, type DataSourceDto, type DateRange, type GoogleSite, type SearchPages, type SearchSummary, type SearchTotals } from "@/lib/data-api";
+import { brandApi, change, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type GoogleSite, type SearchPages, type SearchSummary, type SearchTotals } from "@/lib/data-api";
 
 const num = (n: number) => n.toLocaleString();
 const pct = (ctr: number) => `${(ctr * 100).toFixed(1)}%`;
@@ -25,14 +24,14 @@ const query = (r: DateRange) => `from=${r.from}&to=${r.to}`;
  * `source` undefined = no site picked yet. `canManage` (integrations.manage) gets the site picker.
  */
 export function SearchTab({ workspaceId, brandId, range, source, canManage, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; onSourceChanged: () => void }) {
-  const base = brandBase(workspaceId, brandId);
+  const base = brandApi(workspaceId, brandId);
   const [picking, setPicking] = useState(false);
 
   if (!source || picking) {
     return (
       <PageSection id="search-site" title="Search Console" description="Clicks and positions from Google Search, for one site.">
         {canManage ? (
-          <SitePicker workspaceId={workspaceId} brandId={brandId} current={source?.label} onSaved={() => { setPicking(false); onSourceChanged(); }} onCancel={source ? () => setPicking(false) : undefined} />
+          <SitePicker workspaceId={workspaceId} brandId={brandId} current={source?.label ?? undefined} onSaved={() => { setPicking(false); onSourceChanged(); }} onCancel={source ? () => setPicking(false) : undefined} />
         ) : (
           <p className="text-sm text-muted-foreground">No site picked yet. Ask a workspace owner to pick the brand&apos;s site.</p>
         )}
@@ -49,7 +48,7 @@ function SearchNumbers({ base, range, source, onChangeSite }: { base: string; ra
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
-  useFocusReload(reload);
+  useReloadOnFocus(reload);
 
   const header = (
     <div className="flex flex-col gap-1">
@@ -160,7 +159,7 @@ function TopPages({ base, range, first }: { base: string; range: DateRange; firs
 
 /** Owners pick the site from the Google account's verified sites; saving starts a 90-day backfill on the server. */
 function SitePicker({ workspaceId, brandId, current, onSaved, onCancel }: { workspaceId: string; brandId: string; current?: string; onSaved: () => void; onCancel?: () => void }) {
-  const base = brandBase(workspaceId, brandId);
+  const base = brandApi(workspaceId, brandId);
   const fetcher = useCallback(async () => {
     const { connections } = await request<{ connections: Connection[] }>(connectionsUrl(workspaceId, brandId));
     const google = connections.find((c) => c.provider === "GOOGLE" && c.status === "ACTIVE");

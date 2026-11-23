@@ -1,31 +1,19 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import Link from "next/link";
+import { useCallback } from "react";
 import { BarChart3 } from "lucide-react";
+import { SyncedAt } from "@/components/data/synced-at";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CHANNEL_LABEL } from "@/lib/post-labels";
-import { brandBase } from "@/lib/tasks-api";
-import { dayDate, timeAgo } from "@/lib/time";
+import { brandApi, KIND_SLUG, rangeQuery, useReloadOnFocus, type DataSourceDto } from "@/lib/data-api";
+import { dayDate } from "@/lib/time";
 
 // ---- mirror of server DTO — replace with synced type at merge ------------------------------------------------------
-// shared/data-sources.ts (GET data-sources) and shared/api/insights.ts (GET insights/posts).
-
-type DataSourceKind = "SEARCH_CONSOLE" | "POST_METRICS" | "SHOPIFY_ORDERS" | "META_ADS";
-type DataSyncReason = "reconnect" | "permission" | "partial" | "failed" | "rate-limited";
-export type DataSourceDto = {
-  id: string;
-  kind: DataSourceKind;
-  label?: string | null;
-  status: "ACTIVE" | "ERROR" | "OFF";
-  lastResult: { at: string; okAt: string | null; reason: DataSyncReason | null; count: number; error: string | null } | null;
-  syncedThrough: string | null;
-  reportsInZone: string | null;
-};
+// shared/api/insights.ts (GET insights/posts). The data-source DTO and helpers are in lib/data-api.ts.
 
 type PostMetricsDto = {
   views: number | null;
@@ -50,54 +38,6 @@ type PostWithMetricsDto = {
   final: boolean;
 };
 type PostsInsightsDto = { posts: PostWithMetricsDto[] };
-
-// ---- shared with ads-tab (move next to lib/data-api.ts at merge) ---------------------------------------------------
-
-export const brandApi = brandBase;
-export const rangeQuery = (from: string, to: string) => `from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
-
-/** Data screens don't poll: they load once and again when the window gets focus. */
-export function useReloadOnFocus(reload: () => void) {
-  useEffect(() => {
-    window.addEventListener("focus", reload);
-    return () => window.removeEventListener("focus", reload);
-  }, [reload]);
-}
-
-/**
- * A source's sync state above its numbers: what to do when it needs reconnecting or lacks a permission, the fixed
- * error text otherwise, and when it last synced. Nothing while it's healthy and has never synced.
- */
-export function SourceNotice({ source, provider }: { source: DataSourceDto; provider: string }) {
-  const last = source.lastResult;
-  const updated = timeAgo(last?.okAt);
-  const fix =
-    last?.reason === "reconnect"
-      ? `${provider} needs reconnecting before these numbers can update.`
-      : last?.reason === "permission"
-        ? `${provider} didn't grant access to these numbers. Reconnect it and allow access.`
-        : null;
-  if (fix) {
-    return (
-      <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-warning/40 bg-warning/5 px-4 py-3 text-sm">
-        <span>
-          {fix}
-          {updated ? <span className="text-muted-foreground"> Numbers below are from {updated}.</span> : null}
-        </span>
-        <Link href="/connections" className="font-medium text-primary underline-offset-4 hover:underline">
-          Open Connections
-        </Link>
-      </div>
-    );
-  }
-  if (!updated && !last?.error) return null;
-  return (
-    <p className="text-xs text-muted-foreground">
-      {updated ? `Updated ${updated}.` : null}
-      {last?.error ? ` ${last.error}` : null}
-    </p>
-  );
-}
 
 // ---- the tab ------------------------------------------------------------------------------------------------------
 
@@ -151,7 +91,7 @@ export function PostsTab({ workspaceId, brandId, from, to }: { workspaceId: stri
       description="Each post's latest numbers, highest reach first."
       className="flex flex-col gap-3"
     >
-      {source ? <SourceNotice source={source} provider="Instagram, Facebook or Threads" /> : null}
+      {source ? <SyncedAt source={source} syncUrl={`${base}/data-sources/${KIND_SLUG.POST_METRICS}/sync`} /> : null}
       {posts.length ? (
         <div className="-mx-5 overflow-x-auto">
           <table className="w-full text-left text-sm">

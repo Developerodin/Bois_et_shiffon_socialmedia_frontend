@@ -10,10 +10,11 @@ import { timeAgo } from "@/lib/time";
 
 /**
  * "Updated 3 h ago" from the source's last success, what a failed or stopped sync means, and Sync now. Sync now only
- * queues a job (POST …/sync); the numbers change when it has run, on the next load or window focus. 429 = synced
- * recently or 3 tries this hour: the server's message says which.
+ * queues a job (POST …/sync); the numbers change when it has run, on the next load or window focus. `queued: false`
+ * = synced in the last 5 minutes or already queued; 429 = 3 presses this hour (the server's message says so).
+ * `name` tells several sources of one kind apart (two ad accounts).
  */
-export function SyncedAt({ source, syncUrl }: { source: DataSourceDto; syncUrl: string }) {
+export function SyncedAt({ source, syncUrl, name }: { source: DataSourceDto; syncUrl: string; name?: string }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ text: string; error: boolean } | null>(null);
   const okAt = source.lastResult?.okAt ?? null;
@@ -23,8 +24,8 @@ export function SyncedAt({ source, syncUrl }: { source: DataSourceDto; syncUrl: 
     setBusy(true);
     setNote(null);
     try {
-      await request(syncUrl, { method: "POST" });
-      setNote({ text: "Queued; numbers update in a few minutes.", error: false });
+      const { queued } = await request<{ queued: boolean }>(syncUrl, { method: "POST" });
+      setNote({ text: queued ? "Queued; numbers update in a few minutes." : "Already synced or queued in the last few minutes.", error: false });
     } catch (e) {
       const recently = e instanceof ApiError && e.status === 429;
       setNote({ text: errorMessage(e, "Couldn't queue a sync. Try again."), error: !recently });
@@ -36,7 +37,7 @@ export function SyncedAt({ source, syncUrl }: { source: DataSourceDto; syncUrl: 
   return (
     <div className="flex flex-col gap-1 text-sm">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="text-muted-foreground">{okAt ? `Updated ${timeAgo(okAt)}` : "Not synced yet"}</span>
+        <span className="text-muted-foreground">{name ? `${name}: ` : ""}{okAt ? `Updated ${timeAgo(okAt)}` : "Not synced yet"}</span>
         <Button size="sm" variant="outline" className="print:hidden" disabled={busy} onClick={() => void sync()}>
           <RefreshCw aria-hidden="true" />
           {busy ? "Queuing…" : "Sync now"}

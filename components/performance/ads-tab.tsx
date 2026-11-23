@@ -8,7 +8,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
-import { SourceNotice, brandApi, rangeQuery, useReloadOnFocus, type DataSourceDto } from "@/components/performance/posts-tab";
+import { Stat } from "@/components/data/shared";
+import { SyncedAt } from "@/components/data/synced-at";
+import { brandApi, change, KIND_SLUG, rangeQuery, useReloadOnFocus, type DataSourceDto } from "@/lib/data-api";
 
 // ---- mirror of server DTO — replace with synced type at merge ------------------------------------------------------
 // shared/api/ads.ts: GET ads/summary, GET ads/campaigns. Money is a decimal string with its ISO currency beside it;
@@ -52,37 +54,17 @@ const money = (v: string | null | undefined, currency: string) =>
 const roas = (v: number | null | undefined) => (v == null ? "—" : `${v.toFixed(2)}×`);
 const whole = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
 
-/** "+12 %" against the previous period; null when there's nothing to compare with. */
-function change(now: number | null, before: number | null): string | null {
-  if (now == null || before == null || before === 0) return null;
-  const pct = Math.round(((now - before) / Math.abs(before)) * 100);
-  return `${pct > 0 ? "+" : ""}${pct} %`;
-}
 const num = (v: string | number | null | undefined) => (v == null ? null : Number(v));
-
-function Stat({ label, value, before, now, prev }: { label: string; value: string; before: string; now: number | null; prev: number | null }) {
-  const delta = change(now, prev);
-  return (
-    <div className="flex flex-col">
-      <span className="font-display text-xl font-medium tabular-nums">{value}</span>
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-xs text-muted-foreground">
-        Before: {before}
-        {delta ? ` (${delta})` : null}
-      </span>
-    </div>
-  );
-}
 
 function Totals({ now, prev }: { now: AdsTotalsDto; prev: AdsTotalsDto | undefined }) {
   const c = now.currency;
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl bg-muted/40 px-4 py-3 sm:grid-cols-3 lg:grid-cols-5">
-      <Stat label="Spend" value={money(now.spend, c)} before={money(prev?.spend, c)} now={num(now.spend)} prev={num(prev?.spend)} />
-      <Stat label="Purchases" value={whole(now.purchases)} before={whole(prev?.purchases)} now={now.purchases} prev={num(prev?.purchases)} />
-      <Stat label="Purchase value" value={money(now.purchaseValue, c)} before={money(prev?.purchaseValue, c)} now={num(now.purchaseValue)} prev={num(prev?.purchaseValue)} />
-      <Stat label="ROAS" value={roas(now.roas)} before={roas(prev?.roas)} now={now.roas} prev={prev?.roas ?? null} />
-      <Stat label="Cost per purchase" value={money(now.costPerPurchase, c)} before={money(prev?.costPerPurchase, c)} now={num(now.costPerPurchase)} prev={num(prev?.costPerPurchase)} />
+      <Stat label="Spend" value={money(now.spend, c)} before={money(prev?.spend, c)} delta={change(num(now.spend), num(prev?.spend))} />
+      <Stat label="Purchases" value={whole(now.purchases)} before={whole(prev?.purchases)} delta={change(now.purchases, num(prev?.purchases))} />
+      <Stat label="Purchase value" value={money(now.purchaseValue, c)} before={money(prev?.purchaseValue, c)} delta={change(num(now.purchaseValue), num(prev?.purchaseValue))} />
+      <Stat label="ROAS" value={roas(now.roas)} before={roas(prev?.roas)} delta={change(now.roas, prev?.roas ?? null)} />
+      <Stat label="Cost per purchase" value={money(now.costPerPurchase, c)} before={money(prev?.costPerPurchase, c)} delta={change(num(now.costPerPurchase), num(prev?.costPerPurchase))} />
     </div>
   );
 }
@@ -171,7 +153,7 @@ export function AdsTab({ workspaceId, brandId, from, to }: { workspaceId: string
         className="flex flex-col gap-4"
       >
         {sources.map((s) => (
-          <SourceNotice key={s.id} source={s} provider={sources.length > 1 && s.label ? `Meta ad account ${s.label}` : "Meta Ads"} />
+          <SyncedAt key={s.id} source={s} syncUrl={`${base}/data-sources/${KIND_SLUG.META_ADS}/sync`} name={sources.length > 1 && s.label ? s.label : undefined} />
         ))}
         {empty ? (
           <p className="text-sm text-muted-foreground">No ad spend in these dates.</p>

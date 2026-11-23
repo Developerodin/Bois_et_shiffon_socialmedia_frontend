@@ -1,15 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-
-/** Data screens don't poll: they load once and again when the window gets focus back. */
-export function useFocusReload(reload: () => void) {
-  useEffect(() => {
-    window.addEventListener("focus", reload);
-    return () => window.removeEventListener("focus", reload);
-  }, [reload]);
-}
-
 /** One total with the previous period beside it: "1,234 · +12% vs 1,100 before". */
 export function Stat({ label, value, before, delta }: { label: string; value: string; before?: string; delta?: string | null }) {
   return (

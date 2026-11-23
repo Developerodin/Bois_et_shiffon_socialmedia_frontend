@@ -2,7 +2,6 @@
 
 import { useCallback, useRef, useState, type ReactNode } from "react";
 import { DateRangeFilter, rangeLabel } from "@/components/data/date-range";
-import { useFocusReload } from "@/components/data/shared";
 import { AdsTab } from "@/components/performance/ads-tab";
 import { PostsTab } from "@/components/performance/posts-tab";
 import { SalesTab } from "@/components/performance/sales-tab";
@@ -10,9 +9,8 @@ import { SearchTab } from "@/components/performance/search-tab";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { PageHeader } from "@/components/ui/page-header";
-import { readRange, withRange, zoneToday, type DataSourcesResponse, type DateRange } from "@/lib/data-api";
+import { brandApi, readRange, useReloadOnFocus, withRange, zoneToday, type DataSourcesResponse, type DateRange } from "@/lib/data-api";
 import { navFor } from "@/lib/nav";
-import { brandBase } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 
 export type PerformanceTab = "reports" | "search" | "posts" | "sales" | "ads";
@@ -40,10 +38,10 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
   const tabRefs = useRef<Partial<Record<PerformanceTab, HTMLButtonElement | null>>>({});
   const isData = active !== "reports";
 
-  const base = brandBase(workspaceId, brandId);
+  const base = brandApi(workspaceId, brandId);
   const fetcher = useCallback(() => request<DataSourcesResponse>(`${base}/data-sources`), [base]);
   const { state, reload } = useLoad(isData ? fetcher : null);
-  useFocusReload(reload);
+  useReloadOnFocus(reload);
 
   function select(tab: PerformanceTab) {
     setActive(tab);

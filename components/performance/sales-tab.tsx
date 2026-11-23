@@ -3,14 +3,13 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { Table } from "@/components/admin/table";
-import { Stat, useFocusReload } from "@/components/data/shared";
+import { Stat } from "@/components/data/shared";
 import { SyncedAt } from "@/components/data/synced-at";
 import { connectionsUrl, errorMessage, request, type Connection } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
-import { brandBase } from "@/lib/tasks-api";
 import { PageSection } from "@/components/ui/page-section";
-import { change, KIND_SLUG, type DataSourceDto, type DateRange, type SalesCurrency, type SalesSummary, type SalesTotals } from "@/lib/data-api";
+import { brandApi, change, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type SalesCurrency, type SalesSummary, type SalesTotals } from "@/lib/data-api";
 
 const money = (v: string | number, currency: string) => Number(v).toLocaleString(undefined, { style: "currency", currency });
 const aov = (t: SalesTotals) => (t.orders ? Number(t.netSales) / t.orders : 0);
@@ -22,7 +21,7 @@ const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
  * Shopify reports them, VAT included where the shop's prices include it. `source` undefined = orders not turned on.
  */
 export function SalesTab({ workspaceId, brandId, range, source, canManage, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; onSourceChanged: () => void }) {
-  const base = brandBase(workspaceId, brandId);
+  const base = brandApi(workspaceId, brandId);
   if (!source) {
     return (
       <PageSection id="sales-off" title="Sales" description="Orders and revenue from Shopify, without customer details.">
@@ -37,7 +36,7 @@ function SalesNumbers({ base, range, source }: { base: string; range: DateRange;
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(() => request<SalesSummary>(`${base}/sales/summary?from=${from}&to=${to}`), [base, from, to]);
   const { state, reload } = useLoad(fetcher);
-  useFocusReload(reload);
+  useReloadOnFocus(reload);
 
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading sales" />;
@@ -116,7 +115,7 @@ function TurnOnOrders({ workspaceId, brandId, onDone }: { workspaceId: string; b
     setBusy(true);
     setError("");
     try {
-      await request(`${brandBase(workspaceId, brandId)}/data-sources/${KIND_SLUG.SHOPIFY_ORDERS}`, { method: "PUT", body: JSON.stringify({ connectionId: shop.id }) });
+      await request(`${brandApi(workspaceId, brandId)}/data-sources/${KIND_SLUG.SHOPIFY_ORDERS}`, { method: "PUT", body: JSON.stringify({ connectionId: shop.id }) });
       onDone();
     } catch (e) {
       setError(errorMessage(e, "Couldn't turn on orders. Try again."));
