@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { ListSkeleton, LoadError, formatDate, useLoad } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
+import { navFor } from "@/lib/nav";
 import { PageSection } from "@/components/ui/page-section";
 
 type Severity = "critical" | "high" | "medium" | "low";
@@ -260,7 +261,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks =
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5">
-      <PageHeader title="Performance">
+      <PageHeader title={navFor("/performance").title}>
         How findable the brand is, in search engines and in AI assistants, and what to fix first.
       </PageHeader>
       {body}

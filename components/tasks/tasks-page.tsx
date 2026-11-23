@@ -16,20 +16,24 @@ import { TaskBoard } from "@/components/tasks/task-board";
 import { TaskList } from "@/components/tasks/task-list";
 import { TaskPeek } from "@/components/tasks/task-view";
 import { navigate } from "@/lib/workspace-view";
-import { AREA_TABS, areaParam, readSaved, TASK_LIST_VIEWS, TASKS_VIEW_KEY, type AreaParam, type TaskLayout, type TaskListView } from "@/components/tasks/task-views";
+import { AREA_TABS, areaParam, readSaved, SOURCE_TABS, sourceParam, TASK_LIST_VIEWS, TASKS_VIEW_KEY, type AreaParam, type SourceParam, type TaskLayout, type TaskListView } from "@/components/tasks/task-views";
 
 const LAYOUTS = [
   { value: "list", label: "List" },
   { value: "board", label: "Board" },
 ] as const;
 
-/** /tasks: area tabs (from ?area=, so the Website and SEO nav links land on theirs), a view, List or Board, and the task peek (?task=). */
+/**
+ * /tasks: area tabs (from ?area=, so the Website and Performance nav links land on theirs), on Performance a filter by
+ * report (?source=seo|geo), a view, List or Board, and the task peek (?task=).
+ */
 export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId: string; brandId: string; userId: string; perms: string[] }) {
   const base = brandBase(workspaceId, brandId);
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
   const area = areaParam(search.get("area"));
+  const source = sourceParam(search.get("source"), area);
   // Read after mount so the server render and the first client render match.
   const [saved, setSaved] = useState<{ view: TaskListView; layout: TaskLayout } | null>(null);
   useEffect(() => {
@@ -57,13 +61,19 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
       localStorage.setItem(TASKS_VIEW_KEY, JSON.stringify(next));
     } catch {}
   };
-  const setArea = (a: AreaParam) => {
+  // Both filters change the URL in place (no server round trip); the lists re-read on their new query.
+  const setParams = (next: { area?: AreaParam; source?: SourceParam }) => {
     const q = new URLSearchParams(search.toString());
-    if (a) q.set("area", a);
-    else q.delete("area");
+    for (const [k, v] of Object.entries(next)) {
+      if (v) q.set(k, v);
+      else q.delete(k);
+    }
     const s = q.toString();
     navigate(router, s ? `${pathname}?${s}` : pathname, pathname, "replace");
   };
+  // The report filter belongs to the Performance tab: leaving it drops ?source=.
+  const setArea = (a: AreaParam) => setParams({ area: a, source: "" });
+  const setSource = (s: SourceParam) => setParams({ source: s });
 
   return (
     <div className="flex w-full flex-col gap-5">
@@ -78,10 +88,11 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
           </div>
         }
       >
-        Work on this business across content, the website and SEO.
+        Work on this business across content, the website and performance.
       </PageHeader>
       <div className="flex flex-wrap items-center gap-3">
         <SegmentedRadios label="Area" name="task-area" value={area} onChange={setArea} options={AREA_TABS} />
+        {area === "seo" ? <SegmentedRadios label="Report" name="task-source" value={source} onChange={setSource} options={SOURCE_TABS} /> : null}
         {layout === "list" ? (
           <label className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">View</span>
@@ -100,10 +111,10 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
       </div>
       {layout === "board" ? <p className="-mt-2 text-xs text-muted-foreground">The board shows every open task and the last 30 days&rsquo; done ones.</p> : null}
       {saved === null ? null : layout === "board" ? (
-        <TaskBoard base={base} area={area} />
+        <TaskBoard base={base} area={area} source={source} />
       ) : (
         <section className="rounded-2xl border border-border bg-card px-5 py-2 shadow-sm">
-          <TaskList base={base} view={view} area={area} />
+          <TaskList base={base} view={view} area={area} source={source} />
         </section>
       )}
       <TaskPeek base={base} perms={perms} userId={userId} recentKey={recentKey(workspaceId, brandId, userId)} />

@@ -40,11 +40,11 @@ describe("navFor", () => {
   it("falls back to Overview for unknown paths", () => {
     expect(navFor("/totally/unknown")).toEqual({ activeId: null, title: "Overview", brandScoped: true });
   });
-  it("keeps the Performance page over Surge", () => {
+  it("keeps the SEO & GEO reports page over Surge", () => {
     expect(navFor("/performance").activeId).toBe("performance");
   });
   it("ignores the query string", () => {
-    expect(navFor("/performance?x=1").title).toBe("Performance");
+    expect(navFor("/performance?x=1").title).toBe("SEO & GEO reports");
   });
 });
 
@@ -121,12 +121,13 @@ describe("tasks nav", () => {
     expect(beat(["tasks"], ["tasks.read"])).toMatchObject({ href: "/tasks", role: "Projects & tasks", soon: false });
   });
 
-  it("adds Website and SEO to the main list behind the flag and tasks.read, and titles /tasks", () => {
+  it("adds Website and Performance to the main list behind the flag and tasks.read, and titles /tasks", () => {
     expect(ids(sidebarGroups(["tasks"], ["brand.read"])[0])).not.toContain("website");
     expect(ids(sidebarGroups(["tasks"], ["brand.read", "tasks.read"])[0]).slice(-2)).toEqual(["website", "seo"]);
     expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("tasks");
     expect(NAV.find((e) => e.id === "tasks")?.group).not.toBe("more");
     expect(navFor("/tasks").title).toBe("Projects & tasks");
+    expect(NAV.find((e) => e.id === "seo")).toMatchObject({ label: "Performance", href: "/tasks?area=seo&view=open" });
   });
   it("titles /projects and a project page Projects without listing it", () => {
     expect(navFor("/projects").title).toBe("Projects");

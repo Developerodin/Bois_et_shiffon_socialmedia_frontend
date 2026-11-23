@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TaskDto } from "@/shared";
-import { boardMove, ownerLabel, readSaved, tasksQuery } from "@/components/tasks/task-views";
+import { AREA_TABS, boardMove, ownerLabel, readSaved, sourceParam, tasksQuery } from "@/components/tasks/task-views";
 
 const task = (over: Partial<TaskDto> = {}): TaskDto => ({
   id: "t1",
@@ -90,5 +90,19 @@ describe("tasksQuery", () => {
   it("sends only the filters that are set", () => {
     expect(tasksQuery({ view: "mine" })).toBe("tasks?view=mine");
     expect(tasksQuery({ view: "open", area: "website", workProjectId: "p 1" })).toBe("tasks?view=open&area=website&workProjectId=p+1");
+    expect(tasksQuery({ view: "open", area: "seo", source: "geo" })).toBe("tasks?view=open&area=seo&source=geo");
+  });
+});
+
+describe("Performance area", () => {
+  it("names the SEO area Performance on its tab", () => {
+    expect(AREA_TABS.find((t) => t.value === "seo")?.label).toBe("Performance");
+  });
+  it("reads ?source= only on the Performance tab, and only seo or geo", () => {
+    expect(sourceParam("geo", "seo")).toBe("geo");
+    expect(sourceParam("seo", "seo")).toBe("seo");
+    expect(sourceParam("GEO", "seo")).toBe("");
+    expect(sourceParam("geo", "website")).toBe("");
+    expect(sourceParam(null, "seo")).toBe("");
   });
 });

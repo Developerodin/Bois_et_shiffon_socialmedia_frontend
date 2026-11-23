@@ -55,7 +55,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
   if (pathname === "/" && panel === "content") activeId = "wave";
   if (pathname === "/" && panel === "competitors") activeId = "drift";
   if (pathname === "/performance") activeId = "surge";
-  // /tasks is told apart by ?area=: Website, SEO, else Beat's Projects & tasks slot.
+  // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
   if (pathname === "/tasks") activeId = search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
   if (pathname === "/projects" || pathname.startsWith("/projects/")) activeId = "beat";
   const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));

@@ -15,7 +15,7 @@ describe("one name per agent and page", () => {
   });
   it("gives the built agents the role name the Overview shows", () => {
     expect(byId("drift").role).toBe("Competitors");
-    expect(byId("surge").role).toBe("Performance");
+    expect(byId("surge").role).toBe("SEO & GEO reports");
   });
   it("keeps Echo pointing at Connections", () => {
     expect(byId("echo").href).toBe("/settings?tab=connections");

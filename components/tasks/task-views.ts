@@ -15,17 +15,33 @@ const VIEW_LABEL: Record<TaskView, string> = {
 export const TASK_LIST_VIEWS = TASK_VIEWS.map((value) => ({ value, label: VIEW_LABEL[value] }));
 export type TaskListView = TaskView;
 
+/** The area's name everywhere it shows. The SEO area reads "Performance"; its value stays SEO (`?area=seo`). */
+export const AREA_LABEL: Record<string, string> = { CONTENT: "Content", WEBSITE: "Website", SEO: "Performance", GENERAL: "General" };
+
 /** Area tabs; the value is the lower-case `?area=` the nav links use ("" is All). */
 export const AREA_TABS = [
   { value: "", label: "All" },
-  { value: "content", label: "Content" },
-  { value: "website", label: "Website" },
-  { value: "seo", label: "SEO" },
+  { value: "content", label: AREA_LABEL.CONTENT },
+  { value: "website", label: AREA_LABEL.WEBSITE },
+  { value: "seo", label: AREA_LABEL.SEO },
 ] as const;
 export type AreaParam = (typeof AREA_TABS)[number]["value"];
 
 export function areaParam(s: string | null | undefined): AreaParam {
   return AREA_TABS.some((t) => t.value === s) ? (s as AreaParam) : "";
+}
+
+/** The Performance tab's filter by the report a task came from; the value is the lower-case `?source=` ("" is All). */
+export const SOURCE_TABS = [
+  { value: "", label: "All" },
+  { value: "seo", label: "SEO" },
+  { value: "geo", label: "GEO" },
+] as const;
+export type SourceParam = (typeof SOURCE_TABS)[number]["value"];
+
+/** `?source=` counts only on the Performance tab; elsewhere it's All. */
+export function sourceParam(s: string | null | undefined, area: AreaParam): SourceParam {
+  return area === "seo" && SOURCE_TABS.some((t) => t.value === s) ? (s as SourceParam) : "";
 }
 
 export type TaskLayout = "list" | "board";
@@ -45,9 +61,10 @@ export function readSaved(raw: string | null): { view: TaskListView; layout: Tas
 }
 
 /** The GET tasks path (relative to the brand) for a view and its filters. */
-export function tasksQuery(q: { view: TaskListView; area?: AreaParam; workProjectId?: string }): string {
+export function tasksQuery(q: { view: TaskListView; area?: AreaParam; source?: SourceParam; workProjectId?: string }): string {
   const p = new URLSearchParams({ view: q.view });
   if (q.area) p.set("area", q.area);
+  if (q.source) p.set("source", q.source);
   if (q.workProjectId) p.set("workProjectId", q.workProjectId);
   return `tasks?${p}`;
 }
@@ -60,7 +77,6 @@ export const STATUS_LABEL: Record<string, string> = {
   CANCELLED: "Cancelled",
 };
 export const PRIORITY_LABEL: Record<string, string> = { LOW: "Low", NORMAL: "Normal", HIGH: "High", URGENT: "Urgent" };
-export const AREA_LABEL: Record<string, string> = { CONTENT: "Content", WEBSITE: "Website", SEO: "SEO", GENERAL: "General" };
 
 /** The board's columns: the open statuses and Done. Cancelled tasks aren't on the board. */
 export const BOARD_COLUMNS = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"] as const;

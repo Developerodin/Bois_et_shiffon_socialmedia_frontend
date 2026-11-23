@@ -14,7 +14,7 @@ import { CHANNEL_LABEL, STATUS_LABEL as POST_STATUS_LABEL } from "@/lib/post-lab
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { listsCare, onTasksChanged, tasksApi, type TaskPage } from "@/lib/tasks-api";
 import { shallowClick } from "@/lib/workspace-view";
-import { AREA_LABEL, dueLabel, ownerLabel, PRIORITY_LABEL, STATUS_LABEL, tasksQuery, type AreaParam, type TaskListView } from "@/components/tasks/task-views";
+import { AREA_LABEL, dueLabel, ownerLabel, PRIORITY_LABEL, STATUS_LABEL, tasksQuery, type AreaParam, type SourceParam, type TaskListView } from "@/components/tasks/task-views";
 
 const pickPage = (d: TaskPage) => d;
 
@@ -34,12 +34,18 @@ export function useTasksChanged(reload: () => void) {
   useEffect(() => onTasksChanged((d) => listsCare(d) && reload()), [reload]);
 }
 
+/** The report a task came from ("SEO" or "GEO"), as a small tag; nothing for a task made by hand. */
+export function FindingTag({ kind }: { kind: TaskDto["findingKind"] }) {
+  if (!kind) return null;
+  return <span className="shrink-0 rounded-[8px] bg-accent px-2 text-xs text-accent-foreground">{kind}</span>;
+}
+
 const th = "px-3 py-2 text-left text-xs font-medium text-muted-foreground";
 const td = "px-3 py-3 align-top";
 
 /** One view of the brand's tasks as a table, 50 a page with "Show more". View=mine also lists your posts that need action. */
 /** `empty`: a page's own short line for no tasks (a project's), instead of the big "Nothing here". */
-export function TaskList(props: { base: string; view: TaskListView; area: AreaParam; workProjectId?: string; empty?: string }) {
+export function TaskList(props: { base: string; view: TaskListView; area: AreaParam; source?: SourceParam; workProjectId?: string; empty?: string }) {
   const query = tasksQuery(props);
   // Keyed by the query: a new view starts from its own first page.
   return <Pages key={query} base={props.base} query={query} empty={props.empty} />;
@@ -154,9 +160,12 @@ function Pages({ base, query, empty }: { base: string; query: string; empty?: st
             {tasks.map((t) => (
               <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                 <td className={td}>
-                  <Link href={taskHref(t.id)} scroll={false} onClick={(e) => shallowClick(e, taskHref(t.id), pathname)} className="font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                    {t.title}
-                  </Link>
+                  <span className="flex items-center gap-2">
+                    <FindingTag kind={t.findingKind} />
+                    <Link href={taskHref(t.id)} scroll={false} onClick={(e) => shallowClick(e, taskHref(t.id), pathname)} className="font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      {t.title}
+                    </Link>
+                  </span>
                   {t.checklist.total ? (
                     <span className="block text-xs text-muted-foreground">
                       {t.checklist.done} of {t.checklist.total} checked

@@ -26,6 +26,7 @@ import { ProjectSelect } from "@/components/tasks/new-task-dialog";
 import { TaskAttachments } from "@/components/tasks/task-attachments";
 import { TaskChecklist } from "@/components/tasks/task-checklist";
 import { TaskComments } from "@/components/tasks/task-comments";
+import { FindingTag } from "@/components/tasks/task-list";
 import { WebsiteChecks, WebsiteFacts, WebsiteInputs } from "@/components/tasks/website-fields";
 import { AREA_LABEL, dueLabel, ownerLabel, peekReaction, PRIORITY_LABEL, STATUS_LABEL } from "@/components/tasks/task-views";
 
@@ -163,6 +164,7 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
       <div className="flex flex-wrap items-center gap-1">
         <StatusBadge status={task.status}>{STATUS_LABEL[task.status] ?? task.status}</StatusBadge>
         {task.blockedReason ? <StatusBadge status="BLOCKED">Blocked</StatusBadge> : null}
+        <FindingTag kind={task.findingKind} />
         {task.findingClearedAt ? <span className="text-xs text-muted-foreground">A later audit no longer finds this.</span> : null}
       </div>
       {task.blockedReason ? (

@@ -1299,8 +1299,8 @@ const AGENT_NEXT: Record<string, { text: string; label: string; panel?: PanelId;
   brief: { text: "Briefs are written on your posts.", label: "Open posts", panel: "content" },
   creator: { text: "Drafts are written on your posts.", label: "Open posts", panel: "content" },
   quality: { text: "Quality checks are on your drafts.", label: "Open posts", panel: "content" },
-  seo: { text: "The SEO report is updated.", label: "See it in Performance", href: "/performance" },
-  geo: { text: "The AI visibility report is updated.", label: "See it in Performance", href: "/performance" },
+  seo: { text: "The SEO report is updated.", label: "See the SEO & GEO reports", href: "/performance" },
+  geo: { text: "The AI visibility report is updated.", label: "See the SEO & GEO reports", href: "/performance" },
   competitors: { text: "Competitors it found are in the Competitors panel.", label: "Open competitors", panel: "competitors" },
 };
 

@@ -13,7 +13,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { tasksApi, type TaskActionBody, type TaskPage } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
-import { useTaskHref, useTasksChanged } from "@/components/tasks/task-list";
+import { FindingTag, useTaskHref, useTasksChanged } from "@/components/tasks/task-list";
 import { shallowClick } from "@/lib/workspace-view";
 import {
   AREA_LABEL,
@@ -25,6 +25,7 @@ import {
   tasksQuery,
   type AreaParam,
   type BoardStatus,
+  type SourceParam,
 } from "@/components/tasks/task-views";
 
 const pickPage = (d: TaskPage) => d;
@@ -34,9 +35,9 @@ const pickPage = (d: TaskPage) => d;
  * matching action when the server lists it for this person; otherwise the reason shows above the board.
  * ponytail: the first 50 of each (open, done); a note says so and the list view pages through the rest.
  */
-export function TaskBoard({ base, area }: { base: string; area: AreaParam }) {
-  const open = useJob(`${base}/${tasksQuery({ view: "open", area })}`, { pick: pickPage, intervals: JOB_INTERVALS.tasks });
-  const done = useJob(`${base}/${tasksQuery({ view: "done", area })}`, { pick: pickPage, intervals: JOB_INTERVALS.tasks });
+export function TaskBoard({ base, area, source }: { base: string; area: AreaParam; source?: SourceParam }) {
+  const open = useJob(`${base}/${tasksQuery({ view: "open", area, source })}`, { pick: pickPage, intervals: JOB_INTERVALS.tasks });
+  const done = useJob(`${base}/${tasksQuery({ view: "done", area, source })}`, { pick: pickPage, intervals: JOB_INTERVALS.tasks });
   const { reload: reloadOpen } = open;
   const { reload: reloadDone } = done;
   const [message, setMessage] = useState("");
@@ -152,9 +153,10 @@ function Card({ task, busy, dragging, onDrag, onMove }: { task: TaskDto; busy: b
         {ownerLabel(task.owner)} · {dueLabel(task.dueOn)}
         {task.areas.length ? ` · ${task.areas.map((a) => AREA_LABEL[a] ?? a).join(", ")}` : ""}
       </p>
-      {task.blockedReason ? (
-        <span>
-          <StatusBadge status="BLOCKED">Blocked</StatusBadge>
+      {task.blockedReason || task.findingKind ? (
+        <span className="flex flex-wrap items-center gap-1">
+          <FindingTag kind={task.findingKind} />
+          {task.blockedReason ? <StatusBadge status="BLOCKED">Blocked</StatusBadge> : null}
         </span>
       ) : null}
       {/* The keyboard's way to move a card. */}
