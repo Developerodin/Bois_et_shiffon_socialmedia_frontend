@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
   experimental: {
     // The dev proxy otherwise cuts a request after 30 s; chat streams and agent runs take up to 300 s.
     proxyTimeout: 330_000,
+    // Dev only: the devtools segment explorer wraps segments differently on the server and the client, which shifted
+    // React ids and made the top bar's menus (Radix trigger ids) fail hydration. Nothing in production uses it.
+    devtoolSegmentExplorer: false,
   },
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${SERVER_URL}/api/:path*` }];
