@@ -28,6 +28,8 @@ export const PERMISSIONS = [
   ["inbox.read", "customers", "Read customer messages and reviews"],
   ["analytics.read", "analytics", "See performance, learning notes and reports"],
   ["commercial.manage", "commercial", "Set product priorities, campaigns and offers"],
+  ["tasks.read", "tasks", "See tasks and projects, and comment"],
+  ["tasks.manage", "tasks", "Create, edit, assign and cancel tasks and projects"],
 ] as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[number][0];
