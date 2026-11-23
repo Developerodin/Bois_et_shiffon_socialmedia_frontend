@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { BarChart3 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SyncedAt } from "@/components/data/synced-at";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
@@ -50,6 +51,9 @@ const COLUMNS: { key: keyof PostMetricsDto; label: string }[] = [
   { key: "saves", label: "Saves" },
 ];
 
+/** Rows shown at first and added per "Show more posts". */
+const PAGE = 50;
+
 const count = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
 /** Highest reach first; posts with no reach yet go last, newest first among them. */
 const byReach = (a: PostWithMetricsDto, b: PostWithMetricsDto) =>
@@ -68,6 +72,7 @@ export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId:
   );
   const { state, reload } = useLoad(fetcher);
   useReloadOnFocus(reload, state);
+  const [shown, setShown] = useState(PAGE);
 
   if (state.kind === "loading") return <ListSkeleton label="Loading post results" />;
   if (state.kind === "forbidden") return <EmptyState icon={BarChart3} title="You can't see post results" description="Ask a workspace owner for access." />;
@@ -105,7 +110,7 @@ export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId:
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {posts.map((p) => (
+              {posts.slice(0, shown).map((p) => (
                 <tr key={p.attemptId}>
                   <td className="max-w-72 px-5 py-2.5">
                     <p className="truncate font-medium">{p.title || "Untitled post"}</p>
@@ -122,6 +127,11 @@ export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId:
               ))}
             </tbody>
           </table>
+          {posts.length > shown ? (
+            <Button size="sm" variant="outline" className="mx-5 mt-3 print:hidden" onClick={() => setShown((n) => n + PAGE)}>
+              Show more posts
+            </Button>
+          ) : null}
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">No posts were published in these dates.</p>
