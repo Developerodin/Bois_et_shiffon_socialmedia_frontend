@@ -6,7 +6,7 @@ import { ChevronRight, Gauge, Sparkles } from "lucide-react";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { fetchAgents } from "@/components/agents/api";
-import { errorMessage, request } from "@/components/settings/api";
+import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ListSkeleton, LoadError, formatDate, useLoad } from "@/components/settings/shared";
@@ -36,7 +36,7 @@ const scoreTone = (n: number) => (n >= 80 ? "text-success" : n >= 50 ? "text-war
 export function Score({ label, value, big }: { label: string; value: number | null | undefined; big?: boolean }) {
   return (
     <div className="flex flex-col">
-      <span className={cn("font-display font-medium tabular-nums", big ? "text-5xl" : "text-2xl", value == null ? "text-muted-foreground" : scoreTone(value))}>
+      <span className={cn("font-display font-medium tabular-nums", big ? "text-4xl" : "text-xl", value == null ? "text-muted-foreground" : scoreTone(value))}>
         {value ?? "—"}
       </span>
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -44,27 +44,30 @@ export function Score({ label, value, big }: { label: string; value: number | nu
   );
 }
 
-/** `action`: shown under each finding's row (Make a task). */
+/**
+ * `action`: beside each finding's row (Make a task); it drops under the row on a narrow screen. Closed rows show the
+ * title and two lines of the why; open one for the detail, fix and pages.
+ */
 export function Findings({ findings, action }: { findings: Finding[]; action?: (f: Finding) => ReactNode }) {
   if (!findings.length) return <p className="text-sm text-muted-foreground">No issues found.</p>;
   return (
     <ol className="flex flex-col divide-y divide-border">
       {findings.map((f, i) => (
-        <li key={f.id} className="py-4">
-          <details className="group">
-            <summary className="flex cursor-pointer list-none items-start gap-3">
+        <li key={f.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-start sm:gap-3">
+          <details className="group min-w-0 flex-1">
+            <summary className="flex cursor-pointer list-none items-start gap-2">
               <ChevronRight className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true" />
               <span className="mt-0.5 w-5 shrink-0 text-right font-mono text-xs text-muted-foreground">{i + 1}</span>
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <StatusBadge tone={TONE[f.severity]}>{SEVERITY_LABEL[f.severity]}</StatusBadge>
                   <span className="text-xs text-muted-foreground">{f.category}</span>
                 </div>
-                <p className="mt-1 font-medium">{f.title}</p>
-                {f.why && <p className="mt-1 text-sm text-muted-foreground">{f.why}</p>}
+                <p className="mt-1 text-sm font-medium">{f.title}</p>
+                {f.why && <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground group-open:line-clamp-none">{f.why}</p>}
               </div>
             </summary>
-            <div className="ml-8 mt-3 flex flex-col gap-2 text-sm">
+            <div className="ml-7 mt-2 flex flex-col gap-2 text-sm">
               <p>{f.detail}</p>
               <p><span className="font-medium">Fix: </span>{f.fix}</p>
               {f.urls?.length ? (
@@ -75,7 +78,7 @@ export function Findings({ findings, action }: { findings: Finding[]; action?: (
               ) : null}
             </div>
           </details>
-          {action ? <div className="ml-8 mt-2">{action(f)}</div> : null}
+          {action ? <div className="ml-7 shrink-0 sm:ml-0">{action(f)}</div> : null}
         </li>
       ))}
     </ol>
@@ -114,7 +117,7 @@ function FindingTask({ url }: { url: string }) {
   };
 
   return (
-    <div className="flex flex-col items-start gap-1">
+    <div className="flex flex-col items-start gap-1 sm:items-end">
       {link.href ? (
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild size="sm" variant="outline">
@@ -138,19 +141,75 @@ function FindingTask({ url }: { url: string }) {
   );
 }
 
-function Panel({ id, title, report, agent, exportUrl, findingTaskUrl, children }: { id: string; exportUrl: string; title: string; report: Report | null; agent: string; findingTaskUrl?: (reportId: string, findingId: string) => string; children?: React.ReactNode }) {
+/**
+ * "Make all tasks": a task for every finding of this report that hasn't got one (the server skips findings with an open
+ * task, and ones a person cancelled), then a link to them on the Performance tab.
+ */
+function MakeAllTasks({ url, kind, onStale }: { url: string; kind: "SEO" | "GEO"; onStale: () => void }) {
+  const [made, setMade] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const make = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      setMade((await request<{ made: number }>(url, { method: "POST" })).made);
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't make the tasks. Try again."));
+      // A newer report replaced this one (404): show it.
+      if (e instanceof ApiError && e.status === 404) onStale();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (made !== null) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <span role="status" className="text-xs text-muted-foreground">
+          {made ? `${made} ${made === 1 ? "task" : "tasks"} made.` : "Every finding already has a task."}
+        </span>
+        <Button asChild size="sm" variant="outline">
+          <Link href={`/tasks?area=seo&view=open&source=${kind.toLowerCase()}`}>Open tasks</Link>
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col items-start gap-1">
+      <Button size="sm" disabled={busy} onClick={() => void make()}>
+        {busy ? "Making…" : "Make all tasks"}
+      </Button>
+      {error ? (
+        <p role="alert" className="text-xs text-destructive">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl, onStale, children }: { id: string; exportUrl: string; title: string; report: Report | null; agent: string; reportsUrl: string; findingTaskUrl?: (reportId: string, findingId: string) => string; onStale: () => void; children?: React.ReactNode }) {
   return (
     <PageSection
       id={id}
       title={title}
-      className="flex flex-col gap-5"
-      description={report ? `Last run ${formatDate(report.createdAt)}` : undefined}
+      className="flex flex-col gap-4"
+      description={
+        report ? (
+          <span className="flex items-baseline gap-2">
+            <span className={cn("font-display text-2xl font-medium tabular-nums", scoreTone(report.score))}>{report.score}</span>
+            <span>/ 100 · Last run {formatDate(report.createdAt)}</span>
+          </span>
+        ) : undefined
+      }
       actions={
         report ? (
-          <div className="flex items-center gap-4">
+          <>
+            {findingTaskUrl && report.findings.length ? <MakeAllTasks key={report.id} url={`${reportsUrl}/${encodeURIComponent(report.id)}/tasks`} kind={report.kind} onStale={onStale} /> : null}
             <ExportCsvButton url={exportUrl} filename={`${id}-findings-${new Date().toLocaleDateString("en-CA")}.csv`} />
-            <Score label="out of 100" value={report.score} big />
-          </div>
+          </>
         ) : undefined
       }
     >
@@ -217,10 +276,10 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks =
     const questions = (geo?.metrics.questions ?? []) as Question[];
     const competitors = (geo?.metrics.competitors ?? []) as { name: string; mentions: number }[];
     body = (
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Panel id="seo" title="SEO health" report={seo} agent="SEO" exportUrl={`${reportsUrl}/export?kind=SEO`} findingTaskUrl={findingTaskUrl}>
+      <div className="grid items-start gap-4 xl:grid-cols-2">
+        <Panel id="seo" title="SEO health" report={seo} agent="SEO" exportUrl={`${reportsUrl}/export?kind=SEO`} reportsUrl={reportsUrl} findingTaskUrl={findingTaskUrl} onStale={reload}>
           {ps && (
-            <div className="flex flex-wrap gap-8 rounded-xl bg-muted/40 px-5 py-4">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl bg-muted/40 px-4 py-3 sm:grid-cols-4">
               <Score label="Performance (mobile)" value={ps.performance} />
               <Score label="SEO" value={ps.seo} />
               <Score label="Accessibility" value={ps.accessibility} />
@@ -228,24 +287,32 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks =
             </div>
           )}
         </Panel>
-        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO" exportUrl={`${reportsUrl}/export?kind=GEO`} findingTaskUrl={findingTaskUrl}>
+        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO" exportUrl={`${reportsUrl}/export?kind=GEO`} reportsUrl={reportsUrl} findingTaskUrl={findingTaskUrl} onStale={reload}>
           {geo && (
-            <div className="flex flex-col gap-4 rounded-xl bg-muted/40 px-5 py-4">
-              <div className="flex flex-wrap gap-8">
+            <div className="flex flex-col gap-3 rounded-xl bg-muted/40 px-4 py-3">
+              <div className="grid grid-cols-3 gap-x-6 gap-y-3">
                 <Score label="Recommended unprompted" value={geo.metrics.visibility as number} />
                 <Score label="Citability" value={geo.metrics.citability as number} />
                 <Score label="AI crawler access" value={geo.metrics.technical as number} />
               </div>
-              <ul className="flex flex-col gap-2 text-sm">
-                {questions.map((q) => (
-                  <li key={q.question} className="flex items-start gap-2">
-                    <StatusBadge tone={q.branded ? "muted" : q.mentioned ? "good" : "warn"}>
-                      {q.branded ? "Names brand" : q.mentioned ? "Mentioned" : "Not yet"}
-                    </StatusBadge>
-                    <span>{q.question}</span>
-                  </li>
-                ))}
-              </ul>
+              {questions.length > 0 && (
+                <details className="group text-sm">
+                  <summary className="flex cursor-pointer list-none items-center gap-2 text-muted-foreground">
+                    <ChevronRight className="size-4 shrink-0 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true" />
+                    Questions asked: mentioned in {questions.filter((q) => q.mentioned).length} of {questions.length}
+                  </summary>
+                  <ul className="mt-2 flex flex-col gap-1.5">
+                    {questions.map((q) => (
+                      <li key={q.question} className="flex items-start gap-2">
+                        <StatusBadge tone={q.branded ? "muted" : q.mentioned ? "good" : "warn"}>
+                          {q.branded ? "Names brand" : q.mentioned ? "Mentioned" : "Not yet"}
+                        </StatusBadge>
+                        <span>{q.question}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
               {competitors.length > 0 && (
                 <p className="text-xs text-muted-foreground">
                   <Sparkles className="mr-1 inline size-3" aria-hidden="true" />
@@ -260,7 +327,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks =
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-5">
+    <div className="mx-auto flex max-w-6xl flex-col gap-4">
       <PageHeader title={navFor("/performance").title}>
         How findable the brand is, in search engines and in AI assistants, and what to fix first.
       </PageHeader>
