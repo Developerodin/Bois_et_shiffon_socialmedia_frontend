@@ -113,5 +113,9 @@ export type TaskCommentDto = { id: string; kind: string; body: string; author: T
 /** A brand photo on a task: a before/after screenshot or other. `url` is a signed link, valid for an hour. */
 export type TaskAttachmentDto = { id: string; mediaUploadId: string; role: string; createdById: string; createdAt: string; url: string };
 
-/** GET tasks/:id (and the task an action or edit returns): the list row plus its checklist lines and photos. */
-export type TaskDetailDto = TaskDto & { checklistItems: TaskChecklistItemDto[]; attachments: TaskAttachmentDto[] };
+/**
+ * GET tasks/:id (and the task an action or edit returns): the list row plus its checklist lines and photos.
+ * `clientVisible`: some client reviewer can see the task (its reviewer is a client, or its project is shared);
+ * `viewerIsClient`: the person reading is a client reviewer.
+ */
+export type TaskDetailDto = TaskDto & { checklistItems: TaskChecklistItemDto[]; attachments: TaskAttachmentDto[]; clientVisible: boolean; viewerIsClient: boolean };
