@@ -3,6 +3,7 @@ export const TASK_STATUSES = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "CANCE
 export const OPEN_TASK_STATUSES = ["TODO", "IN_PROGRESS", "IN_REVIEW"] as const;
 export const TASK_AREAS = ["CONTENT", "WEBSITE", "SEO", "GENERAL"] as const;
 export const TASK_PRIORITIES = ["LOW", "NORMAL", "HIGH", "URGENT"] as const;
+export const WORK_PROJECT_STATUSES = ["ACTIVE", "DONE", "ARCHIVED"] as const;
 export const WEBSITE_CHANGE_KINDS = ["PRODUCT_PAGE", "COLLECTION", "MENU", "HOMEPAGE", "LANDING_PAGE", "BUG", "CORRECTION", "OTHER"] as const;
 
 export const TASK_ACTIONS = ["start", "submitForReview", "approve", "requestChanges", "markDone", "block", "unblock", "checkedLive", "cancel", "reopen"] as const;

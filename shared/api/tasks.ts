@@ -60,6 +60,20 @@ export type WorkProjectDto = {
   progress: { done: number; total: number };
 };
 
+/** A dated step of a work project; done when `doneAt` is set. */
+export type WorkProjectMilestoneDto = { id: string; title: string; dueOn: string; doneAt: string | null; position: number };
+
+/**
+ * GET work-projects/:id: milestones, the viewer's visible tasks counted by status, and the linked campaign with its posts
+ * in the calendar window.
+ */
+export type WorkProjectDetailDto = WorkProjectDto & {
+  campaign: { id: string; name: string } | null;
+  milestones: WorkProjectMilestoneDto[];
+  taskCounts: Record<string, number>;
+  posts: PostRow[];
+};
+
 export type NotificationDto = {
   id: string;
   kind: string;
