@@ -1,4 +1,4 @@
-import type { PostRow, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto } from "@/shared";
+import type { PostRow, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto, WorkProjectDetailDto, WorkProjectDto, WorkProjectMilestoneDto } from "@/shared";
 import { ApiError, request } from "@/components/settings/api";
 
 const enc = encodeURIComponent;
@@ -39,6 +39,28 @@ export const tasksApi = {
   comment: (base: string, id: string, body: string, shareWithClient: boolean) =>
     request<{ comment: TaskCommentDto }>(`${base}/tasks/${enc(id)}/comments`, { method: "POST", body: JSON.stringify({ body, shareWithClient }) }).then((d) => d.comment),
   uploadScreenshot,
+};
+
+/** GET work-projects: 30 a page, soonest due first; archived ones only with status=ARCHIVED. */
+export type ProjectPage = { projects: WorkProjectDto[]; nextCursor: string | null };
+
+/** The GET work-projects path (relative to the brand) for a status filter ("" = all but archived). */
+export const projectsQuery = (status: string) => (status ? `work-projects?status=${enc(status)}` : "work-projects");
+
+/** Work projects and their milestones. Every write needs tasks.manage; a refusal throws with the server's message. */
+export const projectsApi = {
+  page: (base: string, query: string, cursor: string) => request<ProjectPage>(`${base}/${query}${query.includes("?") ? "&" : "?"}cursor=${enc(cursor)}`),
+  /** With a requestId, a retry returns the project the first request made. */
+  create: (base: string, body: { name: string; requestId: string }) =>
+    request<{ project: WorkProjectDetailDto }>(`${base}/work-projects`, { method: "POST", body: JSON.stringify(body) }).then((d) => d.project),
+  /** Send only the fields that change. Unsharing (clientVisible false) is a 409 while a client reviews a task in it. */
+  patch: (base: string, id: string, fields: Record<string, unknown>) =>
+    request<{ project: WorkProjectDetailDto }>(`${base}/work-projects/${enc(id)}`, { method: "PATCH", body: JSON.stringify(fields) }).then((d) => d.project),
+  addMilestone: (base: string, id: string, body: { title: string; dueOn: string }) =>
+    request<{ milestone: WorkProjectMilestoneDto }>(`${base}/work-projects/${enc(id)}/milestones`, { method: "POST", body: JSON.stringify(body) }).then((d) => d.milestone),
+  patchMilestone: (base: string, id: string, milestoneId: string, body: { title?: string; dueOn?: string; done?: boolean; position?: number }) =>
+    request<{ milestone: WorkProjectMilestoneDto }>(`${base}/work-projects/${enc(id)}/milestones/${enc(milestoneId)}`, { method: "PATCH", body: JSON.stringify(body) }).then((d) => d.milestone),
+  removeMilestone: (base: string, id: string, milestoneId: string) => request<void>(`${base}/work-projects/${enc(id)}/milestones/${enc(milestoneId)}`, { method: "DELETE" }),
 };
 
 const UPLOAD_FAILED = "Couldn't upload the photo. Try again.";

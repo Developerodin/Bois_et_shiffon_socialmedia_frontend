@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { selectClass } from "@/components/settings/shared";
@@ -53,7 +55,16 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
-      <PageHeader title={navFor("/tasks").title}>Work on this business across content, the website and SEO.</PageHeader>
+      <PageHeader
+        title={navFor("/tasks").title}
+        actions={
+          <Button asChild size="sm" variant="outline">
+            <Link href="/projects">{navFor("/projects").title}</Link>
+          </Button>
+        }
+      >
+        Work on this business across content, the website and SEO.
+      </PageHeader>
       <div className="flex flex-wrap items-center gap-3">
         <SegmentedRadios label="Area" name="task-area" value={area} onChange={setArea} options={AREA_TABS} />
         {layout === "list" ? (

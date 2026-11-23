@@ -128,4 +128,9 @@ describe("tasks nav", () => {
     expect(NAV.find((e) => e.id === "tasks")?.group).not.toBe("more");
     expect(navFor("/tasks").title).toBe("Projects & tasks");
   });
+  it("titles /projects and a project page Projects without listing it", () => {
+    expect(navFor("/projects").title).toBe("Projects");
+    expect(navFor("/projects/p1").title).toBe("Projects");
+    expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("projects");
+  });
 });

@@ -57,6 +57,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
   if (pathname === "/performance") activeId = "surge";
   // /tasks is told apart by ?area=: Website, SEO, else Beat's Projects & tasks slot.
   if (pathname === "/tasks") activeId = search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
+  if (pathname === "/projects" || pathname.startsWith("/projects/")) activeId = "beat";
   const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));
 
   // The person can reorder their agents by dragging, or with Alt+Up/Down on a focused row. Read after mount so the

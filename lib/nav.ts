@@ -34,6 +34,8 @@ export const NAV: readonly NavEntry[] = [
   // Its own link is the Beat slot (agentEntries); this entry only gives the page its title. Not "more": the account
   // menu lists those without checking flags.
   { id: "tasks", label: "Projects & tasks", href: "/tasks", group: "page", feature: "tasks", perm: TASKS_READ },
+  // Its link is on the tasks page; the sidebar highlights Beat's slot on it.
+  { id: "projects", label: "Projects", href: "/projects", group: "page", feature: "tasks", perm: TASKS_READ },
   { id: "website", label: "Website", href: "/tasks?area=website", group: "main", feature: "tasks", perm: TASKS_READ },
   { id: "seo", label: "SEO", href: "/tasks?area=seo", group: "main", feature: "tasks", perm: TASKS_READ },
 

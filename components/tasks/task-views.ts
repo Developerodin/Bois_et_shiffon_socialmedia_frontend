@@ -100,3 +100,15 @@ export function boardMove(task: TaskDto, to: BoardStatus): { action: TaskAction 
 
 /** Fired after a task changes here, so other lists of tasks on the page reload. */
 export const TASKS_CHANGED = "tasks:changed";
+
+/** A project's progress (done of all but cancelled) as words: "3 of 8 done", or "No tasks yet". */
+export function progressLabel(p: { done: number; total: number }): string {
+  return p.total ? `${p.done} of ${p.total} done` : "No tasks yet";
+}
+
+/** The same as a whole percent for the bar; 0 with no tasks. */
+export function progressPercent(p: { done: number; total: number }): number {
+  return p.total ? Math.round((p.done / p.total) * 100) : 0;
+}
+
+export const PROJECT_STATUS_LABEL: Record<string, string> = { ACTIVE: "Active", DONE: "Done", ARCHIVED: "Archived" };
