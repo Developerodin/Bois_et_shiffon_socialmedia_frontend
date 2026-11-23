@@ -37,13 +37,14 @@ const th = "px-3 py-2 text-left text-xs font-medium text-muted-foreground";
 const td = "px-3 py-3 align-top";
 
 /** One view of the brand's tasks as a table, 50 a page with "Show more". View=mine also lists your posts that need action. */
-export function TaskList(props: { base: string; view: TaskListView; area: AreaParam; workProjectId?: string }) {
+/** `empty`: a page's own short line for no tasks (a project's), instead of the big "Nothing here". */
+export function TaskList(props: { base: string; view: TaskListView; area: AreaParam; workProjectId?: string; empty?: string }) {
   const query = tasksQuery(props);
   // Keyed by the query: a new view starts from its own first page.
-  return <Pages key={query} base={props.base} query={query} />;
+  return <Pages key={query} base={props.base} query={query} empty={props.empty} />;
 }
 
-function Pages({ base, query }: { base: string; query: string }) {
+function Pages({ base, query, empty }: { base: string; query: string; empty?: string }) {
   const url = `${base}/${query}`;
   const { data, failed, reload } = useJob(url, { pick: pickPage, intervals: JOB_INTERVALS.tasks });
   // Pages after the first, loaded on request; a reload drops them (the first page is fresh, they may not be).
@@ -119,6 +120,7 @@ function Pages({ base, query }: { base: string; query: string }) {
   };
 
   if (!tasks.length && !posts.length) {
+    if (empty) return <p className="py-1 text-sm text-muted-foreground">{empty}</p>;
     return <EmptyState icon={ListTodo} title="Nothing here" description="No tasks in this view. Try another view or area." className="py-6" />;
   }
 

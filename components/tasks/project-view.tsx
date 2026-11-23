@@ -48,7 +48,7 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
     } else if (failed) body = <LoadFailed what="this project" onRetry={refresh} className="py-6" />;
     else body = <ListSkeleton label="Loading project" rows={4} />;
     return (
-      <div className="mx-auto flex max-w-6xl flex-col gap-4">
+      <div className="flex w-full flex-col gap-4">
         <PageHeader title={navFor("/projects").title} crumbs={crumbs} />
         {body}
       </div>
@@ -56,7 +56,7 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
       <PageHeader title={project.name} crumbs={[...crumbs, { label: project.name }]} />
       {failed ? (
         <p role="status" className="-mt-2 text-xs text-muted-foreground">
@@ -64,7 +64,7 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
         </p>
       ) : null}
       <ProjectHeader base={base} project={project} canManage={canManage} onSaved={(p) => putShared(url, { project: p })} />
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] 2xl:grid-cols-[minmax(0,3fr)_minmax(20rem,1fr)]">
         <section aria-labelledby="project-tasks" className="flex min-w-0 flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="project-tasks" className="text-base font-medium">
@@ -72,7 +72,7 @@ export function ProjectView({ workspaceId, brandId, projectId, perms, userId }: 
             </h2>
             <SegmentedRadios label="Which tasks" name="project-task-view" value={view} onChange={setView} options={TASK_VIEWS} />
           </div>
-          <TaskList base={base} view={view} area="" workProjectId={project.id} />
+          <TaskList base={base} view={view} area="" workProjectId={project.id} empty={view === "open" ? "No open tasks in this project." : "Nothing finished in the last 30 days."} />
         </section>
         <Milestones base={base} projectId={project.id} milestones={project.milestones} canEdit={canManage} onChanged={refresh} />
       </div>

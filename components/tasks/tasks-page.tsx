@@ -64,7 +64,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
   };
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-5">
+    <div className="flex w-full flex-col gap-5">
       <PageHeader
         title={navFor("/tasks").title}
         actions={

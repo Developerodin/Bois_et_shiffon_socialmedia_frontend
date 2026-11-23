@@ -34,7 +34,7 @@ export function ProjectsPage({ workspaceId, brandId, perms }: { workspaceId: str
   const base = brandBase(workspaceId, brandId);
   const [filter, setFilter] = useState<Filter>("");
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-5">
+    <div className="flex w-full flex-col gap-5">
       <PageHeader
         title={navFor("/projects").title}
         crumbs={[{ href: "/tasks", label: navFor("/tasks").title }, { label: navFor("/projects").title }]}
