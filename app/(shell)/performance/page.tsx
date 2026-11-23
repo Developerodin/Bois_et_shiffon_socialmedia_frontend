@@ -1,6 +1,7 @@
 import { Gauge } from "lucide-react";
 import { AuditBoard } from "@/components/performance/audit-board";
 import { EmptyState } from "@/components/ui/empty-state";
+import { featureOn } from "@/lib/features";
 import { getShell } from "@/lib/server-fetch";
 import { navFor } from "@/lib/nav";
 
@@ -22,5 +23,13 @@ export default async function PerformancePage() {
     );
   }
 
-  return <AuditBoard key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} canReadAgents={shell.brandPermissions.includes("agents.read")} />;
+  return (
+    <AuditBoard
+      key={shell.activeBrandId}
+      workspaceId={shell.activeWorkspaceId}
+      brandId={shell.activeBrandId}
+      canReadAgents={shell.brandPermissions.includes("agents.read")}
+      canMakeTasks={featureOn("tasks", shell.activeWorkspaceId) && shell.brandPermissions.includes("tasks.manage")}
+    />
+  );
 }
