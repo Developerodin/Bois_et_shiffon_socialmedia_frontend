@@ -11,7 +11,7 @@ import { NewProject } from "@/components/tasks/project-list";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
-import { postHref, samePage, taskHref } from "@/lib/workspace-view";
+import { navigate, postHref, samePage, taskHref } from "@/lib/workspace-view";
 
 type Kind = "task" | "post" | "project" | "note";
 
@@ -50,7 +50,7 @@ export function QuickCreate({ base, perms }: { base: string; perms: readonly str
   // The new item opens where it lives; leaving this page asks about unsaved work here first.
   const go = (href: string) => {
     if (!samePage(href, pathname) && !okToDiscard()) return;
-    router.push(href, { scroll: false });
+    navigate(router, href, pathname);
   };
 
   return (

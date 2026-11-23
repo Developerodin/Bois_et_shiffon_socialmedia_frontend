@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RUN_ID_PATTERN } from "@/shared";
 import { entryToView, parseRecent, viewToEntry } from "@/lib/recent";
-import { agentLabel, namesItem, parseViewParts, peekCrumb, peekKey, peekTitle, viewFromSearch, viewToSearch, withoutOpenItem } from "@/lib/workspace-view";
+import { agentLabel, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem } from "@/lib/workspace-view";
 
 describe("workspace view URL", () => {
   it("round-trips an agent's run", () => {
@@ -171,5 +171,40 @@ describe("task in the peek (?task=)", () => {
     expect(withoutOpenItem("?task=t1", "/projects/p1")).toBe("/projects");
     expect(withoutOpenItem("?area=seo", "/tasks")).toBeNull();
     expect(withoutOpenItem("?task=t1", "/reels")).toBeNull();
+  });
+});
+
+describe("navigate and shallowClick", () => {
+  const history = { pushState: vi.fn(), replaceState: vi.fn() };
+  const router = { push: vi.fn(), replace: vi.fn() };
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubGlobal("window", { history });
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("changes only the query through the history, and another page through the router", () => {
+    navigate(router, "/tasks?area=seo", "/tasks", "replace");
+    expect(history.replaceState).toHaveBeenCalledWith(null, "", "/tasks?area=seo");
+    navigate(router, "/tasks?task=t1", "/tasks");
+    expect(history.pushState).toHaveBeenCalledWith(null, "", "/tasks?task=t1");
+    navigate(router, "/projects/p1", "/tasks");
+    expect(router.push).toHaveBeenCalledWith("/projects/p1", { scroll: false });
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("leaves new-tab and other-page clicks to the link", () => {
+    const click = (o: Partial<{ button: number; ctrlKey: boolean; metaKey: boolean }> = {}) => ({ button: 0, metaKey: false, ctrlKey: false, shiftKey: false, altKey: false, preventDefault: vi.fn(), ...o });
+    const plain = click();
+    shallowClick(plain, "/tasks?task=t1", "/tasks");
+    expect(plain.preventDefault).toHaveBeenCalled();
+    expect(history.pushState).toHaveBeenCalledWith(null, "", "/tasks?task=t1");
+    for (const e of [click({ ctrlKey: true }), click({ metaKey: true }), click({ button: 1 })]) {
+      shallowClick(e, "/tasks?task=t1", "/tasks");
+      expect(e.preventDefault).not.toHaveBeenCalled();
+    }
+    const away = click();
+    shallowClick(away, "/projects?task=t1", "/tasks");
+    expect(away.preventDefault).not.toHaveBeenCalled();
   });
 });

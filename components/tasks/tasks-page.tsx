@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { TaskBoard } from "@/components/tasks/task-board";
 import { TaskList } from "@/components/tasks/task-list";
 import { TaskPeek } from "@/components/tasks/task-view";
+import { navigate } from "@/lib/workspace-view";
 import { AREA_TABS, areaParam, readSaved, TASK_LIST_VIEWS, TASKS_VIEW_KEY, type AreaParam, type TaskLayout, type TaskListView } from "@/components/tasks/task-views";
 
 const LAYOUTS = [
@@ -43,7 +44,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
       const q = new URLSearchParams(search.toString());
       q.delete("view");
       const s = q.toString();
-      router.replace(s ? `${pathname}?${s}` : pathname, { scroll: false });
+      navigate(router, s ? `${pathname}?${s}` : pathname, pathname, "replace");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- read once on mount, like the saved choice
   }, []);
@@ -60,7 +61,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
     if (a) q.set("area", a);
     else q.delete("area");
     const s = q.toString();
-    router.replace(s ? `${pathname}?${s}` : pathname, { scroll: false });
+    navigate(router, s ? `${pathname}?${s}` : pathname, pathname, "replace");
   };
 
   return (

@@ -86,6 +86,25 @@ export function postHref(pathname: string, search: string, id: string): string {
 /** `href` stays on `pathname` (only its query changes): no page is left, so nothing needs asking before it. */
 export const samePage = (href: string, pathname: string) => href === pathname || href.startsWith(`${pathname}?`);
 
+type Nav = { push: (href: string, o?: { scroll?: boolean }) => void; replace: (href: string, o?: { scroll?: boolean }) => void };
+
+/**
+ * Go to `href`. Only this page's query changing (a filter, opening or closing a peek) goes through the browser's
+ * history, which useSearchParams follows: router.push/replace would fetch the whole page from the server again, seconds
+ * each time against a distant database. Another page still goes through the router.
+ */
+export function navigate(router: Nav, href: string, pathname: string, mode: "push" | "replace" = "push") {
+  if (samePage(href, pathname)) window.history[mode === "push" ? "pushState" : "replaceState"](null, "", href);
+  else router[mode](href, { scroll: false });
+}
+
+/** A link's plain click onto this same page: the history instead of a server round trip. New-tab clicks are left alone. */
+export function shallowClick(e: { button: number; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean; preventDefault: () => void }, href: string, pathname: string) {
+  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !samePage(href, pathname)) return;
+  e.preventDefault();
+  window.history.pushState(null, "", href);
+}
+
 /** One item, whatever run it shows: a replaced item remounts fresh, a new runId on the same agent doesn't. */
 export function peekKey(v: View): string {
   switch (v.kind) {

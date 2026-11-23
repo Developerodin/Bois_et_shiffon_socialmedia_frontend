@@ -10,7 +10,7 @@ import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { searchBrand } from "@/lib/tasks-api";
-import { postHref, samePage, taskHref } from "@/lib/workspace-view";
+import { navigate, postHref, samePage, taskHref } from "@/lib/workspace-view";
 
 const KINDS = [
   { key: "tasks", label: "Tasks" },
@@ -110,7 +110,7 @@ export function SearchBox({ base }: { base: string }) {
     // Leaving this page: ask about unsaved work here (a page's own peek asks itself when its URL changes).
     if (!samePage(href, pathname) && !okToDiscard()) return;
     change(false);
-    router.push(href, { scroll: false });
+    navigate(router, href, pathname);
   };
 
   const groups = state.kind === "done" ? groupResults(state.results) : [];

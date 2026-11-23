@@ -20,7 +20,7 @@ import { putShared } from "@/components/workspace/use-job";
 import { writeRecent } from "@/lib/recent";
 import { onTasksChanged, searchBrand, tasksApi } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
-import { agreedToDrop, parseViewParts, peekCrumb, peekKey, peekTitle, viewToSearch, type View } from "@/lib/workspace-view";
+import { agreedToDrop, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, type View, viewToSearch } from "@/lib/workspace-view";
 import { PersonSelect, TaskActions } from "@/components/tasks/task-actions";
 import { ProjectSelect } from "@/components/tasks/new-task-dialog";
 import { TaskAttachments } from "@/components/tasks/task-attachments";
@@ -462,11 +462,11 @@ export function TaskPeek({ base, perms, userId, recentKey }: { base: string; per
     const v = raw === null ? null : parseViewParts("task", raw);
     const next = v?.kind === "task" ? v.id : null;
     // A bad task link: drop it, so Back doesn't return to it.
-    if (raw !== null && !next) return void router.replace(hrefFor(null), { scroll: false });
+    if (raw !== null && !next) return void navigate(router, hrefFor(null), pathname, "replace");
     // A brand or workspace switch took the task out of the URL after the person agreed to leave: don't ask again.
     const agreed = agreedToDrop(window.location.search || window.location.pathname);
     if (next !== shownRef.current) {
-      if (!agreed && !okToDiscard()) return void router.replace(accepted.current ?? hrefFor(shownRef.current), { scroll: false });
+      if (!agreed && !okToDiscard()) return void navigate(router, accepted.current ?? hrefFor(shownRef.current), pathname, "replace");
       shownRef.current = next;
       recorded.current = null;
       setShownId(next);
@@ -480,7 +480,7 @@ export function TaskPeek({ base, perms, userId, recentKey }: { base: string; per
     shownRef.current = null;
     recorded.current = null;
     setShownId(null);
-    router.push(hrefFor(null), { scroll: false });
+    navigate(router, hrefFor(null), pathname);
   };
 
   const view: View | null = shownId ? { kind: "task", id: shownId } : null;

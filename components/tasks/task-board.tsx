@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import type { TaskDto, TaskPersonDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
@@ -13,6 +14,7 @@ import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { tasksApi, type TaskActionBody, type TaskPage } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { useTaskHref, useTasksChanged } from "@/components/tasks/task-list";
+import { shallowClick } from "@/lib/workspace-view";
 import {
   AREA_LABEL,
   BOARD_COLUMNS,
@@ -129,6 +131,7 @@ export function TaskBoard({ base, area }: { base: string; area: AreaParam }) {
 
 function Card({ task, busy, dragging, onDrag, onMove }: { task: TaskDto; busy: boolean; dragging: boolean; onDrag: (id: string | null) => void; onMove: (to: BoardStatus) => void }) {
   const taskHref = useTaskHref();
+  const pathname = usePathname();
   const moveId = useId();
   return (
     <article
@@ -142,7 +145,7 @@ function Card({ task, busy, dragging, onDrag, onMove }: { task: TaskDto; busy: b
       aria-busy={busy || undefined}
       className={cn("flex flex-col gap-2 rounded-xl border border-border bg-background p-3 active:cursor-grabbing", (dragging || busy) && "opacity-50")}
     >
-      <Link href={taskHref(task.id)} scroll={false} draggable={false} className="text-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <Link href={taskHref(task.id)} scroll={false} draggable={false} onClick={(e) => shallowClick(e, taskHref(task.id), pathname)} className="text-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         {task.title}
       </Link>
       <p className="text-xs text-muted-foreground">

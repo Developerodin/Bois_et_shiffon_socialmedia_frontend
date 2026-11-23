@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { CHANNEL_LABEL, STATUS_LABEL as POST_STATUS_LABEL } from "@/lib/post-labels";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { listsCare, onTasksChanged, tasksApi, type TaskPage } from "@/lib/tasks-api";
+import { shallowClick } from "@/lib/workspace-view";
 import { AREA_LABEL, dueLabel, ownerLabel, PRIORITY_LABEL, STATUS_LABEL, tasksQuery, type AreaParam, type TaskListView } from "@/components/tasks/task-views";
 
 const pickPage = (d: TaskPage) => d;
@@ -85,6 +86,7 @@ function Pages({ base, query, empty }: { base: string; query: string; empty?: st
   }, [data, base, query]);
   useTasksChanged(refresh);
   const taskHref = useTaskHref();
+  const pathname = usePathname();
 
   if (!data) {
     return failed ? (
@@ -152,7 +154,7 @@ function Pages({ base, query, empty }: { base: string; query: string; empty?: st
             {tasks.map((t) => (
               <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                 <td className={td}>
-                  <Link href={taskHref(t.id)} scroll={false} className="font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <Link href={taskHref(t.id)} scroll={false} onClick={(e) => shallowClick(e, taskHref(t.id), pathname)} className="font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                     {t.title}
                   </Link>
                   {t.checklist.total ? (
