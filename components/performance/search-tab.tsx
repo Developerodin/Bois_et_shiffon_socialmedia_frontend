@@ -29,10 +29,16 @@ export function SearchTab({ workspaceId, brandId, range, source, canManage, onSo
   if (!source || picking) {
     return (
       <PageSection id="search-site" title="Search Console" description="Clicks and positions from Google Search, for one site.">
-        {canManage ? (
-          <SitePicker workspaceId={workspaceId} brandId={brandId} current={source?.label ?? undefined} onSaved={() => { setPicking(false); onSourceChanged(); }} onCancel={source ? () => setPicking(false) : undefined} />
-        ) : (
+        {!canManage ? (
           <p className="text-sm text-muted-foreground">No site picked yet. Ask a workspace owner to pick the brand&apos;s site.</p>
+        ) : picking ? (
+          <SitePicker workspaceId={workspaceId} brandId={brandId} current={source?.label ?? undefined} onSaved={() => { setPicking(false); onSourceChanged(); }} onCancel={() => setPicking(false)} />
+        ) : (
+          // The picker asks Google for the sites, so it opens on a press, not on every visit to the tab.
+          <div className="flex flex-col items-start gap-2">
+            <p className="text-sm text-muted-foreground">No site picked yet.</p>
+            <Button size="sm" onClick={() => setPicking(true)}>Choose site</Button>
+          </div>
         )}
       </PageSection>
     );
@@ -157,7 +163,7 @@ function TopPages({ base, range, first }: { base: string; range: DateRange; firs
 }
 
 /** Owners pick the site from the Google account's verified sites; saving starts a 90-day backfill on the server. */
-function SitePicker({ workspaceId, brandId, current, onSaved, onCancel }: { workspaceId: string; brandId: string; current?: string; onSaved: () => void; onCancel?: () => void }) {
+function SitePicker({ workspaceId, brandId, current, onSaved, onCancel }: { workspaceId: string; brandId: string; current?: string; onSaved: () => void; onCancel: () => void }) {
   const base = brandApi(workspaceId, brandId);
   const fetcher = useCallback(async () => {
     const { connections } = await request<{ connections: Connection[] }>(connectionsUrl(workspaceId, brandId));
@@ -206,7 +212,7 @@ function SitePicker({ workspaceId, brandId, current, onSaved, onCancel }: { work
           {sites.map((s) => <option key={s.siteUrl} value={s.siteUrl}>{s.siteUrl}</option>)}
         </select>
         <Button size="sm" disabled={busy || !site || site === current} onClick={() => void save()}>{busy ? "Saving…" : "Use this site"}</Button>
-        {onCancel ? <Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button> : null}
+        <Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
       </div>
       <p className="text-xs text-muted-foreground">The first sync reads the last 90 days. A new site starts fresh; the old site&apos;s numbers are kept.</p>
       {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
