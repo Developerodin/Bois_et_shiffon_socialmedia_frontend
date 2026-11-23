@@ -20,7 +20,7 @@ const KINDS = [
   { key: "campaigns", label: "Campaigns" },
 ] as const;
 const DEBOUNCE_MS = 250;
-const MIN = 2;
+const MIN = 3;
 const MAX = 100;
 
 /** The results in kind order (tasks, projects, posts, products, campaigns), kinds with nothing left out. */
@@ -45,6 +45,16 @@ export function resultHref(r: SearchResultDto, pathname: string, search: string)
   }
 }
 
+/** A dialog other than this search is open. */
+function anotherDialogOpen(): boolean {
+  return !!document.querySelector('[role="dialog"]:not([data-search]), [role="alertdialog"]');
+}
+
+/** The empty answer's text: "Searching…" while what's typed has moved on from the term it answers. */
+export function noMatchText(term: string, typed: string): string {
+  return term === typed.trim() ? `Nothing matches “${term}”.` : "Searching…";
+}
+
 type State = { kind: "idle" } | { kind: "loading" } | { kind: "done"; results: SearchResultsDto; term: string } | { kind: "error"; message: string };
 
 /**
@@ -63,6 +73,8 @@ export function SearchBox({ base }: { base: string }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "k") {
+        // Another dialog is open (a new task, a confirm): leave it be rather than stack search over it.
+        if (anotherDialogOpen()) return;
         e.preventDefault();
         setOpen(true);
       }
@@ -117,7 +129,7 @@ export function SearchBox({ base }: { base: string }) {
         </kbd>
       </button>
       <Dialog open={open} onOpenChange={change}>
-        <DialogContent className="top-[15%] translate-y-0 sm:max-w-xl">
+        <DialogContent data-search="" className="top-[15%] translate-y-0 sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Search this business</DialogTitle>
             <DialogDescription id={hintId}>Tasks, projects, posts, products and campaigns. Enter opens the first result.</DialogDescription>
@@ -127,7 +139,7 @@ export function SearchBox({ base }: { base: string }) {
             autoFocus
             value={q}
             maxLength={MAX}
-            placeholder="Type at least 2 letters"
+            placeholder="Type at least 3 letters"
             aria-label="Search"
             aria-describedby={hintId}
             aria-controls={listId}
@@ -145,7 +157,7 @@ export function SearchBox({ base }: { base: string }) {
             ) : state.kind === "error" ? (
               <p className="py-2 text-sm text-muted-foreground">{state.message}</p>
             ) : state.kind === "done" && !groups.length ? (
-              <p className="py-2 text-sm text-muted-foreground">Nothing matches &ldquo;{q.trim()}&rdquo;.</p>
+              <p className="py-2 text-sm text-muted-foreground">{noMatchText(state.term, q)}</p>
             ) : (
               groups.map((g) => (
                 <section key={g.label} aria-label={g.label} className="py-1">

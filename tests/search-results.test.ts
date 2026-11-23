@@ -37,3 +37,11 @@ describe("quick create", () => {
     expect(quickCreateItems(["tasks.manage", "content.create"]).map((i) => i.label)).toEqual(["Task", "Post from a brief", "Project", "Tasks from a note"]);
   });
 });
+
+describe("search's empty answer", () => {
+  it("names the term it answers, and says Searching… once the typing has moved on", async () => {
+    const { noMatchText } = await import("@/components/shell/search-box");
+    expect(noMatchText("silk", " silk ")).toBe("Nothing matches “silk”.");
+    expect(noMatchText("silk", "silk s")).toBe("Searching…");
+  });
+});

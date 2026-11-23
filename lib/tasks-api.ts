@@ -106,7 +106,7 @@ export const tasksApi = {
     ),
 };
 
-/** Top-bar search (brand.read): 2–100 characters, 5 per kind; 30 a minute per person (429 past that). */
+/** Top-bar search (brand.read): 3–100 characters, 5 per kind; 30 a minute per person (429 past that). */
 export const searchBrand = (base: string, q: string, signal?: AbortSignal) => request<SearchResultsDto>(`${base}/search?q=${enc(q)}`, { signal });
 
 /** The person's notifications in the current workspace: the /me routes read it from X-Workspace-Id. */

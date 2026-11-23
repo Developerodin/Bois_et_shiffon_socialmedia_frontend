@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FolderKanban } from "lucide-react";
 import type { WorkProjectDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
+import { okToDiscard } from "@/components/context/unsaved";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { LoadFailed } from "@/components/ui/load-failed";
 import { PageHeader } from "@/components/ui/page-header";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { toast } from "@/components/ui/toast";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { navFor } from "@/lib/nav";
 import { brandBase, projectsApi, projectsQuery, type ProjectPage } from "@/lib/tasks-api";
@@ -148,7 +150,10 @@ export function NewProject({ base, onCreated }: { base: string; onCreated?: () =
       const p = await projectsApi.create(base, { name: n, requestId: requestId.current });
       requestId.current = null;
       onCreated?.();
-      router.push(`/projects/${encodeURIComponent(p.id)}`);
+      const href = `/projects/${encodeURIComponent(p.id)}`;
+      // Quick create opens this over any page: leaving one with unsaved work asks first; staying shows a link instead.
+      if (!okToDiscard()) return void toast({ title: "Project created", href, tone: "success" });
+      router.push(href);
     } catch (e) {
       setError(errorMessage(e, "Couldn't start the project. Try again."));
       setBusy(false);

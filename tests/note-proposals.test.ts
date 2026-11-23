@@ -36,3 +36,13 @@ describe("tasks from a note", () => {
     expect(noteSession().requestId).not.toBe(session.requestId);
   });
 });
+
+describe("a proposal from the model", () => {
+  it("keeps only real areas and a known priority", async () => {
+    const { rowOf } = await import("@/components/tasks/note-to-tasks-dialog");
+    const r = rowOf({ title: "Fix menu", areas: ["WEBSITE", "MARKETING", "SEO"], priority: "CRITICAL" }, 0);
+    expect(r.areas).toEqual(["WEBSITE", "SEO"]);
+    expect(r.priority).toBe("NORMAL");
+    expect(rowOf({ title: "x", areas: ["CONTENT"], priority: "HIGH" }, 1).priority).toBe("HIGH");
+  });
+});

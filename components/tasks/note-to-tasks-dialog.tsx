@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import type { TaskProposalDto } from "@/shared";
+import { TASK_AREAS, TASK_PRIORITIES, type TaskProposalDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,15 +17,16 @@ const NOTE_MAX = 8_000;
 /** One proposal as the person edits it: form values ("" for none) and whether it is kept. */
 export type ProposalRow = { key: string; keep: boolean; title: string; description: string; areas: string[]; ownerId: string; dueOn: string; priority: string };
 
-const rowOf = (p: TaskProposalDto, i: number): ProposalRow => ({
+/** A proposal as an editable row. The model's areas and priority are kept only when they are ones a task can have. */
+export const rowOf = (p: TaskProposalDto, i: number): ProposalRow => ({
   key: String(i),
   keep: true,
   title: p.title,
   description: p.description ?? "",
-  areas: p.areas,
+  areas: p.areas.filter((a) => (TASK_AREAS as readonly string[]).includes(a)),
   ownerId: p.ownerId ?? "",
   dueOn: p.dueOn ?? "",
-  priority: p.priority,
+  priority: (TASK_PRIORITIES as readonly string[]).includes(p.priority) ? p.priority : "NORMAL",
 });
 
 /** POST tasks/batch's body: the kept rows only, blank optional fields left out. */
@@ -115,7 +116,8 @@ export function NoteToTasksDialog({ base, open, onOpenChange }: { base: string; 
   };
 
   const edit = (key: string, patch: Partial<ProposalRow>) => setRows((rs) => rs?.map((r) => (r.key === key ? { ...r, ...patch } : r)) ?? rs);
-  const blocked = rows ? whyNot(rows) : note.trim() ? "" : "Paste or type a note first.";
+  // No proposals: there is nothing to tick, so no reason shows beside the (absent) Create button.
+  const blocked = rows ? (rows.length ? whyNot(rows) : "") : note.trim() ? "" : "Paste or type a note first.";
   const kept = rows?.filter((r) => r.keep).length ?? 0;
 
   return (
