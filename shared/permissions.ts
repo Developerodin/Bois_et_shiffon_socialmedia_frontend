@@ -29,7 +29,11 @@ export const PERMISSIONS = [
   ["analytics.read", "analytics", "See performance, learning notes and reports"],
   ["commercial.manage", "commercial", "Set product priorities, campaigns and offers"],
   ["tasks.read", "tasks", "See tasks and projects, and comment"],
-  ["tasks.manage", "tasks", "Create, edit, assign and cancel tasks and projects"],
+  ["tasks.manage", "tasks", "Create tasks and edit your own"],
+  // tasks.all: see and assign every task of the project. Without it, someone sees only the tasks they own (or their
+  // project role owns), review, unblock or created. Staff only: a client reviewer never holds it. Assigning also needs
+  // tasks.manage, so a role with tasks.all alone sees every task but can't give one to anyone.
+  ["tasks.all", "tasks", "See and assign every task"],
 ] as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[number][0];

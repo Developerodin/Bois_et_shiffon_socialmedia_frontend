@@ -32,6 +32,8 @@ export type TaskDto = {
   createdAt: string;
   updatedAt: string;
   owner: TaskPersonDto | null;
+  /** The project role that owns the task until someone with it takes it (then `owner`); never set with `owner`. */
+  ownerRole: { id: string; name: string } | null;
   reviewer: TaskPersonDto | null;
   blockedOn: TaskPersonDto | null;
   project: { id: string; name: string } | null;

@@ -15,7 +15,7 @@ export const DONE_DAYS = 30;
 export const SEARCH_MIN = 3;
 export const SEARCH_MAX = 100;
 
-export const TASK_ACTIONS = ["start", "submitForReview", "approve", "requestChanges", "markDone", "block", "unblock", "checkedLive", "cancel", "reopen"] as const;
+export const TASK_ACTIONS = ["take", "start", "submitForReview", "approve", "requestChanges", "markDone", "block", "unblock", "checkedLive", "cancel", "reopen"] as const;
 export type TaskAction = (typeof TASK_ACTIONS)[number];
 
 /** The task fields the rules read and write; dates are ISO strings. */
@@ -23,6 +23,8 @@ export type TaskRow = {
   status: string;
   reviewerId: string | null;
   ownerId: string | null;
+  /** The project role that owns the task while nobody has taken it (never set together with ownerId). */
+  ownerRoleId: string | null;
   url: string | null;
   blockedReason: string | null;
   blockedOnId: string | null;
@@ -33,7 +35,11 @@ export type TaskRow = {
   recheckOn: string | null;
 };
 
-export type ActorRole = { userId: string; isOwner: boolean; isReviewer: boolean; canManage: boolean; soleStaff: boolean; isBlockedOn: boolean };
+/**
+ * `canManage`: may run the manager actions on this task (tasks.all, or tasks.manage on a task they own or created).
+ * `holdsOwnerRole`: the actor holds the project role that owns the task, so they may take it.
+ */
+export type ActorRole = { userId: string; isOwner: boolean; isReviewer: boolean; canManage: boolean; soleStaff: boolean; isBlockedOn: boolean; holdsOwnerRole: boolean };
 export type ActionInput = { reviewerId?: string; reason?: string; blockedOnId?: string; now: string };
 /** `code`: the stable code the same refusal carries elsewhere (PATCH), so clients see one shape. */
 export type ActionResult = { ok: true; patch: Partial<TaskRow> & { status?: string } } | { ok: false; reason: string; code?: string };
@@ -46,6 +52,13 @@ function run(task: TaskRow, action: TaskAction, actor: ActorRole, input: ActionI
   const mine = actor.isOwner || actor.canManage;
   const reason = input.reason?.trim();
   switch (action) {
+    case "take":
+      // A role's task becomes one person's. The reviewer of a task in review can't take it (unless sole staff), as in PATCH.
+      if (!task.ownerRoleId || task.ownerId) return no("Someone else has taken this task.", "task.taken");
+      if (!actor.holdsOwnerRole) return no("Only someone with this role can take this task.");
+      if (!isOpen(task.status)) return no("Only an open task can be taken.");
+      if (task.status === "IN_REVIEW" && task.reviewerId === actor.userId && !actor.soleStaff) return no("The reviewer can't be the owner.", "task.reviewerIsOwner");
+      return { ok: true, patch: { ownerId: actor.userId, ownerRoleId: null } };
     case "start":
       if (!mine) return no("Only the owner or a manager can start this task.");
       return task.status === "TODO" ? { ok: true, patch: { status: "IN_PROGRESS" } } : no("Only a to-do task can be started.");
@@ -108,7 +121,7 @@ export function allowedActions(task: TaskRow, actor: ActorRole): TaskAction[] {
 
 /** The fields a manager may change through PATCH; everything else (status, completedAt, checkedLive*, finding*) is server-only. */
 export const MANAGE_PATCH_FIELDS = [
-  "title", "description", "priority", "areas", "ownerId", "reviewerId", "dueOn", "workProjectId",
+  "title", "description", "priority", "areas", "ownerId", "ownerRoleId", "reviewerId", "dueOn", "workProjectId",
   "contentItemId", "url", "changeKind", "acceptanceCriteria", "previewUrl", "recheckOn",
 ] as const;
 
