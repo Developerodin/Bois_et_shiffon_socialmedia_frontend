@@ -19,6 +19,8 @@ export function TaskAttachments({ base, task, roles, canEdit, slots }: { base: s
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState<string | null>(null);
+  // The person's own say that they may use the photo; nothing uploads until it's ticked.
+  const [rights, setRights] = useState(false);
   const inputId = useId();
   const photos = task.attachments.filter((a) => roles.includes(a.role));
   if (!slots && !photos.length) return null;
@@ -36,12 +38,12 @@ export function TaskAttachments({ base, task, roles, canEdit, slots }: { base: s
   };
 
   const upload = async (role: "BEFORE" | "AFTER", file: File | undefined) => {
-    if (!file) return;
+    if (!file || !rights) return;
     setError("");
     if (!PHOTO_TYPES.includes(file.type)) return setError("Screenshots can be JPG or PNG.");
     setUploading(role);
     try {
-      await tasksApi.uploadScreenshot(base, task.id, file, role);
+      await tasksApi.uploadScreenshot(base, task.id, file, role, rights);
     } catch (e) {
       setError(errorMessage(e, "Couldn't upload the photo. Try again."));
     } finally {
@@ -49,10 +51,11 @@ export function TaskAttachments({ base, task, roles, canEdit, slots }: { base: s
     }
   };
 
+  const uploadOff = !!uploading || !rights;
   const uploader = (role: "BEFORE" | "AFTER") => (
     <label
       htmlFor={`${inputId}-${role}`}
-      aria-disabled={!!uploading || undefined}
+      aria-disabled={uploadOff || undefined}
       className="inline-flex h-8 cursor-pointer items-center gap-2 self-start rounded-full border border-input px-3 text-xs font-medium hover:bg-muted focus-within:ring-2 focus-within:ring-ring aria-disabled:pointer-events-none aria-disabled:opacity-50 pointer-coarse:h-11"
     >
       <Upload className="size-4" aria-hidden="true" />
@@ -62,7 +65,8 @@ export function TaskAttachments({ base, task, roles, canEdit, slots }: { base: s
         type="file"
         accept={PHOTO_TYPES.join(",")}
         className="sr-only"
-        disabled={!!uploading}
+        disabled={uploadOff}
+        aria-describedby={!rights ? `${inputId}-why` : undefined}
         onChange={(e) => {
           const f = e.target.files?.[0];
           e.target.value = "";
@@ -109,7 +113,17 @@ export function TaskAttachments({ base, task, roles, canEdit, slots }: { base: s
             })
           : photos.map(tile)}
       </div>
-      {slots && canEdit ? <p className="text-xs text-muted-foreground">JPG or PNG, up to 15 MB. Uploading confirms you may use the photo.</p> : null}
+      {slots && canEdit ? (
+        <div className="flex flex-col gap-1">
+          <label className="flex items-center gap-2 text-sm pointer-coarse:min-h-11">
+            <input type="checkbox" className="size-4 accent-primary" checked={rights} disabled={!!uploading} onChange={(e) => setRights(e.target.checked)} />
+            I have the right to use this photo
+          </label>
+          <p id={`${inputId}-why`} className="text-xs text-muted-foreground">
+            {rights ? "JPG or PNG, up to 15 MB." : "Tick “I have the right to use this photo” to upload. JPG or PNG, up to 15 MB."}
+          </p>
+        </div>
+      ) : null}
       {error ? (
         <p role="alert" className="text-sm text-destructive">
           {error}

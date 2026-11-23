@@ -29,8 +29,8 @@ const task = (over: Partial<TaskDetailDto> = {}): TaskDetailDto => ({
   findingClearedAt: null,
   createdAt: "2026-11-23T10:00:00.000Z",
   updatedAt: "2026-11-23T10:00:00.000Z",
-  owner: { id: "u1", name: "Ana", gone: false },
-  reviewer: { id: "u2", name: "Ben", gone: false },
+  owner: { id: "u1", name: "Ana", gone: false, client: false },
+  reviewer: { id: "u2", name: "Ben", gone: false, client: false },
   blockedOn: null,
   project: null,
   post: null,
@@ -82,5 +82,27 @@ describe("task edits", () => {
   it("reads the editable fields off a task", () => {
     const d = draftOf(task({ description: "x" }));
     expect(d).toMatchObject({ title: "Fix the menu", description: "x", priority: "NORMAL", areas: ["WEBSITE"], dueOn: "", ownerId: "u1", reviewerId: "u2" });
+  });
+});
+
+describe("person pickers", () => {
+  const people = [
+    { id: "u1", name: "Ana", gone: false, client: false },
+    { id: "c1", name: "Cleo", gone: false, client: true },
+  ];
+  it("offer staff only for owner, waiting on and project owner", async () => {
+    const { personOptions } = await import("@/components/tasks/task-actions");
+    expect(personOptions(people, null, false)).toEqual([{ id: "u1", label: "Ana" }]);
+  });
+  it("offer clients, labelled, for the reviewer", async () => {
+    const { personOptions } = await import("@/components/tasks/task-actions");
+    expect(personOptions(people, null, true)).toEqual([
+      { id: "u1", label: "Ana" },
+      { id: "c1", label: "Cleo (client)" },
+    ]);
+  });
+  it("keep the current person pickable", async () => {
+    const { personOptions } = await import("@/components/tasks/task-actions");
+    expect(personOptions([], { id: "u9", name: "Old", gone: true, client: false }, false)).toEqual([{ id: "u9", label: "Old (no longer on this business)" }]);
   });
 });

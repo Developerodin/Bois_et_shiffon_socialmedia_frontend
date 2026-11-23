@@ -27,24 +27,33 @@ const PRIMARY: TaskAction[] = ["start", "submitForReview", "approve", "markDone"
 /** These ask for something first (a reviewer, a reason, an optional note) in a short form under the buttons. */
 const WITH_FORM: TaskAction[] = ["submitForReview", "approve", "requestChanges", "block"];
 
-/** A select of the people who read the brand's tasks; `current` stays pickable when the list leaves them out or failed. */
+/**
+ * A picker's options: staff only (owner, waiting on, project owner), or with the business's client reviewers too,
+ * labelled so (reviewer). `current` stays pickable when the list leaves them out or failed.
+ */
+export function personOptions(people: TaskPersonDto[] | null, current: TaskPersonDto | null | undefined, withClients: boolean): { id: string; label: string }[] {
+  const options = (people ?? []).filter((o) => withClients || !o.client);
+  if (current && !options.some((o) => o.id === current.id)) options.unshift(current);
+  return options.map((o) => ({ id: o.id, label: o.gone ? `${o.name} (no longer on this business)` : o.client ? `${o.name} (client)` : o.name }));
+}
+
+/** A select of the people who read the brand's tasks: staff, plus clients when `withClients` (the reviewer pickers). */
 export function PersonSelect(p: {
   id: string;
   value: string;
   people: TaskPersonDto[] | null;
   current?: TaskPersonDto | null;
+  withClients?: boolean;
   empty: string;
   disabled?: boolean;
   onChange: (id: string) => void;
 }) {
-  const options = [...(p.people ?? [])];
-  if (p.current && !options.some((o) => o.id === p.current!.id)) options.unshift(p.current);
   return (
     <select id={p.id} value={p.value} disabled={p.disabled} onChange={(e) => p.onChange(e.target.value)} className={cn(selectClass, "pointer-coarse:h-11")}>
       <option value="">{p.people ? p.empty : "Loading people…"}</option>
-      {options.map((o) => (
+      {personOptions(p.people, p.current, !!p.withClients).map((o) => (
         <option key={o.id} value={o.id}>
-          {o.gone ? `${o.name} (no longer on this business)` : o.name}
+          {o.label}
         </option>
       ))}
     </select>
@@ -54,8 +63,9 @@ export function PersonSelect(p: {
 /**
  * The status buttons this person may press, straight from `task.actions` (the server's answer; nothing is decided here).
  * A refusal comes back as the server's message and shows as text. tasksApi announces every success (`tasks:changed`).
+ * `noPeople`: the viewer may not list the business's people (a client reviewer), so no person pickers show.
  */
-export function TaskActions({ base, task, people, onChanged, hide = [] }: { base: string; task: TaskDetailDto; people: TaskPersonDto[] | null; onChanged: (t: TaskDetailDto) => void; hide?: TaskAction[] }) {
+export function TaskActions({ base, task, people, onChanged, hide = [], noPeople = false }: { base: string; task: TaskDetailDto; people: TaskPersonDto[] | null; onChanged: (t: TaskDetailDto) => void; hide?: TaskAction[]; noPeople?: boolean }) {
   const [form, setForm] = useState<TaskAction | null>(null);
   const [text, setText] = useState("");
   const [personId, setPersonId] = useState("");
@@ -64,6 +74,7 @@ export function TaskActions({ base, task, people, onChanged, hide = [] }: { base
   const textId = useId();
   const personSelectId = useId();
   const whyId = useId();
+  const readsId = useId();
   const shown = TASK_ACTIONS.filter((a) => task.actions.includes(a) && !hide.includes(a));
   if (!shown.length && !error) return null;
 
@@ -112,7 +123,7 @@ export function TaskActions({ base, task, people, onChanged, hide = [] }: { base
       </div>
       {form ? (
         <div className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3">
-          {form === "submitForReview" || form === "block" ? (
+          {(form === "submitForReview" || form === "block") && !noPeople ? (
             <>
               <label htmlFor={personSelectId} className="text-sm font-medium">
                 {form === "block" ? "Waiting on (optional)" : "Reviewer"}
@@ -122,6 +133,7 @@ export function TaskActions({ base, task, people, onChanged, hide = [] }: { base
                 value={personId}
                 people={people}
                 current={form === "submitForReview" && task.reviewer && !task.reviewer.gone ? task.reviewer : null}
+                withClients={form === "submitForReview"}
                 empty={form === "block" ? "Nobody in particular" : "Pick a reviewer"}
                 disabled={busy}
                 onChange={setPersonId}
@@ -133,7 +145,21 @@ export function TaskActions({ base, task, people, onChanged, hide = [] }: { base
               <label htmlFor={textId} className="text-sm font-medium">
                 {form === "approve" ? "Note (optional)" : form === "block" ? "What is it waiting on?" : "What needs to change?"}
               </label>
-              <Textarea id={textId} value={text} maxLength={4_000} disabled={busy} onChange={(e) => setText(e.target.value)} className="min-h-20" />
+              {/* The approval note and the reason for changes are kept as comments the client can see. */}
+              {task.clientVisible && (form === "approve" || form === "requestChanges") ? (
+                <p id={readsId} className="text-xs text-muted-foreground">
+                  The client can read this.
+                </p>
+              ) : null}
+              <Textarea
+                id={textId}
+                value={text}
+                maxLength={4_000}
+                disabled={busy}
+                aria-describedby={task.clientVisible && (form === "approve" || form === "requestChanges") ? readsId : undefined}
+                onChange={(e) => setText(e.target.value)}
+                className="min-h-20"
+              />
             </>
           ) : null}
           <div className="flex flex-wrap items-center justify-end gap-2">

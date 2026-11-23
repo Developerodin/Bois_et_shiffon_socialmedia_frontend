@@ -94,6 +94,8 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
   const [loadError, setLoadError] = useState<"gone" | "failed" | null>(null);
   const [people, setPeople] = useState<TaskPersonDto[] | null>(null);
   const [peopleFailed, setPeopleFailed] = useState(false);
+  // A client reviewer may not list the business's people (403): no person pickers for them.
+  const [noPeople, setNoPeople] = useState(false);
   const onLoadedRef = useRef(onLoaded);
   onLoadedRef.current = onLoaded;
 
@@ -124,10 +126,11 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
     let alive = true;
     tasksApi.people(base).then(
       (p) => alive && setPeople(p),
-      () => {
+      (e) => {
         if (!alive) return;
         setPeople([]);
-        setPeopleFailed(true);
+        if (e instanceof ApiError && e.status === 403) setNoPeople(true);
+        else setPeopleFailed(true);
       },
     );
     return () => {
@@ -160,7 +163,7 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
           <span className="font-medium">Waiting on{task.blockedOn ? ` ${ownerLabel(task.blockedOn)}` : ""}:</span> {task.blockedReason}
         </p>
       ) : null}
-      <TaskActions base={base} task={task} people={people} onChanged={show} hide={website ? ["checkedLive"] : []} />
+      <TaskActions base={base} task={task} people={people} noPeople={noPeople} onChanged={show} hide={website ? ["checkedLive"] : []} />
       {peopleFailed ? <p className="text-xs text-muted-foreground">Couldn&rsquo;t load the people on this business. Close and open the task to try again.</p> : null}
       {canManage ? <TaskFields key={task.id} base={base} task={task} people={people} onSaved={show} /> : <TaskFacts task={task} />}
       {website ? <WebsiteChecks base={base} task={task} people={people} canEditPhotos={canEditPhotos} onChanged={show} /> : null}
@@ -301,7 +304,7 @@ function TaskFields({ base, task, people, onSaved }: { base: string; task: TaskD
           <label htmlFor={ids.reviewer} className={fieldLabel}>
             Reviewer
           </label>
-          <PersonSelect id={ids.reviewer} value={draft.reviewerId} people={people} current={task.reviewer} empty="No reviewer" onChange={(v) => set("reviewerId", v)} />
+          <PersonSelect id={ids.reviewer} value={draft.reviewerId} people={people} current={task.reviewer} withClients empty="No reviewer" onChange={(v) => set("reviewerId", v)} />
         </div>
       </div>
       {draft.areas.includes(WEBSITE) ? <WebsiteInputs draft={draft} set={set} /> : null}

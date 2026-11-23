@@ -59,7 +59,10 @@ export const tasksApi = {
       request<{ task: TaskDetailDto }>(`${base}/tasks/${enc(id)}`, { method: "PATCH", body: JSON.stringify(fields) }).then((d) => d.task),
       (task) => ({ taskId: id, kind: "task", task }),
     ),
-  /** People who read the brand's tasks (tasks.read): the owner, reviewer and "waiting on" pickers. */
+  /**
+   * People who read the brand's tasks (tasks.read), `client` marking client reviewers: the reviewer pickers offer them,
+   * the owner, "waiting on" and project owner pickers don't. A client reviewer asking gets 403.
+   */
   people: (base: string) => request<{ people: TaskPersonDto[] }>(`${base}/tasks/people`).then((d) => d.people),
   /** Checklist lines: the task's owner or tasks.manage. */
   addItem: (base: string, id: string, text: string) =>
@@ -151,15 +154,15 @@ const UPLOAD_FAILED = "Couldn't upload the photo. Try again.";
 
 /**
  * A screenshot onto a task through the story upload flow, the one that makes VERIFIED photo uploads: a slot
- * (content.create; the person confirms they may use the file by uploading it), the browser PUTs the file straight to
+ * (content.create; `rightsConfirmed` is the person's own tick that they may use the photo), the browser PUTs the file straight to
  * storage, the server reads it back and checks it, then it is attached (the owner with content.create, or tasks.manage).
  * A refusal at any step throws with the server's message. ponytail: an upload that fails after the slot leaves a
  * PENDING row; the daily purge removes those after 7 days.
  */
-async function uploadScreenshot(base: string, taskId: string, file: File, role: "BEFORE" | "AFTER" | "OTHER"): Promise<TaskAttachmentDto> {
+async function uploadScreenshot(base: string, taskId: string, file: File, role: "BEFORE" | "AFTER" | "OTHER", rightsConfirmed: boolean): Promise<TaskAttachmentDto> {
   const slot = await request<{ uploadId: string; url: string; headers: Record<string, string> }>(`${base}/stories/uploads`, {
     method: "POST",
-    body: JSON.stringify({ kind: "photo", contentType: file.type, bytes: file.size, rightsConfirmed: true }),
+    body: JSON.stringify({ kind: "photo", contentType: file.type, bytes: file.size, rightsConfirmed }),
   });
   let put: Response;
   try {

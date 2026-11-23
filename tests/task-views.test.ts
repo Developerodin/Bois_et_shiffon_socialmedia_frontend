@@ -26,7 +26,7 @@ const task = (over: Partial<TaskDto> = {}): TaskDto => ({
   findingClearedAt: null,
   createdAt: "2026-11-20T10:00:00.000Z",
   updatedAt: "2026-11-20T10:00:00.000Z",
-  owner: { id: "u1", name: "Ana", gone: false },
+  owner: { id: "u1", name: "Ana", gone: false, client: false },
   reviewer: null,
   blockedOn: null,
   project: null,
@@ -57,7 +57,7 @@ describe("boardMove", () => {
   });
 
   it("refuses Done for a reviewed task with the reason", () => {
-    const r = boardMove(task({ reviewer: { id: "u2", name: "Bo", gone: false }, actions: ["submitForReview"] }), "DONE");
+    const r = boardMove(task({ reviewer: { id: "u2", name: "Bo", gone: false, client: false }, actions: ["submitForReview"] }), "DONE");
     expect(r).toEqual({ refused: "A reviewed task is finished by the reviewer's approval." });
   });
 
@@ -68,8 +68,8 @@ describe("boardMove", () => {
 
 describe("ownerLabel", () => {
   it("names the owner, flags one who left, and says Unassigned", () => {
-    expect(ownerLabel({ id: "u1", name: "Ana", gone: false })).toBe("Ana");
-    expect(ownerLabel({ id: "u1", name: "Ana", gone: true })).toBe("No longer on this business");
+    expect(ownerLabel({ id: "u1", name: "Ana", gone: false, client: false })).toBe("Ana");
+    expect(ownerLabel({ id: "u1", name: "Ana", gone: true, client: false })).toBe("No longer on this business");
     expect(ownerLabel(null)).toBe("Unassigned");
   });
 });

@@ -15,7 +15,7 @@ describe("notification bell", () => {
   });
 
   it("says what happened as plain words", () => {
-    const n = { id: "n1", brandId: "b1", taskId: "t1", taskTitle: "<b>Fix</b>", actor: { id: "u1", name: "Ana", gone: false }, readAt: null, createdAt: "2026-11-23T10:00:00.000Z" };
+    const n = { id: "n1", brandId: "b1", taskId: "t1", taskTitle: "<b>Fix</b>", actor: { id: "u1", name: "Ana", gone: false, client: false }, readAt: null, createdAt: "2026-11-23T10:00:00.000Z" };
     expect(notificationText({ ...n, kind: "TASK_ASSIGNED" })).toBe("Ana assigned you a task");
     expect(notificationText({ ...n, kind: "REVIEW_REQUESTED" })).toBe("Ana asked you to review a task");
     expect(notificationText({ ...n, kind: "TASK_OVERDUE" })).toBe("A task of yours is overdue");

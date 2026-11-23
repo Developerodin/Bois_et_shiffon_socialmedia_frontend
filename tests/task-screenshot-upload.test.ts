@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import type { TaskDetailDto } from "@/shared";
 import { tasksApi } from "@/lib/tasks-api";
+import { TaskAttachments } from "@/components/tasks/task-attachments";
 
 const fetchMock = vi.fn();
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -19,7 +23,7 @@ describe("task screenshot upload", () => {
       .mockResolvedValueOnce(new Response(null, { status: 200 }))
       .mockResolvedValueOnce(json({ status: "VERIFIED", previewUrl: "https://s/p" }))
       .mockResolvedValueOnce(json({ attachment }, 201));
-    await expect(tasksApi.uploadScreenshot("/api/b", "t1", file, "BEFORE")).resolves.toEqual(attachment);
+    await expect(tasksApi.uploadScreenshot("/api/b", "t1", file, "BEFORE", true)).resolves.toEqual(attachment);
     const [slot, put, verify, attach] = fetchMock.mock.calls;
     expect(slot[0]).toBe("/api/b/stories/uploads");
     expect(JSON.parse(slot[1].body)).toEqual({ kind: "photo", contentType: "image/jpeg", bytes: 3, rightsConfirmed: true });
@@ -35,11 +39,26 @@ describe("task screenshot upload", () => {
       .mockResolvedValueOnce(json({ uploadId: "u1", url: "https://store/put", headers: {} }, 201))
       .mockResolvedValueOnce(new Response(null, { status: 200 }))
       .mockResolvedValueOnce(json({ status: "REJECTED", reason: "That photo is too small.", code: "story.small" }));
-    await expect(tasksApi.uploadScreenshot("/api/b", "t1", file, "AFTER")).rejects.toMatchObject({ message: "That photo is too small." });
+    await expect(tasksApi.uploadScreenshot("/api/b", "t1", file, "AFTER", true)).rejects.toMatchObject({ message: "That photo is too small." });
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+  it("sends the person's own answer about the photo's rights", async () => {
+    fetchMock.mockResolvedValueOnce(json({ title: "Refused", detail: "Confirm you may use this photo." }, 400));
+    await expect(tasksApi.uploadScreenshot("/api/b", "t1", file, "AFTER", false)).rejects.toThrow();
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).rightsConfirmed).toBe(false);
   });
   it("says so when the file can't reach storage", async () => {
     fetchMock.mockResolvedValueOnce(json({ uploadId: "u1", url: "https://store/put", headers: {} }, 201)).mockRejectedValueOnce(new TypeError("Failed to fetch"));
-    await expect(tasksApi.uploadScreenshot("/api/b", "t1", file, "AFTER")).rejects.toMatchObject({ message: "Couldn't upload the photo. Try again." });
+    await expect(tasksApi.uploadScreenshot("/api/b", "t1", file, "AFTER", true)).rejects.toMatchObject({ message: "Couldn't upload the photo. Try again." });
+  });
+});
+
+describe("the screenshot slots", () => {
+  it("ask for the photo's rights and hold the upload until they're ticked", () => {
+    const task = { id: "t1", attachments: [] } as unknown as TaskDetailDto;
+    const html = renderToStaticMarkup(createElement(TaskAttachments, { base: "/api/b", task, roles: ["BEFORE", "AFTER"], canEdit: true, slots: true }));
+    expect(html).toContain("I have the right to use this photo");
+    expect(html).toContain("to upload.");
+    expect(html.match(/type="file"[^>]*disabled=""/g)).toHaveLength(2);
   });
 });
