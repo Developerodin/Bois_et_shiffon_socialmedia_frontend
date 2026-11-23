@@ -10,9 +10,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
-import { Stat } from "@/components/data/shared";
+import { money, Stat } from "@/components/data/shared";
 import { SyncedAt } from "@/components/data/synced-at";
-import { brandApi, change, KIND_SLUG, rangeQuery, useReloadOnFocus, type DataSourceDto } from "@/lib/data-api";
+import { brandApi, change, KIND_SLUG, rangeQuery, useReloadOnFocus, type DataSourceDto, type DateRange } from "@/lib/data-api";
 
 // ---- mirror of server DTO — replace with synced type at merge ------------------------------------------------------
 // shared/api/ads.ts: GET ads/summary, GET ads/campaigns. Money is a decimal string with its ISO currency beside it;
@@ -51,8 +51,6 @@ type AdsCampaignsDto = { campaigns: AdsCampaignDto[] };
 
 // ---- formatting ---------------------------------------------------------------------------------------------------
 
-const money = (v: string | null | undefined, currency: string) =>
-  v == null ? "—" : new Intl.NumberFormat(undefined, { style: "currency", currency }).format(Number(v));
 const roas = (v: number | null | undefined) => (v == null ? "—" : `${v.toFixed(2)}×`);
 const whole = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
 
@@ -106,19 +104,18 @@ function Pacing({ budgets }: { budgets: AdsBudgetDto[] }) {
 
 // ---- the tab ------------------------------------------------------------------------------------------------------
 
-/** Meta Ads spend and results for `from`..`to` ("YYYY-MM-DD"), per currency and per campaign. ads.read; the shell hides it otherwise. */
-/** `canManage` (integrations.manage): with no ad account chosen yet, pick one of the connected Meta ad accounts. */
-export function AdsTab({ workspaceId, brandId, from, to, canManage = false }: { workspaceId: string; brandId: string; from: string; to: string; canManage?: boolean }) {
+/**
+ * Meta Ads spend and results for the range ("YYYY-MM-DD"), per currency and per campaign. ads.read; the shell hides it
+ * otherwise. `sources`: the META_ADS sources from PerformanceTabs' data-sources load. `canManage` (integrations.manage):
+ * with no ad account chosen yet, pick one of the connected Meta ad accounts; `onSourceChanged` reloads the sources.
+ */
+export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; sources: DataSourceDto[]; canManage: boolean; onSourceChanged: () => void }) {
   const base = brandApi(workspaceId, brandId);
+  const { from, to } = days;
   const range = rangeQuery(from, to);
   const fetcher = useCallback(
     () =>
-      Promise.all([
-        request<{ sources: DataSourceDto[] }>(`${base}/data-sources`),
-        request<AdsSummaryDto>(`${base}/ads/summary?${range}`),
-        request<AdsCampaignsDto>(`${base}/ads/campaigns?${range}`),
-      ]).then(([s, summary, c]) => ({
-        sources: s.sources.filter((d) => d.kind === "META_ADS"),
+      Promise.all([request<AdsSummaryDto>(`${base}/ads/summary?${range}`), request<AdsCampaignsDto>(`${base}/ads/campaigns?${range}`)]).then(([summary, c]) => ({
         summary,
         campaigns: [...c.campaigns].sort((a, b) => Number(b.spend) - Number(a.spend)),
       })),
@@ -131,11 +128,11 @@ export function AdsTab({ workspaceId, brandId, from, to, canManage = false }: { 
   if (state.kind === "forbidden") return <EmptyState icon={Megaphone} title="You can't see ad results" description="Ask a workspace owner for access." />;
   if (state.kind === "error") return <LoadError message={state.message} onRetry={reload} />;
 
-  const { sources, summary, campaigns } = state.data;
+  const { summary, campaigns } = state.data;
   if (!sources.length && canManage) {
     return (
       <PageSection id="ads-account" title="Meta Ads" description="Spend, purchases and ROAS from one Meta ad account.">
-        <AdAccountPicker workspaceId={workspaceId} brandId={brandId} onSaved={reload} />
+        <AdAccountPicker workspaceId={workspaceId} brandId={brandId} onSaved={onSourceChanged} />
       </PageSection>
     );
   }

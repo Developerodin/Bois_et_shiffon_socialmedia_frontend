@@ -10,14 +10,13 @@ import { ListSkeleton, LoadError, selectClass, useLoad } from "@/components/sett
 import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
-import { brandApi, change, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type GoogleSite, type SearchPages, type SearchSummary, type SearchTotals } from "@/lib/data-api";
+import { brandApi, change, rangeQuery, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type GoogleSite, type SearchPages, type SearchSummary, type SearchTotals } from "@/lib/data-api";
 
 const num = (n: number) => n.toLocaleString();
 const pct = (ctr: number | null) => (ctr == null ? "—" : `${(ctr * 100).toFixed(1)}%`);
 const pos = (p: number | null) => (p == null ? "—" : p.toFixed(1));
 const DAY = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
 const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
-const query = (r: DateRange) => `from=${r.from}&to=${r.to}`;
 
 /**
  * Search Console for the brand's site: totals against the previous equal-length period, every day, and the top pages.
@@ -44,7 +43,7 @@ export function SearchTab({ workspaceId, brandId, range, source, canManage, onSo
 function SearchNumbers({ base, range, source, onChangeSite }: { base: string; range: DateRange; source: DataSourceDto; onChangeSite?: () => void }) {
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(
-    () => Promise.all([request<SearchSummary>(`${base}/search/summary?${query({ from, to })}`), request<SearchPages>(`${base}/search/pages?${query({ from, to })}&sort=clicks`)]),
+    () => Promise.all([request<SearchSummary>(`${base}/search/summary?${rangeQuery(from, to)}`), request<SearchPages>(`${base}/search/pages?${rangeQuery(from, to)}&sort=clicks`)]),
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
@@ -127,7 +126,7 @@ function TopPages({ base, range, first }: { base: string; range: DateRange; firs
     setBusy(true);
     setError("");
     try {
-      const d = await request<SearchPages>(`${base}/search/pages?${query(range)}&sort=clicks&cursor=${encodeURIComponent(next)}`);
+      const d = await request<SearchPages>(`${base}/search/pages?${rangeQuery(range.from, range.to)}&sort=clicks&cursor=${encodeURIComponent(next)}`);
       setMore({ for: first, pages: [...(extra?.pages ?? []), ...d.pages], next: d.nextCursor });
     } catch (e) {
       setError(errorMessage(e, "Couldn't load more pages. Try again."));

@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CHANNEL_LABEL } from "@/lib/post-labels";
-import { brandApi, KIND_SLUG, rangeQuery, useReloadOnFocus, type DataSourceDto } from "@/lib/data-api";
+import { brandApi, KIND_SLUG, rangeQuery, useReloadOnFocus, type DataSourceDto, type DateRange } from "@/lib/data-api";
 import { dayDate } from "@/lib/time";
 
 // ---- mirror of server DTO — replace with synced type at merge ------------------------------------------------------
@@ -55,15 +55,15 @@ const count = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleS
 const byReach = (a: PostWithMetricsDto, b: PostWithMetricsDto) =>
   (b.metrics?.reach ?? -1) - (a.metrics?.reach ?? -1) || b.publishedAt.localeCompare(a.publishedAt);
 
-/** Published posts in `from`..`to` (brand-local "YYYY-MM-DD") and how each did. analytics.read; the shell hides it otherwise. */
-export function PostsTab({ workspaceId, brandId, from, to }: { workspaceId: string; brandId: string; from: string; to: string }) {
+/**
+ * Published posts in the range (brand-local "YYYY-MM-DD") and how each did. analytics.read; the shell hides it otherwise.
+ * `source`: the POST_METRICS source from PerformanceTabs' data-sources load, undefined before the first sync.
+ */
+export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined }) {
   const base = brandApi(workspaceId, brandId);
+  const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(
-    () =>
-      Promise.all([
-        request<{ sources: DataSourceDto[] }>(`${base}/data-sources`),
-        request<PostsInsightsDto>(`${base}/insights/posts?${rangeQuery(from, to)}`),
-      ]).then(([s, p]) => ({ source: s.sources.find((d) => d.kind === "POST_METRICS") ?? null, posts: [...p.posts].sort(byReach) })),
+    () => request<PostsInsightsDto>(`${base}/insights/posts?${rangeQuery(from, to)}`).then((p) => [...p.posts].sort(byReach)),
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
@@ -73,7 +73,7 @@ export function PostsTab({ workspaceId, brandId, from, to }: { workspaceId: stri
   if (state.kind === "forbidden") return <EmptyState icon={BarChart3} title="You can't see post results" description="Ask a workspace owner for access." />;
   if (state.kind === "error") return <LoadError message={state.message} onRetry={reload} />;
 
-  const { source, posts } = state.data;
+  const posts = state.data;
   if (!source && !posts.length) {
     return (
       <EmptyState

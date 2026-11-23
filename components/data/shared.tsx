@@ -1,5 +1,9 @@
 "use client";
 
+/** A decimal string (or number) in its ISO currency; "—" when there is none. Never add amounts across currencies. */
+export const money = (v: string | number | null | undefined, currency: string) =>
+  v == null ? "—" : Number(v).toLocaleString(undefined, { style: "currency", currency });
+
 /** One total with the previous period beside it: "1,234 · +12% vs 1,100 before". */
 export function Stat({ label, value, before, delta }: { label: string; value: string; before?: string; delta?: string | null }) {
   return (

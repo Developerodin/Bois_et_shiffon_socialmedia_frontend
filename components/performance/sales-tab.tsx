@@ -3,15 +3,14 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { Table } from "@/components/admin/table";
-import { Stat } from "@/components/data/shared";
+import { money, Stat } from "@/components/data/shared";
 import { SyncedAt } from "@/components/data/synced-at";
 import { connectionsUrl, errorMessage, request, type Connection } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
-import { brandApi, change, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type SalesCurrency, type SalesSummary, type SalesTotals } from "@/lib/data-api";
+import { brandApi, change, rangeQuery, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type SalesCurrency, type SalesSummary, type SalesTotals } from "@/lib/data-api";
 
-const money = (v: string | number, currency: string) => Number(v).toLocaleString(undefined, { style: "currency", currency });
 const aov = (t: SalesTotals) => (t.orders ? Number(t.netSales) / t.orders : 0);
 const DAY = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
 const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
@@ -34,7 +33,7 @@ export function SalesTab({ workspaceId, brandId, range, source, canManage, onSou
 
 function SalesNumbers({ base, range, source }: { base: string; range: DateRange; source: DataSourceDto }) {
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
-  const fetcher = useCallback(() => request<SalesSummary>(`${base}/sales/summary?from=${from}&to=${to}`), [base, from, to]);
+  const fetcher = useCallback(() => request<SalesSummary>(`${base}/sales/summary?${rangeQuery(from, to)}`), [base, from, to]);
   const { state, reload } = useLoad(fetcher);
   useReloadOnFocus(reload, state);
 
