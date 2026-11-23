@@ -10,7 +10,8 @@ import { ListSkeleton, LoadError, selectClass, useLoad } from "@/components/sett
 import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
-import { brandApi, change, rangeQuery, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type GoogleSite, type SearchPages, type SearchSummary, type SearchTotals } from "@/lib/data-api";
+import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { DATA_SOURCE_SLUGS, type ChooseSearchSiteBody, type DataSourceDto, type SearchMetrics, type SearchPagesDto, type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto } from "@/shared";
 
 const num = (n: number) => n.toLocaleString();
 const pct = (ctr: number | null) => (ctr == null ? "—" : `${(ctr * 100).toFixed(1)}%`);
@@ -49,7 +50,7 @@ export function SearchTab({ workspaceId, brandId, range, source, canManage, onSo
 function SearchNumbers({ base, range, source, onChangeSite }: { base: string; range: DateRange; source: DataSourceDto; onChangeSite?: () => void }) {
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(
-    () => Promise.all([request<SearchSummary>(`${base}/search/summary?${rangeQuery(from, to)}`), request<SearchPages>(`${base}/search/pages?${rangeQuery(from, to)}&sort=clicks`)]),
+    () => Promise.all([request<SearchSummaryDto>(`${base}/search/summary?${rangeQuery(from, to)}`), request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(from, to)}&sort=clicks`)]),
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
@@ -57,7 +58,7 @@ function SearchNumbers({ base, range, source, onChangeSite }: { base: string; ra
 
   const header = (
     <div className="flex flex-col gap-1">
-      <SyncedAt source={source} syncUrl={`${base}/data-sources/${KIND_SLUG.SEARCH_CONSOLE}/sync`} />
+      <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.SEARCH_CONSOLE}/sync`} />
       <p className="text-xs text-muted-foreground">
         {source.label ? `${source.label} · ` : ""}
         {source.reportsInZone ? "Google's days (Pacific time). " : ""}
@@ -106,7 +107,7 @@ function SearchNumbers({ base, range, source, onChangeSite }: { base: string; ra
   );
 }
 
-function Totals({ now, before }: { now: SearchTotals; before: SearchTotals }) {
+function Totals({ now, before }: { now: SearchMetrics; before: SearchMetrics }) {
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl bg-muted/40 px-4 py-3 sm:grid-cols-4">
       <Stat label="Clicks" value={num(now.clicks)} before={num(before.clicks)} delta={change(now.clicks, before.clicks)} />
@@ -118,8 +119,8 @@ function Totals({ now, before }: { now: SearchTotals; before: SearchTotals }) {
 }
 
 /** The first 50 pages by clicks, then more on asking. */
-function TopPages({ base, range, first }: { base: string; range: DateRange; first: SearchPages }) {
-  const [more, setMore] = useState<{ for: SearchPages; pages: SearchPages["pages"]; next: string | null } | null>(null);
+function TopPages({ base, range, first }: { base: string; range: DateRange; first: SearchPagesDto }) {
+  const [more, setMore] = useState<{ for: SearchPagesDto; pages: SearchPagesDto["pages"]; next: string | null } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   // A new first page (new range, a reload) drops what was added under the old one.
@@ -132,7 +133,7 @@ function TopPages({ base, range, first }: { base: string; range: DateRange; firs
     setBusy(true);
     setError("");
     try {
-      const d = await request<SearchPages>(`${base}/search/pages?${rangeQuery(range.from, range.to)}&sort=clicks&cursor=${encodeURIComponent(next)}`);
+      const d = await request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(range.from, range.to)}&sort=clicks&cursor=${encodeURIComponent(next)}`);
       setMore({ for: first, pages: [...(extra?.pages ?? []), ...d.pages], next: d.nextCursor });
     } catch (e) {
       setError(errorMessage(e, "Couldn't load more pages. Try again."));
@@ -168,8 +169,8 @@ function SitePicker({ workspaceId, brandId, current, onSaved, onCancel }: { work
   const fetcher = useCallback(async () => {
     const { connections } = await request<{ connections: Connection[] }>(connectionsUrl(workspaceId, brandId));
     const google = connections.find((c) => c.provider === "GOOGLE" && c.status === "ACTIVE");
-    if (!google) return { google: null, sites: [] as GoogleSite[] };
-    const { sites } = await request<{ sites: GoogleSite[] }>(`${base}/google/sites?connectionId=${encodeURIComponent(google.id)}`);
+    if (!google) return { google: null, sites: [] as SearchSiteDto[] };
+    const { sites } = await request<SearchSitesDto>(`${base}/google/sites?connectionId=${encodeURIComponent(google.id)}`);
     return { google, sites };
   }, [workspaceId, brandId, base]);
   const { state, reload } = useLoad(fetcher);
@@ -194,7 +195,7 @@ function SitePicker({ workspaceId, brandId, current, onSaved, onCancel }: { work
     setBusy(true);
     setError("");
     try {
-      await request<{ source: DataSourceDto }>(`${base}/data-sources/${KIND_SLUG.SEARCH_CONSOLE}`, { method: "PUT", body: JSON.stringify({ connectionId: google.id, siteUrl: site }) });
+      await request<{ source: DataSourceDto }>(`${base}/data-sources/${DATA_SOURCE_SLUGS.SEARCH_CONSOLE}`, { method: "PUT", body: JSON.stringify({ connectionId: google.id, siteUrl: site } satisfies ChooseSearchSiteBody) });
       onSaved();
     } catch (e) {
       setError(errorMessage(e, "Couldn't save the site. Try again."));

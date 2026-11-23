@@ -5,7 +5,7 @@ import Link from "next/link";
 import { RefreshCw } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
-import { type DataSourceDto } from "@/lib/data-api";
+import { type DataSourceDto } from "@/shared";
 import { timeAgo } from "@/lib/time";
 
 /**

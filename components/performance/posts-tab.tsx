@@ -10,35 +10,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CHANNEL_LABEL } from "@/lib/post-labels";
-import { brandApi, KIND_SLUG, rangeQuery, useReloadOnFocus, type DataSourceDto, type DateRange } from "@/lib/data-api";
+import { brandApi, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { DATA_SOURCE_SLUGS, type DataSourceDto, type PostInsightDto, type PostInsightsDto, type PostMetricsDto } from "@/shared";
 import { dayDate } from "@/lib/time";
-
-// ---- mirror of server DTO — replace with synced type at merge ------------------------------------------------------
-// shared/api/insights.ts (GET insights/posts). The data-source DTO and helpers are in lib/data-api.ts.
-
-type PostMetricsDto = {
-  views: number | null;
-  reach: number | null;
-  likes: number | null;
-  comments: number | null;
-  shares: number | null;
-  saves: number | null;
-  interactions: number | null;
-};
-/** One published post in the range, with its latest snapshot (null before the first read). */
-type PostWithMetricsDto = {
-  attemptId: string;
-  contentItemId: string;
-  title: string | null;
-  /** ContentChannel, e.g. INSTAGRAM_POST */
-  channel: string;
-  publishedAt: string;
-  metrics: PostMetricsDto | null;
-  readAt: string | null;
-  /** Past day 30: these numbers won't change again. */
-  final: boolean;
-};
-type PostsInsightsDto = { posts: PostWithMetricsDto[] };
 
 // ---- the tab ------------------------------------------------------------------------------------------------------
 
@@ -56,7 +30,7 @@ const PAGE = 50;
 
 const count = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
 /** Highest reach first; posts with no reach yet go last, newest first among them. */
-const byReach = (a: PostWithMetricsDto, b: PostWithMetricsDto) =>
+const byReach = (a: PostInsightDto, b: PostInsightDto) =>
   (b.metrics?.reach ?? -1) - (a.metrics?.reach ?? -1) || b.publishedAt.localeCompare(a.publishedAt);
 
 /**
@@ -67,7 +41,7 @@ export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId:
   const base = brandApi(workspaceId, brandId);
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(
-    () => request<PostsInsightsDto>(`${base}/insights/posts?${rangeQuery(from, to)}`).then((p) => [...p.posts].sort(byReach)),
+    () => request<PostInsightsDto>(`${base}/insights/posts?${rangeQuery(from, to)}`).then((p) => [...p.posts].sort(byReach)),
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
@@ -96,7 +70,7 @@ export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId:
       description="Each post's latest numbers, highest reach first."
       className="flex flex-col gap-3"
     >
-      {source ? <SyncedAt source={source} syncUrl={`${base}/data-sources/${KIND_SLUG.POST_METRICS}/sync`} /> : null}
+      {source ? <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.POST_METRICS}/sync`} /> : null}
       {posts.length ? (
         <div className="-mx-5 overflow-x-auto">
           <table className="w-full text-left text-sm">

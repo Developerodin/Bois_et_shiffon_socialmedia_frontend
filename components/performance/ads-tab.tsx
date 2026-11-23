@@ -12,42 +12,8 @@ import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
 import { money, Stat } from "@/components/data/shared";
 import { SyncedAt } from "@/components/data/synced-at";
-import { brandApi, change, KIND_SLUG, rangeQuery, useReloadOnFocus, type DataSourceDto, type DateRange } from "@/lib/data-api";
-
-// ---- mirror of server DTO — replace with synced type at merge ------------------------------------------------------
-// shared/api/ads.ts: GET ads/summary, GET ads/campaigns. Money is a decimal string with its ISO currency beside it;
-// currencies are never summed, so totals come one per currency.
-
-type AdsTotalsDto = {
-  currency: string;
-  spend: string;
-  purchases: number;
-  purchaseValue: string;
-  /** purchase value ÷ spend as Meta reports it; null when spend is 0 */
-  roas: number | null;
-  /** null when there were no purchases */
-  costPerPurchase: string | null;
-};
-/** Held (H1): only sent once budgets are set; the tab shows nothing without it. */
-type AdsBudgetDto = {
-  /** "YYYY-MM" */
-  month: string;
-  currency: string;
-  budget: string;
-  spent: string;
-  /** days from the 1st to syncedThrough; 0 = no data yet */
-  elapsedDays: number;
-  daysInMonth: number;
-};
-type AdsSummaryDto = {
-  totals: AdsTotalsDto[];
-  /** The same-length range just before from..to */
-  previous: AdsTotalsDto[];
-  previousRange: { from: string; to: string };
-  budget?: AdsBudgetDto[] | null;
-};
-type AdsCampaignDto = AdsTotalsDto & { accountId: string; campaignId: string; campaignName: string; impressions: number; clicks: number };
-type AdsCampaignsDto = { campaigns: AdsCampaignDto[] };
+import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { DATA_SOURCE_SLUGS, type AdsCampaignsDto, type AdsSummaryDto, type AdsTotals, type ChooseMetaAdAccountBody, type DataSourceDto, type MetaAdAccountsDto } from "@/shared";
 
 // ---- formatting ---------------------------------------------------------------------------------------------------
 
@@ -56,7 +22,7 @@ const whole = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleS
 
 const num = (v: string | number | null | undefined) => (v == null ? null : Number(v));
 
-function Totals({ now, prev }: { now: AdsTotalsDto; prev: AdsTotalsDto | undefined }) {
+function Totals({ now, prev }: { now: AdsTotals; prev: AdsTotals | undefined }) {
   const c = now.currency;
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl bg-muted/40 px-4 py-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -66,39 +32,6 @@ function Totals({ now, prev }: { now: AdsTotalsDto; prev: AdsTotalsDto | undefin
       <Stat label="ROAS" value={roas(now.roas)} before={roas(prev?.roas)} delta={change(now.roas, prev?.roas ?? null)} />
       <Stat label="Cost per purchase" value={money(now.costPerPurchase, c)} before={money(prev?.costPerPurchase, c)} delta={change(num(now.costPerPurchase), num(prev?.costPerPurchase))} />
     </div>
-  );
-}
-
-/** Spent against the month's budget, and whether that's ahead of the days gone. */
-function Pacing({ budgets }: { budgets: AdsBudgetDto[] }) {
-  return (
-    <PageSection id="ads-pacing" title="Budget pacing" className="flex flex-col gap-4">
-      {budgets.map((b) => {
-        const budget = Number(b.budget);
-        const spent = Number(b.spent);
-        const used = budget > 0 ? Math.min(1, spent / budget) : 0;
-        const expected = b.daysInMonth > 0 ? b.elapsedDays / b.daysInMonth : 0;
-        const pace =
-          b.elapsedDays === 0 ? "No data yet" : used > expected * 1.1 ? "Ahead of budget" : used < expected * 0.9 ? "Behind budget" : "On pace";
-        return (
-          <div key={`${b.month}:${b.currency}`} className="flex flex-col gap-1.5 text-sm">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span>
-                {money(b.spent, b.currency)} of {money(b.budget, b.currency)} · {b.month}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {pace}
-                {b.elapsedDays ? ` · day ${b.elapsedDays} of ${b.daysInMonth}` : null}
-              </span>
-            </div>
-            <div className="relative h-2 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-              <div className={cn("h-full rounded-full", used > expected * 1.1 ? "bg-warning" : "bg-primary")} style={{ width: `${used * 100}%` }} />
-              {b.elapsedDays ? <div className="absolute inset-y-0 w-0.5 bg-foreground/60" style={{ left: `${expected * 100}%` }} /> : null}
-            </div>
-          </div>
-        );
-      })}
-    </PageSection>
   );
 }
 
@@ -160,7 +93,7 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
         className="flex flex-col gap-4"
       >
         {sources.map((s) => (
-          <SyncedAt key={s.id} source={s} syncUrl={`${base}/data-sources/${KIND_SLUG.META_ADS}/sync`} name={sources.length > 1 && s.label ? s.label : undefined} />
+          <SyncedAt key={s.id} source={s} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.META_ADS}/sync`} name={sources.length > 1 && s.label ? s.label : undefined} />
         ))}
         {empty ? (
           <p className="text-sm text-muted-foreground">No ad spend in these dates.</p>
@@ -206,7 +139,6 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
           {zones ? ` Days are in the ad account's time zone (${zones}).` : null}
         </p>
       </PageSection>
-      {summary.budget?.length ? <Pacing budgets={summary.budget} /> : null}
     </div>
   );
 }
@@ -245,12 +177,10 @@ function AdAccountPicker({ workspaceId, brandId, onSaved }: { workspaceId: strin
     setLive(null);
     setError("");
     if (!id) return;
-    const conn = accounts.find((c) => c.id === id);
     try {
-      // The login can read several accounts; the connection is one of them. Match it by id when the server says which
-      // (`connectionAccountId`); names aren't unique, so the name match is only a fallback for an older server.
-      const d = await request<{ accounts: { id: string; name: string; currency: string; timeZone: string }[]; connectionAccountId?: string }>(`${base}/meta-ads/accounts?connectionId=${encodeURIComponent(id)}`);
-      const a = d.connectionAccountId ? d.accounts.find((x) => x.id === d.connectionAccountId) : d.accounts.find((x) => x.name === conn?.displayName);
+      // The login can read several accounts; the connection is one of them (`connectionAccountId`).
+      const d = await request<MetaAdAccountsDto>(`${base}/meta-ads/accounts?connectionId=${encodeURIComponent(id)}`);
+      const a = d.accounts.find((x) => x.id === d.connectionAccountId);
       setLive({ id, text: a ? `Reports in ${a.currency}, ${a.timeZone} days.` : "Meta doesn't list this account as active any more." });
     } catch (e) {
       setError(errorMessage(e, "Couldn't read the ad accounts. Try again."));
@@ -260,7 +190,7 @@ function AdAccountPicker({ workspaceId, brandId, onSaved }: { workspaceId: strin
     setBusy(true);
     setError("");
     try {
-      await request<{ source: DataSourceDto }>(`${base}/data-sources/${KIND_SLUG.META_ADS}`, { method: "PUT", body: JSON.stringify({ connectionId: picked }) });
+      await request<{ source: DataSourceDto }>(`${base}/data-sources/${DATA_SOURCE_SLUGS.META_ADS}`, { method: "PUT", body: JSON.stringify({ connectionId: picked } satisfies ChooseMetaAdAccountBody) });
       onSaved();
     } catch (e) {
       setError(errorMessage(e, "Couldn't choose the ad account. Try again."));

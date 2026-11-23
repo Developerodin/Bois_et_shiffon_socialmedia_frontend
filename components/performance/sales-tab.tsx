@@ -9,7 +9,8 @@ import { connectionsUrl, errorMessage, request, type Connection } from "@/compon
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
-import { brandApi, change, rangeQuery, useReloadOnFocus, KIND_SLUG, type DataSourceDto, type DateRange, type SalesCurrency, type SalesSummary, type SalesTotals } from "@/lib/data-api";
+import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { DATA_SOURCE_SLUGS, type DataSourceDto, type SalesCurrency, type SalesSummaryDto, type SalesTotals, type TurnOnShopifyOrdersBody } from "@/shared";
 
 const aov = (t: SalesTotals) => (t.orders ? Number(t.netSales) / t.orders : 0);
 const DAY = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
@@ -33,7 +34,7 @@ export function SalesTab({ workspaceId, brandId, range, source, canManage, onSou
 
 function SalesNumbers({ base, range, source }: { base: string; range: DateRange; source: DataSourceDto }) {
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
-  const fetcher = useCallback(() => request<SalesSummary>(`${base}/sales/summary?${rangeQuery(from, to)}`), [base, from, to]);
+  const fetcher = useCallback(() => request<SalesSummaryDto>(`${base}/sales/summary?${rangeQuery(from, to)}`), [base, from, to]);
   const { state, reload } = useLoad(fetcher);
   useReloadOnFocus(reload, state);
 
@@ -51,7 +52,7 @@ function SalesNumbers({ base, range, source }: { base: string; range: DateRange;
       className="flex flex-col gap-4"
       description={
         <div className="flex flex-col gap-1">
-          <SyncedAt source={source} syncUrl={`${base}/data-sources/${KIND_SLUG.SHOPIFY_ORDERS}/sync`} />
+          <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.SHOPIFY_ORDERS}/sync`} />
           <p className="text-xs text-muted-foreground">
             {source.label ? `${source.label} · ` : ""}Days in the brand&apos;s time zone. Test and cancelled orders left out; amounts include VAT where the shop&apos;s prices do.
           </p>
@@ -114,7 +115,7 @@ function TurnOnOrders({ workspaceId, brandId, onDone }: { workspaceId: string; b
     setBusy(true);
     setError("");
     try {
-      await request<{ source: DataSourceDto }>(`${brandApi(workspaceId, brandId)}/data-sources/${KIND_SLUG.SHOPIFY_ORDERS}`, { method: "PUT", body: JSON.stringify({ connectionId: shop.id }) });
+      await request<{ source: DataSourceDto }>(`${brandApi(workspaceId, brandId)}/data-sources/${DATA_SOURCE_SLUGS.SHOPIFY_ORDERS}`, { method: "PUT", body: JSON.stringify({ connectionId: shop.id } satisfies TurnOnShopifyOrdersBody) });
       onDone();
     } catch (e) {
       setError(errorMessage(e, "Couldn't turn on orders. Try again."));

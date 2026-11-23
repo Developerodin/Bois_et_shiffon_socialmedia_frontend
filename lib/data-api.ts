@@ -1,48 +1,8 @@
-// The Performance data tabs' routes, DTOs and shared helpers.
-// Mirror of server shared/data-sources.ts (and shared/api/search.ts, shared/api/sales.ts) — replace with the synced type at merge.
+// The Performance data tabs' routes and shared helpers. The DTOs are in @/shared (data-sources.ts).
 
 import { useEffect, useRef } from "react";
+import { SEARCH_RANGE_MAX_DAYS, type DateRange } from "@/shared";
 import { brandBase } from "@/lib/tasks-api";
-
-export type DataSourceKind = "SEARCH_CONSOLE" | "POST_METRICS" | "SHOPIFY_ORDERS" | "META_ADS";
-/** Why the last sync didn't fully succeed. */
-export type DataSyncReason = "reconnect" | "permission" | "partial" | "failed" | "rate_limited";
-/** `okAt`: the last successful sync ("Updated …"); `error`: the server's fixed text for `reason`. */
-export type DataSyncResult = { at: string; okAt: string | null; reason: DataSyncReason | null; count: number; error: string | null };
-export type DataSourceDto = {
-  id: string;
-  kind: DataSourceKind;
-  /** Site URL, shop domain or ad account name; only for people with integrations.manage. */
-  label?: string | null;
-  status: "ACTIVE" | "ERROR" | "OFF";
-  lastResult: DataSyncResult | null;
-  /** "YYYY-MM-DD", the last provider day held contiguously. */
-  syncedThrough: string | null;
-  /** The zone the provider's days are in when it says (Search Console: Pacific; Meta Ads: the account's). */
-  reportsInZone: string | null;
-};
-/** GET data-sources. `timeZone`: the brand's zone for the date presets, if the server sends it (else the browser's). */
-export type DataSourcesResponse = { sources: DataSourceDto[]; timeZone?: string | null };
-
-/** `ctr` 0–1 and `position` (impression-weighted), both null with no impressions. */
-export type SearchTotals = { clicks: number; impressions: number; ctr: number | null; position: number | null };
-export type SearchSummary = { totals: SearchTotals; previous: SearchTotals; days: (SearchTotals & { day: string })[] };
-export type SearchPage = SearchTotals & { page: string };
-export type SearchPages = { pages: SearchPage[]; nextCursor: string | null };
-export type GoogleSite = { siteUrl: string; permissionLevel?: string };
-
-/** Money is a decimal string in `currency`; never added across currencies. */
-export type SalesTotals = { orders: number; gross: string; discounts: string; netSales: string; total: string; refunded: string };
-export type SalesCurrency = { currency: string; totals: SalesTotals; previous: SalesTotals; days: (SalesTotals & { day: string })[] };
-export type SalesSummary = { currencies: SalesCurrency[] };
-
-/** URL slugs of the kinds (data-sources/:kind/sync, PUT data-sources/search-console, …). */
-export const KIND_SLUG: Record<DataSourceKind, string> = {
-  SEARCH_CONSOLE: "search-console",
-  POST_METRICS: "post-metrics",
-  SHOPIFY_ORDERS: "shopify-orders",
-  META_ADS: "meta-ads",
-};
 
 /** The brand's API root the data routes hang off. */
 export const brandApi = brandBase;
@@ -69,10 +29,9 @@ export function useReloadOnFocus(reload: () => void, state: { kind: string }) {
 
 // ---- Date range: brand-local YYYY-MM-DD days carried in ?from&to ----
 
-export type DateRange = { from: string; to: string };
+export type { DateRange };
 export const PRESETS = [7, 28, 90] as const;
 export const DEFAULT_DAYS = 28;
-export const MAX_DAYS = 90;
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ms = (d: string) => Date.parse(`${d}T00:00:00Z`);
@@ -107,7 +66,7 @@ export const presetRange = (days: number, end: string): DateRange => ({ from: ad
 export function readRange(params: URLSearchParams, end: string): DateRange {
   const from = params.get("from") ?? "";
   const to = params.get("to") ?? "";
-  const ok = DAY.test(from) && DAY.test(to) && !Number.isNaN(ms(from)) && !Number.isNaN(ms(to)) && from <= to && rangeDays({ from, to }) <= MAX_DAYS;
+  const ok = DAY.test(from) && DAY.test(to) && !Number.isNaN(ms(from)) && !Number.isNaN(ms(to)) && from <= to && rangeDays({ from, to }) <= SEARCH_RANGE_MAX_DAYS;
   return ok ? { from, to } : presetRange(DEFAULT_DAYS, end);
 }
 

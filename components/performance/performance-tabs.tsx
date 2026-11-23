@@ -9,7 +9,8 @@ import { SearchTab } from "@/components/performance/search-tab";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { PageHeader } from "@/components/ui/page-header";
-import { brandApi, presetEnd, presetRange, rangeDays, readRange, useReloadOnFocus, withRange, zoneToday, type DataSourcesResponse, type DateRange } from "@/lib/data-api";
+import { brandApi, presetEnd, presetRange, rangeDays, readRange, useReloadOnFocus, withRange, zoneToday, type DateRange } from "@/lib/data-api";
+import type { DataSourcesDto } from "@/shared";
 import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +41,7 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
   const isData = active !== "reports";
 
   const base = brandApi(workspaceId, brandId);
-  const fetcher = useCallback(() => request<DataSourcesResponse>(`${base}/data-sources`), [base]);
+  const fetcher = useCallback(() => request<DataSourcesDto>(`${base}/data-sources`), [base]);
   const { state, reload } = useLoad(isData ? fetcher : null);
   useReloadOnFocus(reload, state);
 
