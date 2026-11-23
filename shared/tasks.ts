@@ -5,8 +5,8 @@ export const TASK_AREAS = ["CONTENT", "WEBSITE", "SEO", "GENERAL"] as const;
 export const TASK_PRIORITIES = ["LOW", "NORMAL", "HIGH", "URGENT"] as const;
 export const WEBSITE_CHANGE_KINDS = ["PRODUCT_PAGE", "COLLECTION", "MENU", "HOMEPAGE", "LANDING_PAGE", "BUG", "CORRECTION", "OTHER"] as const;
 
-export type TaskAction = "start" | "submitForReview" | "approve" | "requestChanges" | "markDone" | "block" | "unblock" | "checkedLive" | "cancel" | "reopen";
-const ACTIONS: readonly TaskAction[] = ["start", "submitForReview", "approve", "requestChanges", "markDone", "block", "unblock", "checkedLive", "cancel", "reopen"];
+export const TASK_ACTIONS = ["start", "submitForReview", "approve", "requestChanges", "markDone", "block", "unblock", "checkedLive", "cancel", "reopen"] as const;
+export type TaskAction = (typeof TASK_ACTIONS)[number];
 
 /** The task fields the rules read and write; dates are ISO strings. */
 export type TaskRow = {
@@ -91,7 +91,7 @@ export function applyAction(task: TaskRow, action: TaskAction, actor: ActorRole,
 
 /** Every action that would work for this actor, ignoring refusals that depend on what they type (reason, reviewer). */
 export function allowedActions(task: TaskRow, actor: ActorRole): TaskAction[] {
-  return ACTIONS.filter((a) => run(task, a, actor, { now: "" }, true).ok);
+  return TASK_ACTIONS.filter((a) => run(task, a, actor, { now: "" }, true).ok);
 }
 
 /** The fields a manager may change through PATCH; everything else (status, completedAt, checkedLive*, finding*) is server-only. */
