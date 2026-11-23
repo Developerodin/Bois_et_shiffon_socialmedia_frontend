@@ -84,7 +84,7 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
         active === "search" ? <SearchTab {...props} source={source("SEARCH_CONSOLE")} />
         : active === "sales" ? <SalesTab {...props} source={source("SHOPIFY_ORDERS")} />
         : active === "posts" ? <PostsTab workspaceId={workspaceId} brandId={brandId} from={range.from} to={range.to} />
-        : <AdsTab workspaceId={workspaceId} brandId={brandId} from={range.from} to={range.to} />;
+        : <AdsTab workspaceId={workspaceId} brandId={brandId} from={range.from} to={range.to} canManage={canManage} />;
     }
   }
 

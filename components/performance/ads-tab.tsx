@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import Link from "next/link";
 import { Megaphone } from "lucide-react";
-import { request } from "@/components/settings/api";
-import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
+import { connectionsUrl, errorMessage, request, type Connection } from "@/components/settings/api";
+import { ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { PageSection } from "@/components/ui/page-section";
@@ -105,7 +107,8 @@ function Pacing({ budgets }: { budgets: AdsBudgetDto[] }) {
 // ---- the tab ------------------------------------------------------------------------------------------------------
 
 /** Meta Ads spend and results for `from`..`to` ("YYYY-MM-DD"), per currency and per campaign. ads.read; the shell hides it otherwise. */
-export function AdsTab({ workspaceId, brandId, from, to }: { workspaceId: string; brandId: string; from: string; to: string }) {
+/** `canManage` (integrations.manage): with no ad account chosen yet, pick one of the connected Meta ad accounts. */
+export function AdsTab({ workspaceId, brandId, from, to, canManage = false }: { workspaceId: string; brandId: string; from: string; to: string; canManage?: boolean }) {
   const base = brandApi(workspaceId, brandId);
   const range = rangeQuery(from, to);
   const fetcher = useCallback(
@@ -129,6 +132,13 @@ export function AdsTab({ workspaceId, brandId, from, to }: { workspaceId: string
   if (state.kind === "error") return <LoadError message={state.message} onRetry={reload} />;
 
   const { sources, summary, campaigns } = state.data;
+  if (!sources.length && canManage) {
+    return (
+      <PageSection id="ads-account" title="Meta Ads" description="Spend, purchases and ROAS from one Meta ad account.">
+        <AdAccountPicker workspaceId={workspaceId} brandId={brandId} onSaved={reload} />
+      </PageSection>
+    );
+  }
   if (!sources.length) {
     return (
       <EmptyState
@@ -200,6 +210,79 @@ export function AdsTab({ workspaceId, brandId, from, to }: { workspaceId: string
         </p>
       </PageSection>
       {summary.budget?.length ? <Pacing budgets={summary.budget} /> : null}
+    </div>
+  );
+}
+
+/**
+ * Owners choose which connected Meta ad account (one connection per account) feeds the tab. GET meta-ads/accounts
+ * reads Meta's live list so the choice shows its currency and zone, or that it is no longer readable; PUT checks it
+ * again. 409 (reconnect, not readable) and 429 (too many tries) show the server's message.
+ */
+function AdAccountPicker({ workspaceId, brandId, onSaved }: { workspaceId: string; brandId: string; onSaved: () => void }) {
+  const base = brandApi(workspaceId, brandId);
+  const fetcher = useCallback(
+    () => request<{ connections: Connection[] }>(connectionsUrl(workspaceId, brandId)).then((d) => d.connections.filter((c) => c.provider === "META_ADS" && c.status === "ACTIVE")),
+    [workspaceId, brandId],
+  );
+  const { state, reload } = useLoad(fetcher);
+  const [picked, setPicked] = useState("");
+  const [live, setLive] = useState<{ id: string; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  if (state.kind === "loading") return <ListSkeleton label="Loading ad accounts" rows={1} />;
+  if (state.kind === "forbidden") return <p className="text-sm text-muted-foreground">You can&apos;t choose the ad account.</p>;
+  if (state.kind === "error") return <LoadError message={state.message} onRetry={reload} />;
+  const accounts = state.data;
+  if (!accounts.length) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Connect a Meta ad account first. <Link href="/connections" className="font-medium text-foreground underline underline-offset-2">Open Connections</Link>
+      </p>
+    );
+  }
+
+  const pick = async (id: string) => {
+    setPicked(id);
+    setLive(null);
+    setError("");
+    if (!id) return;
+    const conn = accounts.find((c) => c.id === id);
+    try {
+      const d = await request<{ accounts: { id: string; name: string; currency: string; timeZone: string }[] }>(`${base}/meta-ads/accounts?connectionId=${encodeURIComponent(id)}`);
+      const a = d.accounts.find((x) => x.name === conn?.displayName);
+      setLive({ id, text: a ? `Reports in ${a.currency}, ${a.timeZone} days.` : "Meta doesn't list this account as active any more." });
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't read the ad accounts. Try again."));
+    }
+  };
+  const save = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await request(`${base}/meta-ads/accounts`, { method: "PUT", body: JSON.stringify({ connectionId: picked }) });
+      onSaved();
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't choose the ad account. Try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor="ads-account-pick" className="text-sm font-medium">Ad account</label>
+      <div className="flex flex-wrap items-center gap-2">
+        <select id="ads-account-pick" className={cn(selectClass, "sm:w-auto sm:min-w-72")} value={picked} onChange={(e) => void pick(e.target.value)}>
+          <option value="">Pick an ad account</option>
+          {accounts.map((c) => <option key={c.id} value={c.id}>{c.displayName}</option>)}
+        </select>
+        <Button size="sm" disabled={busy || !picked} onClick={() => void save()}>{busy ? "Saving…" : "Use this account"}</Button>
+      </div>
+      {live?.id === picked ? <p className="text-xs text-muted-foreground">{live.text}</p> : null}
+      <p className="text-xs text-muted-foreground">The first sync reads the last 90 days.</p>
+      {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
     </div>
   );
 }
