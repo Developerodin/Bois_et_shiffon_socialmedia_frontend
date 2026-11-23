@@ -239,8 +239,9 @@ function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl
 /**
  * `canReadAgents`: agents.read (from the shell). Without it the agents list is a 403, so it isn't watched.
  * `canMakeTasks`: the tasks flag is on and the role holds tasks.manage; each finding then gets "Make a task".
+ * `bare`: the reports alone, without the page header (the Performance tabs draw it).
  */
-export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks = false }: { workspaceId: string; brandId: string; canReadAgents: boolean; canMakeTasks?: boolean }) {
+export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks = false, bare = false }: { workspaceId: string; brandId: string; canReadAgents: boolean; canMakeTasks?: boolean; bare?: boolean }) {
   const reportsUrl = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}/audit-reports`;
   const findingTaskUrl = canMakeTasks ? (reportId: string, findingId: string) => `${reportsUrl}/${encodeURIComponent(reportId)}/findings/${encodeURIComponent(findingId)}/task` : undefined;
   const fetcher = useCallback(() => request<{ seo: Report | null; geo: Report | null }>(reportsUrl), [reportsUrl]);
@@ -331,6 +332,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks =
     );
   }
 
+  if (bare) return body;
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-4">
       <PageHeader title={navFor("/performance").title}>

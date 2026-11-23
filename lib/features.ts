@@ -1,7 +1,7 @@
 import "server-only";
 import { notFound } from "next/navigation";
 
-export const WEB_FEATURE_LIST = ["library", "photoshoot", "reels", "stories", "inbox", "automations", "onboarding", "plans", "tasks"] as const;
+export const WEB_FEATURE_LIST = ["library", "photoshoot", "reels", "stories", "inbox", "automations", "onboarding", "plans", "tasks", "data", "sales", "ads"] as const;
 export type WebFeature = (typeof WEB_FEATURE_LIST)[number];
 
 const list = (name: string) =>

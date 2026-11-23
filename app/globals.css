@@ -211,3 +211,14 @@ details[open] > :not(summary) {
     transition: none;
   }
 }
+
+/*
+ * Print: a page that marks its content data-print-root (the Performance tabs) prints that alone, on A4, without the
+ * shell. Every ancestor of the root unrolls its scroll box; every sibling along the way is hidden; controls inside go.
+ */
+@media print {
+  @page { size: A4; margin: 14mm; }
+  :has([data-print-root]) { display: block !important; height: auto !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; }
+  :has([data-print-root]) > :not([data-print-root], :has([data-print-root])) { display: none !important; }
+  [data-print-root] :is(button, fieldset, select, input, [role="tablist"]) { display: none !important; }
+}
