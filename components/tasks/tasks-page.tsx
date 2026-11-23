@@ -35,9 +35,16 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
     try {
       raw = localStorage.getItem(TASKS_VIEW_KEY);
     } catch {}
-    // A link to one view (Today's group headers: ?view=approvals) shows that list, for this visit only.
+    // A link to one view (Today's group headers: ?view=approvals) shows that list, for this visit only. Then the
+    // parameter leaves the URL (no history entry), so a reload or a shared link shows the person's own choice.
     const linked = TASK_LIST_VIEWS.find((v) => v.value === search.get("view"))?.value;
     setSaved(linked ? { view: linked, layout: "list" } : readSaved(raw));
+    if (search.has("view")) {
+      const q = new URLSearchParams(search.toString());
+      q.delete("view");
+      const s = q.toString();
+      router.replace(s ? `${pathname}?${s}` : pathname, { scroll: false });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- read once on mount, like the saved choice
   }, []);
   const { view, layout } = saved ?? readSaved(null);

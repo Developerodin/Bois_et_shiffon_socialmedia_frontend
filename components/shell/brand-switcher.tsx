@@ -98,7 +98,8 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
                 try {
                   await setActiveContext({ workspaceId, brandId: brand.id });
                   // The Overview remounts for the new brand (keyed by brand); its URL must not name the old brand's item.
-                  dropOpenItem();
+                  const away = dropOpenItem();
+                  if (away) router.replace(away);
                   router.refresh();
                 } catch {
                   toast({ title: "Couldn't switch business", detail: "Try again.", tone: "warning" });

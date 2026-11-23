@@ -11,11 +11,14 @@ import { dueLabel, STATUS_LABEL } from "@/components/tasks/task-views";
 
 const pickToday = (d: TodayDto) => d;
 
-/** Today's groups, in order; each header links to the full view on /tasks. */
+/**
+ * Today's groups, in order; each header links to a view on /tasks. My tasks and Blockers show a narrower slice than any
+ * view, so their links say what they open (`more`) instead of "See all".
+ */
 const GROUPS = [
-  { key: "mine", title: "My tasks", hint: "due today or overdue", view: "mine" },
-  { key: "approvals", title: "Approvals", hint: "waiting for your review", view: "approvals" },
-  { key: "blockers", title: "Blockers", hint: "blocked, yours or waiting on you", view: "blocked" },
+  { key: "mine", title: "My tasks", hint: "due today or overdue", view: "mine", more: "All my open tasks" },
+  { key: "approvals", title: "Approvals", hint: "waiting for your review", view: "approvals", more: null },
+  { key: "blockers", title: "Blockers", hint: "blocked, yours or waiting on you", view: "blocked", more: "All blocked tasks" },
 ] as const;
 
 /**
@@ -39,13 +42,13 @@ export function TodayTasks({ base, onOpen }: { base: string; onOpen: (id: string
   return (
     <div className="mt-4 flex flex-col gap-4">
       {shown.map((g) => (
-        <TaskGroup key={g.key} title={g.title} hint={g.hint} href={`/tasks?view=${g.view}`} count={data[g.key].count} tasks={data[g.key].tasks} onOpen={onOpen} />
+        <TaskGroup key={g.key} title={g.title} hint={g.hint} href={`/tasks?view=${g.view}`} more={g.more} count={data[g.key].count} tasks={data[g.key].tasks} onOpen={onOpen} />
       ))}
     </div>
   );
 }
 
-function TaskGroup({ title, hint, href, count, tasks, onOpen }: { title: string; hint: string; href: string; count: number; tasks: TaskDto[]; onOpen: (id: string) => void }) {
+function TaskGroup({ title, hint, href, more, count, tasks, onOpen }: { title: string; hint: string; href: string; more: string | null; count: number; tasks: TaskDto[]; onOpen: (id: string) => void }) {
   return (
     <section aria-label={title}>
       <div className="flex items-baseline justify-between gap-3">
@@ -53,7 +56,7 @@ function TaskGroup({ title, hint, href, count, tasks, onOpen }: { title: string;
           {title} <span className="font-normal text-muted-foreground">· {count} {hint}</span>
         </h3>
         <Link href={href} className="shrink-0 text-xs font-medium text-primary-strong underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          {count > tasks.length ? `See all ${count}` : "Open tasks"}
+          {more ?? (count > tasks.length ? `See all ${count}` : "Open tasks")}
         </Link>
       </div>
       <ul className="mt-2 divide-y divide-border rounded-xl border border-border">

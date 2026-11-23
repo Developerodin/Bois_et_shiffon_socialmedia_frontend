@@ -163,8 +163,10 @@ export function namesItem(search: string): boolean {
  * that item or filter by a campaign it doesn't have. The other cf_ filters stay.
  */
 export function withoutOpenItem(search: string, pathname: string): string | null {
-  // The task pages open a task peek too (?task=); nothing else of theirs belongs to a brand.
-  if (pathname === "/tasks" || pathname.startsWith("/projects/")) {
+  // A project belongs to the old brand: its page gives way to the new brand's projects.
+  if (pathname.startsWith("/projects/")) return "/projects";
+  // /tasks opens a task peek too (?task=); nothing else of it belongs to a brand.
+  if (pathname === "/tasks") {
     if (!new URLSearchParams(search).has("task")) return null;
     return viewToSearch({ kind: "home" }, search, pathname);
   }
@@ -181,12 +183,17 @@ export function withoutOpenItem(search: string, pathname: string): string | null
 // (TaskPeek), where that read follows.
 let agreedUrl: string | null = null;
 
-/** After the person agreed to leave (a brand or workspace switch): takes the open item out of the URL. */
-export function dropOpenItem() {
+/**
+ * After the person agreed to leave (a brand or workspace switch): takes the open item out of the URL. When the page
+ * itself belongs to the old brand (a project's), returns where to go instead; the caller navigates there.
+ */
+export function dropOpenItem(): string | null {
   const next = withoutOpenItem(window.location.search, window.location.pathname);
-  if (next === null) return;
+  if (next === null) return null;
+  if (next.startsWith("/") && next !== window.location.pathname) return next;
   agreedUrl = next;
   window.history.replaceState(null, "", next);
+  return null;
 }
 
 /** True once when `url` is the one dropOpenItem wrote; always clears it. */
