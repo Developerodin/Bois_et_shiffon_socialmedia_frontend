@@ -16,7 +16,7 @@ import { TaskBoard } from "@/components/tasks/task-board";
 import { TaskList } from "@/components/tasks/task-list";
 import { TaskPeek } from "@/components/tasks/task-view";
 import { navigate } from "@/lib/workspace-view";
-import { AREA_TABS, areaParam, readSaved, SOURCE_TABS, sourceParam, TASK_LIST_VIEWS, TASKS_VIEW_KEY, type AreaParam, type SourceParam, type TaskLayout, type TaskListView } from "@/components/tasks/task-views";
+import { areaParam, areaTabs, readSaved, SOURCE_TABS, sourceParam, TASK_LIST_VIEWS, TASKS_VIEW_KEY, type AreaParam, type SourceParam, type TaskLayout, type TaskListView } from "@/components/tasks/task-views";
 
 const LAYOUTS = [
   { value: "list", label: "List" },
@@ -28,12 +28,12 @@ const LAYOUTS = [
  * report (?source=seo|geo), a view, List or Board, and the task peek (?task=). With tasks.all the page opens on all open
  * tasks, and a manager with it assigns from the list (people and roles read once here).
  */
-export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId: string; brandId: string; userId: string; perms: string[] }) {
+export function TasksPage({ workspaceId, brandId, userId, perms, crm }: { workspaceId: string; brandId: string; userId: string; perms: string[]; crm: boolean }) {
   const base = brandBase(workspaceId, brandId);
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams();
-  const area = areaParam(search.get("area"));
+  const area = areaParam(search.get("area"), crm);
   const source = sourceParam(search.get("source"), area);
   const all = perms.includes("tasks.all");
   const canAssign = all && perms.includes("tasks.manage");
@@ -102,7 +102,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms }: { workspaceId
         Work on this business across content, the website and performance.
       </PageHeader>
       <div className="flex flex-wrap items-center gap-3">
-        <SegmentedRadios label="Area" name="task-area" value={area} onChange={setArea} options={AREA_TABS} />
+        <SegmentedRadios label="Area" name="task-area" value={area} onChange={setArea} options={areaTabs(crm)} />
         {area === "seo" ? <SegmentedRadios label="Report" name="task-source" value={source} onChange={setSource} options={SOURCE_TABS} /> : null}
         {layout === "list" ? (
           <label className="flex items-center gap-2 text-sm">

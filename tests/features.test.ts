@@ -59,6 +59,17 @@ describe("WEB_FEATURE_LIST", () => {
   });
 });
 
+describe("Phase 3 flags", () => {
+  it("lists crm, blog and digest, each off until set", () => {
+    for (const f of ["crm", "blog", "digest"] as const) {
+      expect(WEB_FEATURE_LIST).toContain(f);
+      expect(featureOn(f, "w1")).toBe(false);
+    }
+    vi.stubEnv("WEB_FEATURE_WORKSPACES", "crm:w1");
+    expect(featuresOn("w1")).toEqual(["crm"]);
+  });
+});
+
 describe("requireFeature", () => {
   it("calls notFound when the feature is off", () => {
     requireFeature("plans", "w1");

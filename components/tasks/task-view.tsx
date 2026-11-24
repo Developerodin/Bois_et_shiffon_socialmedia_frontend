@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SearchX } from "lucide-react";
-import { SEARCH_MAX, SEARCH_MIN, TASK_AREAS, TASK_PRIORITIES, type TaskDetailDto, type TaskDto, type TaskPersonDto } from "@/shared";
+import { SEARCH_MAX, SEARCH_MIN, TASK_PRIORITIES, type TaskDetailDto, type TaskDto, type TaskPersonDto } from "@/shared";
 import { okToDiscard, UnsavedGuardOff, useUnsavedGuard } from "@/components/context/unsaved";
 import { ApiError, errorMessage } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
@@ -28,7 +28,7 @@ import { TaskChecklist } from "@/components/tasks/task-checklist";
 import { TaskComments } from "@/components/tasks/task-comments";
 import { FindingTag } from "@/components/tasks/task-list";
 import { WebsiteChecks, WebsiteFacts, WebsiteInputs } from "@/components/tasks/website-fields";
-import { AREA_LABEL, dueLabel, ownerFromValue, ownerLabel, ownerValue, peekReaction, PRIORITY_LABEL, STATUS_LABEL } from "@/components/tasks/task-views";
+import { AREA_LABEL, dueLabel, ownerFromValue, ownerLabel, ownerValue, peekReaction, pickableAreas, PRIORITY_LABEL, STATUS_LABEL } from "@/components/tasks/task-views";
 
 /** The task fields a manager edits in the peek, as form values ("" for none; ownerId is the owner picker's value, ownerValue). */
 export type TaskDraft = {
@@ -297,7 +297,7 @@ function TaskFields({
       <fieldset className="flex flex-col gap-1.5">
         <legend className={cn(fieldLabel, "mb-1.5")}>Areas</legend>
         <div className="flex flex-wrap gap-x-4 gap-y-2">
-          {TASK_AREAS.map((a) => (
+          {pickableAreas(task.areas).map((a) => (
             <label key={a} className="flex items-center gap-2 text-sm pointer-coarse:min-h-11">
               <input
                 type="checkbox"

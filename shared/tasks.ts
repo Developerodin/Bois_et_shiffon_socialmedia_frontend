@@ -1,7 +1,8 @@
 /** Task vocabulary and status rules. Plain TS (no Prisma) so the web and phone share one copy. */
 export const TASK_STATUSES = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "CANCELLED"] as const;
 export const OPEN_TASK_STATUSES = ["TODO", "IN_PROGRESS", "IN_REVIEW"] as const;
-export const TASK_AREAS = ["CONTENT", "WEBSITE", "SEO", "GENERAL"] as const;
+/** CRM: customer follow-ups and quote reminders, seen only with a CRM_TASK_KEYS key (server/tasks/access.ts). */
+export const TASK_AREAS = ["CONTENT", "WEBSITE", "SEO", "GENERAL", "CRM"] as const;
 export const TASK_PRIORITIES = ["LOW", "NORMAL", "HIGH", "URGENT"] as const;
 export const WORK_PROJECT_STATUSES = ["ACTIVE", "DONE", "ARCHIVED"] as const;
 export const WEBSITE_CHANGE_KINDS = ["PRODUCT_PAGE", "COLLECTION", "MENU", "HOMEPAGE", "LANDING_PAGE", "BUG", "CORRECTION", "OTHER"] as const;

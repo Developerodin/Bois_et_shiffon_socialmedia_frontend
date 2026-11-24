@@ -32,6 +32,8 @@ export const PERMISSIONS = [
   // the project only: not Creator, Approver, Viewer or Client reviewer. Editing budgets, FX and VAT is commercial.manage.
   ["crm.read", "crm", "See orders and sales totals"],
   ["ads.read", "ads", "See ad spend, results and budgets"],
+  // crm.manage: customer records, notes and quotes (Phase 3). crm.read stays orders and sales totals.
+  ["crm.manage", "crm", "See customer records and notes, and write quotes"],
   ["tasks.read", "tasks", "See tasks and projects, and comment"],
   ["tasks.manage", "tasks", "Create tasks and edit your own"],
   // tasks.all: see and assign every task of the project. Without it, someone sees only the tasks they own (or their
@@ -47,3 +49,9 @@ export type PermissionKey = (typeof PERMISSIONS)[number][0];
  * the accounts. Any one of these is enough; a client reviewer holds none.
  */
 export const CONNECTIONS_READ = ["inbox.read", "publish.execute", "integrations.manage"] as const satisfies readonly PermissionKey[];
+
+/**
+ * Seeing and being given a CRM-area task (follow-ups, quote reminders): people who answer customers or manage customer
+ * records. Any one is enough; the matrix decides (a client reviewer holds neither by default).
+ */
+export const CRM_TASK_KEYS = ["inbox.read", "crm.manage"] as const satisfies readonly PermissionKey[];
