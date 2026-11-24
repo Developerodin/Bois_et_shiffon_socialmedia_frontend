@@ -55,6 +55,7 @@ function activeIdFor(pathname: string, search: URLSearchParams) {
   // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
   if (pathname === "/tasks") return search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
   if (pathname === "/projects" || pathname.startsWith("/projects/")) return "beat";
+  if (pathname === "/crm" || pathname.startsWith("/crm/")) return "spark";
   return navFor(pathname).activeId;
 }
 
