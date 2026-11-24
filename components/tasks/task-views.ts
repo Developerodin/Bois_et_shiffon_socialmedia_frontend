@@ -1,5 +1,5 @@
 /** The /tasks page's vocabulary and rules, kept free of React so they can be tested. */
-import { DONE_DAYS, TASK_VIEWS, type TaskAction, type TaskDto, type TaskPersonDto, type TaskView } from "@/shared";
+import { DONE_DAYS, TASK_AREAS, TASK_VIEWS, type TaskAction, type TaskDto, type TaskPersonDto, type TaskView } from "@/shared";
 import type { TasksChanged } from "@/lib/tasks-api";
 
 const VIEW_LABEL: Record<TaskView, string> = {
@@ -16,20 +16,30 @@ export const TASK_LIST_VIEWS = TASK_VIEWS.map((value) => ({ value, label: VIEW_L
 export type TaskListView = TaskView;
 
 /** The area's name everywhere it shows. The SEO area reads "Performance"; its value stays SEO (`?area=seo`). */
-export const AREA_LABEL: Record<string, string> = { CONTENT: "Content", WEBSITE: "Website", SEO: "Performance", GENERAL: "General" };
+export const AREA_LABEL: Record<string, string> = { CONTENT: "Content", WEBSITE: "Website", SEO: "Performance", GENERAL: "General", CRM: "Sales & CRM" };
 
-/** Area tabs; the value is the lower-case `?area=` the nav links use ("" is All). */
+/** Area tabs; the value is the lower-case `?area=` the nav links use ("" is All). Sales & CRM only when `crm` (areaTabs). */
 export const AREA_TABS = [
   { value: "", label: "All" },
   { value: "content", label: AREA_LABEL.CONTENT },
   { value: "website", label: AREA_LABEL.WEBSITE },
   { value: "seo", label: AREA_LABEL.SEO },
+  { value: "crm", label: AREA_LABEL.CRM },
 ] as const;
 export type AreaParam = (typeof AREA_TABS)[number]["value"];
 
-export function areaParam(s: string | null | undefined): AreaParam {
-  return AREA_TABS.some((t) => t.value === s) ? (s as AreaParam) : "";
+/** `crm`: the crm flag is on and the person holds inbox.read or crm.manage (the server hides CRM tasks otherwise). */
+export const areaTabs = (crm: boolean) => AREA_TABS.filter((t) => crm || t.value !== "crm");
+
+export function areaParam(s: string | null | undefined, crm = false): AreaParam {
+  return areaTabs(crm).some((t) => t.value === s) ? (s as AreaParam) : "";
 }
+
+/**
+ * The areas a task form offers. CRM tasks come from customer messages and quotes, so CRM is offered only on a task that
+ * already has it (to someone who sees it, so holds a key); the server refuses it from anyone else.
+ */
+export const pickableAreas = (areas: readonly string[]) => TASK_AREAS.filter((a) => a !== "CRM" || areas.includes("CRM"));
 
 /** The Performance tab's filter by the report a task came from; the value is the lower-case `?source=` ("" is All). */
 export const SOURCE_TABS = [

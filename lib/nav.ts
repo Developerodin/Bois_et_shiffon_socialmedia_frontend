@@ -23,6 +23,7 @@ export type NavEntry = {
 };
 
 const TASKS_READ = ["tasks.read"] as const;
+const CRM_READ = ["crm.manage"] as const;
 
 export const NAV: readonly NavEntry[] = [
   { id: "overview", label: "Overview", href: "/", group: "main" },
@@ -36,7 +37,10 @@ export const NAV: readonly NavEntry[] = [
   { id: "tasks", label: "Projects & tasks", href: "/tasks", group: "page", feature: "tasks", perm: TASKS_READ },
   // Its link is on the tasks page; the sidebar highlights Beat's slot on it.
   { id: "projects", label: "Projects", href: "/projects", group: "page", feature: "tasks", perm: TASKS_READ },
+  // Linked from the Overview's "This week".
+  { id: "digest", label: "Weekly digest", href: "/digest", group: "page", feature: "digest" },
   { id: "website", label: "Website", href: "/tasks?area=website&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
+  { id: "blog", label: "Blog", href: "/blog", group: "main", feature: "blog" },
   { id: "seo", label: "Performance", href: "/tasks?area=seo&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
 
   { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },
@@ -45,6 +49,8 @@ export const NAV: readonly NavEntry[] = [
   { id: "studio", label: "Studio", href: "/studio", group: "create", feature: "stories" },
 
   { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox", perm: ["inbox.read"] },
+  // Its link is Spark's slot (agentEntries). Quotes only for now, so crm.manage; inbox.read joins with the stored inbox.
+  { id: "crm", label: "Sales & CRM", href: "/crm", group: "page", feature: "crm", perm: CRM_READ },
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
@@ -82,12 +88,13 @@ export function sidebarGroups(enabled: readonly WebFeature[], perms?: readonly s
 
 /**
  * The agents as the sidebar lists them. With the tasks flag and tasks.read, Beat's "Projects & team" slot opens
- * Projects & tasks instead of its coming-soon page.
+ * Projects & tasks instead of its coming-soon page; with the crm flag and a CRM key, Spark's "Sales & CRM" slot opens /crm (crm.manage, who can open it).
  */
 export function agentEntries(enabled: readonly WebFeature[], perms?: readonly string[]): NavEntry[] {
   const tasks = enabled.includes("tasks") && (!perms || TASKS_READ.some((p) => perms.includes(p)));
+  const crm = enabled.includes("crm") && (!perms || CRM_READ.some((p) => perms.includes(p)));
   return NAV.filter((e) => e.group === "agent").map((e) =>
-    e.id === "beat" && tasks ? { ...e, role: "Projects & tasks", href: "/tasks", soon: false } : e,
+    e.id === "beat" && tasks ? { ...e, role: "Projects & tasks", href: "/tasks", soon: false } : e.id === "spark" && crm ? { ...e, href: "/crm", soon: false } : e,
   );
 }
 

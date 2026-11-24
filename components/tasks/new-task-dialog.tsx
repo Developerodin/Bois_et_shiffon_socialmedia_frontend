@@ -3,7 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
-import { TASK_AREAS, TASK_PRIORITIES, type TaskDto, type TaskPersonDto, type WorkProjectDto } from "@/shared";
+import { TASK_PRIORITIES, type TaskDto, type TaskPersonDto, type WorkProjectDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
 import { selectClass } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { projectsApi, tasksApi, type TaskTeam } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { ownerPeople, PersonSelect } from "@/components/tasks/task-actions";
-import { AREA_LABEL, ownerFromValue, PRIORITY_LABEL } from "@/components/tasks/task-views";
+import { AREA_LABEL, ownerFromValue, pickableAreas, PRIORITY_LABEL } from "@/components/tasks/task-views";
 
 /** The areas as checkboxes; at least one is needed (the caller says so). */
 export function AreaChecks({ value, onChange, legend = "Areas" }: { value: string[]; onChange: (areas: string[]) => void; legend?: string }) {
@@ -21,7 +21,7 @@ export function AreaChecks({ value, onChange, legend = "Areas" }: { value: strin
     <fieldset className="flex flex-col gap-1.5">
       <legend className="mb-1.5 text-sm font-medium">{legend}</legend>
       <div className="flex flex-wrap gap-x-4 gap-y-2">
-        {TASK_AREAS.map((a) => (
+        {pickableAreas([]).map((a) => (
           <label key={a} className="flex items-center gap-2 text-sm pointer-coarse:min-h-11">
             <input type="checkbox" className="size-4 accent-primary" checked={value.includes(a)} onChange={(e) => onChange(e.target.checked ? [...value, a] : value.filter((x) => x !== a))} />
             {AREA_LABEL[a] ?? a}

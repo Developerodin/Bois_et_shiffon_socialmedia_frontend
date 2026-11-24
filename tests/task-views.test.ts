@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TaskDto } from "@/shared";
-import { AREA_TABS, boardMove, ownerFromValue, ownerLabel, ownerValue, readSaved, sourceParam, tasksQuery } from "@/components/tasks/task-views";
+import { AREA_TABS, areaParam, areaTabs, boardMove, pickableAreas, ownerFromValue, ownerLabel, ownerValue, readSaved, sourceParam, tasksQuery } from "@/components/tasks/task-views";
 
 const task = (over: Partial<TaskDto> = {}): TaskDto => ({
   id: "t1",
@@ -125,6 +125,19 @@ describe("tasksQuery", () => {
     expect(tasksQuery({ view: "mine" })).toBe("tasks?view=mine");
     expect(tasksQuery({ view: "open", area: "website", workProjectId: "p 1" })).toBe("tasks?view=open&area=website&workProjectId=p+1");
     expect(tasksQuery({ view: "open", area: "seo", source: "geo" })).toBe("tasks?view=open&area=seo&source=geo");
+  });
+});
+
+describe("Sales & CRM area", () => {
+  it("is a tab only with crm (flag and key), and ?area=crm reads as All without it", () => {
+    expect(areaTabs(false).map((t) => t.value)).not.toContain("crm");
+    expect(areaTabs(true).find((t) => t.value === "crm")?.label).toBe("Sales & CRM");
+    expect(areaParam("crm")).toBe("");
+    expect(areaParam("crm", true)).toBe("crm");
+  });
+  it("is offered in a task form only on a task that already has it", () => {
+    expect(pickableAreas([])).toEqual(["CONTENT", "WEBSITE", "SEO", "GENERAL"]);
+    expect(pickableAreas(["CRM"])).toContain("CRM");
   });
 });
 
