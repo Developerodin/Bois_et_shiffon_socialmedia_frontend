@@ -10,11 +10,11 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { PAGE_SIZES, productsApi, stockLabel, thumbUrl, type FullProduct, type PageQuery, type Product, type ProductPage } from "@/components/products/api";
+import { PAGE_SIZES, productsApi, stockLabel, thumbUrl, type CatalogSync, type FullProduct, type PageQuery, type Product, type ProductPage } from "@/components/products/api";
 import { CampaignsSection } from "@/components/products/campaigns";
 import { ImportDialog } from "@/components/products/import-dialog";
 import { okToDiscard, useUnsavedGuard } from "@/components/context/unsaved";
-import { errorMessage } from "@/components/settings/api";
+import { ApiError, errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { Pagination } from "@/components/ui/pagination";
 import { timeAgo } from "@/lib/time";
@@ -26,6 +26,37 @@ const SOURCE_LINE = {
   WEBSITE: "From your website's product feed",
   SITE: "From your website's product pages",
 } as const;
+/**
+ * The line above the catalogue about the last sync: the site reader's progress (not a failure), the 5,000-page cap,
+ * or the server's message for a failed or refused sync. Null when there's nothing to say.
+ */
+export function syncBanner(sync: CatalogSync | null): { text: string; tone: "info" | "warning" } | null {
+  if (!sync) return null;
+  // A feed that missed one day isn't a failure yet: it's checked again tomorrow before reading pages instead.
+  if (sync.error) return { text: sync.error, tone: sync.reason === "feed-missing" ? "info" : "warning" };
+  if (sync.source !== "SITE" || !sync.pages) return null;
+  const { read, total, capped } = sync.pages;
+  const cap = capped ? `Your sitemap lists more than ${count(total)} product pages, so we read the newest ${count(total)}.` : "";
+  if (sync.reason === "reading") return { text: `Reading your website's product pages: ${count(read)} of ${count(total)} so far. More each day. ${cap}`.trim(), tone: "info" };
+  return cap ? { text: cap, tone: "info" } : null;
+}
+
+/**
+ * When the board next asks for the sync status: every 4 s, every 30 s after 3 minutes (the site reader's daily chain
+ * can run for half an hour), and never after 60 minutes or once the UTC day has changed (null: stop and offer Refresh).
+ */
+export function pollDelay(startedAt: number, now: number): number | null {
+  if (now - startedAt > 3_600_000 || new Date(now).toISOString().slice(0, 10) !== new Date(startedAt).toISOString().slice(0, 10)) return null;
+  return now - startedAt > 180_000 ? 30_000 : 4000;
+}
+
+/** Sync now's own limit (the server allows 6 an hour per person and business) said plainly; other errors as sent. */
+export function syncNowError(err: unknown) {
+  return err instanceof ApiError && err.status === 429
+    ? "Sync now can run 6 times an hour. The daily sync still runs; try again later."
+    : errorMessage(err);
+}
+
 /** How a person-owned row came in, under its name. */
 const OWNED_LINE: Partial<Record<Product["source"], string>> = { MANUAL: "Added by hand", IMPORT: "Imported" };
 
@@ -66,6 +97,9 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   const [removing, setRemoving] = useState<Product | null>(null);
   const [importing, setImporting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  // The status the last poll returned (fresher than the list's until it's read again), and whether polling gave up.
+  const [live, setLive] = useState<CatalogSync | null>(null);
+  const [stale, setStale] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // The table pages on the server (?page=); the full list above still feeds Campaigns and the empty state.
@@ -154,30 +188,58 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   };
 
   const data = state.kind === "ready" ? state.data : null;
-  const lastSync = data?.catalogSync ?? null;
+  const lastSync = live ?? data?.catalogSync ?? null;
+  // The site reader's chain is reading pages: the banner says how far; the button doesn't claim a sync.
+  const readingPages = lastSync?.source === "SITE" && lastSync.reason === "reading";
 
-  // While a sync is queued or running, poll the light status every 4 s; read the full list once it's done
-  // (or after 3 minutes).
+  // A sync (or the site reader's daily chain) already going when the page opens is followed too.
+  useEffect(() => {
+    if (data?.running) setSyncing(true);
+  }, [data?.running]);
+
+  // While a sync is queued or running, poll the light status (pollDelay), showing each answer's progress; read the
+  // full list once it's done. Past the poll limit the last known progress stays, with Refresh.
   useEffect(() => {
     if (!syncing) return;
     const started = Date.now();
-    const timer = setInterval(async () => {
-      const status = await productsApi.status(workspaceId, brandId).catch(() => null);
-      if ((status && !status.running) || Date.now() - started > 180_000) {
+    let timer: ReturnType<typeof setTimeout>;
+    const next = () => {
+      const delay = pollDelay(started, Date.now());
+      if (delay === null) {
         setSyncing(false);
+        setStale(true);
+      } else timer = setTimeout(tick, delay);
+    };
+    const tick = async () => {
+      const status = await productsApi.status(workspaceId, brandId).catch(() => null);
+      if (status?.catalogSync) setLive(status.catalogSync);
+      if (status && !status.running) {
+        setSyncing(false);
+        setLive(null);
         reloadAll();
+        return;
       }
-    }, 4000);
-    return () => clearInterval(timer);
+      next();
+    };
+    next();
+    return () => clearTimeout(timer);
   }, [syncing, workspaceId, brandId, reloadAll]);
+  const banner = syncBanner(lastSync);
+  const refresh = () => {
+    setStale(false);
+    setLive(null);
+    reloadAll();
+    setSyncing(true);
+  };
 
   async function syncNow() {
     setError(null);
     try {
       await productsApi.sync(workspaceId, brandId);
+      setStale(false);
       setSyncing(true);
     } catch (err) {
-      setError(errorMessage(err));
+      setError(syncNowError(err));
     }
   }
 
@@ -312,7 +374,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
               {data?.source ? (
                 <Button variant="outline" onClick={syncNow} disabled={syncing}>
                   <RefreshCw aria-hidden="true" />
-                  {syncing ? "Syncing…" : "Sync now"}
+                  {syncing ? (readingPages ? "Reading pages…" : "Syncing…") : "Sync now"}
                 </Button>
               ) : null}
               <Button variant="outline" onClick={() => setImporting(true)}>Import file</Button>
@@ -328,9 +390,24 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           </>
         ) : null}
       </PageHeader>
-      {lastSync?.error && !syncing ? (
-        <p role="status" className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
-          {lastSync.error} <span className="text-muted-foreground">({timeAgo(lastSync.at)})</span>
+      {banner && lastSync && (!syncing || banner.tone === "info") ? (
+        <p
+          role="status"
+          className={cn(
+            "rounded-xl border px-4 py-3 text-sm",
+            banner.tone === "warning" ? "border-warning/40 bg-warning/10" : "border-border bg-muted/40",
+          )}
+        >
+          {banner.text} <span className="text-muted-foreground">({timeAgo(lastSync.at)})</span>
+        </p>
+      ) : null}
+      {stale ? (
+        <p role="status" className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          This page stopped checking for progress; reading carries on in the background.
+          <Button variant="outline" size="sm" onClick={refresh}>
+            <RefreshCw aria-hidden="true" />
+            Refresh
+          </Button>
         </p>
       ) : null}
       <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
