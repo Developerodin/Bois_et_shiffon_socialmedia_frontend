@@ -34,7 +34,8 @@ export type BlogArticleDto = {
 
 /** What a Shopify article write sends (ARTICLE_CREATE / ARTICLE_UPDATE): every link target is listed in `links`. */
 export type ArticleWritePreview = {
-  blogId: string;
+  /** null only while Shopify writes aren't connected (the confirm is then refused) */
+  blogId: string | null;
   title: string;
   handle: string;
   summary: string;
@@ -45,6 +46,9 @@ export type ArticleWritePreview = {
 };
 /** ARTICLE_PUBLISH: the article Shopify shows from then on. */
 export type ArticlePublishPreview = { shopifyId: string; title: string; handle: string };
+export type ArticleShopifyAction = "create" | "update" | "publish";
+/** The brand's Shopify blogs; articles go to `selectedId` when picked, else the first (`defaultId`). */
+export type ShopifyBlogsDto = { blogs: { id: string; title: string }[]; selectedId: string | null; defaultId: string | null; connected: boolean };
 
 /** The plain text of a line, with links shown as [text](url), bold as **text** and italic as *text*: the web editor's format. */
 export function spansToText(spans: ArticleSpan[]): string {
