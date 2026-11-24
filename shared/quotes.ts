@@ -36,7 +36,8 @@ export type QuoteDto = {
   note: string | null;
   internalNote: string | null;
   /** "YYYY-MM-DD" */
-  validUntil: string;
+  /** "YYYY-MM-DD": 30 brand days from the invoice send; null until it is sent (a draft never expires) */
+  validUntil: string | null;
   shopifyName: string | null;
   /** Shopify's draft order is behind this quote's edits: send an update before the invoice. */
   needsShopifyUpdate: boolean;
