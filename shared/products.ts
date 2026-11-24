@@ -37,7 +37,7 @@ export const byExternalId = (a: { externalId: string | null }, b: { externalId: 
 /** Why the last catalogue sync failed, as a kind the apps word themselves. */
 export type SyncReason = "not-a-feed" | "blocked" | "partial" | "failed" | "shopify-refused";
 /** A brand's last catalogue sync (BrandProfile.catalogSync). `error` is the message the web shows; `reason` lets the app say it in the person's language. */
-export type CatalogSync = { at: string; source: "WEBSITE" | "SHOPIFY" | null; count: number; error: string | null; reason?: SyncReason | null };
+export type CatalogSync = { at: string; source: "WEBSITE" | "SHOPIFY" | "SITE" | null; count: number; error: string | null; reason?: SyncReason | null };
 
 /**
  * "12 in stock" / "In stock" / "Out of stock" / "Unknown". A count of 0 or less with inStock true is a store that
@@ -58,9 +58,9 @@ export const IMPORT_FIELDS = [
 export type ImportField = (typeof IMPORT_FIELDS)[number];
 /**
  * A row skipped, or imported with a value left out (an in-stock value that isn't yes or no): its line in the CSV or
- * row number in Excel, and why.
+ * row number in Excel, and why. `skipped`: the row was not imported (the server always sends it).
  */
-export type ImportProblem = { row: number; reason: string };
+export type ImportProblem = { row: number; reason: string; skipped?: boolean };
 /**
  * The import preview (?dryRun=1): the file's headers, the mapping (guessed, or the one sent), its first 20 data rows
  * as written, and what importing with that mapping would skip. `needsApproval`: fields this person can't import
