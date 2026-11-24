@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { PageSection } from "@/components/ui/page-section";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { PAGE_SIZES, productsApi, stockLabel, thumbUrl, type FullProduct, type PageQuery, type Product, type ProductPage } from "@/components/products/api";
+import { PAGE_SIZES, productsApi, stockLabel, thumbUrl, type CatalogSync, type FullProduct, type PageQuery, type Product, type ProductPage } from "@/components/products/api";
 import { CampaignsSection } from "@/components/products/campaigns";
 import { ImportDialog } from "@/components/products/import-dialog";
 import { okToDiscard, useUnsavedGuard } from "@/components/context/unsaved";
@@ -26,6 +26,20 @@ const SOURCE_LINE = {
   WEBSITE: "From your website's product feed",
   SITE: "From your website's product pages",
 } as const;
+/**
+ * The line above the catalogue about the last sync: the site reader's progress (not a failure), the 5,000-page cap,
+ * or the server's message for a failed or refused sync. Null when there's nothing to say.
+ */
+export function syncBanner(sync: CatalogSync | null): { text: string; tone: "info" | "warning" } | null {
+  if (!sync) return null;
+  if (sync.error) return { text: sync.error, tone: "warning" };
+  if (sync.source !== "SITE" || !sync.pages) return null;
+  const { read, total, capped } = sync.pages;
+  const cap = capped ? `Your sitemap lists more than ${count(total)} product pages, so we read the newest ${count(total)}.` : "";
+  if (sync.reason === "reading") return { text: `Reading your website's product pages: ${count(read)} of ${count(total)} so far. More each day. ${cap}`.trim(), tone: "info" };
+  return cap ? { text: cap, tone: "info" } : null;
+}
+
 /** How a person-owned row came in, under its name. */
 const OWNED_LINE: Partial<Record<Product["source"], string>> = { MANUAL: "Added by hand", IMPORT: "Imported" };
 
@@ -156,20 +170,30 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   const data = state.kind === "ready" ? state.data : null;
   const lastSync = data?.catalogSync ?? null;
 
-  // While a sync is queued or running, poll the light status every 4 s; read the full list once it's done
-  // (or after 3 minutes).
+  // A sync (or the site reader's daily chain) already going when the page opens is followed too.
+  useEffect(() => {
+    if (data?.running) setSyncing(true);
+  }, [data?.running]);
+
+  // While a sync is queued or running, poll the light status (every 4 s, every 30 s after 3 minutes: the site
+  // reader's chain can run for half an hour); read the full list once it's done.
   useEffect(() => {
     if (!syncing) return;
     const started = Date.now();
-    const timer = setInterval(async () => {
+    let timer: ReturnType<typeof setTimeout>;
+    const tick = async () => {
       const status = await productsApi.status(workspaceId, brandId).catch(() => null);
-      if ((status && !status.running) || Date.now() - started > 180_000) {
+      if (status && !status.running) {
         setSyncing(false);
         reloadAll();
+        return;
       }
-    }, 4000);
-    return () => clearInterval(timer);
+      timer = setTimeout(tick, Date.now() - started > 180_000 ? 30_000 : 4000);
+    };
+    timer = setTimeout(tick, 4000);
+    return () => clearTimeout(timer);
   }, [syncing, workspaceId, brandId, reloadAll]);
+  const banner = syncBanner(lastSync);
 
   async function syncNow() {
     setError(null);
@@ -328,9 +352,15 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           </>
         ) : null}
       </PageHeader>
-      {lastSync?.error && !syncing ? (
-        <p role="status" className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
-          {lastSync.error} <span className="text-muted-foreground">({timeAgo(lastSync.at)})</span>
+      {banner && lastSync && (!syncing || banner.tone === "info") ? (
+        <p
+          role="status"
+          className={cn(
+            "rounded-xl border px-4 py-3 text-sm",
+            banner.tone === "warning" ? "border-warning/40 bg-warning/10" : "border-border bg-muted/40",
+          )}
+        >
+          {banner.text} <span className="text-muted-foreground">({timeAgo(lastSync.at)})</span>
         </p>
       ) : null}
       <p aria-live="polite" className="text-sm text-destructive empty:hidden">{error}</p>
