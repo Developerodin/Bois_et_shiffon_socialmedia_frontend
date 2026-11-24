@@ -56,7 +56,10 @@ export const IMPORT_FIELDS = [
   "inStock", "stockQuantity", "materials", "dimensions", "certifications",
 ] as const;
 export type ImportField = (typeof IMPORT_FIELDS)[number];
-/** A skipped row: its number in the file counting the header as row 1 (empty rows aren't counted), and why. */
+/**
+ * A row skipped, or imported with a value left out (an in-stock value that isn't yes or no): its line in the CSV or
+ * row number in Excel, and why.
+ */
 export type ImportProblem = { row: number; reason: string };
 /**
  * The import preview (?dryRun=1): the file's headers, the mapping (guessed, or the one sent), its first 20 data rows
@@ -73,7 +76,7 @@ export type ImportPreviewDto = {
   problems: ImportProblem[];
   needsApproval: ImportField[];
 };
-/** What an import did. `problems`: the first 50 skipped rows. */
+/** What an import did. `problems`: the first 50 (ImportProblem). */
 export type ImportResultDto = {
   created: number;
   updated: number;
