@@ -28,10 +28,10 @@ function SectionBody({ s }: { s: DigestSection }) {
       return (
         <>
           <Figures items={[["Done", n(s.done)], ["Open", n(s.open)], ["Overdue", n(s.overdue)]]} />
-          {s.overdueTitles.length > 0 && (
+          {s.overdueTasks.length > 0 && (
             <ul className="mt-2 list-disc pl-5 text-sm">
-              {s.overdueTitles.map((t, i) => (
-                <li key={i}>{t}</li>
+              {s.overdueTasks.map((t) => (
+                <li key={t.id}>{t.title}</li>
               ))}
             </ul>
           )}

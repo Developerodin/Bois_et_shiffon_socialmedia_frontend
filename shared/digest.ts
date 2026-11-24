@@ -9,8 +9,11 @@ import type { PermissionKey } from "./permissions";
  */
 export type DigestSection =
   | { kind: "content"; key: "brand.read"; published: number; scheduled: number; awaitingApproval: number }
-  /** `crm`: CRM-area tasks were counted (the reader held inbox.read or crm.manage), so it needs one of them still. */
-  | { kind: "tasks"; key: "tasks.read"; crm: boolean; done: number; open: number; overdue: number; overdueTitles: string[] }
+  /**
+   * `crm`: CRM-area tasks were counted (the reader held inbox.read or crm.manage), so it needs one of them still.
+   * Counts are as built; `overdueTasks` (first 5) are re-checked against task visibility on every read and send.
+   */
+  | { kind: "tasks"; key: "tasks.read"; crm: boolean; done: number; open: number; overdue: number; overdueTasks: { id: string; title: string }[] }
   /** The latest 7 complete Search Console days (Google lags 2-3 days), in Google's Pacific days. */
   | { kind: "seo"; key: "analytics.read"; data: { range: DateRange; totals: SearchMetrics; previous: SearchMetrics } | null }
   /** The week's published posts with the most reach (reach null until read). */

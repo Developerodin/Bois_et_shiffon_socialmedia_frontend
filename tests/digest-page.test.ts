@@ -18,7 +18,7 @@ const digest: DigestDto = {
         week,
         sections: [
           { kind: "content", key: "brand.read", published: 4, scheduled: 2, awaitingApproval: 1 },
-          { kind: "tasks", key: "tasks.read", crm: false, done: 3, open: 5, overdue: 1, overdueTitles: ["Fix the footer"] },
+          { kind: "tasks", key: "tasks.read", crm: false, done: 3, open: 5, overdue: 1, overdueTasks: [{ id: "t1", title: "Fix the footer" }] },
           { kind: "sales", key: "crm.read", data: [{ currency: "EUR", orders: 12, netSales: "840.00" }, { currency: "USD", orders: 1, netSales: "40.00" }] },
           { kind: "ads", key: "ads.read", data: null },
         ],
