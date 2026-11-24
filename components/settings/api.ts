@@ -225,8 +225,9 @@ export const settingsApi = {
     request<{ cancelled: number }>(`${brand(w, b)}/connections/${encodeURIComponent(id)}`, { method: "DELETE" }),
   connectShopify: (w: string, b: string, body: { shop: string; accessToken: string }) =>
     request<{ connection: Connection }>(`${brand(w, b)}/integrations/shopify`, json("POST", body)),
-  connectAskCart: (w: string, b: string) =>
-    request<{ connection: Connection }>(`${brand(w, b)}/integrations/shopify/askcart`, json("POST", {})),
+  /** Per-brand: `{ shop }` → AskCart's connect page to go to. Single-store (interim): no shop → the connection. */
+  connectAskCart: (w: string, b: string, shop?: string) =>
+    request<{ connection?: Connection; url?: string }>(`${brand(w, b)}/integrations/shopify/askcart`, json("POST", shop ? { shop } : {})),
 
   // Platform admins only (Platform admin → AI models); not per workspace.
   aiModels: () => request<AiModelSettings>("/api/v1/ai-models"),
@@ -265,9 +266,12 @@ export type ProjectPeople = {
 export type Provider = "META" | "INSTAGRAM" | "THREADS" | "GOOGLE" | "GOOGLE_BUSINESS" | "REDDIT" | "PINTEREST" | "SHOPIFY" | "META_ADS";
 /**
  * `kind`: "oauth" signs in on the platform; "token" (Shopify) takes a pasted Admin API token in a dialog.
- * `askCart` (Shopify only): this platform can also read one store through AskCart, with no token.
+ * `askCart` (Shopify only): how this platform reads a store through AskCart, with no token: "per-brand" (each brand
+ * connects its own store on AskCart's page), "single-store" (interim: one store, one press), or null (not set up).
  */
-export type ProviderInfo = { provider: Provider; label: string; configured: boolean; kind: "oauth" | "token"; askCart?: boolean };
+export type ProviderInfo = {
+  provider: Provider; label: string; configured: boolean; kind: "oauth" | "token"; askCart?: "per-brand" | "single-store" | null;
+};
 export type Connection = {
   id: string;
   provider: Provider;

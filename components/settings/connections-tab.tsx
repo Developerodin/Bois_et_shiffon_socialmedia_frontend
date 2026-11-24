@@ -262,7 +262,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
         <ShopifyDialog
           workspaceId={workspaceId}
           brandId={brandId}
-          askCart={state.kind === "ready" && state.data.providers.some((p) => p.provider === "SHOPIFY" && p.askCart)}
+          askCart={state.kind === "ready" ? (state.data.providers.find((p) => p.provider === "SHOPIFY")?.askCart ?? null) : null}
           onClose={() => setShopifyOpen(false)}
           onConnected={(name) => {
             setShopifyOpen(false);
@@ -277,8 +277,9 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
 }
 
 /**
- * Shopify custom app: the store's .myshopify.com address and its Admin API access token. With `askCart`, the store
- * AskCart holds can be connected with one press instead (no token; only one brand on the platform can have it).
+ * Connect Shopify. Two ways: (1) our app, AskCart, when the platform is linked to it (`askCart`): per-brand asks for the
+ * store's address and goes to AskCart's connect page (it comes back to Connections); single-store (interim) connects
+ * with one press. (2) Shopify MCP, not built yet (shown as coming soon). Below them, a custom app's Admin API token.
  */
 function ShopifyDialog({
   workspaceId,
@@ -289,26 +290,48 @@ function ShopifyDialog({
 }: {
   workspaceId: string;
   brandId: string;
-  askCart: boolean;
+  askCart: "per-brand" | "single-store" | null;
   onClose: () => void;
   onConnected: (name: string) => void;
 }) {
   const [shop, setShop] = useState("");
+  const [askCartShop, setAskCartShop] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function submit(e: React.FormEvent | null) {
-    e?.preventDefault();
+  async function run(work: () => Promise<void>, fallback: string) {
     setBusy(true);
     setError(null);
     try {
-      const { connection } = e ? await settingsApi.connectShopify(workspaceId, brandId, { shop, accessToken }) : await settingsApi.connectAskCart(workspaceId, brandId);
-      onConnected(connection.displayName);
+      await work();
     } catch (err) {
-      setError(errorMessage(err, "Couldn't connect Shopify."));
+      setError(errorMessage(err, fallback));
       setBusy(false);
     }
+  }
+
+  function submitToken(e: React.FormEvent) {
+    e.preventDefault();
+    void run(async () => {
+      const { connection } = await settingsApi.connectShopify(workspaceId, brandId, { shop, accessToken });
+      onConnected(connection.displayName);
+    }, "Couldn't connect Shopify.");
+  }
+
+  function connectAskCart(e: React.FormEvent) {
+    e.preventDefault();
+    void run(async () => {
+      const res = await settingsApi.connectAskCart(workspaceId, brandId, askCart === "per-brand" ? askCartShop : undefined);
+      if (res.url) {
+        try {
+          window.sessionStorage.setItem(CONNECT_RETURN_KEY, window.location.pathname);
+        } catch {
+          /* storage blocked: the callback lands on Settings */
+        }
+        window.location.assign(res.url); // AskCart's connect page; it sends the browser back to Connections
+      } else if (res.connection) onConnected(res.connection.displayName);
+    }, "Couldn't connect through AskCart.");
   }
 
   return (
@@ -316,20 +339,50 @@ function ShopifyDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Connect Shopify</DialogTitle>
-          <DialogDescription>
-            In Shopify, go to Settings → Apps → Develop apps, create a custom app with the read_products and
-            read_inventory Admin API scopes, install it, and paste its Admin API access token here.
-          </DialogDescription>
+          <DialogDescription>Choose how this brand reads its Shopify store.</DialogDescription>
         </DialogHeader>
-        {askCart ? (
-          <div className="flex items-center justify-between gap-4 rounded-md border p-3 text-sm">
-            <span className="text-muted-foreground">Or connect the store AskCart reads, with no token.</span>
-            <Button type="button" variant="outline" disabled={busy} onClick={() => submit(null)}>
-              Connect via AskCart
+        <div className="flex flex-col gap-3">
+          {askCart ? (
+            <form onSubmit={connectAskCart} className="flex flex-col gap-3 rounded-md border p-3 text-sm">
+              <div>
+                <p className="font-medium">Connect with our app (AskCart)</p>
+                <p className="text-muted-foreground">
+                  {askCart === "per-brand"
+                    ? "You approve AskCart in your Shopify admin, then come back here. No token to copy."
+                    : "Connects the store AskCart reads. No token to copy."}
+                </p>
+              </div>
+              {askCart === "per-brand" ? (
+                <Input
+                  required
+                  autoComplete="off"
+                  value={askCartShop}
+                  onChange={(e) => setAskCartShop(e.target.value)}
+                  placeholder="your-store.myshopify.com"
+                  maxLength={200}
+                  aria-label="Store address"
+                />
+              ) : null}
+              <Button type="submit" disabled={busy} className="self-start">
+                {busy ? "Connecting…" : "Connect with AskCart"}
+              </Button>
+            </form>
+          ) : null}
+          <div className="flex items-center justify-between gap-4 rounded-md border p-3 text-sm opacity-60">
+            <div>
+              <p className="font-medium">Shopify MCP</p>
+              <p className="text-muted-foreground">Coming soon.</p>
+            </div>
+            <Button type="button" variant="outline" disabled>
+              Connect
             </Button>
           </div>
-        ) : null}
-        <form onSubmit={submit} className="flex flex-col gap-5">
+        </div>
+        <form onSubmit={submitToken} className="flex flex-col gap-5">
+          <p className="text-sm text-muted-foreground">
+            Or use a custom app: in Shopify, go to Settings → Apps → Develop apps, create a custom app with the read_products
+            and read_inventory Admin API scopes, install it, and paste its Admin API access token here.
+          </p>
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-muted-foreground">Store address</span>
             <Input required autoComplete="off" value={shop} onChange={(e) => setShop(e.target.value)} placeholder="your-store.myshopify.com" maxLength={200} />
@@ -346,7 +399,7 @@ function ShopifyDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={busy}>
-              {busy ? "Checking…" : "Connect"}
+              {busy ? "Checking…" : "Connect with token"}
             </Button>
           </DialogFooter>
         </form>
