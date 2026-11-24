@@ -34,10 +34,19 @@ export function groupKey(row: { id: string; source: string; url: string | null }
 export const byExternalId = (a: { externalId: string | null }, b: { externalId: string | null }) =>
   (a.externalId ?? "").localeCompare(b.externalId ?? "", undefined, { numeric: true });
 
-/** Why the last catalogue sync failed, as a kind the apps word themselves. */
-export type SyncReason = "not-a-feed" | "blocked" | "partial" | "failed" | "shopify-refused";
-/** A brand's last catalogue sync (BrandProfile.catalogSync). `error` is the message the web shows; `reason` lets the app say it in the person's language. */
-export type CatalogSync = { at: string; source: "WEBSITE" | "SHOPIFY" | "SITE" | null; count: number; error: string | null; reason?: SyncReason | null };
+/**
+ * Why the last catalogue sync failed, as a kind the apps word themselves. "reading": not a failure, the site reader
+ * (SITE) is still reading the website's product pages, a little each day.
+ */
+export type SyncReason = "not-a-feed" | "blocked" | "partial" | "failed" | "shopify-refused" | "reading" | "no-product-pages" | "site-refused";
+/**
+ * A brand's last catalogue sync (BrandProfile.catalogSync). `error` is the message the web shows; `reason` lets the app say it in the person's language.
+ * `pages` (SITE): product pages read so far of those the sitemap lists; `capped`: it lists more than the 5,000 read.
+ */
+export type CatalogSync = {
+  at: string; source: "WEBSITE" | "SHOPIFY" | "SITE" | null; count: number; error: string | null; reason?: SyncReason | null;
+  pages?: { read: number; total: number; capped: boolean };
+};
 
 /**
  * "12 in stock" / "In stock" / "Out of stock" / "Unknown". A count of 0 or less with inStock true is a store that
