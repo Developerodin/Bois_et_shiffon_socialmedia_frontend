@@ -262,6 +262,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
         <ShopifyDialog
           workspaceId={workspaceId}
           brandId={brandId}
+          askCart={state.kind === "ready" && state.data.providers.some((p) => p.provider === "SHOPIFY" && p.askCart)}
           onClose={() => setShopifyOpen(false)}
           onConnected={(name) => {
             setShopifyOpen(false);
@@ -275,15 +276,20 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
   );
 }
 
-/** Shopify custom app: the store's .myshopify.com address and its Admin API access token. */
+/**
+ * Shopify custom app: the store's .myshopify.com address and its Admin API access token. With `askCart`, the store
+ * AskCart holds can be connected with one press instead (no token; only one brand on the platform can have it).
+ */
 function ShopifyDialog({
   workspaceId,
   brandId,
+  askCart,
   onClose,
   onConnected,
 }: {
   workspaceId: string;
   brandId: string;
+  askCart: boolean;
   onClose: () => void;
   onConnected: (name: string) => void;
 }) {
@@ -292,12 +298,12 @@ function ShopifyDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  async function submit(e: React.FormEvent | null) {
+    e?.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const { connection } = await settingsApi.connectShopify(workspaceId, brandId, { shop, accessToken });
+      const { connection } = e ? await settingsApi.connectShopify(workspaceId, brandId, { shop, accessToken }) : await settingsApi.connectAskCart(workspaceId, brandId);
       onConnected(connection.displayName);
     } catch (err) {
       setError(errorMessage(err, "Couldn't connect Shopify."));
@@ -315,6 +321,14 @@ function ShopifyDialog({
             read_inventory Admin API scopes, install it, and paste its Admin API access token here.
           </DialogDescription>
         </DialogHeader>
+        {askCart ? (
+          <div className="flex items-center justify-between gap-4 rounded-md border p-3 text-sm">
+            <span className="text-muted-foreground">Or connect the store AskCart reads, with no token.</span>
+            <Button type="button" variant="outline" disabled={busy} onClick={() => submit(null)}>
+              Connect via AskCart
+            </Button>
+          </div>
+        ) : null}
         <form onSubmit={submit} className="flex flex-col gap-5">
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-muted-foreground">Store address</span>
