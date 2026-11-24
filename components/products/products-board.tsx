@@ -12,18 +12,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PAGE_SIZES, productsApi, stockLabel, thumbUrl, type FullProduct, type PageQuery, type Product, type ProductPage } from "@/components/products/api";
 import { CampaignsSection } from "@/components/products/campaigns";
+import { ImportDialog } from "@/components/products/import-dialog";
 import { okToDiscard, useUnsavedGuard } from "@/components/context/unsaved";
 import { errorMessage } from "@/components/settings/api";
 import { ConfirmDialog, ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { Pagination } from "@/components/ui/pagination";
 import { timeAgo } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { safeHttpUrl } from "@/shared";
+import { personOwned, safeHttpUrl } from "@/shared";
 
 const SOURCE_LINE = {
   SHOPIFY: "From your Shopify store",
   WEBSITE: "From your website's product feed",
+  SITE: "From your website's product pages",
 } as const;
+/** How a person-owned row came in, under its name. */
+const OWNED_LINE: Partial<Record<Product["source"], string>> = { MANUAL: "Added by hand", IMPORT: "Imported" };
 
 function price(p: Product) {
   if (p.price === null) return "—";
@@ -60,6 +64,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
   const { state, reload } = useLoad(fetcher);
   const [editing, setEditing] = useState<FullProduct | "new" | null>(null);
   const [removing, setRemoving] = useState<Product | null>(null);
+  const [importing, setImporting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -310,6 +315,7 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
                   {syncing ? "Syncing…" : "Sync now"}
                 </Button>
               ) : null}
+              <Button variant="outline" onClick={() => setImporting(true)}>Import file</Button>
               <Button onClick={() => setEditing("new")}>Add product</Button>
             </>
             ) : null}
@@ -350,11 +356,16 @@ export function ProductsBoard({ workspaceId, brandId, canEdit, canVouch, canMana
           }}
         />
       ) : null}
+      {importing ? <ImportDialog workspaceId={workspaceId} brandId={brandId} onClose={() => setImporting(false)} onImported={reloadAll} /> : null}
       <ConfirmDialog
         open={removing !== null}
         onOpenChange={(open) => !open && setRemoving(null)}
         title={`Delete ${removing?.title ?? ""}?`}
-        description="This removes the product you added by hand. It can't be undone."
+        description={
+          removing?.source === "IMPORT"
+            ? "This removes the imported product. It can't be undone, but importing a file that has it adds it again."
+            : "This removes the product you added by hand. It can't be undone."
+        }
         confirmLabel="Delete"
         onConfirm={async () => {
           await productsApi.remove(workspaceId, brandId, removing!.id);
@@ -429,9 +440,9 @@ const ProductRow = memo(function ProductRow({
               <p className="line-clamp-2 font-medium text-foreground">{p.title}</p>
             )}
             {/* The facts a person added; nothing when there are none, rather than a filler line on every row. */}
-            {p.source === "MANUAL" || p.materials || p.dimensions ? (
+            {OWNED_LINE[p.source] || p.materials || p.dimensions ? (
               <p className="truncate text-xs text-muted-foreground">
-                {[p.source === "MANUAL" ? "Added by hand" : null, p.materials, p.dimensions].filter(Boolean).join(", ")}
+                {[OWNED_LINE[p.source], p.materials, p.dimensions].filter(Boolean).join(", ")}
               </p>
             ) : null}
             {loadError ? <p className="text-xs text-destructive">{loadError}</p> : null}
@@ -443,7 +454,7 @@ const ProductRow = memo(function ProductRow({
       <td className="px-3 py-2 sm:px-5">
         <p className="whitespace-nowrap">{stockLabel(p)}</p>
         {/* Synced stock is as of the last sync (shown once, in the header); only a hand-set check gets its own time. */}
-        {p.source === "MANUAL" && p.stockCheckedAt ? <p className="text-xs whitespace-nowrap text-muted-foreground">checked {timeAgo(p.stockCheckedAt)}</p> : null}
+        {personOwned(p.source) && p.stockCheckedAt ? <p className="text-xs whitespace-nowrap text-muted-foreground">checked {timeAgo(p.stockCheckedAt)}</p> : null}
       </td>
       {canEdit ? (
         <td className="px-3 py-2 sm:px-5 text-right">
@@ -451,7 +462,7 @@ const ProductRow = memo(function ProductRow({
             {loading ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
             Edit
           </Button>
-          {p.source === "MANUAL" ? (
+          {personOwned(p.source) ? (
             <Button size="sm" variant="ghost" aria-label={`Delete ${p.title}`} onClick={() => onRemove(p)}>Delete</Button>
           ) : null}
         </td>
@@ -476,7 +487,8 @@ function ProductDialog({
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const manual = !product || product.source === "MANUAL";
+  // Added by hand or imported: every field is the person's.
+  const manual = !product || personOwned(product.source);
   const [form, setForm] = useState<Record<FieldKey, string>>(() => ({
     title: product?.title ?? "",
     sku: product?.sku ?? "",

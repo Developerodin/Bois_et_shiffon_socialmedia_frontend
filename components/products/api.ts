@@ -1,12 +1,13 @@
 // Client-side contract for the products API (app/api/v1/.../brands/[brandId]/products). Keep in sync with the routes.
 import { request } from "@/components/settings/api";
-import type { CatalogSync } from "@/shared";
+import type { CatalogSync, ImportField, ImportPreviewDto, ImportResultDto } from "@/shared";
 /** Shared with the server (the chat says the same thing). */
 export { stockLabel } from "@/shared";
 
 export type { CatalogSync };
 
-export type Source = "WEBSITE" | "SHOPIFY" | "MANUAL";
+/** IMPORT: from the person's spreadsheet; SITE: read from the website's product pages. */
+export type Source = "WEBSITE" | "SHOPIFY" | "SITE" | "MANUAL" | "IMPORT";
 /** A list row; the description comes with the single product (`productsApi.get`). */
 export type Product = {
   id: string;
@@ -30,7 +31,7 @@ export type Product = {
 };
 export type FullProduct = Product & { description: string | null };
 /** `running`: a sync is queued or running for the brand. */
-export type CatalogStatus = { source: "WEBSITE" | "SHOPIFY" | null; catalogSync: CatalogSync | null; running: boolean };
+export type CatalogStatus = { source: "WEBSITE" | "SHOPIFY" | "SITE" | null; catalogSync: CatalogSync | null; running: boolean };
 export type Catalogue = CatalogStatus & { products: Product[] };
 /** The page sizes the server accepts (PRODUCT_PAGE_SIZES). */
 export const PAGE_SIZES = [20, 50, 100] as const;
@@ -41,6 +42,13 @@ export type ProductPage = { products: Product[]; pagination: { page: number; lim
 const base = (w: string, b: string) => `/api/v1/workspaces/${encodeURIComponent(w)}/brands/${encodeURIComponent(b)}/products`;
 const one = (w: string, b: string, id: string) => `${base(w, b)}/${encodeURIComponent(id)}`;
 const json = (method: string, body: unknown): RequestInit => ({ method, body: JSON.stringify(body) });
+/** The import form: the file, and the column mapping when there is one (the server guesses it otherwise). */
+export function importForm(file: File, mapping?: (ImportField | null)[]) {
+  const body = new FormData();
+  body.append("file", file);
+  if (mapping) body.append("mapping", JSON.stringify(mapping));
+  return body;
+}
 
 export const productsApi = {
   /** The whole list: Campaigns' picker needs every product. The table reads `page`. */
@@ -55,6 +63,12 @@ export const productsApi = {
   remove: (w: string, b: string, id: string) => request<void>(one(w, b, id), { method: "DELETE" }),
   /** `queued: false` when a sync was already queued or running. */
   sync: (w: string, b: string) => request<{ queued: boolean }>(`${base(w, b)}/sync`, { method: "POST" }),
+  /** Nothing is written: the columns matched to fields (or `mapping`), the first rows, and what would be skipped. */
+  previewImport: (w: string, b: string, file: File, mapping?: (ImportField | null)[], signal?: AbortSignal) =>
+    request<ImportPreviewDto>(`${base(w, b)}/import?dryRun=1`, { method: "POST", body: importForm(file, mapping), timeoutMs: 60_000, signal }),
+  /** The file is sent again (nothing is kept between the preview and the import). */
+  importFile: (w: string, b: string, file: File, mapping: (ImportField | null)[]) =>
+    request<ImportResultDto>(`${base(w, b)}/import`, { method: "POST", body: importForm(file, mapping), timeoutMs: 60_000 }),
 };
 
 /** A small rendition for list thumbnails: Shopify's CDN resizes on request (feeds store 1200 px); other hosts as is. */

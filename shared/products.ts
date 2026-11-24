@@ -18,6 +18,12 @@ export function handleOf(url: string | null) {
   }
 }
 
+/**
+ * Rows a person owns: added by hand (MANUAL) or from their spreadsheet (IMPORT). Every field is editable, the row can
+ * be deleted, and its stock is always fresh; synced rows take only the person fields and go stale.
+ */
+export const personOwned = (source: string) => source === "MANUAL" || source === "IMPORT";
+
 /** The key a row groups under: synced rows of one source sharing a product handle; MANUAL or URL-less rows alone. */
 export function groupKey(row: { id: string; source: string; url: string | null }) {
   const handle = row.source === "MANUAL" ? null : handleOf(row.url);
@@ -29,9 +35,9 @@ export const byExternalId = (a: { externalId: string | null }, b: { externalId: 
   (a.externalId ?? "").localeCompare(b.externalId ?? "", undefined, { numeric: true });
 
 /** Why the last catalogue sync failed, as a kind the apps word themselves. */
-export type SyncReason = "not-a-feed" | "partial" | "failed" | "shopify-refused";
+export type SyncReason = "not-a-feed" | "blocked" | "partial" | "failed" | "shopify-refused";
 /** A brand's last catalogue sync (BrandProfile.catalogSync). `error` is the message the web shows; `reason` lets the app say it in the person's language. */
-export type CatalogSync = { at: string; source: "WEBSITE" | "SHOPIFY" | null; count: number; error: string | null; reason?: SyncReason | null };
+export type CatalogSync = { at: string; source: "WEBSITE" | "SHOPIFY" | "SITE" | null; count: number; error: string | null; reason?: SyncReason | null };
 
 /**
  * "12 in stock" / "In stock" / "Out of stock" / "Unknown". A count of 0 or less with inStock true is a store that
@@ -43,3 +49,40 @@ export function stockLabel(p: { inStock: boolean | null; stockQuantity: number |
   if (p.inStock !== null) return p.inStock ? "In stock" : "Out of stock";
   return p.stockQuantity !== null ? "Out of stock" : "Unknown";
 }
+
+/** What a spreadsheet column can be imported as (the import screen's dropdown); `title` is required. */
+export const IMPORT_FIELDS = [
+  "title", "sku", "url", "imageUrl", "price", "compareAtPrice", "currency", "category", "description",
+  "inStock", "stockQuantity", "materials", "dimensions", "certifications",
+] as const;
+export type ImportField = (typeof IMPORT_FIELDS)[number];
+/**
+ * A row skipped, or imported with a value left out (an in-stock value that isn't yes or no): its line in the CSV or
+ * row number in Excel, and why. `skipped`: the row was not imported (the server always sends it).
+ */
+export type ImportProblem = { row: number; reason: string; skipped?: boolean };
+/**
+ * The import preview (?dryRun=1): the file's headers, the mapping (guessed, or the one sent), its first 20 data rows
+ * as written, and what importing with that mapping would skip. `needsApproval`: fields this person can't import
+ * (stock, prices, facts need rules.approve); empty when they can import every field.
+ */
+export type ImportPreviewDto = {
+  headers: string[];
+  mapping: (ImportField | null)[];
+  sample: string[][];
+  rowCount: number;
+  skipped: number;
+  duplicates: number;
+  problems: ImportProblem[];
+  needsApproval: ImportField[];
+};
+/** What an import did. `problems`: the first 50 (ImportProblem). */
+export type ImportResultDto = {
+  created: number;
+  updated: number;
+  unchanged: number;
+  archived: number;
+  skipped: number;
+  duplicates: number;
+  problems: ImportProblem[];
+};
