@@ -228,9 +228,12 @@ export const settingsApi = {
   /** Per-brand: `{ shop }` → AskCart's connect page to go to. Single-store (interim): no shop → the connection. */
   connectAskCart: (w: string, b: string, shop?: string) =>
     request<{ connection?: Connection; url?: string }>(`${brand(w, b)}/integrations/shopify/askcart`, json("POST", shop ? { shop } : {})),
-  /** Shopify MCP: the store's address → the connection, once the store answered a catalogue search. Products only. */
+  /**
+   * Shopify MCP: the store's address → the connection, once the store answered a catalogue search. Products only.
+   * `warning` when the store's own domain isn't the brand's website.
+   */
   connectShopifyMcp: (w: string, b: string, shop: string) =>
-    request<{ connection: Connection }>(`${brand(w, b)}/integrations/shopify/mcp`, json("POST", { shop })),
+    request<{ connection: Connection; warning?: string }>(`${brand(w, b)}/integrations/shopify/mcp`, json("POST", { shop })),
 
   // Platform admins only (Platform admin → AI models); not per workspace.
   aiModels: () => request<AiModelSettings>("/api/v1/ai-models"),

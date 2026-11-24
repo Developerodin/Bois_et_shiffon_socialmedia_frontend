@@ -266,10 +266,10 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
           askCart={state.kind === "ready" ? (state.data.providers.find((p) => p.provider === "SHOPIFY")?.askCart ?? null) : null}
           mcp={state.kind === "ready" ? (state.data.providers.find((p) => p.provider === "SHOPIFY")?.mcp ?? false) : false}
           onClose={() => setShopifyOpen(false)}
-          onConnected={(name) => {
+          onConnected={(name, warning) => {
             setShopifyOpen(false);
             setError(null);
-            setShown({ kind: "ok", text: `Connected ${name}. Its products sync in a minute.`, names: [name] });
+            setShown({ kind: "ok", text: `Connected ${name}. Its products sync in a minute.${warning ? ` ${warning}` : ""}`, names: [name] });
             reload();
           }}
         />
@@ -297,7 +297,7 @@ function ShopifyDialog({
   askCart: "per-brand" | "single-store" | null;
   mcp: boolean;
   onClose: () => void;
-  onConnected: (name: string) => void;
+  onConnected: (name: string, warning?: string) => void;
 }) {
   const [shop, setShop] = useState("");
   const [askCartShop, setAskCartShop] = useState("");
@@ -343,8 +343,8 @@ function ShopifyDialog({
   function connectMcp(e: React.FormEvent) {
     e.preventDefault();
     void run(async () => {
-      const { connection } = await settingsApi.connectShopifyMcp(workspaceId, brandId, mcpShop);
-      onConnected(connection.displayName);
+      const { connection, warning } = await settingsApi.connectShopifyMcp(workspaceId, brandId, mcpShop);
+      onConnected(connection.displayName, warning);
     }, "Couldn't connect through Shopify MCP.");
   }
 
