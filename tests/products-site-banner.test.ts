@@ -2,7 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { CatalogSync } from "@/shared";
-import { syncBanner } from "@/components/products/products-board";
+import { ApiError } from "@/components/settings/api";
+import { pollDelay, syncBanner, syncNowError } from "@/components/products/products-board";
 
 const n = (v: number) => v.toLocaleString();
 const site = (over: Partial<CatalogSync> = {}): CatalogSync => ({
@@ -28,8 +29,30 @@ describe("products sync banner", () => {
     expect(syncBanner(null)).toBeNull();
   });
 
+  it("words a paused reader as a warning and a feed that missed a day as news", () => {
+    expect(syncBanner(site({ error: "We paused reading them.", reason: "pages-changed" }))).toEqual({ text: "We paused reading them.", tone: "warning" });
+    expect(syncBanner(site({ source: "WEBSITE", error: "Your website's product feed didn't answer today.", reason: "feed-missing" }))?.tone).toBe("info");
+  });
+
+  it("polls fast, then slowly, and stops after an hour or at the UTC day's end", () => {
+    const start = Date.parse("2026-11-24T10:00:00Z");
+    expect(pollDelay(start, start + 10_000)).toBe(4000);
+    expect(pollDelay(start, start + 200_000)).toBe(30_000);
+    expect(pollDelay(start, start + 3_600_001)).toBeNull();
+    const late = Date.parse("2026-11-24T23:50:00Z");
+    expect(pollDelay(late, late + 5 * 60_000)).toBe(30_000);
+    expect(pollDelay(late, late + 11 * 60_000)).toBeNull();
+  });
+
+  it("says Sync now's own limit plainly", () => {
+    expect(syncNowError(new ApiError(429, "Too many syncs. Try again in a while."))).toMatch(/6 times an hour/);
+    expect(syncNowError(new ApiError(500, "Boom"))).toBe("Boom");
+  });
+
   it("follows a sync already running when the page opens", () => {
     const s = fs.readFileSync(path.join(process.cwd(), "components/products/products-board.tsx"), "utf8");
     expect(s).toContain("if (data?.running) setSyncing(true);");
+    expect(s).toContain("if (status?.catalogSync) setLive(status.catalogSync);");
+    expect(s).toContain('readingPages ? "Reading pages…" : "Syncing…"');
   });
 });
