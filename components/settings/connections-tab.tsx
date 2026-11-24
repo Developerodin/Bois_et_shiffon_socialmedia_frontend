@@ -164,6 +164,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
                       {c.status === "ACTIVE" ? "Connected" : "Needs reconnect"}
                     </StatusBadge>
                     <span className="truncate text-sm">{c.displayName}</span>
+                    {c.via === "mcp" ? <span className="text-xs text-muted-foreground">Shopify MCP · products only</span> : null}
                     <span className="text-xs text-muted-foreground">
                       {fresh.has(c.displayName) && c.status === "ACTIVE" ? "just now" : `since ${formatDate(c.connectedAt)}`}
                     </span>
@@ -263,6 +264,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
           workspaceId={workspaceId}
           brandId={brandId}
           askCart={state.kind === "ready" ? (state.data.providers.find((p) => p.provider === "SHOPIFY")?.askCart ?? null) : null}
+          mcp={state.kind === "ready" ? (state.data.providers.find((p) => p.provider === "SHOPIFY")?.mcp ?? false) : false}
           onClose={() => setShopifyOpen(false)}
           onConnected={(name) => {
             setShopifyOpen(false);
@@ -279,23 +281,27 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
 /**
  * Connect Shopify. Two ways: (1) our app, AskCart, when the platform is linked to it (`askCart`): per-brand asks for the
  * store's address and goes to AskCart's connect page (it comes back to Connections); single-store (interim) connects
- * with one press. (2) Shopify MCP, not built yet (shown as coming soon). Below them, a custom app's Admin API token.
+ * with one press. (2) Shopify MCP, when the platform has a public agent profile (`mcp`): the store's address only, no
+ * install; products only (orders need AskCart). Below them, a custom app's Admin API token.
  */
 function ShopifyDialog({
   workspaceId,
   brandId,
   askCart,
+  mcp,
   onClose,
   onConnected,
 }: {
   workspaceId: string;
   brandId: string;
   askCart: "per-brand" | "single-store" | null;
+  mcp: boolean;
   onClose: () => void;
   onConnected: (name: string) => void;
 }) {
   const [shop, setShop] = useState("");
   const [askCartShop, setAskCartShop] = useState("");
+  const [mcpShop, setMcpShop] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -334,6 +340,14 @@ function ShopifyDialog({
     }, "Couldn't connect through AskCart.");
   }
 
+  function connectMcp(e: React.FormEvent) {
+    e.preventDefault();
+    void run(async () => {
+      const { connection } = await settingsApi.connectShopifyMcp(workspaceId, brandId, mcpShop);
+      onConnected(connection.displayName);
+    }, "Couldn't connect through Shopify MCP.");
+  }
+
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
@@ -368,15 +382,39 @@ function ShopifyDialog({
               </Button>
             </form>
           ) : null}
-          <div className="flex items-center justify-between gap-4 rounded-md border p-3 text-sm opacity-60">
-            <div>
-              <p className="font-medium">Shopify MCP</p>
-              <p className="text-muted-foreground">Coming soon.</p>
+          {mcp ? (
+            <form onSubmit={connectMcp} className="flex flex-col gap-3 rounded-md border p-3 text-sm">
+              <div>
+                <p className="font-medium">Connect with Shopify MCP</p>
+                <p className="text-muted-foreground">
+                  Reads your products, prices and stock from your store&apos;s public catalogue. Nothing to install. Orders need our app
+                  (AskCart).
+                </p>
+              </div>
+              <Input
+                required
+                autoComplete="off"
+                value={mcpShop}
+                onChange={(e) => setMcpShop(e.target.value)}
+                placeholder="your-store.myshopify.com or your shop's domain"
+                maxLength={200}
+                aria-label="Store address for Shopify MCP"
+              />
+              <Button type="submit" variant="outline" disabled={busy} className="self-start">
+                {busy ? "Checking…" : "Connect with Shopify MCP"}
+              </Button>
+            </form>
+          ) : (
+            <div className="flex items-center justify-between gap-4 rounded-md border p-3 text-sm opacity-60">
+              <div>
+                <p className="font-medium">Shopify MCP</p>
+                <p className="text-muted-foreground">Not set up on this platform. Ask your platform admin.</p>
+              </div>
+              <Button type="button" variant="outline" disabled>
+                Connect
+              </Button>
             </div>
-            <Button type="button" variant="outline" disabled>
-              Connect
-            </Button>
-          </div>
+          )}
         </div>
         <form onSubmit={submitToken} className="flex flex-col gap-5">
           <p className="text-sm text-muted-foreground">

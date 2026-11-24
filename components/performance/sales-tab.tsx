@@ -102,7 +102,17 @@ function TurnOnOrders({ workspaceId, brandId, onDone }: { workspaceId: string; b
   if (state.kind === "loading") return <ListSkeleton label="Loading connections" rows={1} />;
   if (state.kind === "forbidden") return <p className="text-sm text-muted-foreground">You can&apos;t turn on orders.</p>;
   if (state.kind === "error") return <LoadError message={state.message} onRetry={reload} />;
-  const shop = state.data.connections.find((c) => c.provider === "SHOPIFY" && c.status === "ACTIVE");
+  const shops = state.data.connections.filter((c) => c.provider === "SHOPIFY" && c.status === "ACTIVE");
+  const shop = shops.find((c) => c.via !== "mcp");
+  if (!shop && shops.length) {
+    // Shopify MCP reads products only.
+    return (
+      <p className="text-sm text-muted-foreground">
+        Orders need our app (AskCart). {shops[0].displayName} is connected through Shopify MCP, which reads products only.{" "}
+        <Link href="/connections" className="font-medium text-foreground underline underline-offset-2">Open Connections</Link>
+      </p>
+    );
+  }
   if (!shop) {
     return (
       <p className="text-sm text-muted-foreground">
