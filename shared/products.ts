@@ -29,7 +29,7 @@ export const byExternalId = (a: { externalId: string | null }, b: { externalId: 
   (a.externalId ?? "").localeCompare(b.externalId ?? "", undefined, { numeric: true });
 
 /** Why the last catalogue sync failed, as a kind the apps word themselves. */
-export type SyncReason = "not-a-feed" | "partial" | "failed" | "shopify-refused";
+export type SyncReason = "not-a-feed" | "blocked" | "partial" | "failed" | "shopify-refused";
 /** A brand's last catalogue sync (BrandProfile.catalogSync). `error` is the message the web shows; `reason` lets the app say it in the person's language. */
 export type CatalogSync = { at: string; source: "WEBSITE" | "SHOPIFY" | null; count: number; error: string | null; reason?: SyncReason | null };
 
