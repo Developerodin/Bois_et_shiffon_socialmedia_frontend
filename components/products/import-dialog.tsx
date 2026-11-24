@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { productsApi } from "@/components/products/api";
-import { errorMessage } from "@/components/settings/api";
+import { ApiError, errorMessage } from "@/components/settings/api";
 import { selectClass } from "@/components/settings/shared";
 import { cn } from "@/lib/utils";
 import { IMPORT_FIELDS, type ImportField, type ImportPreviewDto, type ImportProblem, type ImportResultDto } from "@/shared";
@@ -57,23 +57,47 @@ export function resultSummary(r: ImportResultDto) {
 export const duplicatesLine = (n: number) =>
   n ? `${n === 1 ? "1 row had" : `${count(n)} rows had`} the same SKU, link or name as another row; the last one was kept.` : null;
 
-/** The skipped rows, row numbers as in the file (the header is row 1). The server sends the first 50. */
-function Problems({ problems, skipped, lead }: { problems: ImportProblem[]; skipped: number; lead: string }) {
-  if (!skipped) return null;
-  return (
-    <div className="flex flex-col gap-1.5 text-sm">
-      <p>
-        {lead} {skipped > problems.length ? `The first ${problems.length}:` : ""}
-      </p>
+/** A problem the server reports; `skipped` false (or absent, from an older server): imported, but worth a look. */
+type Problem = ImportProblem & { skipped?: boolean };
+const PROBLEM_CAP = 50; // the server sends the first 50 problems
+
+/** The problems as two lists, each with a heading that says when it's only the first ones. */
+export function problemLists(problems: Problem[], skipped: number) {
+  const capped = problems.length >= PROBLEM_CAP;
+  const out = problems.filter((p) => p.skipped === true);
+  const check = problems.filter((p) => p.skipped !== true);
+  return [
+    { heading: `Skipped rows${skipped > out.length ? ` (the first ${count(out.length)} of ${count(skipped)})` : ""}`, items: out },
+    { heading: `Rows to check${capped ? ` (the first ${count(check.length)})` : ""}`, items: check },
+  ].filter((l) => l.items.length > 0);
+}
+
+/** Row numbers as in the file (the header is row 1). */
+function Problems({ problems, skipped }: { problems: Problem[]; skipped: number }) {
+  return problemLists(problems, skipped).map((l) => (
+    <div key={l.heading} className="flex flex-col gap-1.5 text-sm">
+      <p>{l.heading}</p>
       <ul className="max-h-32 overflow-y-auto rounded-md border border-border px-3 py-2 text-muted-foreground">
-        {problems.map((p) => (
-          <li key={p.row}>
+        {l.items.map((p, i) => (
+          <li key={i}>
             Row {p.row}: {p.reason}
           </li>
         ))}
       </ul>
     </div>
-  );
+  ));
+}
+
+/** A clear line for a refused import: another one or a sync running (409), or too many imports (429). */
+export function importError(err: unknown, fallback: string) {
+  if (err instanceof ApiError && (err.status === 409 || err.status === 429)) {
+    const detail = (err.data as { detail?: unknown } | undefined)?.detail;
+    if (typeof detail === "string" && detail.trim()) return detail;
+    return err.status === 409
+      ? "Another import or a catalogue sync is running for this business. Try again in a minute."
+      : "Too many imports right now. Try again in a while.";
+  }
+  return errorMessage(err, fallback);
 }
 
 /**
@@ -167,52 +191,67 @@ export function ImportDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ImportResultDto | null>(null);
-  // Each preview request takes a number; a reply that isn't the latest is dropped, so a slow one can't land last.
-  const seq = useRef(0);
+  // One preview upload at a time: a newer one, or closing the dialog, cancels the one on its way, and only the
+  // latest request's end clears the spinner.
+  const inflight = useRef<AbortController | null>(null);
+  useEffect(() => () => inflight.current?.abort(), []);
+  const cancelPreview = useCallback(() => {
+    if (!inflight.current) return;
+    inflight.current.abort();
+    inflight.current = null;
+    setPreviewing(false);
+  }, []);
 
-  async function pick(f: File | undefined) {
+  const runPreview = useCallback(
+    async (f: File, m: Mapping | undefined, fallback: string, done: (p: ImportPreviewDto) => void) => {
+      inflight.current?.abort();
+      const ctrl = new AbortController();
+      inflight.current = ctrl;
+      setPreviewing(true);
+      try {
+        const p = await productsApi.previewImport(workspaceId, brandId, f, m, ctrl.signal);
+        if (ctrl.signal.aborted) return;
+        setError(null);
+        done(p);
+      } catch (err) {
+        if (!ctrl.signal.aborted) setError(importError(err, fallback));
+      } finally {
+        if (inflight.current === ctrl) {
+          inflight.current = null;
+          setPreviewing(false);
+        }
+      }
+    },
+    [workspaceId, brandId],
+  );
+
+  function pick(f: File | undefined) {
     if (!f) return;
     setError(null);
     if (f.size > MAX_BYTES) return setError("Files can be up to 5 MB.");
-    const n = ++seq.current;
-    setPreviewing(true);
-    try {
-      const p = await productsApi.previewImport(workspaceId, brandId, f);
-      if (n !== seq.current) return;
+    // The old file's table goes, so a re-preview still waiting for it can't start and cancel this one.
+    setFile(null);
+    setPreview(null);
+    void runPreview(f, undefined, "Couldn't read this file. Try again.", (p) => {
       setFile(f);
       setPreview(p);
       setLocked(lockedColumns(p));
       setMapping(startMapping(p));
-    } catch (err) {
-      if (n === seq.current) setError(errorMessage(err, "Couldn't read this file. Try again."));
-    } finally {
-      if (n === seq.current) setPreviewing(false);
-    }
+    });
   }
 
-  // A changed mapping previews again once the dropdowns have been still for 400 ms.
+  // A changed mapping previews again once the dropdowns have been still for 400 ms. Changed back to what the preview
+  // shows (or to no name column): the upload on its way is for a mapping no longer chosen, so it's cancelled.
   const sent = JSON.stringify(mapping);
   const previewed = preview ? JSON.stringify(preview.mapping) : "";
   const current = sent === previewed;
   const problem = preview ? mappingProblem(mapping) : null;
   useEffect(() => {
-    if (!file || current || problem) return;
-    const n = ++seq.current;
-    const t = setTimeout(async () => {
-      setPreviewing(true);
-      try {
-        const p = await productsApi.previewImport(workspaceId, brandId, file, JSON.parse(sent) as Mapping);
-        if (n !== seq.current) return;
-        setPreview(p);
-        setError(null);
-      } catch (err) {
-        if (n === seq.current) setError(errorMessage(err, "Couldn't check these columns. Try again."));
-      } finally {
-        if (n === seq.current) setPreviewing(false);
-      }
-    }, 400);
+    if (!file) return;
+    if (current || problem) return cancelPreview();
+    const t = setTimeout(() => void runPreview(file, JSON.parse(sent) as Mapping, "Couldn't check these columns. Try again.", setPreview), 400);
     return () => clearTimeout(t);
-  }, [file, current, problem, sent, workspaceId, brandId]);
+  }, [file, current, problem, sent, runPreview, cancelPreview]);
 
   async function runImport() {
     if (!file) return;
@@ -222,7 +261,7 @@ export function ImportDialog({
       setResult(await productsApi.importFile(workspaceId, brandId, file, mapping));
       onImported();
     } catch (err) {
-      setError(errorMessage(err, "Couldn't import this file. Try again."));
+      setError(importError(err, "Couldn't import this file. Try again."));
     } finally {
       setBusy(false);
     }
@@ -247,7 +286,7 @@ export function ImportDialog({
           <div className="flex flex-col gap-3">
             <p role="status" className="text-sm font-medium">{resultSummary(result)}</p>
             {duplicatesLine(result.duplicates) ? <p className="text-sm text-muted-foreground">{duplicatesLine(result.duplicates)}</p> : null}
-            <Problems problems={result.problems} skipped={result.skipped} lead="Skipped rows:" />
+            <Problems problems={result.problems} skipped={result.skipped} />
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -285,7 +324,8 @@ export function ImportDialog({
                 </p>
                 {problem ? <p className="text-sm text-destructive">{problem}</p> : null}
                 {duplicatesLine(preview.duplicates) ? <p className="text-sm text-muted-foreground">{duplicatesLine(preview.duplicates)}</p> : null}
-                <Problems problems={preview.problems} skipped={preview.skipped} lead={`${plural(preview.skipped, "row")} will be skipped.`} />
+                {preview.skipped ? <p className="text-sm">{plural(preview.skipped, "row")} will be skipped.</p> : null}
+                <Problems problems={preview.problems} skipped={preview.skipped} />
               </>
             ) : null}
           </div>

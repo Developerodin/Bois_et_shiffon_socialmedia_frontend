@@ -64,8 +64,8 @@ export const productsApi = {
   /** `queued: false` when a sync was already queued or running. */
   sync: (w: string, b: string) => request<{ queued: boolean }>(`${base(w, b)}/sync`, { method: "POST" }),
   /** Nothing is written: the columns matched to fields (or `mapping`), the first rows, and what would be skipped. */
-  previewImport: (w: string, b: string, file: File, mapping?: (ImportField | null)[]) =>
-    request<ImportPreviewDto>(`${base(w, b)}/import?dryRun=1`, { method: "POST", body: importForm(file, mapping), timeoutMs: 60_000 }),
+  previewImport: (w: string, b: string, file: File, mapping?: (ImportField | null)[], signal?: AbortSignal) =>
+    request<ImportPreviewDto>(`${base(w, b)}/import?dryRun=1`, { method: "POST", body: importForm(file, mapping), timeoutMs: 60_000, signal }),
   /** The file is sent again (nothing is kept between the preview and the import). */
   importFile: (w: string, b: string, file: File, mapping: (ImportField | null)[]) =>
     request<ImportResultDto>(`${base(w, b)}/import`, { method: "POST", body: importForm(file, mapping), timeoutMs: 60_000 }),

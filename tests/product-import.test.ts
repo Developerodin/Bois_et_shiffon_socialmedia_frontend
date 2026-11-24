@@ -5,8 +5,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { personOwned, type ImportPreviewDto, type ImportResultDto } from "@/shared";
 import { productsApi } from "@/components/products/api";
+import { ApiError } from "@/components/settings/api";
 import {
   PreviewTable,
+  importError,
+  problemLists,
   duplicatesLine,
   importable,
   lockedColumns,
@@ -113,5 +116,37 @@ describe("IMPORT rows editable", () => {
     expect(s).toContain("personOwned(product.source)");
     expect(s).toContain('IMPORT: "Imported"');
     expect(s).toContain("SITE: \"From your website's product pages\"");
+  });
+});
+
+describe("problems", () => {
+  it("lists notes on imported rows even when nothing is skipped", () => {
+    expect(problemLists([{ row: 3, reason: "the in-stock value isn't yes or no", skipped: false }], 0)).toEqual([
+      { heading: "Rows to check", items: [{ row: 3, reason: "the in-stock value isn't yes or no", skipped: false }] },
+    ]);
+  });
+  it("splits skipped rows from rows to check; no flag means to check", () => {
+    const lists = problemLists([{ row: 2, reason: "it has no name", skipped: true }, { row: 5, reason: "note" }], 1);
+    expect(lists.map((l) => [l.heading, l.items.map((p) => p.row)])).toEqual([["Skipped rows", [2]], ["Rows to check", [5]]]);
+  });
+  it("says when a list is only the first ones", () => {
+    const fifty = Array.from({ length: 50 }, (_, i) => ({ row: i + 2, reason: "x", skipped: i < 40 }));
+    expect(problemLists(fifty, 70).map((l) => l.heading)).toEqual(["Skipped rows (the first 40 of 70)", "Rows to check (the first 10)"]);
+  });
+});
+
+describe("refused imports", () => {
+  it("uses the server's words for a busy brand or a rate limit, else says it plainly", () => {
+    expect(importError(new ApiError(409, "x", undefined, { detail: "A sync is running." }), "f")).toBe("A sync is running.");
+    expect(importError(new ApiError(409, "Request failed (409)"), "f")).toMatch(/Try again in a minute/);
+    expect(importError(new ApiError(429, "Request failed (429)"), "f")).toMatch(/^Too many imports right now/);
+    expect(importError(new Error("boom"), "fallback")).toBe("fallback");
+  });
+  it("a preview can be cancelled", async () => {
+    const ctrl = new AbortController();
+    await productsApi.previewImport("w", "b", new File(["a"], "a.csv"), undefined, ctrl.signal);
+    const signal = fetchMock.mock.calls[0]![1].signal as AbortSignal;
+    ctrl.abort();
+    expect(signal.aborted).toBe(true);
   });
 });
