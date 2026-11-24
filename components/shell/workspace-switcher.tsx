@@ -5,6 +5,7 @@ import { setActiveContext } from "@/components/context/api";
 import { dropOpenItem } from "@/lib/workspace-view";
 import { toast } from "@/components/ui/toast";
 import { okToDiscard } from "@/components/context/unsaved";
+import { finishNavigation, startNavigation } from "@/components/nav/nav-progress";
 import { DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 
 export type WorkspaceOption = {
@@ -27,12 +28,16 @@ export function WorkspaceItems({
       value={activeWorkspaceId ?? ""}
       onValueChange={(id) => {
         if (!okToDiscard()) return;
+        startNavigation();
         void setActiveContext({ workspaceId: id }).then(() => {
           // The new workspace's Overview must not open the old brand's item.
           const away = dropOpenItem();
           if (away) router.replace(away);
           router.refresh();
-        }, () => toast({ title: "Couldn't switch workspace", detail: "Try again.", tone: "warning" }));
+        }, () => {
+          finishNavigation();
+          toast({ title: "Couldn't switch workspace", detail: "Try again.", tone: "warning" });
+        });
       }}
     >
       {workspaces.map((ws) => (

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Camera, Clapperboard, FileText, Globe, Images, Inbox, LayoutDashboard, Menu, Package, Plug, PenSquare, Search, ShieldCheck, Workflow, type LucideIcon } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { finishNavigation, usePendingHref } from "@/components/nav/nav-progress";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
 import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
@@ -45,20 +46,31 @@ type Props = {
 const row =
   "flex items-center gap-3 rounded-2xl text-sm transition-colors active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
+/** The sidebar entry a URL belongs to. Agents that point at a page or panel are selected by where you are; Echo's stand-in destination never is. */
+function activeIdFor(pathname: string, search: URLSearchParams) {
+  const panel = search.get("panel");
+  if (pathname === "/" && panel === "content") return "wave";
+  if (pathname === "/" && panel === "competitors") return "drift";
+  if (pathname === "/performance") return "surge";
+  // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
+  if (pathname === "/tasks") return search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
+  if (pathname === "/projects" || pathname.startsWith("/projects/")) return "beat";
+  return navFor(pathname).activeId;
+}
+
 function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, perms, user }: Props) {
   const pathname = usePathname();
   const search = useSearchParams();
-  const panel = search.get("panel");
-
-  // Agents that point at a page or panel are selected by where you are; Echo's stand-in destination never is.
-  let activeId = navFor(pathname).activeId;
-  if (pathname === "/" && panel === "content") activeId = "wave";
-  if (pathname === "/" && panel === "competitors") activeId = "drift";
-  if (pathname === "/performance") activeId = "surge";
-  // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
-  if (pathname === "/tasks") activeId = search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
-  if (pathname === "/projects" || pathname.startsWith("/projects/")) activeId = "beat";
-  const isActive = (e: NavEntry) => activeId === e.id && !(e.soon && !e.href.startsWith("/agents/"));
+  const activeId = activeIdFor(pathname, search);
+  // While a clicked link's page loads, mark where it goes at once; aria-current stays on the page you are on.
+  const pending = usePendingHref();
+  const pendingUrl = pending ? new URL(pending, "http://x") : null;
+  const shownId = pendingUrl ? activeIdFor(pendingUrl.pathname, pendingUrl.searchParams) : activeId;
+  const visible = (e: NavEntry) => !(e.soon && !e.href.startsWith("/agents/"));
+  const isActive = (e: NavEntry) => activeId === e.id && visible(e);
+  const isShown = (e: NavEntry) => shownId === e.id && visible(e);
+  // A business or workspace switch (BrandSwitcher, WorkspaceItems) keeps the URL: its new shell data ends the bar.
+  useEffect(finishNavigation, [activeWorkspaceId, activeBrandId]);
 
   // The person can reorder their agents by dragging, or with Alt+Up/Down on a focused row. Read after mount so the
   // server render and the first client render match.
@@ -139,13 +151,12 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
             <ul className="mr-7 ml-5">
               {g.entries.map((e) => {
                 const Icon = NAV_ICONS[e.id];
-                const on = isActive(e);
                 return (
                   <li key={e.id}>
                     <Link
                       href={e.href}
-                      aria-current={on ? "page" : undefined}
-                      className={cn(row, "h-12 px-3", on ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+                      aria-current={isActive(e) ? "page" : undefined}
+                      className={cn(row, "h-12 px-3", isShown(e) ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
                     >
                       {Icon ? <Icon className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : null}
                       {e.label}
@@ -160,7 +171,6 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
         <p className="mt-6 mb-2 px-5 text-xs text-muted-foreground">Your agents</p>
         <ul className="mx-5">
           {agents.map((e, i) => {
-            const on = isActive(e);
             return (
               <li
                 key={e.id}
@@ -185,7 +195,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                   href={e.href}
                   ref={(el) => void (el ? links.current.set(e.id, el) : links.current.delete(e.id))}
                   draggable={false}
-                  aria-current={on ? "page" : undefined}
+                  aria-current={isActive(e) ? "page" : undefined}
                   aria-keyshortcuts="Alt+ArrowUp Alt+ArrowDown"
                   onKeyDown={(ev) => {
                     if (!ev.altKey || (ev.key !== "ArrowUp" && ev.key !== "ArrowDown")) return;
@@ -193,7 +203,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     refocus.current = e.id;
                     reorder(i, ev.key === "ArrowUp" ? i - 1 : i + 1);
                   }}
-                  className={cn(row, "h-[52px] px-2", on ? "bg-accent" : "hover:bg-muted")}
+                  className={cn(row, "h-[52px] px-2", isShown(e) ? "bg-accent" : "hover:bg-muted")}
                 >
                   <Image src={`/agents/${e.id}.svg`} alt="" width={36} height={36} draggable={false} className="size-9 shrink-0" />
                   <span className="min-w-0 flex-1">
