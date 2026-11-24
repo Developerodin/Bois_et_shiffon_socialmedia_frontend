@@ -18,6 +18,12 @@ export function handleOf(url: string | null) {
   }
 }
 
+/**
+ * Rows a person owns: added by hand (MANUAL) or from their spreadsheet (IMPORT). Every field is editable, the row can
+ * be deleted, and its stock is always fresh; synced rows take only the person fields and go stale.
+ */
+export const personOwned = (source: string) => source === "MANUAL" || source === "IMPORT";
+
 /** The key a row groups under: synced rows of one source sharing a product handle; MANUAL or URL-less rows alone. */
 export function groupKey(row: { id: string; source: string; url: string | null }) {
   const handle = row.source === "MANUAL" ? null : handleOf(row.url);
