@@ -1,7 +1,7 @@
 import type { PermissionKey } from "./permissions";
 
 /** Outside sources of daily numbers (prisma DataSourceKind). */
-export const DATA_SOURCE_KINDS = ["SEARCH_CONSOLE", "POST_METRICS", "SHOPIFY_ORDERS", "META_ADS"] as const;
+export const DATA_SOURCE_KINDS = ["SEARCH_CONSOLE", "POST_METRICS", "SHOPIFY_ORDERS", "META_ADS", "SHOPIFY_QUOTES"] as const;
 export type DataSourceKind = (typeof DATA_SOURCE_KINDS)[number];
 export type DataSourceStatus = "ACTIVE" | "ERROR" | "OFF";
 
@@ -11,6 +11,7 @@ export const DATA_SOURCE_SLUGS = {
   POST_METRICS: "post-metrics",
   SHOPIFY_ORDERS: "shopify-orders",
   META_ADS: "meta-ads",
+  SHOPIFY_QUOTES: "shopify-quotes",
 } as const satisfies Record<DataSourceKind, string>;
 export type DataSourceSlug = (typeof DATA_SOURCE_SLUGS)[DataSourceKind];
 
@@ -20,6 +21,8 @@ export const READ_KEY = {
   POST_METRICS: "analytics.read",
   SHOPIFY_ORDERS: "crm.read",
   META_ADS: "ads.read",
+  /** Quote status, expiry and payment reminders: the quotes carry customer contact details */
+  SHOPIFY_QUOTES: "crm.manage",
 } as const satisfies Record<DataSourceKind, PermissionKey>;
 
 /** Why the last sync didn't fully succeed, as a kind the apps word themselves. */
