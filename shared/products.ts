@@ -38,7 +38,9 @@ export const byExternalId = (a: { externalId: string | null }, b: { externalId: 
  * Why the last catalogue sync failed, as a kind the apps word themselves. "reading": not a failure, the site reader
  * (SITE) is still reading the website's product pages, a little each day.
  */
-export type SyncReason = "not-a-feed" | "blocked" | "partial" | "failed" | "shopify-refused" | "reading" | "no-product-pages" | "site-refused";
+export type SyncReason =
+  | "not-a-feed" | "blocked" | "partial" | "failed" | "shopify-refused" | "reading" | "no-product-pages" | "site-refused"
+  | "pages-changed" | "feed-missing";
 /**
  * A brand's last catalogue sync (BrandProfile.catalogSync). `error` is the message the web shows; `reason` lets the app say it in the person's language.
  * `pages` (SITE): product pages read so far of those the sitemap lists; `capped`: it lists more than the 5,000 read.
