@@ -36,6 +36,8 @@ export const NAV: readonly NavEntry[] = [
   { id: "tasks", label: "Projects & tasks", href: "/tasks", group: "page", feature: "tasks", perm: TASKS_READ },
   // Its link is on the tasks page; the sidebar highlights Beat's slot on it.
   { id: "projects", label: "Projects", href: "/projects", group: "page", feature: "tasks", perm: TASKS_READ },
+  // Linked from the Overview's "This week".
+  { id: "digest", label: "Weekly digest", href: "/digest", group: "page", feature: "digest" },
   { id: "website", label: "Website", href: "/tasks?area=website&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
   { id: "seo", label: "Performance", href: "/tasks?area=seo&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
 

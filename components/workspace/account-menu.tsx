@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SignOutItem } from "@/components/workspace/sign-out-item";
+import { DigestEmailItem } from "@/components/digest/digest-email-item";
 
 type Props = {
   name?: string | null;
@@ -27,10 +28,12 @@ type Props = {
   /** The workspaces to switch between. */
   workspaces?: WorkspaceOption[];
   activeWorkspaceId?: string | null;
+  /** The digest flag is on: offers "Email me the weekly digest". */
+  digest?: boolean;
 };
 
 /** The sidebar's account row and its menu: the "more" pages, Admin, the workspaces, sign out. */
-export function AccountMenu({ name, email, image, roleLabel, platformAdmin, workspaces = [], activeWorkspaceId = null }: Props) {
+export function AccountMenu({ name, email, image, roleLabel, platformAdmin, workspaces = [], activeWorkspaceId = null, digest = false }: Props) {
   const initial = (name ?? email ?? "?").trim().charAt(0).toUpperCase();
   return (
     <DropdownMenu>
@@ -60,6 +63,7 @@ export function AccountMenu({ name, email, image, roleLabel, platformAdmin, work
             <Link href={e.href}>{e.label}</Link>
           </DropdownMenuItem>
         ))}
+        {digest ? <DigestEmailItem /> : null}
         {platformAdmin ? (
           <DropdownMenuItem asChild>
             <Link href="/admin">Admin</Link>

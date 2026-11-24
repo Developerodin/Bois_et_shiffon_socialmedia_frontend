@@ -125,6 +125,8 @@ type Props = {
   reelsOn: boolean;
   /** The tasks flag is on for this workspace: without it a ?task= link is a bad link. */
   tasksOn: boolean;
+  /** The digest flag is on: Home links to "This week" (/digest). */
+  digestOn?: boolean;
   user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
   /** The person's permissions on this brand, from the shell (read with the page, so no fetch here can fail on its own). */
   perms: string[];
@@ -133,7 +135,7 @@ type Props = {
 const viewFromUrl = () => viewFromSearch(window.location.search);
 const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
-export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, user, perms }: Props) {
+export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, user, perms }: Props) {
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
@@ -416,6 +418,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
             due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={revealPanel} /> : null}
             taskGroups={tasksOn && perms.includes("tasks.read") ? <TodayTasks base={base} onOpen={(id) => open({ kind: "task", id })} /> : null}
             showAgents={canAgents}
+            digestOn={digestOn}
           />
       ),
     },
@@ -896,11 +899,13 @@ function Home({
   due,
   taskGroups,
   showAgents,
+  digestOn,
 }: {
   workspaceId: string;
   base: string;
   /** The agents section, for roles that can read agents. */
   showAgents: boolean;
+  digestOn: boolean;
   docs: ContextDocsResponse | null;
   /** The card for stories due to be posted by hand (people who can publish only). */
   due: React.ReactNode;
@@ -1058,9 +1063,14 @@ function Home({
 
   return (
     <div className="flex flex-col">
-      <p className="px-5 pt-6 font-display text-2xl font-medium tracking-tight">
-        {first ? `Welcome, ${first}.` : "Welcome."}
-      </p>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 px-5 pt-6">
+        <p className="font-display text-2xl font-medium tracking-tight">{first ? `Welcome, ${first}.` : "Welcome."}</p>
+        {digestOn && (
+          <Link href="/digest" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+            This week
+          </Link>
+        )}
+      </div>
 
       <section aria-labelledby="today-h" className="px-5 pb-8 pt-5">
         <div className="flex items-center justify-between gap-4">

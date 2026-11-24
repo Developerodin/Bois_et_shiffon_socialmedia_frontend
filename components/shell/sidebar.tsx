@@ -233,6 +233,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
           platformAdmin={platformAdmin}
           workspaces={workspaces}
           activeWorkspaceId={activeWorkspaceId}
+          digest={features.includes("digest")}
         />
       </div>
     </>
