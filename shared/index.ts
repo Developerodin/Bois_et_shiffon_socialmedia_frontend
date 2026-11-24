@@ -23,3 +23,4 @@ export * from "./needs-action";
 export * from "./api/tasks";
 export * from "./data-sources";
 export * from "./digest";
+export * from "./shopify-writes";
