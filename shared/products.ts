@@ -49,3 +49,37 @@ export function stockLabel(p: { inStock: boolean | null; stockQuantity: number |
   if (p.inStock !== null) return p.inStock ? "In stock" : "Out of stock";
   return p.stockQuantity !== null ? "Out of stock" : "Unknown";
 }
+
+/** What a spreadsheet column can be imported as (the import screen's dropdown); `title` is required. */
+export const IMPORT_FIELDS = [
+  "title", "sku", "url", "imageUrl", "price", "compareAtPrice", "currency", "category", "description",
+  "inStock", "stockQuantity", "materials", "dimensions", "certifications",
+] as const;
+export type ImportField = (typeof IMPORT_FIELDS)[number];
+/** A skipped row: its number in the file counting the header as row 1 (empty rows aren't counted), and why. */
+export type ImportProblem = { row: number; reason: string };
+/**
+ * The import preview (?dryRun=1): the file's headers, the mapping (guessed, or the one sent), its first 20 data rows
+ * as written, and what importing with that mapping would skip. `needsApproval`: fields this person can't import
+ * (stock, prices, facts need rules.approve); empty when they can import every field.
+ */
+export type ImportPreviewDto = {
+  headers: string[];
+  mapping: (ImportField | null)[];
+  sample: string[][];
+  rowCount: number;
+  skipped: number;
+  duplicates: number;
+  problems: ImportProblem[];
+  needsApproval: ImportField[];
+};
+/** What an import did. `problems`: the first 50 skipped rows. */
+export type ImportResultDto = {
+  created: number;
+  updated: number;
+  unchanged: number;
+  archived: number;
+  skipped: number;
+  duplicates: number;
+  problems: ImportProblem[];
+};
