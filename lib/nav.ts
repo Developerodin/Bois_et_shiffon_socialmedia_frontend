@@ -39,6 +39,7 @@ export const NAV: readonly NavEntry[] = [
   // Linked from the Overview's "This week".
   { id: "digest", label: "Weekly digest", href: "/digest", group: "page", feature: "digest" },
   { id: "website", label: "Website", href: "/tasks?area=website&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
+  { id: "blog", label: "Blog", href: "/blog", group: "main", feature: "blog" },
   { id: "seo", label: "Performance", href: "/tasks?area=seo&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
 
   { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },

@@ -96,7 +96,8 @@ const WEBSITE = "WEBSITE";
  * screenshots, the checklist and comments. `perms` (the shell's brand permissions) only hides controls the server
  * would refuse; it decides every write.
  */
-export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; id: string; perms: string[]; userId: string | null | undefined; onLoaded?: (t: TaskDetailDto) => void }) {
+/** `blog`: offer "Write an article" on SEO tasks (flag `blog` and content.create, decided by the page). */
+export function TaskView({ base, id, perms, userId, onLoaded, blog }: { base: string; id: string; perms: string[]; userId: string | null | undefined; onLoaded?: (t: TaskDetailDto) => void; blog?: boolean }) {
   const canManage = perms.includes("tasks.manage");
   const [task, setTask] = useState<TaskDetailDto | null>(null);
   const [loadError, setLoadError] = useState<"gone" | "failed" | null>(null);
@@ -173,6 +174,11 @@ export function TaskView({ base, id, perms, userId, onLoaded }: { base: string; 
         {task.blockedReason ? <StatusBadge status="BLOCKED">Blocked</StatusBadge> : null}
         <FindingTag kind={task.findingKind} />
         {task.findingClearedAt ? <span className="text-xs text-muted-foreground">A later audit no longer finds this.</span> : null}
+        {blog && task.areas.includes("SEO") ? (
+          <Link href={`/blog?task=${encodeURIComponent(task.id)}`} className="ml-auto text-sm font-medium underline underline-offset-2">
+            Write an article
+          </Link>
+        ) : null}
       </div>
       {task.blockedReason ? (
         <p className="rounded-xl border border-border bg-muted/50 px-3 py-2 text-sm">
@@ -457,7 +463,7 @@ function LinkedPost({ base, value, current, onChange }: { base: string; value: s
  * The task peek on a page of its own (/tasks; the project pages later): opens on `?task=<id>`, asks about unsaved edits
  * before switching or closing, records the task in Recent once it loads. The Overview has its own peek and renders TaskView.
  */
-export function TaskPeek({ base, perms, userId, recentKey }: { base: string; perms: string[]; userId: string; recentKey: string | null }) {
+export function TaskPeek({ base, perms, userId, recentKey, blog }: { base: string; perms: string[]; userId: string; recentKey: string | null; blog?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const query = useSearchParams().toString();
@@ -517,7 +523,7 @@ export function TaskPeek({ base, perms, userId, recentKey }: { base: string; per
   return (
     <Peek placement="page" open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} onClose={close} onExited={peek.onExited} asideRef={peek.ref}>
       <UnsavedGuardOff value={!peek.live}>
-        <TaskView key={peekKey(peek.shown.view)} base={base} id={peek.shown.view.id} perms={perms} userId={userId} onLoaded={onLoaded} />
+        <TaskView key={peekKey(peek.shown.view)} base={base} id={peek.shown.view.id} perms={perms} userId={userId} onLoaded={onLoaded} blog={blog} />
       </UnsavedGuardOff>
     </Peek>
   );
