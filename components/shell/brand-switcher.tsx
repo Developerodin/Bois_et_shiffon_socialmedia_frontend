@@ -6,6 +6,7 @@ import { ChevronDown, Plus } from "lucide-react";
 import { setActiveContext } from "@/components/context/api";
 import { dropOpenItem } from "@/lib/workspace-view";
 import { okToDiscard } from "@/components/context/unsaved";
+import { finishNavigation, startNavigation } from "@/components/nav/nav-progress";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "@/components/ui/toast";
 import {
@@ -94,6 +95,7 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
               if (brand.id === active.id) return;
               if (!okToDiscard()) return;
               setTarget(brand.id);
+              startNavigation();
               startSwitch(async () => {
                 try {
                   await setActiveContext({ workspaceId, brandId: brand.id });
@@ -102,6 +104,7 @@ function SidebarSwitcher({ workspaceId, brands, activeBrandId, canCreate }: Omit
                   if (away) router.replace(away);
                   router.refresh();
                 } catch {
+                  finishNavigation();
                   toast({ title: "Couldn't switch business", detail: "Try again.", tone: "warning" });
                 }
               });
