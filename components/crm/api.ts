@@ -25,7 +25,8 @@ export const quotesApi = {
   update: (w: string, b: string, id: string, body: QuoteBody & { version: number }) => request<{ quote: QuoteDto }>(one(w, b, id), json("PATCH", body)),
   /** revise: a sent quote back to editable; acceptSubtotal: go with Shopify's subtotal where it differs. */
   act: (w: string, b: string, id: string, body: { action: "revise" | "acceptSubtotal"; version: number }) => request<{ quote: QuoteDto }>(one(w, b, id), json("POST", body)),
-  remove: (w: string, b: string, id: string) => request<void>(one(w, b, id), { method: "DELETE" }),
+  /** A draft never in Shopify is deleted (nothing back); any other open quote is cancelled: the quote, and a notice when its invoice stays payable. */
+  remove: (w: string, b: string, id: string) => request<{ quote: QuoteDto; notice: string | null } | undefined>(one(w, b, id), { method: "DELETE" }),
   /** The invoice's `email` goes with both the preview and the confirm: the confirm token covers it. */
   preview: (w: string, b: string, id: string, action: QuoteShopifyAction, opts: { again?: boolean; email?: InvoiceEmailInput } = {}) =>
     request<QuotePreview>(`${one(w, b, id)}/shopify/preview`, json("POST", { action, ...opts })),

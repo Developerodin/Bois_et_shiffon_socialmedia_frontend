@@ -113,6 +113,13 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   );
 }
 
+/** What a person is asked before deleting or cancelling: a sent quote's invoice stays payable in Shopify. */
+export function cancelQuestion(q: Pick<QuoteDto, "status" | "shopifyName">) {
+  if (q.status === "DRAFT" && !q.shopifyName) return "Delete this quote?";
+  if (q.status === "SENT") return "Cancel this quote? Shopify's invoice stays payable until you delete the draft order in Shopify.";
+  return "Cancel this quote? Shopify's draft order stays as it is.";
+}
+
 /** "Shopify's subtotal is 1872.01 EUR; ours is 1872.00 EUR." when the two differ, else null. */
 export function subtotalNotice(q: Pick<QuoteDto, "subtotalDiffers" | "shopifySubtotal" | "totals" | "currency">) {
   return q.subtotalDiffers ? `Shopify's subtotal is ${q.shopifySubtotal} ${q.currency}; ours is ${q.totals.total} ${q.currency}.` : null;
@@ -133,6 +140,7 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [dialog, setDialog] = useState<{ action: QuoteShopifyAction; again?: boolean } | null>(null);
   const [search, setSearch] = useState("");
   const [found, setFound] = useState<Product[]>([]);
@@ -224,11 +232,14 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
             disabled={!!busy}
             onClick={async () => {
               const draft = quote.status === "DRAFT" && !quote.shopifyName;
-              if (!window.confirm(draft ? "Delete this quote?" : "Cancel this quote? Shopify's draft order stays as it is.")) return;
+              if (!window.confirm(cancelQuestion(quote))) return;
               try {
-                await quotesApi.remove(w, b, quote.id);
-                if (draft) onRemoved();
-                else onChange({ ...quote, status: "CANCELLED" });
+                const out = await quotesApi.remove(w, b, quote.id);
+                if (draft || !out) onRemoved();
+                else {
+                  onChange(out.quote);
+                  setInfo(out.notice);
+                }
               } catch (e) {
                 setError(errorMessage(e));
               }
@@ -239,6 +250,7 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
         ) : null}
       </div>
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
+      {info ? <p className="rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-sm" role="status">{info}</p> : null}
       {editable ? (
         <form
           className="flex flex-col gap-3"

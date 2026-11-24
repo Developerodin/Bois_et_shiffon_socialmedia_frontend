@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import type { QuoteDto } from "@/shared";
 import type { QuotePreview } from "@/components/crm/api";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
-import { fromDraft, nextQuoteStep, subtotalNotice } from "@/components/crm/quotes/quotes-board";
+import { cancelQuestion, fromDraft, nextQuoteStep, subtotalNotice } from "@/components/crm/quotes/quotes-board";
 import { QuotePreviewBody } from "@/components/crm/quotes/shopify-dialog";
 import { agentEntries, navFor } from "@/lib/nav";
 
@@ -25,7 +25,8 @@ describe("Sales & CRM nav", () => {
     expect(spark([], ["crm.manage"])).toMatchObject({ href: "/agents/spark", soon: true });
     expect(spark(["crm"], ["brand.read", "crm.read"])).toMatchObject({ href: "/agents/spark", soon: true });
     expect(spark(["crm"], ["crm.manage"])).toMatchObject({ href: "/crm", role: "Sales & CRM", soon: false });
-    expect(spark(["crm"], ["inbox.read"])).toMatchObject({ href: "/crm", soon: false });
+    // Quotes only for now: inbox.read alone can't open /crm, so the slot stays as it was.
+    expect(spark(["crm"], ["inbox.read"])).toMatchObject({ href: "/agents/spark", soon: true });
     expect(navFor("/crm").title).toBe("Sales & CRM");
   });
 });
@@ -48,6 +49,18 @@ describe("the quote editor", () => {
     const unsent = html(createElement(QuoteSheet, { quote: { ...quote, validUntil: null } }));
     expect(unsent).toContain("Draft");
     expect(unsent).not.toContain("Valid until");
+  });
+
+  it("prints Shopify's subtotal when a person accepted it", () => {
+    const out = html(createElement(QuoteSheet, { quote: { ...quote, shopifySubtotal: "1872.01", subtotalDiffers: true, subtotalAccepted: true } }));
+    expect(out).toContain("subtotal (accepted)");
+    expect(out).toContain("1872.01 EUR");
+    expect(html(createElement(QuoteSheet, { quote }))).not.toContain("(accepted)");
+  });
+
+  it("warns that a sent quote's invoice stays payable when cancelled", () => {
+    expect(cancelQuestion({ status: "SENT", shopifyName: "#D1" })).toContain("invoice stays payable");
+    expect(cancelQuestion({ status: "DRAFT", shopifyName: null })).toBe("Delete this quote?");
   });
 
   it("offers the next Shopify step from the quote's state", () => {

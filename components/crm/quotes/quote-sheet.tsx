@@ -39,6 +39,10 @@ export function QuoteSheet({ quote, brand }: { quote: QuoteDto; brand?: string }
           </div>
         ) : null}
         <div className="flex justify-between border-t border-border pt-1 font-semibold"><dt>Total</dt><dd>{m(quote.totals.total)}</dd></div>
+        {/* Shopify's own figure, accepted where it differs: what the invoice asks for. */}
+        {quote.subtotalAccepted && quote.shopifySubtotal ? (
+          <div className="flex justify-between font-semibold"><dt>Shopify&rsquo;s subtotal (accepted)</dt><dd>{m(quote.shopifySubtotal)}</dd></div>
+        ) : null}
         <p className="text-xs text-muted-foreground">Shipping and tax are added by Shopify.</p>
       </dl>
       {quote.note ? <p className="whitespace-pre-wrap">{quote.note}</p> : null}
