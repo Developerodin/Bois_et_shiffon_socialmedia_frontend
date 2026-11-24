@@ -9,7 +9,7 @@ export function QuoteSheet({ quote, brand }: { quote: QuoteDto; brand?: string }
         <h2 className="text-xl font-semibold">
           {brand ? `${brand}: quote ${quote.number}` : `Quote ${quote.number}`}
         </h2>
-        <span className="text-muted-foreground">Valid until {quote.validUntil}</span>
+        <span className="text-muted-foreground">{quote.validUntil ? `Valid until ${quote.validUntil}` : "Draft"}</span>
       </div>
       {quote.contactName || quote.contactEmail ? <p>For {[quote.contactName, quote.contactEmail].filter(Boolean).join(", ")}</p> : null}
       <table className="w-full text-left">

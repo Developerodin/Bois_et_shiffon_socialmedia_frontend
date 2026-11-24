@@ -184,7 +184,7 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={quote.status}>{QUOTE_STATUS_LABEL[quote.status]}</StatusBadge>
         {quote.shopifyName ? <span className="text-xs text-muted-foreground">Shopify draft {quote.shopifyName}</span> : null}
-        <span className="text-xs text-muted-foreground">Valid until {quote.validUntil}</span>
+        {quote.validUntil ? <span className="text-xs text-muted-foreground">Valid until {quote.validUntil}</span> : null}
       </div>
       {notice ? (
         <div className="flex flex-col gap-2 rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-sm" role="status">

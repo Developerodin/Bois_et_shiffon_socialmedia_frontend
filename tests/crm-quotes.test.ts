@@ -44,6 +44,10 @@ describe("the quote editor", () => {
     const out = html(createElement(QuoteSheet, { quote }));
     for (const v of ["2080.00 EUR", "−208.00 EUR", "1872.00 EUR", "Shipping and tax are added by Shopify", "Valid until 2026-12-24"]) expect(out).toContain(v);
     expect(out).not.toContain("Margin ok");
+    // Valid 30 days from the invoice send: before it, a draft.
+    const unsent = html(createElement(QuoteSheet, { quote: { ...quote, validUntil: null } }));
+    expect(unsent).toContain("Draft");
+    expect(unsent).not.toContain("Valid until");
   });
 
   it("offers the next Shopify step from the quote's state", () => {
