@@ -32,17 +32,24 @@ export type BlogArticleDto = {
   updatedAt: string;
 };
 
-/** What a Shopify article write sends (ARTICLE_CREATE / ARTICLE_UPDATE): every link target is listed in `links`. */
+/**
+ * What a Shopify article write sends (ARTICLE_CREATE / ARTICLE_UPDATE). `blocks` is the body `bodyHtml` is rendered
+ * from (the dialog shows them); every link target is in `links`, and those off the brand's website in `externalLinks`.
+ */
 export type ArticleWritePreview = {
   /** null only while Shopify writes aren't connected (the confirm is then refused) */
   blogId: string | null;
   title: string;
   handle: string;
+  /** shown to the person; Shopify gets `summaryHtml` (escaped, in a paragraph) */
   summary: string;
+  summaryHtml: string;
   tags: string[];
   author: string;
+  blocks: ArticleBlock[];
   bodyHtml: string;
   links: string[];
+  externalLinks: string[];
 };
 /** ARTICLE_PUBLISH: the article Shopify shows from then on. */
 export type ArticlePublishPreview = { shopifyId: string; title: string; handle: string };

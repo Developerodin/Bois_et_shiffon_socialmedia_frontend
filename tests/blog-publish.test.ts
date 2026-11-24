@@ -19,7 +19,10 @@ const article: BlogArticleDto = {
   ],
 };
 const preview = (over: Partial<ArticlePreview> = {}): ArticlePreview => ({
-  preview: { blogId: "gid://shopify/Blog/1", title: article.title, handle: article.handle, summary: "How to.", tags: ["linen"], author: "Bois & Chiffons", bodyHtml: "<h2>Washing</h2>", links: ["https://bc.test/guide", "https://bc.test/gentle"] },
+  preview: {
+    blogId: "gid://shopify/Blog/1", title: article.title, handle: article.handle, summary: "How to.", summaryHtml: "<p>How to.</p>", tags: ["linen"], author: "Bois & Chiffons",
+    blocks: article.blocks, bodyHtml: "<h2>Washing</h2>", links: ["https://bc.test/guide", "https://elsewhere.test/gentle"], externalLinks: ["https://elsewhere.test/gentle"],
+  },
   attempt: 1,
   confirmToken: "t",
   expiresAt: "2026-11-24T10:10:00Z",
@@ -31,26 +34,28 @@ const html = (el: ReturnType<typeof createElement>) => renderToStaticMarkup(el);
 
 describe("the Send to Shopify dialog", () => {
   it("shows the rendered article, every field and every link target", () => {
-    const out = html(createElement(ShopifyPreviewBody, { action: "create", preview: preview(), article }));
+    const out = html(createElement(ShopifyPreviewBody, { action: "create", preview: preview() }));
     expect(out).toContain("Created hidden");
     expect(out).toContain("<h2");
     expect(out).toContain("<strong>Cold</strong>");
     for (const v of ["Bois &amp; Chiffons", "caring-for-linen", "How to.", "linen"]) expect(out).toContain(v);
     expect(out).toContain("Links in the article (2)");
     expect(out).toContain('href="https://bc.test/guide" target="_blank" rel="noopener noreferrer"');
-    expect(out).toContain('href="https://bc.test/gentle"');
+    expect(out).toContain('href="https://elsewhere.test/gentle"');
+    expect(out.match(/Outside your website/g)).toHaveLength(1);
+    expect(out.indexOf("Outside your website")).toBeGreaterThan(out.indexOf("elsewhere.test/gentle"));
     expect(out).not.toContain("javascript:");
   });
 
   it("says when Shopify writes aren't connected yet", () => {
-    const out = html(createElement(ShopifyPreviewBody, { action: "create", preview: preview({ writes: { ready: false, reason: "NOT_CONNECTED" } }), article }));
+    const out = html(createElement(ShopifyPreviewBody, { action: "create", preview: preview({ writes: { ready: false, reason: "NOT_CONNECTED" } }) }));
     expect(out).toContain("Shopify writes aren&#x27;t connected yet. Nothing will be sent.");
     expect(writesNotice({ ready: false, reason: "MISSING_SCOPE", scope: "write_content" })).toMatch(/missing write_content/);
     expect(writesNotice({ ready: true })).toBeNull();
   });
 
   it("publish shows the article it makes visible", () => {
-    const out = html(createElement(ShopifyPreviewBody, { action: "publish", preview: preview({ preview: { shopifyId: "gid://shopify/Article/1", title: article.title, handle: article.handle } }), article }));
+    const out = html(createElement(ShopifyPreviewBody, { action: "publish", preview: preview({ preview: { shopifyId: "gid://shopify/Article/1", title: article.title, handle: article.handle } }) }));
     expect(out).toContain("Makes the article visible on the store");
     expect(out).toContain("caring-for-linen");
   });

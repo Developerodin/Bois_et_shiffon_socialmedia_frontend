@@ -17,10 +17,10 @@ export function writesNotice(writes: ArticlePreview["writes"]): string | null {
 }
 
 /**
- * Exactly what the confirm writes, from the server's preview: every field, every link target, and the body rendered as
- * it will read (from the article as the server has it now, so it matches the preview's hash).
+ * Exactly what the confirm writes, all from the server's preview (what its token covers): every field, every link target
+ * (those off the brand's website flagged), and the body rendered from the blocks the HTML is made from.
  */
-export function ShopifyPreviewBody({ action, preview, article }: { action: ArticleShopifyAction; preview: ArticlePreview; article: BlogArticleDto }) {
+export function ShopifyPreviewBody({ action, preview }: { action: ArticleShopifyAction; preview: ArticlePreview }) {
   const notice = writesNotice(preview.writes);
   const row = (term: string, value: string) => (
     <div className="flex gap-3">
@@ -58,7 +58,10 @@ export function ShopifyPreviewBody({ action, preview, article }: { action: Artic
         {p.links.length ? (
           <ul className="flex flex-col gap-1 break-all">
             {p.links.map((l) => (
-              <li key={l}>{httpHref(l) ? <a href={httpHref(l)!} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{l}</a> : l}</li>
+              <li key={l}>
+                {httpHref(l) ? <a href={httpHref(l)!} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{l}</a> : l}
+                {p.externalLinks.includes(l) ? <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">Outside your website</span> : null}
+              </li>
             ))}
           </ul>
         ) : (
@@ -66,7 +69,7 @@ export function ShopifyPreviewBody({ action, preview, article }: { action: Artic
         )}
       </div>
       <div className="rounded-xl border border-border p-4">
-        <ArticleBody blocks={article.blocks} />
+        <ArticleBody blocks={p.blocks} />
       </div>
     </div>
   );
@@ -74,15 +77,14 @@ export function ShopifyPreviewBody({ action, preview, article }: { action: Artic
 
 /** Preview → the person confirms → written at most once. A change since the preview shows the new one to check again. */
 export function ShopifyDialog({ w, b, article, action, onClose, onDone }: { w: string; b: string; article: BlogArticleDto; action: ArticleShopifyAction; onClose(): void; onDone(a: BlogArticleDto): void }) {
-  const [state, setState] = useState<{ preview: ArticlePreview; article: BlogArticleDto } | null>(null);
+  const [state, setState] = useState<ArticlePreview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
     setState(null);
     try {
-      const [preview, fresh] = await Promise.all([blogApi.preview(w, b, article.id, action), blogApi.get(w, b, article.id)]);
-      setState({ preview, article: fresh.article });
+      setState(await blogApi.preview(w, b, article.id, action));
     } catch (e) {
       setError(errorMessage(e, "Couldn't prepare the change. Try again."));
     }
@@ -97,7 +99,7 @@ export function ShopifyDialog({ w, b, article, action, onClose, onDone }: { w: s
     setBusy(true);
     setError(null);
     try {
-      const done = await blogApi.confirm(w, b, article.id, action, state.preview.confirmToken);
+      const done = await blogApi.confirm(w, b, article.id, action, state.confirmToken);
       onDone(done.article);
     } catch (e) {
       setError(errorMessage(e, "Couldn't send it. Try again."));
@@ -114,13 +116,13 @@ export function ShopifyDialog({ w, b, article, action, onClose, onDone }: { w: s
           <DialogTitle>{ACTION_LABEL[action]}</DialogTitle>
           <DialogDescription>This is exactly what will be written to Shopify.</DialogDescription>
         </DialogHeader>
-        {state ? <ShopifyPreviewBody action={action} preview={state.preview} article={state.article} /> : !error ? <p className="text-sm text-muted-foreground">Preparing…</p> : null}
+        {state ? <ShopifyPreviewBody action={action} preview={state} /> : !error ? <p className="text-sm text-muted-foreground">Preparing…</p> : null}
         {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button onClick={confirm} disabled={busy || !state || !state.preview.writes.ready}>
+          <Button onClick={confirm} disabled={busy || !state || !state.writes.ready}>
             {busy ? "Sending…" : ACTION_LABEL[action]}
           </Button>
         </DialogFooter>
