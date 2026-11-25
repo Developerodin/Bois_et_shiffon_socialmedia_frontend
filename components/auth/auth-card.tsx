@@ -65,6 +65,7 @@ export function PasswordFields({
           required
           minLength={MIN_PASSWORD}
           autoComplete="new-password"
+          placeholder="Choose a password"
           value={password}
           onChange={(e) => onPassword(e.target.value)}
           aria-describedby="password-hint"
@@ -80,6 +81,7 @@ export function PasswordFields({
           required
           minLength={MIN_PASSWORD}
           autoComplete="new-password"
+          placeholder="Type it again"
           value={confirm}
           onChange={(e) => onConfirm(e.target.value)}
           className="mt-1.5 h-11"
