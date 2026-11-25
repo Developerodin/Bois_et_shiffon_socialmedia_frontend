@@ -7,32 +7,25 @@ import { Button } from "@/components/ui/button";
 import { creditsLabel } from "@/lib/plan-credits";
 import { cn } from "@/lib/utils";
 
-/** The balance popover: the top bar's overflow menu opens it too, where the chip is hidden. */
+/** The balance popover: the top bar's More menu opens it too, where the chip is hidden. */
 export const CREDITS_POPOVER_ID = "credits-popover";
-const POPOVER_ID = CREDITS_POPOVER_ID;
 
-/** The workspace's balance in the top bar; its native popover (light dismiss and Escape for free) says what the credits are. */
-/** `className` goes on the chip only: hiding it keeps the popover, so the overflow menu can still open it. */
+/**
+ * The workspace's balance in the top bar; its native popover (light dismiss and Escape for free) says what the credits are.
+ * `className` goes on the chip only: hiding it keeps the popover, so the More menu can still open (and focus) it.
+ */
 export function CreditsChip({ workspaceId, className }: { workspaceId: string; className?: string }) {
   const { credits, failed, reload } = useCredits(workspaceId);
   const { plan, unlimited } = usePlan(workspaceId);
   const label = creditsLabel(credits, unlimited);
-  // "120 credits" shows as "120" below sm; a bare "Credits" stays whole.
-  const cut = label.lastIndexOf(" ");
   return (
     <>
-      <button type="button" popoverTarget={POPOVER_ID} className={cn(tool, className)}>
+      <button type="button" popoverTarget={CREDITS_POPOVER_ID} className={cn(tool, className)}>
         <Coins className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
-        {cut < 0 ? (
-          label
-        ) : (
-          <span className="tabular-nums">
-            {label.slice(0, cut)}
-            <span className="max-sm:sr-only">{label.slice(cut)}</span>
-          </span>
-        )}
+        <span className="tabular-nums">{label}</span>
       </button>
-      <div id={POPOVER_ID} popover="auto" className="fixed inset-auto right-4 top-[76px] m-0 w-72 rounded-2xl border border-border bg-popover p-4 text-sm shadow-lg">
+      {/* tabIndex -1: opened from the More menu, which has no invoker, it takes focus so it is announced and Tab reaches "Try again". */}
+      <div id={CREDITS_POPOVER_ID} popover="auto" tabIndex={-1} className="fixed inset-auto outline-none right-4 top-[76px] m-0 w-72 rounded-2xl border border-border bg-popover p-4 text-sm shadow-lg">
         <p className="text-lg font-medium tabular-nums text-popover-foreground">{label}</p>
         <p className="mt-1 text-muted-foreground">Shared by every business in this workspace.</p>
         <p className="mt-3 text-popover-foreground">
