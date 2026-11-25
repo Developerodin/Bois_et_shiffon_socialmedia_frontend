@@ -5,8 +5,8 @@ test.describe.configure({ mode: "serial" });
 
 const MAIN = ["Overview", "Business context", "Connections"];
 const AGENTS = ["Spark", "Beat", "Wave", "Echo", "Pulse", "Hum", "Surge", "Drift"];
-// lib/nav.ts: the four placeholder agents, plus Echo (no web inbox yet).
-const SOON = ["Spark", "Beat", "Echo", "Pulse", "Hum"];
+// lib/nav.ts: Spark, Beat and Pulse until their flags are on, plus Echo (no web inbox yet). Hum opens Settings' Members tab for the owner.
+const SOON = ["Spark", "Beat", "Echo", "Pulse"];
 const CONNECT_BUTTON = /^(re)?connect\b|^disconnect\b/i;
 const MORE = ["Calendar", "SEO & GEO reports", "Agent log", "Settings"];
 

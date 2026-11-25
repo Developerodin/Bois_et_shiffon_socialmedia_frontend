@@ -24,6 +24,9 @@ export type NavEntry = {
 
 const TASKS_READ = ["tasks.read"] as const;
 const CRM_READ = ["crm.manage"] as const;
+/** The Sales tab on /performance (Pulse's slot) needs crm.read, not crm.manage. */
+const SALES_READ = ["crm.read"] as const;
+const MEMBERS_READ = ["members.read"] as const;
 
 export const NAV: readonly NavEntry[] = [
   { id: "overview", label: "Overview", href: "/", group: "main" },
@@ -88,14 +91,19 @@ export function sidebarGroups(enabled: readonly WebFeature[], perms?: readonly s
 
 /**
  * The agents as the sidebar lists them. With the tasks flag and tasks.read, Beat's "Projects & team" slot opens
- * Projects & tasks instead of its coming-soon page; with the crm flag and a CRM key, Spark's "Sales & CRM" slot opens /crm (crm.manage, who can open it).
+ * Projects & tasks instead of its coming-soon page; with the crm flag and a CRM key, Spark's "Sales & CRM" slot opens /crm (crm.manage, who can open it);
+ * with the sales flag and crm.read, Pulse opens the Sales tab of /performance; with members.read, Hum opens Settings' Members tab.
+ * Echo stays coming soon: there is no web inbox page yet.
  */
 export function agentEntries(enabled: readonly WebFeature[], perms?: readonly string[]): NavEntry[] {
-  const tasks = enabled.includes("tasks") && (!perms || TASKS_READ.some((p) => perms.includes(p)));
-  const crm = enabled.includes("crm") && (!perms || CRM_READ.some((p) => perms.includes(p)));
-  return NAV.filter((e) => e.group === "agent").map((e) =>
-    e.id === "beat" && tasks ? { ...e, role: "Projects & tasks", href: "/tasks", soon: false } : e.id === "spark" && crm ? { ...e, href: "/crm", soon: false } : e,
-  );
+  const holds = (keys: readonly string[]) => !perms || keys.some((p) => perms.includes(p));
+  const live: Partial<Record<string, Partial<NavEntry>>> = {
+    beat: enabled.includes("tasks") && holds(TASKS_READ) ? { role: "Projects & tasks", href: "/tasks" } : undefined,
+    spark: enabled.includes("crm") && holds(CRM_READ) ? { href: "/crm" } : undefined,
+    pulse: enabled.includes("sales") && holds(SALES_READ) ? { href: "/performance?tab=sales" } : undefined,
+    hum: holds(MEMBERS_READ) ? { href: "/settings?tab=members" } : undefined,
+  };
+  return NAV.filter((e) => e.group === "agent").map((e) => (live[e.id] ? { ...e, ...live[e.id], soon: false } : e));
 }
 
 const hrefPath = (href: string) => href.split(/[?#]/)[0] || "/";

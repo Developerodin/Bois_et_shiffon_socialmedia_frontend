@@ -47,11 +47,13 @@ const row =
   "flex items-center gap-3 rounded-2xl text-sm transition-colors active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 /** The sidebar entry a URL belongs to. Agents that point at a page or panel are selected by where you are; Echo's stand-in destination never is. */
-function activeIdFor(pathname: string, search: URLSearchParams) {
+function activeIdFor(pathname: string, search: URLSearchParams, live: ReadonlySet<string>) {
   const panel = search.get("panel");
   if (pathname === "/" && panel === "content") return "wave";
   if (pathname === "/" && panel === "competitors") return "drift";
-  if (pathname === "/performance") return "surge";
+  // Pulse and Hum point at a tab of a page: theirs only while their slot is live.
+  if (pathname === "/performance") return search.get("tab") === "sales" && live.has("pulse") ? "pulse" : "surge";
+  if (pathname === "/settings" && search.get("tab") === "members" && live.has("hum")) return "hum";
   // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
   if (pathname === "/tasks") return search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
   if (pathname === "/projects" || pathname.startsWith("/projects/")) return "beat";
@@ -62,11 +64,12 @@ function activeIdFor(pathname: string, search: URLSearchParams) {
 function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, perms, user }: Props) {
   const pathname = usePathname();
   const search = useSearchParams();
-  const activeId = activeIdFor(pathname, search);
+  const liveAgents = new Set(agentEntries(features, perms).filter((e) => !e.soon).map((e) => e.id));
+  const activeId = activeIdFor(pathname, search, liveAgents);
   // While a clicked link's page loads, mark where it goes at once; aria-current stays on the page you are on.
   const pending = usePendingHref();
   const pendingUrl = pending ? new URL(pending, "http://x") : null;
-  const shownId = pendingUrl ? activeIdFor(pendingUrl.pathname, pendingUrl.searchParams) : activeId;
+  const shownId = pendingUrl ? activeIdFor(pendingUrl.pathname, pendingUrl.searchParams, liveAgents) : activeId;
   const visible = (e: NavEntry) => !(e.soon && !e.href.startsWith("/agents/"));
   const isActive = (e: NavEntry) => activeId === e.id && visible(e);
   const isShown = (e: NavEntry) => shownId === e.id && visible(e);

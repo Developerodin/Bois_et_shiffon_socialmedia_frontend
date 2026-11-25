@@ -135,3 +135,29 @@ describe("tasks nav", () => {
     expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("projects");
   });
 });
+
+describe("agent slots", () => {
+  const slot = (id: string, f: Parameters<typeof agentEntries>[0], p?: string[]) => agentEntries(f, p).find((e) => e.id === id);
+
+  it("turns Pulse into the Sales tab only with the sales flag and crm.read", () => {
+    expect(slot("pulse", ["sales"], ["crm.read"])).toMatchObject({ href: "/performance?tab=sales", role: "Finance", soon: false });
+    expect(slot("pulse", ["sales"], ["brand.read"])).toMatchObject({ href: "/agents/pulse", soon: true });
+    expect(slot("pulse", [], ["crm.read"])).toMatchObject({ href: "/agents/pulse", soon: true });
+    // crm.manage opens /crm, not the Sales tab.
+    expect(slot("pulse", ["sales"], ["crm.manage"])).toMatchObject({ href: "/agents/pulse", soon: true });
+  });
+
+  it("turns Hum into Settings' Members tab with members.read, no flag needed", () => {
+    expect(slot("hum", [], ["members.read"])).toMatchObject({ href: "/settings?tab=members", role: "Admin & access", soon: false });
+    expect(slot("hum", [], ["brand.read"])).toMatchObject({ href: "/agents/hum", soon: true });
+  });
+
+  it("keeps Echo coming soon: there is no web inbox page", () => {
+    expect(slot("echo", ["inbox"], ["inbox.read"])).toMatchObject({ soon: true });
+  });
+
+  it("keeps the pages over the agents that point at them", () => {
+    expect(navFor("/settings").activeId).toBe("settings");
+    expect(navFor("/performance?tab=sales").activeId).toBe("performance");
+  });
+});
