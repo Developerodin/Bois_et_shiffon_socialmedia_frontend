@@ -137,7 +137,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
       <EmptyState
         icon={Newspaper}
         title="No articles yet"
-        description="Give a topic and the article is written for you to edit. Approved articles go to your Shopify blog hidden until you publish them."
+        description="Start one from a topic, then write it with AI or by hand. Approved articles go to your Shopify blog hidden until you publish them."
         action={starters}
       />
     );
