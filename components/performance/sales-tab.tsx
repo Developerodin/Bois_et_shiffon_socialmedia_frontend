@@ -70,12 +70,15 @@ function CurrencyBlock({ c, several }: { c: SalesCurrency; several: boolean }) {
   return (
     <div className="flex flex-col gap-3">
       {several ? <h3 className="text-sm font-medium">In {c.currency}</h3> : null}
-      <div className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl bg-muted/40 px-4 py-3 sm:grid-cols-5">
-        <Stat label="Orders" value={now.orders.toLocaleString()} before={before.orders.toLocaleString()} delta={change(now.orders, before.orders)} />
-        <Stat label="Net sales" value={m(now.netSales)} before={m(before.netSales)} delta={change(Number(now.netSales), Number(before.netSales))} />
-        <Stat label="Gross sales" value={m(now.gross)} before={m(before.gross)} delta={change(Number(now.gross), Number(before.gross))} />
-        <Stat label="Average order (net)" value={m(aov(now))} before={m(aov(before))} delta={change(aov(now), aov(before))} />
-        <Stat label="Refunded" value={m(now.refunded)} before={m(before.refunded)} />
+      {/* Columns follow the section's own width (the sidebar and assistant take part of the window): five only where the amounts fit. */}
+      <div className="@container rounded-xl bg-muted/40 px-4 py-3">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4 @xl:grid-cols-3 @4xl:grid-cols-5">
+          <Stat label="Orders" value={now.orders.toLocaleString()} before={before.orders.toLocaleString()} delta={change(now.orders, before.orders)} />
+          <Stat label="Net sales" value={m(now.netSales)} before={m(before.netSales)} delta={change(Number(now.netSales), Number(before.netSales))} />
+          <Stat label="Gross sales" value={m(now.gross)} before={m(before.gross)} delta={change(Number(now.gross), Number(before.gross))} />
+          <Stat label="Average order (net)" value={m(aov(now))} before={m(aov(before))} delta={change(aov(now), aov(before))} />
+          <Stat label="Refunded" value={m(now.refunded)} before={m(before.refunded)} />
+        </div>
       </div>
       <details className="text-sm" open>
         <summary className="cursor-pointer py-1 text-xs text-muted-foreground hover:text-foreground print:hidden">By day</summary>
