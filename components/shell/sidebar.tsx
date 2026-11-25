@@ -14,7 +14,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { AccountMenu } from "@/components/workspace/account-menu";
 import type { WebFeature } from "@/lib/features";
 import { AGENT_ORDER_KEY, applyOrder, move, parseOrder } from "@/lib/agent-order";
-import { agentEntries, navFor, sidebarGroups, type NavEntry } from "@/lib/nav";
+import { activeIdFor, agentEntries, sidebarGroups, type NavEntry } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 const NAV_ICONS: Record<string, LucideIcon> = { overview: LayoutDashboard, context: FileText, products: Package, connections: Plug,
@@ -40,33 +40,24 @@ type Props = {
   features: readonly WebFeature[];
   /** The role's permissions on the active business: visibility only, the pages and API check them. */
   perms: readonly string[];
+  /** The role's permissions in the workspace (Hum's slot): visibility only. */
+  workspacePerms: readonly string[];
   user: { name?: string | null; email?: string | null; image?: string | null; roleLabel?: string | null };
 };
 
 const row =
   "flex items-center gap-3 rounded-2xl text-sm transition-colors active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-/** The sidebar entry a URL belongs to. Agents that point at a page or panel are selected by where you are; Echo's stand-in destination never is. */
-function activeIdFor(pathname: string, search: URLSearchParams) {
-  const panel = search.get("panel");
-  if (pathname === "/" && panel === "content") return "wave";
-  if (pathname === "/" && panel === "competitors") return "drift";
-  if (pathname === "/performance") return "surge";
-  // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
-  if (pathname === "/tasks") return search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
-  if (pathname === "/projects" || pathname.startsWith("/projects/")) return "beat";
-  if (pathname === "/crm" || pathname.startsWith("/crm/")) return "spark";
-  return navFor(pathname).activeId;
-}
-
-function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, perms, user }: Props) {
+function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, canCreateBrand, platformAdmin, features, perms, workspacePerms, user }: Props) {
   const pathname = usePathname();
   const search = useSearchParams();
-  const activeId = activeIdFor(pathname, search);
+  const agentList = agentEntries(features, perms, workspacePerms);
+  const liveAgents = new Set(agentList.filter((e) => !e.soon).map((e) => e.id));
+  const activeId = activeIdFor(pathname, search, liveAgents);
   // While a clicked link's page loads, mark where it goes at once; aria-current stays on the page you are on.
   const pending = usePendingHref();
   const pendingUrl = pending ? new URL(pending, "http://x") : null;
-  const shownId = pendingUrl ? activeIdFor(pendingUrl.pathname, pendingUrl.searchParams) : activeId;
+  const shownId = pendingUrl ? activeIdFor(pendingUrl.pathname, pendingUrl.searchParams, liveAgents) : activeId;
   const visible = (e: NavEntry) => !(e.soon && !e.href.startsWith("/agents/"));
   const isActive = (e: NavEntry) => activeId === e.id && visible(e);
   const isShown = (e: NavEntry) => shownId === e.id && visible(e);
@@ -100,7 +91,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
     if (refocus.current) links.current.get(refocus.current)?.focus();
     refocus.current = null;
   }, [order]);
-  const agents = applyOrder(agentEntries(features, perms), order);
+  const agents = applyOrder(agentList, order);
   const reorder = (from: number, to: number) => {
     const next = move(agents, from, to).map((e) => e.id);
     setOrder(next);

@@ -5,8 +5,10 @@ test.describe.configure({ mode: "serial" });
 
 const MAIN = ["Overview", "Business context", "Connections"];
 const AGENTS = ["Spark", "Beat", "Wave", "Echo", "Pulse", "Hum", "Surge", "Drift"];
-// lib/nav.ts: the four placeholder agents, plus Echo (no web inbox yet).
-const SOON = ["Spark", "Beat", "Echo", "Pulse", "Hum"];
+// lib/nav.ts, for the owner under any WEB_FEATURES: Echo is always Soon (no web inbox yet); Wave, Hum (the owner holds
+// members.read), Surge and Drift never are. Spark, Beat and Pulse depend on the tasks, crm and sales flags, so they are not checked.
+const SOON = ["Echo"];
+const LIVE = ["Wave", "Hum", "Surge", "Drift"];
 const CONNECT_BUTTON = /^(re)?connect\b|^disconnect\b/i;
 const MORE = ["Calendar", "SEO & GEO reports", "Agent log", "Settings"];
 
@@ -32,7 +34,7 @@ test.describe("owner", () => {
       const row = navLink(page, name);
       await expect(row).toBeVisible();
       if (SOON.includes(name)) await expect(row.getByText("Soon", { exact: true })).toBeVisible();
-      else await expect(row.getByText("Soon", { exact: true })).toHaveCount(0);
+      else if (LIVE.includes(name)) await expect(row.getByText("Soon", { exact: true })).toHaveCount(0);
     }
   });
 

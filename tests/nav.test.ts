@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NAV, agentEntries, navFor, sidebarGroups } from "@/lib/nav";
+import { NAV, activeIdFor, agentEntries, navFor, sidebarGroups } from "@/lib/nav";
 
 describe("NAV", () => {
   it("lists the agents in order", () => {
@@ -133,5 +133,62 @@ describe("tasks nav", () => {
     expect(navFor("/projects").title).toBe("Projects");
     expect(navFor("/projects/p1").title).toBe("Projects");
     expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("projects");
+  });
+});
+
+describe("agent slots", () => {
+  const slot = (id: string, f: Parameters<typeof agentEntries>[0], p?: string[]) => agentEntries(f, p).find((e) => e.id === id);
+
+  it("turns Pulse into the Sales tab only with the sales flag and crm.read", () => {
+    expect(slot("pulse", ["sales"], ["crm.read"])).toMatchObject({ href: "/performance?tab=sales", role: "Finance", soon: false });
+    expect(slot("pulse", ["sales"], ["brand.read"])).toMatchObject({ href: "/agents/pulse", soon: true });
+    expect(slot("pulse", [], ["crm.read"])).toMatchObject({ href: "/agents/pulse", soon: true });
+    // crm.manage opens /crm, not the Sales tab.
+    expect(slot("pulse", ["sales"], ["crm.manage"])).toMatchObject({ href: "/agents/pulse", soon: true });
+  });
+
+  it("turns Spark into /crm with the crm flag and crm.manage", () => {
+    expect(slot("spark", ["crm"], ["crm.manage"])).toMatchObject({ href: "/crm", soon: false });
+  });
+
+  it("turns Hum into Settings' Members tab with members.read in the workspace, no flag needed", () => {
+    const hum = (perms: string[] | undefined, workspacePerms: string[] | undefined) =>
+      agentEntries([], perms, workspacePerms).find((e) => e.id === "hum");
+    expect(hum(["brand.read"], ["members.read"])).toMatchObject({ href: "/settings?tab=members", role: "Admin & access", soon: false });
+    // No business picked: no business permissions, but the workspace's members.read still opens Members.
+    expect(hum([], ["members.read"])).toMatchObject({ href: "/settings?tab=members", soon: false });
+    expect(hum(["members.read"], ["brand.read"])).toMatchObject({ href: "/agents/hum", soon: true });
+    expect(hum(undefined, undefined)).toMatchObject({ href: "/settings?tab=members", soon: false });
+  });
+
+  it("keeps Echo coming soon: there is no web inbox page", () => {
+    expect(slot("echo", ["inbox"], ["inbox.read"])).toMatchObject({ soon: true });
+  });
+
+  it("resolves /settings and /performance to their pages in navFor, ignoring the tab query", () => {
+    expect(navFor("/settings").activeId).toBe("settings");
+    expect(navFor("/performance?tab=sales").activeId).toBe("performance");
+  });
+});
+
+describe("activeIdFor", () => {
+  const ALL_FLAGS = ["tasks", "crm", "sales", "inbox"] as const;
+  const ALL_PERMS = ["tasks.read", "crm.manage", "crm.read", "inbox.read", "members.read"];
+  const at = (href: string, live: ReadonlySet<string>) => {
+    const u = new URL(href, "http://x");
+    return activeIdFor(u.pathname, u.searchParams, live);
+  };
+
+  it("selects every live agent that points at a page, a tab or a panel on its own href", () => {
+    const entries = agentEntries([...ALL_FLAGS], ALL_PERMS, ALL_PERMS);
+    const live = new Set(entries.filter((e) => !e.soon).map((e) => e.id));
+    const pointing = entries.filter((e) => !e.soon && !e.href.startsWith("/agents/"));
+    expect(pointing.map((e) => e.id).sort()).toEqual(["beat", "drift", "hum", "pulse", "spark", "surge", "wave"]);
+    for (const e of pointing) expect(at(e.href, live), e.href).toBe(e.id);
+  });
+
+  it("falls back to the page while Pulse or Hum is not live", () => {
+    expect(at("/performance?tab=sales", new Set())).toBe("surge");
+    expect(at("/settings?tab=members", new Set())).toBe("settings");
   });
 });
