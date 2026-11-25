@@ -78,6 +78,7 @@ describe("sidebar while a page loads", () => {
     platformAdmin: false,
     features: [],
     perms: ["products.read"],
+    workspacePerms: [],
     user: { name: "Ana" },
   };
   const navLink = (html: string, label: string) => html.match(/<a [^>]*>(?:(?!<\/a>).)*<\/a>/g)?.find((a) => a.endsWith(`${label}</a>`)) ?? "";

@@ -25,7 +25,8 @@ export type NavEntry = {
 const TASKS_READ = ["tasks.read"] as const;
 const CRM_READ = ["crm.manage"] as const;
 /** The Sales tab on /performance (Pulse's slot) needs crm.read, not crm.manage. */
-const SALES_READ = ["crm.read"] as const;
+const PULSE_PERM = ["crm.read"] as const;
+/** A workspace permission: Settings' Members tab works with no business picked. */
 const MEMBERS_READ = ["members.read"] as const;
 
 export const NAV: readonly NavEntry[] = [
@@ -90,20 +91,41 @@ export function sidebarGroups(enabled: readonly WebFeature[], perms?: readonly s
 }
 
 /**
- * The agents as the sidebar lists them. With the tasks flag and tasks.read, Beat's "Projects & team" slot opens
- * Projects & tasks instead of its coming-soon page; with the crm flag and a CRM key, Spark's "Sales & CRM" slot opens /crm (crm.manage, who can open it);
- * with the sales flag and crm.read, Pulse opens the Sales tab of /performance; with members.read, Hum opens Settings' Members tab.
+ * The agents as the sidebar lists them; a slot opens a real page instead of its coming-soon one when:
+ * - Beat ("Projects & team"): the tasks flag and tasks.read, to Projects & tasks.
+ * - Spark ("Sales & CRM"): the crm flag and crm.manage (who can open /crm), to /crm.
+ * - Pulse ("Finance"): the sales flag and crm.read, to the Sales tab of /performance.
+ * - Hum ("Admin & access"): members.read in the workspace (`workspacePerms`), to Settings' Members tab.
  * Echo stays coming soon: there is no web inbox page yet.
+ * `perms`: the role's permissions on the business. Either list undefined: no filter (as in sidebarGroups), so with
+ * `workspacePerms` undefined Hum is live.
  */
-export function agentEntries(enabled: readonly WebFeature[], perms?: readonly string[]): NavEntry[] {
-  const holds = (keys: readonly string[]) => !perms || keys.some((p) => perms.includes(p));
-  const live: Partial<Record<string, Partial<NavEntry>>> = {
+export function agentEntries(enabled: readonly WebFeature[], perms?: readonly string[], workspacePerms?: readonly string[]): NavEntry[] {
+  const holds = (keys: readonly string[], list = perms) => !list || keys.some((p) => list.includes(p));
+  const overrides: Record<string, Partial<NavEntry> | undefined> = {
     beat: enabled.includes("tasks") && holds(TASKS_READ) ? { role: "Projects & tasks", href: "/tasks" } : undefined,
     spark: enabled.includes("crm") && holds(CRM_READ) ? { href: "/crm" } : undefined,
-    pulse: enabled.includes("sales") && holds(SALES_READ) ? { href: "/performance?tab=sales" } : undefined,
-    hum: holds(MEMBERS_READ) ? { href: "/settings?tab=members" } : undefined,
+    pulse: enabled.includes("sales") && holds(PULSE_PERM) ? { href: "/performance?tab=sales" } : undefined,
+    hum: holds(MEMBERS_READ, workspacePerms) ? { href: "/settings?tab=members" } : undefined,
   };
-  return NAV.filter((e) => e.group === "agent").map((e) => (live[e.id] ? { ...e, ...live[e.id], soon: false } : e));
+  return NAV.filter((e) => e.group === "agent").map((e) => (overrides[e.id] ? { ...e, ...overrides[e.id], soon: false } : e));
+}
+
+/**
+ * The sidebar entry a URL belongs to. Agents that point at a page, a tab or a panel are selected by where you are;
+ * Pulse and Hum (a tab of a page) only while `live` (ids of agents not coming soon) holds them.
+ */
+export function activeIdFor(pathname: string, search: { get(name: string): string | null }, live: ReadonlySet<string>): string | null {
+  const panel = search.get("panel");
+  if (pathname === "/" && panel === "content") return "wave";
+  if (pathname === "/" && panel === "competitors") return "drift";
+  if (pathname === "/performance") return search.get("tab") === "sales" && live.has("pulse") ? "pulse" : "surge";
+  if (pathname === "/settings" && search.get("tab") === "members" && live.has("hum")) return "hum";
+  // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
+  if (pathname === "/tasks") return search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
+  if (pathname === "/projects" || pathname.startsWith("/projects/")) return "beat";
+  if (pathname === "/crm" || pathname.startsWith("/crm/")) return "spark";
+  return navFor(pathname).activeId;
 }
 
 const hrefPath = (href: string) => href.split(/[?#]/)[0] || "/";

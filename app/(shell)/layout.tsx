@@ -30,6 +30,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
     platformAdmin: shell.isPlatformAdmin,
     features: featuresOn(workspaceId),
     perms: shell.brandPermissions,
+    workspacePerms: shell.workspacePermissions,
     user: { ...shell.user, roleLabel: shell.roleLabel },
   };
 
