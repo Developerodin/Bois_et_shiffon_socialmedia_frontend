@@ -17,6 +17,8 @@ type Props = {
   action?: ReactNode;
   /** "card": a solid card surface instead of the dashed outline, for an empty pane beside other cards (ListDetail). */
   variant?: "dashed" | "card";
+  /** An id for the heading, for focus to land on (useListSelection's closed() when nothing is left). */
+  headingId?: string;
 };
 
 export function EmptyState({
@@ -30,10 +32,12 @@ export function EmptyState({
   hideIcon = false,
   action,
   variant = "dashed",
+  headingId,
 }: Props) {
   const hero = size === "hero";
   return (
     <div
+      data-slot="empty-state"
       className={cn(
         "flex flex-col items-start gap-4 rounded-2xl border border-border",
         variant === "card" ? "bg-card shadow-sm" : "border-dashed",
@@ -58,6 +62,7 @@ export function EmptyState({
         </p>
       ) : null}
       <Heading
+        id={headingId}
         className={cn(
           "font-display font-medium tracking-tight text-foreground text-balance",
           hero ? "max-w-2xl text-4xl sm:text-5xl" : "text-xl",

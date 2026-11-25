@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
-import { ListCard, ListDetail, ListRow, useRevealSection } from "@/components/ui/list-detail";
+import { ListCard, ListDetail, ListRow, useListSelection } from "@/components/ui/list-detail";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,12 +60,10 @@ const BLOCK_TYPES: { value: ArticleBlock["type"]; label: string }[] = [
 export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms: string[]; taskId: string | null }) {
   const [articles, setArticles] = useState<BlogArticleDto[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [topic, setTopic] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const canCreate = perms.includes("content.create");
-  const { containerRef, reveal } = useRevealSection("article", selected);
+  const { selected, open, closed } = useListSelection({ item: "article", list: "articles-list", emptyHeadingId: "articles-empty-h" });
 
   const load = () => {
     setFailed(false);
@@ -74,27 +72,25 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
       () => setFailed(true),
     );
   };
+  // One request for every article: fine for the tens a blog has here; past a few hundred this wants the server's paging.
   // eslint-disable-next-line react-hooks/exhaustive-deps -- once; the board remounts on a brand switch
   useEffect(load, []);
 
   const put = (a: BlogArticleDto) => setArticles((list) => [a, ...(list ?? []).filter((x) => x.id !== a.id)]);
-  const open = (id: string, mode: "stacked" | "always" = "stacked") => {
-    if (id === selected) return;
-    reveal(mode);
-    setSelected(id);
-  };
+  /** True when the article was made. Focus moves to it when the control that started it goes away. */
   const create = async (body: { topic?: string; taskId?: string }) => {
-    // From the empty state the form goes away with it, so focus must move to the new article.
-    const fromEmpty = articles?.length === 0;
+    // The empty state (with its form) and "Start from the task" both unmount once the article exists.
+    const controlGone = articles?.length === 0 || !!body.taskId;
     setBusy(true);
     setError(null);
     try {
       const { article } = await blogApi.create(w, b, body);
       put(article);
-      open(article.id, fromEmpty ? "always" : "stacked");
-      setTopic("");
+      open(article.id, controlGone ? "always" : "if-hidden");
+      return true;
     } catch (e) {
       setError(errorMessage(e));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -114,19 +110,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
           </Button>
         </div>
       ) : null}
-      <form
-        className="flex w-full max-w-md gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (topic.trim()) void create({ topic: topic.trim() });
-        }}
-      >
-        <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="New article: its topic" maxLength={200} aria-label="New article topic" className="min-w-0 flex-1" />
-        <Button type="submit" size="sm" disabled={busy || !topic.trim()}>
-          <Plus aria-hidden="true" />
-          Add
-        </Button>
-      </form>
+      <NewArticleForm busy={busy} onCreate={(topic) => create({ topic })} />
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
     </div>
   ) : null;
@@ -136,6 +120,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
       <EmptyState
         icon={Newspaper}
         title="No articles yet"
+        headingId="articles-empty-h"
         description={
           canCreate
             ? "Start one from a topic, then write it with AI or by hand. Approved articles go to your Shopify blog hidden until you publish them."
@@ -146,7 +131,6 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
     );
   return (
     <ListDetail
-      containerRef={containerRef}
       list={
         <ListCard id="articles-list" title="Articles" description={`${articles.length} ${articles.length === 1 ? "article" : "articles"}`} top={starters}>
           {articles.map((a) => (
@@ -157,9 +141,33 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
           ))}
         </ListCard>
       }
-      detail={current ? <ArticleEditor key={current.id} w={w} b={b} article={current} perms={perms} onChange={put} onRemoved={() => setArticles((l) => (l ?? []).filter((x) => x.id !== current.id))} /> : null}
+      detail={
+        current ? (
+          <ArticleEditor key={current.id} w={w} b={b} article={current} perms={perms} onChange={put} onRemoved={() => (setArticles((l) => (l ?? []).filter((x) => x.id !== current.id)), closed())} />
+        ) : null
+      }
       placeholder={<EmptyState variant="card" icon={Newspaper} title="No article open" description={`Pick an article to read and edit it${canCreate ? ", or add one" : ""}.`} />}
     />
+  );
+}
+
+/** The topic field and Add: its own state, so typing re-renders only this form, not the list and the open article. */
+function NewArticleForm({ busy, onCreate }: { busy: boolean; onCreate(topic: string): Promise<boolean> }) {
+  const [topic, setTopic] = useState("");
+  return (
+    <form
+      className="flex w-full max-w-md gap-2"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (topic.trim() && (await onCreate(topic.trim()))) setTopic("");
+      }}
+    >
+      <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="New article: its topic" maxLength={200} aria-label="New article topic" className="min-w-0 flex-1" />
+      <Button type="submit" size="sm" disabled={busy || !topic.trim()}>
+        <Plus aria-hidden="true" />
+        Add
+      </Button>
+    </form>
   );
 }
 

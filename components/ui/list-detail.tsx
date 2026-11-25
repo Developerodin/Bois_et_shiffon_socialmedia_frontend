@@ -1,22 +1,17 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, type ReactNode, type RefObject } from "react";
-import { PageSection } from "@/components/ui/page-section";
+import { useCallback, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { focusSectionHeading, PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
 
 /**
- * The page column's width (rem) below which the list and the open item stack. It must match the `@3xl` (48rem) in
- * ListDetail's grid: the split follows the column, not the window, since the sidebar and assistant take part of a wide window.
- */
-const STACK_BELOW_REM = 48;
-
-/**
- * A list card beside the open item (Quotes, Blog): two panes from a 48rem page column, stacked below it. `placeholder`
+ * A list card beside the open item (Quotes, Blog): two panes from a 48rem page column (`@3xl`), stacked below it. The
+ * split follows the column, not the window, since the sidebar and assistant take part of a wide window. `placeholder`
  * shows in the detail pane while nothing is open (an EmptyState with `variant="card"`).
  */
-export function ListDetail({ containerRef, list, detail, placeholder }: { containerRef: RefObject<HTMLDivElement | null>; list: ReactNode; detail: ReactNode; placeholder: ReactNode }) {
+export function ListDetail({ list, detail, placeholder }: { list: ReactNode; detail: ReactNode; placeholder: ReactNode }) {
   return (
-    <div ref={containerRef} className="@container">
+    <div className="@container">
       {/* One shrinkable column when stacked: an implicit column would size to the longest row and run past a phone's edge. */}
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
         {list}
@@ -56,30 +51,58 @@ export function ListRow({ selected, onSelect, className, children }: { selected:
   );
 }
 
+/** The shell's top bar (h-18) covers the top of the scrolling page: a heading under it isn't in sight. */
+const TOP_BAR_PX = 72;
+/** A heading closer than this to the window's bottom edge counts as out of sight (its section starts below the fold). */
+const BOTTOM_MARGIN_PX = 96;
+
+type Pending = { kind: "open"; mode: "if-hidden" | "always" } | { kind: "closed" };
+
 /**
- * Takes the reader to the open item's section (`<id>-h`, a PageSection heading) after the render that shows it:
- * `reveal("stacked")` only when the panes are stacked (the item opened below the list), `reveal("always")` when the
- * control that held focus is gone (New quote in an empty state unmounts once the list exists). Scrolls the heading to
- * the top and focuses it without a second scroll. Pass the open item's id as `selected`.
+ * Which item of a ListDetail is open, and where the reader is taken after the render that shows the change:
+ * - `open(id)`: to the item's section heading (`<item>-h`) only when it is out of sight (stacked below the list, or a
+ *   low row on a long list), else nowhere, so a click in the list keeps its place.
+ * - `open(id, "always")`: always, for when the control that held focus is gone (an empty state, a step, a task button).
+ * - `closed()`: the item was deleted or archived; to the list's heading (`<list>-h`), or `emptyHeadingId` once nothing is left.
  */
-export function useRevealSection(id: string, selected: string | null) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const pending = useRef<"stacked" | "always" | null>(null);
+export function useListSelection({ item, list, emptyHeadingId }: { item: string; list: string; emptyHeadingId: string }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [tick, setTick] = useState(0);
+  const pending = useRef<Pending | null>(null);
   useLayoutEffect(() => {
-    const mode = pending.current;
+    const p = pending.current;
     pending.current = null;
-    if (!mode || !selected) return;
-    const heading = document.getElementById(`${id}-h`);
-    const box = containerRef.current;
-    if (!heading || !box) return;
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    if (mode === "stacked" && box.clientWidth >= STACK_BELOW_REM * rem) return;
-    heading.setAttribute("tabindex", "-1");
+    if (!p) return;
+    if (p.kind === "closed") {
+      const target = document.getElementById(`${list}-h`) ? list : null;
+      if (target) focusSectionHeading(target);
+      else {
+        const empty = document.getElementById(emptyHeadingId);
+        empty?.setAttribute("tabindex", "-1");
+        empty?.focus();
+      }
+      return;
+    }
+    const heading = document.getElementById(`${item}-h`);
+    if (!heading) return;
+    const top = heading.getBoundingClientRect().top;
+    if (p.mode === "if-hidden" && top >= TOP_BAR_PX && top <= window.innerHeight - BOTTOM_MARGIN_PX) return;
     heading.scrollIntoView({ block: "start" });
-    heading.focus({ preventScroll: true });
-  }, [id, selected]);
-  const reveal = useCallback((mode: "stacked" | "always") => {
-    pending.current = mode;
+    focusSectionHeading(item);
+  }, [item, list, emptyHeadingId, selected, tick]);
+  const open = useCallback(
+    (id: string, mode: "if-hidden" | "always" = "if-hidden") => {
+      if (id === selected && mode === "if-hidden") return;
+      pending.current = { kind: "open", mode };
+      setSelected(id);
+      setTick((t) => t + 1);
+    },
+    [selected],
+  );
+  const closed = useCallback(() => {
+    pending.current = { kind: "closed" };
+    setSelected(null);
+    setTick((t) => t + 1);
   }, []);
-  return { containerRef, reveal };
+  return { selected, open, closed };
 }

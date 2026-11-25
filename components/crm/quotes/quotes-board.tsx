@@ -15,7 +15,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { PageHeader } from "@/components/ui/page-header";
-import { ListCard, ListDetail, ListRow, useRevealSection } from "@/components/ui/list-detail";
+import { ListCard, ListDetail, ListRow, useListSelection } from "@/components/ui/list-detail";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,13 +52,12 @@ export const fromDraft = (lines: DraftLine[]): QuoteLineInput[] =>
 export function QuotesBoard({ w, b }: { w: string; b: string }) {
   const [quotes, setQuotes] = useState<QuoteDto[] | null>(null);
   const [failed, setFailed] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // The business has no currency yet (no Shopify shop currency, no earlier quote): ask once, then create with it.
   const [askCurrency, setAskCurrency] = useState(false);
   const [currencyError, setCurrencyError] = useState<string | null>(null);
-  const { containerRef, reveal } = useRevealSection("quote", selected);
+  const { selected, open, closed } = useListSelection({ item: "quote", list: "quotes-list", emptyHeadingId: "quotes-empty-h" });
 
   const load = () => {
     setFailed(false);
@@ -67,14 +66,10 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
       () => setFailed(true),
     );
   };
+  // One request for every quote: fine for the tens a business keeps; past a few hundred this wants the server's paging.
   // eslint-disable-next-line react-hooks/exhaustive-deps -- once; the board remounts on a brand switch
   useEffect(load, []);
   const put = (q: QuoteDto) => setQuotes((list) => [q, ...(list ?? []).filter((x) => x.id !== q.id)]);
-  const open = (id: string, mode: "stacked" | "always" = "stacked") => {
-    if (id === selected) return;
-    reveal(mode);
-    setSelected(id);
-  };
 
   /** Without `currency` the server takes the shop's or the business's earlier one; with neither it asks (quote.currency). */
   const create = async (currency?: string) => {
@@ -87,7 +82,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
       const { quote } = await quotesApi.create(w, b, currency ? { lines: [], currency } : { lines: [] });
       setAskCurrency(false);
       put(quote);
-      open(quote.id, moveFocus ? "always" : "stacked");
+      open(quote.id, moveFocus ? "always" : "if-hidden");
     } catch (e) {
       // A create without lines or a currency fails on quote.currency only when the business has no currency yet.
       if (!currency && e instanceof ApiError && e.code === "quote.currency") setAskCurrency(true);
@@ -99,27 +94,32 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   };
 
   const newQuote = (
-    <Button disabled={busy || !quotes || askCurrency} onClick={() => void create()}>
+    <Button disabled={busy || !quotes || askCurrency} aria-describedby={failed ? "quotes-load-error" : undefined} onClick={() => void create()}>
       <Plus aria-hidden="true" />
       {busy ? "Starting…" : "New quote"}
     </Button>
   );
   const current = quotes?.find((q) => q.id === selected) ?? null;
   let body: React.ReactNode;
-  if (failed) body = <LoadFailed what="the quotes" onRetry={load} />;
+  if (failed)
+    body = (
+      <div id="quotes-load-error">
+        <LoadFailed what="the quotes" onRetry={load} />
+      </div>
+    );
   else if (!quotes) body = <ListSkeleton label="Loading quotes" rows={3} />;
   else if (!quotes.length)
     body = (
       <EmptyState
         icon={FileText}
         title="No quotes yet"
+        headingId="quotes-empty-h"
         description="A quote lists products and prices for one customer. When it's ready it becomes a Shopify draft order, and the customer gets Shopify's invoice only when you send it. Start one with New quote above."
       />
     );
   else
     body = (
       <ListDetail
-        containerRef={containerRef}
         list={
           <ListCard id="quotes-list" title="All quotes" description={`${quotes.length} ${quotes.length === 1 ? "quote" : "quotes"}, newest change first`}>
             {quotes.map((q) => (
@@ -141,7 +141,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
             ))}
           </ListCard>
         }
-        detail={current ? <QuoteEditor key={current.id} w={w} b={b} quote={current} onChange={put} onRemoved={() => setQuotes((l) => (l ?? []).filter((x) => x.id !== current.id))} /> : null}
+        detail={current ? <QuoteEditor key={current.id} w={w} b={b} quote={current} onChange={put} onCancelled={(q) => (put(q), open(q.id, "always"))} onRemoved={() => (setQuotes((l) => (l ?? []).filter((x) => x.id !== current.id)), closed())} /> : null}
         placeholder={<EmptyState variant="card" icon={FileText} title="No quote open" description="Pick a quote to see and edit it, or start a new one." />}
       />
     );
@@ -227,10 +227,11 @@ function CurrencyStep({ busy, error, onCreate, onCancel }: { busy: boolean; erro
 
 const SHORT_DATE = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
 /**
- * A quote line's columns on a wide editor column (item, quantity, unit price, Remove), shared by the column heads and
- * the rows. 5.5rem is the ghost "Remove" button at size sm; change both together.
+ * The quote lines' columns once the editor's own column is wide (`@lg`): item, quantity, unit price, Remove. Shared by
+ * the column heads and every row so they line up. 5.5rem is the width of the ghost "Remove" button at size sm: change
+ * one with the other. Narrower, rows stack (the item on its own row) and there are no heads.
  */
-const LINE_COLS = "@lg:grid-cols-[minmax(0,1fr)_5rem_7rem_5.5rem]";
+const LINE_COLS_WIDE = "@lg:grid-cols-[minmax(0,1fr)_5rem_7rem_5.5rem]";
 
 /** What a person is asked before deleting or cancelling: a sent quote's invoice stays payable in Shopify. */
 export function cancelQuestion(q: Pick<QuoteDto, "status" | "shopifyName">) {
@@ -244,7 +245,7 @@ export function subtotalNotice(q: Pick<QuoteDto, "subtotalDiffers" | "shopifySub
   return q.subtotalDiffers ? `Shopify's subtotal is ${q.shopifySubtotal} ${q.currency}; ours is ${q.totals.total} ${q.currency}.` : null;
 }
 
-function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: string; quote: QuoteDto; onChange(q: QuoteDto): void; onRemoved(): void }) {
+function QuoteEditor({ w, b, quote, onChange, onCancelled, onRemoved }: { w: string; b: string; quote: QuoteDto; onChange(q: QuoteDto): void; onCancelled(q: QuoteDto): void; onRemoved(): void }) {
   const editable = quote.status === "DRAFT" || quote.status === "CREATED";
   const reset = (q: QuoteDto) => ({
     contactName: q.contactName ?? "",
@@ -352,7 +353,8 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
                   const out = await quotesApi.remove(w, b, quote.id);
                   if (draft || !out) onRemoved();
                   else {
-                    onChange(out.quote);
+                    // Its Cancel button is gone now (a cancelled quote has none): focus goes to the quote's heading.
+                    onCancelled(out.quote);
                     setInfo(out.notice);
                   }
                 } catch (e) {
@@ -401,7 +403,7 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
             <fieldset className="flex min-w-0 flex-col gap-3">
               <legend className="mb-1.5 text-sm text-muted-foreground">Lines ({form.lines.length} of 100)</legend>
               {form.lines.length ? (
-                <div className={cn("hidden gap-2 text-xs text-muted-foreground @lg:grid", LINE_COLS)} aria-hidden="true">
+                <div className={cn("hidden gap-2 text-xs text-muted-foreground @lg:grid", LINE_COLS_WIDE)} aria-hidden="true">
                   <span>Item</span>
                   <span>Qty</span>
                   <span>Unit price ({quote.currency})</span>
@@ -413,7 +415,7 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
                 <div className="flex flex-col gap-3">
                   {form.lines.map((l, i) => (
                     // Narrow: the title on its own row, then quantity, price and Remove; wide: one row under the column heads.
-                    <div key={i} className={cn("grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0 @lg:border-b-0 @lg:pb-0", LINE_COLS)}>
+                    <div key={i} className={cn("grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0 @lg:border-b-0 @lg:pb-0", LINE_COLS_WIDE)}>
                       <Input className="col-span-3 @lg:col-span-1" value={l.title} onChange={(e) => setLine(i, { title: e.target.value })} maxLength={255} aria-label="Line title" placeholder="Item" required />
                       <Input value={l.quantity} onChange={(e) => setLine(i, { quantity: e.target.value })} inputMode="numeric" aria-label="Quantity" required />
                       <Input value={l.unitPrice} onChange={(e) => setLine(i, { unitPrice: e.target.value })} inputMode="decimal" aria-label={`Unit price (${quote.currency})`} placeholder={quote.currency} required />
