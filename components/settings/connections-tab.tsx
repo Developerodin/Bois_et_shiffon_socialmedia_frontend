@@ -129,16 +129,18 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
           const accounts = state.data.connections.filter((c) => c.provider === p.provider && !gone.has(c.id));
           return (
             <li key={p.provider} className="flex flex-col gap-3 px-5 py-4">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              {/* Stacked on a phone (description, then the action); side by side from 640 px. */}
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between sm:gap-4">
                 <div className="min-w-0">
                   <p className="font-medium">{p.label}</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">{PURPOSE[p.provider]}</p>
+                  {/* Under the description, so it wraps with it instead of squeezing a narrow column beside it. */}
+                  {!p.configured ? (
+                    <p className="mt-1 text-xs text-muted-foreground">Needs app keys on the server. Ask your platform admin.</p>
+                  ) : null}
                 </div>
                 {!p.configured ? (
-                  <div className="flex flex-col items-end gap-1 text-right">
-                    <StatusBadge tone="muted">Not set up</StatusBadge>
-                    <span className="text-xs text-muted-foreground">Needs app keys on the server. Ask your platform admin.</span>
-                  </div>
+                  <StatusBadge tone="muted" className="shrink-0">Not set up</StatusBadge>
                 ) : canManage ? (
                   <Button
                     size="sm"
@@ -159,7 +161,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
                       : "flex flex-wrap items-center justify-between gap-3 rounded-xl border border-transparent bg-muted/40 px-4 py-2.5"
                   }
                 >
-                  <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                     <StatusBadge tone={c.status === "ACTIVE" ? "good" : "bad"}>
                       {c.status === "ACTIVE" ? "Connected" : "Needs reconnect"}
                     </StatusBadge>

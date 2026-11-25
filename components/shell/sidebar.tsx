@@ -8,6 +8,7 @@ import { Camera, Clapperboard, FileText, Globe, Images, Inbox, LayoutDashboard, 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { finishNavigation, usePendingHref } from "@/components/nav/nav-progress";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
+import { useWide } from "@/components/shell/assistant-state";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
 import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -136,7 +137,8 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
           ) : null}
         </nav>
       ) : (
-      <nav aria-label="Workspace" className="mt-6 min-h-0 flex-1 overflow-y-auto pb-4">
+      // pb-6 matches the 24 px fade at the bottom edge: rows fade out under the footer mid-scroll, and the last one clears it at the end.
+      <nav aria-label="Workspace" className="mt-6 min-h-0 flex-1 overflow-y-auto scroll-pb-6 pb-6 [mask-image:linear-gradient(to_bottom,#000_calc(100%-1.5rem),transparent)]">
         {sidebarGroups(features, perms).map((g) => (
           <div key={g.id} className={g.label ? "mt-6" : undefined}>
             {g.label ? <p className="mb-2 px-5 text-xs text-muted-foreground">{g.label}</p> : null}
@@ -148,7 +150,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     <Link
                       href={e.href}
                       aria-current={isActive(e) ? "page" : undefined}
-                      className={cn(row, "h-12 px-3", isShown(e) ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+                      className={cn(row, "h-10 px-3 pointer-coarse:h-12", isShown(e) ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
                     >
                       {Icon ? <Icon className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : null}
                       {e.label}
@@ -195,7 +197,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     refocus.current = e.id;
                     reorder(i, ev.key === "ArrowUp" ? i - 1 : i + 1);
                   }}
-                  className={cn(row, "h-[52px] px-2", isShown(e) ? "bg-accent" : "hover:bg-muted")}
+                  className={cn(row, "h-11 px-2 pointer-coarse:h-[52px]", isShown(e) ? "bg-accent" : "hover:bg-muted")}
                 >
                   <Image src={`/agents/${e.id}.svg`} alt="" width={36} height={36} draggable={false} className="size-9 shrink-0" />
                   <span className="min-w-0 flex-1">
@@ -232,25 +234,30 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
   );
 }
 
-/** Desktop (768 px and up): the fixed sidebar. Below that the same body lives in MobileNav's sheet. */
+/** From 1280 px up: the fixed sidebar. Below that (phones and tablets) the same body lives in MobileNav's sheet, so the page keeps the width. */
 export function Sidebar(props: Props) {
   return (
-    <aside aria-label="Sidebar" className="hidden h-full w-[232px] shrink-0 flex-col bg-card md:flex">
+    <aside aria-label="Sidebar" className="hidden h-full w-[232px] shrink-0 flex-col bg-card xl:flex">
       <SidebarBody {...props} />
     </aside>
   );
 }
 
-/** Below 768 px: a Menu button in the top bar that opens the sidebar body as a left sheet, closed again on navigation. */
+/** Below 1280 px: a Menu button in the top bar that opens the sidebar body as a left sheet, closed again on navigation. */
 export function MobileNav(props: Props) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   useEffect(() => setOpen(false), [pathname]);
+  // Grown to 1280 px the docked sidebar is back: close the sheet, or the nav shows twice.
+  const wide = useWide();
+  useEffect(() => {
+    if (wide) setOpen(false);
+  }, [wide]);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger className={cn(tool, "md:hidden")}>
+      <SheetTrigger className={cn(tool, "xl:hidden")}>
         <Menu className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
-        <span className="sr-only sm:not-sr-only">Menu</span>
+        <span className="sr-only lg:not-sr-only">Menu</span>
       </SheetTrigger>
       <SheetContent
         side="left"
