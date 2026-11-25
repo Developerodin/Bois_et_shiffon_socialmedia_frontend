@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -12,6 +13,8 @@ type Props = {
   headingLevel?: "h1" | "h2";
   /** Leave out the icon tile when the page shows its own artwork. */
   hideIcon?: boolean;
+  /** The one next step, under the description (a primary Button, or a small form). */
+  action?: ReactNode;
 };
 
 export function EmptyState({
@@ -23,6 +26,7 @@ export function EmptyState({
   className,
   headingLevel: Heading = "h2",
   hideIcon = false,
+  action,
 }: Props) {
   const hero = size === "hero";
   return (
@@ -65,6 +69,7 @@ export function EmptyState({
       >
         {description}
       </p>
+      {action ? <div className="flex flex-wrap items-center gap-2">{action}</div> : null}
     </div>
   );
 }
