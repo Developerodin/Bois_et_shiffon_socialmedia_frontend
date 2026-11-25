@@ -15,7 +15,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { PageHeader } from "@/components/ui/page-header";
-import { focusSectionHeading, PageSection } from "@/components/ui/page-section";
+import { ListCard, ListDetail, ListRow, useRevealSection } from "@/components/ui/list-detail";
+import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -54,6 +55,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { containerRef, reveal } = useRevealSection("quote", selected);
 
   const load = () => {
     setFailed(false);
@@ -65,22 +67,21 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- once; the board remounts on a brand switch
   useEffect(load, []);
   const put = (q: QuoteDto) => setQuotes((list) => [q, ...(list ?? []).filter((x) => x.id !== q.id)]);
-  const open = (id: string) => {
+  const open = (id: string, mode: "stacked" | "always" = "stacked") => {
+    if (id === selected) return;
+    reveal(mode);
     setSelected(id);
-    // Stacked (a narrow page), the quote opens below the list, out of sight: take the reader there.
-    requestAnimationFrame(() => {
-      const top = document.getElementById("quote-h")?.getBoundingClientRect().top;
-      if (top !== undefined && (top < 0 || top > window.innerHeight - 80)) focusSectionHeading("quote");
-    });
   };
 
   const create = async () => {
+    // From the empty state the button goes away with it, so focus must move to the new quote.
+    const fromEmpty = quotes?.length === 0;
     setBusy(true);
     setError(null);
     try {
       const { quote } = await quotesApi.create(w, b, { lines: [] });
       put(quote);
-      open(quote.id);
+      open(quote.id, fromEmpty ? "always" : "stacked");
     } catch (e) {
       setError(errorMessage(e));
     } finally {
@@ -89,7 +90,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   };
 
   const newQuote = (
-    <Button disabled={busy} onClick={create}>
+    <Button disabled={busy || !quotes} onClick={create}>
       <Plus aria-hidden="true" />
       {busy ? "Starting…" : "New quote"}
     </Button>
@@ -109,57 +110,39 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
     );
   else
     body = (
-      // Split on the page column's own width, not the window's: the sidebar and the assistant take part of a wide window.
-      <div className="@container">
-        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
-          <PageSection id="quotes-list" title="All quotes" description={`${quotes.length} ${quotes.length === 1 ? "quote" : "quotes"}, newest change first`} className="px-0 py-2">
-            <ul className="flex flex-col">
-              {quotes.map((q) => (
-                <li key={q.id}>
-                  <button
-                    type="button"
-                    aria-current={q.id === selected ? "true" : undefined}
-                    onClick={() => open(q.id)}
-                    className={cn(
-                      "flex w-full flex-col gap-1 px-5 py-3 text-left text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring pointer-coarse:py-3.5",
-                      q.id === selected && "bg-accent hover:bg-accent",
-                    )}
-                  >
-                    <span className="flex w-full items-center justify-between gap-2">
-                      <span className="min-w-0 truncate">
-                        <span className="font-medium">{q.number}</span>
-                        <span className="text-muted-foreground"> · {q.contactName ?? "No contact yet"}</span>
-                      </span>
-                      <StatusBadge status={q.status}>{QUOTE_STATUS_LABEL[q.status]}</StatusBadge>
-                    </span>
-                    <span className="flex w-full items-center justify-between gap-2 text-xs text-muted-foreground">
-                      <span className="font-medium tabular-nums text-foreground">
-                        {q.totals.total} {q.currency}
-                      </span>
-                      <time dateTime={q.updatedAt}>{SHORT_DATE.format(new Date(q.updatedAt))}</time>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </PageSection>
-          {current ? (
-            <QuoteEditor key={current.id} w={w} b={b} quote={current} onChange={put} onRemoved={() => setQuotes((l) => (l ?? []).filter((x) => x.id !== current.id))} />
-          ) : (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card px-5 py-16 text-center shadow-sm">
-              <span className="inline-flex size-10 items-center justify-center rounded-full border border-border bg-muted text-primary" aria-hidden="true">
-                <FileText className="size-4" />
-              </span>
-              <p className="text-sm text-muted-foreground">Pick a quote to see and edit it, or start a new one.</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <ListDetail
+        containerRef={containerRef}
+        list={
+          <ListCard id="quotes-list" title="All quotes" description={`${quotes.length} ${quotes.length === 1 ? "quote" : "quotes"}, newest change first`}>
+            {quotes.map((q) => (
+              <ListRow key={q.id} selected={q.id === selected} onSelect={() => open(q.id)} className="flex-col gap-1">
+                <span className="flex w-full items-center justify-between gap-2">
+                  <span className="min-w-0 truncate">
+                    <span className="font-medium">{q.number}</span>
+                    <span className="text-muted-foreground"> · {q.contactName ?? "No contact yet"}</span>
+                  </span>
+                  <StatusBadge status={q.status}>{QUOTE_STATUS_LABEL[q.status]}</StatusBadge>
+                </span>
+                <span className="flex w-full items-center justify-between gap-2 text-xs text-muted-foreground">
+                  <span className="font-medium tabular-nums text-foreground">
+                    {q.totals.total} {q.currency}
+                  </span>
+                  <time dateTime={q.updatedAt}>{SHORT_DATE.format(new Date(q.updatedAt))}</time>
+                </span>
+              </ListRow>
+            ))}
+          </ListCard>
+        }
+        detail={current ? <QuoteEditor key={current.id} w={w} b={b} quote={current} onChange={put} onRemoved={() => setQuotes((l) => (l ?? []).filter((x) => x.id !== current.id))} /> : null}
+        placeholder={<EmptyState variant="card" icon={FileText} title="No quote open" description="Pick a quote to see and edit it, or start a new one." />}
+      />
     );
 
+  // The board owns the page header (Blog's page keeps its own): New quote needs the board's state. It is always there,
+  // disabled until the list has loaded, so the header doesn't shift and the button stays after a failed load.
   return (
     <>
-      <PageHeader title="Quotes" actions={quotes?.length ? newQuote : null}>
+      <PageHeader title="Quotes" actions={newQuote}>
         Quotes become Shopify draft orders when you say so. The customer gets Shopify&rsquo;s invoice email only when you send it.
       </PageHeader>
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
@@ -169,6 +152,11 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
 }
 
 const SHORT_DATE = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
+/**
+ * A quote line's columns on a wide editor column (item, quantity, unit price, Remove), shared by the column heads and
+ * the rows. 5.5rem is the ghost "Remove" button at size sm; change both together.
+ */
+const LINE_COLS = "@lg:grid-cols-[minmax(0,1fr)_5rem_7rem_5.5rem]";
 
 /** What a person is asked before deleting or cancelling: a sent quote's invoice stays payable in Shopify. */
 export function cancelQuestion(q: Pick<QuoteDto, "status" | "shopifyName">) {
@@ -339,7 +327,7 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
             <fieldset className="flex min-w-0 flex-col gap-3">
               <legend className="mb-1.5 text-sm text-muted-foreground">Lines ({form.lines.length} of 100)</legend>
               {form.lines.length ? (
-                <div className="hidden grid-cols-[minmax(0,1fr)_5rem_7rem_5.5rem] gap-2 text-xs text-muted-foreground @lg:grid" aria-hidden="true">
+                <div className={cn("hidden gap-2 text-xs text-muted-foreground @lg:grid", LINE_COLS)} aria-hidden="true">
                   <span>Item</span>
                   <span>Qty</span>
                   <span>Unit price ({quote.currency})</span>
@@ -349,17 +337,17 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
               )}
               {form.lines.length ? (
                 <div className="flex flex-col gap-3">
-                {form.lines.map((l, i) => (
-                  // Narrow: the title on its own row, then quantity, price and Remove; wide: one row under the column heads.
-                  <div key={i} className="grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0 @lg:grid-cols-[minmax(0,1fr)_5rem_7rem_5.5rem] @lg:border-b-0 @lg:pb-0">
-                    <Input className="col-span-3 @lg:col-span-1" value={l.title} onChange={(e) => setLine(i, { title: e.target.value })} maxLength={255} aria-label="Line title" placeholder="Item" required />
-                    <Input value={l.quantity} onChange={(e) => setLine(i, { quantity: e.target.value })} inputMode="numeric" aria-label="Quantity" required />
-                    <Input value={l.unitPrice} onChange={(e) => setLine(i, { unitPrice: e.target.value })} inputMode="decimal" aria-label={`Unit price (${quote.currency})`} placeholder={quote.currency} required />
-                    <Button type="button" size="sm" variant="ghost" onClick={() => edit({ lines: form.lines.filter((_, j) => j !== i) })}>
-                      Remove
-                    </Button>
-                  </div>
-                ))}
+                  {form.lines.map((l, i) => (
+                    // Narrow: the title on its own row, then quantity, price and Remove; wide: one row under the column heads.
+                    <div key={i} className={cn("grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0 @lg:border-b-0 @lg:pb-0", LINE_COLS)}>
+                      <Input className="col-span-3 @lg:col-span-1" value={l.title} onChange={(e) => setLine(i, { title: e.target.value })} maxLength={255} aria-label="Line title" placeholder="Item" required />
+                      <Input value={l.quantity} onChange={(e) => setLine(i, { quantity: e.target.value })} inputMode="numeric" aria-label="Quantity" required />
+                      <Input value={l.unitPrice} onChange={(e) => setLine(i, { unitPrice: e.target.value })} inputMode="decimal" aria-label={`Unit price (${quote.currency})`} placeholder={quote.currency} required />
+                      <Button type="button" size="sm" variant="ghost" onClick={() => edit({ lines: form.lines.filter((_, j) => j !== i) })}>
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               ) : null}
               <div className="flex flex-col gap-2 rounded-xl bg-muted/50 p-3 @lg:flex-row @lg:items-center">
@@ -428,7 +416,7 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
         <section aria-labelledby="quote-preview-h" className="flex flex-col gap-2">
           <h3 id="quote-preview-h" className="text-xs font-medium text-muted-foreground">What the customer sees</h3>
           <div className="overflow-x-auto rounded-xl border border-border p-4">
-            <QuoteSheet quote={quote} />
+            <QuoteSheet quote={quote} headingLevel="h4" />
           </div>
         </section>
       </div>

@@ -1,14 +1,17 @@
 import type { QuoteDto } from "@/shared";
 
-/** The quote as the customer would read it: lines, discount and totals as the server worked them out. Also the print view. */
-export function QuoteSheet({ quote, brand }: { quote: QuoteDto; brand?: string }) {
+/**
+ * The quote as the customer would read it: lines, discount and totals as the server worked them out. Also the print view.
+ * `headingLevel`: h2 on its own page (print); embedded under another heading (the editor's preview), the level below it.
+ */
+export function QuoteSheet({ quote, brand, headingLevel: Heading = "h2" }: { quote: QuoteDto; brand?: string; headingLevel?: "h2" | "h3" | "h4" }) {
   const m = (amount: string) => `${amount} ${quote.currency}`;
   return (
     <div className="flex flex-col gap-4 text-sm">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-xl font-semibold">
+        <Heading className="text-xl font-semibold">
           {brand ? `${brand}: quote ${quote.number}` : `Quote ${quote.number}`}
-        </h2>
+        </Heading>
         <span className="text-muted-foreground">{quote.validUntil ? `Valid until ${quote.validUntil}` : "Draft"}</span>
       </div>
       {quote.contactName || quote.contactEmail ? <p>For {[quote.contactName, quote.contactEmail].filter(Boolean).join(", ")}</p> : null}
