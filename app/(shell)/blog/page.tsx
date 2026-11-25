@@ -20,7 +20,7 @@ export default async function BlogRoute({ searchParams }: { searchParams: Promis
   const shell = await getShell(); // cached: featureAccess read it already
   const task = (await searchParams).task;
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-8">
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
       <PageHeader title="Blog">Articles for the store&rsquo;s blog. Approved ones go to Shopify hidden; nobody sees them there until you press Publish.</PageHeader>
       <BlogBoard key={access.brandId} w={access.workspaceId} b={access.brandId} perms={shell.brandPermissions} taskId={typeof task === "string" && task.length <= 40 ? task : null} />
     </div>

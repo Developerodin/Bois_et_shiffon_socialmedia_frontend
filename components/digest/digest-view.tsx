@@ -1,3 +1,5 @@
+import { Mail } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { DigestDto, DigestSection } from "@/shared";
 
 const n = (v: number) => v.toLocaleString("en-GB");
@@ -71,19 +73,20 @@ function SectionBody({ s }: { s: DigestSection }) {
 
 /** The weekly digests as the server sent them (already filtered by what the reader may see now). */
 export function DigestView({ digests }: { digests: DigestDto[] }) {
-  if (!digests.length) return <p className="text-sm text-muted-foreground">Your first digest arrives on Monday.</p>;
+  if (!digests.length)
+    return <EmptyState icon={Mail} title="No digest yet" description="Your first digest arrives on Monday: last week for each business you work on, as far as your role can see." />;
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-8">
       {digests.map((d) => (
-        <section key={d.id} aria-labelledby={`digest-${d.id}`} className="flex flex-col gap-4">
-          <h2 id={`digest-${d.id}`} className="text-base font-semibold">
+        <section key={d.id} aria-labelledby={`digest-${d.id}`} className="flex flex-col gap-3">
+          <h2 id={`digest-${d.id}`} className="font-display text-lg font-medium">
             Week of {d.weekStart}
           </h2>
-          {d.body.brands.length === 0 && <p className="text-sm text-muted-foreground">Nothing you can still see in this week.</p>}
+          {d.body.brands.length === 0 && <p className="rounded-2xl border border-dashed border-border px-5 py-6 text-sm text-muted-foreground">Nothing you can still see in this week.</p>}
           {d.body.brands.map((b) => (
-            <article key={b.brandId} className="rounded-xl border border-border p-5">
-              <h3 className="font-medium">
-                {b.brandName}{" "}
+            <article key={b.brandId} className="min-w-0 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+              <h3 className="flex flex-wrap items-baseline gap-x-2 font-medium break-words">
+                {b.brandName}
                 <span className="text-xs font-normal text-muted-foreground">
                   {b.week.from} to {b.week.to}
                 </span>
