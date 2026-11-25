@@ -14,8 +14,10 @@ PLAYWRIGHT_CHANNEL=msedge npx playwright test e2e/shell.spec.ts
 
 Every spec in this folder needs these, `shell-smoke.spec.ts` included, because the global setup signs in before any spec runs.
 
+`E2E_ROLES` (comma-separated: `owner`, `viewer`, `admin`) signs in only those roles, for a run of specs that need no others: `E2E_ROLES=owner npx playwright test e2e/new-screens.spec.ts`. Unset, all three sign in.
+
 Put these six values in the server repo's `.env` (git-ignored; global-setup takes only the `E2E_*` names from it) or the shell.
-There are no defaults: a missing value stops the run. Never commit them.
+There are no defaults: a missing value stops the run. Never commit them. Quote a value that contains `#` (`E2E_OWNER_PASSWORD='pa#ss'`): unquoted, the `.env` reader takes `#` as the start of a comment and signs in with the text before it.
 
 | Variable | Account |
 | --- | --- |
