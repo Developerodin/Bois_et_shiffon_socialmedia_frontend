@@ -83,6 +83,7 @@ export function DigestView({ digests }: { digests: DigestDto[] }) {
             Week of {d.weekStart}
           </h2>
           {d.body.brands.length === 0 && <p className="rounded-2xl border border-dashed border-border px-5 py-6 text-sm text-muted-foreground">Nothing you can still see in this week.</p>}
+          {/* Cards by hand, not PageSection: a brand sits under its week's h2, so its title is an h3 (PageSection's is an h2). */}
           {d.body.brands.map((b) => (
             <article key={b.brandId} className="min-w-0 rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
               <h3 className="flex flex-wrap items-baseline gap-x-2 font-medium break-words">

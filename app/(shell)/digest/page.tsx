@@ -15,7 +15,7 @@ export default async function DigestPage() {
   requireFeature("digest", shell.activeWorkspaceId);
   if (!shell.activeWorkspaceId) {
     return (
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-4xl">
         <EmptyState size="hero" icon={Mail} headingLevel="h1" title="Weekly digest" description="Digests belong to a workspace. Pick one from the menu, then its digests show here." />
       </div>
     );
