@@ -28,7 +28,7 @@ export default async function QuotePrintRoute({ params }: { params: Promise<{ id
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6" data-print-root>
       <PrintButton />
-      <QuoteSheet quote={quote} brand={brand} />
+      <QuoteSheet quote={quote} brand={brand} headingLevel="h1" />
     </div>
   );
 }

@@ -2,9 +2,9 @@ import type { QuoteDto } from "@/shared";
 
 /**
  * The quote as the customer would read it: lines, discount and totals as the server worked them out. Also the print view.
- * `headingLevel`: h2 on its own page (print); embedded under another heading (the editor's preview), the level below it.
+ * `headingLevel`: h1 as the print page's only heading; embedded under another heading (the editor's preview), the level below it.
  */
-export function QuoteSheet({ quote, brand, headingLevel: Heading = "h2" }: { quote: QuoteDto; brand?: string; headingLevel?: "h2" | "h3" | "h4" }) {
+export function QuoteSheet({ quote, brand, headingLevel: Heading = "h2" }: { quote: QuoteDto; brand?: string; headingLevel?: "h1" | "h2" | "h3" | "h4" }) {
   const m = (amount: string) => `${amount} ${quote.currency}`;
   return (
     <div className="flex flex-col gap-4 text-sm">
