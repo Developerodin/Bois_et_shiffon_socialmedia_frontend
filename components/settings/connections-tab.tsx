@@ -376,7 +376,7 @@ function ShopifyDialog({
                   onChange={(e) => setAskCartShop(e.target.value)}
                   placeholder="your-store.myshopify.com"
                   maxLength={200}
-                  aria-label="Store address"
+                  aria-label="Store address for AskCart"
                 />
               ) : null}
               <Button type="submit" disabled={busy} className="self-start">
@@ -388,7 +388,7 @@ function ShopifyDialog({
             <form onSubmit={connectMcp} className="flex flex-col gap-3 rounded-xl border border-border p-4 text-sm">
               <div>
                 <p className="font-medium">Connect with Shopify MCP</p>
-                <p className="text-muted-foreground">
+                <p id="shopify-mcp-hint" className="text-muted-foreground">
                   Reads your products, prices and stock from your store&apos;s public catalogue. Nothing to install. Orders need our app
                   (AskCart). Enter the store&apos;s .myshopify.com address or its own domain.
                 </p>
@@ -401,6 +401,7 @@ function ShopifyDialog({
                 placeholder="your-store.myshopify.com"
                 maxLength={200}
                 aria-label="Store address for Shopify MCP"
+                aria-describedby="shopify-mcp-hint"
               />
               <Button type="submit" variant="outline" disabled={busy} className="self-start">
                 {busy ? "Checking…" : "Connect with Shopify MCP"}

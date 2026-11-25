@@ -81,7 +81,7 @@ test.describe("owner", () => {
     await page.locator("li", { has: page.getByText("Shopify", { exact: true }) }).getByRole("button", { name: /^(re)?connect$/i }).click();
     const dialog = page.getByRole("dialog", { name: "Connect Shopify" });
     await expect(dialog).toBeVisible();
-    await dialog.getByLabel("Store address").fill("evil.example.com");
+    await dialog.getByLabel("Store address", { exact: true }).fill("evil.example.com");
     await dialog.getByLabel("Admin API access token").fill("shpat_not_a_real_token");
     await dialog.getByRole("button", { name: "Connect" }).click();
     await expect(dialog.getByText(/myshopify\.com/i).last()).toBeVisible();
