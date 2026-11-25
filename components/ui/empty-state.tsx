@@ -15,6 +15,8 @@ type Props = {
   hideIcon?: boolean;
   /** The one next step, under the description (a primary Button, or a small form). */
   action?: ReactNode;
+  /** "card": a solid card surface instead of the dashed outline, for an empty pane beside other cards (ListDetail). */
+  variant?: "dashed" | "card";
 };
 
 export function EmptyState({
@@ -27,12 +29,14 @@ export function EmptyState({
   headingLevel: Heading = "h2",
   hideIcon = false,
   action,
+  variant = "dashed",
 }: Props) {
   const hero = size === "hero";
   return (
     <div
       className={cn(
-        "flex flex-col items-start gap-4 rounded-2xl border border-dashed border-border",
+        "flex flex-col items-start gap-4 rounded-2xl border border-border",
+        variant === "card" ? "bg-card shadow-sm" : "border-dashed",
         hero ? "surface-glow px-8 py-16 sm:px-12 sm:py-24" : "px-6 py-10",
         className,
       )}
