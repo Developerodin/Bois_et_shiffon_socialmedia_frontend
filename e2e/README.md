@@ -15,7 +15,7 @@ PLAYWRIGHT_CHANNEL=msedge npx playwright test e2e/shell.spec.ts
 The global setup signs in before any spec runs, so every run needs the values for each role it signs in, `shell-smoke.spec.ts` included.
 
 `E2E_ROLES` (comma-separated: `owner`, `viewer`, `admin`) signs in only those roles, for a run of specs that need no others: `E2E_ROLES=owner npx playwright test e2e/new-screens.spec.ts`. Unset, all three sign in. The saved sessions of roles left out are deleted.
-`E2E_REUSE_AUTH=1` uses a role's saved session again when it is less than 12 hours old instead of signing in (login is rate-limited).
+`E2E_REUSE_AUTH=1` uses a role's saved session again when it is less than 12 hours old instead of signing in (login is rate-limited); a saved session the server has ended is noticed and signed in again once. Delete `e2e/.auth/` to force a fresh sign-in.
 Both are read from the shell only, never from the server's `.env`.
 
 Put the values in the server repo's `.env` (git-ignored; global-setup takes only the `E2E_*` names from it) or the shell.
@@ -41,6 +41,6 @@ database host is listed: set `SEED_ALLOW_DB_HOSTS=<host of DATABASE_URL>` in the
 
 `new-screens.spec.ts` (owner only) checks Quotes, Blog, the weekly digest, the Sales tab, the Shopify connect dialog and the Pulse and Hum
 slots at 390, 820 and 1500 px. It writes nothing: fixed lists are answered in the browser. Blog and the digest are skipped while their
-flags (`blog`, `digest` in the website's `WEB_FEATURES`) are off. Its screenshots go to `e2e/screenshots/` (git-ignored).
+flags (`blog`, `digest` in the website's `WEB_FEATURES`, read from the shell or its env files) are off; any other not-found page, or landing on the sign-in page, fails. Its screenshots go to `e2e/screenshots/` (git-ignored).
 
 Traces, failure screenshots and videos go to `test-results/` and reports to `playwright-report/`, both git-ignored.

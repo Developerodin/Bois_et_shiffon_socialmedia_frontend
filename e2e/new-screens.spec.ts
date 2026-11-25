@@ -1,4 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { parseEnv } from "node:util";
 import { expect as baseExpect, test, type Page, type Route } from "@playwright/test";
 import { authFile } from "./global-setup";
 import type { QuoteDto } from "@/shared";
@@ -8,7 +10,8 @@ import type { QuoteDto } from "@/shared";
  * Pulse and Hum agent slots) at a phone, a tablet and a desktop width, as the owner: nothing wider than the window, the
  * key parts visible, and the empty states. Read-only against a shared database: nothing is created, saved or connected;
  * lists that need fixed contents (an empty list, a filled one, Shopify's connect options) are answered here in the browser.
- * Blog and the digest are behind flags; when theirs is off the page is the app's not-found page and the test skips.
+ * Blog and the digest are behind flags: they skip only when their flag is off (as the website reads WEB_FEATURES) and the
+ * page is the not-found screen. Any other not-found, or a sign-in page, fails.
  * Owner only: `E2E_ROLES=owner`. Screenshots go to e2e/screenshots/ (git-ignored).
  */
 test.use({ storageState: authFile("owner") });
@@ -24,32 +27,50 @@ const SIZES = [
 const SHOTS = path.join(__dirname, "screenshots");
 
 async function noSideways(page: Page) {
-  // The window, and <main> (the shell's own scroller): neither scrolls sideways.
-  await expect.poll(() => page.evaluate(() => document.scrollingElement!.scrollWidth <= window.innerWidth)).toBe(true);
+  // The window, and <main> (the shell's own scroller): neither scrolls sideways. The page is loaded by now: a short wait.
+  await expect.poll(() => page.evaluate(() => document.scrollingElement!.scrollWidth <= window.innerWidth), { timeout: 10_000 }).toBe(true);
   await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const main = document.getElementById("content");
-        return !main || main.scrollWidth <= main.clientWidth;
-      }),
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const main = document.getElementById("content");
+          return !main || main.scrollWidth <= main.clientWidth;
+        }),
+      { timeout: 10_000 },
     )
     .toBe(true);
 }
 const shot = (page: Page, name: string) => page.screenshot({ path: path.join(SHOTS, `${name}.png`), fullPage: true });
+/** The website's WEB_FEATURES as its dev server reads them: the shell first, then its env files (Next's order). */
+function webFeatures(): string[] {
+  let raw = process.env.WEB_FEATURES;
+  for (const file of [".env.development.local", ".env.local", ".env.development", ".env"]) {
+    if (raw !== undefined) break;
+    const p = path.join(__dirname, "..", file);
+    if (existsSync(p)) raw = parseEnv(readFileSync(p, "utf8")).WEB_FEATURES;
+  }
+  return (raw ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+}
+const FEATURES = webFeatures();
+
 /**
- * Opens a page; skips the test when its flag is off. The route then renders the app's not-found page, streamed in after
- * the load event, so wait for the page's h1 before reading it.
+ * Opens a page and fails at once if the session is gone (the page went to /login). The not-found screen (marked
+ * `data-error-screen="not-found"`, streamed in after the load event, hence the wait for an h1) skips the test only for a
+ * page behind `flag` while that flag is off for everyone; anywhere else it fails, since serverFetch answers a broken or
+ * forbidden API call with it too. (A flag on for one workspace only, WEB_FEATURE_WORKSPACES, isn't seen here: such a page
+ * that shows not-found fails rather than skips.)
  */
-async function open(page: Page, url: string) {
+async function open(page: Page, url: string, opts: { flag?: string } = {}) {
   const res = await page.goto(url);
-  const h1 = page.getByRole("heading", { level: 1 }).first();
-  await h1.waitFor();
-  const notFound = res?.status() === 404 || /This page doesn.t exist/.test(await h1.innerText());
-  test.skip(notFound, `${url} is behind a flag that is off`);
+  if (new URL(page.url()).pathname.startsWith("/login")) throw new Error(`Signed out: ${url} went to the sign-in page. Delete e2e/.auth/ to sign in afresh.`);
+  await page.getByRole("heading", { level: 1 }).first().waitFor();
+  const notFound = res?.status() === 404 || (await page.locator('[data-error-screen="not-found"]').count()) > 0;
+  if (notFound && opts.flag && !FEATURES.includes(opts.flag)) test.skip(true, `${url}: the ${opts.flag} flag is off`);
+  if (notFound) throw new Error(`${url} showed the not-found page`);
 }
 
 const day = "2026-11-20T10:00:00.000Z";
-function quote(n: number, over: Partial<QuoteDto> = {}): QuoteDto {
+function quote(n: number, over: Partial<QuoteDto> = {}) {
   return {
     id: `q${n}`,
     number: `Q-000${n}`,
@@ -113,7 +134,9 @@ for (const size of SIZES) {
     test("Quotes: the empty state points at the one New quote button", async ({ page }) => {
       await listQuotes(page, []);
       await open(page, "/crm");
-      await expect(page.getByRole("heading", { name: "No quotes yet", level: 2 })).toBeVisible();
+      const empty = page.locator('[data-slot="empty-state"]');
+      await expect(empty.getByRole("heading", { name: "No quotes yet", level: 2 })).toBeVisible();
+      await expect(empty.getByRole("button")).toHaveCount(0);
       await expect(page.getByRole("button", { name: "New quote" })).toHaveCount(1);
       await expect(page.getByRole("button", { name: "New quote" })).toBeEnabled();
       await noSideways(page);
@@ -159,7 +182,7 @@ for (const size of SIZES) {
       const list = page.getByRole("region", { name: "All quotes" });
       await expect(list).toBeVisible();
       await expect(list.getByRole("button")).toHaveCount(3);
-      await expect(page.getByRole("heading", { name: "No quote open" })).toBeVisible();
+      await expect(page.locator('[data-slot="empty-state"]').getByRole("heading", { name: "No quote open" })).toBeVisible();
       await expect(page.getByRole("button", { name: "New quote" })).toBeEnabled();
       await noSideways(page);
       await shot(page, `quotes-list-${size.name}`);
@@ -176,7 +199,7 @@ for (const size of SIZES) {
     });
 
     test("Blog", async ({ page }) => {
-      await open(page, "/blog");
+      await open(page, "/blog", { flag: "blog" });
       await expect(page.getByRole("heading", { name: "Blog", level: 1 })).toBeVisible();
       await expect(page.getByRole("heading", { name: /^(Articles|No articles yet)$/ })).toBeVisible();
       await noSideways(page);
@@ -184,7 +207,7 @@ for (const size of SIZES) {
     });
 
     test("Weekly digest", async ({ page }) => {
-      await open(page, "/digest");
+      await open(page, "/digest", { flag: "digest" });
       await expect(page.getByRole("heading", { name: "Weekly digest", level: 1 })).toBeVisible();
       await expect(page.getByRole("heading", { name: /^(Week of |No digest yet)/ }).first()).toBeVisible();
       await noSideways(page);
@@ -228,7 +251,7 @@ for (const size of SIZES) {
     });
 
     test("Pulse and Hum slots open the Sales tab and Members", async ({ page }) => {
-      await page.goto("/products");
+      await open(page, "/products");
       const pulse = (await sidebar(page, size.width)).getByRole("link", { name: /^Pulse/ });
       await expect(pulse).toHaveAttribute("href", "/performance?tab=sales");
       await expect(pulse).not.toContainText("Soon");

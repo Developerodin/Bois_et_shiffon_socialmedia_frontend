@@ -64,8 +64,16 @@ export default async function globalSetup(config: FullConfig) {
   const browser = await chromium.launch({ channel: use.channel });
   try {
     for (const { role, email, password } of creds) {
-      // Login is rate-limited: with E2E_REUSE_AUTH=1 a session saved in the last 12 hours is used again, not signed in anew.
-      if (reuse && existsSync(authFile(role)) && Date.now() - statSync(authFile(role)).mtimeMs < REUSE_FOR_MS) continue;
+      // Login is rate-limited: with E2E_REUSE_AUTH=1 a session saved in the last 12 hours is used again, not signed in anew,
+      // as long as it still opens the app (a session ended on the server sends "/" to /login; then it signs in once).
+      if (reuse && existsSync(authFile(role)) && Date.now() - statSync(authFile(role)).mtimeMs < REUSE_FOR_MS) {
+        const saved = await browser.newContext({ baseURL, storageState: authFile(role) });
+        const check = await saved.newPage();
+        await check.goto("/");
+        const alive = !new URL(check.url()).pathname.startsWith("/login");
+        await saved.close();
+        if (alive) continue;
+      }
       const context = await browser.newContext({ baseURL });
       const page = await context.newPage();
       await page.goto("/login");
