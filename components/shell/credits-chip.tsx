@@ -5,11 +5,15 @@ import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { useCredits, usePlan } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { creditsLabel } from "@/lib/plan-credits";
+import { cn } from "@/lib/utils";
 
-const POPOVER_ID = "credits-popover";
+/** The balance popover: the top bar's overflow menu opens it too, where the chip is hidden. */
+export const CREDITS_POPOVER_ID = "credits-popover";
+const POPOVER_ID = CREDITS_POPOVER_ID;
 
 /** The workspace's balance in the top bar; its native popover (light dismiss and Escape for free) says what the credits are. */
-export function CreditsChip({ workspaceId }: { workspaceId: string }) {
+/** `className` goes on the chip only: hiding it keeps the popover, so the overflow menu can still open it. */
+export function CreditsChip({ workspaceId, className }: { workspaceId: string; className?: string }) {
   const { credits, failed, reload } = useCredits(workspaceId);
   const { plan, unlimited } = usePlan(workspaceId);
   const label = creditsLabel(credits, unlimited);
@@ -17,7 +21,7 @@ export function CreditsChip({ workspaceId }: { workspaceId: string }) {
   const cut = label.lastIndexOf(" ");
   return (
     <>
-      <button type="button" popoverTarget={POPOVER_ID} className={tool}>
+      <button type="button" popoverTarget={POPOVER_ID} className={cn(tool, className)}>
         <Coins className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
         {cut < 0 ? (
           label
