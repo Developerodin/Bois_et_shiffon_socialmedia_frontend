@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   Bot,
@@ -23,7 +23,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
+import { ASSISTANT_TOGGLE_ID, useAssistant, useWide } from "@/components/shell/assistant-state";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { ChatPane, type ChatSlots } from "@/components/workspace/chat-pane";
 import { assistantDocks, navFor } from "@/lib/nav";
@@ -78,25 +78,23 @@ function greeting() {
   return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 }
 
-const XL = "(min-width: 1280px)";
-const subscribe = (cb: () => void) => {
-  const mq = window.matchMedia(XL);
-  mq.addEventListener("change", cb);
-  return () => mq.removeEventListener("change", cb);
-};
-/** Server and first paint assume the wide layout; the column is CSS-hidden below 1280 until the check runs. */
-function useWide() {
-  return useSyncExternalStore(subscribe, () => window.matchMedia(XL).matches, () => true);
-}
+/**
+ * The docked column's width, for the aside and the spacer that holds its place while expanded: 320 px, 384 px from
+ * 1536 px so the header fits on one line. The drawer (phone, tablet, undocked pages) is sized on its own.
+ */
+const COLUMN_W = "xl:w-80 2xl:w-96";
+/** What Tab cycles through while the panel is an overlay. */
+const TABBABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 type Props = { workspaceId: string; brandId: string | null; brandName: string | null; canCreateBrand: boolean };
 
 /**
- * The Bois & Chiffons chat: a 320 px column (384 px from 1536 px) from 1280 px up on docked pages (assistantDocks), a right-hand drawer (opened from
- * the top bar) below that and on pages that don't dock it. One element serves both, so the conversation, a typed draft
+ * The Bois & Chiffons chat: a column (COLUMN_W) from 1280 px up on docked pages (assistantDocks), a right-hand drawer (opened
+ * from the top bar) below that and on pages that don't dock it: full screen on a phone, 384 px from 640 px. One element serves both, so the conversation, a typed draft
  * and an in-flight reply survive the switch.
  * Narrow and closed, the drawer is off-screen and inert. Open, it takes focus, Escape or the scrim closes it and
- * focus goes back to the toggle. No focus trap: the page behind stays reachable, which the scrim only discourages.
+ * focus goes back to the toggle. As an overlay (drawer or expanded) Tab and Shift+Tab cycle inside it, so focus never
+ * lands on the page behind the scrim (or, on a phone, behind the full-screen sheet).
  */
 export function AssistantPanel(p: Props) {
   const wide = useWide();
@@ -156,13 +154,28 @@ export function AssistantPanel(p: Props) {
         <div aria-hidden="true" className="fixed inset-0 z-40 bg-overlay" onClick={() => (expanded ? collapse() : setOpen(false))} />
       ) : null}
       {/* Holds the docked column's place while the panel floats expanded, so the page doesn't reflow under it. */}
-      {docked && expanded ? <div aria-hidden="true" className="hidden w-80 shrink-0 xl:block 2xl:w-96" /> : null}
+      {docked && expanded ? <div aria-hidden="true" className={cn("hidden shrink-0 xl:block", COLUMN_W)} /> : null}
       <aside
         ref={ref}
         tabIndex={-1}
         aria-label="Bois & Chiffons"
         role={docked && !expanded ? undefined : "dialog"}
         onKeyDown={(e) => {
+          if (e.key === "Tab" && (expanded || !docked) && ref.current) {
+            const items = [...ref.current.querySelectorAll<HTMLElement>(TABBABLE)].filter((el) => el.offsetParent !== null);
+            const first = items[0];
+            const last = items[items.length - 1];
+            const at = document.activeElement;
+            if (!first || !last) return;
+            if (e.shiftKey && (at === first || at === ref.current)) {
+              e.preventDefault();
+              last.focus();
+            } else if (!e.shiftKey && at === last) {
+              e.preventDefault();
+              first.focus();
+            }
+            return;
+          }
           if (e.key !== "Escape") return;
           if (expanded) {
             // Marked handled, so the document listener doesn't also close the drawer.
@@ -176,16 +189,18 @@ export function AssistantPanel(p: Props) {
         // The same element in every state (classes only), so the conversation and a streaming reply carry on.
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-full shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
-          // A phone gets the whole screen (no inset, no card edge). The tablet drawer (touch-sized header buttons) and the
-          // column from 1536 px are 384 px, so the header fits on one line; the docked column at 1280-1535 px stays 320.
+          // A phone gets the whole screen (no inset, no card edge). The drawer is 384 px so its header, with touch-sized
+          // buttons, fits on one line; docked, the column takes COLUMN_W.
           "max-sm:p-0",
-          expanded ? "w-[min(56rem,100vw)]" : "w-full sm:w-96 xl:w-80 2xl:w-96",
+          expanded ? "w-[min(56rem,100vw)]" : cn("w-full sm:w-96", docked && COLUMN_W),
           // Docked it sits beside the page, under the top bar (layout.tsx): the page's own 12 px edge is the gap, so no
           // left padding of its own, and its top edge lines up with the page's cards.
           docked && !expanded && "xl:static xl:z-auto xl:translate-x-0 xl:pl-0",
           open || expanded ? "translate-x-0" : "translate-x-full",
         )}
       >
+        {/* Floats over the header's top-right corner: the header's button row keeps mr-8 free for it (Body), so a change
+            to this button's size or offset needs that margin checked too. */}
         <button
           type="button"
           onClick={() => setOpen(false)}
@@ -255,8 +270,9 @@ function Body({
             </p>
           </div>
         </div>
+        {/* mr-8 leaves room for the drawer's Close button, which floats over this corner (AssistantPanel). */}
         <div className={cn("mr-8 flex shrink-0 items-center gap-1", docked && "xl:mr-0")}>
-          {/* From md up (a phone's drawer is already full width), and always while expanded so it can be collapsed. */}
+          {/* From sm up (a phone's drawer is already full width), and always while expanded so it can be collapsed. */}
           <button
             id={EXPAND_ID}
             type="button"
