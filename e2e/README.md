@@ -12,11 +12,13 @@ PLAYWRIGHT_CHANNEL=msedge npx playwright test e2e/shell.spec.ts
 
 ## Accounts
 
-Every spec in this folder needs these, `shell-smoke.spec.ts` included, because the global setup signs in before any spec runs.
+The global setup signs in before any spec runs, so every run needs the values for each role it signs in, `shell-smoke.spec.ts` included.
 
-`E2E_ROLES` (comma-separated: `owner`, `viewer`, `admin`) signs in only those roles, for a run of specs that need no others: `E2E_ROLES=owner npx playwright test e2e/new-screens.spec.ts`. Unset, all three sign in.
+`E2E_ROLES` (comma-separated: `owner`, `viewer`, `admin`) signs in only those roles, for a run of specs that need no others: `E2E_ROLES=owner npx playwright test e2e/new-screens.spec.ts`. Unset, all three sign in. The saved sessions of roles left out are deleted.
+`E2E_REUSE_AUTH=1` uses a role's saved session again when it is less than 12 hours old instead of signing in (login is rate-limited).
+Both are read from the shell only, never from the server's `.env`.
 
-Put these six values in the server repo's `.env` (git-ignored; global-setup takes only the `E2E_*` names from it) or the shell.
+Put the values in the server repo's `.env` (git-ignored; global-setup takes only the `E2E_*` names from it) or the shell.
 There are no defaults: a missing value stops the run. Never commit them. Quote a value that contains `#` (`E2E_OWNER_PASSWORD='pa#ss'`): unquoted, the `.env` reader takes `#` as the start of a comment and signs in with the text before it.
 
 | Variable | Account |
@@ -37,4 +39,8 @@ How to make them on a local database:
 `stories.spec.ts` seeds a story with the server repo's `npm run seed:story`, which writes only to the pinned dev brand and only when the
 database host is listed: set `SEED_ALLOW_DB_HOSTS=<host of DATABASE_URL>` in the server repo's `.env` or the shell (see its `.env.example`).
 
-Traces, screenshots and videos go to `test-results/` and reports to `playwright-report/`, both git-ignored.
+`new-screens.spec.ts` (owner only) checks Quotes, Blog, the weekly digest, the Sales tab, the Shopify connect dialog and the Pulse and Hum
+slots at 390, 820 and 1500 px. It writes nothing: fixed lists are answered in the browser. Blog and the digest are skipped while their
+flags (`blog`, `digest` in the website's `WEB_FEATURES`) are off. Its screenshots go to `e2e/screenshots/` (git-ignored).
+
+Traces, failure screenshots and videos go to `test-results/` and reports to `playwright-report/`, both git-ignored.
