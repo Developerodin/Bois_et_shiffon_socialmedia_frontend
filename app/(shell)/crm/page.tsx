@@ -1,7 +1,6 @@
 import { Handshake } from "lucide-react";
 import { QuotesBoard } from "@/components/crm/quotes/quotes-board";
 import { featureAccess } from "@/components/shell/feature-access";
-import { PageHeader } from "@/components/ui/page-header";
 import { navFor } from "@/lib/nav";
 
 export const metadata = { title: navFor("/crm").title };
@@ -17,9 +16,9 @@ export default async function CrmRoute() {
     perm: "crm.manage",
   });
   if (access.gate) return access.gate;
+  // The board holds the page header: its New quote button needs the board's state.
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-8">
-      <PageHeader title="Quotes">Quotes become Shopify draft orders when you say so. The customer gets Shopify&rsquo;s invoice email only when you send it.</PageHeader>
+    <div className="mx-auto flex max-w-6xl flex-col gap-5">
       <QuotesBoard key={access.brandId} w={access.workspaceId} b={access.brandId} />
     </div>
   );
