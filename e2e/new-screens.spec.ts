@@ -110,14 +110,47 @@ for (const size of SIZES) {
       await shot(page, `quotes-${size.name}`);
     });
 
-    test("Quotes: the empty state offers New quote", async ({ page }) => {
+    test("Quotes: the empty state points at the one New quote button", async ({ page }) => {
       await listQuotes(page, []);
       await open(page, "/crm");
-      const empty = page.locator("div").filter({ has: page.getByRole("heading", { name: "No quotes yet", level: 2 }) }).last();
-      await expect(empty).toBeVisible();
-      await expect(empty.getByRole("button", { name: "New quote" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "No quotes yet", level: 2 })).toBeVisible();
+      await expect(page.getByRole("button", { name: "New quote" })).toHaveCount(1);
+      await expect(page.getByRole("button", { name: "New quote" })).toBeEnabled();
       await noSideways(page);
       await shot(page, `quotes-empty-${size.name}`);
+    });
+
+    test("Quotes: a business with no currency is asked for one, and the retry sends it", async ({ page }) => {
+      // Both creates are answered here: the first as the server answers a business with no shop and no earlier quote,
+      // the retry with a made-up quote. Nothing reaches the server but the page itself.
+      const sent: Record<string, unknown>[] = [];
+      await page.route(/\/api\/v1\/workspaces\/[^/]+\/brands\/[^/]+\/quotes(\?.*)?$/, (route: Route) => {
+        const req = route.request();
+        if (req.method() === "GET") return route.fulfill({ json: { quotes: [] } });
+        if (req.method() !== "POST") return route.abort();
+        const body = req.postDataJSON() as Record<string, unknown>;
+        sent.push(body);
+        if (!body.currency) {
+          return route.fulfill({ status: 400, contentType: "application/problem+json", json: { title: "Bad request", status: 400, detail: "Say which currency the quote is in", code: "quote.currency" } });
+        }
+        return route.fulfill({ status: 201, json: { quote: quote(1, { currency: String(body.currency), lines: [], discount: null, note: null, contactName: null, contactEmail: null, totals: { subtotal: "0.00", discount: "0.00", total: "0.00" } }) } });
+      });
+      await open(page, "/crm");
+      await page.getByRole("button", { name: "New quote" }).click();
+      const step = page.getByRole("region", { name: "Which currency are this business's quotes in?" });
+      await expect(step).toBeVisible();
+      // No bare error line: the question is the answer to that refusal.
+      await expect(page.getByText("Say which currency the quote is in")).toHaveCount(0);
+      await expect(step.getByRole("combobox", { name: "Currency" })).toBeFocused();
+      await noSideways(page);
+      await shot(page, `quotes-currency-${size.name}`);
+      await step.getByRole("combobox", { name: "Currency" }).selectOption("GBP");
+      await step.getByRole("button", { name: "Create quote" }).click();
+      await expect(page.getByRole("heading", { name: "Quote Q-0001", level: 2 })).toBeFocused();
+      await expect(step).toBeHidden();
+      expect(sent).toHaveLength(2);
+      expect(sent[0].currency).toBeUndefined();
+      expect(sent[1].currency).toBe("GBP");
     });
 
     test("Quotes: list and a quote open", async ({ page }) => {

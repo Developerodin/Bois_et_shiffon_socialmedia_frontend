@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileText, Plus, Printer, Search } from "lucide-react";
 import type { QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteStatus } from "@/shared";
 import { quotesApi, type QuoteBody } from "@/components/crm/api";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
 import { QUOTE_ACTION_LABEL, QuoteShopifyDialog } from "@/components/crm/quotes/shopify-dialog";
 import { productsApi, type Product } from "@/components/products/api";
-import { errorMessage } from "@/components/settings/api";
+import { ApiError, errorMessage } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -55,6 +55,9 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // The business has no currency yet (no Shopify shop currency, no earlier quote): ask once, then create with it.
+  const [askCurrency, setAskCurrency] = useState(false);
+  const [currencyError, setCurrencyError] = useState<string | null>(null);
   const { containerRef, reveal } = useRevealSection("quote", selected);
 
   const load = () => {
@@ -73,24 +76,30 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
     setSelected(id);
   };
 
-  const create = async () => {
-    // From the empty state the button goes away with it, so focus must move to the new quote.
-    const fromEmpty = quotes?.length === 0;
+  /** Without `currency` the server takes the shop's or the business's earlier one; with neither it asks (quote.currency). */
+  const create = async (currency?: string) => {
+    // From the empty state or the currency step, the control that had focus goes away, so focus moves to the new quote.
+    const moveFocus = quotes?.length === 0 || !!currency;
     setBusy(true);
     setError(null);
+    setCurrencyError(null);
     try {
-      const { quote } = await quotesApi.create(w, b, { lines: [] });
+      const { quote } = await quotesApi.create(w, b, currency ? { lines: [], currency } : { lines: [] });
+      setAskCurrency(false);
       put(quote);
-      open(quote.id, fromEmpty ? "always" : "stacked");
+      open(quote.id, moveFocus ? "always" : "stacked");
     } catch (e) {
-      setError(errorMessage(e));
+      // A create without lines or a currency fails on quote.currency only when the business has no currency yet.
+      if (!currency && e instanceof ApiError && e.code === "quote.currency") setAskCurrency(true);
+      else if (currency) setCurrencyError(errorMessage(e));
+      else setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
   };
 
   const newQuote = (
-    <Button disabled={busy || !quotes} onClick={create}>
+    <Button disabled={busy || !quotes || askCurrency} onClick={() => void create()}>
       <Plus aria-hidden="true" />
       {busy ? "Starting…" : "New quote"}
     </Button>
@@ -104,8 +113,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
       <EmptyState
         icon={FileText}
         title="No quotes yet"
-        description="A quote lists products and prices for one customer. When it's ready it becomes a Shopify draft order, and the customer gets Shopify's invoice only when you send it."
-        action={newQuote}
+        description="A quote lists products and prices for one customer. When it's ready it becomes a Shopify draft order, and the customer gets Shopify's invoice only when you send it. Start one with New quote above."
       />
     );
   else
@@ -146,8 +154,74 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
         Quotes become Shopify draft orders when you say so. The customer gets Shopify&rsquo;s invoice email only when you send it.
       </PageHeader>
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
+      {askCurrency ? <CurrencyStep busy={busy} error={currencyError} onCreate={(c) => void create(c)} onCancel={() => (setAskCurrency(false), setCurrencyError(null))} /> : null}
       {body}
     </>
+  );
+}
+
+/** Currencies offered first when a business has none yet; any other ISO 4217 code can be typed under Other. */
+const QUOTE_CURRENCIES = ["EUR", "USD", "GBP", "CHF", "CAD", "AUD", "SEK", "DKK", "NOK", "PLN", "CZK", "INR", "JPY"];
+
+/**
+ * Asked once per business, when the first quote can't take a currency from a Shopify shop: every later quote keeps it
+ * (the server stores it on the business). Takes focus when it appears; only a failed create is announced as an alert.
+ */
+function CurrencyStep({ busy, error, onCreate, onCancel }: { busy: boolean; error: string | null; onCreate(currency: string): void; onCancel(): void }) {
+  const [pick, setPick] = useState("EUR");
+  const [other, setOther] = useState("");
+  const first = useRef<HTMLSelectElement>(null);
+  useEffect(() => first.current?.focus(), []);
+  const code = pick === "other" ? other.trim().toUpperCase() : pick;
+  const valid = /^[A-Z]{3}$/.test(code);
+  return (
+    <PageSection
+      id="quote-currency"
+      title="Which currency are this business's quotes in?"
+      description="It has no Shopify store to take the currency from. Its first quote sets it, and every quote after uses the same one."
+    >
+      <form
+        className="flex flex-wrap items-end gap-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (valid) onCreate(code);
+        }}
+      >
+        <label className="flex flex-col gap-1.5 text-sm">
+          <span className="text-muted-foreground">Currency</span>
+          <select ref={first} className={cn(selectClass, "w-auto pointer-coarse:h-11")} value={pick} onChange={(e) => setPick(e.target.value)}>
+            {QUOTE_CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+            <option value="other">Other…</option>
+          </select>
+        </label>
+        {pick === "other" ? (
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">Code (3 letters)</span>
+            <Input value={other} onChange={(e) => setOther(e.target.value)} maxLength={3} className="w-24 uppercase" aria-describedby="quote-currency-hint" autoFocus />
+          </label>
+        ) : null}
+        <Button type="submit" disabled={busy || !valid}>
+          {busy ? "Creating…" : "Create quote"}
+        </Button>
+        <Button type="button" variant="ghost" onClick={onCancel} disabled={busy}>
+          Cancel
+        </Button>
+        {pick === "other" ? (
+          <p id="quote-currency-hint" className="basis-full text-xs text-muted-foreground">
+            The ISO code, like SGD or MXN.
+          </p>
+        ) : null}
+        {error ? (
+          <p className="basis-full text-sm text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </form>
+    </PageSection>
   );
 }
 
