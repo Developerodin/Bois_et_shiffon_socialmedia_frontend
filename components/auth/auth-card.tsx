@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand/brand-logo";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 
 /** Centered card under the logo, for the account pages (reset password, invitation). */
 export function AuthCard({
@@ -61,8 +61,7 @@ export function PasswordFields({
     <>
       <label className="block text-sm">
         <span className="text-muted-foreground">{label}</span>
-        <Input
-          type="password"
+        <PasswordInput
           required
           minLength={MIN_PASSWORD}
           autoComplete="new-password"
@@ -77,8 +76,7 @@ export function PasswordFields({
       </label>
       <label className="block text-sm">
         <span className="text-muted-foreground">Confirm password</span>
-        <Input
-          type="password"
+        <PasswordInput
           required
           minLength={MIN_PASSWORD}
           autoComplete="new-password"
