@@ -92,7 +92,7 @@ function useWide() {
 type Props = { workspaceId: string; brandId: string | null; brandName: string | null; canCreateBrand: boolean };
 
 /**
- * The Bois & Chiffons chat: a 320 px column from 1280 px up on docked pages (assistantDocks), a right-hand drawer (opened from
+ * The Bois & Chiffons chat: a 320 px column (384 px from 1536 px) from 1280 px up on docked pages (assistantDocks), a right-hand drawer (opened from
  * the top bar) below that and on pages that don't dock it. One element serves both, so the conversation, a typed draft
  * and an in-flight reply survive the switch.
  * Narrow and closed, the drawer is off-screen and inert. Open, it takes focus, Escape or the scrim closes it and
@@ -156,7 +156,7 @@ export function AssistantPanel(p: Props) {
         <div aria-hidden="true" className="fixed inset-0 z-40 bg-overlay" onClick={() => (expanded ? collapse() : setOpen(false))} />
       ) : null}
       {/* Holds the docked column's place while the panel floats expanded, so the page doesn't reflow under it. */}
-      {docked && expanded ? <div aria-hidden="true" className="hidden w-80 shrink-0 xl:block" /> : null}
+      {docked && expanded ? <div aria-hidden="true" className="hidden w-80 shrink-0 xl:block 2xl:w-96" /> : null}
       <aside
         ref={ref}
         tabIndex={-1}
@@ -176,7 +176,9 @@ export function AssistantPanel(p: Props) {
         // The same element in every state (classes only), so the conversation and a streaming reply carry on.
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-full shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
-          expanded ? "w-[min(56rem,100vw)]" : "w-full sm:w-80",
+          // A phone gets the whole screen (no inset, no card edge); from 1536 px the column widens so its header fits on one line.
+          "max-sm:p-0",
+          expanded ? "w-[min(56rem,100vw)]" : "w-full sm:w-80 2xl:w-96",
           // Docked it sits beside the page, under the top bar (layout.tsx): the page's own 12 px edge is the gap, so no
           // left padding of its own, and its top edge lines up with the page's cards.
           docked && !expanded && "xl:static xl:z-auto xl:translate-x-0 xl:pl-0",
@@ -186,13 +188,13 @@ export function AssistantPanel(p: Props) {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className={cn("absolute top-7 right-6 z-10 grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted pointer-coarse:size-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
+          className={cn("absolute top-7 right-6 z-10 grid size-8 max-sm:top-2.5 max-sm:right-2 place-items-center rounded-lg text-muted-foreground hover:bg-muted pointer-coarse:size-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", docked && "xl:hidden")}
         >
           <X className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
           <span className="sr-only">Close</span>
         </button>
         {/* A card like every other panel (DESIGN_SYSTEM §4): white, bordered, on the page background, not painted onto it. */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm max-sm:rounded-none max-sm:border-0 max-sm:shadow-none">
           <Body {...p} docked={docked} page={navFor(pathname).activeId} expanded={expanded} onExpand={() => (expanded ? collapse() : setExpanded(true))} />
         </div>
       </aside>
@@ -212,7 +214,12 @@ function Body({
   expanded,
   onExpand,
 }: Props & { docked: boolean; page: string | null; expanded: boolean; onExpand: () => void }) {
-  const title = <h2 className="text-lg leading-tight font-semibold text-foreground">Bois & Chiffons</h2>;
+  // One line: cut short with the full name on hover rather than wrapping the header.
+  const title = (
+    <h2 title="Bois & Chiffons" className="truncate text-lg leading-tight font-semibold text-foreground">
+      Bois & Chiffons
+    </h2>
+  );
   const mark = (
     <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
       <Sparkles className="size-4.5" strokeWidth={SHELL_STROKE} />
@@ -236,13 +243,13 @@ function Body({
 
   const slots: ChatSlots = {
     header: ({ busy, empty, onNew }) => (
-      <div className="flex h-16 shrink-0 items-center justify-between gap-3 px-5">
+      <div className="flex h-16 shrink-0 items-center justify-between gap-2 px-5">
         {/* The business under the name, so the empty body has no stray line at its top. */}
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
           {mark}
           <div className="min-w-0">
             {title}
-            <p className="truncate text-xs text-muted-foreground">
+            <p title={brandName ? `Working on ${brandName}` : undefined} className="truncate text-xs text-muted-foreground">
               Working on <span className="text-foreground">{brandName ?? "your business"}</span>
             </p>
           </div>
@@ -257,7 +264,7 @@ function Body({
             aria-label={expanded ? "Collapse chat" : "Expand chat"}
             title={expanded ? "Collapse chat" : "Expand chat"}
             className={cn(
-              "size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px",
+              "size-9 shrink-0 place-items-center rounded-xl text-muted-foreground transition-colors hover:bg-muted pointer-coarse:size-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px",
               expanded ? "grid" : "hidden sm:grid",
             )}
           >
@@ -269,7 +276,7 @@ function Body({
             disabled={busy || empty}
             aria-label="New conversation"
             title="New conversation"
-            className="grid size-11 shrink-0 place-items-center rounded-2xl text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px disabled:opacity-50 disabled:hover:bg-transparent"
+            className="grid size-9 shrink-0 place-items-center rounded-xl text-muted-foreground transition-colors hover:bg-muted pointer-coarse:size-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:translate-y-px disabled:opacity-50 disabled:hover:bg-transparent"
           >
             <SquarePen className="size-5" strokeWidth={SHELL_STROKE} aria-hidden="true" />
           </button>
