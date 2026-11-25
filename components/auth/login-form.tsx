@@ -7,6 +7,7 @@ import { getProviders, getSession, signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { clearAllRecent } from "@/lib/recent";
 
 const ERRORS: Record<string, string> = {
@@ -139,9 +140,8 @@ export function LoginForm({ next, error, expired, notice }: { next: string; erro
         </label>
         <label className="block text-sm">
           <span className="text-muted-foreground">Password</span>
-          <Input
+          <PasswordInput
             name="password"
-            type="password"
             required
             autoComplete="current-password"
             value={password}
