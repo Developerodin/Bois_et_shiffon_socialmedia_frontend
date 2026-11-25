@@ -59,7 +59,8 @@ export default async function ConnectionsPage({
       : null;
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-5">
+    // The dashboard cap (max-w-7xl), not 5xl: beside the docked chat on a wide screen, 5xl left a wide empty band on each side.
+    <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <PageHeader title="Connections">
         The accounts this business has connected, and what each one lets the agents do.
       </PageHeader>
