@@ -111,7 +111,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
     body = (
       // Split on the page column's own width, not the window's: the sidebar and the assistant take part of a wide window.
       <div className="@container">
-        <div className="grid items-start gap-5 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
+        <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
           <PageSection id="quotes-list" title="All quotes" description={`${quotes.length} ${quotes.length === 1 ? "quote" : "quotes"}, newest change first`} className="px-0 py-2">
             <ul className="flex flex-col">
               {quotes.map((q) => (
@@ -347,17 +347,21 @@ function QuoteEditor({ w, b, quote, onChange, onRemoved }: { w: string; b: strin
               ) : (
                 <p className="rounded-xl border border-dashed border-border px-4 py-5 text-sm text-muted-foreground">No lines yet. Find a product from the catalogue, or add a free line.</p>
               )}
-              {form.lines.map((l, i) => (
-                // Narrow: the title on its own row, then quantity, price and Remove; wide: one row under the column heads.
-                <div key={i} className="grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0 @lg:grid-cols-[minmax(0,1fr)_5rem_7rem_5.5rem] @lg:border-b-0 @lg:pb-0">
-                  <Input className="col-span-3 @lg:col-span-1" value={l.title} onChange={(e) => setLine(i, { title: e.target.value })} maxLength={255} aria-label="Line title" placeholder="Item" required />
-                  <Input value={l.quantity} onChange={(e) => setLine(i, { quantity: e.target.value })} inputMode="numeric" aria-label="Quantity" required />
-                  <Input value={l.unitPrice} onChange={(e) => setLine(i, { unitPrice: e.target.value })} inputMode="decimal" aria-label={`Unit price (${quote.currency})`} placeholder={quote.currency} required />
-                  <Button type="button" size="sm" variant="ghost" onClick={() => edit({ lines: form.lines.filter((_, j) => j !== i) })}>
-                    Remove
-                  </Button>
+              {form.lines.length ? (
+                <div className="flex flex-col gap-3">
+                {form.lines.map((l, i) => (
+                  // Narrow: the title on its own row, then quantity, price and Remove; wide: one row under the column heads.
+                  <div key={i} className="grid grid-cols-[5rem_minmax(0,1fr)_auto] items-center gap-2 border-b border-border pb-3 last:border-b-0 last:pb-0 @lg:grid-cols-[minmax(0,1fr)_5rem_7rem_5.5rem] @lg:border-b-0 @lg:pb-0">
+                    <Input className="col-span-3 @lg:col-span-1" value={l.title} onChange={(e) => setLine(i, { title: e.target.value })} maxLength={255} aria-label="Line title" placeholder="Item" required />
+                    <Input value={l.quantity} onChange={(e) => setLine(i, { quantity: e.target.value })} inputMode="numeric" aria-label="Quantity" required />
+                    <Input value={l.unitPrice} onChange={(e) => setLine(i, { unitPrice: e.target.value })} inputMode="decimal" aria-label={`Unit price (${quote.currency})`} placeholder={quote.currency} required />
+                    <Button type="button" size="sm" variant="ghost" onClick={() => edit({ lines: form.lines.filter((_, j) => j !== i) })}>
+                      Remove
+                    </Button>
+                  </div>
+                ))}
                 </div>
-              ))}
+              ) : null}
               <div className="flex flex-col gap-2 rounded-xl bg-muted/50 p-3 @lg:flex-row @lg:items-center">
                 <div className="flex min-w-0 flex-1 gap-2">
                   <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Find a product" className="min-w-0 flex-1 bg-card" aria-label="Find a product" />

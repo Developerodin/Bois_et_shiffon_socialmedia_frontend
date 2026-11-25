@@ -16,16 +16,16 @@ export function QuoteSheet({ quote, brand }: { quote: QuoteDto; brand?: string }
         <thead className="text-muted-foreground">
           <tr>
             <th className="py-1 font-normal">Item</th>
-            <th className="py-1 text-right font-normal">Qty</th>
-            <th className="py-1 text-right font-normal">Unit price</th>
+            <th className="py-1 pl-3 text-right font-normal">Qty</th>
+            <th className="whitespace-nowrap py-1 pl-3 text-right font-normal">Unit price</th>
           </tr>
         </thead>
         <tbody>
           {quote.lines.map((l, i) => (
             <tr key={i} className="border-t border-border">
               <td className="py-1">{l.title}</td>
-              <td className="py-1 text-right">{l.quantity}</td>
-              <td className="py-1 text-right">{m(l.unitPrice)}</td>
+              <td className="py-1 pl-3 text-right tabular-nums">{l.quantity}</td>
+              <td className="whitespace-nowrap py-1 pl-3 text-right tabular-nums">{m(l.unitPrice)}</td>
             </tr>
           ))}
         </tbody>

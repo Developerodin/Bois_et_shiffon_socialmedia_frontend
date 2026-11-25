@@ -144,7 +144,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
   return (
     // Split on the page column's own width, not the window's: the sidebar and the assistant take part of a wide window.
     <div className="@container">
-      <div className="grid items-start gap-5 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
         <PageSection id="articles-list" title="Articles" description={`${articles.length} ${articles.length === 1 ? "article" : "articles"}`} className="px-0 py-2">
           {starters ? <div className="px-5 pb-3 pt-1">{starters}</div> : null}
           <ul className="flex flex-col">
