@@ -176,9 +176,10 @@ export function AssistantPanel(p: Props) {
         // The same element in every state (classes only), so the conversation and a streaming reply carry on.
         className={cn(
           "fixed inset-y-0 right-0 z-50 flex h-full shrink-0 flex-col bg-background p-3 outline-none transition-transform motion-reduce:transition-none",
-          // A phone gets the whole screen (no inset, no card edge); from 1536 px the column widens so its header fits on one line.
+          // A phone gets the whole screen (no inset, no card edge). The tablet drawer (touch-sized header buttons) and the
+          // column from 1536 px are 384 px, so the header fits on one line; the docked column at 1280-1535 px stays 320.
           "max-sm:p-0",
-          expanded ? "w-[min(56rem,100vw)]" : "w-full sm:w-80 2xl:w-96",
+          expanded ? "w-[min(56rem,100vw)]" : "w-full sm:w-96 xl:w-80 2xl:w-96",
           // Docked it sits beside the page, under the top bar (layout.tsx): the page's own 12 px edge is the gap, so no
           // left padding of its own, and its top edge lines up with the page's cards.
           docked && !expanded && "xl:static xl:z-auto xl:translate-x-0 xl:pl-0",

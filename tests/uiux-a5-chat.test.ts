@@ -20,7 +20,7 @@ describe("restoreThread", () => {
 describe("assistant drawer", () => {
   it("fills the phone width and only offers Expand from sm up", () => {
     const src = read("components/shell/assistant-panel.tsx");
-    expect(src).toContain("w-full sm:w-80");
+    expect(src).toContain("w-full sm:w-96 xl:w-80 2xl:w-96");
     expect(src).toContain('"hidden sm:grid"');
   });
 });
