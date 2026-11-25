@@ -142,6 +142,7 @@ export function LoginForm({ next, error, expired, notice }: { next: string; erro
           <span className="text-muted-foreground">Password</span>
           <PasswordInput
             name="password"
+            placeholder="Your password"
             required
             autoComplete="current-password"
             value={password}
