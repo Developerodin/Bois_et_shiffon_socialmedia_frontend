@@ -36,10 +36,15 @@ async function noSideways(page: Page) {
     .toBe(true);
 }
 const shot = (page: Page, name: string) => page.screenshot({ path: path.join(SHOTS, `${name}.png`), fullPage: true });
-/** Opens a page; skips the test when its flag is off (the route answers with the app's not-found page). */
+/**
+ * Opens a page; skips the test when its flag is off. The route then renders the app's not-found page, streamed in after
+ * the load event, so wait for the page's h1 before reading it.
+ */
 async function open(page: Page, url: string) {
   const res = await page.goto(url);
-  const notFound = res?.status() === 404 || (await page.getByRole("heading", { name: /This page doesn.t exist/, level: 1 }).count()) > 0;
+  const h1 = page.getByRole("heading", { level: 1 }).first();
+  await h1.waitFor();
+  const notFound = res?.status() === 404 || /This page doesn.t exist/.test(await h1.innerText());
   test.skip(notFound, `${url} is behind a flag that is off`);
 }
 
@@ -85,10 +90,11 @@ const listQuotes = (page: Page, quotes: QuoteDto[]) =>
   page.route(/\/api\/v1\/workspaces\/[^/]+\/brands\/[^/]+\/quotes(\?.*)?$/, (route: Route) =>
     route.request().method() === "GET" ? route.fulfill({ json: { quotes } }) : route.abort(),
   );
-/** The sidebar's links: in the Menu sheet when the window is too narrow for the docked sidebar. */
-async function sidebar(page: Page) {
-  const menu = page.getByRole("button", { name: "Menu" });
-  if (await menu.isVisible()) await menu.click();
+/** The window width (px) from which the sidebar is docked (`xl`); below it the links are in the Menu sheet. */
+const DOCKED_SIDEBAR_FROM = 1280;
+/** The sidebar's links. "Menu" exactly: the account button is named "Account menu". */
+async function sidebar(page: Page, width: number) {
+  if (width < DOCKED_SIDEBAR_FROM) await page.getByRole("button", { name: "Menu", exact: true }).click();
   return page.getByRole("navigation", { name: "Workspace" }).last();
 }
 
@@ -190,14 +196,14 @@ for (const size of SIZES) {
 
     test("Pulse and Hum slots open the Sales tab and Members", async ({ page }) => {
       await page.goto("/products");
-      const pulse = (await sidebar(page)).getByRole("link", { name: /^Pulse/ });
+      const pulse = (await sidebar(page, size.width)).getByRole("link", { name: /^Pulse/ });
       await expect(pulse).toHaveAttribute("href", "/performance?tab=sales");
       await expect(pulse).not.toContainText("Soon");
       await shot(page, `agent-slots-${size.name}`);
       await pulse.click();
       await expect(page).toHaveURL(/\/performance\?tab=sales/);
       await expect(page.getByRole("region", { name: "Sales", exact: true })).toBeVisible();
-      const hum = (await sidebar(page)).getByRole("link", { name: /^Hum/ });
+      const hum = (await sidebar(page, size.width)).getByRole("link", { name: /^Hum/ });
       await expect(hum).toHaveAttribute("href", "/settings?tab=members");
       await hum.click();
       await expect(page).toHaveURL(/\/settings\?tab=members/);
