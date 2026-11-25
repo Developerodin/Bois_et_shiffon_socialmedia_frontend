@@ -8,6 +8,7 @@ import { Camera, Clapperboard, FileText, Globe, Images, Inbox, LayoutDashboard, 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { finishNavigation, usePendingHref } from "@/components/nav/nav-progress";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
+import { useWide } from "@/components/shell/assistant-state";
 import { BrandSwitcher, type BrandOption } from "@/components/shell/brand-switcher";
 import type { WorkspaceOption } from "@/components/shell/workspace-switcher";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -247,6 +248,11 @@ export function MobileNav(props: Props) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   useEffect(() => setOpen(false), [pathname]);
+  // Grown to 1280 px the docked sidebar is back: close the sheet, or the nav shows twice.
+  const wide = useWide();
+  useEffect(() => {
+    if (wide) setOpen(false);
+  }, [wide]);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger className={cn(tool, "xl:hidden")}>
