@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Newspaper, Plus } from "lucide-react";
 import { spansToText, textToSpans, type ArticleBlock, type ArticleShopifyAction, type BlogArticleDto, type BlogArticleStatus } from "@/shared";
 import { ArticleBody } from "@/components/blog/article-body";
 import { blogApi } from "@/components/blog/api";
@@ -8,8 +9,10 @@ import { ACTION_LABEL, ShopifyDialog } from "@/components/blog/shopify-dialog";
 import { errorMessage } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
+import { focusSectionHeading, PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -80,7 +83,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
     try {
       const { article } = await blogApi.create(w, b, body);
       put(article);
-      setSelected(article.id);
+      open(article.id);
       setTopic("");
     } catch (e) {
       setError(errorMessage(e));
@@ -89,60 +92,91 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
     }
   };
 
-  if (failed) return <LoadFailed what="the articles" onRetry={load} className="px-5 py-6" />;
+  const open = (id: string) => {
+    setSelected(id);
+    // Stacked (a narrow page), the article opens below the list, out of sight: take the reader there.
+    requestAnimationFrame(() => {
+      const top = document.getElementById("article-h")?.getBoundingClientRect().top;
+      if (top !== undefined && (top < 0 || top > window.innerHeight - 80)) focusSectionHeading("article");
+    });
+  };
+
+  if (failed) return <LoadFailed what="the articles" onRetry={load} />;
   if (!articles) return <ListSkeleton label="Loading articles" rows={3} />;
   const current = articles.find((a) => a.id === selected) ?? null;
   const fromTask = taskId && !articles.some((a) => a.taskId === taskId) ? taskId : null;
+  const starters = canCreate ? (
+    <div className="flex w-full flex-col gap-3">
+      {fromTask ? (
+        <div className="flex flex-col items-start gap-2 rounded-xl border border-border bg-muted/50 p-3 text-sm">
+          <p>Write an article for the task you came from.</p>
+          <Button size="sm" disabled={busy} onClick={() => create({ taskId: fromTask })}>
+            Start from the task
+          </Button>
+        </div>
+      ) : null}
+      <form
+        className="flex w-full max-w-md gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (topic.trim()) void create({ topic: topic.trim() });
+        }}
+      >
+        <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="New article: its topic" maxLength={200} aria-label="New article topic" className="min-w-0 flex-1" />
+        <Button type="submit" size="sm" disabled={busy || !topic.trim()}>
+          <Plus aria-hidden="true" />
+          Add
+        </Button>
+      </form>
+      {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
+    </div>
+  ) : null;
+
+  if (!articles.length)
+    return (
+      <EmptyState
+        icon={Newspaper}
+        title="No articles yet"
+        description="Give a topic and the article is written for you to edit. Approved articles go to your Shopify blog hidden until you publish them."
+        action={starters}
+      />
+    );
   return (
-    <div className="grid gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
-      <div className="flex flex-col gap-3">
-        {canCreate && fromTask ? (
-          <div className="flex flex-col gap-2 rounded-xl border border-border bg-muted/50 p-3 text-sm">
-            <p>Write an article for the task you came from.</p>
-            <Button size="sm" disabled={busy} onClick={() => create({ taskId: fromTask })}>
-              Start from the task
-            </Button>
-          </div>
-        ) : null}
-        {canCreate ? (
-          <form
-            className="flex gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (topic.trim()) void create({ topic: topic.trim() });
-            }}
-          >
-            <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="New article: its topic" maxLength={200} aria-label="New article topic" />
-            <Button type="submit" size="sm" disabled={busy || !topic.trim()}>
-              Add
-            </Button>
-          </form>
-        ) : null}
-        {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
-        {articles.length ? (
-          <ul className="flex flex-col gap-1">
+    // Split on the page column's own width, not the window's: the sidebar and the assistant take part of a wide window.
+    <div className="@container">
+      <div className="grid items-start gap-5 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
+        <PageSection id="articles-list" title="Articles" description={`${articles.length} ${articles.length === 1 ? "article" : "articles"}`} className="px-0 py-2">
+          {starters ? <div className="px-5 pb-3 pt-1">{starters}</div> : null}
+          <ul className="flex flex-col">
             {articles.map((a) => (
               <li key={a.id}>
                 <button
                   type="button"
-                  onClick={() => setSelected(a.id)}
-                  className={cn("flex w-full flex-col items-start gap-1 rounded-xl px-3 py-2 text-left text-sm hover:bg-muted", a.id === selected && "bg-muted")}
+                  aria-current={a.id === selected ? "true" : undefined}
+                  onClick={() => open(a.id)}
+                  className={cn(
+                    "flex w-full items-start justify-between gap-2 px-5 py-3 text-left text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring pointer-coarse:py-3.5",
+                    a.id === selected && "bg-accent hover:bg-accent",
+                  )}
                 >
-                  <span className="font-medium">{a.title}</span>
+                  <span className="min-w-0 break-words font-medium">{a.title}</span>
                   <StatusBadge status={a.status}>{STATUS_LABEL[a.status]}</StatusBadge>
                 </button>
               </li>
             ))}
           </ul>
+        </PageSection>
+        {current ? (
+          <ArticleEditor key={current.id} w={w} b={b} article={current} perms={perms} onChange={put} onRemoved={() => setArticles((l) => (l ?? []).filter((x) => x.id !== current.id))} />
         ) : (
-          <p className="text-sm text-muted-foreground">No articles yet.</p>
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card px-5 py-16 text-center shadow-sm">
+            <span className="inline-flex size-10 items-center justify-center rounded-full border border-border bg-muted text-primary" aria-hidden="true">
+              <Newspaper className="size-4" />
+            </span>
+            <p className="text-sm text-muted-foreground">Pick an article to read and edit it{canCreate ? ", or add one" : ""}.</p>
+          </div>
         )}
       </div>
-      {current ? (
-        <ArticleEditor key={current.id} w={w} b={b} article={current} perms={perms} onChange={put} onRemoved={() => setArticles((l) => (l ?? []).filter((x) => x.id !== current.id))} />
-      ) : (
-        <p className="text-sm text-muted-foreground">Pick an article, or add one.</p>
-      )}
     </div>
   );
 }
@@ -186,12 +220,17 @@ function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: strin
   const setBlock = (i: number, patch: Partial<DraftBlock>) => setForm((f) => ({ ...f, blocks: f.blocks.map((x, j) => (j === i ? { ...x, ...patch } : x)) }));
 
   return (
-    <div className="flex min-w-0 flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge status={article.status}>{STATUS_LABEL[article.status]}</StatusBadge>
-        {article.status === "APPROVED" || article.status === "HIDDEN_IN_SHOPIFY" ? <span className="text-xs text-muted-foreground">An edit after approval sends the article back to review.</span> : null}
-      </div>
-      <div className="flex flex-wrap gap-2">
+    <PageSection
+      id="article"
+      title={article.title}
+      description={
+        <span className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={article.status}>{STATUS_LABEL[article.status]}</StatusBadge>
+          {article.status === "APPROVED" || article.status === "HIDDEN_IN_SHOPIFY" ? <span className="text-xs">An edit after approval sends the article back to review.</span> : null}
+        </span>
+      }
+      actions={
+      <>
         {canEdit && !editing ? (
           <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
             Edit
@@ -230,7 +269,10 @@ function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: strin
             {article.shopifyId ? "Archive" : "Delete"}
           </Button>
         ) : null}
-      </div>
+      </>
+      }
+    >
+    <div className="flex min-w-0 flex-col gap-5">
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
       {canApprove ? (
         <div className="flex flex-col gap-2">
@@ -248,20 +290,20 @@ function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: strin
             void save();
           }}
         >
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            Title
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">Title</span>
             <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={200} required />
           </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            Address (lower-case letters, digits and dashes)
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">Address (lower-case letters, digits and dashes)</span>
             <Input value={form.handle} onChange={(e) => setForm({ ...form, handle: e.target.value })} maxLength={120} required />
           </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            Summary
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">Summary</span>
             <Textarea value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} maxLength={500} rows={2} />
           </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
-            Tags (comma-separated)
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">Tags (comma-separated)</span>
             <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
           </label>
           <p className="text-xs text-muted-foreground">In the text: [words](https://link) for a link, **bold**, *italic*. A list takes one item per line.</p>
@@ -295,8 +337,7 @@ function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: strin
           </div>
         </form>
       ) : (
-        <article className="flex flex-col gap-3">
-          <h2 className="text-xl font-semibold">{article.title}</h2>
+        <article className="flex min-w-0 flex-col gap-3 break-words" aria-labelledby="article-h">
           {article.summary ? <p className="text-sm text-muted-foreground">{article.summary}</p> : null}
           <ArticleBody blocks={article.blocks} />
         </article>
@@ -315,5 +356,6 @@ function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: strin
         />
       ) : null}
     </div>
+    </PageSection>
   );
 }
