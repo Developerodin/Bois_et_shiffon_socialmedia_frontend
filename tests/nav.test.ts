@@ -127,7 +127,7 @@ describe("tasks nav", () => {
     expect(sidebarGroups(["tasks"], ["tasks.read"]).flatMap(ids)).not.toContain("tasks");
     expect(NAV.find((e) => e.id === "tasks")?.group).not.toBe("more");
     expect(navFor("/tasks").title).toBe("Projects & tasks");
-    expect(NAV.find((e) => e.id === "seo")).toMatchObject({ label: "Performance", href: "/tasks?area=seo&view=open" });
+    expect(NAV.find((e) => e.id === "seo")).toMatchObject({ label: "Performance tasks", href: "/tasks?area=seo&view=open" });
   });
   it("titles /projects and a project page Projects without listing it", () => {
     expect(navFor("/projects").title).toBe("Projects");

@@ -45,7 +45,7 @@ export const NAV: readonly NavEntry[] = [
   { id: "digest", label: "Weekly digest", href: "/digest", group: "page", feature: "digest" },
   { id: "website", label: "Website", href: "/tasks?area=website&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
   { id: "blog", label: "Blog", href: "/blog", group: "main", feature: "blog" },
-  { id: "seo", label: "Performance", href: "/tasks?area=seo&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
+  { id: "seo", label: "Performance tasks", href: "/tasks?area=seo&view=open", group: "main", feature: "tasks", perm: TASKS_READ },
 
   { id: "library", label: "Brand & photos", href: "/library", group: "create", feature: "library" },
   { id: "photoshoot", label: "Photoshoot", href: "/photoshoot", group: "create", feature: "photoshoot" },
