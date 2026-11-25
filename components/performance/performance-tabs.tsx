@@ -9,7 +9,7 @@ import { SearchTab } from "@/components/performance/search-tab";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { PageHeader } from "@/components/ui/page-header";
-import { brandApi, presetEnd, presetRange, rangeDays, readRange, useReloadOnFocus, withRange, zoneToday, type DateRange } from "@/lib/data-api";
+import { brandApi, PRESETS, presetEnd, presetRange, rangeDays, readRange, useReloadOnFocus, withRange, zoneToday, type DateRange } from "@/lib/data-api";
 import type { DataSourcesDto } from "@/shared";
 import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
@@ -35,8 +35,8 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
   reports: ReactNode;
 }) {
   const [active, setActive] = useState<PerformanceTab>(tabs.find((t) => t === initialTab) ?? tabs[0]);
-  /** The preset's length once one is pressed: each tab ends it on its own presetEnd. */
-  const [picked, setPicked] = useState<number | null>(null);
+  /** A preset's length once one is pressed (each tab ends it on its own presetEnd), or the custom days as chosen. */
+  const [picked, setPicked] = useState<number | DateRange | null>(null);
   const tabRefs = useRef<Partial<Record<PerformanceTab, HTMLButtonElement | null>>>({});
   const isData = active !== "reports";
 
@@ -74,9 +74,10 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
       const { sources, timeZone } = state.data;
       const source = (kind: string) => sources.find((s) => s.kind === kind);
       const end = presetEnd(zoneToday(timeZone), active === "search" ? source("SEARCH_CONSOLE")?.syncedThrough : null);
-      const range = picked ? presetRange(picked, end) : readRange(new URLSearchParams({ from: initialRange.from ?? "", to: initialRange.to ?? "" }), end);
+      const range = typeof picked === "number" ? presetRange(picked, end) : picked ?? readRange(new URLSearchParams({ from: initialRange.from ?? "", to: initialRange.to ?? "" }), end);
       const changeRange = (r: DateRange) => {
-        setPicked(rangeDays(r));
+        const days = rangeDays(r);
+        setPicked(r.to === end && PRESETS.some((n) => n === days) ? days : r);
         window.history.replaceState(window.history.state, "", withRange(window.location.href, r));
       };
       rangeLine = rangeLabel(range);
