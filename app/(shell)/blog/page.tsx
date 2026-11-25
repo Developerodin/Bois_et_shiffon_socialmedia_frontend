@@ -19,6 +19,8 @@ export default async function BlogRoute({ searchParams }: { searchParams: Promis
   if (access.gate) return access.gate;
   const shell = await getShell(); // cached: featureAccess read it already
   const task = (await searchParams).task;
+  // The page holds the header here; Quotes' board holds its own because its New quote button needs the board's state.
+  // Blog has no header action: a new article starts from the topic form in the list (or the empty state).
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5">
       <PageHeader title="Blog">Articles for the store&rsquo;s blog. Approved ones go to Shopify hidden; nobody sees them there until you press Publish.</PageHeader>

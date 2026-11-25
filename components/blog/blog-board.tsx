@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
-import { focusSectionHeading, PageSection } from "@/components/ui/page-section";
+import { ListCard, ListDetail, ListRow, useRevealSection } from "@/components/ui/list-detail";
+import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 
 export const STATUS_LABEL: Record<BlogArticleStatus, string> = {
   DRAFT: "Draft",
@@ -65,6 +65,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const canCreate = perms.includes("content.create");
+  const { containerRef, reveal } = useRevealSection("article", selected);
 
   const load = () => {
     setFailed(false);
@@ -77,28 +78,26 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
   useEffect(load, []);
 
   const put = (a: BlogArticleDto) => setArticles((list) => [a, ...(list ?? []).filter((x) => x.id !== a.id)]);
+  const open = (id: string, mode: "stacked" | "always" = "stacked") => {
+    if (id === selected) return;
+    reveal(mode);
+    setSelected(id);
+  };
   const create = async (body: { topic?: string; taskId?: string }) => {
+    // From the empty state the form goes away with it, so focus must move to the new article.
+    const fromEmpty = articles?.length === 0;
     setBusy(true);
     setError(null);
     try {
       const { article } = await blogApi.create(w, b, body);
       put(article);
-      open(article.id);
+      open(article.id, fromEmpty ? "always" : "stacked");
       setTopic("");
     } catch (e) {
       setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
-  };
-
-  const open = (id: string) => {
-    setSelected(id);
-    // Stacked (a narrow page), the article opens below the list, out of sight: take the reader there.
-    requestAnimationFrame(() => {
-      const top = document.getElementById("article-h")?.getBoundingClientRect().top;
-      if (top !== undefined && (top < 0 || top > window.innerHeight - 80)) focusSectionHeading("article");
-    });
   };
 
   if (failed) return <LoadFailed what="the articles" onRetry={load} />;
@@ -137,47 +136,30 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
       <EmptyState
         icon={Newspaper}
         title="No articles yet"
-        description="Start one from a topic, then write it with AI or by hand. Approved articles go to your Shopify blog hidden until you publish them."
+        description={
+          canCreate
+            ? "Start one from a topic, then write it with AI or by hand. Approved articles go to your Shopify blog hidden until you publish them."
+            : "Articles for this business's blog show here once someone on the team starts one."
+        }
         action={starters}
       />
     );
   return (
-    // Split on the page column's own width, not the window's: the sidebar and the assistant take part of a wide window.
-    <div className="@container">
-      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-5 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
-        <PageSection id="articles-list" title="Articles" description={`${articles.length} ${articles.length === 1 ? "article" : "articles"}`} className="px-0 py-2">
-          {starters ? <div className="px-5 pb-3 pt-1">{starters}</div> : null}
-          <ul className="flex flex-col">
-            {articles.map((a) => (
-              <li key={a.id}>
-                <button
-                  type="button"
-                  aria-current={a.id === selected ? "true" : undefined}
-                  onClick={() => open(a.id)}
-                  className={cn(
-                    "flex w-full items-start justify-between gap-2 px-5 py-3 text-left text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring pointer-coarse:py-3.5",
-                    a.id === selected && "bg-accent hover:bg-accent",
-                  )}
-                >
-                  <span className="min-w-0 break-words font-medium">{a.title}</span>
-                  <StatusBadge status={a.status}>{STATUS_LABEL[a.status]}</StatusBadge>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </PageSection>
-        {current ? (
-          <ArticleEditor key={current.id} w={w} b={b} article={current} perms={perms} onChange={put} onRemoved={() => setArticles((l) => (l ?? []).filter((x) => x.id !== current.id))} />
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card px-5 py-16 text-center shadow-sm">
-            <span className="inline-flex size-10 items-center justify-center rounded-full border border-border bg-muted text-primary" aria-hidden="true">
-              <Newspaper className="size-4" />
-            </span>
-            <p className="text-sm text-muted-foreground">Pick an article to read and edit it{canCreate ? ", or add one" : ""}.</p>
-          </div>
-        )}
-      </div>
-    </div>
+    <ListDetail
+      containerRef={containerRef}
+      list={
+        <ListCard id="articles-list" title="Articles" description={`${articles.length} ${articles.length === 1 ? "article" : "articles"}`} top={starters}>
+          {articles.map((a) => (
+            <ListRow key={a.id} selected={a.id === selected} onSelect={() => open(a.id)} className="items-start justify-between">
+              <span className="min-w-0 break-words font-medium">{a.title}</span>
+              <StatusBadge status={a.status}>{STATUS_LABEL[a.status]}</StatusBadge>
+            </ListRow>
+          ))}
+        </ListCard>
+      }
+      detail={current ? <ArticleEditor key={current.id} w={w} b={b} article={current} perms={perms} onChange={put} onRemoved={() => setArticles((l) => (l ?? []).filter((x) => x.id !== current.id))} /> : null}
+      placeholder={<EmptyState variant="card" icon={Newspaper} title="No article open" description={`Pick an article to read and edit it${canCreate ? ", or add one" : ""}.`} />}
+    />
   );
 }
 
@@ -230,132 +212,132 @@ function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: strin
         </span>
       }
       actions={
-      <>
-        {canEdit && !editing ? (
-          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
-            Edit
-          </Button>
-        ) : null}
-        {canEdit ? (
-          <Button size="sm" variant="outline" disabled={!!busy} onClick={() => run("write", () => blogApi.write(w, b, article.id))}>
-            {busy === "write" ? "Writing… (up to a minute)" : article.blocks.length ? "Rewrite with AI" : "Write with AI"}
-          </Button>
-        ) : null}
-        {canApprove ? (
-          <Button size="sm" disabled={!!busy || !article.blocks.length} onClick={() => run("approve", () => blogApi.decide(w, b, article.id, { version: article.version, verdict: "APPROVED" }))}>
-            Approve
-          </Button>
-        ) : null}
-        {next ? (
-          <Button size="sm" disabled={!!busy} onClick={() => setDialog(next)}>
-            {ACTION_LABEL[next]}
-          </Button>
-        ) : null}
-        {perms.includes("content.create") ? (
-          <Button
-            size="sm"
-            variant="ghost"
-            disabled={!!busy}
-            onClick={async () => {
-              if (!window.confirm(article.shopifyId ? "Archive this article here? Shopify's copy stays as it is." : "Delete this article?")) return;
-              try {
-                await blogApi.remove(w, b, article.id);
-                onRemoved();
-              } catch (e) {
-                setError(errorMessage(e));
-              }
-            }}
-          >
-            {article.shopifyId ? "Archive" : "Delete"}
-          </Button>
-        ) : null}
-      </>
+        <>
+          {canEdit && !editing ? (
+            <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
+              Edit
+            </Button>
+          ) : null}
+          {canEdit ? (
+            <Button size="sm" variant="outline" disabled={!!busy} onClick={() => run("write", () => blogApi.write(w, b, article.id))}>
+              {busy === "write" ? "Writing… (up to a minute)" : article.blocks.length ? "Rewrite with AI" : "Write with AI"}
+            </Button>
+          ) : null}
+          {canApprove ? (
+            <Button size="sm" disabled={!!busy || !article.blocks.length} onClick={() => run("approve", () => blogApi.decide(w, b, article.id, { version: article.version, verdict: "APPROVED" }))}>
+              Approve
+            </Button>
+          ) : null}
+          {next ? (
+            <Button size="sm" disabled={!!busy} onClick={() => setDialog(next)}>
+              {ACTION_LABEL[next]}
+            </Button>
+          ) : null}
+          {perms.includes("content.create") ? (
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={!!busy}
+              onClick={async () => {
+                if (!window.confirm(article.shopifyId ? "Archive this article here? Shopify's copy stays as it is." : "Delete this article?")) return;
+                try {
+                  await blogApi.remove(w, b, article.id);
+                  onRemoved();
+                } catch (e) {
+                  setError(errorMessage(e));
+                }
+              }}
+            >
+              {article.shopifyId ? "Archive" : "Delete"}
+            </Button>
+          ) : null}
+        </>
       }
     >
-    <div className="flex min-w-0 flex-col gap-5">
-      {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
-      {canApprove ? (
-        <div className="flex flex-col gap-2">
-          <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What needs to change" maxLength={1000} aria-label="What needs to change" rows={2} />
-          <Button size="sm" variant="outline" className="self-start" disabled={!!busy || !note.trim()} onClick={() => run("changes", () => blogApi.decide(w, b, article.id, { version: article.version, verdict: "CHANGES_REQUESTED", note: note.trim() }))}>
-            Ask for changes
-          </Button>
-        </div>
-      ) : null}
-      {editing ? (
-        <form
-          className="flex flex-col gap-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void save();
-          }}
-        >
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-muted-foreground">Title</span>
-            <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={200} required />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-muted-foreground">Address (lower-case letters, digits and dashes)</span>
-            <Input value={form.handle} onChange={(e) => setForm({ ...form, handle: e.target.value })} maxLength={120} required />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-muted-foreground">Summary</span>
-            <Textarea value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} maxLength={500} rows={2} />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-muted-foreground">Tags (comma-separated)</span>
-            <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
-          </label>
-          <p className="text-xs text-muted-foreground">In the text: [words](https://link) for a link, **bold**, *italic*. A list takes one item per line.</p>
-          {form.blocks.map((blk, i) => (
-            <div key={i} className="flex flex-col gap-1 rounded-xl border border-border p-3">
-              <div className="flex gap-2">
-                <select className={selectClass} value={blk.type} onChange={(e) => setBlock(i, { type: e.target.value as DraftBlock["type"] })} aria-label="Block type">
-                  {BLOCK_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-                <Button type="button" size="sm" variant="ghost" onClick={() => setForm((f) => ({ ...f, blocks: f.blocks.filter((_, j) => j !== i) }))}>
-                  Remove
-                </Button>
-              </div>
-              <Textarea value={blk.text} onChange={(e) => setBlock(i, { text: e.target.value })} rows={blk.type === "h2" || blk.type === "h3" ? 1 : 4} aria-label="Block text" />
-            </div>
-          ))}
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" variant="outline" onClick={() => setForm((f) => ({ ...f, blocks: [...f.blocks, { type: "p", text: "" }] }))}>
-              Add a block
-            </Button>
-            <Button type="submit" size="sm" disabled={!!busy}>
-              {busy === "save" ? "Saving…" : "Save"}
-            </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(false)}>
-              Cancel
+      <div className="flex min-w-0 flex-col gap-5">
+        {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
+        {canApprove ? (
+          <div className="flex flex-col gap-2">
+            <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What needs to change" maxLength={1000} aria-label="What needs to change" rows={2} />
+            <Button size="sm" variant="outline" className="self-start" disabled={!!busy || !note.trim()} onClick={() => run("changes", () => blogApi.decide(w, b, article.id, { version: article.version, verdict: "CHANGES_REQUESTED", note: note.trim() }))}>
+              Ask for changes
             </Button>
           </div>
-        </form>
-      ) : (
-        <article className="flex min-w-0 flex-col gap-3 break-words" aria-labelledby="article-h">
-          {article.summary ? <p className="text-sm text-muted-foreground">{article.summary}</p> : null}
-          <ArticleBody blocks={article.blocks} />
-        </article>
-      )}
-      {dialog ? (
-        <ShopifyDialog
-          w={w}
-          b={b}
-          article={article}
-          action={dialog}
-          onClose={() => setDialog(null)}
-          onDone={(a) => {
-            setDialog(null);
-            onChange(a);
-          }}
-        />
-      ) : null}
-    </div>
+        ) : null}
+        {editing ? (
+          <form
+            className="flex flex-col gap-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void save();
+            }}
+          >
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-muted-foreground">Title</span>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} maxLength={200} required />
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-muted-foreground">Address (lower-case letters, digits and dashes)</span>
+              <Input value={form.handle} onChange={(e) => setForm({ ...form, handle: e.target.value })} maxLength={120} required />
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-muted-foreground">Summary</span>
+              <Textarea value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} maxLength={500} rows={2} />
+            </label>
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-muted-foreground">Tags (comma-separated)</span>
+              <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+            </label>
+            <p className="text-xs text-muted-foreground">In the text: [words](https://link) for a link, **bold**, *italic*. A list takes one item per line.</p>
+            {form.blocks.map((blk, i) => (
+              <div key={i} className="flex flex-col gap-1 rounded-xl border border-border p-3">
+                <div className="flex gap-2">
+                  <select className={selectClass} value={blk.type} onChange={(e) => setBlock(i, { type: e.target.value as DraftBlock["type"] })} aria-label="Block type">
+                    {BLOCK_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => setForm((f) => ({ ...f, blocks: f.blocks.filter((_, j) => j !== i) }))}>
+                    Remove
+                  </Button>
+                </div>
+                <Textarea value={blk.text} onChange={(e) => setBlock(i, { text: e.target.value })} rows={blk.type === "h2" || blk.type === "h3" ? 1 : 4} aria-label="Block text" />
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={() => setForm((f) => ({ ...f, blocks: [...f.blocks, { type: "p", text: "" }] }))}>
+                Add a block
+              </Button>
+              <Button type="submit" size="sm" disabled={!!busy}>
+                {busy === "save" ? "Saving…" : "Save"}
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(false)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <article className="flex min-w-0 flex-col gap-3 break-words" aria-labelledby="article-h">
+            {article.summary ? <p className="text-sm text-muted-foreground">{article.summary}</p> : null}
+            <ArticleBody blocks={article.blocks} />
+          </article>
+        )}
+        {dialog ? (
+          <ShopifyDialog
+            w={w}
+            b={b}
+            article={article}
+            action={dialog}
+            onClose={() => setDialog(null)}
+            onDone={(a) => {
+              setDialog(null);
+              onChange(a);
+            }}
+          />
+        ) : null}
+      </div>
     </PageSection>
   );
 }
