@@ -359,7 +359,7 @@ function ShopifyDialog({
         </DialogHeader>
         <div className="flex flex-col gap-3">
           {askCart ? (
-            <form onSubmit={connectAskCart} className="flex flex-col gap-3 rounded-md border p-3 text-sm">
+            <form onSubmit={connectAskCart} className="flex flex-col gap-3 rounded-xl border border-border p-4 text-sm">
               <div>
                 <p className="font-medium">Connect with our app (AskCart)</p>
                 <p className="text-muted-foreground">
@@ -385,12 +385,12 @@ function ShopifyDialog({
             </form>
           ) : null}
           {mcp ? (
-            <form onSubmit={connectMcp} className="flex flex-col gap-3 rounded-md border p-3 text-sm">
+            <form onSubmit={connectMcp} className="flex flex-col gap-3 rounded-xl border border-border p-4 text-sm">
               <div>
                 <p className="font-medium">Connect with Shopify MCP</p>
                 <p className="text-muted-foreground">
                   Reads your products, prices and stock from your store&apos;s public catalogue. Nothing to install. Orders need our app
-                  (AskCart).
+                  (AskCart). Enter the store&apos;s .myshopify.com address or its own domain.
                 </p>
               </div>
               <Input
@@ -398,7 +398,7 @@ function ShopifyDialog({
                 autoComplete="off"
                 value={mcpShop}
                 onChange={(e) => setMcpShop(e.target.value)}
-                placeholder="your-store.myshopify.com or your shop's domain"
+                placeholder="your-store.myshopify.com"
                 maxLength={200}
                 aria-label="Store address for Shopify MCP"
               />
@@ -407,14 +407,15 @@ function ShopifyDialog({
               </Button>
             </form>
           ) : (
-            <div className="flex items-center justify-between gap-4 rounded-md border p-3 text-sm opacity-60">
-              <div>
+            // Unavailable as on a provider row of this page: readable text and a muted badge, no disabled button.
+            <div className="flex flex-col items-start gap-3 rounded-xl border border-border p-4 text-sm sm:flex-row sm:justify-between sm:gap-4">
+              <div className="min-w-0">
                 <p className="font-medium">Shopify MCP</p>
                 <p className="text-muted-foreground">Not set up on this platform. Ask your platform admin.</p>
               </div>
-              <Button type="button" variant="outline" disabled>
-                Connect
-              </Button>
+              <StatusBadge tone="muted" className="shrink-0">
+                Not set up
+              </StatusBadge>
             </div>
           )}
         </div>
