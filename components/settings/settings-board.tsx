@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useRef } from "react";
 import { ShieldOff } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
@@ -30,14 +31,12 @@ const TABS: { key: TabKey; label: string; needs: string | readonly string[] }[] 
 type Props = {
   workspaceId: string;
   brandId: string | null;
-  /** From ?tab=; anything that is not a tab is ignored. */
-  initialTab?: string;
   notice: { kind: "ok" | "error"; text: string; names?: string[] } | null;
   /** The `ads` flag, for the Connections tab's Meta Ads card. */
   showAds?: boolean;
 };
 
-export function SettingsBoard({ workspaceId, brandId, initialTab, notice, showAds = false }: Props) {
+export function SettingsBoard({ workspaceId, brandId, notice, showAds = false }: Props) {
   const permsFetcher = useCallback(
     // With a project open: workspace role plus that project's role.
     () => settingsApi.myPermissions(workspaceId, brandId).then((d) => new Set(d.permissions ?? [])),
@@ -59,10 +58,10 @@ export function SettingsBoard({ workspaceId, brandId, initialTab, notice, showAd
   const visible = can
     ? TABS.filter((t) => (typeof t.needs === "string" ? can.has(t.needs) : t.needs.some((k) => can.has(k))) && ((t.key !== "connections" && t.key !== "project" && t.key !== "languages") || brandId))
     : [];
-  const [active, setActiveState] = useState<TabKey | null>(TABS.find((t) => t.key === initialTab)?.key ?? null);
-  // The tab lives in the URL (replace, not push) so a reload or a shared link lands on the same one.
+  // The tab lives in the URL (replace, not push) so a reload or a shared link lands on the same one, and a link to
+  // another ?tab= (the sidebar's agents) switches it on this page too. Next syncs useSearchParams from native history.
+  const active = useSearchParams().get("tab");
   function setActive(key: TabKey) {
-    setActiveState(key);
     const url = new URL(window.location.href);
     url.searchParams.set("tab", key);
     window.history.replaceState(window.history.state, "", url);

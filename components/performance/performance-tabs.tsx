@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useCallback, useRef, useState, type ReactNode } from "react";
 import { DateRangeFilter, rangeLabel } from "@/components/data/date-range";
 import { AdsTab } from "@/components/performance/ads-tab";
@@ -22,19 +23,20 @@ const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "S
  * (flag + read permission). The tab and the date range live in the URL (?tab, ?from&to; replace, not push) so a reload
  * or a shared link lands on the same view. Prints as the open tab alone (globals.css, data-print-root).
  */
-export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialTab, initialRange, canManage, reports }: {
+export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialRange, canManage, reports }: {
   workspaceId: string;
   brandId: string;
   brandName: string | null;
   tabs: PerformanceTab[];
-  initialTab?: string;
   /** ?from&to as they came; checked once the brand's "today" is known. */
   initialRange: { from?: string; to?: string };
   /** integrations.manage: the site picker and turning on orders. */
   canManage: boolean;
   reports: ReactNode;
 }) {
-  const [active, setActive] = useState<PerformanceTab>(tabs.find((t) => t === initialTab) ?? tabs[0]);
+  // The tab is read from the URL, so a link to another ?tab= (the sidebar's agents) switches it on this page too.
+  const urlTab = useSearchParams().get("tab");
+  const active = tabs.find((t) => t === urlTab) ?? tabs[0];
   /** A preset's length once one is pressed (each tab ends it on its own presetEnd), or the custom days as chosen. */
   const [picked, setPicked] = useState<number | DateRange | null>(null);
   const tabRefs = useRef<Partial<Record<PerformanceTab, HTMLButtonElement | null>>>({});
@@ -46,7 +48,7 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
   useReloadOnFocus(reload, state);
 
   function select(tab: PerformanceTab) {
-    setActive(tab);
+    // Native history, not router.push: Next syncs useSearchParams from it without a server round trip.
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
     window.history.replaceState(window.history.state, "", url);

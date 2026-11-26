@@ -41,7 +41,6 @@ export default async function SettingsPage({
       key={shell.activeWorkspaceId}
       workspaceId={shell.activeWorkspaceId}
       brandId={shell.activeBrandId ?? null}
-      initialTab={q.tab}
       notice={notice}
       showAds={featureOn("ads", shell.activeWorkspaceId)}
     />
