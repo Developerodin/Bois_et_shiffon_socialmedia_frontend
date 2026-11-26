@@ -55,6 +55,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
   const [error, setError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<Connection | null>(null);
   const [shopifyOpen, setShopifyOpen] = useState(false);
+  const [systemOpen, setSystemOpen] = useState(false);
   const [shown, setShown] = useState(notice);
   // Hide a disconnected account at once; the list refetch from the database can take seconds.
   const [gone, setGone] = useState<Set<string>>(new Set());
@@ -142,14 +143,21 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
                 {!p.configured ? (
                   <StatusBadge tone="muted" className="shrink-0">Not set up</StatusBadge>
                 ) : canManage ? (
-                  <Button
-                    size="sm"
-                    variant={accounts.length ? "outline" : "default"}
-                    onClick={() => connect(p)}
-                    disabled={busy !== null}
-                  >
-                    {busy === p.provider ? "Opening…" : accounts.length ? "Reconnect" : "Connect"}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    {p.provider === "META_ADS" ? (
+                      <Button size="sm" variant="outline" onClick={() => setSystemOpen(true)} disabled={busy !== null}>
+                        Use a system user token
+                      </Button>
+                    ) : null}
+                    <Button
+                      size="sm"
+                      variant={accounts.length ? "outline" : "default"}
+                      onClick={() => connect(p)}
+                      disabled={busy !== null}
+                    >
+                      {busy === p.provider ? "Opening…" : accounts.length ? "Reconnect" : "Connect"}
+                    </Button>
+                  </div>
                 ) : null}
               </div>
               {accounts.map((c) => (
@@ -261,6 +269,19 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
           reload();
         }}
       />
+      {systemOpen ? (
+        <SystemTokenDialog
+          workspaceId={workspaceId}
+          brandId={brandId}
+          onClose={() => setSystemOpen(false)}
+          onConnected={(names) => {
+            setSystemOpen(false);
+            setError(null);
+            setShown({ kind: "ok", text: `Connected ${names.join(", ")} with the system user token. It doesn't expire.`, names });
+            reload();
+          }}
+        />
+      ) : null}
       {shopifyOpen ? (
         <ShopifyDialog
           workspaceId={workspaceId}
@@ -277,6 +298,63 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
         />
       ) : null}
     </div>
+  );
+}
+
+/**
+ * Meta Ads on a System User token pasted from Business Manager (docs/meta-system-user.md on the server). The server
+ * checks it is our app's, a system user's, never expiring and allowed to read ads, then connects every ad account it
+ * sees; it replaces a personal login in place. Refusals are the server's fixed messages; the token is never shown back.
+ */
+function SystemTokenDialog({ workspaceId, brandId, onClose, onConnected }: { workspaceId: string; brandId: string; onClose: () => void; onConnected: (names: string[]) => void }) {
+  const [token, setToken] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      const { connections } = await settingsApi.connectMetaSystemToken(workspaceId, brandId, token);
+      setToken("");
+      onConnected(connections.map((c) => c.displayName));
+    } catch (err) {
+      setError(errorMessage(err, "Couldn't use this token. Try again."));
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => (!open && !busy ? onClose() : undefined)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Use a system user token</DialogTitle>
+          <DialogDescription>
+            A token that doesn&apos;t expire, so the ad numbers keep coming without signing in again every 60 days. In Business
+            Manager, create a system user, assign it only your own ad account and our app, and generate a token with ads_read,
+            expiry &ldquo;Never&rdquo;.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={(e) => void submit(e)} className="flex flex-col gap-5">
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">System user token</span>
+            <Input required type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} maxLength={600} />
+          </label>
+          <p aria-live="polite" className="text-sm text-destructive empty:hidden">
+            {error}
+          </p>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={busy || !token.trim()}>
+              {busy ? "Checking…" : "Use this token"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 

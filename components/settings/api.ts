@@ -232,6 +232,9 @@ export const settingsApi = {
    * Shopify MCP: the store's address → the connection, once the store answered a catalogue search. Products only.
    * `warning` when the store's own domain isn't the brand's website.
    */
+  /** Meta Ads on a System User token from Business Manager (never expires); replaces personal logins in place. */
+  connectMetaSystemToken: (w: string, b: string, token: string) =>
+    request<{ connections: Connection[] }>(`${brand(w, b)}/integrations/meta-ads/system-token`, json("POST", { token })),
   connectShopifyMcp: (w: string, b: string, shop: string) =>
     request<{ connection: Connection; warning?: string }>(`${brand(w, b)}/integrations/shopify/mcp`, json("POST", { shop })),
 
