@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { ChecksList } from "@/components/ui/checks-list";
 import { reelHref } from "@/components/reels/href";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
@@ -389,7 +390,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     // One height with the toolbar's buttons and selects (32 px); the chosen view carries the --control outline chosen tabs use.
     <div role="tablist" aria-label="Calendar view" className="flex h-8 items-center gap-0.5 rounded-full border border-border bg-muted p-0.5 text-xs pointer-coarse:h-auto">
       {(["list", "month"] as const).map((v) => (
-        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("h-[26px] min-w-14 rounded-full px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11", view === v ? "bg-card text-foreground ring-1 ring-inset ring-control" : "text-muted-foreground hover:text-foreground")}>
+        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("h-[26px] rounded-full px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11", view === v ? "bg-card text-foreground ring-1 ring-inset ring-control" : "text-muted-foreground hover:text-foreground")}>
           {v === "list" ? "List" : "Month"}
         </button>
       ))}
@@ -429,46 +430,36 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const campaignOptions = [...named].map(([id, name]) => ({ id, name }));
   const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
   // 16 px text on touch screens, so focusing a select doesn't zoom the page.
-  // Rounded like the toolbar's buttons, so the two rows read as one set of controls.
-  const sel = cn(selectClass, "h-8 rounded-full pl-3 pr-7 text-xs pointer-coarse:h-11 pointer-coarse:text-base");
   const filterCount = activeFilterCount(filter);
-  // The filter selects: in the toolbar on a wide panel (`wide`), in the Filters popover otherwise.
+  // The filter dropdowns: in the toolbar on a wide panel (`wide`), in the Filters popover otherwise, filling its width.
   const filterControls = (wide: boolean) => {
-    const c = cn(sel, wide ? "w-auto" : "w-full");
     return (
       <>
-        <select aria-label="Channel" value={filter.channel ?? ""} onChange={(e) => set({ channel: e.target.value || undefined })} className={c}>
-          <option value="">All channels</option>
-          {channels.map((ch) => <option key={ch} value={ch}>{CHANNEL_LABEL[ch] ?? ch}</option>)}
-        </select>
-        <select aria-label="Status" value={filter.status ?? ""} onChange={(e) => set({ status: (e.target.value || undefined) as CalendarFilter["status"] })} className={c}>
-          <option value="">Any status</option>
-          {(Object.keys(STATUS_GROUPS) as (keyof typeof STATUS_GROUPS)[]).map((g) => <option key={g} value={g}>{STATUS_GROUP_LABEL[g]}</option>)}
-        </select>
+        <FilterSelect label="Channel" fill={!wide} value={filter.channel ?? ""} onChange={(v) => set({ channel: v || undefined })} options={[{ value: "", label: "All channels" }, ...channels.map((ch) => ({ value: ch, label: CHANNEL_LABEL[ch] ?? ch, icon: CHANNEL_ICON[ch] ?? FileText }))]} />
+        <FilterSelect label="Status" fill={!wide} value={filter.status ?? ""} onChange={(v) => set({ status: (v || undefined) as CalendarFilter["status"] })} options={[{ value: "", label: "Any status" }, ...(Object.keys(STATUS_GROUPS) as (keyof typeof STATUS_GROUPS)[]).map((g) => ({ value: g, label: STATUS_GROUP_LABEL[g] }))]} />
         {(campaignOptions.length > 0 || filter.campaignId) && (
-          <select aria-label="Campaign" value={filter.campaignId ?? ""} onChange={(e) => set({ campaignId: e.target.value || undefined })} className={c}>
-            <option value="">Any campaign</option>
-            {campaignOptions.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-            {filter.campaignId && !campaignOptions.some((o) => o.id === filter.campaignId) && <option value={filter.campaignId}>This campaign</option>}
-          </select>
+          <FilterSelect
+            label="Campaign"
+            fill={!wide}
+            value={filter.campaignId ?? ""}
+            onChange={(v) => set({ campaignId: v || undefined })}
+            options={[
+              { value: "", label: "Any campaign" },
+              ...campaignOptions.map((o) => ({ value: o.id, label: o.name })),
+              ...(filter.campaignId && !campaignOptions.some((o) => o.id === filter.campaignId) ? [{ value: filter.campaignId, label: "This campaign" }] : []),
+            ]}
+          />
         )}
         {campaignsFailed && <p className="text-xs text-muted-foreground">Couldn&rsquo;t load campaigns.</p>}
-        <select aria-label="Owner" value={filter.owner ?? ""} onChange={(e) => set({ owner: (e.target.value || undefined) as CalendarFilter["owner"] })} className={c}>
-          <option value="">Anyone</option>
-          {(me || filter.owner === "me") && <option value="me" disabled={!me}>Mine</option>}
-          <option value="none">Unassigned</option>
-        </select>
-        <select aria-label="Needs action" value={filter.need ?? ""} onChange={(e) => set({ need: (e.target.value || undefined) as CalendarFilter["need"] })} className={c}>
-          <option value="">Needs action: any</option>
-          {(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => <option key={n} value={n}>{NEED_LABEL[n]}</option>)}
-        </select>
+        <FilterSelect label="Owner" fill={!wide} value={filter.owner ?? ""} onChange={(v) => set({ owner: (v || undefined) as CalendarFilter["owner"] })} options={[{ value: "", label: "Anyone" }, ...(me || filter.owner === "me" ? [{ value: "me", label: "Mine", disabled: !me }] : []), { value: "none", label: "Unassigned" }]} />
+        <FilterSelect label="Needs action" fill={!wide} value={filter.need ?? ""} onChange={(v) => set({ need: (v || undefined) as CalendarFilter["need"] })} options={[{ value: "", label: "Needs action: any" }, ...(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => ({ value: n, label: NEED_LABEL[n] }))]} />
       </>
     );
   };
   const monthNav = (
     // On a narrow panel it takes a row of its own under the buttons. On a wide panel the heading keeps one width so the arrows don't move.
     <div className="flex items-center gap-1 @max-[640px]/cal:order-last @max-[640px]/cal:w-full">
-      <h2 id={monthHeadId} aria-live="polite" className="mx-1.5 text-base font-semibold tracking-tight tabular-nums @min-[900px]/cal:min-w-40 @max-[640px]/cal:mr-auto">
+      <h2 id={monthHeadId} aria-live="polite" className="mx-1 text-base font-semibold tracking-tight tabular-nums @min-[900px]/cal:min-w-40 @max-[640px]/cal:mr-auto">
         {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
       </h2>
       <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Previous month" onClick={() => showMonth(month.y, month.m - 1)}>
@@ -611,6 +602,8 @@ function FiltersMenu({ count, onClear, children }: { count: number; onClear: () 
     box.current?.querySelector<HTMLElement>("select, button")?.focus();
     const down = (e: PointerEvent) => {
       const t = e.target as Node;
+      // A filter's open menu is portalled to the body: a press in it is still a press inside the popover.
+      if ((t as Element).closest?.("[role=menu]")) return;
       if (!box.current?.contains(t) && !btn.current?.contains(t)) setOpen(false);
     };
     document.addEventListener("pointerdown", down);
@@ -639,7 +632,8 @@ function FiltersMenu({ count, onClear, children }: { count: number; onClear: () 
           role="group"
           aria-label="Filter posts"
           onKeyDown={(e) => {
-            if (e.key !== "Escape") return;
+            // Esc in a filter's menu closes that menu only (React passes its keys up through the portal).
+            if (e.key !== "Escape" || (e.target as Element).closest("[role=menu]")) return;
             e.preventDefault();
             close();
           }}
