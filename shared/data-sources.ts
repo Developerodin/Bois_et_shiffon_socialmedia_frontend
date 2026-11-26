@@ -105,9 +105,18 @@ export type PostMetricsDto = {
   shares: number | null;
   saves: number | null;
   interactions: number | null;
+  /**
+   * Instagram stories only (null for posts): taps forward, back, exits and next-story swipes. A story's numbers are
+   * read once, 20 h after its first frame: views, replies (in `comments`), shares and interactions summed over its
+   * frames, `reach` the highest frame's (people overlap).
+   */
+  navigation: number | null;
 };
 
-/** GET insights/posts?from&to (analytics.read): one per Instagram, Facebook or Threads post published in the range. */
+/**
+ * GET insights/posts?from&to (analytics.read): one per Instagram, Facebook or Threads post published in the range,
+ * Instagram stories included (channel INSTAGRAM_STORY, `final` once read; story numbers follow analytics.read too).
+ */
 export type PostInsightDto = {
   attemptId: string;
   contentItemId: string;

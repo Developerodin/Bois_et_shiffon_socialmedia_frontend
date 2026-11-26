@@ -25,6 +25,16 @@ const COLUMNS: { key: keyof PostMetricsDto; label: string }[] = [
   { key: "saves", label: "Saves" },
 ];
 
+/** Instagram stories: read once, 20 h after the first frame; sums over the frames, reach the highest frame's. */
+const STORY_COLUMNS: { key: keyof PostMetricsDto; label: string }[] = [
+  { key: "reach", label: "Reach (highest frame)" },
+  { key: "views", label: "Views" },
+  { key: "comments", label: "Replies" },
+  { key: "shares", label: "Shares" },
+  { key: "navigation", label: "Taps" },
+];
+export const isStory = (p: PostInsightDto) => p.channel === "INSTAGRAM_STORY";
+
 /** Rows shown at first and added per "Show more posts". */
 const PAGE = 50;
 
@@ -53,8 +63,9 @@ export function PostsTab({ workspaceId, brandId, range, source, onSourceChanged 
   if (state.kind === "forbidden") return <EmptyState icon={BarChart3} title="You can't see post results" description="Ask a workspace owner for access." />;
   if (state.kind === "error") return <LoadError message={state.message} onRetry={reload} />;
 
-  const posts = state.data;
-  if (!source && !posts.length) {
+  const posts = state.data.filter((p) => !isStory(p));
+  const stories = state.data.filter(isStory);
+  if (!source && !posts.length && !stories.length) {
     return (
       <EmptyState
         icon={BarChart3}
@@ -111,9 +122,47 @@ export function PostsTab({ workspaceId, brandId, range, source, onSourceChanged 
       ) : (
         <p className="text-sm text-muted-foreground">No posts were published in these dates.</p>
       )}
+      {stories.length ? <StoriesTable stories={stories} /> : null}
       <p className="text-xs text-muted-foreground">
-        A dash means the channel doesn&rsquo;t report that number. Older Facebook photo posts have no results, and Instagram stories aren&rsquo;t measured.
+        A dash means the channel doesn&rsquo;t report that number. Older Facebook photo posts have no results. Instagram stories are
+        read once, 20 hours after their first frame, before they disappear: frames posted later, or posted by hand, have no numbers.
       </p>
     </PageSection>
+  );
+}
+
+/** Instagram stories in the range, each with its one read. */
+function StoriesTable({ stories }: { stories: PostInsightDto[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <h3 className="text-sm font-medium">Stories</h3>
+      <div className="-mx-5 overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead className="border-b border-border text-xs text-muted-foreground">
+            <tr>
+              <th scope="col" className="px-5 py-2 font-medium">Story</th>
+              <th scope="col" className="px-3 py-2 font-medium">Published</th>
+              {STORY_COLUMNS.map((c) => (
+                <th key={c.key} scope="col" className="px-3 py-2 text-right font-medium">{c.label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {stories.map((p) => (
+              <tr key={p.attemptId}>
+                <td className="max-w-72 px-5 py-2.5">
+                  <p className="truncate font-medium">{p.title || "Untitled story"}</p>
+                  {!p.metrics ? <p className="text-xs text-muted-foreground">Read 20 hours after it went out</p> : null}
+                </td>
+                <td className="whitespace-nowrap px-3 py-2.5 text-muted-foreground">{dayDate(p.publishedAt)}</td>
+                {STORY_COLUMNS.map((c) => (
+                  <td key={c.key} className="px-3 py-2.5 text-right tabular-nums">{count(p.metrics?.[c.key])}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
