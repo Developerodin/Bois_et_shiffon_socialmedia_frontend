@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { urlHistoryHref } from "@/lib/seo-links";
 import {
   DATA_SOURCE_SLUGS, type ChooseSearchSiteBody, type DataSourceDto, type SearchMetrics, type SearchPageRow, type SearchPagesDto, type SearchQueriesDto, type SearchQueryRow,
   type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto,
@@ -140,7 +141,7 @@ function TopPages({ base, range, first }: { base: string; range: DateRange; firs
       title="Top pages"
       note="Google reports the top pages each day, so these add up to less than the site total."
       empty="No pages in this range."
-      label={(p) => <span key="p" className="break-all">{p.page}</span>}
+      label={(p) => <Link key="p" href={urlHistoryHref(p.page)} className="break-all underline-offset-2 hover:underline">{p.page}</Link>}
     />
   );
 }

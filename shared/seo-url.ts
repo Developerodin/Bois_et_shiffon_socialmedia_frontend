@@ -1,3 +1,7 @@
+import type { BlogArticleStatus } from "./blog";
+import type { DateRange, SearchMetrics, SearchQueryRow } from "./data-sources";
+import type { TASK_STATUSES, WEBSITE_CHANGE_KINDS } from "./tasks";
+
 // One way to tell when two URLs name the same page, for SEO matching (Search Console rows, audit findings, tasks).
 // http and https are the same page, the host is lower-cased and a leading "www." dropped, the fragment and the whole
 // query string are dropped (variant, tracking and filter parameters name the same page for SEO), and a trailing slash
@@ -42,3 +46,43 @@ export function urlVariants(raw: string): string[] {
 export function urlPath(raw: string): string | null {
   return parse(raw)?.path ?? null;
 }
+
+/**
+ * GET seo/url?u=<url>&from&to: one page's SEO story. `url` is rebuilt by the server (https, host, path), never echoed
+ * from `u`, so it is safe as a link. `search` null: no Search Console site. `tasks` null: the caller can't see tasks
+ * (no tasks.read, or a client reviewer). Findings are matched by urlKey across the last year's audit reports.
+ */
+export type UrlHistoryDto = {
+  url: string;
+  key: string;
+  range: DateRange;
+  search: {
+    totals: SearchMetrics;
+    previous: SearchMetrics;
+    previousRange: DateRange;
+    days: (SearchMetrics & { day: string })[];
+    topQueries: SearchQueryRow[];
+  } | null;
+  findings: {
+    kind: "SEO" | "GEO";
+    findingId: string;
+    title: string;
+    severity: string;
+    firstSeen: string;
+    lastSeen: string;
+    clearedOn: string | null;
+    open: boolean;
+  }[];
+  tasks: {
+    id: string;
+    title: string;
+    status: (typeof TASK_STATUSES)[number];
+    changeKind: (typeof WEBSITE_CHANGE_KINDS)[number] | null;
+    dueOn: string | null;
+    completedAt: string | null;
+    checkedLiveAt: string | null;
+    recheckOn: string | null;
+    findingClearedAt: string | null;
+  }[] | null;
+  articles: { id: string; title: string; status: BlogArticleStatus; publishedAt: string | null }[];
+};

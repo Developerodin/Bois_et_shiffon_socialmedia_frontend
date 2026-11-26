@@ -34,6 +34,7 @@ export default async function PerformancePage({ searchParams }: { searchParams: 
       brandId={b}
       canReadAgents={can("agents.read")}
       canMakeTasks={featureOn("tasks", w) && can("tasks.manage")}
+      canSeeHistory={featureOn("data", w) && can("analytics.read")}
       bare={bare}
     />
   );

@@ -28,7 +28,7 @@ const LAYOUTS = [
  * report (?source=seo|geo), a view, List or Board, and the task peek (?task=). With tasks.all the page opens on all open
  * tasks, and a manager with it assigns from the list (people and roles read once here).
  */
-export function TasksPage({ workspaceId, brandId, userId, perms, crm, blog }: { workspaceId: string; brandId: string; userId: string; perms: string[]; crm: boolean; blog?: boolean }) {
+export function TasksPage({ workspaceId, brandId, userId, perms, crm, blog, seoHistory }: { workspaceId: string; brandId: string; userId: string; perms: string[]; crm: boolean; blog?: boolean; seoHistory?: boolean }) {
   const base = brandBase(workspaceId, brandId);
   const router = useRouter();
   const pathname = usePathname();
@@ -128,7 +128,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms, crm, blog }: { 
           <TaskList base={base} view={view} area={area} source={source} assign={canAssign ? team : undefined} />
         </section>
       )}
-      <TaskPeek base={base} perms={perms} userId={userId} recentKey={recentKey(workspaceId, brandId, userId)} blog={blog} />
+      <TaskPeek base={base} perms={perms} userId={userId} recentKey={recentKey(workspaceId, brandId, userId)} blog={blog} seoHistory={seoHistory} />
     </div>
   );
 }
