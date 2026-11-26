@@ -52,7 +52,7 @@ export function filterFromSearch(q: URLSearchParams): CalendarFilter {
   const f: CalendarFilter = {};
   const channel = q.get("cf_channel"), status = q.get("cf_status"), campaignId = q.get("cf_campaignId"), owner = q.get("cf_owner"), need = q.get("cf_need");
   if (channel) f.channel = channel;
-  if (status && status in STATUS_GROUPS) f.status = status as StatusGroup;
+  if (status && Object.hasOwn(STATUS_GROUPS, status)) f.status = status as StatusGroup;
   if (campaignId) f.campaignId = campaignId;
   if (owner && OWNERS.includes(owner)) f.owner = owner as "me" | "none";
   if (need && NEEDS.includes(need)) f.need = need as NonNullable<CalendarFilter["need"]>;
@@ -73,3 +73,6 @@ export function withFilter(search: string, f: CalendarFilter): string {
   for (const [k, v] of new URLSearchParams(filterToSearch(f))) q.set(k, v);
   return q.toString();
 }
+
+/** How many filters are set, for the Filters button's count. */
+export const activeFilterCount = (f: CalendarFilter): number => KEYS.filter((k) => f[k]).length;

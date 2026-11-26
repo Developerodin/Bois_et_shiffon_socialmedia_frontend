@@ -23,6 +23,11 @@ describe("one name per agent and page", () => {
     expect(ws).toContain('Competitors page</Link>');
     expect(read("app/(shell)/page.tsx")).toContain("competitorsRedirect(");
   });
+  it("gives the content calendar its own page, titled Content calendar, and no panel on the Overview", () => {
+    expect(read("components/workspace/workspace.tsx")).not.toContain("<ContentPanel");
+    expect(read("app/(shell)/calendar/page.tsx")).toContain('title="Content calendar"');
+    expect(read("app/(shell)/page.tsx")).toContain("calendarRedirect(params)");
+  });
   it("keeps Echo pointing at Connections", () => {
     expect(byId("echo").href).toBe("/settings?tab=connections");
   });

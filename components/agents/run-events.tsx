@@ -5,8 +5,11 @@ import { AgentEventRow } from "@/components/agents/agent-log";
 import { fetchEvents, type AgentEvent } from "@/components/agents/api";
 import { RUN_ID_PATTERN } from "@/shared";
 
-/** Where an event's entity lives in the app: only types we know, never a path taken from the event's own text. */
-const hrefFor = (e: AgentEvent) => (e.entityType === "ContentItem" && e.entityId ? `?post=${encodeURIComponent(e.entityId)}` : undefined);
+/**
+ * Where an event's entity lives in the app: only types we know, never a path taken from the event's own text. Absolute,
+ * since the run shows on other pages too (/competitors): the Overview opens the post in its peek, as it did on itself.
+ */
+const hrefFor = (e: AgentEvent) => (e.entityType === "ContentItem" && e.entityId ? `/?post=${encodeURIComponent(e.entityId)}` : undefined);
 
 /**
  * What one run of this agent did, oldest first (the server sends at most 200). One read; read again when `again` changes, which

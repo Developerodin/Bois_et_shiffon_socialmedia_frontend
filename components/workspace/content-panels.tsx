@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
+import { AtSign, BriefcaseBusiness, Check, ChevronLeft, ChevronRight, CircleDashed, Clapperboard, ExternalLink, FileText, GalleryHorizontal, Hash, Image as ImageIcon, LoaderCircle, Pencil, Pin, Plus, SlidersHorizontal, Sparkles, ThumbsUp, TriangleAlert, X, type LucideIcon } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { LoadFailed } from "@/components/ui/load-failed";
@@ -21,10 +21,10 @@ import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
 import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { TONE_CLASS, toneOf, type Tone } from "@/lib/status";
+import { TONE_CLASS, TONE_DOT, toneOf, type Tone } from "@/lib/status";
 import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
-import { filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
-import { dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
+import { activeFilterCount, filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
+import { AGENDA_BELOW, CELL_FLOOR, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 import { CHANNEL_LABEL, STATUS_LABEL } from "@/lib/post-labels";
 
@@ -385,16 +385,23 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     }
   };
   const viewSwitch = (
-    <div role="tablist" aria-label="Calendar view" className="flex rounded-md bg-muted p-0.5 text-xs">
+    <div role="tablist" aria-label="Calendar view" className="flex h-8 items-center rounded-full bg-muted p-0.5 text-xs pointer-coarse:h-auto">
       {(["list", "month"] as const).map((v) => (
-        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("rounded px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", view === v ? "bg-background text-foreground" : "text-muted-foreground")}>
+        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("h-7 rounded-full px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11", view === v ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
           {v === "list" ? "List" : "Month"}
         </button>
       ))}
     </div>
   );
+  // The month Month shows. It lives here so its name and arrows sit in the toolbar row instead of a row of their own.
+  const [month, setMonth] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }));
+  const monthHeadId = useId();
+  const showMonth = (y: number, m: number) => setMonth({ y: new Date(y, m, 1).getFullYear(), m: new Date(y, m, 1).getMonth() });
   // Opens the new post in the post view, like a calendar row.
-  const newPost = <NewPostDialog base={base} canCreate={perms.includes("content.create")} onCreated={onOpen} />;
+  const canCreate = perms.includes("content.create");
+  const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} />;
+  // The same dialog, opened from an empty day in Month, set to that day (newPostTime; a day that is over starts undated).
+  const [dayNewPost, setDayNewPost] = useState<{ at: string | null } | null>(null);
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading calendar" rows={3} /></div>;
   // Month never shows this: past months come from their own read. The switch stays, so a brand with only old posts gets there.
   if (!data.length && view === "list") {
@@ -419,52 +426,110 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   for (const i of [...data, ...monthItems]) if (i.campaign && !named.has(i.campaign.id)) named.set(i.campaign.id, i.campaign.name);
   const campaignOptions = [...named].map(([id, name]) => ({ id, name }));
   const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
-  const sel = cn(selectClass, "h-8 w-auto text-xs pointer-coarse:h-11");
-  const filters = (
-    <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2" role="group" aria-label="Filter posts">
-      {viewSwitch}
-      <select aria-label="Channel" value={filter.channel ?? ""} onChange={(e) => set({ channel: e.target.value || undefined })} className={sel}>
-        <option value="">All channels</option>
-        {channels.map((c) => <option key={c} value={c}>{CHANNEL_LABEL[c] ?? c}</option>)}
-      </select>
-      <select aria-label="Status" value={filter.status ?? ""} onChange={(e) => set({ status: (e.target.value || undefined) as CalendarFilter["status"] })} className={sel}>
-        <option value="">Any status</option>
-        {(Object.keys(STATUS_GROUPS) as (keyof typeof STATUS_GROUPS)[]).map((g) => <option key={g} value={g}>{STATUS_GROUP_LABEL[g]}</option>)}
-      </select>
-      {(campaignOptions.length > 0 || filter.campaignId) && (
-        <select aria-label="Campaign" value={filter.campaignId ?? ""} onChange={(e) => set({ campaignId: e.target.value || undefined })} className={sel}>
-          <option value="">Any campaign</option>
-          {campaignOptions.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          {filter.campaignId && !campaignOptions.some((c) => c.id === filter.campaignId) && <option value={filter.campaignId}>This campaign</option>}
+  // 16 px text on touch screens, so focusing a select doesn't zoom the page.
+  const sel = cn(selectClass, "h-8 text-xs pointer-coarse:h-11 pointer-coarse:text-base");
+  const filterCount = activeFilterCount(filter);
+  // The filter selects: in the toolbar on a wide panel (`wide`), in the Filters popover otherwise.
+  const filterControls = (wide: boolean) => {
+    const c = cn(sel, wide ? "w-auto" : "w-full");
+    return (
+      <>
+        <select aria-label="Channel" value={filter.channel ?? ""} onChange={(e) => set({ channel: e.target.value || undefined })} className={c}>
+          <option value="">All channels</option>
+          {channels.map((ch) => <option key={ch} value={ch}>{CHANNEL_LABEL[ch] ?? ch}</option>)}
         </select>
-      )}
-      {campaignsFailed && <p className="text-xs text-muted-foreground">Couldn&rsquo;t load campaigns.</p>}
-      <select aria-label="Owner" value={filter.owner ?? ""} onChange={(e) => set({ owner: (e.target.value || undefined) as CalendarFilter["owner"] })} className={sel}>
-        <option value="">Anyone</option>
-        {(me || filter.owner === "me") && <option value="me" disabled={!me}>Mine</option>}
-        <option value="none">Unassigned</option>
-      </select>
-      <select aria-label="Needs action" value={filter.need ?? ""} onChange={(e) => set({ need: (e.target.value || undefined) as CalendarFilter["need"] })} className={sel}>
-        <option value="">Needs action: any</option>
-        {(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => <option key={n} value={n}>{NEED_LABEL[n]}</option>)}
-      </select>
-      <span className="ml-auto flex items-center gap-2">
-        {canExport && <ExportCsvButton url={`${base}/content/export`} filename={`calendar-${new Date().toLocaleDateString("en-CA")}.csv`} />}
-        {newPost}
-      </span>
+        <select aria-label="Status" value={filter.status ?? ""} onChange={(e) => set({ status: (e.target.value || undefined) as CalendarFilter["status"] })} className={c}>
+          <option value="">Any status</option>
+          {(Object.keys(STATUS_GROUPS) as (keyof typeof STATUS_GROUPS)[]).map((g) => <option key={g} value={g}>{STATUS_GROUP_LABEL[g]}</option>)}
+        </select>
+        {(campaignOptions.length > 0 || filter.campaignId) && (
+          <select aria-label="Campaign" value={filter.campaignId ?? ""} onChange={(e) => set({ campaignId: e.target.value || undefined })} className={c}>
+            <option value="">Any campaign</option>
+            {campaignOptions.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+            {filter.campaignId && !campaignOptions.some((o) => o.id === filter.campaignId) && <option value={filter.campaignId}>This campaign</option>}
+          </select>
+        )}
+        {campaignsFailed && <p className="text-xs text-muted-foreground">Couldn&rsquo;t load campaigns.</p>}
+        <select aria-label="Owner" value={filter.owner ?? ""} onChange={(e) => set({ owner: (e.target.value || undefined) as CalendarFilter["owner"] })} className={c}>
+          <option value="">Anyone</option>
+          {(me || filter.owner === "me") && <option value="me" disabled={!me}>Mine</option>}
+          <option value="none">Unassigned</option>
+        </select>
+        <select aria-label="Needs action" value={filter.need ?? ""} onChange={(e) => set({ need: (e.target.value || undefined) as CalendarFilter["need"] })} className={c}>
+          <option value="">Needs action: any</option>
+          {(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => <option key={n} value={n}>{NEED_LABEL[n]}</option>)}
+        </select>
+      </>
+    );
+  };
+  const monthNav = (
+    // On a narrow panel it takes a row of its own under the buttons. On a wide panel the heading keeps one width so the arrows don't move.
+    <div className="flex items-center gap-1 @max-[640px]/cal:order-last @max-[640px]/cal:w-full">
+      <h2 id={monthHeadId} aria-live="polite" className="mx-1 text-base font-semibold tracking-tight @min-[900px]/cal:min-w-36 @max-[640px]/cal:mr-auto">
+        {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+      </h2>
+      <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Previous month" onClick={() => showMonth(month.y, month.m - 1)}>
+        <ChevronLeft aria-hidden className="size-4" />
+      </Button>
+      <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Next month" onClick={() => showMonth(month.y, month.m + 1)}>
+        <ChevronRight aria-hidden className="size-4" />
+      </Button>
+      <Button size="sm" variant="outline" onClick={() => showMonth(new Date().getFullYear(), new Date().getMonth())}>
+        Today
+      </Button>
+    </div>
+  );
+  // Two rows (owner's spec). The first: view, month and its arrows and Today (in Month), then Export and New post at the
+  // right. The second: the filter selects, once the panel is 760 px wide (they take about 650 px); under that they fold
+  // into a Filters button in the first row and the second row goes. Under 720 px Export shows its icon only.
+  const filters = (
+    <div className="relative flex flex-col gap-2 border-b border-border px-4 py-2.5 @max-[640px]/cal:px-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {viewSwitch}
+        {view === "month" && monthNav}
+        <span className="ml-auto flex items-center gap-2">
+          <span className="@min-[480px]/cal:relative @min-[760px]/cal:hidden">
+            <FiltersMenu count={filterCount} onClear={() => onFilter({})}>
+              {filterControls(false)}
+            </FiltersMenu>
+          </span>
+          {canExport && <ExportCsvButton url={`${base}/content/export`} filename={`calendar-${new Date().toLocaleDateString("en-CA")}.csv`} labelClassName="@max-[720px]/cal:sr-only" />}
+          {newPost}
+        </span>
+      </div>
+      <div role="group" aria-label="Filter posts" className="hidden flex-wrap items-center gap-2 @min-[760px]/cal:flex">
+        {filterControls(true)}
+        {filterCount > 0 && (
+          <Button size="sm" variant="ghost" onClick={() => onFilter({})}>
+            Clear filters
+          </Button>
+        )}
+      </div>
     </div>
   );
   if (view === "month") {
     return (
-      <div>
+      // A column that fills the card, so the month grid can take the height that is left.
+      <div className="flex flex-1 flex-col @container/cal">
         {filters}
-        <MonthView base={base} filter={filter} me={me} undated={shown.filter((i) => !i.scheduledFor)} onOpen={onOpen} onItems={setMonthItems} />
+        <MonthView
+          base={base}
+          filter={filter}
+          me={me}
+          month={month}
+          headId={monthHeadId}
+          undated={shown.filter((i) => !i.scheduledFor)}
+          onOpen={onOpen}
+          onItems={setMonthItems}
+          onNewPost={canCreate ? (day) => setDayNewPost({ at: newPostTime(day) }) : undefined}
+        />
+        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={!!dayNewPost} onOpenChange={(o) => !o && setDayNewPost(null)} at={dayNewPost?.at ?? undefined} />
       </div>
     );
   }
   if (!shown.length) {
     return (
-      <div>
+      <div className="@container/cal">
         {filters}
         <div className="flex flex-col items-start gap-3 p-4">
           <p className="text-sm text-muted-foreground">No posts match these filters</p>
@@ -478,32 +543,44 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   // Grouped by the viewer's local date, not the UTC one.
   const groups = groupByDay(shown);
   return (
-    <div>
+    <div className="@container/cal">
       {filters}
       <ol className="flex flex-col">
         {[...groups].map(([k, list]) => (
           <li key={k}>
-            <p className="sticky top-0 z-[1] bg-background/95 px-4 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">{k === "unscheduled" ? "No date" : day(list[0].scheduledFor!)}</p>
+            <p className="sticky top-0 z-[1] bg-background/95 px-4 py-1 text-xs font-semibold text-muted-foreground backdrop-blur">{k === "unscheduled" ? "No date" : day(list[0].scheduledFor!)}</p>
             <ul className="divide-y divide-border">
-              {list.map((i) => (
-                <li key={i.id}>
-                  <button type="button" onClick={() => onOpen(i.id)} className="flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
-                    {i.channel === "INSTAGRAM_STORY" && (
-                      // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
-                      i.firstFrameUrl ? <img src={i.firstFrameUrl} alt="" className="aspect-[9/16] w-9 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-9 shrink-0 rounded bg-muted" />
-                    )}
-                    <span className="flex min-w-0 flex-1 flex-col gap-1">
-                    <span className="flex items-center justify-between gap-2 text-xs">
-                      <span className="text-muted-foreground">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
-                      <StatusBadge status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>
-                    </span>
-                    <span className="text-sm">{i.title}</span>
-                    <span className="text-xs text-muted-foreground">{ownerLabel(i.owner)}</span>
-                    {i.byHand && i.scheduledFor && <span className="text-xs font-medium text-primary">Post by hand &middot; {dayTime(i.scheduledFor)}</span>}
-                    </span>
-                  </button>
-                </li>
-              ))}
+              {list.map((i) => {
+                const time = i.scheduledFor ? shortTime(i.scheduledFor) : null;
+                return (
+                  <li key={i.id}>
+                    <button type="button" onClick={() => onOpen(i.id)} className="flex min-h-11 w-full items-center gap-3 px-4 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                      {i.channel === "INSTAGRAM_STORY" && (
+                        // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
+                        i.firstFrameUrl ? <img src={i.firstFrameUrl} alt="" className="aspect-[9/16] w-6 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-6 shrink-0 rounded bg-muted" />
+                      )}
+                      {/* One line on a wide panel (time and channel, title, owner, status); three on a narrow one (time,
+                          channel and status; the title, wrapping; the owner). Grid placement keeps one reading order. */}
+                      <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 @min-[640px]/cal:grid-cols-[9rem_minmax(0,1fr)_auto_auto]">
+                        <span className="col-start-1 row-start-1 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                          {time && <span className="shrink-0 tabular-nums">{time}</span>}
+                          <span className="truncate">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
+                        </span>
+                        <span title={i.title} className="col-span-2 row-start-2 text-sm @min-[640px]/cal:col-span-1 @min-[640px]/cal:col-start-2 @min-[640px]/cal:row-start-1 @min-[640px]/cal:truncate">
+                          {i.title}
+                        </span>
+                        <span className="col-span-2 row-start-3 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground @min-[640px]/cal:col-span-1 @min-[640px]/cal:col-start-3 @min-[640px]/cal:row-start-1">
+                          <span className="truncate">{ownerLabel(i.owner)}</span>
+                          {i.byHand && i.scheduledFor && <span className="shrink-0 font-medium text-foreground">&middot; Post by hand {dayTime(i.scheduledFor)}</span>}
+                        </span>
+                        <span className="col-start-2 row-start-1 justify-self-end @min-[640px]/cal:col-start-4">
+                          <StatusBadge quiet status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </li>
         ))}
@@ -512,57 +589,162 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   );
 }
 
+/**
+ * The Filters button for a panel too narrow for the selects: it shows how many filters are on and opens them in a
+ * popover. Focus moves to the first select on open; Esc or Done closes it and gives focus back to the button, and a
+ * press outside closes it. Under 480 px it spans the toolbar (its wrapper isn't positioned there), else it opens under the
+ * button, lined up with its right edge (the button sits at the toolbar's right end).
+ */
+function FiltersMenu({ count, onClear, children }: { count: number; onClear: () => void; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  const btn = useRef<HTMLButtonElement>(null);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    box.current?.querySelector<HTMLElement>("select, button")?.focus();
+    const down = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (!box.current?.contains(t) && !btn.current?.contains(t)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", down);
+    return () => document.removeEventListener("pointerdown", down);
+  }, [open]);
+  const close = () => {
+    setOpen(false);
+    btn.current?.focus();
+  };
+  return (
+    <>
+      <Button ref={btn} size="sm" variant="outline" aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
+        <SlidersHorizontal aria-hidden="true" />
+        Filters
+        {count > 0 && (
+          <span className="rounded-full bg-foreground px-1.5 text-xs leading-5 text-background tabular-nums">
+            {count}
+            <span className="sr-only"> on</span>
+          </span>
+        )}
+      </Button>
+      {open && (
+        <div
+          ref={box}
+          id={id}
+          role="group"
+          aria-label="Filter posts"
+          onKeyDown={(e) => {
+            if (e.key !== "Escape") return;
+            e.preventDefault();
+            close();
+          }}
+          className="absolute left-2 right-2 top-full z-30 mt-1 flex flex-col gap-2 rounded-2xl border border-border bg-popover p-3 text-popover-foreground shadow-lg @min-[480px]/cal:left-auto @min-[480px]/cal:right-0 @min-[480px]/cal:w-72"
+        >
+          {children}
+          <div className="flex justify-end gap-2 pt-1">
+            {count > 0 && (
+              <Button size="sm" variant="ghost" onClick={onClear}>
+                Clear filters
+              </Button>
+            )}
+            <Button size="sm" variant="secondary" onClick={close}>
+              Done
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 type RangeAnswer = { items: ContentItem[]; truncated?: boolean };
 const pickRange = (d: RangeAnswer) => d;
-const MORE_AFTER = 3;
-/** The month's chips are coloured by status: this says what each colour is, since colour alone is not a label. */
+// A day cell's size before its first measurement (three one-line cards); ResizeObserver replaces it at once.
+const CELL_SIZE = { h: 94, w: 0 };
+/** The month's cards mark their status with a coloured edge: this says what each colour is, since colour alone is not a label. */
 const LEGEND: readonly (readonly [Tone, string])[] = [["info", "Awaiting approval · Scheduled"], ["good", "Approved · Published"], ["warn", "Needs a look"], ["bad", "Blocked · Rejected"], ["muted", "To write"]];
 const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
+/**
+ * A small glyph per channel for the month's cards; the card's tooltip and name say the channel in words. Lucide has no
+ * brand marks (and the app had no channel icons), so Instagram's formats show their shape and the others a stand-in.
+ */
+const CHANNEL_ICON: Record<string, LucideIcon> = {
+  INSTAGRAM_POST: ImageIcon,
+  INSTAGRAM_CAROUSEL: GalleryHorizontal,
+  INSTAGRAM_REEL: Clapperboard,
+  INSTAGRAM_STORY: CircleDashed,
+  FACEBOOK_POST: ThumbsUp,
+  PINTEREST_PIN: Pin,
+  THREADS_POST: AtSign,
+  LINKEDIN_POST: BriefcaseBusiness,
+  X_POST: Hash,
+};
 
 /**
- * One post in its status tone. In the No date strip it's a button that opens the post. In a month cell it sits inside
- * the cell's button: the title, plus a short time once the cell is over 140 px wide (a time ate narrow chips).
+ * One post as a card with a coloured left edge for its status. `stacked` (a roomy day, see dayCards): two lines in 34 px
+ * (STACKED_STEP in calendar-month.ts counts on that height), the channel's icon and the time small and muted, then the
+ * title. Otherwise one 20 px line (CARD_STEP): the icon and the title, the time left to the tooltip, so the title keeps
+ * the width. The title is cut short with an ellipsis; the day's popover lists it in full. It opens the post. It is not
+ * a tab stop: the day's cell is, and its popover lists the same posts for the keyboard. The full time, title, channel
+ * and status are its tooltip and its accessible name.
  */
-function PostChip({ item, onOpen }: { item: ContentItem; onOpen?: (id: string) => void }) {
-  const tone = cn("flex w-full min-w-0 items-center gap-1 rounded border px-1 py-0.5 text-left text-xs leading-tight", TONE_CLASS[toneOf(item.publishIssue ?? item.status)]);
-  const status = statusText(item); // once per chip: the title and the screen-reader text both use it
-  if (!onOpen) {
-    const time = item.scheduledFor ? shortTime(item.scheduledFor) : null;
-    return (
-      <span className={tone}>
-        {time && <span className="hidden shrink-0 tabular-nums @min-[140px]/cell:inline">{time}</span>}
-        <span className="truncate">{item.title}</span>
-      </span>
-    );
-  }
+function PostCard({ item, onOpen, stacked = false }: { item: ContentItem; onOpen: (id: string) => void; stacked?: boolean }) {
+  const time = item.scheduledFor ? shortTime(item.scheduledFor) : null;
+  const channel = CHANNEL_LABEL[item.channel] ?? item.channel;
+  const Icon = CHANNEL_ICON[item.channel] ?? FileText;
+  const status = statusText(item); // once per card: the tooltip and the accessible name both use it
+  const about = `${time ? `${time} · ` : ""}${item.title} · ${channel} · ${status}`;
   return (
-    <button type="button" onClick={() => onOpen(item.id)} title={`${item.title} · ${status}`} className={cn(tone, "hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring")}>
-      <span className="truncate">{item.title}</span>
-      <span className="sr-only">, {status}</span>
+    <button
+      type="button"
+      tabIndex={-1}
+      onClick={() => onOpen(item.id)}
+      title={about}
+      aria-label={about}
+      className={cn(
+        "pointer-events-auto relative flex w-full min-w-0 shrink-0 overflow-hidden rounded border border-border bg-card pl-2 pr-1.5 text-left text-xs leading-4 shadow-[0_1px_1px_0_color-mix(in_srgb,var(--foreground)_4%,transparent)] transition-colors hover:border-foreground/25 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        stacked ? "h-[34px] flex-col justify-center" : "h-5 items-center gap-1.5",
+      )}
+    >
+      <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", TONE_DOT[toneOf(item.publishIssue ?? item.status)])} />
+      {stacked ? (
+        <span aria-hidden className="flex min-w-0 items-center gap-1 text-xs leading-3 text-muted-foreground">
+          <Icon className="size-3 shrink-0" />
+          {time && <span className="truncate tabular-nums">{time}</span>}
+        </span>
+      ) : (
+        <Icon aria-hidden className="size-3 shrink-0 text-muted-foreground" />
+      )}
+      <span data-card-title className="min-w-0 truncate font-medium text-foreground">{item.title}</span>
     </button>
   );
 }
 
 const POPOVER_W = 288; // w-72
+const POPOVER_MAX_H = 320; // what max-h-80 was
 // The close animation is 150 ms; the popover unmounts after this (under reduced motion it is hidden at once meanwhile).
 const POPOVER_EXIT_MS = 200;
 
+/** Where a day popover sits in MonthView's box: its left edge, and its top (below the cell) or bottom (above it). */
+type PopoverAt = { left: number; top?: number; bottom?: number; maxHeight: number };
+
 /**
- * A day's posts in a popover under its cell: time, channel, title and status, each opening the post. Focus moves in on
- * open; Esc, the close button or a press outside close it, and the caller gives focus back to the cell. Fades and
- * scales in from 0.96 with a 4 px slide from the cell (opacity and transform only), and back out on close.
- * ponytail: not Radix Popover (not installed); always opens below its cell (the panel scrolls to it). Flip it above
- * if the bottom rows feel cramped.
+ * A day's posts in a popover by its cell: time, channel, title and status, each opening the post. Focus moves in on
+ * open; Esc, the close button or a press outside close it, and the caller gives focus back to the cell. It opens below
+ * the cell, or above it when there is more room there (popoverSide), and is never taller than that room, so the
+ * scrolling page never clips it. An empty day offers New post when `onNewPost` is given. Fades and scales in from 0.96
+ * with a 4 px slide from the cell (opacity and transform only), and back out on close.
+ * ponytail: not Radix Popover (not installed).
  */
-function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }: {
+function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen, onNewPost }: {
   label: string;
   posts: ContentItem[];
   open: boolean;
-  at: { left: number; top: number };
+  at: PopoverAt;
   cell: () => HTMLElement | null | undefined;
   onClose: () => void;
   onExited: () => void;
   onOpen: (id: string) => void;
+  onNewPost?: () => void;
 }) {
   const titleId = useId();
   const box = useRef<HTMLDivElement>(null);
@@ -594,6 +776,7 @@ function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }:
     return () => document.removeEventListener("pointerdown", down);
   }, [open, cell, onClose]);
   const shown = open && entered;
+  const above = at.bottom !== undefined;
   return (
     <div
       ref={box}
@@ -605,10 +788,11 @@ function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }:
         e.preventDefault();
         onClose();
       }}
-      style={{ left: at.left, top: at.top, width: POPOVER_W }}
+      style={{ left: at.left, top: at.top, bottom: at.bottom, width: POPOVER_W, maxHeight: at.maxHeight }}
       className={cn(
-        "absolute z-20 flex max-h-80 max-w-full origin-top-left flex-col gap-1 overflow-y-auto rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-lg transition-[opacity,translate,scale] duration-150 ease-out motion-reduce:transition-none",
-        shown ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none -translate-y-1 scale-[0.96] opacity-0",
+        "absolute z-20 flex max-w-full flex-col gap-1 overflow-y-auto rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-lg transition-[opacity,translate,scale] duration-150 ease-out motion-reduce:transition-none",
+        above ? "origin-bottom-left" : "origin-top-left",
+        shown ? "translate-y-0 scale-100 opacity-100" : cn("pointer-events-none scale-[0.96] opacity-0", above ? "translate-y-1" : "-translate-y-1"),
       )}
     >
       <div className="flex items-center gap-2 pl-2">
@@ -619,51 +803,80 @@ function DayPopover({ label, posts, open, at, cell, onClose, onExited, onOpen }:
           <X aria-hidden className="size-4" />
         </Button>
       </div>
-      {posts.length > 0 && (
-        <ul className="flex flex-col">
-          {posts.map((i) => {
-            const time = i.scheduledFor && shortTime(i.scheduledFor) ? new Date(i.scheduledFor).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : null;
-            return (
-              <li key={i.id}>
-                {/* Closed first, so focus is back on the cell when the post opens: the preview returns focus there. */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    onOpen(i.id);
-                  }}
-                  className="flex w-full flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-                >
-                  <span className="flex items-center justify-between gap-2 text-xs">
-                    <span className="text-muted-foreground">
-                      {time && <span className="tabular-nums">{time} &middot; </span>}
-                      {CHANNEL_LABEL[i.channel] ?? i.channel}
-                    </span>
-                    <StatusBadge status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>
-                  </span>
-                  <span className="text-sm">{i.title}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+      <DayPosts
+        posts={posts}
+        onPick={(id) => {
+          // Closed first, so focus is back on the cell when the post opens: the preview returns focus there.
+          onClose();
+          onOpen(id);
+        }}
+      />
+      {!posts.length && onNewPost && (
+        <div className="px-2 pb-1">
+          <Button
+            size="sm"
+            onClick={() => {
+              onClose();
+              onNewPost();
+            }}
+          >
+            <Plus aria-hidden="true" />
+            New post
+          </Button>
+        </div>
       )}
     </div>
   );
 }
 
+/** A day's posts, each a row (time and channel, status, title) that opens the post: the day popover's list and the narrow month's agenda. */
+function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string) => void }) {
+  if (!posts.length) return null;
+  return (
+    <ul className="flex flex-col">
+      {posts.map((i) => {
+        const time = i.scheduledFor && shortTime(i.scheduledFor) ? new Date(i.scheduledFor).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : null;
+        return (
+          <li key={i.id}>
+            <button
+              type="button"
+              onClick={() => onPick(i.id)}
+              className="flex w-full flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring pointer-coarse:min-h-11"
+            >
+              <span className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-muted-foreground">
+                  {time && <span className="tabular-nums">{time} &middot; </span>}
+                  {CHANNEL_LABEL[i.channel] ?? i.channel}
+                </span>
+                <StatusBadge quiet status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>
+              </span>
+              <span className="text-sm">{i.title}</span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 /**
- * The calendar as a month grid (weeks start Monday). Dated posts come from their own read of the grid's dates (?from&to,
- * so past months show); undated ones are the list's. The same filters apply. Each day is a button that opens its posts
- * in a popover; arrow keys move between days (the grid is one tab stop).
- * ponytail: no drag to reschedule, no week view, no new post from a day (the new post dialog has no date): not asked for yet.
+ * The calendar as a month grid (weeks start Monday); the toolbar holds its month name and arrows. Dated posts come from
+ * their own read of the grid's dates (?from&to, so past months show); undated ones are the list's. The same filters apply.
+ * Each day is a button under its cards; arrow keys move between days (the grid is one tab stop). From AGENDA_BELOW px
+ * wide, the weeks share the height the page leaves them (each at least CELL_FLOOR), each day shows as many post cards as
+ * its height holds (cardsThatFit) and then "+N more", and a day opens a popover listing all its posts; a card opens its
+ * post. Under that width days show status dots and a tapped day lists its posts under the grid (an agenda), as phone
+ * calendars do, since a popover over a 45 px cell covers the grid it belongs to.
+ * A CSS grid with ARIA table roles, not a <table>: table rows size to their content and won't share a height.
+ * ponytail: no drag to reschedule, no week view.
  */
-function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: string; filter: CalendarFilter; me: string | null; undated: ContentItem[]; onOpen: (id: string) => void; onItems: (items: ContentItem[]) => void }) {
-  const [month, setMonth] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }));
+function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; onItems: (items: ContentItem[]) => void; onNewPost?: (day: string) => void }) {
   // The day whose popover shows (its key) and where; `open` is false while it closes.
-  const [pop, setPop] = useState<{ key: string; open: boolean; at: { left: number; top: number } } | null>(null);
+  const [pop, setPop] = useState<{ key: string; open: boolean; at: PopoverAt } | null>(null);
   // The day last focused: it holds the grid's one tab stop.
   const [cursor, setCursor] = useState<string | null>(null);
+  // The narrow month's chosen day, whose posts the agenda lists.
+  const [picked, setPicked] = useState<string | null>(null);
   const grid = useMemo(() => monthGrid(month.y, month.m), [month]);
   const { from, to } = gridRange(grid);
   // A month that is all past changes rarely: polled slower. ponytail: one cached read per month looked at, polled while Month is open.
@@ -679,14 +892,46 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
     if (data) onItems(data.items);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemsKey, onItems]);
+  // Another month closes the open day.
+  useEffect(() => setPop(null), [month]);
   const today = dayKey(new Date());
-  const headId = useId();
+  const agendaId = useId();
   const wrap = useRef<HTMLDivElement>(null);
+  // Whether the panel is under AGENDA_BELOW px: the same width the @min-[640px]/cal classes test (this box fills the panel).
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setNarrow(el.clientWidth < AGENDA_BELOW));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  // A day cell's measured size (every cell is the same), which sets how many cards a day shows and in which form
+  // (dayCards). Watches the weeks' box, which is there once the month has loaded.
+  const weeksBox = useRef<HTMLDivElement>(null);
+  const [cellSize, setCellSize] = useState(CELL_SIZE);
+  const loaded = !!data;
+  useEffect(() => {
+    const el = weeksBox.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      const cell = el.querySelector<HTMLElement>("[role=cell]");
+      if (cell) setCellSize((s) => (s.h === cell.offsetHeight && s.w === cell.offsetWidth ? s : { h: cell.offsetHeight, w: cell.offsetWidth }));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [loaded, narrow, grid.length]);
   const cellOf = useCallback((k: string) => wrap.current?.querySelector<HTMLElement>(`[data-day="${k}"]`), []);
-  const openDay = (k: string, el: HTMLElement) => {
+  const openDay = (k: string) => {
+    const el = cellOf(k);
+    if (!el) return;
     const box = wrap.current!.getBoundingClientRect();
     const r = el.getBoundingClientRect();
-    setPop({ key: k, open: true, at: { left: popoverLeft(r.left - box.left, POPOVER_W, box.width), top: r.bottom - box.top + 4 } });
+    // The room above and below inside the scrolling main area (else the window), which would clip the popover.
+    const scroller = wrap.current!.closest("main")?.getBoundingClientRect() ?? { top: 0, bottom: window.innerHeight };
+    const { side, maxHeight } = popoverSide(scroller.bottom - r.bottom - 4, r.top - scroller.top - 4, POPOVER_MAX_H);
+    const left = popoverLeft(r.left - box.left, POPOVER_W, box.width);
+    setPop({ key: k, open: true, at: side === "below" ? { left, top: r.bottom - box.top + 4, maxHeight } : { left, bottom: box.bottom - r.top + 4, maxHeight } });
   };
   // Closing gives focus back to the day's cell.
   const closeDay = useCallback(() => {
@@ -696,40 +941,25 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
   }, [pop, cellOf]);
   const popCell = useCallback(() => (pop ? cellOf(pop.key) : null), [pop, cellOf]);
   const popExited = useCallback(() => setPop((p) => (p && !p.open ? null : p)), []);
-  const show = (y: number, m: number) => {
-    setMonth({ y: new Date(y, m, 1).getFullYear(), m: new Date(y, m, 1).getMonth() });
-    setPop(null);
-  };
-  const go = (by: number) => show(month.y, month.m + by);
   const inMonth = grid.filter((d) => d.getMonth() === month.m).reduce((n, d) => n + (byDay.get(dayKey(d))?.length ?? 0), 0);
   const weeks = Array.from({ length: grid.length / 7 }, (_, w) => grid.slice(w * 7, w * 7 + 7));
   const keys = grid.map(dayKey);
   // The tab stop: the day last focused if it's on this grid, else today if shown, else the 1st.
   const stop = cursor && keys.includes(cursor) ? cursor : keys.includes(today) ? today : dayKey(new Date(month.y, month.m, 1));
+  // The agenda's day: the one tapped if it's on this grid, else the tab stop's.
+  const agendaKey = picked && keys.includes(picked) ? picked : stop;
   const dayLabel = (d: Date) => d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
   const popDay = pop ? grid[keys.indexOf(pop.key)] : undefined;
+  const agendaDay = grid[keys.indexOf(agendaKey)];
+  const agendaPosts = byDay.get(agendaKey) ?? [];
   return (
-    <div ref={wrap} className="@container/month relative flex flex-col gap-2 px-4 py-3">
-      <div className="flex items-center gap-1">
-        <h3 id={headId} tabIndex={-1} className="mr-auto text-sm font-semibold focus-visible:outline-none">
-          {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
-        </h3>
-        <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Previous month" onClick={() => go(-1)}>
-          <ChevronLeft aria-hidden className="size-4" />
-        </Button>
-        <Button size="sm" variant="ghost" className="w-8 px-0" aria-label="Next month" onClick={() => go(1)}>
-          <ChevronRight aria-hidden className="size-4" />
-        </Button>
-        <Button size="sm" variant="outline" onClick={() => show(new Date().getFullYear(), new Date().getMonth())}>
-          Today
-        </Button>
-      </div>
+    <div ref={wrap} className="relative flex flex-1 flex-col gap-2 px-4 pt-2 pb-2 @max-[640px]/cal:px-1">
       {undated.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1 text-xs">
+        <div className="flex flex-wrap items-center gap-1 text-xs @max-[640px]/cal:px-1">
           <span className="mr-1 text-muted-foreground">No date &middot; {undated.length}</span>
           {undated.map((i) => (
-            <span key={i.id} className="max-w-48">
-              <PostChip item={i} onOpen={onOpen} />
+            <span key={i.id} className="w-48 max-w-full">
+              <PostCard item={i} onOpen={onOpen} />
             </span>
           ))}
         </div>
@@ -737,19 +967,25 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
       <LoadGate ready={!!data} failed={failed} what="this month" onRetry={reload}>
         {inMonth === 0 && <p className="text-xs text-muted-foreground">Nothing planned this month</p>}
         {data?.truncated && <p className="text-xs text-muted-foreground">Showing the first 500 posts of this range</p>}
-        <table aria-labelledby={headId} className="w-full table-fixed border-separate border-spacing-1 text-xs">
-          <thead>
-            <tr>
+        <div role="table" aria-labelledby={headId} className={cn("flex flex-col gap-1 text-xs", !narrow && "flex-1")}>
+          <div role="rowgroup">
+            <div role="row" className="grid grid-cols-7 gap-1 @max-[640px]/cal:gap-x-0">
               {grid.slice(0, 7).map((d) => (
-                <th key={d.getDay()} scope="col" className="pb-0.5 text-left font-medium text-muted-foreground">
+                <div key={d.getDay()} role="columnheader" className="px-1 pb-0.5 text-left font-medium text-muted-foreground @max-[640px]/cal:text-center">
                   <abbr title={d.toLocaleDateString(undefined, { weekday: "long" })} className="no-underline">
                     {d.toLocaleDateString(undefined, { weekday: "short" })}
                   </abbr>
-                </th>
+                </div>
               ))}
-            </tr>
-          </thead>
-          <tbody
+            </div>
+          </div>
+          <div
+            ref={weeksBox}
+            role="rowgroup"
+            // Wide: the weeks share what height is left, each at least CELL_FLOOR (the floor is also the box's minimum,
+            // so a short window scrolls the page instead of squeezing the days). Narrow: rows as tall as their days.
+            className={cn("grid gap-1", !narrow && "flex-1")}
+            style={narrow ? undefined : { gridTemplateRows: `repeat(${weeks.length}, minmax(${CELL_FLOOR}px, 1fr))`, minHeight: weeks.length * CELL_FLOOR + (weeks.length - 1) * 4 }}
             // Arrow keys move between days, a week up or down; the focused day becomes the grid's tab stop.
             onKeyDown={(e) => {
               const k = (e.target as HTMLElement).dataset.day;
@@ -764,61 +1000,116 @@ function MonthView({ base, filter, me, undated, onOpen, onItems }: { base: strin
             }}
           >
             {weeks.map((week) => (
-              <tr key={dayKey(week[0])}>
+              <div key={dayKey(week[0])} role="row" className="grid min-h-0 grid-cols-7 gap-1 @max-[640px]/cal:gap-x-0">
                 {week.map((d) => {
                   const k = dayKey(d);
                   const posts = byDay.get(k) ?? [];
-                  const isOpen = pop?.key === k && pop.open;
+                  const isOpen = !narrow && pop?.key === k && pop.open;
+                  const isPicked = narrow && agendaKey === k;
+                  const isToday = k === today;
+                  const outside = d.getMonth() !== month.m;
+                  const fit = dayCards(posts.length, cellSize.h, cellSize.w);
                   return (
-                    <td
+                    <div
                       key={k}
+                      role="cell"
                       className={cn(
-                        "h-14 rounded-lg border border-border p-0 align-top @min-[520px]/month:h-24",
-                        d.getDay() % 6 === 0 && "bg-muted/40",
-                        isOpen && "bg-primary/5",
-                        k === today && "ring-2 ring-inset ring-primary",
+                        // The cell clips: its height comes from the row, never from its cards (cardsThatFit sizes those).
+                        "@container/cell relative min-h-0 min-w-0 overflow-hidden rounded-lg border border-border @max-[640px]/cal:min-h-11 @max-[640px]/cal:border-transparent",
+                        // Days of the next or last month are muted; in the month, weekends are a shade darker.
+                        outside ? "bg-muted/50" : d.getDay() % 6 === 0 ? "bg-muted/20" : "bg-card",
+                        // Today is marked by its date alone (a filled circle). Chosen (popover or agenda open): lifted, a
+                        // white card with a darker border and a shadow, so it never looks like today. No purple washes.
+                        (isOpen || isPicked) && "z-[1] border-foreground/40 bg-card shadow-md @max-[640px]/cal:border-foreground/40",
                       )}
                     >
-                      {/* The whole cell is the button that opens the day's popover. */}
+                      {/* The day itself: a button under the cards, filling the cell. It opens the day's popover, or on a
+                          narrow panel picks the agenda's day. Its name reads the day's posts, which the cards show cut short. */}
                       <button
                         type="button"
                         data-day={k}
                         tabIndex={k === stop ? 0 : -1}
-                        aria-label={`${dayLabel(d)}, ${postCount(posts.length)}`}
-                        aria-haspopup="dialog"
-                        aria-expanded={isOpen}
+                        aria-label={dayCellLabel(dayLabel(d), posts.map((i) => ({ title: i.title, time: i.scheduledFor ? shortTime(i.scheduledFor) : null, status: statusText(i) })))}
+                        aria-current={isToday ? "date" : undefined}
+                        {...(narrow ? { "aria-pressed": isPicked, "aria-controls": agendaId } : { "aria-haspopup": "dialog" as const, "aria-expanded": isOpen })}
                         onFocus={() => setCursor(k)}
-                        onClick={(e) => (isOpen ? closeDay() : openDay(k, e.currentTarget))}
-                        className="@container/cell flex h-full min-h-14 w-full flex-col items-stretch rounded-lg p-1 text-left align-top hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @min-[520px]/month:min-h-24"
-                      >
-                        {/* Only the number of a day outside the month is dimmed: its posts read as usual. */}
-                        <span aria-hidden className={cn("block text-xs", d.getMonth() !== month.m && "text-muted-foreground", k === today && "font-semibold text-primary")}>{d.getDate()}</span>
-                        {posts.length > 0 && (
-                          <>
-                            {/* Wide panel: the posts as chips. Narrow (under 520 px): a count. */}
-                            <span className="mt-0.5 hidden flex-col gap-0.5 @min-[520px]/month:flex">
-                              {posts.slice(0, MORE_AFTER).map((i) => <PostChip key={i.id} item={i} />)}
-                              {posts.length > MORE_AFTER && <span className="px-1 text-xs text-muted-foreground">+{posts.length - MORE_AFTER} more</span>}
+                        onClick={() => (narrow ? setPicked(k) : isOpen ? closeDay() : openDay(k))}
+                        className="absolute inset-0 rounded-lg transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      />
+                      {/* What the cell shows, over the button. Clicks pass through to it, except on a card or "+N more".
+                          Absolute, so the cards never give the row a height of their own: the row sizes the cell, the
+                          cell's measured height sizes the cards (cardsThatFit). In flow they would hold the row at
+                          whatever height the last count of cards needed. */}
+                      <div className="pointer-events-none absolute inset-0 flex flex-col gap-0.5 px-1 pt-1 pb-0.5 @max-[640px]/cal:items-center">
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums",
+                            outside ? "text-muted-foreground" : "text-foreground",
+                            isToday && "bg-primary font-semibold text-primary-foreground",
+                          )}
+                        >
+                          {d.getDate()}
+                        </span>
+                        {posts.length > 0 &&
+                          (narrow ? (
+                            // Narrow panel: a dot per post in its status colour (the agenda below names each one).
+                            <span aria-hidden className="flex items-center gap-0.5">
+                              {posts.slice(0, 3).map((i) => <span key={i.id} className={cn("size-1.5 rounded-full", TONE_DOT[toneOf(i.publishIssue ?? i.status)])} />)}
+                              {posts.length > 3 && <span className="leading-none text-muted-foreground">+{posts.length - 3}</span>}
                             </span>
-                            <span className="mt-0.5 block truncate text-xs text-primary @min-[520px]/month:hidden">{postCount(posts.length)}</span>
-                          </>
-                        )}
-                      </button>
-                    </td>
+                          ) : (
+                            <>
+                              {posts.slice(0, fit.shown).map((i) => <PostCard key={i.id} item={i} onOpen={onOpen} stacked={fit.stacked} />)}
+                              {fit.more > 0 && (
+                                // Opens the day's popover, which lists every post: no post is ever out of reach.
+                                <button
+                                  type="button"
+                                  tabIndex={-1}
+                                  onClick={() => (isOpen ? closeDay() : openDay(k))}
+                                  className="pointer-events-auto h-5 shrink-0 rounded px-1.5 text-left text-xs font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                  +{fit.more} more
+                                </button>
+                              )}
+                            </>
+                          ))}
+                      </div>
+                    </div>
                   );
                 })}
-              </tr>
+              </div>
             ))}
-          </tbody>
-        </table>
-        <ul aria-label="Status colours" className="mt-2 flex flex-wrap gap-1.5 text-xs">
+          </div>
+        </div>
+        {narrow && agendaDay && (
+          <section id={agendaId} aria-label="Posts on the chosen day" className="flex flex-col gap-1 border-t border-border pt-2">
+            <h3 aria-live="polite" className="px-2 text-xs font-semibold">
+              {agendaPosts.length ? <>{dayLabel(agendaDay)} &middot; {postCount(agendaPosts.length)}</> : `Nothing on ${dayLabel(agendaDay)}`}
+            </h3>
+            <DayPosts posts={agendaPosts} onPick={onOpen} />
+            {!agendaPosts.length && onNewPost && (
+              <div className="px-2">
+                <Button size="sm" onClick={() => onNewPost(agendaKey)}>
+                  <Plus aria-hidden="true" />
+                  New post
+                </Button>
+              </div>
+            )}
+          </section>
+        )}
+        {/* What each colour means, in words: a dot and its label. */}
+        <ul aria-label="Status colours" className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-2.5 text-xs text-muted-foreground @max-[640px]/cal:px-2">
           {LEGEND.map(([tone, label]) => (
-            <li key={label} className={cn("rounded border px-1 py-0.5", TONE_CLASS[tone])}>{label}</li>
+            <li key={label} className="flex items-center gap-1.5">
+              <span aria-hidden className={cn("size-2 shrink-0 rounded-full", TONE_DOT[tone])} />
+              {label}
+            </li>
           ))}
         </ul>
       </LoadGate>
-      {pop && popDay && (
-        <DayPopover key={pop.key} label={dayLabel(popDay)} posts={byDay.get(pop.key) ?? []} open={pop.open} at={pop.at} cell={popCell} onClose={closeDay} onExited={popExited} onOpen={onOpen} />
+      {!narrow && pop && popDay && (
+        <DayPopover key={pop.key} label={dayLabel(popDay)} posts={byDay.get(pop.key) ?? []} open={pop.open} at={pop.at} cell={popCell} onClose={closeDay} onExited={popExited} onOpen={onOpen} onNewPost={onNewPost && (() => onNewPost(pop.key))} />
       )}
     </div>
   );

@@ -102,14 +102,14 @@ export function Markdown({ source }: { source: string }) {
         return block.type === "ul" ? (
           <ul
             key={i}
-            className="flex list-disc flex-col gap-1.5 pl-5 marker:text-primary"
+            className="flex list-disc flex-col gap-1.5 pl-5 marker:text-muted-foreground"
           >
             {items}
           </ul>
         ) : (
           <ol
             key={i}
-            className="flex list-decimal flex-col gap-1.5 pl-5 marker:text-primary"
+            className="flex list-decimal flex-col gap-1.5 pl-5 marker:text-muted-foreground"
           >
             {items}
           </ol>

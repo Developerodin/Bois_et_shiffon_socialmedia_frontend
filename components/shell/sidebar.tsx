@@ -129,7 +129,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
             <Link
               href="/admin"
               aria-current={pathname.startsWith("/admin") ? "page" : undefined}
-              className={cn(row, "mt-3 h-12 px-3", pathname.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+              className={cn(row, "mt-3 h-12 px-3", pathname.startsWith("/admin") ? "bg-accent ring-1 ring-inset ring-control text-foreground" : "text-muted-foreground hover:bg-muted")}
             >
               <ShieldCheck className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               Platform admin
@@ -150,7 +150,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     <Link
                       href={e.href}
                       aria-current={isActive(e) ? "page" : undefined}
-                      className={cn(row, "h-10 px-3 pointer-coarse:h-12", isShown(e) ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+                      className={cn(row, "h-10 px-3 pointer-coarse:h-12", isShown(e) ? "bg-accent ring-1 ring-inset ring-control text-foreground" : "text-muted-foreground hover:bg-muted")}
                     >
                       {Icon ? <Icon className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : null}
                       {e.label}
@@ -197,14 +197,14 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     refocus.current = e.id;
                     reorder(i, ev.key === "ArrowUp" ? i - 1 : i + 1);
                   }}
-                  className={cn(row, "h-11 px-2 pointer-coarse:h-[52px]", isShown(e) ? "bg-accent" : "hover:bg-muted")}
+                  className={cn(row, "h-11 px-2 pointer-coarse:h-[52px]", isShown(e) ? "bg-accent ring-1 ring-inset ring-control" : "hover:bg-muted")}
                 >
                   <Image src={`/agents/${e.id}.svg`} alt="" width={36} height={36} draggable={false} className="size-9 shrink-0" />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
                       <span className="truncate font-medium text-foreground">{e.label}</span>
                       {e.soon ? (
-                        <span className="shrink-0 rounded-[8px] bg-muted px-2 text-xs text-primary-strong">Soon</span>
+                        <span className="shrink-0 rounded-[8px] bg-muted px-2 text-xs text-muted-foreground">Soon</span>
                       ) : null}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">{e.role}</span>
@@ -262,7 +262,7 @@ export function MobileNav(props: Props) {
       <SheetContent
         side="left"
         aria-describedby={undefined}
-        // Query-only links (/?panel=content) keep the pathname, so the effect above can't see them: close on any link click.
+        // Query-only links (/settings?tab=members from Settings) keep the pathname, so the effect above can't see them: close on any link click.
         onClick={(e) => e.target instanceof Element && e.target.closest("a") && setOpen(false)}
         className="flex w-[264px] max-w-[85vw] flex-col bg-card p-0"
       >

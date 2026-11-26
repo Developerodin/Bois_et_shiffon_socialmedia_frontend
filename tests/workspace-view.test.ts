@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RUN_ID_PATTERN } from "@/shared";
 import { entryToView, parseRecent, viewToEntry } from "@/lib/recent";
-import { agentLabel, competitorsRedirect, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem, PANEL_IDS, type PanelId } from "@/lib/workspace-view";
+import { agentLabel, calendarRedirect, competitorsRedirect, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem, PANEL_IDS, type PanelId } from "@/lib/workspace-view";
 import { sanitize, type Layout } from "@/components/workspace/panel-layout";
 
 describe("workspace view URL", () => {
@@ -93,9 +93,14 @@ describe("brand switch", () => {
     expect(withoutOpenItem("?post=p1&panel=content", "/")).toBe("?panel=content");
     expect(withoutOpenItem("?agent=seo&runId=r1", "/")).toBe("/");
   });
-  it("drops the old brand's campaign filter, open item or not, and keeps other filters", () => {
-    expect(withoutOpenItem("?cf_campaignId=c1&cf_status=draft", "/")).toBe("?cf_status=draft");
-    expect(withoutOpenItem("?post=p1&cf_campaignId=c1", "/")).toBe("/");
+  it("leaves cf_ params on the Overview alone, since only the Content calendar page reads them", () => {
+    expect(withoutOpenItem("?cf_campaignId=c1&cf_status=draft", "/")).toBeNull();
+    expect(withoutOpenItem("?post=p1&cf_campaignId=c1", "/")).toBe("?cf_campaignId=c1");
+  });
+  it("drops the open post and the old brand's campaign from the Content calendar page, keeping other filters", () => {
+    expect(withoutOpenItem("?cf_need=week&post=p1", "/calendar")).toBe("?cf_need=week");
+    expect(withoutOpenItem("?cf_campaignId=c1", "/calendar")).toBe("/calendar");
+    expect(withoutOpenItem("?cf_status=draft", "/calendar")).toBeNull();
   });
   it("leaves the URL alone when nothing is open or the page isn't the Overview", () => {
     expect(withoutOpenItem("?panel=content", "/")).toBeNull();
@@ -144,6 +149,35 @@ describe("panel in the peek (?peek=)", () => {
     expect(withoutOpenItem("?competitor=c1", "/competitors")).toBe("/competitors");
     expect(withoutOpenItem("?agent=competitors&runId=r1", "/competitors")).toBe("/competitors");
     expect(withoutOpenItem("", "/competitors")).toBeNull();
+  });
+  it("no longer opens the content calendar, which is a page now", () => {
+    expect(PANEL_IDS).not.toContain("content");
+    expect(viewFromSearch("?peek=content")).toEqual({ kind: "home" });
+  });
+  it("sends old content calendar panel links to the page, keeping a well-formed post and the known filters", () => {
+    expect(calendarRedirect({ panel: "content" })).toBe("/calendar");
+    expect(calendarRedirect({ peek: "content" })).toBe("/calendar");
+    expect(calendarRedirect({ panel: "content", post: "cm_1-a" })).toBe("/calendar?post=cm_1-a");
+    expect(calendarRedirect({ peek: "content", post: "p1", cf_need: "week", cf_campaignId: "c1" })).toBe("/calendar?cf_campaignId=c1&cf_need=week&post=p1");
+    // A malformed or repeated post, an unknown filter value and other parameters are dropped, never passed on.
+    expect(calendarRedirect({ panel: "content", post: "../x?y" })).toBe("/calendar");
+    expect(calendarRedirect({ panel: "content", post: ["p1", "p2"] })).toBe("/calendar");
+    expect(calendarRedirect({ panel: "content", cf_need: "soon", cf_owner: ["me"], doc: "x" })).toBe("/calendar");
+    // A status that is only an object property is not a status group.
+    expect(calendarRedirect({ panel: "content", cf_status: "toString" })).toBe("/calendar");
+    expect(calendarRedirect({ panel: "content", cf_status: "__proto__", cf_need: "week" })).toBe("/calendar?cf_need=week");
+    // Not an old calendar link: a bare post stays in the Overview's peek.
+    expect(calendarRedirect({ post: "p1" })).toBeNull();
+    expect(calendarRedirect({ panel: "competitors" })).toBeNull();
+    expect(calendarRedirect({ panel: ["content"] })).toBeNull();
+    expect(calendarRedirect({})).toBeNull();
+  });
+  it("drops the content calendar from a layout saved with it, and the column it leaves empty", () => {
+    const saved = { columns: [{ id: "a", size: 1.1, panels: ["ideas"] }, { id: "b", size: 1.8, panels: ["home"] }, { id: "c", size: 1.1, panels: ["content"] }], collapsed: ["content", "ideas"] };
+    const fallback: Layout<PanelId> = { columns: [{ id: "x", size: 1, panels: ["home"] }], collapsed: [] };
+    const l = sanitize(saved, [...PANEL_IDS], fallback);
+    expect(l.columns.map((c) => c.panels)).toEqual([["ideas"], ["home"]]);
+    expect(l.collapsed).toEqual(["ideas"]);
   });
   it("drops Competitors from a layout saved with it, and the column it leaves empty", () => {
     const saved = { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.3, panels: ["analytics"] }, { id: "c", size: 1.3, panels: ["competitors"] }], collapsed: ["competitors"] };

@@ -21,7 +21,7 @@ export function ComingSoon({ icon, title, description, mark, backHref, backLabel
       {backHref ? (
         <Link
           href={backHref}
-          className="inline-flex min-h-11 w-fit items-center gap-2 rounded-xl text-sm font-medium text-link hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="inline-flex min-h-11 w-fit items-center gap-2 rounded-xl text-sm font-medium text-link underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ArrowLeft className="size-4" strokeWidth={SHELL_STROKE} aria-hidden="true" />
           {backLabel ?? "Back"}

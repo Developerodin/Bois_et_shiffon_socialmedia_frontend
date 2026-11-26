@@ -9,7 +9,7 @@ describe("panel layout", () => {
     expect(src).not.toContain("aria-current={activeMobile");
     expect(src).toContain("aria-pressed={activeMobile === id}");
     expect(src).toContain("border-t-2");
-    expect(src).toContain("border-primary font-medium");
+    expect(src).toContain("border-foreground font-medium");
   });
   it("starts a drag from the grip and title only, not from the header's buttons", () => {
     const header = src.slice(src.indexOf("<header"), src.indexOf("</header>"));

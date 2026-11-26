@@ -39,7 +39,7 @@ import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorView } from "@/components/workspace/competitors-panel";
-import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
+import { ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Peek } from "@/components/workspace/peek";
 import { TaskView } from "@/components/tasks/task-view";
@@ -56,7 +56,7 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
 import { CONNECTIONS_READ, safeHttpUrl, STATUS_GROUPS } from "@/shared";
-import { filterFromSearch, filterToSearch, isBlocked, isOverdue, isThisWeek, withFilter, type CalendarFilter } from "@/lib/calendar-filter";
+import { filterToSearch, isBlocked, isOverdue, isThisWeek, type CalendarFilter } from "@/lib/calendar-filter";
 import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
 import { nothingToDo } from "@/lib/agent-runs";
@@ -72,11 +72,11 @@ type Report = { score: number; summary: string; findings: Finding[]; metrics: Re
 
 /** Agents shown as tiles. Built ones come from the API; planned ones are locked (Okara shows locked tiles too). */
 const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
-  research: { icon: ScanSearch, tint: "text-primary" },
-  scout: { icon: Compass, tint: "text-primary" },
-  planner: { icon: CalendarDays, tint: "text-primary" },
-  brief: { icon: FileText, tint: "text-primary" },
-  creator: { icon: PenLine, tint: "text-primary" },
+  research: { icon: ScanSearch, tint: "text-primary-strong" },
+  scout: { icon: Compass, tint: "text-primary-strong" },
+  planner: { icon: CalendarDays, tint: "text-primary-strong" },
+  brief: { icon: FileText, tint: "text-primary-strong" },
+  creator: { icon: PenLine, tint: "text-primary-strong" },
   quality: { icon: ShieldCheck, tint: "text-success" },
   analyst: { icon: LineChart, tint: "text-primary-strong" },
   seo: { icon: Gauge, tint: "text-success" },
@@ -145,13 +145,6 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
   const [view, setView] = useState<View>({ kind: "home" });
   const [focus, setFocus] = useState<{ id: PanelId; n: number } | undefined>();
   const [urlRead, setUrlRead] = useState(false);
-  // The calendar's filters live in the URL (cf_ params) so a filtered view can be shared or refreshed.
-  const [calFilter, setCalFilter] = useState<CalendarFilter>({});
-  const changeFilter = useCallback((f: CalendarFilter) => {
-    setCalFilter(f);
-    const q = withFilter(window.location.search, f);
-    window.history.replaceState(null, "", q ? `?${q}` : window.location.pathname);
-  }, []);
   const [failed, setFailed] = useState(NONE_FAILED);
   const mark = useCallback((k: keyof typeof NONE_FAILED, v: boolean) => setFailed((f) => (f[k] === v ? f : { ...f, [k]: v })), []);
   const viewNow = useRef(view);
@@ -197,13 +190,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
       forgetClosed();
       setView(v);
     }
-    // ?panel= shows that panel (e.g. Menu → Content calendar) once, and stays in the URL: the sidebar reads it to
-    // keep Wave selected.
+    // ?panel= shows that panel once (e.g. a link to the Ideas panel), and stays in the URL.
     const panel = new URLSearchParams(window.location.search).get("panel");
     if (panel && panel !== shownPanel.current && (PANEL_IDS as readonly string[]).includes(panel)) setFocus((f) => ({ id: panel as PanelId, n: (f?.n ?? 0) + 1 }));
     shownPanel.current = panel;
-    const cf = filterFromSearch(new URLSearchParams(window.location.search));
-    setCalFilter((old) => (filterToSearch(old) === filterToSearch(cf) ? old : cf));
     popped.current = false;
     acceptedUrl.current = window.location.search || window.location.pathname;
     setUrlRead(true);
@@ -360,6 +350,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
     }
     revealRef.current?.(id);
   };
+  // The posts now live on the Content calendar page: leaving for it asks about unsaved work in the peek first.
+  const openCalendar = () => {
+    if (okToDiscard()) router.push("/calendar");
+  };
   // Toasts with a button (Reopen) do nothing once this page is gone.
   useEffect(() => clearActionToasts, []);
 
@@ -406,16 +400,12 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
             connections={connections}
             pipeline={pipeline}
             needs={{ overdue: overdueQ.data ?? 0, blocked: blockedQ.data ?? 0, week: weekQ.data ?? 0 }}
-            onOpenCalendar={(need) => {
-              changeFilter({ need });
-              revealPanel("content");
-            }}
             canRun={canRun}
             canCreate={canCreate}
             onOpen={open}
             onShowPanel={revealPanel}
             onRetry={retry}
-            due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} onShowPanel={revealPanel} /> : null}
+            due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} /> : null}
             taskGroups={tasksOn && perms.includes("tasks.read") ? <TodayTasks base={base} onOpen={(id) => open({ kind: "task", id })} /> : null}
             showAgents={canAgents}
             digestOn={digestOn}
@@ -438,13 +428,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
       id: "ideas",
       title: "Ideas",
       icon: <Compass />,
-      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={() => revealPanel("content")} onOpenPost={(id) => open({ kind: "content", id })} />,
-    },
-    {
-      id: "content",
-      title: "Content calendar",
-      icon: <CalendarDays />,
-      render: () => <ContentPanel base={base} perms={perms} me={user.id ?? null} filter={calFilter} onFilter={changeFilter} onOpen={(id) => open({ kind: "content", id })} onRunPlanner={() => open({ kind: "agent", key: "planner" })} />,
+      render: () => <IdeasPanel base={base} perms={perms} onRunScout={() => open({ kind: "agent", key: "scout", run: true })} onOpenPosts={openCalendar} onOpenPost={(id) => open({ kind: "content", id })} />,
     },
     { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => (canAgents ? <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> : <NotForRole what="the Agent Log" />) },
   ];
@@ -517,9 +501,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
         brandId={brandId}
         onOpenDoc={(doc) => open({ kind: "doc", doc })}
         onRan={refreshAgents}
-        onOpenPosts={() => revealPanel("content")}
+        onOpenPosts={openCalendar}
         onOpenPost={(id) => open({ kind: "content", id })}
-        onShowPanel={revealPanel}
       />
       )
     ) : null;
@@ -566,9 +549,10 @@ const PRESETS: Preset<PanelId>[] = [
     layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 2.2, panels: ["home"] }, { id: "c", size: 1.3, panels: ["feed"] }], collapsed: [] },
   },
   {
+    // The content calendar has its own page now (/calendar); a saved copy of this preset loses it the same way.
     name: "Content team",
-    description: "Ideas, today and agents, content calendar",
-    layout: { columns: [{ id: "a", size: 1.1, panels: ["ideas"] }, { id: "b", size: 1.8, panels: ["home"] }, { id: "c", size: 1.1, panels: ["content"] }], collapsed: [] },
+    description: "Ideas, today and agents",
+    layout: { columns: [{ id: "a", size: 1.1, panels: ["ideas"] }, { id: "b", size: 1.8, panels: ["home"] }], collapsed: [] },
   },
   {
     name: "Classic",
@@ -878,7 +862,6 @@ function Home({
   connections,
   pipeline,
   needs,
-  onOpenCalendar,
   canRun,
   canCreate,
   onOpen,
@@ -910,7 +893,6 @@ function Home({
   pipeline: { ideasToDecide: number; awaiting: number; toWrite: number; shortlisted: number } | null;
   /** Posts needing action, from the calendar: past their date, blocked, and due in the next 7 days. */
   needs: { overdue: number; blocked: number; week: number };
-  onOpenCalendar: (need: NonNullable<CalendarFilter["need"]>) => void;
   canRun: boolean;
   canCreate: boolean;
   onOpen: (v: View) => void;
@@ -990,8 +972,8 @@ function Home({
         detail: `${pipeline.toWrite} to brief and draft`,
         action: (
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => onShowPanel("content")}>
-              Open posts
+            <Button size="sm" variant="secondary" asChild>
+              <Link href={calendarHref()}>Open posts</Link>
             </Button>
             <NewPostDialog base={base} canCreate={canCreate} onCreated={(id) => onOpen({ kind: "content", id })} />
           </div>
@@ -1005,8 +987,8 @@ function Home({
         label: "Review drafts ready for approval",
         detail: `${pipeline.awaiting} waiting`,
         action: (
-          <Button size="sm" variant="secondary" onClick={() => onShowPanel("content")}>
-            Open calendar
+          <Button size="sm" variant="secondary" asChild>
+            <Link href={calendarHref()}>Open calendar</Link>
           </Button>
         ),
       });
@@ -1023,8 +1005,8 @@ function Home({
         label,
         detail: `${needs[need]} ${detail}`,
         action: (
-          <Button size="sm" variant="secondary" onClick={() => onOpenCalendar(need)}>
-            Open calendar
+          <Button size="sm" variant="secondary" asChild>
+            <Link href={calendarHref(need)}>Open calendar</Link>
           </Button>
         ),
       });
@@ -1043,7 +1025,7 @@ function Home({
       });
     }
     return list;
-  }, [base, docs, marks, mark, reports, connections, pipeline, needs, onOpenCalendar, canRun, canCreate, onOpen, onShowPanel, scoutPrice]);
+  }, [base, docs, marks, mark, reports, connections, pipeline, needs, canRun, canCreate, onOpen, onShowPanel, scoutPrice]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done && !(Date.now() - (marks[t.id] ?? 0) < DAY_MS));
@@ -1054,7 +1036,7 @@ function Home({
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 px-5 pt-6">
         <p className="font-display text-2xl font-medium tracking-tight">{first ? `Welcome, ${first}.` : "Welcome."}</p>
         {digestOn && (
-          <Link href="/digest" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+          <Link href="/digest" className="text-sm font-medium text-link underline underline-offset-4 hover:decoration-2">
             This week
           </Link>
         )}
@@ -1127,7 +1109,7 @@ function Home({
         ) : (
         <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-x-3 gap-y-5">
           {built.map((a) => {
-            const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
+            const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary-strong" };
             const running = a.lastRun?.status === "RUNNING" || a.lastRun?.status === "QUEUED";
             const state = running ? "running" : a.lastRun?.status === "FAILED" && !nothingToDo(a) ? "failed" : "ready";
             // SEO and GEO show their latest score on the tile (no need to open them); running or failed still says so.
@@ -1174,11 +1156,14 @@ type DueStory = { id: string; title: string; scheduledFor: string };
 const pickDue = (d: { items: DueStory[] }) => d.items;
 const DAY_MS = 24 * 3600_000;
 
+/** The Content calendar page, filtered to posts needing one kind of action when `need` is given. */
+const calendarHref = (need?: NonNullable<CalendarFilter["need"]>) => (need ? `/calendar?${filterToSearch({ need })}` : "/calendar");
+
 /**
  * Stories due to be posted by hand: one card with a count, until someone posts them or stops Post by hand. Dismiss hides
  * it in this browser for a day (localStorage, per business; a blocked storage just means it can't stay dismissed).
  */
-function DueStories({ base, onOpen, onShowPanel }: { base: string; onOpen: (v: View) => void; onShowPanel: (id: PanelId) => void }) {
+function DueStories({ base, onOpen }: { base: string; onOpen: (v: View) => void }) {
   const items = useBrandData(base, "stories/due", pickDue as (d: never) => DueStory[]).data;
   const key = `stories-due-dismissed:${base}`;
   // Read after mount: the server render has no localStorage.
@@ -1207,9 +1192,15 @@ function DueStories({ base, onOpen, onShowPanel }: { base: string; onOpen: (v: V
         <span className="font-medium">{n} {n === 1 ? "story" : "stories"} to post by hand</span>
         {n === 1 && <span className="text-muted-foreground"> · {items[0].title}</span>}
       </p>
-      <Button size="sm" onClick={() => (n === 1 ? onOpen({ kind: "content", id: items[0].id }) : onShowPanel("content"))}>
-        Open
-      </Button>
+      {n === 1 ? (
+        <Button size="sm" onClick={() => onOpen({ kind: "content", id: items[0].id })}>
+          Open
+        </Button>
+      ) : (
+        <Button size="sm" asChild>
+          <Link href={calendarHref()}>Open</Link>
+        </Button>
+      )}
       <Button size="sm" variant="ghost" onClick={dismiss}>
         Dismiss
       </Button>
@@ -1292,11 +1283,11 @@ function DocView(p: {
 }
 
 /** Where an agent's result lands, shown once its run has finished. */
-const AGENT_NEXT: Record<string, { text: string; label: string; panel?: PanelId; href?: string }> = {
-  planner: { text: "The Planner has filled your calendar.", label: "Open the calendar", panel: "content" },
-  brief: { text: "Briefs are written on your posts.", label: "Open posts", panel: "content" },
-  creator: { text: "Drafts are written on your posts.", label: "Open posts", panel: "content" },
-  quality: { text: "Quality checks are on your drafts.", label: "Open posts", panel: "content" },
+const AGENT_NEXT: Record<string, { text: string; label: string; href: string }> = {
+  planner: { text: "The Planner has filled your calendar.", label: "Open the calendar", href: "/calendar" },
+  brief: { text: "Briefs are written on your posts.", label: "Open posts", href: "/calendar" },
+  creator: { text: "Drafts are written on your posts.", label: "Open posts", href: "/calendar" },
+  quality: { text: "Quality checks are on your drafts.", label: "Open posts", href: "/calendar" },
   seo: { text: "The SEO report is updated.", label: "See the SEO & GEO reports", href: "/performance" },
   geo: { text: "The AI visibility report is updated.", label: "See the SEO & GEO reports", href: "/performance" },
   competitors: { text: "Competitors it found are on the Competitors page.", label: "Open competitors", href: "/competitors" },
@@ -1316,14 +1307,12 @@ export function AgentView({
   runId,
   onOpenPosts,
   onOpenPost,
-  onShowPanel,
   canRun,
   perms,
 }: {
   agentKey: string;
   /** A run to show what it did (from the "agent finished" toast); without it, the latest run. */
   runId?: string;
-  onShowPanel: (id: PanelId) => void;
   /** The role may run agents; without it the Run button is hidden. */
   canRun: boolean;
   perms: string[];
@@ -1399,13 +1388,9 @@ export function AgentView({
         {!running && agent?.lastRun?.status === "SUCCEEDED" && AGENT_NEXT[agentKey] && (
           <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
             <span>{AGENT_NEXT[agentKey].text}</span>
-            {AGENT_NEXT[agentKey].href ? (
-              <Button size="sm" asChild>
-                <Link href={AGENT_NEXT[agentKey].href!}>{AGENT_NEXT[agentKey].label}</Link>
-              </Button>
-            ) : (
-              <Button size="sm" onClick={() => onShowPanel(AGENT_NEXT[agentKey].panel!)}>{AGENT_NEXT[agentKey].label}</Button>
-            )}
+            <Button size="sm" asChild>
+              <Link href={AGENT_NEXT[agentKey].href}>{AGENT_NEXT[agentKey].label}</Link>
+            </Button>
           </div>
         )}
 
@@ -1626,7 +1611,7 @@ function AgentsFeed({
       )}
       {agents && built.length === 0 && <li className="px-4 py-3 text-sm text-muted-foreground">No agents are set up for this business yet.</li>}
       {built.map((a) => {
-        const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
+        const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary-strong" };
         const Icon = meta.icon;
         const running = a.lastRun?.status === "RUNNING" || a.lastRun?.status === "QUEUED";
         return (

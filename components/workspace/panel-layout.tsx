@@ -412,7 +412,7 @@ export function PanelLayout<Id extends string>({
               aria-pressed={activeMobile === id}
               className={cn(
                 "flex min-w-20 flex-1 flex-col items-center gap-0.5 border-t-2 px-2 py-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                activeMobile === id ? "border-primary font-medium text-primary-strong" : "border-transparent text-muted-foreground",
+                activeMobile === id ? "border-foreground font-medium text-foreground" : "border-transparent text-muted-foreground",
               )}
             >
               {def(id).icon}

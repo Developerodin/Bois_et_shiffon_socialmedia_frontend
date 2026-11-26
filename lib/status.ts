@@ -19,6 +19,18 @@ export const TONE_CLASS: Record<Tone, string> = {
   good: "border-success/40 bg-success/10 text-success-ink",
   warn: "border-warning/40 bg-warning/10 text-warning-ink",
   bad: "border-destructive/40 bg-destructive/10 text-destructive",
-  info: "border-primary/40 bg-primary/10 text-primary-strong",
+  info: "border-status-info/40 bg-status-info/10 text-status-info",
   muted: "border-border bg-muted text-muted-foreground",
+};
+
+/**
+ * A solid swatch per tone, for status dots, the calendar's card edges and legend, and quiet status pills; always shown
+ * beside text that names the status. Info is a slate blue (--status-info), not the brand purple, which stays for actions.
+ */
+export const TONE_DOT: Record<Tone, string> = {
+  good: "bg-success",
+  warn: "bg-warning",
+  bad: "bg-destructive",
+  info: "bg-status-info",
+  muted: "bg-muted-foreground",
 };

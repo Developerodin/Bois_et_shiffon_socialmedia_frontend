@@ -46,6 +46,11 @@ describe("navFor", () => {
   it("ignores the query string", () => {
     expect(navFor("/performance?x=1").title).toBe("Growth reports");
   });
+  it("titles the Content calendar page over Wave, and links both Wave and More's entry to it", () => {
+    expect(NAV.find((e) => e.id === "wave")?.href).toBe("/calendar");
+    expect(NAV.find((e) => e.id === "calendar")).toMatchObject({ href: "/calendar", group: "more", perm: ["brand.read"] });
+    expect(navFor("/calendar")).toMatchObject({ activeId: "calendar", title: "Content calendar", brandScoped: true });
+  });
   it("titles the Competitors page over Drift, which links to it", () => {
     expect(NAV.find((e) => e.id === "drift")?.href).toBe("/competitors");
     expect(navFor("/competitors")).toMatchObject({ activeId: "competitors", title: "Competitors", brandScoped: true });
@@ -192,6 +197,12 @@ describe("activeIdFor", () => {
     const pointing = entries.filter((e) => !e.soon && !e.href.startsWith("/agents/"));
     expect(pointing.map((e) => e.id).sort()).toEqual(["beat", "drift", "hum", "pulse", "spark", "surge", "wave"]);
     for (const e of pointing) expect(at(e.href, live), e.href).toBe(e.id);
+  });
+
+  it("selects Wave on the Content calendar page, and no longer on the Overview's old ?panel=content", () => {
+    expect(at("/calendar", new Set())).toBe("wave");
+    expect(at("/calendar?post=p1&cf_need=week", new Set())).toBe("wave");
+    expect(at("/?panel=content", new Set())).toBe("overview");
   });
 
   it("selects Drift on the Competitors page, and no longer on the Overview's old ?panel=competitors", () => {

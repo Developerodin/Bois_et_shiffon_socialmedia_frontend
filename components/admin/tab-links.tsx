@@ -15,7 +15,7 @@ export function TabLinks({ label, tabs }: { label: string; tabs: { href: string;
   const { ref, style, shown, pick } = useIndicator<HTMLElement>(active, "underline");
   return (
     <nav ref={ref} aria-label={label} className="relative flex flex-wrap gap-1 border-b border-border">
-      <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-full bg-primary" style={style} />
+      <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-full bg-foreground" style={style} />
       {tabs.map((t) => {
         const on = t.href === shown;
         return (

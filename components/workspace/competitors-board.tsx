@@ -103,9 +103,8 @@ export function CompetitorsBoard({ workspaceId, brandId, perms, userId }: { work
         brandId={brandId}
         onOpenDoc={(doc) => router.push(`/?doc=${encodeURIComponent(doc)}`)}
         onRan={refreshAgents}
-        onOpenPosts={() => router.push("/?panel=content")}
+        onOpenPosts={() => router.push("/calendar")}
         onOpenPost={(id) => router.push(`/?post=${encodeURIComponent(id)}`)}
-        onShowPanel={(id) => router.push(`/?panel=${encodeURIComponent(id)}`)}
       />
     );
 

@@ -1,10 +1,12 @@
 import { DOC_KINDS, RUN_ID_PATTERN, type ContextDocKind } from "@/shared";
+import { filterFromSearch, filterToSearch } from "@/lib/calendar-filter";
 
 /**
- * The Overview's panels. Competitors left for its own page (/competitors): saved layouts drop the id when read
- * (panel-layout's sanitize), and the Overview's page sends /?panel=competitors there.
+ * The Overview's panels. Competitors and the content calendar left for their own pages (/competitors, /calendar): saved
+ * layouts drop the ids when read (panel-layout's sanitize), and the Overview's page sends /?panel=competitors and
+ * /?panel=content (or ?peek=content) there.
  */
-export const PANEL_IDS = ["context", "home", "ideas", "content", "analytics", "feed", "log"] as const;
+export const PANEL_IDS = ["context", "home", "ideas", "analytics", "feed", "log"] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 
 /** What the Overview has open. `run` starts the agent on open; `runId` shows one finished run's events. */
@@ -81,9 +83,15 @@ export function taskHref(pathname: string, search: string, id: string): string {
   return `${pathname}${s}`;
 }
 
-/** Where a post opens from the shell: the Overview's peek (keeping the Overview's other parameters when already there). */
+/** The pages with a post peek of their own (the Overview, the content calendar). */
+const hasPostPeek = (pathname: string) => pathname === "/" || pathname === "/calendar";
+
+/**
+ * Where a post opens from the shell: this page's peek when it has one (keeping its other parameters, such as the
+ * calendar's filters), else the Overview's.
+ */
 export function postHref(pathname: string, search: string, id: string): string {
-  return pathname === "/" ? `/${viewToSearch({ kind: "content", id }, search, "/")}` : `/?post=${encodeURIComponent(id)}`;
+  return hasPostPeek(pathname) ? `${pathname}${viewToSearch({ kind: "content", id }, search, pathname)}` : `/?post=${encodeURIComponent(id)}`;
 }
 
 /**
@@ -94,6 +102,24 @@ export function competitorsRedirect(panel: unknown, competitor: unknown): string
   if (panel !== "competitors") return null;
   const v = typeof competitor === "string" ? parseViewParts("competitor", competitor) : null;
   return v?.kind === "competitor" ? `/competitors?competitor=${encodeURIComponent(v.id)}` : "/competitors";
+}
+
+type Param = string | string[] | undefined;
+
+/**
+ * Where an old link to the Overview's content calendar panel (/?panel=content, or /?peek=content) goes now: the Content
+ * calendar page, with the post it named (?post=) open when that is a well-formed id, and the calendar's filters (cf_)
+ * it carried, read through the filter parser so only known values pass. Null when the link isn't one of those.
+ */
+export function calendarRedirect(params: { panel?: Param; peek?: Param; post?: Param; [k: string]: Param }): string | null {
+  if (params.panel !== "content" && params.peek !== "content") return null;
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) if (k.startsWith("cf_") && typeof v === "string") q.set(k, v);
+  const out = new URLSearchParams(filterToSearch(filterFromSearch(q)));
+  const v = typeof params.post === "string" ? parseViewParts("post", params.post) : null;
+  if (v?.kind === "content") out.set("post", v.id);
+  const s = out.toString();
+  return s ? `/calendar?${s}` : "/calendar";
 }
 
 /** `href` stays on `pathname` (only its query changes): no page is left, so nothing needs asking before it. */
@@ -190,9 +216,9 @@ export function namesItem(search: string): boolean {
 }
 
 /**
- * The Overview's URL without what belongs to the old brand (the open item, and the calendar's campaign filter), or null
- * when there's nothing to drop (or not the Overview). A brand switch uses it: the new brand's Overview must not open
- * that item or filter by a campaign it doesn't have. The other cf_ filters stay.
+ * The Overview's or the content calendar's URL without what belongs to the old brand (the open item, and on /calendar
+ * the campaign filter), or null when there's nothing to drop (or another page). A brand switch uses it: the new brand's
+ * page must not open that item or filter by a campaign it doesn't have. The other cf_ filters stay.
  */
 export function withoutOpenItem(search: string, pathname: string): string | null {
   // A project belongs to the old brand: its page gives way to the new brand's projects.
@@ -204,17 +230,18 @@ export function withoutOpenItem(search: string, pathname: string): string | null
   }
   // /competitors opens a competitor or the Competitors agent in its peek; the competitor belongs to the old brand.
   if (pathname === "/competitors") return namesItem(search) ? viewToSearch({ kind: "home" }, search, pathname) : null;
-  if (pathname !== "/") return null;
+  if (pathname !== "/" && pathname !== "/calendar") return null;
   const q = new URLSearchParams(search);
-  const hadCampaign = q.has("cf_campaignId");
-  q.delete("cf_campaignId");
+  // Only /calendar reads the cf_ filters now; on the Overview they are left as they are.
+  const hadCampaign = pathname === "/calendar" && q.has("cf_campaignId");
+  if (hadCampaign) q.delete("cf_campaignId");
   if (!namesItem(search) && !hadCampaign) return null;
   return viewToSearch({ kind: "home" }, q.toString(), pathname);
 }
 
 // The URL dropOpenItem just wrote. The Overview reads it once, on the URL change that write causes, and doesn't ask
 // about unsaved work again: the person already agreed in the switcher. Set only on the Overview, the task pages
-// (TaskPeek) and /competitors (CompetitorsBoard), where that read follows.
+// (TaskPeek), /competitors (CompetitorsBoard) and /calendar (CalendarBoard), where that read follows.
 let agreedUrl: string | null = null;
 
 /**

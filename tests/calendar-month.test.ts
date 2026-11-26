@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
+import { CELL_FLOOR, CELL_FRAME, STACKED_STEP, cardsThatFit, cellFit, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, peekInset, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 
 // A zone with DST, so a day that is 23 or 25 hours long is in play.
 beforeAll(() => {
@@ -66,6 +66,68 @@ describe("groupByDay", () => {
   });
 });
 
+describe("week rows", () => {
+  it("gives Feb 2027 four weeks, Dec 2026 five and Nov 2026 six", () => {
+    expect(monthGrid(2027, 1).length / 7).toBe(4);
+    expect(monthGrid(2026, 11).length / 7).toBe(5);
+    expect(monthGrid(2026, 10).length / 7).toBe(6);
+  });
+});
+
+describe("cards in a day cell", () => {
+  it("fits one more card per 22 px past the cell's 28 px frame, and at least one line", () => {
+    expect(cardsThatFit(40)).toBe(1);
+    expect(CELL_FLOOR).toBe(72);
+    expect(cardsThatFit(CELL_FLOOR)).toBe(2);
+    expect(cardsThatFit(93)).toBe(2);
+    expect(cardsThatFit(94)).toBe(3);
+    expect(cardsThatFit(127)).toBe(4);
+    expect(cardsThatFit(200)).toBe(7);
+  });
+
+  it("never hides a post: shown plus more is the day's count", () => {
+    for (const h of [CELL_FLOOR, 103, 130, 200])
+      for (let n = 0; n < 12; n++) {
+        const fit = cellFit(n, cardsThatFit(h));
+        expect(fit.shown + fit.more).toBe(n);
+        expect(fit.shown + (fit.more ? 1 : 0)).toBeLessThanOrEqual(cardsThatFit(h));
+      }
+  });
+
+  it("uses two-line cards on a wide cell when every post fits that way, else one-line cards and +N more", () => {
+    // A 133 x 100 cell (1657 x 921, six weeks): two two-line cards fit, three don't.
+    expect(dayCards(1, 100, 133)).toEqual({ stacked: true, shown: 1, more: 0 });
+    expect(dayCards(2, 100, 133)).toEqual({ stacked: true, shown: 2, more: 0 });
+    expect(dayCards(3, 100, 133)).toEqual({ stacked: false, shown: 3, more: 0 });
+    expect(dayCards(5, 100, 133)).toEqual({ stacked: false, shown: 2, more: 3 });
+    // Too narrow for two lines: one-line cards even for one post.
+    expect(dayCards(1, 100, 90)).toEqual({ stacked: false, shown: 1, more: 0 });
+    expect(dayCards(0, CELL_FLOOR, 133)).toEqual({ stacked: true, shown: 0, more: 0 });
+  });
+
+  it("never lets two-line cards run out of the cell, and never hides a post", () => {
+    for (const h of [CELL_FLOOR, 100, 130, 200])
+      for (let n = 0; n < 12; n++) {
+        const fit = dayCards(n, h, 140);
+        expect(fit.shown + fit.more).toBe(n);
+        if (fit.stacked) expect(CELL_FRAME + n * STACKED_STEP).toBeLessThanOrEqual(h);
+      }
+  });
+});
+
+describe("calendar beside the post peek", () => {
+  it("moves in by what the peek covers of the main area, or not at all if the rest would be too narrow", () => {
+    // 1920 wide: main 232..1536 (the docked assistant is right of it), a 560 px peek from 1360.
+    expect(peekInset(232, 1536, 1360)).toBe(176);
+    // The peek starts right of the main area: nothing covered.
+    expect(peekInset(232, 1536, 1600)).toBe(0);
+    // A phone: the peek covers everything, so the calendar stays put under it.
+    expect(peekInset(0, 390, 0)).toBe(0);
+    expect(peekInset(0, 820, 400, 360)).toBe(420);
+    expect(peekInset(0, 820, 300, 360)).toBe(0);
+  });
+});
+
 describe("day grid keys", () => {
   it("moves a day left or right and a week up or down, and stops at the edges", () => {
     expect(gridStep(10, "ArrowRight", 42)).toBe(11);
@@ -86,8 +148,44 @@ describe("day popover", () => {
     expect(popoverLeft(100, 288, 200)).toBe(0);
   });
 
+  it("opens below when it fits or there is more room below, else above, capped to the room on its side", () => {
+    expect(popoverSide(400, 100, 320)).toEqual({ side: "below", maxHeight: 320 });
+    expect(popoverSide(200, 100, 320)).toEqual({ side: "below", maxHeight: 192 });
+    expect(popoverSide(100, 500, 320)).toEqual({ side: "above", maxHeight: 320 });
+    expect(popoverSide(100, 200, 320)).toEqual({ side: "above", maxHeight: 192 });
+    expect(popoverSide(40, 60, 320)).toEqual({ side: "above", maxHeight: 120 });
+  });
+
   it("a cell shows a compact 24-hour time, none at midnight", () => {
     expect(shortTime(new Date(2026, 10, 23, 14, 30).toISOString())).toMatch(/^14.30$/);
     expect(shortTime(new Date(2026, 10, 23, 0, 0).toISOString())).toBeNull();
+  });
+});
+
+describe("compact cells", () => {
+  it("shows every post up to the line limit, else one fewer and the rest as +N more", () => {
+    expect(cellFit(0, 3)).toEqual({ shown: 0, more: 0 });
+    expect(cellFit(3, 3)).toEqual({ shown: 3, more: 0 });
+    expect(cellFit(4, 3)).toEqual({ shown: 2, more: 2 });
+    expect(cellFit(9, 3)).toEqual({ shown: 2, more: 7 });
+  });
+
+  it("names a cell by its day, count and each post's time, full title and status", () => {
+    expect(dayCellLabel("Monday 23 November", [])).toBe("Monday 23 November, 0 posts");
+    expect(dayCellLabel("Monday 23 November", [{ title: "A festive dining table", time: "14:30", status: "Scheduled" }, { title: "Undated", time: null, status: "To write" }])).toBe(
+      "Monday 23 November, 2 posts: 14:30 A festive dining table (Scheduled); Undated (To write)",
+    );
+  });
+});
+
+describe("New post from a day", () => {
+  it("starts a later day at 10:00, today at the next whole hour, and a day that is over undated", () => {
+    const now = new Date(2026, 10, 26, 14, 20); // 26 Nov 2026, 14:20 local (made here, after the zone is set)
+    expect(newPostTime("2026-11-30", now)).toBe("2026-11-30T10:00");
+    expect(newPostTime("2026-11-26", now)).toBe("2026-11-26T15:00");
+    expect(newPostTime("2026-11-26", new Date(2026, 10, 26, 8, 0))).toBe("2026-11-26T10:00");
+    expect(newPostTime("2026-11-25", now)).toBeNull();
+    // Past 23:00 there is no whole hour left today.
+    expect(newPostTime("2026-11-26", new Date(2026, 10, 26, 23, 5))).toBeNull();
   });
 });

@@ -24,8 +24,10 @@ describe("search results", () => {
     expect(resultHref({ kind: "project", id: "w1", title: "" }, "/", "")).toBe("/projects/w1");
     expect(resultHref({ kind: "post", id: "p1", title: "" }, "/library", "")).toBe("/?post=p1");
     expect(resultHref({ kind: "post", id: "p1", title: "" }, "/", "?task=t1")).toBe("/?post=p1");
+    // The Content calendar page has its own post peek: a post opens there, keeping the calendar's filters.
+    expect(resultHref({ kind: "post", id: "p1", title: "" }, "/calendar", "?cf_need=week")).toBe("/calendar?cf_need=week&post=p1");
     expect(resultHref({ kind: "product", id: "x", title: "Silk scarf" }, "/", "")).toBe("/products?q=Silk+scarf");
-    expect(resultHref({ kind: "campaign", id: "c1", title: "" }, "/library", "")).toBe("/?panel=content&cf_campaignId=c1");
+    expect(resultHref({ kind: "campaign", id: "c1", title: "" }, "/library", "")).toBe("/calendar?cf_campaignId=c1");
   });
 });
 

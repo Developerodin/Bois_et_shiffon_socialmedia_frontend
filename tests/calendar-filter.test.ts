@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, ownerLabel, withFilter, type CalendarItem } from "@/lib/calendar-filter";
+import { activeFilterCount, filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, ownerLabel, withFilter, type CalendarItem } from "@/lib/calendar-filter";
 
 const now = new Date("2026-11-20T12:00:00Z");
 const past = "2026-11-19T12:00:00Z";
@@ -101,5 +101,12 @@ describe("URL", () => {
   it("writes nothing for an empty filter and drops unknown values", () => {
     expect(filterToSearch({})).toBe("");
     expect(filterFromSearch(new URLSearchParams("cf_status=nope&cf_owner=x&cf_need=y&cf_channel="))).toEqual({});
+  });
+  it("ignores a status that is only an object property, so it never reaches the filter", () => {
+    for (const status of ["toString", "__proto__", "constructor", "hasOwnProperty"]) expect(filterFromSearch(new URLSearchParams(`cf_status=${status}`))).toEqual({});
+  });
+  it("counts the filters that are on", () => {
+    expect(activeFilterCount({})).toBe(0);
+    expect(activeFilterCount({ channel: "INSTAGRAM_POST", owner: "me", need: "week" })).toBe(3);
   });
 });

@@ -61,7 +61,9 @@ export const NAV: readonly NavEntry[] = [
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
-  { id: "wave", label: "Wave", href: "/?panel=content", group: "agent", role: "Content calendar" },
+  // Links to the Content calendar page; the "calendar" entry below titles it (the page wins the tie with Wave's href).
+  // No perm: agentEntries reads none (as for Drift); the page itself shows a no-access state without brand.read.
+  { id: "wave", label: "Wave", href: "/calendar", group: "agent", role: "Content calendar" },
   // Echo has no web inbox yet; it points at Connections until one exists.
   { id: "echo", label: "Echo", href: "/settings?tab=connections", group: "agent", role: "Communication", soon: true },
   { id: "pulse", label: "Pulse", href: "/agents/pulse", group: "agent", role: "Finance", soon: true },
@@ -69,7 +71,8 @@ export const NAV: readonly NavEntry[] = [
   { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "Growth reports" },
   { id: "drift", label: "Drift", href: "/competitors", group: "agent", role: "Competitors" },
 
-  { id: "calendar", label: "Content calendar", href: "/?panel=content", group: "more" },
+  // The page and the posts list it reads need brand.read.
+  { id: "calendar", label: "Content calendar", href: "/calendar", group: "more", perm: ["brand.read"] },
   { id: "performance", label: "Growth reports", href: "/performance", group: "more" },
   { id: "agent-log", label: "Agent log", href: "/agents", group: "more" },
   { id: "settings", label: "Settings", href: "/settings", group: "more" },
@@ -115,12 +118,10 @@ export function agentEntries(enabled: readonly WebFeature[], perms?: readonly st
 }
 
 /**
- * The sidebar entry a URL belongs to. Agents that point at a page, a tab or a panel are selected by where you are;
+ * The sidebar entry a URL belongs to. Agents that point at a page or a tab are selected by where you are;
  * Pulse and Hum (a tab of a page) only while `live` (ids of agents not coming soon) holds them.
  */
 export function activeIdFor(pathname: string, search: { get(name: string): string | null }, live: ReadonlySet<string>): string | null {
-  const panel = search.get("panel");
-  if (pathname === "/" && panel === "content") return "wave";
   if (pathname === "/performance") return search.get("tab") === "sales" && live.has("pulse") ? "pulse" : "surge";
   if (pathname === "/settings" && search.get("tab") === "members" && live.has("hum")) return "hum";
   // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
@@ -128,6 +129,7 @@ export function activeIdFor(pathname: string, search: { get(name: string): strin
   if (pathname === "/projects" || pathname.startsWith("/projects/")) return "beat";
   if (pathname === "/crm" || pathname.startsWith("/crm/")) return "spark";
   if (pathname === "/competitors") return "drift";
+  if (pathname === "/calendar") return "wave";
   return navFor(pathname).activeId;
 }
 

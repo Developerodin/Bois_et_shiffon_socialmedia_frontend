@@ -6,8 +6,11 @@ import { errorMessage } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { downloadFile } from "@/lib/download";
 
-/** "Export CSV" (or `label`): downloads `url` as `filename`; a refusal shows beside the button. */
-export function ExportCsvButton({ url, filename, label = "Export CSV" }: { url: string; filename: string; label?: string }) {
+/**
+ * "Export CSV" (or `label`): downloads `url` as `filename`; a refusal shows beside the button. `labelClassName` styles the
+ * label, e.g. to make it screen-reader-only on a narrow toolbar so the button shows just its icon.
+ */
+export function ExportCsvButton({ url, filename, label = "Export CSV", labelClassName }: { url: string; filename: string; label?: string; labelClassName?: string }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   async function run() {
@@ -23,9 +26,9 @@ export function ExportCsvButton({ url, filename, label = "Export CSV" }: { url: 
   }
   return (
     <span className="inline-flex items-center gap-2">
-      <Button size="sm" variant="outline" disabled={pending} onClick={() => void run()}>
+      <Button size="sm" variant="outline" disabled={pending} onClick={() => void run()} title={labelClassName ? label : undefined}>
         <Download className="size-4" aria-hidden="true" />
-        {pending ? "Exporting…" : label}
+        <span className={labelClassName}>{pending ? "Exporting…" : label}</span>
       </Button>
       {error && <span role="alert" className="text-xs text-destructive">{error}</span>}
     </span>
