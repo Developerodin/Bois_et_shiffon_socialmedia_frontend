@@ -15,6 +15,14 @@ import { peekInset } from "@/lib/calendar-month";
 import { recentKey } from "@/lib/recent";
 import { navigate, peekCrumb, peekKey, peekTitle, type View } from "@/lib/workspace-view";
 
+/** The post inspector's width (px) on wide screens. */
+const INSPECTOR_W = 440;
+/**
+ * The narrowest the calendar may get beside the inspector (px). Narrower than this (a smaller desktop) the inspector
+ * slides over the calendar as a drawer instead of squeezing its seven columns.
+ */
+const CALENDAR_BESIDE_MIN = 720;
+
 /**
  * The /calendar page's content calendar and its side peek, which opens a post (?post=) over the calendar, as /tasks does
  * with ?task= (TaskPeek). It renders the Overview's ContentPanel and ContentView; the Overview still opens /?post= links.
@@ -46,8 +54,9 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
   const peek = usePeek(item);
   // The post the peek shows: the open one, or the closed one while it slides out.
   const peekPost = peek.shown?.view.kind === "content" ? peek.shown.view : null;
-  // While a post is open the calendar gives up the width its peek covers (the peek is fixed to the window's right edge
-  // and its width can be dragged), so the toolbar and Sunday stay in view beside it. Back to full width as it closes.
+  // While a post is open the calendar gives up the width its peek covers (the peek is fixed to the window's right edge),
+  // so the toolbar and Sunday stay in view beside it, unless that would leave it under CALENDAR_BESIDE_MIN: then the
+  // peek is a drawer over it. Back to full width as it closes.
   const [inset, setInset] = useState(0);
   const aside = peek.ref;
   useEffect(() => {
@@ -56,7 +65,7 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
     if (!peek.live || !el || !main) return setInset(0);
     const measure = () => {
       const m = main.getBoundingClientRect();
-      setInset(peekInset(m.left, m.right, window.innerWidth - el.offsetWidth));
+      setInset(peekInset(m.left, m.right, window.innerWidth - el.offsetWidth, CALENDAR_BESIDE_MIN));
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -70,10 +79,10 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
       {/* It fills the page's height (flex-1), so the month grid below can spread its weeks over the window. */}
       <Card className="flex min-w-0 flex-1 flex-col" style={inset ? { marginRight: inset } : undefined}>
         {/* The Planner runs from the Overview's agent peek; this page hosts posts only. */}
-        <ContentPanel base={base} perms={perms} me={userId} filter={filter} onFilter={changeFilter} onOpen={(id) => open(id)} onRunPlanner={() => okToDiscard() && router.push("/?agent=planner")} />
+        <ContentPanel base={base} perms={perms} me={userId} filter={filter} onFilter={changeFilter} onOpen={(id) => open(id)} onRunPlanner={() => okToDiscard() && router.push("/?agent=planner")} selectedId={shownId} />
       </Card>
       {peek.shown && peekPost && (
-        <Peek placement="page" open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={() => open(null)} onExited={peek.onExited} asideRef={peek.ref}>
+        <Peek placement="page" fixedWidth={INSPECTOR_W} open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={() => open(null)} onExited={peek.onExited} asideRef={peek.ref}>
           {/* While it slides out, the closed post's editors no longer count as unsaved: the person already agreed. */}
           <UnsavedGuardOff value={!peek.live}>
             {/* Keyed by post: a replaced post remounts fresh, never carrying one post's edits into another. */}

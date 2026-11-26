@@ -11,11 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
-import { ChecksList } from "@/components/ui/checks-list";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { reelHref } from "@/components/reels/href";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
+import { PeekSlot, usePeekTitle } from "@/components/workspace/peek";
+import { QualityCheck } from "@/components/workspace/quality-check";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
 import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
 import { dayTime } from "@/lib/time";
@@ -24,7 +26,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, TONE_DOT, toneOf, type Tone } from "@/lib/status";
 import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
 import { activeFilterCount, filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
-import { AGENDA_BELOW, CELL_FLOOR, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
+import { AGENDA_BELOW, CELL_FLOOR, dayCards, type CardForm, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 import { CHANNEL_LABEL, STATUS_LABEL } from "@/lib/post-labels";
 
@@ -352,7 +354,8 @@ type CalendarView = "list" | "month";
 const statusText = (i: ContentItem) =>
   i.publishIssue ? PUBLISH_ISSUE[i.publishIssue] : i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status);
 
-export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void }) {
+/** `selectedId`: the post open in the side peek, which the month marks. */
+export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner, selectedId }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void; selectedId?: string | null }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const canExport = perms.includes("content.download");
@@ -385,9 +388,10 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     }
   };
   const viewSwitch = (
-    <div role="tablist" aria-label="Calendar view" className="flex h-8 items-center rounded-full bg-muted p-0.5 text-xs pointer-coarse:h-auto">
+    // One height with the toolbar's buttons and selects (32 px); the chosen view carries the --control outline chosen tabs use.
+    <div role="tablist" aria-label="Calendar view" className="flex h-8 items-center gap-0.5 rounded-full border border-border bg-muted p-0.5 text-xs pointer-coarse:h-auto">
       {(["list", "month"] as const).map((v) => (
-        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("h-7 rounded-full px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11", view === v ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("h-[26px] rounded-full px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11", view === v ? "bg-card text-foreground ring-1 ring-inset ring-control" : "text-muted-foreground hover:text-foreground")}>
           {v === "list" ? "List" : "Month"}
         </button>
       ))}
@@ -427,45 +431,36 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const campaignOptions = [...named].map(([id, name]) => ({ id, name }));
   const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
   // 16 px text on touch screens, so focusing a select doesn't zoom the page.
-  const sel = cn(selectClass, "h-8 text-xs pointer-coarse:h-11 pointer-coarse:text-base");
   const filterCount = activeFilterCount(filter);
-  // The filter selects: in the toolbar on a wide panel (`wide`), in the Filters popover otherwise.
+  // The filter dropdowns: in the toolbar on a wide panel (`wide`), in the Filters popover otherwise, filling its width.
   const filterControls = (wide: boolean) => {
-    const c = cn(sel, wide ? "w-auto" : "w-full");
     return (
       <>
-        <select aria-label="Channel" value={filter.channel ?? ""} onChange={(e) => set({ channel: e.target.value || undefined })} className={c}>
-          <option value="">All channels</option>
-          {channels.map((ch) => <option key={ch} value={ch}>{CHANNEL_LABEL[ch] ?? ch}</option>)}
-        </select>
-        <select aria-label="Status" value={filter.status ?? ""} onChange={(e) => set({ status: (e.target.value || undefined) as CalendarFilter["status"] })} className={c}>
-          <option value="">Any status</option>
-          {(Object.keys(STATUS_GROUPS) as (keyof typeof STATUS_GROUPS)[]).map((g) => <option key={g} value={g}>{STATUS_GROUP_LABEL[g]}</option>)}
-        </select>
+        <FilterSelect label="Channel" fill={!wide} value={filter.channel ?? ""} onChange={(v) => set({ channel: v || undefined })} options={[{ value: "", label: "All channels" }, ...channels.map((ch) => ({ value: ch, label: CHANNEL_LABEL[ch] ?? ch, icon: CHANNEL_ICON[ch] ?? FileText }))]} />
+        <FilterSelect label="Status" fill={!wide} value={filter.status ?? ""} onChange={(v) => set({ status: (v || undefined) as CalendarFilter["status"] })} options={[{ value: "", label: "Any status" }, ...(Object.keys(STATUS_GROUPS) as (keyof typeof STATUS_GROUPS)[]).map((g) => ({ value: g, label: STATUS_GROUP_LABEL[g] }))]} />
         {(campaignOptions.length > 0 || filter.campaignId) && (
-          <select aria-label="Campaign" value={filter.campaignId ?? ""} onChange={(e) => set({ campaignId: e.target.value || undefined })} className={c}>
-            <option value="">Any campaign</option>
-            {campaignOptions.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-            {filter.campaignId && !campaignOptions.some((o) => o.id === filter.campaignId) && <option value={filter.campaignId}>This campaign</option>}
-          </select>
+          <FilterSelect
+            label="Campaign"
+            fill={!wide}
+            value={filter.campaignId ?? ""}
+            onChange={(v) => set({ campaignId: v || undefined })}
+            options={[
+              { value: "", label: "Any campaign" },
+              ...campaignOptions.map((o) => ({ value: o.id, label: o.name })),
+              ...(filter.campaignId && !campaignOptions.some((o) => o.id === filter.campaignId) ? [{ value: filter.campaignId, label: "This campaign" }] : []),
+            ]}
+          />
         )}
         {campaignsFailed && <p className="text-xs text-muted-foreground">Couldn&rsquo;t load campaigns.</p>}
-        <select aria-label="Owner" value={filter.owner ?? ""} onChange={(e) => set({ owner: (e.target.value || undefined) as CalendarFilter["owner"] })} className={c}>
-          <option value="">Anyone</option>
-          {(me || filter.owner === "me") && <option value="me" disabled={!me}>Mine</option>}
-          <option value="none">Unassigned</option>
-        </select>
-        <select aria-label="Needs action" value={filter.need ?? ""} onChange={(e) => set({ need: (e.target.value || undefined) as CalendarFilter["need"] })} className={c}>
-          <option value="">Needs action: any</option>
-          {(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => <option key={n} value={n}>{NEED_LABEL[n]}</option>)}
-        </select>
+        <FilterSelect label="Owner" fill={!wide} value={filter.owner ?? ""} onChange={(v) => set({ owner: (v || undefined) as CalendarFilter["owner"] })} options={[{ value: "", label: "Anyone" }, ...(me || filter.owner === "me" ? [{ value: "me", label: "Mine", disabled: !me }] : []), { value: "none", label: "Unassigned" }]} />
+        <FilterSelect label="Needs action" fill={!wide} value={filter.need ?? ""} onChange={(v) => set({ need: (v || undefined) as CalendarFilter["need"] })} options={[{ value: "", label: "Needs action: any" }, ...(Object.keys(NEED_LABEL) as (keyof typeof NEED_LABEL)[]).map((n) => ({ value: n, label: NEED_LABEL[n] }))]} />
       </>
     );
   };
   const monthNav = (
     // On a narrow panel it takes a row of its own under the buttons. On a wide panel the heading keeps one width so the arrows don't move.
     <div className="flex items-center gap-1 @max-[640px]/cal:order-last @max-[640px]/cal:w-full">
-      <h2 id={monthHeadId} aria-live="polite" className="mx-1 text-base font-semibold tracking-tight @min-[900px]/cal:min-w-36 @max-[640px]/cal:mr-auto">
+      <h2 id={monthHeadId} aria-live="polite" className="mx-1 text-base font-semibold tracking-tight tabular-nums @min-[900px]/cal:min-w-40 @max-[640px]/cal:mr-auto">
         {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
       </h2>
       <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Previous month" onClick={() => showMonth(month.y, month.m - 1)}>
@@ -482,8 +477,10 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   // Two rows (owner's spec). The first: view, month and its arrows and Today (in Month), then Export and New post at the
   // right. The second: the filter selects, once the panel is 760 px wide (they take about 650 px); under that they fold
   // into a Filters button in the first row and the second row goes. Under 720 px Export shows its icon only.
+  // In Month the toolbar sticks to the top of the scrolling page (a short window scrolls under the calendar), on the
+  // card's white so nothing shows through. Not in List, whose day headings stick to the same top.
   const filters = (
-    <div className="relative flex flex-col gap-2 border-b border-border px-4 py-2.5 @max-[640px]/cal:px-2">
+    <div className={cn("relative flex flex-col gap-2 border-b border-border px-4 py-2 @max-[640px]/cal:px-2", view === "month" && "sticky top-0 z-10 rounded-t-2xl bg-card")}>
       <div className="flex flex-wrap items-center gap-2">
         {viewSwitch}
         {view === "month" && monthNav}
@@ -520,6 +517,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           headId={monthHeadId}
           undated={shown.filter((i) => !i.scheduledFor)}
           onOpen={onOpen}
+          selectedId={selectedId ?? null}
           onItems={setMonthItems}
           onNewPost={canCreate ? (day) => setDayNewPost({ at: newPostTime(day) }) : undefined}
         />
@@ -605,6 +603,8 @@ function FiltersMenu({ count, onClear, children }: { count: number; onClear: () 
     box.current?.querySelector<HTMLElement>("select, button")?.focus();
     const down = (e: PointerEvent) => {
       const t = e.target as Node;
+      // A filter's open menu is portalled to the body: a press in it is still a press inside the popover.
+      if ((t as Element).closest?.("[role=menu]")) return;
       if (!box.current?.contains(t) && !btn.current?.contains(t)) setOpen(false);
     };
     document.addEventListener("pointerdown", down);
@@ -633,7 +633,8 @@ function FiltersMenu({ count, onClear, children }: { count: number; onClear: () 
           role="group"
           aria-label="Filter posts"
           onKeyDown={(e) => {
-            if (e.key !== "Escape") return;
+            // Esc in a filter's menu closes that menu only (React passes its keys up through the portal).
+            if (e.key !== "Escape" || (e.target as Element).closest("[role=menu]")) return;
             e.preventDefault();
             close();
           }}
@@ -658,6 +659,8 @@ function FiltersMenu({ count, onClear, children }: { count: number; onClear: () 
 
 type RangeAnswer = { items: ContentItem[]; truncated?: boolean };
 const pickRange = (d: RangeAnswer) => d;
+/** The gap (px) between day cells and between weeks. */
+const CELL_GAP = 5;
 // A day cell's size before its first measurement (three one-line cards); ResizeObserver replaces it at once.
 const CELL_SIZE = { h: 94, w: 0 };
 /** The month's cards mark their status with a coloured edge: this says what each colour is, since colour alone is not a label. */
@@ -680,19 +683,21 @@ const CHANNEL_ICON: Record<string, LucideIcon> = {
 };
 
 /**
- * One post as a card with a coloured left edge for its status. `stacked` (a roomy day, see dayCards): two lines in 34 px
- * (STACKED_STEP in calendar-month.ts counts on that height), the channel's icon and the time small and muted, then the
- * title. Otherwise one 20 px line (CARD_STEP): the icon and the title, the time left to the tooltip, so the title keeps
- * the width. The title is cut short with an ellipsis; the day's popover lists it in full. It opens the post. It is not
- * a tab stop: the day's cell is, and its popover lists the same posts for the keyboard. The full time, title, channel
- * and status are its tooltip and its accessible name.
+ * One post as a card: a quiet fill, a hairline border and a thin left edge in its status colour. Its `form` comes from
+ * dayCards, whose steps in calendar-month.ts count on these heights: "stacked2" and "stacked" put the channel's icon and
+ * the time small and muted above the title (two lines of title, at most 50 px, or one, 34 px); "line" (28 px) and
+ * "compact" (20 px) are one line, the icon and the title, the time left to the tooltip so the title keeps the width.
+ * The title is cut short with an ellipsis; the day's popover lists it in full. It opens the post. It is not a tab stop:
+ * the day's cell is, and its popover lists the same posts for the keyboard. The full time, title, channel and status are
+ * its tooltip and its accessible name. `selected`: the post open in the side peek, outlined so its day reads at a glance.
  */
-function PostCard({ item, onOpen, stacked = false }: { item: ContentItem; onOpen: (id: string) => void; stacked?: boolean }) {
+function PostCard({ item, onOpen, form = "compact", selected = false }: { item: ContentItem; onOpen: (id: string) => void; form?: CardForm; selected?: boolean }) {
   const time = item.scheduledFor ? shortTime(item.scheduledFor) : null;
   const channel = CHANNEL_LABEL[item.channel] ?? item.channel;
   const Icon = CHANNEL_ICON[item.channel] ?? FileText;
   const status = statusText(item); // once per card: the tooltip and the accessible name both use it
   const about = `${time ? `${time} · ` : ""}${item.title} · ${channel} · ${status}`;
+  const stacked = form === "stacked" || form === "stacked2";
   return (
     <button
       type="button"
@@ -700,9 +705,11 @@ function PostCard({ item, onOpen, stacked = false }: { item: ContentItem; onOpen
       onClick={() => onOpen(item.id)}
       title={about}
       aria-label={about}
+      aria-current={selected ? "true" : undefined}
       className={cn(
-        "pointer-events-auto relative flex w-full min-w-0 shrink-0 overflow-hidden rounded border border-border bg-card pl-2 pr-1.5 text-left text-xs leading-4 shadow-[0_1px_1px_0_color-mix(in_srgb,var(--foreground)_4%,transparent)] transition-colors hover:border-foreground/25 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        stacked ? "h-[34px] flex-col justify-center" : "h-5 items-center gap-1.5",
+        "pointer-events-auto relative flex w-full min-w-0 shrink-0 overflow-hidden rounded-md border pl-2.5 pr-1.5 text-left text-xs leading-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        selected ? "border-foreground bg-accent ring-1 ring-foreground" : "border-border/70 bg-background hover:border-control hover:bg-muted",
+        form === "stacked2" ? "max-h-[50px] min-h-[34px] flex-col justify-center py-0.5" : form === "stacked" ? "h-[34px] flex-col justify-center" : cn("items-center gap-1.5", form === "line" ? "h-7" : "h-5"),
       )}
     >
       <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", TONE_DOT[toneOf(item.publishIssue ?? item.status)])} />
@@ -714,7 +721,7 @@ function PostCard({ item, onOpen, stacked = false }: { item: ContentItem; onOpen
       ) : (
         <Icon aria-hidden className="size-3 shrink-0 text-muted-foreground" />
       )}
-      <span data-card-title className="min-w-0 truncate font-medium text-foreground">{item.title}</span>
+      <span data-card-title className={cn("min-w-0 font-medium text-foreground", form === "stacked2" ? "line-clamp-2 break-words" : "truncate")}>{item.title}</span>
     </button>
   );
 }
@@ -870,7 +877,7 @@ function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string
  * A CSS grid with ARIA table roles, not a <table>: table rows size to their content and won't share a height.
  * ponytail: no drag to reschedule, no week view.
  */
-function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; onItems: (items: ContentItem[]) => void; onNewPost?: (day: string) => void }) {
+function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedId, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; selectedId: string | null; onItems: (items: ContentItem[]) => void; onNewPost?: (day: string) => void }) {
   // The day whose popover shows (its key) and where; `open` is false while it closes.
   const [pop, setPop] = useState<{ key: string; open: boolean; at: PopoverAt } | null>(null);
   // The day last focused: it holds the grid's one tab stop.
@@ -959,7 +966,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
           <span className="mr-1 text-muted-foreground">No date &middot; {undated.length}</span>
           {undated.map((i) => (
             <span key={i.id} className="w-48 max-w-full">
-              <PostCard item={i} onOpen={onOpen} />
+              <PostCard item={i} onOpen={onOpen} form="line" selected={i.id === selectedId} />
             </span>
           ))}
         </div>
@@ -967,11 +974,11 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
       <LoadGate ready={!!data} failed={failed} what="this month" onRetry={reload}>
         {inMonth === 0 && <p className="text-xs text-muted-foreground">Nothing planned this month</p>}
         {data?.truncated && <p className="text-xs text-muted-foreground">Showing the first 500 posts of this range</p>}
-        <div role="table" aria-labelledby={headId} className={cn("flex flex-col gap-1 text-xs", !narrow && "flex-1")}>
+        <div role="table" aria-labelledby={headId} className={cn("flex flex-col gap-1.5 text-xs", !narrow && "flex-1")}>
           <div role="rowgroup">
-            <div role="row" className="grid grid-cols-7 gap-1 @max-[640px]/cal:gap-x-0">
+            <div role="row" className="grid grid-cols-7 gap-[5px] @max-[640px]/cal:gap-x-0">
               {grid.slice(0, 7).map((d) => (
-                <div key={d.getDay()} role="columnheader" className="px-1 pb-0.5 text-left font-medium text-muted-foreground @max-[640px]/cal:text-center">
+                <div key={d.getDay()} role="columnheader" className="px-1.5 text-left text-xs font-semibold uppercase leading-4 tracking-wide text-foreground/70 @max-[640px]/cal:px-0 @max-[640px]/cal:text-center">
                   <abbr title={d.toLocaleDateString(undefined, { weekday: "long" })} className="no-underline">
                     {d.toLocaleDateString(undefined, { weekday: "short" })}
                   </abbr>
@@ -984,8 +991,8 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
             role="rowgroup"
             // Wide: the weeks share what height is left, each at least CELL_FLOOR (the floor is also the box's minimum,
             // so a short window scrolls the page instead of squeezing the days). Narrow: rows as tall as their days.
-            className={cn("grid gap-1", !narrow && "flex-1")}
-            style={narrow ? undefined : { gridTemplateRows: `repeat(${weeks.length}, minmax(${CELL_FLOOR}px, 1fr))`, minHeight: weeks.length * CELL_FLOOR + (weeks.length - 1) * 4 }}
+            className={cn("grid", !narrow && "flex-1")}
+            style={{ gap: CELL_GAP, ...(narrow ? {} : { gridTemplateRows: `repeat(${weeks.length}, minmax(${CELL_FLOOR}px, 1fr))`, minHeight: weeks.length * CELL_FLOOR + (weeks.length - 1) * CELL_GAP }) }}
             // Arrow keys move between days, a week up or down; the focused day becomes the grid's tab stop.
             onKeyDown={(e) => {
               const k = (e.target as HTMLElement).dataset.day;
@@ -1000,7 +1007,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
             }}
           >
             {weeks.map((week) => (
-              <div key={dayKey(week[0])} role="row" className="grid min-h-0 grid-cols-7 gap-1 @max-[640px]/cal:gap-x-0">
+              <div key={dayKey(week[0])} role="row" className="grid min-h-0 grid-cols-7 gap-[5px] @max-[640px]/cal:gap-x-0">
                 {week.map((d) => {
                   const k = dayKey(d);
                   const posts = byDay.get(k) ?? [];
@@ -1009,6 +1016,8 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
                   const isToday = k === today;
                   const outside = d.getMonth() !== month.m;
                   const fit = dayCards(posts.length, cellSize.h, cellSize.w);
+                  // The open post behind "+N more" marks that button instead, so its day still shows.
+                  const selectedHidden = !!selectedId && posts.slice(fit.shown).some((i) => i.id === selectedId);
                   return (
                     <div
                       key={k}
@@ -1016,11 +1025,11 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
                       className={cn(
                         // The cell clips: its height comes from the row, never from its cards (cardsThatFit sizes those).
                         "@container/cell relative min-h-0 min-w-0 overflow-hidden rounded-lg border border-border @max-[640px]/cal:min-h-11 @max-[640px]/cal:border-transparent",
-                        // Days of the next or last month are muted; in the month, weekends are a shade darker.
-                        outside ? "bg-muted/50" : d.getDay() % 6 === 0 ? "bg-muted/20" : "bg-card",
-                        // Today is marked by its date alone (a filled circle). Chosen (popover or agenda open): lifted, a
-                        // white card with a darker border and a shadow, so it never looks like today. No purple washes.
-                        (isOpen || isPicked) && "z-[1] border-foreground/40 bg-card shadow-md @max-[640px]/cal:border-foreground/40",
+                        // The month's days are white; days of the next or last month sit on a muted fill with muted dates.
+                        outside ? "bg-muted/60" : "bg-card",
+                        // Today is marked by its date alone (a dark circle). The chosen day (popover or agenda open) gets
+                        // the --control outline chosen tabs use and a faint fill; the open post marks its own card.
+                        (isOpen || isPicked) && "z-[1] border-control bg-accent/40 ring-1 ring-control @max-[640px]/cal:border-control",
                       )}
                     >
                       {/* The day itself: a button under the cards, filling the cell. It opens the day's popover, or on a
@@ -1045,7 +1054,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
                           aria-hidden
                           className={cn(
                             "flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums",
-                            outside ? "text-muted-foreground" : "text-foreground",
+                            outside ? "text-muted-foreground/80" : "text-foreground",
                             isToday && "bg-primary font-semibold text-primary-foreground",
                           )}
                         >
@@ -1053,21 +1062,22 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
                         </span>
                         {posts.length > 0 &&
                           (narrow ? (
-                            // Narrow panel: a dot per post in its status colour (the agenda below names each one).
+                            // Narrow panel: a dot per post in its status colour (the agenda below names each one); the open post's is ringed.
                             <span aria-hidden className="flex items-center gap-0.5">
-                              {posts.slice(0, 3).map((i) => <span key={i.id} className={cn("size-1.5 rounded-full", TONE_DOT[toneOf(i.publishIssue ?? i.status)])} />)}
+                              {posts.slice(0, 3).map((i) => <span key={i.id} className={cn("size-1.5 rounded-full", TONE_DOT[toneOf(i.publishIssue ?? i.status)], i.id === selectedId && "ring-1 ring-foreground ring-offset-1")} />)}
                               {posts.length > 3 && <span className="leading-none text-muted-foreground">+{posts.length - 3}</span>}
                             </span>
                           ) : (
                             <>
-                              {posts.slice(0, fit.shown).map((i) => <PostCard key={i.id} item={i} onOpen={onOpen} stacked={fit.stacked} />)}
+                              {posts.slice(0, fit.shown).map((i) => <PostCard key={i.id} item={i} onOpen={onOpen} form={fit.form} selected={i.id === selectedId} />)}
                               {fit.more > 0 && (
                                 // Opens the day's popover, which lists every post: no post is ever out of reach.
                                 <button
                                   type="button"
                                   tabIndex={-1}
                                   onClick={() => (isOpen ? closeDay() : openDay(k))}
-                                  className="pointer-events-auto h-5 shrink-0 rounded px-1.5 text-left text-xs font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                  aria-current={selectedHidden ? "true" : undefined}
+                                  className={cn("pointer-events-auto h-5 shrink-0 self-start rounded-md px-1.5 text-left text-xs font-semibold text-foreground underline-offset-2 hover:bg-muted hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", selectedHidden && "bg-accent ring-1 ring-foreground")}
                                 >
                                   +{fit.more} more
                                 </button>
@@ -1099,7 +1109,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
           </section>
         )}
         {/* What each colour means, in words: a dot and its label. */}
-        <ul aria-label="Status colours" className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-2.5 text-xs text-muted-foreground @max-[640px]/cal:px-2">
+        <ul aria-label="Status colours" className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-2 text-xs text-muted-foreground @max-[640px]/cal:px-2">
           {LEGEND.map(([tone, label]) => (
             <li key={label} className="flex items-center gap-1.5">
               <span aria-hidden className={cn("size-2 shrink-0 rounded-full", TONE_DOT[tone])} />
@@ -1259,7 +1269,7 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   const body = item.latest?.body as unknown as { frames?: { label?: string; headline?: string; body?: string }[]; cta?: string; link?: string } | undefined;
   const link = body?.link ? safeHttpUrl(body.link) : null;
   return (
-    <section aria-label="Story frames" className="rounded-xl border border-border p-4">
+    <section aria-label="Story frames" className="border-t border-border pt-5">
       <h2 className="text-sm font-semibold">
         Story {item.latest ? `v${item.latest.version}` : ""}
         {item.latest?.byPerson && <span className="ml-2 font-normal text-muted-foreground">edited by a person</span>}
@@ -1375,6 +1385,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
   };
   const brief = (item?.brief ?? {}) as { goal?: string; audience?: string; keyMessage?: string; products?: string[]; cta?: string; visual?: string; questions?: string[]; angle?: string };
   const b = item?.latest?.body;
+  usePeekTitle(item?.title);
 
   return (
     <div>
@@ -1393,14 +1404,19 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
           <div className="min-h-48 p-6"><ListSkeleton label="Loading post" rows={3} /></div>
         )
       ) : (
-        <div className="flex flex-col gap-6 px-6 py-6">
+        <div className="flex flex-col gap-5 px-5 py-5">
+          {/* In the peek's sticky header, under the title: where and when it goes out, and where it stands. */}
+          <PeekSlot to="header">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <span>
+                {CHANNEL_LABEL[item.channel]} · {item.scheduledFor ? day(item.scheduledFor) : "no date"}
+                {item.latest ? ` · draft v${item.latest.version}` : ""}
+              </span>
+              <span className={cn("rounded-full border px-2 py-0.5 font-medium", TONE_CLASS[toneOf(item.publishIssue ?? item.status)])}>{statusText(item)}</span>
+            </div>
+          </PeekSlot>
           <div>
-            <p className="text-xs text-muted-foreground">
-              {CHANNEL_LABEL[item.channel]} · {item.scheduledFor ? day(item.scheduledFor) : "no date"} · {STATUS_LABEL[item.status] ?? item.status}
-              {item.latest ? ` · draft v${item.latest.version}` : ""}
-            </p>
-            <h1 className="mt-1 font-display text-2xl font-medium tracking-tight">{item.title}</h1>
-            {item.opportunity && <p className="mt-1 text-sm text-muted-foreground">From the idea: {item.opportunity.title}</p>}
+            {item.opportunity && <p className="text-sm text-muted-foreground">From the idea: {item.opportunity.title}</p>}
             {canAssign ? (
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
                 <label htmlFor="post-owner" className="text-muted-foreground">Owner</label>
@@ -1425,7 +1441,27 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
             )}
           </div>
 
-          <section aria-labelledby="brief-h" className="rounded-xl border border-border p-4">
+          {item.studio ? (
+            <section aria-label="Made in Reels" className="flex flex-col items-start gap-3 border-t border-border pt-5">
+              <p className="text-sm">Made in Reels. Change its plan, video and caption there.</p>
+              {reelsOn ? (
+                <Button size="sm" asChild>
+                  <Link href={reelHref(item.id, brandId)}>Open in Reels</Link>
+                </Button>
+              ) : null}
+            </section>
+          ) : (
+            !editing && <NextStep base={base} item={item} perms={perms} onEdit={() => setEditing(true)} />
+          )}
+
+          {/* The review first: the check's summary, then the brief, the draft and the approval. */}
+          {item.latest?.check && (
+            <div className="border-t border-border pt-5">
+              <QualityCheck check={item.latest.check} />
+            </div>
+          )}
+
+          <section aria-labelledby="brief-h" className="border-t border-border pt-5">
             <h2 id="brief-h" className="text-sm font-semibold">Brief</h2>
             {brief.keyMessage ? (
               <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-[8rem_1fr]">
@@ -1458,23 +1494,10 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
             )}
           </section>
 
-          {item.studio ? (
-            <section aria-label="Made in Reels" className="flex flex-col items-start gap-3 rounded-xl border border-border p-4">
-              <p className="text-sm">Made in Reels. Change its plan, video and caption there.</p>
-              {reelsOn ? (
-                <Button size="sm" asChild>
-                  <Link href={reelHref(item.id, brandId)}>Open in Reels</Link>
-                </Button>
-              ) : null}
-            </section>
-          ) : (
-            !editing && <NextStep base={base} item={item} perms={perms} onEdit={() => setEditing(true)} />
-          )}
-
           {item.channel === "INSTAGRAM_STORY" ? (
             <StoryFrames base={base} item={item} />
           ) : (
-          <section aria-labelledby="draft-h" className="rounded-xl border border-border p-4">
+          <section aria-labelledby="draft-h" className="border-t border-border pt-5">
             <div className="flex items-center justify-between gap-2">
               <h2 id="draft-h" className="text-sm font-semibold">
                 {editing ? "Edit draft" : `Draft ${item.latest ? `v${item.latest.version}` : ""}`}
@@ -1524,16 +1547,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
           </section>
           )}
 
-          {item.latest?.check && (
-            <section aria-labelledby="qc-h" className="rounded-xl border border-border p-4">
-              <h2 id="qc-h" className="text-sm font-semibold">
-                Quality check · {item.latest.check.overall === "PASS" ? "passed" : item.latest.check.overall === "WARN" ? "passed with notes" : "needs fixes"}
-              </h2>
-              <ChecksList results={item.latest.check.results} />
-            </section>
-          )}
-
-          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} />
+          <ReleasePanel className="rounded-none border-0 border-t p-0 pt-5" base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} />
         </div>
       )}
     </div>

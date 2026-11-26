@@ -11,7 +11,7 @@ describe("one name per agent and page", () => {
   it("names the calendar Content calendar everywhere", () => {
     expect(byId("calendar").label).toBe("Content calendar");
     expect(byId("wave").role).toBe("Content calendar");
-    expect(peekCrumb({ kind: "content", id: "p1" })).toBe("Content calendar › Post");
+    expect(peekCrumb({ kind: "content", id: "p1" })).toBe("Review post");
   });
   it("gives the built agents the role name the Overview shows", () => {
     expect(byId("drift").role).toBe("Competitors");

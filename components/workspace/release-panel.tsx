@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { publishCalls } from "@/components/workspace/release";
+import { PeekSlot } from "@/components/workspace/peek";
 import { downloadFile } from "@/lib/download";
 import { dayTime, nowLocalInput } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -77,7 +78,7 @@ const browserZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
  * Approve the exact draft shown above, then publish or schedule it, with a full history. `approveFirst`: one press
  * approves a version awaiting approval and then publishes it (the reel page; the phone does the same).
  */
-export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false, pinLink }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[]; onChanged: () => void; approveFirst?: boolean; /** A Pinterest pin's destination, so the approver sees where it leads. */ pinLink?: string | null }) {
+export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false, pinLink, className }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[]; onChanged: () => void; approveFirst?: boolean; /** A Pinterest pin's destination, so the approver sees where it leads. */ pinLink?: string | null; /** Overrides the card look (the post inspector lays it flat). */ className?: string }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
   const { data, failed: loadError, slow, reload } = useJob(url, { pick: asRelease, done: notGoingOut, intervals: JOB_INTERVALS.publishing, capMs: 600_000 });
   // The hook's own mount poll is the first fetch; only a real change of status or version needs a fresh one.
@@ -122,7 +123,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
 
   if (!data) {
     return (
-      <section className="flex flex-wrap items-center gap-2 rounded-xl border border-border p-4 text-sm text-muted-foreground">
+      <section className={cn("flex flex-wrap items-center gap-2 rounded-xl border border-border p-4 text-sm text-muted-foreground", className)}>
         {loadError ? (
           <>
             Couldn&rsquo;t load approval and publishing.
@@ -146,7 +147,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
   const decideProps = { version: version!, issues, canOverride, onDecide: (verdict: Decision["verdict"], note: string, extra: object) => act({ action: "decide", version, verdict, note, ...(verdict === "APPROVED" ? noAutoPublish : {}), ...extra }) };
 
   return (
-    <section aria-labelledby="release-h" className="flex flex-col gap-4 rounded-xl border border-border p-4">
+    <section aria-labelledby="release-h" className={cn("flex flex-col gap-4 rounded-xl border border-border p-4", className)}>
       <h2 id="release-h" className="text-sm font-semibold">Approval and publishing</h2>
       {data.campaign && <p className="text-sm">{campaignLine(data.campaign)}</p>}
       {pinLink && <p className="break-all text-sm"><span className="text-muted-foreground">This pin leads to</span> {pinLink}</p>}
@@ -303,7 +304,10 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
           {!switchProducts && unavailable && <p className="text-xs text-muted-foreground">The product stays linked, so the post will still be refused</p>}
         </div>
       )}
-      <div className="flex flex-wrap gap-2">
+      {/* In a peek, the actions sit in its sticky footer, always in view; their state and the note stay here. */}
+      <PeekSlot to="footer">
+      <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {/* With "Approve anyway" on offer, the plain approve (which would be refused) steps aside. */}
         {!approved && !overrideShown && (
           <Button onClick={() => run("APPROVED")} disabled={pending !== null || blocked || refused} aria-describedby={blocked || refused ? "approve-why" : undefined}>
@@ -333,6 +337,8 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
         <p id="approve-why" className="text-xs text-muted-foreground">{blocked ? "Fix the quality blockers first." : "An issue stops this post."}</p>
       )}
       {overrideShown && <p id="override-why" className="text-xs text-muted-foreground">Approves with the issue; your note is recorded.</p>}
+      </div>
+      </PeekSlot>
     </div>
   );
 }

@@ -53,39 +53,58 @@ export function cellFit(count: number, max: number): { shown: number; more: numb
 
 /**
  * A wide month's day cell, in px, as MonthView draws it: 28 px of frame (a 1 px border top and bottom, 4 px padding
- * on top and 2 px below, the 20 px date) and then one 20 px post card per line, each with 2 px above it. Change these with the
- * classes on the cell and on PostCard, or the cards will overrun the cell or leave a line empty.
+ * on top and 2 px below, the 20 px date) and then the post cards, each with 2 px above it. Change these with the classes
+ * on the cell and on PostCard, or the cards will overrun the cell or leave a line empty.
  */
 export const CELL_FRAME = 28;
+/** A compact one-line card (20 px, the channel icon and the title) and the 2 px above it: the form a short cell uses. */
 export const CARD_STEP = 22;
+/** The roomier one-line card (28 px) and the 2 px above it, once a cell holds two of them. */
+export const LINE_STEP = 30;
 /**
- * The shortest a wide month's week row may be (px): two lines of cards. A short window keeps this height and the page
- * scrolls under the calendar instead of squeezing the days (1280 x 720 with a six-week month is about at the edge).
+ * The shortest a wide month's week row may be (px): two lines of compact cards. A short window keeps this height and the
+ * page scrolls under the calendar instead of squeezing the days (1280 x 720 with a six-week month is about at the edge).
  */
 export const CELL_FLOOR = CELL_FRAME + 2 * CARD_STEP;
 
-/** How many lines of post cards (cards, or cards and "+N more") a day cell of this height holds: at least one. */
+/** How many lines of compact cards (cards, or cards and "+N more") a day cell of this height holds: at least one. */
 export function cardsThatFit(cellHeight: number): number {
   return Math.max(1, Math.floor((cellHeight - CELL_FRAME) / CARD_STEP));
 }
 
 /**
- * A two-line post card (time and channel above, the title below), in px: 34 tall plus the 2 px gap above it. Change it
- * with PostCard's stacked classes.
+ * A two-line post card (the channel's icon and the time above, a one-line title below), in px: 34 tall plus the 2 px
+ * gap above it. Change it with PostCard's stacked classes.
  */
 export const STACKED_STEP = 36;
+/** The same card with room for a title of two lines: at most 50 px tall (a shorter title leaves it shorter) plus the gap. */
+export const STACKED_TWO_STEP = 52;
 /** The narrowest day cell (px) that gets two-line cards; narrower, the one-line card (channel icon and title) reads better. */
 export const STACKED_FROM = 96;
 
 /**
- * How a wide month's day cell of this size shows its `count` posts: as two-line cards when the cell is at least
- * STACKED_FROM wide and every post fits that way, else as one-line cards with "+N more" as cellFit says. A busy day
- * thus keeps showing as many posts as before, and a quieter one gets the readable card.
+ * How a post card is drawn: "stacked2" (icon and time, then a title of up to two lines), "stacked" (the same with a
+ * one-line title), "line" (one 28 px line) or "compact" (one 20 px line, for the shortest cells).
  */
-export function dayCards(count: number, cellHeight: number, cellWidth: number): { stacked: boolean; shown: number; more: number } {
-  if (cellWidth >= STACKED_FROM && count * STACKED_STEP <= cellHeight - CELL_FRAME) return { stacked: true, shown: count, more: 0 };
-  return { stacked: false, ...cellFit(count, cardsThatFit(cellHeight)) };
+export type CardForm = "stacked2" | "stacked" | "line" | "compact";
+
+/**
+ * How a wide month's day cell of this size shows its `count` posts. On a cell at least STACKED_FROM wide where every post
+ * fits as a two-line card, the two-line card (with a two-line title when those fit too). Else one-line cards and
+ * "+N more" as cellFit says: the 28 px line once the cell holds two of them, else the 20 px compact line, so a short
+ * cell still shows two lines (a card and "+N more" at the least).
+ */
+export function dayCards(count: number, cellHeight: number, cellWidth: number): { form: CardForm; shown: number; more: number } {
+  const room = cellHeight - CELL_FRAME;
+  if (cellWidth >= STACKED_FROM && count * STACKED_TWO_STEP <= room) return { form: "stacked2", shown: count, more: 0 };
+  if (cellWidth >= STACKED_FROM && count * STACKED_STEP <= room) return { form: "stacked", shown: count, more: 0 };
+  const lines = Math.floor(room / LINE_STEP);
+  if (lines >= 2) return { form: "line", ...cellFit(count, lines) };
+  return { form: "compact", ...cellFit(count, cardsThatFit(cellHeight)) };
 }
+
+/** The step (px) one card of this form takes in a cell, its gap included. */
+export const CARD_FORM_STEP: Record<CardForm, number> = { stacked2: STACKED_TWO_STEP, stacked: STACKED_STEP, line: LINE_STEP, compact: CARD_STEP };
 
 /**
  * Whether a day popover opens below its cell or above it, and how tall it may be. It goes below when it fits there in

@@ -17,6 +17,7 @@ const expect = baseExpect.configure({ timeout: 60_000 });
 
 const SIZES = [
   { width: 1920, height: 1080 },
+  { width: 1768, height: 888 },
   { width: 1657, height: 921 },
   { width: 1440, height: 900 },
   { width: 1280, height: 720 },
@@ -55,7 +56,8 @@ async function guard(page: Page) {
   await page.route(/\/api\/v1\//, (route) => {
     const req = route.request();
     if (req.method() === "GET" || req.method() === "HEAD") return route.continue();
-    if (new URL(req.url()).pathname.startsWith("/api/v1/activity/page-views")) return route.abort();
+    // Answered with an empty 204 rather than aborted: an aborted request logs a console error of its own.
+    if (new URL(req.url()).pathname.startsWith("/api/v1/activity/page-views")) return route.fulfill({ status: 204 });
     writes.push(`${req.method()} ${req.url()}`);
     return route.abort();
   });
@@ -97,7 +99,8 @@ async function noSideways(page: Page) {
 
 const tab = (page: Page, name: "List" | "Month") => page.getByRole("tablist", { name: "Calendar view" }).getByRole("tab", { name, exact: true });
 const monthLabel = (page: Page) => page.getByRole("heading", { level: 2, name: /^[A-Z][a-z]+ \d{4}$/ });
-const statusSelect = (page: Page) => page.getByRole("combobox", { name: "Status", exact: true });
+/** The Status filter: a dropdown whose name is the label and the current choice ("Status: Any status"). */
+const statusSelect = (page: Page) => page.getByRole("button", { name: /^Status: / });
 const days = (page: Page) => page.locator("button[data-day]");
 /** The week rows of the month grid (the second row group; the first holds the weekday names). */
 const weekRows = (page: Page) => page.getByRole("table").getByRole("rowgroup").nth(1).getByRole("row");
@@ -107,13 +110,32 @@ const dayPopover = (page: Page) => page.getByRole("dialog").filter({ has: page.g
 const peek = (page: Page) => page.locator("aside[role=region]");
 const postCount = (label: string | null) => Number(/, (\d+) posts?/.exec(label ?? "")?.[1] ?? 0);
 
-/** The Status select: in the toolbar on a wide panel, else in the Filters popover (opened here). */
+/** The Status filter: in the toolbar on a wide panel, else in the Filters popover (opened here). */
 async function showStatusSelect(page: Page) {
   const select = statusSelect(page);
   if (await select.isVisible()) return select;
   await page.getByRole("button", { name: /^Filters/ }).click();
   await expect(select).toBeVisible();
   return select;
+}
+
+/** Opens the Status filter's menu and returns the values its options set (the "any" option is ""). */
+async function statusValues(page: Page) {
+  await (await showStatusSelect(page)).click();
+  const menu = page.getByRole("menu", { name: "Status" });
+  await expect(menu).toBeVisible();
+  const values = await menu.getByRole("menuitemradio").evaluateAll((els) => els.map((e) => e.getAttribute("data-value") ?? ""));
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveCount(0);
+  return values;
+}
+
+/** Picks a Status option by its value from the dropdown's menu; the menu closes. */
+async function pickStatus(page: Page, value: string) {
+  await (await showStatusSelect(page)).click();
+  const menu = page.getByRole("menu", { name: "Status" });
+  await menu.locator(`[role=menuitemradio][data-value="${value}"]`).click();
+  await expect(menu).toHaveCount(0);
 }
 
 /** Month view, its grid loaded. */
@@ -287,12 +309,11 @@ test.describe("owner", () => {
         await toMonth(page);
         const total = async () => (await days(page).evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")))).reduce((n, l) => n + postCount(l), 0);
         const all = await total();
-        const select = await showStatusSelect(page);
-        const options = (await select.locator("option").evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value))).filter(Boolean);
+        const options = (await statusValues(page)).filter(Boolean);
         expect(options.length).toBeGreaterThan(0);
         let sum = 0;
         for (const value of options) {
-          await (await showStatusSelect(page)).selectOption(value);
+          await pickStatus(page, value);
           await expect(page).toHaveURL(new RegExp(`[?&]cf_status=${value}(&|$)`));
           const n = await total();
           expect(n).toBeLessThanOrEqual(all);
@@ -306,7 +327,9 @@ test.describe("owner", () => {
         await expect(page).toHaveURL(new RegExp(`[?&]cf_status=${options[options.length - 1]}(&|$)`));
         // Narrower panels fold the selects into the Filters button, which counts what is on.
         if (!(await statusSelect(page).isVisible())) await expect(page.getByRole("button", { name: /^Filters/ })).toContainText("1");
-        await (await showStatusSelect(page)).selectOption("");
+        // The chosen filter's pill is marked as on; "Any status" clears it.
+        await expect(await showStatusSelect(page)).not.toHaveAccessibleName("Status: Any status");
+        await pickStatus(page, "");
         await expect(page).not.toHaveURL(/cf_status=/);
         done();
       });
@@ -431,6 +454,67 @@ test.describe("owner", () => {
         done();
       });
 
+      test("the month's surfaces, cards and toolbar: white days, today, the chosen day and the open post apart", async ({ page }) => {
+        const done = await guard(page);
+        await open(page, "/calendar");
+        await calendarShown(page);
+        await toMonth(page);
+        await goToMonth(page, 2026, 10);
+        await expect(weekRows(page)).toHaveCount(6);
+        // The month's own days are white; the next or last month's are not.
+        const fills = await page.evaluate(() => {
+          // The chosen day (the phone's agenda always has one) has a fill of its own: left out.
+          const cells = [...document.querySelectorAll<HTMLElement>("[role=cell]")].filter((c) => !c.querySelector('button[data-day][aria-pressed="true"], button[data-day][aria-expanded="true"]'));
+          const fill = (c: HTMLElement) => getComputedStyle(c).backgroundColor;
+          const inMonth = cells.filter((c) => c.querySelector<HTMLElement>("button[data-day]")!.dataset.day!.startsWith("2026-11"));
+          const outside = cells.filter((c) => !c.querySelector<HTMLElement>("button[data-day]")!.dataset.day!.startsWith("2026-11"));
+          return { inMonth: [...new Set(inMonth.map(fill))], outside: [...new Set(outside.map(fill))] };
+        });
+        expect(fills.inMonth, "the month's days").toEqual(["rgb(255, 255, 255)"]);
+        expect(fills.outside.every((f) => f !== "rgb(255, 255, 255)"), "other months' days").toBe(true);
+        if (!phone) {
+          // Every control in the toolbar's rows is one height.
+          const heights = await page.evaluate(() => {
+            const bar = document.querySelector('[role="tablist"][aria-label="Calendar view"]')!.closest(".border-b")!;
+            return [...bar.querySelectorAll<HTMLElement>('[role="tablist"], button:not([role="tab"]), select')].filter((e) => e.offsetParent).map((e) => Math.round(e.getBoundingClientRect().height));
+          });
+          expect(new Set(heights), "toolbar control heights").toEqual(new Set([32]));
+          const reach = await everyPostReachable(page);
+          expect(reach.bad, "posts each day shows").toEqual([]);
+        }
+        await noSideways(page);
+        await page.screenshot({ path: path.join(SHOTS, `polish-${tag}.png`) });
+
+        // The chosen day (popover or agenda) is outlined, unlike today, which only has its dark date.
+        const busy = page.locator('button[data-day]:not([aria-label$=", 0 posts"])');
+        test.skip((await busy.count()) === 0, "No posts in November 2026: no day to choose or post to open.");
+        const reach = phone ? { more: null } : await everyPostReachable(page);
+        const key = reach.more ?? (await busy.first().getAttribute("data-day"))!;
+        const day = page.locator(`button[data-day="${key}"]`);
+        if (phone) await day.click();
+        else if (reach.more) await day.locator("..").getByRole("button", { name: /^\+\d+ more$/ }).click();
+        else await day.click({ position: { x: 60, y: 8 } });
+        if (!phone) {
+          const dialog = dayPopover(page);
+          await expect(dialog.getByRole("listitem")).toHaveCount(postCount(await day.getAttribute("aria-label")));
+          const box = (await dialog.boundingBox())!;
+          expect(box.y + box.height, "popover inside the window").toBeLessThanOrEqual(size.height);
+          await page.waitForTimeout(300);
+          await page.screenshot({ path: path.join(SHOTS, `polish-${tag}-popover.png`) });
+          // A post from the popover opens in the peek; its card (or "+N more") is marked as the open post.
+          await dialog.getByRole("listitem").first().getByRole("button").click();
+        } else {
+          await page.getByRole("region", { name: "Posts on the chosen day" }).getByRole("listitem").first().getByRole("button").click();
+        }
+        await expect(page).toHaveURL(/[?&]post=[^&]+/);
+        await expect(peek(page)).toBeVisible();
+        if (!phone) await expect(page.locator('[role=cell] button[aria-current="true"]')).toHaveCount(1);
+        await page.waitForTimeout(400);
+        await noSideways(page);
+        await page.screenshot({ path: path.join(SHOTS, `polish-${tag}-open-post.png`) });
+        done();
+      });
+
       test("old Overview links redirect to /calendar; a crafted filter is ignored", async ({ page }) => {
         const done = await guard(page);
         await open(page, "/?panel=content");
@@ -442,7 +526,7 @@ test.describe("owner", () => {
         await open(page, "/calendar?cf_status=toString");
         await calendarShown(page);
         if (!(await statusSelect(page).isVisible())) await expect(page.getByRole("button", { name: /^Filters/ })).not.toContainText(/\d/);
-        else await expect(statusSelect(page)).toHaveValue("");
+        else await expect(statusSelect(page)).toHaveAccessibleName("Status: Any status");
         done();
       });
     });
