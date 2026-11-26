@@ -5,15 +5,35 @@ import Link from "next/link";
 import { Clock, LoaderCircle, RefreshCw } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
-import { type DataSourceDto } from "@/shared";
+import { type DataSourceDto, type DataSyncResult, type DataSyncRun } from "@/shared";
 import { clockTime, timeAgo } from "@/lib/time";
 
 /** How often the sources are read again while a run is queued or running. */
 const POLL_MS = 5_000;
 
 /** "12:04 – 12:06", or only the end when the start isn't recorded (runs from before it was). */
-function runSpan(startedAt: string | null | undefined, at: string) {
-  return startedAt ? `${clockTime(startedAt)} – ${clockTime(at)}` : `ended ${clockTime(at)}`;
+function runSpan(startedAt: string | null | undefined, at: string, now: number) {
+  return startedAt ? `${clockTime(startedAt, now)} – ${clockTime(at, now)}` : `ended ${clockTime(at, now)}`;
+}
+
+/** A queued run due within this long reads "starts in a moment" rather than a time. */
+const SOON_MS = 30_000;
+
+/**
+ * What SyncedAt says, as text: the state's kind and its line, and in the idle state the last run's span
+ * ("last sync 12:04 – 12:06"; null before any run ended). Pure, so it can be checked without rendering.
+ */
+export function syncStatus(run: DataSyncRun, last: DataSyncResult | null, now = Date.now()): { kind: "running" | "queued" | "idle"; text: string; lastSync: string | null } {
+  if (run?.state === "running") return { kind: "running", text: `Syncing…${run.since ? ` started ${clockTime(run.since, now)}` : ""}`, lastSync: null };
+  if (run?.state === "queued") {
+    const soon = !run.since || Date.parse(run.since) <= now + SOON_MS;
+    return { kind: "queued", text: `Sync queued, ${soon ? "starts in a moment" : `starts ${clockTime(run.since!, now)}`}`, lastSync: null };
+  }
+  return {
+    kind: "idle",
+    text: last?.okAt ? `Updated ${timeAgo(last.okAt, now)}` : "Not synced yet",
+    lastSync: last?.at ? `last sync ${runSpan(last.startedAt, last.at, now)}` : null,
+  };
 }
 
 /**
@@ -45,7 +65,6 @@ export function SyncedAt({ source, syncUrl, name, onChanged }: { source: DataSou
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ text: string; error: boolean } | null>(null);
   const last = source.lastResult;
-  const okAt = last?.okAt ?? null;
   const reason = last?.reason ?? null;
   const run = source.sync ?? null;
 
@@ -82,31 +101,25 @@ export function SyncedAt({ source, syncUrl, name, onChanged }: { source: DataSou
   };
 
   const label = name ? `${name}: ` : "";
-  let status: React.ReactNode;
-  if (run?.state === "running") {
-    status = (
-      <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-        <LoaderCircle aria-hidden="true" className="size-4 motion-safe:animate-spin text-primary" />
-        {label}Syncing…{run.since ? ` started ${clockTime(run.since)}` : ""}
-      </span>
-    );
-  } else if (run?.state === "queued") {
-    const soon = !run.since || Date.parse(run.since) <= Date.now() + 30_000;
-    status = (
-      <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
-        <Clock aria-hidden="true" className="size-4 text-primary" />
-        {label}Sync queued, {soon ? "starts in a moment" : `starts ${clockTime(run.since!)}`}
-      </span>
-    );
-  } else {
-    status = (
+  const shown = syncStatus(run, last);
+  const status =
+    shown.kind === "idle" ? (
       <span className="text-muted-foreground">
         {label}
-        {okAt ? `Updated ${timeAgo(okAt)}` : "Not synced yet"}
-        {last?.at ? <span className="whitespace-nowrap"> · last sync {runSpan(last.startedAt, last.at)}</span> : null}
+        {shown.text}
+        {shown.lastSync ? <span className="whitespace-nowrap"> · {shown.lastSync}</span> : null}
+      </span>
+    ) : (
+      <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+        {shown.kind === "running" ? (
+          <LoaderCircle aria-hidden="true" className="size-4 motion-safe:animate-spin text-primary" />
+        ) : (
+          <Clock aria-hidden="true" className="size-4 text-primary" />
+        )}
+        {label}
+        {shown.text}
       </span>
     );
-  }
 
   return (
     <div className="flex flex-col gap-1 text-sm">
