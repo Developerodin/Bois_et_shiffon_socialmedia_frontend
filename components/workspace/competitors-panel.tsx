@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Coins, ExternalLink, Loader2, Plus, RotateCw, Trash2 } from "lucide-react";
-import { errorMessage, request } from "@/components/settings/api";
+import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { LoadFailed, useBrandData } from "@/components/workspace/content-panels";
 import { ScoreRing } from "@/components/workspace/score-ring";
-import { readable } from "@/lib/agent-message";
-import { blockedAuditNote, PARTIAL_AUDIT_NOTE, readApproach, type Approach } from "@/lib/competitor-audit";
+import { lastFailureNote, PARTIAL_AUDIT_NOTE, readApproach, type Approach } from "@/lib/competitor-audit";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/shared";
 
@@ -39,20 +38,19 @@ type Competitor = {
   /** The latest audit failed because the site blocks automated readers; Audit is hidden until auditBlockedUntil (ISO). */
   auditBlocked: boolean;
   auditBlockedUntil: string | null;
+  /** The latest failure was the site blocking us (ISO), even after the block lifted. */
+  auditBlockedAt: string | null;
   audit: Audit | null;
 };
 type Data = { credits: { balance: number; auditCost: number }; competitors: Competitor[] };
 
 const checked = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
-/** The last audit's failure: a neutral note while the site blocks us (Audit is hidden then), else the error in red. */
+/** The last audit's failure: a neutral note when the site blocked us (lastFailureNote), else the error in red. */
 function LastFailure({ c, className }: { c: Competitor; className?: string }) {
-  if (!c.auditError || c.auditRunning) return null;
-  return c.auditBlocked ? (
-    <p className={cn("text-muted-foreground", className)}>{blockedAuditNote(c.domain, c.auditBlockedUntil)}</p>
-  ) : (
-    <p className={cn("text-destructive", className)}>Last audit failed: {readable(c.auditError)}</p>
-  );
+  const note = c.auditRunning ? null : lastFailureNote(c);
+  if (!note) return null;
+  return <p className={cn(note.soft ? "text-muted-foreground" : "text-destructive", className)}>{note.text}</p>;
 }
 
 function useCompetitors(base: string) {
@@ -83,6 +81,8 @@ function FreshAudit({ base, c, credits, onDone }: { base: string; c: Competitor;
       onDone();
     } catch (e) {
       setError(errorMessage(e, "Couldn't start the audit."));
+      // The server refused (no credits spent): the site blocked us lately. Reload so the row hides Audit and says when.
+      if (e instanceof ApiError && e.code === "audit.siteBlocked") onDone();
     } finally {
       setBusy(false);
     }
