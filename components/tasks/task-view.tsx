@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SearchX } from "lucide-react";
 import { SEARCH_MAX, SEARCH_MIN, TASK_PRIORITIES, type TaskDetailDto, type TaskDto, type TaskPersonDto } from "@/shared";
-import { okToDiscard, UnsavedGuardOff, useUnsavedGuard } from "@/components/context/unsaved";
+import { UnsavedGuardOff, useUnsavedGuard } from "@/components/context/unsaved";
 import { ApiError, errorMessage } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
@@ -15,12 +14,12 @@ import { LoadFailed } from "@/components/ui/load-failed";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Peek } from "@/components/workspace/peek";
+import { useGuardedPeekParam } from "@/components/workspace/use-guarded-peek-param";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
 import { putShared } from "@/components/workspace/use-job";
-import { writeRecent } from "@/lib/recent";
 import { onTasksChanged, searchBrand, tasksApi, type TaskTeam } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
-import { agreedToDrop, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, type View, viewToSearch } from "@/lib/workspace-view";
+import { peekCrumb, peekKey, peekTitle, type View } from "@/lib/workspace-view";
 import { PersonSelect, TaskActions } from "@/components/tasks/task-actions";
 import { ProjectSelect } from "@/components/tasks/new-task-dialog";
 import { TaskAttachments } from "@/components/tasks/task-attachments";
@@ -464,59 +463,16 @@ function LinkedPost({ base, value, current, onChange }: { base: string; value: s
  * before switching or closing, records the task in Recent once it loads. The Overview has its own peek and renders TaskView.
  */
 export function TaskPeek({ base, perms, userId, recentKey, blog }: { base: string; perms: string[]; userId: string; recentKey: string | null; blog?: boolean }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const query = useSearchParams().toString();
-  const [shownId, setShownId] = useState<string | null>(null);
+  const { shownId, open, recordLoaded } = useGuardedPeekParam("task", recentKey);
   const [loaded, setLoaded] = useState<{ id: string; title: string } | null>(null);
-  // The open task as the URL effect last accepted it, and that URL (put back when the person stays on unsaved edits).
-  const shownRef = useRef<string | null>(null);
-  // Recent records a task once per opening, not on every reload (tasks:changed reads it again).
-  const recorded = useRef<string | null>(null);
-  const accepted = useRef<string | null>(null);
-
-  const hrefFor = useCallback(
-    (id: string | null) => {
-      const v: View = id ? { kind: "task", id } : { kind: "home" };
-      const s = viewToSearch(v, window.location.search, pathname);
-      return s.startsWith("?") ? `${pathname}${s}` : s;
-    },
-    [pathname],
-  );
-
-  useEffect(() => {
-    const raw = new URLSearchParams(query).get("task");
-    const v = raw === null ? null : parseViewParts("task", raw);
-    const next = v?.kind === "task" ? v.id : null;
-    // A bad task link: drop it, so Back doesn't return to it.
-    if (raw !== null && !next) return void navigate(router, hrefFor(null), pathname, "replace");
-    // A brand or workspace switch took the task out of the URL after the person agreed to leave: don't ask again.
-    const agreed = agreedToDrop(window.location.search || window.location.pathname);
-    if (next !== shownRef.current) {
-      if (!agreed && !okToDiscard()) return void navigate(router, accepted.current ?? hrefFor(shownRef.current), pathname, "replace");
-      shownRef.current = next;
-      recorded.current = null;
-      setShownId(next);
-    }
-    accepted.current = `${pathname}${query ? `?${query}` : ""}`;
-  }, [query, pathname, router, hrefFor]);
-
-  const close = () => {
-    if (!okToDiscard()) return;
-    // The view first, so the URL change that follows finds nothing to ask about.
-    shownRef.current = null;
-    recorded.current = null;
-    setShownId(null);
-    navigate(router, hrefFor(null), pathname);
-  };
+  const close = () => open(null);
 
   const view: View | null = shownId ? { kind: "task", id: shownId } : null;
   const item: PeekItem | null = view ? { view, title: peekTitle(view, loaded?.id === shownId ? loaded.title : null), crumb: peekCrumb(view) } : null;
   const peek = usePeek(item);
   const onLoaded = (t: TaskDetailDto) => {
     setLoaded({ id: t.id, title: t.title });
-    if (recentKey && recorded.current !== t.id) writeRecent(recentKey, { kind: "task", id: t.id, at: Date.now() });
-    recorded.current = t.id;
+    recordLoaded(t.id);
   };
 
   if (!peek.shown || peek.shown.view.kind !== "task") return null;
