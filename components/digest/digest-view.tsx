@@ -1,6 +1,6 @@
 import { Mail } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
-import type { DigestDto, DigestSection } from "@/shared";
+import type { DigestDto, DigestSales, DigestSection } from "@/shared";
 
 const n = (v: number) => v.toLocaleString("en-GB");
 const pct = (v: number | null) => (v === null ? "–" : `${(v * 100).toFixed(1)}%`);
@@ -64,11 +64,18 @@ function SectionBody({ s }: { s: DigestSection }) {
       );
     case "sales":
       if (!s.data) return NO_DATA;
-      return s.data.length ? <Figures items={s.data.map((c) => [`${c.currency} net (${n(c.orders)} orders)`, c.netSales])} /> : <p className="text-sm text-muted-foreground">No orders this week</p>;
+      return s.data.length ? <Figures items={s.data.map(salesFigure)} /> : <p className="text-sm text-muted-foreground">No orders this week</p>;
     case "ads":
       if (!s.data) return NO_DATA;
       return s.data.length ? <Figures items={s.data.map((c) => [`${c.currency} spent (${n(c.purchases)} purchases)`, c.spend])} /> : <p className="text-sm text-muted-foreground">No spend this week</p>;
   }
+}
+
+/** A currency's week: net without VAT when known (none when not); digests built before that change keep their net. */
+function salesFigure(c: DigestSales): [string, string] {
+  const orders = `${n(c.orders)} orders`;
+  if (c.netExVat === undefined) return [`${c.currency} net (${orders})`, c.netSales ?? "—"];
+  return [`${c.currency} net excl. VAT${c.exVatFrom ? ` from ${c.exVatFrom}` : ""} (${orders})`, c.netExVat ?? "—"];
 }
 
 /** The weekly digests as the server sent them (already filtered by what the reader may see now). */

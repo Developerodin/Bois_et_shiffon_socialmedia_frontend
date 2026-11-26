@@ -120,8 +120,21 @@ export type TurnOnShopifyOrdersBody = { connectionId: string };
  */
 export type SalesTotals = { orders: number; gross: string; discounts: string; netSales: string; total: string; refunded: string };
 export type SalesDay = SalesTotals & { day: string };
-/** One currency: totals for from..to, the same-length period just before it, and its days that had orders. */
-export type SalesCurrency = { currency: string; totals: SalesTotals; previous: SalesTotals; days: SalesDay[] };
+/**
+ * One currency: totals for from..to, the same-length period just before it, and its days that had orders. Totals are
+ * as Shopify reports them (VAT included where the shop's prices include it). `netExVat`: net sales without VAT for
+ * exVatFrom..to (exVatFrom null = the whole range; netExVat null = no day of the range has it yet, as orders read
+ * before the change don't); `exVatMissing` orders were left out of it (their VAT couldn't be read).
+ */
+export type SalesCurrency = {
+  currency: string;
+  totals: SalesTotals;
+  previous: SalesTotals;
+  days: SalesDay[];
+  netExVat: string | null;
+  exVatFrom: string | null;
+  exVatMissing: number;
+};
 /** GET sales/summary?from&to (brand-local "YYYY-MM-DD", inclusive). Needs crm.read. */
 export type SalesSummaryDto = { currencies: SalesCurrency[] };
 

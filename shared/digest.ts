@@ -19,8 +19,15 @@ export type DigestSection =
   /** The week's published posts with the most reach (reach null until read). */
   | { kind: "posts"; key: "analytics.read"; published: number; top: { title: string | null; channel: string; reach: number | null }[] }
   /** Per currency, never added across currencies. */
-  | { kind: "sales"; key: "crm.read"; data: { currency: string; orders: number; netSales: string }[] | null }
+  | { kind: "sales"; key: "crm.read"; data: DigestSales[] | null }
   | { kind: "ads"; key: "ads.read"; data: { currency: string; spend: string; purchases: number; purchaseValue: string; roas: number | null }[] | null };
+
+/**
+ * One currency's week of sales. `netExVat`: net sales without VAT (from `exVatFrom` when set; null = not known for the
+ * week, so no revenue figure). `netSales` (VAT included where prices include it) only on digests built before
+ * 2026-11-26; newer ones never carry it.
+ */
+export type DigestSales = { currency: string; orders: number; netExVat?: string | null; exVatFrom?: string | null; netSales?: string };
 
 export type DigestSectionKind = DigestSection["kind"];
 /** The key each section needs (the `key` it carries). */

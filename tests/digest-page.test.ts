@@ -38,6 +38,19 @@ describe("digest page", () => {
     expect(html).not.toContain("Search");
   });
 
+  it("a digest built after the VAT split shows net excl. VAT, and no revenue when it isn't known", () => {
+    const brand = digest.body.brands[0];
+    const sales = { kind: "sales" as const, key: "crm.read" as const, data: [
+      { currency: "EUR", orders: 12, netExVat: "700.00", exVatFrom: "2026-11-18" },
+      { currency: "USD", orders: 1, netExVat: null, exVatFrom: "2026-11-23" },
+    ] };
+    const html = renderToStaticMarkup(createElement(DigestView, { digests: [{ ...digest, body: { brands: [{ ...brand, sections: [sales] }] } }] }));
+    expect(html).toContain("EUR net excl. VAT from 2026-11-18 (12 orders)");
+    expect(html).toContain("700.00");
+    expect(html).toContain("USD net excl. VAT from 2026-11-23 (1 orders)");
+    expect(html).not.toContain("840.00");
+  });
+
   it("says when there is nothing yet, and has its own title", () => {
     expect(renderToStaticMarkup(createElement(DigestView, { digests: [] }))).toContain("first digest arrives on Monday");
     expect(navFor("/digest").title).toBe("Weekly digest");
