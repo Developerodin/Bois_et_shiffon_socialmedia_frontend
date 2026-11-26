@@ -17,6 +17,10 @@ import { cn } from "@/lib/utils";
 import { CHANNEL_LABEL } from "@/lib/post-labels";
 import { isRunCancelled } from "@/components/languages/languages";
 
+/**
+ * A plain-words label per chat tool step. The server's tools are in server/chat/tools.ts, its data tools listed in
+ * CHAT_DATA_TOOLS (server/chat/turn.ts): a tool added there needs a label here, or its step shows the raw tool name.
+ */
 const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) => string> = {
   listDocuments: () => "Checked your strategy documents",
   readDocument: (i) => `Read ${String(i?.kind ?? "a document").replace(/-/g, " ")}`,
