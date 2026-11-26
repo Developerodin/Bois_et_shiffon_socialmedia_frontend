@@ -1,6 +1,12 @@
 /** "16 Nov, 10:00" in the viewer's locale: a day and a time, for anything that is due. */
 export const dayTime = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
+/** "12:04" today, else dayTime ("25 Nov, 12:04"), in the viewer's locale. `now` decides what "today" is. */
+export function clockTime(iso: string, now = Date.now()) {
+  const d = new Date(iso);
+  return d.toDateString() === new Date(now).toDateString() ? d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : dayTime(iso);
+}
+
 /** Now as a datetime-local value (local time, minutes), for an input's `min` so a past time can't be picked. */
 export const nowLocalInput = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
 

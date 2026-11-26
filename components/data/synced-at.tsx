@@ -6,17 +6,10 @@ import { Clock, LoaderCircle, RefreshCw } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { type DataSourceDto } from "@/shared";
-import { timeAgo } from "@/lib/time";
+import { clockTime, timeAgo } from "@/lib/time";
 
 /** How often the sources are read again while a run is queued or running. */
 const POLL_MS = 5_000;
-
-/** "12:04" today, "25 Nov, 12:04" another day, in the viewer's locale. */
-function clockTime(iso: string) {
-  const d = new Date(iso);
-  const today = d.toDateString() === new Date().toDateString();
-  return d.toLocaleString(undefined, today ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-}
 
 /** "12:04 – 12:06", or only the end when the start isn't recorded (runs from before it was). */
 function runSpan(startedAt: string | null | undefined, at: string) {
