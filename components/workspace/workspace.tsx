@@ -38,7 +38,7 @@ import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
-import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
+import { CompetitorView } from "@/components/workspace/competitors-panel";
 import { ContentPanel, ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Peek } from "@/components/workspace/peek";
@@ -136,6 +136,7 @@ const viewFromUrl = () => viewFromSearch(window.location.search);
 const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
 export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, user, perms }: Props) {
+  const router = useRouter();
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
@@ -197,7 +198,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
       setView(v);
     }
     // ?panel= shows that panel (e.g. Menu → Content calendar) once, and stays in the URL: the sidebar reads it to
-    // keep Wave and Drift selected.
+    // keep Wave selected.
     const panel = new URLSearchParams(window.location.search).get("panel");
     if (panel && panel !== shownPanel.current && (PANEL_IDS as readonly string[]).includes(panel)) setFocus((f) => ({ id: panel as PanelId, n: (f?.n ?? 0) + 1 }));
     shownPanel.current = panel;
@@ -382,7 +383,6 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
           connectionsFailed={failed.connections}
           onOpenDoc={(doc) => open({ kind: "doc", doc })}
           onOpenResearch={() => open({ kind: "agent", key: "research", run: true })}
-          onOpenCompetitors={() => revealPanel("competitors")}
           canEdit={canEditDocs}
           canRun={canRun}
           show={{ docs: canAgents, competitors: canReports, accounts: canAccounts }}
@@ -446,16 +446,10 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
       icon: <CalendarDays />,
       render: () => <ContentPanel base={base} perms={perms} me={user.id ?? null} filter={calFilter} onFilter={changeFilter} onOpen={(id) => open({ kind: "content", id })} onRunPlanner={() => open({ kind: "agent", key: "planner" })} />,
     },
-    {
-      id: "competitors",
-      title: "Competitors",
-      icon: <Users />,
-      render: () => <CompetitorsPanel base={base} canRun={canRun} onOpen={(id) => open({ kind: "competitor", id })} onFind={() => open({ kind: "agent", key: "competitors" })} />,
-    },
     { id: "log", title: "Agent Log", icon: <SquareTerminal />, render: () => (canAgents ? <div className="p-2"><AgentLog workspaceId={workspaceId} brandId={brandId} compact /></div> : <NotForRole what="the Agent Log" />) },
   ];
 
-  // The peek's title: documents and agents from state, posts and competitors from the lists their panels already
+  // The peek's title: documents and agents from state, posts and competitors from the lists their views already
   // fetched (the shared cache; nothing new is polled for a title), else a plain fallback.
   let peekItem: PeekItem | null = null;
   if (view.kind !== "home") {
@@ -540,7 +534,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
       )}
       {/* The Overview's heading whichever panels are on the board (the greeting in Home is a paragraph). */}
       <h1 className="sr-only">Overview</h1>
-      {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={open} />, topSlot)}
+      {/* A competitor opens on the Competitors page, its home now; the rest open in this peek. */}
+      {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={(v) => (v.kind === "competitor" ? router.push(`/competitors?competitor=${encodeURIComponent(v.id)}`) : open(v))} />, topSlot)}
       <div className="relative min-h-0 flex-1">
         <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} onOpenInPeek={(id) => open({ kind: "panel", id })} previewing={view.kind === "panel" ? view.id : null} />
         {peek.shown && (
@@ -560,7 +555,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
 const NONE_FAILED = { docs: false, agents: false, reports: false, connections: false };
 
 /** A panel this role can't read (e.g. a client reviewer and the agents): said plainly, never as a failed load. */
-function NotForRole({ what }: { what: string }) {
+export function NotForRole({ what }: { what: string }) {
   return <p className="p-5 text-sm text-muted-foreground">Your role doesn&rsquo;t include {what}.</p>;
 }
 
@@ -574,11 +569,6 @@ const PRESETS: Preset<PanelId>[] = [
     name: "Content team",
     description: "Ideas, today and agents, content calendar",
     layout: { columns: [{ id: "a", size: 1.1, panels: ["ideas"] }, { id: "b", size: 1.8, panels: ["home"] }, { id: "c", size: 1.1, panels: ["content"] }], collapsed: [] },
-  },
-  {
-    name: "Market",
-    description: "Your scores next to your competitors'",
-    layout: { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.3, panels: ["analytics"] }, { id: "c", size: 1.3, panels: ["competitors"] }], collapsed: [] },
   },
   {
     name: "Classic",
@@ -668,14 +658,12 @@ function ContextPane({
   connectionsFailed,
   onOpenDoc,
   onOpenResearch,
-  onOpenCompetitors,
   canEdit,
   canRun,
   show,
 }: {
   base: string;
   onOpenResearch: () => void;
-  onOpenCompetitors: () => void;
   /** The sections this role can read: documents (agents.read), competitors (analytics.read), accounts (CONNECTIONS_READ). */
   show: { docs: boolean; competitors: boolean; accounts: boolean };
   /** Editing the brand needs context.edit; re-reading the site starts an agent run (agents.run). */
@@ -789,7 +777,7 @@ function ContextPane({
           <LoadGate ready={reportsReady} failed={reportsFailed} what="competitors" onRetry={onRetry} rows={1} className="mt-2">
           {competitors.length ? (
             <>
-              <p className="mt-1 text-xs text-muted-foreground">Brands AI assistants recommend instead of you. Audit them in the{" "}<button type="button" onClick={onOpenCompetitors} className="rounded font-medium underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Competitors panel</button>.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Brands AI assistants recommend instead of you. Audit them on the{" "}<Link href="/competitors" className="rounded font-medium underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Competitors page</Link>.</p>
               <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5">
                 {competitors.map((c) => (
                   <li key={c.name} className="flex min-w-0 items-center gap-2 text-sm">
@@ -1311,10 +1299,11 @@ const AGENT_NEXT: Record<string, { text: string; label: string; panel?: PanelId;
   quality: { text: "Quality checks are on your drafts.", label: "Open posts", panel: "content" },
   seo: { text: "The SEO report is updated.", label: "See the SEO & GEO reports", href: "/performance" },
   geo: { text: "The AI visibility report is updated.", label: "See the SEO & GEO reports", href: "/performance" },
-  competitors: { text: "Competitors it found are in the Competitors panel.", label: "Open competitors", panel: "competitors" },
+  competitors: { text: "Competitors it found are on the Competitors page.", label: "Open competitors", href: "/competitors" },
 };
 
-function AgentView({
+/** An agent in a side peek: the Overview's, and the Competitors page's for the Competitors agent (Find). */
+export function AgentView({
   agentKey,
   agent,
   report,

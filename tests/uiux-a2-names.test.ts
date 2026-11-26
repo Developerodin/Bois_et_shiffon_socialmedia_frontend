@@ -17,6 +17,12 @@ describe("one name per agent and page", () => {
     expect(byId("drift").role).toBe("Competitors");
     expect(byId("surge").role).toBe("Growth reports");
   });
+  it("calls Competitors a page, not a panel, now it has one", () => {
+    const ws = read("components/workspace/workspace.tsx");
+    expect(ws).not.toContain("Competitors panel");
+    expect(ws).toContain('Competitors page</Link>');
+    expect(read("app/(shell)/page.tsx")).toContain("competitorsRedirect(");
+  });
   it("keeps Echo pointing at Connections", () => {
     expect(byId("echo").href).toBe("/settings?tab=connections");
   });

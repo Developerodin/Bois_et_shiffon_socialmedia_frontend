@@ -1,7 +1,10 @@
 import { DOC_KINDS, RUN_ID_PATTERN, type ContextDocKind } from "@/shared";
 
-/** The Overview's panels. */
-export const PANEL_IDS = ["context", "home", "ideas", "content", "competitors", "analytics", "feed", "log"] as const;
+/**
+ * The Overview's panels. Competitors left for its own page (/competitors): saved layouts drop the id when read
+ * (panel-layout's sanitize), and the Overview's page sends /?panel=competitors there.
+ */
+export const PANEL_IDS = ["context", "home", "ideas", "content", "analytics", "feed", "log"] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 
 /** What the Overview has open. `run` starts the agent on open; `runId` shows one finished run's events. */
@@ -81,6 +84,16 @@ export function taskHref(pathname: string, search: string, id: string): string {
 /** Where a post opens from the shell: the Overview's peek (keeping the Overview's other parameters when already there). */
 export function postHref(pathname: string, search: string, id: string): string {
   return pathname === "/" ? `/${viewToSearch({ kind: "content", id }, search, "/")}` : `/?post=${encodeURIComponent(id)}`;
+}
+
+/**
+ * Where an old link to the Overview's Competitors panel (/?panel=competitors) goes now: the Competitors page, opening the
+ * competitor it named (?competitor=) when that is a well-formed id. Null when the link isn't one of those.
+ */
+export function competitorsRedirect(panel: unknown, competitor: unknown): string | null {
+  if (panel !== "competitors") return null;
+  const v = typeof competitor === "string" ? parseViewParts("competitor", competitor) : null;
+  return v?.kind === "competitor" ? `/competitors?competitor=${encodeURIComponent(v.id)}` : "/competitors";
 }
 
 /** `href` stays on `pathname` (only its query changes): no page is left, so nothing needs asking before it. */
@@ -189,6 +202,8 @@ export function withoutOpenItem(search: string, pathname: string): string | null
     if (!new URLSearchParams(search).has("task")) return null;
     return viewToSearch({ kind: "home" }, search, pathname);
   }
+  // /competitors opens a competitor or the Competitors agent in its peek; the competitor belongs to the old brand.
+  if (pathname === "/competitors") return namesItem(search) ? viewToSearch({ kind: "home" }, search, pathname) : null;
   if (pathname !== "/") return null;
   const q = new URLSearchParams(search);
   const hadCampaign = q.has("cf_campaignId");
@@ -198,8 +213,8 @@ export function withoutOpenItem(search: string, pathname: string): string | null
 }
 
 // The URL dropOpenItem just wrote. The Overview reads it once, on the URL change that write causes, and doesn't ask
-// about unsaved work again: the person already agreed in the switcher. Set only on the Overview and the task pages
-// (TaskPeek), where that read follows.
+// about unsaved work again: the person already agreed in the switcher. Set only on the Overview, the task pages
+// (TaskPeek) and /competitors (CompetitorsBoard), where that read follows.
 let agreedUrl: string | null = null;
 
 /**
