@@ -50,9 +50,13 @@ async function guard(page: Page) {
   page.on("console", (m) => {
     if (m.type() === "error") consoleErrors.push(m.text());
   });
-  await page.route(/\/api\/v1\/workspaces\/[^/]+\/brands\/[^/]+\/content(\/.*)?(\?.*)?$/, (route) => {
-    if (route.request().method() === "GET") return route.continue();
-    writes.push(`${route.request().method()} ${route.request().url()}`);
+  // Read-only against the shared database: every non-GET API call is stopped. Page-view beacons are dropped quietly;
+  // anything else counts as a write and fails the test.
+  await page.route(/\/api\/v1\//, (route) => {
+    const req = route.request();
+    if (req.method() === "GET" || req.method() === "HEAD") return route.continue();
+    if (new URL(req.url()).pathname.startsWith("/api/v1/activity/page-views")) return route.abort();
+    writes.push(`${req.method()} ${req.url()}`);
     return route.abort();
   });
   return () => {
