@@ -86,6 +86,16 @@ export function postHref(pathname: string, search: string, id: string): string {
   return pathname === "/" ? `/${viewToSearch({ kind: "content", id }, search, "/")}` : `/?post=${encodeURIComponent(id)}`;
 }
 
+/**
+ * Where an old link to the Overview's Competitors panel (/?panel=competitors) goes now: the Competitors page, opening the
+ * competitor it named (?competitor=) when that is a well-formed id. Null when the link isn't one of those.
+ */
+export function competitorsRedirect(panel: unknown, competitor: unknown): string | null {
+  if (panel !== "competitors") return null;
+  const v = typeof competitor === "string" ? parseViewParts("competitor", competitor) : null;
+  return v?.kind === "competitor" ? `/competitors?competitor=${encodeURIComponent(v.id)}` : "/competitors";
+}
+
 /** `href` stays on `pathname` (only its query changes): no page is left, so nothing needs asking before it. */
 export const samePage = (href: string, pathname: string) => href === pathname || href.startsWith(`${pathname}?`);
 

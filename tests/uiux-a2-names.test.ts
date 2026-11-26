@@ -21,7 +21,7 @@ describe("one name per agent and page", () => {
     const ws = read("components/workspace/workspace.tsx");
     expect(ws).not.toContain("Competitors panel");
     expect(ws).toContain('Competitors page</Link>');
-    expect(read("app/(shell)/page.tsx")).toContain('redirect("/competitors")');
+    expect(read("app/(shell)/page.tsx")).toContain("competitorsRedirect(");
   });
   it("keeps Echo pointing at Connections", () => {
     expect(byId("echo").href).toBe("/settings?tab=connections");

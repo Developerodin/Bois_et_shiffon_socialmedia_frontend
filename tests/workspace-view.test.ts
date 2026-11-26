@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RUN_ID_PATTERN } from "@/shared";
 import { entryToView, parseRecent, viewToEntry } from "@/lib/recent";
-import { agentLabel, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem, PANEL_IDS, type PanelId } from "@/lib/workspace-view";
+import { agentLabel, competitorsRedirect, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem, PANEL_IDS, type PanelId } from "@/lib/workspace-view";
 import { sanitize, type Layout } from "@/components/workspace/panel-layout";
 
 describe("workspace view URL", () => {
@@ -128,6 +128,17 @@ describe("panel in the peek (?peek=)", () => {
     expect(PANEL_IDS).not.toContain("competitors");
     expect(viewFromSearch("?peek=competitors")).toEqual({ kind: "home" });
     expect(namesItem("?peek=competitors")).toBe(true);
+  });
+  it("sends old Competitors panel links to the page, keeping a well-formed competitor", () => {
+    expect(competitorsRedirect("competitors", undefined)).toBe("/competitors");
+    expect(competitorsRedirect("competitors", "c_1-x")).toBe("/competitors?competitor=c_1-x");
+    // A malformed id or a repeated parameter is dropped, never passed on.
+    expect(competitorsRedirect("competitors", "../x?y")).toBe("/competitors");
+    expect(competitorsRedirect("competitors", ["c1", "c2"])).toBe("/competitors");
+    expect(competitorsRedirect("competitors", "")).toBe("/competitors");
+    expect(competitorsRedirect("content", "c1")).toBeNull();
+    expect(competitorsRedirect(undefined, "c1")).toBeNull();
+    expect(competitorsRedirect(["competitors"], undefined)).toBeNull();
   });
   it("drops Competitors from a layout saved with it, and the column it leaves empty", () => {
     const saved = { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.3, panels: ["analytics"] }, { id: "c", size: 1.3, panels: ["competitors"] }], collapsed: ["competitors"] };
