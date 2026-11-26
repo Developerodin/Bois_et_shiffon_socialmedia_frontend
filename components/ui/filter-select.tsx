@@ -15,16 +15,17 @@ export type FilterOption = { value: string; label: string; icon?: LucideIcon; di
  * Enter picks, Esc closes, and focus goes back to the pill. Its accessible name is the label and the current choice
  * ("Status: Any status"). `fill`: fill the row (the Filters popover) instead of sizing to the text.
  */
-export function FilterSelect({ label, value, options, onChange, fill = false }: { label: string; value: string; options: readonly FilterOption[]; onChange: (value: string) => void; fill?: boolean }) {
+export function FilterSelect({ label, value, options, onChange, fill = false, disabled = false }: { label: string; value: string; options: readonly FilterOption[]; onChange: (value: string) => void; fill?: boolean; /** while a change is saving */ disabled?: boolean }) {
   const current = options.find((o) => o.value === value) ?? options[0];
   const on = value !== "";
   const Icon = current?.icon;
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger
+        disabled={disabled}
         aria-label={`${label}: ${current?.label ?? ""}`}
         className={cn(
-          "inline-flex h-8 min-w-0 items-center gap-1.5 rounded-full border bg-card pl-3 pr-2 text-xs font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted pointer-coarse:h-11 pointer-coarse:text-sm",
+          "inline-flex h-8 min-w-0 items-center gap-1.5 rounded-full border bg-card pl-3 pr-2 text-xs font-medium transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted pointer-coarse:h-11 pointer-coarse:text-sm",
           on ? "border-control text-foreground ring-1 ring-inset ring-control" : "border-input text-muted-foreground",
           fill ? "w-full" : "max-w-56",
         )}
