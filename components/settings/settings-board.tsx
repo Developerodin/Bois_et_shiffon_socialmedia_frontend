@@ -122,7 +122,7 @@ export function SettingsBoard({ workspaceId, brandId, notice, showAds = false }:
                 className={cn(
                   "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   selected
-                    ? "bg-accent text-foreground"
+                    ? "bg-accent ring-1 ring-inset ring-control text-foreground"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >

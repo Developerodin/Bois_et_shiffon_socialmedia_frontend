@@ -129,7 +129,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
             <Link
               href="/admin"
               aria-current={pathname.startsWith("/admin") ? "page" : undefined}
-              className={cn(row, "mt-3 h-12 px-3", pathname.startsWith("/admin") ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-muted")}
+              className={cn(row, "mt-3 h-12 px-3", pathname.startsWith("/admin") ? "bg-accent ring-1 ring-inset ring-control text-foreground" : "text-muted-foreground hover:bg-muted")}
             >
               <ShieldCheck className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               Platform admin
@@ -150,7 +150,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     <Link
                       href={e.href}
                       aria-current={isActive(e) ? "page" : undefined}
-                      className={cn(row, "h-10 px-3 pointer-coarse:h-12", isShown(e) ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-muted")}
+                      className={cn(row, "h-10 px-3 pointer-coarse:h-12", isShown(e) ? "bg-accent ring-1 ring-inset ring-control text-foreground" : "text-muted-foreground hover:bg-muted")}
                     >
                       {Icon ? <Icon className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : null}
                       {e.label}
@@ -197,7 +197,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     refocus.current = e.id;
                     reorder(i, ev.key === "ArrowUp" ? i - 1 : i + 1);
                   }}
-                  className={cn(row, "h-11 px-2 pointer-coarse:h-[52px]", isShown(e) ? "bg-accent" : "hover:bg-muted")}
+                  className={cn(row, "h-11 px-2 pointer-coarse:h-[52px]", isShown(e) ? "bg-accent ring-1 ring-inset ring-control" : "hover:bg-muted")}
                 >
                   <Image src={`/agents/${e.id}.svg`} alt="" width={36} height={36} draggable={false} className="size-9 shrink-0" />
                   <span className="min-w-0 flex-1">

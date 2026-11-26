@@ -55,7 +55,7 @@ function TaskGroup({ title, hint, href, more, count, tasks, onOpen }: { title: s
         <h3 className="text-sm font-semibold">
           {title} <span className="font-normal text-muted-foreground">· {count} {hint}</span>
         </h3>
-        <Link href={href} className="shrink-0 text-xs font-medium text-primary-strong underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Link href={href} className="shrink-0 text-xs font-medium text-primary-strong underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           {more ?? (count > tasks.length ? `See all ${count}` : "Open tasks")}
         </Link>
       </div>

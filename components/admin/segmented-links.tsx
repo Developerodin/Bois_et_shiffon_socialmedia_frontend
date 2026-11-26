@@ -8,7 +8,7 @@ export function SegmentedLinks({ label, options, value }: { label: string; optio
   const { ref, style, shown, pick } = useIndicator<HTMLDivElement>(value, "box");
   return (
     <div ref={ref} role="group" aria-label={label} className="relative inline-flex flex-wrap items-center gap-1 rounded-full border border-border bg-card p-1">
-      <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-full bg-accent" style={style} />
+      <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-full bg-accent ring-1 ring-inset ring-control" style={style} />
       {options.map((o) => {
         const on = o.value === shown;
         return (

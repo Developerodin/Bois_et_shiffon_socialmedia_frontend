@@ -30,7 +30,7 @@
   --primary-foreground: #ffffff;
   --secondary: #f1efec;
   --secondary-foreground: #1c1917;
-  --accent: #ebe8e3;
+  --accent: #ebe8e3; /* light on purpose: tinted status pills sit on it at >= 4.5:1. Chosen tabs and nav items add a --control outline (3.6:1) as their cue. */
   --accent-foreground: #1c1917;
   --link: #1c1917;
   --destructive: #b42318;
