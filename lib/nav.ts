@@ -55,8 +55,9 @@ export const NAV: readonly NavEntry[] = [
   { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox", perm: ["inbox.read"] },
   // Its link is Spark's slot (agentEntries). Quotes only for now, so crm.manage; inbox.read joins with the stored inbox.
   { id: "crm", label: "Sales & CRM", href: "/crm", group: "page", feature: "crm", perm: CRM_MANAGE },
-  // Its link is Drift's slot; this entry gives the page its title (the page wins the tie with Drift's href).
-  { id: "competitors", label: "Competitors", href: "/competitors", group: "page" },
+  // Its link is Drift's slot; this entry gives the page its title (the page wins the tie with Drift's href). The page
+  // and its API need brand.read. Drift's slot itself carries no perm: agentEntries lists every agent and reads none.
+  { id: "competitors", label: "Competitors", href: "/competitors", group: "page", perm: ["brand.read"] },
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },

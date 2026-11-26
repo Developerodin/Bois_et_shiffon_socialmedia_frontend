@@ -50,6 +50,9 @@ describe("navFor", () => {
     expect(NAV.find((e) => e.id === "drift")?.href).toBe("/competitors");
     expect(navFor("/competitors")).toMatchObject({ activeId: "competitors", title: "Competitors", brandScoped: true });
   });
+  it("declares that the Competitors page needs brand.read", () => {
+    expect(NAV.find((e) => e.id === "competitors")?.perm).toEqual(["brand.read"]);
+  });
 });
 
 const ids = (g: { entries: { id: string }[] }) => g.entries.map((e) => e.id);
