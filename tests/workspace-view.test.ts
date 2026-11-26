@@ -140,6 +140,11 @@ describe("panel in the peek (?peek=)", () => {
     expect(competitorsRedirect(undefined, "c1")).toBeNull();
     expect(competitorsRedirect(["competitors"], undefined)).toBeNull();
   });
+  it("drops the open competitor or agent from /competitors on a brand switch", () => {
+    expect(withoutOpenItem("?competitor=c1", "/competitors")).toBe("/competitors");
+    expect(withoutOpenItem("?agent=competitors&runId=r1", "/competitors")).toBe("/competitors");
+    expect(withoutOpenItem("", "/competitors")).toBeNull();
+  });
   it("drops Competitors from a layout saved with it, and the column it leaves empty", () => {
     const saved = { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.3, panels: ["analytics"] }, { id: "c", size: 1.3, panels: ["competitors"] }], collapsed: ["competitors"] };
     const fallback: Layout<PanelId> = { columns: [{ id: "x", size: 1, panels: ["home"] }], collapsed: [] };

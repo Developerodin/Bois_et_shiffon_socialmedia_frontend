@@ -136,6 +136,7 @@ const viewFromUrl = () => viewFromSearch(window.location.search);
 const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
 export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, user, perms }: Props) {
+  const router = useRouter();
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
   const [reports, setReports] = useState<{ seo: Report; geo: Report } | null>(null);
@@ -533,7 +534,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
       )}
       {/* The Overview's heading whichever panels are on the board (the greeting in Home is a paragraph). */}
       <h1 className="sr-only">Overview</h1>
-      {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={open} />, topSlot)}
+      {/* A competitor opens on the Competitors page, its home now; the rest open in this peek. */}
+      {rKey && topSlot && createPortal(<RecentMenu storageKey={rKey} base={base} docs={docs} agents={agents} canAgents={canAgents} onOpen={(v) => (v.kind === "competitor" ? router.push(`/competitors?competitor=${encodeURIComponent(v.id)}`) : open(v))} />, topSlot)}
       <div className="relative min-h-0 flex-1">
         <PanelLayout panels={panels} presets={PRESETS} storageKey="ws.layout.v1" focus={focus} revealRef={revealRef} onOpenInPeek={(id) => open({ kind: "panel", id })} previewing={view.kind === "panel" ? view.id : null} />
         {peek.shown && (
@@ -553,7 +555,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
 const NONE_FAILED = { docs: false, agents: false, reports: false, connections: false };
 
 /** A panel this role can't read (e.g. a client reviewer and the agents): said plainly, never as a failed load. */
-function NotForRole({ what }: { what: string }) {
+export function NotForRole({ what }: { what: string }) {
   return <p className="p-5 text-sm text-muted-foreground">Your role doesn&rsquo;t include {what}.</p>;
 }
 
@@ -1300,7 +1302,8 @@ const AGENT_NEXT: Record<string, { text: string; label: string; panel?: PanelId;
   competitors: { text: "Competitors it found are on the Competitors page.", label: "Open competitors", href: "/competitors" },
 };
 
-function AgentView({
+/** An agent in a side peek: the Overview's, and the Competitors page's for the Competitors agent (Find). */
+export function AgentView({
   agentKey,
   agent,
   report,

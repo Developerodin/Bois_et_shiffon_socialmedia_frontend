@@ -1,5 +1,5 @@
 import { Lock, Users } from "lucide-react";
-import { CompetitorsBoard } from "@/components/workspace/competitors-panel";
+import { CompetitorsBoard } from "@/components/workspace/competitors-board";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { getShell } from "@/lib/server-fetch";
@@ -40,12 +40,11 @@ export default async function CompetitorsPage() {
     );
   }
 
-  const base = `/api/v1/workspaces/${encodeURIComponent(shell.activeWorkspaceId)}/brands/${encodeURIComponent(shell.activeBrandId)}`;
   return (
     <div className="flex w-full flex-col gap-5">
       <PageHeader title="Competitors">Brands you track, with their site audits.</PageHeader>
-      {/* Remount on brand switch so the list and the add form reset cleanly. */}
-      <CompetitorsBoard key={shell.activeBrandId} base={base} canRun={perms.has("agents.run")} />
+      {/* Remount on brand switch so the list, the add form and the peek reset cleanly. */}
+      <CompetitorsBoard key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} perms={shell.brandPermissions} userId={shell.user.id} />
     </div>
   );
 }

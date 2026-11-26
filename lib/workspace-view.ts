@@ -202,6 +202,8 @@ export function withoutOpenItem(search: string, pathname: string): string | null
     if (!new URLSearchParams(search).has("task")) return null;
     return viewToSearch({ kind: "home" }, search, pathname);
   }
+  // /competitors opens a competitor or the Competitors agent in its peek; the competitor belongs to the old brand.
+  if (pathname === "/competitors") return namesItem(search) ? viewToSearch({ kind: "home" }, search, pathname) : null;
   if (pathname !== "/") return null;
   const q = new URLSearchParams(search);
   const hadCampaign = q.has("cf_campaignId");
@@ -211,8 +213,8 @@ export function withoutOpenItem(search: string, pathname: string): string | null
 }
 
 // The URL dropOpenItem just wrote. The Overview reads it once, on the URL change that write causes, and doesn't ask
-// about unsaved work again: the person already agreed in the switcher. Set only on the Overview and the task pages
-// (TaskPeek), where that read follows.
+// about unsaved work again: the person already agreed in the switcher. Set only on the Overview, the task pages
+// (TaskPeek) and /competitors (CompetitorsBoard), where that read follows.
 let agreedUrl: string | null = null;
 
 /**

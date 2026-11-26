@@ -1,11 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { Coins, ExternalLink, Loader2, Plus, RotateCw, Trash2 } from "lucide-react";
 import { errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { LoadFailed, useBrandData } from "@/components/workspace/content-panels";
 import { ScoreRing } from "@/components/workspace/score-ring";
 import { readable } from "@/lib/agent-message";
@@ -203,19 +201,6 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
         </ul>
       )}
     </div>
-  );
-}
-
-/**
- * The /competitors page's list. An audit and the Competitors agent still open in the Overview's side peek
- * (?competitor=, ?agent=), the one place that hosts them, as they did from the Overview's panel.
- */
-export function CompetitorsBoard({ base, canRun }: { base: string; canRun: boolean }) {
-  const router = useRouter();
-  return (
-    <Card className="overflow-hidden">
-      <CompetitorsPanel base={base} canRun={canRun} onOpen={(id) => router.push(`/?competitor=${encodeURIComponent(id)}`)} onFind={() => router.push("/?agent=competitors")} />
-    </Card>
   );
 }
 
