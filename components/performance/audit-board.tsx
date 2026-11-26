@@ -229,7 +229,7 @@ function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl
         </>
       ) : (
         <p className="text-sm text-muted-foreground">
-          No report yet. Run the <Link href="/agents" className="text-primary underline-offset-4 hover:underline">{agent} agent</Link> to create one.
+          No report yet. Run the <Link href="/agents" className="text-link underline underline-offset-4 hover:decoration-2">{agent} agent</Link> to create one.
         </p>
       )}
     </PageSection>

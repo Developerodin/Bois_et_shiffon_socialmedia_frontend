@@ -129,7 +129,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
             <Link
               href="/admin"
               aria-current={pathname.startsWith("/admin") ? "page" : undefined}
-              className={cn(row, "mt-3 h-12 px-3", pathname.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+              className={cn(row, "mt-3 h-12 px-3", pathname.startsWith("/admin") ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-muted")}
             >
               <ShieldCheck className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" />
               Platform admin
@@ -150,7 +150,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     <Link
                       href={e.href}
                       aria-current={isActive(e) ? "page" : undefined}
-                      className={cn(row, "h-10 px-3 pointer-coarse:h-12", isShown(e) ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}
+                      className={cn(row, "h-10 px-3 pointer-coarse:h-12", isShown(e) ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-muted")}
                     >
                       {Icon ? <Icon className="size-5 shrink-0" strokeWidth={SHELL_STROKE} aria-hidden="true" /> : null}
                       {e.label}
@@ -204,7 +204,7 @@ function SidebarBody({ brands, workspaces, activeWorkspaceId, activeBrandId, can
                     <span className="flex items-center gap-2">
                       <span className="truncate font-medium text-foreground">{e.label}</span>
                       {e.soon ? (
-                        <span className="shrink-0 rounded-[8px] bg-muted px-2 text-xs text-primary-strong">Soon</span>
+                        <span className="shrink-0 rounded-[8px] bg-muted px-2 text-xs text-muted-foreground">Soon</span>
                       ) : null}
                     </span>
                     <span className="block truncate text-xs text-muted-foreground">{e.role}</span>

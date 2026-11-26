@@ -306,7 +306,7 @@ export function DocPane({
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex max-w-full items-center gap-1.5 text-primary underline-offset-4 hover:underline"
+                      className="inline-flex max-w-full items-center gap-1.5 text-link underline underline-offset-4 hover:decoration-2"
                     >
                       <span className="truncate">
                         {source.title || source.url}

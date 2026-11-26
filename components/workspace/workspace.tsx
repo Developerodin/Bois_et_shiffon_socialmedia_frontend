@@ -1036,7 +1036,7 @@ function Home({
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 px-5 pt-6">
         <p className="font-display text-2xl font-medium tracking-tight">{first ? `Welcome, ${first}.` : "Welcome."}</p>
         {digestOn && (
-          <Link href="/digest" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+          <Link href="/digest" className="text-sm font-medium text-link underline underline-offset-4 hover:decoration-2">
             This week
           </Link>
         )}

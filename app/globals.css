@@ -5,6 +5,8 @@
  * Bois & Chiffons light theme. One token set, hex values. Contrast pairs: ink on canvas and surface, primary-foreground on
  * primary, primary-strong and the status colours as text on surface;
  * status text on tints uses the -ink tokens.
+ * Purple is for primary buttons, today's date and focus rings only. primary-strong (emphasis text on a neutral tint:
+ * initials, badges, a chosen tab) and link (underlined) are the ink; a chosen tab or nav item is the warm grey accent.
  * The neutrals (canvas, muted, borders, accent, the greys) are warm stone, untinted by the brand purple, which suits a
  * wood-furniture brand; purple (primary) is the one accent: primary buttons, today's date, focus rings.
  * muted-foreground is 6.3:1 on background, 6.0:1 on muted and 6.8:1 on card; control is 3.6:1 on card (non-text).
@@ -24,13 +26,13 @@
   --control: #8a857e;
   --disabled: #67625c;
   --primary: #5b50d6;
-  --primary-strong: #4c40bb;
+  --primary-strong: #1c1917;
   --primary-foreground: #ffffff;
   --secondary: #f1efec;
   --secondary-foreground: #1c1917;
   --accent: #ebe8e3;
   --accent-foreground: #1c1917;
-  --link: #4a50f9;
+  --link: #1c1917;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
   --success: #1a7f4b;
@@ -38,8 +40,8 @@
   --success-ink: #146b3e;
   --warning-ink: #8a5100;
   /* The "info" status hue (awaiting approval, scheduled) where a status is a small marker (a dot or a card's edge) rather
-     than a tinted pill: a muted slate blue, so the calendar's status marks don't read as the brand purple. */
-  --status-info: #56677f;
+     than a tinted pill, and the text of its tinted pill: a muted slate blue, so status marks don't read as the brand purple. */
+  --status-info: #4f5f76;
   --ring: #5b50d6;
   --chart-1: #5b50d6;
   --terminal: #191620;

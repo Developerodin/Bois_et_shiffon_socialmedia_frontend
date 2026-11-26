@@ -8,7 +8,7 @@ export function SegmentedLinks({ label, options, value }: { label: string; optio
   const { ref, style, shown, pick } = useIndicator<HTMLDivElement>(value, "box");
   return (
     <div ref={ref} role="group" aria-label={label} className="relative inline-flex flex-wrap items-center gap-1 rounded-full border border-border bg-card p-1">
-      <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-full bg-primary" style={style} />
+      <span aria-hidden="true" className="slide-indicator pointer-events-none absolute left-0 top-0 rounded-full bg-accent" style={style} />
       {options.map((o) => {
         const on = o.value === shown;
         return (
@@ -22,7 +22,7 @@ export function SegmentedLinks({ label, options, value }: { label: string; optio
             aria-current={on ? "true" : undefined}
             className={cn(
               "relative rounded-full px-3 py-1 text-xs transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              on ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              on ? "text-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {o.label}

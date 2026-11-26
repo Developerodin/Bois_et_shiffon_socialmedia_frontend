@@ -87,15 +87,15 @@ describe("sidebar while a page loads", () => {
   it("marks the clicked item at once, keeps aria-current on the page you are on", () => {
     nav.pathname = "/";
     const before = renderToStaticMarkup(createElement(Sidebar, props));
-    expect(navLink(before, "Overview")).toContain("bg-primary");
+    expect(navLink(before, "Overview")).toContain("bg-accent");
 
     startNavigation("/products");
     const html = renderToStaticMarkup(createElement(Sidebar, props));
     const overview = navLink(html, "Overview");
     const products = navLink(html, "Products");
-    expect(products).toContain("bg-primary");
+    expect(products).toContain("bg-accent");
     expect(products).not.toContain("aria-current");
-    expect(overview).not.toContain("bg-primary");
+    expect(overview).not.toContain("bg-accent");
     expect(overview).toContain('aria-current="page"');
   });
 

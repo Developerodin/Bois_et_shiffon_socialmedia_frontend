@@ -19,7 +19,7 @@ export const TONE_CLASS: Record<Tone, string> = {
   good: "border-success/40 bg-success/10 text-success-ink",
   warn: "border-warning/40 bg-warning/10 text-warning-ink",
   bad: "border-destructive/40 bg-destructive/10 text-destructive",
-  info: "border-primary/40 bg-primary/10 text-primary-strong",
+  info: "border-status-info/40 bg-status-info/10 text-status-info",
   muted: "border-border bg-muted text-muted-foreground",
 };
 
