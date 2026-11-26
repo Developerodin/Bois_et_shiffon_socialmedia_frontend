@@ -64,6 +64,19 @@ export type DataSourceDto = {
   reportsInZone: string | null;
 };
 
+/**
+ * The currencies the ECB publishes a daily euro reference rate for (EUR itself excluded: 1 EUR = 1 EUR). The only
+ * currencies rates are fetched for, converted between or accepted for a budget. Taken from the ECB's own series on
+ * 2026-11-26 (those with a rate that week; BGN stopped when Bulgaria joined the euro). A currency that joins the euro
+ * or is suspended has to be removed by hand: its rates then stop and conversions to it go stale.
+ */
+export const ECB_CURRENCIES = [
+  "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "GBP", "HKD", "HUF", "IDR", "ILS", "INR", "ISK", "JPY", "KRW", "MXN",
+  "MYR", "NOK", "NZD", "PHP", "PLN", "RON", "SEK", "SGD", "THB", "TRY", "USD", "ZAR",
+] as const;
+export type EcbCurrency = (typeof ECB_CURRENCIES)[number];
+export const isEcbCurrency = (c: unknown): c is EcbCurrency => typeof c === "string" && (ECB_CURRENCIES as readonly string[]).includes(c);
+
 /** ContentItem.channel (prisma ContentChannel). */
 export type PostChannel =
   | "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL" | "INSTAGRAM_REEL" | "INSTAGRAM_STORY" | "FACEBOOK_POST" | "PINTEREST_PIN"
