@@ -1,12 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { Coins, ExternalLink, Loader2, Plus, RotateCw, Trash2 } from "lucide-react";
+import { Coins, ExternalLink, Loader2, MoreHorizontal, Plus, RotateCw, Search, Trash2, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/toast";
 import { LoadFailed, useBrandData } from "@/components/workspace/content-panels";
-import { ScoreRing } from "@/components/workspace/score-ring";
-import { lastFailureNote, PARTIAL_AUDIT_NOTE, readApproach, type Approach } from "@/lib/competitor-audit";
+import { ScoreRing, scoreTone } from "@/components/workspace/score-ring";
+import { auditAllSummary, lastFailureNote, PARTIAL_AUDIT_NOTE, planAuditAll, readApproach, rowStatus, type Approach } from "@/lib/competitor-audit";
 import { cn } from "@/lib/utils";
 import { safeHttpUrl } from "@/shared";
 
@@ -42,7 +45,8 @@ type Competitor = {
   auditBlockedAt: string | null;
   audit: Audit | null;
 };
-type Data = { credits: { balance: number; auditCost: number }; competitors: Competitor[] };
+/** `unlimited`: the workspace is never charged, so the balance doesn't limit audits. */
+type Data = { credits: { balance: number; auditCost: number; unlimited: boolean }; competitors: Competitor[] };
 
 const checked = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
@@ -58,20 +62,26 @@ function useCompetitors(base: string) {
   return useBrandData(base, "competitors", pick as (d: never) => Data);
 }
 
-/** Run a fresh audit: first click shows the price, second click spends. */
-function FreshAudit({ base, c, credits, onDone }: { base: string; c: Competitor; credits: Data["credits"]; onDone: () => void }) {
+/** Run a fresh audit: first click shows the price, second click spends. `compact` is the list row's icon form. */
+function FreshAudit({ base, c, credits, onDone, compact }: { base: string; c: Competitor; credits: Data["credits"]; onDone: () => void; compact?: boolean }) {
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // In a row the status column already says "auditing…"; the spinner only marks the button's place.
   if (c.auditRunning)
-    return (
+    return compact ? (
+      <span className="flex size-9 items-center justify-center text-muted-foreground pointer-coarse:size-11">
+        <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+      </span>
+    ) : (
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Loader2 className="size-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" /> Audit running…
       </span>
     );
   // Another try would fail the same way and refund again; the row says when it can be tried (LastFailure).
   if (c.auditBlocked) return null;
-  const short = credits.balance < credits.auditCost;
+  const short = !credits.unlimited && credits.balance < credits.auditCost;
+  const label = `${c.audit ? "Fresh audit" : "Audit"} · ${credits.auditCost} credits`;
   async function run() {
     setBusy(true);
     setError(null);
@@ -88,26 +98,162 @@ function FreshAudit({ base, c, credits, onDone }: { base: string; c: Competitor;
     }
   }
   return (
-    <span className="flex flex-col items-end gap-1">
+    // In a row the confirm step floats over the row's right end (the actions column only fits the two icons).
+    <span className={cn("flex flex-col items-end gap-1", compact && confirm && "absolute right-0 top-1/2 z-10 w-max max-w-64 -translate-y-1/2 rounded-md border border-border bg-card p-1 shadow-md")}>
       {confirm ? (
         <span className="flex items-center gap-1.5">
-          <Button size="sm" onClick={run} disabled={busy || short}>
-            {busy ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Coins aria-hidden="true" />} Spend {credits.auditCost} credits
+          <Button size="sm" onClick={run} disabled={busy || short} aria-label={compact ? `Spend ${credits.auditCost} credits auditing ${c.name}` : undefined}>
+            {busy ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Coins aria-hidden="true" />} Spend {credits.auditCost}
+            {compact ? "" : " credits"}
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => setConfirm(false)}>
-            Cancel
-          </Button>
+          {compact ? (
+            <Button size="icon" variant="ghost" onClick={() => setConfirm(false)} aria-label="Cancel" title="Cancel">
+              <X aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button size="sm" variant="ghost" onClick={() => setConfirm(false)}>
+              Cancel
+            </Button>
+          )}
         </span>
+      ) : compact ? (
+        <Button size="icon" variant="ghost" onClick={() => setConfirm(true)} aria-label={`${label}: ${c.name}`} title={label}>
+          <RotateCw aria-hidden="true" />
+        </Button>
       ) : (
         <Button size="sm" variant={c.audit ? "ghost" : "secondary"} onClick={() => setConfirm(true)}>
-          <RotateCw aria-hidden="true" /> {c.audit ? "Fresh audit" : "Audit"} · {credits.auditCost} credits
+          <RotateCw aria-hidden="true" /> {label}
         </Button>
       )}
       {confirm && short && <span className="text-xs text-destructive">You have {credits.balance} credits.</span>}
-      {error && <span role="alert" className="text-xs text-destructive">{error}</span>}
+      {error && <span role="alert" className="text-right text-xs text-destructive">{error}</span>}
     </span>
   );
 }
+
+const SCORES = [
+  ["performance", "Perf.", "Performance"],
+  ["accessibility", "A11y", "Accessibility"],
+  ["bestPractices", "Best pr.", "Best practices"],
+  ["seo", "SEO", "SEO"],
+] as const;
+
+/**
+ * The row's columns from 48rem of panel width (a container query, since the assistant panel and the peek change the
+ * room): competitor | AI mentions | four scores | checked | actions. Narrower, a row is a two-line card.
+ */
+const COLS = "@3xl:grid-cols-[minmax(0,1fr)_3.5rem_repeat(4,4.25rem)_7.5rem_6rem]";
+
+/** One score as a chip: a dot in the score's colour plus the number; the label shows on the phone card, else in the header. */
+function ScoreChip({ value, short, long }: { value: number | null; short: string; long: string }) {
+  return (
+    <span className="inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-md bg-muted px-1.5 py-0.5 text-xs">
+      <span className={cn("size-2 shrink-0 rounded-full bg-current", scoreTone(value))} aria-hidden="true" />
+      <span className="font-semibold tabular-nums text-foreground">{value ?? "–"}</span>
+      <span className="text-muted-foreground @3xl:sr-only">
+        <span aria-hidden="true">{short}</span>
+        <span className="sr-only">{long}</span>
+      </span>
+    </span>
+  );
+}
+
+/** Audit all: confirm the price, then start what the credits cover (planAuditAll); the server starts them in that order. */
+function AuditAll({ base, data, onDone }: { base: string; data: Data; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const plan = planAuditAll(data.competitors, data.credits);
+  const n = plan.candidates.length;
+  const k = plan.affordable.length;
+  const sites = (count: number) => `${count} ${count === 1 ? "site" : "sites"}`;
+  async function run() {
+    setBusy(true);
+    setError(null);
+    try {
+      // Only the sites confirmed, in plan order: the server starts them until credits run out (a spend elsewhere meanwhile).
+      const r = await request<{ started: string[]; skipped: { id: string; reason: string }[] }>(`${base}/competitors/audit-all`, {
+        method: "POST",
+        body: JSON.stringify({ competitorIds: plan.affordable.map((c) => c.id) }),
+      });
+      setOpen(false);
+      // The ones left out of the request wait for credits too.
+      const skipped = [...r.skipped, ...plan.waiting.map((c) => ({ id: c.id, reason: "credits" }))];
+      toast({ title: auditAllSummary({ started: r.started, skipped }), tone: r.started.length ? "success" : "warning" });
+      onDone();
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't start the audits."));
+    } finally {
+      setBusy(false);
+    }
+  }
+  function onOpenChange(o: boolean) {
+    setOpen(o);
+    setError(null);
+  }
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* A trigger, so closing the dialog puts focus back on this button. */}
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost">
+          <RotateCw aria-hidden="true" /> Audit all
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Audit all</DialogTitle>
+          <DialogDescription>
+            {n === 0
+              ? "Every competitor has a fresh audit, is being audited, or blocks automated readers for now."
+              : data.credits.unlimited
+                ? `Audit ${sites(n)}. This workspace isn't charged for audits.`
+                : `Audit ${sites(n)} · ${n} × ${plan.cost} credits (you have ${data.credits.balance}).`}
+          </DialogDescription>
+        </DialogHeader>
+        {n > 0 && (
+          <div className="flex flex-col gap-2 text-sm">
+            {k === 0 ? (
+              <p>Each audit costs {plan.cost} credits. Add credits to audit these sites; nothing starts until then.</p>
+            ) : k < n ? (
+              <p>
+                Your credits cover {sites(k)}. These go first, the ones AI names most before the rest; the other {n - k} wait for credits.
+              </p>
+            ) : null}
+            <ul className="flex flex-col gap-1">
+              {plan.candidates.map((c, i) => (
+                <li key={c.id} className={cn("flex items-baseline justify-between gap-3", i >= k && "text-muted-foreground")}>
+                  <span className="min-w-0 truncate">
+                    {c.name} <span className="text-xs text-muted-foreground">{c.domain}</span>
+                  </span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{i >= k ? "waits" : c.audit ? "out of date" : "never audited"}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
+        <DialogFooter>
+          <Button variant="ghost" className="pointer-coarse:min-h-11" onClick={() => onOpenChange(false)}>
+            {k === 0 ? "Close" : "Cancel"}
+          </Button>
+          {k > 0 && (
+            <Button onClick={run} disabled={busy} className="pointer-coarse:min-h-11">
+              {busy ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Coins aria-hidden="true" />}
+              {k === n ? `Audit ${sites(n)}` : `Audit ${sites(k)} (${k} × ${plan.cost} credits)`}
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** Fewer than this many tracked competitors and the list asks for more (Find more). */
+const FEW = 3;
 
 /** agents.run gates adding, auditing and removing: the routes refuse those without it. */
 export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: string; canRun: boolean; onOpen: (id: string) => void; onFind: () => void }) {
@@ -147,35 +293,35 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
   }
 
   if (!data) return failed ? <LoadFailed what="competitors" onRetry={() => void reload()} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading competitors…</p>;
+  const few = data.competitors.length > 0 && data.competitors.length < FEW;
   return (
-    <div className="flex flex-col">
+    <div className="@container flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 text-xs">
         <span className="flex items-center gap-1.5 text-muted-foreground">
           <Coins className="size-3.5" aria-hidden="true" />
           <span className="font-medium text-foreground tabular-nums">{data.credits.balance}</span> credits · audits shared by others are free
         </span>
-        <span className="flex gap-1">
-          {canRun && (
-            <Button size="sm" variant="ghost" onClick={() => setAdding((a) => !a)}>
+        {canRun && (
+          <span className="flex flex-wrap gap-1">
+            <Button size="sm" variant="ghost" onClick={() => setAdding((a) => !a)} aria-expanded={adding}>
               <Plus aria-hidden="true" /> Add
             </Button>
-          )}
-          {canRun && (
-            <Button size="sm" variant="ghost" onClick={onFind}>
-              Find
+            <Button size="sm" variant="ghost" onClick={onFind} aria-label="Find more competitors">
+              <Search aria-hidden="true" /> Find more
             </Button>
-          )}
-        </span>
+            {data.competitors.length > 0 && <AuditAll base={base} data={data} onDone={reload} />}
+          </span>
+        )}
       </div>
       {adding && canRun && (
         <form onSubmit={add} className="flex flex-wrap items-end gap-2 border-b border-border px-4 py-3">
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-muted-foreground">Name</span>
-            <input required value={name} onChange={(e) => setName(e.target.value)} className="h-9 w-36 rounded-md border border-input bg-card px-2 text-sm" />
+            <input required value={name} onChange={(e) => setName(e.target.value)} className="h-9 w-36 rounded-md pointer-coarse:min-h-11 border border-input bg-card px-2 text-sm" />
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-muted-foreground">Website</span>
-            <input required value={site} onChange={(e) => setSite(e.target.value)} placeholder="tikamoon.com" className="h-9 w-44 rounded-md border border-input bg-card px-2 text-sm" />
+            <input required value={site} onChange={(e) => setSite(e.target.value)} placeholder="tikamoon.com" className="h-9 w-44 rounded-md pointer-coarse:min-h-11 border border-input bg-card px-2 text-sm" />
           </label>
           <Button size="sm" type="submit" disabled={addPending}>{addPending ? "Adding…" : "Add competitor"}</Button>
           {error && <p role="alert" className="w-full text-xs text-destructive">{error}</p>}
@@ -184,50 +330,112 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
       {data.competitors.length === 0 ? (
         <div className="flex flex-col items-start gap-3 p-4">
           <p className="text-sm text-muted-foreground">No competitors yet. Find them from your GEO report and documents, or add one by hand.</p>
-          <Button size="sm" variant="secondary" onClick={onFind}>Find competitors</Button>
+          {canRun && (
+            <Button size="sm" variant="secondary" onClick={onFind}>
+              <Search aria-hidden="true" /> Find competitors
+            </Button>
+          )}
         </div>
       ) : (
-        <ul className="divide-y divide-border">
-          {data.competitors.map((c) => (
-            <li key={c.id} className="flex flex-col gap-2 px-4 py-3">
-              <div className="flex items-start justify-between gap-3">
-                <button type="button" onClick={() => c.audit && onOpen(c.id)} disabled={!c.audit} className="min-w-0 text-left disabled:cursor-default">
-                  <span className="block text-sm font-medium">{c.name}</span>
-                  <span className="block text-xs text-muted-foreground">{c.domain}</span>
-                </button>
-                {canRun && <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} />}
-              </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                {c.aiMentions != null && <span>Named by AI in {c.aiMentions} of your questions</span>}
-                {c.audit ? (
-                  <span className={cn(c.audit.stale && "text-warning")}>
-                    Last checked {checked(c.audit.createdAt)}
-                    {c.audit.stale ? " · may be out of date" : ""}
-                  </span>
-                ) : (
-                  <span>Not audited yet</span>
-                )}
-                {c.audit?.partial && <span>Page checks unavailable</span>}
-                <LastFailure c={c} />
-              </div>
-              {c.audit && (
-                <button type="button" onClick={() => onOpen(c.id)} className="flex flex-wrap gap-3 rounded-lg py-1 text-left hover:bg-muted/50">
-                  <ScoreRing value={c.audit.scores.performance} label="Perf." />
-                  <ScoreRing value={c.audit.scores.accessibility} label="A11y" />
-                  <ScoreRing value={c.audit.scores.bestPractices} label="Best pr." />
-                  <ScoreRing value={c.audit.scores.seo} label="SEO" />
-                </button>
-              )}
-              {canRun && (
-                <button type="button" onClick={() => remove(c)} className="self-start py-0.5 text-xs text-muted-foreground hover:text-destructive" aria-label={`Stop tracking ${c.name}`}>
-                  <Trash2 className="mr-1 inline size-3" aria-hidden="true" />
-                  Stop tracking
-                </button>
-              )}
-              {removeError?.id === c.id && <p role="alert" className="text-xs text-destructive">{removeError.message}</p>}
-            </li>
-          ))}
-        </ul>
+        <>
+          {/* Column labels for sighted readers; each chip and cell names itself for screen readers. Sticks as the page scrolls. */}
+          <div aria-hidden="true" className={cn("sticky top-0 z-10 hidden gap-x-3 border-b border-border bg-card px-4 py-2 text-xs font-medium text-muted-foreground @3xl:grid", COLS)}>
+            <span>Competitor</span>
+            <span>AI</span>
+            {SCORES.map(([key, short]) => (
+              <span key={key}>{short}</span>
+            ))}
+            <span>Checked</span>
+            <span />
+          </div>
+          <ul className="divide-y divide-border">
+            {data.competitors.map((c) => {
+              const status = rowStatus(c);
+              return (
+                <li key={c.id} className={cn("relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-4 py-2.5 hover:bg-muted/50", COLS)}>
+                  {/* The name's button covers the row (after:inset-0), so the whole row opens the peek; the actions sit above it. */}
+                  <button
+                    type="button"
+                    onClick={() => onOpen(c.id)}
+                    className="min-w-0 text-left after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring"
+                  >
+                    <span className="block truncate text-sm font-medium">{c.name}</span>
+                    <span className="block truncate text-xs text-muted-foreground">{c.domain}</span>
+                  </button>
+                  <div className="col-span-2 row-start-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground @3xl:contents">
+                    {c.aiMentions != null && (
+                      <span className="tabular-nums @3xl:col-start-2 @3xl:row-start-1">
+                        <span aria-hidden="true">
+                          <span className="@3xl:hidden">AI </span>
+                          {c.aiMentions}×
+                        </span>
+                        <span className="sr-only">Named by AI in {c.aiMentions} of your questions</span>
+                      </span>
+                    )}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 @3xl:col-span-4 @3xl:col-start-3 @3xl:row-start-1 @3xl:grid @3xl:grid-cols-subgrid">
+                      {status.kind === "scores" ? (
+                        <>
+                          {SCORES.map(([key, short, long]) => (
+                            <ScoreChip key={key} value={c.audit?.scores[key] ?? null} short={short} long={long} />
+                          ))}
+                          {status.partial && <span className="@3xl:col-span-4">page checks unavailable</span>}
+                          {status.note && <span className={cn("line-clamp-2 @3xl:col-span-4", !status.note.soft && "text-destructive")}>{status.note.text}</span>}
+                        </>
+                      ) : (
+                        <span className={cn("@3xl:col-span-4", status.kind === "failed" && "line-clamp-2", status.kind === "failed" && !status.soft && "text-destructive")}>
+                          {status.kind === "running" && <Loader2 className="mr-1 inline size-3 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
+                          {status.text}
+                        </span>
+                      )}
+                    </div>
+                    {c.audit && (
+                      <span className={cn("@3xl:col-start-7 @3xl:row-start-1", c.audit.stale && "text-warning")}>
+                        <span className="@3xl:sr-only">Checked </span>
+                        {checked(c.audit.createdAt)}
+                        {c.audit.stale && (
+                          <>
+                            <span aria-hidden="true"> · old</span>
+                            <span className="sr-only"> (may be out of date)</span>
+                          </>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                  {canRun && (
+                    <div className="relative z-10 col-start-2 row-start-1 flex items-center justify-end gap-0.5 @3xl:col-start-8">
+                      <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} compact />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="icon" variant="ghost" aria-label={`More for ${c.name}`} title="More">
+                            <MoreHorizontal aria-hidden="true" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => void remove(c)} className="text-destructive focus:text-destructive">
+                            <Trash2 aria-hidden="true" /> Stop tracking
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
+                  {removeError?.id === c.id && (
+                    <p role="alert" className="col-span-full text-xs text-destructive">
+                      {removeError.message}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {few && canRun && (
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-4 py-3 text-sm">
+              <span className="text-muted-foreground">Compare against a few more: the competitors agent finds them from your GEO report and documents.</span>
+              <Button size="sm" variant="secondary" onClick={onFind}>
+                <Search aria-hidden="true" /> Find more competitors
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

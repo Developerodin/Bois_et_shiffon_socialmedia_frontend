@@ -1,10 +1,13 @@
 import { cn } from "@/lib/utils";
 
+/** A score's colour: the same 90 / 50 thresholds as Lighthouse, shared by the ring and the competitors' score chips. */
+export const scoreTone = (value: number | null) => (value == null ? "text-muted-foreground" : value >= 90 ? "text-success" : value >= 50 ? "text-warning" : "text-destructive");
+
 /** Small circular score (0–100) with a label, like Okara's top-bar Lighthouse rings. */
 export function ScoreRing({ value, label }: { value: number | null; label: string }) {
   const r = 7;
   const c = 2 * Math.PI * r;
-  const tone = value == null ? "text-muted-foreground" : value >= 90 ? "text-success" : value >= 50 ? "text-warning" : "text-destructive";
+  const tone = scoreTone(value);
   return (
     <span className="flex items-center gap-1.5 whitespace-nowrap text-xs">
       <svg viewBox="0 0 18 18" className={cn("size-[18px] -rotate-90", tone)} aria-hidden="true">
