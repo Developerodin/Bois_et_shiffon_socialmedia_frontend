@@ -51,7 +51,8 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
     // Native history, not router.push: Next syncs useSearchParams from it without a server round trip.
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
-    window.history.replaceState(window.history.state, "", url);
+    // null, not window.history.state: Next ignores a call that carries its own state, so useSearchParams wouldn't move.
+    window.history.replaceState(null, "", url);
   }
   function onTabKey(e: React.KeyboardEvent, index: number) {
     const delta = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;

@@ -64,7 +64,8 @@ export function SettingsBoard({ workspaceId, brandId, notice, showAds = false }:
   function setActive(key: TabKey) {
     const url = new URL(window.location.href);
     url.searchParams.set("tab", key);
-    window.history.replaceState(window.history.state, "", url);
+    // null, not window.history.state: Next ignores a call that carries its own state, so useSearchParams wouldn't move.
+    window.history.replaceState(null, "", url);
   }
   const current = visible.find((t) => t.key === active) ?? visible[0];
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
