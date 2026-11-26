@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Coins, ExternalLink, Loader2, MoreHorizontal, Plus, RotateCw, Search, Trash2, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
 import { LoadFailed, useBrandData } from "@/components/workspace/content-panels";
@@ -97,7 +97,8 @@ function FreshAudit({ base, c, credits, onDone, compact }: { base: string; c: Co
     }
   }
   return (
-    <span className={cn("flex flex-col items-end gap-1", compact && "max-w-56")}>
+    // In a row the confirm step floats over the row's right end (the actions column only fits the two icons).
+    <span className={cn("flex flex-col items-end gap-1", compact && confirm && "absolute right-0 top-1/2 z-10 w-max max-w-64 -translate-y-1/2 rounded-md border border-border bg-card p-1 shadow-md")}>
       {confirm ? (
         <span className="flex items-center gap-1.5">
           <Button size="sm" onClick={run} disabled={busy || short} aria-label={compact ? `Spend ${credits.auditCost} credits auditing ${c.name}` : undefined}>
@@ -140,12 +141,12 @@ const SCORES = [
  * The row's columns from 48rem of panel width (a container query, since the assistant panel and the peek change the
  * room): competitor | AI mentions | four scores | checked | actions. Narrower, a row is a two-line card.
  */
-const COLS = "@3xl:grid-cols-[minmax(0,1fr)_3.5rem_repeat(4,4.25rem)_6.5rem_5.5rem]";
+const COLS = "@3xl:grid-cols-[minmax(0,1fr)_3.5rem_repeat(4,4.25rem)_6.5rem_6rem]";
 
 /** One score as a chip: a dot in the score's colour plus the number; the label shows on the phone card, else in the header. */
 function ScoreChip({ value, short, long }: { value: number | null; short: string; long: string }) {
   return (
-    <span className="inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-md bg-muted px-1.5 py-0.5 text-xs" title={long}>
+    <span className="inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-md bg-muted px-1.5 py-0.5 text-xs">
       <span className={cn("size-2 shrink-0 rounded-full bg-current", scoreTone(value))} aria-hidden="true" />
       <span className="font-semibold tabular-nums text-foreground">{value ?? "–"}</span>
       <span className="text-muted-foreground @3xl:sr-only">
@@ -191,9 +192,12 @@ function AuditAll({ base, data, onDone }: { base: string; data: Data; onDone: ()
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <Button size="sm" variant="ghost" onClick={() => onOpenChange(true)}>
-        <RotateCw aria-hidden="true" /> Audit all
-      </Button>
+      {/* A trigger, so closing the dialog puts focus back on this button. */}
+      <DialogTrigger asChild>
+        <Button size="sm" variant="ghost">
+          <RotateCw aria-hidden="true" /> Audit all
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Audit all</DialogTitle>
@@ -230,11 +234,11 @@ function AuditAll({ base, data, onDone }: { base: string; data: Data; onDone: ()
           </p>
         )}
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" className="pointer-coarse:min-h-11" onClick={() => onOpenChange(false)}>
             {k === 0 ? "Close" : "Cancel"}
           </Button>
           {k > 0 && (
-            <Button onClick={run} disabled={busy}>
+            <Button onClick={run} disabled={busy} className="pointer-coarse:min-h-11">
               {busy ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Coins aria-hidden="true" />}
               {k === n ? `Audit ${sites(n)}` : `Audit ${sites(k)} (${k} × ${plan.cost} credits)`}
             </Button>
@@ -310,11 +314,11 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
         <form onSubmit={add} className="flex flex-wrap items-end gap-2 border-b border-border px-4 py-3">
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-muted-foreground">Name</span>
-            <input required value={name} onChange={(e) => setName(e.target.value)} className="h-9 w-36 rounded-md border border-input bg-card px-2 text-sm" />
+            <input required value={name} onChange={(e) => setName(e.target.value)} className="h-9 w-36 rounded-md pointer-coarse:min-h-11 border border-input bg-card px-2 text-sm" />
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-muted-foreground">Website</span>
-            <input required value={site} onChange={(e) => setSite(e.target.value)} placeholder="tikamoon.com" className="h-9 w-44 rounded-md border border-input bg-card px-2 text-sm" />
+            <input required value={site} onChange={(e) => setSite(e.target.value)} placeholder="tikamoon.com" className="h-9 w-44 rounded-md pointer-coarse:min-h-11 border border-input bg-card px-2 text-sm" />
           </label>
           <Button size="sm" type="submit" disabled={addPending}>{addPending ? "Adding…" : "Add competitor"}</Button>
           {error && <p role="alert" className="w-full text-xs text-destructive">{error}</p>}
@@ -332,7 +336,7 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
       ) : (
         <>
           {/* Column labels for sighted readers; each chip and cell names itself for screen readers. Sticks as the page scrolls. */}
-          <div aria-hidden="true" className={cn("sticky top-0 z-20 hidden gap-x-3 border-b border-border bg-card px-4 py-2 text-xs font-medium text-muted-foreground @3xl:grid", COLS)}>
+          <div aria-hidden="true" className={cn("sticky top-0 z-10 hidden gap-x-3 border-b border-border bg-card px-4 py-2 text-xs font-medium text-muted-foreground @3xl:grid", COLS)}>
             <span>Competitor</span>
             <span>AI</span>
             {SCORES.map(([key, short]) => (
@@ -357,7 +361,7 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
                   </button>
                   <div className="col-span-2 row-start-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground @3xl:contents">
                     {c.aiMentions != null && (
-                      <span className="tabular-nums @3xl:col-start-2 @3xl:row-start-1" title={`Named by AI in ${c.aiMentions} of your questions`}>
+                      <span className="tabular-nums @3xl:col-start-2 @3xl:row-start-1">
                         <span aria-hidden="true">
                           <span className="@3xl:hidden">AI </span>
                           {c.aiMentions}×
