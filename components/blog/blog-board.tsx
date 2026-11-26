@@ -63,7 +63,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const canCreate = perms.includes("content.create");
-  const { selected, open, closed } = useListSelection({ item: "article", list: "articles-list", emptyHeadingId: "articles-empty-h" });
+  const { selected, open, closed, ids } = useListSelection({ item: "article", list: "articles-list", emptyHeadingId: "articles-empty-h" });
 
   const load = () => {
     setFailed(false);
@@ -120,7 +120,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
       <EmptyState
         icon={Newspaper}
         title="No articles yet"
-        headingId="articles-empty-h"
+        headingId={ids.emptyHeading}
         description={
           canCreate
             ? "Start one from a topic, then write it with AI or by hand. Approved articles go to your Shopify blog hidden until you publish them."
@@ -132,7 +132,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
   return (
     <ListDetail
       list={
-        <ListCard id="articles-list" title="Articles" description={`${articles.length} ${articles.length === 1 ? "article" : "articles"}`} top={starters}>
+        <ListCard id={ids.list} title="Articles" description={`${articles.length} ${articles.length === 1 ? "article" : "articles"}`} top={starters}>
           {articles.map((a) => (
             <ListRow key={a.id} selected={a.id === selected} onSelect={() => open(a.id)} className="items-start justify-between">
               <span className="min-w-0 break-words font-medium">{a.title}</span>
@@ -143,7 +143,7 @@ export function BlogBoard({ w, b, perms, taskId }: { w: string; b: string; perms
       }
       detail={
         current ? (
-          <ArticleEditor key={current.id} w={w} b={b} article={current} perms={perms} onChange={put} onRemoved={() => (setArticles((l) => (l ?? []).filter((x) => x.id !== current.id)), closed())} />
+          <ArticleEditor key={current.id} sectionId={ids.item} w={w} b={b} article={current} perms={perms} onChange={put} onRemoved={() => (setArticles((l) => (l ?? []).filter((x) => x.id !== current.id)), closed())} />
         ) : null
       }
       placeholder={<EmptyState variant="card" icon={Newspaper} title="No article open" description={`Pick an article to read and edit it${canCreate ? ", or add one" : ""}.`} />}
@@ -171,7 +171,7 @@ function NewArticleForm({ busy, onCreate }: { busy: boolean; onCreate(topic: str
   );
 }
 
-function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: string; b: string; article: BlogArticleDto; perms: string[]; onChange(a: BlogArticleDto): void; onRemoved(): void }) {
+function ArticleEditor({ sectionId, w, b, article, perms, onChange, onRemoved }: { sectionId: string; w: string; b: string; article: BlogArticleDto; perms: string[]; onChange(a: BlogArticleDto): void; onRemoved(): void }) {
   const canEdit = perms.includes("content.create") && article.status !== "PUBLISHED" && article.status !== "ARCHIVED";
   const canApprove = perms.includes("content.approve") && (article.status === "DRAFT" || article.status === "IN_REVIEW");
   const next = perms.includes("publish.execute") ? shopifyAction(article) : null;
@@ -211,7 +211,7 @@ function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: strin
 
   return (
     <PageSection
-      id="article"
+      id={sectionId}
       title={article.title}
       description={
         <span className="flex flex-wrap items-center gap-2">
@@ -327,7 +327,7 @@ function ArticleEditor({ w, b, article, perms, onChange, onRemoved }: { w: strin
             </div>
           </form>
         ) : (
-          <article className="flex min-w-0 flex-col gap-3 break-words" aria-labelledby="article-h">
+          <article className="flex min-w-0 flex-col gap-3 break-words" aria-labelledby={`${sectionId}-h`}>
             {article.summary ? <p className="text-sm text-muted-foreground">{article.summary}</p> : null}
             <ArticleBody blocks={article.blocks} />
           </article>
