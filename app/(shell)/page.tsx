@@ -3,12 +3,12 @@ import { Workspace } from "@/components/workspace/workspace";
 import { getShell } from "@/lib/server-fetch";
 import { featureOn } from "@/lib/features";
 import { navFor } from "@/lib/nav";
-import { competitorsRedirect } from "@/lib/workspace-view";
+import { calendarRedirect, competitorsRedirect } from "@/lib/workspace-view";
 
 export const metadata = { title: navFor("/").title };
 
 /** The workspace: one screen with Context, Today and Agents (Okara pattern); the chat is the shell's Bois & Chiffons panel. */
-export default async function WorkspacePage({ searchParams }: { searchParams: Promise<{ panel?: string | string[]; competitor?: string | string[] }> }) {
+export default async function WorkspacePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const shell = await getShell();
 
   // A platform-only account belongs to no workspace: its home is the admin console.
@@ -17,8 +17,10 @@ export default async function WorkspacePage({ searchParams }: { searchParams: Pr
   if (shell.activeWorkspaceId && shell.brands.length === 0) redirect("/welcome");
   // Competitors was a panel here and is now a page: old links and bookmarks to it land on the page, with the competitor
   // they named (?competitor=) open in its peek. After the checks above, so those accounts still go where they belong.
-  const { panel, competitor } = await searchParams;
-  const moved = competitorsRedirect(panel, competitor);
+  // The content calendar moved the same way: /?panel=content and /?peek=content land on /calendar, with the post they
+  // named (?post=) open and their calendar filters (cf_) kept.
+  const params = await searchParams;
+  const moved = competitorsRedirect(params.panel, params.competitor) ?? calendarRedirect(params);
   if (moved) redirect(moved);
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
     return <p className="p-10 text-muted-foreground">Pick a business from the menu.</p>;

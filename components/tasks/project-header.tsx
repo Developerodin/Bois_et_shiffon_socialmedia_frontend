@@ -26,8 +26,8 @@ export function ProjectProgress({ progress, label }: { progress: { done: number;
   );
 }
 
-/** The campaign's posts in the Overview's calendar, filtered to this campaign. */
-const campaignHref = (id: string) => `/?panel=content&cf_campaignId=${encodeURIComponent(id)}`;
+/** The campaign's posts on the Content calendar page, filtered to this campaign. */
+const campaignHref = (id: string) => `/calendar?cf_campaignId=${encodeURIComponent(id)}`;
 
 /**
  * The project's facts: owner, dates, status, progress, the linked campaign and task counts by status. With tasks.manage

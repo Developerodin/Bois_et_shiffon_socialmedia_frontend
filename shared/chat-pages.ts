@@ -15,6 +15,7 @@ export const CHAT_PAGES = {
   studio: "Studio",
   inbox: "Inbox",
   competitors: "Competitors",
+  calendar: "Content calendar",
   performance: "Growth reports",
   "agent-log": "Agent log",
   settings: "Settings",

@@ -39,7 +39,7 @@ export function resultHref(r: SearchResultDto, pathname: string, search: string)
     case "product":
       return `/products?${new URLSearchParams({ q: r.title })}`;
     case "campaign":
-      return `/?panel=content&cf_campaignId=${id}`;
+      return `/calendar?cf_campaignId=${id}`;
   }
 }
 

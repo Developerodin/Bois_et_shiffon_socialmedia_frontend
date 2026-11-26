@@ -262,7 +262,7 @@ export function MobileNav(props: Props) {
       <SheetContent
         side="left"
         aria-describedby={undefined}
-        // Query-only links (/?panel=content) keep the pathname, so the effect above can't see them: close on any link click.
+        // Query-only links (/settings?tab=members from Settings) keep the pathname, so the effect above can't see them: close on any link click.
         onClick={(e) => e.target instanceof Element && e.target.closest("a") && setOpen(false)}
         className="flex w-[264px] max-w-[85vw] flex-col bg-card p-0"
       >
