@@ -1,4 +1,4 @@
-import type { DateRange, SearchMetrics } from "./data-sources";
+import type { AdAlertKind, DateRange, SearchMetrics } from "./data-sources";
 import type { PermissionKey } from "./permissions";
 
 /**
@@ -20,7 +20,17 @@ export type DigestSection =
   | { kind: "posts"; key: "analytics.read"; published: number; top: { title: string | null; channel: string; reach: number | null }[] }
   /** Per currency, never added across currencies. */
   | { kind: "sales"; key: "crm.read"; data: DigestSales[] | null }
-  | { kind: "ads"; key: "ads.read"; data: { currency: string; spend: string; purchases: number; purchaseValue: string; roas: number | null }[] | null };
+  /**
+   * `alerts`: the Meta Ads alerts raised during the digest's week (each in exactly one digest), text cleaned on the
+   * server; `moreAlerts` beyond those listed. Both absent on digests built before alerts existed.
+   */
+  | {
+      kind: "ads";
+      key: "ads.read";
+      data: { currency: string; spend: string; purchases: number; purchaseValue: string; roas: number | null }[] | null;
+      alerts?: { kind: AdAlertKind; text: string; firstDay: string; lastDay: string }[];
+      moreAlerts?: number;
+    };
 
 /**
  * One currency's week of sales. `netExVat`: net sales without VAT (from `exVatFrom` when set; null = not known for the
