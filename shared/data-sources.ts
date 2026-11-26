@@ -262,6 +262,13 @@ export type ShopRevenueOverSpend = {
  */
 export type AdsSummaryDto = { totals: AdsTotals[]; previous: AdsTotals[]; previousRange: DateRange; shopRevenueOverSpend?: ShopRevenueOverSpend };
 
+/**
+ * Meta Ads problems found after an account's daily sync (prisma AdAlertKind): a spend jump, a ROAS drop, a campaign
+ * spending without purchases, a budget running over pace.
+ */
+export const AD_ALERT_KINDS = ["SPEND_UP", "ROAS_DOWN", "NO_PURCHASES", "OVER_PACE"] as const;
+export type AdAlertKind = (typeof AD_ALERT_KINDS)[number];
+
 /** Platforms a monthly budget can be set for (prisma AdPlatform). Google spend arrives in Phase 3. */
 export const AD_BUDGET_PLATFORMS = ["META", "GOOGLE"] as const;
 export type AdBudgetPlatform = (typeof AD_BUDGET_PLATFORMS)[number];

@@ -66,9 +66,26 @@ function SectionBody({ s }: { s: DigestSection }) {
       if (!s.data) return NO_DATA;
       return s.data.length ? <Figures items={s.data.map(salesFigure)} /> : <p className="text-sm text-muted-foreground">No orders this week</p>;
     case "ads":
-      if (!s.data) return NO_DATA;
-      return s.data.length ? <Figures items={s.data.map((c) => [`${c.currency} spent (${n(c.purchases)} purchases)`, c.spend])} /> : <p className="text-sm text-muted-foreground">No spend this week</p>;
+      return (
+        <>
+          {!s.data ? NO_DATA : s.data.length ? <Figures items={s.data.map((c) => [`${c.currency} spent (${n(c.purchases)} purchases)`, c.spend])} /> : <p className="text-sm text-muted-foreground">No spend this week</p>}
+          <AdAlerts alerts={s.alerts ?? []} more={s.moreAlerts ?? 0} />
+        </>
+      );
   }
+}
+
+/** The ads alerts raised this week (absent on digests built before alerts): server-written text, shown as text. */
+function AdAlerts({ alerts, more }: { alerts: { text: string }[]; more: number }) {
+  if (!alerts.length) return null;
+  return (
+    <ul className="mt-2 list-disc pl-5 text-sm">
+      {alerts.map((a, i) => (
+        <li key={i}>{a.text}</li>
+      ))}
+      {more > 0 && <li className="text-muted-foreground">{n(more)} more in the Ads tab</li>}
+    </ul>
+  );
 }
 
 /** A currency's week: net without VAT when known (none when not); digests built before that change keep their net. */

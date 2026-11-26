@@ -38,6 +38,22 @@ describe("digest page", () => {
     expect(html).not.toContain("Search");
   });
 
+  it("lists the week's ads alerts under the ads figures, as text", () => {
+    const brand = digest.body.brands[0];
+    const ads = {
+      kind: "ads" as const, key: "ads.read" as const, data: [{ currency: "EUR", spend: "120.00", purchases: 4, purchaseValue: "300.00", roas: 2.5 }],
+      alerts: [{ kind: "SPEND_UP" as const, text: "Ad spend up 64% on act_1 <b>x</b>", firstDay: "2026-11-21", lastDay: "2026-11-21" }], moreAlerts: 2,
+    };
+    const html = renderToStaticMarkup(createElement(DigestView, { digests: [{ ...digest, body: { brands: [{ ...brand, sections: [ads] }] } }] }));
+    expect(html).toContain("EUR spent (4 purchases)");
+    expect(html).toContain("Ad spend up 64% on act_1 &lt;b&gt;x&lt;/b&gt;");
+    expect(html).toContain("2 more in the Ads tab");
+    // A stored body without alerts renders as before.
+    const before = renderToStaticMarkup(createElement(DigestView, { digests: [digest] }));
+    expect(before).toContain("No data yet");
+    expect(before).not.toContain("more in the Ads tab");
+  });
+
   it("a digest built after the VAT split shows net excl. VAT, and no revenue when it isn't known", () => {
     const brand = digest.body.brands[0];
     const sales = { kind: "sales" as const, key: "crm.read" as const, data: [
