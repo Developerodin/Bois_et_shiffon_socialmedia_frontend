@@ -63,11 +63,11 @@ export const NAV: readonly NavEntry[] = [
   { id: "echo", label: "Echo", href: "/settings?tab=connections", group: "agent", role: "Communication", soon: true },
   { id: "pulse", label: "Pulse", href: "/agents/pulse", group: "agent", role: "Finance", soon: true },
   { id: "hum", label: "Hum", href: "/agents/hum", group: "agent", role: "Admin & access", soon: true },
-  { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "SEO & GEO reports" },
+  { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "Growth reports" },
   { id: "drift", label: "Drift", href: "/?panel=competitors", group: "agent", role: "Competitors" },
 
   { id: "calendar", label: "Content calendar", href: "/?panel=content", group: "more" },
-  { id: "performance", label: "SEO & GEO reports", href: "/performance", group: "more" },
+  { id: "performance", label: "Growth reports", href: "/performance", group: "more" },
   { id: "agent-log", label: "Agent log", href: "/agents", group: "more" },
   { id: "settings", label: "Settings", href: "/settings", group: "more" },
 
@@ -130,7 +130,7 @@ export function activeIdFor(pathname: string, search: { get(name: string): strin
 
 const hrefPath = (href: string) => href.split(/[?#]/)[0] || "/";
 
-/** Agents share paths with pages (Surge and SEO & GEO reports), so on a tie the page wins. */
+/** Agents share paths with pages (Surge and Growth reports), so on a tie the page wins. */
 const rank = (e: NavEntry) => (e.group === "agent" ? 0 : 1);
 
 /**

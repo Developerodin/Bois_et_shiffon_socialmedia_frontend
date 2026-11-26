@@ -10,7 +10,7 @@ const AGENTS = ["Spark", "Beat", "Wave", "Echo", "Pulse", "Hum", "Surge", "Drift
 const SOON = ["Echo"];
 const LIVE = ["Wave", "Hum", "Surge", "Drift"];
 const CONNECT_BUTTON = /^(re)?connect\b|^disconnect\b/i;
-const MORE = ["Calendar", "SEO & GEO reports", "Agent log", "Settings"];
+const MORE = ["Calendar", "Growth reports", "Agent log", "Settings"];
 
 const sidebar = (page: Page) => page.getByRole("navigation", { name: "Workspace" });
 /** A sidebar row by its label; agent rows also read their "Soon" tag and role. */
