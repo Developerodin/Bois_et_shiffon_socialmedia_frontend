@@ -161,6 +161,18 @@ async function everyPostReachable(page: Page) {
   });
 }
 
+/**
+ * The first day of the grid with no posts that still has a whole hour left (from tomorrow; today after 22:00 has
+ * none), or null: New post from it is set to that day.
+ */
+async function futureEmptyDay(page: Page) {
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const from = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, "0")}-${String(tomorrow.getDate()).padStart(2, "0")}`;
+  const keys = await page.locator('button[data-day][aria-label$=", 0 posts"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-day")!));
+  return keys.find((k) => k >= from) ?? null;
+}
+
 /** The page's layout numbers: a day cell's size, the space under the calendar's card, and the assistant column. */
 async function layout(page: Page) {
   return page.evaluate(() => {
@@ -175,6 +187,8 @@ async function layout(page: Page) {
       cellWidth: cell.offsetWidth,
       // Space between the card's bottom and the end of the main area's scrolled content (its 24 px padding included).
       below: Math.round(main.scrollHeight - (c.bottom - m.top + main.scrollTop)),
+      // How far the main area scrolls (0: the page fits the window).
+      overflow: main.scrollHeight - main.clientHeight,
       cardRight: Math.round(c.right),
       assistant: assistant && assistant.width > 0 && assistant.left < window.innerWidth ? { left: Math.round(assistant.left), right: Math.round(assistant.right) } : null,
       viewport: window.innerWidth,
@@ -202,7 +216,7 @@ test.describe("owner", () => {
           await expect(days(page)).toHaveCount(month.weeks * 7);
           await noSideways(page);
           const l = await layout(page);
-          console.log(`${tag} ${month.name}: cell ${l.cellWidth}x${l.cellHeight}, ${l.below}px under the card`);
+          console.log(`${tag} ${month.name}: cell ${l.cellWidth}x${l.cellHeight}, ${l.below}px under the card, scrolls ${l.overflow}px`);
           // No large empty area under the calendar: the card ends at the main area's bottom padding.
           expect(l.below, "space under the calendar").toBeLessThanOrEqual(32);
           if (!phone) {
@@ -210,7 +224,19 @@ test.describe("owner", () => {
             if (size.width >= 1440 && size.height >= 900) expect(l.cellHeight, "day cell height on a desktop").toBeGreaterThanOrEqual(DESKTOP_CELL_MIN);
             const reach = await everyPostReachable(page);
             expect(reach.bad, "posts each day shows").toEqual([]);
+            // Readable cards: each title gets most of its cell's width, not the few letters a time beside it left.
+            if (size.width >= 1440) {
+              const narrowest = await page.evaluate(() => {
+                const titles = [...document.querySelectorAll<HTMLElement>("[role=cell] [data-card-title]")];
+                // A title shown whole is fine at any width; one cut short has most of its cell (a time beside it left about a third).
+                const cut = titles.filter((t) => t.scrollWidth > t.clientWidth);
+                return cut.length ? Math.min(...cut.map((t) => t.getBoundingClientRect().width / t.closest("[role=cell]")!.getBoundingClientRect().width)) : null;
+              });
+              if (narrowest !== null) expect(narrowest, "a card title's share of its cell's width").toBeGreaterThanOrEqual(0.6);
+            }
           }
+          // A desktop window the month fits in doesn't scroll at all.
+          if (size.width >= DOCKED_FROM) expect(l.overflow, "main area scroll").toBeLessThanOrEqual(0);
           // The docked assistant sits beside the calendar, both inside the window.
           if (size.width >= DOCKED_FROM) {
             expect(l.assistant, "docked assistant").not.toBeNull();
@@ -312,14 +338,17 @@ test.describe("owner", () => {
           await dialog.getByRole("button", { name: "Close this day" }).click();
           await expect(dialog).toHaveCount(0);
 
-          // An empty day in the month: its popover offers New post, which opens the New post dialog; cancelled, nothing is sent.
-          const empty = page.locator('button[data-day][aria-label$=", 0 posts"]').first();
-          await empty.click();
+          // An empty day from today on: its popover offers New post, which opens the New post dialog set to that day;
+          // cancelled, nothing is sent.
+          const emptyKey = await futureEmptyDay(page);
+          test.skip(!emptyKey, "No empty day from today on in November 2026.");
+          await page.locator(`button[data-day="${emptyKey}"]`).click();
           const pop = dayPopover(page);
           await expect(pop).toContainText("Nothing on");
           await pop.getByRole("button", { name: "New post" }).click();
           const create = page.getByRole("dialog", { name: "New product post" });
           await expect(create).toBeVisible();
+          await expect(create.getByLabel("Date and time")).toHaveValue(new RegExp(`^${emptyKey}T[0-9]{2}:00$`));
           await page.screenshot({ path: path.join(SHOTS, `calendar-${tag}-new-post.png`) });
           await create.getByRole("button", { name: "Cancel" }).click();
           await expect(create).toHaveCount(0);
@@ -343,10 +372,13 @@ test.describe("owner", () => {
           await expect(agenda.getByRole("listitem")).toHaveCount(n);
           await noSideways(page);
           await page.screenshot({ path: path.join(SHOTS, `calendar-${tag}-agenda.png`) });
-          await page.locator('button[data-day][aria-label$=", 0 posts"]').first().click();
+          const emptyKey = await futureEmptyDay(page);
+          test.skip(!emptyKey, "No empty day from today on in November 2026.");
+          await page.locator(`button[data-day="${emptyKey}"]`).click();
           await agenda.getByRole("button", { name: "New post" }).click();
           const create = page.getByRole("dialog", { name: "New product post" });
           await expect(create).toBeVisible();
+          await expect(create.getByLabel("Date and time")).toHaveValue(new RegExp(`^${emptyKey}T[0-9]{2}:00$`));
           await create.getByRole("button", { name: "Cancel" }).click();
           await expect(create).toHaveCount(0);
           done();
