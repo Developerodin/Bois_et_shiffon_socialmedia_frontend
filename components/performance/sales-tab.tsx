@@ -17,8 +17,9 @@ const DAY = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short",
 const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
 
 /**
- * Shopify orders and revenue per brand-local day, one block per currency (never added across currencies). Totals are as
- * Shopify reports them, VAT included where the shop's prices include it. `source` undefined = orders not turned on.
+ * Shopify orders and revenue per brand-local day, one block per currency (never added across currencies). The headline
+ * is net sales without VAT (from each order's own tax lines); the figures below are as Shopify reports them, VAT
+ * included where the shop's prices include it. `source` undefined = orders not turned on.
  */
 export function SalesTab({ workspaceId, brandId, range, source, canManage, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; onSourceChanged: () => void }) {
   const base = brandApi(workspaceId, brandId);
@@ -55,8 +56,9 @@ function SalesNumbers({ base, range, source, onSourceChanged }: { base: string; 
         <div className="flex flex-col gap-1">
           <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.SHOPIFY_ORDERS}/sync`} onChanged={onSourceChanged} />
           <p className="text-xs text-muted-foreground">
-            {source.label ? `${source.label} · ` : ""}Days in the brand&apos;s time zone. Test and cancelled orders left out; amounts include VAT where the shop&apos;s prices do.
+            {source.label ? `${source.label} · ` : ""}Days in the brand&apos;s time zone. Test and cancelled orders left out; amounts below the headline include VAT where the shop&apos;s prices do.
           </p>
+          {historyNote(source) ? <p className="text-xs text-muted-foreground">{historyNote(source)}</p> : null}
         </div>
       }
     >
@@ -71,6 +73,7 @@ function CurrencyBlock({ c, several }: { c: SalesCurrency; several: boolean }) {
   return (
     <div className="flex flex-col gap-3">
       {several ? <h3 className="text-sm font-medium">In {c.currency}</h3> : null}
+      <ExVatHeadline c={c} />
       {/* Columns follow the section's own width (the sidebar and assistant take part of the window): five only where the amounts fit. */}
       <div className="@container rounded-xl bg-muted/40 px-4 py-3">
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 @xl:grid-cols-3 @4xl:grid-cols-5">
@@ -92,6 +95,35 @@ function CurrencyBlock({ c, several }: { c: SalesCurrency; several: boolean }) {
           />
         </div>
       </details>
+    </div>
+  );
+}
+
+/** The order history past 60 days: being read, not allowed yet by Shopify, or (done, or unknown) nothing to say. */
+export function historyNote(source: DataSourceDto): string | null {
+  const h = source.history;
+  if (!h) return null;
+  if (h.loading) return `Loading older orders${h.through ? `: through ${dayLabel(h.through)}` : ""}`;
+  if (h.allOrders === false) {
+    return `Orders ${h.visibleSince ? `from ${dayLabel(h.visibleSince.slice(0, 10))} ` : ""}on (Shopify hasn't approved older orders yet)`;
+  }
+  return null;
+}
+
+/**
+ * Net sales without VAT. Orders read before the VAT split existed have no shipping tax stored, so the figure may start
+ * later than the range (exVatFrom), and orders whose VAT couldn't be read are left out and counted.
+ */
+function ExVatHeadline({ c }: { c: SalesCurrency }) {
+  const notes = [
+    c.exVatFrom ? `Excl. VAT from ${dayLabel(c.exVatFrom)}` : null,
+    c.exVatMissing ? `${c.exVatMissing.toLocaleString()} ${c.exVatMissing === 1 ? "order" : "orders"} left out (their VAT couldn't be read)` : null,
+  ].filter(Boolean);
+  return (
+    <div className="flex flex-col">
+      <span className="font-display text-3xl font-medium tabular-nums">{c.netExVat === null ? "—" : money(c.netExVat, c.currency)}</span>
+      <span className="text-xs text-muted-foreground">Net sales (excl. VAT)</span>
+      {notes.length ? <span className="mt-0.5 text-xs text-muted-foreground">{notes.join(" · ")}</span> : null}
     </div>
   );
 }

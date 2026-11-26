@@ -18,6 +18,18 @@ import { cn } from "@/lib/utils";
 export type PerformanceTab = "reports" | "search" | "posts" | "sales" | "ads";
 /** How often the sources are read again while a run is queued or running. */
 const POLL_MS = 5_000;
+/** The same while only history windows (backfill runs, ~50 in a chain lasting up to an hour) are queued or running. */
+const BACKFILL_POLL_MS = 60_000;
+
+/**
+ * How often to read the sources again: null when nothing is queued or running; every minute when every run in hand
+ * is a history window (so a 30–45 min chain costs ~one read a minute, not twelve); 5 s as soon as another run shows.
+ */
+export function pollEvery(sources: DataSourcesDto["sources"]): number | null {
+  const runs = sources.flatMap((s) => (s.sync ? [s.sync] : []));
+  if (!runs.length) return null;
+  return runs.every((r) => r.backfill) ? BACKFILL_POLL_MS : POLL_MS;
+}
 const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "Search", posts: "Posts", sales: "Sales", ads: "Ads" };
 
 /**
@@ -25,7 +37,7 @@ const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "S
  * (flag + read permission). The tab and the date range live in the URL (?tab, ?from&to; replace, not push) so a reload
  * or a shared link lands on the same view. Prints as the open tab alone (globals.css, data-print-root).
  */
-export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialRange, canManage, reports }: {
+export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialRange, canManage, canSetBudgets, reports }: {
   workspaceId: string;
   brandId: string;
   brandName: string | null;
@@ -34,6 +46,8 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
   initialRange: { from?: string; to?: string };
   /** integrations.manage: the site picker and turning on orders. */
   canManage: boolean;
+  /** commercial.manage: set ad budgets (the server also needs ads.read, which the Ads tab already does). */
+  canSetBudgets: boolean;
   reports: ReactNode;
 }) {
   // The tab is read from the URL, so a link to another ?tab= (the sidebar's agents) switches it on this page too.
@@ -51,14 +65,14 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
 
   // One poll for the page while any source has a run queued or running (two ad accounts syncing still read once),
   // skipped while the tab is hidden; the server's answer ends it. A failed poll keeps the numbers on screen (poll).
-  const syncing = isData && state.kind === "ready" && state.data.sources.some((s) => s.sync);
+  const every = isData && state.kind === "ready" ? pollEvery(state.data.sources) : null;
   useEffect(() => {
-    if (!syncing) return;
+    if (!every) return;
     const t = window.setInterval(() => {
       if (!document.hidden) poll();
-    }, POLL_MS);
+    }, every);
     return () => window.clearInterval(t);
-  }, [syncing, poll]);
+  }, [every, poll]);
 
   function select(tab: PerformanceTab) {
     // Native history, not router.push: Next syncs useSearchParams from it without a server round trip.
@@ -103,7 +117,7 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
         active === "search" ? <SearchTab {...props} source={source("SEARCH_CONSOLE")} />
         : active === "sales" ? <SalesTab {...props} source={source("SHOPIFY_ORDERS")} />
         : active === "posts" ? <PostsTab {...props} source={source("POST_METRICS")} />
-        : <AdsTab {...props} sources={sources.filter((s) => s.kind === "META_ADS")} />;
+        : <AdsTab {...props} canSetBudgets={canSetBudgets} sources={sources.filter((s) => s.kind === "META_ADS")} />;
     }
   }
 

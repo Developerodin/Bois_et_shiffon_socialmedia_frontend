@@ -47,7 +47,19 @@ export type DataSyncResult = { at: string; startedAt?: string | null; okAt: stri
  * A run of the source in hand: "running" since it started, or "queued" to start at `since` (Sync now, or the
  * follow-up of a run that stopped partway). null: nothing due in the next couple of minutes.
  */
-export type DataSyncRun = { state: "queued" | "running"; since: string | null } | null;
+export type DataSyncRun = {
+  state: "queued" | "running";
+  since: string | null;
+  /** A history window (a backfill job), not a daily, manual or follow-up run. */
+  backfill: boolean;
+} | null;
+
+/**
+ * Shopify orders only: the history past 60 days. `allOrders`: the store lets us read every order (null: not known
+ * yet); `visibleSince` (an ISO date) while it doesn't; `loading` while the history is being read, `through` the last
+ * day it holds so far (null before its first window).
+ */
+export type OrderHistoryDto = { allOrders: boolean | null; visibleSince: string | null; through: string | null; loading: boolean };
 
 /** GET data-sources: one per source the person may see. `label` only for people who manage integrations. */
 export type DataSourceDto = {
@@ -62,7 +74,22 @@ export type DataSourceDto = {
   syncedThrough: string | null;
   /** The zone the provider's days are in (Google: Pacific; Meta Ads: the account's), when it says */
   reportsInZone: string | null;
+  /** SHOPIFY_ORDERS only (null when there is nothing to say). */
+  history?: OrderHistoryDto | null;
 };
+
+/**
+ * The currencies the ECB publishes a daily euro reference rate for (EUR itself excluded: 1 EUR = 1 EUR). The only
+ * currencies rates are fetched for, converted between or accepted for a budget. Taken from the ECB's own series on
+ * 2026-11-26 (those with a rate that week; BGN stopped when Bulgaria joined the euro). A currency that joins the euro
+ * or is suspended has to be removed by hand: its rates then stop and conversions to it go stale.
+ */
+export const ECB_CURRENCIES = [
+  "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "GBP", "HKD", "HUF", "IDR", "ILS", "INR", "ISK", "JPY", "KRW", "MXN",
+  "MYR", "NOK", "NZD", "PHP", "PLN", "RON", "SEK", "SGD", "THB", "TRY", "USD", "ZAR",
+] as const;
+export type EcbCurrency = (typeof ECB_CURRENCIES)[number];
+export const isEcbCurrency = (c: unknown): c is EcbCurrency => typeof c === "string" && (ECB_CURRENCIES as readonly string[]).includes(c);
 
 /** ContentItem.channel (prisma ContentChannel). */
 export type PostChannel =
@@ -78,9 +105,18 @@ export type PostMetricsDto = {
   shares: number | null;
   saves: number | null;
   interactions: number | null;
+  /**
+   * Instagram stories only (null for posts): taps forward, back, exits and next-story swipes. A story's numbers are
+   * read once, 20 h after its first frame: views, replies (in `comments`), shares and interactions summed over its
+   * frames, `reach` the highest frame's (people overlap).
+   */
+  navigation: number | null;
 };
 
-/** GET insights/posts?from&to (analytics.read): one per Instagram, Facebook or Threads post published in the range. */
+/**
+ * GET insights/posts?from&to (analytics.read): one per Instagram, Facebook or Threads post published in the range,
+ * Instagram stories included (channel INSTAGRAM_STORY, `final` once read; story numbers follow analytics.read too).
+ */
 export type PostInsightDto = {
   attemptId: string;
   contentItemId: string;
@@ -107,8 +143,21 @@ export type TurnOnShopifyOrdersBody = { connectionId: string };
  */
 export type SalesTotals = { orders: number; gross: string; discounts: string; netSales: string; total: string; refunded: string };
 export type SalesDay = SalesTotals & { day: string };
-/** One currency: totals for from..to, the same-length period just before it, and its days that had orders. */
-export type SalesCurrency = { currency: string; totals: SalesTotals; previous: SalesTotals; days: SalesDay[] };
+/**
+ * One currency: totals for from..to, the same-length period just before it, and its days that had orders. Totals are
+ * as Shopify reports them (VAT included where the shop's prices include it). `netExVat`: net sales without VAT for
+ * exVatFrom..to (exVatFrom null = the whole range; netExVat null = no day of the range has it yet, as orders read
+ * before the change don't); `exVatMissing` orders were left out of it (their VAT couldn't be read).
+ */
+export type SalesCurrency = {
+  currency: string;
+  totals: SalesTotals;
+  previous: SalesTotals;
+  days: SalesDay[];
+  netExVat: string | null;
+  exVatFrom: string | null;
+  exVatMissing: number;
+};
 /** GET sales/summary?from&to (brand-local "YYYY-MM-DD", inclusive). Needs crm.read. */
 export type SalesSummaryDto = { currencies: SalesCurrency[] };
 
@@ -193,8 +242,44 @@ export type AdsTotals = {
   costPerPurchase: string | null;
 };
 
-/** GET ads/summary. `budget` stays null until budgets are built (held on the owner's answers). */
-export type AdsSummaryDto = { totals: AdsTotals[]; previous: AdsTotals[]; previousRange: DateRange; budget: null };
+/**
+ * Shop revenue (net, without VAT) ÷ ad spend over the same days, the spend converted to the shop's currency through
+ * the ECB rates. `ratio` null when nothing was spent, the shop has orders in several currencies, the ex-VAT revenue
+ * doesn't cover the range, or a rate is missing (`why` says which). `staleRateFrom`: the oldest rate used when it is
+ * more than a week older than its day. Shopify days and ad account days may differ by a few hours.
+ */
+export type ShopRevenueOverSpend = {
+  ratio: number | null;
+  currency: string | null;
+  /** vat_missing: some orders' VAT couldn't be read, so the revenue would read low. */
+  why: "no_spend" | "currencies" | "no_revenue" | "no_rate" | "vat_missing" | null;
+  staleRateFrom: string | null;
+};
+
+/**
+ * GET ads/summary. `shopRevenueOverSpend` only for people who may see sales too (crm.read and ads.read); budgets and
+ * pacing come from GET ads/budgets only.
+ */
+export type AdsSummaryDto = { totals: AdsTotals[]; previous: AdsTotals[]; previousRange: DateRange; shopRevenueOverSpend?: ShopRevenueOverSpend };
+
+/** Platforms a monthly budget can be set for (prisma AdPlatform). Google spend arrives in Phase 3. */
+export const AD_BUDGET_PLATFORMS = ["META", "GOOGLE"] as const;
+export type AdBudgetPlatform = (typeof AD_BUDGET_PLATFORMS)[number];
+/** One platform's budget for a month ("YYYY-MM"), in the currency it was entered in. */
+export type AdBudgetDto = { platform: AdBudgetPlatform; month: string; amount: string; currency: string; updatedAt: string };
+/**
+ * Pacing of a month's budget so far. ok: spend from the 1st to `through` (the least advanced ad account's last full
+ * day), converted to the budget's currency, against budget × days elapsed ÷ days in the month: under < 90 %,
+ * on 90–110 %, over > 110 %. no_data: no ad account synced into the month yet; no_rate: an exchange rate is missing;
+ * google_later: Google Ads spend arrives in Phase 3.
+ */
+export type PacingDto =
+  | { platform: AdBudgetPlatform; state: "ok"; through: string; spent: string; expected: string; ratio: number; status: "under" | "on" | "over"; currency: string; staleRateFrom: string | null }
+  | { platform: AdBudgetPlatform; state: "no_data" | "no_rate" | "google_later" };
+/** GET ads/budgets?month=YYYY-MM. `defaultCurrency`: the ad account's, else the shop's, else EUR. */
+export type AdBudgetsDto = { month: string; budgets: AdBudgetDto[]; pacing: PacingDto[]; defaultCurrency: string };
+/** PUT ads/budgets. `amount` a decimal string; "0" removes the month's budget. */
+export type SetAdBudgetBody = { platform: AdBudgetPlatform; month: string; amount: string; currency: string };
 
 export type AdsCampaignDto = AdsTotals & { accountId: string; campaignId: string; campaignName: string; impressions: number; clicks: number };
 /** GET ads/campaigns, highest spend first. */

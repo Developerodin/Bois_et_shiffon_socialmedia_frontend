@@ -54,6 +54,7 @@ export default async function PerformancePage({ searchParams }: { searchParams: 
       tabs={tabs}
       initialRange={{ from: q.from, to: q.to }}
       canManage={can("integrations.manage")}
+      canSetBudgets={can("commercial.manage")}
       reports={reports(true)}
     />
   );
