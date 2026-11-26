@@ -18,6 +18,18 @@ import { cn } from "@/lib/utils";
 export type PerformanceTab = "reports" | "search" | "posts" | "sales" | "ads";
 /** How often the sources are read again while a run is queued or running. */
 const POLL_MS = 5_000;
+/** The same while only history windows (backfill runs, ~50 in a chain lasting up to an hour) are queued or running. */
+const BACKFILL_POLL_MS = 60_000;
+
+/**
+ * How often to read the sources again: null when nothing is queued or running; every minute when every run in hand
+ * is a history window (so a 30–45 min chain costs ~one read a minute, not twelve); 5 s as soon as another run shows.
+ */
+export function pollEvery(sources: DataSourcesDto["sources"]): number | null {
+  const runs = sources.flatMap((s) => (s.sync ? [s.sync] : []));
+  if (!runs.length) return null;
+  return runs.every((r) => r.backfill) ? BACKFILL_POLL_MS : POLL_MS;
+}
 const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "Search", posts: "Posts", sales: "Sales", ads: "Ads" };
 
 /**
@@ -51,14 +63,14 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
 
   // One poll for the page while any source has a run queued or running (two ad accounts syncing still read once),
   // skipped while the tab is hidden; the server's answer ends it. A failed poll keeps the numbers on screen (poll).
-  const syncing = isData && state.kind === "ready" && state.data.sources.some((s) => s.sync);
+  const every = isData && state.kind === "ready" ? pollEvery(state.data.sources) : null;
   useEffect(() => {
-    if (!syncing) return;
+    if (!every) return;
     const t = window.setInterval(() => {
       if (!document.hidden) poll();
-    }, POLL_MS);
+    }, every);
     return () => window.clearInterval(t);
-  }, [syncing, poll]);
+  }, [every, poll]);
 
   function select(tab: PerformanceTab) {
     // Native history, not router.push: Next syncs useSearchParams from it without a server round trip.

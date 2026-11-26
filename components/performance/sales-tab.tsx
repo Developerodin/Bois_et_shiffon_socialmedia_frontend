@@ -58,6 +58,7 @@ function SalesNumbers({ base, range, source, onSourceChanged }: { base: string; 
           <p className="text-xs text-muted-foreground">
             {source.label ? `${source.label} · ` : ""}Days in the brand&apos;s time zone. Test and cancelled orders left out; amounts below the headline include VAT where the shop&apos;s prices do.
           </p>
+          {historyNote(source) ? <p className="text-xs text-muted-foreground">{historyNote(source)}</p> : null}
         </div>
       }
     >
@@ -96,6 +97,17 @@ function CurrencyBlock({ c, several }: { c: SalesCurrency; several: boolean }) {
       </details>
     </div>
   );
+}
+
+/** The order history past 60 days: being read, not allowed yet by Shopify, or (done, or unknown) nothing to say. */
+export function historyNote(source: DataSourceDto): string | null {
+  const h = source.history;
+  if (!h) return null;
+  if (h.loading) return `Loading older orders${h.through ? `: through ${dayLabel(h.through)}` : ""}`;
+  if (h.allOrders === false) {
+    return `Orders ${h.visibleSince ? `from ${dayLabel(h.visibleSince.slice(0, 10))} ` : ""}on (Shopify hasn't approved older orders yet)`;
+  }
+  return null;
 }
 
 /**

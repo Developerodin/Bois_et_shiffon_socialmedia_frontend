@@ -34,17 +34,33 @@ export function syncStatus(run: DataSyncRun, last: DataSyncResult | null, now = 
 }
 
 /**
- * Reloads a tab's numbers when one of its sources finishes a run (its lastResult.at moves), not on the first render.
- * useLoad keeps the old numbers on screen while the new ones load, so nothing flashes.
+ * The run ends useReloadWhenSynced reacts to, one per source: its lastResult.at, except while a history (backfill)
+ * run is queued or running, when the source keeps the value it had (`before`). So a chain of ~50 history windows
+ * reloads the numbers once, when it ends, not after every window. Pure, so it can be checked without rendering.
+ */
+export function syncedKeys(sources: (DataSourceDto | undefined)[], before: string[]): string[] {
+  return sources.map((s, i) => (s?.sync?.backfill ? (before[i] ?? s.lastResult?.at ?? "") : (s?.lastResult?.at ?? "")));
+}
+
+/**
+ * Reloads a tab's numbers when one of its sources finishes a run (its lastResult.at moves), not on the first render,
+ * and not after each window of a history being read (syncedKeys). useLoad keeps the old numbers on screen while the
+ * new ones load, so nothing flashes.
  */
 export function useReloadWhenSynced(sources: (DataSourceDto | undefined)[], reload: () => void) {
-  const ended = sources.map((s) => s?.lastResult?.at ?? "").join("|");
-  const seen = useRef(ended);
+  const state = sources.map((s) => `${s?.lastResult?.at ?? ""}~${s?.sync?.backfill ? 1 : 0}`).join("|");
+  const latest = useRef(sources);
+  const seen = useRef<string[] | null>(null);
   useEffect(() => {
-    if (seen.current === ended) return;
-    seen.current = ended;
-    reload();
-  }, [ended, reload]);
+    latest.current = sources;
+  });
+  useEffect(() => {
+    const keys = syncedKeys(latest.current, seen.current ?? []);
+    const first = seen.current === null;
+    const changed = !first && keys.join("|") !== seen.current!.join("|");
+    seen.current = keys;
+    if (changed) reload();
+  }, [state, reload]);
 }
 
 /**
@@ -52,7 +68,8 @@ export function useReloadWhenSynced(sources: (DataSourceDto | undefined)[], relo
  * - running: "Syncing… started 12:04", the button off;
  * - queued: "Sync queued, starts 12:05" (Sync now, or a run that stopped partway carrying on), the button off;
  * - idle: "Updated 3 h ago" from the last success, and when the last run started and ended.
- * While queued or running, PerformanceTabs reads the sources again every 5 s; when the run ends, "Sync finished"
+ * While queued or running, PerformanceTabs reads the sources again every 5 s (every minute while only history
+ * windows run, pollEvery); when the run ends, "Sync finished"
  * is announced here and the tab reloads its numbers (useReloadWhenSynced). Sync now queues a job (POST …/sync):
  * `queued: false` = synced in the last 5 minutes or already queued; 429 = 3 presses this hour (the server says so).
  * `name` tells several sources of one kind apart (two ad accounts). The reason's text is the server's fixed one

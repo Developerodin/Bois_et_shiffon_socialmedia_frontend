@@ -47,7 +47,19 @@ export type DataSyncResult = { at: string; startedAt?: string | null; okAt: stri
  * A run of the source in hand: "running" since it started, or "queued" to start at `since` (Sync now, or the
  * follow-up of a run that stopped partway). null: nothing due in the next couple of minutes.
  */
-export type DataSyncRun = { state: "queued" | "running"; since: string | null } | null;
+export type DataSyncRun = {
+  state: "queued" | "running";
+  since: string | null;
+  /** A history window (a backfill job), not a daily, manual or follow-up run. */
+  backfill: boolean;
+} | null;
+
+/**
+ * Shopify orders only: the history past 60 days. `allOrders`: the store lets us read every order (null: not known
+ * yet); `visibleSince` (an ISO date) while it doesn't; `loading` while the history is being read, `through` the last
+ * day it holds so far (null before its first window).
+ */
+export type OrderHistoryDto = { allOrders: boolean | null; visibleSince: string | null; through: string | null; loading: boolean };
 
 /** GET data-sources: one per source the person may see. `label` only for people who manage integrations. */
 export type DataSourceDto = {
@@ -62,6 +74,8 @@ export type DataSourceDto = {
   syncedThrough: string | null;
   /** The zone the provider's days are in (Google: Pacific; Meta Ads: the account's), when it says */
   reportsInZone: string | null;
+  /** SHOPIFY_ORDERS only (null when there is nothing to say). */
+  history?: OrderHistoryDto | null;
 };
 
 /**
