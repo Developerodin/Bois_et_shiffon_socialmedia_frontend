@@ -94,7 +94,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
     }
     url.searchParams.delete("connected");
     url.searchParams.delete("connectError");
-    window.history.replaceState(window.history.state, "", url);
+    window.history.replaceState(null, "", url); // null: Next then keeps its own copy of the URL in step
   }, [notice, router]);
 
   async function connect({ provider, kind }: ProviderInfo) {

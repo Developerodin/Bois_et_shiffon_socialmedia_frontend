@@ -81,7 +81,7 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
       const changeRange = (r: DateRange) => {
         const days = rangeDays(r);
         setPicked(r.to === end && PRESETS.some((n) => n === days) ? days : r);
-        window.history.replaceState(window.history.state, "", withRange(window.location.href, r));
+        window.history.replaceState(null, "", withRange(window.location.href, r));
       };
       rangeLine = rangeLabel(range);
       filter = <DateRangeFilter range={range} end={end} onChange={changeRange} />;
