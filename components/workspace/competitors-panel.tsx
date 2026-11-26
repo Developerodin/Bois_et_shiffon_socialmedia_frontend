@@ -29,8 +29,9 @@ const STARTING_MS = 120_000;
 
 /**
  * The competitors list, every 6 s while an audit is running (or Audit all was just queued: `starting`), else every
- * minute: audits take minutes, and nothing else on the list changes by itself. Paused while the tab is hidden and read
- * again when it shows (useJob). `starting()` asks for the fast pace for STARTING_MS.
+ * minute: audits take minutes. The page reads it again when the Competitors agent's run ends (CompetitorsBoard), and
+ * after the person's own changes. Paused while the tab is hidden and read again when it shows (useJob). `starting()`
+ * asks for the fast pace for STARTING_MS.
  */
 function useCompetitors(base: string) {
   const [starting, setStarting] = useState(false);

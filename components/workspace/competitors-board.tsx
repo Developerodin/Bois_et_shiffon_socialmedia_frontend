@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { CompetitorsPanel, CompetitorView } from "@/components/workspace/competitors-panel";
 import { knownName } from "@/components/workspace/known-name";
 import { Peek } from "@/components/workspace/peek";
+import { fetchShared } from "@/components/workspace/use-job";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
 import { AgentView, NotForRole } from "@/components/workspace/workspace";
 import { recentKey, viewToEntry, writeRecent } from "@/lib/recent";
@@ -49,6 +50,13 @@ export function CompetitorsBoard({ workspaceId, brandId, perms, userId }: { work
   const agentOpen = view?.kind === "agent" && canAgents;
   const { agents } = useAgentsPoll(workspaceId, brandId, agentOpen);
   const refreshAgents = useCallback(() => fetchAgents(workspaceId, brandId, true).then(() => undefined), [workspaceId, brandId]);
+  // The Competitors agent adds competitors: once its run ends, read the list again instead of waiting for the list's
+  // idle poll (a minute).
+  const findRun = agents?.find((a) => a.key === "competitors")?.lastRun;
+  const findDone = findRun && findRun.status !== "QUEUED" && findRun.status !== "RUNNING" ? findRun.id : null;
+  useEffect(() => {
+    if (findDone) void fetchShared(`${base}/competitors`, true).catch(() => {});
+  }, [findDone, base]);
   const unknownAgent = view?.kind === "agent" && canAgents && !!agents && !agents.some((a) => a.key === view.key);
   const bad = (!view && namesItem(query)) || unknownAgent;
   useEffect(() => {
