@@ -31,6 +31,17 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
     const label = Object.hasOwn(CHANNEL_LABEL, String(i?.channel)) ? CHANNEL_LABEL[String(i?.channel)] : null;
     return label ? `Checked your posts: ${label}` : "Checked your posts";
   },
+  salesSummary: () => "Checked your shop sales",
+  salesBreakdown: () => "Broke down your shop sales",
+  topProducts: () => "Ranked your best sellers",
+  productSales: () => "Checked how a product is selling",
+  stockRisk: () => "Checked stock against sales",
+  adsSummary: () => "Checked your Meta Ads results",
+  adCampaigns: () => "Compared your ad campaigns",
+  adBudgets: () => "Checked your ad budgets",
+  revenuePerAdSpend: () => "Compared shop revenue with ad spend",
+  postPerformance: () => "Checked how your posts did",
+  searchPerformance: () => "Checked your Google search results",
 };
 
 /**
