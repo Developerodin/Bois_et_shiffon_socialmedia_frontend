@@ -24,7 +24,11 @@ export function urlKey(raw: string): string | null {
   return p ? p.host + p.path : null;
 }
 
-/** Every stored spelling that has this key (8: http/https × www/none × slash/none; 4 for the root). */
+/**
+ * Every stored spelling that has this key (8: http/https × www/none × slash/none; 4 for the root), in URL's encoded
+ * form (punycode host, percent-encoded path). Ceiling: a row stored with a Unicode host or a raw non-ASCII path
+ * matches none of them; match in JS by urlKey if that turns up.
+ */
 export function urlVariants(raw: string): string[] {
   const p = parse(raw);
   if (!p) return [];
