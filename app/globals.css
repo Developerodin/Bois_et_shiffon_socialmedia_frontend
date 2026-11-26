@@ -25,7 +25,7 @@
   --input: #e0dcd6;
   --control: #8a857e;
   --disabled: #67625c;
-  --primary: #5b50d6;
+  --primary: #1c1917; /* ink: the one accent is the darkest neutral, no purple (owner) */
   --primary-strong: #1c1917;
   --primary-foreground: #ffffff;
   --secondary: #f1efec;
@@ -42,8 +42,8 @@
   /* The "info" status hue (awaiting approval, scheduled) where a status is a small marker (a dot or a card's edge) rather
      than a tinted pill, and the text of its tinted pill: a muted slate blue, so status marks don't read as the brand purple. */
   --status-info: #4f5f76;
-  --ring: #5b50d6;
-  --chart-1: #5b50d6;
+  --ring: #1c1917;
+  --chart-1: #44403c;
   --terminal: #191620;
   --terminal-foreground: #e8e6ee;
   --terminal-accent: #b7aef5;
