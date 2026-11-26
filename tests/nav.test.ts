@@ -46,6 +46,10 @@ describe("navFor", () => {
   it("ignores the query string", () => {
     expect(navFor("/performance?x=1").title).toBe("Growth reports");
   });
+  it("titles the Competitors page over Drift, which links to it", () => {
+    expect(NAV.find((e) => e.id === "drift")?.href).toBe("/competitors");
+    expect(navFor("/competitors")).toMatchObject({ activeId: "competitors", title: "Competitors", brandScoped: true });
+  });
 });
 
 const ids = (g: { entries: { id: string }[] }) => g.entries.map((e) => e.id);
@@ -185,6 +189,11 @@ describe("activeIdFor", () => {
     const pointing = entries.filter((e) => !e.soon && !e.href.startsWith("/agents/"));
     expect(pointing.map((e) => e.id).sort()).toEqual(["beat", "drift", "hum", "pulse", "spark", "surge", "wave"]);
     for (const e of pointing) expect(at(e.href, live), e.href).toBe(e.id);
+  });
+
+  it("selects Drift on the Competitors page, and no longer on the Overview's old ?panel=competitors", () => {
+    expect(at("/competitors", new Set())).toBe("drift");
+    expect(at("/?panel=competitors", new Set())).toBe("overview");
   });
 
   it("falls back to the page while Pulse or Hum is not live", () => {

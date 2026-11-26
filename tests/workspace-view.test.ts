@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RUN_ID_PATTERN } from "@/shared";
 import { entryToView, parseRecent, viewToEntry } from "@/lib/recent";
-import { agentLabel, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem } from "@/lib/workspace-view";
+import { agentLabel, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem, PANEL_IDS, type PanelId } from "@/lib/workspace-view";
+import { sanitize, type Layout } from "@/components/workspace/panel-layout";
 
 describe("workspace view URL", () => {
   it("round-trips an agent's run", () => {
@@ -122,6 +123,18 @@ describe("panel in the peek (?peek=)", () => {
     expect(viewToSearch({ kind: "panel", id: "feed" }, "?panel=content", "/")).toBe("?panel=content&peek=feed");
     expect(viewToSearch({ kind: "home" }, "?peek=feed&panel=content", "/")).toBe("?panel=content");
     expect(viewFromSearch("?panel=content")).toEqual({ kind: "home" });
+  });
+  it("no longer opens Competitors, which is a page now", () => {
+    expect(PANEL_IDS).not.toContain("competitors");
+    expect(viewFromSearch("?peek=competitors")).toEqual({ kind: "home" });
+    expect(namesItem("?peek=competitors")).toBe(true);
+  });
+  it("drops Competitors from a layout saved with it, and the column it leaves empty", () => {
+    const saved = { columns: [{ id: "a", size: 1, panels: ["context"] }, { id: "b", size: 1.3, panels: ["analytics"] }, { id: "c", size: 1.3, panels: ["competitors"] }], collapsed: ["competitors"] };
+    const fallback: Layout<PanelId> = { columns: [{ id: "x", size: 1, panels: ["home"] }], collapsed: [] };
+    const l = sanitize(saved, [...PANEL_IDS], fallback);
+    expect(l.columns.map((c) => c.panels)).toEqual([["context"], ["analytics"]]);
+    expect(l.collapsed).toEqual([]);
   });
   it("comes after the other item parameters", () => {
     expect(viewFromSearch("?peek=feed&competitor=c1")).toEqual({ kind: "competitor", id: "c1" });

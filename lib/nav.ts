@@ -55,6 +55,8 @@ export const NAV: readonly NavEntry[] = [
   { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox", perm: ["inbox.read"] },
   // Its link is Spark's slot (agentEntries). Quotes only for now, so crm.manage; inbox.read joins with the stored inbox.
   { id: "crm", label: "Sales & CRM", href: "/crm", group: "page", feature: "crm", perm: CRM_MANAGE },
+  // Its link is Drift's slot; this entry gives the page its title (the page wins the tie with Drift's href).
+  { id: "competitors", label: "Competitors", href: "/competitors", group: "page" },
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
@@ -64,7 +66,7 @@ export const NAV: readonly NavEntry[] = [
   { id: "pulse", label: "Pulse", href: "/agents/pulse", group: "agent", role: "Finance", soon: true },
   { id: "hum", label: "Hum", href: "/agents/hum", group: "agent", role: "Admin & access", soon: true },
   { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "Growth reports" },
-  { id: "drift", label: "Drift", href: "/?panel=competitors", group: "agent", role: "Competitors" },
+  { id: "drift", label: "Drift", href: "/competitors", group: "agent", role: "Competitors" },
 
   { id: "calendar", label: "Content calendar", href: "/?panel=content", group: "more" },
   { id: "performance", label: "Growth reports", href: "/performance", group: "more" },
@@ -118,13 +120,13 @@ export function agentEntries(enabled: readonly WebFeature[], perms?: readonly st
 export function activeIdFor(pathname: string, search: { get(name: string): string | null }, live: ReadonlySet<string>): string | null {
   const panel = search.get("panel");
   if (pathname === "/" && panel === "content") return "wave";
-  if (pathname === "/" && panel === "competitors") return "drift";
   if (pathname === "/performance") return search.get("tab") === "sales" && live.has("pulse") ? "pulse" : "surge";
   if (pathname === "/settings" && search.get("tab") === "members" && live.has("hum")) return "hum";
   // /tasks is told apart by ?area=: Website, Performance (area=seo), else Beat's Projects & tasks slot.
   if (pathname === "/tasks") return search.get("area") === "website" ? "website" : search.get("area") === "seo" ? "seo" : "beat";
   if (pathname === "/projects" || pathname.startsWith("/projects/")) return "beat";
   if (pathname === "/crm" || pathname.startsWith("/crm/")) return "spark";
+  if (pathname === "/competitors") return "drift";
   return navFor(pathname).activeId;
 }
 

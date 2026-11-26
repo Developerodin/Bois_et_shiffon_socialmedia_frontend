@@ -41,7 +41,7 @@ function rowFor(entry: RecentEntry, p: Props, competitors: Competitors): Row {
     gone = !p.canAgents || (!!p.agents && !p.agents.some((a) => a.key === entry.id));
     pending = !p.agents && p.canAgents;
   } else if (entry.kind === "competitor") {
-    // Its own fresh fetch, not the shared cache: the menu may open before the competitors panel has loaded.
+    // Its own fresh fetch, not the shared cache: the Overview loads the competitors only while one is open in the peek.
     if (competitors.state === "loading") pending = true;
     else if (competitors.state === "loaded") {
       name = competitors.names.get(entry.id);

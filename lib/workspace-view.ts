@@ -1,7 +1,10 @@
 import { DOC_KINDS, RUN_ID_PATTERN, type ContextDocKind } from "@/shared";
 
-/** The Overview's panels. */
-export const PANEL_IDS = ["context", "home", "ideas", "content", "competitors", "analytics", "feed", "log"] as const;
+/**
+ * The Overview's panels. Competitors left for its own page (/competitors): saved layouts drop the id when read
+ * (panel-layout's sanitize), and the Overview's page sends /?panel=competitors there.
+ */
+export const PANEL_IDS = ["context", "home", "ideas", "content", "analytics", "feed", "log"] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 
 /** What the Overview has open. `run` starts the agent on open; `runId` shows one finished run's events. */

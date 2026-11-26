@@ -7,7 +7,10 @@ import { navFor } from "@/lib/nav";
 export const metadata = { title: navFor("/").title };
 
 /** The workspace: one screen with Context, Today and Agents (Okara pattern); the chat is the shell's Bois & Chiffons panel. */
-export default async function WorkspacePage() {
+export default async function WorkspacePage({ searchParams }: { searchParams: Promise<{ panel?: string | string[] }> }) {
+  // Competitors was a panel here and is now a page: old links and bookmarks to it land on the page. Any item they named
+  // (?competitor=) is dropped; the page lists it.
+  if ((await searchParams).panel === "competitors") redirect("/competitors");
   const shell = await getShell();
 
   // A platform-only account belongs to no workspace: its home is the admin console.
