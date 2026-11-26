@@ -34,6 +34,9 @@
   --warning: #9a5b00;
   --success-ink: #146b3e;
   --warning-ink: #8a5100;
+  /* The "info" status hue (awaiting approval, scheduled) where a status is a small marker (a dot or a card's edge) rather
+     than a tinted pill: a muted slate blue, so the calendar's status marks don't read as the brand purple. */
+  --status-info: #56677f;
   --ring: #5b50d6;
   --chart-1: #5b50d6;
   --terminal: #191620;
@@ -71,6 +74,7 @@
   --color-warning: var(--warning);
   --color-success-ink: var(--success-ink);
   --color-warning-ink: var(--warning-ink);
+  --color-status-info: var(--status-info);
   --color-ring: var(--ring);
   --color-overlay: var(--overlay);
   --color-terminal: var(--terminal);

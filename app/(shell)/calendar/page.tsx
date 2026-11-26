@@ -41,7 +41,9 @@ export default async function CalendarPage() {
   }
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-5">
+    // At least the scrolling main area's height, so the calendar's card can grow to its bottom edge instead of stopping
+    // after the last week (a taller month or a short window makes it longer, and the main area scrolls).
+    <div className="flex min-h-full w-full min-w-0 flex-col">
       {/* No visible header: the calendar's own toolbar starts the page (owner). The breadcrumb names it; screen readers still get a heading. */}
       <h1 className="sr-only">Content calendar</h1>
       {/* Remount on brand switch so the calendar, its filters' options and the peek reset cleanly. */}

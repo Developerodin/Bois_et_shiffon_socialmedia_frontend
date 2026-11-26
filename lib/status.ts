@@ -23,11 +23,14 @@ export const TONE_CLASS: Record<Tone, string> = {
   muted: "border-border bg-muted text-muted-foreground",
 };
 
-/** A solid swatch per tone, for status dots and the calendar's legend; always shown beside text that names the status. */
+/**
+ * A solid swatch per tone, for status dots, the calendar's card edges and legend, and quiet status pills; always shown
+ * beside text that names the status. Info is a slate blue (--status-info), not the brand purple, which stays for actions.
+ */
 export const TONE_DOT: Record<Tone, string> = {
   good: "bg-success",
   warn: "bg-warning",
   bad: "bg-destructive",
-  info: "bg-primary",
+  info: "bg-status-info",
   muted: "bg-muted-foreground",
 };

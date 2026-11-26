@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { okToDiscard, UnsavedGuardOff } from "@/components/context/unsaved";
 import { reelHref } from "@/components/reels/href";
@@ -11,6 +11,7 @@ import { Peek } from "@/components/workspace/peek";
 import { useGuardedPeekParam } from "@/components/workspace/use-guarded-peek-param";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
 import { filterFromSearch, withFilter, type CalendarFilter } from "@/lib/calendar-filter";
+import { peekInset } from "@/lib/calendar-month";
 import { recentKey } from "@/lib/recent";
 import { navigate, peekCrumb, peekKey, peekTitle, type View } from "@/lib/workspace-view";
 
@@ -45,10 +46,29 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
   const peek = usePeek(item);
   // The post the peek shows: the open one, or the closed one while it slides out.
   const peekPost = peek.shown?.view.kind === "content" ? peek.shown.view : null;
+  // While a post is open the calendar gives up the width its peek covers (the peek is fixed to the window's right edge
+  // and its width can be dragged), so the toolbar and Sunday stay in view beside it. Back to full width as it closes.
+  const [inset, setInset] = useState(0);
+  const aside = peek.ref;
+  useEffect(() => {
+    const el = aside.current;
+    const main = document.getElementById("content");
+    if (!peek.live || !el || !main) return setInset(0);
+    const measure = () => {
+      const m = main.getBoundingClientRect();
+      setInset(peekInset(m.left, m.right, window.innerWidth - el.offsetWidth));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    ro.observe(main);
+    return () => ro.disconnect();
+  }, [peek.live, aside]);
   return (
     <>
       {/* No overflow clip: the month view's day popover opens below its cell and may run past the card's bottom. */}
-      <Card className="min-w-0">
+      {/* It fills the page's height (flex-1), so the month grid below can spread its weeks over the window. */}
+      <Card className="flex min-w-0 flex-1 flex-col" style={inset ? { marginRight: inset } : undefined}>
         {/* The Planner runs from the Overview's agent peek; this page hosts posts only. */}
         <ContentPanel base={base} perms={perms} me={userId} filter={filter} onFilter={changeFilter} onOpen={(id) => open(id)} onRunPlanner={() => okToDiscard() && router.push("/?agent=planner")} />
       </Card>

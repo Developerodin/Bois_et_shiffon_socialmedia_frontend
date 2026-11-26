@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { cellFit, dayCellLabel, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
+import { CELL_FLOOR, cardsThatFit, cellFit, dayCellLabel, dayKey, gridRange, gridStep, groupByDay, monthGrid, peekInset, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 
 // A zone with DST, so a day that is 23 or 25 hours long is in play.
 beforeAll(() => {
@@ -66,6 +66,48 @@ describe("groupByDay", () => {
   });
 });
 
+describe("week rows", () => {
+  it("gives Feb 2027 four weeks, Dec 2026 five and Nov 2026 six", () => {
+    expect(monthGrid(2027, 1).length / 7).toBe(4);
+    expect(monthGrid(2026, 11).length / 7).toBe(5);
+    expect(monthGrid(2026, 10).length / 7).toBe(6);
+  });
+});
+
+describe("cards in a day cell", () => {
+  it("fits one more card per 22 px past the cell's 28 px frame, and at least one line", () => {
+    expect(cardsThatFit(40)).toBe(1);
+    expect(CELL_FLOOR).toBe(72);
+    expect(cardsThatFit(CELL_FLOOR)).toBe(2);
+    expect(cardsThatFit(93)).toBe(2);
+    expect(cardsThatFit(94)).toBe(3);
+    expect(cardsThatFit(127)).toBe(4);
+    expect(cardsThatFit(200)).toBe(7);
+  });
+
+  it("never hides a post: shown plus more is the day's count", () => {
+    for (const h of [CELL_FLOOR, 103, 130, 200])
+      for (let n = 0; n < 12; n++) {
+        const fit = cellFit(n, cardsThatFit(h));
+        expect(fit.shown + fit.more).toBe(n);
+        expect(fit.shown + (fit.more ? 1 : 0)).toBeLessThanOrEqual(cardsThatFit(h));
+      }
+  });
+});
+
+describe("calendar beside the post peek", () => {
+  it("moves in by what the peek covers of the main area, or not at all if the rest would be too narrow", () => {
+    // 1920 wide: main 232..1536 (the docked assistant is right of it), a 560 px peek from 1360.
+    expect(peekInset(232, 1536, 1360)).toBe(176);
+    // The peek starts right of the main area: nothing covered.
+    expect(peekInset(232, 1536, 1600)).toBe(0);
+    // A phone: the peek covers everything, so the calendar stays put under it.
+    expect(peekInset(0, 390, 0)).toBe(0);
+    expect(peekInset(0, 820, 400, 360)).toBe(420);
+    expect(peekInset(0, 820, 300, 360)).toBe(0);
+  });
+});
+
 describe("day grid keys", () => {
   it("moves a day left or right and a week up or down, and stops at the edges", () => {
     expect(gridStep(10, "ArrowRight", 42)).toBe(11);
@@ -84,6 +126,14 @@ describe("day popover", () => {
     expect(popoverLeft(100, 288, 800)).toBe(100);
     expect(popoverLeft(700, 288, 800)).toBe(512);
     expect(popoverLeft(100, 288, 200)).toBe(0);
+  });
+
+  it("opens below when it fits or there is more room below, else above, capped to the room on its side", () => {
+    expect(popoverSide(400, 100, 320)).toEqual({ side: "below", maxHeight: 320 });
+    expect(popoverSide(200, 100, 320)).toEqual({ side: "below", maxHeight: 192 });
+    expect(popoverSide(100, 500, 320)).toEqual({ side: "above", maxHeight: 320 });
+    expect(popoverSide(100, 200, 320)).toEqual({ side: "above", maxHeight: 192 });
+    expect(popoverSide(40, 60, 320)).toEqual({ side: "above", maxHeight: 120 });
   });
 
   it("a cell shows a compact 24-hour time, none at midnight", () => {
