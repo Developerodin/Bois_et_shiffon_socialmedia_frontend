@@ -8,9 +8,6 @@ import { Button } from "@/components/ui/button";
 import { type DataSourceDto, type DataSyncResult, type DataSyncRun } from "@/shared";
 import { clockTime, timeAgo } from "@/lib/time";
 
-/** How often the sources are read again while a run is queued or running. */
-const POLL_MS = 5_000;
-
 /** "12:04 – 12:06", or only the end when the start isn't recorded (runs from before it was). */
 function runSpan(startedAt: string | null | undefined, at: string, now: number) {
   return startedAt ? `${clockTime(startedAt, now)} – ${clockTime(at, now)}` : `ended ${clockTime(at, now)}`;
@@ -55,8 +52,8 @@ export function useReloadWhenSynced(sources: (DataSourceDto | undefined)[], relo
  * - running: "Syncing… started 12:04", the button off;
  * - queued: "Sync queued, starts 12:05" (Sync now, or a run that stopped partway carrying on), the button off;
  * - idle: "Updated 3 h ago" from the last success, and when the last run started and ended.
- * While queued or running, the sources are read again every 5 s (`onChanged`); when the run ends, "Sync finished"
- * is announced and the tab reloads its numbers (useReloadWhenSynced). Sync now queues a job (POST …/sync):
+ * While queued or running, PerformanceTabs reads the sources again every 5 s; when the run ends, "Sync finished"
+ * is announced here and the tab reloads its numbers (useReloadWhenSynced). Sync now queues a job (POST …/sync):
  * `queued: false` = synced in the last 5 minutes or already queued; 429 = 3 presses this hour (the server says so).
  * `name` tells several sources of one kind apart (two ad accounts). The reason's text is the server's fixed one
  * (`lastResult.error`, shared DATA_SYNC_ERRORS); `reason` only picks the tone and the Connections link.
@@ -67,13 +64,6 @@ export function SyncedAt({ source, syncUrl, name, onChanged }: { source: DataSou
   const last = source.lastResult;
   const reason = last?.reason ?? null;
   const run = source.sync ?? null;
-
-  // Poll while a run is queued or running; the server's answer ends it.
-  useEffect(() => {
-    if (!run) return;
-    const t = window.setInterval(onChanged, POLL_MS);
-    return () => window.clearInterval(t);
-  }, [run, onChanged]);
 
   // A run seen going and now gone: say it finished (the numbers reload through useReloadWhenSynced).
   const wasRunning = useRef(!!run);

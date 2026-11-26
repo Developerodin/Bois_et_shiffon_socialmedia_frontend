@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useCallback, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { DateRangeFilter, rangeLabel } from "@/components/data/date-range";
 import { AdsTab } from "@/components/performance/ads-tab";
 import { PostsTab } from "@/components/performance/posts-tab";
@@ -16,6 +16,8 @@ import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 export type PerformanceTab = "reports" | "search" | "posts" | "sales" | "ads";
+/** How often the sources are read again while a run is queued or running. */
+const POLL_MS = 5_000;
 const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "Search", posts: "Posts", sales: "Sales", ads: "Ads" };
 
 /**
@@ -44,8 +46,19 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
 
   const base = brandApi(workspaceId, brandId);
   const fetcher = useCallback(() => request<DataSourcesDto>(`${base}/data-sources`), [base]);
-  const { state, reload } = useLoad(isData ? fetcher : null);
+  const { state, reload, poll } = useLoad(isData ? fetcher : null);
   useReloadOnFocus(reload, state);
+
+  // One poll for the page while any source has a run queued or running (two ad accounts syncing still read once),
+  // skipped while the tab is hidden; the server's answer ends it. A failed poll keeps the numbers on screen (poll).
+  const syncing = isData && state.kind === "ready" && state.data.sources.some((s) => s.sync);
+  useEffect(() => {
+    if (!syncing) return;
+    const t = window.setInterval(() => {
+      if (!document.hidden) poll();
+    }, POLL_MS);
+    return () => window.clearInterval(t);
+  }, [syncing, poll]);
 
   function select(tab: PerformanceTab) {
     // Native history, not router.push: Next syncs useSearchParams from it without a server round trip.
