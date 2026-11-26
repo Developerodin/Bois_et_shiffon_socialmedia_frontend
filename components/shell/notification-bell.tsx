@@ -53,6 +53,8 @@ export function notificationText(n: NotificationDto): string {
         return `${c} of your tasks were approved`;
       case "TASK_CHANGES_REQUESTED":
         return `Changes asked for on ${c} of your tasks`;
+      case "AD_ALERT":
+        return `${c} ads alerts`;
       default:
         return `${c} task updates`;
     }
@@ -70,9 +72,22 @@ export function notificationText(n: NotificationDto): string {
       return `${who} approved your task`;
     case "TASK_CHANGES_REQUESTED":
       return `${who} asked for changes to your task`;
+    case "AD_ALERT":
+      // Written and cleaned on the server (one line, no control or bidi characters); shown as text, never as HTML.
+      return n.alert?.text ?? "Ads alert";
     default:
       return "A task changed";
   }
+}
+
+/**
+ * Where a notice opens, or null when it has nowhere to go: an ads alert (one or a group) opens the Ads tab; a task
+ * group the list it is about; a single task notice its task (the caller places it in this page's peek when it can).
+ */
+export function notificationTarget(n: NotificationDto): string | null {
+  if (n.kind === "AD_ALERT") return "/performance?tab=ads";
+  if (!n.taskId) return null;
+  return n.count > 1 ? `/tasks?view=${groupView(n.kind)}` : `/tasks?task=${encodeURIComponent(n.taskId)}`;
 }
 
 /** The task list a group of notices opens: review requests go to Approvals, the rest to My tasks (overdue to Overdue). */
@@ -148,9 +163,8 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
       void notificationsApi.read(workspaceId, which).then(refresh, () => undefined);
       setList((l) => l?.map((x) => (x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x)) ?? l);
     }
-    if (!n.taskId) return;
-    // A group opens the list it is about; a single notice opens its task.
-    const target = group ? `/tasks?view=${groupView(n.kind)}` : `/tasks?task=${encodeURIComponent(n.taskId)}`;
+    const target = notificationTarget(n);
+    if (!target) return;
     if (n.brandId !== brandId) {
       // Another business: the same guard the business switcher uses, then its /tasks page opens the task or list.
       if (!okToDiscard()) return;
@@ -163,7 +177,7 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
       router.refresh();
       return;
     }
-    const href = group ? target : taskHref(pathname, window.location.search, n.taskId);
+    const href = group || !n.taskId ? target : taskHref(pathname, window.location.search, n.taskId);
     // Leaving this page for /tasks: ask about unsaved work here (a page with a peek asks itself when its URL changes).
     if (!samePage(href, pathname) && !okToDiscard()) return;
     navigate(router, href, pathname);
@@ -207,7 +221,7 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
             Loading…
           </p>
         ) : list.length === 0 ? (
-          <p className="px-2 py-3 text-sm text-muted-foreground">Nothing new. Task assignments and review requests show here.</p>
+          <p className="px-2 py-3 text-sm text-muted-foreground">Nothing new. Task updates and ads alerts show here.</p>
         ) : (
           <div className="max-h-[60vh] overflow-y-auto">
             {list.map((n) => (

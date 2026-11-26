@@ -1,4 +1,5 @@
 import type { TaskAction } from "../tasks";
+import type { AdAlertKind } from "../data-sources";
 
 /**
  * A person on a task; `gone` when the account no longer exists or can't see it; `client` when they are a client
@@ -89,6 +90,8 @@ export type NotificationDto = {
   taskId: string | null;
   taskTitle: string | null;
   actor: TaskPersonDto | null;
+  /** AD_ALERT notices: the alert's kind and its one-line text (cleaned on the server); null for task notices. */
+  alert: { kind: AdAlertKind; text: string } | null;
   readAt: string | null;
   createdAt: string;
 };

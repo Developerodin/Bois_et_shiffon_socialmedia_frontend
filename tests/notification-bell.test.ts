@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { BellBadge, badgeLabel, groupView, notificationText } from "@/components/shell/notification-bell";
+import { BellBadge, badgeLabel, groupView, notificationTarget, notificationText } from "@/components/shell/notification-bell";
 import { taskHref } from "@/lib/workspace-view";
 
 describe("notification bell", () => {
@@ -15,7 +15,7 @@ describe("notification bell", () => {
   });
 
   it("says what happened as plain words", () => {
-    const n = { id: "n1", count: 1, brandId: "b1", taskId: "t1", taskTitle: "<b>Fix</b>", actor: { id: "u1", name: "Ana", gone: false, client: false }, readAt: null, createdAt: "2026-11-23T10:00:00.000Z" };
+    const n = { id: "n1", count: 1, brandId: "b1", taskId: "t1", taskTitle: "<b>Fix</b>", actor: { id: "u1", name: "Ana", gone: false, client: false }, alert: null, readAt: null, createdAt: "2026-11-23T10:00:00.000Z" };
     expect(notificationText({ ...n, kind: "TASK_ASSIGNED" })).toBe("Ana assigned you a task");
     expect(notificationText({ ...n, kind: "REVIEW_REQUESTED" })).toBe("Ana asked you to review a task");
     expect(notificationText({ ...n, kind: "TASK_OVERDUE" })).toBe("A task of yours is overdue");
@@ -27,6 +27,27 @@ describe("notification bell", () => {
     expect(groupView("REVIEW_REQUESTED")).toBe("approvals");
     expect(groupView("TASK_OVERDUE")).toBe("overdue");
     expect(groupView("TASK_ASSIGNED")).toBe("mine");
+  });
+
+  const alert = { id: "n2", kind: "AD_ALERT", count: 1, brandId: "b2", taskId: null, taskTitle: null, actor: null, readAt: null, createdAt: "2026-11-23T10:00:00.000Z" };
+
+  it("an ads alert reads as its server text, as text: markup stays literal", () => {
+    const text = '<img src=x onerror=alert(1)> Campaign "Spring" spent 46.10 EUR';
+    const n = { ...alert, alert: { kind: "NO_PURCHASES" as const, text } };
+    expect(notificationText(n)).toBe(text);
+    expect(notificationText({ ...n, alert: null })).toBe("Ads alert");
+    expect(notificationText({ ...n, count: 3 })).toBe("3 ads alerts");
+    // React escapes it like any text child.
+    expect(renderToStaticMarkup(createElement("span", null, notificationText(n)))).toContain("&lt;img");
+  });
+
+  it("an ads alert opens the Ads tab, one or a group, with no task; a task notice its task or list", () => {
+    expect(notificationTarget({ ...alert, alert: { kind: "SPEND_UP", text: "x" } })).toBe("/performance?tab=ads");
+    expect(notificationTarget({ ...alert, count: 2, alert: null })).toBe("/performance?tab=ads");
+    const task = { ...alert, kind: "TASK_ASSIGNED", taskId: "t 1", alert: null };
+    expect(notificationTarget(task)).toBe("/tasks?task=t%201");
+    expect(notificationTarget({ ...task, count: 2 })).toBe("/tasks?view=mine");
+    expect(notificationTarget({ ...task, taskId: null })).toBeNull();
   });
 });
 
