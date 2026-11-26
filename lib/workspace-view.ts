@@ -216,9 +216,9 @@ export function namesItem(search: string): boolean {
 }
 
 /**
- * The Overview's or the content calendar's URL without what belongs to the old brand (the open item, and the calendar's
- * campaign filter), or null when there's nothing to drop (or another page). A brand switch uses it: the new brand's Overview must not open
- * that item or filter by a campaign it doesn't have. The other cf_ filters stay.
+ * The Overview's or the content calendar's URL without what belongs to the old brand (the open item, and on /calendar
+ * the campaign filter), or null when there's nothing to drop (or another page). A brand switch uses it: the new brand's
+ * page must not open that item or filter by a campaign it doesn't have. The other cf_ filters stay.
  */
 export function withoutOpenItem(search: string, pathname: string): string | null {
   // A project belongs to the old brand: its page gives way to the new brand's projects.

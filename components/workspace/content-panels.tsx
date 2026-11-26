@@ -907,7 +907,8 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems }
                     <td
                       key={k}
                       className={cn(
-                        "rounded-lg border border-border p-0 align-top @max-[640px]/cal:border-transparent",
+                        // A cell's height is a minimum: the row still grows to its busiest day, and the button fills the cell.
+                        "h-16 rounded-lg border border-border p-0 align-top @max-[640px]/cal:h-11 @max-[640px]/cal:border-transparent",
                         // Days of the next or last month are muted; in the month, weekends are a shade darker.
                         outside ? "bg-muted/50" : d.getDay() % 6 === 0 && "bg-muted/25",
                         (isOpen || isPicked) && "bg-primary/10",
