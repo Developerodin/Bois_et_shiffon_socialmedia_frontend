@@ -11,7 +11,10 @@ import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
-import { DATA_SOURCE_SLUGS, type ChooseSearchSiteBody, type DataSourceDto, type SearchMetrics, type SearchPagesDto, type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto } from "@/shared";
+import {
+  DATA_SOURCE_SLUGS, type ChooseSearchSiteBody, type DataSourceDto, type SearchMetrics, type SearchPageRow, type SearchPagesDto, type SearchQueriesDto, type SearchQueryRow,
+  type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto,
+} from "@/shared";
 
 const num = (n: number) => n.toLocaleString();
 const pct = (ctr: number | null) => (ctr == null ? "—" : `${(ctr * 100).toFixed(1)}%`);
@@ -50,7 +53,12 @@ export function SearchTab({ workspaceId, brandId, range, source, canManage, onSo
 function SearchNumbers({ base, range, source, onSourceChanged, onChangeSite }: { base: string; range: DateRange; source: DataSourceDto; onSourceChanged: () => void; onChangeSite?: () => void }) {
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(
-    () => Promise.all([request<SearchSummaryDto>(`${base}/search/summary?${rangeQuery(from, to)}`), request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(from, to)}&sort=clicks`)]),
+    () =>
+      Promise.all([
+        request<SearchSummaryDto>(`${base}/search/summary?${rangeQuery(from, to)}`),
+        request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(from, to)}&sort=clicks`),
+        request<SearchQueriesDto>(`${base}/search/queries?${rangeQuery(from, to)}&sort=clicks`),
+      ]),
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
@@ -79,7 +87,7 @@ function SearchNumbers({ base, range, source, onSourceChanged, onChangeSite }: {
   else if (state.kind === "forbidden") body = <p className="text-sm text-muted-foreground">You can&apos;t see search numbers.</p>;
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
   else {
-    const [summary, pages] = state.data;
+    const [summary, pages, queries] = state.data;
     body = !summary.days.length && !summary.totals.impressions ? (
       <p className="text-sm text-muted-foreground">No numbers for these days yet. The first sync reads the last 90 days and takes a few minutes.</p>
     ) : (
@@ -96,6 +104,7 @@ function SearchNumbers({ base, range, source, onSourceChanged, onChangeSite }: {
             />
           </div>
         </details>
+        <TopQueries base={base} range={range} first={queries} />
         <TopPages base={base} range={range} first={pages} />
       </div>
     );
@@ -121,23 +130,76 @@ function Totals({ now, before }: { now: SearchMetrics; before: SearchMetrics }) 
 
 /** The first 50 pages by clicks, then more on asking. */
 function TopPages({ base, range, first }: { base: string; range: DateRange; first: SearchPagesDto }) {
-  const [more, setMore] = useState<{ for: SearchPagesDto; pages: SearchPagesDto["pages"]; next: string | null } | null>(null);
+  return (
+    <MoreRows<SearchPageRow>
+      base={base}
+      range={range}
+      list="pages"
+      first={{ rows: first.pages, next: first.nextCursor }}
+      rowsOf={(d) => (d as SearchPagesDto).pages}
+      title="Top pages"
+      note="Google reports the top pages each day, so these add up to less than the site total."
+      empty="No pages in this range."
+      label={(p) => <span key="p" className="break-all">{p.page}</span>}
+    />
+  );
+}
+
+/** The first 50 search queries by clicks, then more on asking, with how much of the site's clicks they cover. */
+function TopQueries({ base, range, first }: { base: string; range: DateRange; first: SearchQueriesDto }) {
+  const share = first.coverage.clicks;
+  const since = first.since && first.since > range.from ? first.since : null;
+  const note = (
+    <>
+      These are the top 500 searches a day; Google also hides rare searches for privacy.
+      {share != null ? ` Together they cover ${Math.round(share * 100)}% of clicks.` : ""}
+      {since ? ` Queries since ${dayLabel(since)}.` : ""}
+    </>
+  );
+  return (
+    <MoreRows<SearchQueryRow>
+      base={base}
+      range={range}
+      list="queries"
+      first={{ rows: first.queries, next: first.nextCursor }}
+      rowsOf={(d) => (d as SearchQueriesDto).queries}
+      title="Top queries"
+      note={note}
+      empty="No queries in this range."
+      label={(q) => <span key="q" className="break-words">{q.query}</span>}
+    />
+  );
+}
+
+/** A table of search rows (pages or queries), 50 at a time from search/<list>, with "Show more". */
+function MoreRows<R extends SearchMetrics>({ base, range, list, first, rowsOf, title, note, empty, label }: {
+  base: string;
+  range: DateRange;
+  list: "pages" | "queries";
+  first: { rows: R[]; next: string | null };
+  rowsOf: (d: SearchPagesDto | SearchQueriesDto) => R[];
+  title: string;
+  note: React.ReactNode;
+  empty: string;
+  label: (r: R) => React.ReactNode;
+}) {
+  const [more, setMore] = useState<{ for: R[]; rows: R[]; next: string | null } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   // A new first page (new range, a reload) drops what was added under the old one.
-  const extra = more?.for === first ? more : null;
-  const rows = [...first.pages, ...(extra?.pages ?? [])];
-  const next = extra ? extra.next : first.nextCursor;
+  const extra = more?.for === first.rows ? more : null;
+  const rows = [...first.rows, ...(extra?.rows ?? [])];
+  const next = extra ? extra.next : first.next;
 
   const loadMore = async () => {
     if (!next) return;
     setBusy(true);
     setError("");
     try {
-      const d = await request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(range.from, range.to)}&sort=clicks&cursor=${encodeURIComponent(next)}`);
-      setMore({ for: first, pages: [...(extra?.pages ?? []), ...d.pages], next: d.nextCursor });
+      const d = await request<SearchPagesDto | SearchQueriesDto>(`${base}/search/${list}?${rangeQuery(range.from, range.to)}&sort=clicks&cursor=${encodeURIComponent(next)}`);
+      setMore({ for: first.rows, rows: [...(extra?.rows ?? []), ...rowsOf(d)], next: d.nextCursor });
     } catch (e) {
-      setError(errorMessage(e, "Couldn't load more pages. Try again."));
+      setError(errorMessage(e, `Couldn't load more ${list}. Try again.`));
     } finally {
       setBusy(false);
     }
@@ -145,18 +207,18 @@ function TopPages({ base, range, first }: { base: string; range: DateRange; firs
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium">Top pages</h3>
-      <p className="text-xs text-muted-foreground">Google reports the top pages each day, so these add up to less than the site total.</p>
+      <h3 className="text-sm font-medium">{title}</h3>
+      <p className="text-xs text-muted-foreground">{note}</p>
       <Table
-        head={["Page", "Clicks", "Impressions", "CTR", "Position"]}
+        head={[list === "pages" ? "Page" : "Query", "Clicks", "Impressions", "CTR", "Position"]}
         numeric={[1, 2, 3, 4]}
         wide
-        empty="No pages in this range."
-        rows={rows.map((p) => [<span key="p" className="break-all">{p.page}</span>, num(p.clicks), num(p.impressions), pct(p.ctr), pos(p.position)])}
+        empty={empty}
+        rows={rows.map((r) => [label(r), num(r.clicks), num(r.impressions), pct(r.ctr), pos(r.position)])}
       />
       {next ? (
         <Button size="sm" variant="outline" className="self-start print:hidden" disabled={busy} onClick={() => void loadMore()}>
-          {busy ? "Loading…" : "Show more pages"}
+          {busy ? "Loading…" : `Show more ${list}`}
         </Button>
       ) : null}
       {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}

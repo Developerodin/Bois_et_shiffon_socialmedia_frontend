@@ -207,6 +207,22 @@ export type SearchSummaryDto = {
  */
 export type SearchPagesDto = { pages: SearchPageRow[]; nextCursor: string | null };
 
+export const SEARCH_QUERIES_LIMIT = 50;
+export type SearchQueryRow = SearchMetrics & { query: string };
+/**
+ * GET search/queries?from&to&sort=clicks|impressions&cursor[&page=<url>]: search queries summed over the range,
+ * SEARCH_QUERIES_LIMIT at a time (with `page`: the queries that led to that page, any spelling of its URL).
+ * Built from each day's top 500 queries (or query-page pairs), and Google leaves rare queries out for privacy, so the
+ * sums sit below the site's (or page's) total: `coverage` is the share they cover over the range's days that have
+ * query rows (null when the total is 0). `since`: the first day with query rows for the chosen site (null: none yet).
+ */
+export type SearchQueriesDto = {
+  queries: SearchQueryRow[];
+  nextCursor: string | null;
+  coverage: { clicks: number | null; impressions: number | null };
+  since: string | null;
+};
+
 /** GET data-sources. `timeZone`: the brand's zone (dates we bucket ourselves); a provider's own is `reportsInZone`. */
 export type DataSourcesDto = { sources: DataSourceDto[]; timeZone: string };
 
