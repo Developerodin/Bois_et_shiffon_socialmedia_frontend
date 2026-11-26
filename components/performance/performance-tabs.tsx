@@ -37,7 +37,7 @@ const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "S
  * (flag + read permission). The tab and the date range live in the URL (?tab, ?from&to; replace, not push) so a reload
  * or a shared link lands on the same view. Prints as the open tab alone (globals.css, data-print-root).
  */
-export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialRange, canManage, reports }: {
+export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialRange, canManage, canSetBudgets, reports }: {
   workspaceId: string;
   brandId: string;
   brandName: string | null;
@@ -46,6 +46,8 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
   initialRange: { from?: string; to?: string };
   /** integrations.manage: the site picker and turning on orders. */
   canManage: boolean;
+  /** commercial.manage: set ad budgets (the server also needs ads.read, which the Ads tab already does). */
+  canSetBudgets: boolean;
   reports: ReactNode;
 }) {
   // The tab is read from the URL, so a link to another ?tab= (the sidebar's agents) switches it on this page too.
@@ -115,7 +117,7 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
         active === "search" ? <SearchTab {...props} source={source("SEARCH_CONSOLE")} />
         : active === "sales" ? <SalesTab {...props} source={source("SHOPIFY_ORDERS")} />
         : active === "posts" ? <PostsTab {...props} source={source("POST_METRICS")} />
-        : <AdsTab {...props} sources={sources.filter((s) => s.kind === "META_ADS")} />;
+        : <AdsTab {...props} canSetBudgets={canSetBudgets} sources={sources.filter((s) => s.kind === "META_ADS")} />;
     }
   }
 

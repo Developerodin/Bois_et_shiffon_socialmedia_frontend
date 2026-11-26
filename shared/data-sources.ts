@@ -233,8 +233,43 @@ export type AdsTotals = {
   costPerPurchase: string | null;
 };
 
-/** GET ads/summary. `budget` stays null until budgets are built (held on the owner's answers). */
-export type AdsSummaryDto = { totals: AdsTotals[]; previous: AdsTotals[]; previousRange: DateRange; budget: null };
+/**
+ * Shop revenue (net, without VAT) ÷ ad spend over the same days, the spend converted to the shop's currency through
+ * the ECB rates. `ratio` null when nothing was spent, the shop has orders in several currencies, the ex-VAT revenue
+ * doesn't cover the range, or a rate is missing (`why` says which). `staleRateFrom`: the oldest rate used when it is
+ * more than a week older than its day. Shopify days and ad account days may differ by a few hours.
+ */
+export type ShopRevenueOverSpend = {
+  ratio: number | null;
+  currency: string | null;
+  why: "no_spend" | "currencies" | "no_revenue" | "no_rate" | null;
+  staleRateFrom: string | null;
+};
+
+/**
+ * GET ads/summary. `shopRevenueOverSpend` only for people who may see sales too (crm.read and ads.read); budgets and
+ * pacing come from GET ads/budgets only.
+ */
+export type AdsSummaryDto = { totals: AdsTotals[]; previous: AdsTotals[]; previousRange: DateRange; shopRevenueOverSpend?: ShopRevenueOverSpend };
+
+/** Platforms a monthly budget can be set for (prisma AdPlatform). Google spend arrives in Phase 3. */
+export const AD_BUDGET_PLATFORMS = ["META", "GOOGLE"] as const;
+export type AdBudgetPlatform = (typeof AD_BUDGET_PLATFORMS)[number];
+/** One platform's budget for a month ("YYYY-MM"), in the currency it was entered in. */
+export type AdBudgetDto = { platform: AdBudgetPlatform; month: string; amount: string; currency: string; updatedAt: string };
+/**
+ * Pacing of a month's budget so far. ok: spend from the 1st to `through` (the least advanced ad account's last full
+ * day), converted to the budget's currency, against budget × days elapsed ÷ days in the month: under < 90 %,
+ * on 90–110 %, over > 110 %. no_data: no ad account synced into the month yet; no_rate: an exchange rate is missing;
+ * google_later: Google Ads spend arrives in Phase 3.
+ */
+export type PacingDto =
+  | { platform: AdBudgetPlatform; state: "ok"; through: string; spent: string; expected: string; ratio: number; status: "under" | "on" | "over"; currency: string; staleRateFrom: string | null }
+  | { platform: AdBudgetPlatform; state: "no_data" | "no_rate" | "google_later" };
+/** GET ads/budgets?month=YYYY-MM. `defaultCurrency`: the ad account's, else the shop's, else EUR. */
+export type AdBudgetsDto = { month: string; budgets: AdBudgetDto[]; pacing: PacingDto[]; defaultCurrency: string };
+/** PUT ads/budgets. `amount` a decimal string; "0" removes the month's budget. */
+export type SetAdBudgetBody = { platform: AdBudgetPlatform; month: string; amount: string; currency: string };
 
 export type AdsCampaignDto = AdsTotals & { accountId: string; campaignId: string; campaignName: string; impressions: number; clicks: number };
 /** GET ads/campaigns, highest spend first. */

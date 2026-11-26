@@ -12,8 +12,9 @@ import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
 import { money, Stat } from "@/components/data/shared";
 import { SyncedAt, useReloadWhenSynced } from "@/components/data/synced-at";
+import { AdBudgets } from "@/components/performance/ad-budgets";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
-import { DATA_SOURCE_SLUGS, type AdsCampaignsDto, type AdsSummaryDto, type AdsTotals, type ChooseMetaAdAccountBody, type DataSourceDto, type MetaAdAccountsDto } from "@/shared";
+import { DATA_SOURCE_SLUGS, type AdsCampaignsDto, type AdsSummaryDto, type AdsTotals, type ChooseMetaAdAccountBody, type DataSourceDto, type MetaAdAccountsDto, type ShopRevenueOverSpend } from "@/shared";
 
 // ---- formatting ---------------------------------------------------------------------------------------------------
 
@@ -35,6 +36,19 @@ function Totals({ now, prev }: { now: AdsTotals; prev: AdsTotals | undefined }) 
   );
 }
 
+/** Shop revenue ÷ ad spend, only sent to people who may see sales; says why there is no figure, and an old rate. */
+export function ratioLine(r: ShopRevenueOverSpend): string {
+  if (r.ratio === null) {
+    const why = r.why === "no_spend" ? "no ad spend in these dates"
+      : r.why === "currencies" ? "the shop sells in several currencies"
+      : r.why === "no_rate" ? "no exchange rate yet"
+      : "net sales without VAT don't cover these dates yet";
+    return `Shop revenue ÷ ad spend: — (${why}).`;
+  }
+  const stale = r.staleRateFrom ? ` Uses an exchange rate from ${dayLabel(r.staleRateFrom)}.` : "";
+  return `Shop revenue ÷ ad spend: ${r.ratio.toFixed(2)}× (net sales without VAT ÷ spend in ${r.currency}; Shopify days and ad account days may differ by a few hours).${stale}`;
+}
+
 // ---- the tab ------------------------------------------------------------------------------------------------------
 
 /**
@@ -45,7 +59,7 @@ function Totals({ now, prev }: { now: AdsTotals; prev: AdsTotals | undefined }) 
 const DAY = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
 
-export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; sources: DataSourceDto[]; canManage: boolean; onSourceChanged: () => void }) {
+export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, canSetBudgets, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; sources: DataSourceDto[]; canManage: boolean; canSetBudgets: boolean; onSourceChanged: () => void }) {
   const base = brandApi(workspaceId, brandId);
   const { from, to } = days;
   const range = rangeQuery(from, to);
@@ -66,20 +80,28 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
   if (state.kind === "error") return <LoadError message={state.message} onRetry={reload} />;
 
   const { summary, campaigns } = state.data;
+  // Budgets can be set before an ad account is connected (pacing then says there is no data yet).
+  const budgets = <AdBudgets base={base} month={to.slice(0, 7)} canEdit={canSetBudgets} />;
   if (!sources.length && canManage) {
     return (
-      <PageSection id="ads-account" title="Meta Ads" description="Spend, purchases and ROAS from one Meta ad account.">
-        <AdAccountPicker workspaceId={workspaceId} brandId={brandId} onSaved={onSourceChanged} />
-      </PageSection>
+      <div className="flex flex-col gap-4">
+        <PageSection id="ads-account" title="Meta Ads" description="Spend, purchases and ROAS from one Meta ad account.">
+          <AdAccountPicker workspaceId={workspaceId} brandId={brandId} onSaved={onSourceChanged} />
+        </PageSection>
+        {budgets}
+      </div>
     );
   }
   if (!sources.length) {
     return (
-      <EmptyState
-        icon={Megaphone}
-        title="No ad account connected"
-        description="Connect a Meta ad account in Connections to see spend, purchases and ROAS here."
-      />
+      <div className="flex flex-col gap-4">
+        <EmptyState
+          icon={Megaphone}
+          title="No ad account connected"
+          description="Connect a Meta ad account in Connections to see spend, purchases and ROAS here."
+        />
+        {budgets}
+      </div>
     );
   }
 
@@ -138,11 +160,13 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
             ) : null}
           </>
         )}
+        {summary.shopRevenueOverSpend ? <p className="text-sm">{ratioLine(summary.shopRevenueOverSpend)}</p> : null}
         <p className="text-xs text-muted-foreground">
           Purchases, purchase value and ROAS are as Meta reports them, with Ads Manager&rsquo;s default attribution.
           {zones ? ` Days are in the ad account's time zone (${zones}).` : null}
         </p>
       </PageSection>
+      {budgets}
     </div>
   );
 }
