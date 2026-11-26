@@ -62,6 +62,7 @@ export const NAV: readonly NavEntry[] = [
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
   // Links to the Content calendar page; the "calendar" entry below titles it (the page wins the tie with Wave's href).
+  // No perm: agentEntries reads none (as for Drift); the page itself shows a no-access state without brand.read.
   { id: "wave", label: "Wave", href: "/calendar", group: "agent", role: "Content calendar" },
   // Echo has no web inbox yet; it points at Connections until one exists.
   { id: "echo", label: "Echo", href: "/settings?tab=connections", group: "agent", role: "Communication", soon: true },
