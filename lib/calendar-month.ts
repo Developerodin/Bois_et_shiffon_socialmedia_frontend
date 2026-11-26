@@ -70,6 +70,24 @@ export function cardsThatFit(cellHeight: number): number {
 }
 
 /**
+ * A two-line post card (time and channel above, the title below), in px: 34 tall plus the 2 px gap above it. Change it
+ * with PostCard's stacked classes.
+ */
+export const STACKED_STEP = 36;
+/** The narrowest day cell (px) that gets two-line cards; narrower, the one-line card (channel icon and title) reads better. */
+export const STACKED_FROM = 96;
+
+/**
+ * How a wide month's day cell of this size shows its `count` posts: as two-line cards when the cell is at least
+ * STACKED_FROM wide and every post fits that way, else as one-line cards with "+N more" as cellFit says. A busy day
+ * thus keeps showing as many posts as before, and a quieter one gets the readable card.
+ */
+export function dayCards(count: number, cellHeight: number, cellWidth: number): { stacked: boolean; shown: number; more: number } {
+  if (cellWidth >= STACKED_FROM && count * STACKED_STEP <= cellHeight - CELL_FRAME) return { stacked: true, shown: count, more: 0 };
+  return { stacked: false, ...cellFit(count, cardsThatFit(cellHeight)) };
+}
+
+/**
  * Whether a day popover opens below its cell or above it, and how tall it may be. It goes below when it fits there in
  * full or when there is at least as much room below as above, else above; either way it is capped to the room on that
  * side (less an 8 px margin) so the scrolling page around the calendar never clips it, down to a 120 px minimum.
@@ -104,3 +122,19 @@ export function dayCellLabel(day: string, posts: { title: string; time: string |
  * grid instead of in a popover. The month view's `@min-[640px]/month` classes use the same number.
  */
 export const AGENDA_BELOW = 640;
+
+/** The hour (local) a post started from a calendar day is first set for. */
+export const NEW_POST_HOUR = 10;
+
+/**
+ * The datetime-local value ("2026-11-30T10:00") New post starts at when opened from day `day` (YYYY-MM-DD, local): that
+ * day at NEW_POST_HOUR, or today's next whole hour once that hour has gone; null for a day that is over (the server
+ * refuses a past date, so a past day's New post starts undated).
+ */
+export function newPostTime(day: string, now = new Date()): string | null {
+  const [y, m, d] = day.split("-").map(Number);
+  const at = new Date(y, m - 1, d, NEW_POST_HOUR);
+  if (at.getTime() <= now.getTime()) at.setHours(now.getHours() + 1, 0, 0, 0);
+  if (dayKey(at) !== day || at.getTime() <= now.getTime()) return null;
+  return `${day}T${String(at.getHours()).padStart(2, "0")}:00`;
+}

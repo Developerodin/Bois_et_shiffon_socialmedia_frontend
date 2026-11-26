@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { CELL_FLOOR, cardsThatFit, cellFit, dayCellLabel, dayKey, gridRange, gridStep, groupByDay, monthGrid, peekInset, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
+import { CELL_FLOOR, CELL_FRAME, STACKED_STEP, cardsThatFit, cellFit, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, peekInset, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 
 // A zone with DST, so a day that is 23 or 25 hours long is in play.
 beforeAll(() => {
@@ -93,6 +93,26 @@ describe("cards in a day cell", () => {
         expect(fit.shown + (fit.more ? 1 : 0)).toBeLessThanOrEqual(cardsThatFit(h));
       }
   });
+
+  it("uses two-line cards on a wide cell when every post fits that way, else one-line cards and +N more", () => {
+    // A 133 x 100 cell (1657 x 921, six weeks): two two-line cards fit, three don't.
+    expect(dayCards(1, 100, 133)).toEqual({ stacked: true, shown: 1, more: 0 });
+    expect(dayCards(2, 100, 133)).toEqual({ stacked: true, shown: 2, more: 0 });
+    expect(dayCards(3, 100, 133)).toEqual({ stacked: false, shown: 3, more: 0 });
+    expect(dayCards(5, 100, 133)).toEqual({ stacked: false, shown: 2, more: 3 });
+    // Too narrow for two lines: one-line cards even for one post.
+    expect(dayCards(1, 100, 90)).toEqual({ stacked: false, shown: 1, more: 0 });
+    expect(dayCards(0, CELL_FLOOR, 133)).toEqual({ stacked: true, shown: 0, more: 0 });
+  });
+
+  it("never lets two-line cards run out of the cell, and never hides a post", () => {
+    for (const h of [CELL_FLOOR, 100, 130, 200])
+      for (let n = 0; n < 12; n++) {
+        const fit = dayCards(n, h, 140);
+        expect(fit.shown + fit.more).toBe(n);
+        if (fit.stacked) expect(CELL_FRAME + n * STACKED_STEP).toBeLessThanOrEqual(h);
+      }
+  });
 });
 
 describe("calendar beside the post peek", () => {
@@ -155,5 +175,17 @@ describe("compact cells", () => {
     expect(dayCellLabel("Monday 23 November", [{ title: "A festive dining table", time: "14:30", status: "Scheduled" }, { title: "Undated", time: null, status: "To write" }])).toBe(
       "Monday 23 November, 2 posts: 14:30 A festive dining table (Scheduled); Undated (To write)",
     );
+  });
+});
+
+describe("New post from a day", () => {
+  it("starts a later day at 10:00, today at the next whole hour, and a day that is over undated", () => {
+    const now = new Date(2026, 10, 26, 14, 20); // 26 Nov 2026, 14:20 local (made here, after the zone is set)
+    expect(newPostTime("2026-11-30", now)).toBe("2026-11-30T10:00");
+    expect(newPostTime("2026-11-26", now)).toBe("2026-11-26T15:00");
+    expect(newPostTime("2026-11-26", new Date(2026, 10, 26, 8, 0))).toBe("2026-11-26T10:00");
+    expect(newPostTime("2026-11-25", now)).toBeNull();
+    // Past 23:00 there is no whole hour left today.
+    expect(newPostTime("2026-11-26", new Date(2026, 10, 26, 23, 5))).toBeNull();
   });
 });

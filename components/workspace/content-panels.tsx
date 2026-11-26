@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, Plus, SlidersHorizontal, Sparkles, TriangleAlert, X } from "lucide-react";
+import { AtSign, BriefcaseBusiness, Check, ChevronLeft, ChevronRight, CircleDashed, Clapperboard, ExternalLink, FileText, GalleryHorizontal, Hash, Image as ImageIcon, LoaderCircle, Pencil, Pin, Plus, SlidersHorizontal, Sparkles, ThumbsUp, TriangleAlert, X, type LucideIcon } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton, selectClass } from "@/components/settings/shared";
 import { LoadFailed } from "@/components/ui/load-failed";
@@ -24,7 +24,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, TONE_DOT, toneOf, type Tone } from "@/lib/status";
 import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
 import { activeFilterCount, filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
-import { AGENDA_BELOW, CELL_FLOOR, cardsThatFit, cellFit, dayCellLabel, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
+import { AGENDA_BELOW, CELL_FLOOR, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 import { CHANNEL_LABEL, STATUS_LABEL } from "@/lib/post-labels";
 
@@ -400,9 +400,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   // Opens the new post in the post view, like a calendar row.
   const canCreate = perms.includes("content.create");
   const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} />;
-  // The same dialog, opened from an empty day in Month. ponytail: it can't carry the day yet (a new post's request has
-  // no date field on the server); the day is picked when the post is scheduled.
-  const [dayNewPost, setDayNewPost] = useState(false);
+  // The same dialog, opened from an empty day in Month, set to that day (newPostTime; a day that is over starts undated).
+  const [dayNewPost, setDayNewPost] = useState<{ at: string | null } | null>(null);
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading calendar" rows={3} /></div>;
   // Month never shows this: past months come from their own read. The switch stays, so a brand with only old posts gets there.
   if (!data.length && view === "list") {
@@ -522,9 +521,9 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           undated={shown.filter((i) => !i.scheduledFor)}
           onOpen={onOpen}
           onItems={setMonthItems}
-          onNewPost={canCreate ? () => setDayNewPost(true) : undefined}
+          onNewPost={canCreate ? (day) => setDayNewPost({ at: newPostTime(day) }) : undefined}
         />
-        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={dayNewPost} onOpenChange={setDayNewPost} />
+        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={!!dayNewPost} onOpenChange={(o) => !o && setDayNewPost(null)} at={dayNewPost?.at ?? undefined} />
       </div>
     );
   }
@@ -659,24 +658,39 @@ function FiltersMenu({ count, onClear, children }: { count: number; onClear: () 
 
 type RangeAnswer = { items: ContentItem[]; truncated?: boolean };
 const pickRange = (d: RangeAnswer) => d;
-// Lines of cards a cell shows before its first measurement (a 94 px cell); ResizeObserver replaces it at once.
-const CELL_LINES = 3;
+// A day cell's size before its first measurement (three one-line cards); ResizeObserver replaces it at once.
+const CELL_SIZE = { h: 94, w: 0 };
 /** The month's cards mark their status with a coloured edge: this says what each colour is, since colour alone is not a label. */
 const LEGEND: readonly (readonly [Tone, string])[] = [["info", "Awaiting approval · Scheduled"], ["good", "Approved · Published"], ["warn", "Needs a look"], ["bad", "Blocked · Rejected"], ["muted", "To write"]];
 const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
-/** The platform part of a channel's label ("Instagram carousel" is "Instagram"), for a card wide enough to name it. */
-const platformOf = (channel: string) => (CHANNEL_LABEL[channel] ?? channel).split(" ")[0];
+/**
+ * A small glyph per channel for the month's cards; the card's tooltip and name say the channel in words. Lucide has no
+ * brand marks (and the app had no channel icons), so Instagram's formats show their shape and the others a stand-in.
+ */
+const CHANNEL_ICON: Record<string, LucideIcon> = {
+  INSTAGRAM_POST: ImageIcon,
+  INSTAGRAM_CAROUSEL: GalleryHorizontal,
+  INSTAGRAM_REEL: Clapperboard,
+  INSTAGRAM_STORY: CircleDashed,
+  FACEBOOK_POST: ThumbsUp,
+  PINTEREST_PIN: Pin,
+  THREADS_POST: AtSign,
+  LINKEDIN_POST: BriefcaseBusiness,
+  X_POST: Hash,
+};
 
 /**
- * One post as a card on one 20 px line (CARD_STEP in calendar-month.ts counts on that height): a coloured left edge for
- * its status, the time once the cell is 96 px wide (narrower, it left the title a few letters), the title (cut short with
- * an ellipsis), and the platform once the cell is 200 px wide. It opens
- * the post. It is not a tab stop: the day's cell is, and its popover lists the same posts for the keyboard. The full
- * time, title, channel and status are its tooltip and its accessible name.
+ * One post as a card with a coloured left edge for its status. `stacked` (a roomy day, see dayCards): two lines in 34 px
+ * (STACKED_STEP in calendar-month.ts counts on that height), the channel's icon and the time small and muted, then the
+ * title. Otherwise one 20 px line (CARD_STEP): the icon and the title, the time left to the tooltip, so the title keeps
+ * the width. The title is cut short with an ellipsis; the day's popover lists it in full. It opens the post. It is not
+ * a tab stop: the day's cell is, and its popover lists the same posts for the keyboard. The full time, title, channel
+ * and status are its tooltip and its accessible name.
  */
-function PostCard({ item, onOpen }: { item: ContentItem; onOpen: (id: string) => void }) {
+function PostCard({ item, onOpen, stacked = false }: { item: ContentItem; onOpen: (id: string) => void; stacked?: boolean }) {
   const time = item.scheduledFor ? shortTime(item.scheduledFor) : null;
   const channel = CHANNEL_LABEL[item.channel] ?? item.channel;
+  const Icon = CHANNEL_ICON[item.channel] ?? FileText;
   const status = statusText(item); // once per card: the tooltip and the accessible name both use it
   const about = `${time ? `${time} · ` : ""}${item.title} · ${channel} · ${status}`;
   return (
@@ -686,12 +700,21 @@ function PostCard({ item, onOpen }: { item: ContentItem; onOpen: (id: string) =>
       onClick={() => onOpen(item.id)}
       title={about}
       aria-label={about}
-      className="pointer-events-auto relative flex h-5 w-full min-w-0 shrink-0 items-center gap-1.5 overflow-hidden rounded border border-border bg-card pl-2 pr-1.5 text-left text-xs leading-4 shadow-[0_1px_1px_0_color-mix(in_srgb,var(--foreground)_4%,transparent)] transition-colors hover:border-foreground/25 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={cn(
+        "pointer-events-auto relative flex w-full min-w-0 shrink-0 overflow-hidden rounded border border-border bg-card pl-2 pr-1.5 text-left text-xs leading-4 shadow-[0_1px_1px_0_color-mix(in_srgb,var(--foreground)_4%,transparent)] transition-colors hover:border-foreground/25 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        stacked ? "h-[34px] flex-col justify-center" : "h-5 items-center gap-1.5",
+      )}
     >
       <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", TONE_DOT[toneOf(item.publishIssue ?? item.status)])} />
-      {time && <span className="hidden shrink-0 tabular-nums text-muted-foreground @min-[96px]/cell:inline">{time}</span>}
-      <span className="min-w-0 flex-1 truncate font-medium text-foreground">{item.title}</span>
-      <span className="hidden shrink-0 text-muted-foreground @min-[200px]/cell:inline">{platformOf(item.channel)}</span>
+      {stacked ? (
+        <span aria-hidden className="flex min-w-0 items-center gap-1 text-xs leading-3 text-muted-foreground">
+          <Icon className="size-3 shrink-0" />
+          {time && <span className="truncate tabular-nums">{time}</span>}
+        </span>
+      ) : (
+        <Icon aria-hidden className="size-3 shrink-0 text-muted-foreground" />
+      )}
+      <span data-card-title className="min-w-0 truncate font-medium text-foreground">{item.title}</span>
     </button>
   );
 }
@@ -845,9 +868,9 @@ function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string
  * post. Under that width days show status dots and a tapped day lists its posts under the grid (an agenda), as phone
  * calendars do, since a popover over a 45 px cell covers the grid it belongs to.
  * A CSS grid with ARIA table roles, not a <table>: table rows size to their content and won't share a height.
- * ponytail: no drag to reschedule, no week view; New post from an empty day can't carry the day (see ContentPanel).
+ * ponytail: no drag to reschedule, no week view.
  */
-function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; onItems: (items: ContentItem[]) => void; onNewPost?: () => void }) {
+function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; onItems: (items: ContentItem[]) => void; onNewPost?: (day: string) => void }) {
   // The day whose popover shows (its key) and where; `open` is false while it closes.
   const [pop, setPop] = useState<{ key: string; open: boolean; at: PopoverAt } | null>(null);
   // The day last focused: it holds the grid's one tab stop.
@@ -883,17 +906,17 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  // How many lines of cards a day holds, from a day cell's measured height (every row is the same height). Watches the
-  // weeks' box, which is there once the month has loaded.
+  // A day cell's measured size (every cell is the same), which sets how many cards a day shows and in which form
+  // (dayCards). Watches the weeks' box, which is there once the month has loaded.
   const weeksBox = useRef<HTMLDivElement>(null);
-  const [lines, setLines] = useState(CELL_LINES);
+  const [cellSize, setCellSize] = useState(CELL_SIZE);
   const loaded = !!data;
   useEffect(() => {
     const el = weeksBox.current;
     if (!el) return;
     const ro = new ResizeObserver(() => {
       const cell = el.querySelector<HTMLElement>("[role=cell]");
-      if (cell) setLines(cardsThatFit(cell.offsetHeight));
+      if (cell) setCellSize((s) => (s.h === cell.offsetHeight && s.w === cell.offsetWidth ? s : { h: cell.offsetHeight, w: cell.offsetWidth }));
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -985,7 +1008,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
                   const isPicked = narrow && agendaKey === k;
                   const isToday = k === today;
                   const outside = d.getMonth() !== month.m;
-                  const fit = cellFit(posts.length, lines);
+                  const fit = dayCards(posts.length, cellSize.h, cellSize.w);
                   return (
                     <div
                       key={k}
@@ -1037,7 +1060,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
                             </span>
                           ) : (
                             <>
-                              {posts.slice(0, fit.shown).map((i) => <PostCard key={i.id} item={i} onOpen={onOpen} />)}
+                              {posts.slice(0, fit.shown).map((i) => <PostCard key={i.id} item={i} onOpen={onOpen} stacked={fit.stacked} />)}
                               {fit.more > 0 && (
                                 // Opens the day's popover, which lists every post: no post is ever out of reach.
                                 <button
@@ -1067,7 +1090,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
             <DayPosts posts={agendaPosts} onPick={onOpen} />
             {!agendaPosts.length && onNewPost && (
               <div className="px-2">
-                <Button size="sm" onClick={onNewPost}>
+                <Button size="sm" onClick={() => onNewPost(agendaKey)}>
                   <Plus aria-hidden="true" />
                   New post
                 </Button>
@@ -1086,7 +1109,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems, 
         </ul>
       </LoadGate>
       {!narrow && pop && popDay && (
-        <DayPopover key={pop.key} label={dayLabel(popDay)} posts={byDay.get(pop.key) ?? []} open={pop.open} at={pop.at} cell={popCell} onClose={closeDay} onExited={popExited} onOpen={onOpen} onNewPost={onNewPost} />
+        <DayPopover key={pop.key} label={dayLabel(popDay)} posts={byDay.get(pop.key) ?? []} open={pop.open} at={pop.at} cell={popCell} onClose={closeDay} onExited={popExited} onOpen={onOpen} onNewPost={onNewPost && (() => onNewPost(pop.key))} />
       )}
     </div>
   );

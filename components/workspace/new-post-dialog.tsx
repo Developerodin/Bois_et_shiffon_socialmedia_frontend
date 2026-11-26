@@ -7,9 +7,11 @@ import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { selectClass } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { Textarea } from "@/components/ui/textarea";
 import { workspaceIdOf } from "@/lib/plan-credits";
+import { nowLocalInput } from "@/lib/time";
 import { CONTENT_GOALS, CONTENT_GOAL_LABELS, type ContentGoal, type LibraryPhoto } from "@/shared";
 
 type Channel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL";
@@ -18,8 +20,10 @@ const DIRECTION_MAX = 500;
 /**
  * "New post" for people who can create content: a product photo, a goal and a note, then the Creator drafts it and it opens.
  * With `open`/`onOpenChange` (the top bar's quick create) the caller opens it and no "New post" button shows.
+ * `at` (a datetime-local value; the calendar's empty day) adds a date and time field set to it, and the post is made on
+ * that date; cleared, or without `at`, the post is made undated as before.
  */
-export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOpenChange }: { base: string; canCreate: boolean; onCreated: (id: string) => void; open?: boolean; onOpenChange?: (o: boolean) => void }) {
+export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOpenChange, at }: { base: string; canCreate: boolean; onCreated: (id: string) => void; open?: boolean; onOpenChange?: (o: boolean) => void; at?: string }) {
   const workspaceId = workspaceIdOf(base);
   const brandId = base.split("/brands/")[1];
   const [open, setOpen] = useState(false);
@@ -28,6 +32,7 @@ export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOp
   const [goal, setGoal] = useState<ContentGoal>("newArrival");
   const [photo, setPhoto] = useState<LibraryPhoto | null>(null);
   const [direction, setDirection] = useState("");
+  const [when, setWhen] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   // One id per opening: a double click or a retry after a dropped answer returns the same post instead of a second one.
@@ -40,13 +45,15 @@ export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOp
     setGoal("newArrival");
     setPhoto(null);
     setDirection("");
+    setWhen(at ?? "");
     setError("");
     setRequestId(crypto.randomUUID());
   }
   // Opened by the caller: start fresh, as the button does.
   useEffect(() => {
     if (controlled && openProp) reset();
-  }, [controlled, openProp]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset reads `at`, listed; it is remade each render
+  }, [controlled, openProp, at]);
 
   if (!canCreate || !workspaceId || !brandId) return null;
 
@@ -63,7 +70,7 @@ export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOp
     try {
       const { id } = await request<{ id: string }>(`${base}/content`, {
         method: "POST",
-        body: JSON.stringify({ channel, goal, product: { title: photo.title.trim() || "Product", photoKey: photo.key }, ...(direction.trim() ? { direction: direction.trim() } : {}), requestId }),
+        body: JSON.stringify({ channel, goal, product: { title: photo.title.trim() || "Product", photoKey: photo.key }, ...(direction.trim() ? { direction: direction.trim() } : {}), ...(at && when ? { scheduledFor: new Date(when).toISOString() } : {}), requestId }),
       });
       change(false);
       onCreated(id);
@@ -114,6 +121,12 @@ export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOp
               <Textarea id="new-post-direction" value={direction} maxLength={DIRECTION_MAX} onChange={(e) => setDirection(e.target.value)} placeholder="Anything the writer should know" aria-describedby="direction-count" />
               <span id="direction-count" className="self-end text-xs font-normal text-muted-foreground">{direction.length}/{DIRECTION_MAX}</span>
             </div>
+            {at !== undefined && (
+              <label className="flex flex-col gap-1.5 text-sm font-medium">
+                Date and time
+                <Input type="datetime-local" value={when} min={nowLocalInput()} onChange={(e) => setWhen(e.target.value)} className="h-11 w-fit" />
+              </label>
+            )}
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
             <p className="text-sm text-muted-foreground">Cost: included in your plan</p>
           </div>
