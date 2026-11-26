@@ -232,8 +232,9 @@ export function withoutOpenItem(search: string, pathname: string): string | null
   if (pathname === "/competitors") return namesItem(search) ? viewToSearch({ kind: "home" }, search, pathname) : null;
   if (pathname !== "/" && pathname !== "/calendar") return null;
   const q = new URLSearchParams(search);
-  const hadCampaign = q.has("cf_campaignId");
-  q.delete("cf_campaignId");
+  // Only /calendar reads the cf_ filters now; on the Overview they are left as they are.
+  const hadCampaign = pathname === "/calendar" && q.has("cf_campaignId");
+  if (hadCampaign) q.delete("cf_campaignId");
   if (!namesItem(search) && !hadCampaign) return null;
   return viewToSearch({ kind: "home" }, q.toString(), pathname);
 }

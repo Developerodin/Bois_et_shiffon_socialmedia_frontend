@@ -93,9 +93,9 @@ describe("brand switch", () => {
     expect(withoutOpenItem("?post=p1&panel=content", "/")).toBe("?panel=content");
     expect(withoutOpenItem("?agent=seo&runId=r1", "/")).toBe("/");
   });
-  it("drops the old brand's campaign filter, open item or not, and keeps other filters", () => {
-    expect(withoutOpenItem("?cf_campaignId=c1&cf_status=draft", "/")).toBe("?cf_status=draft");
-    expect(withoutOpenItem("?post=p1&cf_campaignId=c1", "/")).toBe("/");
+  it("leaves cf_ params on the Overview alone, since only the Content calendar page reads them", () => {
+    expect(withoutOpenItem("?cf_campaignId=c1&cf_status=draft", "/")).toBeNull();
+    expect(withoutOpenItem("?post=p1&cf_campaignId=c1", "/")).toBe("?cf_campaignId=c1");
   });
   it("drops the open post and the old brand's campaign from the Content calendar page, keeping other filters", () => {
     expect(withoutOpenItem("?cf_need=week&post=p1", "/calendar")).toBe("?cf_need=week");
@@ -163,6 +163,9 @@ describe("panel in the peek (?peek=)", () => {
     expect(calendarRedirect({ panel: "content", post: "../x?y" })).toBe("/calendar");
     expect(calendarRedirect({ panel: "content", post: ["p1", "p2"] })).toBe("/calendar");
     expect(calendarRedirect({ panel: "content", cf_need: "soon", cf_owner: ["me"], doc: "x" })).toBe("/calendar");
+    // A status that is only an object property is not a status group.
+    expect(calendarRedirect({ panel: "content", cf_status: "toString" })).toBe("/calendar");
+    expect(calendarRedirect({ panel: "content", cf_status: "__proto__", cf_need: "week" })).toBe("/calendar?cf_need=week");
     // Not an old calendar link: a bare post stays in the Overview's peek.
     expect(calendarRedirect({ post: "p1" })).toBeNull();
     expect(calendarRedirect({ panel: "competitors" })).toBeNull();
