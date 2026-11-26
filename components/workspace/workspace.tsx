@@ -72,11 +72,11 @@ type Report = { score: number; summary: string; findings: Finding[]; metrics: Re
 
 /** Agents shown as tiles. Built ones come from the API; planned ones are locked (Okara shows locked tiles too). */
 const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
-  research: { icon: ScanSearch, tint: "text-primary" },
-  scout: { icon: Compass, tint: "text-primary" },
-  planner: { icon: CalendarDays, tint: "text-primary" },
-  brief: { icon: FileText, tint: "text-primary" },
-  creator: { icon: PenLine, tint: "text-primary" },
+  research: { icon: ScanSearch, tint: "text-primary-strong" },
+  scout: { icon: Compass, tint: "text-primary-strong" },
+  planner: { icon: CalendarDays, tint: "text-primary-strong" },
+  brief: { icon: FileText, tint: "text-primary-strong" },
+  creator: { icon: PenLine, tint: "text-primary-strong" },
   quality: { icon: ShieldCheck, tint: "text-success" },
   analyst: { icon: LineChart, tint: "text-primary-strong" },
   seo: { icon: Gauge, tint: "text-success" },
@@ -1109,7 +1109,7 @@ function Home({
         ) : (
         <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-x-3 gap-y-5">
           {built.map((a) => {
-            const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
+            const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary-strong" };
             const running = a.lastRun?.status === "RUNNING" || a.lastRun?.status === "QUEUED";
             const state = running ? "running" : a.lastRun?.status === "FAILED" && !nothingToDo(a) ? "failed" : "ready";
             // SEO and GEO show their latest score on the tile (no need to open them); running or failed still says so.
@@ -1611,7 +1611,7 @@ function AgentsFeed({
       )}
       {agents && built.length === 0 && <li className="px-4 py-3 text-sm text-muted-foreground">No agents are set up for this business yet.</li>}
       {built.map((a) => {
-        const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary" };
+        const meta = AGENT_META[a.key] ?? { icon: ScanSearch, tint: "text-primary-strong" };
         const Icon = meta.icon;
         const running = a.lastRun?.status === "RUNNING" || a.lastRun?.status === "QUEUED";
         return (
