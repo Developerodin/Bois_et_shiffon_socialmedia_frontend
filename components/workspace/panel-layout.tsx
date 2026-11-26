@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { ChevronDown, ChevronRight, GripVertical, LayoutPanelLeft, MoreHorizontal, RotateCcw, X } from "lucide-react";
 import { SHELL_STROKE, tool } from "@/components/shell/icon";
@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
+import { LG, useLg } from "@/lib/media-query";
 import { cn } from "@/lib/utils";
 import { arrow, drag, KEY_STEP, split } from "@/components/workspace/resize";
 
@@ -36,16 +37,9 @@ export type Preset<Id extends string> = { name: string; description: string; lay
 const MIN_PX = 240;
 // A panel dragged smaller keeps its header (44 px), a 120 px body and its borders.
 const MIN_PANEL_PX = 166;
-// Matches Tailwind's lg breakpoint. Only the layout on screen renders panels: rendering both (one hidden
+// The board from Tailwind's lg breakpoint (LG). Only the layout on screen renders panels: rendering both (one hidden
 // by CSS) would mount every panel twice, double the polling, duplicate element ids and split edit state.
 // A panel shown in the side preview (`previewing`) is left out of the board while it's there, so it isn't mounted twice.
-const WIDE = "(min-width: 1024px)";
-const subscribeWide = (cb: () => void) => {
-  const m = window.matchMedia(WIDE);
-  m.addEventListener("change", cb);
-  return () => m.removeEventListener("change", cb);
-};
-const useWide = () => useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE).matches, () => true);
 let seq = 0;
 const colId = () => `c${Date.now().toString(36)}${seq++}`;
 
@@ -105,7 +99,7 @@ export function PanelLayout<Id extends string>({
 }) {
   const ids = panels.map((p) => p.id);
   const [layout, setLayout] = useState<Layout<Id>>(presets[0].layout);
-  const wide = useWide();
+  const wide = useLg();
   const [mobilePanel, setMobilePanel] = useState<Id | null>(null);
   const [dropHint, setDropHint] = useState<string | null>(null);
   const [hintSeen, setHintSeen] = useState(true);
@@ -318,7 +312,7 @@ export function PanelLayout<Id extends string>({
 
   if (revealRef)
     revealRef.current = (id: Id) => {
-      if (!window.matchMedia(WIDE).matches) return setMobilePanel(id);
+      if (!window.matchMedia(LG).matches) return setMobilePanel(id);
       // The panel is in the preview, which the caller is closing: it is back on the board after the next render.
       if (id === previewing) {
         revealAfter.current = id;

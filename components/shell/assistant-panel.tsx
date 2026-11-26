@@ -23,7 +23,8 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { ASSISTANT_TOGGLE_ID, useAssistant, useWide } from "@/components/shell/assistant-state";
+import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
+import { useXl } from "@/lib/media-query";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { ChatPane, type ChatSlots } from "@/components/workspace/chat-pane";
 import { assistantDocks, navFor } from "@/lib/nav";
@@ -97,7 +98,7 @@ type Props = { workspaceId: string; brandId: string | null; brandName: string | 
  * lands on the page behind the scrim (or, on a phone, behind the full-screen sheet).
  */
 export function AssistantPanel(p: Props) {
-  const wide = useWide();
+  const wide = useXl();
   const pathname = usePathname();
   const docked = wide && assistantDocks(pathname);
   const { open, setOpen } = useAssistant();
