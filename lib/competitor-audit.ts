@@ -55,7 +55,7 @@ export type AuditRowInput = AuditFailure & { aiMentions: number | null; auditRun
 export type RowStatus =
   | { kind: "running"; text: string }
   | { kind: "blocked"; text: string }
-  | { kind: "scores"; partial: boolean; stale: boolean; note: { text: string; soft: boolean } | null }
+  | { kind: "scores"; partial: boolean; note: { text: string; soft: boolean } | null }
   | { kind: "failed"; text: string; soft: boolean }
   | { kind: "none"; text: string };
 
@@ -63,7 +63,7 @@ export function rowStatus(c: AuditRowInput): RowStatus {
   if (c.auditRunning) return { kind: "running", text: "auditing…" };
   if (c.auditBlocked) return { kind: "blocked", text: c.auditBlockedUntil ? `blocked · try after ${dayDate(c.auditBlockedUntil)}` : "blocked" };
   const note = lastFailureNote(c);
-  if (c.audit) return { kind: "scores", partial: c.audit.partial, stale: c.audit.stale, note };
+  if (c.audit) return { kind: "scores", partial: c.audit.partial, note };
   if (note) return { kind: "failed", ...note };
   return { kind: "none", text: "not audited yet" };
 }
@@ -71,16 +71,18 @@ export function rowStatus(c: AuditRowInput): RowStatus {
 /**
  * Audit all's plan. The candidates need an audit: never audited or stale (the server's freshness), not blocked, not
  * already running. The most named by AI go first, then never-audited before stale, then list order. The balance pays for
- * the first `affordable` of them; the rest wait for credits. The server starts them in this order and stops when credits
- * run out, so a concurrent spend only shortens the list.
+ * the first `affordable` of them; the rest wait for credits. A workspace with `unlimited` credits is never charged, so
+ * nothing waits. The server starts them in this order and stops when credits run out, so a concurrent spend only
+ * shortens the list. Keep the filter in step with auditAllCompetitors' skips (server/services/competitor-audits.ts),
+ * which re-checks fresh, blocked and running before charging.
  */
-export function planAuditAll<T extends AuditRowInput & { id: string }>(competitors: T[], credits: { balance: number; auditCost: number }) {
+export function planAuditAll<T extends AuditRowInput & { id: string }>(competitors: T[], credits: { balance: number; auditCost: number; unlimited?: boolean }) {
   const candidates = competitors
     .map((c, i) => ({ c, i }))
     .filter(({ c }) => !c.auditRunning && !c.auditBlocked && (!c.audit || c.audit.stale))
     .sort((a, b) => (b.c.aiMentions ?? 0) - (a.c.aiMentions ?? 0) || Number(!!a.c.audit) - Number(!!b.c.audit) || a.i - b.i)
     .map(({ c }) => c);
-  const k = credits.auditCost > 0 ? Math.min(candidates.length, Math.max(0, Math.floor(credits.balance / credits.auditCost))) : candidates.length;
+  const k = credits.unlimited || credits.auditCost <= 0 ? candidates.length : Math.min(candidates.length, Math.max(0, Math.floor(credits.balance / credits.auditCost)));
   return { candidates, affordable: candidates.slice(0, k), waiting: candidates.slice(k), cost: credits.auditCost };
 }
 
@@ -89,10 +91,14 @@ export function auditAllSummary(r: { started: string[]; skipped: { reason: strin
   const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
   const credits = r.skipped.filter((s) => s.reason === "credits").length;
   const limit = r.skipped.filter((s) => s.reason === "limit").length;
-  const other = r.skipped.length - credits - limit;
+  const disabled = r.skipped.filter((s) => s.reason === "disabled").length;
+  const failed = r.skipped.filter((s) => s.reason === "failed").length;
+  const other = r.skipped.length - credits - limit - disabled - failed;
   const parts = [`Started ${n(r.started.length, "audit", "audits")}`];
   if (credits) parts.push(`${n(credits, "waits", "wait")} for credits`);
   if (limit) parts.push(`${n(limit, "waits", "wait")} for tomorrow (daily run limit)`);
+  if (disabled) parts.push(`${n(disabled, "waits", "wait")}: site audits are turned off for this business`);
+  if (failed) parts.push(`${failed} couldn't start`);
   if (other) parts.push(`${n(other, "was", "were")} already running, fresh or unavailable`);
   return `${parts.join("; ")}.`;
 }

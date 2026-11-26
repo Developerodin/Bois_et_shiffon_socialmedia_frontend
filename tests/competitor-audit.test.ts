@@ -68,7 +68,7 @@ describe("rowStatus", () => {
   });
 
   it("shows scores, flagging a partial audit and keeping a later failure as a note", () => {
-    expect(rowStatus(row("a", { audit: { stale: false, partial: true } }))).toEqual({ kind: "scores", partial: true, stale: false, note: null });
+    expect(rowStatus(row("a", { audit: { stale: false, partial: true } }))).toEqual({ kind: "scores", partial: true, note: null });
     expect(rowStatus(row("a", { audit: stale, auditError: "Could not read" }))).toMatchObject({ kind: "scores", note: { text: "Last audit failed: Could not read", soft: false } });
   });
 
@@ -105,6 +105,12 @@ describe("planAuditAll", () => {
     expect(plan.cost).toBe(10);
   });
 
+  it("doesn't cap a workspace with unlimited credits at its balance", () => {
+    const plan = planAuditAll(list, { balance: 0, auditCost: 10, unlimited: true });
+    expect(ids(plan.affordable)).toEqual(ids(plan.candidates));
+    expect(plan.waiting).toEqual([]);
+  });
+
   it("starts nothing without credits for one audit", () => {
     expect(planAuditAll(list, { balance: 9, auditCost: 10 }).affordable).toEqual([]);
     expect(planAuditAll(list, { balance: -5, auditCost: 10 }).affordable).toEqual([]);
@@ -116,6 +122,8 @@ describe("auditAllSummary", () => {
     const credits = Array.from({ length: 7 }, (_, i) => ({ id: String(i), reason: "credits" }));
     expect(auditAllSummary({ started: ["a"], skipped: credits })).toBe("Started 1 audit; 7 wait for credits.");
     expect(auditAllSummary({ started: ["a", "b"], skipped: [{ reason: "fresh" }] })).toBe("Started 2 audits; 1 was already running, fresh or unavailable.");
+    expect(auditAllSummary({ started: ["a"], skipped: [{ reason: "failed" }, { reason: "failed" }, { reason: "running" }] })).toBe("Started 1 audit; 2 couldn't start; 1 was already running, fresh or unavailable.");
+    expect(auditAllSummary({ started: [], skipped: [{ reason: "disabled" }, { reason: "disabled" }] })).toBe("Started 0 audits; 2 wait: site audits are turned off for this business.");
     expect(auditAllSummary({ started: [], skipped: [{ reason: "credits" }, { reason: "limit" }] })).toBe("Started 0 audits; 1 waits for credits; 1 waits for tomorrow (daily run limit).");
   });
 });

@@ -45,7 +45,8 @@ type Competitor = {
   auditBlockedAt: string | null;
   audit: Audit | null;
 };
-type Data = { credits: { balance: number; auditCost: number }; competitors: Competitor[] };
+/** `unlimited`: the workspace is never charged, so the balance doesn't limit audits. */
+type Data = { credits: { balance: number; auditCost: number; unlimited: boolean }; competitors: Competitor[] };
 
 const checked = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 
@@ -79,7 +80,7 @@ function FreshAudit({ base, c, credits, onDone, compact }: { base: string; c: Co
     );
   // Another try would fail the same way and refund again; the row says when it can be tried (LastFailure).
   if (c.auditBlocked) return null;
-  const short = credits.balance < credits.auditCost;
+  const short = !credits.unlimited && credits.balance < credits.auditCost;
   const label = `${c.audit ? "Fresh audit" : "Audit"} · ${credits.auditCost} credits`;
   async function run() {
     setBusy(true);
@@ -141,7 +142,7 @@ const SCORES = [
  * The row's columns from 48rem of panel width (a container query, since the assistant panel and the peek change the
  * room): competitor | AI mentions | four scores | checked | actions. Narrower, a row is a two-line card.
  */
-const COLS = "@3xl:grid-cols-[minmax(0,1fr)_3.5rem_repeat(4,4.25rem)_6.5rem_6rem]";
+const COLS = "@3xl:grid-cols-[minmax(0,1fr)_3.5rem_repeat(4,4.25rem)_7.5rem_6rem]";
 
 /** One score as a chip: a dot in the score's colour plus the number; the label shows on the phone card, else in the header. */
 function ScoreChip({ value, short, long }: { value: number | null; short: string; long: string }) {
@@ -204,7 +205,9 @@ function AuditAll({ base, data, onDone }: { base: string; data: Data; onDone: ()
           <DialogDescription>
             {n === 0
               ? "Every competitor has a fresh audit, is being audited, or blocks automated readers for now."
-              : `Audit ${sites(n)} · ${n} × ${plan.cost} credits (you have ${data.credits.balance}).`}
+              : data.credits.unlimited
+                ? `Audit ${sites(n)}. This workspace isn't charged for audits.`
+                : `Audit ${sites(n)} · ${n} × ${plan.cost} credits (you have ${data.credits.balance}).`}
           </DialogDescription>
         </DialogHeader>
         {n > 0 && (
@@ -389,7 +392,12 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
                       <span className={cn("@3xl:col-start-7 @3xl:row-start-1", c.audit.stale && "text-warning")}>
                         <span className="@3xl:sr-only">Checked </span>
                         {checked(c.audit.createdAt)}
-                        {c.audit.stale && <span className="sr-only"> (may be out of date)</span>}
+                        {c.audit.stale && (
+                          <>
+                            <span aria-hidden="true"> · old</span>
+                            <span className="sr-only"> (may be out of date)</span>
+                          </>
+                        )}
                       </span>
                     )}
                   </div>
