@@ -635,8 +635,7 @@ function FiltersMenu({ count, onClear, children }: { count: number; onClear: () 
 type RangeAnswer = { items: ContentItem[]; truncated?: boolean };
 const pickRange = (d: RangeAnswer) => d;
 // A cell shows up to this many lines of posts: all of them, or one fewer and "+N more".
-// Two lines a day keeps the month about half the height of a three-line cell (owner): a busier day shows "+N more".
-const CELL_LINES = 2;
+const CELL_LINES = 3;
 /** The month's chips are coloured by status: this says what each colour is, since colour alone is not a label. */
 const LEGEND: readonly (readonly [Tone, string])[] = [["info", "Awaiting approval · Scheduled"], ["good", "Approved · Published"], ["warn", "Needs a look"], ["bad", "Blocked · Rejected"], ["muted", "To write"]];
 const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
@@ -909,7 +908,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems }
                       key={k}
                       className={cn(
                         // A cell's height is a minimum: the row still grows to its busiest day, and the button fills the cell.
-                        "h-8 rounded-md border border-border p-0 align-top @max-[640px]/cal:h-11 @max-[640px]/cal:border-transparent",
+                        "h-16 rounded-lg border border-border p-0 align-top @max-[640px]/cal:h-11 @max-[640px]/cal:border-transparent",
                         // Days of the next or last month are muted; in the month, weekends are a shade darker.
                         outside ? "bg-muted/50" : d.getDay() % 6 === 0 && "bg-muted/25",
                         (isOpen || isPicked) && "bg-primary/10",
@@ -926,7 +925,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems }
                         {...(narrow ? { "aria-pressed": isPicked, "aria-controls": agendaId } : { "aria-haspopup": "dialog" as const, "aria-expanded": isOpen })}
                         onFocus={() => setCursor(k)}
                         onClick={(e) => (narrow ? setPicked(k) : isOpen ? closeDay() : openDay(k, e.currentTarget))}
-                        className="@container/cell flex h-full min-h-8 w-full flex-col items-stretch gap-0.5 rounded-md px-1 py-0.5 text-left @min-[640px]/cal:flex-row @min-[640px]/cal:items-start @min-[640px]/cal:gap-1 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @max-[640px]/cal:min-h-11 @max-[640px]/cal:items-center"
+                        className="@container/cell flex h-full min-h-16 w-full flex-col items-stretch gap-0.5 rounded-lg p-1 text-left hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring @max-[640px]/cal:min-h-11 @max-[640px]/cal:items-center"
                       >
                         <span
                           aria-hidden
@@ -941,7 +940,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, onItems }
                         {posts.length > 0 && (
                           <>
                             {/* Wide panel: the posts as chips, then "+N more"; the cell's popover lists them all. */}
-                            <span aria-hidden className="hidden min-w-0 flex-1 flex-col gap-0.5 @min-[640px]/cal:flex">
+                            <span aria-hidden className="hidden flex-col gap-0.5 @min-[640px]/cal:flex">
                               {posts.slice(0, fit.shown).map((i) => <PostChip key={i.id} item={i} />)}
                               {fit.more > 0 && <span className="px-1 font-medium leading-4 text-primary">+{fit.more} more</span>}
                             </span>
