@@ -33,9 +33,9 @@ export function pollEvery(sources: DataSourcesDto["sources"]): number | null {
 const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "Search", posts: "Posts", sales: "Sales", ads: "Ads" };
 
 /**
- * The Performance page with its tabs: the SEO & GEO reports first, then the data tabs the server page let through
- * (flag + read permission). The tab and the date range live in the URL (?tab, ?from&to; replace, not push) so a reload
- * or a shared link lands on the same view. Prints as the open tab alone (globals.css, data-print-root).
+ * The Growth reports page (/performance) with its tabs: the SEO & GEO reports first, then the data tabs the server
+ * page let through (flag + read permission). The tab and the date range live in the URL (?tab, ?from&to; replace, not
+ * push) so a reload or a shared link lands on the same view. Prints as the open tab alone (globals.css, data-print-root).
  */
 export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialRange, canManage, canSetBudgets, reports }: {
   workspaceId: string;

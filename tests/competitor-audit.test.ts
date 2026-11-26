@@ -118,12 +118,11 @@ describe("planAuditAll", () => {
 });
 
 describe("auditAllSummary", () => {
-  it("says what started and what waits", () => {
+  it("says what is starting and what waits", () => {
     const credits = Array.from({ length: 7 }, (_, i) => ({ id: String(i), reason: "credits" }));
-    expect(auditAllSummary({ started: ["a"], skipped: credits })).toBe("Started 1 audit; 7 wait for credits.");
-    expect(auditAllSummary({ started: ["a", "b"], skipped: [{ reason: "fresh" }] })).toBe("Started 2 audits; 1 was already running, fresh or unavailable.");
-    expect(auditAllSummary({ started: ["a"], skipped: [{ reason: "failed" }, { reason: "failed" }, { reason: "running" }] })).toBe("Started 1 audit; 2 couldn't start; 1 was already running, fresh or unavailable.");
-    expect(auditAllSummary({ started: [], skipped: [{ reason: "disabled" }, { reason: "disabled" }] })).toBe("Started 0 audits; 2 wait: site audits are turned off for this business.");
-    expect(auditAllSummary({ started: [], skipped: [{ reason: "credits" }, { reason: "limit" }] })).toBe("Started 0 audits; 1 waits for credits; 1 waits for tomorrow (daily run limit).");
+    expect(auditAllSummary({ queued: ["a", "b", "c"], skipped: [] })).toBe("Starting 3 audits…");
+    expect(auditAllSummary({ queued: ["a"], skipped: credits })).toBe("Starting 1 audit; 7 wait for credits.");
+    expect(auditAllSummary({ queued: ["a"], skipped: [{ reason: "not-tracked" }] })).toBe("Starting 1 audit; 1 is no longer tracked.");
+    expect(auditAllSummary({ queued: [], skipped: [{ reason: "credits" }] })).toBe("Starting 0 audits; 1 waits for credits.");
   });
 });

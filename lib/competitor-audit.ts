@@ -1,8 +1,9 @@
 import { readable } from "@/lib/agent-message";
 import { dayDate } from "@/lib/time";
+import type { CompetitorApproach } from "@/shared";
 
-/** What a competitor audit says about the company's marketing. */
-export type Approach = { positioning: string; audience: string; products: string[]; priceSignals: string; contentThemes: string[]; strengths: string[]; weaknesses: string[] };
+/** What a competitor audit says about the company's marketing (the server's shape, shared/competitors.ts). */
+export type Approach = CompetitorApproach;
 
 /** Shown on a partial audit: the site refused our crawler, so only PageSpeed and search results fed it. */
 export const PARTIAL_AUDIT_NOTE =
@@ -86,19 +87,16 @@ export function planAuditAll<T extends AuditRowInput & { id: string }>(competito
   return { candidates, affordable: candidates.slice(0, k), waiting: candidates.slice(k), cost: credits.auditCost };
 }
 
-/** What the page says after Audit all: "Started 1 audit; 7 wait for credits." */
-export function auditAllSummary(r: { started: string[]; skipped: { reason: string }[] }) {
+/**
+ * What the page says once Audit all is queued: "Starting 3 audits; 7 wait for credits." The job on the server starts
+ * them and may still skip one (already running, out of credits by then); the list shows each as it starts.
+ */
+export function auditAllSummary(r: { queued: string[]; skipped: { reason: string }[] }) {
   const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
   const credits = r.skipped.filter((s) => s.reason === "credits").length;
-  const limit = r.skipped.filter((s) => s.reason === "limit").length;
-  const disabled = r.skipped.filter((s) => s.reason === "disabled").length;
-  const failed = r.skipped.filter((s) => s.reason === "failed").length;
-  const other = r.skipped.length - credits - limit - disabled - failed;
-  const parts = [`Started ${n(r.started.length, "audit", "audits")}`];
+  const other = r.skipped.length - credits;
+  const parts = [`Starting ${n(r.queued.length, "audit", "audits")}`];
   if (credits) parts.push(`${n(credits, "waits", "wait")} for credits`);
-  if (limit) parts.push(`${n(limit, "waits", "wait")} for tomorrow (daily run limit)`);
-  if (disabled) parts.push(`${n(disabled, "waits", "wait")}: site audits are turned off for this business`);
-  if (failed) parts.push(`${failed} couldn't start`);
-  if (other) parts.push(`${n(other, "was", "were")} already running, fresh or unavailable`);
-  return `${parts.join("; ")}.`;
+  if (other) parts.push(`${n(other, "is", "are")} no longer tracked`);
+  return parts.length === 1 && r.queued.length ? `${parts[0]}…` : `${parts.join("; ")}.`;
 }

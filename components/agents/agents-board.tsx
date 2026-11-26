@@ -1,15 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback } from "react";
 import { AgentLog } from "@/components/agents/agent-log";
 import { AgentTile } from "@/components/agents/agent-tile";
 import { fetchAgents, type AgentSummary } from "@/components/agents/api";
 import { ServiceUnavailable } from "@/components/agents/service-unavailable";
+import { useAgentsPoll } from "@/components/agents/use-agents-poll";
 import { PageHeader } from "@/components/ui/page-header";
-
-// Agents list refresh cadence. Polling is fine at Slice 0 scale (one tab per
-// manager, a handful of agents); move to SSE if many viewers per brand appear.
-const AGENTS_POLL_MS = 5000;
 
 type Props = {
   workspaceId: string;
@@ -22,41 +19,12 @@ type LoadState =
   | { kind: "error" };
 
 export function AgentsBoard({ workspaceId, brandId }: Props) {
-  const [state, setState] = useState<LoadState>({ kind: "loading" });
-
-  // False once the board is gone: no state is set by an answer that arrives after that.
-  const live = useRef(true);
-  useEffect(() => {
-    live.current = true;
-    return () => {
-      live.current = false;
-    };
-  }, []);
-
-  const load = useCallback(async () => {
-    try {
-      const data = await fetchAgents(workspaceId, brandId);
-      if (live.current) setState({ kind: "ready", agents: data.agents ?? [] });
-    } catch (err) {
-      if (!live.current) return;
-      console.error("[agents] failed to load agents", err);
-      setState({ kind: "error" });
-    }
-  }, [workspaceId, brandId]);
-
-  useEffect(() => {
-    let stopped = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const tick = async () => {
-      await load();
-      if (!stopped) timer = setTimeout(tick, AGENTS_POLL_MS);
-    };
-    void tick();
-    return () => {
-      stopped = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, [load]);
+  // Polled every 5 s, not while the tab is hidden. Polling is fine at this scale (one tab per manager, a handful of
+  // agents); move to SSE if many viewers per brand appear.
+  const { agents, failed } = useAgentsPoll(workspaceId, brandId);
+  const state: LoadState = failed ? { kind: "error" } : agents ? { kind: "ready", agents } : { kind: "loading" };
+  // A fresh read (Retry, a run just started) reaches the poll through the shared request; a failure shows as `failed`.
+  const load = useCallback(() => fetchAgents(workspaceId, brandId, true).then(() => undefined, () => console.error("[agents] failed to load agents")), [workspaceId, brandId]);
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5">

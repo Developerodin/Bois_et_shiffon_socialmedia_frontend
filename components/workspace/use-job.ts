@@ -8,6 +8,10 @@ export type Intervals = readonly (readonly [untilMs: number, everyMs: number])[]
 
 export const JOB_INTERVALS = {
   always: [[Infinity, 6_000]],
+  // The agents list while a view shows it (the Overview's agent view, the agents board, the Competitors page's Find).
+  agents: [[Infinity, 5_000]],
+  // The competitors list with no audit running or just queued: audits take minutes, and the tab's return refetches.
+  competitorsIdle: [[Infinity, 60_000]],
   // The shell's "agent finished" watcher: slow, since the Overview and the post panels already poll the same URL faster.
   agentWatch: [[Infinity, 20_000]],
   reelOptions: [[120_000, 10_000], [600_000, 20_000], [Infinity, 60_000]],

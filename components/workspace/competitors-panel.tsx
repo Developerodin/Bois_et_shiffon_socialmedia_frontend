@@ -1,54 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Coins, ExternalLink, Loader2, MoreHorizontal, Plus, RotateCw, Search, Trash2, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
-import { LoadFailed, useBrandData } from "@/components/workspace/content-panels";
+import { LoadFailed } from "@/components/workspace/content-panels";
 import { ScoreRing, scoreTone } from "@/components/workspace/score-ring";
-import { auditAllSummary, lastFailureNote, PARTIAL_AUDIT_NOTE, planAuditAll, readApproach, rowStatus, type Approach } from "@/lib/competitor-audit";
+import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
+import { auditAllSummary, lastFailureNote, PARTIAL_AUDIT_NOTE, planAuditAll, readApproach, rowStatus } from "@/lib/competitor-audit";
+import { makePresser } from "@/lib/presser";
+import { dayDate } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { safeHttpUrl } from "@/shared";
-
-type Audit = {
-  id: string;
-  domain: string;
-  url: string;
-  scores: { performance: number | null; accessibility: number | null; bestPractices: number | null; seo: number | null; siteChecks: number | null; lcpMs: number | null };
-  findings: { id: string; severity: string; title: string; fix: string }[];
-  aiCrawlers: { ua: string; purpose: string; allowed: boolean }[];
-  // A partial audit's approach may lack any field (search found nothing): read it through readApproach.
-  approach: Partial<Approach>;
-  socials: { platform: string; url: string }[];
-  sources: { url: string; title: string }[];
-  pagesRead: number;
-  createdAt: string;
-  stale: boolean;
-  /** The site blocked our crawler: PageSpeed scores and a search-based approach only, no page checks or findings. */
-  partial: boolean;
-};
-type Competitor = {
-  id: string;
-  name: string;
-  domain: string;
-  source: string;
-  aiMentions: number | null;
-  auditRunning: boolean;
-  auditError: string | null;
-  /** The latest audit failed because the site blocks automated readers; Audit is hidden until auditBlockedUntil (ISO). */
-  auditBlocked: boolean;
-  auditBlockedUntil: string | null;
-  /** The latest failure was the site blocking us (ISO), even after the block lifted. */
-  auditBlockedAt: string | null;
-  audit: Audit | null;
-};
-/** `unlimited`: the workspace is never charged, so the balance doesn't limit audits. */
-type Data = { credits: { balance: number; auditCost: number; unlimited: boolean }; competitors: Competitor[] };
-
-const checked = (iso: string) => new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+import { safeHttpUrl, type AuditAllQueued, type CompetitorAudit, type CompetitorCredits, type CompetitorDto as Competitor, type CompetitorsListDto as Data } from "@/shared";
 
 /** The last audit's failure: a neutral note when the site blocked us (lastFailureNote), else the error in red. */
 function LastFailure({ c, className }: { c: Competitor; className?: string }) {
@@ -57,13 +23,35 @@ function LastFailure({ c, className }: { c: Competitor; className?: string }) {
   return <p className={cn(note.soft ? "text-muted-foreground" : "text-destructive", className)}>{note.text}</p>;
 }
 
+const pickData = (d: Data) => d;
+/** How long the list keeps polling fast after Audit all is queued: the job starts the runs within a minute or so. */
+const STARTING_MS = 120_000;
+
+/**
+ * The competitors list, every 6 s while an audit is running (or Audit all was just queued: `starting`), else every
+ * minute: audits take minutes. The page reads it again when the Competitors agent's run ends (CompetitorsBoard), and
+ * after the person's own changes. Paused while the tab is hidden and read again when it shows (useJob). `starting()`
+ * asks for the fast pace for STARTING_MS.
+ */
 function useCompetitors(base: string) {
-  const pick = useCallback((d: Data) => d, []);
-  return useBrandData(base, "competitors", pick as (d: never) => Data);
+  const [starting, setStarting] = useState(false);
+  const [running, setRunning] = useState(false);
+  const { data, failed, reload } = useJob(`${base}/competitors`, {
+    pick: pickData as (d: never) => Data,
+    intervals: running || starting ? JOB_INTERVALS.always : JOB_INTERVALS.competitorsIdle,
+  });
+  const anyRunning = !!data?.competitors.some((c) => c.auditRunning);
+  useEffect(() => setRunning(anyRunning), [anyRunning]);
+  useEffect(() => {
+    if (!starting) return;
+    const t = setTimeout(() => setStarting(false), STARTING_MS);
+    return () => clearTimeout(t);
+  }, [starting]);
+  return { data, failed, reload, starting: useCallback(() => setStarting(true), []) };
 }
 
 /** Run a fresh audit: first click shows the price, second click spends. `compact` is the list row's icon form. */
-function FreshAudit({ base, c, credits, onDone, compact }: { base: string; c: Competitor; credits: Data["credits"]; onDone: () => void; compact?: boolean }) {
+function FreshAudit({ base, c, credits, onDone, compact }: { base: string; c: Competitor; credits: CompetitorCredits; onDone: () => void; compact?: boolean }) {
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,12 +146,24 @@ function ScoreChip({ value, short, long }: { value: number | null; short: string
   );
 }
 
-/** Audit all: confirm the price, then start what the credits cover (planAuditAll); the server starts them in that order. */
-function AuditAll({ base, data, onDone }: { base: string; data: Data; onDone: () => void }) {
+/**
+ * Audit all: confirm the price, then queue what the credits cover (planAuditAll); a background job on the server starts
+ * them in that order, and the list shows each one running as it starts. The press keeps its id until the server
+ * answers (makePresser), so a retry after a timeout joins the job already queued instead of queuing another.
+ */
+function AuditAll({ base, data, credits, onDone }: { base: string; data: Data; credits: CompetitorCredits; onDone: () => void }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const plan = planAuditAll(data.competitors, data.credits);
+  const plan = planAuditAll(data.competitors, credits);
+  const press = useMemo(
+    () =>
+      makePresser(
+        (ids: string[], pressId: string) => request<AuditAllQueued>(`${base}/competitors/audit-all`, { method: "POST", body: JSON.stringify({ competitorIds: ids, pressId }) }),
+        (ids) => ids.join(","),
+      ),
+    [base],
+  );
   const n = plan.candidates.length;
   const k = plan.affordable.length;
   const sites = (count: number) => `${count} ${count === 1 ? "site" : "sites"}`;
@@ -171,15 +171,12 @@ function AuditAll({ base, data, onDone }: { base: string; data: Data; onDone: ()
     setBusy(true);
     setError(null);
     try {
-      // Only the sites confirmed, in plan order: the server starts them until credits run out (a spend elsewhere meanwhile).
-      const r = await request<{ started: string[]; skipped: { id: string; reason: string }[] }>(`${base}/competitors/audit-all`, {
-        method: "POST",
-        body: JSON.stringify({ competitorIds: plan.affordable.map((c) => c.id) }),
-      });
+      // Only the sites confirmed, in plan order: the job starts them until credits run out (a spend elsewhere meanwhile).
+      const r = await press(plan.affordable.map((c) => c.id));
       setOpen(false);
       // The ones left out of the request wait for credits too.
       const skipped = [...r.skipped, ...plan.waiting.map((c) => ({ id: c.id, reason: "credits" }))];
-      toast({ title: auditAllSummary({ started: r.started, skipped }), tone: r.started.length ? "success" : "warning" });
+      toast({ title: auditAllSummary({ queued: r.queued, skipped }), tone: r.queued.length ? "success" : "warning" });
       onDone();
     } catch (e) {
       setError(errorMessage(e, "Couldn't start the audits."));
@@ -205,9 +202,9 @@ function AuditAll({ base, data, onDone }: { base: string; data: Data; onDone: ()
           <DialogDescription>
             {n === 0
               ? "Every competitor has a fresh audit, is being audited, or blocks automated readers for now."
-              : data.credits.unlimited
+              : credits.unlimited
                 ? `Audit ${sites(n)}. This workspace isn't charged for audits.`
-                : `Audit ${sites(n)} · ${n} × ${plan.cost} credits (you have ${data.credits.balance}).`}
+                : `Audit ${sites(n)} · ${n} × ${plan.cost} credits (you have ${credits.balance}).`}
           </DialogDescription>
         </DialogHeader>
         {n > 0 && (
@@ -257,7 +254,7 @@ const FEW = 3;
 
 /** agents.run gates adding, auditing and removing: the routes refuse those without it. */
 export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: string; canRun: boolean; onOpen: (id: string) => void; onFind: () => void }) {
-  const { data, failed, reload } = useCompetitors(base);
+  const { data, failed, reload, starting } = useCompetitors(base);
   const [adding, setAdding] = useState(false);
   const [addPending, setAddPending] = useState(false);
   const [name, setName] = useState("");
@@ -294,13 +291,25 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
 
   if (!data) return failed ? <LoadFailed what="competitors" onRetry={() => void reload()} className="p-4" /> : <p className="p-4 text-sm text-muted-foreground">Loading competitors…</p>;
   const few = data.competitors.length > 0 && data.competitors.length < FEW;
+  // Sent only to someone who may run audits (agents.run); everything that spends credits needs it too.
+  const credits = canRun ? data.credits : undefined;
   return (
     <div className="@container flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2 text-xs">
-        <span className="flex items-center gap-1.5 text-muted-foreground">
-          <Coins className="size-3.5" aria-hidden="true" />
-          <span className="font-medium text-foreground tabular-nums">{data.credits.balance}</span> credits · audits shared by others are free
-        </span>
+        {credits ? (
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <Coins className="size-3.5" aria-hidden="true" />
+            {credits.unlimited ? (
+              "Unlimited credits"
+            ) : (
+              <>
+                <span className="font-medium text-foreground tabular-nums">{credits.balance}</span> credits · audits shared by others are free
+              </>
+            )}
+          </span>
+        ) : (
+          <span />
+        )}
         {canRun && (
           <span className="flex flex-wrap gap-1">
             <Button size="sm" variant="ghost" onClick={() => setAdding((a) => !a)} aria-expanded={adding}>
@@ -309,7 +318,17 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
             <Button size="sm" variant="ghost" onClick={onFind} aria-label="Find more competitors">
               <Search aria-hidden="true" /> Find more
             </Button>
-            {data.competitors.length > 0 && <AuditAll base={base} data={data} onDone={reload} />}
+            {data.competitors.length > 0 && credits && (
+              <AuditAll
+                base={base}
+                data={data}
+                credits={credits}
+                onDone={() => {
+                  starting();
+                  void reload();
+                }}
+              />
+            )}
           </span>
         )}
       </div>
@@ -391,7 +410,7 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
                     {c.audit && (
                       <span className={cn("@3xl:col-start-7 @3xl:row-start-1", c.audit.stale && "text-warning")}>
                         <span className="@3xl:sr-only">Checked </span>
-                        {checked(c.audit.createdAt)}
+                        {dayDate(c.audit.createdAt)}
                         {c.audit.stale && (
                           <>
                             <span aria-hidden="true"> · old</span>
@@ -403,7 +422,7 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
                   </div>
                   {canRun && (
                     <div className="relative z-10 col-start-2 row-start-1 flex items-center justify-end gap-0.5 @3xl:col-start-8">
-                      <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} compact />
+                      {credits && <FreshAudit base={base} c={c} credits={credits} onDone={reload} compact />}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button size="icon" variant="ghost" aria-label={`More for ${c.name}`} title="More">
@@ -441,6 +460,36 @@ export function CompetitorsPanel({ base, canRun, onOpen, onFind }: { base: strin
   );
 }
 
+/**
+ * The audit shown for a competitor, in full (the list sends only its scores). Read once per audit: again only when the
+ * list shows another audit for it (its id changes), never on the list's poll. `retry` reads again after a failure.
+ */
+function useFullAudit(base: string, competitorId: string, auditId: string | null) {
+  const [got, setGot] = useState<{ id: string; audit: CompetitorAudit | null } | null>(null);
+  const [failedId, setFailedId] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    if (!auditId) return;
+    let alive = true;
+    request<{ audit: CompetitorAudit | null }>(`${base}/competitors/${encodeURIComponent(competitorId)}/audit`).then(
+      (r) => {
+        if (!alive) return;
+        setGot({ id: auditId, audit: r.audit });
+        setFailedId(null);
+      },
+      () => alive && setFailedId(auditId),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [base, competitorId, auditId, attempt]);
+  return {
+    full: got && got.id === auditId ? got.audit : null,
+    failed: !!auditId && failedId === auditId,
+    retry: useCallback(() => setAttempt((n) => n + 1), []),
+  };
+}
+
 export function CompetitorView({ base, canRun, id, onLoaded }: { base: string; canRun: boolean; id: string; onLoaded?: () => void }) {
   const { data, failed, reload } = useCompetitors(base);
   const c = data?.competitors.find((x) => x.id === id);
@@ -448,7 +497,10 @@ export function CompetitorView({ base, canRun, id, onLoaded }: { base: string; c
   useEffect(() => {
     if (found) onLoaded?.();
   }, [found, onLoaded]);
-  const a = c?.audit;
+  const credits = canRun ? data?.credits : undefined;
+  const summary = c?.audit ?? null;
+  const detail = useFullAudit(base, id, summary?.id ?? null);
+  const a = detail.full;
   const approach = readApproach(a?.approach);
   return (
     <div>
@@ -456,12 +508,14 @@ export function CompetitorView({ base, canRun, id, onLoaded }: { base: string; c
         failed ? <LoadFailed what="competitors" onRetry={() => void reload()} className="p-6" /> : <p className="p-6 text-sm text-muted-foreground">Loading…</p>
       ) : !c ? (
         <p className="p-6 text-sm text-muted-foreground">This competitor isn&rsquo;t tracked any more.</p>
-      ) : !a ? (
+      ) : !summary ? (
         <div className="flex flex-col items-start gap-3 p-6">
           <p className="text-sm text-muted-foreground">No audit for this competitor yet.</p>
           <LastFailure c={c} className="text-sm" />
-          {canRun && <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} />}
+          {credits && <FreshAudit base={base} c={c} credits={credits} onDone={reload} />}
         </div>
+      ) : !a ? (
+        detail.failed ? <LoadFailed what="the audit" onRetry={detail.retry} className="p-6" /> : <p className="p-6 text-sm text-muted-foreground">Loading…</p>
       ) : (
         <div className="flex flex-col gap-6 px-6 py-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -478,12 +532,12 @@ export function CompetitorView({ base, canRun, id, onLoaded }: { base: string; c
                     c.domain
                   );
                 })()}{" "}
-                · last checked {checked(a.createdAt)}
+                · last checked {dayDate(a.createdAt)}
                 {a.partial ? "" : ` · ${a.pagesRead} pages read`}
               </p>
               {a.stale && <p className="mt-1 text-xs text-warning">Over 30 days old: run a fresh audit for current numbers.</p>}
             </div>
-            {canRun && <FreshAudit base={base} c={c} credits={data.credits} onDone={reload} />}
+            {credits && <FreshAudit base={base} c={c} credits={credits} onDone={reload} />}
           </div>
           <LastFailure c={c} className="-mt-3 text-sm" />
           {a.partial && <p className="-mt-3 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">{PARTIAL_AUDIT_NOTE}</p>}
