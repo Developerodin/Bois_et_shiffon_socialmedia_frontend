@@ -75,7 +75,8 @@ function SectionBody({ s }: { s: DigestSection }) {
 function salesFigure(c: DigestSales): [string, string] {
   const orders = `${n(c.orders)} orders`;
   if (c.netExVat === undefined) return [`${c.currency} net (${orders})`, c.netSales ?? "—"];
-  return [`${c.currency} net excl. VAT${c.exVatFrom ? ` from ${c.exVatFrom}` : ""} (${orders})`, c.netExVat ?? "—"];
+  const missing = c.exVatMissing ? `, ${n(c.exVatMissing)} left out: VAT unreadable` : "";
+  return [`${c.currency} net excl. VAT${c.exVatFrom ? ` from ${c.exVatFrom}` : ""} (${orders}${missing})`, c.netExVat ?? "—"];
 }
 
 /** The weekly digests as the server sent them (already filtered by what the reader may see now). */

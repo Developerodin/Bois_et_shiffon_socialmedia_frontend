@@ -251,7 +251,8 @@ export type AdsTotals = {
 export type ShopRevenueOverSpend = {
   ratio: number | null;
   currency: string | null;
-  why: "no_spend" | "currencies" | "no_revenue" | "no_rate" | null;
+  /** vat_missing: some orders' VAT couldn't be read, so the revenue would read low. */
+  why: "no_spend" | "currencies" | "no_revenue" | "no_rate" | "vat_missing" | null;
   staleRateFrom: string | null;
 };
 

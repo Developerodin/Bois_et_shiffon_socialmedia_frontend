@@ -15,6 +15,7 @@ describe("ad budgets", () => {
   it("shop revenue ÷ ad spend says it is converted, and why there is none", () => {
     expect(ratioLine({ ratio: 3, currency: "EUR", why: null, staleRateFrom: null })).toContain("3.00× (net sales without VAT ÷ spend in EUR; Shopify days and ad account days may differ by a few hours)");
     expect(ratioLine({ ratio: null, currency: null, why: "currencies", staleRateFrom: null })).toContain("several currencies");
+    expect(ratioLine({ ratio: null, currency: "EUR", why: "vat_missing", staleRateFrom: null })).toContain("VAT couldn't be read");
     expect(ratioLine({ ratio: 2, currency: "EUR", why: null, staleRateFrom: "2026-09-20" })).toContain("Uses an exchange rate from");
   });
 });

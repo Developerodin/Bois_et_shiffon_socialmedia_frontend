@@ -42,6 +42,7 @@ export function ratioLine(r: ShopRevenueOverSpend): string {
     const why = r.why === "no_spend" ? "no ad spend in these dates"
       : r.why === "currencies" ? "the shop sells in several currencies"
       : r.why === "no_rate" ? "no exchange rate yet"
+      : r.why === "vat_missing" ? "some orders' VAT couldn't be read"
       : "net sales without VAT don't cover these dates yet";
     return `Shop revenue ÷ ad spend: — (${why}).`;
   }

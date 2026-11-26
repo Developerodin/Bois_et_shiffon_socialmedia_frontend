@@ -24,10 +24,10 @@ export type DigestSection =
 
 /**
  * One currency's week of sales. `netExVat`: net sales without VAT (from `exVatFrom` when set; null = not known for the
- * week, so no revenue figure). `netSales` (VAT included where prices include it) only on digests built before
+ * week, so no revenue figure); `exVatMissing` orders were left out of it (their VAT couldn't be read). `netSales` (VAT included where prices include it) only on digests built before
  * 2026-11-26; newer ones never carry it.
  */
-export type DigestSales = { currency: string; orders: number; netExVat?: string | null; exVatFrom?: string | null; netSales?: string };
+export type DigestSales = { currency: string; orders: number; netExVat?: string | null; exVatFrom?: string | null; exVatMissing?: number; netSales?: string };
 
 export type DigestSectionKind = DigestSection["kind"];
 /** The key each section needs (the `key` it carries). */
