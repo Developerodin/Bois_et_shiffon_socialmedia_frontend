@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { DateRangeFilter, rangeLabel } from "@/components/data/date-range";
 import { AdsTab } from "@/components/performance/ads-tab";
 import { PostsTab } from "@/components/performance/posts-tab";
@@ -15,6 +16,8 @@ import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 export type PerformanceTab = "reports" | "search" | "posts" | "sales" | "ads";
+/** How often the sources are read again while a run is queued or running. */
+const POLL_MS = 5_000;
 const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "Search", posts: "Posts", sales: "Sales", ads: "Ads" };
 
 /**
@@ -22,19 +25,20 @@ const LABEL: Record<PerformanceTab, string> = { reports: "SEO & GEO", search: "S
  * (flag + read permission). The tab and the date range live in the URL (?tab, ?from&to; replace, not push) so a reload
  * or a shared link lands on the same view. Prints as the open tab alone (globals.css, data-print-root).
  */
-export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialTab, initialRange, canManage, reports }: {
+export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initialRange, canManage, reports }: {
   workspaceId: string;
   brandId: string;
   brandName: string | null;
   tabs: PerformanceTab[];
-  initialTab?: string;
   /** ?from&to as they came; checked once the brand's "today" is known. */
   initialRange: { from?: string; to?: string };
   /** integrations.manage: the site picker and turning on orders. */
   canManage: boolean;
   reports: ReactNode;
 }) {
-  const [active, setActive] = useState<PerformanceTab>(tabs.find((t) => t === initialTab) ?? tabs[0]);
+  // The tab is read from the URL, so a link to another ?tab= (the sidebar's agents) switches it on this page too.
+  const urlTab = useSearchParams().get("tab");
+  const active = tabs.find((t) => t === urlTab) ?? tabs[0];
   /** A preset's length once one is pressed (each tab ends it on its own presetEnd), or the custom days as chosen. */
   const [picked, setPicked] = useState<number | DateRange | null>(null);
   const tabRefs = useRef<Partial<Record<PerformanceTab, HTMLButtonElement | null>>>({});
@@ -42,14 +46,26 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
 
   const base = brandApi(workspaceId, brandId);
   const fetcher = useCallback(() => request<DataSourcesDto>(`${base}/data-sources`), [base]);
-  const { state, reload } = useLoad(isData ? fetcher : null);
+  const { state, reload, poll } = useLoad(isData ? fetcher : null);
   useReloadOnFocus(reload, state);
 
+  // One poll for the page while any source has a run queued or running (two ad accounts syncing still read once),
+  // skipped while the tab is hidden; the server's answer ends it. A failed poll keeps the numbers on screen (poll).
+  const syncing = isData && state.kind === "ready" && state.data.sources.some((s) => s.sync);
+  useEffect(() => {
+    if (!syncing) return;
+    const t = window.setInterval(() => {
+      if (!document.hidden) poll();
+    }, POLL_MS);
+    return () => window.clearInterval(t);
+  }, [syncing, poll]);
+
   function select(tab: PerformanceTab) {
-    setActive(tab);
+    // Native history, not router.push: Next syncs useSearchParams from it without a server round trip.
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tab);
-    window.history.replaceState(window.history.state, "", url);
+    // null, not window.history.state: Next ignores a call that carries its own state, so useSearchParams wouldn't move.
+    window.history.replaceState(null, "", url);
   }
   function onTabKey(e: React.KeyboardEvent, index: number) {
     const delta = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
@@ -78,7 +94,7 @@ export function PerformanceTabs({ workspaceId, brandId, brandName, tabs, initial
       const changeRange = (r: DateRange) => {
         const days = rangeDays(r);
         setPicked(r.to === end && PRESETS.some((n) => n === days) ? days : r);
-        window.history.replaceState(window.history.state, "", withRange(window.location.href, r));
+        window.history.replaceState(null, "", withRange(window.location.href, r));
       };
       rangeLine = rangeLabel(range);
       filter = <DateRangeFilter range={range} end={end} onChange={changeRange} />;

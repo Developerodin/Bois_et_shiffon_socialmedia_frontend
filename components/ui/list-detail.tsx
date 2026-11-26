@@ -64,6 +64,7 @@ type Pending = { kind: "open"; mode: "if-hidden" | "always" } | { kind: "closed"
  *   low row on a long list), else nowhere, so a click in the list keeps its place.
  * - `open(id, "always")`: always, for when the control that held focus is gone (an empty state, a step, a task button).
  * - `closed()`: the item was deleted or archived; to the list's heading (`<list>-h`), or `emptyHeadingId` once nothing is left.
+ * `ids` are the ids it looks for: give them to the item's PageSection, the ListCard and the EmptyState's heading.
  */
 export function useListSelection({ item, list, emptyHeadingId }: { item: string; list: string; emptyHeadingId: string }) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -104,5 +105,5 @@ export function useListSelection({ item, list, emptyHeadingId }: { item: string;
     setSelected(null);
     setTick((t) => t + 1);
   }, []);
-  return { selected, open, closed };
+  return { selected, open, closed, ids: { item, list, emptyHeading: emptyHeadingId } };
 }

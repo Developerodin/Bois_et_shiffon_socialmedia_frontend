@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SyncedAt } from "@/components/data/synced-at";
+import { SyncedAt, useReloadWhenSynced } from "@/components/data/synced-at";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -37,7 +37,7 @@ const byReach = (a: PostInsightDto, b: PostInsightDto) =>
  * Published posts in the range (brand-local "YYYY-MM-DD") and how each did. analytics.read; the shell hides it otherwise.
  * `source`: the POST_METRICS source from PerformanceTabs' data-sources load, undefined before the first sync.
  */
-export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined }) {
+export function PostsTab({ workspaceId, brandId, range, source, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; onSourceChanged: () => void }) {
   const base = brandApi(workspaceId, brandId);
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(
@@ -46,6 +46,7 @@ export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId:
   );
   const { state, reload } = useLoad(fetcher);
   useReloadOnFocus(reload, state);
+  useReloadWhenSynced([source], reload);
   const [shown, setShown] = useState(PAGE);
 
   if (state.kind === "loading") return <ListSkeleton label="Loading post results" />;
@@ -70,7 +71,7 @@ export function PostsTab({ workspaceId, brandId, range, source }: { workspaceId:
       description="Each post's latest numbers, highest reach first."
       className="flex flex-col gap-3"
     >
-      {source ? <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.POST_METRICS}/sync`} /> : null}
+      {source ? <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.POST_METRICS}/sync`} onChanged={onSourceChanged} /> : null}
       {posts.length ? (
         <div className="-mx-5 overflow-x-auto">
           <table className="w-full text-left text-sm">

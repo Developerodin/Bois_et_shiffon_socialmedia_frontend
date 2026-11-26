@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import { Table } from "@/components/admin/table";
 import { money, Stat } from "@/components/data/shared";
-import { SyncedAt } from "@/components/data/synced-at";
+import { SyncedAt, useReloadWhenSynced } from "@/components/data/synced-at";
 import { connectionsUrl, errorMessage, request, type Connection } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
@@ -29,14 +29,15 @@ export function SalesTab({ workspaceId, brandId, range, source, canManage, onSou
       </PageSection>
     );
   }
-  return <SalesNumbers base={base} range={range} source={source} />;
+  return <SalesNumbers base={base} range={range} source={source} onSourceChanged={onSourceChanged} />;
 }
 
-function SalesNumbers({ base, range, source }: { base: string; range: DateRange; source: DataSourceDto }) {
+function SalesNumbers({ base, range, source, onSourceChanged }: { base: string; range: DateRange; source: DataSourceDto; onSourceChanged: () => void }) {
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(() => request<SalesSummaryDto>(`${base}/sales/summary?${rangeQuery(from, to)}`), [base, from, to]);
   const { state, reload } = useLoad(fetcher);
   useReloadOnFocus(reload, state);
+  useReloadWhenSynced([source], reload);
 
   let body: React.ReactNode;
   if (state.kind === "loading") body = <ListSkeleton label="Loading sales" />;
@@ -52,7 +53,7 @@ function SalesNumbers({ base, range, source }: { base: string; range: DateRange;
       className="flex flex-col gap-4"
       description={
         <div className="flex flex-col gap-1">
-          <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.SHOPIFY_ORDERS}/sync`} />
+          <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.SHOPIFY_ORDERS}/sync`} onChanged={onSourceChanged} />
           <p className="text-xs text-muted-foreground">
             {source.label ? `${source.label} · ` : ""}Days in the brand&apos;s time zone. Test and cancelled orders left out; amounts include VAT where the shop&apos;s prices do.
           </p>

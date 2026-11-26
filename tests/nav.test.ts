@@ -40,11 +40,11 @@ describe("navFor", () => {
   it("falls back to Overview for unknown paths", () => {
     expect(navFor("/totally/unknown")).toEqual({ activeId: null, title: "Overview", brandScoped: true });
   });
-  it("keeps the SEO & GEO reports page over Surge", () => {
+  it("keeps the Growth reports page over Surge", () => {
     expect(navFor("/performance").activeId).toBe("performance");
   });
   it("ignores the query string", () => {
-    expect(navFor("/performance?x=1").title).toBe("SEO & GEO reports");
+    expect(navFor("/performance?x=1").title).toBe("Growth reports");
   });
 });
 

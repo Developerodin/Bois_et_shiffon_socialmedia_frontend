@@ -11,7 +11,7 @@ import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
 import { money, Stat } from "@/components/data/shared";
-import { SyncedAt } from "@/components/data/synced-at";
+import { SyncedAt, useReloadWhenSynced } from "@/components/data/synced-at";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
 import { DATA_SOURCE_SLUGS, type AdsCampaignsDto, type AdsSummaryDto, type AdsTotals, type ChooseMetaAdAccountBody, type DataSourceDto, type MetaAdAccountsDto } from "@/shared";
 
@@ -58,6 +58,7 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
     [base, range],
   );
   const { state, reload } = useLoad(fetcher);
+  useReloadWhenSynced(sources, reload);
   useReloadOnFocus(reload, state);
 
   if (state.kind === "loading") return <ListSkeleton label="Loading ad results" />;
@@ -96,7 +97,7 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
         className="flex flex-col gap-4"
       >
         {sources.map((s) => (
-          <SyncedAt key={s.id} source={s} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.META_ADS}/sync`} name={sources.length > 1 && s.label ? s.label : undefined} />
+          <SyncedAt key={s.id} source={s} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.META_ADS}/sync`} name={sources.length > 1 && s.label ? s.label : undefined} onChanged={onSourceChanged} />
         ))}
         {empty ? (
           <p className="text-sm text-muted-foreground">No ad spend in these dates.</p>

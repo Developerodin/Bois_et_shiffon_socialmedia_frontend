@@ -37,8 +37,17 @@ export const DATA_SYNC_ERRORS: Record<DataSyncReason, string> = {
   rate_limited: "The provider asked us to slow down. The next sync picks up where this one stopped.",
 };
 
-/** DataSource.lastResult. `okAt`: the last successful sync ("Updated 3 h ago"). */
-export type DataSyncResult = { at: string; okAt: string | null; reason: DataSyncReason | null; count: number; error: string | null };
+/**
+ * DataSource.lastResult. `okAt`: the last successful sync ("Updated 3 h ago"). `at`: when the last run ended;
+ * `startedAt`: when it started (absent on rows written before it was recorded).
+ */
+export type DataSyncResult = { at: string; startedAt?: string | null; okAt: string | null; reason: DataSyncReason | null; count: number; error: string | null };
+
+/**
+ * A run of the source in hand: "running" since it started, or "queued" to start at `since` (Sync now, or the
+ * follow-up of a run that stopped partway). null: nothing due in the next couple of minutes.
+ */
+export type DataSyncRun = { state: "queued" | "running"; since: string | null } | null;
 
 /** GET data-sources: one per source the person may see. `label` only for people who manage integrations. */
 export type DataSourceDto = {
@@ -47,6 +56,8 @@ export type DataSourceDto = {
   label?: string | null;
   status: DataSourceStatus;
   lastResult: DataSyncResult | null;
+  /** A run queued or running now (the job table's word, so a run that died never shows as running). */
+  sync: DataSyncRun;
   /** "YYYY-MM-DD", the last provider day held contiguously */
   syncedThrough: string | null;
   /** The zone the provider's days are in (Google: Pacific; Meta Ads: the account's), when it says */

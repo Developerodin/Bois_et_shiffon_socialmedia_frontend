@@ -52,7 +52,6 @@ export default async function PerformancePage({ searchParams }: { searchParams: 
       brandId={b}
       brandName={shell.brands.find((x) => x.id === b)?.displayName ?? null}
       tabs={tabs}
-      initialTab={q.tab}
       initialRange={{ from: q.from, to: q.to }}
       canManage={can("integrations.manage")}
       reports={reports(true)}

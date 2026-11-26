@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -130,19 +130,29 @@ export type Load<T> =
   | { kind: "forbidden" }
   | { kind: "error"; message: string };
 
-/** Fetch on mount / when `fetcher` changes; `reload` refetches without flashing the skeleton. */
+/**
+ * Fetch on mount / when `fetcher` changes; `reload` refetches without flashing the skeleton. `poll` is the same for a
+ * background read nobody asked for: if it fails, the last ready data stays on screen instead of the error (the next
+ * poll tries again). A 403 still shows, since it won't pass on its own.
+ */
 export function useLoad<T>(fetcher: (() => Promise<T>) | null) {
   const [state, setState] = useState<Load<T>>({ kind: "loading" });
   const [nonce, setNonce] = useState(0);
+  const quiet = useRef(false);
   useEffect(() => {
     if (!fetcher) return;
     let cancelled = false;
+    const keep = quiet.current;
+    quiet.current = false;
     fetcher().then(
       (data) => !cancelled && setState({ kind: "ready", data }),
       (err: unknown) => {
         if (cancelled) return;
         if (err instanceof ApiError && err.status === 403) setState({ kind: "forbidden" });
-        else setState({ kind: "error", message: errorMessage(err, "Couldn't load this. Try again.") });
+        else {
+          const failed: Load<T> = { kind: "error", message: errorMessage(err, "Couldn't load this. Try again.") };
+          setState((s) => (keep && s.kind === "ready" ? s : failed));
+        }
       },
     );
     return () => {
@@ -150,6 +160,10 @@ export function useLoad<T>(fetcher: (() => Promise<T>) | null) {
     };
   }, [fetcher, nonce]);
   const reload = useCallback(() => setNonce((n) => n + 1), []);
+  const poll = useCallback(() => {
+    quiet.current = true;
+    setNonce((n) => n + 1);
+  }, []);
   // Failed while offline: load again as soon as the connection is back.
   const failed = state.kind === "error";
   useEffect(() => {
@@ -157,5 +171,5 @@ export function useLoad<T>(fetcher: (() => Promise<T>) | null) {
     window.addEventListener("online", reload);
     return () => window.removeEventListener("online", reload);
   }, [failed, reload]);
-  return { state, reload };
+  return { state, reload, poll };
 }

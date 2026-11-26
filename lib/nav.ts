@@ -23,7 +23,7 @@ export type NavEntry = {
 };
 
 const TASKS_READ = ["tasks.read"] as const;
-const CRM_READ = ["crm.manage"] as const;
+const CRM_MANAGE = ["crm.manage"] as const;
 /** The Sales tab on /performance (Pulse's slot) needs crm.read, not crm.manage. */
 const PULSE_PERM = ["crm.read"] as const;
 /** A workspace permission: Settings' Members tab works with no business picked. */
@@ -54,7 +54,7 @@ export const NAV: readonly NavEntry[] = [
 
   { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox", perm: ["inbox.read"] },
   // Its link is Spark's slot (agentEntries). Quotes only for now, so crm.manage; inbox.read joins with the stored inbox.
-  { id: "crm", label: "Sales & CRM", href: "/crm", group: "page", feature: "crm", perm: CRM_READ },
+  { id: "crm", label: "Sales & CRM", href: "/crm", group: "page", feature: "crm", perm: CRM_MANAGE },
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
@@ -63,11 +63,11 @@ export const NAV: readonly NavEntry[] = [
   { id: "echo", label: "Echo", href: "/settings?tab=connections", group: "agent", role: "Communication", soon: true },
   { id: "pulse", label: "Pulse", href: "/agents/pulse", group: "agent", role: "Finance", soon: true },
   { id: "hum", label: "Hum", href: "/agents/hum", group: "agent", role: "Admin & access", soon: true },
-  { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "SEO & GEO reports" },
+  { id: "surge", label: "Surge", href: "/performance", group: "agent", role: "Growth reports" },
   { id: "drift", label: "Drift", href: "/?panel=competitors", group: "agent", role: "Competitors" },
 
   { id: "calendar", label: "Content calendar", href: "/?panel=content", group: "more" },
-  { id: "performance", label: "SEO & GEO reports", href: "/performance", group: "more" },
+  { id: "performance", label: "Growth reports", href: "/performance", group: "more" },
   { id: "agent-log", label: "Agent log", href: "/agents", group: "more" },
   { id: "settings", label: "Settings", href: "/settings", group: "more" },
 
@@ -104,7 +104,7 @@ export function agentEntries(enabled: readonly WebFeature[], perms?: readonly st
   const holds = (keys: readonly string[], list = perms) => !list || keys.some((p) => list.includes(p));
   const overrides: Record<string, Partial<NavEntry> | undefined> = {
     beat: enabled.includes("tasks") && holds(TASKS_READ) ? { role: "Projects & tasks", href: "/tasks" } : undefined,
-    spark: enabled.includes("crm") && holds(CRM_READ) ? { href: "/crm" } : undefined,
+    spark: enabled.includes("crm") && holds(CRM_MANAGE) ? { href: "/crm" } : undefined,
     pulse: enabled.includes("sales") && holds(PULSE_PERM) ? { href: "/performance?tab=sales" } : undefined,
     hum: holds(MEMBERS_READ, workspacePerms) ? { href: "/settings?tab=members" } : undefined,
   };
@@ -130,7 +130,7 @@ export function activeIdFor(pathname: string, search: { get(name: string): strin
 
 const hrefPath = (href: string) => href.split(/[?#]/)[0] || "/";
 
-/** Agents share paths with pages (Surge and SEO & GEO reports), so on a tie the page wins. */
+/** Agents share paths with pages (Surge and Growth reports), so on a tie the page wins. */
 const rank = (e: NavEntry) => (e.group === "agent" ? 0 : 1);
 
 /**

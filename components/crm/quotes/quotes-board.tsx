@@ -57,7 +57,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   // The business has no currency yet (no Shopify shop currency, no earlier quote): ask once, then create with it.
   const [askCurrency, setAskCurrency] = useState(false);
   const [currencyError, setCurrencyError] = useState<string | null>(null);
-  const { selected, open, closed } = useListSelection({ item: "quote", list: "quotes-list", emptyHeadingId: "quotes-empty-h" });
+  const { selected, open, closed, ids } = useListSelection({ item: "quote", list: "quotes-list", emptyHeadingId: "quotes-empty-h" });
 
   const load = () => {
     setFailed(false);
@@ -113,7 +113,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
       <EmptyState
         icon={FileText}
         title="No quotes yet"
-        headingId="quotes-empty-h"
+        headingId={ids.emptyHeading}
         description="A quote lists products and prices for one customer. When it's ready it becomes a Shopify draft order, and the customer gets Shopify's invoice only when you send it. Start one with New quote above."
       />
     );
@@ -121,7 +121,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
     body = (
       <ListDetail
         list={
-          <ListCard id="quotes-list" title="All quotes" description={`${quotes.length} ${quotes.length === 1 ? "quote" : "quotes"}, newest change first`}>
+          <ListCard id={ids.list} title="All quotes" description={`${quotes.length} ${quotes.length === 1 ? "quote" : "quotes"}, newest change first`}>
             {quotes.map((q) => (
               <ListRow key={q.id} selected={q.id === selected} onSelect={() => open(q.id)} className="flex-col gap-1">
                 <span className="flex w-full items-center justify-between gap-2">
@@ -141,7 +141,7 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
             ))}
           </ListCard>
         }
-        detail={current ? <QuoteEditor key={current.id} w={w} b={b} quote={current} onChange={put} onCancelled={(q) => (put(q), open(q.id, "always"))} onRemoved={() => (setQuotes((l) => (l ?? []).filter((x) => x.id !== current.id)), closed())} /> : null}
+        detail={current ? <QuoteEditor key={current.id} sectionId={ids.item} w={w} b={b} quote={current} onChange={put} onCancelled={(q) => (put(q), open(q.id, "always"))} onRemoved={() => (setQuotes((l) => (l ?? []).filter((x) => x.id !== current.id)), closed())} /> : null}
         placeholder={<EmptyState variant="card" icon={FileText} title="No quote open" description="Pick a quote to see and edit it, or start a new one." />}
       />
     );
@@ -245,7 +245,7 @@ export function subtotalNotice(q: Pick<QuoteDto, "subtotalDiffers" | "shopifySub
   return q.subtotalDiffers ? `Shopify's subtotal is ${q.shopifySubtotal} ${q.currency}; ours is ${q.totals.total} ${q.currency}.` : null;
 }
 
-function QuoteEditor({ w, b, quote, onChange, onCancelled, onRemoved }: { w: string; b: string; quote: QuoteDto; onChange(q: QuoteDto): void; onCancelled(q: QuoteDto): void; onRemoved(): void }) {
+function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved }: { sectionId: string; w: string; b: string; quote: QuoteDto; onChange(q: QuoteDto): void; onCancelled(q: QuoteDto): void; onRemoved(): void }) {
   const editable = quote.status === "DRAFT" || quote.status === "CREATED";
   const reset = (q: QuoteDto) => ({
     contactName: q.contactName ?? "",
@@ -310,7 +310,7 @@ function QuoteEditor({ w, b, quote, onChange, onCancelled, onRemoved }: { w: str
   const meta = [quote.contactName ?? "No contact yet", quote.shopifyName ? `Shopify draft ${quote.shopifyName}` : null, quote.validUntil ? `Valid until ${quote.validUntil}` : null].filter(Boolean).join(" · ");
   return (
     <PageSection
-      id="quote"
+      id={sectionId}
       title={`Quote ${quote.number}`}
       description={
         <span className="flex flex-wrap items-center gap-2">

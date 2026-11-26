@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import { Table } from "@/components/admin/table";
 import { Stat } from "@/components/data/shared";
-import { SyncedAt } from "@/components/data/synced-at";
+import { SyncedAt, useReloadWhenSynced } from "@/components/data/synced-at";
 import { connectionsUrl, errorMessage, request, type Connection } from "@/components/settings/api";
 import { ListSkeleton, LoadError, selectClass, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
@@ -44,10 +44,10 @@ export function SearchTab({ workspaceId, brandId, range, source, canManage, onSo
       </PageSection>
     );
   }
-  return <SearchNumbers base={base} range={range} source={source} onChangeSite={canManage ? () => setPicking(true) : undefined} />;
+  return <SearchNumbers base={base} range={range} source={source} onSourceChanged={onSourceChanged} onChangeSite={canManage ? () => setPicking(true) : undefined} />;
 }
 
-function SearchNumbers({ base, range, source, onChangeSite }: { base: string; range: DateRange; source: DataSourceDto; onChangeSite?: () => void }) {
+function SearchNumbers({ base, range, source, onSourceChanged, onChangeSite }: { base: string; range: DateRange; source: DataSourceDto; onSourceChanged: () => void; onChangeSite?: () => void }) {
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(
     () => Promise.all([request<SearchSummaryDto>(`${base}/search/summary?${rangeQuery(from, to)}`), request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(from, to)}&sort=clicks`)]),
@@ -55,10 +55,11 @@ function SearchNumbers({ base, range, source, onChangeSite }: { base: string; ra
   );
   const { state, reload } = useLoad(fetcher);
   useReloadOnFocus(reload, state);
+  useReloadWhenSynced([source], reload);
 
   const header = (
     <div className="flex flex-col gap-1">
-      <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.SEARCH_CONSOLE}/sync`} />
+      <SyncedAt source={source} syncUrl={`${base}/data-sources/${DATA_SOURCE_SLUGS.SEARCH_CONSOLE}/sync`} onChanged={onSourceChanged} />
       <p className="text-xs text-muted-foreground">
         {source.label ? `${source.label} · ` : ""}
         {source.reportsInZone ? "Google's days (Pacific time). " : ""}

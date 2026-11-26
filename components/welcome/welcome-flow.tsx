@@ -67,7 +67,7 @@ export function WelcomeFlow({ workspaceId, canCreate, resume }: Props) {
         // Keep the URL on the run being shown, so a refresh doesn't fall back to the old one.
         const q = new URLSearchParams(window.location.search);
         q.set("run", runId);
-        window.history.replaceState(window.history.state, "", `?${q}`);
+        window.history.replaceState(null, "", `?${q}`); // null: Next then keeps its own copy of the URL in step
         setReading({ ...reading, runId });
       }} />
   ) : (
