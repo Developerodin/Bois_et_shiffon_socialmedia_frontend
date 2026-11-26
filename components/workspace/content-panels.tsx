@@ -12,11 +12,12 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { FilterSelect } from "@/components/ui/filter-select";
-import { ChecksList } from "@/components/ui/checks-list";
 import { reelHref } from "@/components/reels/href";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
+import { PeekSlot, usePeekTitle } from "@/components/workspace/peek";
+import { QualityCheck } from "@/components/workspace/quality-check";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
 import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
 import { dayTime } from "@/lib/time";
@@ -1268,7 +1269,7 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   const body = item.latest?.body as unknown as { frames?: { label?: string; headline?: string; body?: string }[]; cta?: string; link?: string } | undefined;
   const link = body?.link ? safeHttpUrl(body.link) : null;
   return (
-    <section aria-label="Story frames" className="rounded-xl border border-border p-4">
+    <section aria-label="Story frames" className="border-t border-border pt-5">
       <h2 className="text-sm font-semibold">
         Story {item.latest ? `v${item.latest.version}` : ""}
         {item.latest?.byPerson && <span className="ml-2 font-normal text-muted-foreground">edited by a person</span>}
@@ -1384,6 +1385,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
   };
   const brief = (item?.brief ?? {}) as { goal?: string; audience?: string; keyMessage?: string; products?: string[]; cta?: string; visual?: string; questions?: string[]; angle?: string };
   const b = item?.latest?.body;
+  usePeekTitle(item?.title);
 
   return (
     <div>
@@ -1402,14 +1404,19 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
           <div className="min-h-48 p-6"><ListSkeleton label="Loading post" rows={3} /></div>
         )
       ) : (
-        <div className="flex flex-col gap-6 px-6 py-6">
+        <div className="flex flex-col gap-5 px-5 py-5">
+          {/* In the peek's sticky header, under the title: where and when it goes out, and where it stands. */}
+          <PeekSlot to="header">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <span>
+                {CHANNEL_LABEL[item.channel]} · {item.scheduledFor ? day(item.scheduledFor) : "no date"}
+                {item.latest ? ` · draft v${item.latest.version}` : ""}
+              </span>
+              <span className={cn("rounded-full border px-2 py-0.5 font-medium", TONE_CLASS[toneOf(item.publishIssue ?? item.status)])}>{statusText(item)}</span>
+            </div>
+          </PeekSlot>
           <div>
-            <p className="text-xs text-muted-foreground">
-              {CHANNEL_LABEL[item.channel]} · {item.scheduledFor ? day(item.scheduledFor) : "no date"} · {STATUS_LABEL[item.status] ?? item.status}
-              {item.latest ? ` · draft v${item.latest.version}` : ""}
-            </p>
-            <h1 className="mt-1 font-display text-2xl font-medium tracking-tight">{item.title}</h1>
-            {item.opportunity && <p className="mt-1 text-sm text-muted-foreground">From the idea: {item.opportunity.title}</p>}
+            {item.opportunity && <p className="text-sm text-muted-foreground">From the idea: {item.opportunity.title}</p>}
             {canAssign ? (
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
                 <label htmlFor="post-owner" className="text-muted-foreground">Owner</label>
@@ -1434,7 +1441,27 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
             )}
           </div>
 
-          <section aria-labelledby="brief-h" className="rounded-xl border border-border p-4">
+          {item.studio ? (
+            <section aria-label="Made in Reels" className="flex flex-col items-start gap-3 border-t border-border pt-5">
+              <p className="text-sm">Made in Reels. Change its plan, video and caption there.</p>
+              {reelsOn ? (
+                <Button size="sm" asChild>
+                  <Link href={reelHref(item.id, brandId)}>Open in Reels</Link>
+                </Button>
+              ) : null}
+            </section>
+          ) : (
+            !editing && <NextStep base={base} item={item} perms={perms} onEdit={() => setEditing(true)} />
+          )}
+
+          {/* The review first: the check's summary, then the brief, the draft and the approval. */}
+          {item.latest?.check && (
+            <div className="border-t border-border pt-5">
+              <QualityCheck check={item.latest.check} />
+            </div>
+          )}
+
+          <section aria-labelledby="brief-h" className="border-t border-border pt-5">
             <h2 id="brief-h" className="text-sm font-semibold">Brief</h2>
             {brief.keyMessage ? (
               <dl className="mt-3 grid gap-x-4 gap-y-2 text-sm sm:grid-cols-[8rem_1fr]">
@@ -1467,23 +1494,10 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
             )}
           </section>
 
-          {item.studio ? (
-            <section aria-label="Made in Reels" className="flex flex-col items-start gap-3 rounded-xl border border-border p-4">
-              <p className="text-sm">Made in Reels. Change its plan, video and caption there.</p>
-              {reelsOn ? (
-                <Button size="sm" asChild>
-                  <Link href={reelHref(item.id, brandId)}>Open in Reels</Link>
-                </Button>
-              ) : null}
-            </section>
-          ) : (
-            !editing && <NextStep base={base} item={item} perms={perms} onEdit={() => setEditing(true)} />
-          )}
-
           {item.channel === "INSTAGRAM_STORY" ? (
             <StoryFrames base={base} item={item} />
           ) : (
-          <section aria-labelledby="draft-h" className="rounded-xl border border-border p-4">
+          <section aria-labelledby="draft-h" className="border-t border-border pt-5">
             <div className="flex items-center justify-between gap-2">
               <h2 id="draft-h" className="text-sm font-semibold">
                 {editing ? "Edit draft" : `Draft ${item.latest ? `v${item.latest.version}` : ""}`}
@@ -1533,16 +1547,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
           </section>
           )}
 
-          {item.latest?.check && (
-            <section aria-labelledby="qc-h" className="rounded-xl border border-border p-4">
-              <h2 id="qc-h" className="text-sm font-semibold">
-                Quality check · {item.latest.check.overall === "PASS" ? "passed" : item.latest.check.overall === "WARN" ? "passed with notes" : "needs fixes"}
-              </h2>
-              <ChecksList results={item.latest.check.results} />
-            </section>
-          )}
-
-          <ReleasePanel base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} />
+          <ReleasePanel className="rounded-none border-0 border-t p-0 pt-5" base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} />
         </div>
       )}
     </div>
