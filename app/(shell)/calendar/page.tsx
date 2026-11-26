@@ -1,7 +1,6 @@
 import { CalendarDays, Lock } from "lucide-react";
 import { CalendarBoard } from "@/components/workspace/calendar-board";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageHeader } from "@/components/ui/page-header";
 import { featureOn } from "@/lib/features";
 import { getShell } from "@/lib/server-fetch";
 import { navFor } from "@/lib/nav";
@@ -43,7 +42,8 @@ export default async function CalendarPage() {
 
   return (
     <div className="flex w-full min-w-0 flex-col gap-5">
-      <PageHeader title="Content calendar">Your posts by day, with their status. Open one to brief, draft, approve or schedule it.</PageHeader>
+      {/* No visible header: the calendar's own toolbar starts the page (owner). The breadcrumb names it; screen readers still get a heading. */}
+      <h1 className="sr-only">Content calendar</h1>
       {/* Remount on brand switch so the calendar, its filters' options and the peek reset cleanly. */}
       <CalendarBoard key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} perms={shell.brandPermissions} userId={shell.user.id} reelsOn={featureOn("reels", shell.activeWorkspaceId)} />
     </div>
