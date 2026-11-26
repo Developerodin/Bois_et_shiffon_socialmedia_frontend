@@ -22,3 +22,12 @@ export const TONE_CLASS: Record<Tone, string> = {
   info: "border-primary/40 bg-primary/10 text-primary-strong",
   muted: "border-border bg-muted text-muted-foreground",
 };
+
+/** A solid swatch per tone, for status dots and the calendar's legend; always shown beside text that names the status. */
+export const TONE_DOT: Record<Tone, string> = {
+  good: "bg-success",
+  warn: "bg-warning",
+  bad: "bg-destructive",
+  info: "bg-primary",
+  muted: "bg-muted-foreground",
+};

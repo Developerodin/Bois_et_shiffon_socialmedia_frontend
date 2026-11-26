@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
+import { cellFit, dayCellLabel, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, shortTime } from "@/lib/calendar-month";
 
 // A zone with DST, so a day that is 23 or 25 hours long is in play.
 beforeAll(() => {
@@ -89,5 +89,21 @@ describe("day popover", () => {
   it("a cell shows a compact 24-hour time, none at midnight", () => {
     expect(shortTime(new Date(2026, 10, 23, 14, 30).toISOString())).toMatch(/^14.30$/);
     expect(shortTime(new Date(2026, 10, 23, 0, 0).toISOString())).toBeNull();
+  });
+});
+
+describe("compact cells", () => {
+  it("shows every post up to the line limit, else one fewer and the rest as +N more", () => {
+    expect(cellFit(0, 3)).toEqual({ shown: 0, more: 0 });
+    expect(cellFit(3, 3)).toEqual({ shown: 3, more: 0 });
+    expect(cellFit(4, 3)).toEqual({ shown: 2, more: 2 });
+    expect(cellFit(9, 3)).toEqual({ shown: 2, more: 7 });
+  });
+
+  it("names a cell by its day, count and each post's time, full title and status", () => {
+    expect(dayCellLabel("Monday 23 November", [])).toBe("Monday 23 November, 0 posts");
+    expect(dayCellLabel("Monday 23 November", [{ title: "A festive dining table", time: "14:30", status: "Scheduled" }, { title: "Undated", time: null, status: "To write" }])).toBe(
+      "Monday 23 November, 2 posts: 14:30 A festive dining table (Scheduled); Undated (To write)",
+    );
   });
 });

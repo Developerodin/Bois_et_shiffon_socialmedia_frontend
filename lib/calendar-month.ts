@@ -42,3 +42,27 @@ export function shortTime(iso: string): string | null {
   const at = new Date(iso);
   return at.getHours() || at.getMinutes() ? at.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }) : null;
 }
+
+/**
+ * How a month cell fits its posts: all of them when there are `max` or fewer, else `max - 1` and a "+N more" line, so a
+ * busy day takes no more lines than a full one and the month keeps to one screen.
+ */
+export function cellFit(count: number, max: number): { shown: number; more: number } {
+  return count <= max ? { shown: count, more: 0 } : { shown: max - 1, more: count - (max - 1) };
+}
+
+/**
+ * A month cell's accessible name: the day, its post count and each post's time, title and status, since the chips show
+ * titles cut short and colour the status.
+ */
+export function dayCellLabel(day: string, posts: { title: string; time: string | null; status: string }[]): string {
+  const count = posts.length === 1 ? "1 post" : `${posts.length} posts`;
+  if (!posts.length) return `${day}, ${count}`;
+  return `${day}, ${count}: ${posts.map((p) => `${p.time ? `${p.time} ` : ""}${p.title} (${p.status})`).join("; ")}`;
+}
+
+/**
+ * Under this width (px) the month is a grid of day numbers with status dots, and a tapped day lists its posts below the
+ * grid instead of in a popover. The month view's `@min-[640px]/month` classes use the same number.
+ */
+export const AGENDA_BELOW = 640;
