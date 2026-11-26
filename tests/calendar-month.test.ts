@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { CELL_FLOOR, CELL_FRAME, STACKED_STEP, cardsThatFit, cellFit, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, peekInset, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
+import { CARD_FORM_STEP, CELL_FLOOR, CELL_FRAME, cardsThatFit, cellFit, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, peekInset, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 
 // A zone with DST, so a day that is 23 or 25 hours long is in play.
 beforeAll(() => {
@@ -95,23 +95,30 @@ describe("cards in a day cell", () => {
   });
 
   it("uses two-line cards on a wide cell when every post fits that way, else one-line cards and +N more", () => {
-    // A 133 x 100 cell (1657 x 921, six weeks): two two-line cards fit, three don't.
-    expect(dayCards(1, 100, 133)).toEqual({ stacked: true, shown: 1, more: 0 });
-    expect(dayCards(2, 100, 133)).toEqual({ stacked: true, shown: 2, more: 0 });
-    expect(dayCards(3, 100, 133)).toEqual({ stacked: false, shown: 3, more: 0 });
-    expect(dayCards(5, 100, 133)).toEqual({ stacked: false, shown: 2, more: 3 });
+    // A 133 x 100 cell (1657 x 921, six weeks): one card with a two-line title, two with one-line titles, three don't.
+    expect(dayCards(1, 100, 133)).toEqual({ form: "stacked2", shown: 1, more: 0 });
+    expect(dayCards(2, 100, 133)).toEqual({ form: "stacked", shown: 2, more: 0 });
+    // Three 28 px lines don't fit in 72 px of room, two do: two lines, so one card and "+2 more".
+    expect(dayCards(3, 100, 133)).toEqual({ form: "line", shown: 1, more: 2 });
+    expect(dayCards(5, 130, 133)).toEqual({ form: "line", shown: 2, more: 3 });
     // Too narrow for two lines: one-line cards even for one post.
-    expect(dayCards(1, 100, 90)).toEqual({ stacked: false, shown: 1, more: 0 });
-    expect(dayCards(0, CELL_FLOOR, 133)).toEqual({ stacked: true, shown: 0, more: 0 });
+    expect(dayCards(1, 100, 90)).toEqual({ form: "line", shown: 1, more: 0 });
+    // The floor holds two compact lines but not two 28 px ones.
+    expect(dayCards(3, CELL_FLOOR, 133)).toEqual({ form: "compact", shown: 1, more: 2 });
+    expect(dayCards(0, CELL_FLOOR, 133)).toEqual({ form: "stacked2", shown: 0, more: 0 });
   });
 
-  it("never lets two-line cards run out of the cell, and never hides a post", () => {
-    for (const h of [CELL_FLOOR, 100, 130, 200])
-      for (let n = 0; n < 12; n++) {
-        const fit = dayCards(n, h, 140);
-        expect(fit.shown + fit.more).toBe(n);
-        if (fit.stacked) expect(CELL_FRAME + n * STACKED_STEP).toBeLessThanOrEqual(h);
-      }
+  it("never lets cards run out of the cell, and never hides a post", () => {
+    for (const h of [CELL_FLOOR, 80, 100, 130, 200])
+      for (const w of [90, 140])
+        for (let n = 0; n < 12; n++) {
+          const fit = dayCards(n, h, w);
+          expect(fit.shown + fit.more).toBe(n);
+          // Every line drawn (cards and "+N more", which is never taller than a card) fits under the frame.
+          expect(CELL_FRAME + (fit.shown + (fit.more ? 1 : 0)) * CARD_FORM_STEP[fit.form]).toBeLessThanOrEqual(h);
+          // A short cell shows at least one card unless the day is empty.
+          if (n) expect(fit.shown).toBeGreaterThanOrEqual(1);
+        }
   });
 });
 
