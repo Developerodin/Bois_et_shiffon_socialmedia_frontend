@@ -121,7 +121,7 @@ export function CompetitorsBoard({ workspaceId, brandId, perms, userId }: { work
 
   return (
     <>
-      <Card className="overflow-hidden">
+      <Card className="overflow-clip">
         <CompetitorsPanel base={base} canRun={canRun} onOpen={(id) => show({ kind: "competitor", id })} onFind={() => show({ kind: "agent", key: "competitors" })} />
       </Card>
       {peek.shown && (
