@@ -386,9 +386,10 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     }
   };
   const viewSwitch = (
-    <div role="tablist" aria-label="Calendar view" className="flex h-8 items-center rounded-full bg-muted p-0.5 text-xs pointer-coarse:h-auto">
+    // One height with the toolbar's buttons and selects (32 px); the chosen view carries the --control outline chosen tabs use.
+    <div role="tablist" aria-label="Calendar view" className="flex h-8 items-center gap-0.5 rounded-full border border-border bg-muted p-0.5 text-xs pointer-coarse:h-auto">
       {(["list", "month"] as const).map((v) => (
-        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("h-7 rounded-full px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11", view === v ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+        <button key={v} role="tab" type="button" aria-selected={view === v} onClick={() => pickView(v)} className={cn("h-[26px] min-w-14 rounded-full px-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11", view === v ? "bg-card text-foreground ring-1 ring-inset ring-control" : "text-muted-foreground hover:text-foreground")}>
           {v === "list" ? "List" : "Month"}
         </button>
       ))}
@@ -428,7 +429,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const campaignOptions = [...named].map(([id, name]) => ({ id, name }));
   const set = (patch: Partial<CalendarFilter>) => onFilter(Object.fromEntries(Object.entries({ ...filter, ...patch }).filter(([, v]) => v)) as CalendarFilter);
   // 16 px text on touch screens, so focusing a select doesn't zoom the page.
-  const sel = cn(selectClass, "h-8 text-xs pointer-coarse:h-11 pointer-coarse:text-base");
+  // Rounded like the toolbar's buttons, so the two rows read as one set of controls.
+  const sel = cn(selectClass, "h-8 rounded-full pl-3 pr-7 text-xs pointer-coarse:h-11 pointer-coarse:text-base");
   const filterCount = activeFilterCount(filter);
   // The filter selects: in the toolbar on a wide panel (`wide`), in the Filters popover otherwise.
   const filterControls = (wide: boolean) => {
@@ -466,7 +468,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const monthNav = (
     // On a narrow panel it takes a row of its own under the buttons. On a wide panel the heading keeps one width so the arrows don't move.
     <div className="flex items-center gap-1 @max-[640px]/cal:order-last @max-[640px]/cal:w-full">
-      <h2 id={monthHeadId} aria-live="polite" className="mx-1 text-base font-semibold tracking-tight @min-[900px]/cal:min-w-36 @max-[640px]/cal:mr-auto">
+      <h2 id={monthHeadId} aria-live="polite" className="mx-1.5 text-base font-semibold tracking-tight tabular-nums @min-[900px]/cal:min-w-40 @max-[640px]/cal:mr-auto">
         {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
       </h2>
       <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Previous month" onClick={() => showMonth(month.y, month.m - 1)}>
@@ -483,8 +485,10 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   // Two rows (owner's spec). The first: view, month and its arrows and Today (in Month), then Export and New post at the
   // right. The second: the filter selects, once the panel is 760 px wide (they take about 650 px); under that they fold
   // into a Filters button in the first row and the second row goes. Under 720 px Export shows its icon only.
+  // In Month the toolbar sticks to the top of the scrolling page (a short window scrolls under the calendar), on the
+  // card's white so nothing shows through. Not in List, whose day headings stick to the same top.
   const filters = (
-    <div className="relative flex flex-col gap-2 border-b border-border px-4 py-2.5 @max-[640px]/cal:px-2">
+    <div className={cn("relative flex flex-col gap-2 border-b border-border px-4 py-2 @max-[640px]/cal:px-2", view === "month" && "sticky top-0 z-10 rounded-t-2xl bg-card")}>
       <div className="flex flex-wrap items-center gap-2">
         {viewSwitch}
         {view === "month" && monthNav}
