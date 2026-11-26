@@ -4,7 +4,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNod
 import Link from "next/link";
 import { AtSign, BriefcaseBusiness, Check, ChevronLeft, ChevronRight, CircleDashed, Clapperboard, ExternalLink, FileText, GalleryHorizontal, Hash, Image as ImageIcon, LoaderCircle, Pencil, Pin, Plus, SlidersHorizontal, Sparkles, ThumbsUp, TriangleAlert, X, type LucideIcon } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
-import { ListSkeleton, selectClass } from "@/components/settings/shared";
+import { ListSkeleton } from "@/components/settings/shared";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
@@ -1419,12 +1419,19 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
             {item.opportunity && <p className="text-sm text-muted-foreground">From the idea: {item.opportunity.title}</p>}
             {canAssign ? (
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                <label htmlFor="post-owner" className="text-muted-foreground">Owner</label>
-                <select id="post-owner" disabled={assigning} value={item.owner?.id ?? ""} onChange={(e) => assign(e.target.value || null)} className={cn(selectClass, "h-8 w-auto text-sm pointer-coarse:h-11")}>
-                  <option value="">Unassigned</option>
-                  {item.owner && !owners.some((o) => o.id === item.owner!.id) && <option value={item.owner.id}>{item.owner.name ?? "Unnamed"}</option>}
-                  {owners.map((o) => <option key={o.id} value={o.id}>{o.name ?? "Unnamed"}</option>)}
-                </select>
+                <span aria-hidden className="text-muted-foreground">Owner</span>
+                {/* The styled dropdown the calendar filters use: its accessible name says "Owner: <who>". */}
+                <FilterSelect
+                  label="Owner"
+                  disabled={assigning}
+                  value={item.owner?.id ?? ""}
+                  onChange={(v) => assign(v || null)}
+                  options={[
+                    { value: "", label: "Unassigned" },
+                    ...(item.owner && !owners.some((o) => o.id === item.owner!.id) ? [{ value: item.owner.id, label: item.owner.name ?? "Unnamed" }] : []),
+                    ...owners.map((o) => ({ value: o.id, label: o.name ?? "Unnamed" })),
+                  ]}
+                />
                 {ownerError && <span role="alert" className="text-xs text-destructive">{ownerError}</span>}
                 {ownersFailed && <span className="text-xs text-muted-foreground">Couldn&rsquo;t load owners.</span>}
               </div>
