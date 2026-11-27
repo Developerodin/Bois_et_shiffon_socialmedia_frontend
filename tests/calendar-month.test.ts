@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { CARD_FORM_STEP, CELL_FLOOR, CELL_FRAME, cardsThatFit, cellFit, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, peekInset, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
+import { CARD_FORM_STEP, CELL_FLOOR, CELL_FRAME, cardsThatFit, cellFit, dayCards, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, itemCount, monthGrid, peekInset, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 
 // A zone with DST, so a day that is 23 or 25 hours long is in play.
 beforeAll(() => {
@@ -194,5 +194,21 @@ describe("New post from a day", () => {
     expect(newPostTime("2026-11-25", now)).toBeNull();
     // Past 23:00 there is no whole hour left today.
     expect(newPostTime("2026-11-26", new Date(2026, 10, 26, 23, 5))).toBeNull();
+  });
+});
+
+describe("other calendars' items", () => {
+  it("groupByDay takes a day key as it is, so a due day never shifts with the viewer's zone", () => {
+    const tasks = [{ id: "a", dueOn: "2026-11-30" }, { id: "b", dueOn: null }, { id: "c", dueOn: "2026-11-30" }];
+    const g = groupByDay(tasks, (t) => t.dueOn);
+    expect(g.get("2026-11-30")!.map((t) => t.id)).toEqual(["a", "c"]);
+    expect(g.get("unscheduled")!.map((t) => t.id)).toEqual(["b"]);
+  });
+
+  it("counts and day names in the calendar's own noun", () => {
+    expect(itemCount(1)).toBe("1 post");
+    expect(itemCount(2, ["task", "tasks"])).toBe("2 tasks");
+    expect(dayCellLabel("Monday 30 November", [{ title: "Fix menu", time: null, status: "To do" }], ["task", "tasks"])).toBe("Monday 30 November, 1 task: Fix menu (To do)");
+    expect(dayCellLabel("Monday 30 November", [], ["task", "tasks"])).toBe("Monday 30 November, 0 tasks");
   });
 });
