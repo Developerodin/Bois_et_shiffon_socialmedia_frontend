@@ -352,6 +352,11 @@ export type ChannelPostDto = {
   postedAt: string | null;
   caption: string | null;
   permalink: string | null;
+  /**
+   * Instagram: a picture of the post (a video's cover, else the image; a carousel's first item), an https link from
+   * Instagram's CDN that expires after a while. Null when there is none (Pinterest, Threads); older servers omit it.
+   */
+  thumbnailUrl: string | null;
   metrics: PostMetricsDto | null;
 };
 /**

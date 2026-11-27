@@ -20,14 +20,13 @@ export function column(x: number, y: number, w: number, h: number) {
 
 export type DayValue = { day: string; value: number | null };
 
-const H = 140;
 const M = { top: 18, right: 8, bottom: 22, left: 44 };
 const DATE = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
 export const dayLabel = (d: string) => DATE.format(new Date(`${d}T00:00:00Z`));
 /** Short axis numbers: 950, 1.2k, 3.4M. */
 export const compact = (v: number) => new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(v);
 
-function Plot({ days, what, W, label, className }: { days: DayValue[]; what: string; W: number; label: string; className: string }) {
+function Plot({ days, what, W, H = 140, label, className }: { days: DayValue[]; what: string; W: number; H?: number; label: string; className: string }) {
   const values = days.map((d) => d.value ?? 0);
   const top = niceMax(Math.max(...values));
   const plotW = W - M.left - M.right;
@@ -74,14 +73,15 @@ function Plot({ days, what, W, label, className }: { days: DayValue[]; what: str
 
 /** `what`: the unit in words for tooltips and the label ("reach", "media views"). Nothing drawn without a number. */
 /** `caption={false}`: the caller titles the chart itself; `title` still names it for screen readers. */
-export function DayBars({ days, what, title, caption = true }: { days: DayValue[]; what: string; title: string; caption?: boolean }) {
+/** `tall`: a taller wide plot (180 px of 720 instead of 140), for a chart that is the page's main one. */
+export function DayBars({ days, what, title, caption = true, tall = false }: { days: DayValue[]; what: string; title: string; caption?: boolean; tall?: boolean }) {
   if (!days.length || !days.some((d) => d.value !== null)) return <p className="text-xs text-muted-foreground">No daily numbers for these days.</p>;
   // No total: daily unique counts (reach) can't be added up. The figures above give the period's totals.
   const label = `${title}: daily ${what}, ${dayLabel(days[0].day)} to ${dayLabel(days[days.length - 1].day)}.`;
   return (
     <figure className="@container">
       {caption && <figcaption className="mb-1 text-xs text-muted-foreground">{title}</figcaption>}
-      <Plot days={days} what={what} W={720} label={label} className="hidden h-auto w-full @xl:block" />
+      <Plot days={days} what={what} W={720} H={tall ? 180 : 140} label={label} className="hidden h-auto w-full @xl:block" />
       <Plot days={days} what={what} W={360} label={label} className="h-auto w-full @xl:hidden" />
     </figure>
   );
