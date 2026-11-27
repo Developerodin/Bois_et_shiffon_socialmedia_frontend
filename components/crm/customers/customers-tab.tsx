@@ -82,15 +82,17 @@ export function CustomersTab({ w, b }: { w: string; b: string }) {
   // A link from another tab (?customer=<id>): open it once per link, then the list's own clicks decide.
   const urlCustomer = useSearchParams().get("customer");
   const handled = useRef<string | null>(null);
+  // After the list is in: the customer's heading has to be on the page to take focus.
+  const listed = rows !== null || failed;
   useEffect(() => {
-    if (!urlCustomer || handled.current === urlCustomer) return;
+    if (!urlCustomer || !listed || handled.current === urlCustomer) return;
     handled.current = urlCustomer;
     setCreating(false);
     open(urlCustomer, "always");
-  }, [urlCustomer, open]);
+  }, [urlCustomer, listed, open]);
 
-  const searching = search.kind !== "idle";
-  const shown = search.kind === "ready" ? search.customers : rows;
+  const searching = search.kind === "ready";
+  const shown = searching ? search.customers : rows;
   const current = shown?.find((c) => c.id === selected) ?? rows?.find((c) => c.id === selected) ?? null;
 
   const newCustomer = (
@@ -138,7 +140,7 @@ export function CustomersTab({ w, b }: { w: string; b: string }) {
         list={
           <ListCard id={ids.list} title={searching ? "Search results" : "All customers"} description={searching ? undefined : "Latest activity first"} top={searchBox}>
             {(shown ?? []).map((c) => (
-              <ListRow key={c.id} selected={!creating && c.id === selected} onSelect={() => show(c.id)} className="flex-col gap-1">
+              <ListRow key={c.id} selected={!creating && c.id === selected} onSelect={() => (setCreating(false), open(c.id))} className="flex-col gap-1">
                 <span className="w-full truncate font-medium">{c.displayName}</span>
                 <span className="flex w-full items-center justify-between gap-2 text-xs text-muted-foreground">
                   <span className="min-w-0 truncate">{[c.role, c.company?.name].filter(Boolean).join(" · ") || "No company"}</span>
@@ -153,7 +155,7 @@ export function CustomersTab({ w, b }: { w: string; b: string }) {
               </ListRow>
             ))}
             {search.kind === "ready" && !search.customers.length ? <li className="px-5 py-3 text-sm text-muted-foreground">No customer matches that.</li> : null}
-            {!searching && next ? (
+            {search.kind === "idle" && next ? (
               <li className="px-5 pt-2">
                 <Button size="sm" variant="outline" disabled={more === "busy"} onClick={() => void loadMore()}>
                   {more === "busy" ? "Loading…" : "Load more"}

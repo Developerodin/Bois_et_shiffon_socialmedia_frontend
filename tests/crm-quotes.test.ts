@@ -15,7 +15,7 @@ const quote: QuoteDto = {
   lines: [{ productId: "p1", variantId: "gid://shopify/ProductVariant/7", title: "Linen sofa", quantity: 2, unitPrice: "1000.00" }, { productId: null, variantId: null, title: "Delivery", quantity: 1, unitPrice: "80.00" }],
   discount: { kind: "PERCENT", value: "10" }, totals: { subtotal: "2080.00", discount: "208.00", total: "1872.00" }, note: "Delivery in May", internalNote: "Margin ok",
   validUntil: "2026-12-24", shopifyName: "#D1", needsShopifyUpdate: false, shopifySubtotal: "1872.00", subtotalDiffers: false, subtotalAccepted: false,
-  invoiceUrl: null, sentAt: null, customerId: null, declinedReason: null, createdById: "u1", createdAt: "2026-11-24T10:00:00Z", updatedAt: "2026-11-24T10:00:00Z",
+  invoiceUrl: null, sentAt: null, customerId: null, dealId: null, declinedReason: null, createdById: "u1", createdAt: "2026-11-24T10:00:00Z", updatedAt: "2026-11-24T10:00:00Z",
 };
 const preview = (p: QuotePreview["preview"], over: Partial<QuotePreview> = {}): QuotePreview => ({ preview: p, attempt: 1, confirmToken: "t", expiresAt: "", writes: { ready: true }, last: null, ...over });
 const html = (el: ReturnType<typeof createElement>) => renderToStaticMarkup(el);

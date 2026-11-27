@@ -76,6 +76,10 @@ export const crmApi = {
   companies: (w: string, b: string) => request<{ companies: CompanyDto[] }>(`${crm(w, b)}/companies`),
   createCompany: (w: string, b: string, body: { name: string; website?: string | null; ownerId?: string | null }) =>
     request<{ company: CompanyDto }>(`${crm(w, b)}/companies`, json("POST", body)),
+  company: (w: string, b: string, id: string) => request<{ company: CompanyDto }>(`${crm(w, b)}/companies/${encodeURIComponent(id)}`),
+  /** 409 `crm.changed` when someone saved since `updatedAt` was read. */
+  updateCompany: (w: string, b: string, id: string, body: { name?: string; website?: string | null; ownerId?: string | null; updatedAt: string }) =>
+    request<{ company: CompanyDto }>(`${crm(w, b)}/companies/${encodeURIComponent(id)}`, json("PATCH", body)),
   /** Link a quote to a customer (null unlinks), or `{ create: true }`: save its contact as a new customer. */
   quoteCustomer: (w: string, b: string, quoteId: string, body: { customerId: string | null } | { create: true }) =>
     request<{ quote: QuoteDto }>(`${one(w, b, quoteId)}/customer`, json("POST", body)),

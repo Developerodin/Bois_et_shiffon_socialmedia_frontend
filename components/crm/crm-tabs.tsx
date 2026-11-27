@@ -96,8 +96,22 @@ export function CrmTabs({ w, b, perms }: { w: string; b: string; perms: readonly
         })}
       </div>
       <div role="tabpanel" id={`crm-panel-${active}`} aria-labelledby={`crm-tab-${active}`} className="flex flex-col gap-5">
-        {active === "customers" ? <CustomersTab w={w} b={b} /> : <QuotesBoard w={w} b={b} />}
+        <CrmPanel tab={active} w={w} b={b} />
       </div>
     </>
   );
+}
+
+/** The body of each tab. Follow-ups and Pipeline get their branch when they join crmTabs(). */
+function CrmPanel({ tab, w, b }: { tab: CrmTab; w: string; b: string }) {
+  switch (tab) {
+    case "customers":
+      return <CustomersTab w={w} b={b} />;
+    case "quotes":
+      return <QuotesBoard w={w} b={b} />;
+    case "follow-ups":
+    case "pipeline":
+      // Not in crmTabs() yet, so never active.
+      return null;
+  }
 }
