@@ -63,7 +63,12 @@ export default async function ShellLayout({ children }: { children: React.ReactN
               <MainArea>{children}</MainArea>
             </div>
             {/* A platform-only account has no workspace, so no conversation to hold. */}
-            {workspaceId && agents ? <AssistantPanel workspaceId={workspaceId} brandId={shell.activeBrandId} brandName={brandName} canCreateBrand={canCreateBrand} /> : null}
+            {/* Suspense: the panel reads the calendar's ?cf_channel= (useSearchParams), as the sidebar reads ?panel=. */}
+            {workspaceId && agents ? (
+              <Suspense fallback={null}>
+                <AssistantPanel workspaceId={workspaceId} brandId={shell.activeBrandId} brandName={brandName} canCreateBrand={canCreateBrand} />
+              </Suspense>
+            ) : null}
           </div>
         </div>
       </AssistantProvider>

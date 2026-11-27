@@ -1,77 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
-import {
-  Bot,
-  CalendarRange,
-  FileSearch,
-  Gauge,
-  Lightbulb,
-  Maximize2,
-  Minimize2,
-  PackageSearch,
-  PackageX,
-  PenLine,
-  Search,
-  Sparkles,
-  SquarePen,
-  Swords,
-  Tag,
-  Target,
-  Users,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { Maximize2, Minimize2, Sparkles, SquarePen, X } from "lucide-react";
 import { ASSISTANT_TOGGLE_ID, useAssistant } from "@/components/shell/assistant-state";
 import { useXl } from "@/lib/media-query";
 import { SHELL_STROKE } from "@/components/shell/icon";
 import { ChatPane, type ChatSlots } from "@/components/workspace/chat-pane";
 import { assistantDocks, navFor } from "@/lib/nav";
-import { CHAT_PAGES, isChatPage } from "@/shared";
+import { isChatPage } from "@/shared";
+import { chatChannel, contextLabel, suggestionsFor } from "@/lib/assistant-context";
 import { cn } from "@/lib/utils";
-
-/** A starter card: what it says, and the fuller question it sends. */
-type Suggestion = { icon: LucideIcon; title: string; hint: string; ask: string };
-
-/**
- * Starters for the page being viewed. Only things the chat can really answer: it reads the strategy documents, the
- * SEO / AI-visibility reports, the product catalogue and the agents, and searches the web. It can't see campaigns or
- * posts, so content pages get starters that ask the person for the specifics instead of pretending to know them.
- */
-const GENERAL: Suggestion[] = [
-  { icon: CalendarRange, title: "Plan my next 30 days", hint: "A content and marketing plan from your strategy.", ask: "Plan my next 30 days of marketing." },
-  { icon: Users, title: "Who is my customer?", hint: "Your audience, from your business documents.", ask: "Who is my customer?" },
-  { icon: Swords, title: "Compare me with competitors", hint: "Where you stand and where you can win.", ask: "How do I compare with my competitors?" },
-];
-const BY_PAGE: Record<string, Suggestion[]> = {
-  context: [
-    { icon: Target, title: "Sharpen my positioning", hint: "What sets you apart, in one clear line.", ask: "Read my strategy documents and sharpen my positioning." },
-    { icon: FileSearch, title: "What's missing?", hint: "Gaps and weak spots in your documents.", ask: "What's missing or weak in my strategy documents?" },
-    { icon: Users, title: "Who is my customer?", hint: "Your audience, from your business documents.", ask: "Who is my customer?" },
-  ],
-  products: [
-    { icon: PackageSearch, title: "Explore my catalogue", hint: "What you sell, by category and range.", ask: "Give me an overview of my product catalogue: what I sell, the main categories and anything that stands out." },
-    { icon: Tag, title: "Analyse my pricing", hint: "Price ranges, the median and outliers.", ask: "Analyse my pricing: ranges, the median, and the products priced far above or below the rest." },
-    { icon: PackageX, title: "What's out of stock?", hint: "Out of stock, and stock we can't confirm.", ask: "Which of my products are out of stock, and which have unknown stock?" },
-  ],
-  performance: [
-    { icon: Gauge, title: "Explain my scores", hint: "Your SEO and AI-visibility reports in plain words.", ask: "Explain my latest SEO and AI-visibility reports in plain words." },
-    { icon: Lightbulb, title: "What should I fix first?", hint: "The few fixes that matter most.", ask: "From my site reports, what should I fix first?" },
-    { icon: Search, title: "Am I visible in AI answers?", hint: "How assistants talk about you, and why.", ask: "Am I visible when people ask AI assistants about my category?" },
-  ],
-  "agent-log": [
-    { icon: Bot, title: "Which agents should I run?", hint: "Based on what your business needs now.", ask: "Which of my agents should I run next, and why?" },
-    { icon: FileSearch, title: "What have my agents done?", hint: "Their latest runs, summed up.", ask: "Sum up what my agents did in their latest runs." },
-    { icon: CalendarRange, title: "Plan my next 30 days", hint: "A content and marketing plan from your strategy.", ask: "Plan my next 30 days of marketing." },
-  ],
-};
-for (const id of ["library", "photoshoot", "reels", "studio"])
-  BY_PAGE[id] = [
-    { icon: Lightbulb, title: "Content ideas for this week", hint: "Posts that fit your brand and audience.", ask: "Give me content ideas for this week." },
-    { icon: PenLine, title: "Write a caption", hint: "In your brand voice; tell me the post.", ask: "Help me write a caption in my brand voice. Ask me what the post is about first." },
-    { icon: CalendarRange, title: "Plan my next 30 days", hint: "A content and marketing plan from your strategy.", ask: "Plan my next 30 days of marketing." },
-  ];
 
 /** Morning / afternoon / evening, by the reader's clock (the empty state renders in the browser only). */
 function greeting() {
@@ -100,11 +39,13 @@ type Props = { workspaceId: string; brandId: string | null; brandName: string | 
 export function AssistantPanel(p: Props) {
   const wide = useXl();
   const pathname = usePathname();
+  const search = useSearchParams();
   const docked = wide && assistantDocks(pathname);
   const { open, setOpen } = useAssistant();
   const ref = useRef<HTMLElement>(null);
   const wasOpen = useRef(false);
   const shown = docked || open;
+  const page = navFor(pathname).activeId;
   // Expanded: a wide reading view over the page, for long answers and tables. Not remembered between pages.
   const [expanded, setExpanded] = useState(false);
   const collapse = useCallback(() => {
@@ -212,7 +153,7 @@ export function AssistantPanel(p: Props) {
         </button>
         {/* A card like every other panel (DESIGN_SYSTEM §4): white, bordered, on the page background, not painted onto it. */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm max-sm:rounded-none max-sm:border-0 max-sm:shadow-none">
-          <Body {...p} docked={docked} page={navFor(pathname).activeId} expanded={expanded} onExpand={() => (expanded ? collapse() : setExpanded(true))} />
+          <Body {...p} docked={docked} page={page} channel={chatChannel(page, search)} expanded={expanded} onExpand={() => (expanded ? collapse() : setExpanded(true))} />
         </div>
       </aside>
     </>
@@ -228,9 +169,10 @@ function Body({
   canCreateBrand,
   docked,
   page,
+  channel,
   expanded,
   onExpand,
-}: Props & { docked: boolean; page: string | null; expanded: boolean; onExpand: () => void }) {
+}: Props & { docked: boolean; page: string | null; channel: string | null; expanded: boolean; onExpand: () => void }) {
   // One line: cut short with the full name on hover rather than wrapping the header.
   const title = (
     <h2 title="Bois & Chiffons" className="truncate text-lg leading-tight font-semibold text-foreground">
@@ -242,7 +184,8 @@ function Body({
       <Sparkles className="size-4.5" strokeWidth={SHELL_STROKE} />
     </span>
   );
-  const suggestions = (page && BY_PAGE[page]) || GENERAL;
+  // A channel calendar's starters follow its channel; the conversation itself is never reset by a switch.
+  const suggestions = suggestionsFor(page, channel);
 
   if (!brandId) {
     return (
@@ -346,7 +289,8 @@ function Body({
         workspaceId={workspaceId}
         brandId={brandId}
         page={isChatPage(page) ? page : null}
-        pageLabel={isChatPage(page) ? CHAT_PAGES[page] : null}
+        channel={channel}
+        pageLabel={contextLabel(page, channel)}
         wide={expanded}
         {...slots}
       />
