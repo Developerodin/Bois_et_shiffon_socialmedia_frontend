@@ -266,11 +266,11 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
       {error && <p role="alert" className="px-4 pt-3 text-sm text-destructive">{error}</p>}
       {planned && (
         <div role="status" className="flex flex-wrap items-center justify-between gap-3 px-4 pt-3 text-sm">
-          <span>Posts planned. Open one to write its brief and draft.</span>
+          <span>Posts planned. The Brief writer, Creator and Quality check now prepare each one for your approval; the Planner's own view lists them.</span>
           <span className="flex gap-2">
             {onOpenPosts && (
               <Button size="sm" onClick={() => { setPlanned(false); onOpenPosts(); }}>
-                Open posts
+                See them on the calendar
               </Button>
             )}
             <Button size="sm" variant="ghost" onClick={() => setPlanned(false)}>
@@ -321,7 +321,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
                 </div>
               ) : onOpenPosts ? (
                 <div className="flex gap-2 pt-1">
-                  <Button size="sm" variant="secondary" onClick={onOpenPosts}>Open posts</Button>
+                  <Button size="sm" variant="secondary" onClick={onOpenPosts}>See them on the calendar</Button>
                 </div>
               ) : null)}
               {o.status !== "PLANNED" && canDecide && (
