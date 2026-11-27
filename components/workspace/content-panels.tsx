@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, SlidersHorizontal, Sparkles, TriangleAlert, X } from "lucide-react";
-import { ApiError, errorMessage, request } from "@/components/settings/api";
+import { ApiError, errorMessage, request, type Connection } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
@@ -75,6 +75,8 @@ export type ContentItem = {
   campaign?: { id: string; name: string } | null;
   /** Who looks after the post; older servers omit it (read as unassigned). */
   owner?: { id: string; name: string | null } | null;
+  /** The account its scheduled or published attempt uses; older servers omit it. */
+  publishConnectionId?: string | null;
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string };
@@ -370,6 +372,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const canExport = perms.includes("content.download");
+  // The brand's connections when this role reads them: cards name a Facebook Post's Page from them.
+  const accounts = connections && typeof connections === "object" ? connections.list : null;
   // Campaign names for the filter, read once (the calendar's poll doesn't carry them); without them the filter just isn't offered.
   const [campaigns, setCampaigns] = useState<{ id: string; name: string }[]>([]);
   const [campaignsFailed, setCampaignsFailed] = useState(false);
@@ -556,6 +560,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           undated={shown.filter((i) => !i.scheduledFor)}
           onOpen={onOpen}
           selectedId={selectedId ?? null}
+          accounts={accounts}
           onItems={reportMonth}
           onNewPost={canCreate ? (day) => setDayNewPost({ at: newPostTime(day) }) : undefined}
         />
@@ -588,7 +593,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
             <ul className="divide-y divide-border">
               {list.map((i) => {
                 const time = i.scheduledFor ? shortTime(i.scheduledFor) : null;
-                const d = postCardDetails(i);
+                const d = postCardDetails(i, accounts);
                 return (
                   <li key={i.id}>
                     <button type="button" onClick={() => onOpen(i.id)} className="flex min-h-11 w-full items-center gap-3 px-4 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
@@ -707,13 +712,13 @@ const LEGEND: readonly (readonly [Tone, string])[] = [["info", "Awaiting approva
  * it on one line (the time left to the tooltip so the title keeps the width). The full time, title, channel and status
  * are its tooltip and accessible name.
  */
-function PostCard({ item, onOpen, form = "compact", selected = false }: { item: ContentItem; onOpen: (id: string) => void; form?: CardForm; selected?: boolean }) {
+function PostCard({ item, accounts, onOpen, form = "compact", selected = false }: { item: ContentItem; accounts: readonly Connection[] | null; onOpen: (id: string) => void; form?: CardForm; selected?: boolean }) {
   const time = item.scheduledFor ? shortTime(item.scheduledFor) : null;
   const channel = CHANNEL_LABEL[item.channel] ?? item.channel;
   const Icon = channelIcon(item.channel);
   const status = statusText(item); // once per card: the tooltip and the accessible name both use it
-  const d = postCardDetails(item);
-  // The channel's label already names an Instagram format; the line adds a carousel's pictures or where a pin leads.
+  const d = postCardDetails(item, accounts);
+  // The channel's label already names an Instagram format; the line adds a carousel's pictures, where a pin leads or a Facebook Post's Page.
   const extra = postCardLine({ ...d, format: null });
   const thumb = useStableSignedUrl(d.thumb);
   return (
@@ -738,7 +743,7 @@ function PostCard({ item, onOpen, form = "compact", selected = false }: { item: 
 }
 
 /** A day's posts, each a row (time and channel, status, title) that opens the post: the day popover's list and the narrow month's agenda. */
-function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string) => void }) {
+function DayPosts({ posts, accounts, onPick }: { posts: ContentItem[]; accounts: readonly Connection[] | null; onPick: (id: string) => void }) {
   if (!posts.length) return null;
   return (
     <ul className="flex flex-col">
@@ -751,7 +756,7 @@ function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string
             meta={
               <>
                 {time && <span className="tabular-nums">{time} &middot; </span>}
-                {[CHANNEL_LABEL[i.channel] ?? i.channel, postCardLine({ ...postCardDetails(i), format: null })].filter(Boolean).join(" · ")}
+                {[CHANNEL_LABEL[i.channel] ?? i.channel, postCardLine({ ...postCardDetails(i, accounts), format: null })].filter(Boolean).join(" · ")}
               </>
             }
             status={<StatusBadge quiet status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>}
@@ -768,7 +773,7 @@ function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string
  * read of the grid's dates (?from&to, so past months show); undated ones are the list's. The same filters apply. A day
  * opens a popover (wide) or the agenda (narrow) listing its posts as DayPosts rows; an empty day offers New post.
  */
-function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedId, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; selectedId: string | null; onItems: (items: ContentItem[], from: string) => void; onNewPost?: (day: string) => void }) {
+function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedId, accounts, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; selectedId: string | null; accounts: readonly Connection[] | null; onItems: (items: ContentItem[], from: string) => void; onNewPost?: (day: string) => void }) {
   const grid = useMemo(() => monthGrid(month.y, month.m), [month]);
   const { from, to } = gridRange(grid);
   // A month that is all past changes rarely: polled slower. ponytail: one cached read per month looked at, polled while Month is open.
@@ -793,8 +798,8 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedI
       idOf={postId}
       selectedId={selectedId}
       onOpen={onOpen}
-      card={(i, form, selected) => <PostCard item={i} onOpen={onOpen} form={form} selected={selected} />}
-      dayList={(posts, onPick) => <DayPosts posts={posts} onPick={onPick} />}
+      card={(i, form, selected) => <PostCard item={i} accounts={accounts} onOpen={onOpen} form={form} selected={selected} />}
+      dayList={(posts, onPick) => <DayPosts posts={posts} accounts={accounts} onPick={onPick} />}
       summary={postSummary}
       tone={postTone}
       noun={POST_NOUN}
@@ -812,7 +817,7 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedI
             <span className="mr-1 text-muted-foreground">No date &middot; {undated.length}</span>
             {undated.map((i) => (
               <span key={i.id} className="w-48 max-w-full">
-                <PostCard item={i} onOpen={onOpen} form="line" selected={i.id === selectedId} />
+                <PostCard item={i} accounts={accounts} onOpen={onOpen} form="line" selected={i.id === selectedId} />
               </span>
             ))}
           </div>

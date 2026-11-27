@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { postCardDetails, postCardLine, sameSignedObject, type CardPost } from "@/lib/post-card";
+import type { Connection } from "@/components/settings/api";
+import { facebookPage, postCardDetails, postCardLine, sameSignedObject, type CardPost } from "@/lib/post-card";
 
 const post = (channel: string, latest: CardPost["latest"], firstFrameUrl?: string | null): CardPost => ({ channel, latest, firstFrameUrl });
 
@@ -44,5 +45,34 @@ describe("sameSignedObject", () => {
     expect(sameSignedObject("https://s3.example/b/k.jpg?sig=a", "https://s3.example/b/other.jpg?sig=a")).toBe(false);
     expect(sameSignedObject("https://s3.example/b/k.jpg", "https://cdn.example/b/k.jpg")).toBe(false);
     expect(sameSignedObject("not a url", "not a url")).toBe(false);
+  });
+});
+
+describe("facebookPage", () => {
+  const conn = (id: string, displayName: string, over: Partial<Connection> = {}): Connection => ({ id, provider: "META", displayName, status: "ACTIVE", lastError: null, tokenExpiresAt: null, connectedAt: "2026-11-01T00:00:00Z", ...over });
+  const fb = (publishConnectionId?: string | null) => ({ channel: "FACEBOOK_POST", publishConnectionId });
+  it("names the Page of the scheduled or published attempt", () => {
+    expect(facebookPage(fb("c2"), [conn("c1", "Oak"), conn("c2", "Oak Outlet")])).toBe("Oak Outlet");
+    // Its account still names it once that connection stops working.
+    expect(facebookPage(fb("c2"), [conn("c2", "Oak Outlet", { status: "ERROR" })])).toBe("Oak Outlet");
+  });
+  it("says nothing when the attempt's account is gone, never guessing another Page", () => {
+    expect(facebookPage(fb("gone"), [conn("c1", "Oak")])).toBeNull();
+  });
+  it("falls back to the one working Facebook Pages connection", () => {
+    expect(facebookPage(fb(), [conn("c1", "Oak"), conn("ig", "oak.ig", { provider: "INSTAGRAM" }), conn("old", "Old", { status: "REVOKED" })])).toBe("Oak");
+    expect(facebookPage(fb(null), [conn("c1", "Oak")])).toBe("Oak");
+  });
+  it("says nothing with several Pages and none chosen, none, or connections unknown", () => {
+    expect(facebookPage(fb(), [conn("c1", "Oak"), conn("c2", "Oak Outlet")])).toBeNull();
+    expect(facebookPage(fb(), [])).toBeNull();
+    expect(facebookPage(fb("c1"), null)).toBeNull();
+  });
+  it("is only for Facebook Posts", () => {
+    expect(facebookPage({ channel: "INSTAGRAM_POST", publishConnectionId: "c1" }, [conn("c1", "Oak")])).toBeNull();
+  });
+  it("reaches the card line", () => {
+    expect(postCardLine(postCardDetails({ ...fb(), latest: null }, [conn("c1", "Oak")]))).toBe("Page: Oak");
+    expect(postCardLine(postCardDetails({ ...fb(), latest: null }))).toBe("");
   });
 });
