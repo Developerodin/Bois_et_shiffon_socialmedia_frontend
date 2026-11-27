@@ -83,6 +83,8 @@ export type ConversationRow = {
   lastFromCustomer: boolean;
   waitingSince: string | null;
   closedAt: string | null;
+  /** send back on PATCH (409 when someone changed it in between) */
+  updatedAt: string;
   state: FollowUpState;
   overdue: boolean;
 };

@@ -26,8 +26,8 @@ describe("Sales & CRM nav", () => {
     expect(spark([], ["crm.manage"])).toMatchObject({ href: "/agents/spark", soon: true });
     expect(spark(["crm"], ["brand.read", "crm.read"])).toMatchObject({ href: "/agents/spark", soon: true });
     expect(spark(["crm"], ["crm.manage"])).toMatchObject({ href: "/crm", role: "Sales & CRM", soon: false });
-    // Quotes only for now: inbox.read alone can't open /crm, so the slot stays as it was.
-    expect(spark(["crm"], ["inbox.read"])).toMatchObject({ href: "/agents/spark", soon: true });
+    // Either key opens /crm (Decision 17): inbox.read for Follow-ups, crm.manage for the rest.
+    expect(spark(["crm"], ["inbox.read"])).toMatchObject({ href: "/crm", soon: false });
     expect(navFor("/crm").title).toBe("Sales & CRM");
   });
 });

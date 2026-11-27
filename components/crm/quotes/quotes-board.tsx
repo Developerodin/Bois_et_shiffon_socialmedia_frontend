@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { FileText, Plus, Printer, Search } from "lucide-react";
 import type { QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteStatus } from "@/shared";
 import { quotesApi, type QuoteBody } from "@/components/crm/api";
+import { QuoteCustomer } from "@/components/crm/customers/quote-customer";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
 import { QuoteVersions } from "@/components/crm/quotes/quote-versions";
 import { QUOTE_ACTION_LABEL, QuoteShopifyDialog } from "@/components/crm/quotes/shopify-dialog";
@@ -15,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
-import { PageHeader } from "@/components/ui/page-header";
 import { ListCard, ListDetail, ListRow, useListSelection } from "@/components/ui/list-detail";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -63,7 +64,7 @@ export const fromDraft = (lines: DraftLine[]): QuoteLineInput[] =>
 
 /**
  * The quotes tab of /crm (crm.manage): list, editor (totals always the server's answer), the Shopify steps through
- * confirm dialogs, and a print view.
+ * confirm dialogs, and a print view. `?quote=<id>` (a link from a customer) opens that quote once the list is in.
  */
 export function QuotesBoard({ w, b }: { w: string; b: string }) {
   const [quotes, setQuotes] = useState<QuoteDto[] | null>(null);
@@ -86,6 +87,14 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- once; the board remounts on a brand switch
   useEffect(load, []);
   const put = (q: QuoteDto) => setQuotes((list) => [q, ...(list ?? []).filter((x) => x.id !== q.id)]);
+  // A link from another tab (?quote=<id>): open it once per link, then the list's own clicks decide.
+  const urlQuote = useSearchParams().get("quote");
+  const handled = useRef<string | null>(null);
+  useEffect(() => {
+    if (!urlQuote || !quotes || handled.current === urlQuote || !quotes.some((q) => q.id === urlQuote)) return;
+    handled.current = urlQuote;
+    open(urlQuote, "always");
+  }, [urlQuote, quotes, open]);
 
   /** Without `currency` the server takes the shop's or the business's earlier one; with neither it asks (quote.currency). */
   const create = async (currency?: string) => {
@@ -162,13 +171,16 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
       />
     );
 
-  // The board owns the page header (Blog's page keeps its own): New quote needs the board's state. It is always there,
-  // disabled until the list has loaded, so the header doesn't shift and the button stays after a failed load.
+  // The page's header is /crm's (CrmTabs); the board's line carries New quote, which needs the board's state. It is
+  // always there, disabled until the list has loaded, so the line doesn't shift and the button stays after a failed load.
   return (
     <>
-      <PageHeader title="Quotes" actions={newQuote}>
-        Quotes become Shopify draft orders when you say so. The customer gets Shopify&rsquo;s invoice email only when you send it.
-      </PageHeader>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-prose text-sm text-muted-foreground">
+          Quotes become Shopify draft orders when you say so. The customer gets Shopify&rsquo;s invoice email only when you send it.
+        </p>
+        {newQuote}
+      </div>
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
       {askCurrency ? <CurrencyStep busy={busy} error={currencyError} onCreate={(c) => void create(c)} onCancel={() => (setAskCurrency(false), setCurrencyError(null))} /> : null}
       {body}
@@ -435,6 +447,16 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
         ) : null}
         {quote.status === "DECLINED" && quote.declinedReason ? <p className="text-sm"><span className="text-muted-foreground">Declined: </span><span className="whitespace-pre-wrap">{quote.declinedReason}</span></p> : null}
         {info ? <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm" role="status">{info}</p> : null}
+        <QuoteCustomer
+          w={w}
+          b={b}
+          quote={quote}
+          disabled={dirty}
+          onChange={(q) => {
+            onChange(q);
+            setForm(reset(q));
+          }}
+        />
         {editable ? (
           <form
             className="flex flex-col gap-5"

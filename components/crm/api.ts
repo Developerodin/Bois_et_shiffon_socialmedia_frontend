@@ -1,6 +1,6 @@
-// Client-side contract for the quotes API (app/api/v1/.../brands/[brandId]/quotes). Keep in sync with the routes.
-import { request } from "@/components/settings/api";
-import type { DraftOrderWritePreview, InvoiceEmailInput, InvoiceWritePreview, QuoteDiscount, QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteVersionDto, ShopifyWritePreview } from "@/shared";
+// Client-side contract for the quotes and CRM APIs (app/api/v1/.../brands/[brandId]/{quotes,crm}). Keep in sync with the routes.
+import { ApiError, request } from "@/components/settings/api";
+import type { CompanyDto, CustomerDto, CustomerNoteDto, CustomerRow, DraftOrderWritePreview, InvoiceEmailInput, InvoiceWritePreview, QuoteDiscount, QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteVersionDto, ShopifyWritePreview } from "@/shared";
 
 /** What the editor sends. Totals never: the server works them out and answers with the quote. */
 export type QuoteBody = {
@@ -14,6 +14,7 @@ export type QuoteBody = {
 };
 export type QuotePreview = ShopifyWritePreview<DraftOrderWritePreview | InvoiceWritePreview>;
 
+const brand = (w: string, b: string) => `/api/v1/workspaces/${encodeURIComponent(w)}/brands/${encodeURIComponent(b)}`;
 const base = (w: string, b: string) => `/api/v1/workspaces/${encodeURIComponent(w)}/brands/${encodeURIComponent(b)}/quotes`;
 const one = (w: string, b: string, id: string) => `${base(w, b)}/${encodeURIComponent(id)}`;
 const json = (method: string, body: unknown): RequestInit => ({ method, body: JSON.stringify(body) });
@@ -36,3 +37,57 @@ export const quotesApi = {
   confirm: (w: string, b: string, id: string, action: QuoteShopifyAction, confirmToken: string, email?: InvoiceEmailInput) =>
     request<{ quote: QuoteDto }>(`${one(w, b, id)}/shopify/confirm`, json("POST", { action, confirmToken, ...(action === "invoice" ? { email: email ?? {} } : {}) })),
 };
+
+/** The fields a person edits on a customer (create and PATCH); the PATCH adds the `updatedAt` it read. */
+export type CustomerFields = {
+  displayName?: string;
+  role?: string | null;
+  language?: string | null;
+  companyId?: string | null;
+  ownerId?: string | null;
+  nextAction?: string | null;
+  /** "YYYY-MM-DD" */
+  nextActionDue?: string | null;
+};
+export type ManualIdentity = { kind: "EMAIL" | "PHONE"; value: string };
+
+const crm = (w: string, b: string) => `${brand(w, b)}/crm`;
+const customer = (w: string, b: string, id: string) => `${crm(w, b)}/customers/${encodeURIComponent(id)}`;
+
+/** CRM records (crm.manage on every route). Errors carry `code`; an identity clash is `crm.identityTaken` (identityConflict). */
+export const crmApi = {
+  /** 50 a page, latest activity first. */
+  customers: (w: string, b: string, cursor?: string | null, init?: RequestInit) =>
+    request<{ customers: CustomerRow[]; nextCursor: string | null }>(`${crm(w, b)}/customers${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`, init),
+  /** At least CRM_LIMITS.searchMin characters (searchTerm); 20 results; 429 past 60 a minute. */
+  search: (w: string, b: string, q: string, init?: RequestInit) =>
+    request<{ customers: CustomerRow[]; nextCursor: null }>(`${crm(w, b)}/customers?q=${encodeURIComponent(q)}`, init),
+  customer: (w: string, b: string, id: string) => request<{ customer: CustomerDto }>(customer(w, b, id)),
+  createCustomer: (w: string, b: string, body: CustomerFields & { displayName: string; identities?: ManualIdentity[] }) =>
+    request<{ customer: CustomerDto }>(`${crm(w, b)}/customers`, json("POST", body)),
+  /** 409 `crm.changed` when someone saved since `updatedAt` was read. */
+  updateCustomer: (w: string, b: string, id: string, body: CustomerFields & { updatedAt: string }) => request<{ customer: CustomerDto }>(customer(w, b, id), json("PATCH", body)),
+  addIdentity: (w: string, b: string, id: string, body: ManualIdentity) => request<{ customer: CustomerDto }>(`${customer(w, b, id)}/identities`, json("POST", body)),
+  removeIdentity: (w: string, b: string, id: string, identityId: string) =>
+    request<{ customer: CustomerDto }>(`${customer(w, b, id)}/identities/${encodeURIComponent(identityId)}`, { method: "DELETE" }),
+  addNote: (w: string, b: string, id: string, text: string) => request<{ note: CustomerNoteDto }>(`${customer(w, b, id)}/notes`, json("POST", { text })),
+  /** Only the author's own note, in its first 24 hours (`deletable`). */
+  deleteNote: (w: string, b: string, id: string, noteId: string) => request<void>(`${customer(w, b, id)}/notes/${encodeURIComponent(noteId)}`, { method: "DELETE" }),
+  companies: (w: string, b: string) => request<{ companies: CompanyDto[] }>(`${crm(w, b)}/companies`),
+  createCompany: (w: string, b: string, body: { name: string; website?: string | null; ownerId?: string | null }) =>
+    request<{ company: CompanyDto }>(`${crm(w, b)}/companies`, json("POST", body)),
+  /** Link a quote to a customer (null unlinks), or `{ create: true }`: save its contact as a new customer. */
+  quoteCustomer: (w: string, b: string, quoteId: string, body: { customerId: string | null } | { create: true }) =>
+    request<{ quote: QuoteDto }>(`${one(w, b, quoteId)}/customer`, json("POST", body)),
+};
+
+/** A 409 `crm.identityTaken`: its message, and the customer who has the detail when the server names them. */
+export function identityConflict(e: unknown): { message: string; customerId: string | null; customerName: string | null } | null {
+  if (!(e instanceof ApiError) || e.code !== "crm.identityTaken") return null;
+  const d = (e.data ?? {}) as { customerId?: unknown; customerName?: unknown };
+  return {
+    message: e.message,
+    customerId: typeof d.customerId === "string" ? d.customerId : null,
+    customerName: typeof d.customerName === "string" ? d.customerName : null,
+  };
+}

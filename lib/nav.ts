@@ -23,7 +23,8 @@ export type NavEntry = {
 };
 
 const TASKS_READ = ["tasks.read"] as const;
-const CRM_MANAGE = ["crm.manage"] as const;
+/** Who can open /crm (plan 2026-11-27-crm, Decision 17): either key; each tab on the page checks its own. */
+const CRM_KEYS = ["crm.manage", "inbox.read"] as const;
 /** The Sales tab on /performance (Pulse's slot) needs crm.read, not crm.manage. */
 const PULSE_PERM = ["crm.read"] as const;
 /** A workspace permission: Settings' Members tab works with no business picked. */
@@ -53,8 +54,8 @@ export const NAV: readonly NavEntry[] = [
   { id: "studio", label: "Studio", href: "/studio", group: "create", feature: "stories" },
 
   { id: "inbox", label: "Inbox", href: "/inbox", group: "customers", feature: "inbox", perm: ["inbox.read"] },
-  // Its link is Spark's slot (agentEntries). Quotes only for now, so crm.manage; inbox.read joins with the stored inbox.
-  { id: "crm", label: "Sales & CRM", href: "/crm", group: "page", feature: "crm", perm: CRM_MANAGE },
+  // Its link is Spark's slot (agentEntries). Either key opens it: Follow-ups need inbox.read, the other tabs crm.manage.
+  { id: "crm", label: "Sales & CRM", href: "/crm", group: "page", feature: "crm", perm: CRM_KEYS },
   // Its link is Drift's slot; this entry gives the page its title (the page wins the tie with Drift's href). The page
   // and its API need brand.read. Drift's slot itself carries no perm: agentEntries lists every agent and reads none.
   { id: "competitors", label: "Competitors", href: "/competitors", group: "page", perm: ["brand.read"] },
@@ -99,7 +100,7 @@ export function sidebarGroups(enabled: readonly WebFeature[], perms?: readonly s
 /**
  * The agents as the sidebar lists them; a slot opens a real page instead of its coming-soon one when:
  * - Beat ("Projects & team"): the tasks flag and tasks.read, to Projects & tasks.
- * - Spark ("Sales & CRM"): the crm flag and crm.manage (who can open /crm), to /crm.
+ * - Spark ("Sales & CRM"): the crm flag and crm.manage or inbox.read (who can open /crm), to /crm.
  * - Pulse ("Finance"): the sales flag and crm.read, to the Sales tab of /performance.
  * - Hum ("Admin & access"): members.read in the workspace (`workspacePerms`), to Settings' Members tab.
  * Echo stays coming soon: there is no web inbox page yet.
@@ -110,7 +111,7 @@ export function agentEntries(enabled: readonly WebFeature[], perms?: readonly st
   const holds = (keys: readonly string[], list = perms) => !list || keys.some((p) => list.includes(p));
   const overrides: Record<string, Partial<NavEntry> | undefined> = {
     beat: enabled.includes("tasks") && holds(TASKS_READ) ? { role: "Projects & tasks", href: "/tasks" } : undefined,
-    spark: enabled.includes("crm") && holds(CRM_MANAGE) ? { href: "/crm" } : undefined,
+    spark: enabled.includes("crm") && holds(CRM_KEYS) ? { href: "/crm" } : undefined,
     pulse: enabled.includes("sales") && holds(PULSE_PERM) ? { href: "/performance?tab=sales" } : undefined,
     hum: holds(MEMBERS_READ, workspacePerms) ? { href: "/settings?tab=members" } : undefined,
   };

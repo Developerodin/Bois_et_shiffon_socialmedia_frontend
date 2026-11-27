@@ -49,6 +49,8 @@ export type QuoteDto = {
   sentAt: string | null;
   /** The customer record it belongs to (crm.manage), if linked. */
   customerId: string | null;
+  /** The pipeline deal it belongs to, if linked. */
+  dealId: string | null;
   /** DECLINED: why, as the team wrote it (≤ 500) */
   declinedReason: string | null;
   createdById: string | null;
