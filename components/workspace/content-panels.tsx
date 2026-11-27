@@ -23,6 +23,9 @@ import { PeekSlot, usePeekTitle } from "@/components/workspace/peek";
 import { QualityCheck } from "@/components/workspace/quality-check";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
 import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
+import { plannerChainBody } from "@/lib/agent-workflow";
+import { AgentWorkflowStrip } from "@/components/agents/agent-workflow-strip";
+import { PlanWithAgents } from "@/components/agents/plan-with-agents";
 import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -206,7 +209,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
     setPlanned(false);
     try {
       await ensureWorkLanguage(base);
-      const { run } = await request<{ run: { id: string } }>(`${base}/agents/planner/runs`, { method: "POST", body: "{}" });
+      const { run } = await request<{ run: { id: string } }>(`${base}/agents/planner/runs`, { method: "POST", body: plannerChainBody() });
       setPlanning(run.id);
       if (workspaceId) void loadPlanCredits(workspaceId, true);
     } catch (e) {
@@ -371,7 +374,7 @@ const statusText = (i: ContentItem) =>
  * `selectedId`: the post open in the side peek, which the month marks. `connections`: the brand's connections, for a
  * channel calendar's header (cf_channel set); without them it shows no connection state.
  */
-export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner, selectedId, connections = "hidden", reelsOn = false }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void; selectedId?: string | null; connections?: Conns; reelsOn?: boolean }) {
+export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, selectedId, connections = "hidden", reelsOn = false }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; selectedId?: string | null; connections?: Conns; reelsOn?: boolean }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const canExport = perms.includes("content.download");
@@ -432,6 +435,11 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const canCreate = perms.includes("content.create");
   // A channel's calendar offers that channel's posts in New post, starting on it.
   const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} filter={filter.channel} reelsOn={reelsOn} />;
+  // The posts chain (Planner → Brief writer → Creator → Quality) for this calendar's channel, or every channel. Keyed by
+  // channel so a new channel filter preselects afresh.
+  const planWithAgents = (label: string, variant: "secondary" | "outline") => <PlanWithAgents key={filter.channel ?? ""} base={base} perms={perms} filter={filter.channel} conns={connections} label={label} variant={variant} />;
+  // Below the toolbar (never inside Month's sticky one).
+  const strip = <AgentWorkflowStrip base={base} perms={perms} className="mx-4 mt-3 @max-[640px]/cal:mx-2" />;
   // The same dialog, opened from an empty day in Month, set to that day (newPostTime; a day that is over starts undated).
   const [dayNewPost, setDayNewPost] = useState<{ at: string | null } | null>(null);
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading calendar" rows={3} /></div>;
@@ -456,9 +464,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
         {viewSwitch}
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
         <div className="flex gap-2">
-          <Button size="sm" variant="secondary" onClick={onRunPlanner}>
-            Plan posts
-          </Button>
+          {planWithAgents("Plan posts", "secondary")}
           {newPost}
         </div>
       </div>
@@ -536,6 +542,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           </span>
           {/* A channel's calendar exports that channel (or group) only, and its file says which. */}
           {canExport && <ExportCsvButton url={`${base}/content/export${filter.channel ? `?channel=${encodeURIComponent(filter.channel)}` : ""}`} filename={`calendar-${filter.channel ? `${channelSlug(filter.channel)}-` : ""}${new Date().toLocaleDateString("en-CA")}.csv`} labelClassName="@max-[720px]/cal:sr-only" />}
+          {planWithAgents("Generate with agents", "outline")}
           {newPost}
         </span>
       </div>
@@ -554,6 +561,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       // A column that fills the card, so the month grid can take the height that is left.
       <div className="flex flex-1 flex-col @container/cal">
         {filters}
+        {strip}
         <MonthView
           base={base}
           filter={filter}
@@ -575,6 +583,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     return (
       <div className="@container/cal">
         {filters}
+        {strip}
         <div className="flex flex-col items-start gap-3 p-4">
           <p className="text-sm text-muted-foreground">No posts match these filters</p>
           <Button size="sm" variant="secondary" onClick={() => onFilter({})}>
@@ -589,6 +598,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   return (
     <div className="@container/cal">
       {filters}
+      {strip}
       <ol className="flex flex-col">
         {[...groups].map(([k, list]) => (
           <li key={k}>

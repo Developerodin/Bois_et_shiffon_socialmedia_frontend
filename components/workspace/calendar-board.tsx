@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { okToDiscard, UnsavedGuardOff } from "@/components/context/unsaved";
+import { UnsavedGuardOff } from "@/components/context/unsaved";
 import { reelHref } from "@/components/reels/href";
 import { useChannelConnections } from "@/components/social/channel-connection";
 import { Card } from "@/components/ui/card";
@@ -82,8 +82,8 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
       {/* No overflow clip: the month view's day popover opens below its cell and may run past the card's bottom. */}
       {/* It fills the page's height (flex-1), so the month grid below can spread its weeks over the window. */}
       <Card className="flex min-w-0 flex-1 flex-col" style={inset ? { marginRight: inset } : undefined}>
-        {/* The Planner runs from the Overview's agent peek; this page hosts posts only. */}
-        <ContentPanel base={base} perms={perms} me={userId} filter={filter} onFilter={changeFilter} onOpen={(id) => open(id)} onRunPlanner={() => okToDiscard() && router.push("/?agent=planner")} selectedId={shownId} connections={connections} reelsOn={reelsOn} />
+        {/* Plan with agents (the toolbar's Generate with agents) starts the Planner's posts chain here. */}
+        <ContentPanel base={base} perms={perms} me={userId} filter={filter} onFilter={changeFilter} onOpen={(id) => open(id)} selectedId={shownId} connections={connections} reelsOn={reelsOn} />
       </Card>
       {peek.shown && peekPost && (
         <Peek placement="page" fixedWidth={INSPECTOR_W} open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={() => open(null)} onExited={peek.onExited} asideRef={peek.ref}>
