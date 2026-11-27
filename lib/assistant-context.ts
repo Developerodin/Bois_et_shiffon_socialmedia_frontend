@@ -72,20 +72,20 @@ const BY_CHANNEL: Record<ChannelFamily, Suggestion[]> = {
   meta: [
     { icon: CalendarRange, title: "Plan my next week's content", hint: "Facebook and Instagram, around what's already planned.", ask: "Plan my next week of Facebook and Instagram content. Check what is already planned on both first, then fill the gaps." },
     { icon: Film, title: "Suggest Reel ideas for our collection", hint: "Reels that show off your products.", ask: "Suggest Instagram Reel ideas for our collection, based on my products and brand." },
-    { icon: ClipboardCheck, title: "Review posts awaiting approval", hint: "Facebook and Instagram posts to sign off.", ask: "Review my Facebook and Instagram posts awaiting approval and tell me what to check before approving them." },
+    { icon: ClipboardCheck, title: "Review posts awaiting approval", hint: "Facebook and Instagram posts to sign off.", ask: "Review my Facebook and Instagram posts awaiting approval and say which ones go out soonest." },
   ],
   instagram: [
     { icon: CalendarRange, title: "Plan my next week's content", hint: "Instagram, around what's already planned.", ask: "Plan my next week of Instagram content. Check what is already planned on Instagram first, then fill the gaps." },
     { icon: Film, title: "Suggest Reel ideas for our collection", hint: "Reels that show off your products.", ask: "Suggest Instagram Reel ideas for our collection, based on my products and brand." },
-    { icon: ClipboardCheck, title: "Review Instagram posts awaiting approval", hint: "What to check before you approve.", ask: "Review my Instagram posts awaiting approval and tell me what to check before approving them." },
+    { icon: ClipboardCheck, title: "Review Instagram posts awaiting approval", hint: "What waits for your sign-off.", ask: "Review my Instagram posts awaiting approval and say which ones go out soonest." },
   ],
   facebook: [
     { icon: CalendarRange, title: "Plan my next week's content", hint: "Facebook, around what's already planned.", ask: "Plan my next week of Facebook content. Check what is already planned on Facebook first, then fill the gaps." },
-    { icon: ClipboardCheck, title: "Review Facebook posts awaiting approval", hint: "What to check before you approve.", ask: "Review my Facebook posts awaiting approval and tell me what to check before approving them." },
+    { icon: ClipboardCheck, title: "Review Facebook posts awaiting approval", hint: "What waits for your sign-off.", ask: "Review my Facebook posts awaiting approval and say which ones go out soonest." },
   ],
   pinterest: [
-    { icon: Lightbulb, title: "Suggest Pin ideas for our products", hint: "Pins that lead to what you sell.", ask: "Suggest Pinterest Pin ideas for my products, with the board each would go on." },
-    { icon: LayoutGrid, title: "Organize content by board", hint: "Your planned Pins, grouped by board.", ask: "Organize my planned Pinterest Pins by board, and suggest a board for any Pin without one." },
+    { icon: Lightbulb, title: "Suggest Pin ideas for our products", hint: "Pins that lead to what you sell.", ask: "Suggest Pinterest Pin ideas for my products, using boards my Pins already plan on where one fits." },
+    { icon: LayoutGrid, title: "Organize content by board", hint: "Your planned Pins, grouped by board.", ask: "Organize my planned Pinterest Pins by their planned board, and list the Pins that have no board yet." },
   ],
   linkedin: [
     { icon: Megaphone, title: "Create a professional brand update", hint: "A company post in your brand voice.", ask: "Draft a professional LinkedIn company update about our brand. Ask me what news to share if you need it." },
