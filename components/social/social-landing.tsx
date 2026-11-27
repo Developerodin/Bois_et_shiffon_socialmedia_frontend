@@ -6,6 +6,8 @@ import { ChevronRight, Newspaper } from "lucide-react";
 import { ListSkeleton } from "@/components/settings/shared";
 import { AccountNumbers } from "@/components/social/channel-analytics";
 import { ChannelConnection, useChannelConnections, type Conns } from "@/components/social/channel-connection";
+import { AgentWorkflowStrip } from "@/components/agents/agent-workflow-strip";
+import { PlanWithAgents } from "@/components/agents/plan-with-agents";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -30,7 +32,7 @@ const CONNECTIONS = "/connections";
  * (GET content), the connections from GET connections (only for roles that hold CONNECTIONS_READ: `canSeeConnections`).
  * `canManageConnections` (integrations.manage) offers Connect and Manage, as the Connections page does.
  */
-export function SocialLanding({ workspaceId, brandId, canSeeConnections, canManageConnections, blogOn, actions, canSeeAnalytics = false }: { workspaceId: string; brandId: string; canSeeConnections: boolean; canManageConnections: boolean; blogOn: boolean; /** The page's buttons, at the right end of the figures' row. */ actions?: ReactNode; /** analytics.read: the Facebook Page and Instagram numbers. */ canSeeAnalytics?: boolean }) {
+export function SocialLanding({ workspaceId, brandId, canSeeConnections, canManageConnections, blogOn, actions, canSeeAnalytics = false, perms = [] }: { workspaceId: string; brandId: string; canSeeConnections: boolean; canManageConnections: boolean; blogOn: boolean; /** The page's buttons, at the right end of the figures' row. */ actions?: ReactNode; /** analytics.read: the Facebook Page and Instagram numbers. */ canSeeAnalytics?: boolean; /** The brand permissions: agents.run offers Create with agents, agents.read the workflow strip. */ perms?: string[] }) {
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
   const { data, failed, reload } = useJob(`${base}/content/summary`, { pick: pickSummary as (d: never) => ChannelSummary[], intervals: JOB_INTERVALS.socialLanding });
   // ponytail: the calendar's list (open posts + 30 days, 200 rows) feeds the Scheduled figure and the short lists; a brand
@@ -43,8 +45,12 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
       {/* One row: the figures fill the width, the page's buttons at its right end; under each other on a narrow page. */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-[min(100%,30rem)] flex-1">{data && <Figures summary={data} items={posts.data} conns={conns} />}</div>
-        {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <PlanWithAgents base={base} perms={perms} conns={conns} label="Create with agents" variant="outline" />
+          {actions}
+        </div>
       </div>
+      <AgentWorkflowStrip base={base} perms={perms} />
       <PageSection id="channels" title="Your channels" description="Open a channel to plan it on its own calendar." className="pt-1">
         {!data ? (
           failed ? <LoadFailed what="the channels" onRetry={reload} /> : <ListSkeleton label="Loading channels" rows={4} />

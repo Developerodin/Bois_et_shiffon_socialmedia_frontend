@@ -40,6 +40,7 @@ export default async function SocialPage() {
       <SocialLanding
         key={shell.activeBrandId}
         canSeeAnalytics={shell.brandPermissions.includes("analytics.read")}
+        perms={shell.brandPermissions}
         actions={
           <>
             {canManageConnections && (

@@ -15,6 +15,8 @@ export type AgentSummary = {
     finishedAt: string | null;
     /** Last failure reason, only for FAILED runs. */
     error?: string | null;
+    /** A FAILED run that had nothing to do (a chained round with no posts left); older servers omit it. */
+    nothingToDo?: boolean;
   } | null;
 };
 
