@@ -8,13 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { CAPTION_LIMITS, CHANNEL_TEXT_MAX } from "@/shared";
+import { CAPTION_LIMITS, captionMaxFor } from "@/shared";
 import type { ContentItem } from "@/components/workspace/content-panels";
 
 type Body = NonNullable<ContentItem["latest"]>["body"];
 const EMPTY: Body = { hook: "", caption: "", hashtags: [], slides: [], script: [], pinTitle: "", altText: "" };
-// Limits shared with server/content/rules.ts and the publish check (Pinterest's is checked in rules only).
-const CAPTION_MAX: Record<string, number> = { ...CHANNEL_TEXT_MAX, PINTEREST_PIN: CAPTION_LIMITS.pinDescriptionMax };
 const HASHTAGS_MAX = CAPTION_LIMITS.hashtagsMax;
 const lines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
 
@@ -54,7 +52,8 @@ function TextDraftEditor({ url, item, onSaved, onCancel }: { url: string; item: 
   const captionRef = useRef<HTMLTextAreaElement>(null);
 
   const ch = item.channel;
-  const captionMax = CAPTION_MAX[ch] ?? CAPTION_LIMITS.captionMax;
+  // Limits shared with server/content/rules.ts, New post and the publish check (Pinterest's is checked in rules only).
+  const captionMax = captionMaxFor(ch);
   const body: Body = {
     hook,
     caption,

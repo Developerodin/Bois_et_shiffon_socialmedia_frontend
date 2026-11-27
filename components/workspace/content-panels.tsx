@@ -13,7 +13,7 @@ import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { reelHref } from "@/components/reels/href";
-import { NEW_POST_CHANNELS, NewPostDialog, type NewPostChannel } from "@/components/workspace/new-post-dialog";
+import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { ChannelCalendarHeader } from "@/components/social/channel-calendar-header";
 import type { Conns } from "@/components/social/channel-connection";
 import { channelCounts } from "@/lib/social-channels";
@@ -82,7 +82,7 @@ export type ContentItem = {
   plannedBoardName?: string | null;
   latest: {
     version: number;
-    body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string };
+    body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string; photoKeys?: string[] };
     /** The draft's pictures, signed for an hour; the first is the cover (a studio reel's first scene). */
     photoUrls?: string[];
     byPerson: boolean;
@@ -371,7 +371,7 @@ const statusText = (i: ContentItem) =>
  * `selectedId`: the post open in the side peek, which the month marks. `connections`: the brand's connections, for a
  * channel calendar's header (cf_channel set); without them it shows no connection state.
  */
-export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner, selectedId, connections = "hidden" }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void; selectedId?: string | null; connections?: Conns }) {
+export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner, selectedId, connections = "hidden", reelsOn = false }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void; selectedId?: string | null; connections?: Conns; reelsOn?: boolean }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const canExport = perms.includes("content.download");
@@ -430,9 +430,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const showMonth = (y: number, m: number) => setMonth({ y: new Date(y, m, 1).getFullYear(), m: new Date(y, m, 1).getMonth() });
   // Opens the new post in the post view, like a calendar row.
   const canCreate = perms.includes("content.create");
-  // A channel calendar New post can make (an Instagram post or carousel) starts the dialog on it.
-  const composeChannel = filter.channel && NEW_POST_CHANNELS.includes(filter.channel) ? (filter.channel as NewPostChannel) : undefined;
-  const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} channel={composeChannel} />;
+  // A channel's calendar offers that channel's posts in New post, starting on it.
+  const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} filter={filter.channel} reelsOn={reelsOn} />;
   // The same dialog, opened from an empty day in Month, set to that day (newPostTime; a day that is over starts undated).
   const [dayNewPost, setDayNewPost] = useState<{ at: string | null } | null>(null);
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading calendar" rows={3} /></div>;
@@ -445,7 +444,6 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       conns={connections}
       counts={view === "month" ? (monthFrom === gridRange(monthGrid(month.y, month.m)).from ? channelCounts(monthItems, filter.channel, month) : null) : channelCounts(data, filter.channel)}
       range={view === "month" ? `in ${monthName}` : "open posts and the last 30 days"}
-      canCreate={canCreate}
       onReset={() => onFilter({ ...filter, channel: undefined })}
     />
   ) : null;
@@ -567,7 +565,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           onItems={reportMonth}
           onNewPost={canCreate ? (day) => setDayNewPost({ at: newPostTime(day) }) : undefined}
         />
-        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={!!dayNewPost} onOpenChange={(o) => !o && setDayNewPost(null)} at={dayNewPost?.at ?? undefined} channel={composeChannel} />
+        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={!!dayNewPost} onOpenChange={(o) => !o && setDayNewPost(null)} at={dayNewPost?.at ?? undefined} filter={filter.channel} reelsOn={reelsOn} />
       </div>
     );
   }
@@ -1051,6 +1049,16 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   );
 }
 
+/**
+ * The draft's pictures with their signed previews, for publishing. Only when every key has its link (GET content signs
+ * only this brand's keys, so a stored foreign key would shift the pairs); otherwise none, and the person adds images.
+ */
+export function draftPhotos(item: Pick<ContentItem, "latest">): { key: string; previewUrl: string }[] {
+  const keys = item.latest?.body.photoKeys ?? [];
+  const urls = item.latest?.photoUrls ?? [];
+  return keys.length && keys.length === urls.length ? keys.map((key, n) => ({ key, previewUrl: urls[n]! })) : [];
+}
+
 export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { base: string; perms: string[]; id: string; reelsOn: boolean; brandId: string; onLoaded?: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
@@ -1104,7 +1112,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
       .catch((e) => setOwnerError(errorMessage(e)))
       .finally(() => setAssigning(false));
   };
-  const brief = (item?.brief ?? {}) as { goal?: string; audience?: string; keyMessage?: string; products?: string[]; cta?: string; visual?: string; questions?: string[]; angle?: string };
+  const brief = (item?.brief ?? {}) as { goal?: string; audience?: string; keyMessage?: string; products?: string[]; cta?: string; visual?: string; questions?: string[]; angle?: string; written?: boolean };
   const b = item?.latest?.body;
   usePeekTitle(item?.title);
 
@@ -1217,6 +1225,8 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
                   </div>
                 ) : null}
               </dl>
+            ) : brief.written ? (
+              <p className="mt-2 text-sm text-muted-foreground">None: written by hand in New post.</p>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">Angle: {brief.angle?.trim().replace(/[.\s]+$/, "") || "-"}. The Brief writer hasn&rsquo;t written the brief yet.</p>
             )}
@@ -1275,7 +1285,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
           </section>
           )}
 
-          <ReleasePanel className="rounded-none border-0 border-t p-0 pt-5" base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} />
+          <ReleasePanel className="rounded-none border-0 border-t p-0 pt-5" base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} photos={draftPhotos(item)} />
         </div>
       )}
     </div>

@@ -83,7 +83,7 @@ export function TopBar({ brandName, workspaceId, brandId, userId, nav, agents, f
         <div className="flex shrink-0 items-center gap-1">
           {/* Search and "+" work on the active business; the "+" offers only what the role may create. */}
           {tasksOn && workspaceId && brandId && perms.includes("brand.read") && <SearchBox base={brandBase(workspaceId, brandId)} />}
-          {tasksOn && workspaceId && brandId && <QuickCreate base={brandBase(workspaceId, brandId)} perms={perms} userId={userId} />}
+          {tasksOn && workspaceId && brandId && <QuickCreate base={brandBase(workspaceId, brandId)} perms={perms} userId={userId} reelsOn={features.includes("reels")} />}
           {workspaceId && <CreditsChip workspaceId={workspaceId} className="max-xl:hidden" />}
           {/* Notifications are per person across the workspace's businesses; the server lists only tasks they can see. */}
           {tasksOn && workspaceId && <NotificationBell workspaceId={workspaceId} brandId={brandId} dataOn={features.includes("data")} />}

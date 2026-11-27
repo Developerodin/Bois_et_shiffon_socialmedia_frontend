@@ -410,6 +410,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
             needs={{ overdue: overdueQ.data ?? 0, blocked: blockedQ.data ?? 0 }}
             canRun={canRun}
             canCreate={canCreate}
+            reelsOn={reelsOn}
             onOpen={open}
             onShowPanel={revealPanel}
             onRetry={retry}
@@ -875,6 +876,7 @@ function Home({
   needs,
   canRun,
   canCreate,
+  reelsOn,
   onOpen,
   onShowPanel,
   onRetry,
@@ -914,6 +916,7 @@ function Home({
   needs: { overdue: number; blocked: number };
   canRun: boolean;
   canCreate: boolean;
+  reelsOn: boolean;
   onOpen: (v: View) => void;
   onShowPanel: (id: PanelId) => void;
 }) {
@@ -994,7 +997,7 @@ function Home({
             <Button size="sm" variant="secondary" asChild>
               <Link href={calendarHref()}>Open posts</Link>
             </Button>
-            <NewPostDialog base={base} canCreate={canCreate} onCreated={(id) => onOpen({ kind: "content", id })} />
+            <NewPostDialog base={base} canCreate={canCreate} reelsOn={reelsOn} onCreated={(id) => onOpen({ kind: "content", id })} />
           </div>
         ),
       });
@@ -1043,7 +1046,7 @@ function Home({
       });
     }
     return list;
-  }, [base, docs, marks, mark, reports, connections, pipeline, needs, canRun, canCreate, onOpen, onShowPanel, scoutPrice]);
+  }, [base, docs, marks, mark, reports, connections, pipeline, needs, canRun, canCreate, reelsOn, onOpen, onShowPanel, scoutPrice]);
 
   const done = tasks.filter((t) => t.done).length;
   const open = tasks.filter((t) => !t.done && !(Date.now() - (marks[t.id] ?? 0) < DAY_MS));
