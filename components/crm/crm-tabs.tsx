@@ -105,7 +105,7 @@ function CrmPanel({ tab, w, b, access }: { tab: CrmTab; w: string; b: string; ac
     case "customers":
       return <CustomersTab w={w} b={b} access={access} />;
     case "pipeline":
-      return <PipelineTab w={w} b={b} />;
+      return <PipelineTab w={w} b={b} canInbox={access.inbox} />;
     case "quotes":
       return <QuotesBoard w={w} b={b} />;
   }

@@ -1,26 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import { CRM_LIMITS, DEAL_STAGE_LABEL, OPEN_DEAL_STAGES, type CompanyDto, type DealDto, type DealStage, type QuoteStatus } from "@/shared";
+import { useCallback, useState } from "react";
+import { CRM_LIMITS, DEAL_STAGE_LABEL, OPEN_DEAL_STAGES, type CompanyDto, type ConversationRow, type DealDto, type DealStage, type QuoteStatus } from "@/shared";
 import { crmApi, type DealFields } from "@/components/crm/api";
 import { CrmLink, crmHref } from "@/components/crm/crm-link";
 import { CustomerPicker } from "@/components/crm/customers/customer-picker";
 import { OwnerSelect } from "@/components/crm/customers/owner-select";
 import type { Owner } from "@/components/crm/customers/people";
+import { CHANNEL_LABEL, FOLLOW_UP_STATE_LABEL, stateTone } from "@/components/crm/follow-ups/labels";
 import { QUOTE_STATUS_LABEL } from "@/components/crm/quotes/quotes-board";
-import { DEAL_TITLE_HINT, dealHints, dealValueProblem } from "@/components/crm/pipeline/labels";
+import { conversationLink, DEAL_TITLE_HINT, dealHints, dealValueProblem } from "@/components/crm/pipeline/labels";
 import { ApiError, errorMessage } from "@/components/settings/api";
-import { selectClass } from "@/components/settings/shared";
+import { ListSkeleton, selectClass, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { LoadFailed } from "@/components/ui/load-failed";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { cn } from "@/lib/utils";
 
-type Draft = { title: string; customer: { id: string; displayName: string } | null; companyId: string; value: string; currency: string; ownerId: string; nextAction: string; nextActionDue: string; stage: DealStage };
+const SHORT_DATE = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
+/** A conversation in the deal's picker: its subject, else its channel. */
+const conversationName = (c: Pick<ConversationRow, "subject" | "channel">) => c.subject ?? CHANNEL_LABEL[c.channel];
+
+type Draft = { title: string; customer: { id: string; displayName: string } | null; companyId: string; conversationId: string; value: string; currency: string; ownerId: string; nextAction: string; nextActionDue: string; stage: DealStage };
 const draftOf = (d: DealDto | null, currency: string): Draft => ({
   title: d?.title ?? "",
   customer: d?.customer ?? null,
   companyId: d?.company?.id ?? "",
+  conversationId: d?.conversationId ?? "",
   value: d?.value ?? "",
   currency: d?.currency ?? currency,
   ownerId: d?.ownerId ?? "",
@@ -31,11 +39,14 @@ const draftOf = (d: DealDto | null, currency: string): Draft => ({
 
 /**
  * A new deal, or one deal's details (stages move from the card). Edits save on the `updatedAt` read (409 asks for a
- * reload). The title warns against personal data: link the customer instead.
+ * reload). The title warns against personal data: link the customer instead. With inbox.read, the deal can link one
+ * of its customer's conversations.
  */
-export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onClose, onSaved, onStale }: {
+export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, canInbox, onClose, onSaved, onStale }: {
   w: string;
   b: string;
+  /** inbox.read: see and change the linked conversation (the server refuses a link without it, 400 crm.needsInbox). */
+  canInbox: boolean;
   /** null: a new deal */
   deal: DealDto | null;
   companies: CompanyDto[] | null;
@@ -49,6 +60,9 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onC
 }) {
   const [draft, setDraft] = useState(() => draftOf(deal, defaultCurrency));
   const [picking, setPicking] = useState(false);
+  const [pickingConversation, setPickingConversation] = useState(false);
+  // The picked conversation's name; a link saved earlier has none here (no read by id), so it shows as a plain link.
+  const [conversationLabel, setConversationLabel] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const edit = (p: Partial<Draft>) => setDraft((d) => ({ ...d, ...p }));
@@ -67,6 +81,7 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onC
       ownerId: draft.ownerId || null,
       nextAction: draft.nextAction.trim() || null,
       nextActionDue: draft.nextActionDue || null,
+      ...conversationLink(deal?.conversationId ?? null, draft.conversationId, canInbox),
     };
     try {
       const { deal: d } = deal ? await crmApi.updateDeal(w, b, deal.id, { ...fields, updatedAt: deal.updatedAt }) : await crmApi.createDeal(w, b, { ...fields, stage: draft.stage });
@@ -116,6 +131,38 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onC
             </div>
             {picking ? <CustomerPicker w={w} b={b} label="Find the deal's customer" onPick={(c) => (edit({ customer: { id: c.id, displayName: c.displayName } }), setPicking(false))} /> : null}
           </div>
+          {canInbox ? (
+            <div className="flex flex-col gap-1.5 text-sm">
+              <span className="text-muted-foreground">Conversation</span>
+              <div className="flex flex-wrap items-center gap-2">
+                {draft.conversationId ? (
+                  <CrmLink href={crmHref("follow-ups", { c: draft.conversationId })}>{conversationLabel ?? "The linked conversation"}</CrmLink>
+                ) : (
+                  <span>None</span>
+                )}
+                {draft.customer ? (
+                  <Button type="button" size="sm" variant="ghost" aria-expanded={pickingConversation} onClick={() => setPickingConversation((p) => !p)}>
+                    {draft.conversationId ? "Change" : "Pick a conversation"}
+                  </Button>
+                ) : null}
+                {draft.conversationId ? (
+                  <Button type="button" size="sm" variant="ghost" onClick={() => (edit({ conversationId: "" }), setConversationLabel(null))}>
+                    Remove
+                  </Button>
+                ) : null}
+              </div>
+              {!draft.customer ? <span className="text-xs text-muted-foreground">Pick the deal&rsquo;s customer to choose one of their conversations.</span> : null}
+              {pickingConversation && draft.customer ? (
+                <ConversationChoices
+                  w={w}
+                  b={b}
+                  customerId={draft.customer.id}
+                  current={draft.conversationId}
+                  onPick={(c) => (edit({ conversationId: c.id }), setConversationLabel(conversationName(c)), setPickingConversation(false))}
+                />
+              ) : null}
+            </div>
+          ) : null}
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="text-muted-foreground">Company</span>
@@ -182,6 +229,35 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onC
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** The customer's conversations to link (read when the picker opens: reading a customer is audited), latest first. */
+function ConversationChoices({ w, b, customerId, current, onPick }: { w: string; b: string; customerId: string; current: string; onPick(c: ConversationRow): void }) {
+  const fetcher = useCallback(() => crmApi.customer(w, b, customerId).then((r) => r.customer.conversations ?? []), [w, b, customerId]);
+  const { state, reload } = useLoad(fetcher);
+  if (state.kind === "loading") return <ListSkeleton label="Loading the customer's conversations" rows={1} />;
+  if (state.kind !== "ready") return <LoadFailed what="the customer's conversations" message={state.kind === "error" ? state.message : undefined} onRetry={reload} />;
+  if (!state.data.length) return <p className="text-xs text-muted-foreground">This customer has no conversations yet. Log one from their page on the Customers tab.</p>;
+  return (
+    <ul className="flex flex-col divide-y divide-border rounded-xl border border-border">
+      {state.data.map((c) => (
+        <li key={c.id}>
+          <button
+            type="button"
+            aria-current={c.id === current ? "true" : undefined}
+            className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-2 text-left hover:bg-muted aria-[current]:bg-muted pointer-coarse:py-3"
+            onClick={() => onPick(c)}
+          >
+            <span className="min-w-0 truncate">{conversationName(c)}</span>
+            <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+              <StatusBadge tone={stateTone(c.state)}>{FOLLOW_UP_STATE_LABEL[c.state]}</StatusBadge>
+              <time dateTime={c.lastMessageAt}>{SHORT_DATE.format(new Date(c.lastMessageAt))}</time>
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 

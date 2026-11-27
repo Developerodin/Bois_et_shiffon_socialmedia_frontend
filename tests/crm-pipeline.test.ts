@@ -3,7 +3,7 @@ import type { DealDto, PipelineDto } from "@/shared";
 import { crmAccess } from "@/components/crm/crm-link";
 import { crmTabs } from "@/components/crm/crm-tabs";
 import { money } from "@/components/data/shared";
-import { closesDeal, dealHints, dealValueProblem, HAND_CLOSE_REASONS, totalsLine } from "@/components/crm/pipeline/labels";
+import { closesDeal, conversationLink, dealHints, dealValueProblem, HAND_CLOSE_REASONS, totalsLine } from "@/components/crm/pipeline/labels";
 import { commonCurrency, orderedColumns } from "@/components/crm/pipeline/pipeline-tab";
 import { openDeals } from "@/components/crm/pipeline/quote-deal";
 
@@ -61,5 +61,21 @@ describe("closing a deal", () => {
     expect(dealValueProblem("1250.50", "eur")).toBeNull();
     expect(dealValueProblem("1250.505", "EUR")).toContain("1250.50");
     expect(dealValueProblem("1250", "")).toContain("currency");
+  });
+});
+
+describe("a deal's conversation", () => {
+  it("sends the link only when it changed", () => {
+    expect(conversationLink(null, "c1", true)).toEqual({ conversationId: "c1" });
+    expect(conversationLink("c1", "c2", true)).toEqual({ conversationId: "c2" });
+    expect(conversationLink("c1", "", true)).toEqual({ conversationId: null });
+    expect(conversationLink("c1", "c1", true)).toEqual({});
+    expect(conversationLink(null, "", true)).toEqual({});
+  });
+
+  it("never sends it without inbox.read, so a link the viewer can't see stays", () => {
+    // Without inbox.read the server reads the link as null: sending that would unlink it.
+    expect(conversationLink(null, "", false)).not.toHaveProperty("conversationId");
+    expect(conversationLink(null, "c1", false)).not.toHaveProperty("conversationId");
   });
 });

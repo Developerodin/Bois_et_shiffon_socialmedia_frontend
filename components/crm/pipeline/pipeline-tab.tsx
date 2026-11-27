@@ -37,7 +37,7 @@ export function commonCurrency(p: PipelineDto | null): string {
  * last 90 days). A deal moves with its card's stage menu (no dragging); Won and Lost ask why. After any change the
  * board is read again, so the totals stay the server's. `?deal=<id>` opens that deal.
  */
-export function PipelineTab({ w, b }: { w: string; b: string }) {
+export function PipelineTab({ w, b, canInbox }: { w: string; b: string; canInbox: boolean }) {
   const [board, setBoard] = useState<PipelineDto | null>(null);
   const [failed, setFailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -182,6 +182,7 @@ export function PipelineTab({ w, b }: { w: string; b: string }) {
           companies={companies}
           owners={owners}
           defaultCurrency={commonCurrency(board)}
+          canInbox={canInbox}
           onClose={() => setEditing(null)}
           onSaved={() => (setEditing(null), load())}
           onStale={load}
