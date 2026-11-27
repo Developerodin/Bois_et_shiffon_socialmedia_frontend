@@ -132,3 +132,21 @@ export function attentionPosts<T extends Listed>(items: readonly T[], now: Date,
   const upcoming = items.filter((i) => UPCOMING.includes(i.status) && at(i) >= now.getTime() && at(i) < Infinity).sort((a, b) => at(a) - at(b));
   return { awaiting: awaiting.slice(0, n), upcoming: upcoming.slice(0, n) };
 }
+
+/**
+ * A channel calendar's counts over the posts it has loaded, in the calendar's status groups: scheduled, awaiting approval
+ * and published. `month` (the Month view's, local time): only posts dated in it; without it, every post given (the
+ * List view's open posts and last 30 days of changes).
+ */
+export function channelCounts(items: readonly Pick<CalendarItem, "channel" | "status" | "scheduledFor">[], filter: string, month?: { y: number; m: number }) {
+  const channels = channelsOf(filter);
+  const inMonth = (iso: string | null) => {
+    if (!month) return true;
+    if (!iso) return false;
+    const d = new Date(iso);
+    return d.getFullYear() === month.y && d.getMonth() === month.m;
+  };
+  const mine = items.filter((i) => channels.includes(i.channel) && inMonth(i.scheduledFor));
+  const count = (group: readonly string[]) => mine.filter((i) => group.includes(i.status)).length;
+  return { scheduled: count(STATUS_GROUPS.scheduled), awaiting: count(STATUS_GROUPS.awaiting), published: count(STATUS_GROUPS.published) };
+}

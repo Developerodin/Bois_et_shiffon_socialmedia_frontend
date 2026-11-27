@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Connection } from "@/components/settings/api";
 import { CHANNEL_ICON, channelLabel } from "@/lib/post-labels";
-import { attentionPosts, channelName, connectionLines, connectionState, landingCounts, providersOf, rowSummary, SOCIAL_ROWS, type ChannelSummary } from "@/lib/social-channels";
+import { attentionPosts, channelCounts, channelName, connectionLines, connectionState, landingCounts, providersOf, rowSummary, SOCIAL_ROWS, type ChannelSummary } from "@/lib/social-channels";
 
 const next = (id: string, scheduledFor: string) => ({ id, title: id, scheduledFor, status: "SCHEDULED" });
 const summary: ChannelSummary[] = [
@@ -131,5 +131,25 @@ describe("attentionPosts", () => {
   });
   it("keeps at most n of each", () => {
     expect(attentionPosts(items, now, 1)).toEqual({ awaiting: [items[2]], upcoming: [items[4]] });
+  });
+});
+
+describe("channelCounts", () => {
+  const post = (channel: string, status: string, scheduledFor: string | null) => ({ channel, status, scheduledFor });
+  const items = [
+    post("INSTAGRAM_REEL", "SCHEDULED", "2026-11-15T12:00:00Z"),
+    post("INSTAGRAM_POST", "AWAITING_APPROVAL", "2026-11-16T12:00:00Z"),
+    post("INSTAGRAM_POST", "AWAITING_APPROVAL", null),
+    post("FACEBOOK_POST", "PUBLISHED", "2026-11-10T12:00:00Z"),
+    post("FACEBOOK_POST", "REVIEWED", "2026-12-15T12:00:00Z"),
+    post("PINTEREST_PIN", "SCHEDULED", "2026-11-15T12:00:00Z"),
+  ];
+  it("counts a group's channels in the calendar's status groups (Published includes Reviewed)", () => {
+    expect(channelCounts(items, "meta")).toEqual({ scheduled: 1, awaiting: 2, published: 2 });
+    expect(channelCounts(items, "instagram")).toEqual({ scheduled: 1, awaiting: 2, published: 0 });
+    expect(channelCounts(items, "PINTEREST_PIN")).toEqual({ scheduled: 1, awaiting: 0, published: 0 });
+  });
+  it("with a month, only posts dated in it", () => {
+    expect(channelCounts(items, "meta", { y: 2026, m: 10 })).toEqual({ scheduled: 1, awaiting: 1, published: 1 });
   });
 });

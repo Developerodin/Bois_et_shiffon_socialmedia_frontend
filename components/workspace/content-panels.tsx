@@ -13,7 +13,10 @@ import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { reelHref } from "@/components/reels/href";
-import { NewPostDialog } from "@/components/workspace/new-post-dialog";
+import { NEW_POST_CHANNELS, NewPostDialog, type NewPostChannel } from "@/components/workspace/new-post-dialog";
+import { ChannelCalendarHeader } from "@/components/social/channel-calendar-header";
+import type { Conns } from "@/components/social/channel-connection";
+import { channelCounts } from "@/lib/social-channels";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { PeekSlot, usePeekTitle } from "@/components/workspace/peek";
@@ -355,8 +358,11 @@ type CalendarView = "list" | "month";
 const statusText = (i: ContentItem) =>
   i.publishIssue ? PUBLISH_ISSUE[i.publishIssue] : i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status);
 
-/** `selectedId`: the post open in the side peek, which the month marks. */
-export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner, selectedId }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void; selectedId?: string | null }) {
+/**
+ * `selectedId`: the post open in the side peek, which the month marks. `connections`: the brand's connections, for a
+ * channel calendar's header (cf_channel set); without them it shows no connection state.
+ */
+export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner, selectedId, connections = "hidden" }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void; selectedId?: string | null; connections?: Conns }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const canExport = perms.includes("content.download");
@@ -370,7 +376,16 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
   // The posts of the month last shown in Month, so its channels and campaigns can be filtered on too.
   const [monthItems, setMonthItems] = useState<ContentItem[]>([]);
-  useEffect(() => setMonthItems([]), [base]);
+  // The grid start those posts were read for, so a channel's counts never show one month's posts under another's name.
+  const [monthFrom, setMonthFrom] = useState<string | null>(null);
+  const reportMonth = useCallback((items: ContentItem[], from: string) => {
+    setMonthItems(items);
+    setMonthFrom(from);
+  }, []);
+  useEffect(() => {
+    setMonthItems([]);
+    setMonthFrom(null);
+  }, [base]);
   // List or Month, remembered per browser; read after mount so the server render and the first client render agree.
   const [view, setView] = useState<CalendarView>("list");
   useEffect(() => {
@@ -404,14 +419,29 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const showMonth = (y: number, m: number) => setMonth({ y: new Date(y, m, 1).getFullYear(), m: new Date(y, m, 1).getMonth() });
   // Opens the new post in the post view, like a calendar row.
   const canCreate = perms.includes("content.create");
-  const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} />;
+  // A channel calendar New post can make (an Instagram post or carousel) starts the dialog on it.
+  const composeChannel = filter.channel && NEW_POST_CHANNELS.includes(filter.channel) ? (filter.channel as NewPostChannel) : undefined;
+  const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} channel={composeChannel} />;
   // The same dialog, opened from an empty day in Month, set to that day (newPostTime; a day that is over starts undated).
   const [dayNewPost, setDayNewPost] = useState<{ at: string | null } | null>(null);
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading calendar" rows={3} /></div>;
+  // A channel's calendar (cf_channel): its header, with counts over what this view has loaded and that range in words.
+  // Month counts wait for the shown month's own read; List counts its open posts and the last 30 days of changes.
+  const monthName = new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const channelHeader = filter.channel ? (
+    <ChannelCalendarHeader
+      channel={filter.channel}
+      conns={connections}
+      counts={view === "month" ? (monthFrom === gridRange(monthGrid(month.y, month.m)).from ? channelCounts(monthItems, filter.channel, month) : null) : channelCounts(data, filter.channel)}
+      range={view === "month" ? `in ${monthName}` : "open posts and the last 30 days"}
+      onReset={() => onFilter({ ...filter, channel: undefined })}
+    />
+  ) : null;
   // Month never shows this: past months come from their own read. The switch stays, so a brand with only old posts gets there.
   if (!data.length && view === "list") {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
+        {channelHeader && <div className="w-full">{channelHeader}</div>}
         {viewSwitch}
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
         <div className="flex gap-2">
@@ -462,7 +492,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     // On a narrow panel it takes a row of its own under the buttons. On a wide panel the heading keeps one width so the arrows don't move.
     <div className="flex items-center gap-1 @max-[640px]/cal:order-last @max-[640px]/cal:w-full">
       <h2 id={monthHeadId} aria-live="polite" className="mx-1 text-base font-semibold tracking-tight tabular-nums @min-[900px]/cal:min-w-40 @max-[640px]/cal:mr-auto">
-        {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+        {monthName}
       </h2>
       <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Previous month" onClick={() => showMonth(month.y, month.m - 1)}>
         <ChevronLeft aria-hidden className="size-4" />
@@ -482,6 +512,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   // card's white so nothing shows through. Not in List, whose day headings stick to the same top.
   const filters = (
     <div className={cn("relative flex flex-col gap-2 border-b border-border px-4 py-2 @max-[640px]/cal:px-2", view === "month" && "sticky top-0 z-10 rounded-t-2xl bg-card")}>
+      {channelHeader}
       <div className="flex flex-wrap items-center gap-2">
         {viewSwitch}
         {view === "month" && monthNav}
@@ -519,10 +550,10 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           undated={shown.filter((i) => !i.scheduledFor)}
           onOpen={onOpen}
           selectedId={selectedId ?? null}
-          onItems={setMonthItems}
+          onItems={reportMonth}
           onNewPost={canCreate ? (day) => setDayNewPost({ at: newPostTime(day) }) : undefined}
         />
-        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={!!dayNewPost} onOpenChange={(o) => !o && setDayNewPost(null)} at={dayNewPost?.at ?? undefined} />
+        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={!!dayNewPost} onOpenChange={(o) => !o && setDayNewPost(null)} at={dayNewPost?.at ?? undefined} channel={composeChannel} />
       </div>
     );
   }
@@ -723,7 +754,7 @@ function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string
  * read of the grid's dates (?from&to, so past months show); undated ones are the list's. The same filters apply. A day
  * opens a popover (wide) or the agenda (narrow) listing its posts as DayPosts rows; an empty day offers New post.
  */
-function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedId, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; selectedId: string | null; onItems: (items: ContentItem[]) => void; onNewPost?: (day: string) => void }) {
+function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedId, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; selectedId: string | null; onItems: (items: ContentItem[], from: string) => void; onNewPost?: (day: string) => void }) {
   const grid = useMemo(() => monthGrid(month.y, month.m), [month]);
   const { from, to } = gridRange(grid);
   // A month that is all past changes rarely: polled slower. ponytail: one cached read per month looked at, polled while Month is open.
@@ -733,10 +764,11 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedI
     intervals: past ? JOB_INTERVALS.preview : JOB_INTERVALS.always,
   });
   const byDay = useMemo(() => groupByDay(data ? filterItems(data.items, filter, me, new Date()) : []), [data, filter, me]);
-  // Reported only when what the filters list changes (a post, its channel or campaign), not on every poll.
-  const itemsKey = data?.items.map((i) => `${i.id}:${i.channel}:${i.campaign?.id ?? i.campaignId ?? ""}`).join() ?? null;
+  // Reported only when what the filters and a channel's counts read changes (a post, its channel, campaign or status,
+  // or the month), not on every poll.
+  const itemsKey = data ? `${from}|${data.items.map((i) => `${i.id}:${i.channel}:${i.campaign?.id ?? i.campaignId ?? ""}:${i.status}`).join()}` : null;
   useEffect(() => {
-    if (data) onItems(data.items);
+    if (data) onItems(data.items, from);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemsKey, onItems]);
   return (
