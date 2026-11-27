@@ -12,10 +12,11 @@ describe("disabled buttons say why in visible text", () => {
     expect(src).not.toContain('title="Fix the quality blockers first"');
     expect(src).not.toContain("(needed to");
   });
-  it("Draft post explains the missing photo", () => {
+  it("Draft post / Create post explains what is missing", () => {
     const src = read("components/workspace/new-post-dialog.tsx");
     expect(src).toContain("Choose a photo to draft the post.");
     expect(src).not.toContain("aria-required");
-    expect(src).toContain('aria-describedby={photo ? undefined : "photo-required"}');
+    expect(src).toContain('id="new-post-problem"');
+    expect(src).toContain('aria-describedby={problem ? "new-post-problem" : undefined}');
   });
 });

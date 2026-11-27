@@ -3,8 +3,6 @@
 import { X } from "lucide-react";
 import { ChannelConnection, type Conns } from "@/components/social/channel-connection";
 import { Button } from "@/components/ui/button";
-import { NEW_POST_CHANNELS } from "@/components/workspace/new-post-dialog";
-import { channelsOf } from "@/lib/calendar-filter";
 import { channelIcon } from "@/lib/post-labels";
 import { channelName } from "@/lib/social-channels";
 
@@ -13,13 +11,12 @@ export type ChannelCounts = { scheduled: number; awaiting: number; published: nu
 /**
  * The context line a channel's calendar opens with (cf_channel set): its mark, "<Channel> calendar", its connection state
  * and, once the posts it counts are loaded, how many are scheduled, awaiting approval and published over `range` (which
- * says what they cover). "All channels" clears only the channel, keeping the other filters. When New post can't make
- * this channel's posts (it makes Instagram posts and carousels), it says so to people who can create posts.
+ * says what they cover). "All channels" clears only the channel, keeping the other filters. New post starts on this
+ * channel (lib/new-post.ts composeChoices).
  */
-export function ChannelCalendarHeader({ channel, conns, counts, range, canCreate, onReset }: { channel: string; conns: Conns; counts: ChannelCounts | null; range: string; canCreate: boolean; onReset: () => void }) {
+export function ChannelCalendarHeader({ channel, conns, counts, range, onReset }: { channel: string; conns: Conns; counts: ChannelCounts | null; range: string; onReset: () => void }) {
   const Icon = channelIcon(channel);
   const name = channelName(channel);
-  const composes = channelsOf(channel).some((c) => NEW_POST_CHANNELS.includes(c));
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <span className="flex min-w-0 items-center gap-2">
@@ -35,7 +32,6 @@ export function ChannelCalendarHeader({ channel, conns, counts, range, canCreate
           <span> &middot; {range}</span>
         </p>
       )}
-      {canCreate && !composes && <p className="text-xs text-muted-foreground">New post makes an Instagram post or carousel</p>}
       <Button size="sm" variant="ghost" className="ml-auto" onClick={onReset}>
         <X aria-hidden />
         All channels
