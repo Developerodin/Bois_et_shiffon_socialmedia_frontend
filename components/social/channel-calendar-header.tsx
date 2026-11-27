@@ -1,8 +1,10 @@
 "use client";
 
-import { X } from "lucide-react";
+import Link from "next/link";
+import { ChartColumn, X } from "lucide-react";
 import { ChannelConnection, type Conns } from "@/components/social/channel-connection";
 import { Button } from "@/components/ui/button";
+import { analyticsFor, analyticsHref } from "@/lib/channel-analytics";
 import { channelIcon } from "@/lib/post-labels";
 import { channelName } from "@/lib/social-channels";
 
@@ -14,8 +16,9 @@ export type ChannelCounts = { scheduled: number; awaiting: number; published: nu
  * says what they cover). "All channels" clears only the channel, keeping the other filters. New post starts on this
  * channel (lib/new-post.ts composeChoices).
  */
-export function ChannelCalendarHeader({ channel, conns, counts, range, onReset }: { channel: string; conns: Conns; counts: ChannelCounts | null; range: string; onReset: () => void }) {
+export function ChannelCalendarHeader({ channel, conns, counts, range, onReset, analytics = false }: { channel: string; conns: Conns; counts: ChannelCounts | null; range: string; onReset: () => void; /** analytics.read: link to the channel's numbers on the Analytics page. */ analytics?: boolean }) {
   const Icon = channelIcon(channel);
+  const accounts = analytics ? analyticsFor(channel) : null;
   const name = channelName(channel);
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
@@ -32,7 +35,15 @@ export function ChannelCalendarHeader({ channel, conns, counts, range, onReset }
           <span> &middot; {range}</span>
         </p>
       )}
-      <Button size="sm" variant="ghost" className="ml-auto" onClick={onReset}>
+      {Array.isArray(accounts) && (
+        <Button asChild size="sm" variant="ghost" className="ml-auto">
+          <Link href={analyticsHref(accounts[accounts.length - 1])}>
+            <ChartColumn aria-hidden />
+            Analytics
+          </Link>
+        </Button>
+      )}
+      <Button size="sm" variant="ghost" className={Array.isArray(accounts) ? undefined : "ml-auto"} onClick={onReset}>
         <X aria-hidden />
         All channels
       </Button>

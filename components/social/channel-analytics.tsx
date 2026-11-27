@@ -1,17 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { ExternalLink } from "lucide-react";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { Stat } from "@/components/data/shared";
 import { DayBars, dayLabel } from "@/components/data/day-bars";
-import { analyticsFor } from "@/lib/channel-analytics";
 import type { AnalyticsChannel, ChannelAnalyticsDto, ChannelPostDto } from "@/shared";
 
-const DAYS = 28;
-/** Closed or open, remembered per browser (closed gives Month its height back). */
-const OPEN_KEY = "channel-analytics-open";
+export const DAYS = 28;
 const NAME: Record<AnalyticsChannel, string> = { instagram: "Instagram", facebook: "Facebook Page" };
 const n = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString());
 const COUNTRY = (() => {
@@ -30,55 +27,6 @@ const countryName = (code: string) => {
 };
 const TYPE: Record<string, string> = { REELS: "Reel", STORY: "Story", CAROUSEL_ALBUM: "Carousel", VIDEO: "Video", IMAGE: "Photo" };
 const postType = (p: ChannelPostDto) => (p.productType === "REELS" || p.productType === "STORY" ? TYPE[p.productType] : TYPE[p.mediaType ?? ""] ?? "Post");
-
-/**
- * A channel calendar's account numbers (cf_channel set; the caller checks analytics.read): the Facebook Page and/or
- * Instagram account, read live from Meta over the last 28 days. LinkedIn and X are posted by hand; Pinterest and
- * Threads have no analytics yet. Collapsible (remembered per browser); nothing is read while it is closed.
- */
-export function ChannelAnalytics({ base, filter }: { base: string; filter: string }) {
-  const what = analyticsFor(filter);
-  // null until storage is read (after mount, so the server and first client render agree): nothing is read till then.
-  const [open, setOpen] = useState<boolean | null>(null);
-  useEffect(() => {
-    let closed = false;
-    try {
-      closed = localStorage.getItem(OPEN_KEY) === "0";
-    } catch {
-      // storage blocked: open
-    }
-    setOpen(!closed);
-  }, []);
-  const toggle = (next: boolean) => {
-    setOpen(next);
-    try {
-      localStorage.setItem(OPEN_KEY, next ? "1" : "0");
-    } catch {
-      // ignore
-    }
-  };
-  if (what === "byHand" || what === "notYet") {
-    return (
-      <p className="text-xs text-muted-foreground">
-        {what === "byHand" ? "Published by hand — no analytics from the platform." : "Analytics for this channel aren't connected yet."}
-      </p>
-    );
-  }
-  return (
-    <details open={open !== false} onToggle={(e) => open !== null && e.currentTarget.open !== open && toggle(e.currentTarget.open)} className="rounded-2xl border border-border bg-card shadow-sm">
-      <summary className="cursor-pointer select-none px-4 py-2.5 text-sm font-medium">
-        Analytics <span className="font-normal text-muted-foreground">&middot; last {DAYS} days, from Meta</span>
-      </summary>
-      {open === true && (
-        <div className="flex flex-col gap-5 border-t border-border px-4 py-4">
-          {what.map((c) => (
-            <AccountNumbers key={c} base={base} channel={c} titled={what.length > 1} />
-          ))}
-        </div>
-      )}
-    </details>
-  );
-}
 
 /** One account's numbers. `compact` (the Channels page): the figures and the daily chart only; the calendar has the rest. */
 export function AccountNumbers({ base, channel, titled, compact = false }: { base: string; channel: AnalyticsChannel; titled: boolean; compact?: boolean }) {

@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import type { ContentItem } from "@/components/workspace/content-panels";
 import { calendarHref } from "@/lib/calendar-filter";
+import { analyticsHref } from "@/lib/channel-analytics";
 import { channelIcon, channelLabel, STATUS_LABEL, type ChannelIcon } from "@/lib/post-labels";
 import { attentionPosts, connectionState, landingCounts, providersOf, rowSummary, SOCIAL_ROWS, type ChannelSummary, type SocialRow } from "@/lib/social-channels";
 import { dayTime } from "@/lib/time";
@@ -201,16 +202,25 @@ function BlogRow() {
 
 /**
  * The Facebook Page and Instagram account over the last 28 days (GET insights/channel, live from Meta, cached 15 min on
- * the server): figures and the daily chart, side by side when there's room. Each channel's calendar has the rest
- * (engagement breakdown, countries, best posts).
+ * the server): figures and the daily chart, side by side when there's room. The Analytics page (/social/analytics) has
+ * the rest (engagement breakdown, countries, best posts).
  */
 function Analytics({ base }: { base: string }) {
   const accounts = [
-    { channel: "facebook", label: "Facebook Page", href: calendarHref({ channel: "FACEBOOK_POST" }) },
-    { channel: "instagram", label: "Instagram", href: calendarHref({ channel: "instagram" }) },
+    { channel: "facebook", label: "Facebook Page", href: analyticsHref("facebook") },
+    { channel: "instagram", label: "Instagram", href: analyticsHref("instagram") },
   ] as const;
   return (
-    <PageSection id="analytics" title="Analytics" description="Last 28 days, read from Meta.">
+    <PageSection
+      id="analytics"
+      title="Analytics"
+      description="Last 28 days, read from Meta."
+      actions={
+        <Link href={analyticsHref()} className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+          Open analytics
+        </Link>
+      }
+    >
       <div className="@container/analytics">
         <div className="grid grid-cols-[minmax(0,1fr)] gap-5 @min-[56rem]/analytics:grid-cols-2">
           {accounts.map((a) => {
@@ -223,7 +233,7 @@ function Analytics({ base }: { base: string }) {
                     {a.label}
                   </span>
                   <Link href={a.href} className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-                    More on its calendar
+                    Full analytics
                   </Link>
                 </div>
                 <AccountNumbers base={base} channel={a.channel} titled={false} compact />

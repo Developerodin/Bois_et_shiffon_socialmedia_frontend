@@ -14,7 +14,6 @@ import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { reelHref } from "@/components/reels/href";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
-import { ChannelAnalytics } from "@/components/social/channel-analytics";
 import { ChannelCalendarHeader } from "@/components/social/channel-calendar-header";
 import type { Conns } from "@/components/social/channel-connection";
 import { channelCounts } from "@/lib/social-channels";
@@ -446,18 +445,14 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       counts={view === "month" ? (monthFrom === gridRange(monthGrid(month.y, month.m)).from ? channelCounts(monthItems, filter.channel, month) : null) : channelCounts(data, filter.channel)}
       range={view === "month" ? `in ${monthName}` : "open posts and the last 30 days"}
       onReset={() => onFilter({ ...filter, channel: undefined })}
+      analytics={perms.includes("analytics.read")}
     />
   ) : null;
-  // The channel's own account numbers from the platform (roles that read analytics), between the toolbar and the posts;
-  // outside the toolbar, which sticks in Month.
-  const numbers = filter.channel && perms.includes("analytics.read") ? <ChannelAnalytics base={base} filter={filter.channel} /> : null;
-  const analytics = numbers && <div className="border-b border-border px-4 py-3 @max-[640px]/cal:px-2">{numbers}</div>;
   // Month never shows this: past months come from their own read. The switch stays, so a brand with only old posts gets there.
   if (!data.length && view === "list") {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
         {channelHeader && <div className="w-full">{channelHeader}</div>}
-        {numbers && <div className="w-full">{numbers}</div>}
         {viewSwitch}
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
         <div className="flex gap-2">
@@ -526,8 +521,9 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   // into a Filters button in the first row and the second row goes. Under 720 px Export shows its icon only.
   // In Month the toolbar sticks to the top of the scrolling page (a short window scrolls under the calendar), on the
   // card's white so nothing shows through. Not in List, whose day headings stick to the same top.
+  // Month's toolbar sticks flush to the top of the scrolling page (minus its padding), so nothing scrolls into view above it.
   const filters = (
-    <div className={cn("relative flex flex-col gap-2 border-b border-border px-4 py-2 @max-[640px]/cal:px-2", view === "month" && "sticky top-0 z-10 rounded-t-2xl bg-card")}>
+    <div className={cn("relative flex flex-col gap-2 border-b border-border px-4 py-2 @max-[640px]/cal:px-2", view === "month" && "sticky -top-4 z-10 rounded-t-2xl bg-card sm:-top-6")}>
       {channelHeader}
       <div className="flex flex-wrap items-center gap-2">
         {viewSwitch}
@@ -558,7 +554,6 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       // A column that fills the card, so the month grid can take the height that is left.
       <div className="flex flex-1 flex-col @container/cal">
         {filters}
-        {analytics}
         <MonthView
           base={base}
           filter={filter}
@@ -580,7 +575,6 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     return (
       <div className="@container/cal">
         {filters}
-        {analytics}
         <div className="flex flex-col items-start gap-3 p-4">
           <p className="text-sm text-muted-foreground">No posts match these filters</p>
           <Button size="sm" variant="secondary" onClick={() => onFilter({})}>
@@ -595,7 +589,6 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   return (
     <div className="@container/cal">
       {filters}
-      {analytics}
       <ol className="flex flex-col">
         {[...groups].map(([k, list]) => (
           <li key={k}>
