@@ -74,9 +74,9 @@ function Plot({ days, what, W, label, className }: { days: DayValue[]; what: str
 
 /** `what`: the unit in words for tooltips and the label ("reach", "media views"). Nothing drawn without a number. */
 export function DayBars({ days, what, title }: { days: DayValue[]; what: string; title: string }) {
-  const sum = days.reduce((a, d) => a + (d.value ?? 0), 0);
   if (!days.length || !days.some((d) => d.value !== null)) return <p className="text-xs text-muted-foreground">No daily numbers for these days.</p>;
-  const label = `${title}: ${sum.toLocaleString()} ${what} in all, ${dayLabel(days[0].day)} to ${dayLabel(days[days.length - 1].day)}.`;
+  // No total: daily unique counts (reach) can't be added up. The figures above give the period's totals.
+  const label = `${title}: daily ${what}, ${dayLabel(days[0].day)} to ${dayLabel(days[days.length - 1].day)}.`;
   return (
     <figure className="@container">
       <figcaption className="mb-1 text-xs text-muted-foreground">{title}</figcaption>
