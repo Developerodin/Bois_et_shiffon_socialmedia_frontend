@@ -70,7 +70,7 @@ export function AnalyticsView({ base, workspaceId, brandId, canSeeConnections, a
   // Not read while the connection is known to be missing: the connect state says so without asking the platform.
   const [load, retry] = useChannelAnalytics(base, id, days, channel.kind === "read" && conn.state !== "off" && conn.state !== "broken");
   const state = panelState(channel, conn.state, load);
-  const wide = useWideRead(base, id, days, state.kind === "ok");
+  const wide = useWideRead(base, id, days, state.kind === "ok" && state.pendingDays === 0);
   const data = "data" in state ? state.data : null;
   const Icon = CHANNEL_ICON[channel.id];
   const showRange = channel.kind === "read" && state.kind !== "disconnected" && state.kind !== "reconnect" && state.kind !== "unavailable";

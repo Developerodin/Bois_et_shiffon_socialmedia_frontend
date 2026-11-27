@@ -26,7 +26,7 @@ export function TopPerformingPosts({ posts, spec }: { posts: ChannelPostDto[]; s
   const top = topPosts(posts, sort.key);
   const pictures = posts.some((p) => p.thumbnailUrl);
   // One template for the head and every row: rank, the post, then a column per number once there's room.
-  const wide = { gridTemplateColumns: `1.25rem minmax(0,1fr) repeat(${cols.length}, 4.75rem)` };
+  const wide = { gridTemplateColumns: `1.25rem minmax(0,1fr) repeat(${cols.length}, 4.25rem)` };
   return (
     <section aria-labelledby="top-posts-title" className="@container/posts min-w-0 rounded-2xl border border-border bg-card p-4 sm:p-5">
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
@@ -40,7 +40,7 @@ export function TopPerformingPosts({ posts, spec }: { posts: ChannelPostDto[]; s
         </div>
         {sorts.length > 1 && <FilterSelect label="Sort by" value={sort.key} onChange={setSortKey} options={sorts.map((c) => ({ value: c.key, label: `By ${c.label.toLowerCase()}` }))} />}
       </div>
-      <div aria-hidden className="hidden gap-x-3 border-b border-border pb-2 text-xs text-muted-foreground @min-[30rem]/posts:grid" style={wide}>
+      <div aria-hidden className="hidden gap-x-3 border-b border-border pb-2 text-xs text-muted-foreground @min-[40rem]/posts:grid" style={wide}>
         <span />
         <span>{spec.noun}</span>
         {cols.map((c) => (
@@ -53,13 +53,13 @@ export function TopPerformingPosts({ posts, spec }: { posts: ChannelPostDto[]; s
         {top.map((p, i) => (
           <li key={p.id} className="py-2.5">
             {/* Narrow: the post over its numbers. Wide: one row on the table's template. */}
-            <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-x-3 @min-[30rem]/posts:hidden">
+            <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-x-3 @min-[40rem]/posts:hidden">
               <span className="text-sm tabular-nums text-muted-foreground">{i + 1}</span>
               <PostCell p={p} spec={spec} picture={pictures} />
               <span />
               <p className="mt-1.5 text-xs tabular-nums text-muted-foreground">{cols.map((c) => `${fmt(p.metrics?.[c.key])} ${c.label.toLowerCase()}`).join(" · ")}</p>
             </div>
-            <div className="hidden items-center gap-x-3 @min-[30rem]/posts:grid" style={wide}>
+            <div className="hidden items-center gap-x-3 @min-[40rem]/posts:grid" style={wide}>
               <span className="text-sm tabular-nums text-muted-foreground">{i + 1}</span>
               <PostCell p={p} spec={spec} picture={pictures} />
               {cols.map((c) => (

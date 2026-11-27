@@ -38,7 +38,7 @@ export function ChannelSidebar({ items, current, onSelect }: { items: RailItem[]
             <li key={c.id} className="relative shrink-0 @min-[36rem]/an:shrink">
               <button
                 type="button"
-                aria-current={on ? "page" : undefined}
+                aria-current={on ? "true" : undefined}
                 onClick={() => onSelect(c.id)}
                 className={cn(
                   "flex w-full min-w-0 items-center gap-2.5 rounded-xl border px-3 py-2 text-left @min-[36rem]/an:gap-3 @min-[36rem]/an:py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
