@@ -41,6 +41,16 @@ describe("notification bell", () => {
     expect(renderToStaticMarkup(createElement("span", null, notificationText(n)))).toContain("&lt;img");
   });
 
+  it("a search traffic alert opens its page's history, or the Search tab, only with the data flag", () => {
+    const seo = { ...alert, kind: "SEO_ALERT", alert: { kind: "CLICKS_DOWN" as const, text: "2 pages losing search traffic, e.g. /a", seoUrl: "https://shop.test/a b" } };
+    expect(notificationText(seo)).toBe("2 pages losing search traffic, e.g. /a");
+    expect(notificationText({ ...seo, count: 3 })).toBe("3 search traffic alerts");
+    expect(notificationTarget(seo)).toBeNull();
+    expect(notificationTarget(seo, { data: true })).toBe("/performance/url?u=https%3A%2F%2Fshop.test%2Fa%20b");
+    expect(notificationTarget({ ...seo, count: 2 }, { data: true })).toBe("/performance?tab=search");
+    expect(notificationTarget({ ...seo, alert: { kind: "SITE_DOWN", text: "x" } }, { data: true })).toBe("/performance?tab=search");
+  });
+
   it("an ads alert opens the Ads tab, one or a group, with no task; a task notice its task or list", () => {
     expect(notificationTarget({ ...alert, alert: { kind: "SPEND_UP", text: "x" } })).toBe("/performance?tab=ads");
     expect(notificationTarget({ ...alert, count: 2, alert: null })).toBe("/performance?tab=ads");

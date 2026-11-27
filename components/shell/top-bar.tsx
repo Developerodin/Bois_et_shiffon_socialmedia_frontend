@@ -86,7 +86,7 @@ export function TopBar({ brandName, workspaceId, brandId, userId, nav, agents, f
           {tasksOn && workspaceId && brandId && <QuickCreate base={brandBase(workspaceId, brandId)} perms={perms} userId={userId} />}
           {workspaceId && <CreditsChip workspaceId={workspaceId} className="max-xl:hidden" />}
           {/* Notifications are per person across the workspace's businesses; the server lists only tasks they can see. */}
-          {tasksOn && workspaceId && <NotificationBell workspaceId={workspaceId} brandId={brandId} />}
+          {tasksOn && workspaceId && <NotificationBell workspaceId={workspaceId} brandId={brandId} dataOn={features.includes("data")} />}
           {/* The Overview's panel layout portals its Layout menu here (one header band instead of two). */}
           <div id={TOPBAR_SLOT_ID} className="contents" />
           {brandId && agents && (
