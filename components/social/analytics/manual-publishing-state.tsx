@@ -28,8 +28,8 @@ export function plannedPosts(items: readonly ContentItem[], postChannel: string,
 
 /**
  * A channel published by hand (LinkedIn, X): no platform sends its numbers through this workflow, so instead of an
- * empty dashboard, what happens to its posts, Plan posts, and its next planned posts from the calendar's list (GET
- * content, filtered here). The list is a help, not the point: when it can't be read, it is just left out.
+ * empty dashboard, what happens to its posts, Plan posts (and the ones already out, on the calendar's Published
+ * filter), and its next planned posts from the calendar's list (GET content, filtered here). The list is a help, not the point: when it can't be read, it is just left out.
  */
 export function ManualPublishingState({ base, channel, icon, status }: { base: string; channel: ManualChannel; icon: Icon; status?: ReactNode }) {
   const [items, setItems] = useState<ContentItem[] | null | "failed">(null);
@@ -56,6 +56,11 @@ export function ManualPublishingState({ base, channel, icon, status }: { base: s
             <CalendarPlus aria-hidden />
             Plan {channel.label} posts
           </Link>
+        </Button>
+      }
+      secondary={
+        <Button asChild size="sm" variant="outline">
+          <Link href={calendarHref({ channel: channel.postChannel, status: "published" })}>See published posts</Link>
         </Button>
       }
       aside={items === "failed" ? undefined : <Planned channel={channel} posts={planned} />}
