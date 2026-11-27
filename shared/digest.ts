@@ -14,8 +14,12 @@ export type DigestSection =
    * Counts are as built; `overdueTasks` (first 5) are re-checked against task visibility on every read and send.
    */
   | { kind: "tasks"; key: "tasks.read"; crm: boolean; done: number; open: number; overdue: number; overdueTasks: { id: string; title: string }[] }
-  /** The latest 7 complete Search Console days (Google lags 2-3 days), in Google's Pacific days. */
-  | { kind: "seo"; key: "analytics.read"; data: { range: DateRange; totals: SearchMetrics; previous: SearchMetrics } | null }
+  /**
+   * The latest 7 complete Search Console days (Google lags 2-3 days), in Google's Pacific days. `declines`: the pages
+   * found losing search traffic during the digest's week (each in exactly one digest): how many, and up to 3 cleaned
+   * page paths (no host, no query text). Absent on digests built before declines existed.
+   */
+  | { kind: "seo"; key: "analytics.read"; data: { range: DateRange; totals: SearchMetrics; previous: SearchMetrics } | null; declines?: { count: number; pages: string[] } }
   /** The week's published posts with the most reach (reach null until read). */
   | { kind: "posts"; key: "analytics.read"; published: number; top: { title: string | null; channel: string; reach: number | null }[] }
   /** Per currency, never added across currencies. */

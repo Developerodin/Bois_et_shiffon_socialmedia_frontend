@@ -11,6 +11,7 @@ import { SHELL_STROKE, tool } from "@/components/shell/icon";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
 import { JOB_INTERVALS } from "@/components/workspace/use-job";
+import { urlHistoryHref } from "@/lib/seo-links";
 import { listsCare, notificationsApi, onTasksChanged } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { navigate, samePage, taskHref } from "@/lib/workspace-view";
@@ -55,6 +56,8 @@ export function notificationText(n: NotificationDto): string {
         return `Changes asked for on ${c} of your tasks`;
       case "AD_ALERT":
         return `${c} ads alerts`;
+      case "SEO_ALERT":
+        return `${c} search traffic alerts`;
       default:
         return `${c} task updates`;
     }
@@ -75,17 +78,26 @@ export function notificationText(n: NotificationDto): string {
     case "AD_ALERT":
       // Written and cleaned on the server (one line, no control or bidi characters); shown as text, never as HTML.
       return n.alert?.text ?? "Ads alert";
+    case "SEO_ALERT":
+      // Server text too ("3 pages losing search traffic, e.g. /a"), shown as text.
+      return n.alert?.text ?? "Pages losing search traffic";
     default:
       return "A task changed";
   }
 }
 
 /**
- * Where a notice opens, or null when it has nowhere to go: an ads alert (one or a group) opens the Ads tab; a task
- * group the list it is about; a single task notice its task (the caller places it in this page's peek when it can).
+ * Where a notice opens, or null when it has nowhere to go: an ads alert (one or a group) opens the Ads tab; a search
+ * traffic alert opens its page's URL history (the server-built `seoUrl`), or the Search tab for a group or the whole
+ * site, only with the `data` flag (`opts.data`; else nowhere); a task group the list it is about; a single task notice
+ * its task (the caller places it in this page's peek when it can).
  */
-export function notificationTarget(n: NotificationDto): string | null {
+export function notificationTarget(n: NotificationDto, opts: { data?: boolean } = {}): string | null {
   if (n.kind === "AD_ALERT") return "/performance?tab=ads";
+  if (n.kind === "SEO_ALERT") {
+    if (!opts.data) return null;
+    return n.count === 1 && n.alert?.seoUrl ? urlHistoryHref(n.alert.seoUrl) : "/performance?tab=search";
+  }
   if (!n.taskId) return null;
   return n.count > 1 ? `/tasks?view=${groupView(n.kind)}` : `/tasks?task=${encodeURIComponent(n.taskId)}`;
 }
@@ -101,7 +113,7 @@ const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: "nu
  * business first (asking about unsaved work) when it belongs to another one.
  * ponytail: only the first 20 are listed; older ones stay reachable through the task lists.
  */
-export function NotificationBell({ workspaceId, brandId }: { workspaceId: string; brandId: string | null }) {
+export function NotificationBell({ workspaceId, brandId, dataOn = false }: { workspaceId: string; brandId: string | null; dataOn?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [count, setCount] = useState(0);
@@ -163,7 +175,7 @@ export function NotificationBell({ workspaceId, brandId }: { workspaceId: string
       void notificationsApi.read(workspaceId, which).then(refresh, () => undefined);
       setList((l) => l?.map((x) => (x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x)) ?? l);
     }
-    const target = notificationTarget(n);
+    const target = notificationTarget(n, { data: dataOn });
     if (!target) return;
     if (n.brandId !== brandId) {
       // Another business: the same guard the business switcher uses, then its /tasks page opens the task or list.

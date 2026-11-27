@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
-import { DATA_SOURCE_SLUGS, type ChooseSearchSiteBody, type DataSourceDto, type SearchMetrics, type SearchPagesDto, type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto } from "@/shared";
+import { urlHistoryHref } from "@/lib/seo-links";
+import { tasksApi } from "@/lib/tasks-api";
+import { WriteBrief } from "@/components/performance/seo-brief";
+import {
+  DATA_SOURCE_SLUGS, type ChooseSearchSiteBody, type DataSourceDto, type SearchMetrics, type SearchPageRow, type SearchPagesDto, type SearchQueriesDto, type SearchQueryRow,
+  type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto, type SeoAlertView, type SeoDeclinesDto,
+} from "@/shared";
 
 const num = (n: number) => n.toLocaleString();
 const pct = (ctr: number | null) => (ctr == null ? "—" : `${(ctr * 100).toFixed(1)}%`);
@@ -23,7 +29,7 @@ const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
  * Search Console for the brand's site: totals against the previous equal-length period, every day, and the top pages.
  * `source` undefined = no site picked yet. `canManage` (integrations.manage) gets the site picker.
  */
-export function SearchTab({ workspaceId, brandId, range, source, canManage, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; onSourceChanged: () => void }) {
+export function SearchTab({ workspaceId, brandId, range, source, canManage, canMakeTasks, canWriteArticles, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; canMakeTasks: boolean; canWriteArticles: boolean; onSourceChanged: () => void }) {
   const base = brandApi(workspaceId, brandId);
   const [picking, setPicking] = useState(false);
 
@@ -44,13 +50,130 @@ export function SearchTab({ workspaceId, brandId, range, source, canManage, onSo
       </PageSection>
     );
   }
-  return <SearchNumbers base={base} range={range} source={source} onSourceChanged={onSourceChanged} onChangeSite={canManage ? () => setPicking(true) : undefined} />;
+  return (
+    <>
+      <SearchNumbers base={base} range={range} source={source} onSourceChanged={onSourceChanged} onChangeSite={canManage ? () => setPicking(true) : undefined} />
+      <Declines base={base} source={source} canMakeTasks={canMakeTasks} canWriteArticles={canWriteArticles} />
+    </>
+  );
+}
+
+const plusDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+
+/**
+ * Pages losing search traffic: the open decline alerts the server found after each daily sync (Google's days, the 28
+ * days ending 3 days before the last synced day vs the 28 before). Each page links to its URL history page (the
+ * server built the URL); "Make a task" files a task for it, re-checked in 28 days. With tasks on (the tab already
+ * needs analytics.read), checked pages go into one AI brief ("Write a brief", up to 20).
+ */
+function Declines({ base, source, canMakeTasks, canWriteArticles }: { base: string; source: DataSourceDto; canMakeTasks: boolean; canWriteArticles: boolean }) {
+  const fetcher = useCallback(() => request<SeoDeclinesDto>(`${base}/search/declines`), [base]);
+  const { state, reload } = useLoad(fetcher);
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const toggle = (id: string) => setChecked((s) => {
+    const next = new Set(s);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
+  useReloadOnFocus(reload, state);
+  useReloadWhenSynced([source], reload);
+
+  let body: React.ReactNode;
+  if (state.kind === "loading") body = <ListSkeleton label="Loading pages losing traffic" rows={2} />;
+  else if (state.kind === "forbidden") return null;
+  else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
+  else if (!state.data.alerts.length) body = <p className="text-sm text-muted-foreground">No page is losing search traffic right now.</p>;
+  else {
+    // Only pages still listed count: a reload may have closed some.
+    const ids = state.data.alerts.filter((a) => a.url && checked.has(a.id)).map((a) => a.id);
+    body = (
+      <div className="flex flex-col gap-2">
+        {canMakeTasks ? (
+          <div className="flex flex-wrap items-center gap-2 print:hidden">
+            <WriteBrief key={ids.join(",")} base={base} body={ids.length ? { from: "declines", alertIds: ids } : null} disabled={ids.length > 20} canWriteArticles={canWriteArticles} />
+            <span className="text-xs text-muted-foreground">{ids.length ? `${ids.length} checked` : "Check pages to write one brief for them (up to 20)."}</span>
+          </div>
+        ) : null}
+        <ul className="flex flex-col divide-y divide-border text-sm">
+          {state.data.alerts.map((a) => (
+            <li key={a.id} className="flex flex-col gap-2 py-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-start gap-2">
+                {canMakeTasks && a.url ? (
+                  <input type="checkbox" aria-label={`Include ${a.path} in a brief`} className="mt-1 print:hidden" checked={checked.has(a.id)} onChange={() => toggle(a.id)} />
+                ) : null}
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  {a.url ? (
+                    <Link href={urlHistoryHref(a.url)} className="break-all font-medium underline-offset-2 hover:underline">{a.path}</Link>
+                  ) : (
+                    <span className="font-medium">The whole site</span>
+                  )}
+                  <span>{a.text}</span>
+                  <span className="text-xs text-muted-foreground">Since {dayLabel(a.firstDay)}</span>
+                </div>
+              </div>
+              {canMakeTasks ? <DeclineTask base={base} alert={a} /> : null}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  return (
+    <PageSection id="search-declines" title="Pages losing search traffic" description="Clicks down 40% or more, or 3 places lower in Google, over 28 days against the 28 before.">
+      {body}
+    </PageSection>
+  );
+}
+
+/** "Make a task" for one declining page: SEO, the page's URL, re-checked in 28 days. */
+function DeclineTask({ base, alert }: { base: string; alert: SeoAlertView }) {
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  // One id per row: a retry after a lost answer returns the task the first press made.
+  const [requestId] = useState(() => crypto.randomUUID());
+  const make = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const task = await tasksApi.create(base, {
+        title: (alert.path ? `Win back search traffic: ${alert.path}` : "Win back search traffic across the site").slice(0, 200),
+        description: alert.text,
+        areas: ["SEO"],
+        priority: "NORMAL",
+        ...(alert.url ? { url: alert.url } : {}),
+        recheckOn: plusDays(28),
+        requestId,
+      });
+      setTaskId(task.id);
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't make the task. Try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
+      {taskId ? (
+        <Button asChild size="sm" variant="outline"><Link href={`/tasks?task=${encodeURIComponent(taskId)}`}>Open task</Link></Button>
+      ) : (
+        <Button size="sm" variant="outline" disabled={busy} onClick={() => void make()}>{busy ? "Making…" : "Make a task"}</Button>
+      )}
+      {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
+    </div>
+  );
 }
 
 function SearchNumbers({ base, range, source, onSourceChanged, onChangeSite }: { base: string; range: DateRange; source: DataSourceDto; onSourceChanged: () => void; onChangeSite?: () => void }) {
   const { from, to } = range; // the parent makes a new range object each render; refetch on its days only
   const fetcher = useCallback(
-    () => Promise.all([request<SearchSummaryDto>(`${base}/search/summary?${rangeQuery(from, to)}`), request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(from, to)}&sort=clicks`)]),
+    () =>
+      Promise.all([
+        request<SearchSummaryDto>(`${base}/search/summary?${rangeQuery(from, to)}`),
+        request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(from, to)}&sort=clicks`),
+        request<SearchQueriesDto>(`${base}/search/queries?${rangeQuery(from, to)}&sort=clicks`),
+      ]),
     [base, from, to],
   );
   const { state, reload } = useLoad(fetcher);
@@ -79,7 +202,7 @@ function SearchNumbers({ base, range, source, onSourceChanged, onChangeSite }: {
   else if (state.kind === "forbidden") body = <p className="text-sm text-muted-foreground">You can&apos;t see search numbers.</p>;
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
   else {
-    const [summary, pages] = state.data;
+    const [summary, pages, queries] = state.data;
     body = !summary.days.length && !summary.totals.impressions ? (
       <p className="text-sm text-muted-foreground">No numbers for these days yet. The first sync reads the last 90 days and takes a few minutes.</p>
     ) : (
@@ -96,6 +219,7 @@ function SearchNumbers({ base, range, source, onSourceChanged, onChangeSite }: {
             />
           </div>
         </details>
+        <TopQueries base={base} range={range} first={queries} />
         <TopPages base={base} range={range} first={pages} />
       </div>
     );
@@ -121,23 +245,76 @@ function Totals({ now, before }: { now: SearchMetrics; before: SearchMetrics }) 
 
 /** The first 50 pages by clicks, then more on asking. */
 function TopPages({ base, range, first }: { base: string; range: DateRange; first: SearchPagesDto }) {
-  const [more, setMore] = useState<{ for: SearchPagesDto; pages: SearchPagesDto["pages"]; next: string | null } | null>(null);
+  return (
+    <MoreRows<SearchPageRow>
+      base={base}
+      range={range}
+      list="pages"
+      first={{ rows: first.pages, next: first.nextCursor }}
+      rowsOf={(d) => (d as SearchPagesDto).pages}
+      title="Top pages"
+      note="Google reports the top pages each day, so these add up to less than the site total."
+      empty="No pages in this range."
+      label={(p) => <Link key="p" href={urlHistoryHref(p.page)} className="break-all underline-offset-2 hover:underline">{p.page}</Link>}
+    />
+  );
+}
+
+/** The first 50 search queries by clicks, then more on asking, with how much of the site's clicks they cover. */
+function TopQueries({ base, range, first }: { base: string; range: DateRange; first: SearchQueriesDto }) {
+  const share = first.coverage.clicks;
+  const since = first.since && first.since > range.from ? first.since : null;
+  const note = (
+    <>
+      These are the top 500 searches a day; Google also hides rare searches for privacy.
+      {share != null ? ` Together they cover ${Math.round(share * 100)}% of clicks.` : ""}
+      {since ? ` Queries since ${dayLabel(since)}.` : ""}
+    </>
+  );
+  return (
+    <MoreRows<SearchQueryRow>
+      base={base}
+      range={range}
+      list="queries"
+      first={{ rows: first.queries, next: first.nextCursor }}
+      rowsOf={(d) => (d as SearchQueriesDto).queries}
+      title="Top queries"
+      note={note}
+      empty="No queries in this range."
+      label={(q) => <span key="q" className="break-words">{q.query}</span>}
+    />
+  );
+}
+
+/** A table of search rows (pages or queries), 50 at a time from search/<list>, with "Show more". */
+function MoreRows<R extends SearchMetrics>({ base, range, list, first, rowsOf, title, note, empty, label }: {
+  base: string;
+  range: DateRange;
+  list: "pages" | "queries";
+  first: { rows: R[]; next: string | null };
+  rowsOf: (d: SearchPagesDto | SearchQueriesDto) => R[];
+  title: string;
+  note: React.ReactNode;
+  empty: string;
+  label: (r: R) => React.ReactNode;
+}) {
+  const [more, setMore] = useState<{ for: R[]; rows: R[]; next: string | null } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   // A new first page (new range, a reload) drops what was added under the old one.
-  const extra = more?.for === first ? more : null;
-  const rows = [...first.pages, ...(extra?.pages ?? [])];
-  const next = extra ? extra.next : first.nextCursor;
+  const extra = more?.for === first.rows ? more : null;
+  const rows = [...first.rows, ...(extra?.rows ?? [])];
+  const next = extra ? extra.next : first.next;
 
   const loadMore = async () => {
     if (!next) return;
     setBusy(true);
     setError("");
     try {
-      const d = await request<SearchPagesDto>(`${base}/search/pages?${rangeQuery(range.from, range.to)}&sort=clicks&cursor=${encodeURIComponent(next)}`);
-      setMore({ for: first, pages: [...(extra?.pages ?? []), ...d.pages], next: d.nextCursor });
+      const d = await request<SearchPagesDto | SearchQueriesDto>(`${base}/search/${list}?${rangeQuery(range.from, range.to)}&sort=clicks&cursor=${encodeURIComponent(next)}`);
+      setMore({ for: first.rows, rows: [...(extra?.rows ?? []), ...rowsOf(d)], next: d.nextCursor });
     } catch (e) {
-      setError(errorMessage(e, "Couldn't load more pages. Try again."));
+      setError(errorMessage(e, `Couldn't load more ${list}. Try again.`));
     } finally {
       setBusy(false);
     }
@@ -145,18 +322,18 @@ function TopPages({ base, range, first }: { base: string; range: DateRange; firs
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm font-medium">Top pages</h3>
-      <p className="text-xs text-muted-foreground">Google reports the top pages each day, so these add up to less than the site total.</p>
+      <h3 className="text-sm font-medium">{title}</h3>
+      <p className="text-xs text-muted-foreground">{note}</p>
       <Table
-        head={["Page", "Clicks", "Impressions", "CTR", "Position"]}
+        head={[list === "pages" ? "Page" : "Query", "Clicks", "Impressions", "CTR", "Position"]}
         numeric={[1, 2, 3, 4]}
         wide
-        empty="No pages in this range."
-        rows={rows.map((p) => [<span key="p" className="break-all">{p.page}</span>, num(p.clicks), num(p.impressions), pct(p.ctr), pos(p.position)])}
+        empty={empty}
+        rows={rows.map((r) => [label(r), num(r.clicks), num(r.impressions), pct(r.ctr), pos(r.position)])}
       />
       {next ? (
         <Button size="sm" variant="outline" className="self-start print:hidden" disabled={busy} onClick={() => void loadMore()}>
-          {busy ? "Loading…" : "Show more pages"}
+          {busy ? "Loading…" : `Show more ${list}`}
         </Button>
       ) : null}
       {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}

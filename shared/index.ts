@@ -28,3 +28,4 @@ export * from "./blog";
 export * from "./quotes";
 export * from "./competitors";
 export * from "./api/upcoming";
+export * from "./seo-url";

@@ -19,6 +19,7 @@ import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
 import { putShared } from "@/components/workspace/use-job";
 import { onTasksChanged, searchBrand, tasksApi, type TaskTeam } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
+import { urlHistoryHref } from "@/lib/seo-links";
 import { peekCrumb, peekKey, peekTitle, type View } from "@/lib/workspace-view";
 import { PersonSelect, TaskActions } from "@/components/tasks/task-actions";
 import { ProjectSelect } from "@/components/tasks/new-task-dialog";
@@ -95,8 +96,11 @@ const WEBSITE = "WEBSITE";
  * screenshots, the checklist and comments. `perms` (the shell's brand permissions) only hides controls the server
  * would refuse; it decides every write.
  */
-/** `blog`: offer "Write an article" on SEO tasks (flag `blog` and content.create, decided by the page). */
-export function TaskView({ base, id, perms, userId, onLoaded, blog }: { base: string; id: string; perms: string[]; userId: string | null | undefined; onLoaded?: (t: TaskDetailDto) => void; blog?: boolean }) {
+/**
+ * `blog`: offer "Write an article" on SEO tasks (flag `blog` and content.create, decided by the page).
+ * `seoHistory`: link the task's page (`url`) to its SEO history (flag `data` and analytics.read).
+ */
+export function TaskView({ base, id, perms, userId, onLoaded, blog, seoHistory }: { base: string; id: string; perms: string[]; userId: string | null | undefined; onLoaded?: (t: TaskDetailDto) => void; blog?: boolean; seoHistory?: boolean }) {
   const canManage = perms.includes("tasks.manage");
   const [task, setTask] = useState<TaskDetailDto | null>(null);
   const [loadError, setLoadError] = useState<"gone" | "failed" | null>(null);
@@ -176,6 +180,11 @@ export function TaskView({ base, id, perms, userId, onLoaded, blog }: { base: st
         {blog && task.areas.includes("SEO") ? (
           <Link href={`/blog?task=${encodeURIComponent(task.id)}`} className="ml-auto text-sm font-medium underline underline-offset-2">
             Write an article
+          </Link>
+        ) : null}
+        {seoHistory && task.url ? (
+          <Link href={urlHistoryHref(task.url)} className={cn("text-sm font-medium underline underline-offset-2", !(blog && task.areas.includes("SEO")) && "ml-auto")}>
+            SEO history
           </Link>
         ) : null}
       </div>
@@ -463,7 +472,7 @@ function LinkedPost({ base, value, current, onChange }: { base: string; value: s
  * The task peek on a page of its own (/tasks; the project pages later): opens on `?task=<id>`, asks about unsaved edits
  * before switching or closing, records the task in Recent once it loads. The Overview has its own peek and renders TaskView.
  */
-export function TaskPeek({ base, perms, userId, recentKey, blog }: { base: string; perms: string[]; userId: string; recentKey: string | null; blog?: boolean }) {
+export function TaskPeek({ base, perms, userId, recentKey, blog, seoHistory }: { base: string; perms: string[]; userId: string; recentKey: string | null; blog?: boolean; seoHistory?: boolean }) {
   const { shownId, open, recordLoaded } = useGuardedPeekParam("task", recentKey);
   const [loaded, setLoaded] = useState<{ id: string; title: string } | null>(null);
   const close = () => open(null);
@@ -480,7 +489,7 @@ export function TaskPeek({ base, perms, userId, recentKey, blog }: { base: strin
   return (
     <Peek placement="page" open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} onClose={close} onExited={peek.onExited} asideRef={peek.ref}>
       <UnsavedGuardOff value={!peek.live}>
-        <TaskView key={peekKey(peek.shown.view)} base={base} id={peek.shown.view.id} perms={perms} userId={userId} onLoaded={onLoaded} blog={blog} />
+        <TaskView key={peekKey(peek.shown.view)} base={base} id={peek.shown.view.id} perms={perms} userId={userId} onLoaded={onLoaded} blog={blog} seoHistory={seoHistory} />
       </UnsavedGuardOff>
     </Peek>
   );

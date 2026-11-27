@@ -13,6 +13,8 @@ import { ListSkeleton, LoadError, formatDate, useLoad } from "@/components/setti
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/ui/page-header";
 import { navFor } from "@/lib/nav";
+import { urlHistoryHref } from "@/lib/seo-links";
+import { WriteBrief } from "@/components/performance/seo-brief";
 import { PageSection } from "@/components/ui/page-section";
 
 type Severity = "critical" | "high" | "medium" | "low";
@@ -50,7 +52,8 @@ export function Score({ label, value, big }: { label: string; value: number | nu
  * `action`: beside each finding's row (Make a task); it drops under the row on a narrow screen. Closed rows show the
  * title and two lines of the why; open one for the detail, fix and pages.
  */
-export function Findings({ findings, action }: { findings: Finding[]; action?: (f: Finding) => ReactNode }) {
+/** `history`: link each URL to its page history (flag `data` and the analytics read permission, decided by the page). */
+export function Findings({ findings, action, history = false }: { findings: Finding[]; action?: (f: Finding) => ReactNode; history?: boolean }) {
   if (!findings.length) return <p className="text-sm text-muted-foreground">No issues found.</p>;
   return (
     <ol className="flex flex-col divide-y divide-border">
@@ -74,7 +77,11 @@ export function Findings({ findings, action }: { findings: Finding[]; action?: (
               <p><span className="font-medium">Fix: </span>{f.fix}</p>
               {f.urls?.length ? (
                 <ul className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-                  {f.urls.slice(0, 8).map((u) => <li key={u} className="truncate">{u}</li>)}
+                  {f.urls.slice(0, 8).map((u) => (
+                    <li key={u} className="truncate">
+                      {history ? <Link href={urlHistoryHref(u)} className="underline-offset-2 hover:underline">{u}</Link> : u}
+                    </li>
+                  ))}
                   {f.urls.length > 8 && <li>+{f.urls.length - 8} more</li>}
                 </ul>
               ) : null}
@@ -195,7 +202,7 @@ function MakeAllTasks({ url, kind, onStale, onMade }: { url: string; kind: "SEO"
   );
 }
 
-function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl, onStale, children }: { id: string; exportUrl: string; title: string; report: Report | null; agent: string; reportsUrl: string; findingTaskUrl?: (reportId: string, findingId: string) => string; onStale: () => void; children?: React.ReactNode }) {
+function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl, brief, history, onStale, children }: { id: string; exportUrl: string; title: string; report: Report | null; agent: string; reportsUrl: string; findingTaskUrl?: (reportId: string, findingId: string) => string; brief?: { base: string; canWriteArticles: boolean }; history: boolean; onStale: () => void; children?: React.ReactNode }) {
   return (
     <PageSection
       id={id}
@@ -224,7 +231,13 @@ function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl
           {children}
           <Findings
             findings={report.findings}
-            action={findingTaskUrl ? (f) => <FindingTask key={`${report.id}:${f.id}:${report.openTasks?.[f.id] ?? ""}`} url={findingTaskUrl(report.id, f.id)} taskId={report.openTasks?.[f.id]} /> : undefined}
+            history={history}
+            action={findingTaskUrl || brief ? (f) => (
+              <div className="flex flex-col items-start gap-2 sm:items-end">
+                {findingTaskUrl ? <FindingTask key={`${report.id}:${f.id}:${report.openTasks?.[f.id] ?? ""}`} url={findingTaskUrl(report.id, f.id)} taskId={report.openTasks?.[f.id]} /> : null}
+                {brief && (f.urls?.length ?? 0) >= 2 ? <WriteBrief key={`${report.id}:${f.id}`} base={brief.base} body={{ from: "finding", reportId: report.id, findingId: f.id }} canWriteArticles={brief.canWriteArticles} /> : null}
+              </div>
+            ) : undefined}
           />
         </>
       ) : (
@@ -241,8 +254,16 @@ function Panel({ id, title, report, agent, exportUrl, reportsUrl, findingTaskUrl
  * `canMakeTasks`: the tasks flag is on and the role holds tasks.manage; each finding then gets "Make a task".
  * `bare`: the reports alone, without the page header (the Performance tabs draw it).
  */
-export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks = false, bare = false }: { workspaceId: string; brandId: string; canReadAgents: boolean; canMakeTasks?: boolean; bare?: boolean }) {
+export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks = false, canSeeHistory = false, canWriteBriefs = false, canWriteArticles = false, bare = false }: {
+  workspaceId: string; brandId: string; canReadAgents: boolean; canMakeTasks?: boolean; canSeeHistory?: boolean;
+  /** The tasks flag, making tasks and seeing search numbers: "Write a brief" on a finding with two or more pages. */
+  canWriteBriefs?: boolean;
+  /** The blog flag and content.create: "Write an article" after a content brief. */
+  canWriteArticles?: boolean;
+  bare?: boolean;
+}) {
   const reportsUrl = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}/audit-reports`;
+  const brief = canWriteBriefs ? { base: `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`, canWriteArticles } : undefined;
   const findingTaskUrl = canMakeTasks ? (reportId: string, findingId: string) => `${reportsUrl}/${encodeURIComponent(reportId)}/findings/${encodeURIComponent(findingId)}/task` : undefined;
   const fetcher = useCallback(() => request<{ seo: Report | null; geo: Report | null }>(reportsUrl), [reportsUrl]);
   const { state, reload } = useLoad(fetcher);
@@ -283,7 +304,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks =
     const competitors = (geo?.metrics.competitors ?? []) as { name: string; mentions: number }[];
     body = (
       <div className="grid items-start gap-4 xl:grid-cols-2">
-        <Panel id="seo" title="SEO health" report={seo} agent="SEO" exportUrl={`${reportsUrl}/export?kind=SEO`} reportsUrl={reportsUrl} findingTaskUrl={findingTaskUrl} onStale={reload}>
+        <Panel id="seo" title="SEO health" report={seo} agent="SEO" exportUrl={`${reportsUrl}/export?kind=SEO`} reportsUrl={reportsUrl} findingTaskUrl={findingTaskUrl} brief={brief} history={canSeeHistory} onStale={reload}>
           {ps && (
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl bg-muted/40 px-4 py-3 sm:grid-cols-4">
               <Score label="Performance (mobile)" value={ps.performance} />
@@ -293,7 +314,7 @@ export function AuditBoard({ workspaceId, brandId, canReadAgents, canMakeTasks =
             </div>
           )}
         </Panel>
-        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO" exportUrl={`${reportsUrl}/export?kind=GEO`} reportsUrl={reportsUrl} findingTaskUrl={findingTaskUrl} onStale={reload}>
+        <Panel id="geo" title="AI visibility (GEO)" report={geo} agent="GEO" exportUrl={`${reportsUrl}/export?kind=GEO`} reportsUrl={reportsUrl} findingTaskUrl={findingTaskUrl} history={canSeeHistory} onStale={reload}>
           {geo && (
             <div className="flex flex-col gap-3 rounded-xl bg-muted/40 px-4 py-3">
               <div className="grid grid-cols-3 gap-x-6 gap-y-3">

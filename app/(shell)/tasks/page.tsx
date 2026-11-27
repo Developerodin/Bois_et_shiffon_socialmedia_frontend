@@ -24,6 +24,8 @@ export default async function TasksRoute() {
   const crm = featureOn("crm", access.workspaceId) && CRM_TASK_KEYS.some((k) => shell.brandPermissions.includes(k));
   // "Write an article" on SEO tasks: flag `blog` and content.create.
   const blog = featureOn("blog", access.workspaceId) && shell.brandPermissions.includes("content.create");
+  // "SEO history" on a task's page: flag `data` and analytics.read, as the URL page.
+  const seoHistory = featureOn("data", access.workspaceId) && shell.brandPermissions.includes("analytics.read");
   // Remount on brand switch so the lists start over for the new business.
-  return <TasksPage key={access.brandId} workspaceId={access.workspaceId} brandId={access.brandId} userId={shell.user.id} perms={shell.brandPermissions} crm={crm} blog={blog} />;
+  return <TasksPage key={access.brandId} workspaceId={access.workspaceId} brandId={access.brandId} userId={shell.user.id} perms={shell.brandPermissions} crm={crm} blog={blog} seoHistory={seoHistory} />;
 }
