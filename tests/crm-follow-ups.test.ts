@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { crmAccess } from "@/components/crm/crm-link";
 import { crmTabs, defaultCrmTab } from "@/components/crm/crm-tabs";
 import { mergeMoves } from "@/components/crm/customers/customer-admin";
+import { shownSummary, suggestionPatch } from "@/components/crm/follow-ups/conversation-ai";
 import { FOLLOW_UP_STATE_LABEL, followUpChips, localDateTime, sentAtOf, stateTone } from "@/components/crm/follow-ups/labels";
 import { messageBody, newMessageDraft } from "@/components/crm/follow-ups/log-message";
 
@@ -51,5 +52,25 @@ describe("merging customers", () => {
     const other = { identities: [{ id: "i", kind: "EMAIL" as const, value: "a@b.c" }], notes: [], quotes: [], deals: [], conversations: null };
     expect(mergeMoves(other)).toBe("1 contact detail, 0 notes, 0 quotes, 0 deals and their conversations");
     expect(mergeMoves({ ...other, conversations: [] })).toBe("1 contact detail, 0 notes, 0 quotes, 0 deals and 0 conversations");
+  });
+});
+
+describe("the conversation's AI help", () => {
+  const fresh = { summary: "Wants samples in linen.", nextStep: "Send the linen samples", nextActionDue: "2026-12-01", cached: false };
+  it("shows a fresh summary over the saved one, and marks the saved one when stale", () => {
+    expect(shownSummary({ summary: "Old", summaryStale: true }, null)).toEqual({ text: "Old", stale: true });
+    expect(shownSummary({ summary: "Old", summaryStale: true }, fresh)).toEqual({ text: "Wants samples in linen.", stale: false });
+    expect(shownSummary({ summary: null, summaryStale: false }, null)).toBeNull();
+  });
+  it("offers the next step as a next action only when there is one, cut to its limit", () => {
+    expect(suggestionPatch(fresh)).toEqual({ nextAction: "Send the linen samples", nextActionDue: "2026-12-01" });
+    expect(suggestionPatch({ ...fresh, nextStep: null, cached: true })).toBeNull();
+    expect(suggestionPatch(null)).toBeNull();
+    expect(suggestionPatch({ ...fresh, nextStep: "x".repeat(300) })?.nextAction).toHaveLength(200);
+  });
+  it("lets only content.create holders draft a reply", () => {
+    expect(crmAccess(["inbox.read", "content.create"], []).draft).toBe(true);
+    expect(crmAccess(["inbox.read"], []).draft).toBe(false);
+    expect(crmAccess(["content.create"], []).draft).toBe(false);
   });
 });

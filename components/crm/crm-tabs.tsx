@@ -95,7 +95,7 @@ export function CrmTabs({ w, b, perms, workspacePerms }: { w: string; b: string;
 function CrmPanel({ tab, w, b, access }: { tab: CrmTab; w: string; b: string; access: CrmAccess }) {
   switch (tab) {
     case "follow-ups":
-      return <FollowUpsTab w={w} b={b} canManage={access.manage} />;
+      return <FollowUpsTab w={w} b={b} canManage={access.manage} canDraft={access.draft} />;
     case "customers":
       return <CustomersTab w={w} b={b} access={access} />;
     case "pipeline":

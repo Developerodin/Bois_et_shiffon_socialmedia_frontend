@@ -23,7 +23,7 @@ describe("the /crm tabs", () => {
   });
 
   it("erases and exports only with crm.manage and members.manage in the workspace", () => {
-    expect(crmAccess(["crm.manage"], ["members.manage"])).toEqual({ manage: true, inbox: false, admin: true });
+    expect(crmAccess(["crm.manage"], ["members.manage"])).toEqual({ manage: true, inbox: false, admin: true, draft: false });
     expect(crmAccess(["crm.manage"], ["members.read"]).admin).toBe(false);
     expect(crmAccess(["inbox.read"], ["members.manage"]).admin).toBe(false);
   });

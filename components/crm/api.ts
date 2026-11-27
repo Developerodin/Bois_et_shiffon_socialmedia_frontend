@@ -54,6 +54,7 @@ export type ManualIdentity = { kind: "EMAIL" | "PHONE"; value: string };
 const crm = (w: string, b: string) => `${brand(w, b)}/crm`;
 const conversation = (w: string, b: string, id: string) => `${crm(w, b)}/conversations/${encodeURIComponent(id)}`;
 
+export type ConversationSummary = { summary: string; nextStep: string | null; /** "YYYY-MM-DD" */ nextActionDue: string | null; cached: boolean };
 export type LoggedMessage = { fromCustomer: boolean; medium: MessageMedium; text: string; /** ISO with offset */ sentAt: string };
 export type ConversationPatch = {
   updatedAt: string;
@@ -129,6 +130,10 @@ export const crmApi = {
   logMessage: (w: string, b: string, id: string, body: LoggedMessage) => request<{ conversation: ConversationDto }>(`${conversation(w, b, id)}/messages`, json("POST", body)),
   /** 409 `crm.changed` when stale; `customerId` needs crm.manage; an owner must hold inbox.read (400 `crm.owner`). */
   updateConversation: (w: string, b: string, id: string, body: ConversationPatch) => request<{ conversation: ConversationDto }>(conversation(w, b, id), json("PATCH", body)),
+  /** The AI summary and a suggested next step (never applied by itself); `cached`: the saved one, with no next step. */
+  summarise: (w: string, b: string, id: string) => request<{ summary: ConversationSummary }>(`${conversation(w, b, id)}/summary`, { method: "POST" }),
+  /** An AI reply draft to copy (inbox.read and content.create); nothing is sent. */
+  draftReply: (w: string, b: string, id: string) => request<{ draft: string }>(`${conversation(w, b, id)}/draft`, { method: "POST" }),
   /** A new logged conversation on a customer: inbox.read and crm.manage. */
   createConversation: (w: string, b: string, body: { customerId: string; subject?: string | null; ownerId?: string | null; message: LoggedMessage }) =>
     request<{ conversation: ConversationDto }>(`${crm(w, b)}/conversations`, json("POST", body)),

@@ -23,7 +23,7 @@ const WHEN = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short"
  * one conversation beside it. Counts are read once per visit and after a change made here; nothing polls.
  * `?c=<id>` (a follow-up task's link, a customer's conversation) opens that conversation.
  */
-export function FollowUpsTab({ w, b, canManage }: { w: string; b: string; canManage: boolean }) {
+export function FollowUpsTab({ w, b, canManage, canDraft }: { w: string; b: string; canManage: boolean; canDraft: boolean }) {
   const [filter, setFilter] = useState<FollowUpFilter>("open");
   const [rows, setRows] = useState<ConversationRow[] | null>(null);
   const [next, setNext] = useState<string | null>(null);
@@ -175,6 +175,7 @@ export function FollowUpsTab({ w, b, canManage }: { w: string; b: string; canMan
               name={current ? (current.customer?.displayName ?? conversationTitle(current)) : null}
               owners={owners}
               canManage={canManage}
+              canDraft={canDraft}
               onChanged={changed}
             />
           ) : null

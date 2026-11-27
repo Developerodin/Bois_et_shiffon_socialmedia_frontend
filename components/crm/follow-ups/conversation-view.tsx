@@ -5,6 +5,7 @@ import { CRM_LIMITS, type ConversationDto } from "@/shared";
 import { crmApi, type ConversationPatch } from "@/components/crm/api";
 import { CrmLink, crmHref } from "@/components/crm/crm-link";
 import { ownerName, type Owner } from "@/components/crm/customers/people";
+import { ConversationAi } from "@/components/crm/follow-ups/conversation-ai";
 import { CHANNEL_LABEL, FOLLOW_UP_STATE_LABEL, MEDIUM_LABEL, stateTone } from "@/components/crm/follow-ups/labels";
 import { messageBody, MessageFields, newMessageDraft } from "@/components/crm/follow-ups/log-message";
 import { ApiError, errorMessage } from "@/components/settings/api";
@@ -26,7 +27,7 @@ export const conversationTitle = (c: { subject: string | null; customer: { displ
  * reload), waiting and close, logging a message, and the messages newest first. The customer links to their page
  * only for crm.manage holders.
  */
-export function ConversationView({ sectionId, w, b, id, name, owners, canManage, onChanged }: {
+export function ConversationView({ sectionId, w, b, id, name, owners, canManage, canDraft, onChanged }: {
   sectionId: string;
   w: string;
   b: string;
@@ -35,21 +36,23 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
   name: string | null;
   owners: readonly Owner[];
   canManage: boolean;
+  /** content.create: an AI reply draft. */
+  canDraft: boolean;
   onChanged(c: ConversationDto): void;
 }) {
   const [c, setC] = useState<ConversationDto | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
-  const [form, setForm] = useState({ ownerId: "", nextAction: "", nextActionDue: "" });
+  const [form, setForm] = useState({ subject: "", ownerId: "", nextAction: "", nextActionDue: "" });
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<{ message: string; stale: boolean } | null>(null);
   const [draft, setDraft] = useState(newMessageDraft);
 
-  /** The server's conversation; the owner and next-action form follows it only when saved or first read (edits stay). */
+  /** The server's conversation; the form follows it only when saved, a suggestion used, or first read (edits stay). */
   const take = (x: ConversationDto, resetForm: boolean) => {
     setC(x);
     if (!resetForm) return;
-    setForm({ ownerId: x.ownerId ?? "", nextAction: x.nextAction ?? "", nextActionDue: x.nextActionDue ?? "" });
+    setForm({ subject: x.subject ?? "", ownerId: x.ownerId ?? "", nextAction: x.nextAction ?? "", nextActionDue: x.nextActionDue ?? "" });
     setDirty(false);
   };
   const load = useCallback(() => {
@@ -67,7 +70,7 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
     setError(null);
     try {
       const { conversation } = await call();
-      take(conversation, what === "save");
+      take(conversation, what === "save" || what === "use");
       onChanged(conversation);
       after?.();
     } catch (e) {
@@ -100,9 +103,13 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
           className="flex flex-col gap-3"
           onSubmit={(e) => {
             e.preventDefault();
-            void patch("save", { ownerId: form.ownerId || null, nextAction: form.nextAction.trim() || null, nextActionDue: form.nextActionDue || null });
+            void patch("save", { subject: form.subject.trim() || null, ownerId: form.ownerId || null, nextAction: form.nextAction.trim() || null, nextActionDue: form.nextActionDue || null });
           }}
         >
+          <label className="flex flex-col gap-1.5 text-sm">
+            <span className="text-muted-foreground">Subject (optional)</span>
+            <Input value={form.subject} onChange={(e) => (setForm((f) => ({ ...f, subject: e.target.value })), setDirty(true))} maxLength={CRM_LIMITS.subject} />
+          </label>
           <div className="grid gap-3 @lg:grid-cols-[12rem_minmax(0,1fr)_auto]">
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="text-muted-foreground">Owner</span>
@@ -138,6 +145,8 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
             ) : null}
           </div>
         ) : null}
+        {/* A change to the conversation (a logged message, a save) starts the AI help afresh from the saved summary. */}
+        <ConversationAi key={c.updatedAt} w={w} b={b} conversation={c} canDraft={canDraft} busy={!!busy} onUseNext={(p) => void patch("use", p)} />
         <section aria-labelledby="conversation-log-h" className="flex flex-col gap-2 rounded-xl border border-border p-3">
           <h3 id="conversation-log-h" className="text-xs font-medium text-muted-foreground">
             Log a message

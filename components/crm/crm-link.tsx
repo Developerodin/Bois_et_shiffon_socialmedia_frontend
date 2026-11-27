@@ -11,11 +11,13 @@ export type CrmTab = "follow-ups" | "customers" | "pipeline" | "quotes";
  * - `manage` (crm.manage): customers, pipeline, quotes, merging, linking a conversation to a customer.
  * - `inbox` (inbox.read): follow-ups and conversations.
  * - `admin` (members.manage in the workspace, with crm.manage): erase and export customer data (Decision 15).
+ * - `draft` (inbox.read and content.create; not Approvers): an AI reply draft on a conversation.
  */
-export type CrmAccess = { manage: boolean; inbox: boolean; admin: boolean };
+export type CrmAccess = { manage: boolean; inbox: boolean; admin: boolean; draft: boolean };
 export function crmAccess(perms: readonly string[], workspacePerms: readonly string[]): CrmAccess {
   const manage = perms.includes("crm.manage");
-  return { manage, inbox: perms.includes("inbox.read"), admin: manage && workspacePerms.includes("members.manage") };
+  const inbox = perms.includes("inbox.read");
+  return { manage, inbox, admin: manage && workspacePerms.includes("members.manage"), draft: inbox && perms.includes("content.create") };
 }
 
 /** A link to a tab of /crm, with what to open there (`customer`, `quote`). */
