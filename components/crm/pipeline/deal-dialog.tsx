@@ -154,6 +154,7 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, can
               {!draft.customer ? <span className="text-xs text-muted-foreground">Pick the deal&rsquo;s customer to choose one of their conversations.</span> : null}
               {pickingConversation && draft.customer ? (
                 <ConversationChoices
+                  key={draft.customer.id}
                   w={w}
                   b={b}
                   customerId={draft.customer.id}

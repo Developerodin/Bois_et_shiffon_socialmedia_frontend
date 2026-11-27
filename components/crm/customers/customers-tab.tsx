@@ -132,7 +132,8 @@ export function CustomersTab({ w, b, access }: { w: string; b: string; access: C
           key={v}
           type="button"
           aria-pressed={v === view}
-          onClick={() => setView(v)}
+          // Companies read afresh: customer counts change with every customer saved, merged or erased here.
+          onClick={() => (setView(v), v === "companies" && reloadCompanies())}
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:py-2",
             v === view ? "border-control bg-accent text-foreground" : "border-border text-muted-foreground hover:text-foreground",
