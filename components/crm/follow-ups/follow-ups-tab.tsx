@@ -41,9 +41,13 @@ export function FollowUpsTab({ w, b, canManage, canDraft }: { w: string; b: stri
   }, [w, b]);
   const [nonce, setNonce] = useState(0);
   const load = useCallback(() => setNonce((n) => n + 1), []);
+  // Which list load is current: a Load more answer for an earlier one (another chip, a reload) is dropped.
+  const generation = useRef(0);
   useEffect(() => {
     // A slower answer for the chip before must not land under this one.
     let cancelled = false;
+    generation.current += 1;
+    setMore("idle");
     setFailed(false);
     setRows(null);
     crmApi.followUps(w, b, filter).then(
@@ -58,13 +62,15 @@ export function FollowUpsTab({ w, b, canManage, canDraft }: { w: string; b: stri
   const loadMore = async () => {
     if (!next) return;
     setMore("busy");
+    const asked = generation.current;
     try {
       const r = await crmApi.followUps(w, b, filter, next);
+      if (generation.current !== asked) return;
       setRows((list) => [...(list ?? []), ...r.conversations.filter((c) => !(list ?? []).some((x) => x.id === c.id))]);
       setNext(r.nextCursor);
       setMore("idle");
     } catch {
-      setMore("failed");
+      if (generation.current === asked) setMore("failed");
     }
   };
   // A change keeps the row where it is (until the next load), so the list doesn't jump under the reader.

@@ -5,6 +5,7 @@ import { CRM_LIMITS, DEAL_STAGE_LABEL, OPEN_DEAL_STAGES, type CompanyDto, type D
 import { crmApi, type DealFields } from "@/components/crm/api";
 import { CrmLink, crmHref } from "@/components/crm/crm-link";
 import { CustomerPicker } from "@/components/crm/customers/customer-picker";
+import { OwnerSelect } from "@/components/crm/customers/owner-select";
 import type { Owner } from "@/components/crm/customers/people";
 import { QUOTE_STATUS_LABEL } from "@/components/crm/quotes/quotes-board";
 import { DEAL_TITLE_HINT, dealHints, dealValueProblem } from "@/components/crm/pipeline/labels";
@@ -52,7 +53,6 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onC
   const [error, setError] = useState<string | null>(null);
   const edit = (p: Partial<Draft>) => setDraft((d) => ({ ...d, ...p }));
   const problem = dealValueProblem(draft.value, draft.currency);
-  const ownerList = draft.ownerId && !owners.some((o) => o.id === draft.ownerId) ? [...owners, { id: draft.ownerId, name: "Another member" }] : owners;
   const companyList = companies ?? (deal?.company ? [deal.company] : []);
 
   const save = async () => {
@@ -128,17 +128,7 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onC
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-muted-foreground">Owner</span>
-              <select className={cn(selectClass, "pointer-coarse:h-11")} value={draft.ownerId} onChange={(e) => edit({ ownerId: e.target.value })}>
-                <option value="">Nobody yet</option>
-                {ownerList.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <OwnerSelect value={draft.ownerId} onChange={(ownerId) => edit({ ownerId })} owners={owners} />
             <div className="flex gap-2">
               <label className="flex min-w-0 flex-1 flex-col gap-1.5 text-sm">
                 <span className="text-muted-foreground">Value (optional)</span>

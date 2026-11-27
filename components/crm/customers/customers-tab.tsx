@@ -9,7 +9,7 @@ import type { CrmAccess } from "@/components/crm/crm-link";
 import { CustomerFieldInputs, CustomerPage, draftOf, fieldsBody, type FieldsDraft } from "@/components/crm/customers/customer-page";
 import { ClashNotice, type Clash } from "@/components/crm/customers/identities";
 import { useOwners, type Owner } from "@/components/crm/customers/people";
-import { useCustomerSearch } from "@/components/crm/customers/search";
+import { searchResults, useCustomerSearch } from "@/components/crm/customers/search";
 import { errorMessage } from "@/components/settings/api";
 import { ListSkeleton, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
@@ -90,8 +90,9 @@ export function CustomersTab({ w, b, access }: { w: string; b: string; access: C
     open(urlCustomer, "always");
   }, [urlCustomer, listed, open]);
 
-  const searching = search.kind === "ready";
-  const shown = searching ? search.customers : rows;
+  const results = searchResults(search);
+  const searching = results !== null;
+  const shown = results ?? rows;
   const current = shown?.find((c) => c.id === selected) ?? rows?.find((c) => c.id === selected) ?? null;
 
   const newCustomer = (

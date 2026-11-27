@@ -87,9 +87,12 @@ export const crmApi = {
   /** 50 a page, latest activity first. */
   customers: (w: string, b: string, cursor?: string | null, init?: RequestInit) =>
     request<{ customers: CustomerRow[]; nextCursor: string | null }>(`${crm(w, b)}/customers${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`, init),
-  /** At least CRM_LIMITS.searchMin characters (searchTerm); 20 results; 429 past 60 a minute. */
+  /**
+   * At least CRM_LIMITS.searchMin characters (searchTerm); 20 results; 429 past 60 a minute. The term goes in the body:
+   * it is often an email or a phone number, and URLs end up in access logs.
+   */
   search: (w: string, b: string, q: string, init?: RequestInit) =>
-    request<{ customers: CustomerRow[]; nextCursor: null }>(`${crm(w, b)}/customers?q=${encodeURIComponent(q)}`, init),
+    request<{ customers: CustomerRow[]; nextCursor: null }>(`${crm(w, b)}/customers/search`, { ...init, ...json("POST", { q }) }),
   customer: (w: string, b: string, id: string) => request<{ customer: CustomerDto }>(customer(w, b, id)),
   createCustomer: (w: string, b: string, body: CustomerFields & { displayName: string; identities?: ManualIdentity[] }) =>
     request<{ customer: CustomerDto }>(`${crm(w, b)}/customers`, json("POST", body)),

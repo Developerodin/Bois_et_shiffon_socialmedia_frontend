@@ -1,15 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CRM_LIMITS, type ConversationDto } from "@/shared";
 import { crmApi, type ConversationPatch } from "@/components/crm/api";
 import { CrmLink, crmHref } from "@/components/crm/crm-link";
-import { ownerName, type Owner } from "@/components/crm/customers/people";
+import { OwnerSelect } from "@/components/crm/customers/owner-select";
+import type { Owner } from "@/components/crm/customers/people";
 import { ConversationAi } from "@/components/crm/follow-ups/conversation-ai";
 import { CHANNEL_LABEL, FOLLOW_UP_STATE_LABEL, MEDIUM_LABEL, stateTone } from "@/components/crm/follow-ups/labels";
 import { messageBody, MessageFields, newMessageDraft } from "@/components/crm/follow-ups/log-message";
 import { ApiError, errorMessage } from "@/components/settings/api";
-import { ListSkeleton, selectClass } from "@/components/settings/shared";
+import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
@@ -44,15 +45,27 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
   const [failed, setFailed] = useState<string | null>(null);
   const [form, setForm] = useState({ subject: "", ownerId: "", nextAction: "", nextActionDue: "" });
   const [dirty, setDirty] = useState(false);
+  // Read in async answers (a closure's `dirty` may be old); `base`: the updatedAt the form was taken from, sent on Save.
+  const dirtyRef = useRef(false);
+  const [base, setBase] = useState("");
+  const markDirty = () => {
+    dirtyRef.current = true;
+    setDirty(true);
+  };
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<{ message: string; stale: boolean } | null>(null);
   const [draft, setDraft] = useState(newMessageDraft);
 
-  /** The server's conversation; the form follows it only when saved, a suggestion used, or first read (edits stay). */
-  const take = (x: ConversationDto, resetForm: boolean) => {
+  /**
+   * The server's conversation. The form follows it when `force` (read, saved, a suggestion used) or when it has no
+   * unsaved edits; edits stay otherwise, and keep the `base` they were made on, so a colleague's change in between is a 409.
+   */
+  const take = (x: ConversationDto, force: boolean) => {
     setC(x);
-    if (!resetForm) return;
+    if (!force && dirtyRef.current) return;
     setForm({ subject: x.subject ?? "", ownerId: x.ownerId ?? "", nextAction: x.nextAction ?? "", nextActionDue: x.nextActionDue ?? "" });
+    setBase(x.updatedAt);
+    dirtyRef.current = false;
     setDirty(false);
   };
   const load = useCallback(() => {
@@ -79,13 +92,13 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
       setBusy(null);
     }
   };
-  const patch = (what: string, body: Omit<ConversationPatch, "updatedAt">) => c && run(what, () => crmApi.updateConversation(w, b, id, { ...body, updatedAt: c.updatedAt }));
+  /** One change on the conversation as last read; Save sends the form's `base` instead. */
+  const patch = (what: string, body: Omit<ConversationPatch, "updatedAt">, at = c?.updatedAt) => at && run(what, () => crmApi.updateConversation(w, b, id, { ...body, updatedAt: at }));
 
   let body: React.ReactNode;
   if (failed) body = <LoadFailed what="this conversation" message={failed} onRetry={load} />;
   else if (!c) body = <ListSkeleton label="Loading the conversation" rows={2} />;
   else {
-    const ownerList = form.ownerId && !owners.some((o) => o.id === form.ownerId) ? [...owners, { id: form.ownerId, name: ownerName(owners, form.ownerId) ?? "" }] : owners;
     const message = messageBody(draft);
     body = (
       <div className="@container flex min-w-0 flex-col gap-5">
@@ -103,32 +116,22 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
           className="flex flex-col gap-3"
           onSubmit={(e) => {
             e.preventDefault();
-            void patch("save", { subject: form.subject.trim() || null, ownerId: form.ownerId || null, nextAction: form.nextAction.trim() || null, nextActionDue: form.nextActionDue || null });
+            void patch("save", { subject: form.subject.trim() || null, ownerId: form.ownerId || null, nextAction: form.nextAction.trim() || null, nextActionDue: form.nextActionDue || null }, base);
           }}
         >
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-muted-foreground">Subject (optional)</span>
-            <Input value={form.subject} onChange={(e) => (setForm((f) => ({ ...f, subject: e.target.value })), setDirty(true))} maxLength={CRM_LIMITS.subject} />
+            <Input value={form.subject} onChange={(e) => (setForm((f) => ({ ...f, subject: e.target.value })), markDirty())} maxLength={CRM_LIMITS.subject} />
           </label>
           <div className="grid gap-3 @lg:grid-cols-[12rem_minmax(0,1fr)_auto]">
-            <label className="flex flex-col gap-1.5 text-sm">
-              <span className="text-muted-foreground">Owner</span>
-              <select className={cn(selectClass, "pointer-coarse:h-11")} value={form.ownerId} onChange={(e) => (setForm((f) => ({ ...f, ownerId: e.target.value })), setDirty(true))}>
-                <option value="">Nobody yet</option>
-                {ownerList.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <OwnerSelect value={form.ownerId} onChange={(ownerId) => (setForm((f) => ({ ...f, ownerId })), markDirty())} owners={owners} />
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="text-muted-foreground">Next action</span>
-              <Input value={form.nextAction} onChange={(e) => (setForm((f) => ({ ...f, nextAction: e.target.value })), setDirty(true))} maxLength={CRM_LIMITS.nextAction} />
+              <Input value={form.nextAction} onChange={(e) => (setForm((f) => ({ ...f, nextAction: e.target.value })), markDirty())} maxLength={CRM_LIMITS.nextAction} />
             </label>
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="text-muted-foreground">Due</span>
-              <Input type="date" value={form.nextActionDue} onChange={(e) => (setForm((f) => ({ ...f, nextActionDue: e.target.value })), setDirty(true))} />
+              <Input type="date" value={form.nextActionDue} onChange={(e) => (setForm((f) => ({ ...f, nextActionDue: e.target.value })), markDirty())} />
             </label>
           </div>
           <Button type="submit" size="sm" className="self-start" disabled={!!busy || !dirty}>

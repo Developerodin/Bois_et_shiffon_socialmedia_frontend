@@ -12,7 +12,11 @@ export function searchTerm(typed: string): string | null {
   return q.length >= CRM_LIMITS.searchMin ? q : null;
 }
 
-export type CustomerSearch = { kind: "idle" } | { kind: "loading" } | { kind: "ready"; customers: CustomerRow[] } | { kind: "error"; message: string };
+/** `loading` keeps the previous term's results (`last`) on screen until the new ones come. */
+export type CustomerSearch = { kind: "idle" } | { kind: "loading"; last: CustomerRow[] | null } | { kind: "ready"; customers: CustomerRow[] } | { kind: "error"; message: string };
+
+/** The results to show: the latest answer, or while a new term loads the one before it; null when not searching. */
+export const searchResults = (s: CustomerSearch): CustomerRow[] | null => (s.kind === "ready" ? s.customers : s.kind === "loading" ? s.last : null);
 
 /**
  * Customers matching `typed`: waits for the minimum length and a pause in typing, and cancels the request a newer
@@ -26,7 +30,7 @@ export function useCustomerSearch(w: string, b: string, typed: string): Customer
       setState({ kind: "idle" });
       return;
     }
-    setState({ kind: "loading" });
+    setState((s) => ({ kind: "loading", last: searchResults(s) }));
     const abort = new AbortController();
     const timer = window.setTimeout(() => {
       crmApi.search(w, b, term, { signal: abort.signal }).then(

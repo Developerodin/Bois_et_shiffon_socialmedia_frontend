@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CRM_LIMITS, DEAL_STAGE_LABEL, type CompanyDto, type ConversationRow, type CustomerDto, type QuoteStatus } from "@/shared";
 import { crmApi, type CustomerFields } from "@/components/crm/api";
 import type { CrmAccess } from "@/components/crm/crm-link";
@@ -9,18 +9,18 @@ import { CustomerData, MergeDialog } from "@/components/crm/customers/customer-a
 import { LogConversation } from "@/components/crm/follow-ups/log-conversation";
 import { Identities } from "@/components/crm/customers/identities";
 import { Notes } from "@/components/crm/customers/notes";
+import { OwnerSelect } from "@/components/crm/customers/owner-select";
 import { CHANNEL_LABEL, FOLLOW_UP_STATE_LABEL, stateTone } from "@/components/crm/follow-ups/labels";
 import type { Owner } from "@/components/crm/customers/people";
 import { CrmLink, crmHref } from "@/components/crm/crm-link";
 import { QUOTE_STATUS_LABEL } from "@/components/crm/quotes/quotes-board";
 import { ApiError, errorMessage } from "@/components/settings/api";
-import { ListSkeleton, selectClass } from "@/components/settings/shared";
+import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { cn } from "@/lib/utils";
 
 /** The customer's editable fields as typed (every one a string; empty means none). */
 export type FieldsDraft = { displayName: string; role: string; language: string; companyId: string; ownerId: string; nextAction: string; nextActionDue: string };
@@ -57,8 +57,6 @@ export function CustomerFieldInputs({ w, b, draft, onEdit, companies, current, o
   onCompany(c: CompanyDto): void;
   owners: readonly Owner[];
 }) {
-  // An owner the members list lacks (or before it loads) still shows as the pick.
-  const ownerList = draft.ownerId && !owners.some((o) => o.id === draft.ownerId) ? [...owners, { id: draft.ownerId, name: "Another member" }] : owners;
   return (
     <div className="grid gap-4 @lg:grid-cols-2">
       <label className="flex flex-col gap-1.5 text-sm">
@@ -74,17 +72,7 @@ export function CustomerFieldInputs({ w, b, draft, onEdit, companies, current, o
         <span className="text-muted-foreground">Language (optional)</span>
         <Input value={draft.language} onChange={(e) => onEdit({ language: e.target.value })} maxLength={CRM_LIMITS.language} placeholder="fr, en-GB" />
       </label>
-      <label className="flex flex-col gap-1.5 text-sm">
-        <span className="text-muted-foreground">Owner</span>
-        <select className={cn(selectClass, "pointer-coarse:h-11")} value={draft.ownerId} onChange={(e) => onEdit({ ownerId: e.target.value })}>
-          <option value="">Nobody yet</option>
-          {ownerList.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <OwnerSelect value={draft.ownerId} onChange={(ownerId) => onEdit({ ownerId })} owners={owners} />
       <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 @lg:col-span-2">
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="text-muted-foreground">Next action (optional)</span>
@@ -225,31 +213,42 @@ export function CustomerPage({ sectionId, w, b, id, name, access, companies, onC
   const [failed, setFailed] = useState<string | null>(null);
   const [draft, setDraft] = useState<FieldsDraft>(draftOf());
   const [dirty, setDirty] = useState(false);
+  // Read in async answers (a closure's `dirty` may be old); `base`: the updatedAt the draft was taken from, sent on Save.
+  const dirtyRef = useRef(false);
+  const [base, setBase] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; stale: boolean } | null>(null);
 
+  /**
+   * The server's customer. The form follows it when `force` (read, saved, merged) or when it has no unsaved edits;
+   * edits stay otherwise, on the `base` they were made on, so a colleague's save in between is a 409 on Save.
+   */
+  const adopt = useCallback((c: CustomerDto, force: boolean) => {
+    setCustomer(c);
+    if (!force && dirtyRef.current) return;
+    setDraft(draftOf(c));
+    setBase(c.updatedAt);
+    dirtyRef.current = false;
+    setDirty(false);
+  }, []);
   const load = useCallback(
     (fresh: boolean) => {
       setFailed(null);
       crmApi.customer(w, b, id).then(
         ({ customer: c }) => {
-          setCustomer(c);
-          if (fresh) {
-            setDraft(draftOf(c));
-            setDirty(false);
-            setError(null);
-          }
+          adopt(c, fresh);
+          if (fresh) setError(null);
         },
         (e: unknown) => setFailed(errorMessage(e, "Couldn't load this customer. Try again.")),
       );
     },
-    [w, b, id],
+    [w, b, id, adopt],
   );
   useEffect(() => load(true), [load]);
 
-  // A change elsewhere on the page (contact details, notes): the customer as the server has it now, the form kept.
-  const changed = (c: CustomerDto) => {
-    setCustomer(c);
+  // A change elsewhere on the page (contact details): the customer as the server has it now.
+  const changed = (c: CustomerDto, force = false) => {
+    adopt(c, force);
     onSaved(c);
   };
   const save = async () => {
@@ -257,10 +256,8 @@ export function CustomerPage({ sectionId, w, b, id, name, access, companies, onC
     setBusy(true);
     setError(null);
     try {
-      const { customer: c } = await crmApi.updateCustomer(w, b, id, { ...fieldsBody(draft), updatedAt: customer.updatedAt });
-      changed(c);
-      setDraft(draftOf(c));
-      setDirty(false);
+      const { customer: c } = await crmApi.updateCustomer(w, b, id, { ...fieldsBody(draft), updatedAt: base });
+      changed(c, true);
     } catch (e) {
       setError({ message: errorMessage(e), stale: e instanceof ApiError && e.code === "crm.changed" });
     } finally {
@@ -285,7 +282,7 @@ export function CustomerPage({ sectionId, w, b, id, name, access, companies, onC
             w={w}
             b={b}
             draft={draft}
-            onEdit={(patch) => (setDraft((d) => ({ ...d, ...patch })), setDirty(true))}
+            onEdit={(patch) => (setDraft((d) => ({ ...d, ...patch })), (dirtyRef.current = true), setDirty(true))}
             companies={companies}
             current={customer.company}
             onCompany={onCompany}
@@ -323,10 +320,8 @@ export function CustomerPage({ sectionId, w, b, id, name, access, companies, onC
             onStale={() => load(true)}
             onMerged={(c, otherId) => {
               setMerging(false);
-              changed(c);
               // The merge fills empty fields from the duplicate: the form shows them, so a Save keeps them.
-              setDraft(draftOf(c));
-              setDirty(false);
+              changed(c, true);
               onMerged(c, otherId);
             }}
           />
