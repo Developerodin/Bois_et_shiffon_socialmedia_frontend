@@ -88,3 +88,13 @@ export type UrlHistoryDto = {
   /** The page's decline alerts of the last year (losing clicks or position), newest first. */
   alerts: SeoAlertView[];
 };
+
+/**
+ * POST seo/briefs (analytics.read and tasks.manage, 2 credits): one AI brief over a finding's pages or a set of open
+ * declining pages (1–20 of this brand's alerts), written into a task. `existed`: the brief went into the finding's
+ * open task (prepended to its description) instead of a new one.
+ */
+export type SeoBriefRequest =
+  | { from: "finding"; reportId: string; findingId: string }
+  | { from: "declines"; alertIds: string[] };
+export type SeoBriefResult = { taskId: string; existed: boolean; kind: "website" | "content" };

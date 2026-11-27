@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
 import { urlHistoryHref } from "@/lib/seo-links";
 import { tasksApi } from "@/lib/tasks-api";
+import { WriteBrief } from "@/components/performance/seo-brief";
 import {
   DATA_SOURCE_SLUGS, type ChooseSearchSiteBody, type DataSourceDto, type SearchMetrics, type SearchPageRow, type SearchPagesDto, type SearchQueriesDto, type SearchQueryRow,
   type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto, type SeoAlertView, type SeoDeclinesDto,
@@ -28,7 +29,7 @@ const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
  * Search Console for the brand's site: totals against the previous equal-length period, every day, and the top pages.
  * `source` undefined = no site picked yet. `canManage` (integrations.manage) gets the site picker.
  */
-export function SearchTab({ workspaceId, brandId, range, source, canManage, canMakeTasks, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; canMakeTasks: boolean; onSourceChanged: () => void }) {
+export function SearchTab({ workspaceId, brandId, range, source, canManage, canMakeTasks, canWriteArticles, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; canMakeTasks: boolean; canWriteArticles: boolean; onSourceChanged: () => void }) {
   const base = brandApi(workspaceId, brandId);
   const [picking, setPicking] = useState(false);
 
@@ -52,7 +53,7 @@ export function SearchTab({ workspaceId, brandId, range, source, canManage, canM
   return (
     <>
       <SearchNumbers base={base} range={range} source={source} onSourceChanged={onSourceChanged} onChangeSite={canManage ? () => setPicking(true) : undefined} />
-      <Declines base={base} source={source} canMakeTasks={canMakeTasks} />
+      <Declines base={base} source={source} canMakeTasks={canMakeTasks} canWriteArticles={canWriteArticles} />
     </>
   );
 }
@@ -62,11 +63,19 @@ const plusDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOStrin
 /**
  * Pages losing search traffic: the open decline alerts the server found after each daily sync (Google's days, the 28
  * days ending 3 days before the last synced day vs the 28 before). Each page links to its URL history page (the
- * server built the URL); "Make a task" files a task for it, re-checked in 28 days.
+ * server built the URL); "Make a task" files a task for it, re-checked in 28 days. With tasks on (the tab already
+ * needs analytics.read), checked pages go into one AI brief ("Write a brief", up to 20).
  */
-function Declines({ base, source, canMakeTasks }: { base: string; source: DataSourceDto; canMakeTasks: boolean }) {
+function Declines({ base, source, canMakeTasks, canWriteArticles }: { base: string; source: DataSourceDto; canMakeTasks: boolean; canWriteArticles: boolean }) {
   const fetcher = useCallback(() => request<SeoDeclinesDto>(`${base}/search/declines`), [base]);
   const { state, reload } = useLoad(fetcher);
+  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const toggle = (id: string) => setChecked((s) => {
+    const next = new Set(s);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
   useReloadOnFocus(reload, state);
   useReloadWhenSynced([source], reload);
 
@@ -76,23 +85,38 @@ function Declines({ base, source, canMakeTasks }: { base: string; source: DataSo
   else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
   else if (!state.data.alerts.length) body = <p className="text-sm text-muted-foreground">No page is losing search traffic right now.</p>;
   else {
+    // Only pages still listed count: a reload may have closed some.
+    const ids = state.data.alerts.filter((a) => a.url && checked.has(a.id)).map((a) => a.id);
     body = (
-      <ul className="flex flex-col divide-y divide-border text-sm">
-        {state.data.alerts.map((a) => (
-          <li key={a.id} className="flex flex-col gap-2 py-2 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex min-w-0 flex-col gap-0.5">
-              {a.url ? (
-                <Link href={urlHistoryHref(a.url)} className="break-all font-medium underline-offset-2 hover:underline">{a.path}</Link>
-              ) : (
-                <span className="font-medium">The whole site</span>
-              )}
-              <span>{a.text}</span>
-              <span className="text-xs text-muted-foreground">Since {dayLabel(a.firstDay)}</span>
-            </div>
-            {canMakeTasks ? <DeclineTask base={base} alert={a} /> : null}
-          </li>
-        ))}
-      </ul>
+      <div className="flex flex-col gap-2">
+        {canMakeTasks ? (
+          <div className="flex flex-wrap items-center gap-2 print:hidden">
+            <WriteBrief key={ids.join(",")} base={base} body={ids.length ? { from: "declines", alertIds: ids } : null} disabled={ids.length > 20} canWriteArticles={canWriteArticles} />
+            <span className="text-xs text-muted-foreground">{ids.length ? `${ids.length} checked` : "Check pages to write one brief for them (up to 20)."}</span>
+          </div>
+        ) : null}
+        <ul className="flex flex-col divide-y divide-border text-sm">
+          {state.data.alerts.map((a) => (
+            <li key={a.id} className="flex flex-col gap-2 py-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-start gap-2">
+                {canMakeTasks && a.url ? (
+                  <input type="checkbox" aria-label={`Include ${a.path} in a brief`} className="mt-1 print:hidden" checked={checked.has(a.id)} onChange={() => toggle(a.id)} />
+                ) : null}
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  {a.url ? (
+                    <Link href={urlHistoryHref(a.url)} className="break-all font-medium underline-offset-2 hover:underline">{a.path}</Link>
+                  ) : (
+                    <span className="font-medium">The whole site</span>
+                  )}
+                  <span>{a.text}</span>
+                  <span className="text-xs text-muted-foreground">Since {dayLabel(a.firstDay)}</span>
+                </div>
+              </div>
+              {canMakeTasks ? <DeclineTask base={base} alert={a} /> : null}
+            </li>
+          ))}
+        </ul>
+      </div>
     );
   }
   return (

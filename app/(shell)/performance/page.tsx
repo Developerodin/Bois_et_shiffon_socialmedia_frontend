@@ -35,6 +35,8 @@ export default async function PerformancePage({ searchParams }: { searchParams: 
       canReadAgents={can("agents.read")}
       canMakeTasks={featureOn("tasks", w) && can("tasks.manage")}
       canSeeHistory={featureOn("data", w) && can("analytics.read")}
+      canWriteBriefs={featureOn("tasks", w) && can("tasks.manage") && can("analytics.read")}
+      canWriteArticles={featureOn("blog", w) && can("content.create")}
       bare={bare}
     />
   );
@@ -57,6 +59,7 @@ export default async function PerformancePage({ searchParams }: { searchParams: 
       canManage={can("integrations.manage")}
       canSetBudgets={can("commercial.manage")}
       canMakeTasks={featureOn("tasks", w) && can("tasks.manage")}
+      canWriteArticles={featureOn("blog", w) && can("content.create")}
       reports={reports(true)}
     />
   );
