@@ -147,7 +147,7 @@ export const crmApi = {
   deal: (w: string, b: string, id: string) => request<{ deal: DealDto }>(`${crm(w, b)}/deals/${encodeURIComponent(id)}`),
   /** 400 `crm.currency` for a value without a currency. */
   createDeal: (w: string, b: string, body: DealFields & { title: string; stage?: DealStage }) => request<{ deal: DealDto }>(`${crm(w, b)}/deals`, json("POST", body)),
-  /** Moving to WON or LOST needs `closedReason` (400 `crm.closeReason`); 409 `crm.changed` when stale. */
+  /** Moving to LOST needs `closedReason` (400 `crm.closeReason`); WON takes none by hand; 409 `crm.changed` when stale. */
   updateDeal: (w: string, b: string, id: string, body: DealFields & { updatedAt: string; stage?: DealStage; closedReason?: DealCloseReason | null; closedNote?: string | null }) =>
     request<{ deal: DealDto }>(`${crm(w, b)}/deals/${encodeURIComponent(id)}`, json("PATCH", body)),
   /** Link a quote to a deal (null unlinks); an already-sent or accepted quote moves the deal forward. */

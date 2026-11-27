@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { DealDto, PipelineDto } from "@/shared";
 import { crmAccess } from "@/components/crm/crm-link";
 import { crmTabs } from "@/components/crm/crm-tabs";
+import { money } from "@/components/data/shared";
 import { closesDeal, dealHints, dealValueProblem, HAND_CLOSE_REASONS, totalsLine } from "@/components/crm/pipeline/labels";
 import { commonCurrency, orderedColumns } from "@/components/crm/pipeline/pipeline-tab";
 import { openDeals } from "@/components/crm/pipeline/quote-deal";
@@ -19,7 +20,7 @@ describe("the pipeline board", () => {
   });
 
   it("totals each currency on its own, never added together", () => {
-    expect(totalsLine([{ currency: "EUR", value: "1250.00" }, { currency: "USD", value: "300.00" }])).toBe("1250.00 EUR · 300.00 USD");
+    expect(totalsLine([{ currency: "EUR", value: "1250.00" }, { currency: "USD", value: "300.00" }])).toBe(`${money("1250.00", "EUR")} · ${money("300.00", "USD")}`);
     expect(totalsLine([])).toBeNull();
   });
 

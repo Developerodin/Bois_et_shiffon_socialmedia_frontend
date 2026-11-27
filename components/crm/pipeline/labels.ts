@@ -1,14 +1,15 @@
+import { money } from "@/components/data/shared";
 import { DEAL_CLOSE_REASONS, type DealCloseReason, type DealDto, type DealStage } from "@/shared";
 
 /** Reasons a person can give by hand: "Quote accepted" is set by the quote's acceptance itself. */
 export const HAND_CLOSE_REASONS = DEAL_CLOSE_REASONS.filter((r): r is Exclude<DealCloseReason, "quote_accepted"> => r !== "quote_accepted");
 
-/** Won and Lost close a deal, and need a reason (the server answers 400 crm.closeReason without one). */
+/** Won and Lost close a deal. Lost needs a reason (the server answers 400 crm.closeReason without one); the reasons are why a deal was lost, so a win by hand has none. */
 export const closesDeal = (stage: DealStage) => stage === "WON" || stage === "LOST";
 
-/** A column's value, one total per currency and never added across currencies: "1250.00 EUR · 300.00 USD". */
+/** A column's value, one total per currency and never added across currencies: "€1,250.00 · $300.00". */
 export function totalsLine(totals: readonly { currency: string; value: string }[]): string | null {
-  return totals.length ? totals.map((t) => `${t.value} ${t.currency}`).join(" · ") : null;
+  return totals.length ? totals.map((t) => money(t.value, t.currency)).join(" · ") : null;
 }
 
 /** What a person should look at on a deal (nothing moves by itself). */

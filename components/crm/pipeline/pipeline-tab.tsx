@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { CRM_LIMITS, DEAL_CLOSE_REASON_LABEL, DEAL_STAGE_LABEL, DEAL_STAGES, type DealDto, type DealStage, type PipelineDto } from "@/shared";
 import { crmApi } from "@/components/crm/api";
+import { money } from "@/components/data/shared";
 import { ownerName, useOwners } from "@/components/crm/customers/people";
 import { DealDialog, DealExtras } from "@/components/crm/pipeline/deal-dialog";
 import { closesDeal, HAND_CLOSE_REASONS, totalsLine } from "@/components/crm/pipeline/labels";
@@ -68,7 +69,7 @@ export function PipelineTab({ w, b }: { w: string; b: string }) {
     else crmApi.deal(w, b, urlDeal).then((r) => setEditing(r.deal), (e: unknown) => setError(errorMessage(e)));
   }, [urlDeal, board, w, b]);
 
-  const move = async (deal: DealDto, stage: DealStage, reason?: { closedReason: Reason; closedNote: string | null }) => {
+  const move = async (deal: DealDto, stage: DealStage, reason?: { closedReason: Reason | null; closedNote: string | null }) => {
     setMoving(deal.id);
     setError(null);
     try {
@@ -116,7 +117,7 @@ export function PipelineTab({ w, b }: { w: string; b: string }) {
                         {d.title}
                       </button>
                       <span className="text-xs text-muted-foreground">
-                        {[d.customer?.displayName, d.company?.name, d.value ? `${d.value} ${d.currency ?? ""}` : null, ownerName(owners, d.ownerId)].filter(Boolean).join(" · ") || "No customer yet"}
+                        {[d.customer?.displayName, d.company?.name, d.value ? (d.currency ? money(d.value, d.currency) : d.value) : null, ownerName(owners, d.ownerId)].filter(Boolean).join(" · ") || "No customer yet"}
                       </span>
                       {d.nextAction ? (
                         <span className="text-xs">
@@ -192,7 +193,9 @@ export function PipelineTab({ w, b }: { w: string; b: string }) {
 }
 
 /** Won or Lost: why (a reason is required; "Quote accepted" is the quote's own), with an optional note. */
-function CloseDialog({ deal, stage, onCancel, onConfirm }: { deal: DealDto; stage: DealStage; onCancel(): void; onConfirm(r: { closedReason: Reason; closedNote: string | null }): Promise<void> }) {
+function CloseDialog({ deal, stage, onCancel, onConfirm }: { deal: DealDto; stage: DealStage; onCancel(): void; onConfirm(r: { closedReason: Reason | null; closedNote: string | null }): Promise<void> }) {
+  // A win by hand needs no reason: the reasons are why a deal was lost.
+  const won = stage === "WON";
   const [reason, setReason] = useState<Reason | "">("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -208,11 +211,11 @@ function CloseDialog({ deal, stage, onCancel, onConfirm }: { deal: DealDto; stag
           className="flex flex-col gap-4"
           onSubmit={async (e) => {
             e.preventDefault();
-            if (!reason) return;
+            if (!won && !reason) return;
             setBusy(true);
             setError(null);
             try {
-              await onConfirm({ closedReason: reason, closedNote: note.trim() || null });
+              await onConfirm({ closedReason: won ? null : reason || null, closedNote: note.trim() || null });
             } catch (err) {
               setError(err instanceof Error ? err.message : errorMessage(err));
             } finally {
@@ -220,19 +223,21 @@ function CloseDialog({ deal, stage, onCancel, onConfirm }: { deal: DealDto; stag
             }
           }}
         >
-          <label className="flex flex-col gap-1.5 text-sm">
-            <span className="text-muted-foreground">Why?</span>
-            <select className={cn(selectClass, "pointer-coarse:h-11")} value={reason} onChange={(e) => setReason(e.target.value as Reason)} required>
-              <option value="" disabled>
-                Pick a reason
-              </option>
-              {HAND_CLOSE_REASONS.map((r) => (
-                <option key={r} value={r}>
-                  {DEAL_CLOSE_REASON_LABEL[r]}
+          {won ? null : (
+            <label className="flex flex-col gap-1.5 text-sm">
+              <span className="text-muted-foreground">Why?</span>
+              <select className={cn(selectClass, "pointer-coarse:h-11")} value={reason} onChange={(e) => setReason(e.target.value as Reason)} required>
+                <option value="" disabled>
+                  Pick a reason
                 </option>
-              ))}
-            </select>
-          </label>
+                {HAND_CLOSE_REASONS.map((r) => (
+                  <option key={r} value={r}>
+                    {DEAL_CLOSE_REASON_LABEL[r]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label className="flex flex-col gap-1.5 text-sm">
             <span className="text-muted-foreground">Note for the team (optional)</span>
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={CRM_LIMITS.closedNote} rows={2} />
@@ -246,7 +251,7 @@ function CloseDialog({ deal, stage, onCancel, onConfirm }: { deal: DealDto; stag
             <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>
               Cancel
             </Button>
-            <Button type="submit" disabled={busy || !reason}>
+            <Button type="submit" disabled={busy || (!won && !reason)}>
               {busy ? "Saving…" : stage === "WON" ? "Mark won" : "Mark lost"}
             </Button>
           </DialogFooter>
