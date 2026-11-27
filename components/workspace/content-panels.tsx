@@ -24,7 +24,7 @@ import { PeekSlot, usePeekTitle } from "@/components/workspace/peek";
 import { QualityCheck } from "@/components/workspace/quality-check";
 import { JOB_INTERVALS, useBrandData, useJob } from "@/components/workspace/use-job";
 import { loadPlanCredits, withPrice, workspaceIdOf } from "@/lib/plan-credits";
-import { plannerChainBody } from "@/lib/agent-workflow";
+import { plannerChainBody, stageQueue } from "@/lib/agent-workflow";
 import { AgentWorkflowStrip } from "@/components/agents/agent-workflow-strip";
 import { PlanWithAgents } from "@/components/agents/plan-with-agents";
 import { dayTime } from "@/lib/time";
@@ -1102,6 +1102,43 @@ function ShowOnCalendar({ id, at }: { id: string; at: string }) {
     <button type="button" onClick={go} className="ml-auto inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-0.5 font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       Show on calendar
     </button>
+  );
+}
+
+/**
+ * An agent's peek on the calendar and Channels: the posts still waiting at its stage (older ones too, not only the
+ * latest run's), each opening in place. `exclude`: the latest run's posts, already listed above. Brand-wide queue.
+ */
+export function StageQueue({ base, agentKey, exclude, onOpenPost }: { base: string; agentKey: string; exclude: readonly string[]; onOpenPost: (id: string) => void }) {
+  const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
+  const { data } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
+  if (!data) return null;
+  const groups = stageQueue(agentKey, data)
+    .map((g) => ({ ...g, posts: g.posts.filter((p) => !exclude.includes(p.id)) }))
+    .filter((g) => g.posts.length);
+  if (!groups.length) return null;
+  return (
+    <section aria-labelledby="queue-h" className="flex flex-col gap-3">
+      <h2 id="queue-h" className="text-base font-semibold">Still waiting at this stage</h2>
+      {groups.map((g) => (
+        <div key={g.label} className="flex flex-col gap-1.5">
+          <p className="text-xs text-muted-foreground">{g.label} · {g.posts.length}</p>
+          <ul className="divide-y divide-border rounded-xl border border-border">
+            {g.posts.map((p) => (
+              <li key={p.id}>
+                <button type="button" onClick={() => onOpenPost(p.id)} className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                  <span className="min-w-0">
+                    <span className="block truncate">{p.title}</span>
+                    <span className="block text-xs text-muted-foreground">{CHANNEL_LABEL[p.channel] ?? p.channel} · {p.scheduledFor ? day(p.scheduledFor) : "no date"}</span>
+                  </span>
+                  <span className="shrink-0 text-xs text-muted-foreground">Open post</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
   );
 }
 

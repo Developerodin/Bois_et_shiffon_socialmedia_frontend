@@ -39,7 +39,7 @@ import { useRunPrice } from "@/components/shell/use-plan-credits";
 import { Button } from "@/components/ui/button";
 import { Findings, Score } from "@/components/performance/audit-board";
 import { CompetitorView } from "@/components/workspace/competitors-panel";
-import { ContentView, IdeasPanel, LoadFailed, LoadGate, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
+import { ContentView, IdeasPanel, LoadFailed, LoadGate, StageQueue, useBrandData, type ContentItem, type Opportunity } from "@/components/workspace/content-panels";
 import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Peek } from "@/components/workspace/peek";
 import { TaskView } from "@/components/tasks/task-view";
@@ -1365,6 +1365,8 @@ export function AgentView({
   const shownRun = startedFor === runId ? undefined : runId;
   const running = agent?.lastRun?.status === "RUNNING" || agent?.lastRun?.status === "QUEUED";
   const price = useRunPrice(workspaceId, agentKey);
+  // The latest run's posts (from its log), so the stage's queue below doesn't list them twice.
+  const [runPosts, setRunPosts] = useState<string[]>([]);
 
   async function run() {
     setPending(true);
@@ -1426,7 +1428,7 @@ export function AgentView({
 
         {(shownRun ?? agent?.lastRun?.id) && (
           <section aria-labelledby="did-h" className="flex flex-col gap-3">
-            <h2 id="did-h" className="text-base font-semibold">What it did</h2>
+            <h2 id="did-h" className="text-base font-semibold">{postsHere ? "Its latest run" : "What it did"}</h2>
             <RunEvents
               workspaceId={workspaceId}
               brandId={brandId}
@@ -1434,8 +1436,13 @@ export function AgentView({
               runId={(shownRun ?? agent?.lastRun?.id)!}
               again={shownRun ? undefined : `${agent?.lastRun?.id}:${agent?.lastRun?.status}`}
               onOpenPost={postsHere ? onOpenPost : undefined}
+              log={!postsHere}
+              onPosts={postsHere ? setRunPosts : undefined}
             />
           </section>
+        )}
+        {postsHere && onOpenPost && (
+          <StageQueue base={`/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`} agentKey={agentKey} exclude={runPosts} onOpenPost={onOpenPost} />
         )}
 
         {report && (

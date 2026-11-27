@@ -94,6 +94,21 @@ export function workflowCounts(ideas: readonly Idea[] | null, posts: readonly Po
 }
 export type WorkflowCounts = ReturnType<typeof workflowCounts>;
 
+/**
+ * The posts waiting at an agent's stage now (the same tests as workflowCounts), in groups with a label: what the agent's
+ * peek lists under its latest run, so older posts that never moved on stay in view. Unknown agent → no groups.
+ */
+export function stageQueue<P extends Post>(key: string, posts: readonly P[]): { label: string; posts: P[] }[] {
+  const pick = (label: string, test: (p: P) => boolean) => ({ label, posts: posts.filter(test) });
+  const groups =
+    key === "planner" ? [pick("Planned, waiting for a brief", (p) => p.status === "PLANNED" && !p.studio && !p.latest)]
+    : key === "brief" ? [pick("Briefed, waiting for a draft", (p) => p.status === "BRIEF_READY" && !p.studio)]
+    : key === "creator" ? [pick("Drafted, waiting for the quality check", (p) => p.status === "DRAFT_REVIEW" && !p.latest?.check)]
+    : key === "quality" ? [pick("Blocked by the check: needs fixes", (p) => p.status === "DRAFT_REVIEW" && p.latest?.check?.overall === "BLOCKER"), pick("Passed, awaiting your approval", (p) => p.status === "AWAITING_APPROVAL")]
+    : [];
+  return groups.filter((g) => g.posts.length);
+}
+
 /** A stage's workload state, apart from its last run: the person must act (Waiting for input, Needs attention) or not. */
 export type StageFlag = "waiting" | "attention" | null;
 export const FLAG_LABEL = { waiting: "Waiting for input", attention: "Needs attention" } as const;
