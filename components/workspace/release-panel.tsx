@@ -83,7 +83,7 @@ const browserZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
  * Approve the exact draft shown above, then publish or schedule it, with a full history. `approveFirst`: one press
  * approves a version awaiting approval and then publishes it (the reel page; the phone does the same).
  */
-export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false, pinLink, className }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[]; onChanged: () => void; approveFirst?: boolean; /** A Pinterest pin's destination, so the approver sees where it leads. */ pinLink?: string | null; /** Overrides the card look (the post inspector lays it flat). */ className?: string }) {
+export function ReleasePanel({ base, id, status, version, qualityBlocked, perms, onChanged, approveFirst = false, pinLink, photos, className }: { base: string; id: string; status: string; version: number | null; qualityBlocked: boolean; perms: readonly string[]; onChanged: () => void; approveFirst?: boolean; /** A Pinterest pin's destination, so the approver sees where it leads. */ pinLink?: string | null; /** The draft's own pictures (key and signed preview): publishing starts with them, as the phone and auto-publish do. */ photos?: readonly { key: string; previewUrl: string }[]; /** Overrides the card look (the post inspector lays it flat). */ className?: string }) {
   const url = `${base}/content/${encodeURIComponent(id)}`;
   const { data, failed: loadError, slow, reload } = useJob(url, { pick: asRelease, done: notGoingOut, intervals: JOB_INTERVALS.publishing, capMs: 600_000 });
   // The hook's own mount poll is the first fetch; only a real change of status or version needs a fresh one.
@@ -172,7 +172,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
       {approveFirst && !refused && version !== null && (status === "AWAITING_APPROVAL" || (status === "APPROVED" && data.approvalValid)) ? (
         // A blocking check: the page says why above, and there is no form.
         qualityBlocked ? null : (status === "APPROVED" || canApprove) && canPublish ? (
-          <PublishForm base={base} data={data} version={version} approving={status === "AWAITING_APPROVAL"} onPublish={approveAndPublish} />
+          <PublishForm base={base} data={data} photos={photos} version={version} approving={status === "AWAITING_APPROVAL"} onPublish={approveAndPublish} />
         ) : (
           <p className="text-sm text-muted-foreground">
             {canPublish ? "Your role can't approve reels, so it can't publish this one." : "Your role can't publish reels. Someone who can publish will post it."}
@@ -199,7 +199,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
       ) : status === "APPROVED" && data.approvalValid && data.requirements.frames ? (
         canPublish ? (
           <>
-            <PublishForm base={base} data={data} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
+            <PublishForm base={base} data={data} photos={photos} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
             <StoryByHand base={base} id={id} data={data} canDownload={perms.includes("content.download")} onAct={act} />
           </>
         ) : (
@@ -213,7 +213,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
       ) : status === "APPROVED" && data.approvalValid ? (
         canPublish ? (
           <>
-            <PublishForm base={base} data={data} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
+            <PublishForm base={base} data={data} photos={photos} version={version!} approving={false} onPublish={(b) => act({ action: "publish", version, ...b })} />
             <PostedByHand studio={!!data.requirements.studio} onAct={act} />
           </>
         ) : (
@@ -389,7 +389,7 @@ function PlannedBoard({ data, canEdit, onSet }: { data: Release; canEdit: boolea
 }
 
 /** approving: the press approves draft v`version` first (approveFirst). */
-function PublishForm({ base, data, version, approving, onPublish }: { base: string; data: Release; version: number; approving: boolean; onPublish: (b: Record<string, unknown>) => Promise<void> }) {
+function PublishForm({ base, data, photos = [], version, approving, onPublish }: { base: string; data: Release; photos?: readonly { key: string; previewUrl: string }[]; version: number; approving: boolean; onPublish: (b: Record<string, unknown>) => Promise<void> }) {
   const { requirements: req, accounts } = data;
   // A studio reel posts its own video: no link to ask for.
   const needsLink = req.needsVideo && !req.studio;
@@ -400,8 +400,10 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
   const [videoUrl, setVideoUrl] = useState("");
   // Carousels take several links, one per line.
   const imageLinks = imageUrl.split("\n").map((l) => l.trim()).filter(Boolean);
-  // Files uploaded to the brand's private storage; they go out before any links.
-  const [uploads, setUploads] = useState<{ key: string; previewUrl: string }[]>([]);
+  // Files in the brand's private storage, starting with the draft's own pictures (the approval covers those; other
+  // uploads are refused on a draft that names its pictures); they go out before any links.
+  const [uploads, setUploads] = useState<{ key: string; previewUrl: string }[]>(() => photos.slice(0, data.requirements.maxImages));
+  const added = uploads.some((u) => !photos.some((p) => p.key === u.key));
   const [uploading, setUploading] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const imageCount = uploads.length + imageLinks.length;
@@ -417,7 +419,7 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
   const allHttps = imageLinks.every((l) => safeHttpUrl(l)?.protocol === "https:");
   const video = safeHttpUrl(videoUrl.trim());
   // Typed links, a chosen time or an upload in progress are lost on leaving (uploaded files wait for Publish).
-  useUnsavedGuard(uploading || uploads.length > 0 || imageUrl !== "" || videoUrl !== "" || (later && runAt !== ""));
+  useUnsavedGuard(uploading || added || imageUrl !== "" || videoUrl !== "" || (later && runAt !== ""));
 
   // Starts on the planned board when this account lists it, else the first; a plan set or changed while the form is open
   // moves the choice to it once (boardChoice).
@@ -552,11 +554,11 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
         </div>
         <p id="pub-image-help" className="text-xs text-muted-foreground">Upload {req.provider === "INSTAGRAM" ? "JPG" : "JPG or PNG"} images (up to 4 MB each), or paste public https link{many ? "s" : ""}. {name} downloads them from there.</p>
         {uploads.length > 0 && (
-          <ul className="flex flex-wrap gap-2" aria-label="Uploaded images">
+          <ul className="flex flex-wrap gap-2" aria-label="Images to post">
             {uploads.map((u, i) => (
               <li key={u.key} className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element -- short-lived signed link */}
-                <img src={u.previewUrl} alt={`Uploaded image ${i + 1}`} className="size-16 rounded-md border border-border object-cover" />
+                <img src={u.previewUrl} alt={`Image ${i + 1}`} className="size-16 rounded-md border border-border object-cover" />
                 <button type="button" onClick={() => setUploads((prev) => prev.filter((x) => x.key !== u.key))} aria-label={`Remove image ${i + 1}`} className="absolute -right-2 -top-2 grid size-6 place-items-center rounded-full border border-border bg-background text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <X aria-hidden className="size-3.5" />
                 </button>

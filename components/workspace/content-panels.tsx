@@ -82,7 +82,7 @@ export type ContentItem = {
   plannedBoardName?: string | null;
   latest: {
     version: number;
-    body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string };
+    body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string; photoKeys?: string[] };
     /** The draft's pictures, signed for an hour; the first is the cover (a studio reel's first scene). */
     photoUrls?: string[];
     byPerson: boolean;
@@ -1049,6 +1049,16 @@ function StoryFrames({ base, item }: { base: string; item: ContentItem }) {
   );
 }
 
+/**
+ * The draft's pictures with their signed previews, for publishing. Only when every key has its link (GET content signs
+ * only this brand's keys, so a stored foreign key would shift the pairs); otherwise none, and the person adds images.
+ */
+export function draftPhotos(item: Pick<ContentItem, "latest">): { key: string; previewUrl: string }[] {
+  const keys = item.latest?.body.photoKeys ?? [];
+  const urls = item.latest?.photoUrls ?? [];
+  return keys.length && keys.length === urls.length ? keys.map((key, n) => ({ key, previewUrl: urls[n]! })) : [];
+}
+
 export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { base: string; perms: string[]; id: string; reelsOn: boolean; brandId: string; onLoaded?: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
@@ -1275,7 +1285,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
           </section>
           )}
 
-          <ReleasePanel className="rounded-none border-0 border-t p-0 pt-5" base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} />
+          <ReleasePanel className="rounded-none border-0 border-t p-0 pt-5" base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} photos={draftPhotos(item)} />
         </div>
       )}
     </div>

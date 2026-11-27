@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { COMPOSE_CHOICES, composeChoices, isWrittenChannel, postedByHand } from "@/lib/new-post";
+import { draftPhotos } from "@/components/workspace/content-panels";
 import { CHANNEL_PROVIDER } from "@/lib/social-channels";
 import { CHANNEL_IMAGES, NEW_POST_CHANNELS, writtenPostProblem } from "@/shared";
 
@@ -38,5 +39,17 @@ describe("the dialog's checks are the server's (shared/content-limits.ts)", () =
     expect(writtenPostProblem("X_POST", { text: "a".repeat(281), photos: 0 })).toMatch(/280/);
     expect(writtenPostProblem("PINTEREST_PIN", { text: "d", pinTitle: "t", photos: 0 })).toMatch(/image/);
     expect(CHANNEL_IMAGES.FACEBOOK_POST).toEqual([0, 1]);
+  });
+});
+
+describe("draftPhotos: publishing starts with the draft's own pictures", () => {
+  const latest = (photoKeys: string[] | undefined, photoUrls: string[] | undefined) => ({ latest: { version: 1, body: { hook: "", caption: "c", hashtags: [], slides: [], script: [], pinTitle: "", altText: "", photoKeys }, photoUrls, byPerson: true, check: null, review: null } });
+  it("pairs each key with its signed link", () => {
+    expect(draftPhotos(latest(["w/b/a.jpg"], ["https://s/a"]))).toEqual([{ key: "w/b/a.jpg", previewUrl: "https://s/a" }]);
+  });
+  it("none when the pairs don't line up, or there are none", () => {
+    expect(draftPhotos(latest(["w/b/a.jpg", "x/y/b.jpg"], ["https://s/a"]))).toEqual([]);
+    expect(draftPhotos(latest(undefined, ["https://s/scene"]))).toEqual([]);
+    expect(draftPhotos({ latest: null })).toEqual([]);
   });
 });
