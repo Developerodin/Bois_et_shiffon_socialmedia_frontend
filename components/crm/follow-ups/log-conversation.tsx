@@ -22,7 +22,7 @@ export function LogConversation({ w, b, customerId, onLogged }: { w: string; b: 
 
   if (!open)
     return (
-      <Button size="sm" variant="outline" className="self-start" onClick={() => setOpen(true)}>
+      <Button size="sm" variant="outline" className="self-start" onClick={() => (setDraft(newMessageDraft()), setOpen(true))}>
         Log a conversation
       </Button>
     );

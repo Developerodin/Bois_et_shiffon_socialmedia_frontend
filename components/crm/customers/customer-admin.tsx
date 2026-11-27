@@ -29,7 +29,15 @@ export function mergeMoves(other: Pick<CustomerDto, "identities" | "notes" | "qu
  * Merge a duplicate into this customer (kept): pick a same-name suggestion or search any customer, see what moves,
  * then confirm. Both are sent as read (409 when either changed in between). No undo.
  */
-export function MergeDialog({ w, b, customer, onClose, onMerged }: { w: string; b: string; customer: CustomerDto; onClose(): void; onMerged(c: CustomerDto, otherId: string): void }) {
+export function MergeDialog({ w, b, customer, onClose, onStale, onMerged }: {
+  w: string;
+  b: string;
+  customer: CustomerDto;
+  onClose(): void;
+  /** Either customer changed since it was read: the page reads this one again. */
+  onStale(): void;
+  onMerged(c: CustomerDto, otherId: string): void;
+}) {
   const [suggestions, setSuggestions] = useState<CustomerRow[] | null>(null);
   const [other, setOther] = useState<CustomerDto | null>(null);
   const [busy, setBusy] = useState(false);
@@ -57,7 +65,12 @@ export function MergeDialog({ w, b, customer, onClose, onMerged }: { w: string; 
       const { customer: kept } = await crmApi.merge(w, b, customer.id, { otherId: other.id, survivorUpdatedAt: customer.updatedAt, otherUpdatedAt: other.updatedAt });
       onMerged(kept, other.id);
     } catch (e) {
-      setError(e instanceof ApiError && e.code === "crm.changed" ? "One of the two customers changed since you opened this. Close it, open the customer again and redo the merge." : errorMessage(e));
+      if (e instanceof ApiError && e.code === "crm.changed") {
+        // Both are read again: this one by the page, the other on the next pick.
+        onStale();
+        setOther(null);
+        setError("One of the two customers changed in the meantime. Pick the duplicate again to see them as they are now.");
+      } else setError(errorMessage(e));
     } finally {
       setBusy(false);
     }

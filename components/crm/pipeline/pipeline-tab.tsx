@@ -76,10 +76,13 @@ export function PipelineTab({ w, b }: { w: string; b: string }) {
       setClosing(null);
       load();
     } catch (e) {
-      const msg = e instanceof ApiError && e.code === "crm.changed" ? "Someone changed this deal in the meantime. The board shows it as it is now; try again." : errorMessage(e);
-      if (e instanceof ApiError && e.code === "crm.changed") load();
-      if (reason) throw new Error(msg);
-      setError(msg);
+      if (e instanceof ApiError && e.code === "crm.changed") {
+        // The dialog's copy of the deal is stale too: close it, and the board shows the deal as it is now.
+        setClosing(null);
+        setError("Someone changed this deal in the meantime. The board shows it as it is now; try again.");
+        load();
+      } else if (reason) throw new Error(errorMessage(e));
+      else setError(errorMessage(e));
     } finally {
       setMoving(null);
     }
@@ -180,6 +183,7 @@ export function PipelineTab({ w, b }: { w: string; b: string }) {
           defaultCurrency={commonCurrency(board)}
           onClose={() => setEditing(null)}
           onSaved={() => (setEditing(null), load())}
+          onStale={load}
         />
       ) : null}
       {closing ? <CloseDialog deal={closing.deal} stage={closing.stage} onCancel={() => setClosing(null)} onConfirm={(r) => move(closing.deal, closing.stage, r)} /> : null}

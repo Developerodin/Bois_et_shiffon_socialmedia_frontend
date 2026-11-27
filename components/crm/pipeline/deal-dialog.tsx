@@ -32,7 +32,7 @@ const draftOf = (d: DealDto | null, currency: string): Draft => ({
  * A new deal, or one deal's details (stages move from the card). Edits save on the `updatedAt` read (409 asks for a
  * reload). The title warns against personal data: link the customer instead.
  */
-export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onClose, onSaved }: {
+export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onClose, onSaved, onStale }: {
   w: string;
   b: string;
   /** null: a new deal */
@@ -43,6 +43,8 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onC
   defaultCurrency: string;
   onClose(): void;
   onSaved(d: DealDto): void;
+  /** The deal changed since it was read: the board reads it again. */
+  onStale(): void;
 }) {
   const [draft, setDraft] = useState(() => draftOf(deal, defaultCurrency));
   const [picking, setPicking] = useState(false);
@@ -70,7 +72,9 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, onC
       const { deal: d } = deal ? await crmApi.updateDeal(w, b, deal.id, { ...fields, updatedAt: deal.updatedAt }) : await crmApi.createDeal(w, b, { ...fields, stage: draft.stage });
       onSaved(d);
     } catch (e) {
-      setError(e instanceof ApiError && e.code === "crm.changed" ? "Someone changed this deal since you opened it. Close this and open it again to see their change." : errorMessage(e));
+      const stale = e instanceof ApiError && e.code === "crm.changed";
+      if (stale) onStale();
+      setError(stale ? "Someone changed this deal since you opened it. Close this and open the deal again from the board to see their change." : errorMessage(e));
     } finally {
       setBusy(false);
     }

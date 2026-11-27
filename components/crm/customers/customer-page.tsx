@@ -313,16 +313,20 @@ export function CustomerPage({ sectionId, w, b, id, name, access, companies, onC
           <CustomerConversations conversations={customer.conversations} />
           {access.inbox ? <LogConversation w={w} b={b} customerId={customer.id} onLogged={() => load(false)} /> : null}
         </div>
-        {access.admin ? <CustomerData w={w} b={b} customer={customer} onErased={onErased} onCompanyErased={() => (onCompanyErased(), load(false))} /> : null}
+        {access.admin ? <CustomerData w={w} b={b} customer={customer} onErased={onErased} onCompanyErased={() => (onCompanyErased(), load(true))} /> : null}
         {merging ? (
           <MergeDialog
             w={w}
             b={b}
             customer={customer}
             onClose={() => setMerging(false)}
+            onStale={() => load(true)}
             onMerged={(c, otherId) => {
               setMerging(false);
               changed(c);
+              // The merge fills empty fields from the duplicate: the form shows them, so a Save keeps them.
+              setDraft(draftOf(c));
+              setDirty(false);
               onMerged(c, otherId);
             }}
           />

@@ -39,15 +39,21 @@ export function FollowUpsTab({ w, b, canManage }: { w: string; b: string; canMan
       () => setCounts(null), // the chips just go without numbers
     );
   }, [w, b]);
-  const load = useCallback(() => {
+  const [nonce, setNonce] = useState(0);
+  const load = useCallback(() => setNonce((n) => n + 1), []);
+  useEffect(() => {
+    // A slower answer for the chip before must not land under this one.
+    let cancelled = false;
     setFailed(false);
     setRows(null);
     crmApi.followUps(w, b, filter).then(
-      (r) => (setRows(r.conversations), setNext(r.nextCursor)),
-      () => setFailed(true),
+      (r) => !cancelled && (setRows(r.conversations), setNext(r.nextCursor)),
+      () => !cancelled && setFailed(true),
     );
-  }, [w, b, filter]);
-  useEffect(load, [load]);
+    return () => {
+      cancelled = true;
+    };
+  }, [w, b, filter, nonce]);
   useEffect(loadCounts, [loadCounts]);
   const loadMore = async () => {
     if (!next) return;

@@ -45,8 +45,10 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
   const [error, setError] = useState<{ message: string; stale: boolean } | null>(null);
   const [draft, setDraft] = useState(newMessageDraft);
 
-  const take = (x: ConversationDto) => {
+  /** The server's conversation; the owner and next-action form follows it only when saved or first read (edits stay). */
+  const take = (x: ConversationDto, resetForm: boolean) => {
     setC(x);
+    if (!resetForm) return;
     setForm({ ownerId: x.ownerId ?? "", nextAction: x.nextAction ?? "", nextActionDue: x.nextActionDue ?? "" });
     setDirty(false);
   };
@@ -54,7 +56,7 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
     setFailed(null);
     setError(null);
     crmApi.conversation(w, b, id).then(
-      (r) => take(r.conversation),
+      (r) => take(r.conversation, true),
       (e: unknown) => setFailed(errorMessage(e, "Couldn't load this conversation. Try again.")),
     );
   }, [w, b, id]);
@@ -65,7 +67,7 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
     setError(null);
     try {
       const { conversation } = await call();
-      take(conversation);
+      take(conversation, what === "save");
       onChanged(conversation);
       after?.();
     } catch (e) {
