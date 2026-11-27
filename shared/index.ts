@@ -15,6 +15,7 @@ export * from "./brand-look";
 export * from "./photoshoot";
 export * from "./reels";
 export * from "./content-status";
+export * from "./channel-groups";
 export * from "./csv";
 export * from "./run-id";
 export * from "./context-docs";

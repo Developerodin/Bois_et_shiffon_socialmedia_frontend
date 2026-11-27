@@ -27,7 +27,7 @@ import { dayTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, TONE_DOT, toneOf, type Tone } from "@/lib/status";
-import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
+import { channelSlug, safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
 import { activeFilterCount, channelOptions, filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
 import { type CardForm, newPostTime, gridRange, groupByDay, monthGrid, POST_NOUN, shortTime } from "@/lib/calendar-month";
 import { CalendarCard, DayRow, MonthGrid } from "@/components/calendar/month-grid";
@@ -527,8 +527,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
               {filterControls(false)}
             </FiltersMenu>
           </span>
-          {/* The export route takes dates only: on a channel's calendar the button says it holds every channel. */}
-          {canExport && <ExportCsvButton url={`${base}/content/export`} filename={`calendar-${new Date().toLocaleDateString("en-CA")}.csv`} label={filter.channel ? "Export CSV (all channels)" : undefined} labelClassName="@max-[720px]/cal:sr-only" />}
+          {/* A channel's calendar exports that channel (or group) only, and its file says which. */}
+          {canExport && <ExportCsvButton url={`${base}/content/export${filter.channel ? `?channel=${encodeURIComponent(filter.channel)}` : ""}`} filename={`calendar-${filter.channel ? `${channelSlug(filter.channel)}-` : ""}${new Date().toLocaleDateString("en-CA")}.csv`} labelClassName="@max-[720px]/cal:sr-only" />}
           {newPost}
         </span>
       </div>

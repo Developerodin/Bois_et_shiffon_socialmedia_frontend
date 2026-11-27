@@ -1,7 +1,8 @@
 import { CHANNEL_LABEL } from "@/lib/post-labels";
-import { inNextWeek, isBlocked, isOverdue, STATUS_GROUPS } from "@/shared";
+import { CHANNEL_GROUPS, channelsOf, inNextWeek, isBlocked, isChannelGroup, isOverdue, STATUS_GROUPS } from "@/shared";
 
-export { isBlocked, isOverdue };
+// The channel groups (meta, instagram) live in shared/ so the calendar export takes the same values.
+export { CHANNEL_GROUPS, channelsOf, isBlocked, isOverdue };
 
 /** The parts of a calendar post the filters read; ContentItem satisfies it. */
 export type CalendarItem = {
@@ -21,17 +22,6 @@ export type StatusGroup = keyof typeof STATUS_GROUPS;
 export type CalendarFilter = { channel?: string; status?: StatusGroup; campaignId?: string; owner?: "me" | "none"; need?: "overdue" | "blocked" | "week" };
 
 const PUBLISHED: readonly string[] = STATUS_GROUPS.published;
-
-const INSTAGRAM = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "INSTAGRAM_STORY"] as const;
-/**
- * Channel groups the channel filter (cf_channel) takes beside one channel: Meta is Facebook and every Instagram format,
- * Instagram its four formats, so the Meta calendar and the Instagram shortcut show the same posts.
- */
-export const CHANNEL_GROUPS = { meta: ["FACEBOOK_POST", ...INSTAGRAM], instagram: INSTAGRAM } as const;
-const isGroup = (v: string): v is keyof typeof CHANNEL_GROUPS => Object.hasOwn(CHANNEL_GROUPS, v);
-
-/** The channels a cf_channel value stands for: a group's members, else the one channel. */
-export const channelsOf = (v: string): readonly string[] => (isGroup(v) ? CHANNEL_GROUPS[v] : [v]);
 
 /**
  * The Channel filter's choices: each group some present channel belongs to, then the present channels, then the
@@ -74,7 +64,7 @@ const OWNERS = ["me", "none"], NEEDS = ["overdue", "blocked", "week"];
 export function filterFromSearch(q: URLSearchParams): CalendarFilter {
   const f: CalendarFilter = {};
   const channel = q.get("cf_channel"), status = q.get("cf_status"), campaignId = q.get("cf_campaignId"), owner = q.get("cf_owner"), need = q.get("cf_need");
-  if (channel && (isGroup(channel) || Object.hasOwn(CHANNEL_LABEL, channel))) f.channel = channel;
+  if (channel && (isChannelGroup(channel) || Object.hasOwn(CHANNEL_LABEL, channel))) f.channel = channel;
   if (status && Object.hasOwn(STATUS_GROUPS, status)) f.status = status as StatusGroup;
   if (campaignId) f.campaignId = campaignId;
   if (owner && OWNERS.includes(owner)) f.owner = owner as "me" | "none";
