@@ -1659,7 +1659,8 @@ function AgentsFeed({
 
 /* ───────────── Analyst notes ───────────── */
 
-export function LearningNotes({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
+/** The Analyst's learning notes, newest first as the server sends them: null until read; `load` reads again. */
+export function useLearningNotes(workspaceId: string, brandId: string) {
   const [notes, setNotes] = useState<{ id: string; title: string; body: string; createdAt: string }[] | null>(null);
   const [failed, setFailed] = useState(false);
   const load = useCallback(() => {
@@ -1669,6 +1670,11 @@ export function LearningNotes({ workspaceId, brandId }: { workspaceId: string; b
     ).then((d) => setNotes(d.notes), () => setFailed(true));
   }, [workspaceId, brandId]);
   useEffect(load, [load]);
+  return { notes, failed, load };
+}
+
+export function LearningNotes({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
+  const { notes, failed, load } = useLearningNotes(workspaceId, brandId);
   if (failed) return <LoadFailed what="learning notes" onRetry={load} />;
   if (!notes) return <ListSkeleton label="Loading notes" rows={2} />;
   if (!notes.length) return <p className="text-sm text-muted-foreground">No learning notes yet. Run the Analyst to write the first one.</p>;
