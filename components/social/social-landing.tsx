@@ -109,7 +109,7 @@ function WorkflowPeek({ workspaceId, brandId, perms, conns }: { workspaceId: str
         <Peek placement="page" open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} onClose={() => show({ kind: "home" })} onExited={peek.onExited} asideRef={peek.ref}>
           {/* Keyed by item: another agent remounts fresh. */}
           <Fragment key={peekKey(shown)}>
-            <WorkflowPeekBody view={shown} live={peek.live} base={wf.base} workspaceId={workspaceId} brandId={brandId} perms={perms} agents={wf.agents} autoRunKey={wf.autoRunKey} onRunScout={wf.runScout} onOpenPost={(id) => router.push(`/calendar?post=${encodeURIComponent(id)}`)} onOpenPosts={() => router.push("/calendar")} />
+            <WorkflowPeekBody view={shown} live={peek.live} base={wf.base} workspaceId={workspaceId} brandId={brandId} perms={perms} agents={wf.agents} agentsFailed={wf.agentsFailed} autoRunKey={wf.autoRunKey} onRunScout={wf.runScout} onOpenPost={(id) => router.push(`/calendar?post=${encodeURIComponent(id)}`)} onOpenPosts={() => router.push("/calendar")} />
           </Fragment>
         </Peek>
       )}

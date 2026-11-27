@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { fetchAgents, type AgentSummary } from "@/components/agents/api";
 import { useAgentsPoll } from "@/components/agents/use-agents-poll";
 import { ListSkeleton } from "@/components/settings/shared";
 import { IdeasPanel } from "@/components/workspace/content-panels";
 import { knownName } from "@/components/workspace/known-name";
 import type { PeekItem } from "@/components/workspace/use-peek";
-import { AgentView, NotForRole } from "@/components/workspace/workspace";
+import { NotForRole } from "@/components/workspace/workspace";
+import { AgentDrawer } from "@/components/agents/drawer/agent-drawer";
+import { LoadFailed } from "@/components/ui/load-failed";
 import { peekCrumb, peekKey, peekTitle, workflowPeekFromSearch, type WorkflowPeekView } from "@/lib/workspace-view";
 
 /**
@@ -22,7 +23,7 @@ export function useWorkflowPeek({ workspaceId, brandId, perms, query, go }: { wo
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
   const canAgents = perms.includes("agents.read");
   const view = workflowPeekFromSearch(query);
-  const { agents } = useAgentsPoll(workspaceId, brandId, view?.kind === "agent" && canAgents);
+  const { agents, failed: agentsFailed } = useAgentsPoll(workspaceId, brandId, view?.kind === "agent" && canAgents);
   const bad = view?.kind === "agent" && canAgents && !!agents && !agents.some((a) => a.key === view.key);
   const item: PeekItem | null =
     view && !bad
@@ -40,12 +41,12 @@ export function useWorkflowPeek({ workspaceId, brandId, perms, query, go }: { wo
     setRunKey("scout");
     go({ kind: "agent", key: "scout" });
   };
-  return { view, item, agents, bad, base, autoRunKey: runKey, runScout };
+  return { view, item, agents, agentsFailed, bad, base, autoRunKey: runKey, runScout };
 }
 
 /**
- * What the workflow peek shows: the Ideas panel, or AgentView for the open agent (a skeleton until the agents list has
- * it). `live` is false while it slides out: that snapshot never auto-runs. Documents open on the Overview.
+ * What the workflow peek shows: the Ideas panel, or the agent drawer for the open agent (a skeleton until the agents
+ * list has it, a retry if it can't be read). `live` is false while it slides out: that snapshot never auto-runs. Documents open on the Overview.
  */
 export function WorkflowPeekBody({
   view,
@@ -59,6 +60,7 @@ export function WorkflowPeekBody({
   onRunScout,
   onOpenPost,
   onOpenPosts,
+  agentsFailed = false,
 }: {
   view: WorkflowPeekView;
   live: boolean;
@@ -71,8 +73,9 @@ export function WorkflowPeekBody({
   onRunScout: () => void;
   onOpenPost: (id: string) => void;
   onOpenPosts: () => void;
+  /** The agents list's last read failed (with no list yet: a retry instead of an endless skeleton). */
+  agentsFailed?: boolean;
 }) {
-  const router = useRouter();
   const canRun = perms.includes("agents.run");
   // A fresh read after a run reaches the polled list through the shared request.
   const refreshAgents = useCallback(() => void fetchAgents(workspaceId, brandId, true).catch(() => {}), [workspaceId, brandId]);
@@ -80,28 +83,20 @@ export function WorkflowPeekBody({
   if (!perms.includes("agents.read")) return <NotForRole what="the agents" />;
   const agent = agents?.find((a) => a.key === view.key);
   if (!agent) {
-    return (
-      <div className="px-6 py-6">
-        <ListSkeleton label="Loading" rows={3} />
-      </div>
-    );
+    return <div className="px-6 py-6">{agentsFailed ? <LoadFailed what="the agents" onRetry={refreshAgents} /> : <ListSkeleton label="Loading" rows={3} />}</div>;
   }
   return (
-    <AgentView
+    <AgentDrawer
       agentKey={view.key}
       autoRun={live && canRun && autoRunKey === view.key}
       canRun={canRun}
       perms={perms}
       agent={agent}
-      report={null}
-      docs={null}
       workspaceId={workspaceId}
       brandId={brandId}
-      onOpenDoc={(doc) => router.push(`/?doc=${encodeURIComponent(doc)}`)}
       onRan={refreshAgents}
       onOpenPosts={onOpenPosts}
       onOpenPost={onOpenPost}
-      postsHere
     />
   );
 }
