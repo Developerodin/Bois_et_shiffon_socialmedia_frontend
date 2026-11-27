@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { CRM_LIMITS, type ConversationDto } from "@/shared";
 import { crmApi, type ConversationPatch } from "@/components/crm/api";
 import { CrmLink, crmHref } from "@/components/crm/crm-link";
+import { CustomerPicker } from "@/components/crm/customers/customer-picker";
 import { OwnerSelect } from "@/components/crm/customers/owner-select";
 import type { Owner } from "@/components/crm/customers/people";
 import { ConversationAi } from "@/components/crm/follow-ups/conversation-ai";
@@ -26,7 +27,7 @@ export const conversationTitle = (c: { subject: string | null; customer: { displ
 /**
  * One conversation (inbox.read): its state, owner and next action (saved on the `updatedAt` read; 409 offers a
  * reload), waiting and close, logging a message, and the messages newest first. The customer links to their page
- * only for crm.manage holders.
+ * only for crm.manage holders, who can also move the conversation to another customer (Decision 17: both keys).
  */
 export function ConversationView({ sectionId, w, b, id, name, owners, canManage, canDraft, onChanged }: {
   sectionId: string;
@@ -55,6 +56,7 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<{ message: string; stale: boolean } | null>(null);
   const [draft, setDraft] = useState(newMessageDraft);
+  const [moving, setMoving] = useState(false);
 
   /**
    * The server's conversation. The form follows it when `force` (read, saved, a suggestion used) or when it has no
@@ -111,7 +113,36 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
           <Button size="sm" variant="outline" disabled={!!busy} onClick={() => void patch("closed", { closed: c.state !== "CLOSED" })}>
             {c.state === "CLOSED" ? "Reopen" : "Close"}
           </Button>
+          {canManage ? (
+            <Button size="sm" variant="ghost" disabled={!!busy} aria-expanded={moving} onClick={() => setMoving((m) => !m)}>
+              Move to another customer
+            </Button>
+          ) : null}
         </div>
+        {canManage && moving ? (
+          <section aria-labelledby="conversation-move-h" className="flex flex-col gap-2 rounded-xl border border-border p-3">
+            <h3 id="conversation-move-h" className="text-xs font-medium text-muted-foreground">
+              Move to another customer
+            </h3>
+            <p className="text-sm text-muted-foreground">The conversation and all its messages go to the customer you pick.</p>
+            <CustomerPicker
+              w={w}
+              b={b}
+              label="Find the customer to move this conversation to"
+              exclude={c.customer?.id}
+              // Closes only once moved: a refusal shows below and the picker stays for another try.
+              onPick={(to) => !busy && void run("move", () => crmApi.updateConversation(w, b, id, { customerId: to.id, updatedAt: c.updatedAt }), () => setMoving(false))}
+            />
+            {busy === "move" ? (
+              <p className="text-sm text-muted-foreground" role="status">
+                Moving…
+              </p>
+            ) : null}
+            <Button size="sm" variant="ghost" className="self-start" disabled={!!busy} onClick={() => setMoving(false)}>
+              Cancel
+            </Button>
+          </section>
+        ) : null}
         <form
           className="flex flex-col gap-3"
           onSubmit={(e) => {

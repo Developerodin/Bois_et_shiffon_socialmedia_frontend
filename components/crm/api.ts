@@ -110,6 +110,9 @@ export const crmApi = {
   createCompany: (w: string, b: string, body: { name: string; website?: string | null; ownerId?: string | null }) =>
     request<{ company: CompanyDto }>(`${crm(w, b)}/companies`, json("POST", body)),
   company: (w: string, b: string, id: string) => request<{ company: CompanyDto }>(`${crm(w, b)}/companies/${encodeURIComponent(id)}`),
+  /** A company's customers: the customer list filtered by company (50 a page, latest activity first; it counts toward the list's hourly limit). */
+  companyCustomers: (w: string, b: string, companyId: string, cursor?: string | null) =>
+    request<{ customers: CustomerRow[]; nextCursor: string | null }>(`${crm(w, b)}/customers?${new URLSearchParams({ companyId, ...(cursor ? { cursor } : {}) }).toString()}`),
   /** 409 `crm.changed` when someone saved since `updatedAt` was read. */
   updateCompany: (w: string, b: string, id: string, body: { name?: string; website?: string | null; ownerId?: string | null; updatedAt: string }) =>
     request<{ company: CompanyDto }>(`${crm(w, b)}/companies/${encodeURIComponent(id)}`, json("PATCH", body)),

@@ -6,6 +6,7 @@ import { identityConflict } from "@/components/crm/api";
 import { crmAccess, crmHref } from "@/components/crm/crm-link";
 import { crmTabs, defaultCrmTab } from "@/components/crm/crm-tabs";
 import { CustomerConversations, CustomerQuotes, draftOf, fieldsBody } from "@/components/crm/customers/customer-page";
+import { companyBody, companyDraft, customersLabel, websiteProblem } from "@/components/crm/customers/companies";
 import { ownerOptions } from "@/components/crm/customers/people";
 import { searchTerm } from "@/components/crm/customers/search";
 import { ApiError } from "@/components/settings/api";
@@ -105,5 +106,28 @@ describe("a customer's page", () => {
       people: [{ id: "g1", userId: "u2", name: "Anna", role: { id: "r1", name: "Manager" } }],
     });
     expect(owners).toEqual([{ id: "u2", name: "Anna" }, { id: "u1", name: "Zoé" }]);
+  });
+});
+
+describe("a company", () => {
+  const company = { id: "co1", name: "Studio Lin", website: null, ownerId: null, customers: 2, createdAt: "2026-11-20T10:00:00Z", updatedAt: "2026-11-20T10:00:00Z" };
+
+  it("sends its fields trimmed, an empty website or owner as none", () => {
+    expect(companyBody({ ...companyDraft(company), name: "  Studio Lin  ", website: "  " })).toEqual({ name: "Studio Lin", website: null, ownerId: null });
+    expect(companyBody({ name: "Studio Lin", website: " https://lin.studio ", ownerId: "u1" })).toEqual({ name: "Studio Lin", website: "https://lin.studio", ownerId: "u1" });
+  });
+
+  it("takes only an http or https website, as the server does", () => {
+    expect(websiteProblem("")).toBeNull();
+    expect(websiteProblem("https://lin.studio")).toBeNull();
+    expect(websiteProblem("http://lin.studio/about")).toBeNull();
+    expect(websiteProblem("lin.studio")).toBe("A website starts with http:// or https://");
+    expect(websiteProblem("ftp://lin.studio")).toBe("A website starts with http:// or https://");
+  });
+
+  it("counts its customers", () => {
+    expect(customersLabel(0)).toBe("0 customers");
+    expect(customersLabel(1)).toBe("1 customer");
+    expect(customersLabel(1200)).toBe("1,200 customers");
   });
 });

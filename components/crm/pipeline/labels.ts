@@ -31,3 +31,13 @@ export function dealValueProblem(value: string, currency: string): string | null
 }
 
 export const DEAL_TITLE_HINT = "Describe the opportunity, like \"Sofa covers for the lobby\". Keep personal details (names, emails, phone numbers) out of the title: link the customer instead.";
+
+/**
+ * The deal's conversation link as the save sends it: the key only when the viewer holds inbox.read and the link
+ * changed. Without inbox.read the server hides the link (conversationId reads null), so sending null would unlink a
+ * conversation the viewer can't see.
+ */
+export function conversationLink(saved: string | null, picked: string, canInbox: boolean): { conversationId?: string | null } {
+  const next = picked || null;
+  return canInbox && next !== saved ? { conversationId: next } : {};
+}

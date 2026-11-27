@@ -6,6 +6,7 @@ import { Plus, Users } from "lucide-react";
 import { CRM_LIMITS, type CompanyDto, type CustomerDto, type CustomerRow } from "@/shared";
 import { crmApi, identityConflict, type ManualIdentity } from "@/components/crm/api";
 import type { CrmAccess } from "@/components/crm/crm-link";
+import { CompaniesView } from "@/components/crm/customers/companies";
 import { CustomerFieldInputs, CustomerPage, draftOf, fieldsBody, type FieldsDraft } from "@/components/crm/customers/customer-page";
 import { ClashNotice, type Clash } from "@/components/crm/customers/identities";
 import { useOwners, type Owner } from "@/components/crm/customers/people";
@@ -18,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { ListCard, ListDetail, ListRow, useListSelection } from "@/components/ui/list-detail";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { focusSectionHeading, PageSection } from "@/components/ui/page-section";
+import { cn } from "@/lib/utils";
 
 const SHORT_DATE = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
 const rowOf = (c: CustomerDto): CustomerRow => ({
@@ -34,7 +36,7 @@ const rowOf = (c: CustomerDto): CustomerRow => ({
 /**
  * The Customers tab of /crm (crm.manage): the list (latest activity first, 50 a page, Load more), a search from 2
  * characters, a new customer, and one customer's page beside the list. `?customer=<id>` (a link from a quote) opens
- * that customer.
+ * that customer. A switch shows the Companies view instead (companies.tsx); the tab's state stays under it.
  */
 export function CustomersTab({ w, b, access }: { w: string; b: string; access: CrmAccess }) {
   const [rows, setRows] = useState<CustomerRow[] | null>(null);
@@ -44,6 +46,7 @@ export function CustomersTab({ w, b, access }: { w: string; b: string; access: C
   const [typed, setTyped] = useState("");
   const search = useCustomerSearch(w, b, typed);
   const [creating, setCreating] = useState(false);
+  const [view, setView] = useState<"customers" | "companies">("customers");
   const { selected, open, closed, ids } = useListSelection({ item: "customer", list: "customers-list", emptyHeadingId: "customers-empty-h" });
 
   const companiesFetch = useCallback(() => crmApi.companies(w, b).then((r) => r.companies), [w, b]);
@@ -76,7 +79,7 @@ export function CustomersTab({ w, b, access }: { w: string; b: string; access: C
   };
   /** A saved customer moves to the top: its activity is the newest. */
   const put = (c: CustomerDto) => setRows((list) => [rowOf(c), ...(list ?? []).filter((x) => x.id !== c.id)]);
-  const show = (id: string) => (setCreating(false), open(id, "always"));
+  const show = (id: string) => (setCreating(false), setView("customers"), open(id, "always"));
 
   // A link from another tab (?customer=<id>): open it once per link, then the list's own clicks decide.
   const urlCustomer = useSearchParams().get("customer");
@@ -87,6 +90,7 @@ export function CustomersTab({ w, b, access }: { w: string; b: string; access: C
     if (!urlCustomer || !listed || handled.current === urlCustomer) return;
     handled.current = urlCustomer;
     setCreating(false);
+    setView("customers");
     open(urlCustomer, "always");
   }, [urlCustomer, listed, open]);
 
@@ -121,8 +125,45 @@ export function CustomersTab({ w, b, access }: { w: string; b: string; access: C
     </div>
   );
 
+  const viewSwitch = (
+    <div role="group" aria-label="Show customers or companies" className="flex flex-wrap gap-1.5">
+      {(["customers", "companies"] as const).map((v) => (
+        <button
+          key={v}
+          type="button"
+          aria-pressed={v === view}
+          // Companies read afresh: customer counts change with every customer saved, merged or erased here.
+          onClick={() => (setView(v), v === "companies" && reloadCompanies())}
+          className={cn(
+            "rounded-full border px-3 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:py-2",
+            v === view ? "border-control bg-accent text-foreground" : "border-border text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {v === "customers" ? "Customers" : "Companies"}
+        </button>
+      ))}
+    </div>
+  );
+
   let body: React.ReactNode;
-  if (failed)
+  if (view === "companies")
+    body = (
+      <CompaniesView
+        w={w}
+        b={b}
+        companies={companies}
+        failed={companiesLoad.kind === "error" || companiesLoad.kind === "forbidden"}
+        onRetry={reloadCompanies}
+        owners={owners}
+        onSaved={(c) => {
+          reloadCompanies();
+          // A renamed company reads right on the customer rows without reading them again.
+          setRows((list) => list && list.map((x) => (x.company?.id === c.id ? { ...x, company: { id: c.id, name: c.name } } : x)));
+        }}
+        onOpenCustomer={show}
+      />
+    );
+  else if (failed)
     body = <LoadFailed what="the customers" onRetry={load} />;
   else if (!rows) body = <ListSkeleton label="Loading customers" rows={3} />;
   else if (!rows.length && !creating)
@@ -212,8 +253,9 @@ export function CustomersTab({ w, b, access }: { w: string; b: string; access: C
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-prose text-sm text-muted-foreground">The people the business sells to: contact details, the team&rsquo;s notes, and their quotes.</p>
-        {newCustomer}
+        {view === "customers" ? newCustomer : null}
       </div>
+      {viewSwitch}
       {body}
     </>
   );
