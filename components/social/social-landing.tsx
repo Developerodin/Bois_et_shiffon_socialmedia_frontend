@@ -50,7 +50,7 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
           {actions}
         </div>
       </div>
-      <AgentWorkflowStrip base={base} perms={perms} />
+      <AgentWorkflowStrip base={base} perms={perms} conns={conns} />
       <PageSection id="channels" title="Your channels" description="Open a channel to plan it on its own calendar." className="pt-1">
         {!data ? (
           failed ? <LoadFailed what="the channels" onRetry={reload} /> : <ListSkeleton label="Loading channels" rows={4} />

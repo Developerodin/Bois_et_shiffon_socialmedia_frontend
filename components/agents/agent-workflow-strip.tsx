@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { CalendarDays, ChevronDown, ChevronRight, Compass, FileText, LineChart, LoaderCircle, PenLine, ShieldCheck, type LucideIcon } from "lucide-react";
 import type { AgentSummary } from "@/components/agents/api";
+import type { Conns } from "@/components/social/channel-connection";
 import { PlanWithAgents } from "@/components/agents/plan-with-agents";
 import { ensureWorkLanguage, isRunCancelled } from "@/components/languages/languages";
 import { errorMessage, request } from "@/components/settings/api";
@@ -80,11 +81,11 @@ function nextTitle(n: NextAction): string {
 
 const NEXT_NOTE: Record<NextAction["kind"], string> = {
   blocked: "Quality found a blocking issue in these drafts. Fix them, or send them back to the Creator.",
-  chain: "Run the chain: each post gets its brief, draft and quality check, then waits for your approval.",
+  chain: "The chain gives each post its brief, draft and quality check, then it waits for your approval.",
   working: "Each post gets its brief, draft and quality check, then waits for your approval.",
   plan: "The Planner turns them into dated posts; the Brief writer, Creator and Quality then prepare each one.",
   "review-ideas": "Scout's ideas wait for you: shortlist the ones worth planning.",
-  approvals: "They passed the quality check and wait for your decision.",
+  approvals: "They wait for your decision before they can be scheduled.",
   create: "Pick channels and let the agents plan, write and check new posts.",
 };
 
@@ -99,11 +100,12 @@ function Dot({ state, flag }: { state: StageState; flag?: StageFlag }) {
  * next step, and the Analyst apart as the learning agent. Counts are the brand's current queues from the ideas and the
  * calendar's list (shared requests other panels already make), never one run's output. A stage opens its agent on the
  * Overview (never starts it). Collapsible, remembered per browser. Only for roles that read agents; starting runs needs
- * agents.run.
+ * agents.run. `filter`, `conns`: a channel calendar's channel and the connections, so the Plan with agents dialog the
+ * banner opens preselects that channel, as the toolbar's does.
  * TODO(Phase 2): a workflow scope line (products · channels · planned posts) once a workflow record is persisted; the
  * posts don't carry one shared scope today, so nothing is shown rather than a guess.
  */
-export function AgentWorkflowStrip({ base, perms, className }: { base: string; perms: string[]; className?: string }) {
+export function AgentWorkflowStrip({ base, perms, className, filter, conns }: { base: string; perms: string[]; className?: string; filter?: string; conns?: Conns }) {
   const canRead = perms.includes("agents.read");
   const canRun = perms.includes("agents.run");
   const agents = useJob(`${base}/agents`, { pick: pickAgents as (d: never) => AgentSummary[], done: idle, intervals: JOB_INTERVALS.agents, off: !canRead }).data;
@@ -112,7 +114,9 @@ export function AgentWorkflowStrip({ base, perms, className }: { base: string; p
   const ideas = useJob(`${base}/opportunities`, { pick: pickIdeas as (d: never) => { status: string }[], done: running ? undefined : once, intervals: JOB_INTERVALS.always, off: !canRead }).data;
   const posts = useJob(`${base}/content`, { pick: pickPosts as (d: never) => { status: string }[], done: running ? undefined : once, intervals: JOB_INTERVALS.always, off: !canRead }).data;
   const workspaceId = workspaceIdOf(base);
-  const price = { brief: useRunPrice(workspaceId, "brief"), creator: useRunPrice(workspaceId, "creator"), analyst: useRunPrice(workspaceId, "analyst") };
+  // Prices only for roles that can start a run: others never load the subscription for this.
+  const priceWs = canRun ? workspaceId : null;
+  const price = { brief: useRunPrice(priceWs, "brief"), creator: useRunPrice(priceWs, "creator"), analyst: useRunPrice(priceWs, "analyst") };
   const [starting, setStarting] = useState<string | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
@@ -141,7 +145,8 @@ export function AgentWorkflowStrip({ base, perms, className }: { base: string; p
       await ensureWorkLanguage(base);
       await request(`${base}/agents/${encodeURIComponent(agent)}/runs`, { method: "POST", body: JSON.stringify(input ? { input } : {}) });
       if (workspaceId) void loadPlanCredits(workspaceId, true);
-      void fetchShared(`${base}/agents`, true).catch(() => undefined);
+      // Wait for the list to show the run queued, so a charged button can't be pressed twice in between.
+      await fetchShared(`${base}/agents`, true).catch(() => undefined);
     } catch (e) {
       if (!isRunCancelled(e)) setRunError(errorMessage(e, "Couldn't start the agent. Try again."));
     } finally {
@@ -177,13 +182,13 @@ export function AgentWorkflowStrip({ base, perms, className }: { base: string; p
           </Button>
         ) : null;
       case "plan":
-        return <PlanWithAgents base={base} perms={perms} label="Plan selected ideas" />;
+        return <PlanWithAgents key={filter ?? ""} base={base} perms={perms} filter={filter} conns={conns} label="Plan selected ideas" />;
       case "review-ideas":
         return <Button asChild size="sm"><Link href="/?peek=ideas">Review ideas</Link></Button>;
       case "approvals":
         return <Button asChild size="sm"><Link href={calendarHref({ status: "awaiting" })}>Review approvals</Link></Button>;
       case "create":
-        return <PlanWithAgents base={base} perms={perms} label="Create with agents" variant="outline" />;
+        return <PlanWithAgents key={filter ?? ""} base={base} perms={perms} filter={filter} conns={conns} label="Create with agents" variant="outline" />;
       default:
         return null;
     }
@@ -254,16 +259,18 @@ export function AgentWorkflowStrip({ base, perms, className }: { base: string; p
                       <Icon aria-hidden className="size-3.5 shrink-0 text-primary-strong" />
                       <span className="truncate font-medium text-foreground">{s.label}</span>
                     </span>
-                    <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground" title={`Last run: ${STAGE_LABEL[state]}`}>
+                    <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
                       <Dot state={state} flag={shownFlag} />
                       <span className="truncate">{shownFlag ? FLAG_LABEL[shownFlag] : STAGE_LABEL[state]}</span>
                     </span>
+                    {/* The run state stays visible apart from the workload flag. */}
+                    {shownFlag && <span className="truncate text-muted-foreground">Last run: {STAGE_LABEL[state].toLowerCase()}</span>}
                     <span className="flex min-w-0 items-baseline gap-1.5">
                       <span className="text-lg leading-tight font-semibold tabular-nums text-foreground">{work.count ?? "–"}</span>
                       <span className="min-w-0 text-muted-foreground">{work.label}</span>
                     </span>
                     {work.extra && <span className="text-muted-foreground">{work.extra}</span>}
-                    <span className="mt-auto truncate text-muted-foreground">Next: <span className="text-foreground">{work.next}</span></span>
+                    <span className="mt-auto text-muted-foreground">Next: <span className="text-foreground">{work.next}</span></span>
                   </Link>
                 </li>
               );
