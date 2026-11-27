@@ -1285,7 +1285,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
           </section>
           )}
 
-          <ReleasePanel className="rounded-none border-0 border-t p-0 pt-5" base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} photos={draftPhotos(item)} />
+          <ReleasePanel className="rounded-none border-0 border-t p-0 pt-5" base={base} id={item.id} status={item.status} version={item.latest?.version ?? null} qualityBlocked={item.latest?.check?.overall === "BLOCKER"} perms={perms} onChanged={reload} pinLink={item.channel === "PINTEREST_PIN" ? item.latest?.body.pinLink : null} photos={draftPhotos(item)} photosFixed={item.latest?.body.photoKeys !== undefined} />
         </div>
       )}
     </div>
