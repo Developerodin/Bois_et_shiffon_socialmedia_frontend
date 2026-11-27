@@ -7,6 +7,7 @@ import { FileText, Plus, Printer, Search } from "lucide-react";
 import type { QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteStatus } from "@/shared";
 import { quotesApi, type QuoteBody } from "@/components/crm/api";
 import { QuoteCustomer } from "@/components/crm/customers/quote-customer";
+import { QuoteDeal } from "@/components/crm/pipeline/quote-deal";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
 import { QuoteVersions } from "@/components/crm/quotes/quote-versions";
 import { QUOTE_ACTION_LABEL, QuoteShopifyDialog } from "@/components/crm/quotes/shopify-dialog";
@@ -448,6 +449,16 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
         {quote.status === "DECLINED" && quote.declinedReason ? <p className="text-sm"><span className="text-muted-foreground">Declined: </span><span className="whitespace-pre-wrap">{quote.declinedReason}</span></p> : null}
         {info ? <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm" role="status">{info}</p> : null}
         <QuoteCustomer
+          w={w}
+          b={b}
+          quote={quote}
+          disabled={dirty}
+          onChange={(q) => {
+            onChange(q);
+            setForm(reset(q));
+          }}
+        />
+        <QuoteDeal
           w={w}
           b={b}
           quote={quote}

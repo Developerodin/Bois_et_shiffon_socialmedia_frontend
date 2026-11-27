@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { CRM_LIMITS, type QuoteDto } from "@/shared";
+import type { QuoteDto } from "@/shared";
 import { crmApi, identityConflict } from "@/components/crm/api";
 import { CrmLink, crmHref } from "@/components/crm/crm-link";
 import type { Clash } from "@/components/crm/customers/identities";
-import { useCustomerSearch } from "@/components/crm/customers/search";
+import { CustomerPicker } from "@/components/crm/customers/customer-picker";
 import { errorMessage } from "@/components/settings/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 /**
  * The quote editor's Customer line: open the linked customer (or unlink), save the quote's contact as a new customer,
@@ -20,8 +19,6 @@ export function QuoteCustomer({ w, b, quote, disabled, onChange }: { w: string; 
   const [error, setError] = useState<string | null>(null);
   const [clash, setClash] = useState<Clash | null>(null);
   const [picking, setPicking] = useState(false);
-  const [typed, setTyped] = useState("");
-  const search = useCustomerSearch(w, b, picking ? typed : "");
 
   const call = async (what: string, body: { customerId: string | null } | { create: true }) => {
     setBusy(what);
@@ -30,7 +27,6 @@ export function QuoteCustomer({ w, b, quote, disabled, onChange }: { w: string; 
     try {
       onChange((await crmApi.quoteCustomer(w, b, quote.id, body)).quote);
       setPicking(false);
-      setTyped("");
     } catch (e) {
       const c = identityConflict(e);
       if (c) setClash(c);
@@ -73,36 +69,7 @@ export function QuoteCustomer({ w, b, quote, disabled, onChange }: { w: string; 
         </div>
       )}
       {disabled ? <p className="text-xs text-muted-foreground">Save the quote first.</p> : null}
-      {picking && !quote.customerId ? (
-        <div className="flex flex-col gap-2">
-          <Input type="search" value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Search by name, email or phone" aria-label="Find a customer" maxLength={100} autoFocus />
-          <p className="text-xs text-muted-foreground" role="status">
-            {search.kind === "idle" ? `Type at least ${CRM_LIMITS.searchMin} characters.` : search.kind === "loading" ? "Searching…" : search.kind === "ready" && !search.customers.length ? "No customer matches that." : null}
-          </p>
-          {search.kind === "error" ? (
-            <p className="text-destructive" role="alert">
-              {search.message}
-            </p>
-          ) : null}
-          {search.kind === "ready" && search.customers.length ? (
-            <ul className="flex flex-col divide-y divide-border rounded-xl border border-border">
-              {search.customers.map((c) => (
-                <li key={c.id}>
-                  <button
-                    type="button"
-                    disabled={off}
-                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-muted disabled:opacity-50 pointer-coarse:py-3"
-                    onClick={() => void call(c.id, { customerId: c.id })}
-                  >
-                    <span className="min-w-0 truncate">{c.displayName}</span>
-                    <span className="shrink-0 text-xs text-muted-foreground">{c.company?.name ?? ""}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      ) : null}
+      {picking && !quote.customerId ? <CustomerPicker w={w} b={b} label="Find a customer" onPick={(c) => void call(c.id, { customerId: c.id })} /> : null}
       {clash ? (
         <div role="alert" className="flex flex-wrap items-center gap-2 text-destructive">
           <span>{clash.message}</span>

@@ -1,6 +1,7 @@
 import { Handshake } from "lucide-react";
 import { CrmTabs } from "@/components/crm/crm-tabs";
 import { featureAccess } from "@/components/shell/feature-access";
+import { getShell } from "@/lib/server-fetch";
 import { navFor } from "@/lib/nav";
 
 export const metadata = { title: navFor("/crm").title };
@@ -14,14 +15,16 @@ export default async function CrmRoute() {
     feature: "crm",
     path: "/crm",
     icon: Handshake,
-    noBusiness: "Customers and quotes belong to a business. Create or pick one from the sidebar, then they show here.",
-    noRead: "Your role can't see this business's customers or quotes. Ask a workspace admin for the customer records permission.",
+    noBusiness: "Customers, follow-ups and quotes belong to a business. Create or pick one from the sidebar, then they show here.",
+    noRead: "Your role can't see this business's customers, follow-ups or quotes. Ask a workspace admin for the customer records or inbox permission.",
     perm: ["crm.manage", "inbox.read"],
   });
   if (access.gate) return access.gate;
+  // Erase and export also need members.manage in the workspace (cached: featureAccess read the same shell).
+  const shell = await getShell();
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-5">
-      <CrmTabs key={access.brandId} w={access.workspaceId} b={access.brandId} perms={[...access.perms]} />
+      <CrmTabs key={access.brandId} w={access.workspaceId} b={access.brandId} perms={[...access.perms]} workspacePerms={shell.workspacePermissions} />
     </div>
   );
 }

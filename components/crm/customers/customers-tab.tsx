@@ -5,11 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { Plus, Users } from "lucide-react";
 import { CRM_LIMITS, type CompanyDto, type CustomerDto, type CustomerRow } from "@/shared";
 import { crmApi, identityConflict, type ManualIdentity } from "@/components/crm/api";
+import type { CrmAccess } from "@/components/crm/crm-link";
 import { CustomerFieldInputs, CustomerPage, draftOf, fieldsBody, type FieldsDraft } from "@/components/crm/customers/customer-page";
 import { ClashNotice, type Clash } from "@/components/crm/customers/identities";
-import { ownerOptions } from "@/components/crm/customers/people";
+import { useOwners, type Owner } from "@/components/crm/customers/people";
 import { useCustomerSearch } from "@/components/crm/customers/search";
-import { errorMessage, settingsApi } from "@/components/settings/api";
+import { errorMessage } from "@/components/settings/api";
 import { ListSkeleton, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -35,7 +36,7 @@ const rowOf = (c: CustomerDto): CustomerRow => ({
  * characters, a new customer, and one customer's page beside the list. `?customer=<id>` (a link from a quote) opens
  * that customer.
  */
-export function CustomersTab({ w, b }: { w: string; b: string }) {
+export function CustomersTab({ w, b, access }: { w: string; b: string; access: CrmAccess }) {
   const [rows, setRows] = useState<CustomerRow[] | null>(null);
   const [next, setNext] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -43,16 +44,14 @@ export function CustomersTab({ w, b }: { w: string; b: string }) {
   const [typed, setTyped] = useState("");
   const search = useCustomerSearch(w, b, typed);
   const [creating, setCreating] = useState(false);
-  const { selected, open, ids } = useListSelection({ item: "customer", list: "customers-list", emptyHeadingId: "customers-empty-h" });
+  const { selected, open, closed, ids } = useListSelection({ item: "customer", list: "customers-list", emptyHeadingId: "customers-empty-h" });
 
   const companiesFetch = useCallback(() => crmApi.companies(w, b).then((r) => r.companies), [w, b]);
-  const companiesLoad = useLoad(companiesFetch).state;
+  const { state: companiesLoad, reload: reloadCompanies } = useLoad(companiesFetch);
   const [added, setAdded] = useState<CompanyDto[]>([]);
   const loadedCompanies = companiesLoad.kind === "ready" ? companiesLoad.data : null;
   const companies = loadedCompanies ? [...added.filter((c) => !loadedCompanies.some((x) => x.id === c.id)), ...loadedCompanies].sort((x, y) => x.name.localeCompare(y.name)) : null;
-  const peopleFetch = useCallback(() => settingsApi.projectPeople(w, b).then(ownerOptions), [w, b]);
-  const people = useLoad(peopleFetch).state;
-  const owners = people.kind === "ready" ? people.data : [];
+  const owners = useOwners(w, b);
 
   const load = () => {
     setFailed(false);
@@ -194,6 +193,13 @@ export function CustomersTab({ w, b }: { w: string; b: string }) {
               owners={owners}
               onSaved={put}
               onOpen={show}
+              access={access}
+              onMerged={(_c, otherId) => setRows((list) => (list ?? []).filter((x) => x.id !== otherId))}
+              onErased={() => {
+                setRows((list) => (list ?? []).filter((x) => x.id !== selected));
+                closed();
+              }}
+              onCompanyErased={reloadCompanies}
             />
           ) : null
         }
@@ -218,7 +224,7 @@ function NewCustomer({ w, b, companies, onCompany, owners, onCancel, onCreated, 
   b: string;
   companies: CompanyDto[] | null;
   onCompany(c: CompanyDto): void;
-  owners: ReturnType<typeof ownerOptions>;
+  owners: readonly Owner[];
   onCancel(): void;
   onCreated(c: CustomerDto): void;
   onOpen(id: string): void;

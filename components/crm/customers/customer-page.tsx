@@ -1,11 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CRM_LIMITS, type CompanyDto, type ConversationChannel, type ConversationRow, type CustomerDto, type FollowUpState, type QuoteStatus } from "@/shared";
+import { CRM_LIMITS, DEAL_STAGE_LABEL, type CompanyDto, type ConversationRow, type CustomerDto, type QuoteStatus } from "@/shared";
 import { crmApi, type CustomerFields } from "@/components/crm/api";
+import type { CrmAccess } from "@/components/crm/crm-link";
 import { CompanyField } from "@/components/crm/customers/company-fields";
+import { CustomerData, MergeDialog } from "@/components/crm/customers/customer-admin";
+import { LogConversation } from "@/components/crm/follow-ups/log-conversation";
 import { Identities } from "@/components/crm/customers/identities";
 import { Notes } from "@/components/crm/customers/notes";
+import { CHANNEL_LABEL, FOLLOW_UP_STATE_LABEL, stateTone } from "@/components/crm/follow-ups/labels";
 import type { Owner } from "@/components/crm/customers/people";
 import { CrmLink, crmHref } from "@/components/crm/crm-link";
 import { QUOTE_STATUS_LABEL } from "@/components/crm/quotes/quotes-board";
@@ -95,11 +99,9 @@ export function CustomerFieldInputs({ w, b, draft, onEdit, companies, current, o
   );
 }
 
-const CHANNEL_LABEL: Record<ConversationChannel, string> = { LOGGED: "Logged", INSTAGRAM: "Instagram", MESSENGER: "Messenger" };
-const STATE_LABEL: Record<FollowUpState, string> = { NEEDS_REPLY: "Needs a reply", WAITING: "Waiting", CLOSED: "Closed" };
 const SHORT_DATE = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
 
-/** The customer's conversations: only for inbox.read holders (`null` otherwise, and the page says who sees them). */
+/** The customer's conversations, each opening on the Follow-ups tab: only for inbox.read holders (`null` otherwise, and the page says who sees them). */
 export function CustomerConversations({ conversations }: { conversations: ConversationRow[] | null }) {
   let body: React.ReactNode;
   if (conversations === null) body = <p className="text-sm text-muted-foreground">Conversations are visible to the inbox team.</p>;
@@ -110,11 +112,14 @@ export function CustomerConversations({ conversations }: { conversations: Conver
         {conversations.map((c) => (
           <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
             <span className="min-w-0 break-words">
-              {c.subject ?? CHANNEL_LABEL[c.channel]}
+              <CrmLink href={crmHref("follow-ups", { c: c.id })} className="font-medium">
+                {c.subject ?? CHANNEL_LABEL[c.channel]}
+              </CrmLink>
               <span className="text-muted-foreground"> · {CHANNEL_LABEL[c.channel]}</span>
             </span>
             <span className="flex items-center gap-2 text-xs text-muted-foreground">
-              <StatusBadge tone={c.overdue ? "bad" : c.state === "CLOSED" ? "muted" : "warn"}>{c.overdue ? `${STATE_LABEL[c.state]}, overdue` : STATE_LABEL[c.state]}</StatusBadge>
+              <StatusBadge tone={stateTone(c.state)}>{FOLLOW_UP_STATE_LABEL[c.state]}</StatusBadge>
+              {c.overdue ? <StatusBadge tone="bad">Overdue</StatusBadge> : null}
               <time dateTime={c.lastMessageAt}>{SHORT_DATE.format(new Date(c.lastMessageAt))}</time>
             </span>
           </li>
@@ -127,6 +132,38 @@ export function CustomerConversations({ conversations }: { conversations: Conver
         Conversations
       </h3>
       {body}
+    </section>
+  );
+}
+
+/** The customer's deals, each a link to it on the Pipeline tab. */
+export function CustomerDeals({ deals }: { deals: CustomerDto["deals"] }) {
+  return (
+    <section aria-labelledby="customer-deals-h" className="flex flex-col gap-2">
+      <h3 id="customer-deals-h" className="text-xs font-medium text-muted-foreground">
+        Deals
+      </h3>
+      {deals.length ? (
+        <ul className="flex flex-col divide-y divide-border rounded-xl border border-border text-sm">
+          {deals.map((d) => (
+            <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+              <CrmLink href={crmHref("pipeline", { deal: d.id })} className="min-w-0 break-words font-medium">
+                {d.title}
+              </CrmLink>
+              <span className="flex items-center gap-2">
+                {d.value ? (
+                  <span className="tabular-nums">
+                    {d.value} {d.currency ?? ""}
+                  </span>
+                ) : null}
+                <StatusBadge tone={d.stage === "WON" ? "good" : d.stage === "LOST" ? "muted" : "info"}>{DEAL_STAGE_LABEL[d.stage]}</StatusBadge>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">No deals yet. Add one on the Pipeline tab.</p>
+      )}
     </section>
   );
 }
@@ -165,7 +202,7 @@ export function CustomerQuotes({ quotes }: { quotes: CustomerDto["quotes"] }) {
  * One customer (read by id: a linked customer may be past the list's loaded pages). Field edits save on the
  * `updatedAt` read (409 `crm.changed` offers a reload); contact details, notes, quotes and conversations below.
  */
-export function CustomerPage({ sectionId, w, b, id, name, companies, onCompany, owners, onSaved, onOpen }: {
+export function CustomerPage({ sectionId, w, b, id, name, access, companies, onCompany, owners, onSaved, onOpen, onMerged, onErased, onCompanyErased }: {
   sectionId: string;
   w: string;
   b: string;
@@ -177,7 +214,13 @@ export function CustomerPage({ sectionId, w, b, id, name, companies, onCompany, 
   owners: readonly Owner[];
   onSaved(c: CustomerDto): void;
   onOpen(id: string): void;
+  access: CrmAccess;
+  /** `otherId` was merged into this customer and is gone. */
+  onMerged(c: CustomerDto, otherId: string): void;
+  onErased(): void;
+  onCompanyErased(): void;
 }) {
+  const [merging, setMerging] = useState(false);
   const [customer, setCustomer] = useState<CustomerDto | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
   const [draft, setDraft] = useState<FieldsDraft>(draftOf());
@@ -265,13 +308,42 @@ export function CustomerPage({ sectionId, w, b, id, name, companies, onCompany, 
         <Identities w={w} b={b} customer={customer} onChange={changed} onOpen={onOpen} />
         <Notes w={w} b={b} customer={customer} owners={owners} onChanged={() => load(false)} />
         <CustomerQuotes quotes={customer.quotes} />
-        <CustomerConversations conversations={customer.conversations} />
+        <CustomerDeals deals={customer.deals} />
+        <div className="flex flex-col gap-2">
+          <CustomerConversations conversations={customer.conversations} />
+          {access.inbox ? <LogConversation w={w} b={b} customerId={customer.id} onLogged={() => load(false)} /> : null}
+        </div>
+        {access.admin ? <CustomerData w={w} b={b} customer={customer} onErased={onErased} onCompanyErased={() => (onCompanyErased(), load(false))} /> : null}
+        {merging ? (
+          <MergeDialog
+            w={w}
+            b={b}
+            customer={customer}
+            onClose={() => setMerging(false)}
+            onMerged={(c, otherId) => {
+              setMerging(false);
+              changed(c);
+              onMerged(c, otherId);
+            }}
+          />
+        ) : null}
       </div>
     );
 
   const meta = customer ? [customer.role, customer.company?.name].filter(Boolean).join(" · ") : null;
   return (
-    <PageSection id={sectionId} title={customer?.displayName ?? name ?? "Customer"} description={meta || undefined}>
+    <PageSection
+      id={sectionId}
+      title={customer?.displayName ?? name ?? "Customer"}
+      description={meta || undefined}
+      actions={
+        customer ? (
+          <Button size="sm" variant="outline" onClick={() => setMerging(true)}>
+            Merge a duplicate
+          </Button>
+        ) : undefined
+      }
+    >
       {body}
     </PageSection>
   );

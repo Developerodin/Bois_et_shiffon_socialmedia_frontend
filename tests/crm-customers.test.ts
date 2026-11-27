@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import type { ConversationRow } from "@/shared";
 import { identityConflict } from "@/components/crm/api";
-import { crmHref } from "@/components/crm/crm-link";
+import { crmAccess, crmHref } from "@/components/crm/crm-link";
 import { crmTabs, defaultCrmTab } from "@/components/crm/crm-tabs";
 import { CustomerConversations, CustomerQuotes, draftOf, fieldsBody } from "@/components/crm/customers/customer-page";
 import { ownerOptions } from "@/components/crm/customers/people";
@@ -15,11 +15,17 @@ const html = (el: ReturnType<typeof createElement>) => renderToStaticMarkup(el);
 
 describe("the /crm tabs", () => {
   it("shows each tab by its key", () => {
-    expect(crmTabs(["brand.read", "crm.manage"])).toEqual(["customers", "quotes"]);
-    expect(crmTabs(["brand.read", "crm.manage", "inbox.read"])).toEqual(["customers", "quotes"]);
-    // inbox.read alone opens the page; Follow-ups is its tab once built, so nothing here yet.
-    expect(crmTabs(["brand.read", "inbox.read"])).toEqual([]);
-    expect(crmTabs(["brand.read", "crm.read"])).toEqual([]);
+    const tabs = (perms: string[]) => crmTabs(crmAccess(perms, []));
+    expect(tabs(["brand.read", "crm.manage"])).toEqual(["customers", "pipeline", "quotes"]);
+    expect(tabs(["brand.read", "crm.manage", "inbox.read"])).toEqual(["follow-ups", "customers", "pipeline", "quotes"]);
+    expect(tabs(["brand.read", "inbox.read"])).toEqual(["follow-ups"]);
+    expect(tabs(["brand.read", "crm.read"])).toEqual([]);
+  });
+
+  it("erases and exports only with crm.manage and members.manage in the workspace", () => {
+    expect(crmAccess(["crm.manage"], ["members.manage"])).toEqual({ manage: true, inbox: false, admin: true });
+    expect(crmAccess(["crm.manage"], ["members.read"]).admin).toBe(false);
+    expect(crmAccess(["inbox.read"], ["members.manage"]).admin).toBe(false);
   });
 
   it("opens Customers for crm.manage, whatever else the role holds", () => {
@@ -82,7 +88,8 @@ describe("a customer's page", () => {
     };
     const out = html(createElement(CustomerConversations, { conversations: [c] }));
     expect(out).toContain("Sofa delivery");
-    expect(out).toContain("Needs a reply, overdue");
+    expect(out).toContain("Needs reply");
+    expect(out).toContain("Overdue");
     expect(out).not.toContain("visible to the inbox team");
   });
 

@@ -2,11 +2,11 @@
 
 import { useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { Lock } from "lucide-react";
-import type { CrmTab } from "@/components/crm/crm-link";
+import { crmAccess, type CrmAccess, type CrmTab } from "@/components/crm/crm-link";
 import { CustomersTab } from "@/components/crm/customers/customers-tab";
+import { FollowUpsTab } from "@/components/crm/follow-ups/follow-ups-tab";
+import { PipelineTab } from "@/components/crm/pipeline/pipeline-tab";
 import { QuotesBoard } from "@/components/crm/quotes/quotes-board";
-import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { navFor } from "@/lib/nav";
 import { cn } from "@/lib/utils";
@@ -14,13 +14,11 @@ import { cn } from "@/lib/utils";
 export type { CrmTab };
 export const CRM_TAB_LABEL: Record<CrmTab, string> = { "follow-ups": "Follow-ups", customers: "Customers", pipeline: "Pipeline", quotes: "Quotes" };
 
-/**
- * The tabs a role sees on /crm, in page order (plan 2026-11-27-crm, Decision 17): Follow-ups needs inbox.read, the
- * others crm.manage. Follow-ups and Pipeline join this list when they are built; the server checks each route again.
- */
-export function crmTabs(perms: readonly string[]): CrmTab[] {
+/** The tabs a role sees on /crm, in page order (Decision 17): Follow-ups needs inbox.read, the others crm.manage. */
+export function crmTabs(access: Pick<CrmAccess, "manage" | "inbox">): CrmTab[] {
   const out: CrmTab[] = [];
-  if (perms.includes("crm.manage")) out.push("customers", "quotes");
+  if (access.inbox) out.push("follow-ups");
+  if (access.manage) out.push("customers", "pipeline", "quotes");
   return out;
 }
 
@@ -30,25 +28,16 @@ export function defaultCrmTab(tabs: readonly CrmTab[]): CrmTab | null {
 }
 
 /** /crm's one header, its tab nav (`?tab=`, replaced in place as on Performance) and the open tab's body. */
-export function CrmTabs({ w, b, perms }: { w: string; b: string; perms: readonly string[] }) {
-  const tabs = crmTabs(perms);
+export function CrmTabs({ w, b, perms, workspacePerms }: { w: string; b: string; perms: readonly string[]; workspacePerms: readonly string[] }) {
+  const access = crmAccess(perms, workspacePerms);
+  const tabs = crmTabs(access);
   const urlTab = useSearchParams().get("tab");
   const active = tabs.find((t) => t === urlTab) ?? defaultCrmTab(tabs);
   const tabRefs = useRef<Partial<Record<CrmTab, HTMLButtonElement | null>>>({});
   const title = navFor("/crm").title;
 
-  if (!active) {
-    // inbox.read alone passes the page's gate; its Follow-ups tab isn't built yet.
-    return (
-      <EmptyState
-        size="hero"
-        icon={Lock}
-        headingLevel="h1"
-        title={title}
-        description="Your role can't see this business's customer records or quotes. Ask a workspace admin for the customer records permission."
-      />
-    );
-  }
+  // The page's gate lets in only a role holding one of the keys, so there is always a tab.
+  if (!active) return null;
 
   function select(tab: CrmTab) {
     // Only the tab: what the other tab had open (?customer, ?quote) doesn't carry over.
@@ -68,7 +57,7 @@ export function CrmTabs({ w, b, perms }: { w: string; b: string; perms: readonly
 
   return (
     <>
-      <PageHeader title={title}>The business&rsquo;s customers and quotes, in one place for the team.</PageHeader>
+      <PageHeader title={title}>Who needs a reply, the business&rsquo;s customers, its pipeline and its quotes, in one place for the team.</PageHeader>
       <div role="tablist" aria-label={title} className="flex max-w-full gap-1 self-start overflow-x-auto rounded-full border border-border bg-card p-1">
         {tabs.map((t, i) => {
           const selected = t === active;
@@ -96,22 +85,22 @@ export function CrmTabs({ w, b, perms }: { w: string; b: string; perms: readonly
         })}
       </div>
       <div role="tabpanel" id={`crm-panel-${active}`} aria-labelledby={`crm-tab-${active}`} className="flex flex-col gap-5">
-        <CrmPanel tab={active} w={w} b={b} />
+        <CrmPanel tab={active} w={w} b={b} access={access} />
       </div>
     </>
   );
 }
 
-/** The body of each tab. Follow-ups and Pipeline get their branch when they join crmTabs(). */
-function CrmPanel({ tab, w, b }: { tab: CrmTab; w: string; b: string }) {
+/** The body of each tab. */
+function CrmPanel({ tab, w, b, access }: { tab: CrmTab; w: string; b: string; access: CrmAccess }) {
   switch (tab) {
+    case "follow-ups":
+      return <FollowUpsTab w={w} b={b} canManage={access.manage} />;
     case "customers":
-      return <CustomersTab w={w} b={b} />;
+      return <CustomersTab w={w} b={b} access={access} />;
+    case "pipeline":
+      return <PipelineTab w={w} b={b} />;
     case "quotes":
       return <QuotesBoard w={w} b={b} />;
-    case "follow-ups":
-    case "pipeline":
-      // Not in crmTabs() yet, so never active.
-      return null;
   }
 }
