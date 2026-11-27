@@ -333,3 +333,56 @@ export type SetAdBudgetBody = { platform: AdBudgetPlatform; month: string; amoun
 export type AdsCampaignDto = AdsTotals & { accountId: string; campaignId: string; campaignName: string; impressions: number; clicks: number };
 /** GET ads/campaigns, highest spend first. */
 export type AdsCampaignsDto = { campaigns: AdsCampaignDto[] };
+
+/** GET insights/channel?channel&days: which account's numbers (Meta here is the Facebook Page). */
+export type AnalyticsChannel = "instagram" | "facebook";
+export type ChannelDayDto = { day: string; value: number | null };
+/** One of the Instagram account's own recent posts (published through the app or not), lifetime numbers. */
+export type ChannelPostDto = {
+  id: string;
+  /** IMAGE, VIDEO, CAROUSEL_ALBUM */
+  mediaType: string | null;
+  /** FEED, REELS, STORY */
+  productType: string | null;
+  /** ISO instant */
+  postedAt: string | null;
+  caption: string | null;
+  permalink: string | null;
+  metrics: PostMetricsDto | null;
+};
+/**
+ * GET insights/channel?channel=instagram|facebook&days (1–30, default 28; analytics.read): the account's own numbers,
+ * read live from the platform (cached up to 15 minutes). Never a token, never the platform's own metric titles.
+ * `state`: "not_connected" (no account) or "reconnect" (its access is gone) come with nothing else filled in.
+ * Any number is null when the platform refused it or the audience is too small for it. `partial`: some reads timed
+ * out or were rate limited, so some numbers are missing this time.
+ */
+export type ChannelAnalyticsDto = {
+  channel: AnalyticsChannel;
+  state: "ok" | "not_connected" | "reconnect";
+  /** The account's name ("@handle", the Page's name); null when not connected. */
+  account: { name: string; followers: number | null; posts: number | null } | null;
+  days: number;
+  /** "YYYY-MM-DD" (UTC), inclusive */
+  from: string;
+  to: string;
+  /**
+   * Totals over the days. Instagram: reach (unique accounts), views, accountsEngaged, interactions, likes, comments,
+   * shares, saves, linkTaps, newFollowers (new follows per day added up). Facebook: views (media views), engagements
+   * (post engagements), pageViews, newFollowers; reach is null (daily unique counts can't be added up).
+   */
+  totals: Record<string, number | null>;
+  /** Instagram: reach per day. Facebook: media views per day. */
+  daily: ChannelDayDto[];
+  /** Facebook: post engagements per day; Instagram: null. */
+  dailyEngagements: ChannelDayDto[] | null;
+  /** New followers per day (Instagram: the last 30 days at most). */
+  followersDaily: ChannelDayDto[];
+  /** Instagram: followers by country (ISO 3166 code), top 5; null for Facebook or when too few followers. */
+  countries: { country: string; followers: number }[] | null;
+  /** Instagram: the account's latest posts with lifetime numbers; null for Facebook (needs a permission not granted). */
+  posts: ChannelPostDto[] | null;
+  partial: boolean;
+  /** ISO instant the numbers were read */
+  readAt: string;
+};
