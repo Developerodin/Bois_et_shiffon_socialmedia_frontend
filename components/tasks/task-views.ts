@@ -1,6 +1,7 @@
 /** The /tasks page's vocabulary and rules, kept free of React so they can be tested. */
 import { DONE_DAYS, TASK_AREAS, TASK_VIEWS, type TaskAction, type TaskDto, type TaskPersonDto, type TaskView } from "@/shared";
 import type { TasksChanged } from "@/lib/tasks-api";
+import type { Tone } from "@/lib/status";
 
 const VIEW_LABEL: Record<TaskView, string> = {
   mine: "Mine",
@@ -54,7 +55,7 @@ export function sourceParam(s: string | null | undefined, area: AreaParam): Sour
   return area === "seo" && SOURCE_TABS.some((t) => t.value === s) ? (s as SourceParam) : "";
 }
 
-export type TaskLayout = "list" | "board";
+export type TaskLayout = "list" | "board" | "calendar";
 
 /** The view and layout remembered per browser. Bump the version when the stored shape changes. */
 export const TASKS_VIEW_KEY = "tasks.view.v1";
@@ -67,16 +68,20 @@ export function readSaved(raw: string | null, fallback: TaskListView = "mine"): 
   } catch {}
   return {
     view: TASK_LIST_VIEWS.some((o) => o.value === v.view) ? (v.view as TaskListView) : fallback,
-    layout: v.layout === "board" ? "board" : "list",
+    layout: v.layout === "board" || v.layout === "calendar" ? v.layout : "list",
   };
 }
 
-/** The GET tasks path (relative to the brand) for a view and its filters. */
-export function tasksQuery(q: { view: TaskListView; area?: AreaParam; source?: SourceParam; workProjectId?: string }): string {
+/** The GET tasks path (relative to the brand) for a view and its filters; `dueFrom`/`dueTo` (YYYY-MM-DD) for the calendar. */
+export function tasksQuery(q: { view: TaskListView; area?: AreaParam; source?: SourceParam; workProjectId?: string; dueFrom?: string; dueTo?: string }): string {
   const p = new URLSearchParams({ view: q.view });
   if (q.area) p.set("area", q.area);
   if (q.source) p.set("source", q.source);
   if (q.workProjectId) p.set("workProjectId", q.workProjectId);
+  if (q.dueFrom && q.dueTo) {
+    p.set("dueFrom", q.dueFrom);
+    p.set("dueTo", q.dueTo);
+  }
   return `tasks?${p}`;
 }
 
@@ -88,6 +93,16 @@ export const STATUS_LABEL: Record<string, string> = {
   CANCELLED: "Cancelled",
 };
 export const PRIORITY_LABEL: Record<string, string> = { LOW: "Low", NORMAL: "Normal", HIGH: "High", URGENT: "Urgent" };
+
+/**
+ * A task's colour on the calendar (its card edge and the narrow month's dot), from its status, blocked first. The
+ * calendar's legend (TASK_LEGEND) names each, since colour alone is not a label.
+ */
+export function taskTone(t: { status: string; blockedReason: string | null }): Tone {
+  if (t.blockedReason) return "bad";
+  return ({ TODO: "muted", IN_PROGRESS: "warn", IN_REVIEW: "info", DONE: "good" } as Record<string, Tone>)[t.status] ?? "muted";
+}
+export const TASK_LEGEND: readonly (readonly [Tone, string])[] = [["muted", "To do"], ["warn", "In progress"], ["info", "In review"], ["good", "Done"], ["bad", "Blocked"]];
 
 /** The board's columns: the open statuses and Done. Cancelled tasks aren't on the board. */
 export const BOARD_COLUMNS = ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"] as const;

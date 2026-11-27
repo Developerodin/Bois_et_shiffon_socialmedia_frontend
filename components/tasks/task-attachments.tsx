@@ -1,10 +1,10 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Upload, X } from "lucide-react";
-import type { TaskAttachmentDto, TaskDetailDto } from "@/shared";
+import { Download, FileText, Upload, X } from "lucide-react";
+import { TASK_FILE_MAX_BYTES, TASK_FILE_TYPES, TASK_FILES_MAX, taskFileType, type TaskAttachmentDto, type TaskDetailDto, type TaskFileDto } from "@/shared";
 import { errorMessage } from "@/components/settings/api";
-import { tasksApi } from "@/lib/tasks-api";
+import { FILE_TYPES_HINT, tasksApi } from "@/lib/tasks-api";
 
 export const ROLE_LABEL: Record<string, string> = { BEFORE: "Before", AFTER: "After", OTHER: "Photo" };
 
@@ -130,5 +130,138 @@ export function TaskAttachments({ base, task, roles, canEdit, slots }: { base: s
         </p>
       ) : null}
     </div>
+  );
+}
+
+const FILE_ACCEPT = Object.values(TASK_FILE_TYPES)
+  .map((t) => `.${t.ext}`)
+  .concat(".jpeg")
+  .join(",");
+
+/** "840 KB", "2.4 MB". */
+export function fileSize(bytes: number): string {
+  return bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/**
+ * A task's documents: name, type and size, a Download link (the server's signed link always downloads, under a plain
+ * name, and is never shown inline), and for `canEdit` (staff who may edit the task: its owner or tasks.manage) Upload
+ * and Remove. Staff are told when a client reviewer can see the task, since the client can download these files too.
+ * The name is the person's own: shown as text only.
+ */
+export function TaskFiles({ base, task, canEdit }: { base: string; task: TaskDetailDto; canEdit: boolean }) {
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const inputId = useId();
+  // Older servers send no files.
+  const files = task.files ?? [];
+  if (!files.length && !canEdit) return null;
+
+  const upload = async (file: File | undefined) => {
+    if (!file) return;
+    setError("");
+    if (!taskFileType(file.name)) return setError(FILE_TYPES_HINT);
+    if (file.size > TASK_FILE_MAX_BYTES) return setError(`That file is too large (up to ${TASK_FILE_MAX_BYTES / (1024 * 1024)} MB).`);
+    setUploading(true);
+    try {
+      await tasksApi.uploadFile(base, task.id, file);
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't upload the file. Try again."));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const remove = async (f: TaskFileDto) => {
+    setBusyId(f.id);
+    setError("");
+    try {
+      await tasksApi.removeFile(base, task.id, f.id);
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't remove the file. Try again."));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    <section aria-labelledby={`${inputId}-head`} className="flex flex-col gap-2">
+      <h3 id={`${inputId}-head`} className="text-sm font-medium">
+        Files
+      </h3>
+      {files.length ? (
+        <ul className="flex flex-col divide-y divide-border rounded-xl border border-border">
+          {files.map((f) => {
+            const label = TASK_FILE_TYPES[f.contentType as keyof typeof TASK_FILE_TYPES]?.label ?? "File";
+            return (
+              <li key={f.id} className="flex items-center gap-3 px-3 py-2">
+                <FileText className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-sm" title={f.fileName}>
+                    {f.fileName}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {label} · {fileSize(f.bytes)}
+                  </span>
+                </span>
+                {/* A signed link, valid for an hour, sent as a download; the peek reads the task again on any change, which renews it. */}
+                <a href={f.url} download rel="noopener noreferrer" className="inline-flex h-8 items-center gap-1 rounded-full px-2 text-xs font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:h-11">
+                  <Download className="size-4" aria-hidden="true" />
+                  Download<span className="sr-only"> {f.fileName}</span>
+                </a>
+                {canEdit ? (
+                  <button
+                    type="button"
+                    disabled={busyId === f.id}
+                    onClick={() => void remove(f)}
+                    className="flex size-8 items-center justify-center rounded-full hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 pointer-coarse:size-11"
+                  >
+                    <X className="size-4" aria-hidden="true" />
+                    <span className="sr-only">Remove {f.fileName}</span>
+                  </button>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+      {canEdit ? (
+        <div className="flex flex-col gap-1">
+          <label
+            htmlFor={inputId}
+            aria-disabled={uploading || files.length >= TASK_FILES_MAX || undefined}
+            className="inline-flex h-8 cursor-pointer items-center gap-2 self-start rounded-full border border-input px-3 text-xs font-medium hover:bg-muted focus-within:ring-2 focus-within:ring-ring aria-disabled:pointer-events-none aria-disabled:opacity-50 pointer-coarse:h-11"
+          >
+            <Upload className="size-4" aria-hidden="true" />
+            {uploading ? "Uploading…" : "Upload file"}
+            <input
+              id={inputId}
+              type="file"
+              accept={FILE_ACCEPT}
+              className="sr-only"
+              disabled={uploading || files.length >= TASK_FILES_MAX}
+              aria-describedby={`${inputId}-hint`}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                void upload(f);
+              }}
+            />
+          </label>
+          <p id={`${inputId}-hint`} className="text-xs text-muted-foreground">
+            PDF, Word, Excel, PowerPoint, CSV, text, JPG or PNG, up to {TASK_FILE_MAX_BYTES / (1024 * 1024)} MB. {files.length >= TASK_FILES_MAX ? `A task holds up to ${TASK_FILES_MAX} files.` : ""}
+          </p>
+        </div>
+      ) : null}
+      {task.clientVisible && !task.viewerIsClient && (files.length || canEdit) ? (
+        <p className="text-xs text-muted-foreground">A client reviewer can see this task and download these files.</p>
+      ) : null}
+      {error ? (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
+    </section>
   );
 }

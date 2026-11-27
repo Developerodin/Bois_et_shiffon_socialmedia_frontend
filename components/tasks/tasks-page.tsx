@@ -13,6 +13,7 @@ import { brandBase } from "@/lib/tasks-api";
 import { cn } from "@/lib/utils";
 import { NewTaskButton, useTaskPeople } from "@/components/tasks/new-task-dialog";
 import { TaskBoard } from "@/components/tasks/task-board";
+import { TaskCalendar } from "@/components/tasks/task-calendar";
 import { TaskList } from "@/components/tasks/task-list";
 import { TaskPeek } from "@/components/tasks/task-view";
 import { navigate } from "@/lib/workspace-view";
@@ -21,11 +22,12 @@ import { areaParam, areaTabs, readSaved, SOURCE_TABS, sourceParam, TASK_LIST_VIE
 const LAYOUTS = [
   { value: "list", label: "List" },
   { value: "board", label: "Board" },
+  { value: "calendar", label: "Calendar" },
 ] as const;
 
 /**
  * /tasks: area tabs (from ?area=, so the Website and Performance nav links land on theirs), on Performance a filter by
- * report (?source=seo|geo), a view, List or Board, and the task peek (?task=). With tasks.all the page opens on all open
+ * report (?source=seo|geo), a view, List, Board or Calendar (the view's tasks on their due days), and the task peek (?task=). With tasks.all the page opens on all open
  * tasks, and a manager with it assigns from the list (people and roles read once here).
  */
 export function TasksPage({ workspaceId, brandId, userId, perms, crm, blog }: { workspaceId: string; brandId: string; userId: string; perms: string[]; crm: boolean; blog?: boolean }) {
@@ -57,7 +59,8 @@ export function TasksPage({ workspaceId, brandId, userId, perms, crm, blog }: { 
   useEffect(() => {
     if (viewParam === null) return;
     const linked = TASK_LIST_VIEWS.find((v) => v.value === viewParam)?.value;
-    if (linked) setSaved((s) => ({ view: linked, layout: s?.layout ?? "list" }));
+    // From the calendar, the List: the calendar leaves undated tasks out, and approvals often have no due day.
+    if (linked) setSaved((s) => ({ view: linked, layout: !s || s.layout === "calendar" ? "list" : s.layout }));
     const q = new URLSearchParams(search.toString());
     q.delete("view");
     const s = q.toString();
@@ -104,7 +107,7 @@ export function TasksPage({ workspaceId, brandId, userId, perms, crm, blog }: { 
       <div className="flex flex-wrap items-center gap-3">
         <SegmentedRadios label="Area" name="task-area" value={area} onChange={setArea} options={areaTabs(crm)} />
         {area === "seo" ? <SegmentedRadios label="Report" name="task-source" value={source} onChange={setSource} options={SOURCE_TABS} /> : null}
-        {layout === "list" ? (
+        {layout === "list" || layout === "calendar" ? (
           <label className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">View</span>
             <select value={view} onChange={(e) => remember({ view: e.target.value as TaskListView, layout })} className={cn(selectClass, "w-auto pointer-coarse:h-11")}>
@@ -123,6 +126,8 @@ export function TasksPage({ workspaceId, brandId, userId, perms, crm, blog }: { 
       {layout === "board" ? <p className="-mt-2 text-xs text-muted-foreground">The board shows every open task and the last 30 days&rsquo; done ones.</p> : null}
       {saved === null ? null : layout === "board" ? (
         <TaskBoard base={base} area={area} source={source} />
+      ) : layout === "calendar" ? (
+        <TaskCalendar base={base} view={view} area={area} source={source} />
       ) : (
         <section className="rounded-2xl border border-border bg-card px-5 py-2 shadow-sm">
           <TaskList base={base} view={view} area={area} source={source} assign={canAssign ? team : undefined} />

@@ -18,15 +18,30 @@ export function gridRange(grid: Date[]): { from: string; to: string } {
   return { from: grid[0].toISOString(), to: new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1).toISOString() };
 }
 
-/** Posts by local day key, in their order; undated ones under "unscheduled". */
-export function groupByDay<T extends { scheduledFor: string | null }>(items: T[]): Map<string, T[]> {
+/**
+ * Items by day key, in their order; undated ones under "unscheduled". Posts key on their local `scheduledFor` day; pass
+ * `keyOf` for anything else (a task's due day is already a YYYY-MM-DD key, never put through a Date).
+ */
+export function groupByDay<T extends { scheduledFor: string | null }>(items: T[]): Map<string, T[]>;
+export function groupByDay<T>(items: T[], keyOf: (i: T) => string | null): Map<string, T[]>;
+export function groupByDay<T>(items: T[], keyOf?: (i: T) => string | null): Map<string, T[]> {
+  const key = keyOf ?? ((i: T) => {
+    const at = (i as { scheduledFor: string | null }).scheduledFor;
+    return at ? dayKey(new Date(at)) : null;
+  });
   const groups = new Map<string, T[]>();
   for (const i of items) {
-    const k = i.scheduledFor ? dayKey(new Date(i.scheduledFor)) : "unscheduled";
+    const k = key(i) ?? "unscheduled";
     groups.set(k, [...(groups.get(k) ?? []), i]);
   }
   return groups;
 }
+
+/** What a calendar counts, singular and plural ("post", "posts"). */
+export type Noun = readonly [one: string, many: string];
+export const POST_NOUN: Noun = ["post", "posts"];
+/** "1 post", "3 posts". */
+export const itemCount = (n: number, noun: Noun = POST_NOUN) => `${n} ${n === 1 ? noun[0] : noun[1]}`;
 
 /** Where an arrow key moves focus in a 7-wide day grid of `length` cells: the new index, or null at an edge or for another key. */
 export function gridStep(i: number, key: string, length: number): number | null {
@@ -127,11 +142,11 @@ export function peekInset(mainLeft: number, mainRight: number, peekLeft: number,
 }
 
 /**
- * A month cell's accessible name: the day, its post count and each post's time, title and status, since the chips show
- * titles cut short and colour the status.
+ * A month cell's accessible name: the day, its item count and each item's time, title and status, since the chips show
+ * titles cut short and colour the status. `noun`: what is counted (posts by default).
  */
-export function dayCellLabel(day: string, posts: { title: string; time: string | null; status: string }[]): string {
-  const count = posts.length === 1 ? "1 post" : `${posts.length} posts`;
+export function dayCellLabel(day: string, posts: { title: string; time: string | null; status: string }[], noun: Noun = POST_NOUN): string {
+  const count = itemCount(posts.length, noun);
   if (!posts.length) return `${day}, ${count}`;
   return `${day}, ${count}: ${posts.map((p) => `${p.time ? `${p.time} ` : ""}${p.title} (${p.status})`).join("; ")}`;
 }

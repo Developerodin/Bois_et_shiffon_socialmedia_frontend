@@ -39,6 +39,7 @@ const task = (over: Partial<TaskDetailDto> = {}): TaskDetailDto => ({
   actions: [],
   checklistItems: [],
   attachments: [],
+  files: [],
   clientVisible: false,
   viewerIsClient: false,
   ...over,

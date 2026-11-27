@@ -1,4 +1,5 @@
-import type { NotificationPageDto, PostRow, SearchResultsDto, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskPersonDto, TaskProposalDto, TaskProposalsDto, WorkProjectDetailDto, WorkProjectDto, WorkProjectMilestoneDto } from "@/shared";
+import type { NotificationPageDto, PostRow, SearchResultsDto, TaskAction, TaskAttachmentDto, TaskChecklistItemDto, TaskCommentDto, TaskDetailDto, TaskDto, TaskFileDto, TaskPersonDto, TaskProposalDto, TaskProposalsDto, WorkProjectDetailDto, WorkProjectDto, WorkProjectMilestoneDto } from "@/shared";
+import { taskFileType } from "@/shared";
 import { ApiError, request } from "@/components/settings/api";
 import { SLOW_MS } from "@/lib/net";
 
@@ -100,6 +101,11 @@ export const tasksApi = {
       () => ({ taskId: id, kind: "comment" }),
     ),
   uploadScreenshot: (...a: Parameters<typeof uploadScreenshot>) => announce(uploadScreenshot(...a), () => ({ taskId: a[1], kind: "attachment" })),
+  /** A document (the task's owner, or tasks.manage; never a client). */
+  uploadFile: (...a: Parameters<typeof uploadFile>) => announce(uploadFile(...a), () => ({ taskId: a[1], kind: "attachment" })),
+  /** Takes a document off the task; the file is deleted. */
+  removeFile: (base: string, id: string, fileId: string) =>
+    announce(request<void>(`${base}/tasks/${enc(id)}/files/${enc(fileId)}`, { method: "DELETE" }), () => ({ taskId: id, kind: "attachment" })),
   /** tasks.manage. With a requestId (one per dialog opening), a retry returns the task the first request made. */
   create: (base: string, body: Record<string, unknown> & { requestId: string }) =>
     announce(
@@ -191,13 +197,7 @@ async function uploadScreenshot(base: string, taskId: string, file: File, role: 
     method: "POST",
     body: JSON.stringify({ kind: "photo", contentType: file.type, bytes: file.size, rightsConfirmed }),
   });
-  let put: Response;
-  try {
-    put = await fetch(slot.url, { method: "PUT", body: file, headers: slot.headers });
-  } catch {
-    throw new ApiError(0, UPLOAD_FAILED); // offline, or storage refused the browser (CORS)
-  }
-  if (!put.ok) throw new ApiError(put.status, UPLOAD_FAILED);
+  await putToSlot(slot, file, UPLOAD_FAILED);
   const checked = await request<{ status: "VERIFIED" } | { status: "REJECTED"; reason: string }>(`${base}/stories/uploads/${enc(slot.uploadId)}`, { method: "POST" });
   if (checked.status !== "VERIFIED") throw new ApiError(400, checked.reason);
   const d = await request<{ attachment: TaskAttachmentDto }>(`${base}/tasks/${enc(taskId)}/attachments`, {
@@ -206,3 +206,44 @@ async function uploadScreenshot(base: string, taskId: string, file: File, role: 
   });
   return d.attachment;
 }
+
+/** The browser's PUT of one file to a signed slot (storage checks the signed type and size); `failed` is what a refusal says. */
+async function putToSlot(slot: { url: string; headers: Record<string, string> }, file: File, failed: string): Promise<void> {
+  let put: Response;
+  try {
+    put = await fetch(slot.url, { method: "PUT", body: file, headers: slot.headers });
+  } catch {
+    throw new ApiError(0, failed); // offline, or storage refused the browser (CORS)
+  }
+  if (!put.ok) throw new ApiError(put.status, failed);
+}
+
+/**
+ * A document onto a task (TaskFile): a slot for the type its extension names (the browser's own type is unreliable for
+ * CSV and Office files), the PUT, then the server checks the bytes and keeps the file. A refusal at any step throws with
+ * the server's message; a refused file is gone. ponytail: an upload that fails after the slot leaves a PENDING row; the
+ * daily sweep removes it after a day.
+ */
+async function uploadFile(base: string, taskId: string, file: File): Promise<TaskFileDto> {
+  const contentType = taskFileType(file.name);
+  if (!contentType) throw new ApiError(400, FILE_TYPES_HINT);
+  const slot = await request<{ fileId: string; url: string; headers: Record<string, string> }>(`${base}/tasks/${enc(taskId)}/files`, {
+    method: "POST",
+    body: JSON.stringify({ fileName: file.name, contentType, bytes: file.size }),
+  });
+  await putToSlot(slot, file, "Couldn't upload the file. Try again.");
+  // The server checks two files at a time; busy, it keeps the slot (valid for an hour), so the check is asked again.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return (await request<{ file: TaskFileDto }>(`${base}/tasks/${enc(taskId)}/files/${enc(slot.fileId)}`, { method: "POST" })).file;
+    } catch (e) {
+      if (!(e instanceof ApiError && e.code === "task.fileBusy") || attempt >= FILE_CHECK_RETRIES.length) throw e;
+      await new Promise((r) => setTimeout(r, FILE_CHECK_RETRIES[attempt]));
+    }
+  }
+}
+
+/** Waits (ms) before asking again while the server is busy checking other files. */
+const FILE_CHECK_RETRIES = [1500, 3000, 6000];
+
+export const FILE_TYPES_HINT = "Attach a PDF, Word, Excel, PowerPoint, CSV, text, JPG or PNG file.";
