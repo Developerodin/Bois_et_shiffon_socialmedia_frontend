@@ -14,7 +14,8 @@ const REUSE_MS = 50 * 60 * 1000;
 export function useStableSignedUrl(url: string | null): string | null {
   const [held, setHeld] = useState(() => (url ? { url, at: Date.now() } : null));
   // Adjusted while rendering (as useJob does with its URL), so the old link never shows for a different picture.
-  if (url !== held?.url && (!url || !held || !sameSignedObject(held.url, url) || Date.now() - held.at > REUSE_MS)) {
+  // `?? null`: with no picture, held is null and url is null; undefined !== null would set state on every render.
+  if (url !== (held?.url ?? null) && (!url || !held || !sameSignedObject(held.url, url) || Date.now() - held.at > REUSE_MS)) {
     const next = url ? { url, at: Date.now() } : null;
     setHeld(next);
     return next?.url ?? null;
