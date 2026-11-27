@@ -45,6 +45,7 @@ import { Peek } from "@/components/workspace/peek";
 import { TaskView } from "@/components/tasks/task-view";
 import { TodayTasks } from "@/components/tasks/today-tasks";
 import { UpcomingWeek } from "@/components/workspace/upcoming-week";
+import { PerformanceSummary } from "@/components/workspace/performance-summary";
 import { RecentMenu } from "@/components/workspace/recent-menu";
 import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
@@ -127,6 +128,9 @@ type Props = {
   tasksOn: boolean;
   /** The digest flag is on: Home links to "This week" (/digest). */
   digestOn?: boolean;
+  /** The ads and sales flags are on: Home's Performance shows those numbers to people who may read them. */
+  adsOn?: boolean;
+  salesOn?: boolean;
   user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
   /** The person's permissions on this brand, from the shell (read with the page, so no fetch here can fail on its own). */
   perms: string[];
@@ -135,7 +139,7 @@ type Props = {
 const viewFromUrl = () => viewFromSearch(window.location.search);
 const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
-export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, user, perms }: Props) {
+export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, adsOn = false, salesOn = false, user, perms }: Props) {
   const router = useRouter();
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
@@ -407,6 +411,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
             due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} /> : null}
             taskGroups={tasksOn && perms.includes("tasks.read") ? <TodayTasks base={base} onOpen={(id) => open({ kind: "task", id })} /> : null}
             week={<UpcomingWeek base={base} withTasks={tasksOn && perms.includes("tasks.read")} onOpen={open} />}
+            performance={<PerformanceSummary base={base} ads={adsOn && perms.includes("ads.read")} sales={salesOn && perms.includes("crm.read")} />}
             showAgents={canAgents}
             digestOn={digestOn}
           />
@@ -870,6 +875,7 @@ function Home({
   due,
   taskGroups,
   week,
+  performance,
   showAgents,
   digestOn,
 }: {
@@ -885,6 +891,8 @@ function Home({
   taskGroups: React.ReactNode;
   /** The Next 7 days section, under Today. */
   week: React.ReactNode;
+  /** The key performance numbers, under Next 7 days (nothing for a role that reads neither ads nor sales). */
+  performance: React.ReactNode;
   user: Props["user"];
   agents: AgentSummary[] | null;
   agentsFailed: boolean;
@@ -1096,6 +1104,8 @@ function Home({
       </section>
 
       {week}
+
+      {performance}
 
       {showAgents && (
       <section aria-labelledby="agents-h" className="px-5 pb-10">

@@ -18,6 +18,9 @@ import { DATA_SOURCE_SLUGS, type AdsCampaignsDto, type AdsSummaryDto, type AdsTo
 
 // ---- formatting ---------------------------------------------------------------------------------------------------
 
+/** Ad money is never converted or added across currencies; the Ads tab and the Overview both say so. */
+export const ADS_CURRENCY_NOTE = "In the ad account's currency";
+
 const roas = (v: number | null | undefined) => (v == null ? "—" : `${v.toFixed(2)}×`);
 const whole = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
 
@@ -115,7 +118,7 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
       <PageSection
         id="ads"
         title="Meta Ads"
-        description={currencies ? `In the ad account's currency: ${currencies}. Before = ${dayLabel(summary.previousRange.from)} to ${dayLabel(summary.previousRange.to)}.` : undefined}
+        description={currencies ? `${ADS_CURRENCY_NOTE}: ${currencies}. Before = ${dayLabel(summary.previousRange.from)} to ${dayLabel(summary.previousRange.to)}.` : undefined}
         actions={empty ? undefined : <ExportCsvButton url={`${base}/ads/export?format=xlsx&${range}`} label="Export Excel" filename={`ads-${from}-${to}.xlsx`} />}
         className="flex flex-col gap-4"
       >

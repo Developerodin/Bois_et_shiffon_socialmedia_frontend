@@ -112,13 +112,19 @@ export function historyNote(source: DataSourceDto): string | null {
 
 /**
  * Net sales without VAT. Orders read before the VAT split existed have no shipping tax stored, so the figure may start
- * later than the range (exVatFrom), and orders whose VAT couldn't be read are left out and counted.
+ * later than the range (exVatFrom), and orders whose VAT couldn't be read are left out and counted: those two notes,
+ * for the Sales headline and the Overview's sales figure.
  */
-function ExVatHeadline({ c }: { c: SalesCurrency }) {
-  const notes = [
+export function exVatNotes(c: Pick<SalesCurrency, "exVatFrom" | "exVatMissing">): string[] {
+  return [
     c.exVatFrom ? `Excl. VAT from ${dayLabel(c.exVatFrom)}` : null,
     c.exVatMissing ? `${c.exVatMissing.toLocaleString()} ${c.exVatMissing === 1 ? "order" : "orders"} left out (their VAT couldn't be read)` : null,
-  ].filter(Boolean);
+  ].filter((n): n is string => !!n);
+}
+
+/** The Sales headline: net sales without VAT, with exVatNotes under it. */
+function ExVatHeadline({ c }: { c: SalesCurrency }) {
+  const notes = exVatNotes(c);
   return (
     <div className="flex flex-col">
       <span className="font-display text-3xl font-medium tabular-nums">{c.netExVat === null ? "—" : money(c.netExVat, c.currency)}</span>
