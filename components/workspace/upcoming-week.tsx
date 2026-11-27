@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import { CalendarDays, Flag, Globe } from "lucide-react";
 import { ListSkeleton } from "@/components/settings/shared";
@@ -9,7 +9,7 @@ import { useTasksChanged } from "@/components/tasks/task-list";
 import { useBrandData, type ContentItem } from "@/components/workspace/content-panels";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { filterToSearch, isThisWeek } from "@/lib/calendar-filter";
-import { zoneToday } from "@/lib/data-api";
+import { addDays, zoneToday } from "@/lib/data-api";
 import { CHANNEL_LABEL } from "@/lib/post-labels";
 import { mergeUpcoming, type UpcomingRow, type WeekPost } from "@/lib/upcoming";
 import type { View } from "@/lib/workspace-view";
@@ -30,8 +30,7 @@ const TIME = (zone: string | undefined) => new Intl.DateTimeFormat(undefined, { 
 
 function dayLabel(day: string, today: string) {
   if (day === today) return "Today";
-  const tomorrow = new Date(Date.parse(`${today}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
-  return day === tomorrow ? "Tomorrow" : DAY.format(new Date(`${day}T00:00:00Z`));
+  return day === addDays(today, 1) ? "Tomorrow" : DAY.format(new Date(`${day}T00:00:00Z`));
 }
 
 const ICON = { post: CalendarDays, website: Globe, milestone: Flag } as const;
@@ -46,17 +45,15 @@ export function UpcomingWeek({ base, withTasks, onOpen }: { base: string; withTa
   const posts = useBrandData(base, "content", pickWeekPosts as (d: never) => WeekPost[]);
   const upcoming = useJob(`${base}/upcoming`, { pick: pickUpcoming as (d: never) => UpcomingDto, intervals: JOB_INTERVALS.tasks, off: !withTasks });
   const reloadUpcoming = upcoming.reload;
-  useTasksChanged(reloadUpcoming);
-  useEffect(() => {
-    if (!withTasks) return;
-    const onFocus = () => void reloadUpcoming();
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [reloadUpcoming, withTasks]);
+  // A task changed here: read again (only when this person reads tasks). Coming back to the tab is useJob's own refetch.
+  useTasksChanged(useCallback(() => void (withTasks && reloadUpcoming()), [withTasks, reloadUpcoming]));
 
   const route = withTasks ? upcoming.data : null;
-  const { rows, more } = useMemo(() => mergeUpcoming(posts.data ?? [], route), [posts.data, route]);
+  const merged = useMemo(() => mergeUpcoming(posts.data ?? [], route), [posts.data, route]);
+  // With tasks on, rows wait for the route too: its zone puts posts on the brand's days, so nothing moves once it lands.
   const loading = (posts.data == null && !posts.failed) || (withTasks && upcoming.data == null && !upcoming.failed);
+  const rows = loading ? [] : merged.rows;
+  const more = loading ? { post: 0, website: 0, milestone: 0 } : merged.more;
   // A part that failed with nothing to show: never say "nothing scheduled", only what did load and Retry.
   const partFailed = (posts.data == null && posts.failed) || (withTasks && upcoming.data == null && upcoming.failed);
   const today = route?.from ?? zoneToday(undefined);

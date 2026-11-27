@@ -1,5 +1,5 @@
 import { zoneToday } from "@/lib/data-api";
-import type { TaskDto, UpcomingDto, UpcomingMilestoneDto } from "@/shared";
+import type { UpcomingDto, UpcomingMilestoneDto, UpcomingTaskDto } from "@/shared";
 
 /** A post due in the next 7 days, as the Overview lists it (from the content list it already polls). */
 export type WeekPost = { id: string; title: string; channel: string; scheduledFor: string };
@@ -18,19 +18,18 @@ export const UPCOMING_ROWS = 8;
 /**
  * The rows in date order, at most `limit`, and how many of each kind are left out (`more`). Every row sorts on a
  * brand-local day: tasks and milestones by their due day, a post by its time turned into a day in the brand's zone (the
- * route's `timeZone`). Posts past the route's `to` are
- * left out (the posts' 7 × 24 h window can reach an eighth day). Without the route (tasks off or not loaded), posts are
- * keyed in the browser's zone, which only orders them. Ties: posts by time, then post, website, milestone, then title.
+ * route's `timeZone`). Posts keep the calendar's "Next 7 days" window (7 × 24 h from now), so the last one can sit on
+ * an eighth brand day, as it does on the calendar the section links to. Without the route (tasks off), posts are keyed
+ * in the browser's zone, which only orders them. Ties: posts by time, then post, website, milestone, then title.
  */
-export function mergeUpcoming(posts: WeekPost[], upcoming: Pick<UpcomingDto, "timeZone" | "to" | "website" | "milestones"> | null, limit = UPCOMING_ROWS) {
+export function mergeUpcoming(posts: WeekPost[], upcoming: Pick<UpcomingDto, "timeZone" | "website" | "milestones"> | null, limit = UPCOMING_ROWS) {
   const zone = upcoming?.timeZone;
   const rows: UpcomingRow[] = [];
   for (const p of posts) {
     const day = zoneToday(zone, new Date(p.scheduledFor));
-    if (upcoming && day > upcoming.to) continue;
     rows.push({ kind: "post", id: p.id, day, at: p.scheduledFor, title: p.title, channel: p.channel });
   }
-  for (const t of upcoming?.website.tasks ?? ([] as TaskDto[])) if (t.dueOn) rows.push({ kind: "website", id: t.id, day: t.dueOn, title: t.title });
+  for (const t of upcoming?.website.tasks ?? ([] as UpcomingTaskDto[])) rows.push({ kind: "website", id: t.id, day: t.dueOn, title: t.title });
   for (const m of upcoming?.milestones.items ?? ([] as UpcomingMilestoneDto[])) rows.push({ kind: "milestone", id: m.id, day: m.dueOn, title: m.title, project: m.project });
   rows.sort(
     (a, b) =>

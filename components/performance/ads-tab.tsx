@@ -14,14 +14,11 @@ import { money, Stat } from "@/components/data/shared";
 import { SyncedAt, useReloadWhenSynced } from "@/components/data/synced-at";
 import { AdBudgets } from "@/components/performance/ad-budgets";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { ADS_CURRENCY_NOTE, roas } from "@/lib/performance-summary";
 import { DATA_SOURCE_SLUGS, type AdsCampaignsDto, type AdsSummaryDto, type AdsTotals, type ChooseMetaAdAccountBody, type DataSourceDto, type MetaAdAccountsDto, type ShopRevenueOverSpend } from "@/shared";
 
 // ---- formatting ---------------------------------------------------------------------------------------------------
 
-/** Ad money is never converted or added across currencies; the Ads tab and the Overview both say so. */
-export const ADS_CURRENCY_NOTE = "In the ad account's currency";
-
-const roas = (v: number | null | undefined) => (v == null ? "—" : `${v.toFixed(2)}×`);
 const whole = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
 
 const num = (v: string | number | null | undefined) => (v == null ? null : Number(v));

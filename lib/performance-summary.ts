@@ -19,6 +19,29 @@ export type SourceState<T> =
 export type AdsFigure = { currency: string; spend: string; roas: number | null };
 export type SalesFigure = Pick<SalesCurrency, "currency" | "netExVat" | "exVatFrom" | "exVatMissing"> & { orders: number };
 
+/** Ad money is never converted or added across currencies; the Ads tab and the Overview both say so. */
+export const ADS_CURRENCY_NOTE = "In the ad account's currency";
+
+/** Return on ad spend as "3.20×"; "—" when nothing was spent. */
+export const roas = (v: number | null | undefined) => (v == null ? "—" : `${v.toFixed(2)}×`);
+
+const DAY = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
+
+/**
+ * Net sales without VAT: orders read before the VAT split existed have no shipping tax stored, so the figure may start
+ * later than the range (exVatFrom), and orders whose VAT couldn't be read are left out and counted. Those two notes,
+ * for the Sales headline and the Overview's sales figure.
+ */
+export function exVatNotes(c: Pick<SalesCurrency, "exVatFrom" | "exVatMissing">): string[] {
+  return [
+    c.exVatFrom ? `Excl. VAT from ${DAY.format(new Date(`${c.exVatFrom}T00:00:00Z`))}` : null,
+    c.exVatMissing ? `${c.exVatMissing.toLocaleString()} ${c.exVatMissing === 1 ? "order" : "orders"} left out (their VAT couldn't be read)` : null,
+  ].filter((n): n is string => !!n);
+}
+
+/** A source that is on and has synced at least once: only then are its figures worth asking for. */
+export const isSynced = (s: DataSourceDto) => s.status !== "OFF" && !!s.lastResult?.okAt;
+
 /** A failed or partial last run, in a few words (the full text stays on the tab, from DATA_SYNC_ERRORS). */
 const REASON: Record<DataSyncReason, string> = {
   reconnect: "Needs reconnecting",
@@ -54,7 +77,7 @@ function statusLine(synced: DataSourceDto[], notSynced: number, now: number): st
 function stateOf<T>(sources: DataSourceDto[], items: T[] | null, now: number): SourceState<T> {
   const on = live(sources);
   if (!on.length) return { kind: "none" };
-  const synced = on.filter((s) => s.lastResult?.okAt);
+  const synced = on.filter(isSynced);
   if (!synced.length || !items) return { kind: "waiting", text: waitingText(on) };
   const status = statusLine(synced, on.length - synced.length, now);
   return items.length ? { kind: "numbers", status, items } : { kind: "empty", status };

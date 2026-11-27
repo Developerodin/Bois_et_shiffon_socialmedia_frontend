@@ -62,7 +62,11 @@ export function presetEnd(today: string, syncedThrough?: string | null): string 
 /** The `days` days ending on `end`, both counted; the server compares with the same number of days before. */
 export const presetRange = (days: number, end: string): DateRange => ({ from: addDays(end, -(days - 1)), to: end });
 
-/** The Ads and Sales tabs' default: the DEFAULT_DAYS days ending yesterday in the brand's zone (or `syncedThrough`). */
+/**
+ * The range the Performance page opens on with no ?from&to (performance-tabs: readRange's fallback on presetEnd), for
+ * callers that link to it without the tab's state: the DEFAULT_DAYS days ending yesterday in the brand's zone, or on
+ * `syncedThrough` when that is earlier.
+ */
 export const defaultRange = (timeZone: string | null | undefined, syncedThrough?: string | null, now = new Date()): DateRange =>
   presetRange(DEFAULT_DAYS, presetEnd(zoneToday(timeZone, now), syncedThrough));
 

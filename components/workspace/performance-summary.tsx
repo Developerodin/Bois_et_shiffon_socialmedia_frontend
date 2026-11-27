@@ -4,17 +4,13 @@ import { useCallback } from "react";
 import Link from "next/link";
 import { rangeLabel } from "@/components/data/date-range";
 import { money, Stat } from "@/components/data/shared";
-import { ADS_CURRENCY_NOTE } from "@/components/performance/ads-tab";
-import { exVatNotes } from "@/components/performance/sales-tab";
 import { request } from "@/components/settings/api";
 import { ListSkeleton, useLoad } from "@/components/settings/shared";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { defaultRange, rangeQuery, type DateRange } from "@/lib/data-api";
-import { adsView, salesView, type SourceState } from "@/lib/performance-summary";
-import type { AdsSummaryDto, DataSourceDto, DataSourcesDto, SalesSummaryDto } from "@/shared";
+import { ADS_CURRENCY_NOTE, adsView, exVatNotes, isSynced, roas, salesView, type SourceState } from "@/lib/performance-summary";
+import type { AdsSummaryDto, DataSourcesDto, SalesSummaryDto } from "@/shared";
 
-const synced = (s: DataSourceDto) => s.status !== "OFF" && !!s.lastResult?.okAt;
-const roas = (v: number | null) => (v == null ? "—" : `${v.toFixed(2)}×`);
 const linkClass = "font-medium text-primary-strong underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const tileClass = "-mx-2 block rounded-lg px-2 py-1 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
@@ -32,9 +28,10 @@ export function PerformanceSummary({ base, ads, sales }: { base: string; ads: bo
     const q = rangeQuery(range.from, range.to);
     const meta = ds.sources.filter((s) => s.kind === "META_ADS");
     const shop = ds.sources.find((s) => s.kind === "SHOPIFY_ORDERS");
-    const [adsSummary, salesSummary] = await Promise.all([
-      ads && meta.some(synced) ? request<AdsSummaryDto>(`${base}/ads/summary?${q}`) : null,
-      sales && shop && synced(shop) ? request<SalesSummaryDto>(`${base}/sales/summary?${q}`) : null,
+    // Settled one by one: a failed summary shows Retry in its own block, the other keeps its figures.
+    const [adsSummary, salesSummary] = await Promise.allSettled([
+      ads && meta.some(isSynced) ? request<AdsSummaryDto>(`${base}/ads/summary?${q}`) : null,
+      sales && shop && isSynced(shop) ? request<SalesSummaryDto>(`${base}/sales/summary?${q}`) : null,
     ]);
     return { range, meta, shop, adsSummary, salesSummary };
   }, [base, ads, sales]);
@@ -57,7 +54,8 @@ export function PerformanceSummary({ base, ads, sales }: { base: string; ads: bo
             title="Meta Ads"
             note={`${ADS_CURRENCY_NOTE}; ROAS as Meta reports it`}
             href={href("ads")}
-            state={adsView(d.meta, d.adsSummary)}
+            state={d.adsSummary.status === "rejected" ? "failed" : adsView(d.meta, d.adsSummary.value)}
+            onRetry={reload}
             none="No ad account connected."
             empty="No ad spend in these days."
             tiles={(f) => [
@@ -71,7 +69,8 @@ export function PerformanceSummary({ base, ads, sales }: { base: string; ads: bo
             title="Sales"
             note="Shopify orders, test and cancelled left out"
             href={href("sales")}
-            state={salesView(d.shop, d.salesSummary)}
+            state={d.salesSummary.status === "rejected" ? "failed" : salesView(d.shop, d.salesSummary.value)}
+            onRetry={reload}
             none="Orders aren't turned on."
             empty="No orders in these days."
             tiles={(f) => [
@@ -104,7 +103,7 @@ export function PerformanceSummary({ base, ads, sales }: { base: string; ads: bo
 type Tile = { label: string; value: string; note?: string };
 
 /** One source: its figures as links to its tab, or in words why there are none. */
-function Block<T extends { currency: string }>({ title, note, href, state, none, empty, tiles }: { title: string; note: string; href: string; state: SourceState<T>; none: string; empty: string; tiles: (f: T) => Tile[] }) {
+function Block<T extends { currency: string }>({ title, note, href, state, onRetry, none, empty, tiles }: { title: string; note: string; href: string; state: SourceState<T> | "failed"; onRetry: () => void; none: string; empty: string; tiles: (f: T) => Tile[] }) {
   const open = (
     <Link href={href} className={linkClass}>
       Open {title}
@@ -113,7 +112,9 @@ function Block<T extends { currency: string }>({ title, note, href, state, none,
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-sm font-semibold">{title}</h3>
-      {state.kind === "none" ? (
+      {state === "failed" ? (
+        <LoadFailed what={`the ${title} figures`} onRetry={onRetry} />
+      ) : state.kind === "none" ? (
         <p className="text-sm text-muted-foreground">
           {none} {open}
         </p>
@@ -143,7 +144,7 @@ function Block<T extends { currency: string }>({ title, note, href, state, none,
           )}
         </ul>
       )}
-      {state.kind !== "none" && (
+      {state !== "failed" && state.kind !== "none" && (
         <p className="text-xs text-muted-foreground">
           {[state.kind === "waiting" ? null : state.status, note].filter(Boolean).join(" · ")}
         </p>

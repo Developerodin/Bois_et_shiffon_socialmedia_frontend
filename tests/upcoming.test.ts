@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { defaultRange } from "@/lib/data-api";
 import { mergeUpcoming, type WeekPost } from "@/lib/upcoming";
-import type { TaskDto, UpcomingDto } from "@/shared";
+import type { UpcomingDto, UpcomingTaskDto } from "@/shared";
 
 const post = (id: string, scheduledFor: string): WeekPost => ({ id, title: id, channel: "INSTAGRAM_POST", scheduledFor });
-const task = (id: string, dueOn: string) => ({ id, title: id, dueOn }) as TaskDto;
+const task = (id: string, dueOn: string): UpcomingTaskDto => ({ id, title: id, dueOn });
 const route = (p: Partial<UpcomingDto> = {}): UpcomingDto => ({
   timeZone: "Europe/Paris",
   from: "2026-11-28",
@@ -37,9 +37,9 @@ describe("mergeUpcoming", () => {
     expect(rows.map((r) => `${r.day} ${r.title}`)).toEqual(["2026-11-28 a", "2026-11-29 night", "2026-11-29 b"]);
   });
 
-  it("leaves out posts past the window's last day and doesn't count them", () => {
+  it("keeps a post on the window's eighth day, as the calendar's Next 7 days filter does", () => {
     const { rows, more } = mergeUpcoming([post("in", "2026-12-04T10:00:00Z"), post("eighth day", "2026-12-05T08:00:00Z")], route());
-    expect(rows.map((r) => r.title)).toEqual(["in"]);
+    expect(rows.map((r) => `${r.day} ${r.title}`)).toEqual(["2026-12-04 in", "2026-12-05 eighth day"]);
     expect(more.post).toBe(0);
   });
 

@@ -10,6 +10,7 @@ import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { exVatNotes } from "@/lib/performance-summary";
 import { DATA_SOURCE_SLUGS, type DataSourceDto, type SalesCurrency, type SalesSummaryDto, type SalesTotals, type TurnOnShopifyOrdersBody } from "@/shared";
 
 const aov = (t: SalesTotals) => (t.orders ? Number(t.netSales) / t.orders : 0);
@@ -108,18 +109,6 @@ export function historyNote(source: DataSourceDto): string | null {
     return `Orders ${h.visibleSince ? `from ${dayLabel(h.visibleSince.slice(0, 10))} ` : ""}on (Shopify hasn't approved older orders yet)`;
   }
   return null;
-}
-
-/**
- * Net sales without VAT. Orders read before the VAT split existed have no shipping tax stored, so the figure may start
- * later than the range (exVatFrom), and orders whose VAT couldn't be read are left out and counted: those two notes,
- * for the Sales headline and the Overview's sales figure.
- */
-export function exVatNotes(c: Pick<SalesCurrency, "exVatFrom" | "exVatMissing">): string[] {
-  return [
-    c.exVatFrom ? `Excl. VAT from ${dayLabel(c.exVatFrom)}` : null,
-    c.exVatMissing ? `${c.exVatMissing.toLocaleString()} ${c.exVatMissing === 1 ? "order" : "orders"} left out (their VAT couldn't be read)` : null,
-  ].filter((n): n is string => !!n);
 }
 
 /** The Sales headline: net sales without VAT, with exVatNotes under it. */
