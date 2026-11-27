@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { Lock, Share2 } from "lucide-react";
 import { SocialLanding } from "@/components/social/social-landing";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { featureOn } from "@/lib/features";
@@ -29,11 +31,29 @@ export default async function SocialPage() {
   }
   // Connections are for people who answer customers, publish or manage the accounts (as on /connections): others see none.
   const canSeeConnections = CONNECTIONS_READ.some((k) => shell.brandPermissions.includes(k));
+  // Connecting an account is for people who manage them, as on /connections.
+  const canManageConnections = shell.brandPermissions.includes("integrations.manage");
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
-      <PageHeader title="Social & Content">Each channel&rsquo;s connection, its next planned post and the posts waiting for approval.</PageHeader>
+      <PageHeader
+        title="Social & Content"
+        actions={
+          <>
+            {canManageConnections && (
+              <Button asChild size="sm" variant="outline">
+                <Link href="/connections">Connect channel</Link>
+              </Button>
+            )}
+            <Button asChild size="sm">
+              <Link href="/calendar">Open full calendar</Link>
+            </Button>
+          </>
+        }
+      >
+        Each channel&rsquo;s connection, its next planned post and the posts waiting for approval.
+      </PageHeader>
       {/* Remount on brand switch so the summary and the connections reset with the business. */}
-      <SocialLanding key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} canSeeConnections={canSeeConnections} blogOn={featureOn("blog", shell.activeWorkspaceId)} />
+      <SocialLanding key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} canSeeConnections={canSeeConnections} canManageConnections={canManageConnections} blogOn={featureOn("blog", shell.activeWorkspaceId)} />
     </div>
   );
 }
