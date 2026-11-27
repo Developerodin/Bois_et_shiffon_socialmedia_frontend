@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, SlidersHorizontal, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request, type Connection } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
@@ -266,7 +267,7 @@ export function IdeasPanel({ base, perms, onRunScout, onOpenPosts, onOpenPost }:
       {error && <p role="alert" className="px-4 pt-3 text-sm text-destructive">{error}</p>}
       {planned && (
         <div role="status" className="flex flex-wrap items-center justify-between gap-3 px-4 pt-3 text-sm">
-          <span>Posts planned. The Brief writer, Creator and Quality check now prepare each one for your approval; the Planner's own view lists them.</span>
+          <span>Posts planned. The Brief writer, Creator and Quality check now prepare each one for your approval; the Planner&apos;s own view lists them.</span>
           <span className="flex gap-2">
             {onOpenPosts && (
               <Button size="sm" onClick={() => { setPlanned(false); onOpenPosts(); }}>
@@ -431,6 +432,14 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, select
   const [month, setMonth] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }));
   const monthHeadId = useId();
   const showMonth = (y: number, m: number) => setMonth({ y: new Date(y, m, 1).getFullYear(), m: new Date(y, m, 1).getMonth() });
+  // ?at=YYYY-MM (a post's "Show on calendar"): Month view on that month, where the open post is highlighted.
+  const at = useSearchParams().get("at");
+  useEffect(() => {
+    const hit = at && /^(\d{4})-(\d{2})$/.exec(at);
+    if (!hit) return;
+    setView("month");
+    setMonth({ y: Number(hit[1]), m: Number(hit[2]) - 1 });
+  }, [at]);
   // Opens the new post in the post view, like a calendar row.
   const canCreate = perms.includes("content.create");
   // A channel's calendar offers that channel's posts in New post, starting on it.
@@ -1073,6 +1082,29 @@ export function draftPhotos(item: Pick<ContentItem, "latest">): { key: string; p
   return keys.length && keys.length === urls.length ? keys.map((key, n) => ({ key, previewUrl: urls[n]! })) : [];
 }
 
+/**
+ * A post's "Show on calendar": the calendar in Month view on the post's month with this post open (?post=&at=), keeping
+ * the calendar's filters when it's already the page. Local month, as the calendar draws its days.
+ */
+function ShowOnCalendar({ id, at }: { id: string; at: string }) {
+  const router = useRouter();
+  const d = new Date(at);
+  const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const go = () => {
+    const here = window.location.pathname === "/calendar";
+    const q = new URLSearchParams(here ? window.location.search : "");
+    for (const k of ["agent", "peek", "panel"]) q.delete(k);
+    q.set("post", id);
+    q.set("at", month);
+    router.push(`/calendar?${q.toString()}`, { scroll: false });
+  };
+  return (
+    <button type="button" onClick={go} className="ml-auto inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-0.5 font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      Show on calendar
+    </button>
+  );
+}
+
 export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { base: string; perms: string[]; id: string; reelsOn: boolean; brandId: string; onLoaded?: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
@@ -1156,6 +1188,7 @@ export function ContentView({ base, perms, id, reelsOn, brandId, onLoaded }: { b
                 {item.latest ? ` · draft v${item.latest.version}` : ""}
               </span>
               <span className={cn("rounded-full border px-2 py-0.5 font-medium", TONE_CLASS[toneOf(item.publishIssue ?? item.status)])}>{statusText(item)}</span>
+              {item.scheduledFor && <ShowOnCalendar id={item.id} at={item.scheduledFor} />}
             </div>
           </PeekSlot>
           <div>
