@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Connection } from "@/components/settings/api";
 import { CHANNEL_ICON, channelLabel } from "@/lib/post-labels";
-import { attentionPosts, channelCounts, channelName, connectionLines, connectionState, landingCounts, providersOf, rowSummary, SOCIAL_ROWS, type ChannelSummary } from "@/lib/social-channels";
+import { accountNames, attentionPosts, channelCounts, channelName, connectionLines, connectionState, landingCounts, providersOf, rowSummary, SOCIAL_ROWS, type ChannelSummary } from "@/lib/social-channels";
 
 const next = (id: string, scheduledFor: string) => ({ id, title: id, scheduledFor, status: "SCHEDULED" });
 const summary: ChannelSummary[] = [
@@ -151,5 +151,19 @@ describe("channelCounts", () => {
   });
   it("with a month, only posts dated in it", () => {
     expect(channelCounts(items, "meta", { y: 2026, m: 10 })).toEqual({ scheduled: 1, awaiting: 1, published: 1 });
+  });
+});
+
+describe("accountNames", () => {
+  const named = (provider: Connection["provider"], displayName: string, status: Connection["status"] = "ACTIVE"): Connection => ({ ...conn(provider, status), id: `${provider}-${displayName}`, displayName });
+  it("names Meta's Page and Instagram handle in the row's order, working accounts only", () => {
+    const list = [named("INSTAGRAM", "@shop"), named("META", "Shop Page"), named("META", "Old Page", "ERROR")];
+    expect(accountNames(providersOf("meta"), list)).toBe("Shop Page · @shop");
+  });
+  it("shows a provider's first account and how many more", () => {
+    expect(accountNames(["META"], [named("META", "A"), named("META", "B"), named("META", "C")])).toBe("A +2");
+  });
+  it("is empty with no working account", () => {
+    expect(accountNames(["PINTEREST"], [named("PINTEREST", "p", "REVOKED")])).toBe("");
   });
 });

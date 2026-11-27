@@ -65,15 +65,15 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
 function Figures({ summary, items, conns }: { summary: ChannelSummary[]; items: ContentItem[] | null; conns: Conns }) {
   const n = landingCounts(summary, items ?? [], conns && typeof conns === "object" ? conns.list : null);
   const figure = (label: string, value: number | null, href: string) => (
-    <div key={label} className="min-w-0 rounded-xl border border-border bg-card px-3 py-2.5 sm:px-4">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
+    <div key={label} className="min-w-0 rounded-xl border border-border bg-card px-3 py-3 sm:px-4">
+      <dt className="truncate text-xs text-muted-foreground">{label}</dt>
       <dd>
         {value === null ? (
-          <span className="text-lg text-muted-foreground" aria-label="Not loaded">
+          <span className="text-2xl leading-tight text-muted-foreground" aria-label="Not loaded">
             —
           </span>
         ) : (
-          <Link href={href} className="rounded text-lg font-semibold tabular-nums underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link href={href} className="rounded text-2xl font-semibold leading-tight tracking-tight tabular-nums underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             {value}
           </Link>
         )}
@@ -94,14 +94,19 @@ function Figures({ summary, items, conns }: { summary: ChannelSummary[]; items: 
 // list is 49rem wide (a container query: the sidebar and the docked assistant narrow the page, not the window), so the
 // columns line up whatever a row holds; a stacked card under that. The minimums add up to ~48rem with the gaps.
 const ROW =
-  "grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-2 py-3 @min-[49rem]/social:min-h-[5.25rem] @min-[49rem]/social:grid-cols-[minmax(9.5rem,1.05fr)_minmax(8.75rem,0.9fr)_minmax(10rem,2fr)_minmax(7.5rem,0.95fr)_minmax(8.25rem,auto)_1.25rem] @min-[49rem]/social:items-center";
+  "grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-2 py-3 @min-[49rem]/social:gap-x-5 @min-[49rem]/social:min-h-[5.25rem] @min-[49rem]/social:grid-cols-[minmax(9.5rem,1.05fr)_minmax(8.75rem,0.9fr)_minmax(10rem,2fr)_minmax(7.5rem,0.95fr)_minmax(8.25rem,0.8fr)_1.25rem] @min-[49rem]/social:items-center";
 const ACTION = "relative z-10 inline-flex h-6 items-center rounded-full border border-border bg-card px-2.5 text-xs font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+// Manage is secondary: a quiet text action beside the badge, shown on the row's hover or its own focus where a pointer
+// can hover; on touch screens (no hover) it always shows.
+const GHOST = "relative z-10 rounded px-1 text-xs text-muted-foreground underline-offset-4 transition-opacity hover:text-foreground hover:underline focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/row:opacity-100";
 const ROW_LINK = "relative z-10 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const ROW_SHELL = "group/row relative rounded-lg transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted/60";
+const ARROW = "size-4 shrink-0 self-center text-muted-foreground transition-transform group-hover/row:translate-x-0.5 group-hover/row:text-foreground @min-[49rem]/social:order-last";
 
 function RowName({ icon: Icon, label, blurb, href }: { icon: ChannelIcon; label: string; blurb: string; href: string }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent">
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent">
         <Icon aria-hidden className="size-4" />
       </span>
       <div className="min-w-0">
@@ -109,7 +114,7 @@ function RowName({ icon: Icon, label, blurb, href }: { icon: ChannelIcon; label:
         <Link href={href} className="font-medium after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none">
           {label}
         </Link>
-        <p className="truncate text-xs text-muted-foreground">{blurb}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground">{blurb}</p>
       </div>
     </div>
   );
@@ -122,13 +127,22 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
   // Connect while any of its connections isn't working; Manage once all are. Only for people who manage connections.
   const action = !canManage || !state || state.kind === "manual" ? null : state.kind === "connected" ? "Manage" : state.kind === "reconnect" ? "Reconnect" : "Connect";
   return (
-    <li className={`relative ${ROW} rounded-lg transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted/60`}>
+    <li className={`${ROW_SHELL} ${ROW}`}>
       <RowName icon={channelIcon(row.filter)} label={row.label} blurb={row.blurb} href={calendarHref({ channel: row.filter })} />
-      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground @min-[49rem]/social:order-last" />
+      <ChevronRight aria-hidden className={ARROW} />
       <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 @min-[49rem]/social:col-span-1 @min-[49rem]/social:flex-col @min-[49rem]/social:flex-nowrap @min-[49rem]/social:items-start">
-        <ChannelConnection filter={row.filter} conns={conns} />
-        {!providers.length && <span className="text-xs text-muted-foreground">Published by hand</span>}
-        {action && (
+        <ChannelConnection
+          filter={row.filter}
+          conns={conns}
+          action={
+            action === "Manage" && (
+              <Link href={CONNECTIONS} aria-label={`Manage ${row.label}`} className={GHOST}>
+                Manage
+              </Link>
+            )
+          }
+        />
+        {action && action !== "Manage" && (
           <Link href={CONNECTIONS} aria-label={`${action} ${row.label}`} className={ACTION}>
             {action}
           </Link>
@@ -164,9 +178,9 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
 /** The blog isn't on the calendar: its articles have no publish date yet, so the row says so instead of showing 0. */
 function BlogRow() {
   return (
-    <li className={`relative ${ROW} rounded-lg transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted/60`}>
+    <li className={`${ROW_SHELL} ${ROW}`}>
       <RowName icon={Newspaper} label="Blog" blurb="Articles for the store's blog" href="/blog" />
-      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground @min-[49rem]/social:order-last" />
+      <ChevronRight aria-hidden className={ARROW} />
       <div className="hidden @min-[49rem]/social:block" />
       <div className="col-span-2 text-sm text-muted-foreground @min-[49rem]/social:col-span-1">Articles live on the Blog page</div>
       <div className="hidden @min-[49rem]/social:block" />

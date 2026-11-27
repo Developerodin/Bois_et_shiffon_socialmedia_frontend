@@ -42,12 +42,12 @@ export function providersOf(filter: string): Provider[] {
  * The Blog row is the page's own (it links to /blog, not the calendar).
  */
 export const SOCIAL_ROWS = [
-  { key: "meta", label: "Meta", blurb: "Facebook and Instagram on one calendar", filter: "meta" },
+  { key: "meta", label: "Meta", blurb: "Facebook Pages · Instagram", filter: "meta" },
   { key: "instagram", label: "Instagram", blurb: "Posts, carousels, Reels and stories", filter: "instagram" },
-  { key: "pinterest", label: channelLabel("PINTEREST_PIN"), blurb: "Pins with their link", filter: "PINTEREST_PIN" },
-  { key: "linkedin", label: channelLabel("LINKEDIN_POST"), blurb: "Company posts", filter: "LINKEDIN_POST" },
-  { key: "x", label: channelLabel("X_POST"), blurb: "Posts", filter: "X_POST" },
-  { key: "threads", label: channelLabel("THREADS_POST"), blurb: "Posts", filter: "THREADS_POST" },
+  { key: "pinterest", label: channelLabel("PINTEREST_PIN"), blurb: "Pins that lead to your store", filter: "PINTEREST_PIN" },
+  { key: "linkedin", label: channelLabel("LINKEDIN_POST"), blurb: "Company page updates", filter: "LINKEDIN_POST" },
+  { key: "x", label: channelLabel("X_POST"), blurb: "Short posts", filter: "X_POST" },
+  { key: "threads", label: channelLabel("THREADS_POST"), blurb: "Conversation posts", filter: "THREADS_POST" },
 ] as const satisfies readonly { key: string; label: string; blurb: string; filter: string }[];
 export type SocialRow = (typeof SOCIAL_ROWS)[number];
 
@@ -97,6 +97,19 @@ export function connectionState(providers: readonly Provider[], connections: rea
   if (good) return { kind: "partial", label: "Partially connected", tone: "warn", lines };
   if (lines.some((l) => l.tone === "bad")) return { kind: "reconnect", label: "Needs reconnect", tone: "bad", lines };
   return { kind: "none", label: "Not connected", tone: "muted", lines };
+}
+
+/**
+ * The working accounts behind a row, in its providers' order ("Bois & Chiffons · @boisandchiffons" for Meta): the Page
+ * and the Instagram handle each named, so Meta's two connections read separately. A provider with several working
+ * accounts shows its first and "+N".
+ */
+export function accountNames(providers: readonly Provider[], connections: readonly Connection[]): string {
+  return providers
+    .map((p) => connections.filter((c) => c.provider === p && c.status === "ACTIVE").map((c) => c.displayName))
+    .filter((names) => names.length)
+    .map((names) => (names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0]))
+    .join(" · ");
 }
 
 /** Every connection a channel row publishes through (Facebook Pages, Instagram, Pinterest, Threads). */
