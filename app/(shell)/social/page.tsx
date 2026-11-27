@@ -47,6 +47,11 @@ export default async function SocialPage() {
                 <Link href="/connections">Connect channel</Link>
               </Button>
             )}
+            {shell.brandPermissions.includes("analytics.read") && (
+              <Button asChild size="sm" variant="outline">
+                <Link href="/social/analytics">Analytics</Link>
+              </Button>
+            )}
             <Button asChild size="sm">
               <Link href="/calendar">Open full calendar</Link>
             </Button>
