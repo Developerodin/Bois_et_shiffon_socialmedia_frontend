@@ -89,7 +89,7 @@ export function FollowUpsTab({ w, b, canManage, canDraft }: { w: string; b: stri
   }, [urlId, listed, open]);
 
   const chips = (
-    <div role="group" aria-label="Show" className="flex flex-wrap gap-1.5">
+    <div role="group" aria-label="Show follow-ups" className="flex flex-wrap gap-1.5">
       {followUpChips(counts).map((c) => (
         <button
           key={c.filter}

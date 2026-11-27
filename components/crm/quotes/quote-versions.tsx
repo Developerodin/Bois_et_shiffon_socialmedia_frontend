@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { QuoteDto, QuoteLine, QuoteVersionDto } from "@/shared";
 import { quotesApi } from "@/components/crm/api";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
@@ -39,6 +39,8 @@ export function QuoteVersions({ w, b, quote }: { w: string; b: string; quote: Qu
   const [list, setList] = useState<QuoteVersionDto[] | null>(null);
   const [open, setOpen] = useState<QuoteVersionDto | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The version asked for last: an earlier click's slower answer doesn't replace it.
+  const asked = useRef<number | null>(null);
   const load = async () => {
     setError(null);
     try {
@@ -49,10 +51,12 @@ export function QuoteVersions({ w, b, quote }: { w: string; b: string; quote: Qu
   };
   const show = async (v: number) => {
     setError(null);
+    asked.current = v;
     try {
-      setOpen((await quotesApi.versions(w, b, quote.id, v)).versions[0] ?? null);
+      const found = (await quotesApi.versions(w, b, quote.id, v)).versions[0] ?? null;
+      if (asked.current === v) setOpen(found);
     } catch (e) {
-      setError(errorMessage(e));
+      if (asked.current === v) setError(errorMessage(e));
     }
   };
   const changes = open?.lines ? [...versionChanges(open.lines, quote.lines), ...(open.note !== quote.note ? ["The note for the customer changed"] : [])] : [];

@@ -148,8 +148,8 @@ export function ConversationView({ sectionId, w, b, id, name, owners, canManage,
             ) : null}
           </div>
         ) : null}
-        {/* A change to the conversation (a logged message, a save) starts the AI help afresh from the saved summary. */}
-        <ConversationAi key={c.updatedAt} w={w} b={b} conversation={c} canDraft={canDraft} busy={!!busy} onUseNext={(p) => void patch("use", p)} />
+        {/* A new message starts the AI help afresh from the saved summary; Close, Waiting or a save keep a draft. */}
+        <ConversationAi key={c.messages[0]?.id ?? "none"} w={w} b={b} conversation={c} canDraft={canDraft} busy={!!busy} onUseNext={(p) => void patch("use", p)} />
         <section aria-labelledby="conversation-log-h" className="flex flex-col gap-2 rounded-xl border border-border p-3">
           <h3 id="conversation-log-h" className="text-xs font-medium text-muted-foreground">
             Log a message

@@ -116,7 +116,7 @@ export function ConversationAi({ w, b, conversation, canDraft, busy, onUseNext }
           <Textarea ref={draftRef} value={draft} readOnly rows={6} aria-label="Reply draft" />
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" variant="outline" onClick={() => void copy()}>
-              {copied ? "Copied" : "Copy"}
+              <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
             </Button>
             <span className="text-xs text-muted-foreground">{DRAFT_NOTE}</span>
           </div>

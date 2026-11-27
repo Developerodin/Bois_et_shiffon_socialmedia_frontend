@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FileText, Plus, Printer, Search } from "lucide-react";
-import type { QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteStatus } from "@/shared";
+import { QUOTE_LIMITS, type QuoteDto, type QuoteLineInput, type QuoteShopifyAction, type QuoteStatus } from "@/shared";
 import { quotesApi, type QuoteBody } from "@/components/crm/api";
 import { QuoteCustomer } from "@/components/crm/customers/quote-customer";
 import { QuoteDeal } from "@/components/crm/pipeline/quote-deal";
@@ -305,6 +305,7 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
     setDirty(true);
   };
   const setLine = (i: number, patch: Partial<DraftLine>) => edit({ lines: form.lines.map((l, j) => (j === i ? { ...l, ...patch } : l)) });
+  /** True when the call went through (a form that waits on it closes only then). */
   const run = async (what: string, call: () => Promise<{ quote: QuoteDto }>) => {
     setBusy(what);
     setError(null);
@@ -314,8 +315,10 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
       onChange(q);
       setForm(reset(q));
       setDirty(false);
+      return true;
     } catch (e) {
       setError(errorMessage(e));
+      return false;
     } finally {
       setBusy(null);
     }
@@ -432,12 +435,12 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
             className="flex flex-col gap-2 rounded-xl border border-border p-3 text-sm"
             onSubmit={(e) => {
               e.preventDefault();
-              void run("decline", () => quotesApi.act(w, b, quote.id, { action: "decline", version: quote.version, reason: reason.trim() || null })).then(() => setDeclining(false));
+              void run("decline", () => quotesApi.act(w, b, quote.id, { action: "decline", version: quote.version, reason: reason.trim() || null })).then((ok) => ok && setDeclining(false));
             }}
           >
             <label className="flex flex-col gap-1.5">
               <span className="text-muted-foreground">Why did the customer say no? (optional, for the team)</span>
-              <Textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} rows={2} autoFocus />
+              <Textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength={QUOTE_LIMITS.reason} rows={2} autoFocus />
             </label>
             {quote.shopifyName ? <p className="text-xs text-muted-foreground">Shopify&rsquo;s draft order stays as it is. If the customer pays it anyway, the quote shows as accepted.</p> : null}
             <div className="flex gap-2">

@@ -140,7 +140,7 @@ export function MergeDialog({ w, b, customer, onClose, onStale, onMerged }: {
 }
 
 export const ERASE_CUSTOMER =
-  "This deletes the customer with their contact details, notes, conversations and messages. Their deals stay, renamed and without next actions or notes. Their quotes stay for the books, with the contact's name and email, the notes, the declined reason and the invoice link removed. It can't be undone.";
+  "This deletes the customer with their contact details, notes, conversations and messages. Their deals, and deals tied to them only through one of their conversations, stay, renamed and without next actions or notes. Their quotes stay for the books, with the contact's name and email, the notes, the declined reason, the invoice link and the titles of free lines removed, and the same for the quotes' earlier versions. It can't be undone.";
 export const ERASE_COMPANY =
   "This deletes the company. Its customers stay, without the company. Its deals stay, renamed and without next actions or notes. It can't be undone.";
 

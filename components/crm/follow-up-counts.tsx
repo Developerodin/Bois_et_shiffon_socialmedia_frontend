@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { MessagesSquare } from "lucide-react";
 import type { FollowUpCounts as Counts } from "@/shared";
-import { request } from "@/components/settings/api";
+import { followUpCountsAt } from "@/components/crm/api";
 import { crmHref } from "@/components/crm/crm-link";
 
 /** "2 need a reply · 1 overdue · 3 waiting" with only the non-zero parts; null when nothing is open. */
@@ -23,7 +23,7 @@ export function FollowUpCounts({ base }: { base: string }) {
   const [counts, setCounts] = useState<Counts | null>(null);
   useEffect(() => {
     let live = true;
-    request<{ counts: Counts }>(`${base}/crm/follow-ups/counts`).then(
+    followUpCountsAt(base).then(
       (r) => live && setCounts(r.counts),
       () => {},
     );
@@ -41,7 +41,7 @@ export function FollowUpCounts({ base }: { base: string }) {
         <span className="text-muted-foreground"> · {line}</span>
       </p>
       <Link href={crmHref("follow-ups")} className="text-sm font-medium underline-offset-4 hover:underline">
-        Open
+        Open follow-ups
       </Link>
     </section>
   );

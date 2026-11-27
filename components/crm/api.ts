@@ -52,6 +52,8 @@ export type CustomerFields = {
 export type ManualIdentity = { kind: "EMAIL" | "PHONE"; value: string };
 
 const crm = (w: string, b: string) => `${brand(w, b)}/crm`;
+/** The viewer's follow-up counts (inbox.read), from a brand's API base (`/api/v1/workspaces/{w}/brands/{b}`): the Overview has the base. */
+export const followUpCountsAt = (brandBase: string) => request<{ counts: FollowUpCounts }>(`${brandBase}/crm/follow-ups/counts`);
 const conversation = (w: string, b: string, id: string) => `${crm(w, b)}/conversations/${encodeURIComponent(id)}`;
 
 export type ConversationSummary = { summary: string; nextStep: string | null; /** "YYYY-MM-DD" */ nextActionDue: string | null; cached: boolean };
@@ -127,7 +129,7 @@ export const crmApi = {
   /** The follow-up queue (inbox.read), 100 a page. */
   followUps: (w: string, b: string, filter: FollowUpFilter, cursor?: string | null) =>
     request<{ conversations: ConversationRow[]; nextCursor: string | null }>(`${crm(w, b)}/follow-ups?${new URLSearchParams({ filter, ...(cursor ? { cursor } : {}) }).toString()}`),
-  followUpCounts: (w: string, b: string) => request<{ counts: FollowUpCounts }>(`${crm(w, b)}/follow-ups/counts`),
+  followUpCounts: (w: string, b: string) => followUpCountsAt(brand(w, b)),
   conversation: (w: string, b: string, id: string) => request<{ conversation: ConversationDto }>(conversation(w, b, id)),
   /** Logs a message that happened elsewhere: nothing is sent. 400 `crm.messageDate` for a future or too old `sentAt`. */
   logMessage: (w: string, b: string, id: string, body: LoggedMessage) => request<{ conversation: ConversationDto }>(`${conversation(w, b, id)}/messages`, json("POST", body)),

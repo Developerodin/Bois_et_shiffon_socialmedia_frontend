@@ -84,7 +84,13 @@ export function CrmTabs({ w, b, perms, workspacePerms }: { w: string; b: string;
           );
         })}
       </div>
-      <div role="tabpanel" id={`crm-panel-${active}`} aria-labelledby={`crm-tab-${active}`} className="flex flex-col gap-5">
+      <div
+        role="tabpanel"
+        id={`crm-panel-${active}`}
+        aria-labelledby={`crm-tab-${active}`}
+        tabIndex={0}
+        className="flex flex-col gap-5 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+      >
         <CrmPanel tab={active} w={w} b={b} access={access} />
       </div>
     </>
