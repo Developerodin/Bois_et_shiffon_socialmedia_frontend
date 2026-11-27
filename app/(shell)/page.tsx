@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { Workspace } from "@/components/workspace/workspace";
 import { getShell } from "@/lib/server-fetch";
-import { featureOn } from "@/lib/features";
-import { navFor } from "@/lib/nav";
+import { featureOn, featuresOn } from "@/lib/features";
+import { agentEntries, navFor } from "@/lib/nav";
 import { calendarRedirect, competitorsRedirect } from "@/lib/workspace-view";
 
 export const metadata = { title: navFor("/").title };
@@ -42,6 +42,7 @@ export default async function WorkspacePage({ searchParams }: { searchParams: Pr
       adsOn={featureOn("ads", shell.activeWorkspaceId)}
       salesOn={featureOn("sales", shell.activeWorkspaceId)}
       crmOn={featureOn("crm", shell.activeWorkspaceId)}
+      soonAgents={agentEntries(featuresOn(shell.activeWorkspaceId), shell.brandPermissions, shell.workspacePermissions).filter((e) => e.soon).map((e) => e.id)}
       user={shell.user}
       perms={shell.brandPermissions}
     />

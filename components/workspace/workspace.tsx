@@ -97,7 +97,7 @@ const TASK_ICON: Record<string, LucideIcon> = {
   approve: ShieldCheck,
   connect: Plug,
 };
-/** The agents the sidebar marks "Soon": one list, so the Overview counts match it. */
+/** Every agent slot that can be "Soon"; the Overview shows the ones the sidebar marks Soon for this person (`soonAgents`). */
 const PLANNED: { key: string; name: string; persona: string; icon: LucideIcon }[] = NAV.filter((e) => e.group === "agent" && e.soon).map((e) => ({
   key: e.id,
   name: e.role ?? e.label, // the role is the name in the Overview; the sidebar's persona is only a subtitle
@@ -133,6 +133,8 @@ type Props = {
   adsOn?: boolean;
   salesOn?: boolean;
   crmOn?: boolean;
+  /** The agent slots the sidebar marks "Soon" for this person (agentEntries): the Overview lists the same ones as coming. */
+  soonAgents: readonly string[];
   user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
   /** The person's permissions on this brand, from the shell (read with the page, so no fetch here can fail on its own). */
   perms: string[];
@@ -141,7 +143,8 @@ type Props = {
 const viewFromUrl = () => viewFromSearch(window.location.search);
 const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
-export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, adsOn = false, salesOn = false, crmOn = false, user, perms }: Props) {
+export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, adsOn = false, salesOn = false, crmOn = false, soonAgents, user, perms }: Props) {
+  const planned = PLANNED.filter((p) => soonAgents.includes(p.key));
   const router = useRouter();
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
@@ -416,6 +419,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
             performance={<PerformanceSummary base={base} ads={adsOn && perms.includes("ads.read")} sales={salesOn && perms.includes("crm.read")} />}
             showAgents={canAgents}
             digestOn={digestOn}
+            planned={planned}
           />
       ),
     },
@@ -429,7 +433,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
       id: "feed",
       title: "Agents feed",
       icon: <ListChecks />,
-      render: () => !canAgents ? <NotForRole what="the agents" /> : <AgentsFeed agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} canRun={canRun} onRan={refreshAgents} onOpen={open} />,
+      render: () => !canAgents ? <NotForRole what="the agents" /> : <AgentsFeed planned={planned} agents={agents} agentsFailed={failed.agents} onRetry={retry} reports={reports} docs={docs} workspaceId={workspaceId} brandId={brandId} canRun={canRun} onRan={refreshAgents} onOpen={open} />,
     },
     {
       id: "ideas",
@@ -880,7 +884,9 @@ function Home({
   performance,
   showAgents,
   digestOn,
+  planned,
 }: {
+  planned: typeof PLANNED;
   workspaceId: string;
   base: string;
   /** The agents section, for roles that can read agents. */
@@ -1116,7 +1122,7 @@ function Home({
             Agents
           </h2>
           <span className="text-xs text-muted-foreground">
-            {built.length} active · {PLANNED.length} coming
+            {built.length} active · {planned.length} coming
           </span>
         </div>
         <LoadGate ready={!!agents} failed={agentsFailed} what="your agents" onRetry={onRetry} rows={1} className="mt-4">
@@ -1149,19 +1155,21 @@ function Home({
         </ul>
         )}
         </LoadGate>
-        <details className="group mt-6">
-          <summary className="flex cursor-pointer list-none items-center gap-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">
-            <ChevronRight className="size-3.5 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true" />
-            Coming soon · {PLANNED.length} agents
-          </summary>
-          <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-x-3 gap-y-5">
-            {PLANNED.map((p) => (
-              <li key={p.key}>
-                <AgentFolder icon={p.icon} tint="text-muted-foreground" name={p.name} status={p.persona} state="locked" />
-              </li>
-            ))}
-          </ul>
-        </details>
+        {planned.length ? (
+          <details className="group mt-6">
+            <summary className="flex cursor-pointer list-none items-center gap-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">
+              <ChevronRight className="size-3.5 transition-transform group-open:rotate-90 motion-reduce:transition-none" aria-hidden="true" />
+              Coming soon · {planned.length} {planned.length === 1 ? "agent" : "agents"}
+            </summary>
+            <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-x-3 gap-y-5">
+              {planned.map((p) => (
+                <li key={p.key}>
+                  <AgentFolder icon={p.icon} tint="text-muted-foreground" name={p.name} status={p.persona} state="locked" />
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
       </section>
       )}
     </div>
@@ -1585,7 +1593,9 @@ function AgentsFeed({
   canRun,
   onRan,
   onOpen,
+  planned,
 }: {
+  planned: typeof PLANNED;
   canRun: boolean;
   agents: AgentSummary[] | null;
   agentsFailed: boolean;
@@ -1645,7 +1655,7 @@ function AgentsFeed({
           </li>
         );
       })}
-      {PLANNED.map((p) => (
+      {planned.map((p) => (
         <li key={p.key} className="flex items-center gap-3 px-4 py-3.5">
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-muted">
             <p.icon className="size-4 text-muted-foreground" aria-hidden="true" />
