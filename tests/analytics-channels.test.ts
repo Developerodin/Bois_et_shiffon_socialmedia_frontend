@@ -123,7 +123,7 @@ describe("pendingTail and seriesOf", () => {
 
 describe("top posts", () => {
   const post = (id: string, m: Partial<Record<"reach" | "views" | "saves" | "likes", number | null>>): ChannelPostDto => ({
-    id, mediaType: null, productType: null, postedAt: null, caption: null, permalink: null,
+    id, mediaType: null, productType: null, postedAt: null, caption: null, permalink: null, thumbnailUrl: null,
     metrics: { views: null, reach: null, likes: null, comments: null, shares: null, saves: null, interactions: null, navigation: null, ...m },
   });
   const posts = [post("a", { reach: 5, saves: 1 }), post("b", { reach: null, saves: 9 }), post("c", { reach: 20, saves: null }), post("d", { reach: 5 })];

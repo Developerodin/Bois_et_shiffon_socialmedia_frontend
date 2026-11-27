@@ -27,7 +27,27 @@ describe("AnalyticsMetricCard", () => {
   });
 });
 
+const post = (id: string, reach: number, thumbnailUrl?: string | null) => ({
+  id, mediaType: "IMAGE", productType: "FEED", postedAt: "2026-11-25T05:11:44.000Z", caption: `Post ${id}`, permalink: null, ...(thumbnailUrl !== undefined && { thumbnailUrl }),
+  metrics: { views: reach * 2, reach, likes: 1, comments: 0, shares: null, saves: null, interactions: 3, navigation: null },
+}) as ChannelAnalyticsDto["posts"] extends (infer P)[] | null ? P : never;
+
 describe("ReadPanel", () => {
+  it("Instagram top posts: pictures when the server sends them, ranked by reach, sortable by the numbers given", () => {
+    const html = panel("instagram", read({ channel: "instagram", account: { name: "@shop", followers: 10, posts: 3 }, totals: { reach: 5 }, posts: [post("a", 5, "https://cdn.example/a.jpg"), post("b", 9, null)] }));
+    expect(html).toContain('src="https://cdn.example/a.jpg"');
+    expect(html.indexOf("Post b")).toBeLessThan(html.indexOf("Post a"));
+    expect(html).toContain("by reached");
+    expect(html).toContain("Sort by");
+    // Saves were given for no post, so they are neither a column nor a sort.
+    expect(html).not.toContain(">Saves<");
+  });
+
+  it("an older server without pictures shows none", () => {
+    const html = panel("instagram", read({ channel: "instagram", account: { name: "@shop", followers: 10, posts: 3 }, totals: { reach: 5 }, posts: [post("a", 5)] }));
+    expect(html).not.toContain("<img");
+  });
+
   it("Facebook: the permission notice says only per-post numbers are missing", () => {
     const html = panel("facebook", read());
     expect(html).toContain("Numbers for each Page post are missing");
