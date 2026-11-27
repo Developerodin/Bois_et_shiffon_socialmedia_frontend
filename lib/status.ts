@@ -7,7 +7,7 @@ export const STATUS_TONE: Readonly<Record<string, Tone>> = Object.fromEntries([
   ...group("info", "AWAITING_APPROVAL SCHEDULED PUBLISHING RUNNING"),
   ...group("good", "APPROVED PUBLISHED SUCCEEDED SUCCESS ACTIVE ACCEPTED RECOMMEND CONFIRMED DONE"),
   ...group("warn", "CHECK HOLD PENDING_VERIFY PARTIAL QUEUED INVITED PENDING WARN ESCALATED FELL_BACK"),
-  ...group("bad", "BLOCKED REJECTED FAILED EXPIRED ERROR"),
+  ...group("bad", "BLOCKED REJECTED FAILED EXPIRED ERROR DECLINED"),
 ]);
 
 export function toneOf(status: string | null | undefined): Tone {
