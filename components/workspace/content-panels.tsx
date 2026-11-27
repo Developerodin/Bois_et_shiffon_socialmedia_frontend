@@ -33,6 +33,7 @@ import { type CardForm, newPostTime, gridRange, groupByDay, monthGrid, POST_NOUN
 import { CalendarCard, DayRow, MonthGrid } from "@/components/calendar/month-grid";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 import { CHANNEL_LABEL, channelIcon, channelLabel, STATUS_LABEL } from "@/lib/post-labels";
+import { postCardDetails, postCardLine } from "@/lib/post-card";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -76,6 +77,8 @@ export type ContentItem = {
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string };
+    /** The draft's pictures, signed for an hour; the first is the cover (a studio reel's first scene). */
+    photoUrls?: string[];
     byPerson: boolean;
     check: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
     review: { verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null } | null;
@@ -582,19 +585,23 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
             <ul className="divide-y divide-border">
               {list.map((i) => {
                 const time = i.scheduledFor ? shortTime(i.scheduledFor) : null;
+                const d = postCardDetails(i);
                 return (
                   <li key={i.id}>
                     <button type="button" onClick={() => onOpen(i.id)} className="flex min-h-11 w-full items-center gap-3 px-4 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
-                      {i.channel === "INSTAGRAM_STORY" && (
+                      {i.channel === "INSTAGRAM_STORY" ? (
                         // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
-                        i.firstFrameUrl ? <img src={i.firstFrameUrl} alt="" className="aspect-[9/16] w-6 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-6 shrink-0 rounded bg-muted" />
+                        d.thumb ? <img src={d.thumb} alt="" className="aspect-[9/16] w-6 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-6 shrink-0 rounded bg-muted" />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
+                        d.thumb && <img src={d.thumb} alt="" className="size-8 shrink-0 rounded bg-muted object-cover" />
                       )}
                       {/* One line on a wide panel (time and channel, title, owner, status); three on a narrow one (time,
                           channel and status; the title, wrapping; the owner). Grid placement keeps one reading order. */}
                       <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 @min-[640px]/cal:grid-cols-[9rem_minmax(0,1fr)_auto_auto]">
                         <span className="col-start-1 row-start-1 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
                           {time && <span className="shrink-0 tabular-nums">{time}</span>}
-                          <span className="truncate">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
+                          <span className="truncate">{[CHANNEL_LABEL[i.channel] ?? i.channel, postCardLine({ ...d, format: null })].filter(Boolean).join(" · ")}</span>
                         </span>
                         <span title={i.title} className="col-span-2 row-start-2 text-sm @min-[640px]/cal:col-span-1 @min-[640px]/cal:col-start-2 @min-[640px]/cal:row-start-1 @min-[640px]/cal:truncate">
                           {i.title}
@@ -704,17 +711,22 @@ function PostCard({ item, onOpen, form = "compact", selected = false }: { item: 
   const channel = CHANNEL_LABEL[item.channel] ?? item.channel;
   const Icon = channelIcon(item.channel);
   const status = statusText(item); // once per card: the tooltip and the accessible name both use it
+  const d = postCardDetails(item);
+  // The channel's label already names an Instagram format; the line adds a carousel's pictures or where a pin leads.
+  const extra = postCardLine({ ...d, format: null });
   return (
     <CalendarCard
       form={form}
       tone={toneOf(item.publishIssue ?? item.status)}
       selected={selected}
-      about={`${time ? `${time} · ` : ""}${item.title} · ${channel} · ${status}`}
+      about={`${time ? `${time} · ` : ""}${item.title} · ${channel}${extra ? ` · ${extra}` : ""} · ${status}`}
       onClick={() => onOpen(item.id)}
+      media={d.thumb}
       top={
         <span aria-hidden className="flex min-w-0 items-center gap-1 text-xs leading-3 text-muted-foreground">
           <Icon className="size-3 shrink-0" />
-          {time && <span className="truncate tabular-nums">{time}</span>}
+          {time && <span className="shrink-0 tabular-nums">{time}</span>}
+          {d.format && <span className="truncate">&middot; {d.format}</span>}
         </span>
       }
       lead={<Icon aria-hidden className="size-3 shrink-0 text-muted-foreground" />}
@@ -737,7 +749,7 @@ function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string
             meta={
               <>
                 {time && <span className="tabular-nums">{time} &middot; </span>}
-                {CHANNEL_LABEL[i.channel] ?? i.channel}
+                {[CHANNEL_LABEL[i.channel] ?? i.channel, postCardLine({ ...postCardDetails(i), format: null })].filter(Boolean).join(" · ")}
               </>
             }
             status={<StatusBadge quiet status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>}
