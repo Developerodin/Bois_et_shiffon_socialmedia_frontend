@@ -12,9 +12,10 @@ import { PageSection } from "@/components/ui/page-section";
 import { cn } from "@/lib/utils";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
 import { urlHistoryHref } from "@/lib/seo-links";
+import { tasksApi } from "@/lib/tasks-api";
 import {
   DATA_SOURCE_SLUGS, type ChooseSearchSiteBody, type DataSourceDto, type SearchMetrics, type SearchPageRow, type SearchPagesDto, type SearchQueriesDto, type SearchQueryRow,
-  type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto,
+  type SearchSiteDto, type SearchSitesDto, type SearchSummaryDto, type SeoAlertView, type SeoDeclinesDto,
 } from "@/shared";
 
 const num = (n: number) => n.toLocaleString();
@@ -27,7 +28,7 @@ const dayLabel = (d: string) => DAY.format(new Date(`${d}T00:00:00Z`));
  * Search Console for the brand's site: totals against the previous equal-length period, every day, and the top pages.
  * `source` undefined = no site picked yet. `canManage` (integrations.manage) gets the site picker.
  */
-export function SearchTab({ workspaceId, brandId, range, source, canManage, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; onSourceChanged: () => void }) {
+export function SearchTab({ workspaceId, brandId, range, source, canManage, canMakeTasks, onSourceChanged }: { workspaceId: string; brandId: string; range: DateRange; source: DataSourceDto | undefined; canManage: boolean; canMakeTasks: boolean; onSourceChanged: () => void }) {
   const base = brandApi(workspaceId, brandId);
   const [picking, setPicking] = useState(false);
 
@@ -48,7 +49,96 @@ export function SearchTab({ workspaceId, brandId, range, source, canManage, onSo
       </PageSection>
     );
   }
-  return <SearchNumbers base={base} range={range} source={source} onSourceChanged={onSourceChanged} onChangeSite={canManage ? () => setPicking(true) : undefined} />;
+  return (
+    <>
+      <SearchNumbers base={base} range={range} source={source} onSourceChanged={onSourceChanged} onChangeSite={canManage ? () => setPicking(true) : undefined} />
+      <Declines base={base} source={source} canMakeTasks={canMakeTasks} />
+    </>
+  );
+}
+
+const plusDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
+
+/**
+ * Pages losing search traffic: the open decline alerts the server found after each daily sync (Google's days, the 28
+ * days ending 3 days before the last synced day vs the 28 before). Each page links to its URL history page (the
+ * server built the URL); "Make a task" files a task for it, re-checked in 28 days.
+ */
+function Declines({ base, source, canMakeTasks }: { base: string; source: DataSourceDto; canMakeTasks: boolean }) {
+  const fetcher = useCallback(() => request<SeoDeclinesDto>(`${base}/search/declines`), [base]);
+  const { state, reload } = useLoad(fetcher);
+  useReloadOnFocus(reload, state);
+  useReloadWhenSynced([source], reload);
+
+  let body: React.ReactNode;
+  if (state.kind === "loading") body = <ListSkeleton label="Loading pages losing traffic" rows={2} />;
+  else if (state.kind === "forbidden") return null;
+  else if (state.kind === "error") body = <LoadError message={state.message} onRetry={reload} />;
+  else if (!state.data.alerts.length) body = <p className="text-sm text-muted-foreground">No page is losing search traffic right now.</p>;
+  else {
+    body = (
+      <ul className="flex flex-col divide-y divide-border text-sm">
+        {state.data.alerts.map((a) => (
+          <li key={a.id} className="flex flex-col gap-2 py-2 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              {a.url ? (
+                <Link href={urlHistoryHref(a.url)} className="break-all font-medium underline-offset-2 hover:underline">{a.path}</Link>
+              ) : (
+                <span className="font-medium">The whole site</span>
+              )}
+              <span>{a.text}</span>
+              <span className="text-xs text-muted-foreground">Since {dayLabel(a.firstDay)}</span>
+            </div>
+            {canMakeTasks ? <DeclineTask base={base} alert={a} /> : null}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  return (
+    <PageSection id="search-declines" title="Pages losing search traffic" description="Clicks down 40% or more, or 3 places lower in Google, over 28 days against the 28 before.">
+      {body}
+    </PageSection>
+  );
+}
+
+/** "Make a task" for one declining page: SEO, the page's URL, re-checked in 28 days. */
+function DeclineTask({ base, alert }: { base: string; alert: SeoAlertView }) {
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  // One id per row: a retry after a lost answer returns the task the first press made.
+  const [requestId] = useState(() => crypto.randomUUID());
+  const make = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const task = await tasksApi.create(base, {
+        title: (alert.path ? `Win back search traffic: ${alert.path}` : "Win back search traffic across the site").slice(0, 200),
+        description: alert.text,
+        areas: ["SEO"],
+        priority: "NORMAL",
+        ...(alert.url ? { url: alert.url } : {}),
+        recheckOn: plusDays(28),
+        requestId,
+      });
+      setTaskId(task.id);
+    } catch (e) {
+      setError(errorMessage(e, "Couldn't make the task. Try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
+      {taskId ? (
+        <Button asChild size="sm" variant="outline"><Link href={`/tasks?task=${encodeURIComponent(taskId)}`}>Open task</Link></Button>
+      ) : (
+        <Button size="sm" variant="outline" disabled={busy} onClick={() => void make()}>{busy ? "Making…" : "Make a task"}</Button>
+      )}
+      {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
+    </div>
+  );
 }
 
 function SearchNumbers({ base, range, source, onSourceChanged, onChangeSite }: { base: string; range: DateRange; source: DataSourceDto; onSourceChanged: () => void; onChangeSite?: () => void }) {

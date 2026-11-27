@@ -40,15 +40,25 @@ function SectionBody({ s }: { s: DigestSection }) {
         </>
       );
     case "seo":
-      return s.data ? (
+      return (
         <>
-          <Figures items={[["Clicks", n(s.data.totals.clicks)], ["Impressions", n(s.data.totals.impressions)], ["CTR", pct(s.data.totals.ctr)]]} />
-          <p className="mt-1 text-xs text-muted-foreground">
-            Google&apos;s days {s.data.range.from} to {s.data.range.to} (Search Console runs 2–3 days behind)
-          </p>
+          {s.data ? (
+            <>
+              <Figures items={[["Clicks", n(s.data.totals.clicks)], ["Impressions", n(s.data.totals.impressions)], ["CTR", pct(s.data.totals.ctr)]]} />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Google&apos;s days {s.data.range.from} to {s.data.range.to} (Search Console runs 2–3 days behind)
+              </p>
+            </>
+          ) : (
+            NO_DATA
+          )}
+          {/* Paths cleaned on the server; shown as text. Absent on digests built before declines. */}
+          {s.declines?.count ? (
+            <p className="mt-2 text-sm">
+              {n(s.declines.count)} {s.declines.count === 1 ? "page" : "pages"} losing search traffic{s.declines.pages.length ? `: ${s.declines.pages.join(", ")}` : ""}
+            </p>
+          ) : null}
         </>
-      ) : (
-        NO_DATA
       );
     case "posts":
       return s.top.length ? (

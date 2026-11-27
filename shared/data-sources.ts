@@ -285,6 +285,32 @@ export type AdsSummaryDto = { totals: AdsTotals[]; previous: AdsTotals[]; previo
 export const AD_ALERT_KINDS = ["SPEND_UP", "ROAS_DOWN", "NO_PURCHASES", "OVER_PACE"] as const;
 export type AdAlertKind = (typeof AD_ALERT_KINDS)[number];
 
+/**
+ * Pages losing Google search traffic (prisma SeoAlertKind, server/seo/declines.ts): a page's clicks down, its average
+ * position down, or the whole site's clicks down (then no page alerts: a tracking break, a Google change or a season).
+ */
+export const SEO_ALERT_KINDS = ["CLICKS_DOWN", "POSITION_DOWN", "SITE_DOWN"] as const;
+export type SeoAlertKind = (typeof SEO_ALERT_KINDS)[number];
+/**
+ * One decline episode. `url`: rebuilt by the server (https, host, path), safe as a link and for the URL history page;
+ * null for SITE_DOWN. `path`: the page's path, cleaned. `text`: one line, cleaned. `values`: the figures as strings
+ * (`now`, `before`, `from`, `to`, `previousFrom`, `previousTo`; `nowAtMost` "true" when hidden days were counted at
+ * the day's 500th row).
+ */
+export type SeoAlertView = {
+  id: string;
+  kind: SeoAlertKind;
+  url: string | null;
+  path: string | null;
+  firstDay: string;
+  lastDay: string;
+  open: boolean;
+  text: string;
+  values: Record<string, string>;
+};
+/** GET search/declines: the open decline alerts, newest first, at most 50. analytics.read. */
+export type SeoDeclinesDto = { alerts: SeoAlertView[] };
+
 /** Platforms a monthly budget can be set for (prisma AdPlatform). Google spend arrives in Phase 3. */
 export const AD_BUDGET_PLATFORMS = ["META", "GOOGLE"] as const;
 export type AdBudgetPlatform = (typeof AD_BUDGET_PLATFORMS)[number];

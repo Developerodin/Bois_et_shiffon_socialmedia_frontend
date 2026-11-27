@@ -53,6 +53,23 @@ export function UrlHistory({ workspaceId, brandId, url, canOpenTasks }: { worksp
       <PageSection id="url-search" title="Search" description="Google's days (Pacific time), all spellings of this address together.">
         {d.search ? <Search search={d.search} /> : <p className="text-sm text-muted-foreground">Search Console isn&apos;t connected.</p>}
       </PageSection>
+      <PageSection id="url-alerts" title="Search traffic alerts" description="Times this page lost clicks or position in Google in the last year.">
+        {/* A server from before alerts sends none: a missing list reads as empty. */}
+        {d.alerts?.length ? (
+          <ul className="flex flex-col divide-y divide-border text-sm">
+            {d.alerts.map((a) => (
+              <li key={a.id} className="flex flex-col gap-0.5 py-2">
+                <span>{a.text}</span>
+                <span className="text-xs text-muted-foreground">
+                  {dayLabel(a.firstDay)}{a.lastDay !== a.firstDay ? ` to ${dayLabel(a.lastDay)}` : ""}{a.open ? " · still losing" : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">No drop in search traffic found for this page.</p>
+        )}
+      </PageSection>
       <PageSection id="url-findings" title="Findings" description="Audit findings that listed this page in the last year.">
         {d.findings.length ? (
           <ul className="flex flex-col divide-y divide-border text-sm">

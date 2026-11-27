@@ -1,5 +1,5 @@
 import type { BlogArticleStatus } from "./blog";
-import type { DateRange, SearchMetrics, SearchQueryRow } from "./data-sources";
+import type { DateRange, SearchMetrics, SearchQueryRow, SeoAlertView } from "./data-sources";
 import type { TASK_STATUSES, WEBSITE_CHANGE_KINDS } from "./tasks";
 
 // One way to tell when two URLs name the same page, for SEO matching (Search Console rows, audit findings, tasks).
@@ -85,4 +85,6 @@ export type UrlHistoryDto = {
     findingClearedAt: string | null;
   }[] | null;
   articles: { id: string; title: string; status: BlogArticleStatus; publishedAt: string | null }[];
+  /** The page's decline alerts of the last year (losing clicks or position), newest first. */
+  alerts: SeoAlertView[];
 };
