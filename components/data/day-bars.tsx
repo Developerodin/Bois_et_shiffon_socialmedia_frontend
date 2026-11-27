@@ -73,13 +73,14 @@ function Plot({ days, what, W, label, className }: { days: DayValue[]; what: str
 }
 
 /** `what`: the unit in words for tooltips and the label ("reach", "media views"). Nothing drawn without a number. */
-export function DayBars({ days, what, title }: { days: DayValue[]; what: string; title: string }) {
+/** `caption={false}`: the caller titles the chart itself; `title` still names it for screen readers. */
+export function DayBars({ days, what, title, caption = true }: { days: DayValue[]; what: string; title: string; caption?: boolean }) {
   if (!days.length || !days.some((d) => d.value !== null)) return <p className="text-xs text-muted-foreground">No daily numbers for these days.</p>;
   // No total: daily unique counts (reach) can't be added up. The figures above give the period's totals.
   const label = `${title}: daily ${what}, ${dayLabel(days[0].day)} to ${dayLabel(days[days.length - 1].day)}.`;
   return (
     <figure className="@container">
-      <figcaption className="mb-1 text-xs text-muted-foreground">{title}</figcaption>
+      {caption && <figcaption className="mb-1 text-xs text-muted-foreground">{title}</figcaption>}
       <Plot days={days} what={what} W={720} label={label} className="hidden h-auto w-full @xl:block" />
       <Plot days={days} what={what} W={360} label={label} className="h-auto w-full @xl:hidden" />
     </figure>

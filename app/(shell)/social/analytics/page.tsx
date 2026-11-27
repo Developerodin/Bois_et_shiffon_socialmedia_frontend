@@ -2,11 +2,12 @@ import { Lock, Share2 } from "lucide-react";
 import { AnalyticsView } from "@/components/social/analytics-view";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
+import { CONNECTIONS_READ } from "@/shared";
 
 export const metadata = { title: "Analytics" };
 
-/** The Facebook Page and Instagram numbers, one tab each (?account=instagram|facebook); for roles that read analytics. */
-export default async function SocialAnalyticsPage({ searchParams }: { searchParams: Promise<{ account?: string }> }) {
+/** Each channel's numbers, one at a time from a rail (?account=, ?days=); for roles that read analytics. */
+export default async function SocialAnalyticsPage({ searchParams }: { searchParams: Promise<{ account?: string; days?: string }> }) {
   const shell = await getShell();
   if (!shell.activeWorkspaceId || !shell.activeBrandId) {
     return (
@@ -22,13 +23,13 @@ export default async function SocialAnalyticsPage({ searchParams }: { searchPara
       </div>
     );
   }
-  const { account } = await searchParams;
+  const { account, days } = await searchParams;
   const base = `/api/v1/workspaces/${encodeURIComponent(shell.activeWorkspaceId)}/brands/${encodeURIComponent(shell.activeBrandId)}`;
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <h1 className="sr-only">Analytics</h1>
       {/* key: a brand switch starts the page over. */}
-      <AnalyticsView key={shell.activeBrandId} base={base} account={account === "facebook" ? "facebook" : "instagram"} />
+      <AnalyticsView key={shell.activeBrandId} base={base} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} canSeeConnections={CONNECTIONS_READ.some((k) => shell.brandPermissions.includes(k))} account={account ?? "instagram"} days={Number(days) || 28} />
     </div>
   );
 }
