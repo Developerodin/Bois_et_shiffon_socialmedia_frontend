@@ -124,8 +124,14 @@ export type TaskCommentDto = { id: string; kind: string; body: string; author: T
 export type TaskAttachmentDto = { id: string; mediaUploadId: string; role: string; createdById: string; createdAt: string; url: string };
 
 /**
- * GET tasks/:id (and the task an action or edit returns): the list row plus its checklist lines and photos.
+ * GET tasks/:id (and the task an action or edit returns): the list row plus its checklist lines, photos and files.
  * `clientVisible`: some client reviewer can see the task (its reviewer is a client, or its project is shared);
  * `viewerIsClient`: the person reading is a client reviewer.
  */
-export type TaskDetailDto = TaskDto & { checklistItems: TaskChecklistItemDto[]; attachments: TaskAttachmentDto[]; clientVisible: boolean; viewerIsClient: boolean };
+export type TaskDetailDto = TaskDto & { checklistItems: TaskChecklistItemDto[]; attachments: TaskAttachmentDto[]; files: TaskFileDto[]; clientVisible: boolean; viewerIsClient: boolean };
+
+/**
+ * A document on a task. `fileName` is as the person named it: show it as text only. `url` is a signed link, valid for an
+ * hour, that always downloads (never opens in the browser) under a plain ASCII name.
+ */
+export type TaskFileDto = { id: string; fileName: string; contentType: string; bytes: number; createdById: string; createdAt: string; url: string };

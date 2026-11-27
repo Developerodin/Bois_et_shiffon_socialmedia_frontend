@@ -12,6 +12,34 @@ export const TASK_VIEWS = ["mine", "approvals", "due-today", "overdue", "blocked
 export type TaskView = (typeof TASK_VIEWS)[number];
 export const DONE_DAYS = 30;
 
+/**
+ * The files a task takes (server/tasks/file-check.ts checks each by its bytes): the announced type, the extension it is
+ * stored and downloaded under, and its name on screen. CSV and plain text can't be told apart by bytes, so either is
+ * accepted for UTF-8 text. Not legacy Office (macros), HTML, SVG or archives.
+ */
+export const TASK_FILE_TYPES = {
+  "application/pdf": { ext: "pdf", label: "PDF" },
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": { ext: "docx", label: "Word" },
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": { ext: "xlsx", label: "Excel" },
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": { ext: "pptx", label: "PowerPoint" },
+  "text/csv": { ext: "csv", label: "CSV" },
+  "text/plain": { ext: "txt", label: "Text" },
+  "image/jpeg": { ext: "jpg", label: "JPG" },
+  "image/png": { ext: "png", label: "PNG" },
+} as const;
+export type TaskFileType = keyof typeof TASK_FILE_TYPES;
+export const TASK_FILE_MAX_BYTES = 25 * 1024 * 1024;
+/** Files on one task, unfinished uploads included. */
+export const TASK_FILES_MAX = 20;
+
+/** The announced type for a file name's extension (the browser's own guess is unreliable for CSV and Office), or null. */
+export function taskFileType(fileName: string): TaskFileType | null {
+  const ext = fileName.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1];
+  if (!ext) return null;
+  if (ext === "jpeg") return "image/jpeg";
+  return (Object.keys(TASK_FILE_TYPES) as TaskFileType[]).find((t) => TASK_FILE_TYPES[t].ext === ext) ?? null;
+}
+
 /** Top-bar search: shorter (trimmed) answers empty, since trigrams need 3; longer is a 400. */
 export const SEARCH_MIN = 3;
 export const SEARCH_MAX = 100;

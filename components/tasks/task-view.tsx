@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { peekCrumb, peekKey, peekTitle, type View } from "@/lib/workspace-view";
 import { PersonSelect, TaskActions } from "@/components/tasks/task-actions";
 import { ProjectSelect } from "@/components/tasks/new-task-dialog";
-import { TaskAttachments } from "@/components/tasks/task-attachments";
+import { TaskAttachments, TaskFiles } from "@/components/tasks/task-attachments";
 import { TaskChecklist } from "@/components/tasks/task-checklist";
 import { TaskComments } from "@/components/tasks/task-comments";
 import { FindingTag } from "@/components/tasks/task-list";
@@ -190,6 +190,7 @@ export function TaskView({ base, id, perms, userId, onLoaded, blog }: { base: st
       {website ? <WebsiteChecks base={base} task={task} people={people} canEditPhotos={canEditPhotos} onChanged={show} /> : null}
       <TaskChecklist base={base} task={task} canEdit={mine} />
       <TaskAttachments base={base} task={task} roles={website ? ["OTHER"] : ["BEFORE", "AFTER", "OTHER"]} canEdit={canEditPhotos} />
+      <TaskFiles base={base} task={task} canEdit={mine && !task.viewerIsClient} />
       {/* Both flags come from the server: whether some client can see the task, and whether the reader is one. */}
       <TaskComments base={base} taskId={task.id} staff={!task.viewerIsClient} clientVisible={task.clientVisible} />
     </div>
