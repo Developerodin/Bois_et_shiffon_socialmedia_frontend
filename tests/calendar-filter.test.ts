@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { activeFilterCount, calendarHref, channelOptions, channelsOf, filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, ownerLabel, withFilter, type CalendarItem } from "@/lib/calendar-filter";
+import { CHANNEL_LABEL } from "@/lib/post-labels";
+import { activeFilterCount, CHANNEL_GROUPS, calendarHref, channelOptions, channelsOf, filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, ownerLabel, withFilter, type CalendarItem } from "@/lib/calendar-filter";
 
 const now = new Date("2026-11-20T12:00:00Z");
 const past = "2026-11-19T12:00:00Z";
@@ -153,5 +154,13 @@ describe("calendarHref", () => {
     expect(calendarHref({ need: "week" })).toBe("/calendar?cf_need=week");
     expect(calendarHref({ channel: "meta", status: "awaiting" })).toBe("/calendar?cf_channel=meta&cf_status=awaiting");
     expect(calendarHref({ channel: "instagram" }, "p 1&x")).toBe("/calendar?cf_channel=instagram&post=p+1%26x");
+  });
+});
+
+describe("channel names", () => {
+  it("names every ContentChannel (server enum), so each can be filtered by URL, and the groups hold only those", () => {
+    const enumValues = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "INSTAGRAM_STORY", "FACEBOOK_POST", "PINTEREST_PIN", "THREADS_POST", "LINKEDIN_POST", "X_POST"];
+    expect(Object.keys(CHANNEL_LABEL).sort()).toEqual([...enumValues].sort());
+    for (const members of Object.values(CHANNEL_GROUPS)) for (const c of members) expect(enumValues).toContain(c);
   });
 });

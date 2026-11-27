@@ -1,6 +1,9 @@
 import { AtSign, BriefcaseBusiness, Camera, CircleDashed, Clapperboard, FileText, GalleryHorizontal, Hash, Image as ImageIcon, Pin, Share2, ThumbsUp, type LucideIcon } from "lucide-react";
 
-/** A post's channel and status in words. Kept out of content-panels so the task pages don't load the Overview's panels. */
+/**
+ * A post's channel and status in words, and each channel's icon. Kept out of content-panels so the task pages and the
+ * Social & Content page don't load the Overview's panels.
+ */
 export const CHANNEL_LABEL: Record<string, string> = {
   INSTAGRAM_POST: "Instagram post",
   INSTAGRAM_CAROUSEL: "Instagram carousel",

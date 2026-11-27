@@ -92,7 +92,7 @@ function ChannelRow({ row, summary, conns }: { row: SocialRow; summary: ChannelS
   const { awaiting, next } = rowSummary(summary, row.filter);
   const lines = conns && typeof conns === "object" ? connectionLines(row.providers, conns.list, conns.names) : row.providers.length ? null : "byHand";
   return (
-    <li className={`relative ${ROW} transition-colors focus-within:ring-2 focus-within:ring-ring hover:bg-muted`}>
+    <li className={`relative ${ROW} transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted`}>
       <RowName icon={channelIcon(row.filter)} label={row.label} blurb={row.blurb} href={calendarHref({ channel: row.filter })} />
       <div className="flex min-w-0 flex-wrap gap-1.5">
         {lines === "byHand" ? (
@@ -112,11 +112,11 @@ function ChannelRow({ row, summary, conns }: { row: SocialRow; summary: ChannelS
       <div className="min-w-0 text-sm">
         {next ? (
           // Above the row's link (relative z-10), so it opens this post rather than the channel.
-          <Link href={calendarHref({ channel: row.filter }, next.id)} className="relative z-10 flex min-w-0 items-center gap-2 rounded hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link href={calendarHref({ channel: row.filter }, next.id)} aria-label={`${row.label}, next: ${next.title}, ${dayTime(next.scheduledFor)}, ${STATUS_LABEL[next.status] ?? next.status}`} className="relative z-10 flex min-w-0 items-center gap-2 rounded hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <span className="shrink-0 text-muted-foreground">Next</span>
             <span className="truncate">{next.title}</span>
             <span className="shrink-0 text-xs text-muted-foreground">{dayTime(next.scheduledFor)}</span>
-            <StatusBadge quiet status={next.status} className="hidden lg:inline-flex">
+            <StatusBadge quiet status={next.status}>
               {STATUS_LABEL[next.status] ?? next.status}
             </StatusBadge>
           </Link>
@@ -126,7 +126,7 @@ function ChannelRow({ row, summary, conns }: { row: SocialRow; summary: ChannelS
       </div>
       <div className="flex items-center justify-between gap-2 md:justify-end">
         {awaiting ? (
-          <Link href={calendarHref({ channel: row.filter, status: "awaiting" })} className="relative z-10 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link href={calendarHref({ channel: row.filter, status: "awaiting" })} aria-label={`${row.label}: ${awaiting} awaiting approval`} className="relative z-10 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <StatusBadge tone="info">{awaiting} awaiting approval</StatusBadge>
           </Link>
         ) : (
@@ -141,13 +141,14 @@ function ChannelRow({ row, summary, conns }: { row: SocialRow; summary: ChannelS
 /** The blog isn't on the calendar: its articles have no publish date yet, so the row says so instead of showing 0. */
 function BlogRow() {
   return (
-    <li className={`relative ${ROW} transition-colors focus-within:ring-2 focus-within:ring-ring hover:bg-muted`}>
+    <li className={`relative ${ROW} transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted`}>
       <RowName icon={Newspaper} label="Blog" blurb="Articles for the store's blog" href="/blog" />
       <div />
       <div className="text-sm text-muted-foreground">Articles live on the Blog page</div>
       <div className="flex items-center justify-between gap-2 md:justify-end">
-        <span aria-label="Not counted" className="text-xs text-muted-foreground">
-          —
+        <span className="text-xs text-muted-foreground">
+          <span aria-hidden>—</span>
+          <span className="sr-only">Approvals not counted</span>
         </span>
         <ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground" />
       </div>

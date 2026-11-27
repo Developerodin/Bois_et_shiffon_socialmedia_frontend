@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { Check, ChevronLeft, ChevronRight, ExternalLink, FileText, LoaderCircle, Pencil, Plus, SlidersHorizontal, Sparkles, TriangleAlert, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, ExternalLink, LoaderCircle, Pencil, Plus, SlidersHorizontal, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { LoadFailed } from "@/components/ui/load-failed";
@@ -28,7 +28,7 @@ import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
 import { activeFilterCount, channelOptions, filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
 import { AGENDA_BELOW, CELL_FLOOR, dayCards, type CardForm, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
-import { CHANNEL_ICON, CHANNEL_LABEL, channelIcon, channelLabel, STATUS_LABEL } from "@/lib/post-labels";
+import { CHANNEL_LABEL, channelIcon, channelLabel, STATUS_LABEL } from "@/lib/post-labels";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -679,7 +679,7 @@ const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
 function PostCard({ item, onOpen, form = "compact", selected = false }: { item: ContentItem; onOpen: (id: string) => void; form?: CardForm; selected?: boolean }) {
   const time = item.scheduledFor ? shortTime(item.scheduledFor) : null;
   const channel = CHANNEL_LABEL[item.channel] ?? item.channel;
-  const Icon = CHANNEL_ICON[item.channel] ?? FileText;
+  const Icon = channelIcon(item.channel);
   const status = statusText(item); // once per card: the tooltip and the accessible name both use it
   const about = `${time ? `${time} · ` : ""}${item.title} · ${channel} · ${status}`;
   const stacked = form === "stacked" || form === "stacked2";
