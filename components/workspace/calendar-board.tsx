@@ -18,7 +18,7 @@ import { recentKey } from "@/lib/recent";
 import { namesItem, navigate, peekCrumb, peekKey, peekTitle, viewToSearch, type View, type WorkflowPeekView } from "@/lib/workspace-view";
 import { CONNECTIONS_READ } from "@/shared";
 
-/** The post inspector's width (px) on wide screens. */
+/** The peek's width (px) on wide screens, for a post and for the workflow card's agents alike, so the calendar keeps its inset. */
 const INSPECTOR_W = 440;
 /**
  * The narrowest the calendar may get beside the inspector (px). Narrower than this (a smaller desktop) the inspector
@@ -110,7 +110,7 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
       </Card>
       {/* One Peek for both kinds, so the inset above keeps observing the same element when a post replaces an agent. */}
       {peek.shown && (peekPost || peekWf) && (
-        <Peek placement="page" fixedWidth={peekPost ? INSPECTOR_W : undefined} open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={() => (peekPost ? open(null) : show({ kind: "home" }))} onExited={peek.onExited} asideRef={peek.ref}>
+        <Peek placement="page" fixedWidth={INSPECTOR_W} open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={() => (peekPost ? open(null) : show({ kind: "home" }))} onExited={peek.onExited} asideRef={peek.ref}>
           {peekPost ? (
             // While it slides out, the closed post's editors no longer count as unsaved: the person already agreed.
             <UnsavedGuardOff value={!peek.live}>
