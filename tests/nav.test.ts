@@ -161,8 +161,10 @@ describe("agent slots", () => {
     expect(slot("pulse", ["sales"], ["crm.manage"])).toMatchObject({ href: "/agents/pulse", soon: true });
   });
 
-  it("turns Spark into /crm with the crm flag and crm.manage", () => {
+  it("turns Spark into /crm with the crm flag and either crm.manage or inbox.read", () => {
     expect(slot("spark", ["crm"], ["crm.manage"])).toMatchObject({ href: "/crm", soon: false });
+    expect(slot("spark", ["crm"], ["inbox.read"])).toMatchObject({ href: "/crm", soon: false });
+    expect(slot("spark", ["crm"], ["brand.read"])).toMatchObject({ href: "/agents/spark", soon: true });
   });
 
   it("turns Hum into Settings' Members tab with members.read in the workspace, no flag needed", () => {

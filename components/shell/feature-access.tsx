@@ -8,7 +8,7 @@ import { navFor } from "@/lib/nav";
 export type Access = { gate: ReactElement } | { gate: null; workspaceId: string; brandId: string; perms: Set<string> };
 
 /**
- * A flagged feature page's shared checks (server): the flag, a business picked, and brand.read (and `perm`). Returns the page to
+ * A flagged feature page's shared checks (server): the flag, a business picked, and brand.read (and one of `perm`). Returns the page to
  * show instead when one fails, else the business and the role's permissions.
  */
 export async function featureAccess(p: {
@@ -19,8 +19,8 @@ export async function featureAccess(p: {
   icon: LucideIcon;
   noBusiness: string;
   noRead: string;
-  /** A permission the page needs besides brand.read; lacking it shows `noRead` too. */
-  perm?: string;
+  /** A permission the page needs besides brand.read (a list: any one of them); lacking it shows `noRead` too. */
+  perm?: string | readonly string[];
 }): Promise<Access> {
   const shell = await getShell();
   requireFeature(p.feature, shell.activeWorkspaceId);
@@ -36,7 +36,8 @@ export async function featureAccess(p: {
   }
 
   const perms = new Set(shell.brandPermissions);
-  if (!perms.has("brand.read") || (p.perm && !perms.has(p.perm))) {
+  const anyOf = p.perm === undefined ? [] : typeof p.perm === "string" ? [p.perm] : p.perm;
+  if (!perms.has("brand.read") || (anyOf.length > 0 && !anyOf.some((k) => perms.has(k)))) {
     return {
       gate: (
         <div className="mx-auto max-w-5xl">

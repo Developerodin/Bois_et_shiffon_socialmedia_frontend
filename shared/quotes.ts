@@ -3,9 +3,9 @@
  * order, and sent with Shopify's own invoice email when a person confirms. Lines are a snapshot: title, variant and
  * unit price are frozen when added. Totals are worked out on the server only; shipping and tax are added by Shopify.
  */
-export type QuoteStatus = "DRAFT" | "CREATED" | "SENT" | "ACCEPTED" | "EXPIRED" | "CANCELLED";
+export type QuoteStatus = "DRAFT" | "CREATED" | "SENT" | "ACCEPTED" | "EXPIRED" | "CANCELLED" | "DECLINED";
 
-export const QUOTE_LIMITS = { lines: 100, quantity: 9999, title: 255, name: 200, email: 254, note: 2000, subject: 200, message: 2000, validDays: 30 } as const;
+export const QUOTE_LIMITS = { lines: 100, quantity: 9999, title: 255, name: 200, email: 254, note: 2000, subject: 200, message: 2000, reason: 500, validDays: 30 } as const;
 
 /** A money amount as the server writes it: digits with two decimals, "1250.00". */
 export type Money = string;
@@ -47,6 +47,12 @@ export type QuoteDto = {
   subtotalAccepted: boolean;
   invoiceUrl: string | null;
   sentAt: string | null;
+  /** The customer record it belongs to (crm.manage), if linked. */
+  customerId: string | null;
+  /** The pipeline deal it belongs to, if linked. */
+  dealId: string | null;
+  /** DECLINED: why, as the team wrote it (≤ 500) */
+  declinedReason: string | null;
   createdById: string | null;
   createdAt: string;
   updatedAt: string;
@@ -71,3 +77,18 @@ export type DraftOrderWritePreview = {
 /** DRAFT_ORDER_INVOICE_SEND: Shopify emails its invoice to `to` with this subject and message. */
 export type InvoiceWritePreview = { draftOrder: string; to: string; subject: string; message: string };
 export type InvoiceEmailInput = { to?: string; subject?: string; message?: string };
+
+/**
+ * An earlier version of a quote (before an edit or a revise). `sent`: the customer had this one. Lines, discount, note
+ * and totals come only when that one version is asked for.
+ */
+export type QuoteVersionDto = {
+  version: number;
+  sent: boolean;
+  createdAt: string;
+  createdById: string | null;
+  lines?: QuoteLine[];
+  discount?: QuoteDiscount | null;
+  note?: string | null;
+  totals?: QuoteTotals;
+};

@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { FileText, Plus, Printer, Search } from "lucide-react";
-import type { QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteStatus } from "@/shared";
+import { QUOTE_LIMITS, type QuoteDto, type QuoteLineInput, type QuoteShopifyAction, type QuoteStatus } from "@/shared";
 import { quotesApi, type QuoteBody } from "@/components/crm/api";
+import { QuoteCustomer } from "@/components/crm/customers/quote-customer";
+import { QuoteDeal } from "@/components/crm/pipeline/quote-deal";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
+import { QuoteVersions } from "@/components/crm/quotes/quote-versions";
 import { QUOTE_ACTION_LABEL, QuoteShopifyDialog } from "@/components/crm/quotes/shopify-dialog";
 import { productsApi, type Product } from "@/components/products/api";
 import { ApiError, errorMessage } from "@/components/settings/api";
@@ -14,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadFailed } from "@/components/ui/load-failed";
-import { PageHeader } from "@/components/ui/page-header";
 import { ListCard, ListDetail, ListRow, useListSelection } from "@/components/ui/list-detail";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -28,7 +31,22 @@ export const QUOTE_STATUS_LABEL: Record<QuoteStatus, string> = {
   ACCEPTED: "Accepted",
   EXPIRED: "Expired",
   CANCELLED: "Cancelled",
+  DECLINED: "Declined",
 };
+
+/**
+ * What a person can record by hand (plan 2026-11-27-crm, Decision 16): sent and accepted only for a quote that isn't in
+ * Shopify (Shopify's invoice and payment move those), declined for any quote that was made, sent or expired.
+ */
+export function handActions(q: Pick<QuoteDto, "status" | "shopifyName" | "lines">): ("markSent" | "markAccepted" | "decline")[] {
+  const out: ("markSent" | "markAccepted" | "decline")[] = [];
+  const hand = !q.shopifyName;
+  if (hand && q.status === "DRAFT" && q.lines.length) out.push("markSent");
+  if (hand && (q.status === "SENT" || q.status === "EXPIRED")) out.push("markAccepted");
+  if (q.status === "CREATED" || q.status === "SENT" || q.status === "EXPIRED") out.push("decline");
+  return out;
+}
+const HAND_LABEL = { markSent: "Mark as sent", markAccepted: "Mark accepted", decline: "Mark declined" } as const;
 
 /** The Shopify step a quote is ready for, if any: create it, send its changes, or send the invoice. */
 export function nextQuoteStep(q: Pick<QuoteDto, "status" | "needsShopifyUpdate" | "subtotalDiffers" | "subtotalAccepted" | "lines">): QuoteShopifyAction | null {
@@ -47,7 +65,7 @@ export const fromDraft = (lines: DraftLine[]): QuoteLineInput[] =>
 
 /**
  * The quotes tab of /crm (crm.manage): list, editor (totals always the server's answer), the Shopify steps through
- * confirm dialogs, and a print view.
+ * confirm dialogs, and a print view. `?quote=<id>` (a link from a customer) opens that quote once the list is in.
  */
 export function QuotesBoard({ w, b }: { w: string; b: string }) {
   const [quotes, setQuotes] = useState<QuoteDto[] | null>(null);
@@ -70,6 +88,14 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- once; the board remounts on a brand switch
   useEffect(load, []);
   const put = (q: QuoteDto) => setQuotes((list) => [q, ...(list ?? []).filter((x) => x.id !== q.id)]);
+  // A link from another tab (?quote=<id>): open it once per link, then the list's own clicks decide.
+  const urlQuote = useSearchParams().get("quote");
+  const handled = useRef<string | null>(null);
+  useEffect(() => {
+    if (!urlQuote || !quotes || handled.current === urlQuote || !quotes.some((q) => q.id === urlQuote)) return;
+    handled.current = urlQuote;
+    open(urlQuote, "always");
+  }, [urlQuote, quotes, open]);
 
   /** Without `currency` the server takes the shop's or the business's earlier one; with neither it asks (quote.currency). */
   const create = async (currency?: string) => {
@@ -146,13 +172,16 @@ export function QuotesBoard({ w, b }: { w: string; b: string }) {
       />
     );
 
-  // The board owns the page header (Blog's page keeps its own): New quote needs the board's state. It is always there,
-  // disabled until the list has loaded, so the header doesn't shift and the button stays after a failed load.
+  // The page's header is /crm's (CrmTabs); the board's line carries New quote, which needs the board's state. It is
+  // always there, disabled until the list has loaded, so the line doesn't shift and the button stays after a failed load.
   return (
     <>
-      <PageHeader title="Quotes" actions={newQuote}>
-        Quotes become Shopify draft orders when you say so. The customer gets Shopify&rsquo;s invoice email only when you send it.
-      </PageHeader>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-prose text-sm text-muted-foreground">
+          Quotes become Shopify draft orders when you say so. The customer gets Shopify&rsquo;s invoice email only when you send it.
+        </p>
+        {newQuote}
+      </div>
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
       {askCurrency ? <CurrencyStep busy={busy} error={currencyError} onCreate={(c) => void create(c)} onCancel={() => (setAskCurrency(false), setCurrencyError(null))} /> : null}
       {body}
@@ -234,9 +263,10 @@ const SHORT_DATE = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "
 const LINE_COLS_WIDE = "@lg:grid-cols-[minmax(0,1fr)_5rem_7rem_5.5rem]";
 
 /** What a person is asked before deleting or cancelling: a sent quote's invoice stays payable in Shopify. */
-export function cancelQuestion(q: Pick<QuoteDto, "status" | "shopifyName">) {
-  if (q.status === "DRAFT" && !q.shopifyName) return "Delete this quote?";
-  if (q.status === "SENT") return "Cancel this quote? Shopify's invoice stays payable until you delete the draft order in Shopify.";
+export function cancelQuestion(q: Pick<QuoteDto, "status" | "shopifyName" | "sentAt">) {
+  if (q.status === "DRAFT" && !q.shopifyName && !q.sentAt) return "Delete this quote?";
+  if (q.status === "SENT" && q.shopifyName) return "Cancel this quote? Shopify's invoice stays payable until you delete the draft order in Shopify.";
+  if (!q.shopifyName) return "Cancel this quote?";
   return "Cancel this quote? Shopify's draft order stays as it is.";
 }
 
@@ -262,6 +292,9 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [dialog, setDialog] = useState<{ action: QuoteShopifyAction; again?: boolean } | null>(null);
+  const [declining, setDeclining] = useState(false);
+  const [reason, setReason] = useState("");
+  const hand = handActions(quote);
   const [search, setSearch] = useState("");
   const [found, setFound] = useState<Product[]>([]);
   const step = nextQuoteStep(quote);
@@ -272,6 +305,7 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
     setDirty(true);
   };
   const setLine = (i: number, patch: Partial<DraftLine>) => edit({ lines: form.lines.map((l, j) => (j === i ? { ...l, ...patch } : l)) });
+  /** True when the call went through (a form that waits on it closes only then). */
   const run = async (what: string, call: () => Promise<{ quote: QuoteDto }>) => {
     setBusy(what);
     setError(null);
@@ -281,8 +315,10 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
       onChange(q);
       setForm(reset(q));
       setDirty(false);
+      return true;
     } catch (e) {
       setError(errorMessage(e));
+      return false;
     } finally {
       setBusy(null);
     }
@@ -325,11 +361,24 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
               {QUOTE_ACTION_LABEL[step]}
             </Button>
           ) : null}
+          {hand.map((a) =>
+            a === "decline" ? (
+              <Button key={a} size="sm" variant="outline" disabled={!!busy || declining} onClick={() => setDeclining(true)}>
+                {HAND_LABEL[a]}
+              </Button>
+            ) : (
+              <Button key={a} size="sm" variant={a === "markSent" && !step ? "default" : "outline"} disabled={!!busy || dirty} onClick={() => run(a, () => quotesApi.act(w, b, quote.id, { action: a, version: quote.version }))}>
+                {busy === a ? "Saving…" : HAND_LABEL[a]}
+              </Button>
+            ),
+          )}
           {quote.status === "SENT" ? (
             <>
-              <Button size="sm" variant="outline" disabled={!!busy} onClick={() => setDialog({ action: "invoice", again: true })}>
-                Send the invoice again
-              </Button>
+              {quote.shopifyName ? (
+                <Button size="sm" variant="outline" disabled={!!busy} onClick={() => setDialog({ action: "invoice", again: true })}>
+                  Send the invoice again
+                </Button>
+              ) : null}
               <Button size="sm" variant="outline" disabled={!!busy} onClick={() => run("revise", () => quotesApi.act(w, b, quote.id, { action: "revise", version: quote.version }))}>
                 Revise
               </Button>
@@ -341,13 +390,13 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
               Print view
             </Link>
           </Button>
-          {quote.status !== "ACCEPTED" && quote.status !== "CANCELLED" ? (
+          {quote.status !== "ACCEPTED" && quote.status !== "CANCELLED" && quote.status !== "DECLINED" ? (
             <Button
               size="sm"
               variant="ghost"
               disabled={!!busy}
               onClick={async () => {
-                const draft = quote.status === "DRAFT" && !quote.shopifyName;
+                const draft = quote.status === "DRAFT" && !quote.shopifyName && !quote.sentAt;
                 if (!window.confirm(cancelQuestion(quote))) return;
                 try {
                   const out = await quotesApi.remove(w, b, quote.id);
@@ -362,7 +411,7 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
                 }
               }}
             >
-              {quote.status === "DRAFT" && !quote.shopifyName ? "Delete" : "Cancel quote"}
+              {quote.status === "DRAFT" && !quote.shopifyName && !quote.sentAt ? "Delete" : "Cancel quote"}
             </Button>
           ) : null}
         </>
@@ -381,7 +430,47 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
           </div>
         ) : null}
         {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
+        {declining ? (
+          <form
+            className="flex flex-col gap-2 rounded-xl border border-border p-3 text-sm"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void run("decline", () => quotesApi.act(w, b, quote.id, { action: "decline", version: quote.version, reason: reason.trim() || null })).then((ok) => ok && setDeclining(false));
+            }}
+          >
+            <label className="flex flex-col gap-1.5">
+              <span className="text-muted-foreground">Why did the customer say no? (optional, for the team)</span>
+              <Textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength={QUOTE_LIMITS.reason} rows={2} autoFocus />
+            </label>
+            {quote.shopifyName ? <p className="text-xs text-muted-foreground">Shopify&rsquo;s draft order stays as it is. If the customer pays it anyway, the quote shows as accepted.</p> : null}
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" disabled={!!busy}>{busy === "decline" ? "Saving…" : "Mark declined"}</Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setDeclining(false)}>Cancel</Button>
+            </div>
+          </form>
+        ) : null}
+        {quote.status === "DECLINED" && quote.declinedReason ? <p className="text-sm"><span className="text-muted-foreground">Declined: </span><span className="whitespace-pre-wrap">{quote.declinedReason}</span></p> : null}
         {info ? <p className="rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm" role="status">{info}</p> : null}
+        <QuoteCustomer
+          w={w}
+          b={b}
+          quote={quote}
+          disabled={dirty}
+          onChange={(q) => {
+            onChange(q);
+            setForm(reset(q));
+          }}
+        />
+        <QuoteDeal
+          w={w}
+          b={b}
+          quote={quote}
+          disabled={dirty}
+          onChange={(q) => {
+            onChange(q);
+            setForm(reset(q));
+          }}
+        />
         {editable ? (
           <form
             className="flex flex-col gap-5"
@@ -489,6 +578,7 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
             </div>
           </form>
         ) : null}
+        <QuoteVersions key={quote.version} w={w} b={b} quote={quote} />
         <section aria-labelledby="quote-preview-h" className="flex flex-col gap-2">
           <h3 id="quote-preview-h" className="text-xs font-medium text-muted-foreground">What the customer sees</h3>
           <div className="overflow-x-auto rounded-xl border border-border p-4">

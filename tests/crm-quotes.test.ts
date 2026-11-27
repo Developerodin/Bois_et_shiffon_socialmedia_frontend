@@ -5,8 +5,9 @@ import { describe, expect, it } from "vitest";
 import type { QuoteDto } from "@/shared";
 import type { QuotePreview } from "@/components/crm/api";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
-import { cancelQuestion, fromDraft, nextQuoteStep, subtotalNotice } from "@/components/crm/quotes/quotes-board";
+import { cancelQuestion, fromDraft, handActions, nextQuoteStep, QUOTE_STATUS_LABEL, subtotalNotice } from "@/components/crm/quotes/quotes-board";
 import { QuotePreviewBody } from "@/components/crm/quotes/shopify-dialog";
+import { versionChanges } from "@/components/crm/quotes/quote-versions";
 import { agentEntries, navFor } from "@/lib/nav";
 
 const quote: QuoteDto = {
@@ -14,7 +15,7 @@ const quote: QuoteDto = {
   lines: [{ productId: "p1", variantId: "gid://shopify/ProductVariant/7", title: "Linen sofa", quantity: 2, unitPrice: "1000.00" }, { productId: null, variantId: null, title: "Delivery", quantity: 1, unitPrice: "80.00" }],
   discount: { kind: "PERCENT", value: "10" }, totals: { subtotal: "2080.00", discount: "208.00", total: "1872.00" }, note: "Delivery in May", internalNote: "Margin ok",
   validUntil: "2026-12-24", shopifyName: "#D1", needsShopifyUpdate: false, shopifySubtotal: "1872.00", subtotalDiffers: false, subtotalAccepted: false,
-  invoiceUrl: null, sentAt: null, createdById: "u1", createdAt: "2026-11-24T10:00:00Z", updatedAt: "2026-11-24T10:00:00Z",
+  invoiceUrl: null, sentAt: null, customerId: null, dealId: null, declinedReason: null, createdById: "u1", createdAt: "2026-11-24T10:00:00Z", updatedAt: "2026-11-24T10:00:00Z",
 };
 const preview = (p: QuotePreview["preview"], over: Partial<QuotePreview> = {}): QuotePreview => ({ preview: p, attempt: 1, confirmToken: "t", expiresAt: "", writes: { ready: true }, last: null, ...over });
 const html = (el: ReturnType<typeof createElement>) => renderToStaticMarkup(el);
@@ -25,8 +26,8 @@ describe("Sales & CRM nav", () => {
     expect(spark([], ["crm.manage"])).toMatchObject({ href: "/agents/spark", soon: true });
     expect(spark(["crm"], ["brand.read", "crm.read"])).toMatchObject({ href: "/agents/spark", soon: true });
     expect(spark(["crm"], ["crm.manage"])).toMatchObject({ href: "/crm", role: "Sales & CRM", soon: false });
-    // Quotes only for now: inbox.read alone can't open /crm, so the slot stays as it was.
-    expect(spark(["crm"], ["inbox.read"])).toMatchObject({ href: "/agents/spark", soon: true });
+    // Either key opens /crm (Decision 17): inbox.read for Follow-ups, crm.manage for the rest.
+    expect(spark(["crm"], ["inbox.read"])).toMatchObject({ href: "/crm", soon: false });
     expect(navFor("/crm").title).toBe("Sales & CRM");
   });
 });
@@ -59,8 +60,8 @@ describe("the quote editor", () => {
   });
 
   it("warns that a sent quote's invoice stays payable when cancelled", () => {
-    expect(cancelQuestion({ status: "SENT", shopifyName: "#D1" })).toContain("invoice stays payable");
-    expect(cancelQuestion({ status: "DRAFT", shopifyName: null })).toBe("Delete this quote?");
+    expect(cancelQuestion({ status: "SENT", shopifyName: "#D1", sentAt: "2026-11-20T10:00:00Z" })).toContain("invoice stays payable");
+    expect(cancelQuestion({ status: "DRAFT", shopifyName: null, sentAt: null })).toBe("Delete this quote?");
   });
 
   it("offers the next Shopify step from the quote's state", () => {
@@ -105,5 +106,32 @@ describe("the print view", () => {
     const page = readFileSync("app/(shell)/crm/quotes/[id]/print/page.tsx", "utf8");
     expect(page).toContain("data-print-root");
     expect(readFileSync("app/globals.css", "utf8")).toMatch(/:has\(\[data-print-root\]\) > :not\(\[data-print-root\]/);
+  });
+});
+
+describe("quotes by hand and declined", () => {
+  const hand = { ...quote, shopifyName: null };
+  it("a quote outside Shopify is marked sent from DRAFT and accepted from SENT or EXPIRED; any made, sent or expired one can be declined", () => {
+    expect(handActions({ ...hand, status: "DRAFT" })).toEqual(["markSent"]);
+    expect(handActions({ ...hand, status: "DRAFT", lines: [] })).toEqual([]);
+    expect(handActions({ ...hand, status: "SENT" })).toEqual(["markAccepted", "decline"]);
+    expect(handActions({ ...hand, status: "EXPIRED" })).toEqual(["markAccepted", "decline"]);
+    expect(handActions({ ...quote, status: "SENT" })).toEqual(["decline"]);
+    expect(handActions({ ...quote, status: "ACCEPTED" })).toEqual([]);
+  });
+  it("declined has its label; a hand-sent quote's cancel says nothing about Shopify", () => {
+    expect(QUOTE_STATUS_LABEL.DECLINED).toBe("Declined");
+    expect(cancelQuestion({ ...hand, status: "SENT" })).toBe("Cancel this quote?");
+    expect(cancelQuestion({ ...hand, status: "DRAFT", sentAt: "2026-11-20T10:00:00Z" })).toBe("Cancel this quote?");
+  });
+});
+
+describe("earlier versions", () => {
+  it("names each line added, removed or changed since that version", () => {
+    const sofa = { productId: "p1", variantId: null, title: "Linen sofa", quantity: 1, unitPrice: "1000.00" };
+    const before = [sofa, { productId: null, variantId: null, title: "Delivery", quantity: 1, unitPrice: "80.00" }];
+    const now = [{ ...sofa, quantity: 2, unitPrice: "950.00" }, { productId: null, variantId: null, title: "Cushion", quantity: 2, unitPrice: "40.00" }];
+    expect(versionChanges(before, now)).toEqual(["Linen sofa: quantity 1 → 2, price 1000.00 → 950.00", "Removed: Delivery", "Added: Cushion"]);
+    expect(versionChanges(now, now)).toEqual([]);
   });
 });

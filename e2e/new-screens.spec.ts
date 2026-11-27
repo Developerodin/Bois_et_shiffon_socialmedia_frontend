@@ -95,6 +95,9 @@ function quote(n: number, over: Partial<QuoteDto> = {}) {
     subtotalAccepted: false,
     invoiceUrl: null,
     sentAt: null,
+    customerId: null,
+    dealId: null,
+    declinedReason: null,
     createdById: null,
     createdAt: day,
     updatedAt: day,
@@ -124,8 +127,9 @@ for (const size of SIZES) {
     test.use({ viewport: { width: size.width, height: size.height } });
 
     test("Quotes smoke check on the stored data", async ({ page }) => {
-      await open(page, "/crm");
-      await expect(page.getByRole("heading", { name: "Quotes", level: 1 })).toBeVisible();
+      await open(page, "/crm?tab=quotes");
+      await expect(page.getByRole("heading", { name: "Sales & CRM", level: 1 })).toBeVisible();
+      await expect(page.getByRole("tab", { name: "Quotes", selected: true })).toBeVisible();
       await expect(page.getByRole("heading", { name: /^(All quotes|No quotes yet)$/ })).toBeVisible();
       await noSideways(page);
       await shot(page, `quotes-${size.name}`);
@@ -133,7 +137,7 @@ for (const size of SIZES) {
 
     test("Quotes: the empty state points at the one New quote button", async ({ page }) => {
       await listQuotes(page, []);
-      await open(page, "/crm");
+      await open(page, "/crm?tab=quotes");
       const empty = page.locator('[data-slot="empty-state"]');
       await expect(empty.getByRole("heading", { name: "No quotes yet", level: 2 })).toBeVisible();
       await expect(empty.getByRole("button")).toHaveCount(0);
@@ -158,7 +162,7 @@ for (const size of SIZES) {
         }
         return route.fulfill({ status: 201, json: { quote: quote(1, { currency: String(body.currency), lines: [], discount: null, note: null, contactName: null, contactEmail: null, totals: { subtotal: "0.00", discount: "0.00", total: "0.00" } }) } });
       });
-      await open(page, "/crm");
+      await open(page, "/crm?tab=quotes");
       await page.getByRole("button", { name: "New quote" }).click();
       const step = page.getByRole("region", { name: "Which currency are this business's quotes in?" });
       await expect(step).toBeVisible();
@@ -178,7 +182,7 @@ for (const size of SIZES) {
 
     test("Quotes: list and a quote open", async ({ page }) => {
       await listQuotes(page, QUOTES);
-      await open(page, "/crm");
+      await open(page, "/crm?tab=quotes");
       const list = page.getByRole("region", { name: "All quotes" });
       await expect(list).toBeVisible();
       await expect(list.getByRole("button")).toHaveCount(3);
