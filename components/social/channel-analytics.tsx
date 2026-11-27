@@ -80,7 +80,8 @@ export function ChannelAnalytics({ base, filter }: { base: string; filter: strin
   );
 }
 
-function AccountNumbers({ base, channel, titled }: { base: string; channel: AnalyticsChannel; titled: boolean }) {
+/** One account's numbers. `compact` (the Channels page): the figures and the daily chart only; the calendar has the rest. */
+export function AccountNumbers({ base, channel, titled, compact = false }: { base: string; channel: AnalyticsChannel; titled: boolean; compact?: boolean }) {
   const fetcher = useCallback(() => request<ChannelAnalyticsDto>(`${base}/insights/channel?channel=${channel}&days=${DAYS}`), [base, channel]);
   const { state, reload } = useLoad(fetcher);
   const name = NAME[channel];
@@ -100,13 +101,14 @@ function AccountNumbers({ base, channel, titled }: { base: string; channel: Anal
   const range = `${dayLabel(a.from)} – ${dayLabel(a.to)}`;
   const top = ig && a.posts ? [...a.posts].sort((x, y) => (y.metrics?.reach ?? -1) - (x.metrics?.reach ?? -1)).slice(0, 5) : [];
   return (
-    <section className="flex flex-col gap-4" aria-label={`${name} numbers`}>
+    <section className="@container flex min-w-0 flex-col gap-4" aria-label={`${name} numbers`}>
       <div className="flex flex-wrap items-baseline gap-x-2 text-sm">
         {titled && <span className="font-medium">{name}</span>}
         <span className="text-muted-foreground">{a.account.name}</span>
         <span className="text-xs text-muted-foreground">&middot; {range}</span>
       </div>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      {/* Sized by the space the panel has (a container query), not the window: it also sits in a half-width card. */}
+      <div className="grid grid-cols-2 gap-4 @min-[28rem]:grid-cols-3 @min-[46rem]:grid-cols-5">
         <Stat label="Followers" value={n(a.account.followers)} />
         {ig ? (
           <>
@@ -123,13 +125,13 @@ function AccountNumbers({ base, channel, titled }: { base: string; channel: Anal
         )}
         <Stat label="New followers" value={n(t.newFollowers)} />
       </div>
-      {ig && (
+      {ig && !compact && (
         <p className="text-xs text-muted-foreground">
           {n(t.accountsEngaged)} accounts engaged &middot; {n(t.likes)} likes &middot; {n(t.comments)} comments &middot; {n(t.shares)} shares &middot; {n(t.saves)} saves &middot; {n(t.linkTaps)} link taps
         </p>
       )}
       <DayBars days={a.daily} what={ig ? "accounts reached" : "media views"} title={ig ? "Accounts reached per day" : "Media views per day"} />
-      {ig && a.countries && a.countries.length > 0 && (
+      {!compact && ig && a.countries && a.countries.length > 0 && (
         <div className="text-xs">
           <p className="mb-1 text-muted-foreground">Followers by country</p>
           <ol className="flex flex-wrap gap-x-4 gap-y-1">
@@ -141,7 +143,7 @@ function AccountNumbers({ base, channel, titled }: { base: string; channel: Anal
           </ol>
         </div>
       )}
-      {top.length > 0 && (
+      {!compact && top.length > 0 && (
         <div className="text-sm">
           <p className="mb-1 text-xs text-muted-foreground">Best of the latest {a.posts!.length} posts, by accounts reached (all time)</p>
           <ul className="divide-y divide-border">
@@ -163,7 +165,7 @@ function AccountNumbers({ base, channel, titled }: { base: string; channel: Anal
           </ul>
         </div>
       )}
-      {!ig && <p className="text-xs text-muted-foreground">Per-post numbers for the Page need a Facebook permission the app doesn&apos;t have yet.</p>}
+      {!ig && !compact && <p className="text-xs text-muted-foreground">Per-post numbers for the Page need a Facebook permission the app doesn&apos;t have yet.</p>}
       {a.partial && <p className="text-xs text-muted-foreground">Some numbers didn&apos;t arrive in time; they&apos;re shown as —. Open the calendar again later for the rest.</p>}
     </section>
   );

@@ -1,8 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ChevronRight, Newspaper } from "lucide-react";
 import { ListSkeleton } from "@/components/settings/shared";
+import { AccountNumbers } from "@/components/social/channel-analytics";
 import { ChannelConnection, useChannelConnections, type Conns } from "@/components/social/channel-connection";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { PageSection } from "@/components/ui/page-section";
@@ -27,7 +29,7 @@ const CONNECTIONS = "/connections";
  * (GET content), the connections from GET connections (only for roles that hold CONNECTIONS_READ: `canSeeConnections`).
  * `canManageConnections` (integrations.manage) offers Connect and Manage, as the Connections page does.
  */
-export function SocialLanding({ workspaceId, brandId, canSeeConnections, canManageConnections, blogOn }: { workspaceId: string; brandId: string; canSeeConnections: boolean; canManageConnections: boolean; blogOn: boolean }) {
+export function SocialLanding({ workspaceId, brandId, canSeeConnections, canManageConnections, blogOn, actions, canSeeAnalytics = false }: { workspaceId: string; brandId: string; canSeeConnections: boolean; canManageConnections: boolean; blogOn: boolean; /** The page's buttons, at the right end of the figures' row. */ actions?: ReactNode; /** analytics.read: the Facebook Page and Instagram numbers. */ canSeeAnalytics?: boolean }) {
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
   const { data, failed, reload } = useJob(`${base}/content/summary`, { pick: pickSummary as (d: never) => ChannelSummary[], intervals: JOB_INTERVALS.socialLanding });
   // ponytail: the calendar's list (open posts + 30 days, 200 rows) feeds the Scheduled figure and the short lists; a brand
@@ -37,7 +39,11 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
 
   return (
     <>
-      {data && <Figures summary={data} items={posts.data} conns={conns} />}
+      {/* One row: the figures fill the width, the page's buttons at its right end; under each other on a narrow page. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-[min(100%,30rem)] flex-1">{data && <Figures summary={data} items={posts.data} conns={conns} />}</div>
+        {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+      </div>
       <PageSection id="channels" title="Your channels" description="Open a channel to plan it on its own calendar." className="pt-1">
         {!data ? (
           failed ? <LoadFailed what="the channels" onRetry={reload} /> : <ListSkeleton label="Loading channels" rows={4} />
@@ -56,6 +62,7 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
           </>
         )}
       </PageSection>
+      {canSeeAnalytics && <Analytics base={base} />}
       {posts.data && <Attention items={posts.data} />}
     </>
   );
@@ -81,7 +88,7 @@ function Figures({ summary, items, conns }: { summary: ChannelSummary[]; items: 
     </div>
   );
   return (
-    <dl aria-label="Channels at a glance" className="grid grid-cols-3 gap-2 sm:max-w-2xl sm:gap-3">
+    <dl aria-label="Channels at a glance" className="grid grid-cols-3 gap-2 sm:gap-3">
       {/* Accounts connected for publishing; LinkedIn and X are published by hand and never count here. */}
       {conns !== "hidden" && figure("Connected accounts", n.accounts, CONNECTIONS)}
       {figure("Scheduled", items ? n.scheduled : null, calendarHref({ status: "scheduled" }))}
@@ -91,17 +98,17 @@ function Figures({ summary, items, conns }: { summary: ChannelSummary[]; items: 
 }
 
 // Identity, connection, next post, its date, approvals, the arrow: one template for every row (the blog's too) once the
-// list is 49rem wide (a container query: the sidebar and the docked assistant narrow the page, not the window), so the
-// columns line up whatever a row holds; a stacked card under that. The minimums add up to ~48rem with the gaps.
+// list is 54rem wide (a container query: the sidebar and the docked assistant narrow the page, not the window), so the
+// columns line up whatever a row holds; a stacked card under that. The minimums add up to ~51.5rem with the gaps.
 const ROW =
-  "grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-2 py-3 @min-[49rem]/social:gap-x-5 @min-[49rem]/social:min-h-[5.25rem] @min-[49rem]/social:grid-cols-[minmax(9.5rem,1.05fr)_minmax(8.75rem,0.9fr)_minmax(10rem,2fr)_minmax(7.5rem,0.95fr)_minmax(8.25rem,0.8fr)_1.25rem] @min-[49rem]/social:items-center";
+  "grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-2 py-3 @min-[54rem]/social:gap-x-5 @min-[54rem]/social:min-h-[5.25rem] @min-[54rem]/social:grid-cols-[minmax(9.5rem,1.05fr)_minmax(8.75rem,0.9fr)_minmax(10rem,2fr)_minmax(7.5rem,0.95fr)_minmax(8.25rem,0.8fr)_1.25rem] @min-[54rem]/social:items-center";
 const ACTION = "relative z-10 inline-flex h-6 items-center rounded-full border border-border bg-card px-2.5 text-xs font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 // Manage is secondary: a quiet text action beside the badge, shown on the row's hover or its own focus where a pointer
 // can hover; on touch screens (no hover) it always shows.
 const GHOST = "relative z-10 rounded px-1 text-xs text-muted-foreground underline-offset-4 transition-opacity hover:text-foreground hover:underline focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/row:opacity-100";
 const ROW_LINK = "relative z-10 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const ROW_SHELL = "group/row relative rounded-lg transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted/60";
-const ARROW = "size-4 shrink-0 self-center text-muted-foreground transition-transform group-hover/row:translate-x-0.5 group-hover/row:text-foreground @min-[49rem]/social:order-last";
+const ARROW = "size-4 shrink-0 self-center text-muted-foreground transition-transform group-hover/row:translate-x-0.5 group-hover/row:text-foreground @min-[54rem]/social:order-last";
 
 function RowName({ icon: Icon, label, blurb, href }: { icon: ChannelIcon; label: string; blurb: string; href: string }) {
   return (
@@ -130,7 +137,7 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
     <li className={`${ROW_SHELL} ${ROW}`}>
       <RowName icon={channelIcon(row.filter)} label={row.label} blurb={row.blurb} href={calendarHref({ channel: row.filter })} />
       <ChevronRight aria-hidden className={ARROW} />
-      <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 @min-[49rem]/social:col-span-1 @min-[49rem]/social:flex-col @min-[49rem]/social:flex-nowrap @min-[49rem]/social:items-start">
+      <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 @min-[54rem]/social:col-span-1 @min-[54rem]/social:flex-col @min-[54rem]/social:flex-nowrap @min-[54rem]/social:items-start">
         <ChannelConnection
           filter={row.filter}
           conns={conns}
@@ -148,11 +155,11 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
           </Link>
         )}
       </div>
-      <div className="col-span-2 flex min-w-0 items-center gap-2 text-sm @min-[49rem]/social:col-span-1">
+      <div className="col-span-2 flex min-w-0 items-center gap-2 text-sm @min-[54rem]/social:col-span-1">
         {next ? (
           // Above the row's link (relative z-10), so it opens this post rather than the channel.
-          <Link href={calendarHref({ channel: row.filter }, next.id)} title={next.title} aria-label={`${row.label}, next: ${next.title}, ${dayTime(next.scheduledFor)}, ${STATUS_LABEL[next.status] ?? next.status}`} className={`${ROW_LINK} flex min-w-0 items-center gap-2 hover:underline @min-[49rem]/social:flex-col @min-[49rem]/social:items-start @min-[49rem]/social:gap-1`}>
-            <span className="max-w-full truncate @min-[49rem]/social:line-clamp-2 @min-[49rem]/social:whitespace-normal">{next.title}</span>
+          <Link href={calendarHref({ channel: row.filter }, next.id)} title={next.title} aria-label={`${row.label}, next: ${next.title}, ${dayTime(next.scheduledFor)}, ${STATUS_LABEL[next.status] ?? next.status}`} className={`${ROW_LINK} flex min-w-0 items-center gap-2 hover:underline @min-[54rem]/social:flex-col @min-[54rem]/social:items-start @min-[54rem]/social:gap-1`}>
+            <span className="max-w-full truncate @min-[54rem]/social:line-clamp-2 @min-[54rem]/social:whitespace-normal">{next.title}</span>
             <StatusBadge quiet status={next.status}>
               {STATUS_LABEL[next.status] ?? next.status}
             </StatusBadge>
@@ -161,7 +168,7 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
           <span className="text-muted-foreground">Nothing scheduled</span>
         )}
       </div>
-      <div className="whitespace-nowrap text-xs tabular-nums text-muted-foreground @min-[49rem]/social:text-sm">{next ? dayTime(next.scheduledFor) : null}</div>
+      <div className="whitespace-nowrap text-xs tabular-nums text-muted-foreground @min-[54rem]/social:text-sm">{next ? dayTime(next.scheduledFor) : null}</div>
       <div className="flex items-center justify-end">
         {awaiting ? (
           <Link href={calendarHref({ channel: row.filter, status: "awaiting" })} aria-label={`${row.label}: ${awaiting} awaiting approval`} className={`${ROW_LINK} rounded-full`}>
@@ -181,14 +188,51 @@ function BlogRow() {
     <li className={`${ROW_SHELL} ${ROW}`}>
       <RowName icon={Newspaper} label="Blog" blurb="Articles for the store's blog" href="/blog" />
       <ChevronRight aria-hidden className={ARROW} />
-      <div className="hidden @min-[49rem]/social:block" />
-      <div className="col-span-2 text-sm text-muted-foreground @min-[49rem]/social:col-span-1">Articles live on the Blog page</div>
-      <div className="hidden @min-[49rem]/social:block" />
+      <div className="hidden @min-[54rem]/social:block" />
+      <div className="col-span-2 text-sm text-muted-foreground @min-[54rem]/social:col-span-1">Articles live on the Blog page</div>
+      <div className="hidden @min-[54rem]/social:block" />
       <div className="text-right text-xs text-muted-foreground">
         <span aria-hidden>—</span>
         <span className="sr-only">Approvals not counted</span>
       </div>
     </li>
+  );
+}
+
+/**
+ * The Facebook Page and Instagram account over the last 28 days (GET insights/channel, live from Meta, cached 15 min on
+ * the server): figures and the daily chart, side by side when there's room. Each channel's calendar has the rest
+ * (engagement breakdown, countries, best posts).
+ */
+function Analytics({ base }: { base: string }) {
+  const accounts = [
+    { channel: "facebook", label: "Facebook Page", href: calendarHref({ channel: "FACEBOOK_POST" }) },
+    { channel: "instagram", label: "Instagram", href: calendarHref({ channel: "instagram" }) },
+  ] as const;
+  return (
+    <PageSection id="analytics" title="Analytics" description="Last 28 days, read from Meta.">
+      <div className="@container/analytics">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 @min-[56rem]/analytics:grid-cols-2">
+          {accounts.map((a) => {
+            const Icon = channelIcon(a.channel === "facebook" ? "FACEBOOK_POST" : "instagram");
+            return (
+              <div key={a.channel} className="flex min-w-0 flex-col gap-3 rounded-xl border border-border p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex items-center gap-2 font-medium">
+                    <Icon aria-hidden className="size-4" />
+                    {a.label}
+                  </span>
+                  <Link href={a.href} className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+                    More on its calendar
+                  </Link>
+                </div>
+                <AccountNumbers base={base} channel={a.channel} titled={false} compact />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </PageSection>
   );
 }
 

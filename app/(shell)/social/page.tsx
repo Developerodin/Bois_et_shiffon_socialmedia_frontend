@@ -3,7 +3,6 @@ import { Lock, Share2 } from "lucide-react";
 import { SocialLanding } from "@/components/social/social-landing";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageHeader } from "@/components/ui/page-header";
 import { featureOn } from "@/lib/features";
 import { navFor } from "@/lib/nav";
 import { getShell } from "@/lib/server-fetch";
@@ -35,8 +34,12 @@ export default async function SocialPage() {
   const canManageConnections = shell.brandPermissions.includes("integrations.manage");
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
-      <PageHeader
-        title="Channels"
+      {/* No visible heading (owner, 2026-11-27): the page's one h1 is for screen readers; its actions sit on the figures' row. */}
+      <h1 className="sr-only">Channels</h1>
+      {/* Remount on brand switch so the summary and the connections reset with the business. */}
+      <SocialLanding
+        key={shell.activeBrandId}
+        canSeeAnalytics={shell.brandPermissions.includes("analytics.read")}
         actions={
           <>
             {canManageConnections && (
@@ -48,12 +51,7 @@ export default async function SocialPage() {
               <Link href="/calendar">Open full calendar</Link>
             </Button>
           </>
-        }
-      >
-        Manage your social publishing destinations.
-      </PageHeader>
-      {/* Remount on brand switch so the summary and the connections reset with the business. */}
-      <SocialLanding key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} canSeeConnections={canSeeConnections} canManageConnections={canManageConnections} blogOn={featureOn("blog", shell.activeWorkspaceId)} />
+        } workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} canSeeConnections={canSeeConnections} canManageConnections={canManageConnections} blogOn={featureOn("blog", shell.activeWorkspaceId)} />
     </div>
   );
 }
