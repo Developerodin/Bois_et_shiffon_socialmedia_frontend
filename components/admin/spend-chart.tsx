@@ -1,4 +1,5 @@
 import { Table, type Fx } from "@/components/admin/ui";
+import { column, niceMax } from "@/components/data/day-bars";
 
 /**
  * Spend per day: one series (total = AI + other paid APIs), columns from one baseline. Built to the dataviz spec:
@@ -15,19 +16,6 @@ const M = { top: 22, right: 8, bottom: 24, left: 52 };
 const DATE = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 const label = (d: string) => DATE.format(new Date(`${d}T00:00:00Z`));
 const usd = (v: number) => (v === 0 ? "$0" : v >= 100 ? `$${v.toFixed(0)}` : v >= 1 ? `$${v.toFixed(2)}` : `$${v.toFixed(v >= 0.01 ? 3 : 4)}`);
-
-/** A round axis top: 1, 2 or 5 × a power of ten, at or above the largest value. */
-function niceMax(v: number) {
-  if (v <= 0) return 1;
-  const p = 10 ** Math.floor(Math.log10(v));
-  return ([1, 2, 5, 10].find((m) => m * p >= v) ?? 10) * p;
-}
-
-/** A column with a 4 px rounded top and a square base (path, since <rect> rounds all four corners). */
-function column(x: number, y: number, w: number, h: number) {
-  const r = Math.min(4, w / 2, h);
-  return `M${x},${y + h} V${y + r} Q${x},${y} ${x + r},${y} H${x + w - r} Q${x + w},${y} ${x + w},${y + r} V${y + h} Z`;
-}
 
 function Plot({ days, totals, fx, W, ariaLabel, className }: { days: Day[]; totals: number[]; fx: Fx; W: number; ariaLabel: string; className: string }) {
   const top = niceMax(Math.max(...totals));
