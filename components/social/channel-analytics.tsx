@@ -38,14 +38,16 @@ const postType = (p: ChannelPostDto) => (p.productType === "REELS" || p.productT
  */
 export function ChannelAnalytics({ base, filter }: { base: string; filter: string }) {
   const what = analyticsFor(filter);
-  const [open, setOpen] = useState(true);
-  // Read after mount so the server render and the first client render agree.
+  // null until storage is read (after mount, so the server and first client render agree): nothing is read till then.
+  const [open, setOpen] = useState<boolean | null>(null);
   useEffect(() => {
+    let closed = false;
     try {
-      if (localStorage.getItem(OPEN_KEY) === "0") setOpen(false);
+      closed = localStorage.getItem(OPEN_KEY) === "0";
     } catch {
       // storage blocked: open
     }
+    setOpen(!closed);
   }, []);
   const toggle = (next: boolean) => {
     setOpen(next);
@@ -63,11 +65,11 @@ export function ChannelAnalytics({ base, filter }: { base: string; filter: strin
     );
   }
   return (
-    <details open={open} onToggle={(e) => e.currentTarget.open !== open && toggle(e.currentTarget.open)} className="rounded-2xl border border-border bg-card shadow-sm">
+    <details open={open !== false} onToggle={(e) => open !== null && e.currentTarget.open !== open && toggle(e.currentTarget.open)} className="rounded-2xl border border-border bg-card shadow-sm">
       <summary className="cursor-pointer select-none px-4 py-2.5 text-sm font-medium">
         Analytics <span className="font-normal text-muted-foreground">&middot; last {DAYS} days, from Meta</span>
       </summary>
-      {open && (
+      {open === true && (
         <div className="flex flex-col gap-5 border-t border-border px-4 py-4">
           {what.map((c) => (
             <AccountNumbers key={c} base={base} channel={c} titled={what.length > 1} />
