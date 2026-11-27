@@ -1,11 +1,12 @@
 "use client";
 
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronDown, type LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
+import { Check, ChevronDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-export type FilterOption = { value: string; label: string; icon?: LucideIcon; disabled?: boolean };
+export type FilterOption = { value: string; label: string; icon?: ComponentType<{ className?: string }>; disabled?: boolean };
 
 /**
  * A filter as a styled dropdown, in place of a native select (whose open list is the system's blue menu): a pill that

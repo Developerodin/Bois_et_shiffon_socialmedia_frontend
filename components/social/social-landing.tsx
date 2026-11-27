@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Newspaper, type LucideIcon } from "lucide-react";
+import { ChevronRight, Newspaper } from "lucide-react";
 import { ApiError, settingsApi, type Connection } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
 import { calendarHref } from "@/lib/calendar-filter";
-import { channelIcon, STATUS_LABEL } from "@/lib/post-labels";
+import { channelIcon, STATUS_LABEL, type ChannelIcon } from "@/lib/post-labels";
 import { connectionLines, rowSummary, SOCIAL_ROWS, type ChannelSummary, type SocialRow } from "@/lib/social-channels";
 import { dayTime } from "@/lib/time";
 
@@ -71,7 +71,7 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, blogOn 
 
 const ROW = "grid gap-x-4 gap-y-2 rounded-xl px-2 py-3 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_minmax(0,1.3fr)_auto] md:items-center";
 
-function RowName({ icon: Icon, label, blurb, href }: { icon: LucideIcon; label: string; blurb: string; href: string }) {
+function RowName({ icon: Icon, label, blurb, href }: { icon: ChannelIcon; label: string; blurb: string; href: string }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
       <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent">
