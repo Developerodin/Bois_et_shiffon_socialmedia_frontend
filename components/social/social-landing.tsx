@@ -45,7 +45,7 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
       {/* One row: the figures fill the width, the page's buttons at its right end; under each other on a narrow page. */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="min-w-[min(100%,30rem)] flex-1">{data && <Figures summary={data} items={posts.data} conns={conns} />}</div>
-        <div className="flex shrink-0 flex-wrap gap-2">
+        <div className="flex max-w-full flex-wrap gap-2">
           <PlanWithAgents base={base} perms={perms} conns={conns} label="Create with agents" variant="outline" />
           {actions}
         </div>
