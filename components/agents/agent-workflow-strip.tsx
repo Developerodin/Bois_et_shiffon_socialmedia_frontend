@@ -13,7 +13,8 @@ const COLLAPSED_KEY = "agent-strip.collapsed.v1";
 const pickAgents = (d: { agents: AgentSummary[] }) => d.agents;
 const pickIdeas = (d: { opportunities: { status: string }[] }) => d.opportunities;
 const pickPosts = (d: { items: { status: string; latest?: { check?: { overall?: string } | null } | null }[] }) => d.items;
-const busy = (agents: AgentSummary[]) => agents.some((a) => a.lastRun?.status === "QUEUED" || a.lastRun?.status === "RUNNING");
+const SHOWN = new Set<string>([...CHAIN_STAGES.map((s) => s.key), ANALYST_STAGE.key]);
+const busy = (agents: AgentSummary[]) => agents.some((a) => SHOWN.has(a.key) && (a.lastRun?.status === "QUEUED" || a.lastRun?.status === "RUNNING"));
 // Polls only while a run is queued or running: an idle brand reads the list once (a run started here refreshes it).
 const idle = (agents: AgentSummary[]) => !busy(agents);
 const once = () => true;

@@ -24,11 +24,15 @@ export const PLAN_CHANNELS = [
 ] as const;
 export type PlanChannelKey = (typeof PLAN_CHANNELS)[number]["key"];
 
-/** The options to tick when opened from a channel filter (a group ticks each of its channels); none: every one but the hand ones. */
-export function preselectedChannels(filter?: string): PlanChannelKey[] {
-  if (!filter) return PLAN_CHANNELS.filter((c) => !c.byHand).map((c) => c.key);
+/**
+ * The options to tick when opened from a channel filter (a group ticks each of its channels); none: every one but the
+ * hand ones. `hand`: whether the Planner may plan LinkedIn and X (the agents list's plannerHandChannels); off, never ticked.
+ */
+export function preselectedChannels(filter?: string, hand = false): PlanChannelKey[] {
+  const offered = PLAN_CHANNELS.filter((c) => hand || !c.byHand);
+  if (!filter) return offered.filter((c) => !c.byHand).map((c) => c.key);
   const wanted = new Set(channelsOf(filter));
-  return PLAN_CHANNELS.filter((c) => c.channels.some((ch) => wanted.has(ch))).map((c) => c.key);
+  return offered.filter((c) => c.channels.some((ch) => wanted.has(ch))).map((c) => c.key);
 }
 
 /** The content channels the ticked options stand for. */
@@ -37,8 +41,9 @@ export const channelsFor = (keys: readonly string[]): string[] => PLAN_CHANNELS.
 export type StageState = "idle" | "queued" | "running" | "completed" | "failed";
 export const STAGE_LABEL: Record<StageState, string> = { idle: "Idle", queued: "Queued", running: "Running", completed: "Completed", failed: "Failed" };
 
-/** An agent's last run as the strip shows it: no run is Idle. */
-export function stageState(lastRun: { status: string } | null | undefined): StageState {
+/** An agent's last run as the strip shows it: no run, or a failed one that had nothing to do, is Idle. */
+export function stageState(lastRun: { status: string; nothingToDo?: boolean } | null | undefined): StageState {
+  if (lastRun?.status === "FAILED" && lastRun.nothingToDo) return "idle";
   switch (lastRun?.status) {
     case "QUEUED":
       return "queued";

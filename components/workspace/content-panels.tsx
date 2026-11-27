@@ -437,7 +437,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, select
   const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} filter={filter.channel} reelsOn={reelsOn} />;
   // The posts chain (Planner → Brief writer → Creator → Quality) for this calendar's channel, or every channel. Keyed by
   // channel so a new channel filter preselects afresh.
-  const planWithAgents = (label: string, variant: "secondary" | "outline") => <PlanWithAgents key={filter.channel ?? ""} base={base} perms={perms} filter={filter.channel} conns={connections} label={label} variant={variant} />;
+  const planWithAgents = (label: string, variant: "secondary" | "outline", labelClassName?: string) => <PlanWithAgents key={filter.channel ?? ""} base={base} perms={perms} filter={filter.channel} conns={connections} label={label} variant={variant} labelClassName={labelClassName} />;
   // Below the toolbar (never inside Month's sticky one).
   const strip = <AgentWorkflowStrip base={base} perms={perms} className="mx-4 mt-3 @max-[640px]/cal:mx-2" />;
   // The same dialog, opened from an empty day in Month, set to that day (newPostTime; a day that is over starts undated).
@@ -462,6 +462,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, select
       <div className="flex flex-col items-start gap-3 p-4">
         {channelHeader && <div className="w-full">{channelHeader}</div>}
         {viewSwitch}
+        <AgentWorkflowStrip base={base} perms={perms} className="w-full" />
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
         <div className="flex gap-2">
           {planWithAgents("Plan posts", "secondary")}
@@ -542,7 +543,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, select
           </span>
           {/* A channel's calendar exports that channel (or group) only, and its file says which. */}
           {canExport && <ExportCsvButton url={`${base}/content/export${filter.channel ? `?channel=${encodeURIComponent(filter.channel)}` : ""}`} filename={`calendar-${filter.channel ? `${channelSlug(filter.channel)}-` : ""}${new Date().toLocaleDateString("en-CA")}.csv`} labelClassName="@max-[720px]/cal:sr-only" />}
-          {planWithAgents("Generate with agents", "outline")}
+          {/* Icon only on a narrow panel, as Export, so the row's buttons keep to one line. */}
+          {planWithAgents("Generate with agents", "outline", "@max-[720px]/cal:sr-only")}
           {newPost}
         </span>
       </div>

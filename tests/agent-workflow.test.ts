@@ -18,6 +18,8 @@ describe("Plan with agents channels", () => {
     expect(preselectedChannels("meta")).toEqual(["instagram", "facebook"]);
     expect(preselectedChannels("instagram")).toEqual(["instagram"]);
     expect(preselectedChannels()).toEqual(["instagram", "facebook", "pinterest", "threads"]);
+    expect(preselectedChannels("LINKEDIN_POST")).toEqual([]);
+    expect(preselectedChannels("LINKEDIN_POST", true)).toEqual(["linkedin"]);
   });
 
   it("maps ticked options to the content channels the Planner plans (no Reels)", () => {
@@ -32,6 +34,7 @@ describe("workflow strip", () => {
     expect(stageState({ status: "RUNNING" })).toBe("running");
     expect(stageState({ status: "SUCCEEDED" })).toBe("completed");
     expect(stageState({ status: "FAILED" })).toBe("failed");
+    expect(stageState({ status: "FAILED", nothingToDo: true })).toBe("idle");
   });
 
   it("counts what waits at each stage, and nothing for a list not read", () => {
