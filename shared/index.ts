@@ -27,3 +27,4 @@ export * from "./shopify-writes";
 export * from "./blog";
 export * from "./quotes";
 export * from "./competitors";
+export * from "./api/upcoming";
