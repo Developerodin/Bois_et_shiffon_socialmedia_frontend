@@ -6,6 +6,7 @@ import { FileText, Plus, Printer, Search } from "lucide-react";
 import type { QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteStatus } from "@/shared";
 import { quotesApi, type QuoteBody } from "@/components/crm/api";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
+import { QuoteVersions } from "@/components/crm/quotes/quote-versions";
 import { QUOTE_ACTION_LABEL, QuoteShopifyDialog } from "@/components/crm/quotes/shopify-dialog";
 import { productsApi, type Product } from "@/components/products/api";
 import { ApiError, errorMessage } from "@/components/settings/api";
@@ -541,6 +542,7 @@ function QuoteEditor({ sectionId, w, b, quote, onChange, onCancelled, onRemoved 
             </div>
           </form>
         ) : null}
+        <QuoteVersions key={quote.version} w={w} b={b} quote={quote} />
         <section aria-labelledby="quote-preview-h" className="flex flex-col gap-2">
           <h3 id="quote-preview-h" className="text-xs font-medium text-muted-foreground">What the customer sees</h3>
           <div className="overflow-x-auto rounded-xl border border-border p-4">

@@ -73,3 +73,18 @@ export type DraftOrderWritePreview = {
 /** DRAFT_ORDER_INVOICE_SEND: Shopify emails its invoice to `to` with this subject and message. */
 export type InvoiceWritePreview = { draftOrder: string; to: string; subject: string; message: string };
 export type InvoiceEmailInput = { to?: string; subject?: string; message?: string };
+
+/**
+ * An earlier version of a quote (before an edit or a revise). `sent`: the customer had this one. Lines, discount, note
+ * and totals come only when that one version is asked for.
+ */
+export type QuoteVersionDto = {
+  version: number;
+  sent: boolean;
+  createdAt: string;
+  createdById: string | null;
+  lines?: QuoteLine[];
+  discount?: QuoteDiscount | null;
+  note?: string | null;
+  totals?: QuoteTotals;
+};

@@ -7,6 +7,7 @@ import type { QuotePreview } from "@/components/crm/api";
 import { QuoteSheet } from "@/components/crm/quotes/quote-sheet";
 import { cancelQuestion, fromDraft, handActions, nextQuoteStep, QUOTE_STATUS_LABEL, subtotalNotice } from "@/components/crm/quotes/quotes-board";
 import { QuotePreviewBody } from "@/components/crm/quotes/shopify-dialog";
+import { versionChanges } from "@/components/crm/quotes/quote-versions";
 import { agentEntries, navFor } from "@/lib/nav";
 
 const quote: QuoteDto = {
@@ -122,5 +123,15 @@ describe("quotes by hand and declined", () => {
     expect(QUOTE_STATUS_LABEL.DECLINED).toBe("Declined");
     expect(cancelQuestion({ ...hand, status: "SENT" })).toBe("Cancel this quote?");
     expect(cancelQuestion({ ...hand, status: "DRAFT", sentAt: "2026-11-20T10:00:00Z" })).toBe("Cancel this quote?");
+  });
+});
+
+describe("earlier versions", () => {
+  it("names each line added, removed or changed since that version", () => {
+    const sofa = { productId: "p1", variantId: null, title: "Linen sofa", quantity: 1, unitPrice: "1000.00" };
+    const before = [sofa, { productId: null, variantId: null, title: "Delivery", quantity: 1, unitPrice: "80.00" }];
+    const now = [{ ...sofa, quantity: 2, unitPrice: "950.00" }, { productId: null, variantId: null, title: "Cushion", quantity: 2, unitPrice: "40.00" }];
+    expect(versionChanges(before, now)).toEqual(["Linen sofa: quantity 1 → 2, price 1000.00 → 950.00", "Removed: Delivery", "Added: Cushion"]);
+    expect(versionChanges(now, now)).toEqual([]);
   });
 });

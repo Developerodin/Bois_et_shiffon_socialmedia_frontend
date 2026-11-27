@@ -1,6 +1,6 @@
 // Client-side contract for the quotes API (app/api/v1/.../brands/[brandId]/quotes). Keep in sync with the routes.
 import { request } from "@/components/settings/api";
-import type { DraftOrderWritePreview, InvoiceEmailInput, InvoiceWritePreview, QuoteDiscount, QuoteDto, QuoteLineInput, QuoteShopifyAction, ShopifyWritePreview } from "@/shared";
+import type { DraftOrderWritePreview, InvoiceEmailInput, InvoiceWritePreview, QuoteDiscount, QuoteDto, QuoteLineInput, QuoteShopifyAction, QuoteVersionDto, ShopifyWritePreview } from "@/shared";
 
 /** What the editor sends. Totals never: the server works them out and answers with the quote. */
 export type QuoteBody = {
@@ -27,6 +27,9 @@ export const quotesApi = {
   act: (w: string, b: string, id: string, body: { action: "revise" | "acceptSubtotal" | "markSent" | "markAccepted"; version: number } | { action: "decline"; version: number; reason?: string | null }) => request<{ quote: QuoteDto }>(one(w, b, id), json("POST", body)),
   /** A draft never in Shopify is deleted (nothing back); any other open quote is cancelled: the quote, and a notice when its invoice stays payable. */
   remove: (w: string, b: string, id: string) => request<{ quote: QuoteDto; notice: string | null } | undefined>(one(w, b, id), { method: "DELETE" }),
+  /** Earlier versions, newest first; with `version`, that one with its lines and totals. */
+  versions: (w: string, b: string, id: string, version?: number) =>
+    request<{ versions: QuoteVersionDto[] }>(`${one(w, b, id)}/versions${version ? `?version=${version}` : ""}`),
   /** The invoice's `email` goes with both the preview and the confirm: the confirm token covers it. */
   preview: (w: string, b: string, id: string, action: QuoteShopifyAction, opts: { again?: boolean; email?: InvoiceEmailInput } = {}) =>
     request<QuotePreview>(`${one(w, b, id)}/shopify/preview`, json("POST", { action, ...opts })),
