@@ -407,3 +407,63 @@ export function MonthGrid<T>({ month, headId, byDay, idOf, selectedId, onOpen, c
   );
 }
 
+
+/**
+ * One item as a month card: a quiet fill, a hairline border and a thin left edge in its `tone`. Its `form` comes from
+ * dayCards, whose steps in calendar-month.ts count on these heights: "stacked2" and "stacked" put `top` small and muted
+ * above the title (two lines of title, at most 50 px, or one, 34 px); "line" (28 px) and "compact" (20 px) are one line,
+ * `lead` and the title. The title is cut short with an ellipsis; the day's popover lists it in full. It is not a tab
+ * stop: the day's cell is, and its popover lists the same items for the keyboard. `about` (everything the card cuts
+ * short) is its tooltip and accessible name. `selected`: the item open in the side peek, outlined so its day reads at a
+ * glance. The content calendar's PostCard and the task calendar's TaskCard are this card.
+ */
+export function CalendarCard({ form, tone, selected, about, onClick, top, lead, title }: {
+  form: CardForm;
+  tone: Tone;
+  selected: boolean;
+  about: string;
+  onClick: () => void;
+  top?: ReactNode;
+  lead?: ReactNode;
+  title: string;
+}) {
+  const stacked = form === "stacked" || form === "stacked2";
+  return (
+    <button
+      type="button"
+      tabIndex={-1}
+      onClick={onClick}
+      title={about}
+      aria-label={about}
+      aria-current={selected ? "true" : undefined}
+      className={cn(
+        "pointer-events-auto relative flex w-full min-w-0 shrink-0 overflow-hidden rounded-md border pl-2.5 pr-1.5 text-left text-xs leading-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        selected ? "border-foreground bg-accent ring-1 ring-foreground" : "border-border/70 bg-background hover:border-control hover:bg-muted",
+        form === "stacked2" ? "max-h-[50px] min-h-[34px] flex-col justify-center py-0.5" : form === "stacked" ? "h-[34px] flex-col justify-center" : cn("items-center gap-1.5", form === "line" ? "h-7" : "h-5"),
+      )}
+    >
+      <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", TONE_DOT[tone])} />
+      {stacked ? top : lead}
+      <span data-card-title className={cn("min-w-0 font-medium text-foreground", form === "stacked2" ? "line-clamp-2 break-words" : "truncate")}>{title}</span>
+    </button>
+  );
+}
+
+/** One row of a day's list (the popover's and the narrow agenda's): `meta` muted at the left, `status` at the right, the title below. */
+export function DayRow({ onClick, meta, status, title }: { onClick: () => void; meta: ReactNode; status: ReactNode; title: string }) {
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex w-full flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring pointer-coarse:min-h-11"
+      >
+        <span className="flex items-center justify-between gap-2 text-xs">
+          <span className="min-w-0 text-muted-foreground">{meta}</span>
+          {status}
+        </span>
+        <span className="text-sm">{title}</span>
+      </button>
+    </li>
+  );
+}

@@ -232,7 +232,18 @@ async function uploadFile(base: string, taskId: string, file: File): Promise<Tas
     body: JSON.stringify({ fileName: file.name, contentType, bytes: file.size }),
   });
   await putToSlot(slot, file, "Couldn't upload the file. Try again.");
-  return (await request<{ file: TaskFileDto }>(`${base}/tasks/${enc(taskId)}/files/${enc(slot.fileId)}`, { method: "POST" })).file;
+  // The server checks two files at a time; busy, it keeps the slot (valid for an hour), so the check is asked again.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return (await request<{ file: TaskFileDto }>(`${base}/tasks/${enc(taskId)}/files/${enc(slot.fileId)}`, { method: "POST" })).file;
+    } catch (e) {
+      if (!(e instanceof ApiError && e.code === "task.fileBusy") || attempt >= FILE_CHECK_RETRIES.length) throw e;
+      await new Promise((r) => setTimeout(r, FILE_CHECK_RETRIES[attempt]));
+    }
+  }
 }
+
+/** Waits (ms) before asking again while the server is busy checking other files. */
+const FILE_CHECK_RETRIES = [1500, 3000, 6000];
 
 export const FILE_TYPES_HINT = "Attach a PDF, Word, Excel, PowerPoint, CSV, text, JPG or PNG file.";

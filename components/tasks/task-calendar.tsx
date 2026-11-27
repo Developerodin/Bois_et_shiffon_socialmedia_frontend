@@ -4,7 +4,7 @@ import { useCallback, useId, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { TaskDto } from "@/shared";
-import { MonthGrid } from "@/components/calendar/month-grid";
+import { CalendarCard, DayRow, MonthGrid } from "@/components/calendar/month-grid";
 import { Button } from "@/components/ui/button";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -104,7 +104,7 @@ export function TaskCalendar({ base, view, area, source }: { base: string; view:
                 </li>
               ))}
             </ul>
-            <p>Tasks without a due day are in the List.</p>
+            <p>Tasks without a due day are in the List.{view === "done" ? " Done shows tasks finished in the last 30 days." : ""}</p>
           </div>
         }
       />
@@ -112,38 +112,23 @@ export function TaskCalendar({ base, view, area, source }: { base: string; view:
   );
 }
 
-/**
- * One task as a month card, drawn as the content calendar's PostCard is (its heights are what dayCards counts on): a
- * quiet fill, a hairline border and a thin left edge in the task's colour. "stacked2"/"stacked" put the owner small
- * above the title; "line" and "compact" are the title alone. Not a tab stop: the day's cell is, and its popover lists
- * the same tasks for the keyboard. Its tooltip and accessible name carry the title, status and owner.
- */
+/** One task as a month card (CalendarCard): the owner small above the title when stacked, the title alone on one line. */
 function TaskCard({ task, form, selected, onOpen }: { task: TaskDto; form: CardForm; selected: boolean; onOpen: (id: string) => void }) {
   const owner = ownerLabel(task.owner, task.ownerRole);
-  const about = `${task.title} · ${statusText(task)} · ${owner}`;
-  const stacked = form === "stacked" || form === "stacked2";
   return (
-    <button
-      type="button"
-      tabIndex={-1}
+    <CalendarCard
+      form={form}
+      tone={taskTone(task)}
+      selected={selected}
+      about={`${task.title} · ${statusText(task)} · ${owner}`}
       onClick={() => onOpen(task.id)}
-      title={about}
-      aria-label={about}
-      aria-current={selected ? "true" : undefined}
-      className={cn(
-        "pointer-events-auto relative flex w-full min-w-0 shrink-0 overflow-hidden rounded-md border pl-2.5 pr-1.5 text-left text-xs leading-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        selected ? "border-foreground bg-accent ring-1 ring-foreground" : "border-border/70 bg-background hover:border-control hover:bg-muted",
-        form === "stacked2" ? "max-h-[50px] min-h-[34px] flex-col justify-center py-0.5" : form === "stacked" ? "h-[34px] flex-col justify-center" : cn("items-center gap-1.5", form === "line" ? "h-7" : "h-5"),
-      )}
-    >
-      <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", TONE_DOT[taskTone(task)])} />
-      {stacked ? (
+      top={
         <span aria-hidden className="min-w-0 truncate text-xs leading-3 text-muted-foreground">
           {owner}
         </span>
-      ) : null}
-      <span className={cn("min-w-0 font-medium text-foreground", form === "stacked2" ? "line-clamp-2 break-words" : "truncate")}>{task.title}</span>
-    </button>
+      }
+      title={task.title}
+    />
   );
 }
 
@@ -152,25 +137,23 @@ function DayTasks({ tasks, onPick }: { tasks: TaskDto[]; onPick: (id: string) =>
   return (
     <ul className="flex flex-col">
       {tasks.map((t) => (
-        <li key={t.id}>
-          <button
-            type="button"
-            onClick={() => onPick(t.id)}
-            className="flex w-full flex-col gap-0.5 rounded-lg px-2 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring pointer-coarse:min-h-11"
-          >
-            <span className="flex items-center justify-between gap-2 text-xs">
-              <span className="min-w-0 truncate text-muted-foreground">
-                {ownerLabel(t.owner, t.ownerRole)}
-                {t.areas.length ? ` · ${t.areas.map((a) => AREA_LABEL[a] ?? a).join(", ")}` : ""}
-              </span>
-              <span className="flex shrink-0 items-center gap-1">
-                {t.blockedReason ? <StatusBadge quiet status="BLOCKED">Blocked</StatusBadge> : null}
-                <StatusBadge quiet status={t.status}>{STATUS_LABEL[t.status] ?? t.status}</StatusBadge>
-              </span>
+        <DayRow
+          key={t.id}
+          onClick={() => onPick(t.id)}
+          meta={
+            <span className="block truncate">
+              {ownerLabel(t.owner, t.ownerRole)}
+              {t.areas.length ? ` · ${t.areas.map((a) => AREA_LABEL[a] ?? a).join(", ")}` : ""}
             </span>
-            <span className="text-sm">{t.title}</span>
-          </button>
-        </li>
+          }
+          status={
+            <span className="flex shrink-0 items-center gap-1">
+              {t.blockedReason ? <StatusBadge quiet status="BLOCKED">Blocked</StatusBadge> : null}
+              <StatusBadge quiet status={t.status}>{STATUS_LABEL[t.status] ?? t.status}</StatusBadge>
+            </span>
+          }
+          title={t.title}
+        />
       ))}
     </ul>
   );

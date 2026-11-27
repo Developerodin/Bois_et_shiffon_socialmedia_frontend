@@ -114,3 +114,20 @@ describe("the files list", () => {
     expect(renderToStaticMarkup(createElement(TaskFiles, { base: "/api/b", task: task({ files: [] }), canEdit: false }))).toBe("");
   });
 });
+
+describe("task file check while the server is busy", () => {
+  it("asks for the check again on task.fileBusy, keeping the same slot", async () => {
+    vi.useFakeTimers();
+    const doc = new File(["%PDF-"], "a.pdf");
+    fetchMock
+      .mockResolvedValueOnce(json({ fileId: "f1", url: "https://store/put", headers: {} }, 201))
+      .mockResolvedValueOnce(new Response(null, { status: 200 }))
+      .mockResolvedValueOnce(json({ title: "Busy", detail: "Busy checking other files.", code: "task.fileBusy" }, 429))
+      .mockResolvedValueOnce(json({ file: { id: "f1" } }, 201));
+    const done = tasksApi.uploadFile("/api/b", "t1", doc);
+    await vi.advanceTimersByTimeAsync(1600);
+    await expect(done).resolves.toEqual({ id: "f1" });
+    expect(fetchMock.mock.calls.slice(2).map((c) => c[0])).toEqual(["/api/b/tasks/t1/files/f1", "/api/b/tasks/t1/files/f1"]);
+    vi.useRealTimers();
+  });
+});
