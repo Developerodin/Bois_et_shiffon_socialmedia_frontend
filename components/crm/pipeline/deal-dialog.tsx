@@ -124,12 +124,12 @@ export function DealDialog({ w, b, deal, companies, owners, defaultCurrency, can
                 {draft.customer ? "Change" : "Pick a customer"}
               </Button>
               {draft.customer ? (
-                <Button type="button" size="sm" variant="ghost" onClick={() => edit({ customer: null })}>
+                <Button type="button" size="sm" variant="ghost" onClick={() => edit({ customer: null, conversationId: "" })}>
                   Remove
                 </Button>
               ) : null}
             </div>
-            {picking ? <CustomerPicker w={w} b={b} label="Find the deal's customer" onPick={(c) => (edit({ customer: { id: c.id, displayName: c.displayName } }), setPicking(false))} /> : null}
+            {picking ? <CustomerPicker w={w} b={b} label="Find the deal's customer" onPick={(c) => (edit({ customer: { id: c.id, displayName: c.displayName }, ...(c.id === draft.customer?.id ? {} : { conversationId: "" }) }), setPicking(false))} /> : null}
           </div>
           {canInbox ? (
             <div className="flex flex-col gap-1.5 text-sm">
