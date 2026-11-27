@@ -20,25 +20,27 @@ export function railStatus({ channel, conn }: RailItem): { text: string; tone: T
 /**
  * The channels, one button each (the chosen one marked as the current page): its mark, name, and the account or why
  * there is none, with a status dot. A column beside the numbers once the page has room (the parent's container
- * query, `an`), else a grid of chips above them.
+ * query, `an`), a grid of them above the numbers on a narrower page, and on a phone a row of name-only chips (the dot
+ * still says the state; the header says the rest) that scrolls sideways inside itself.
  */
 export function ChannelSidebar({ items, current, onSelect }: { items: RailItem[]; current: string; onSelect: (id: string) => void }) {
   return (
     <nav aria-label="Channels" className="min-w-0">
-      <ul className="grid grid-cols-2 gap-1.5 @min-[36rem]/an:grid-cols-3 @min-[60rem]/an:grid-cols-1">
+      {/* A phone: one row of chips that scrolls on its own (never the page); then a grid; then a column. */}
+      <ul className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 @min-[36rem]/an:mx-0 @min-[36rem]/an:grid @min-[36rem]/an:grid-cols-3 @min-[36rem]/an:overflow-visible @min-[36rem]/an:px-0 @min-[36rem]/an:pb-0 @min-[60rem]/an:grid-cols-1">
         {items.map((item) => {
           const { channel: c } = item;
           const I = CHANNEL_ICON[c.id];
           const on = c.id === current;
           const s = railStatus(item);
           return (
-            <li key={c.id}>
+            <li key={c.id} className="shrink-0 @min-[36rem]/an:shrink">
               <button
                 type="button"
                 aria-current={on ? "page" : undefined}
                 onClick={() => onSelect(c.id)}
                 className={cn(
-                  "flex w-full min-w-0 items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "flex w-full min-w-0 items-center gap-2.5 rounded-xl border px-3 py-2 text-left @min-[36rem]/an:gap-3 @min-[36rem]/an:py-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   on ? "border-foreground/15 bg-card shadow-sm" : "border-transparent hover:bg-card/70",
                 )}
               >
@@ -48,7 +50,7 @@ export function ChannelSidebar({ items, current, onSelect }: { items: RailItem[]
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className={cn("block truncate text-sm", on && "font-medium")}>{c.label}</span>
-                  <span className="block truncate text-xs text-muted-foreground">{s.text || " "}</span>
+                  <span className="sr-only truncate text-xs text-muted-foreground @min-[36rem]/an:not-sr-only @min-[36rem]/an:block">{s.text || " "}</span>
                 </span>
                 {on && <ChevronRight aria-hidden className="hidden size-4 shrink-0 text-muted-foreground @min-[60rem]/an:block" />}
               </button>

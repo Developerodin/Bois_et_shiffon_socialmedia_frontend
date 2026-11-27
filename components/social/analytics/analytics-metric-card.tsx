@@ -8,8 +8,8 @@ const WIDE: Record<number, string> = {
   1: "",
   2: "@min-[36rem]/metrics:grid-cols-2",
   3: "@min-[36rem]/metrics:grid-cols-3",
-  4: "@min-[36rem]/metrics:grid-cols-2 @min-[52rem]/metrics:grid-cols-4",
-  5: "@min-[36rem]/metrics:grid-cols-3 @min-[60rem]/metrics:grid-cols-5",
+  4: "@min-[36rem]/metrics:grid-cols-2 @min-[44rem]/metrics:grid-cols-4",
+  5: "@min-[36rem]/metrics:grid-cols-3 @min-[52rem]/metrics:grid-cols-5",
   6: "@min-[36rem]/metrics:grid-cols-3 @min-[60rem]/metrics:grid-cols-6",
 };
 
