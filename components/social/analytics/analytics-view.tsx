@@ -148,7 +148,7 @@ export function ReadPanel({ channel, state, wide, days, retry }: { channel: Read
           secondary={again}
           aside={<StateList title={`Once ${channel.label} shares its numbers, this page shows`} items={channel.gains} />}
         >
-          The account is connected, but {channel.source} refused to send its analytics. That usually means the connection was made without the analytics permission. Reconnecting on the Connections page asks for it again.
+          The account is connected, but {channel.source} refused every request for its numbers, so there is nothing to show (this is not a row of zeros). That usually means the connection is missing a permission {channel.source} needs for analytics; reconnecting on the Connections page asks for the permissions again.
         </AnalyticsEmptyState>
       );
     case "pending":
