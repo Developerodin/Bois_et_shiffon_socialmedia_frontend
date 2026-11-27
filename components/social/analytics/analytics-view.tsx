@@ -227,6 +227,9 @@ function Numbers({ channel, a, wide, days, pendingDays }: { channel: ReadChannel
       )}
       {a.partial && <AnalyticsDataNotice title="Some numbers didn't arrive in time">They show as — for now and come in on the next read.</AnalyticsDataNotice>}
 
+      {series.length === 0 && pendingDays > 0 && (
+        <AnalyticsDataNotice title={`${channel.source} is still counting the last ${pendingDays === 1 ? "day" : `${pendingDays} days`}`}>Their numbers fill in later; nothing is missing for good.</AnalyticsDataNotice>
+      )}
       {series.length > 0 && (
         <AnalyticsChartCard
           series={series}

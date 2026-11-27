@@ -34,7 +34,8 @@ export function ChannelSidebar({ items, current, onSelect }: { items: RailItem[]
           const on = c.id === current;
           const s = railStatus(item);
           return (
-            <li key={c.id} className="shrink-0 @min-[36rem]/an:shrink">
+            // relative: the sr-only status line (absolutely placed) stays inside its chip, so off-screen chips can't widen the page.
+            <li key={c.id} className="relative shrink-0 @min-[36rem]/an:shrink">
               <button
                 type="button"
                 aria-current={on ? "page" : undefined}

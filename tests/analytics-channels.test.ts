@@ -47,6 +47,12 @@ describe("previousPeriod", () => {
     expect(previousPeriod(cur, { ...wide, days: 28 }, "views")).toBeNull();
   });
 
+  it("refuses while the latest days are still being counted (this period would be short)", () => {
+    const pending = [{ day: "2026-11-25", value: 3 }, { day: "2026-11-26", value: null }];
+    expect(previousPeriod({ ...cur, daily: pending }, wide, "views")).toBeNull();
+    expect(previousPeriod(cur, { ...wide, daily: pending }, "views")).toBeNull();
+  });
+
   it("refuses when the reads end on different days, are partial, are missing a number, or would go negative", () => {
     expect(previousPeriod(cur, { ...wide, to: "2026-11-25" }, "views")).toBeNull();
     expect(previousPeriod({ ...cur, partial: true }, wide, "views")).toBeNull();
@@ -92,13 +98,16 @@ describe("panelState", () => {
     expect(panelState(ch("pinterest"), "on", ready(zeros)).kind).toBe("ok");
   });
 
+  // The server's real shape: the five period keys, and monthlyViews from the account read even when analytics refused.
+  const PIN_NULLS = { impressions: null, saves: null, pinClicks: null, outboundClicks: null, engagements: null, monthlyViews: 1500 };
+
   it("Pinterest B: days listed but none counted yet is pending", () => {
-    const a = read({ channel: "pinterest", totals: { impressions: null, saves: null }, daily: [{ day: "2026-11-25", value: null }, { day: "2026-11-26", value: null }], dailyEngagements: [{ day: "2026-11-26", value: null }] });
+    const a = read({ channel: "pinterest", totals: PIN_NULLS, daily: [{ day: "2026-11-25", value: null }, { day: "2026-11-26", value: null }], dailyEngagements: [{ day: "2026-11-26", value: null }] });
     expect(panelState(ch("pinterest"), "on", ready(a)).kind).toBe("pending");
   });
 
   it("Pinterest C: every number refused and no days is unavailable, not zeros", () => {
-    const a = read({ channel: "pinterest", totals: { impressions: null, saves: null, pinClicks: null, outboundClicks: null, engagements: null }, daily: [], dailyEngagements: [], posts: null });
+    const a = read({ channel: "pinterest", totals: PIN_NULLS, daily: [], dailyEngagements: [], posts: null });
     expect(panelState(ch("pinterest"), "on", ready(a)).kind).toBe("unavailable");
   });
 

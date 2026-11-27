@@ -216,11 +216,14 @@ export type Comparison = { previous: number; change: number | null };
  * The previous period for one figure, from two reads ending on the same day: this period (`cur`, N days) and twice it
  * (`wide`, 2N days). previous = wide − cur, for ADDITIVE keys only. Null whenever it can't be said truthfully: the key
  * isn't additive, the period is too long, a read is partial or not ok, the two reads end on different days (they
- * straddled midnight UTC, or one came from the server's cache), a number is missing, or the subtraction goes negative.
+ * straddled midnight UTC, or one came from the server's cache), the latest days are still being counted, a number is
+ * missing, or the subtraction goes negative.
  */
 export function previousPeriod(cur: ChannelAnalyticsDto, wide: ChannelAnalyticsDto | null | undefined, key: string): Comparison | null {
   if (!wide || !ADDITIVE.has(key) || !comparable(cur.days) || wide.days !== cur.days * 2) return null;
   if (cur.state !== "ok" || wide.state !== "ok" || cur.partial || wide.partial || cur.to !== wide.to || cur.channel !== wide.channel) return null;
+  // Days still being counted (Pinterest's latest) leave this period short against a complete previous one.
+  if (pendingTail(cur.daily) > 0 || pendingTail(wide.daily) > 0) return null;
   const now = cur.totals[key];
   const both = wide.totals[key];
   if (now == null || both == null) return null;
@@ -261,9 +264,15 @@ export type PanelState =
   | { kind: "pending"; data: ChannelAnalyticsDto }
   | { kind: "ok"; data: ChannelAnalyticsDto; pendingDays: number };
 
-/** Whether any figure or day has a number (a 0 counts: it is a real number). */
+/**
+ * Totals that aren't read over the period: Pinterest's monthly views come with the account, not its analytics, so they
+ * arrive even when every analytics read was refused and say nothing about whether the period was read.
+ */
+const ACCOUNT_FIGURES: ReadonlySet<string> = new Set(["monthlyViews"]);
+
+/** Whether any figure over the period or any day has a number (a 0 counts: it is a real number). */
 function hasNumbers(a: ChannelAnalyticsDto): boolean {
-  return Object.values(a.totals).some((v) => v != null) || a.daily.some((d) => d.value != null) || (a.dailyEngagements ?? []).some((d) => d.value != null);
+  return Object.entries(a.totals).some(([k, v]) => v != null && !ACCOUNT_FIGURES.has(k)) || a.daily.some((d) => d.value != null) || (a.dailyEngagements ?? []).some((d) => d.value != null);
 }
 
 /** How many days at the end of a series have no number yet (Pinterest's days still being counted). */

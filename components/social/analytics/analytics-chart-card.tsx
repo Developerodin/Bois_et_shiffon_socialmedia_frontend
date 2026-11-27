@@ -25,7 +25,7 @@ export function AnalyticsChartCard({ series, from, to, note }: { series: ChartSe
             {dayLabel(from)} – {dayLabel(to)}
           </p>
         </div>
-        {series.length > 1 && <SegmentedRadios label="Chart" name="analytics-series" value={pick.key} onChange={setKey} options={series.map((s) => ({ value: s.key, label: s.label }))} />}
+        {series.length > 1 && <SegmentedRadios label="Chart" name="analytics-series" value={pick.key} onChange={setKey} options={series.map((s) => ({ value: s.key, label: s.label }))} size="sm" />}
       </div>
       <DayBars key={pick.key} days={pick.days} what={pick.what} title={`${pick.label} per day`} caption={false} tall />
       {note ? <p className="mt-3 text-xs text-muted-foreground">{note}</p> : null}
