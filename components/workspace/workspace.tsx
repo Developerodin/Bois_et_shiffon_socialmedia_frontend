@@ -1336,8 +1336,11 @@ export function AgentView({
   onOpenPost,
   canRun,
   perms,
+  postsHere = false,
 }: {
   agentKey: string;
+  /** Posts open in place on this page (the calendar's and Channels' peek): the run's posts are listed instead of a link to the calendar. */
+  postsHere?: boolean;
   /** A run to show what it did (from the "agent finished" toast); without it, the latest run. */
   runId?: string;
   /** The role may run agents; without it the Run button is hidden. */
@@ -1412,7 +1415,7 @@ export function AgentView({
         </div>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         {running && <p className="text-sm text-muted-foreground">Open Logs in the top bar to watch each step live.</p>}
-        {!running && agent?.lastRun?.status === "SUCCEEDED" && AGENT_NEXT[agentKey] && (
+        {!running && agent?.lastRun?.status === "SUCCEEDED" && AGENT_NEXT[agentKey] && !(postsHere && AGENT_NEXT[agentKey].href === "/calendar") && (
           <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary/5 px-4 py-3 text-sm">
             <span>{AGENT_NEXT[agentKey].text}</span>
             <Button size="sm" asChild>
@@ -1430,6 +1433,7 @@ export function AgentView({
               agentKey={agentKey}
               runId={(shownRun ?? agent?.lastRun?.id)!}
               again={shownRun ? undefined : `${agent?.lastRun?.id}:${agent?.lastRun?.status}`}
+              onOpenPost={postsHere ? onOpenPost : undefined}
             />
           </section>
         )}

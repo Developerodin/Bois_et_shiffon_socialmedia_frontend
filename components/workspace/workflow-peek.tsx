@@ -101,6 +101,7 @@ export function WorkflowPeekBody({
       onRan={refreshAgents}
       onOpenPosts={onOpenPosts}
       onOpenPost={onOpenPost}
+      postsHere
     />
   );
 }
