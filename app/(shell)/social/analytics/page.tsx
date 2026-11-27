@@ -1,5 +1,5 @@
 import { Lock, Share2 } from "lucide-react";
-import { AnalyticsView } from "@/components/social/analytics-view";
+import { AnalyticsView } from "@/components/social/analytics/analytics-view";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getShell } from "@/lib/server-fetch";
 import { CONNECTIONS_READ } from "@/shared";
