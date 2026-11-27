@@ -77,6 +77,9 @@ export type ContentItem = {
   owner?: { id: string; name: string | null } | null;
   /** The account its scheduled or published attempt uses; older servers omit it. */
   publishConnectionId?: string | null;
+  /** A Pinterest Pin's planned board (id and the name kept with it); older servers omit them. */
+  plannedBoardId?: string | null;
+  plannedBoardName?: string | null;
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string };
@@ -718,7 +721,7 @@ function PostCard({ item, accounts, onOpen, form = "compact", selected = false }
   const Icon = channelIcon(item.channel);
   const status = statusText(item); // once per card: the tooltip and the accessible name both use it
   const d = postCardDetails(item, accounts);
-  // The channel's label already names an Instagram format; the line adds a carousel's pictures, where a pin leads or a Facebook Post's Page.
+  // The channel's label already names an Instagram format; the line adds a carousel's pictures, a pin's board and where it leads, or a Facebook Post's Page.
   const extra = postCardLine({ ...d, format: null });
   const thumb = useStableSignedUrl(d.thumb);
   return (

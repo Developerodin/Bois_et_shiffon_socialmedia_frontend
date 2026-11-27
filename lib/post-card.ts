@@ -8,6 +8,8 @@ export type CardPost = {
   firstFrameUrl?: string | null;
   /** The account its scheduled or published attempt uses (GET content); older servers omit it. */
   publishConnectionId?: string | null;
+  /** A Pinterest Pin's planned board, by the name stored with the plan (no Pinterest call); older servers omit it. */
+  plannedBoardName?: string | null;
   latest: { body: { pinLink?: string }; photoUrls?: string[] } | null;
 };
 
@@ -31,23 +33,24 @@ const FORMAT: Record<string, string> = { INSTAGRAM_POST: "Post", INSTAGRAM_CAROU
  * What a post's card can say beyond its channel, time and status, all from the post record (GET content): its
  * Instagram format, how many pictures a carousel has, where a pin leads (the host only), and its picture: a story's first
  * rendered frame, else the draft's cover (photoUrls[0], a studio reel's first scene), and a Facebook Post's Page
- * (facebookPage, from `connections`). Anything missing is left out.
+ * (facebookPage, from `connections`) or a pin's planned board. Anything missing is left out.
  * ponytail: an X thread or a LinkedIn document aren't on the post record, so cards can't show them.
  */
-export function postCardDetails(p: CardPost, connections: readonly Connection[] | null = null): { format: string | null; pictures: number | null; pinHost: string | null; page: string | null; thumb: string | null } {
+export function postCardDetails(p: CardPost, connections: readonly Connection[] | null = null): { format: string | null; pictures: number | null; pinHost: string | null; page: string | null; board: string | null; thumb: string | null } {
   const photos = p.latest?.photoUrls ?? [];
   return {
     format: FORMAT[p.channel] ?? null,
     pictures: p.channel === "INSTAGRAM_CAROUSEL" && photos.length ? photos.length : null,
     pinHost: p.channel === "PINTEREST_PIN" ? (safeHttpUrl(p.latest?.body.pinLink)?.host ?? null) : null,
     page: facebookPage(p, connections),
+    board: p.channel === "PINTEREST_PIN" ? p.plannedBoardName || null : null,
     thumb: (p.channel === "INSTAGRAM_STORY" ? p.firstFrameUrl : photos[0]) ?? null,
   };
 }
 
-/** The details as one short line of words ("Carousel · 4 pictures", "Leads to shop.example", "Page: Oak & Co"), or "" for none. */
-export function postCardLine(d: Pick<ReturnType<typeof postCardDetails>, "format" | "pictures" | "pinHost"> & { page?: string | null }): string {
-  return [d.format, d.pictures ? `${d.pictures} ${d.pictures === 1 ? "picture" : "pictures"}` : null, d.pinHost ? `Leads to ${d.pinHost}` : null, d.page ? `Page: ${d.page}` : null].filter(Boolean).join(" · ");
+/** The details as one short line of words ("Carousel · 4 pictures", "Board: Kitchen · Leads to shop.example", "Page: Oak & Co"), or "" for none. */
+export function postCardLine(d: Pick<ReturnType<typeof postCardDetails>, "format" | "pictures" | "pinHost"> & { page?: string | null; board?: string | null }): string {
+  return [d.format, d.pictures ? `${d.pictures} ${d.pictures === 1 ? "picture" : "pictures"}` : null, d.board ? `Board: ${d.board}` : null, d.pinHost ? `Leads to ${d.pinHost}` : null, d.page ? `Page: ${d.page}` : null].filter(Boolean).join(" · ");
 }
 
 /** Whether two signed links point at the same stored file (they differ only in their signature and date). */

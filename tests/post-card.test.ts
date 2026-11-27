@@ -76,3 +76,16 @@ describe("facebookPage", () => {
     expect(postCardLine(postCardDetails({ ...fb(), latest: null }))).toBe("");
   });
 });
+
+describe("a pin's planned board", () => {
+  it("shows on a pin's card line, before where it leads", () => {
+    const d = postCardDetails({ channel: "PINTEREST_PIN", plannedBoardName: "Kitchen", latest: { body: { pinLink: "https://shop.example/p" } } });
+    expect(d.board).toBe("Kitchen");
+    expect(postCardLine(d)).toBe("Board: Kitchen · Leads to shop.example");
+  });
+  it("is nothing without a plan, from an older server, or on another channel", () => {
+    expect(postCardDetails({ channel: "PINTEREST_PIN", plannedBoardName: null, latest: null }).board).toBeNull();
+    expect(postCardDetails({ channel: "PINTEREST_PIN", latest: null }).board).toBeNull();
+    expect(postCardDetails({ channel: "FACEBOOK_POST", plannedBoardName: "Kitchen", latest: null }).board).toBeNull();
+  });
+});
