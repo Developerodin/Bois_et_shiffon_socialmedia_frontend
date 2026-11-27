@@ -16,6 +16,7 @@ import { restoreThread } from "@/lib/chat-undo";
 import { cn } from "@/lib/utils";
 import { CHANNEL_LABEL } from "@/lib/post-labels";
 import { isRunCancelled } from "@/components/languages/languages";
+import { chatRequestBody } from "@/lib/assistant-context";
 
 /**
  * A plain-words label per chat tool step. The server's tools are in server/chat/tools.ts, its data tools listed in
@@ -49,10 +50,10 @@ const TOOL_LABEL: Record<string, (input: Record<string, unknown> | undefined) =>
 };
 
 /**
- * `page`: the nav id of the page open (CHAT_PAGES), sent with each message so the reply can lean on it; `pageLabel`
- * names it in the composer. `wide`: the expanded panel, which centres the conversation in a reading column.
+ * `page`: the nav id of the page open (CHAT_PAGES), sent with each message so the reply can lean on it; `channel`: the
+ * channel calendar open (CHAT_CHANNELS), sent the same way; `pageLabel` names where they are in the composer. `wide`: the expanded panel, which centres the conversation in a reading column.
  */
-type Props = { workspaceId: string; brandId: string; page?: string | null; pageLabel?: string | null; wide?: boolean };
+type Props = { workspaceId: string; brandId: string; page?: string | null; channel?: string | null; pageLabel?: string | null; wide?: boolean };
 
 type Thread = { id: string; messages: UIMessage[] };
 
@@ -209,6 +210,7 @@ function ChatSession({
   onNew,
   slots,
   page,
+  channel,
   pageLabel,
   wide,
 }: Props & {
@@ -218,11 +220,14 @@ function ChatSession({
   slots: ChatSlots;
 }) {
   const [input, setInput] = useState("");
-  // useChat keeps the transport it was first given, so the page is read through a ref when a message is sent.
+  // useChat keeps the transport it was first given, so the page and channel are read through refs when a message is
+  // sent: a switch changes the next message's context, never the conversation (they are in no key).
   const pageRef = useRef(page);
+  const channelRef = useRef(channel);
   useEffect(() => {
     pageRef.current = page;
-  }, [page]);
+    channelRef.current = channel;
+  }, [page, channel]);
   const column = wide ? "mx-auto w-full max-w-3xl" : "";
   const endRef = useRef<HTMLDivElement>(null);
   // Follow the reply only while the person is at the bottom; scrolling up to reread stops it, sending resumes it.
@@ -235,7 +240,7 @@ function ChatSession({
       headers: { "X-Client": CLIENT_TAG },
       // The server keeps the history; send only the newest message.
       prepareSendMessagesRequest: ({ messages: all, id }) => ({
-        body: { id, message: all[all.length - 1], page: pageRef.current ?? undefined },
+        body: chatRequestBody(id, all, pageRef.current, channelRef.current),
       }),
     }),
   });
@@ -382,7 +387,7 @@ function ChatSession({
           />
           <div className="flex items-center justify-between gap-2 px-3.5 pb-2.5">
             <div className="flex min-w-0 items-center gap-2">
-              {/* Which page Bois & Chiffons is told about (the server names it from its own list). */}
+              {/* Which page (or channel calendar) Bois & Chiffons is told about (the server names it from its own list). */}
               {pageLabel ? (
                 <span className="truncate rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground" title="Bois & Chiffons knows which page you're on">
                   Context: {pageLabel}
