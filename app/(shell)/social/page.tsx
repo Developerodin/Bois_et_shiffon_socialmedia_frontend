@@ -36,7 +36,6 @@ export default async function SocialPage() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <PageHeader
-        visible
         title="Channels"
         actions={
           <>
