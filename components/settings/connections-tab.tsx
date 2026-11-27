@@ -16,6 +16,7 @@ import {
   type ProviderInfo,
 } from "@/components/settings/api";
 import { CONNECT_RETURN_KEY, connectReturnPath } from "@/lib/connect-return";
+import { connectionBadge } from "@/lib/status";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ConfirmDialog,
@@ -170,9 +171,7 @@ export function ConnectionsTab({ workspaceId, brandId, canManage, notice, showAd
                   }
                 >
                   <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-                    <StatusBadge tone={c.status === "ACTIVE" ? "good" : "bad"}>
-                      {c.status === "ACTIVE" ? "Connected" : "Needs reconnect"}
-                    </StatusBadge>
+                    <StatusBadge tone={connectionBadge(c.status).tone}>{connectionBadge(c.status).label}</StatusBadge>
                     <span className="truncate text-sm">{c.displayName}</span>
                     {c.via === "mcp" ? <span className="text-xs text-muted-foreground">Shopify MCP · products only</span> : null}
                     <span className="text-xs text-muted-foreground">

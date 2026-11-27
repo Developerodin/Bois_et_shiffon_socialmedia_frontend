@@ -46,8 +46,10 @@ describe("navFor", () => {
   it("ignores the query string", () => {
     expect(navFor("/performance?x=1").title).toBe("Growth reports");
   });
-  it("titles the Content calendar page over Wave, and links both Wave and More's entry to it", () => {
-    expect(NAV.find((e) => e.id === "wave")?.href).toBe("/calendar");
+  it("titles Social & Content over Wave, which links to it, and keeps More's entry on the Content calendar", () => {
+    expect(NAV.find((e) => e.id === "wave")?.href).toBe("/social");
+    expect(NAV.find((e) => e.id === "social")).toMatchObject({ href: "/social", group: "page", perm: ["brand.read"] });
+    expect(navFor("/social")).toMatchObject({ activeId: "social", title: "Social & Content", brandScoped: true });
     expect(NAV.find((e) => e.id === "calendar")).toMatchObject({ href: "/calendar", group: "more", perm: ["brand.read"] });
     expect(navFor("/calendar")).toMatchObject({ activeId: "calendar", title: "Content calendar", brandScoped: true });
   });
@@ -202,6 +204,8 @@ describe("activeIdFor", () => {
   it("selects Wave on the Content calendar page, and no longer on the Overview's old ?panel=content", () => {
     expect(at("/calendar", new Set())).toBe("wave");
     expect(at("/calendar?post=p1&cf_need=week", new Set())).toBe("wave");
+    expect(at("/social", new Set())).toBe("wave");
+    expect(at("/calendar?cf_channel=meta", new Set())).toBe("wave");
     expect(at("/?panel=content", new Set())).toBe("overview");
   });
 

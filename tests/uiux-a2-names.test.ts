@@ -10,7 +10,8 @@ const byId = (id: string) => NAV.find((e) => e.id === id)!;
 describe("one name per agent and page", () => {
   it("names the calendar Content calendar everywhere", () => {
     expect(byId("calendar").label).toBe("Content calendar");
-    expect(byId("wave").role).toBe("Content calendar");
+    // Wave opens Social & Content (the channels), each channel its Content calendar.
+    expect(byId("wave").role).toBe("Social & Content");
     expect(peekCrumb({ kind: "content", id: "p1" })).toBe("Review post");
   });
   it("gives the built agents the role name the Overview shows", () => {

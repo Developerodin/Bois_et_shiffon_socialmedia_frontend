@@ -58,12 +58,14 @@ export const NAV: readonly NavEntry[] = [
   // Its link is Drift's slot; this entry gives the page its title (the page wins the tie with Drift's href). The page
   // and its API need brand.read. Drift's slot itself carries no perm: agentEntries lists every agent and reads none.
   { id: "competitors", label: "Competitors", href: "/competitors", group: "page", perm: ["brand.read"] },
+  // Its link is Wave's slot; this entry gives the page its title.
+  { id: "social", label: "Social & Content", href: "/social", group: "page", perm: ["brand.read"] },
 
   { id: "spark", label: "Spark", href: "/agents/spark", group: "agent", role: "Sales & CRM", soon: true },
   { id: "beat", label: "Beat", href: "/agents/beat", group: "agent", role: "Projects & team", soon: true },
-  // Links to the Content calendar page; the "calendar" entry below titles it (the page wins the tie with Wave's href).
-  // No perm: agentEntries reads none (as for Drift); the page itself shows a no-access state without brand.read.
-  { id: "wave", label: "Wave", href: "/calendar", group: "agent", role: "Content calendar" },
+  // Links to Social & Content (the channels, each opening its calendar); the "social" entry titles it (the page wins the
+  // tie with Wave's href). No perm: agentEntries reads none (as for Drift); the page shows a no-access state without brand.read.
+  { id: "wave", label: "Wave", href: "/social", group: "agent", role: "Social & Content" },
   // Echo has no web inbox yet; it points at Connections until one exists.
   { id: "echo", label: "Echo", href: "/settings?tab=connections", group: "agent", role: "Communication", soon: true },
   { id: "pulse", label: "Pulse", href: "/agents/pulse", group: "agent", role: "Finance", soon: true },
@@ -129,7 +131,7 @@ export function activeIdFor(pathname: string, search: { get(name: string): strin
   if (pathname === "/projects" || pathname.startsWith("/projects/")) return "beat";
   if (pathname === "/crm" || pathname.startsWith("/crm/")) return "spark";
   if (pathname === "/competitors") return "drift";
-  if (pathname === "/calendar") return "wave";
+  if (pathname === "/calendar" || pathname === "/social") return "wave";
   return navFor(pathname).activeId;
 }
 

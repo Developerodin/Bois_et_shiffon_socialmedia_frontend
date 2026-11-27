@@ -1,3 +1,4 @@
+import { CHANNEL_LABEL } from "@/lib/post-labels";
 import { inNextWeek, isBlocked, isOverdue, STATUS_GROUPS } from "@/shared";
 
 export { isBlocked, isOverdue };
@@ -21,6 +22,28 @@ export type CalendarFilter = { channel?: string; status?: StatusGroup; campaignI
 
 const PUBLISHED: readonly string[] = STATUS_GROUPS.published;
 
+const INSTAGRAM = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "INSTAGRAM_STORY"] as const;
+/**
+ * Channel groups the channel filter (cf_channel) takes beside one channel: Meta is Facebook and every Instagram format,
+ * Instagram its four formats, so the Meta calendar and the Instagram shortcut show the same posts.
+ */
+export const CHANNEL_GROUPS = { meta: ["FACEBOOK_POST", ...INSTAGRAM], instagram: INSTAGRAM } as const;
+const isGroup = (v: string): v is keyof typeof CHANNEL_GROUPS => Object.hasOwn(CHANNEL_GROUPS, v);
+
+/** The channels a cf_channel value stands for: a group's members, else the one channel. */
+export const channelsOf = (v: string): readonly string[] => (isGroup(v) ? CHANNEL_GROUPS[v] : [v]);
+
+/**
+ * The Channel filter's choices: each group some present channel belongs to, then the present channels, then the
+ * current value if it is neither (a group, or a channel with no posts yet, opened from the Social & Content page), so
+ * the pill never reads "All channels" while a filter is on.
+ */
+export function channelOptions(present: readonly string[], current?: string): string[] {
+  const groups = Object.keys(CHANNEL_GROUPS).filter((g) => g === current || channelsOf(g).some((c) => present.includes(c)));
+  const out = [...groups, ...present];
+  return current && !out.includes(current) ? [...out, current] : out;
+}
+
 export function isThisWeek(i: Pick<CalendarItem, "status" | "scheduledFor">, now: Date): boolean {
   return inNextWeek(i.scheduledFor, now) && !PUBLISHED.includes(i.status);
 }
@@ -33,7 +56,7 @@ export function ownerLabel(owner: CalendarItem["owner"]): string {
 export function filterItems<T extends CalendarItem>(items: T[], f: CalendarFilter, me: string | null, now: Date): T[] {
   return items.filter(
     (i) =>
-      (!f.channel || i.channel === f.channel) &&
+      (!f.channel || channelsOf(f.channel).includes(i.channel)) &&
       (!f.status || (STATUS_GROUPS[f.status] as readonly string[]).includes(i.status)) &&
       (!f.campaignId || i.campaignId === f.campaignId) &&
       (f.owner !== "me" || !me || i.owner?.id === me) &&
@@ -51,7 +74,7 @@ const OWNERS = ["me", "none"], NEEDS = ["overdue", "blocked", "week"];
 export function filterFromSearch(q: URLSearchParams): CalendarFilter {
   const f: CalendarFilter = {};
   const channel = q.get("cf_channel"), status = q.get("cf_status"), campaignId = q.get("cf_campaignId"), owner = q.get("cf_owner"), need = q.get("cf_need");
-  if (channel) f.channel = channel;
+  if (channel && (isGroup(channel) || Object.hasOwn(CHANNEL_LABEL, channel))) f.channel = channel;
   if (status && Object.hasOwn(STATUS_GROUPS, status)) f.status = status as StatusGroup;
   if (campaignId) f.campaignId = campaignId;
   if (owner && OWNERS.includes(owner)) f.owner = owner as "me" | "none";
@@ -64,6 +87,14 @@ export function filterToSearch(f: CalendarFilter): string {
   const q = new URLSearchParams();
   for (const k of KEYS) if (f[k]) q.set(param(k), f[k]!);
   return q.toString();
+}
+
+/** The Content calendar page with this filter, and the post open in its peek when given. */
+export function calendarHref(f: CalendarFilter, post?: string): string {
+  const q = new URLSearchParams(filterToSearch(f));
+  if (post) q.set("post", post);
+  const s = q.toString();
+  return s ? `/calendar?${s}` : "/calendar";
 }
 
 /** Replace the cf_ params in a query string with this filter's, keeping every other param. */

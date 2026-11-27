@@ -56,7 +56,7 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
 import { CONNECTIONS_READ, safeHttpUrl, STATUS_GROUPS } from "@/shared";
-import { filterToSearch, isBlocked, isOverdue, isThisWeek, type CalendarFilter } from "@/lib/calendar-filter";
+import { calendarHref as filterHref, isBlocked, isOverdue, isThisWeek, type CalendarFilter } from "@/lib/calendar-filter";
 import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
 import { nothingToDo } from "@/lib/agent-runs";
@@ -1157,7 +1157,7 @@ const pickDue = (d: { items: DueStory[] }) => d.items;
 const DAY_MS = 24 * 3600_000;
 
 /** The Content calendar page, filtered to posts needing one kind of action when `need` is given. */
-const calendarHref = (need?: NonNullable<CalendarFilter["need"]>) => (need ? `/calendar?${filterToSearch({ need })}` : "/calendar");
+const calendarHref = (need?: NonNullable<CalendarFilter["need"]>) => filterHref({ need });
 
 /**
  * Stories due to be posted by hand: one card with a count, until someone posts them or stops Post by hand. Dismiss hides
