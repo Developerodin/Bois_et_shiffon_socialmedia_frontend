@@ -157,6 +157,8 @@ export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOp
                   value={choice.channel}
                   onChange={(e) => {
                     setChannel(e.target.value);
+                    // New post's request ids are shared across channels: a new channel is a new request, never a retry.
+                    setRequestId(crypto.randomUUID());
                     setError("");
                   }}
                   className={selectClass}
