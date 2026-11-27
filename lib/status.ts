@@ -34,3 +34,7 @@ export const TONE_DOT: Record<Tone, string> = {
   info: "bg-status-info",
   muted: "bg-muted-foreground",
 };
+
+/** A connected account's badge, on Connections and the Social & Content page: working, or needing a reconnect. */
+export const connectionBadge = (status: string): { tone: Tone; label: string } =>
+  status === "ACTIVE" ? { tone: "good", label: "Connected" } : { tone: "bad", label: "Needs reconnect" };
