@@ -36,7 +36,8 @@ export default async function SocialPage() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
       <PageHeader
-        title="Social & Content"
+        visible
+        title="Channels"
         actions={
           <>
             {canManageConnections && (
@@ -50,7 +51,7 @@ export default async function SocialPage() {
           </>
         }
       >
-        Each channel&rsquo;s connection, its next planned post and the posts waiting for approval.
+        Manage your social publishing destinations.
       </PageHeader>
       {/* Remount on brand switch so the summary and the connections reset with the business. */}
       <SocialLanding key={shell.activeBrandId} workspaceId={shell.activeWorkspaceId} brandId={shell.activeBrandId} canSeeConnections={canSeeConnections} canManageConnections={canManageConnections} blogOn={featureOn("blog", shell.activeWorkspaceId)} />

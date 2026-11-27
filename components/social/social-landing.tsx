@@ -38,12 +38,12 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
   return (
     <>
       {data && <Figures summary={data} items={posts.data} conns={conns} />}
-      <PageSection id="channels" title="Channels" description="Open a channel to plan it on its own calendar." className="pt-1">
+      <PageSection id="channels" title="Your channels" description="Open a channel to plan it on its own calendar." className="pt-1">
         {!data ? (
           failed ? <LoadFailed what="the channels" onRetry={reload} /> : <ListSkeleton label="Loading channels" rows={4} />
         ) : (
           <>
-            <ul className="-mx-2 flex flex-col @container/social">
+            <ul className="-mx-2 flex flex-col divide-y divide-border @container/social">
               {SOCIAL_ROWS.map((row) => (
                 <ChannelRow key={row.key} row={row} summary={data} conns={conns} canManage={canManageConnections} />
               ))}
@@ -51,7 +51,7 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
             </ul>
             {/* Facebook Pages and Instagram are two logins on Connections (the server's META and INSTAGRAM providers). */}
             {conns !== "hidden" && <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
-              Meta is Facebook and Instagram together. They connect separately, as Facebook Pages and Instagram, so Meta reads Partially connected while only one is; the Instagram row is that same Instagram connection.
+              Meta is Facebook Pages and Instagram, which connect separately: it reads Partially connected while only one is. The Instagram row is that same Instagram connection.
             </p>}
           </>
         )}
@@ -65,7 +65,7 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
 function Figures({ summary, items, conns }: { summary: ChannelSummary[]; items: ContentItem[] | null; conns: Conns }) {
   const n = landingCounts(summary, items ?? [], conns && typeof conns === "object" ? conns.list : null);
   const figure = (label: string, value: number | null, href: string) => (
-    <div key={label} className="min-w-0">
+    <div key={label} className="min-w-0 rounded-xl border border-border bg-card px-3 py-2.5 sm:px-4">
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd>
         {value === null ? (
@@ -81,7 +81,8 @@ function Figures({ summary, items, conns }: { summary: ChannelSummary[]; items: 
     </div>
   );
   return (
-    <dl aria-label="Channels at a glance" className="flex flex-wrap gap-x-8 gap-y-2 px-1">
+    <dl aria-label="Channels at a glance" className="grid grid-cols-3 gap-2 sm:max-w-2xl sm:gap-3">
+      {/* Accounts connected for publishing; LinkedIn and X are published by hand and never count here. */}
       {conns !== "hidden" && figure("Connected accounts", n.accounts, CONNECTIONS)}
       {figure("Scheduled", items ? n.scheduled : null, calendarHref({ status: "scheduled" }))}
       {figure("Awaiting approval", n.awaiting, calendarHref({ status: "awaiting" }))}
@@ -89,9 +90,12 @@ function Figures({ summary, items, conns }: { summary: ChannelSummary[]; items: 
   );
 }
 
-// Identity, connection, next post, its date, approvals, the arrow: the same columns on every row once the list is 46rem
-// wide (a container query: the sidebar and the docked assistant narrow the page, not the window); stacked under that.
-const ROW = "grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 rounded-xl px-2 py-3 @min-[46rem]/social:grid-cols-[minmax(0,11rem)_minmax(0,9.5rem)_minmax(0,1fr)_6.5rem_8.5rem_1rem] @min-[46rem]/social:items-center";
+// Identity, connection, next post, its date, approvals, the arrow: one template for every row (the blog's too) once the
+// list is 49rem wide (a container query: the sidebar and the docked assistant narrow the page, not the window), so the
+// columns line up whatever a row holds; a stacked card under that. The minimums add up to ~48rem with the gaps.
+const ROW =
+  "grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-2 py-3 @min-[49rem]/social:min-h-[5.25rem] @min-[49rem]/social:grid-cols-[minmax(9.5rem,1.05fr)_minmax(8.75rem,0.9fr)_minmax(10rem,2fr)_minmax(7.5rem,0.95fr)_minmax(8.25rem,auto)_1.25rem] @min-[49rem]/social:items-center";
+const ACTION = "relative z-10 inline-flex h-6 items-center rounded-full border border-border bg-card px-2.5 text-xs font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const ROW_LINK = "relative z-10 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 function RowName({ icon: Icon, label, blurb, href }: { icon: ChannelIcon; label: string; blurb: string; href: string }) {
@@ -118,23 +122,23 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
   // Connect while any of its connections isn't working; Manage once all are. Only for people who manage connections.
   const action = !canManage || !state || state.kind === "manual" ? null : state.kind === "connected" ? "Manage" : state.kind === "reconnect" ? "Reconnect" : "Connect";
   return (
-    <li className={`relative ${ROW} transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted`}>
+    <li className={`relative ${ROW} rounded-lg transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted/60`}>
       <RowName icon={channelIcon(row.filter)} label={row.label} blurb={row.blurb} href={calendarHref({ channel: row.filter })} />
-      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground @min-[46rem]/social:order-last" />
-      <div className="col-span-2 flex min-w-0 flex-wrap items-start gap-x-2 gap-y-1 @min-[46rem]/social:col-span-1">
+      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground @min-[49rem]/social:order-last" />
+      <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 @min-[49rem]/social:col-span-1 @min-[49rem]/social:flex-col @min-[49rem]/social:flex-nowrap @min-[49rem]/social:items-start">
         <ChannelConnection filter={row.filter} conns={conns} />
         {!providers.length && <span className="text-xs text-muted-foreground">Published by hand</span>}
         {action && (
-          <Link href={CONNECTIONS} aria-label={`${action} ${row.label}`} className={`${ROW_LINK} text-xs font-medium underline underline-offset-2`}>
+          <Link href={CONNECTIONS} aria-label={`${action} ${row.label}`} className={ACTION}>
             {action}
           </Link>
         )}
       </div>
-      <div className="col-span-2 flex min-w-0 items-center gap-2 text-sm @min-[46rem]/social:col-span-1">
+      <div className="col-span-2 flex min-w-0 items-center gap-2 text-sm @min-[49rem]/social:col-span-1">
         {next ? (
           // Above the row's link (relative z-10), so it opens this post rather than the channel.
-          <Link href={calendarHref({ channel: row.filter }, next.id)} title={next.title} aria-label={`${row.label}, next: ${next.title}, ${dayTime(next.scheduledFor)}, ${STATUS_LABEL[next.status] ?? next.status}`} className={`${ROW_LINK} flex min-w-0 items-center gap-2 hover:underline @min-[46rem]/social:flex-col @min-[46rem]/social:items-start @min-[46rem]/social:gap-1`}>
-            <span className="max-w-full truncate">{next.title}</span>
+          <Link href={calendarHref({ channel: row.filter }, next.id)} title={next.title} aria-label={`${row.label}, next: ${next.title}, ${dayTime(next.scheduledFor)}, ${STATUS_LABEL[next.status] ?? next.status}`} className={`${ROW_LINK} flex min-w-0 items-center gap-2 hover:underline @min-[49rem]/social:flex-col @min-[49rem]/social:items-start @min-[49rem]/social:gap-1`}>
+            <span className="max-w-full truncate @min-[49rem]/social:line-clamp-2 @min-[49rem]/social:whitespace-normal">{next.title}</span>
             <StatusBadge quiet status={next.status}>
               {STATUS_LABEL[next.status] ?? next.status}
             </StatusBadge>
@@ -143,8 +147,8 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
           <span className="text-muted-foreground">Nothing scheduled</span>
         )}
       </div>
-      <div className="text-xs tabular-nums text-muted-foreground @min-[46rem]/social:text-sm">{next ? dayTime(next.scheduledFor) : null}</div>
-      <div className="flex items-center @min-[46rem]/social:justify-end">
+      <div className="whitespace-nowrap text-xs tabular-nums text-muted-foreground @min-[49rem]/social:text-sm">{next ? dayTime(next.scheduledFor) : null}</div>
+      <div className="flex items-center justify-end">
         {awaiting ? (
           <Link href={calendarHref({ channel: row.filter, status: "awaiting" })} aria-label={`${row.label}: ${awaiting} awaiting approval`} className={`${ROW_LINK} rounded-full`}>
             <StatusBadge tone="info">{awaiting} awaiting approval</StatusBadge>
@@ -160,13 +164,13 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
 /** The blog isn't on the calendar: its articles have no publish date yet, so the row says so instead of showing 0. */
 function BlogRow() {
   return (
-    <li className={`relative ${ROW} transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted`}>
+    <li className={`relative ${ROW} rounded-lg transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted/60`}>
       <RowName icon={Newspaper} label="Blog" blurb="Articles for the store's blog" href="/blog" />
-      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground @min-[46rem]/social:order-last" />
-      <div className="hidden @min-[46rem]/social:block" />
-      <div className="col-span-2 text-sm text-muted-foreground @min-[46rem]/social:col-span-1">Articles live on the Blog page</div>
-      <div className="hidden @min-[46rem]/social:block" />
-      <div className="text-xs text-muted-foreground @min-[46rem]/social:text-right">
+      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground @min-[49rem]/social:order-last" />
+      <div className="hidden @min-[49rem]/social:block" />
+      <div className="col-span-2 text-sm text-muted-foreground @min-[49rem]/social:col-span-1">Articles live on the Blog page</div>
+      <div className="hidden @min-[49rem]/social:block" />
+      <div className="text-right text-xs text-muted-foreground">
         <span aria-hidden>—</span>
         <span className="sr-only">Approvals not counted</span>
       </div>
@@ -178,15 +182,18 @@ function BlogRow() {
 function Attention({ items }: { items: ContentItem[] }) {
   const { awaiting, upcoming } = attentionPosts(items, new Date());
   if (!awaiting.length && !upcoming.length) return null;
+  // Two equal columns once there's room for both (a container query, as for the rows), stacked under that.
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-2">
-      {awaiting.length > 0 && <PostList id="awaiting" title="Awaiting approval" posts={awaiting} more={calendarHref({ status: "awaiting" })} />}
-      {upcoming.length > 0 && <PostList id="upcoming" title="Coming up" posts={upcoming} more="/calendar" />}
+    <div className="@container/attention">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 @min-[48rem]/attention:grid-cols-2">
+        <PostList id="awaiting" title="Awaiting approval" posts={awaiting} more={calendarHref({ status: "awaiting" })} empty="Nothing waiting for approval." />
+        <PostList id="upcoming" title="Coming up" posts={upcoming} more="/calendar" empty="Nothing planned yet." />
+      </div>
     </div>
   );
 }
 
-function PostList({ id, title, posts, more }: { id: string; title: string; posts: ContentItem[]; more: string }) {
+function PostList({ id, title, posts, more, empty }: { id: string; title: string; posts: ContentItem[]; more: string; empty: string }) {
   return (
     <PageSection
       id={id}
@@ -198,6 +205,7 @@ function PostList({ id, title, posts, more }: { id: string; title: string; posts
       }
       className="px-3 py-2"
     >
+      {!posts.length && <p className="px-2 py-1.5 text-sm text-muted-foreground">{empty}</p>}
       <ul className="flex flex-col">
         {posts.map((p) => {
           const Icon = channelIcon(p.channel);

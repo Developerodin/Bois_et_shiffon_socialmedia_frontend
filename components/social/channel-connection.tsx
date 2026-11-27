@@ -30,7 +30,7 @@ export function useChannelConnections(workspaceId: string, brandId: string, canS
 
 /**
  * A channel's (or channel group's) connection state as a badge, and, for a group with two connections (Meta: Facebook
- * Pages and Instagram), each one's state under it. Manual publishing needs no connection data, so it shows even when the
+ * Pages and Instagram), the ones that aren't connected under it on one short line (all of them in its tooltip). Manual publishing needs no connection data, so it shows even when the
  * role can't see connections; any other state shows only once the connections are read, never guessed.
  */
 export function ChannelConnection({ filter, conns, detail = true }: { filter: string; conns: Conns; detail?: boolean }) {
@@ -45,7 +45,14 @@ export function ChannelConnection({ filter, conns, detail = true }: { filter: st
       <StatusBadge quiet tone={state.tone}>
         {state.label}
       </StatusBadge>
-      {detail && state.lines.length > 1 && <span className="text-xs text-muted-foreground">{state.lines.map((l) => `${l.name}: ${l.label}`).join(" · ")}</span>}
+      {detail && state.lines.length > 1 && state.kind !== "connected" && (
+        <span className="max-w-full truncate text-xs text-muted-foreground" title={state.lines.map((l) => `${l.name}: ${l.label}`).join(" · ")}>
+          {state.lines
+            .filter((l) => l.tone !== "good")
+            .map((l) => `${l.name}: ${l.label.toLowerCase()}`)
+            .join(" · ")}
+        </span>
+      )}
     </span>
   );
 }
