@@ -14,9 +14,9 @@ export type ChannelCounts = { scheduled: number; awaiting: number; published: nu
  * The context line a channel's calendar opens with (cf_channel set): its mark, "<Channel> calendar", its connection state
  * and, once the posts it counts are loaded, how many are scheduled, awaiting approval and published over `range` (which
  * says what they cover). "All channels" clears only the channel, keeping the other filters. When New post can't make
- * this channel's posts (it makes Instagram posts and carousels), it says so rather than surprising anyone.
+ * this channel's posts (it makes Instagram posts and carousels), it says so to people who can create posts.
  */
-export function ChannelCalendarHeader({ channel, conns, counts, range, onReset }: { channel: string; conns: Conns; counts: ChannelCounts | null; range: string; onReset: () => void }) {
+export function ChannelCalendarHeader({ channel, conns, counts, range, canCreate, onReset }: { channel: string; conns: Conns; counts: ChannelCounts | null; range: string; canCreate: boolean; onReset: () => void }) {
   const Icon = channelIcon(channel);
   const name = channelName(channel);
   const composes = channelsOf(channel).some((c) => NEW_POST_CHANNELS.includes(c));
@@ -35,7 +35,7 @@ export function ChannelCalendarHeader({ channel, conns, counts, range, onReset }
           <span> &middot; {range}</span>
         </p>
       )}
-      {!composes && <p className="text-xs text-muted-foreground">New post makes an Instagram post or carousel</p>}
+      {canCreate && !composes && <p className="text-xs text-muted-foreground">New post makes an Instagram post or carousel</p>}
       <Button size="sm" variant="ghost" className="ml-auto" onClick={onReset}>
         <X aria-hidden />
         All channels

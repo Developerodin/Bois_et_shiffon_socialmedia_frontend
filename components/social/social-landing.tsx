@@ -43,16 +43,16 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
           failed ? <LoadFailed what="the channels" onRetry={reload} /> : <ListSkeleton label="Loading channels" rows={4} />
         ) : (
           <>
-            <ul className="-mx-2 flex flex-col">
+            <ul className="-mx-2 flex flex-col @container/social">
               {SOCIAL_ROWS.map((row) => (
                 <ChannelRow key={row.key} row={row} summary={data} conns={conns} canManage={canManageConnections} />
               ))}
               {blogOn && <BlogRow />}
             </ul>
             {/* Facebook Pages and Instagram are two logins on Connections (the server's META and INSTAGRAM providers). */}
-            <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
+            {conns !== "hidden" && <p className="mt-3 border-t border-border pt-3 text-xs text-muted-foreground">
               Meta is Facebook and Instagram together. They connect separately, as Facebook Pages and Instagram, so Meta reads Partially connected while only one is; the Instagram row is that same Instagram connection.
-            </p>
+            </p>}
           </>
         )}
       </PageSection>
@@ -89,8 +89,9 @@ function Figures({ summary, items, conns }: { summary: ChannelSummary[]; items: 
   );
 }
 
-// Identity, connection, next post, its date, approvals, the arrow: the same columns on every row from md up; stacked under it.
-const ROW = "grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2 rounded-xl px-2 py-3 md:grid-cols-[minmax(0,13rem)_minmax(0,11rem)_minmax(0,1fr)_7.5rem_8.5rem_1rem] md:items-center";
+// Identity, connection, next post, its date, approvals, the arrow: the same columns on every row once the list is 56rem
+// wide (a container query: the sidebar and the docked assistant narrow the page, not the window); stacked under that.
+const ROW = "grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-2 rounded-xl px-2 py-3 @min-[56rem]/social:grid-cols-[minmax(0,13rem)_minmax(0,11rem)_minmax(0,1fr)_7.5rem_8.5rem_1rem] @min-[56rem]/social:items-center";
 const ROW_LINK = "relative z-10 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 function RowName({ icon: Icon, label, blurb, href }: { icon: ChannelIcon; label: string; blurb: string; href: string }) {
@@ -119,8 +120,8 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
   return (
     <li className={`relative ${ROW} transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted`}>
       <RowName icon={channelIcon(row.filter)} label={row.label} blurb={row.blurb} href={calendarHref({ channel: row.filter })} />
-      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground md:order-last" />
-      <div className="col-span-2 flex min-w-0 flex-wrap items-start gap-x-2 gap-y-1 md:col-span-1">
+      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground @min-[56rem]/social:order-last" />
+      <div className="col-span-2 flex min-w-0 flex-wrap items-start gap-x-2 gap-y-1 @min-[56rem]/social:col-span-1">
         <ChannelConnection filter={row.filter} conns={conns} />
         {!providers.length && <span className="text-xs text-muted-foreground">Published by hand</span>}
         {action && (
@@ -129,7 +130,7 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
           </Link>
         )}
       </div>
-      <div className="col-span-2 flex min-w-0 items-center gap-2 text-sm md:col-span-1">
+      <div className="col-span-2 flex min-w-0 items-center gap-2 text-sm @min-[56rem]/social:col-span-1">
         {next ? (
           // Above the row's link (relative z-10), so it opens this post rather than the channel.
           <Link href={calendarHref({ channel: row.filter }, next.id)} title={next.title} aria-label={`${row.label}, next: ${next.title}, ${dayTime(next.scheduledFor)}, ${STATUS_LABEL[next.status] ?? next.status}`} className={`${ROW_LINK} flex min-w-0 items-center gap-2 hover:underline`}>
@@ -142,8 +143,8 @@ function ChannelRow({ row, summary, conns, canManage }: { row: SocialRow; summar
           <span className="text-muted-foreground">Nothing scheduled</span>
         )}
       </div>
-      <div className="text-xs tabular-nums text-muted-foreground md:text-sm">{next ? dayTime(next.scheduledFor) : null}</div>
-      <div className="flex items-center md:justify-end">
+      <div className="text-xs tabular-nums text-muted-foreground @min-[56rem]/social:text-sm">{next ? dayTime(next.scheduledFor) : null}</div>
+      <div className="flex items-center @min-[56rem]/social:justify-end">
         {awaiting ? (
           <Link href={calendarHref({ channel: row.filter, status: "awaiting" })} aria-label={`${row.label}: ${awaiting} awaiting approval`} className={`${ROW_LINK} rounded-full`}>
             <StatusBadge tone="info">{awaiting} awaiting approval</StatusBadge>
@@ -161,11 +162,11 @@ function BlogRow() {
   return (
     <li className={`relative ${ROW} transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring hover:bg-muted`}>
       <RowName icon={Newspaper} label="Blog" blurb="Articles for the store's blog" href="/blog" />
-      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground md:order-last" />
-      <div className="hidden md:block" />
-      <div className="col-span-2 text-sm text-muted-foreground md:col-span-1">Articles live on the Blog page</div>
-      <div className="hidden md:block" />
-      <div className="text-xs text-muted-foreground md:text-right">
+      <ChevronRight aria-hidden className="size-4 shrink-0 self-center text-muted-foreground @min-[56rem]/social:order-last" />
+      <div className="hidden @min-[56rem]/social:block" />
+      <div className="col-span-2 text-sm text-muted-foreground @min-[56rem]/social:col-span-1">Articles live on the Blog page</div>
+      <div className="hidden @min-[56rem]/social:block" />
+      <div className="text-xs text-muted-foreground @min-[56rem]/social:text-right">
         <span aria-hidden>—</span>
         <span className="sr-only">Approvals not counted</span>
       </div>
