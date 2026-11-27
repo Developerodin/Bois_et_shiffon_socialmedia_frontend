@@ -335,9 +335,13 @@ export type AdsCampaignDto = AdsTotals & { accountId: string; campaignId: string
 export type AdsCampaignsDto = { campaigns: AdsCampaignDto[] };
 
 /** GET insights/channel?channel&days: which account's numbers (Meta here is the Facebook Page). */
-export type AnalyticsChannel = "instagram" | "facebook";
+export type AnalyticsChannel = "instagram" | "facebook" | "pinterest" | "threads";
 export type ChannelDayDto = { day: string; value: number | null };
-/** One of the Instagram account's own recent posts (published through the app or not), lifetime numbers. */
+/**
+ * One of the Instagram account's own recent posts (published through the app or not), lifetime numbers. Pinterest:
+ * one of the period's top pins by impressions, numbers over the period: only `id`, `permalink` and metrics views
+ * (impressions), saves and interactions (engagements) are filled, the rest null.
+ */
 export type ChannelPostDto = {
   id: string;
   /** IMAGE, VIDEO, CAROUSEL_ALBUM */
@@ -351,7 +355,7 @@ export type ChannelPostDto = {
   metrics: PostMetricsDto | null;
 };
 /**
- * GET insights/channel?channel=instagram|facebook&days (1–30, default 28; analytics.read): the account's own numbers,
+ * GET insights/channel?channel=instagram|facebook|pinterest|threads&days (1–30, default 28; analytics.read): the account's own numbers,
  * read live from the platform (cached up to 15 minutes). Never a token, never the platform's own metric titles.
  * `state`: "not_connected" (no account) or "reconnect" (its access is gone) come with nothing else filled in.
  * Any number is null when the platform refused it or the audience is too small for it. `partial`: some reads timed
@@ -360,7 +364,7 @@ export type ChannelPostDto = {
 export type ChannelAnalyticsDto = {
   channel: AnalyticsChannel;
   state: "ok" | "not_connected" | "reconnect";
-  /** The account's name ("@handle", the Page's name); null when not connected. */
+  /** The account's name ("@handle", the Page's name); null when not connected. Pinterest `posts`: pin count; Threads: null. */
   account: { name: string; followers: number | null; posts: number | null } | null;
   days: number;
   /** "YYYY-MM-DD" (UTC), inclusive */
@@ -370,17 +374,26 @@ export type ChannelAnalyticsDto = {
    * Totals over the days. Instagram: reach (unique accounts), views, accountsEngaged, interactions, likes, comments,
    * shares, saves, linkTaps, newFollowers (new follows per day added up). Facebook: views (media views), engagements
    * (post engagements), pageViews, newFollowers; reach is null (daily unique counts can't be added up).
+   * Pinterest: impressions, saves, pinClicks, outboundClicks, engagements, and monthlyViews (the account's own rolling
+   * monthly figure, not over the days; the key is absent when Pinterest doesn't give it).
+   * Threads: views, likes, comments (replies), shares (reposts), quotes.
    */
   totals: Record<string, number | null>;
-  /** Instagram: reach per day. Facebook: media views per day. */
+  /**
+   * Instagram: reach per day. Facebook: media views per day. Pinterest: impressions per day (null for days Pinterest
+   * hasn't finished counting). Threads: views per day.
+   */
   daily: ChannelDayDto[];
-  /** Facebook: post engagements per day; Instagram: null. */
+  /** Facebook: post engagements per day; Pinterest: engagements per day (null for unfinished days); Instagram, Threads: null. */
   dailyEngagements: ChannelDayDto[] | null;
-  /** New followers per day (Instagram: the last 30 days at most). */
+  /** New followers per day (Instagram: the last 30 days at most); Pinterest, Threads: always empty. */
   followersDaily: ChannelDayDto[];
-  /** Instagram: followers by country (ISO 3166 code), top 5; null for Facebook or when too few followers. */
+  /** Instagram: followers by country (ISO 3166 code), top 5; null for the others or when too few followers. */
   countries: { country: string; followers: number }[] | null;
-  /** Instagram: the account's latest posts with lifetime numbers; null for Facebook (needs a permission not granted). */
+  /**
+   * Instagram: the account's latest posts with lifetime numbers. Pinterest: the period's top 5 pins by impressions.
+   * Null for Facebook (needs a permission not granted) and Threads.
+   */
   posts: ChannelPostDto[] | null;
   partial: boolean;
   /** ISO instant the numbers were read */

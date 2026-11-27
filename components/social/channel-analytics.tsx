@@ -9,7 +9,7 @@ import { DayBars, dayLabel } from "@/components/data/day-bars";
 import type { AnalyticsChannel, ChannelAnalyticsDto, ChannelPostDto } from "@/shared";
 
 export const DAYS = 28;
-const NAME: Record<AnalyticsChannel, string> = { instagram: "Instagram", facebook: "Facebook Page" };
+const NAME: Record<AnalyticsChannel, string> = { instagram: "Instagram", facebook: "Facebook Page", pinterest: "Pinterest", threads: "Threads" };
 const n = (v: number | null | undefined) => (v == null ? "—" : v.toLocaleString());
 const COUNTRY = (() => {
   try {
