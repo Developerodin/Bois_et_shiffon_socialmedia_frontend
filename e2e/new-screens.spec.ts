@@ -95,6 +95,7 @@ function quote(n: number, over: Partial<QuoteDto> = {}) {
     subtotalAccepted: false,
     invoiceUrl: null,
     sentAt: null,
+    customerId: null,
     declinedReason: null,
     createdById: null,
     createdAt: day,

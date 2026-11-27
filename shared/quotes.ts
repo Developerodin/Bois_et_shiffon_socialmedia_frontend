@@ -47,6 +47,8 @@ export type QuoteDto = {
   subtotalAccepted: boolean;
   invoiceUrl: string | null;
   sentAt: string | null;
+  /** The customer record it belongs to (crm.manage), if linked. */
+  customerId: string | null;
   /** DECLINED: why, as the team wrote it (≤ 500) */
   declinedReason: string | null;
   createdById: string | null;

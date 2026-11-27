@@ -26,4 +26,5 @@ export * from "./digest";
 export * from "./shopify-writes";
 export * from "./blog";
 export * from "./quotes";
+export * from "./crm";
 export * from "./competitors";
