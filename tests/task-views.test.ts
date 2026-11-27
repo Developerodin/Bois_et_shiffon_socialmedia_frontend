@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TaskDto } from "@/shared";
-import { AREA_TABS, areaParam, areaTabs, boardMove, pickableAreas, ownerFromValue, ownerLabel, ownerValue, readSaved, sourceParam, tasksQuery } from "@/components/tasks/task-views";
+import { AREA_TABS, areaParam, areaTabs, boardMove, pickableAreas, ownerFromValue, ownerLabel, ownerValue, readSaved, sourceParam, TASK_LEGEND, taskTone, tasksQuery } from "@/components/tasks/task-views";
 
 const task = (over: Partial<TaskDto> = {}): TaskDto => ({
   id: "t1",
@@ -117,6 +117,7 @@ describe("readSaved", () => {
 
   it("keeps a saved view and layout", () => {
     expect(readSaved(JSON.stringify({ view: "overdue", layout: "board" }))).toEqual({ view: "overdue", layout: "board" });
+    expect(readSaved(JSON.stringify({ view: "done", layout: "calendar" }))).toEqual({ view: "done", layout: "calendar" });
   });
 });
 
@@ -125,6 +126,19 @@ describe("tasksQuery", () => {
     expect(tasksQuery({ view: "mine" })).toBe("tasks?view=mine");
     expect(tasksQuery({ view: "open", area: "website", workProjectId: "p 1" })).toBe("tasks?view=open&area=website&workProjectId=p+1");
     expect(tasksQuery({ view: "open", area: "seo", source: "geo" })).toBe("tasks?view=open&area=seo&source=geo");
+  });
+
+  it("sends a due range only whole", () => {
+    expect(tasksQuery({ view: "open", area: "content", dueFrom: "2026-10-26", dueTo: "2026-12-06" })).toBe("tasks?view=open&area=content&dueFrom=2026-10-26&dueTo=2026-12-06");
+    expect(tasksQuery({ view: "open", dueFrom: "2026-10-26" })).toBe("tasks?view=open");
+  });
+});
+
+describe("taskTone", () => {
+  it("blocked first, then the status; every tone is in the legend", () => {
+    expect(taskTone({ status: "IN_PROGRESS", blockedReason: "Waiting on photos" })).toBe("bad");
+    expect(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"].map((status) => taskTone({ status, blockedReason: null }))).toEqual(["muted", "warn", "info", "good"]);
+    expect(new Set(TASK_LEGEND.map(([t]) => t)).size).toBe(TASK_LEGEND.length);
   });
 });
 
