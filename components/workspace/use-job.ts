@@ -25,6 +25,8 @@ export const JOB_INTERVALS = {
   publishing: [[Infinity, 5_000]],
   // Task lists, Today's task groups and the bell: people change tasks by hand, so a minute is fresh enough.
   tasks: [[Infinity, 60_000]],
+  // The Social & Content page's per-channel summary: an overview, not a live view; a channel opens the calendar.
+  socialLanding: [[Infinity, 30_000]],
 } as const satisfies Record<string, Intervals>;
 
 const MAX_DELAY_MS = 60_000;
