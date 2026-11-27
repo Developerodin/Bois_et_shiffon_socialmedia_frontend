@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { AtSign, BriefcaseBusiness, Check, ChevronLeft, ChevronRight, CircleDashed, Clapperboard, ExternalLink, FileText, GalleryHorizontal, Hash, Image as ImageIcon, LoaderCircle, Pencil, Pin, Plus, SlidersHorizontal, Sparkles, ThumbsUp, TriangleAlert, X, type LucideIcon } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, ExternalLink, FileText, LoaderCircle, Pencil, Plus, SlidersHorizontal, Sparkles, TriangleAlert, X } from "lucide-react";
 import { ApiError, errorMessage, request } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { LoadFailed } from "@/components/ui/load-failed";
@@ -25,10 +25,10 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TONE_CLASS, TONE_DOT, toneOf, type Tone } from "@/lib/status";
 import { safeHttpUrl, STATUS_GROUPS, type CheckResult } from "@/shared";
-import { activeFilterCount, filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
+import { activeFilterCount, channelOptions, filterItems, ownerLabel, type CalendarFilter } from "@/lib/calendar-filter";
 import { AGENDA_BELOW, CELL_FLOOR, dayCards, type CardForm, dayCellLabel, newPostTime, dayKey, gridRange, gridStep, groupByDay, monthGrid, popoverLeft, popoverSide, shortTime } from "@/lib/calendar-month";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
-import { CHANNEL_LABEL, STATUS_LABEL } from "@/lib/post-labels";
+import { CHANNEL_ICON, CHANNEL_LABEL, channelIcon, channelLabel, STATUS_LABEL } from "@/lib/post-labels";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -436,7 +436,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const filterControls = (wide: boolean) => {
     return (
       <>
-        <FilterSelect label="Channel" fill={!wide} value={filter.channel ?? ""} onChange={(v) => set({ channel: v || undefined })} options={[{ value: "", label: "All channels" }, ...channels.map((ch) => ({ value: ch, label: CHANNEL_LABEL[ch] ?? ch, icon: CHANNEL_ICON[ch] ?? FileText }))]} />
+        <FilterSelect label="Channel" fill={!wide} value={filter.channel ?? ""} onChange={(v) => set({ channel: v || undefined })} options={[{ value: "", label: "All channels" }, ...channelOptions(channels, filter.channel).map((ch) => ({ value: ch, label: channelLabel(ch), icon: channelIcon(ch) }))]} />
         <FilterSelect label="Status" fill={!wide} value={filter.status ?? ""} onChange={(v) => set({ status: (v || undefined) as CalendarFilter["status"] })} options={[{ value: "", label: "Any status" }, ...(Object.keys(STATUS_GROUPS) as (keyof typeof STATUS_GROUPS)[]).map((g) => ({ value: g, label: STATUS_GROUP_LABEL[g] }))]} />
         {(campaignOptions.length > 0 || filter.campaignId) && (
           <FilterSelect
@@ -666,21 +666,6 @@ const CELL_SIZE = { h: 94, w: 0 };
 /** The month's cards mark their status with a coloured edge: this says what each colour is, since colour alone is not a label. */
 const LEGEND: readonly (readonly [Tone, string])[] = [["info", "Awaiting approval · Scheduled"], ["good", "Approved · Published"], ["warn", "Needs a look"], ["bad", "Blocked · Rejected"], ["muted", "To write"]];
 const postCount = (n: number) => (n === 1 ? "1 post" : `${n} posts`);
-/**
- * A small glyph per channel for the month's cards; the card's tooltip and name say the channel in words. Lucide has no
- * brand marks (and the app had no channel icons), so Instagram's formats show their shape and the others a stand-in.
- */
-const CHANNEL_ICON: Record<string, LucideIcon> = {
-  INSTAGRAM_POST: ImageIcon,
-  INSTAGRAM_CAROUSEL: GalleryHorizontal,
-  INSTAGRAM_REEL: Clapperboard,
-  INSTAGRAM_STORY: CircleDashed,
-  FACEBOOK_POST: ThumbsUp,
-  PINTEREST_PIN: Pin,
-  THREADS_POST: AtSign,
-  LINKEDIN_POST: BriefcaseBusiness,
-  X_POST: Hash,
-};
 
 /**
  * One post as a card: a quiet fill, a hairline border and a thin left edge in its status colour. Its `form` comes from

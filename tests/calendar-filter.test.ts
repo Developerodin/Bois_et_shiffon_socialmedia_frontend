@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeFilterCount, filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, ownerLabel, withFilter, type CalendarItem } from "@/lib/calendar-filter";
+import { activeFilterCount, calendarHref, channelOptions, channelsOf, filterFromSearch, filterItems, filterToSearch, isBlocked, isOverdue, isThisWeek, ownerLabel, withFilter, type CalendarItem } from "@/lib/calendar-filter";
 
 const now = new Date("2026-11-20T12:00:00Z");
 const past = "2026-11-19T12:00:00Z";
@@ -108,5 +108,50 @@ describe("URL", () => {
   it("counts the filters that are on", () => {
     expect(activeFilterCount({})).toBe(0);
     expect(activeFilterCount({ channel: "INSTAGRAM_POST", owner: "me", need: "week" })).toBe(3);
+  });
+});
+
+describe("channel groups", () => {
+  const all = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "INSTAGRAM_STORY", "FACEBOOK_POST", "PINTEREST_PIN", "THREADS_POST", "LINKEDIN_POST", "X_POST"];
+  const kept = (channel: string) => filterItems(all.map((c) => item({ id: c, channel: c })), { channel }, null, now).map((i) => i.id);
+
+  it("Meta keeps Facebook and every Instagram format, nothing else", () => {
+    expect(kept("meta")).toEqual(["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "INSTAGRAM_STORY", "FACEBOOK_POST"]);
+  });
+  it("Instagram keeps its four formats, not Facebook", () => {
+    expect(kept("instagram")).toEqual(["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL", "INSTAGRAM_REEL", "INSTAGRAM_STORY"]);
+  });
+  it("one channel still matches only itself", () => {
+    expect(kept("FACEBOOK_POST")).toEqual(["FACEBOOK_POST"]);
+    expect(channelsOf("X_POST")).toEqual(["X_POST"]);
+  });
+  it("a group survives the URL, an unknown channel is dropped", () => {
+    expect(filterFromSearch(new URLSearchParams(filterToSearch({ channel: "meta" })))).toEqual({ channel: "meta" });
+    expect(filterFromSearch(new URLSearchParams("cf_channel=LINKEDIN_POST"))).toEqual({ channel: "LINKEDIN_POST" });
+    expect(filterFromSearch(new URLSearchParams("cf_channel=Meta"))).toEqual({});
+    expect(filterFromSearch(new URLSearchParams("cf_channel=%3Cb%3E"))).toEqual({});
+  });
+});
+
+describe("channelOptions", () => {
+  it("lists the groups a present channel belongs to first, then the channels", () => {
+    expect(channelOptions(["FACEBOOK_POST", "PINTEREST_PIN"])).toEqual(["meta", "FACEBOOK_POST", "PINTEREST_PIN"]);
+    expect(channelOptions(["INSTAGRAM_REEL"])).toEqual(["meta", "instagram", "INSTAGRAM_REEL"]);
+    expect(channelOptions(["PINTEREST_PIN"])).toEqual(["PINTEREST_PIN"]);
+  });
+  it("keeps the current value listed when no post has it, once", () => {
+    expect(channelOptions(["PINTEREST_PIN"], "LINKEDIN_POST")).toEqual(["PINTEREST_PIN", "LINKEDIN_POST"]);
+    expect(channelOptions(["PINTEREST_PIN"], "instagram")).toEqual(["instagram", "PINTEREST_PIN"]);
+    expect(channelOptions(["PINTEREST_PIN"], "PINTEREST_PIN")).toEqual(["PINTEREST_PIN"]);
+  });
+});
+
+describe("calendarHref", () => {
+  it("is the calendar with the filter and the open post, always on this site", () => {
+    expect(calendarHref({})).toBe("/calendar");
+    expect(calendarHref({ need: undefined })).toBe("/calendar");
+    expect(calendarHref({ need: "week" })).toBe("/calendar?cf_need=week");
+    expect(calendarHref({ channel: "meta", status: "awaiting" })).toBe("/calendar?cf_channel=meta&cf_status=awaiting");
+    expect(calendarHref({ channel: "instagram" }, "p 1&x")).toBe("/calendar?cf_channel=instagram&post=p+1%26x");
   });
 });
