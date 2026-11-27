@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { postCardDetails, postCardLine, type CardPost } from "@/lib/post-card";
+import { postCardDetails, postCardLine, sameSignedObject, type CardPost } from "@/lib/post-card";
 
 const post = (channel: string, latest: CardPost["latest"], firstFrameUrl?: string | null): CardPost => ({ channel, latest, firstFrameUrl });
 
@@ -35,5 +35,14 @@ describe("postCardLine", () => {
     expect(postCardLine({ format: null, pictures: 1, pinHost: null })).toBe("1 picture");
     expect(postCardLine({ format: null, pictures: null, pinHost: "shop.example" })).toBe("Leads to shop.example");
     expect(postCardLine({ format: null, pictures: null, pinHost: null })).toBe("");
+  });
+});
+
+describe("sameSignedObject", () => {
+  it("matches two signatures of one stored file and nothing else", () => {
+    expect(sameSignedObject("https://s3.example/b/k.jpg?X-Amz-Date=1&sig=a", "https://s3.example/b/k.jpg?X-Amz-Date=2&sig=b")).toBe(true);
+    expect(sameSignedObject("https://s3.example/b/k.jpg?sig=a", "https://s3.example/b/other.jpg?sig=a")).toBe(false);
+    expect(sameSignedObject("https://s3.example/b/k.jpg", "https://cdn.example/b/k.jpg")).toBe(false);
+    expect(sameSignedObject("not a url", "not a url")).toBe(false);
   });
 });

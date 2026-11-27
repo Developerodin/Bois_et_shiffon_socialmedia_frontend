@@ -31,3 +31,13 @@ export function postCardDetails(p: CardPost): { format: string | null; pictures:
 export function postCardLine(d: Pick<ReturnType<typeof postCardDetails>, "format" | "pictures" | "pinHost">): string {
   return [d.format, d.pictures ? `${d.pictures} ${d.pictures === 1 ? "picture" : "pictures"}` : null, d.pinHost ? `Leads to ${d.pinHost}` : null].filter(Boolean).join(" · ");
 }
+
+/** Whether two signed links point at the same stored file (they differ only in their signature and date). */
+export function sameSignedObject(a: string, b: string): boolean {
+  try {
+    const x = new URL(a), y = new URL(b);
+    return x.origin === y.origin && x.pathname === y.pathname;
+  } catch {
+    return false;
+  }
+}

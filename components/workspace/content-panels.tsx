@@ -34,6 +34,7 @@ import { CalendarCard, DayRow, MonthGrid } from "@/components/calendar/month-gri
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 import { CHANNEL_LABEL, channelIcon, channelLabel, STATUS_LABEL } from "@/lib/post-labels";
 import { postCardDetails, postCardLine } from "@/lib/post-card";
+import { PostThumb, useStableSignedUrl } from "@/components/workspace/post-thumb";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -437,6 +438,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
       conns={connections}
       counts={view === "month" ? (monthFrom === gridRange(monthGrid(month.y, month.m)).from ? channelCounts(monthItems, filter.channel, month) : null) : channelCounts(data, filter.channel)}
       range={view === "month" ? `in ${monthName}` : "open posts and the last 30 days"}
+      canCreate={canCreate}
       onReset={() => onFilter({ ...filter, channel: undefined })}
     />
   ) : null;
@@ -525,7 +527,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
               {filterControls(false)}
             </FiltersMenu>
           </span>
-          {canExport && <ExportCsvButton url={`${base}/content/export`} filename={`calendar-${new Date().toLocaleDateString("en-CA")}.csv`} labelClassName="@max-[720px]/cal:sr-only" />}
+          {/* The export route takes dates only: on a channel's calendar the button says it holds every channel. */}
+          {canExport && <ExportCsvButton url={`${base}/content/export`} filename={`calendar-${new Date().toLocaleDateString("en-CA")}.csv`} label={filter.channel ? "Export CSV (all channels)" : undefined} labelClassName="@max-[720px]/cal:sr-only" />}
           {newPost}
         </span>
       </div>
@@ -590,24 +593,22 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
                   <li key={i.id}>
                     <button type="button" onClick={() => onOpen(i.id)} className="flex min-h-11 w-full items-center gap-3 px-4 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
                       {i.channel === "INSTAGRAM_STORY" ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
-                        d.thumb ? <img src={d.thumb} alt="" className="aspect-[9/16] w-6 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-6 shrink-0 rounded bg-muted" />
+                        d.thumb ? <PostThumb url={d.thumb} className="aspect-[9/16] w-6 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-6 shrink-0 rounded bg-muted" />
                       ) : (
-                        // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
-                        d.thumb && <img src={d.thumb} alt="" className="size-8 shrink-0 rounded bg-muted object-cover" />
+                        d.thumb && <PostThumb url={d.thumb} className="size-8 shrink-0 rounded bg-muted object-cover" />
                       )}
                       {/* One line on a wide panel (time and channel, title, owner, status); three on a narrow one (time,
                           channel and status; the title, wrapping; the owner). Grid placement keeps one reading order. */}
                       <span className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 @min-[640px]/cal:grid-cols-[9rem_minmax(0,1fr)_auto_auto]">
                         <span className="col-start-1 row-start-1 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
                           {time && <span className="shrink-0 tabular-nums">{time}</span>}
-                          <span className="truncate">{[CHANNEL_LABEL[i.channel] ?? i.channel, postCardLine({ ...d, format: null })].filter(Boolean).join(" · ")}</span>
+                          <span className="truncate">{CHANNEL_LABEL[i.channel] ?? i.channel}</span>
                         </span>
                         <span title={i.title} className="col-span-2 row-start-2 text-sm @min-[640px]/cal:col-span-1 @min-[640px]/cal:col-start-2 @min-[640px]/cal:row-start-1 @min-[640px]/cal:truncate">
                           {i.title}
                         </span>
                         <span className="col-span-2 row-start-3 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground @min-[640px]/cal:col-span-1 @min-[640px]/cal:col-start-3 @min-[640px]/cal:row-start-1">
-                          <span className="truncate">{ownerLabel(i.owner)}</span>
+                          <span className="truncate">{[ownerLabel(i.owner), postCardLine({ ...d, format: null })].filter(Boolean).join(" · ")}</span>
                           {i.byHand && i.scheduledFor && <span className="shrink-0 font-medium text-foreground">&middot; Post by hand {dayTime(i.scheduledFor)}</span>}
                         </span>
                         <span className="col-start-2 row-start-1 justify-self-end @min-[640px]/cal:col-start-4">
@@ -714,6 +715,7 @@ function PostCard({ item, onOpen, form = "compact", selected = false }: { item: 
   const d = postCardDetails(item);
   // The channel's label already names an Instagram format; the line adds a carousel's pictures or where a pin leads.
   const extra = postCardLine({ ...d, format: null });
+  const thumb = useStableSignedUrl(d.thumb);
   return (
     <CalendarCard
       form={form}
@@ -721,7 +723,7 @@ function PostCard({ item, onOpen, form = "compact", selected = false }: { item: 
       selected={selected}
       about={`${time ? `${time} · ` : ""}${item.title} · ${channel}${extra ? ` · ${extra}` : ""} · ${status}`}
       onClick={() => onOpen(item.id)}
-      media={d.thumb}
+      media={thumb}
       top={
         <span aria-hidden className="flex min-w-0 items-center gap-1 text-xs leading-3 text-muted-foreground">
           <Icon className="size-3 shrink-0" />

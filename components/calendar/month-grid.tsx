@@ -450,7 +450,7 @@ export function CalendarCard({ form, tone, selected, about, onClick, top, lead, 
       {stacked ? top : lead}
       <span data-card-title className={cn("min-w-0 font-medium text-foreground", form === "stacked2" ? "line-clamp-2 break-words" : "truncate")}>{title}</span>
       {/* eslint-disable-next-line @next/next/no-img-element -- a signed storage link */}
-      {thumb && <img src={thumb} alt="" className="absolute right-1 top-1/2 size-7 -translate-y-1/2 rounded bg-muted object-cover" />}
+      {thumb && <img src={thumb} alt="" loading="lazy" className="absolute right-1 top-1/2 size-7 -translate-y-1/2 rounded bg-muted object-cover" />}
     </button>
   );
 }
