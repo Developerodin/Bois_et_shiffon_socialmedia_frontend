@@ -53,6 +53,20 @@ export function viewFromSearch(search: string): View {
   return { kind: "home" };
 }
 
+/** What the content workflow card opens in a page's own peek: an agent, or Scout's Ideas panel. */
+export type WorkflowPeekView = { kind: "agent"; key: string } | { kind: "panel"; id: "ideas" };
+
+/**
+ * The workflow card's peek on /calendar and /social: ?agent=<key> or ?peek=ideas. Null for no item, a post (?post= wins,
+ * as in viewFromSearch), another panel or a malformed value. Drops runId and never sets `run`: opening never runs.
+ */
+export function workflowPeekFromSearch(search: string): WorkflowPeekView | null {
+  const v = viewFromSearch(search);
+  if (v.kind === "agent") return { kind: "agent", key: v.key };
+  if (v.kind === "panel" && v.id === "ideas") return { kind: "panel", id: "ideas" };
+  return null;
+}
+
 /** The URL's search for a view, keeping the parameters that aren't about the view (filters, ?panel=). */
 export function viewToSearch(v: View, search: string, pathname: string): string {
   const q = new URLSearchParams(search);

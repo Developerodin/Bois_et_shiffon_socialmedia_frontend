@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RUN_ID_PATTERN } from "@/shared";
 import { entryToView, parseRecent, viewToEntry } from "@/lib/recent";
-import { agentLabel, calendarRedirect, competitorsRedirect, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem, PANEL_IDS, type PanelId } from "@/lib/workspace-view";
+import { agentLabel, calendarRedirect, competitorsRedirect, namesItem, navigate, parseViewParts, peekCrumb, peekKey, peekTitle, shallowClick, viewFromSearch, viewToSearch, withoutOpenItem, workflowPeekFromSearch, PANEL_IDS, type PanelId } from "@/lib/workspace-view";
 import { sanitize, type Layout } from "@/components/workspace/panel-layout";
 
 describe("workspace view URL", () => {
@@ -269,5 +269,25 @@ describe("navigate and shallowClick", () => {
     const away = click();
     shallowClick(away, "/projects?task=t1", "/tasks");
     expect(away.preventDefault).not.toHaveBeenCalled();
+  });
+});
+
+describe("workflow card peek (/calendar, /social)", () => {
+  it("opens an agent or Scout's ideas, never a run", () => {
+    expect(workflowPeekFromSearch("?agent=planner")).toEqual({ kind: "agent", key: "planner" });
+    expect(workflowPeekFromSearch("?agent=planner&runId=r1")).toEqual({ kind: "agent", key: "planner" });
+    expect(workflowPeekFromSearch("?peek=ideas&cf_channel=instagram")).toEqual({ kind: "panel", id: "ideas" });
+  });
+  it("leaves posts, other panels and malformed values out", () => {
+    expect(workflowPeekFromSearch("")).toBeNull();
+    expect(workflowPeekFromSearch("?post=p1&agent=planner")).toBeNull();
+    expect(workflowPeekFromSearch("?peek=log")).toBeNull();
+    expect(workflowPeekFromSearch("?agent=Bad%20Key")).toBeNull();
+    expect(workflowPeekFromSearch("?doc=brand")).toBeNull();
+  });
+  it("opening one replaces the other and keeps the calendar's filters", () => {
+    expect(viewToSearch({ kind: "agent", key: "creator" }, "?post=p1&cf_channel=instagram", "/calendar")).toBe("?cf_channel=instagram&agent=creator");
+    expect(viewToSearch({ kind: "content", id: "p1" }, "?peek=ideas&cf_channel=instagram", "/calendar")).toBe("?cf_channel=instagram&post=p1");
+    expect(viewToSearch({ kind: "home" }, "?agent=creator&cf_channel=instagram", "/calendar")).toBe("?cf_channel=instagram");
   });
 });

@@ -374,7 +374,7 @@ const statusText = (i: ContentItem) =>
  * `selectedId`: the post open in the side peek, which the month marks. `connections`: the brand's connections, for a
  * channel calendar's header (cf_channel set); without them it shows no connection state.
  */
-export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, selectedId, connections = "hidden", reelsOn = false }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; selectedId?: string | null; connections?: Conns; reelsOn?: boolean }) {
+export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, selectedId, connections = "hidden", reelsOn = false, onOpenAgent, onOpenIdeas }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; selectedId?: string | null; connections?: Conns; reelsOn?: boolean; /** The workflow card opens agents and Scout's ideas in this page's peek (else on the Overview). */ onOpenAgent?: (key: string) => void; onOpenIdeas?: () => void }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const canExport = perms.includes("content.download");
@@ -439,7 +439,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, select
   // channel so a new channel filter preselects afresh.
   const planWithAgents = (label: string, variant: "secondary" | "outline", labelClassName?: string) => <PlanWithAgents key={filter.channel ?? ""} base={base} perms={perms} filter={filter.channel} conns={connections} label={label} variant={variant} labelClassName={labelClassName} />;
   // Below the toolbar (never inside Month's sticky one).
-  const strip = <AgentWorkflowStrip base={base} perms={perms} filter={filter.channel} conns={connections} className="mx-4 mt-3 @max-[640px]/cal:mx-2" />;
+  const strip = <AgentWorkflowStrip base={base} perms={perms} filter={filter.channel} conns={connections} onOpenAgent={onOpenAgent} onOpenIdeas={onOpenIdeas} className="mx-4 mt-3 @max-[640px]/cal:mx-2" />;
   // The same dialog, opened from an empty day in Month, set to that day (newPostTime; a day that is over starts undated).
   const [dayNewPost, setDayNewPost] = useState<{ at: string | null } | null>(null);
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading calendar" rows={3} /></div>;
@@ -462,7 +462,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, select
       <div className="flex flex-col items-start gap-3 p-4">
         {channelHeader && <div className="w-full">{channelHeader}</div>}
         {viewSwitch}
-        <AgentWorkflowStrip base={base} perms={perms} filter={filter.channel} conns={connections} className="w-full" />
+        <AgentWorkflowStrip base={base} perms={perms} filter={filter.channel} conns={connections} onOpenAgent={onOpenAgent} onOpenIdeas={onOpenIdeas} className="w-full" />
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
         <div className="flex gap-2">
           {planWithAgents("Plan posts", "secondary")}
