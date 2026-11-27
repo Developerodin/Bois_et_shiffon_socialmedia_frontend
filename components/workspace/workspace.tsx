@@ -44,6 +44,8 @@ import { NewPostDialog } from "@/components/workspace/new-post-dialog";
 import { Peek } from "@/components/workspace/peek";
 import { TaskView } from "@/components/tasks/task-view";
 import { TodayTasks } from "@/components/tasks/today-tasks";
+import { UpcomingWeek } from "@/components/workspace/upcoming-week";
+import { PerformanceSummary } from "@/components/workspace/performance-summary";
 import { RecentMenu } from "@/components/workspace/recent-menu";
 import { TOPBAR_SLOT_ID } from "@/components/shell/top-bar";
 import { usePeek, type PeekItem } from "@/components/workspace/use-peek";
@@ -56,7 +58,7 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { readable } from "@/lib/agent-message";
 import { CONNECTIONS_READ, safeHttpUrl, STATUS_GROUPS } from "@/shared";
-import { calendarHref as filterHref, isBlocked, isOverdue, isThisWeek, type CalendarFilter } from "@/lib/calendar-filter";
+import { calendarHref as filterHref, isBlocked, isOverdue, type CalendarFilter } from "@/lib/calendar-filter";
 import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
 import { nothingToDo } from "@/lib/agent-runs";
@@ -114,7 +116,6 @@ const POLL_MS = 5000;
 // Today's "Needs action" counts. Numbers, so a poll that changes nothing doesn't re-render Today.
 const pickOverdue = (d: { items: ContentItem[] }) => { const now = new Date(); return d.items.filter((i) => isOverdue(i, now)).length; };
 const pickBlocked = (d: { items: ContentItem[] }) => d.items.filter((i) => isBlocked(i)).length;
-const pickWeek = (d: { items: ContentItem[] }) => { const now = new Date(); return d.items.filter((i) => isThisWeek(i, now)).length; };
 
 type Props = {
   workspaceId: string;
@@ -127,6 +128,9 @@ type Props = {
   tasksOn: boolean;
   /** The digest flag is on: Home links to "This week" (/digest). */
   digestOn?: boolean;
+  /** The ads and sales flags are on: Home's Performance shows those numbers to people who may read them. */
+  adsOn?: boolean;
+  salesOn?: boolean;
   user: { id?: string; name?: string | null; email?: string | null; image?: string | null };
   /** The person's permissions on this brand, from the shell (read with the page, so no fetch here can fail on its own). */
   perms: string[];
@@ -135,7 +139,7 @@ type Props = {
 const viewFromUrl = () => viewFromSearch(window.location.search);
 const viewSearch = (v: View) => viewToSearch(v, window.location.search, window.location.pathname);
 
-export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, user, perms }: Props) {
+export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, tasksOn, digestOn = false, adsOn = false, salesOn = false, user, perms }: Props) {
   const router = useRouter();
   const [docs, setDocs] = useState<ContextDocsResponse | null>(null);
   const [agents, setAgents] = useState<AgentSummary[] | null>(null);
@@ -302,7 +306,6 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
   const pickShortlisted = useCallback((d: { opportunities: Opportunity[] }) => d.opportunities.filter((o) => o.status === "SHORTLISTED").length, []);
   const overdueQ = useBrandData(base, "content", pickOverdue as (d: never) => number);
   const blockedQ = useBrandData(base, "content", pickBlocked as (d: never) => number);
-  const weekQ = useBrandData(base, "content", pickWeek as (d: never) => number);
   const ideas = useBrandData(base, "opportunities", pickOpps as (d: never) => number);
   const shortlistedQ = useBrandData(base, "opportunities", pickShortlisted as (d: never) => number);
   const awaitingQ = useBrandData(base, "content", pickItems as (d: never) => number);
@@ -399,7 +402,7 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
             reports={reports}
             connections={connections}
             pipeline={pipeline}
-            needs={{ overdue: overdueQ.data ?? 0, blocked: blockedQ.data ?? 0, week: weekQ.data ?? 0 }}
+            needs={{ overdue: overdueQ.data ?? 0, blocked: blockedQ.data ?? 0 }}
             canRun={canRun}
             canCreate={canCreate}
             onOpen={open}
@@ -407,6 +410,8 @@ export function Workspace({ workspaceId, brandId, brandName, website, reelsOn, t
             onRetry={retry}
             due={perms.includes("publish.execute") ? <DueStories base={base} onOpen={open} /> : null}
             taskGroups={tasksOn && perms.includes("tasks.read") ? <TodayTasks base={base} onOpen={(id) => open({ kind: "task", id })} /> : null}
+            week={<UpcomingWeek base={base} withTasks={tasksOn && perms.includes("tasks.read")} onOpen={open} />}
+            performance={<PerformanceSummary base={base} ads={adsOn && perms.includes("ads.read")} sales={salesOn && perms.includes("crm.read")} />}
             showAgents={canAgents}
             digestOn={digestOn}
           />
@@ -869,6 +874,8 @@ function Home({
   onRetry,
   due,
   taskGroups,
+  week,
+  performance,
   showAgents,
   digestOn,
 }: {
@@ -882,6 +889,10 @@ function Home({
   due: React.ReactNode;
   /** Today's task groups (flag `tasks`, tasks.read), above the post rows. */
   taskGroups: React.ReactNode;
+  /** The Next 7 days section, under Today. */
+  week: React.ReactNode;
+  /** The key performance numbers, under Next 7 days (nothing for a role that reads neither ads nor sales). */
+  performance: React.ReactNode;
   user: Props["user"];
   agents: AgentSummary[] | null;
   agentsFailed: boolean;
@@ -891,8 +902,8 @@ function Home({
   reports: { seo: Report; geo: Report } | null;
   connections: Connection[] | null;
   pipeline: { ideasToDecide: number; awaiting: number; toWrite: number; shortlisted: number } | null;
-  /** Posts needing action, from the calendar: past their date, blocked, and due in the next 7 days. */
-  needs: { overdue: number; blocked: number; week: number };
+  /** Posts needing action, from the calendar: past their date and blocked (the next 7 days have their own section). */
+  needs: { overdue: number; blocked: number };
   canRun: boolean;
   canCreate: boolean;
   onOpen: (v: View) => void;
@@ -996,7 +1007,6 @@ function Home({
     for (const [need, label, detail] of [
       ["overdue", "Overdue posts", "past their date"],
       ["blocked", "Blocked posts", "stuck on a problem"],
-      ["week", "Posts in the next 7 days", "coming up"],
     ] as const) {
       if (!needs[need]) continue;
       list.push({
@@ -1092,6 +1102,10 @@ function Home({
           </div>
         )}
       </section>
+
+      {week}
+
+      {performance}
 
       {showAgents && (
       <section aria-labelledby="agents-h" className="px-5 pb-10">

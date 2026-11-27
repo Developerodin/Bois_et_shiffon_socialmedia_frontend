@@ -14,11 +14,11 @@ import { money, Stat } from "@/components/data/shared";
 import { SyncedAt, useReloadWhenSynced } from "@/components/data/synced-at";
 import { AdBudgets } from "@/components/performance/ad-budgets";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { ADS_CURRENCY_NOTE, roas } from "@/lib/performance-summary";
 import { DATA_SOURCE_SLUGS, type AdsCampaignsDto, type AdsSummaryDto, type AdsTotals, type ChooseMetaAdAccountBody, type DataSourceDto, type MetaAdAccountsDto, type ShopRevenueOverSpend } from "@/shared";
 
 // ---- formatting ---------------------------------------------------------------------------------------------------
 
-const roas = (v: number | null | undefined) => (v == null ? "—" : `${v.toFixed(2)}×`);
 const whole = (n: number | null | undefined) => (n == null ? "—" : n.toLocaleString());
 
 const num = (v: string | number | null | undefined) => (v == null ? null : Number(v));
@@ -115,7 +115,7 @@ export function AdsTab({ workspaceId, brandId, range: days, sources, canManage, 
       <PageSection
         id="ads"
         title="Meta Ads"
-        description={currencies ? `In the ad account's currency: ${currencies}. Before = ${dayLabel(summary.previousRange.from)} to ${dayLabel(summary.previousRange.to)}.` : undefined}
+        description={currencies ? `${ADS_CURRENCY_NOTE}: ${currencies}. Before = ${dayLabel(summary.previousRange.from)} to ${dayLabel(summary.previousRange.to)}.` : undefined}
         actions={empty ? undefined : <ExportCsvButton url={`${base}/ads/export?format=xlsx&${range}`} label="Export Excel" filename={`ads-${from}-${to}.xlsx`} />}
         className="flex flex-col gap-4"
       >

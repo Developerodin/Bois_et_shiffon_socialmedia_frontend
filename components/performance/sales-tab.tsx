@@ -10,6 +10,7 @@ import { ListSkeleton, LoadError, useLoad } from "@/components/settings/shared";
 import { Button } from "@/components/ui/button";
 import { PageSection } from "@/components/ui/page-section";
 import { brandApi, change, rangeQuery, useReloadOnFocus, type DateRange } from "@/lib/data-api";
+import { exVatNotes } from "@/lib/performance-summary";
 import { DATA_SOURCE_SLUGS, type DataSourceDto, type SalesCurrency, type SalesSummaryDto, type SalesTotals, type TurnOnShopifyOrdersBody } from "@/shared";
 
 const aov = (t: SalesTotals) => (t.orders ? Number(t.netSales) / t.orders : 0);
@@ -110,15 +111,9 @@ export function historyNote(source: DataSourceDto): string | null {
   return null;
 }
 
-/**
- * Net sales without VAT. Orders read before the VAT split existed have no shipping tax stored, so the figure may start
- * later than the range (exVatFrom), and orders whose VAT couldn't be read are left out and counted.
- */
+/** The Sales headline: net sales without VAT, with exVatNotes under it. */
 function ExVatHeadline({ c }: { c: SalesCurrency }) {
-  const notes = [
-    c.exVatFrom ? `Excl. VAT from ${dayLabel(c.exVatFrom)}` : null,
-    c.exVatMissing ? `${c.exVatMissing.toLocaleString()} ${c.exVatMissing === 1 ? "order" : "orders"} left out (their VAT couldn't be read)` : null,
-  ].filter(Boolean);
+  const notes = exVatNotes(c);
   return (
     <div className="flex flex-col">
       <span className="font-display text-3xl font-medium tabular-nums">{c.netExVat === null ? "—" : money(c.netExVat, c.currency)}</span>

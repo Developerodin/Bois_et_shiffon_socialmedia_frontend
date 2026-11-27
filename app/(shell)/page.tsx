@@ -39,6 +39,8 @@ export default async function WorkspacePage({ searchParams }: { searchParams: Pr
       reelsOn={featureOn("reels", shell.activeWorkspaceId)}
       tasksOn={featureOn("tasks", shell.activeWorkspaceId)}
       digestOn={featureOn("digest", shell.activeWorkspaceId)}
+      adsOn={featureOn("ads", shell.activeWorkspaceId)}
+      salesOn={featureOn("sales", shell.activeWorkspaceId)}
       user={shell.user}
       perms={shell.brandPermissions}
     />
