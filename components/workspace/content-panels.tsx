@@ -13,7 +13,10 @@ import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { ExportCsvButton } from "@/components/ui/export-csv-button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { reelHref } from "@/components/reels/href";
-import { NewPostDialog } from "@/components/workspace/new-post-dialog";
+import { NEW_POST_CHANNELS, NewPostDialog, type NewPostChannel } from "@/components/workspace/new-post-dialog";
+import { ChannelCalendarHeader } from "@/components/social/channel-calendar-header";
+import type { Conns } from "@/components/social/channel-connection";
+import { channelCounts } from "@/lib/social-channels";
 import { DraftEditor } from "@/components/workspace/draft-editor";
 import { ReleasePanel } from "@/components/workspace/release-panel";
 import { PeekSlot, usePeekTitle } from "@/components/workspace/peek";
@@ -30,6 +33,8 @@ import { type CardForm, newPostTime, gridRange, groupByDay, monthGrid, POST_NOUN
 import { CalendarCard, DayRow, MonthGrid } from "@/components/calendar/month-grid";
 import { ensureWorkLanguage, isRunCancelled, translateIdeas, TranslateToggle, type TranslatedIdea } from "@/components/languages/languages";
 import { CHANNEL_LABEL, channelIcon, channelLabel, STATUS_LABEL } from "@/lib/post-labels";
+import { postCardDetails, postCardLine } from "@/lib/post-card";
+import { PostThumb, useStableSignedUrl } from "@/components/workspace/post-thumb";
 
 /* ───────────── shared types + data ───────────── */
 
@@ -73,6 +78,8 @@ export type ContentItem = {
   latest: {
     version: number;
     body: { hook: string; caption: string; hashtags: string[]; slides: string[]; script: string[]; pinTitle: string; altText: string; pinLink?: string };
+    /** The draft's pictures, signed for an hour; the first is the cover (a studio reel's first scene). */
+    photoUrls?: string[];
     byPerson: boolean;
     check: { overall: "PASS" | "WARN" | "BLOCKER"; results: CheckResult[] } | null;
     review: { verdict: "APPROVED" | "CHANGES_REQUESTED" | "REJECTED"; note: string | null } | null;
@@ -355,8 +362,11 @@ type CalendarView = "list" | "month";
 const statusText = (i: ContentItem) =>
   i.publishIssue ? PUBLISH_ISSUE[i.publishIssue] : i.latest?.check?.overall === "BLOCKER" && i.status === "DRAFT_REVIEW" ? "Needs fixes" : (STATUS_LABEL[i.status] ?? i.status);
 
-/** `selectedId`: the post open in the side peek, which the month marks. */
-export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner, selectedId }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void; selectedId?: string | null }) {
+/**
+ * `selectedId`: the post open in the side peek, which the month marks. `connections`: the brand's connections, for a
+ * channel calendar's header (cf_channel set); without them it shows no connection state.
+ */
+export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunPlanner, selectedId, connections = "hidden" }: { base: string; perms: string[]; me: string | null; filter: CalendarFilter; onFilter: (f: CalendarFilter) => void; onOpen: (id: string) => void; onRunPlanner: () => void; selectedId?: string | null; connections?: Conns }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data, failed, reload } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   const canExport = perms.includes("content.download");
@@ -370,7 +380,16 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const shown = useMemo(() => (data ? filterItems(data, filter, me, new Date()) : null), [data, filter, me]);
   // The posts of the month last shown in Month, so its channels and campaigns can be filtered on too.
   const [monthItems, setMonthItems] = useState<ContentItem[]>([]);
-  useEffect(() => setMonthItems([]), [base]);
+  // The grid start those posts were read for, so a channel's counts never show one month's posts under another's name.
+  const [monthFrom, setMonthFrom] = useState<string | null>(null);
+  const reportMonth = useCallback((items: ContentItem[], from: string) => {
+    setMonthItems(items);
+    setMonthFrom(from);
+  }, []);
+  useEffect(() => {
+    setMonthItems([]);
+    setMonthFrom(null);
+  }, [base]);
   // List or Month, remembered per browser; read after mount so the server render and the first client render agree.
   const [view, setView] = useState<CalendarView>("list");
   useEffect(() => {
@@ -404,14 +423,30 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   const showMonth = (y: number, m: number) => setMonth({ y: new Date(y, m, 1).getFullYear(), m: new Date(y, m, 1).getMonth() });
   // Opens the new post in the post view, like a calendar row.
   const canCreate = perms.includes("content.create");
-  const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} />;
+  // A channel calendar New post can make (an Instagram post or carousel) starts the dialog on it.
+  const composeChannel = filter.channel && NEW_POST_CHANNELS.includes(filter.channel) ? (filter.channel as NewPostChannel) : undefined;
+  const newPost = <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} channel={composeChannel} />;
   // The same dialog, opened from an empty day in Month, set to that day (newPostTime; a day that is over starts undated).
   const [dayNewPost, setDayNewPost] = useState<{ at: string | null } | null>(null);
   if (!data || !shown) return failed ? <LoadFailed what="the calendar" onRetry={reload} className="p-4" /> : <div className="min-h-48 p-4"><ListSkeleton label="Loading calendar" rows={3} /></div>;
+  // A channel's calendar (cf_channel): its header, with counts over what this view has loaded and that range in words.
+  // Month counts wait for the shown month's own read; List counts its open posts and the last 30 days of changes.
+  const monthName = new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const channelHeader = filter.channel ? (
+    <ChannelCalendarHeader
+      channel={filter.channel}
+      conns={connections}
+      counts={view === "month" ? (monthFrom === gridRange(monthGrid(month.y, month.m)).from ? channelCounts(monthItems, filter.channel, month) : null) : channelCounts(data, filter.channel)}
+      range={view === "month" ? `in ${monthName}` : "open posts and the last 30 days"}
+      canCreate={canCreate}
+      onReset={() => onFilter({ ...filter, channel: undefined })}
+    />
+  ) : null;
   // Month never shows this: past months come from their own read. The switch stays, so a brand with only old posts gets there.
   if (!data.length && view === "list") {
     return (
       <div className="flex flex-col items-start gap-3 p-4">
+        {channelHeader && <div className="w-full">{channelHeader}</div>}
         {viewSwitch}
         <p className="text-sm text-muted-foreground">Nothing planned yet. Shortlist ideas, then run the Planner to fill your calendar.</p>
         <div className="flex gap-2">
@@ -462,7 +497,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
     // On a narrow panel it takes a row of its own under the buttons. On a wide panel the heading keeps one width so the arrows don't move.
     <div className="flex items-center gap-1 @max-[640px]/cal:order-last @max-[640px]/cal:w-full">
       <h2 id={monthHeadId} aria-live="polite" className="mx-1 text-base font-semibold tracking-tight tabular-nums @min-[900px]/cal:min-w-40 @max-[640px]/cal:mr-auto">
-        {new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+        {monthName}
       </h2>
       <Button size="sm" variant="ghost" className="w-8 px-0 pointer-coarse:w-11" aria-label="Previous month" onClick={() => showMonth(month.y, month.m - 1)}>
         <ChevronLeft aria-hidden className="size-4" />
@@ -482,6 +517,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
   // card's white so nothing shows through. Not in List, whose day headings stick to the same top.
   const filters = (
     <div className={cn("relative flex flex-col gap-2 border-b border-border px-4 py-2 @max-[640px]/cal:px-2", view === "month" && "sticky top-0 z-10 rounded-t-2xl bg-card")}>
+      {channelHeader}
       <div className="flex flex-wrap items-center gap-2">
         {viewSwitch}
         {view === "month" && monthNav}
@@ -491,7 +527,8 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
               {filterControls(false)}
             </FiltersMenu>
           </span>
-          {canExport && <ExportCsvButton url={`${base}/content/export`} filename={`calendar-${new Date().toLocaleDateString("en-CA")}.csv`} labelClassName="@max-[720px]/cal:sr-only" />}
+          {/* The export route takes dates only: on a channel's calendar the button says it holds every channel. */}
+          {canExport && <ExportCsvButton url={`${base}/content/export`} filename={`calendar-${new Date().toLocaleDateString("en-CA")}.csv`} label={filter.channel ? "Export CSV (all channels)" : undefined} labelClassName="@max-[720px]/cal:sr-only" />}
           {newPost}
         </span>
       </div>
@@ -519,10 +556,10 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
           undated={shown.filter((i) => !i.scheduledFor)}
           onOpen={onOpen}
           selectedId={selectedId ?? null}
-          onItems={setMonthItems}
+          onItems={reportMonth}
           onNewPost={canCreate ? (day) => setDayNewPost({ at: newPostTime(day) }) : undefined}
         />
-        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={!!dayNewPost} onOpenChange={(o) => !o && setDayNewPost(null)} at={dayNewPost?.at ?? undefined} />
+        <NewPostDialog base={base} canCreate={canCreate} onCreated={onOpen} open={!!dayNewPost} onOpenChange={(o) => !o && setDayNewPost(null)} at={dayNewPost?.at ?? undefined} channel={composeChannel} />
       </div>
     );
   }
@@ -551,12 +588,14 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
             <ul className="divide-y divide-border">
               {list.map((i) => {
                 const time = i.scheduledFor ? shortTime(i.scheduledFor) : null;
+                const d = postCardDetails(i);
                 return (
                   <li key={i.id}>
                     <button type="button" onClick={() => onOpen(i.id)} className="flex min-h-11 w-full items-center gap-3 px-4 py-1.5 text-left hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
-                      {i.channel === "INSTAGRAM_STORY" && (
-                        // eslint-disable-next-line @next/next/no-img-element -- a signed storage link
-                        i.firstFrameUrl ? <img src={i.firstFrameUrl} alt="" className="aspect-[9/16] w-6 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-6 shrink-0 rounded bg-muted" />
+                      {i.channel === "INSTAGRAM_STORY" ? (
+                        d.thumb ? <PostThumb url={d.thumb} className="aspect-[9/16] w-6 shrink-0 rounded bg-muted object-cover" /> : <span aria-hidden className="aspect-[9/16] w-6 shrink-0 rounded bg-muted" />
+                      ) : (
+                        d.thumb && <PostThumb url={d.thumb} className="size-8 shrink-0 rounded bg-muted object-cover" />
                       )}
                       {/* One line on a wide panel (time and channel, title, owner, status); three on a narrow one (time,
                           channel and status; the title, wrapping; the owner). Grid placement keeps one reading order. */}
@@ -569,7 +608,7 @@ export function ContentPanel({ base, perms, me, filter, onFilter, onOpen, onRunP
                           {i.title}
                         </span>
                         <span className="col-span-2 row-start-3 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground @min-[640px]/cal:col-span-1 @min-[640px]/cal:col-start-3 @min-[640px]/cal:row-start-1">
-                          <span className="truncate">{ownerLabel(i.owner)}</span>
+                          <span className="truncate">{[ownerLabel(i.owner), postCardLine({ ...d, format: null })].filter(Boolean).join(" · ")}</span>
                           {i.byHand && i.scheduledFor && <span className="shrink-0 font-medium text-foreground">&middot; Post by hand {dayTime(i.scheduledFor)}</span>}
                         </span>
                         <span className="col-start-2 row-start-1 justify-self-end @min-[640px]/cal:col-start-4">
@@ -673,17 +712,23 @@ function PostCard({ item, onOpen, form = "compact", selected = false }: { item: 
   const channel = CHANNEL_LABEL[item.channel] ?? item.channel;
   const Icon = channelIcon(item.channel);
   const status = statusText(item); // once per card: the tooltip and the accessible name both use it
+  const d = postCardDetails(item);
+  // The channel's label already names an Instagram format; the line adds a carousel's pictures or where a pin leads.
+  const extra = postCardLine({ ...d, format: null });
+  const thumb = useStableSignedUrl(d.thumb);
   return (
     <CalendarCard
       form={form}
       tone={toneOf(item.publishIssue ?? item.status)}
       selected={selected}
-      about={`${time ? `${time} · ` : ""}${item.title} · ${channel} · ${status}`}
+      about={`${time ? `${time} · ` : ""}${item.title} · ${channel}${extra ? ` · ${extra}` : ""} · ${status}`}
       onClick={() => onOpen(item.id)}
+      media={thumb}
       top={
         <span aria-hidden className="flex min-w-0 items-center gap-1 text-xs leading-3 text-muted-foreground">
           <Icon className="size-3 shrink-0" />
-          {time && <span className="truncate tabular-nums">{time}</span>}
+          {time && <span className="shrink-0 tabular-nums">{time}</span>}
+          {d.format && <span className="truncate">&middot; {d.format}</span>}
         </span>
       }
       lead={<Icon aria-hidden className="size-3 shrink-0 text-muted-foreground" />}
@@ -706,7 +751,7 @@ function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string
             meta={
               <>
                 {time && <span className="tabular-nums">{time} &middot; </span>}
-                {CHANNEL_LABEL[i.channel] ?? i.channel}
+                {[CHANNEL_LABEL[i.channel] ?? i.channel, postCardLine({ ...postCardDetails(i), format: null })].filter(Boolean).join(" · ")}
               </>
             }
             status={<StatusBadge quiet status={i.publishIssue ?? i.status}>{statusText(i)}</StatusBadge>}
@@ -723,7 +768,7 @@ function DayPosts({ posts, onPick }: { posts: ContentItem[]; onPick: (id: string
  * read of the grid's dates (?from&to, so past months show); undated ones are the list's. The same filters apply. A day
  * opens a popover (wide) or the agenda (narrow) listing its posts as DayPosts rows; an empty day offers New post.
  */
-function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedId, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; selectedId: string | null; onItems: (items: ContentItem[]) => void; onNewPost?: (day: string) => void }) {
+function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedId, onItems, onNewPost }: { base: string; filter: CalendarFilter; me: string | null; month: { y: number; m: number }; headId: string; undated: ContentItem[]; onOpen: (id: string) => void; selectedId: string | null; onItems: (items: ContentItem[], from: string) => void; onNewPost?: (day: string) => void }) {
   const grid = useMemo(() => monthGrid(month.y, month.m), [month]);
   const { from, to } = gridRange(grid);
   // A month that is all past changes rarely: polled slower. ponytail: one cached read per month looked at, polled while Month is open.
@@ -733,10 +778,11 @@ function MonthView({ base, filter, me, month, headId, undated, onOpen, selectedI
     intervals: past ? JOB_INTERVALS.preview : JOB_INTERVALS.always,
   });
   const byDay = useMemo(() => groupByDay(data ? filterItems(data.items, filter, me, new Date()) : []), [data, filter, me]);
-  // Reported only when what the filters list changes (a post, its channel or campaign), not on every poll.
-  const itemsKey = data?.items.map((i) => `${i.id}:${i.channel}:${i.campaign?.id ?? i.campaignId ?? ""}`).join() ?? null;
+  // Reported only when what the filters and a channel's counts read changes (a post, its channel, campaign or status,
+  // or the month), not on every poll.
+  const itemsKey = data ? `${from}|${data.items.map((i) => `${i.id}:${i.channel}:${i.campaign?.id ?? i.campaignId ?? ""}:${i.status}`).join()}` : null;
   useEffect(() => {
-    if (data) onItems(data.items);
+    if (data) onItems(data.items, from);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemsKey, onItems]);
   return (

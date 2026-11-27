@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { okToDiscard, UnsavedGuardOff } from "@/components/context/unsaved";
 import { reelHref } from "@/components/reels/href";
+import { useChannelConnections } from "@/components/social/channel-connection";
 import { Card } from "@/components/ui/card";
 import { ContentPanel, ContentView } from "@/components/workspace/content-panels";
 import { cachedPost, knownName } from "@/components/workspace/known-name";
@@ -14,6 +15,7 @@ import { filterFromSearch, withFilter, type CalendarFilter } from "@/lib/calenda
 import { peekInset } from "@/lib/calendar-month";
 import { recentKey } from "@/lib/recent";
 import { navigate, peekCrumb, peekKey, peekTitle, type View } from "@/lib/workspace-view";
+import { CONNECTIONS_READ } from "@/shared";
 
 /** The post inspector's width (px) on wide screens. */
 const INSPECTOR_W = 440;
@@ -38,6 +40,8 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
   const { shownId, open, recordLoaded } = useGuardedPeekParam("post", recentKey(workspaceId, brandId, userId));
 
   const filter = useMemo(() => filterFromSearch(new URLSearchParams(query)), [query]);
+  // For a channel calendar's connection state: read once, only by roles that may see connections (as /connections).
+  const connections = useChannelConnections(workspaceId, brandId, CONNECTIONS_READ.some((k) => perms.includes(k)));
   const changeFilter = useCallback(
     (f: CalendarFilter) => {
       const q = withFilter(window.location.search, f);
@@ -79,7 +83,7 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
       {/* It fills the page's height (flex-1), so the month grid below can spread its weeks over the window. */}
       <Card className="flex min-w-0 flex-1 flex-col" style={inset ? { marginRight: inset } : undefined}>
         {/* The Planner runs from the Overview's agent peek; this page hosts posts only. */}
-        <ContentPanel base={base} perms={perms} me={userId} filter={filter} onFilter={changeFilter} onOpen={(id) => open(id)} onRunPlanner={() => okToDiscard() && router.push("/?agent=planner")} selectedId={shownId} />
+        <ContentPanel base={base} perms={perms} me={userId} filter={filter} onFilter={changeFilter} onOpen={(id) => open(id)} onRunPlanner={() => okToDiscard() && router.push("/?agent=planner")} selectedId={shownId} connections={connections} />
       </Card>
       {peek.shown && peekPost && (
         <Peek placement="page" fixedWidth={INSPECTOR_W} open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} fullPageHref={peek.shown.fullPageHref} onClose={() => open(null)} onExited={peek.onExited} asideRef={peek.ref}>

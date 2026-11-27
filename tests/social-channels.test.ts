@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Connection } from "@/components/settings/api";
 import { CHANNEL_ICON, channelLabel } from "@/lib/post-labels";
-import { connectionLines, rowSummary, SOCIAL_ROWS, type ChannelSummary } from "@/lib/social-channels";
+import { attentionPosts, channelCounts, channelName, connectionLines, connectionState, landingCounts, providersOf, rowSummary, SOCIAL_ROWS, type ChannelSummary } from "@/lib/social-channels";
 
 const next = (id: string, scheduledFor: string) => ({ id, title: id, scheduledFor, status: "SCHEDULED" });
 const summary: ChannelSummary[] = [
@@ -23,7 +23,7 @@ describe("SOCIAL_ROWS", () => {
   });
   it("lists Meta, Instagram, Pinterest, LinkedIn, X and Threads; LinkedIn and X have no connection", () => {
     expect(SOCIAL_ROWS.map((r) => r.label)).toEqual(["Meta", "Instagram", "Pinterest", "LinkedIn", "X", "Threads"]);
-    expect(SOCIAL_ROWS.filter((r) => !r.providers.length).map((r) => r.key)).toEqual(["linkedin", "x"]);
+    expect(SOCIAL_ROWS.filter((r) => !providersOf(r.filter).length).map((r) => r.key)).toEqual(["linkedin", "x"]);
   });
 });
 
@@ -52,5 +52,104 @@ describe("connectionLines", () => {
     ]);
     expect(connectionLines(["INSTAGRAM"], [conn("INSTAGRAM", "ACTIVE")], names)).toEqual([{ provider: "INSTAGRAM", name: "Instagram", tone: "good", label: "Connected" }]);
     expect(connectionLines(["PINTEREST"], [conn("PINTEREST", "REVOKED")], names)[0]).toMatchObject({ name: "PINTEREST", label: "Needs reconnect" });
+  });
+});
+
+describe("providersOf", () => {
+  it("Meta is the Facebook Pages and Instagram logins; Instagram and each of its formats only the Instagram one", () => {
+    expect(providersOf("meta")).toEqual(["META", "INSTAGRAM"]);
+    expect(providersOf("instagram")).toEqual(["INSTAGRAM"]);
+    expect(providersOf("INSTAGRAM_REEL")).toEqual(["INSTAGRAM"]);
+    expect(providersOf("FACEBOOK_POST")).toEqual(["META"]);
+  });
+  it("LinkedIn, X and an unknown value have none", () => {
+    expect(providersOf("LINKEDIN_POST")).toEqual([]);
+    expect(providersOf("X_POST")).toEqual([]);
+    expect(providersOf("nope")).toEqual([]);
+  });
+});
+
+describe("channelName", () => {
+  it("names a row by its row label, any other channel by its label", () => {
+    expect(channelName("meta")).toBe("Meta");
+    expect(channelName("instagram")).toBe("Instagram");
+    expect(channelName("INSTAGRAM_REEL")).toBe("Instagram Reel");
+  });
+});
+
+describe("connectionState", () => {
+  const state = (filter: string, list: Connection[]) => connectionState(providersOf(filter), list, names);
+  it("is Manual publishing without a connection to publish through, whatever is connected", () => {
+    expect(state("X_POST", [conn("META", "ACTIVE")])).toMatchObject({ kind: "manual", label: "Manual publishing", lines: [] });
+  });
+  it("Meta: both working is Connected, one Partially connected, neither Not connected", () => {
+    expect(state("meta", [conn("META", "ACTIVE"), conn("INSTAGRAM", "ACTIVE")])).toMatchObject({ kind: "connected", tone: "good" });
+    expect(state("meta", [conn("META", "ACTIVE")])).toMatchObject({ kind: "partial", label: "Partially connected", tone: "warn" });
+    expect(state("meta", [])).toMatchObject({ kind: "none", label: "Not connected" });
+  });
+  it("the Instagram row reads the same Instagram connection as Meta", () => {
+    const list = [conn("META", "ACTIVE")];
+    expect(state("instagram", list).kind).toBe("none");
+    expect(state("meta", list).lines.find((l) => l.provider === "INSTAGRAM")?.label).toBe("Not connected");
+    expect(state("instagram", [conn("INSTAGRAM", "ACTIVE")]).kind).toBe("connected");
+  });
+  it("an account on record that isn't working is Needs reconnect; with another working, Partially connected", () => {
+    expect(state("PINTEREST_PIN", [conn("PINTEREST", "ERROR")])).toMatchObject({ kind: "reconnect", tone: "bad" });
+    expect(state("meta", [conn("META", "ERROR"), conn("INSTAGRAM", "ACTIVE")]).kind).toBe("partial");
+  });
+});
+
+describe("landingCounts", () => {
+  it("counts working channel accounts only, scheduled posts as the Scheduled filter does, and awaiting over every channel once", () => {
+    const list = [conn("META", "ACTIVE"), conn("INSTAGRAM", "ERROR"), conn("PINTEREST", "ACTIVE"), { ...conn("GOOGLE", "ACTIVE") }];
+    const items = [{ status: "SCHEDULED" }, { status: "SCHEDULED" }, { status: "APPROVED" }, { status: "PUBLISHED" }];
+    expect(landingCounts(summary, items, list)).toEqual({ accounts: 2, scheduled: 2, awaiting: 8 });
+  });
+  it("leaves the accounts out when connections aren't known", () => {
+    expect(landingCounts([], [], null)).toEqual({ accounts: null, scheduled: 0, awaiting: 0 });
+  });
+});
+
+describe("attentionPosts", () => {
+  const now = new Date("2026-11-27T12:00:00Z");
+  const post = (id: string, status: string, scheduledFor: string | null) => ({ id, status, scheduledFor });
+  const items = [
+    post("a-undated", "AWAITING_APPROVAL", null),
+    post("a-later", "AWAITING_APPROVAL", "2026-12-05T10:00:00Z"),
+    post("a-soon", "AWAITING_APPROVAL", "2026-11-28T10:00:00Z"),
+    post("s-later", "SCHEDULED", "2026-12-02T10:00:00Z"),
+    post("d-soon", "DRAFT_REVIEW", "2026-11-29T10:00:00Z"),
+    post("past", "SCHEDULED", "2026-11-20T10:00:00Z"),
+    post("blocked", "BLOCKED", "2026-11-28T10:00:00Z"),
+    post("undated", "PLANNED", null),
+    post("done", "PUBLISHED", "2026-11-30T10:00:00Z"),
+  ];
+  it("lists awaiting approval soonest first (undated last), then the next dated open posts not blocked or awaiting", () => {
+    const r = attentionPosts(items, now);
+    expect(r.awaiting.map((p) => p.id)).toEqual(["a-soon", "a-later", "a-undated"]);
+    expect(r.upcoming.map((p) => p.id)).toEqual(["d-soon", "s-later"]);
+  });
+  it("keeps at most n of each", () => {
+    expect(attentionPosts(items, now, 1)).toEqual({ awaiting: [items[2]], upcoming: [items[4]] });
+  });
+});
+
+describe("channelCounts", () => {
+  const post = (channel: string, status: string, scheduledFor: string | null) => ({ channel, status, scheduledFor });
+  const items = [
+    post("INSTAGRAM_REEL", "SCHEDULED", "2026-11-15T12:00:00Z"),
+    post("INSTAGRAM_POST", "AWAITING_APPROVAL", "2026-11-16T12:00:00Z"),
+    post("INSTAGRAM_POST", "AWAITING_APPROVAL", null),
+    post("FACEBOOK_POST", "PUBLISHED", "2026-11-10T12:00:00Z"),
+    post("FACEBOOK_POST", "REVIEWED", "2026-12-15T12:00:00Z"),
+    post("PINTEREST_PIN", "SCHEDULED", "2026-11-15T12:00:00Z"),
+  ];
+  it("counts a group's channels in the calendar's status groups (Published includes Reviewed)", () => {
+    expect(channelCounts(items, "meta")).toEqual({ scheduled: 1, awaiting: 2, published: 2 });
+    expect(channelCounts(items, "instagram")).toEqual({ scheduled: 1, awaiting: 2, published: 0 });
+    expect(channelCounts(items, "PINTEREST_PIN")).toEqual({ scheduled: 1, awaiting: 0, published: 0 });
+  });
+  it("with a month, only posts dated in it", () => {
+    expect(channelCounts(items, "meta", { y: 2026, m: 10 })).toEqual({ scheduled: 1, awaiting: 1, published: 1 });
   });
 });

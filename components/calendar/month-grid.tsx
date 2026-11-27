@@ -415,9 +415,10 @@ export function MonthGrid<T>({ month, headId, byDay, idOf, selectedId, onOpen, c
  * `lead` and the title. The title is cut short with an ellipsis; the day's popover lists it in full. It is not a tab
  * stop: the day's cell is, and its popover lists the same items for the keyboard. `about` (everything the card cuts
  * short) is its tooltip and accessible name. `selected`: the item open in the side peek, outlined so its day reads at a
- * glance. The content calendar's PostCard and the task calendar's TaskCard are this card.
+ * glance. The content calendar's PostCard and the task calendar's TaskCard are this card. `media` (a picture's link):
+ * shown small at the right of a stacked card only; the one-line forms are too short for it.
  */
-export function CalendarCard({ form, tone, selected, about, onClick, top, lead, title }: {
+export function CalendarCard({ form, tone, selected, about, onClick, top, lead, title, media }: {
   form: CardForm;
   tone: Tone;
   selected: boolean;
@@ -426,8 +427,10 @@ export function CalendarCard({ form, tone, selected, about, onClick, top, lead, 
   top?: ReactNode;
   lead?: ReactNode;
   title: string;
+  media?: string | null;
 }) {
   const stacked = form === "stacked" || form === "stacked2";
+  const thumb = stacked && media;
   return (
     <button
       type="button"
@@ -440,11 +443,14 @@ export function CalendarCard({ form, tone, selected, about, onClick, top, lead, 
         "pointer-events-auto relative flex w-full min-w-0 shrink-0 overflow-hidden rounded-md border pl-2.5 pr-1.5 text-left text-xs leading-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         selected ? "border-foreground bg-accent ring-1 ring-foreground" : "border-border/70 bg-background hover:border-control hover:bg-muted",
         form === "stacked2" ? "max-h-[50px] min-h-[34px] flex-col justify-center py-0.5" : form === "stacked" ? "h-[34px] flex-col justify-center" : cn("items-center gap-1.5", form === "line" ? "h-7" : "h-5"),
+        thumb && "pr-9",
       )}
     >
       <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", TONE_DOT[tone])} />
       {stacked ? top : lead}
       <span data-card-title className={cn("min-w-0 font-medium text-foreground", form === "stacked2" ? "line-clamp-2 break-words" : "truncate")}>{title}</span>
+      {/* eslint-disable-next-line @next/next/no-img-element -- a signed storage link */}
+      {thumb && <img src={thumb} alt="" loading="lazy" className="absolute right-1 top-1/2 size-7 -translate-y-1/2 rounded bg-muted object-cover" />}
     </button>
   );
 }

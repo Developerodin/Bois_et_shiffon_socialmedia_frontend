@@ -14,7 +14,10 @@ import { workspaceIdOf } from "@/lib/plan-credits";
 import { nowLocalInput } from "@/lib/time";
 import { CONTENT_GOALS, CONTENT_GOAL_LABELS, type ContentGoal, type LibraryPhoto } from "@/shared";
 
-type Channel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL";
+export type NewPostChannel = "INSTAGRAM_POST" | "INSTAGRAM_CAROUSEL";
+type Channel = NewPostChannel;
+/** The channels New post can make (the server's NewPostInput); a calendar on one of them starts the dialog on it. */
+export const NEW_POST_CHANNELS: readonly string[] = ["INSTAGRAM_POST", "INSTAGRAM_CAROUSEL"] satisfies NewPostChannel[];
 const DIRECTION_MAX = 500;
 
 /**
@@ -22,13 +25,14 @@ const DIRECTION_MAX = 500;
  * With `open`/`onOpenChange` (the top bar's quick create) the caller opens it and no "New post" button shows.
  * `at` (a datetime-local value; the calendar's empty day) adds a date and time field set to it, and the post is made on
  * that date; cleared, or without `at`, the post is made undated as before.
+ * `channel`: the format it starts on (a channel calendar's own); without it, a single photo as before.
  */
-export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOpenChange, at }: { base: string; canCreate: boolean; onCreated: (id: string) => void; open?: boolean; onOpenChange?: (o: boolean) => void; at?: string }) {
+export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOpenChange, at, channel: startChannel = "INSTAGRAM_POST" }: { base: string; canCreate: boolean; onCreated: (id: string) => void; open?: boolean; onOpenChange?: (o: boolean) => void; at?: string; channel?: Channel }) {
   const workspaceId = workspaceIdOf(base);
   const brandId = base.split("/brands/")[1];
   const [open, setOpen] = useState(false);
   const [picking, setPicking] = useState(false);
-  const [channel, setChannel] = useState<Channel>("INSTAGRAM_POST");
+  const [channel, setChannel] = useState<Channel>(startChannel);
   const [goal, setGoal] = useState<ContentGoal>("newArrival");
   const [photo, setPhoto] = useState<LibraryPhoto | null>(null);
   const [direction, setDirection] = useState("");
@@ -41,7 +45,7 @@ export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOp
   const shown = controlled ? openProp : open;
 
   function reset() {
-    setChannel("INSTAGRAM_POST");
+    setChannel(startChannel);
     setGoal("newArrival");
     setPhoto(null);
     setDirection("");
@@ -52,8 +56,8 @@ export function NewPostDialog({ base, canCreate, onCreated, open: openProp, onOp
   // Opened by the caller: start fresh, as the button does.
   useEffect(() => {
     if (controlled && openProp) reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset reads `at`, listed; it is remade each render
-  }, [controlled, openProp, at]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset reads `at` and `startChannel`, listed; it is remade each render
+  }, [controlled, openProp, at, startChannel]);
 
   if (!canCreate || !workspaceId || !brandId) return null;
 
