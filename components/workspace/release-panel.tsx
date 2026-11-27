@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
-import { publishCalls } from "@/components/workspace/release";
+import { boardChoice, publishCalls } from "@/components/workspace/release";
 import { PeekSlot } from "@/components/workspace/peek";
 import { downloadFile } from "@/lib/download";
 import { dayTime, nowLocalInput } from "@/lib/time";
@@ -50,6 +50,8 @@ type Release = {
   postUrl?: string | null;
   accounts: { id: string; displayName: string }[];
   boards?: Record<string, { id: string; name: string }[] | null>;
+  /** A Pinterest Pin's planned board; older servers omit it. */
+  plannedBoard?: { id: string; name: string } | null;
   decisions: Decision[];
   attempts: Attempt[];
   productIssues: ProductIssue[];
@@ -71,6 +73,9 @@ const notGoingOut = (d: Release) =>
     const due = new Date(a.runAt).getTime() - Date.now();
     return a.status === "PUBLISHING" || (a.status === "SCHEDULED" && due < 60_000 && due > -10 * 60_000);
   });
+/** Statuses whose board plan the server no longer changes (its EDITABLE leaves them out). */
+const BOARD_LOCKED = ["SCHEDULED", "PUBLISHED", "REVIEWED", "CANCELLED"];
+const SELECT_CLASS = "h-11 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const errText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Try again.");
 const browserZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -151,6 +156,7 @@ export function ReleasePanel({ base, id, status, version, qualityBlocked, perms,
       <h2 id="release-h" className="text-sm font-semibold">Approval and publishing</h2>
       {data.campaign && <p className="text-sm">{campaignLine(data.campaign)}</p>}
       {pinLink && <p className="break-all text-sm"><span className="text-muted-foreground">This pin leads to</span> {pinLink}</p>}
+      {data.requirements.needsBoard && <PlannedBoard data={data} canEdit={perms.includes("content.create") && !BOARD_LOCKED.includes(status)} onSet={(board) => act({ action: "planBoard", board })} />}
       {issues.length > 0 && (
         <ul aria-label="Issues" className="flex flex-col gap-1 rounded-lg border border-border p-3 text-sm">
           {issues.map((i) => (
@@ -343,6 +349,45 @@ function ApproveForm({ version, blocked, issues, canOverride, approved = false, 
   );
 }
 
+/**
+ * A Pinterest Pin's planned board: a choice among the boards this view lists (only people who publish get them, so
+ * others who edit the post see the plan without changing it), or the plan as text. Scheduling starts on it.
+ */
+function PlannedBoard({ data, canEdit, onSet }: { data: Release; canEdit: boolean; onSet: (board: { id: string; name: string } | null) => Promise<void> }) {
+  const planned = data.plannedBoard ?? null;
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Every listed account's boards, each once.
+  const listed = Object.values(data.boards ?? {}).flatMap((l) => l ?? []).filter((b, n, all) => all.findIndex((x) => x.id === b.id) === n);
+  if (!canEdit || !listed.length) {
+    return planned ? <p className="text-sm"><span className="text-muted-foreground">Planned board</span> {planned.name}</p> : null;
+  }
+  async function pick(id: string) {
+    setPending(true);
+    setError(null);
+    try {
+      await onSet(id ? (listed.find((b) => b.id === id) ?? null) : null);
+    } catch (e) {
+      setError(errText(e));
+    } finally {
+      setPending(false);
+    }
+  }
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor="plan-board" className="text-sm font-medium">Planned board</label>
+      <select id="plan-board" value={planned?.id ?? ""} disabled={pending} onChange={(e) => void pick(e.target.value)} aria-describedby="plan-board-help" className={SELECT_CLASS}>
+        <option value="">No board planned</option>
+        {/* A planned board no longer listed (deleted or renamed on Pinterest) still shows as the plan. */}
+        {planned && !listed.some((b) => b.id === planned.id) && <option value={planned.id}>{planned.name}</option>}
+        {listed.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+      </select>
+      <p id="plan-board-help" className="text-xs text-muted-foreground">Scheduling starts on this board; it can still be changed then.</p>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    </div>
+  );
+}
+
 /** approving: the press approves draft v`version` first (approveFirst). */
 function PublishForm({ base, data, version, approving, onPublish }: { base: string; data: Release; version: number; approving: boolean; onPublish: (b: Record<string, unknown>) => Promise<void> }) {
   const { requirements: req, accounts } = data;
@@ -374,9 +419,16 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
   // Typed links, a chosen time or an upload in progress are lost on leaving (uploaded files wait for Publish).
   useUnsavedGuard(uploading || uploads.length > 0 || imageUrl !== "" || videoUrl !== "" || (later && runAt !== ""));
 
+  // Starts on the planned board when this account lists it, else the first; a plan set or changed while the form is open
+  // moves the choice to it once (boardChoice).
+  const planned = data.plannedBoard?.id ?? null;
+  const plannedSeen = useRef<string | null>(null);
   useEffect(() => {
-    if (boards?.length && !boards.some((b) => b.id === boardId)) setBoardId(boards[0].id);
-  }, [boards, boardId]);
+    const next = boardChoice(boards ?? [], boardId, planned, plannedSeen.current);
+    if (next === null) return;
+    if (next === planned) plannedSeen.current = planned;
+    setBoardId(next);
+  }, [boards, boardId, planned]);
 
   if (!req.provider) {
     return <p className="text-sm text-muted-foreground">This format can&rsquo;t be published from here yet. Post it in the app using the approved text above.</p>;
@@ -426,7 +478,7 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
     try {
       await onPublish({
         connectionId: accountId,
-        ...(req.needsBoard ? { boardId } : {}),
+        ...(req.needsBoard ? { boardId, boardName: boards?.find((b) => b.id === boardId)?.name } : {}),
         ...(imageLinks.length ? { imageLinks } : {}),
         ...(uploads.length ? { mediaKeys: uploads.map((u) => u.key) } : {}),
         ...(needsLink ? { videoUrl: videoUrl.trim() } : {}),
@@ -468,7 +520,7 @@ function PublishForm({ base, data, version, approving, onPublish }: { base: stri
           ) : boards.length === 0 ? (
             <p className="text-sm text-muted-foreground">This account has no boards yet. Create one on Pinterest, then reopen this post.</p>
           ) : (
-            <select id="pub-board" value={boardId} onChange={(e) => setBoardId(e.target.value)} className="h-11 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <select id="pub-board" value={boardId} onChange={(e) => setBoardId(e.target.value)} className={SELECT_CLASS}>
               {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           )}

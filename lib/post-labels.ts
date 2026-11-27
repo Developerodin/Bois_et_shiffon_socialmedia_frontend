@@ -17,7 +17,7 @@ export const CHANNEL_LABEL: Record<string, string> = {
   LINKEDIN_POST: "LinkedIn",
   X_POST: "X",
 };
-/** The calendar's channel groups (CHANNEL_GROUPS in calendar-filter.ts) in words. */
+/** The calendar's channel groups (CHANNEL_GROUPS in shared/channel-groups.ts) in words. */
 export const CHANNEL_GROUP_LABEL: Record<string, string> = {
   meta: "Meta: Facebook + Instagram",
   instagram: "Instagram: all formats",
