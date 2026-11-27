@@ -121,7 +121,7 @@ export function CalendarBoard({ workspaceId, brandId, perms, userId, reelsOn }: 
             peekWf && (
               // Keyed by item: another agent remounts fresh. A post opens in this peek; the posts are this page.
               <Fragment key={peekKey(peekWf)}>
-                <WorkflowPeekBody view={peekWf} live={peek.live} base={base} workspaceId={workspaceId} brandId={brandId} perms={perms} agents={wf.agents} autoRunKey={wf.autoRunKey} onRunScout={wf.runScout} onOpenPost={(id) => open(id)} onOpenPosts={() => show({ kind: "home" })} />
+                <WorkflowPeekBody view={peekWf} live={peek.live} base={base} workspaceId={workspaceId} brandId={brandId} perms={perms} agents={wf.agents} agentsFailed={wf.agentsFailed} autoRunKey={wf.autoRunKey} onRunScout={wf.runScout} onOpenPost={(id) => open(id)} onOpenPosts={() => show({ kind: "home" })} />
               </Fragment>
             )
           )}

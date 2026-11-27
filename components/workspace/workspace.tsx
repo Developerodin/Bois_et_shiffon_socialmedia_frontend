@@ -32,7 +32,7 @@ import { fetchAgents, startRun, type AgentSummary } from "@/components/agents/ap
 import { DocPane } from "@/components/context/doc-pane";
 import { fetchContextDocs, type ContextDocEntry, type ContextDocKind, type ContextDocsResponse } from "@/components/context/api";
 import { okToDiscard, UnsavedGuardOff } from "@/components/context/unsaved";
-import { ApiError, errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
+import { errorMessage, request, settingsApi, type Connection } from "@/components/settings/api";
 import { ListSkeleton } from "@/components/settings/shared";
 import { SegmentedRadios } from "@/components/ui/segmented-radios";
 import { useRunPrice } from "@/components/shell/use-plan-credits";
@@ -62,6 +62,7 @@ import { CONNECTIONS_READ, safeHttpUrl, STATUS_GROUPS } from "@/shared";
 import { calendarHref as filterHref, isBlocked, isOverdue, type CalendarFilter } from "@/lib/calendar-filter";
 import { timeAgo } from "@/lib/time";
 import { RunEvents } from "@/components/agents/run-events";
+import { useRunAgent } from "@/components/agents/use-run-agent";
 import { nothingToDo } from "@/lib/agent-runs";
 import { cachedPost, knownName } from "@/components/workspace/known-name";
 import { recentKey, viewToEntry, writeRecent } from "@/lib/recent";
@@ -74,7 +75,7 @@ type Finding = { id: string; severity: string; title: string; why?: string };
 type Report = { score: number; summary: string; findings: Finding[]; metrics: Record<string, unknown>; createdAt: string } | null;
 
 /** Agents shown as tiles. Built ones come from the API; planned ones are locked (Okara shows locked tiles too). */
-const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
+export const AGENT_META: Record<string, { icon: LucideIcon; tint: string }> = {
   research: { icon: ScanSearch, tint: "text-primary-strong" },
   scout: { icon: Compass, tint: "text-primary-strong" },
   planner: { icon: CalendarDays, tint: "text-primary-strong" },
@@ -1358,43 +1359,12 @@ export function AgentView({
   onOpenDoc: (k: ContextDocKind) => void;
   onRan: () => void;
 }) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   // A run started here replaces the one the link named: from then on show the latest run.
   const [startedFor, setStartedFor] = useState<string | null | undefined>(null);
   const shownRun = startedFor === runId ? undefined : runId;
-  const running = agent?.lastRun?.status === "RUNNING" || agent?.lastRun?.status === "QUEUED";
-  const price = useRunPrice(workspaceId, agentKey);
+  const { pending, error, running, price, run } = useRunAgent({ workspaceId, brandId, agentKey, agent, autoRun, onRan, onStarted: () => setStartedFor(runId) });
   // The latest run's posts (from its log), so the stage's queue below doesn't list them twice.
   const [runPosts, setRunPosts] = useState<string[]>([]);
-
-  async function run() {
-    setPending(true);
-    setError(null);
-    try {
-      await startRun(workspaceId, brandId, agentKey);
-      setStartedFor(runId);
-      onRan();
-      void loadPlanCredits(workspaceId, true);
-    } catch (e) {
-      if (isRunCancelled(e)) return;
-      setError(e instanceof ApiError && e.status === 403 ? "Your role can't run agents. Ask an owner or admin." : errorMessage(e, "Couldn't start the agent. Try again."));
-    } finally {
-      setPending(false);
-    }
-  }
-
-  // Once per mount; the ref stops React's dev double-effect from starting two paid runs.
-  // A run already going counts as the auto-run: the ref is set first, so the end of that run
-  // (the poll hands a new `agent`) doesn't start a second paid one.
-  const autoStarted = useRef(false);
-  useEffect(() => {
-    if (!autoRun || autoStarted.current || !agent) return;
-    autoStarted.current = true;
-    if (running) return;
-    void run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when the agent has loaded
-  }, [autoRun, agent]);
 
   return (
     <div>
@@ -1689,7 +1659,8 @@ function AgentsFeed({
 
 /* ───────────── Analyst notes ───────────── */
 
-function LearningNotes({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
+/** The Analyst's learning notes, newest first as the server sends them: null until read; `load` reads again. */
+export function useLearningNotes(workspaceId: string, brandId: string) {
   const [notes, setNotes] = useState<{ id: string; title: string; body: string; createdAt: string }[] | null>(null);
   const [failed, setFailed] = useState(false);
   const load = useCallback(() => {
@@ -1699,6 +1670,11 @@ function LearningNotes({ workspaceId, brandId }: { workspaceId: string; brandId:
     ).then((d) => setNotes(d.notes), () => setFailed(true));
   }, [workspaceId, brandId]);
   useEffect(load, [load]);
+  return { notes, failed, load };
+}
+
+export function LearningNotes({ workspaceId, brandId }: { workspaceId: string; brandId: string }) {
+  const { notes, failed, load } = useLearningNotes(workspaceId, brandId);
   if (failed) return <LoadFailed what="learning notes" onRetry={load} />;
   if (!notes) return <ListSkeleton label="Loading notes" rows={2} />;
   if (!notes.length) return <p className="text-sm text-muted-foreground">No learning notes yet. Run the Analyst to write the first one.</p>;

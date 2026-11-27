@@ -1109,7 +1109,7 @@ function ShowOnCalendar({ id, at }: { id: string; at: string }) {
  * An agent's peek on the calendar and Channels: the posts still waiting at its stage (older ones too, not only the
  * latest run's), each opening in place. `exclude`: the latest run's posts, already listed above. Brand-wide queue.
  */
-export function StageQueue({ base, agentKey, exclude, onOpenPost }: { base: string; agentKey: string; exclude: readonly string[]; onOpenPost: (id: string) => void }) {
+export function StageQueue({ base, agentKey, exclude, onOpenPost, title = "Still waiting at this stage" }: { base: string; agentKey: string; exclude: readonly string[]; onOpenPost: (id: string) => void; /** The section heading (the agent drawer names its scope). */ title?: string }) {
   const pick = useCallback((d: { items: ContentItem[] }) => d.items, []);
   const { data } = useBrandData(base, "content", pick as (d: never) => ContentItem[]);
   if (!data) return null;
@@ -1119,7 +1119,7 @@ export function StageQueue({ base, agentKey, exclude, onOpenPost }: { base: stri
   if (!groups.length) return null;
   return (
     <section aria-labelledby="queue-h" className="flex flex-col gap-3">
-      <h2 id="queue-h" className="text-base font-semibold">Still waiting at this stage</h2>
+      <h2 id="queue-h" className="text-base font-semibold">{title}</h2>
       {groups.map((g) => (
         <div key={g.label} className="flex flex-col gap-1.5">
           <p className="text-xs text-muted-foreground">{g.label} · {g.posts.length}</p>
