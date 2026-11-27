@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Fragment, useCallback, useEffect, type ReactNode } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronRight, Newspaper } from "lucide-react";
 import { ListSkeleton } from "@/components/settings/shared";
 import { AccountNumbers } from "@/components/social/channel-analytics";
@@ -11,13 +12,17 @@ import { PlanWithAgents } from "@/components/agents/plan-with-agents";
 import { LoadFailed } from "@/components/ui/load-failed";
 import { PageSection } from "@/components/ui/page-section";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Peek } from "@/components/workspace/peek";
 import { JOB_INTERVALS, useJob } from "@/components/workspace/use-job";
+import { usePeek } from "@/components/workspace/use-peek";
+import { useWorkflowPeek, WorkflowPeekBody } from "@/components/workspace/workflow-peek";
 import type { ContentItem } from "@/components/workspace/content-panels";
 import { calendarHref } from "@/lib/calendar-filter";
 import { analyticsHref } from "@/lib/channel-analytics";
 import { channelIcon, channelLabel, STATUS_LABEL, type ChannelIcon } from "@/lib/post-labels";
 import { attentionPosts, connectionState, landingCounts, providersOf, rowSummary, SOCIAL_ROWS, type ChannelSummary, type SocialRow } from "@/lib/social-channels";
 import { dayTime } from "@/lib/time";
+import { namesItem, navigate, peekKey, viewToSearch, type View, type WorkflowPeekView } from "@/lib/workspace-view";
 
 type Summary = { channels: ChannelSummary[] };
 // Module-level: useJob restarts its polling when `pick` changes.
@@ -30,7 +35,8 @@ const CONNECTIONS = "/connections";
  * and how many posts wait for approval (a row opens the Content calendar filtered to it), then the posts awaiting
  * approval and the next ones going out. Counts come from GET content/summary, the posts from the calendar's list
  * (GET content), the connections from GET connections (only for roles that hold CONNECTIONS_READ: `canSeeConnections`).
- * `canManageConnections` (integrations.manage) offers Connect and Manage, as the Connections page does.
+ * `canManageConnections` (integrations.manage) offers Connect and Manage, as the Connections page does. The workflow
+ * card opens its agents and Scout's ideas in a side peek here (WorkflowPeek).
  */
 export function SocialLanding({ workspaceId, brandId, canSeeConnections, canManageConnections, blogOn, actions, canSeeAnalytics = false, perms = [] }: { workspaceId: string; brandId: string; canSeeConnections: boolean; canManageConnections: boolean; blogOn: boolean; /** The page's buttons, at the right end of the figures' row. */ actions?: ReactNode; /** analytics.read: the Facebook Page and Instagram numbers. */ canSeeAnalytics?: boolean; /** The brand permissions: agents.run offers Create with agents, agents.read the workflow strip. */ perms?: string[] }) {
   const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}/brands/${encodeURIComponent(brandId)}`;
@@ -50,7 +56,7 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
           {actions}
         </div>
       </div>
-      <AgentWorkflowStrip base={base} perms={perms} conns={conns} />
+      <WorkflowPeek workspaceId={workspaceId} brandId={brandId} perms={perms} conns={conns} />
       <PageSection id="channels" title="Your channels" description="Open a channel to plan it on its own calendar." className="pt-1">
         {!data ? (
           failed ? <LoadFailed what="the channels" onRetry={reload} /> : <ListSkeleton label="Loading channels" rows={4} />
@@ -71,6 +77,42 @@ export function SocialLanding({ workspaceId, brandId, canSeeConnections, canMana
       </PageSection>
       {canSeeAnalytics && <Analytics base={base} />}
       {posts.data && <Attention items={posts.data} />}
+    </>
+  );
+}
+
+/**
+ * The workflow card and its side peek (?agent=<key>, ?peek=ideas), fixed to the window's right edge over the page, as
+ * /competitors does: /social has no post peek, so a post opens on the calendar.
+ */
+function WorkflowPeek({ workspaceId, brandId, perms, conns }: { workspaceId: string; brandId: string; perms: string[]; conns: Conns }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const query = useSearchParams().toString();
+  const hrefFor = useCallback((v: View) => {
+    const s = viewToSearch(v, window.location.search, pathname);
+    return s.startsWith("?") ? `${pathname}${s}` : s;
+  }, [pathname]);
+  const show = (v: View) => navigate(router, hrefFor(v), pathname);
+  const wf = useWorkflowPeek({ workspaceId, brandId, perms, query, go: show });
+  // Any other item, a malformed one or an agent this brand doesn't have is taken out in place, so Back skips it.
+  const bad = (!wf.view && namesItem(query)) || wf.bad;
+  useEffect(() => {
+    if (bad) navigate(router, hrefFor({ kind: "home" }), pathname, "replace");
+  }, [bad, router, hrefFor, pathname]);
+  const peek = usePeek(wf.item);
+  const shown = peek.shown ? (peek.shown.view as WorkflowPeekView) : null;
+  return (
+    <>
+      <AgentWorkflowStrip base={wf.base} perms={perms} conns={conns} onOpenAgent={(key) => show({ kind: "agent", key })} onOpenIdeas={() => show({ kind: "panel", id: "ideas" })} />
+      {peek.shown && shown && (
+        <Peek placement="page" open={peek.live} title={peek.shown.title} crumb={peek.shown.crumb} onClose={() => show({ kind: "home" })} onExited={peek.onExited} asideRef={peek.ref}>
+          {/* Keyed by item: another agent remounts fresh. */}
+          <Fragment key={peekKey(shown)}>
+            <WorkflowPeekBody view={shown} live={peek.live} base={wf.base} workspaceId={workspaceId} brandId={brandId} perms={perms} agents={wf.agents} autoRunKey={wf.autoRunKey} onRunScout={wf.runScout} onOpenPost={(id) => router.push(`/calendar?post=${encodeURIComponent(id)}`)} onOpenPosts={() => router.push("/calendar")} />
+          </Fragment>
+        </Peek>
+      )}
     </>
   );
 }

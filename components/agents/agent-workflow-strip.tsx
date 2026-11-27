@@ -98,14 +98,15 @@ function Dot({ state, flag }: { state: StageState; flag?: StageFlag }) {
  * The content workflow: a next-step banner (the first open dependency, one action), the five production stages
  * (Scout → Planner → Brief writer → Creator → Quality), each with its last run's state, what waits for it now and its
  * next step, and the Analyst apart as the learning agent. Counts are the brand's current queues from the ideas and the
- * calendar's list (shared requests other panels already make), never one run's output. A stage opens its agent on the
- * Overview (never starts it). Collapsible, remembered per browser. Only for roles that read agents; starting runs needs
+ * calendar's list (shared requests other panels already make), never one run's output. A stage opens its agent (never
+ * starts it): in the page's own peek when `onOpenAgent` is given (Scout's card and Review ideas open the Ideas panel
+ * there, `onOpenIdeas`), else on the Overview. Collapsible, remembered per browser. Only for roles that read agents; starting runs needs
  * agents.run. `filter`, `conns`: a channel calendar's channel and the connections, so the Plan with agents dialog the
  * banner opens preselects that channel, as the toolbar's does.
  * TODO(Phase 2): a workflow scope line (products · channels · planned posts) once a workflow record is persisted; the
  * posts don't carry one shared scope today, so nothing is shown rather than a guess.
  */
-export function AgentWorkflowStrip({ base, perms, className, filter, conns }: { base: string; perms: string[]; className?: string; filter?: string; conns?: Conns }) {
+export function AgentWorkflowStrip({ base, perms, className, filter, conns, onOpenAgent, onOpenIdeas }: { base: string; perms: string[]; className?: string; filter?: string; conns?: Conns; onOpenAgent?: (key: string) => void; onOpenIdeas?: () => void }) {
   const canRead = perms.includes("agents.read");
   const canRun = perms.includes("agents.run");
   const agents = useJob(`${base}/agents`, { pick: pickAgents as (d: never) => AgentSummary[], done: idle, intervals: JOB_INTERVALS.agents, off: !canRead }).data;
@@ -184,7 +185,7 @@ export function AgentWorkflowStrip({ base, perms, className, filter, conns }: { 
       case "plan":
         return <PlanWithAgents key={filter ?? ""} base={base} perms={perms} filter={filter} conns={conns} label="Plan selected ideas" />;
       case "review-ideas":
-        return <Button asChild size="sm"><Link href="/?peek=ideas">Review ideas</Link></Button>;
+        return onOpenIdeas ? <Button size="sm" onClick={onOpenIdeas}>Review ideas</Button> : <Button asChild size="sm"><Link href="/?peek=ideas">Review ideas</Link></Button>;
       case "approvals":
         return <Button asChild size="sm"><Link href={calendarHref({ status: "awaiting" })}>Review approvals</Link></Button>;
       case "create":
@@ -197,6 +198,14 @@ export function AgentWorkflowStrip({ base, perms, className, filter, conns }: { 
   const analystRun = runOf(ANALYST_STAGE.key);
   const analystState = stageState(analystRun);
   const analystWhen = timeAgo(analystRun?.finishedAt ?? analystRun?.startedAt);
+  const analystClass = cn("flex min-h-9 min-w-0 items-center gap-1.5 rounded-md pr-1 text-left hover:underline", focusRing);
+  const analystName = (
+    <>
+      <LineChart aria-hidden className="size-3.5 shrink-0 text-primary-strong" />
+      <span className="font-medium">{ANALYST_STAGE.label}</span>
+      <span className="text-muted-foreground">· Learning</span>
+    </>
+  );
 
   return (
     <section aria-label="Content workflow" className={cn("@container/wf min-w-0 rounded-xl border border-border bg-card", className)}>
@@ -239,6 +248,33 @@ export function AgentWorkflowStrip({ base, perms, className, filter, conns }: { 
               const shownFlag = flag && (state === "idle" || state === "completed") ? flag : null;
               const work = stageWork(s.key, counts);
               const Icon = ICON[s.key];
+              // In this page's peek when it has one (Scout: its ideas), else the agent on the Overview.
+              const openHere = s.key === "scout" ? onOpenIdeas : onOpenAgent && (() => onOpenAgent(s.key));
+              const card = {
+                "aria-label": `${s.label}: ${shownFlag ? FLAG_LABEL[shownFlag] : STAGE_LABEL[state]}, last run ${STAGE_LABEL[state].toLowerCase()}. ${work.count ?? "unknown"} ${work.label}. Next: ${work.next}`,
+                className: cn("flex h-full w-full min-w-0 flex-col gap-1.5 rounded-lg border border-border bg-background p-2.5 text-left text-xs hover:border-foreground/25 hover:bg-muted/40", focusRing),
+              };
+              const body = (
+                <>
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="text-muted-foreground tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                    <Icon aria-hidden className="size-3.5 shrink-0 text-primary-strong" />
+                    <span className="truncate font-medium text-foreground">{s.label}</span>
+                  </span>
+                  <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+                    <Dot state={state} flag={shownFlag} />
+                    <span className="truncate">{shownFlag ? FLAG_LABEL[shownFlag] : STAGE_LABEL[state]}</span>
+                  </span>
+                  {/* The run state stays visible apart from the workload flag. */}
+                  {shownFlag && <span className="truncate text-muted-foreground">Last run: {STAGE_LABEL[state].toLowerCase()}</span>}
+                  <span className="flex min-w-0 items-baseline gap-1.5">
+                    <span className="text-lg leading-tight font-semibold tabular-nums text-foreground">{work.count ?? "–"}</span>
+                    <span className="min-w-0 text-muted-foreground">{work.label}</span>
+                  </span>
+                  {work.extra && <span className="text-muted-foreground">{work.extra}</span>}
+                  <span className="mt-auto text-muted-foreground">Next: <span className="text-foreground">{work.next}</span></span>
+                </>
+              );
               return (
                 <li key={s.key} className="relative min-w-0">
                   {i > 0 && (
@@ -249,29 +285,15 @@ export function AgentWorkflowStrip({ base, perms, className, filter, conns }: { 
                       </span>
                     </>
                   )}
-                  <Link
-                    href={`/?agent=${encodeURIComponent(s.key)}`}
-                    aria-label={`${s.label}: ${shownFlag ? FLAG_LABEL[shownFlag] : STAGE_LABEL[state]}, last run ${STAGE_LABEL[state].toLowerCase()}. ${work.count ?? "unknown"} ${work.label}. Next: ${work.next}`}
-                    className={cn("flex h-full min-w-0 flex-col gap-1.5 rounded-lg border border-border bg-background p-2.5 text-xs hover:border-foreground/25 hover:bg-muted/40", focusRing)}
-                  >
-                    <span className="flex min-w-0 items-center gap-1.5">
-                      <span className="text-muted-foreground tabular-nums">{String(i + 1).padStart(2, "0")}</span>
-                      <Icon aria-hidden className="size-3.5 shrink-0 text-primary-strong" />
-                      <span className="truncate font-medium text-foreground">{s.label}</span>
-                    </span>
-                    <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
-                      <Dot state={state} flag={shownFlag} />
-                      <span className="truncate">{shownFlag ? FLAG_LABEL[shownFlag] : STAGE_LABEL[state]}</span>
-                    </span>
-                    {/* The run state stays visible apart from the workload flag. */}
-                    {shownFlag && <span className="truncate text-muted-foreground">Last run: {STAGE_LABEL[state].toLowerCase()}</span>}
-                    <span className="flex min-w-0 items-baseline gap-1.5">
-                      <span className="text-lg leading-tight font-semibold tabular-nums text-foreground">{work.count ?? "–"}</span>
-                      <span className="min-w-0 text-muted-foreground">{work.label}</span>
-                    </span>
-                    {work.extra && <span className="text-muted-foreground">{work.extra}</span>}
-                    <span className="mt-auto text-muted-foreground">Next: <span className="text-foreground">{work.next}</span></span>
-                  </Link>
+                  {openHere ? (
+                    <button type="button" onClick={openHere} {...card}>
+                      {body}
+                    </button>
+                  ) : (
+                    <Link href={`/?agent=${encodeURIComponent(s.key)}`} {...card}>
+                      {body}
+                    </Link>
+                  )}
                 </li>
               );
             })}
@@ -279,11 +301,15 @@ export function AgentWorkflowStrip({ base, perms, className, filter, conns }: { 
           <p className="text-xs text-muted-foreground">Counts are what waits now across all your ideas and posts, not the output of one run.</p>
           {/* The Analyst learns from results; it is not a step of the chain and never blocks it. */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-dashed border-border p-2.5 text-xs">
-            <Link href={`/?agent=${ANALYST_STAGE.key}`} className={cn("flex min-h-9 min-w-0 items-center gap-1.5 rounded-md pr-1 hover:underline", focusRing)}>
-              <LineChart aria-hidden className="size-3.5 shrink-0 text-primary-strong" />
-              <span className="font-medium">{ANALYST_STAGE.label}</span>
-              <span className="text-muted-foreground">· Learning</span>
-            </Link>
+            {onOpenAgent ? (
+              <button type="button" onClick={() => onOpenAgent(ANALYST_STAGE.key)} className={analystClass}>
+                {analystName}
+              </button>
+            ) : (
+              <Link href={`/?agent=${ANALYST_STAGE.key}`} className={analystClass}>
+                {analystName}
+              </Link>
+            )}
             <span className="flex items-center gap-1.5 text-muted-foreground">
               <Dot state={analystState} />
               {STAGE_LABEL[analystState]}
